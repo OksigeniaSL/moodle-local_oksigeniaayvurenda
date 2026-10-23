@@ -1,0 +1,170 @@
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+namespace local_oksigeniaayvurenda\privacy;
+
+use core_privacy\local\metadata\collection;
+use core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\approved_userlist;
+use core_privacy\local\request\userlist;
+use core_privacy\local\request\writer;
+use core_privacy\tests\provider_testcase;
+
+/**
+ * Tests for the privacy provider.
+ *
+ * @package    local_oksigeniaayvurenda
+ * @category   test
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \local_oksigeniaayvurenda\privacy\provider
+ */
+#[\PHPUnit\Framework\Attributes\CoversClass(provider::class)]
+final class provider_test extends provider_testcase {
+    /** @var string Prefix of the plugin tables. */
+    private const T = 'local_oksigeniaayvurenda_';
+
+    /**
+     * A library where Ana borrowed a book that a librarian lent her, and Leo is a reader too.
+     *
+     * @return \stdClass
+     */
+    private function make_world(): \stdClass {
+        $dg = $this->getDataGenerator();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $dg->get_plugin_generator('local_oksigeniaayvurenda');
+        $w = new \stdClass();
+        $w->ana = $dg->create_user(['firstname' => 'Ana']);
+        $w->leo = $dg->create_user(['firstname' => 'Leo']);
+        $w->librarian = $dg->create_user();
+        $w->library = $gen->create_library();
+        $w->year = $gen->create_year(['entityid' => $w->library->entityid]);
+        $w->anareader = $gen->create_reader(['entityid' => $w->library->entityid, 'userid' => $w->ana->id]);
+        $w->leoreader = $gen->create_reader(['entityid' => $w->library->entityid, 'userid' => $w->leo->id]);
+        $gen->create_member(['readerid' => $w->anareader->id, 'yearid' => $w->year->id]);
+        $w->item = $gen->create_item(['libraryid' => $w->library->id]);
+        $w->loan = $gen->create_loan([
+            'libraryid' => $w->library->id,
+            'itemid' => $w->item->id,
+            'readerid' => $w->anareader->id,
+            'groupname' => '3º Primaria A',
+            'staffid' => $w->librarian->id,
+            'returnnote' => 'loved',
+        ]);
+        return $w;
+    }
+
+    /**
+     * The metadata names the three tables.
+     */
+    public function test_metadata(): void {
+        $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
+        $this->assertCount(3, $items);
+    }
+
+    /**
+     * Readers and staff who lent have data in the site context; others do not.
+     */
+    public function test_contexts_and_users(): void {
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $stranger = $this->getDataGenerator()->create_user();
+        $system = \context_system::instance();
+        $this->assertEquals([$system->id], provider::get_contexts_for_userid($w->ana->id)->get_contextids());
+        $this->assertEquals([$system->id], provider::get_contexts_for_userid($w->librarian->id)->get_contextids());
+        $this->assertEmpty(provider::get_contexts_for_userid($stranger->id)->get_contextids());
+
+        $userlist = new userlist($system, 'local_oksigeniaayvurenda');
+        provider::get_users_in_context($userlist);
+        $ids = $userlist->get_userids();
+        sort($ids);
+        $expected = [(int) $w->ana->id, (int) $w->leo->id, (int) $w->librarian->id];
+        sort($expected);
+        $this->assertEquals($expected, $ids);
+    }
+
+    /**
+     * Ana gets her card, her group and her loan; the librarian gets the loans they handled.
+     */
+    public function test_export(): void {
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $system = \context_system::instance();
+        $this->export_context_data_for_user($w->ana->id, $system, 'local_oksigeniaayvurenda');
+        $path = [get_string('pluginname', 'local_oksigeniaayvurenda'),
+            get_string('privacy:path:reader', 'local_oksigeniaayvurenda', $w->anareader->cardcode)];
+        $data = writer::with_context($system)->get_data($path);
+        $this->assertSame($w->anareader->cardcode, $data->cardcode);
+        $this->assertSame('3º Primaria A', $data->groups[0]['group']);
+        $this->assertSame('loved', $data->loans[0]['note']);
+
+        writer::reset();
+        $this->export_context_data_for_user($w->librarian->id, $system, 'local_oksigeniaayvurenda');
+        $desk = writer::with_context($system)->get_data([get_string('pluginname', 'local_oksigeniaayvurenda'),
+            get_string('privacy:path:desk', 'local_oksigeniaayvurenda')]);
+        $this->assertCount(1, $desk->loans);
+    }
+
+    /**
+     * Deleting Ana anonymises her reader and keeps the loan, without her note; Leo stays as he was.
+     */
+    public function test_delete_user(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $system = \context_system::instance();
+        provider::delete_data_for_user(new approved_contextlist($w->ana, 'local_oksigeniaayvurenda', [$system->id]));
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $w->anareader->id]);
+        $this->assertNull($reader->userid);
+        $this->assertSame('deleted', $reader->status);
+        $this->assertSame('deleted-' . $reader->id, $reader->cardcode);
+        $loan = $DB->get_record(self::T . 'loan', ['id' => $w->loan->id]);
+        $this->assertNull($loan->returnnote);
+        $this->assertEquals($w->librarian->id, $loan->staffid);
+        $this->assertEquals($w->leo->id, $DB->get_field(self::T . 'reader', 'userid', ['id' => $w->leoreader->id]));
+    }
+
+    /**
+     * Deleting a list of users takes the librarian off the loan and anonymises Leo.
+     */
+    public function test_delete_users(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $system = \context_system::instance();
+        provider::delete_data_for_users(new approved_userlist(
+            $system,
+            'local_oksigeniaayvurenda',
+            [$w->librarian->id, $w->leo->id]
+        ));
+        $this->assertNull($DB->get_field(self::T . 'loan', 'staffid', ['id' => $w->loan->id]));
+        $this->assertNull($DB->get_field(self::T . 'reader', 'userid', ['id' => $w->leoreader->id]));
+        $this->assertEquals($w->ana->id, $DB->get_field(self::T . 'reader', 'userid', ['id' => $w->anareader->id]));
+    }
+
+    /**
+     * Deleting everyone in the site context anonymises every reader and every staff mark.
+     */
+    public function test_delete_all(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        provider::delete_data_for_all_users_in_context(\context_system::instance());
+        $this->assertSame(0, $DB->count_records_select(self::T . 'reader', 'userid IS NOT NULL'));
+        $this->assertSame(0, $DB->count_records_select(self::T . 'loan', 'staffid IS NOT NULL'));
+        $this->assertSame(1, $DB->count_records(self::T . 'loan'));
+    }
+}

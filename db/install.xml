@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/oksigeniaayvurenda/db" VERSION="20261023" COMMENT="XMLDB file for local_oksigeniaayvurenda"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_oksigeniaayvurenda_entity" COMMENT="An organisation with one or more libraries: a school, a university, an academy">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="yearstart" TYPE="char" LENGTH="5" NOTNULL="true" DEFAULT="09-01" SEQUENCE="false" COMMENT="MM-DD on which its school year starts"/>
+        <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: classification scheme, item and reader types, options"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_library" COMMENT="A library of an entity: the central one, a classroom, a department or a faculty">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The library it hangs from, if any"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="slug" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Short name for its address"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="central" SEQUENCE="false" COMMENT="central, classroom, department or faculty"/>
+        <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: online options per stage, look, characters"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="parentid" TYPE="foreign" FIELDS="parentid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="slug" UNIQUE="true" FIELDS="slug"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_record" COMMENT="A bibliographic record (a title), shared by the libraries of an entity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="doctype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="book" SEQUENCE="false" COMMENT="book, audio, video, electronic, periodical, device, other"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="subtitle" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="responsibility" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" COMMENT="Statement of responsibility as printed"/>
+        <FIELD NAME="isbn" TYPE="char" LENGTH="13" NOTNULL="false" SEQUENCE="false" COMMENT="ISBN-13, digits only"/>
+        <FIELD NAME="edition" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="pubplace" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="pubyear" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="lang" TYPE="char" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="ISO 639-2"/>
+        <FIELD NAME="extent" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="summary" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="extra" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: fields of its document type and the entity's own fields"/>
+        <FIELD NAME="searchtext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Title, authors and subjects without accents or case, for word search"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="isbn" UNIQUE="false" FIELDS="isbn"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_authority" COMMENT="Authors, subjects, publishers, classification codes, locations and collections of an entity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="author, subject, publisher, class, location, collection"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="The classification code, for kind class"/>
+        <FIELD NAME="label" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The broader entry, in a hierarchy such as UDC"/>
+        <FIELD NAME="extra" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: dates, kind of author and the like"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="parentid" TYPE="foreign" FIELDS="parentid" REFTABLE="local_oksigeniaayvurenda_authority" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="entitykindcode" UNIQUE="false" FIELDS="entityid, kind, code"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_recauth" COMMENT="Which authorities a record carries, and with which role">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="authorityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="role" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="author, illustrator, translator… for authors"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="recordid" TYPE="foreign" FIELDS="recordid" REFTABLE="local_oksigeniaayvurenda_record" REFFIELDS="id"/>
+        <KEY NAME="authorityid" TYPE="foreign" FIELDS="authorityid" REFTABLE="local_oksigeniaayvurenda_authority" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_item" COMMENT="A copy of a record, or a piece of material, kept in a library">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="barcode" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The code on its label, unique within the entity"/>
+        <FIELD NAME="regnumber" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Number in the register book, when there is one"/>
+        <FIELD NAME="callnumber1" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Spine label, first line: the classification"/>
+        <FIELD NAME="callnumber2" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Spine label, second line: usually the author"/>
+        <FIELD NAME="callnumber3" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Spine label, third line: usually the title"/>
+        <FIELD NAME="locationid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="itemtype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="normal" SEQUENCE="false" COMMENT="A type of the entity: normal, reference, restricted, device…"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="available" SEQUENCE="false" COMMENT="available, onloan, lost, withdrawn or repair"/>
+        <FIELD NAME="serial" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Serial number, for material"/>
+        <FIELD NAME="itemcondition" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="State of the item as last checked"/>
+        <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeacquired" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="recordid" TYPE="foreign" FIELDS="recordid" REFTABLE="local_oksigeniaayvurenda_record" REFFIELDS="id"/>
+        <KEY NAME="locationid" TYPE="foreign" FIELDS="locationid" REFTABLE="local_oksigeniaayvurenda_authority" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="entitybarcode" UNIQUE="true" FIELDS="entityid, barcode"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_reader" COMMENT="A reader of an entity, linked to a Moodle account when there is one">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The Moodle account, if linked"/>
+        <FIELD NAME="cardcode" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The code on the reader's card, unique within the entity"/>
+        <FIELD NAME="readertype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="student" SEQUENCE="false" COMMENT="student, teacher, staff, family, classroom, other"/>
+        <FIELD NAME="firstname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="For readers without a Moodle account"/>
+        <FIELD NAME="lastname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="254" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="active" SEQUENCE="false" COMMENT="active, suspended, left or deleted"/>
+        <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="entitycard" UNIQUE="true" FIELDS="entityid, cardcode"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_year" COMMENT="The school years of an entity">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="2026-2027, or 2026 where the year fits in one"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="First second after the year"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="entityname" UNIQUE="true" FIELDS="entityid, name"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_member" COMMENT="The group and stage of a reader in each school year: the history Moodle does not keep">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="yearid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="groupname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="stage" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="source" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="Where the group came from: cohort, course, csv, a connector"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_loan" COMMENT="A loan, with the group and school year of that moment">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="yearid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="groupname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The reader's group when the loan was made"/>
+        <FIELD NAME="timeloaned" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timereturned" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Null while it is out"/>
+        <FIELD NAME="renewals" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="staffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who lent it"/>
+        <FIELD NAME="returnstaffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who took it back"/>
+        <FIELD NAME="returnnote" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="The one-tap note on return: loved, unfinished, more…"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
+        <KEY NAME="staffid" TYPE="foreign" FIELDS="staffid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="returnstaffid" TYPE="foreign" FIELDS="returnstaffid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="libraryreturned" UNIQUE="false" FIELDS="libraryid, timereturned"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_rule" COMMENT="Loan rules of a library by reader type and item type; * matches any">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="readertype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="*" SEQUENCE="false"/>
+        <FIELD NAME="itemtype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="*" SEQUENCE="false"/>
+        <FIELD NAME="loandays" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0: not lent"/>
+        <FIELD NAME="maxloans" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0: no limit"/>
+        <FIELD NAME="renewals" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="renewdays" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="librarytypes" UNIQUE="true" FIELDS="libraryid, readertype, itemtype"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_source" COMMENT="Where a row came from (Abies, a connector, a CSV), so a new import updates it instead of duplicating it">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="system" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="abies, cifra, csv…"/>
+        <FIELD NAME="tablename" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="record, authority, item, reader, loan"/>
+        <FIELD NAME="externalid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="localid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="external" UNIQUE="true" FIELDS="entityid, system, tablename, externalid"/>
+        <INDEX NAME="local" UNIQUE="false" FIELDS="tablename, localid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
