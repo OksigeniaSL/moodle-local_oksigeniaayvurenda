@@ -8,6 +8,8 @@
 **Ayvurenda** es una biblioteca escolar para Moodle™ que llevan los bibliotecarios del centro y cuyos lectores son
 los usuarios del sitio.
 
+Desarrollado por [Oksigenia](https://oksigenia.com).
+
 [Read in English](README.md)
 
 ## Estado
@@ -25,6 +27,12 @@ cada una probada antes de publicarse. No es para sitios en producción.
 Código, comentarios y mensajes de commit en inglés; los textos, en los paquetes de idioma (`lang/en`, `lang/es`). Las
 pruebas pasan con `moodle-plugin-ci` en GitHub Actions en Moodle 4.5 y 5.3 (PostgreSQL), en 5.3 también con MariaDB
 11.4, y en `main`, para ver lo que viene. Más en [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Autoría y procedencia
+
+Ayvurenda lo diseña y lo desarrolla Oksigenia SL. Cada versión sellada lleva, en [`provenance/`](provenance/), un
+manifiesto del código con su prueba de fecha y una etiqueta firmada por Oksigenia, que cualquiera puede comprobar con
+`provenance/verify.sh`.
 
 ## Licencia
 
