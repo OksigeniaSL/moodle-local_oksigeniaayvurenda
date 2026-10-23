@@ -1,17 +1,21 @@
 # Moodle Plugin CI — the suite that Moodle Marketplace reviewers expect (validate, lint, codechecker, phpdoc,
 # savepoints, mustache, grunt) plus the plugin's PHPUnit and Behat tests.
 #
-# Tags and manual runs go through every branch that still gets security fixes, plus main. main tracks the next Moodle release and is
+# Pushes and pull requests run a short matrix (the lowest and the highest supported branch); tags or a manual run
+# go through every branch that still gets security fixes, plus main. main tracks the next Moodle release and is
 # allowed to fail, so upstream breakage shows up early.
 #
 # Reference template: https://github.com/moodlehq/moodle-plugin-ci
 name: Moodle Plugin CI
 
-# The repository is private, so Actions minutes are paid for: the suite runs on its own only for version tags, and by
-# hand otherwise. Day to day, the same checks run locally.
 on:
   push:
+    branches: [main]
     tags: ['v*']
+    # What is not code does not run the suite: the minutes of Actions are counted.
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.gitignore', 'provenance/**']
+  pull_request:
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.gitignore', 'provenance/**']
   workflow_dispatch:
 
 # A new push cancels the run of the one before it on the same branch, which nobody needs any more.
