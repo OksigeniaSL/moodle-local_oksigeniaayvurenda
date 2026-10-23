@@ -15,8 +15,7 @@ name: provenance-upgrade
 
 on:
   schedule:
-    # Weekly, not daily: the repository is private and Actions minutes count; a proof waits a few days at most.
-    - cron: "17 5 * * 1"
+    - cron: "17 5 * * *"
   workflow_dispatch:
 
 permissions:

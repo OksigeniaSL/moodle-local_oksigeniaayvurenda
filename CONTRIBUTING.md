@@ -36,6 +36,13 @@ vendor/bin/phpunit --testsuite local_oksigeniaayvurenda_testsuite
   same PR.
 - Bump `version.php` and add a `CHANGELOG.md` entry when the change reaches users.
 
+## Sponsored development
+
+Organisations can fund features or a connector to their platform. Funded work is released under the same licence,
+GPL v3 or later, and is available to everyone who uses Ayvurenda. It joins the plugin when it serves every library;
+what only one platform needs goes into an optional connector. Oksigenia, as maintainer, decides how it fits. Write to
+`dev@oksigenia.cc`.
+
 ## Reporting bugs
 
 Open an issue with: plugin version, Moodle version, PHP version, theme, browser, and a minimal reproduction.
