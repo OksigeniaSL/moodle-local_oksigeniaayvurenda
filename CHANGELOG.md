@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.8.2 (2026-10-26)
+
+- Material that is not a book (laptops, tablets, calculators, cameras, games…): a record with its brand and model,
+  and its units, each with its label and serial number. It goes through the same desk and rules as books; the desk
+  names the unit by its serial number and notes its state when it goes and when it comes back (fine, marked,
+  something missing, does not work), as it was, changed with a tap or Alt and a number.
+- The loan rules of each library on their own screen: for each kind of reader and kind of copy, days, how many at
+  once and renewals. The first material of a library whose rules do not cover it brings a rule of a week, one at a
+  time, and says so.
+- The daily copy carries the catalogue in MARC21 too, as ISO 2709 (catalogo.mrc) and MARCXML (catalogo.xml), with
+  each copy in field 852 and the brand and model of material in local fields: any library program imports it. Own
+  ISO 2709 writer and reader (UTF-8, and ISO 8859-1 when reading).
+- Notes and summaries from MARC keep their own full stops.
+
 ## 0.8.1 (2026-10-26)
 
 - The camera as a reader, at the desk and when adding books: the browser's own BarcodeDetector where it has one, and

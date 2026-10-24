@@ -182,4 +182,45 @@ final class desk_test extends \advanced_testcase {
         $this->assertSame('choose', $choose['kind']);
         $this->assertCount(2, $choose['readers']);
     }
+
+    /**
+     * Material: the unit is named by its serial number; its state is noted as it was when it goes, changed with a tap,
+     * and offered as it is now when it comes back.
+     */
+    public function test_material(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $tablet = $gen->create_record(['entityid' => $w->library->entityid, 'doctype' => 'device', 'title' => 'Tableta']);
+        $unit = $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $tablet->id, 'barcode' => '300000V',
+            'itemtype' => 'device', 'serial' => 'SN-7']);
+        $this->assertTrue(rules::cover((int) $w->library->id, 'device'));
+        $this->assertFalse(rules::cover((int) $w->library->id, 'device'));
+        $desk = new desk($w->library, (int) $w->staff->id);
+        $lent = $desk->scan('300000V', (int) $w->leo->id);
+        $this->assertSame('lent', $lent['kind']);
+        $this->assertStringContainsString('Tableta (SN-7)', $lent['message']);
+        $this->assertSame('good', $lent['material']['current']);
+        $this->assertSame('out', $lent['material']['when']);
+        $this->assertSame(desk::CONDITIONS, array_column($lent['material']['conditions'], 'value'));
+        $this->assertSame('good', $DB->get_field(self::T . 'loan', 'conditionout', ['id' => $lent['loanid']]));
+        $desk->condition($lent['loanid'], 'out', 'worn');
+        $this->assertSame('worn', $DB->get_field(self::T . 'loan', 'conditionout', ['id' => $lent['loanid']]));
+        $this->assertSame('worn', $DB->get_field(self::T . 'item', 'itemcondition', ['id' => $unit->id]));
+
+        $back = $desk->scan('300000V');
+        $this->assertSame('returned', $back['kind']);
+        $this->assertSame(['current' => 'worn', 'when' => 'in'], array_intersect_key(
+            $back['material'],
+            ['current' => 1, 'when' => 1]
+        ));
+        $desk->condition($back['loanid'], 'in', 'missingpart');
+        $loan = $DB->get_record(self::T . 'loan', ['id' => $back['loanid']]);
+        $this->assertSame(['worn', 'missingpart'], [$loan->conditionout, $loan->conditionin]);
+        $this->assertNull($desk->scan('100000L', (int) $w->ana->id)['material']);
+
+        $this->expectException(\invalid_parameter_exception::class);
+        $desk->condition($back['loanid'], 'in', 'lost');
+    }
 }

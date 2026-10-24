@@ -206,6 +206,8 @@
         <FIELD NAME="returnstaffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who took it back"/>
         <FIELD NAME="returnnote" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="The one-tap note on return: loved, unfinished, more…"/>
         <FIELD NAME="timenotified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Last notice of lateness to the reader"/>
+        <FIELD NAME="conditionout" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="State of material when it was lent: good, worn, missingpart, broken"/>
+        <FIELD NAME="conditionin" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="State of material when it came back"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>

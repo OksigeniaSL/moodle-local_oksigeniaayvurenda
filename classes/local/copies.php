@@ -24,8 +24,13 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\marc\encoder;
+use local_oksigeniaayvurenda\core\marc\iso2709;
+use local_oksigeniaayvurenda\core\marc\marcxml;
+
 /**
- * Every day, everything an entity's libraries hold, in open formats (CSV in a zip, with a note of what each file is),
+ * Every day, everything an entity's libraries hold, in open formats (CSV in a zip, with a note of what each file is,
+ * and the catalogue in MARC21, which any library program imports),
  * kept in the site for the library staff to download with one tap. It does not depend on Moodle's own backups, which
  * only the site administrator sees: when a service goes down, the library has yesterday's copy at hand. The last seven
  * are kept.
@@ -88,6 +93,9 @@ final class copies {
             $counts[$table] = $count;
         }
         $entity = $DB->get_record(self::T . 'entity', ['id' => $entityid], '*', MUST_EXIST);
+        $counts['marc'] = self::marc($entityid, format_string($entity->name), $dir);
+        $zip->addFile($dir . '/catalogo.mrc', 'catalogo.mrc');
+        $zip->addFile($dir . '/catalogo.xml', 'catalogo.xml');
         $zip->addFromString('LEEME.txt', get_string('copyreadme', 'local_oksigeniaayvurenda', (object) [
             'entity' => format_string($entity->name),
             'date' => userdate($now, get_string('strftimedatetime', 'langconfig')),
@@ -113,6 +121,79 @@ final class copies {
             $old->delete();
         }
         return $file;
+    }
+
+    /**
+     * The catalogue in MARC21, as ISO 2709 (catalogo.mrc) and MARCXML (catalogo.xml), a few hundred records at a time.
+     *
+     * @param int $entityid
+     * @param string $entityname
+     * @param string $dir Where to write them.
+     * @return int Records written.
+     */
+    private static function marc(int $entityid, string $entityname, string $dir): int {
+        global $DB;
+        $mrc = fopen($dir . '/catalogo.mrc', 'w');
+        $xml = fopen($dir . '/catalogo.xml', 'w');
+        fwrite($xml, '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<collection xmlns="' . marcxml::NS . '">' . "\n");
+        $count = 0;
+        $last = 0;
+        do {
+            $records = $DB->get_records_select(
+                self::T . 'record',
+                'entityid = :entityid AND id > :last',
+                ['entityid' => $entityid, 'last' => $last],
+                'id',
+                '*',
+                0,
+                500
+            );
+            if (!$records) {
+                break;
+            }
+            [$in, $params] = $DB->get_in_or_equal(array_keys($records), SQL_PARAMS_NAMED);
+            $authorities = [];
+            $rows = $DB->get_recordset_sql(
+                'SELECT ra.id, ra.recordid, a.kind, a.label
+                   FROM {' . self::T . 'recauth} ra
+                   JOIN {' . self::T . 'authority} a ON a.id = ra.authorityid
+                  WHERE ra.recordid ' . $in . '
+               ORDER BY ra.recordid, ra.sortorder, ra.id',
+                $params
+            );
+            foreach ($rows as $row) {
+                $authorities[$row->recordid][$row->kind][] = $row->label;
+            }
+            $rows->close();
+            $items = [];
+            $rows = $DB->get_recordset_sql(
+                'SELECT i.id, i.recordid, i.barcode, i.serial, i.callnumber1, i.callnumber2, i.callnumber3,
+                        b.name AS library, l.label AS location
+                   FROM {' . self::T . 'item} i
+                   JOIN {' . self::T . 'library} b ON b.id = i.libraryid
+              LEFT JOIN {' . self::T . 'authority} l ON l.id = i.locationid
+                  WHERE i.recordid ' . $in . '
+               ORDER BY i.recordid, i.id',
+                $params
+            );
+            foreach ($rows as $row) {
+                $items[$row->recordid][] = ['barcode' => $row->barcode, 'serial' => $row->serial,
+                    'library' => format_string($row->library), 'location' => $row->location,
+                    'callnumber' => [$row->callnumber1, $row->callnumber2, $row->callnumber3]];
+            }
+            $rows->close();
+            foreach ($records as $record) {
+                $marc = encoder::encode((array) $record, $authorities[$record->id] ?? [], $items[$record->id] ?? [], $entityname);
+                fwrite($mrc, iso2709::write($marc));
+                fwrite($xml, marcxml::element($marc) . "\n");
+                $count++;
+                $last = (int) $record->id;
+            }
+        } while (count($records) === 500);
+        fwrite($xml, '</collection>' . "\n");
+        fclose($mrc);
+        fclose($xml);
+        return $count;
     }
 
     /**

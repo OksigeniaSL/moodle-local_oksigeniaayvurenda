@@ -103,7 +103,7 @@ final class cataloguer {
      * @param \stdClass $library
      * @param array $description As the describers give it; ignored when $recordid is given.
      * @param array $copy count, barcodes (read from labels, or empty to make new ones), callnumber1-3, locationid,
-     *     itemtype.
+     *     itemtype, serials (of material, in the order of the copies), notes.
      * @param int $recordid An existing record of the entity, or 0.
      * @return array recordid, newrecord, itemids, barcodes.
      * @throws \invalid_parameter_exception When a barcode is taken.
@@ -154,7 +154,10 @@ final class cataloguer {
             ));
         }
         $itemids = [];
-        foreach (array_slice($barcodes, 0, $count) as $barcode) {
+        $serials = array_values(array_map('trim', $copy['serials'] ?? []));
+        $device = ($description['record']['doctype'] ?? '') === 'device' ||
+            ($recordid && $DB->get_field(self::T . 'record', 'doctype', ['id' => $recordid]) === 'device');
+        foreach (array_slice($barcodes, 0, $count) as $index => $barcode) {
             $itemids[] = $DB->insert_record(self::T . 'item', [
                 'entityid' => $entityid,
                 'libraryid' => $library->id,
@@ -166,15 +169,20 @@ final class cataloguer {
                 'callnumber3' => self::line($copy['callnumber3'] ?? ''),
                 'locationid' => !empty($copy['locationid']) ? (int) $copy['locationid'] : null,
                 'itemtype' => ($copy['itemtype'] ?? '') !== '' ? $copy['itemtype'] : 'normal',
+                'serial' => ($serials[$index] ?? '') !== '' ? \core_text::substr($serials[$index], 0, 100) : null,
+                'itemcondition' => $device ? 'good' : null,
+                'notes' => ($copy['notes'] ?? '') !== '' ? $copy['notes'] : null,
                 'status' => 'available',
                 'timeacquired' => $now,
                 'timecreated' => $now,
                 'timemodified' => $now,
             ]);
         }
+        // Material in a library whose rules do not cover it would never be lent.
+        $ruled = $device && rules::cover((int) $library->id, ($copy['itemtype'] ?? '') !== '' ? $copy['itemtype'] : 'normal');
         $transaction->allow_commit();
         return ['recordid' => $recordid, 'newrecord' => $newrecord, 'itemids' => $itemids,
-            'barcodes' => array_slice($barcodes, 0, $count)];
+            'barcodes' => array_slice($barcodes, 0, $count), 'ruled' => $ruled];
     }
 
     /**
@@ -238,7 +246,7 @@ final class cataloguer {
             'SELECT itemtype FROM {' . self::T . 'item} WHERE entityid = :entityid GROUP BY itemtype ORDER BY COUNT(1) DESC',
             ['entityid' => $entityid]
         );
-        foreach (['normal', 'reference'] as $type) {
+        foreach (['normal', 'reference', 'device'] as $type) {
             if (!in_array($type, $types, true)) {
                 $types[] = $type;
             }

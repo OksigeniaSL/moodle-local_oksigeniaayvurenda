@@ -1,0 +1,74 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/material
+
+    Adding material that is not a book, with its units.
+
+    Context variables required for this template:
+    * heading, intro, notice, error - texts
+    * action, sesskey - the form
+    * existing - the material already there, to add units to (value, label, selected); hasexisting
+    * locations, types - options (value, label, selected)
+    * the words of the fields
+
+    Example context (json):
+    {
+        "heading": "Dar de alta material",
+        "intro": "Portátiles, tabletas, calculadoras, cámaras o juegos.",
+        "notice": "",
+        "error": "",
+        "action": "#",
+        "sesskey": "abc",
+        "hasexisting": true,
+        "existing": [{"value": 0, "label": "Material nuevo", "selected": true}, {"value": 7, "label": "Calculadora científica", "selected": false}],
+        "locations": [{"value": 0, "label": "Sin ubicación"}],
+        "types": [{"value": "device", "label": "Material", "selected": true}],
+        "materialwhich": "¿Qué es?", "materialname": "Nombre", "materialbrand": "Marca", "materialmodel": "Modelo",
+        "materialcount": "Unidades", "materialserials": "Números de serie", "materialserialshint": "Uno por línea",
+        "materiallabels": "Etiquetas que ya llevan", "materiallabelshint": "Una por línea; si no, se hacen nuevas",
+        "materialnotes": "Lo que lleva cada unidad", "addlocation": "Ubicación", "addtype": "Tipo", "materialsave": "Dar de alta"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+<form method="post" action="{{action}}" class="ayv-book ayv-material" autocomplete="off">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    {{#hasexisting}}
+    <label class="ayv-field ayv-field-wide">{{materialwhich}}
+        <select name="recordid">{{#existing}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/existing}}</select></label>
+    {{/hasexisting}}
+    <div class="ayv-book-copy">
+        <label class="ayv-field ayv-field-wide">{{materialname}} <input type="text" name="name" maxlength="255"></label>
+        <label class="ayv-field">{{materialbrand}} <input type="text" name="brand" maxlength="100"></label>
+        <label class="ayv-field">{{materialmodel}} <input type="text" name="model" maxlength="100"></label>
+    </div>
+    <div class="ayv-book-copy">
+        <label class="ayv-field">{{materialcount}} <input type="number" name="count" min="1" max="50" value="1"></label>
+        <label class="ayv-field">{{addlocation}} <select name="locationid">{{#locations}}<option value="{{value}}">{{label}}</option>{{/locations}}</select></label>
+        <label class="ayv-field">{{addtype}} <select name="itemtype">{{#types}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/types}}</select></label>
+    </div>
+    <div class="ayv-book-copy">
+        <label class="ayv-field ayv-field-wide">{{materialserials}} <span class="ayv-field-hint">{{materialserialshint}}</span>
+            <textarea name="serials" rows="3" spellcheck="false"></textarea></label>
+        <label class="ayv-field ayv-field-wide">{{materiallabels}} <span class="ayv-field-hint">{{materiallabelshint}}</span>
+            <textarea name="labels" rows="3" spellcheck="false"></textarea></label>
+        <label class="ayv-field ayv-field-wide">{{materialnotes}} <input type="text" name="notes" maxlength="255"></label>
+    </div>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{materialsave}}</button></p>
+</form>

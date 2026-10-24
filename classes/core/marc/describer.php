@@ -68,7 +68,7 @@ final class describer {
             // Every ISBN of the record, to tell the edition asked for from the others a catalogue may answer with.
             'isbns' => count($isbns) > 1 ? $isbns : null,
         ], fn($v) => $v !== null && $v !== '');
-        $notes = array_map([self::class, 'clean'], $record->values(['500'], 'a'));
+        $notes = array_values(array_filter(array_map([self::class, 'text'], $record->values(['500'], 'a'))));
         return [
             'record' => [
                 'doctype' => self::doctype($record->leader),
@@ -81,7 +81,8 @@ final class describer {
                 'pubyear' => $year,
                 'lang' => $lang,
                 'extent' => self::clean(self::first($record, ['300'], 'a')),
-                'summary' => self::clean(self::first($record, ['520'], 'a')),
+                // Free text keeps its own full stops.
+                'summary' => self::text(self::first($record, ['520'], 'a')),
                 'notes' => $notes ? implode("\n", $notes) : null,
             ],
             'authorities' => [
@@ -162,6 +163,17 @@ final class describer {
             $value = substr($value, 0, -1);
         }
         $value = trim($value, " \t[]");
+        return $value === '' ? null : $value;
+    }
+
+    /**
+     * Free text, only trimmed.
+     *
+     * @param string|null $value
+     * @return string|null
+     */
+    private static function text(?string $value): ?string {
+        $value = trim((string) $value);
         return $value === '' ? null : $value;
     }
 

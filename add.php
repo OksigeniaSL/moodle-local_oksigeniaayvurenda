@@ -95,6 +95,8 @@ shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaay
             'label' => $str('desktitle')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'label' => $str('deskcatalogue')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/material.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('materialnav')],
     ],
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php'))->out(false),

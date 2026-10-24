@@ -160,6 +160,35 @@
         panel.appendChild(list);
     };
 
+    // Material: its state when it goes or comes back, already noted as it was; a tap changes it.
+    var states = function(answer) {
+        var box = el('div', 'ayv-notes ayv-states');
+        box.setAttribute('role', 'group');
+        box.setAttribute('aria-label', answer.material.when === 'out' ? str.deskconditionout : str.deskconditionin);
+        box.appendChild(el('span', 'ayv-states-label', answer.material.when === 'out' ? str.deskconditionout
+            : str.deskconditionin));
+        answer.material.conditions.forEach(function(condition, index) {
+            var chip = button(condition.label, 'ayv-note', function(b) {
+                post({action: 'condition', loanid: answer.loanid, when: answer.material.when, condition: condition.value})
+                    .then(function() {
+                        box.querySelectorAll('.ayv-note').forEach(function(other) {
+                            other.setAttribute('aria-pressed', 'false');
+                        });
+                        b.setAttribute('aria-pressed', 'true');
+                        return condition.value;
+                    }).catch(function() {
+                        tone('no');
+                    });
+            });
+            chip.setAttribute('aria-pressed', condition.value === answer.material.current ? 'true' : 'false');
+            if (index < 3) {
+                chip.setAttribute('aria-keyshortcuts', 'Alt+' + (index + 1));
+            }
+            box.appendChild(chip);
+        });
+        return box;
+    };
+
     var line = function(answer, code) {
         var li = el('li', 'ayv-line ayv-line-' + answer.kind + ' ayv-sound-' + (answer.sound || 'ok'));
         li.appendChild(el('p', 'ayv-line-text', answer.message));
@@ -187,9 +216,15 @@
             }));
         };
         if (answer.kind === 'lent' && answer.loanid) {
+            if (answer.material) {
+                actions.appendChild(states(answer));
+            }
             undo('lent');
         } else if (answer.kind === 'renewed') {
             undo('renewed', {previousdue: answer.previousdue});
+        } else if (answer.kind === 'returned' && answer.loanid && answer.material) {
+            actions.appendChild(states(answer));
+            undo('returned');
         } else if (answer.kind === 'returned' && answer.loanid) {
             var notes = el('div', 'ayv-notes');
             ['loved', 'unfinished', 'more'].forEach(function(note, index) {

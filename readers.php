@@ -65,6 +65,10 @@ if ($group === null) {
             'url' => (new moodle_url('/local/oksigeniaayvurenda/tutors.php', ['library' => $library->slug]))->out(false),
             'label' => $str('tutorsnav'),
         ] : null,
+        'rules' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/rules.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('rulesnav'),
+        ] : null,
         'year' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
             'url' => (new moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug]))->out(false),
             'label' => $str('yearnav'),

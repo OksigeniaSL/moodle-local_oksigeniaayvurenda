@@ -39,6 +39,9 @@ final class desk {
     /** @var string[] The one-tap notes on return. */
     public const NOTES = ['loved', 'unfinished', 'more'];
 
+    /** @var string[] The states of material, the usual one first. */
+    public const CONDITIONS = ['good', 'worn', 'missingpart', 'broken'];
+
     /** @var array The rule when a library has none, nor has the library it hangs from. */
     private const DEFAULT_RULE = ['readertype' => '*', 'itemtype' => '*', 'loandays' => 14, 'maxloans' => 0,
         'renewals' => 1, 'renewdays' => 7];
@@ -242,6 +245,25 @@ final class desk {
     }
 
     /**
+     * Notes the state of material when it went or came back, and keeps it as the unit's state.
+     *
+     * @param int $loanid
+     * @param string $when out or in.
+     * @param string $condition One of CONDITIONS.
+     * @return array
+     */
+    public function condition(int $loanid, string $when, string $condition): array {
+        global $DB;
+        $loan = $this->loan($loanid);
+        if (!in_array($condition, self::CONDITIONS, true) || !in_array($when, ['out', 'in'], true)) {
+            throw new \invalid_parameter_exception('condition');
+        }
+        $DB->set_field(self::T . 'loan', 'condition' . $when, $condition, ['id' => $loan->id]);
+        $DB->set_field(self::T . 'item', 'itemcondition', $condition, ['id' => $loan->itemid]);
+        return ['kind' => 'condition', 'loanid' => (int) $loan->id, 'condition' => $condition];
+    }
+
+    /**
      * Undoes what the desk just did: a loan, a return or a renewal.
      *
      * @param int $loanid
@@ -359,10 +381,11 @@ final class desk {
             'timemodified' => $this->now,
         ]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
+        $material = $this->material($item, (int) $loanid, 'out');
         $transaction->allow_commit();
         $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
         return $this->answer('lent', 'ok', 'desklent', $a, ['loanid' => (int) $loanid, 'readerid' => $readerid,
-            'reader' => $this->reader_panel($readerid)]);
+            'reader' => $this->reader_panel($readerid), 'material' => $material]);
     }
 
     /**
@@ -383,6 +406,7 @@ final class desk {
         }
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => $this->now,
             'returnstaffid' => $this->staffid, 'timemodified' => $this->now]);
+        $material = $this->material($item, (int) $loan->id, 'in');
         $transaction->allow_commit();
         $owner = $this->reader((int) $loan->readerid);
         $days = loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz);
@@ -391,6 +415,7 @@ final class desk {
         $a = (object) ['title' => $this->title($item), 'name' => $owner['name'], 'days' => $days];
         $extra = [
             'loanid' => (int) $loan->id,
+            'material' => $material,
             'canrenew' => loan_rules::can_renew($rule, (int) $loan->renewals),
             'late' => $days,
             'readerid' => (int) $loan->readerid,
@@ -487,7 +512,38 @@ final class desk {
      */
     private function title(\stdClass $item): string {
         global $DB;
-        return (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
+        $record = $DB->get_record(self::T . 'record', ['id' => $item->recordid], 'title, doctype');
+        if (!$record) {
+            return '';
+        }
+        // Units of material look alike: the serial number, or the label, tells which one.
+        if ($record->doctype === 'device') {
+            return get_string('deskunit', 'local_oksigeniaayvurenda', (object) ['title' => $record->title,
+                'unit' => (string) ($item->serial ?: $item->barcode)]);
+        }
+        return (string) $record->title;
+    }
+
+    /**
+     * For material: notes its present state on the loan, and gives what the screen needs to change it with a tap.
+     *
+     * @param \stdClass $item
+     * @param int $loanid
+     * @param string $when out or in.
+     * @return array|null conditions, current and when; null for what is not material.
+     */
+    private function material(\stdClass $item, int $loanid, string $when): ?array {
+        global $DB;
+        if ($DB->get_field(self::T . 'record', 'doctype', ['id' => $item->recordid]) !== 'device') {
+            return null;
+        }
+        $current = in_array($item->itemcondition, self::CONDITIONS, true) ? $item->itemcondition : 'good';
+        $DB->set_field(self::T . 'loan', 'condition' . $when, $current, ['id' => $loanid]);
+        $conditions = [];
+        foreach (self::CONDITIONS as $condition) {
+            $conditions[] = ['value' => $condition, 'label' => get_string('condition' . $condition, 'local_oksigeniaayvurenda')];
+        }
+        return ['conditions' => $conditions, 'current' => $current, 'when' => $when];
     }
 
     /**

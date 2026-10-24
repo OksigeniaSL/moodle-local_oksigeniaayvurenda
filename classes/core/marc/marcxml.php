@@ -100,6 +100,19 @@ final class marcxml {
     }
 
     /**
+     * One record as a MARCXML element, without the document around it: to write a long collection a record at a time.
+     *
+     * @param record $record
+     * @return string
+     */
+    public static function element(record $record): string {
+        $xml = self::write([$record]);
+        $start = strpos($xml, '<record');
+        $end = strrpos($xml, '</record>');
+        return substr($xml, $start, $end - $start + strlen('</record>'));
+    }
+
+    /**
      * One record from its element.
      *
      * @param \DOMElement $node

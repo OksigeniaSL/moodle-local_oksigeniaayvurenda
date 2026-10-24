@@ -159,6 +159,13 @@ final class notices_test extends \advanced_testcase {
         $this->assertStringContainsString('Sin Cuenta', $readers);
         $this->assertSame(4, substr_count($readers, "\n"));
         $this->assertSame(5, substr_count($zip->getFromName('loan.csv'), "\n"));
+        // The catalogue in MARC21 too, as ISO 2709 and MARCXML, each record with its copies.
+        $records = \local_oksigeniaayvurenda\core\marc\iso2709::read($zip->getFromName('catalogo.mrc'));
+        $this->assertCount(4, $records);
+        $this->assertCount(4, \local_oksigeniaayvurenda\core\marc\marcxml::read($zip->getFromName('catalogo.xml')));
+        $titles = array_map(fn($r) => $r->first(['245'], 'a'), $records);
+        $this->assertContains('Mapas del sur.', $titles);
+        $this->assertCount(1, $records[0]->data_fields('852'));
         $zip->close();
         copies::make((int) $other->entityid, $now);
         for ($i = 1; $i <= 8; $i++) {

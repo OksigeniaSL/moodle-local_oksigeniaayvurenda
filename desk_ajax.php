@@ -60,6 +60,13 @@ switch ($action) {
     case 'note':
         $answer = $desk->note(required_param('loanid', PARAM_INT), optional_param('note', '', PARAM_ALPHA));
         break;
+    case 'condition':
+        $answer = $desk->condition(
+            required_param('loanid', PARAM_INT),
+            required_param('when', PARAM_ALPHA),
+            required_param('condition', PARAM_ALPHA)
+        );
+        break;
     case 'undo':
         $answer = $desk->undo(
             required_param('loanid', PARAM_INT),

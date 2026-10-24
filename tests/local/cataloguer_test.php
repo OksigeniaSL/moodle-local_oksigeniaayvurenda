@@ -202,4 +202,38 @@ final class cataloguer_test extends \advanced_testcase {
         covers::remove($one->id);
         $this->assertSame([], covers::urls([$one->id]));
     }
+
+    /**
+     * Material: its units with their serial numbers, fine to begin with; the first one in a library with rules brings
+     * the rule that lets it be lent; the rules screen saves them all at once.
+     */
+    public function test_material_and_rules(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $this->assertSame(1, rules::save((int) $library->id, [
+            ['readertype' => 'student', 'itemtype' => 'normal', 'loandays' => 14, 'maxloans' => 2],
+            ['readertype' => 'student', 'itemtype' => 'normal', 'loandays' => 21, 'maxloans' => -3],
+        ]));
+        $this->assertSame([21, 0], [(int) rules::of((int) $library->id)[0]['loandays'],
+            (int) rules::of((int) $library->id)[0]['maxloans']]);
+        $description = ['record' => ['doctype' => 'device', 'title' => 'Tableta'], 'authorities' => [],
+            'extra' => ['brand' => 'Inventada']];
+        $added = cataloguer::add($library, $description, ['count' => 2, 'serials' => ['SN-1', 'SN-2'],
+            'itemtype' => 'device']);
+        $this->assertTrue($added['ruled']);
+        $units = array_values($DB->get_records('local_oksigeniaayvurenda_item', ['recordid' => $added['recordid']], 'id'));
+        $this->assertSame(['SN-1', 'SN-2'], array_column($units, 'serial'));
+        $this->assertSame('good', $units[0]->itemcondition);
+        $more = cataloguer::add($library, [], ['count' => 1, 'itemtype' => 'device'], $added['recordid']);
+        $this->assertFalse($more['ruled']);
+        $this->assertSame(2, count(rules::of((int) $library->id)));
+        $this->assertSame(['*', 'device'], [rules::of((int) $library->id)[0]['readertype'],
+            rules::of((int) $library->id)[0]['itemtype']]);
+
+        // A library without rules lends everything with the plain default: nothing is added.
+        $other = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $this->assertFalse(cataloguer::add($other, $description, ['count' => 1, 'itemtype' => 'device'])['ruled']);
+        $this->assertSame([], rules::of((int) $other->id));
+    }
 }

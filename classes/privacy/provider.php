@@ -78,6 +78,8 @@ class provider implements
             'staffid' => 'privacy:metadata:loan:staffid',
             'returnstaffid' => 'privacy:metadata:loan:returnstaffid',
             'timenotified' => 'privacy:metadata:loan:timenotified',
+            'conditionout' => 'privacy:metadata:loan:conditionout',
+            'conditionin' => 'privacy:metadata:loan:conditionin',
         ], 'privacy:metadata:loan');
         $collection->add_database_table(self::T . 'tutor', [
             'userid' => 'privacy:metadata:tutor:userid',
@@ -335,6 +337,8 @@ class provider implements
             'returned' => $loan->timereturned ? transform::datetime($loan->timereturned) : null,
             'renewals' => $loan->renewals,
             'note' => $loan->returnnote,
+            'conditionout' => $loan->conditionout ?? null,
+            'conditionin' => $loan->conditionin ?? null,
         ];
     }
 }

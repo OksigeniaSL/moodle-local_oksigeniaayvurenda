@@ -89,5 +89,17 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102601, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102602) {
+        // The state of material when it goes and when it comes back.
+        $table = new xmldb_table('local_oksigeniaayvurenda_loan');
+        foreach (['conditionout' => 'timenotified', 'conditionin' => 'conditionout'] as $name => $after) {
+            $field = new xmldb_field($name, XMLDB_TYPE_CHAR, '20', null, null, null, null, $after);
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026102602, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

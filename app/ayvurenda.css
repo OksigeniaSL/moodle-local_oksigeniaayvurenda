@@ -775,3 +775,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv-camera-hint { margin: 0; font-weight: 700; font-size: 1.1rem; text-align: center; }
 
 .ayv .ayv-camera-close { background: #fbf6ec; color: #0f3a33; border-color: #fbf6ec; }
+
+.ayv .ayv-states { align-items: center; }
+
+.ayv .ayv-states-label { font-size: .9rem; font-weight: 700; margin-right: .25rem; }
+
+.ayv .ayv-field-hint { font-size: .85rem; opacity: .8; }
+
+.ayv .ayv-notice-error { border-left-color: var(--coral); background: var(--no-bg); }
