@@ -544,5 +544,25 @@
         <INDEX NAME="issuerclient" UNIQUE="true" FIELDS="issuer, clientid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_lticontext" COMMENT="A course of a learning platform whose students a teacher brought to the library (LTI names and roles)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="platformid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="contextid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The course's id on the platform"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The course's name on the platform"/>
+        <FIELD NAME="membershipsurl" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="Where the platform lists its members"/>
+        <FIELD NAME="groupname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="The group its students get; none, only readers"/>
+        <FIELD NAME="lastsync" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the students were last brought; none, never"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="platformid" TYPE="foreign" FIELDS="platformid" REFTABLE="local_oksigeniaayvurenda_ltiplatform" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="platformcontext" UNIQUE="true" FIELDS="platformid, contextid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

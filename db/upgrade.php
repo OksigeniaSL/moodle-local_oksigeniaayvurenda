@@ -232,5 +232,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102811, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102816) {
+        // The courses of a platform whose students a teacher brought.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_lticontext')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_lticontext');
+        }
+        upgrade_plugin_savepoint(true, 2026102816, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

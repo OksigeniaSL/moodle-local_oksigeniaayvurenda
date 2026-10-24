@@ -55,6 +55,10 @@ class sync_readers extends \core\task\scheduled_task {
                 }
             }
         }
+        // The courses of learning platforms whose students a teacher brought once.
+        foreach (\local_oksigeniaayvurenda\local\ltitool::bring_all() as $courseid => $stats) {
+            mtrace('Ayvurenda: LTI course ' . $courseid . ': ' . json_encode($stats));
+        }
         foreach ($DB->get_records('local_oksigeniaayvurenda_entity', null, 'id', 'id, settings') as $entity) {
             $settings = json_decode((string) $entity->settings, true) ?: [];
             if (empty($settings['cohorts']) && empty($settings['courses'])) {

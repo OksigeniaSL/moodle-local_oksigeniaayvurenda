@@ -275,4 +275,59 @@ final class ltitool_test extends \advanced_testcase {
         $whole = ltitool::link_to($library, null);
         $this->assertSame(['library' => $library->slug], $whole->getCustomParams());
     }
+
+    /**
+     * Bringing a course: the platform's token, then its members; the active students become readers with the group the
+     * teacher said, the teacher a teacher reader, the inactive ones are left out. Again, nobody comes twice.
+     */
+    public function test_bring_course(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        ltitool::save_platform($entityid, ['name' => 'Aula virtual', 'issuer' => self::ISS, 'clientid' => 'tool-1',
+            'authloginurl' => self::ISS . '/auth', 'authtokenurl' => self::ISS . '/token', 'keyseturl' => self::ISS . '/jwks']);
+        $launch = ['iss' => self::ISS, 'aud' => 'tool-1',
+            'https://purl.imsglobal.org/spec/lti/claim/context' => ['id' => 'c-3b', 'title' => 'Lengua 3.º B'],
+            'https://purl.imsglobal.org/spec/lti-nrps/claim/namesroleservice' => [
+                'context_memberships_url' => self::ISS . '/members/c-3b', 'service_versions' => ['2.0']]];
+        $course = ltitool::course($launch);
+        $this->assertSame('Lengua 3.º B', $course->title);
+        $this->assertNull($course->lastsync);
+        $this->assertSame($course->id, ltitool::course($launch)->id);
+        $this->assertNull(ltitool::course(['iss' => self::ISS, 'aud' => 'tool-1']));
+
+        $lis = 'http://purl.imsglobal.org/vocab/lis/v2/membership#';
+        $members = ['members' => [
+            ['user_id' => 's-1', 'status' => 'Active', 'given_name' => 'Elio', 'family_name' => 'Pino', 'email' => 'elio@example.invalid',
+                'roles' => [$lis . 'Learner']],
+            ['user_id' => 's-2', 'status' => 'Inactive', 'given_name' => 'Ada', 'family_name' => 'Ruiz', 'roles' => ['Learner']],
+            ['user_id' => 't-1', 'status' => 'Active', 'given_name' => 'Marta', 'family_name' => 'Soto', 'roles' => [$lis . 'Instructor']],
+        ]];
+        $history = [];
+        $stack = HandlerStack::create(new MockHandler([
+            new Response(200, [], json_encode(['access_token' => 'tok-1', 'expires_in' => 3600])),
+            new Response(200, ['Content-Type' => 'application/vnd.ims.lti-nrps.v2.membershipcontainer+json'], json_encode($members)),
+            new Response(200, ['Content-Type' => 'application/vnd.ims.lti-nrps.v2.membershipcontainer+json'], json_encode($members)),
+        ]));
+        $stack->push(\GuzzleHttp\Middleware::history($history));
+        ltitool::$client = new \GuzzleHttp\Client(['handler' => $stack]);
+        $stats = ltitool::bring($course, '3.º B');
+        $this->assertSame(['created' => 2, 'existing' => 0, 'grouped' => 1, 'skipped' => 1, 'total' => 2], $stats);
+        $this->assertSame('Bearer tok-1', $history[1]['request']->getHeaderLine('Authorization'));
+        $elio = $DB->get_record('user', ['auth' => 'lti', 'firstname' => 'Elio'], '*', MUST_EXIST);
+        $reader = $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $elio->id], '*', MUST_EXIST);
+        $this->assertSame('student', $reader->readertype);
+        $this->assertSame('3.º B', $DB->get_field(self::T . 'member', 'groupname', ['readerid' => $reader->id]));
+        $this->assertSame('lti', $DB->get_field(self::T . 'member', 'source', ['readerid' => $reader->id]));
+        $this->assertSame('teacher', $DB->get_field_sql("SELECT r.readertype FROM {" . self::T . "reader} r
+            JOIN {user} u ON u.id = r.userid WHERE u.firstname = ?", ['Marta']));
+        $this->assertNotNull($DB->get_field(self::T . 'lticontext', 'lastsync', ['id' => $course->id]));
+
+        // The night: the token kept, nobody twice.
+        $again = ltitool::bring_all();
+        $this->assertSame(['created' => 0, 'existing' => 2, 'grouped' => 0, 'skipped' => 1, 'total' => 2], $again[$course->id]);
+        $this->assertCount(3, $history);
+        $this->assertSame(1, $DB->count_records(self::T . 'member', ['readerid' => $reader->id]));
+    }
 }

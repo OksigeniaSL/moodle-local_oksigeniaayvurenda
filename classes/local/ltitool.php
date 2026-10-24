@@ -276,7 +276,7 @@ final class ltitool {
             'client_name' => $name,
             'jwks_uri' => $urls['jwks'],
             'token_endpoint_auth_method' => 'private_key_jwt',
-            'scope' => '',
+            'scope' => 'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly',
             'https://purl.imsglobal.org/spec/lti-tool-configuration' => [
                 'domain' => $urls['domain'],
                 'target_link_uri' => $urls['launch'],
@@ -316,6 +316,129 @@ final class ltitool {
     }
 
     /**
+     * The course a teacher comes from, kept when the platform offers the list of its members (LTI names and roles).
+     *
+     * @param array $launchdata
+     * @return \stdClass|null The course, or null when the platform does not offer the list.
+     */
+    public static function course(array $launchdata): ?\stdClass {
+        global $DB;
+        $url = (string) ($launchdata[LtiConstants::NRPS_CLAIM_SERVICE]['context_memberships_url'] ?? '');
+        $contextid = (string) ($launchdata['https://purl.imsglobal.org/spec/lti/claim/context']['id'] ?? '');
+        if ($url === '' || $contextid === '') {
+            return null;
+        }
+        $platform = self::platform_of($launchdata);
+        $title = \core_text::substr((string) ($launchdata['https://purl.imsglobal.org/spec/lti/claim/context']['title'] ?? ''), 0, 255);
+        $now = time();
+        $course = $DB->get_record(self::T . 'lticontext', ['platformid' => $platform->id,
+            'contextid' => \core_text::substr($contextid, 0, 255)]);
+        if ($course) {
+            if ($course->membershipsurl !== $url || (string) $course->title !== $title) {
+                $DB->update_record(self::T . 'lticontext', (object) ['id' => $course->id, 'membershipsurl' => $url,
+                    'title' => $title, 'timemodified' => $now]);
+            }
+            return $DB->get_record(self::T . 'lticontext', ['id' => $course->id]);
+        }
+        $id = $DB->insert_record(self::T . 'lticontext', (object) ['platformid' => $platform->id,
+            'contextid' => \core_text::substr($contextid, 0, 255), 'title' => $title, 'membershipsurl' => $url,
+            'timecreated' => $now, 'timemodified' => $now]);
+        return $DB->get_record(self::T . 'lticontext', ['id' => $id]);
+    }
+
+    /**
+     * The members of a course, as its platform lists them.
+     *
+     * @param \stdClass $course
+     * @return array[]
+     */
+    public static function members(\stdClass $course): array {
+        global $DB;
+        $platform = $DB->get_record(self::T . 'ltiplatform', ['id' => $course->platformid], '*', MUST_EXIST);
+        if (trim((string) $platform->authtokenurl) === '') {
+            throw new \moodle_exception('ltinotokenurl', 'local_oksigeniaayvurenda');
+        }
+        $registration = (new lti\store())->findRegistrationByIssuer($platform->issuer, $platform->clientid);
+        $cache = new lti\cache();
+        $connector = new LtiServiceConnector($cache, self::$client ?? new \core\http_client());
+        $service = new \Packback\Lti1p3\LtiNamesRolesProvisioningService(
+            $connector,
+            $registration,
+            ['context_memberships_url' => $course->membershipsurl, 'service_versions' => ['2.0']]
+        );
+        try {
+            return $service->getMembers();
+        } catch (\Throwable $e) {
+            throw new \moodle_exception('ltimembersfailed', 'local_oksigeniaayvurenda', '', $e->getMessage());
+        }
+    }
+
+    /**
+     * Brings the members of a course: each with their account, bound to the platform's user, as a reader of the
+     * entity; the students, with the group the teacher said for this school year, unless another source already gave
+     * them one. From then on, the night keeps them up to date.
+     *
+     * @param \stdClass $course
+     * @param string|null $group The group of its students; null, only readers.
+     * @param int|null $now
+     * @return array created, existing, grouped, skipped (inactive), total.
+     */
+    public static function bring(\stdClass $course, ?string $group, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        $platform = $DB->get_record(self::T . 'ltiplatform', ['id' => $course->platformid], '*', MUST_EXIST);
+        $entityid = (int) $platform->entityid;
+        $group = $group !== null ? \core_text::substr(trim($group), 0, 255) : null;
+        $group = $group === '' ? null : $group;
+        $members = self::members($course);
+        $year = years::around($entityid, $now);
+        $auth = get_auth_plugin('lti');
+        $stats = ['created' => 0, 'existing' => 0, 'grouped' => 0, 'skipped' => 0, 'total' => 0];
+        foreach ($members as $member) {
+            if (empty($member['user_id']) || strcasecmp((string) ($member['status'] ?? 'Active'), 'Active') !== 0) {
+                $stats['skipped']++;
+                continue;
+            }
+            $stats['total']++;
+            $type = self::type_of_roles((array) ($member['roles'] ?? []));
+            $user = $auth->find_or_create_user_from_membership($member, $platform->issuer);
+            $had = $DB->record_exists(self::T . 'reader', ['entityid' => $entityid, 'userid' => $user->id]);
+            $readerid = self::reader($entityid, (int) $user->id, $type, $now);
+            $stats[$had ? 'existing' : 'created']++;
+            if (
+                $type === 'student' && $group !== null &&
+                    !$DB->record_exists(self::T . 'member', ['readerid' => $readerid, 'yearid' => $year->id])
+            ) {
+                $DB->insert_record(self::T . 'member', (object) ['readerid' => $readerid, 'yearid' => $year->id,
+                    'groupname' => $group, 'stage' => \local_oksigeniaayvurenda\core\readers\stage_guesser::guess($group),
+                    'source' => 'lti', 'timecreated' => $now]);
+                $stats['grouped']++;
+            }
+        }
+        $DB->update_record(self::T . 'lticontext', (object) ['id' => $course->id, 'groupname' => $group,
+            'lastsync' => $now, 'timemodified' => $now]);
+        return $stats;
+    }
+
+    /**
+     * Brings again the courses already brought once, for the night.
+     *
+     * @return array[] Course id => what bring() says, or the error.
+     */
+    public static function bring_all(): array {
+        global $DB;
+        $done = [];
+        foreach ($DB->get_records_select(self::T . 'lticontext', 'lastsync IS NOT NULL') as $course) {
+            try {
+                $done[$course->id] = self::bring($course, $course->groupname);
+            } catch (\moodle_exception $e) {
+                $done[$course->id] = ['error' => $e->getMessage()];
+            }
+        }
+        return $done;
+    }
+
+    /**
      * Removes a platform: whoever came from it keeps their reader and their history.
      *
      * @param int $entityid
@@ -323,6 +446,9 @@ final class ltitool {
      */
     public static function delete_platform(int $entityid, int $id): void {
         global $DB;
+        if ($DB->record_exists(self::T . 'ltiplatform', ['id' => $id, 'entityid' => $entityid])) {
+            $DB->delete_records(self::T . 'lticontext', ['platformid' => $id]);
+        }
         $DB->delete_records(self::T . 'ltiplatform', ['id' => $id, 'entityid' => $entityid]);
     }
 
@@ -345,7 +471,17 @@ final class ltitool {
      * @return string
      */
     public static function reader_type(array $launchdata): string {
-        $ends = array_map(fn($role) => preg_replace('/^.*[#\/]/', '', (string) $role), $launchdata[LtiConstants::ROLES] ?? []);
+        return self::type_of_roles($launchdata[LtiConstants::ROLES] ?? []);
+    }
+
+    /**
+     * The reader type some roles give, as a launch or the list of a course's members says them.
+     *
+     * @param string[] $roles
+     * @return string
+     */
+    public static function type_of_roles(array $roles): string {
+        $ends = array_map(fn($role) => preg_replace('/^.*[#\/]/', '', (string) $role), $roles);
         foreach (self::ROLES as $role => $type) {
             if (in_array($role, $ends, true)) {
                 return $type;

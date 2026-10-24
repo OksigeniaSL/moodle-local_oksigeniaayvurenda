@@ -55,4 +55,12 @@ if ($launch->isDeepLinkLaunch()) {
     ltitool::reader((int) ltitool::platform_of($data)->entityid, (int) $USER->id, ltitool::reader_type($data));
     redirect(new moodle_url('/local/oksigeniaayvurenda/lti/pick.php', ['launch' => $launch->getLaunchId()]));
 }
+// A teacher whose course lists its members is offered, the first time, to bring its students.
+if (ltitool::reader_type($data) === 'teacher') {
+    $course = ltitool::course($data);
+    if ($course && $course->lastsync === null) {
+        ltitool::reader((int) ltitool::platform_of($data)->entityid, (int) $USER->id, 'teacher');
+        redirect(new moodle_url('/local/oksigeniaayvurenda/lti/course.php', ['launch' => $launch->getLaunchId()]));
+    }
+}
 redirect(ltitool::arrive($data, (int) $USER->id));
