@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.3 (2026-10-27)
+
+- The six fixed reports, instead of a report builder, each with its CSV: loans by period and group (and how many
+  readers of each group borrowed), late books, the most lent, the never lent or not for years (to weed; all of them in
+  the CSV), the holdings by subject and audience with what was lent this year, and the school year for the library's
+  yearly report. Counts and titles, never what a child read. From «Reports» at the desk.
+- The herald comes as a male hummingbird, «el pregonero», and the memory as a grandmother: invented characters with
+  a normal mix. The titles of the roles agree with the sex chosen.
+- Fixed: the examples of three templates left an empty image address, which the CI's HTML check refuses.
+
 ## 0.9.2 (2026-10-27)
 
 - The two characters of the library, with their screen: the memory, who is asked, and the herald, who tells what

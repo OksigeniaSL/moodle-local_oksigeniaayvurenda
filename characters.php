@@ -63,7 +63,7 @@ foreach (characters::of($entityid) as $role => $character) {
         'text' => $str('characteroff'), 'portrait' => $character['portrait']];
     $roles[] = [
         'role' => $role,
-        'title' => $str('characterrole' . $role),
+        'title' => $str('characterrole' . $role . $character['sex']),
         'job' => $str('characterjob' . $role),
         'enabled' => $character['enabled'],
         'name' => $character['name'],

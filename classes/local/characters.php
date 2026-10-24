@@ -55,7 +55,8 @@ final class characters {
                 'role' => $role,
                 'enabled' => (bool) ($mine['enabled'] ?? true),
                 'name' => $name !== '' ? $name : get_string($role . 'defaultname', 'local_oksigeniaayvurenda'),
-                'sex' => ($mine['sex'] ?? 'f') === 'm' ? 'm' : 'f',
+                // The grandmother who remembers and the hummingbird who heralds: one of each.
+                'sex' => ($mine['sex'] ?? ($role === 'herald' ? 'm' : 'f')) === 'm' ? 'm' : 'f',
                 'signs' => $role === 'herald' && !empty($mine['signs']),
                 'portrait' => (new \moodle_url('/local/oksigeniaayvurenda/app/personajes/' . $role . '.svg'))->out(false),
             ];
@@ -80,7 +81,7 @@ final class characters {
             $settings['characters'][$role] = [
                 'enabled' => !empty($mine['enabled']),
                 'name' => \core_text::substr(trim((string) ($mine['name'] ?? '')), 0, 60),
-                'sex' => ($mine['sex'] ?? 'f') === 'm' ? 'm' : 'f',
+                'sex' => in_array($mine['sex'] ?? '', ['f', 'm'], true) ? $mine['sex'] : ($role === 'herald' ? 'm' : 'f'),
                 'signs' => $role === 'herald' && !empty($mine['signs']),
             ];
         }

@@ -59,7 +59,8 @@ final class characters_test extends \advanced_testcase {
         $this->assertSame(get_string('memorynothingm', 'local_oksigeniaayvurenda', (object) ['query' => 'x',
             'name' => 'Abuelo Tilo']), characters::say($entityid, 'memory', 'memorynothing', ['query' => 'x'])['text']);
         $this->assertSame('Mainumby', $all['herald']['name']);
-        $this->assertSame('f', $all['herald']['sex']);
+        // A sex that is not one of the two leaves the herald as he comes.
+        $this->assertSame('m', $all['herald']['sex']);
         $this->assertNull(characters::say($entityid, 'herald', 'heraldnew'));
         $this->assertTrue(json_decode(
             $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]),

@@ -110,6 +110,8 @@ shell::output($str('desktitle'), $main, $library, '', [
             'label' => $str('deskcatalogue')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $library->slug]))->out(false),
             'label' => $str('copiesnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/reports.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('reportsnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
             ->out(false), 'label' => $str('helpnav')],
     ], has_capability('local/oksigeniaayvurenda:catalogue', context_system::instance()) ? [

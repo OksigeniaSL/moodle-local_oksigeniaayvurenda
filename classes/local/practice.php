@@ -141,7 +141,9 @@ final class practice {
             'timemodified' => $now]);
         $year = years::around($entityid, $now);
         $readers = [];
+        $groups = [];
         foreach (self::READERS as [$number, $first, $last, $group]) {
+            $groups[$number] = $group;
             $readers[$number] = $DB->insert_record(self::T . 'reader', ['entityid' => $entityid,
                 'cardcode' => control_letter::append((string) $number), 'readertype' => 'student', 'firstname' => $first,
                 'lastname' => $last, 'status' => 'active', 'timecreated' => $now, 'timemodified' => $now]);
@@ -160,7 +162,8 @@ final class practice {
                 [$reader, $daysago] = $lent;
                 $loaned = $now - $daysago * DAYSECS;
                 $DB->insert_record(self::T . 'loan', ['libraryid' => $libraryid, 'itemid' => $itemid,
-                    'readerid' => $readers[$reader], 'yearid' => $year->id, 'groupname' => null, 'timeloaned' => $loaned,
+                    'readerid' => $readers[$reader], 'yearid' => $year->id, 'groupname' => $groups[$reader],
+                    'timeloaned' => $loaned,
                     'timedue' => $loaned + 14 * DAYSECS, 'renewals' => 0, 'timecreated' => $loaned,
                     'timemodified' => $loaned]);
             }

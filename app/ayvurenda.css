@@ -950,3 +950,18 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-character p { margin: 0; }
 
 .ayv .ayv-character-preview { font-weight: 700; margin-top: .5rem !important; }
+
+/* Reports. */
+.ayv .ayv-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; }
+
+.ayv .ayv-tabs .ayv-toggle[aria-current="page"] { background: var(--green2); color: #fff; }
+
+.ayv .ayv-tabs .ayv-toggle[aria-current="page"]::before { background: #fff; box-shadow: none; }
+
+.ayv .ayv-report .ayv-person { flex-wrap: wrap; }
+
+.ayv .ayv-report-value { font-family: var(--title); font-weight: 600; font-size: 1.15rem; min-width: 3ch; text-align: right; }
+
+.ayv .ayv-report-note { flex: 1 1 12rem; font-size: .9rem; opacity: .85; }
+
+.ayv .ayv-report-part { font-weight: 400; font-size: .85rem; color: var(--accent); }

@@ -1,0 +1,82 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/reports
+
+    One of the six fixed reports: its filters, its lines with a bar, and the CSV.
+
+    Context variables required for this template:
+    * heading, intro, summary, empty - texts
+    * tabs - url, label, current
+    * action, library, report - the form; period (from, to) or never (unlent, older)
+    * rows - label, value, note, share (bar, 0 to 100), part
+    * csv - address of the CSV
+
+    Example context (json):
+    {
+        "heading": "Préstamos por grupo",
+        "intro": "Cuántos préstamos hubo en el periodo, por grupo.",
+        "tabs": [{"url": "#", "label": "Préstamos por grupo", "current": true}],
+        "action": "#",
+        "library": "central",
+        "report": "loans",
+        "period": {"from": "2026-09-01", "to": "2026-10-24"},
+        "never": null,
+        "summary": "120 préstamos.",
+        "hasrows": true,
+        "rows": [{"label": "3º A", "value": 40, "note": "18 de 25 lectores", "share": 100, "part": ""}],
+        "empty": "",
+        "csv": "#",
+        "reportfrom": "Desde", "reportto": "Hasta", "reportunlent": "Sin prestar desde hace (años)",
+        "reportolder": "Adquiridos hace más de (años)", "labelsshow": "Ver", "reportcsv": "Descargar en CSV"
+    }
+}}
+<nav class="ayv-tabs" aria-label="{{heading}}">
+{{#tabs}}<a class="ayv-toggle" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
+</nav>
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#period}}
+<form method="get" action="{{action}}" class="ayv-inline-form">
+    <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="report" value="{{report}}">
+    <label class="ayv-field">{{reportfrom}} <input type="date" name="from" value="{{from}}"></label>
+    <label class="ayv-field">{{reportto}} <input type="date" name="to" value="{{to}}"></label>
+    <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
+</form>
+{{/period}}
+{{#never}}
+<form method="get" action="{{action}}" class="ayv-inline-form">
+    <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="report" value="{{report}}">
+    <label class="ayv-field">{{reportunlent}} <input type="number" min="0" max="50" name="unlent" value="{{unlent}}"></label>
+    <label class="ayv-field">{{reportolder}} <input type="number" min="0" max="80" name="older" value="{{older}}"></label>
+    <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
+</form>
+{{/never}}
+{{#summary}}<p class="ayv-notice">{{summary}}</p>{{/summary}}
+{{#hasrows}}
+<ul class="ayv-people ayv-report">
+{{#rows}}
+    <li class="ayv-person">
+        <span class="ayv-person-name">{{#part}}<span class="ayv-report-part">{{part}}</span> {{/part}}{{label}}</span>
+        <span class="ayv-report-value">{{value}}</span>
+        <span class="ayv-report-note">{{note}}</span>
+        {{#share}}<span class="ayv-share" aria-hidden="true"><span style="width: {{share}}%"></span></span>{{/share}}
+    </li>
+{{/rows}}
+</ul>
+<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{csv}}">{{reportcsv}}</a></p>
+{{/hasrows}}
+{{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}
