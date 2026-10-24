@@ -39,7 +39,7 @@ $pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 1
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
-require_capability('local/oksigeniaayvurenda:' . $pieces[$piece]['capability'], $context);
+shell::require('local/oksigeniaayvurenda:' . $pieces[$piece]['capability']);
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $ref, 'piece' => $piece]));
 

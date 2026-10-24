@@ -32,7 +32,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $all = optional_param('all', false, PARAM_BOOL);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:desk', $context);
+shell::require('local/oksigeniaayvurenda:desk');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $ref, 'all' => (int) $all]));
 

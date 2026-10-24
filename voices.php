@@ -34,7 +34,7 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/voices.php', ['library' => $ref]));
 
@@ -66,7 +66,7 @@ if (data_submitted() && confirm_sesskey()) {
     } else {
         $item = digital::get(required_param('item', PARAM_INT), $library);
         if ($item->kind !== 'voice' || !voices::can_approve($item, (int) $USER->id)) {
-            throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+            shell::refuse(get_string('voicenotyours', 'local_oksigeniaayvurenda'), $library);
         }
         if ($do === 'approve') {
             voices::approve((int) $item->id, $library, ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),

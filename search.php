@@ -37,7 +37,7 @@ $onlyfree = optional_param('free', false, PARAM_BOOL);
 $subject = optional_param('subject', 0, PARAM_INT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/search.php', ['library' => $ref, 'q' => $query,
     'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree]));

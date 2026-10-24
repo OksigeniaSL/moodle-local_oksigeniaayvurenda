@@ -31,7 +31,7 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:desk', $context);
+shell::require('local/oksigeniaayvurenda:desk');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/holds.php', ['library' => $ref]));
 

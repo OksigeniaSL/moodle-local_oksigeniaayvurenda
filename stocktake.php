@@ -33,7 +33,7 @@ $id = optional_param('id', 0, PARAM_INT);
 $view = optional_param('view', '', PARAM_ALPHA);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:catalogue', $context);
+shell::require('local/oksigeniaayvurenda:catalogue');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/stocktake.php', ['library' => $ref, 'id' => $id, 'view' => $view]));
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.29.1 (2026-10-28)
+
+- A page someone may not use no longer ends in an error. Someone not logged in, or in as a guest, goes to log in and
+  comes back; someone logged in without the permission gets a page of the library that says which permission it
+  needs and has the way back. Recording a voice says so too for someone who is not a reader.
+- The counts in the chips that narrow a search have their space.
+
 ## 0.29.0 (2026-10-28)
 
 - Adding by ISBN asks Spain's National Library too, by SRU and without a key: most books in Spanish, little known to

@@ -31,7 +31,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $context = context_system::instance();
 if (!has_capability('local/oksigeniaayvurenda:desk', $context)) {
-    require_capability('local/oksigeniaayvurenda:catalogue', $context);
+    shell::require('local/oksigeniaayvurenda:catalogue');
 }
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/phone.php', ['library' => $ref]));

@@ -33,7 +33,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $page = max(0, optional_param('page', 0, PARAM_INT));
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/ayvurande.php', ['library' => $ref]));
 $library = catalogue::library($ref);

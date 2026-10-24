@@ -34,7 +34,7 @@ $readerid = optional_param('reader', 0, PARAM_INT);
 $view = optional_param('view', '', PARAM_ALPHA);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/shelf.php', ['library' => $ref]));
 

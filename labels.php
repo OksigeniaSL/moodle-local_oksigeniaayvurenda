@@ -37,7 +37,7 @@ $sheet = optional_param('sheet', $kind === 'spines' ? '5x13' : '3x8', PARAM_ALPH
 $start = optional_param('start', 1, PARAM_INT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:catalogue', $context);
+shell::require('local/oksigeniaayvurenda:catalogue');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $ref, 'kind' => $kind]));
 

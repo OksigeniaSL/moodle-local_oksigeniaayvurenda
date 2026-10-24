@@ -34,7 +34,7 @@ require(__DIR__ . '/../../config.php');
 $ref = optional_param('library', '', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/card.php', ['library' => $ref]));
 

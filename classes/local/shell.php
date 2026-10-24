@@ -30,6 +30,55 @@ namespace local_oksigeniaayvurenda\local;
  */
 final class shell {
     /**
+     * Lets in only who may do what a page does. Someone not logged in, or in as a guest, goes to log in and comes back;
+     * someone logged in without the capability gets a page of the library saying so, with the way back, instead of
+     * an error.
+     *
+     * @param string $capability
+     * @param \stdClass|null $library
+     */
+    public static function require(string $capability, ?\stdClass $library = null): void {
+        if (has_capability($capability, \context_system::instance())) {
+            return;
+        }
+        self::login_first();
+        $name = get_string(str_replace('local/', '', $capability), 'local_oksigeniaayvurenda');
+        self::refuse(get_string('staffonlyhint', 'local_oksigeniaayvurenda', $name), $library);
+    }
+
+    /**
+     * Someone not logged in, or in as a guest, goes to log in and comes back here.
+     */
+    public static function login_first(): void {
+        global $SESSION;
+        if (!isloggedin() || isguestuser()) {
+            $SESSION->wantsurl = qualified_me();
+            redirect(get_login_url());
+        }
+    }
+
+    /**
+     * A page of the library that says why someone may not go on, with the way back, and ends there.
+     *
+     * @param string $why
+     * @param \stdClass|null $library
+     */
+    public static function refuse(string $why, ?\stdClass $library = null): void {
+        $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
+        http_response_code(403);
+        self::output(
+            get_string('staffonly', 'local_oksigeniaayvurenda'),
+            '<h1 class="ayv-results-title">' .
+            s(get_string('staffonly', 'local_oksigeniaayvurenda')) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
+            s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>',
+            $library,
+            '',
+            ['search' => false]
+        );
+        die;
+    }
+
+    /**
      * Sends a whole page.
      *
      * @param string $title

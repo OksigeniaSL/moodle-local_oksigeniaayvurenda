@@ -30,7 +30,7 @@ require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
-require_capability('local/oksigeniaayvurenda:view', context_system::instance());
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $ref]));
 $library = catalogue::library($ref);

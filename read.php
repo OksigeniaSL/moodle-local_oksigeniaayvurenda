@@ -46,7 +46,7 @@ $item = digital::get($id, $library);
 $anyone = (!isloggedin() || isguestuser()) && window::shows($item);
 if (!$anyone) {
     require_login(null, false);
-    require_capability('local/oksigeniaayvurenda:view', $context);
+    shell::require('local/oksigeniaayvurenda:view');
     if (!digital::visible($item, digital::viewer((int) $library->entityid, (int) $USER->id))) {
         throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
     }

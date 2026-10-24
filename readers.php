@@ -32,7 +32,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $group = optional_param('group', null, PARAM_TEXT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:desk', $context);
+shell::require('local/oksigeniaayvurenda:desk');
 $PAGE->set_context($context);
 $params = ['library' => $ref] + ($group !== null ? ['group' => $group] : []);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readers.php', $params));

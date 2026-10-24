@@ -34,7 +34,7 @@ $report = optional_param('report', 'loans', PARAM_ALPHA);
 $format = optional_param('format', '', PARAM_ALPHA);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:desk', $context);
+shell::require('local/oksigeniaayvurenda:desk');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/reports.php', ['library' => $ref, 'report' => $report]));
 

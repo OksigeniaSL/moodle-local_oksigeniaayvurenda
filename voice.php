@@ -33,7 +33,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $recordid = required_param('record', PARAM_INT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/voice.php', ['library' => $ref, 'record' => $recordid]));
 
@@ -45,7 +45,8 @@ if (!$found) {
 $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
 // Readers of the centre and the library staff record; anyone else is no one here.
 if ($viewer['who'] === 'nobody') {
-    throw new required_capability_exception($context, 'local/oksigeniaayvurenda:view', 'nopermissions', '');
+    shell::login_first();
+    shell::refuse(get_string('voicenotreader', 'local_oksigeniaayvurenda'), $library);
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';

@@ -29,7 +29,7 @@ require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:manage', $context);
+shell::require('local/oksigeniaayvurenda:manage');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/libraries.php'));
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);

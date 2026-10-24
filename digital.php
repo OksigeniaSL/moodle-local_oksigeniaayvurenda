@@ -34,7 +34,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $recordid = required_param('record', PARAM_INT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:catalogue', $context);
+shell::require('local/oksigeniaayvurenda:catalogue');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/digital.php', ['library' => $ref, 'record' => $recordid]));
 

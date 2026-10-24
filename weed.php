@@ -33,7 +33,7 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $recordid = optional_param('record', 0, PARAM_INT);
 require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:catalogue', $context);
+shell::require('local/oksigeniaayvurenda:catalogue');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $ref]));
 

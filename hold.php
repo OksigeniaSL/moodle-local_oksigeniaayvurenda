@@ -25,13 +25,14 @@
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\holds;
+use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
 require_sesskey();
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
+shell::require('local/oksigeniaayvurenda:view');
 $library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -53,7 +54,7 @@ if ($action === 'ask') {
         $notice = $result['ok'] ? 'holdadded' : 'hold' . $result['reason'];
     }
 } else if ($action === 'for') {
-    require_capability('local/oksigeniaayvurenda:desk', $context);
+    shell::require('local/oksigeniaayvurenda:desk');
     $text = trim(required_param('reader', PARAM_TEXT));
     $desk = new desk($library, (int) $USER->id, $now);
     $readerid = (int) $DB->get_field_select('local_oksigeniaayvurenda_reader', 'id', 'entityid = :entityid AND ' .
