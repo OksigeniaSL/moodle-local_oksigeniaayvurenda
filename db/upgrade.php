@@ -42,5 +42,11 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102400, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102500) {
+        // The librarian role, for sites that had the plugin before it existed.
+        \local_oksigeniaayvurenda\local\roles::ensure_librarian();
+        upgrade_plugin_savepoint(true, 2026102500, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

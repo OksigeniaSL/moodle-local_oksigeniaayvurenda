@@ -36,8 +36,16 @@ final class shell {
      * @param string $main The HTML of the screen.
      * @param \stdClass|null $library
      * @param string $query What is in the search box.
+     * @param array $options search (false to leave the search out), scripts (more scripts of app/), config (more data
+     *     for the scripts), nav (a link in the header: url and label).
      */
-    public static function output(string $title, string $main, ?\stdClass $library = null, string $query = ''): void {
+    public static function output(
+        string $title,
+        string $main,
+        ?\stdClass $library = null,
+        string $query = '',
+        array $options = []
+    ): void {
         global $CFG, $SITE;
         $version = (int) get_config('local_oksigeniaayvurenda', 'version');
         $base = $CFG->wwwroot . '/local/oksigeniaayvurenda/';
@@ -46,7 +54,7 @@ final class shell {
         $str = fn(string $key, $a = null) => s(get_string($key, 'local_oksigeniaayvurenda', $a));
         $home = $library ? $base . 'index.php?library=' . rawurlencode($library->slug) : $base . 'index.php';
         $search = '';
-        if ($library) {
+        if ($library && ($options['search'] ?? true)) {
             $search = '<form class="ayv-search" role="search" action="' . $base . 'search.php" method="get">
     <input type="hidden" name="library" value="' . s($library->slug) . '">
     <label class="ayv-sr" for="ayv-q">' . $str('searchlabel') . '</label>
@@ -55,11 +63,19 @@ final class shell {
     <button type="submit">' . $str('searchbutton') . '</button>
 </form>';
         }
-        $config = json_encode([
+        $config = json_encode(($options['config'] ?? []) + [
             'library' => $library ? $library->slug : '',
             'searchurl' => $base . 'search.php',
             'homeurl' => $home,
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+        $scripts = '';
+        foreach ($options['scripts'] ?? [] as $script) {
+            $scripts .= '<script src="' . $app . $script . '.js?v=' . $version . '"></script>' . "\n";
+        }
+        $nav = '';
+        if (!empty($options['nav'])) {
+            $nav = '<a class="ayv-nav" href="' . s($options['nav']['url']) . '">' . s($options['nav']['label']) . '</a>';
+        }
         $name = $library ? format_string($library->name) : get_string('pluginname', 'local_oksigeniaayvurenda');
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
@@ -82,7 +98,7 @@ final class shell {
 <header class="ayv-top">
 <a class="ayv-brand" href="' . s($home) . '"><img src="' . $app . 'emblema.svg" alt="" width="44" height="44">
     <span class="ayv-brand-name">' . s($name) . '</span></a>
-' . $search . '
+' . $search . $nav . '
 </header>
 <main id="ayv-main" class="ayv-main" tabindex="-1">
 ' . $main . '
@@ -91,7 +107,7 @@ final class shell {
 <a class="ayv-exit" href="' . $CFG->wwwroot . '/">' . $str('backto', format_string($SITE->shortname)) . '</a></footer>
 <script>window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
-' . self::access() . '
+' . $scripts . self::access() . '
 </body>
 </html>';
     }

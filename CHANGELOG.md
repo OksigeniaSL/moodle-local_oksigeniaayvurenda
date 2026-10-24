@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.0 (2026-10-25)
+
+- The desk: one field, always ready, with no modes. A reader's card opens the reader (name, group, loans, what is
+  late); a free copy goes to the open reader; a copy on loan comes back. A name typed instead of a code finds the
+  reader who came without the card.
+- Reads that arrive while the last one travels wait their turn. Codes with a control letter are checked in the
+  browser before going to the server. Three short sounds made by the page (done, look, no), always with colour and
+  words; the scanner's own beep can stay off.
+- Every line can be undone. Only red cards ask for a tap, and only when the librarian may override them (the reader
+  has as many books as the rule allows, or one late); a copy that is not lent, or is lost, never goes.
+- On return, the one-tap note (loved it, did not finish it, wants more like it) and «Renew» instead. Shortcuts need
+  Alt or Ctrl (Alt+1/2/3, Alt+A, Ctrl+Z), so a scanner never fires them. Escape closes the reader.
+- Due dates move to Monday when they fall on a weekend. Each loan keeps the reader's group and the school year.
+- When no reader is open: what comes back today, what is late and what is out.
+- A librarian role, created on install, with the capabilities to look up, lend and catalogue.
+
 ## 0.4.0 (2026-10-24)
 
 - The catalogue, on screens of its own with the library's look (Literata and Andika, served from the plugin): search

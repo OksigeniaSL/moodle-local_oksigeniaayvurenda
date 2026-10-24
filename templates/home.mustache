@@ -26,6 +26,7 @@
 
     Example context (json):
     {
+        "desk": {"url": "#", "label": "Abrir el mostrador"},
         "heading": "La biblioteca",
         "cornersheading": "Rincones",
         "hascorners": true,
@@ -38,6 +39,7 @@
     }
 }}
 <h1 class="ayv-sr">{{heading}}</h1>
+{{#desk}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/desk}}
 {{#hascorners}}
 <section class="ayv-section" aria-labelledby="ayv-corners">
     <h2 id="ayv-corners" class="ayv-section-title">{{cornersheading}}</h2>

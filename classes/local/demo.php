@@ -91,7 +91,7 @@ final class demo {
         $entityid = $DB->insert_record(self::T . 'entity', [
             'name' => $name,
             'yearstart' => '09-01',
-            'settings' => json_encode(['classification' => 'udc', 'demo' => true]),
+            'settings' => json_encode(['classification' => 'udc', 'demo' => true, 'controlletter' => true]),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);

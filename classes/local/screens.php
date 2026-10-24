@@ -48,7 +48,12 @@ final class screens {
             ];
         }
         $recent = self::cards(catalogue::recent($library), $library);
+        $desk = null;
+        if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
+            $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
+        }
         return [
+            'desk' => $desk,
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
             'corners' => $corners,

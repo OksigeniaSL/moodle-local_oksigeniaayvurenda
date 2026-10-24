@@ -342,6 +342,8 @@ final class abies_import {
         $settings['itemtypes'] = ($settings['itemtypes'] ?? []) + $itemtypes;
         $settings['readertypes'] = ($settings['readertypes'] ?? []) + $readertypes;
         $settings['classification'] = $settings['classification'] ?? 'udc';
+        // Abies codes end with a control letter: the desk checks it before asking the server.
+        $settings['controlletter'] = $settings['controlletter'] ?? true;
         $DB->update_record(self::T . 'entity', (object) ['id' => $entity->id, 'settings' => json_encode($settings),
             'timemodified' => $this->now]);
 
