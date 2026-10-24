@@ -108,6 +108,111 @@ final class voices_test extends \advanced_testcase {
     }
 
     /**
+     * A family invited for a student keeps their voice to that class, signed as they wrote it and as the tutor left it;
+     * the centre says what families may choose. Whoever records gets a message with a link that deletes the voice
+     * without asking; without a term, old voices stay. While recording, the book's text is there if it may be opened.
+     */
+    public function test_class_signature_and_forgetting(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'El faro dormido']);
+        $year = $gen->create_year(['entityid' => $entityid] + \local_oksigeniaayvurenda\core\school_year::around(
+            $now,
+            '09-01',
+            \core_date::get_server_timezone_object()
+        ));
+        $user = fn() => $this->getDataGenerator()->create_user();
+        [$ana, $leo, $eva, $tutor] = [$user(), $user(), $user(), $user()];
+        $student = function ($account, string $group) use ($gen, $entityid, $year) {
+            $reader = $gen->create_reader(['entityid' => $entityid, 'userid' => $account->id, 'readertype' => 'student']);
+            $gen->create_member(['readerid' => $reader->id, 'yearid' => $year->id, 'groupname' => $group]);
+            return $reader;
+        };
+        $anareader = $student($ana, '4º B');
+        $leoreader = $student($leo, '4º B');
+        $student($eva, '5º A');
+        $gen->create_reader(['entityid' => $entityid, 'userid' => $tutor->id, 'readertype' => 'teacher']);
+        $DB->insert_record(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => '4º B', 'userid' => $tutor->id,
+            'timecreated' => $now, 'timemodified' => $now]);
+        $hears = fn(int $id, $who) => voices::can_hear(digital::get($id, $library), digital::viewer($entityid, (int) $who->id));
+        $path = make_request_directory() . '/voz.webm';
+
+        $token = voices::invite($library, (int) $record->id, (int) $tutor->id, '', $now, (int) $anareader->id);
+        $invite = voices::invitation($token, $now);
+        $this->assertSame(['class', 'students', 'families', 'public'], voices::family_options($invite));
+        $other = voices::invitation(voices::invite($library, (int) $record->id, (int) $tutor->id, 'Otra', $now), $now);
+        $this->assertNotContains('class', voices::family_options($other), 'no student, no class');
+        file_put_contents($path, 'made-up recording');
+        $id = voices::record_invited($invite, $path, 'Capítulo 1', 'webm', ['class', 'public'], $now, '  La mamá   de Ana ');
+        $this->assertSame('La mamá de Ana', digital::get($id, $library)->signature);
+        // The tutor offers students; the family chose their class and the public: their class it is, signed as corrected.
+        voices::approve($id, $library, ['licence' => 'pd', 'audience' => ['class', 'students'], 'signature' => 'Mamá de Ana']);
+        $voice = digital::get($id, $library);
+        $this->assertSame(['class', '4º B', 'Mamá de Ana'], [$voice->audience, $voice->classgroup, $voice->signature]);
+        $this->assertTrue($hears($id, $leo));
+        $this->assertTrue($hears($id, $ana));
+        $this->assertFalse($hears($id, $eva));
+        $this->assertFalse(window::shows($voice));
+
+        // What families may choose is the centre's.
+        $DB->set_field(
+            self::T . 'entity',
+            'settings',
+            json_encode(['voicefamilyoptions' => ['class', 'students']]),
+            ['id' => $entityid]
+        );
+        $this->assertSame(['class', 'students'], voices::family_options($invite));
+
+        // Whoever records with an account gets the link that deletes it; it works without logging in, once.
+        $sink = $this->redirectMessages();
+        file_put_contents($path, 'made-up recording');
+        $leovoice = voices::record(
+            $library,
+            (int) $record->id,
+            (int) $leoreader->id,
+            (int) $leo->id,
+            $path,
+            '',
+            'webm',
+            $now,
+            'Leo'
+        );
+        $messages = $sink->get_messages();
+        $sink->close();
+        $this->assertCount(1, $messages);
+        $item = digital::get($leovoice, $library);
+        $this->assertStringContainsString(voices::forget_url($item), $messages[0]->fullmessage);
+        $this->assertSame($leovoice, (int) voices::by_token($item->deletetoken)->id);
+        $this->assertNull(voices::by_token('nonsense'));
+        voices::remove($item);
+        $this->assertNull(voices::by_token($item->deletetoken));
+
+        // Without a term, old voices stay.
+        $DB->set_field(self::T . 'entity', 'settings', json_encode(['voicekeepdays' => 0]), ['id' => $entityid]);
+        $DB->set_field(self::T . 'digital', 'timecreated', $now - 5000 * DAYSECS, ['id' => $id]);
+        $this->assertSame(0, voices::keepdays($entityid));
+        $this->assertSame(0, voices::expire($now));
+        $this->assertTrue($DB->record_exists(self::T . 'digital', ['id' => $id]));
+
+        // The text to read from: an EPUB for students; families get the PDF meant for them.
+        $this->assertNull(voices::text_of((int) $record->id, $library, digital::viewer($entityid, (int) $leo->id)));
+        file_put_contents($path, 'made-up book');
+        $epub = digital::add_file($library, (int) $record->id, $path, 'faro.epub', ['title' => '', 'licence' => 'own',
+            'audience' => ['students']], 0);
+        $pdf = digital::add_file($library, (int) $record->id, $path, 'faro.pdf', ['title' => '', 'licence' => 'own',
+            'audience' => ['families']], 0);
+        $leoviewer = digital::viewer($entityid, (int) $leo->id);
+        $this->assertSame($epub, (int) voices::text_of((int) $record->id, $library, $leoviewer)->id);
+        $families = ['who' => 'families', 'stage' => null, 'userid' => 0, 'readerid' => 0];
+        $this->assertSame($pdf, (int) voices::text_of((int) $record->id, $library, $families)->id);
+    }
+
+    /**
      * A family without an account records once with the link a teacher sent: the teacher hears and approves it, never
      * for more people than the family chose; the link does not record twice and an unused one expires.
      */

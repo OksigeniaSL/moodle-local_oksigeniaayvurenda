@@ -24,8 +24,12 @@
         "pending": [{"id": 1, "book": "El faro dormido", "title": "Capítulo 1", "who": "Ana Montes (4º B)", "url": "#",
             "share": false, "minor": true, "permission": false,
             "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
-            "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "Sin permiso, solo su docente"}],
-        "manage": true, "keepdays": 730, "voicetext": "", "infourl": "#",
+            "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "Sin permiso, solo su docente",
+            "signature": "La mamá de Ana"}],
+        "manage": true, "voicetext": "", "infourl": "#",
+        "keeps": [{"days": 0, "label": "Sin plazo", "selected": false}, {"days": 730, "label": "Dos cursos", "selected": true}],
+        "familyoptions": [{"value": "class", "label": "Su clase", "checked": true}],
+        "voicesignaturereview": "Firma", "voicesignaturereviewhint": "se ve al aprobarla", "voicesfamilyoptions": "Qué eligen las familias",
         "voicesnone": "Ninguna", "voiceapprove": "Aprobar", "voicereject": "Rechazar", "voicelicence": "Licencia",
         "voiceaudience": "Quién más la oye", "voiceprivatehint": "Sin permiso, solo su docente",
         "voicepermissiongive": "Anotar el permiso", "voicepermissiontake": "Retirar el permiso",
@@ -55,6 +59,8 @@
         {{#share}}<fieldset class="ayv-fieldset"><legend>{{voiceaudience}}</legend><div class="ayv-choices">
             {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}"> {{label}}</label>{{/audiences}}</div></fieldset>{{/share}}
         {{^share}}<p class="ayv-field-hint">{{privatehint}}</p>{{/share}}
+        <label class="ayv-field ayv-field-wide">{{voicesignaturereview}} <span class="ayv-field-hint">{{voicesignaturereviewhint}}</span>
+            <input type="text" name="signature" maxlength="60" value="{{signature}}"></label>
         <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{voiceapprove}}</button>
             <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></p>
     </form>
@@ -64,7 +70,9 @@
 <form method="post" action="{{action}}" class="ayv-book">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
     <h2 class="ayv-section-title">{{voicessettings}}</h2>
-    <label class="ayv-field">{{voiceskeepdays}} <input type="number" name="keepdays" value="{{keepdays}}" min="30" max="3650"></label>
+    <label class="ayv-field ayv-field-wide">{{voiceskeepdays}} <select name="keepdays">{{#keeps}}<option value="{{days}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/keeps}}</select></label>
+    <fieldset class="ayv-fieldset"><legend>{{voicesfamilyoptions}}</legend><div class="ayv-choices">
+        {{#familyoptions}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="familyoptions[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/familyoptions}}</div></fieldset>
     <label class="ayv-field ayv-field-wide">{{voicestext}} <span class="ayv-field-hint">{{voicestexthint}}</span>
         <textarea name="voicetext" rows="4">{{voicetext}}</textarea></label>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="settings">{{voicessave}}</button></p>

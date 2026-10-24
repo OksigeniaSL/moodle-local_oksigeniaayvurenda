@@ -67,13 +67,14 @@ $data = [
     'other' => $item->format === 'other',
     'fileurl' => $item->kind === 'link' ? '' : digital::file_url($item),
     'downloadurl' => $candownload && $item->kind !== 'link' ? digital::file_url($item, true) : '',
+    'marks' => true,
     'recordurl' => $anyone ? (new moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug]))->out(false)
         : (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $item->recordid]))
             ->out(false),
 ];
 foreach (
     ['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readmarks', 'readdownload', 'readopenlink',
-        'readnodownload', 'backtorecord', 'readloading'] as $key
+        'readnodownload', 'backtorecord', 'readloading', 'readprogress'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -89,6 +90,7 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
         'item' => (int) $item->id,
         'position' => $place['position'],
         'bookmarks' => $place['bookmarks'],
+        'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage')],
     ],
 ]);

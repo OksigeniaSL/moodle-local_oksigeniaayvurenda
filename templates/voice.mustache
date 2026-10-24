@@ -30,14 +30,23 @@
         "invites": [{"name": "La familia de Ana", "state": "Sin usar, hasta el 7 de noviembre", "link": "https://example.org/f",
             "linklabel": "Enlace para La familia de Ana", "copylabel": "Copiar"}],
         "voiceinvitetitle": "Invitar a una familia", "voiceinvitehint": "Un enlace de un solo uso", "voiceinvitename": "A quién",
-        "voiceinvitenamehint": "como lo reconozcas", "voiceinvitemake": "Hacer el enlace"
+        "voiceinvitenamehint": "como lo reconozcas", "voiceinvitemake": "Hacer el enlace",
+        "askemail": false, "haschildren": true, "children": [{"id": 3, "label": "Ana Montes (4º B)"}],
+        "voiceinvitechild": "De qué alumno", "voiceinvitechildnone": "Ninguno", "voiceinvitechildhint": "de tus grupos",
+        "voicesignature": "Firma", "voicesignaturehint": "si quieres", "hastext": false, "epub": false, "pdf": false,
+        "fileurl": "#", "marks": false, "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "A−",
+        "readbigger": "A+", "readmark": "Marcar", "readprogress": "Cuánto llevas", "readloading": "Abriendo…",
+        "voicetextheading": "Lee desde aquí", "voicepaper": "Ten delante el libro de papel."
     }
 }}
 <section class="ayv-voice">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-notice">{{how}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{> local_oksigeniaayvurenda/voice_recorder}}
+<div class="ayv-voice-grid">
+{{> local_oksigeniaayvurenda/voice_text}}
+<div class="ayv-voice-side">{{> local_oksigeniaayvurenda/voice_recorder}}</div>
+</div>
 {{#hasmine}}
 <h2 class="ayv-section-title">{{voicemine}}</h2>
 <ul class="ayv-holds">
@@ -54,8 +63,10 @@
     <input type="hidden" name="sesskey" value="{{sesskey}}">
     <h2 class="ayv-section-title">{{voiceinvitetitle}}</h2>
     <p class="ayv-field-hint">{{voiceinvitehint}}</p>
+    {{#haschildren}}<label class="ayv-field ayv-field-wide">{{voiceinvitechild}} <span class="ayv-field-hint">{{voiceinvitechildhint}}</span>
+        <select name="child"><option value="0">{{voiceinvitechildnone}}</option>{{#children}}<option value="{{id}}">{{label}}</option>{{/children}}</select></label>{{/haschildren}}
     <label class="ayv-field ayv-field-wide">{{voiceinvitename}} <span class="ayv-field-hint">{{voiceinvitenamehint}}</span>
-        <input type="text" name="name" maxlength="255" required></label>
+        <input type="text" name="name" maxlength="255"></label>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="invite">{{voiceinvitemake}}</button></p>
 </form>
 {{#hasinvites}}

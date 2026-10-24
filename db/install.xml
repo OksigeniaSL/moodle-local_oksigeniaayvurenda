@@ -424,6 +424,10 @@
         <FIELD NAME="download" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="published" SEQUENCE="false" COMMENT="published, or pending until it is approved"/>
         <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: the reader who recorded it"/>
+        <FIELD NAME="signature" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: how it is signed, if its author wants and once approved"/>
+        <FIELD NAME="classyearid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice heard by one class: its school year"/>
+        <FIELD NAME="classgroup" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice heard by one class: its group"/>
+        <FIELD NAME="deletetoken" TYPE="char" LENGTH="48" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: the key of the link that deletes it without logging in"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -435,6 +439,9 @@
         <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
         <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="deletetoken" UNIQUE="false" FIELDS="deletetoken"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_voiceconsent" COMMENT="A family's permission, noted by the centre, for a minor's voice to be heard beyond them and their teacher">
       <FIELDS>
@@ -457,6 +464,7 @@
         <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="token" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="invitedby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The student whose family is invited, if the teacher says"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Who is invited, as the teacher writes it"/>
         <FIELD NAME="audience" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Who else the family lets hear it"/>
         <FIELD NAME="digitalid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The voice recorded with it"/>
@@ -469,6 +477,7 @@
         <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
         <KEY NAME="recordid" TYPE="foreign" FIELDS="recordid" REFTABLE="local_oksigeniaayvurenda_record" REFFIELDS="id"/>
         <KEY NAME="invitedby" TYPE="foreign" FIELDS="invitedby" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
         <KEY NAME="digitalid" TYPE="foreign" FIELDS="digitalid" REFTABLE="local_oksigeniaayvurenda_digital" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>

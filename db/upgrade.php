@@ -186,5 +186,43 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102724, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102727) {
+        // Voices: a signature, one class as audience, a link to delete them, and the student a family's link is for.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $fields = [
+            new xmldb_field('signature', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'readerid'),
+            new xmldb_field('classyearid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'signature'),
+            new xmldb_field('classgroup', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'classyearid'),
+            new xmldb_field('deletetoken', XMLDB_TYPE_CHAR, '48', null, null, null, null, 'classgroup'),
+        ];
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        $index = new xmldb_index('deletetoken', XMLDB_INDEX_NOTUNIQUE, ['deletetoken']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        // The voices recorded before get their link too.
+        $voices = $DB->get_fieldset_select('local_oksigeniaayvurenda_digital', 'id', "kind = 'voice' AND deletetoken IS NULL");
+        foreach ($voices as $id) {
+            $DB->set_field('local_oksigeniaayvurenda_digital', 'deletetoken', bin2hex(random_bytes(24)), ['id' => $id]);
+        }
+        $table = new xmldb_table('local_oksigeniaayvurenda_voiceinvite');
+        $field = new xmldb_field('readerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'invitedby');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            $dbman->add_key($table, new xmldb_key(
+                'readerid',
+                XMLDB_KEY_FOREIGN,
+                ['readerid'],
+                'local_oksigeniaayvurenda_reader',
+                ['id']
+            ));
+        }
+        upgrade_plugin_savepoint(true, 2026102727, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

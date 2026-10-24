@@ -287,6 +287,10 @@ final class screens {
         $items = [];
         foreach (digital::of_record($recordid, $library, $viewer) as $item) {
             $label = $item->title !== '' && $item->title !== null ? $item->title : self::str('format' . $item->format);
+            // A voice's signature, once someone has read and approved it.
+            if ($item->kind === 'voice' && $item->status === 'published' && (string) $item->signature !== '') {
+                $label .= ' · ' . $item->signature;
+            }
             $items[] = [
                 'label' => $label . ($item->status === 'pending' ? ' ' . self::str('voicependingshort') : ''),
                 'action' => self::str('digitalaction' . $item->format),

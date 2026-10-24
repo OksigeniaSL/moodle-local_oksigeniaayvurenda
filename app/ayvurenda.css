@@ -121,10 +121,12 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-brand-name { font-family: var(--title); font-weight: 600; font-size: 1.3rem; line-height: 1.15; }
 
-.ayv .ayv-search { flex: 1 1 18rem; display: flex; gap: .5rem; }
+.ayv .ayv-search { flex: 1 1 18rem; display: flex; gap: .5rem; min-width: 0; }
 
 .ayv .ayv-search input {
     flex: 1;
+    /* No width of its own: it takes what the button leaves, down to a phone of 320 px. */
+    width: 0;
     min-width: 0;
     min-height: 48px;
     padding: .5rem 1rem;
@@ -632,6 +634,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-field input[type="text"],
 .ayv .ayv-field input[type="search"],
+.ayv .ayv-field input[type="email"],
 .ayv .ayv-field input[type="password"],
 .ayv .ayv-source select,
 .ayv .ayv-field select {
@@ -675,6 +678,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-book {
     display: grid;
+    /* One column that never grows beyond the card, whatever a field inside would like. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     margin: 0 0 1.25rem;
     padding: 1rem 1.25rem;
@@ -714,7 +719,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-field-wide { flex: 1 1 100%; flex-wrap: wrap; }
 
-.ayv .ayv-field-wide input, .ayv .ayv-field-wide textarea { flex: 1 1 16rem; }
+.ayv .ayv-field-wide input, .ayv .ayv-field-wide textarea, .ayv .ayv-field-wide select { flex: 1 1 16rem; }
 
 .ayv .ayv-field input[type="number"],
 .ayv .ayv-field textarea,
@@ -1101,7 +1106,61 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 /* Reading in the browser: the book takes the screen; a PDF and a recording, the width. */
 .ayv .ayv-read-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .5rem 0; }
 
-.ayv .ayv-epub { height: min(75vh, 900px); border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+/* The book as a page of paper, with its page turns at the sides. */
+.ayv .ayv-read-book { display: flex; align-items: stretch; gap: .25rem; }
+.ayv .ayv-epub {
+    flex: 1 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    height: min(75vh, 900px);
+    padding: 1.25rem 1.5rem;
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 10px 28px rgba(0, 0, 0, .1);
+}
+.ayv .ayv-page-turn {
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+}
+.ayv .ayv-page-turn:hover, .ayv .ayv-page-turn:focus-visible { background: var(--paper2); }
+.ayv .ayv-page-turn .ayv-icon { width: 32px; height: 32px; margin: 0; }
+.ayv .ayv-read-foot { display: flex; align-items: center; gap: 1rem; margin: .75rem 48px; }
+.ayv .ayv-read-foot progress { flex: 1 1 auto; height: 6px; accent-color: var(--accent); }
+@media (max-width: 480px) {
+    .ayv .ayv-epub { padding: 1rem; }
+    .ayv .ayv-page-turn { flex-basis: 32px; }
+    .ayv .ayv-read-foot { margin: .75rem 0; }
+}
+
+/* Icons, in the colour of their text. */
+.ayv .ayv-icon { width: 1.15em; height: 1.15em; vertical-align: -.2em; flex: 0 0 auto; }
+
+/* A long option does not widen its form beyond a phone. */
+.ayv .ayv-field select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+.ayv .ayv-fieldset { min-width: 0; }
+.ayv .ayv-choices .ayv-field { white-space: normal; }
+.ayv .ayv-button .ayv-icon { margin-right: .35em; }
+
+/* Recording: the text on one side, the recorder on the other, which stays in sight while reading. */
+.ayv .ayv-voice-grid { display: grid; gap: 1.5rem; align-items: start; margin: 1rem 0 1.5rem; }
+.ayv .ayv-voice-grid > * { min-width: 0; }
+.ayv .ayv-voice-text .ayv-epub { height: min(62vh, 720px); }
+.ayv .ayv-voice-text .ayv-pdf { height: 70vh; }
+.ayv .ayv-voice-paper { margin: 0; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--paper2); }
+.ayv .ayv-voice-side .ayv-book { margin: 0 0 1rem; }
+@media (min-width: 900px) {
+    .ayv .ayv-voice-grid { grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr); }
+    .ayv .ayv-voice-side { position: sticky; top: 1rem; }
+}
 
 .ayv .ayv-pdf { display: block; width: 100%; height: 80vh; border: 1px solid var(--line); border-radius: var(--radius); }
 

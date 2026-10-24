@@ -52,6 +52,8 @@ $id = voices::record(
     (int) $USER->id,
     $_FILES['voice']['tmp_name'],
     optional_param('title', '', PARAM_TEXT),
-    optional_param('ext', 'webm', PARAM_ALPHANUM)
+    optional_param('ext', 'webm', PARAM_ALPHANUM),
+    null,
+    optional_param('signature', '', PARAM_TEXT)
 );
 echo json_encode(['id' => $id]);

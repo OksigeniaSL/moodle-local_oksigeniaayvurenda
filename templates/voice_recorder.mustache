@@ -21,18 +21,24 @@
     Example context (json):
     {
         "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar", "voicewhat": "Qué has leído",
-        "voicewhathint": "un capítulo, unas páginas", "voicesend": "Enviar", "consent": false
+        "voicewhathint": "un capítulo, unas páginas", "voicesend": "Enviar", "consent": false,
+        "voicesignature": "Firma", "voicesignaturehint": "si quieres", "askemail": true, "voiceemail": "Tu correo",
+        "voiceemailhint": "si quieres el enlace para borrarla"
     }
 }}
-<div class="ayv-book" id="ayv-recorder">
+<div class="ayv-book ayv-recorder" id="ayv-recorder">
     <p class="ayv-book-actions">
-        <button type="button" class="ayv-button" id="ayv-rec" {{#consent}}disabled{{/consent}}>{{voicerecord}}</button>
-        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-stop" hidden>{{voicestop}}</button>
+        <button type="button" class="ayv-button ayv-button-rec" id="ayv-rec" {{#consent}}disabled{{/consent}}>{{> local_oksigeniaayvurenda/icon_mic}} {{voicerecord}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-stop" hidden>{{> local_oksigeniaayvurenda/icon_stop}} {{voicestop}}</button>
         <span class="ayv-field-hint" id="ayv-time" role="status"></span>
     </p>
     <audio id="ayv-preview" class="ayv-media" controls hidden></audio>
     <label class="ayv-field ayv-field-wide">{{voicewhat}} <span class="ayv-field-hint">{{voicewhathint}}</span>
         <input type="text" id="ayv-what" maxlength="255"></label>
+    <label class="ayv-field ayv-field-wide">{{voicesignature}} <span class="ayv-field-hint">{{voicesignaturehint}}</span>
+        <input type="text" id="ayv-signature" maxlength="60"></label>
+    {{#askemail}}<label class="ayv-field ayv-field-wide">{{voiceemail}} <span class="ayv-field-hint">{{voiceemailhint}}</span>
+        <input type="email" id="ayv-email" maxlength="254" autocomplete="email"></label>{{/askemail}}
     <p class="ayv-book-actions">
         <button type="button" class="ayv-button" id="ayv-send" disabled>{{voicesend}}</button>
         <button type="button" class="ayv-button ayv-button-quiet" id="ayv-again" hidden>{{voiceagain}}</button>

@@ -51,8 +51,32 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 $notice = '';
 // Teachers and the library invite families who have no account, with a one-time link.
 $caninvite = in_array($viewer['who'], ['desk', 'staff'], true);
+// A tutor says whose family it is, among the students of their groups: then the family can keep it to that class.
+$children = [];
+if ($caninvite) {
+    $year = \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time());
+    $rows = $DB->get_records_sql(
+        "SELECT DISTINCT r.id, m.groupname
+           FROM {local_oksigeniaayvurenda_member} m
+           JOIN {local_oksigeniaayvurenda_reader} r ON r.id = m.readerid
+           JOIN {local_oksigeniaayvurenda_tutor} t ON t.yearid = m.yearid AND t.groupname = m.groupname
+          WHERE t.userid = :userid AND m.yearid = :yearid AND r.readertype = 'student' AND r.status = 'active'",
+        ['userid' => $USER->id, 'yearid' => $year->id]
+    );
+    $desk = new \local_oksigeniaayvurenda\local\desk($library, 0);
+    foreach ($rows as $row) {
+        $children[(int) $row->id] = $desk->reader((int) $row->id)['name'] . ' (' . $row->groupname . ')';
+    }
+    asort($children);
+}
 if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'invite' && $caninvite) {
-    voices::invite($library, $recordid, (int) $USER->id, required_param('name', PARAM_TEXT));
+    $child = optional_param('child', 0, PARAM_INT);
+    $child = isset($children[$child]) ? $child : 0;
+    $name = trim(optional_param('name', '', PARAM_TEXT));
+    if ($name === '' && $child) {
+        $name = $str('voiceinvitefamilyof', $desk->reader($child)['name']);
+    }
+    voices::invite($library, $recordid, (int) $USER->id, $name, null, $child);
     $notice = $str('voiceinvitemade');
 }
 if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'delete') {
@@ -64,7 +88,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPH
 }
 $mine = array_map(fn($v) => [
     'id' => (int) $v->id,
-    'title' => (string) $v->title,
+    'title' => (string) $v->title . ((string) $v->signature !== '' ? ' · ' . $v->signature : ''),
     'url' => digital::file_url($v),
     'state' => $str($v->status === 'pending' ? 'voicepending' : 'voiceapproved'),
 ], voices::mine($recordid, $library, (int) $USER->id));
@@ -78,9 +102,25 @@ $data = [
     'mine' => $mine,
     'hasmine' => (bool) $mine,
     'consent' => false,
+    'askemail' => false,
     'caninvite' => $caninvite,
+    'children' => array_map(fn($id, $label) => ['id' => $id, 'label' => $label], array_keys($children), $children),
+    'haschildren' => (bool) $children,
     'invites' => [],
 ];
+// The text to read from, if the book has one this person may open; if not, the paper book.
+$text = voices::text_of($recordid, $library, $viewer);
+$data += [
+    'hastext' => (bool) $text,
+    'epub' => $text && $text->format === 'epub',
+    'pdf' => $text && $text->format === 'pdf',
+    'fileurl' => $text ? digital::file_url($text) : '',
+    'marks' => false,
+];
+foreach (['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading'] as $key) {
+    $data[$key] = $str($key);
+}
+$place = $text ? digital::place((int) $text->id, (int) $USER->id) : ['position' => null, 'bookmarks' => []];
 if ($caninvite) {
     foreach (voices::invites($recordid, (int) $USER->id) as $invite) {
         $open = !$invite->timeused && $invite->timeexpires > time();
@@ -99,7 +139,8 @@ $data['hasinvites'] = (bool) $data['invites'];
 foreach (
     ['voiceinfo', 'voicerecord', 'voicestop', 'voiceagain', 'voicewhat', 'voicewhathint', 'voicesend', 'voicemine',
         'voicedelete', 'voicenomic', 'backtorecord', 'voiceinvitetitle', 'voiceinvitehint', 'voiceinvitename',
-        'voiceinvitenamehint', 'voiceinvitemake'] as $key
+        'voiceinvitenamehint', 'voiceinvitemake', 'voicesignature', 'voicesignaturehint', 'voicetextheading', 'voicepaper',
+        'voiceinvitechild', 'voiceinvitechildnone', 'voiceinvitechildhint'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -107,14 +148,19 @@ $recordurl = (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' 
     ->out(false);
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/voice', $data), $library, '', [
     'search' => false,
-    'scripts' => ['voice'],
+    'scripts' => $data['epub'] ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader', 'voice'] : ['voice'],
     'nav' => [['url' => $recordurl, 'label' => $str('backtorecord')]],
     'config' => [
         'sendurl' => (new moodle_url('/local/oksigeniaayvurenda/voice_ajax.php'))->out(false),
         'sesskey' => sesskey(),
         'record' => $recordid,
+        'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/digital_ajax.php'))->out(false),
+        'item' => $text ? (int) $text->id : 0,
+        'position' => $place['position'],
+        'bookmarks' => $place['bookmarks'],
+        'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicesent'),
             'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
-            'copied' => $str('voiceinvitecopied')],
+            'voicelength' => $str('voicelength'), 'copied' => $str('voiceinvitecopied'), 'readpage' => $str('readpage')],
     ],
 ]);

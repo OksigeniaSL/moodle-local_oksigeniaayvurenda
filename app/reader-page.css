@@ -1,0 +1,13 @@
+/* The letters of the library inside the pages of an EPUB: Andika, made for those learning to read (SIL, OFL). */
+@font-face {
+    font-family: "Ayvurenda Andika";
+    src: url("fonts/andika-400.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Ayvurenda Andika";
+    src: url("fonts/andika-700.woff2") format("woff2");
+    font-weight: 700;
+    font-display: swap;
+}

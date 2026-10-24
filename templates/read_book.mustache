@@ -1,0 +1,42 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/read_book
+
+    An EPUB as a page of paper, with page turns at its sides, the size of the letters, marks if wanted, and how far
+    the reader is.
+
+    Example context (json):
+    {
+        "fileurl": "#", "heading": "El faro dormido", "marks": true, "readprev": "Anterior", "readnext": "Siguiente",
+        "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande", "readmark": "Marcar aquí",
+        "readprogress": "Cuánto llevas", "readloading": "Abriendo el libro…"
+    }
+}}
+<div class="ayv-read-bar" role="toolbar" aria-label="{{heading}}">
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-smaller" aria-label="A− {{readsmaller}}">A−</button>
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-bigger" aria-label="A+ {{readbigger}}">A+</button>
+    {{#marks}}<button type="button" class="ayv-button ayv-button-quiet" id="ayv-mark">{{readmark}}</button>{{/marks}}
+</div>
+<div class="ayv-read-book">
+    <button type="button" class="ayv-page-turn" id="ayv-prev" aria-label="{{readprev}}">{{> local_oksigeniaayvurenda/icon_prev}}</button>
+    <div id="ayv-epub" class="ayv-epub" data-url="{{fileurl}}" data-title="{{heading}}"><p class="ayv-empty">{{readloading}}</p></div>
+    <button type="button" class="ayv-page-turn" id="ayv-next" aria-label="{{readnext}}">{{> local_oksigeniaayvurenda/icon_next}}</button>
+</div>
+<div class="ayv-read-foot">
+    <progress id="ayv-progress" max="100" value="0" aria-label="{{readprogress}}" hidden></progress>
+    <span class="ayv-field-hint" id="ayv-where" role="status"></span>
+</div>

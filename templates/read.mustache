@@ -25,23 +25,14 @@
         "fileurl": "#", "downloadurl": "#", "recordurl": "#",
         "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande",
         "readmark": "Marcar aquí", "readmarks": "Tus marcas", "readdownload": "Descargar", "readopenlink": "Abrirlo",
-        "readnodownload": "Se lee aquí", "backtorecord": "Volver a la ficha", "readloading": "Abriendo el libro…"
+        "readnodownload": "Se lee aquí", "backtorecord": "Volver a la ficha", "readloading": "Abriendo el libro…",
+        "readprogress": "Cuánto llevas", "marks": true
     }
 }}
 <section class="ayv-read">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-field-hint">{{subtitle}} · {{licence}}</p>
-{{#epub}}
-<div class="ayv-read-bar" role="toolbar" aria-label="{{subtitle}}">
-    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-prev">{{readprev}}</button>
-    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-next">{{readnext}}</button>
-    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-smaller" aria-label="A− {{readsmaller}}">A−</button>
-    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-bigger" aria-label="A+ {{readbigger}}">A+</button>
-    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-mark">{{readmark}}</button>
-    <span class="ayv-field-hint" id="ayv-where" role="status"></span>
-</div>
-<div id="ayv-epub" class="ayv-epub" data-url="{{fileurl}}" data-title="{{heading}}"><p class="ayv-empty">{{readloading}}</p></div>
-{{/epub}}
+{{#epub}}{{> local_oksigeniaayvurenda/read_book}}{{/epub}}
 {{#pdf}}<iframe class="ayv-pdf" src="{{fileurl}}" title="{{heading}}"></iframe>{{/pdf}}
 {{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></audio>{{/audio}}
 {{#video}}<video id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></video>{{/video}}

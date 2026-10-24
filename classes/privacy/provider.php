@@ -117,6 +117,7 @@ class provider implements
         $collection->add_database_table(self::T . 'digital', [
             'createdby' => 'privacy:metadata:digital:createdby',
             'title' => 'privacy:metadata:digital:title',
+            'signature' => 'privacy:metadata:digital:signature',
             'timecreated' => 'privacy:metadata:digital:timecreated',
         ], 'privacy:metadata:digital');
         $collection->add_database_table(self::T . 'digitalread', [
@@ -133,6 +134,7 @@ class provider implements
         ], 'privacy:metadata:voiceconsent');
         $collection->add_database_table(self::T . 'voiceinvite', [
             'invitedby' => 'privacy:metadata:voiceinvite:invitedby',
+            'readerid' => 'privacy:metadata:voiceinvite:readerid',
             'name' => 'privacy:metadata:voiceinvite:name',
             'timecreated' => 'privacy:metadata:voiceinvite:timecreated',
             'timeused' => 'privacy:metadata:voiceinvite:timeused',
@@ -340,7 +342,8 @@ class provider implements
         foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'createdby' => $userid], 'id') as $voice) {
             $path = array_merge($base, [get_string('privacy:path:voices', 'local_oksigeniaayvurenda'), (string) $voice->id]);
             writer::with_context($context)->export_data($path, (object) ['title' => $voice->title, 'status' => $voice->status,
-                'audience' => $voice->audience, 'created' => transform::datetime($voice->timecreated)]);
+                'audience' => $voice->audience, 'signature' => $voice->signature,
+                'created' => transform::datetime($voice->timecreated)]);
             writer::with_context($context)->export_area_files($path, 'local_oksigeniaayvurenda', 'digital', $voice->id);
         }
         $places = $DB->get_records_sql('SELECT d.id, r.title, d.position, d.bookmarks, d.timemodified

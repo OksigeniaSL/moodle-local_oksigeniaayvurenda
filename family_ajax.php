@@ -43,6 +43,9 @@ $id = voices::record_invited(
     $_FILES['voice']['tmp_name'],
     optional_param('title', '', PARAM_TEXT),
     optional_param('ext', 'webm', PARAM_ALPHANUM),
-    optional_param_array('audience', [], PARAM_ALPHA)
+    optional_param_array('audience', [], PARAM_ALPHA),
+    null,
+    optional_param('signature', '', PARAM_TEXT),
+    trim(optional_param('email', '', PARAM_EMAIL))
 );
 echo json_encode(['id' => $id]);

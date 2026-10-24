@@ -27,7 +27,12 @@
         "voiceinfocentre": "Lo que añade el centro", "voicefamilyconsent": "Doy mi permiso",
         "voicefamilywho": "Quién más puede oírla", "voicefamilywhohint": "si la aprueban", "voicefamilydone": "Ya has grabado",
         "voicedelete": "Borrarla", "voicefamilydeletedall": "Borrada", "voicerecord": "Grabar", "voicestop": "Parar",
-        "voiceagain": "Volver a grabar", "voicewhat": "Qué has leído", "voicewhathint": "un capítulo", "voicesend": "Enviar"
+        "voiceagain": "Volver a grabar", "voicewhat": "Qué has leído", "voicewhathint": "un capítulo", "voicesend": "Enviar",
+        "askemail": true, "voicesignature": "Firma", "voicesignaturehint": "si quieres", "voiceemail": "Tu correo",
+        "voiceemailhint": "si quieres", "hastext": false, "epub": false, "pdf": false, "fileurl": "#", "marks": false,
+        "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "A−", "readbigger": "A+", "readmark": "Marcar",
+        "readprogress": "Cuánto llevas", "readloading": "Abriendo…", "voicetextheading": "Lee desde aquí",
+        "voicepaper": "Ten delante el libro de papel."
     }
 }}
 <section class="ayv-voice">
@@ -48,6 +53,9 @@
     {{^hasvoice}}{{^notice}}<p class="ayv-empty">{{voicefamilydeletedall}}</p>{{/notice}}{{/hasvoice}}
 {{/used}}
 {{^used}}
+<div class="ayv-voice-grid">
+{{> local_oksigeniaayvurenda/voice_text}}
+<div class="ayv-voice-side">
 <div class="ayv-book">
     <label class="ayv-field ayv-field-check"><input type="checkbox" id="ayv-consent"> {{voicefamilyconsent}}</label>
     <fieldset class="ayv-fieldset"><legend>{{voicefamilywho}} <span class="ayv-field-hint">{{voicefamilywhohint}}</span></legend>
@@ -55,5 +63,7 @@
     </fieldset>
 </div>
 {{> local_oksigeniaayvurenda/voice_recorder}}
+</div>
+</div>
 {{/used}}
 </section>

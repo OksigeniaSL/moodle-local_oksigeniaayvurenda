@@ -53,8 +53,14 @@ if (data_submitted() && confirm_sesskey()) {
             'settings',
             ['id' => $library->entityid]
         ), true) ?: [];
-        $settings['voicekeepdays'] = max(30, min(3650, optional_param('keepdays', voices::KEEPDAYS, PARAM_INT)));
+        // 0 keeps voices until whoever recorded them deletes them.
+        $keep = optional_param('keepdays', voices::KEEPDAYS, PARAM_INT);
+        $settings['voicekeepdays'] = $keep <= 0 ? 0 : max(30, min(3650, $keep));
         $settings['voicetext'] = trim(optional_param('voicetext', '', PARAM_TEXT));
+        $settings['voicefamilyoptions'] = array_values(array_intersect(
+            voices::FAMILYAUDIENCES,
+            optional_param_array('familyoptions', [], PARAM_ALPHA)
+        ));
         $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $library->entityid]);
         $notice = $str('voicessaved');
     } else {
@@ -64,7 +70,8 @@ if (data_submitted() && confirm_sesskey()) {
         }
         if ($do === 'approve') {
             voices::approve((int) $item->id, $library, ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),
-                'audience' => optional_param_array('audience', [], PARAM_ALPHA)]);
+                'audience' => optional_param_array('audience', [], PARAM_ALPHA),
+                'signature' => optional_param('signature', '', PARAM_TEXT)]);
             $notice = $str('voiceapprovednow');
         } else if ($do === 'reject') {
             voices::remove($item);
@@ -82,8 +89,10 @@ foreach (voices::pending($library, (int) $USER->id) as $item) {
     $share = voices::may_share($item);
     // A family who recorded with a link chose who else may hear it: that is the most the approval gives.
     $invite = voices::invite_of((int) $item->id);
-    $offered = $invite ? array_values(array_filter(explode(',', (string) $invite->audience))) : digital_rules::AUDIENCES;
+    $class = voices::class_of($item);
+    $offered = array_merge($class ? ['class'] : [], digital_rules::AUDIENCES);
     if ($invite) {
+        $offered = array_values(array_intersect($offered, array_filter(explode(',', (string) $invite->audience))));
         $who['name'] = $str('voicefamilyfrom', (string) $invite->name);
         $share = (bool) $offered;
     }
@@ -98,8 +107,10 @@ foreach (voices::pending($library, (int) $USER->id) as $item) {
         'permission' => $item->readerid ? voices::has_permission((int) $item->readerid) : false,
         'licences' => array_map(fn($l) => ['value' => $l, 'label' => $str('licence' . str_replace('-', '', $l)),
             'selected' => $l === 'rights'], digital_rules::LICENCES),
-        'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a)], $offered),
+        'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a, $class['group'] ?? '')], $offered),
         'privatehint' => $str($invite ? 'voicefamilyprivate' : 'voiceprivatehint'),
+        // The signature is read here first: it shows only once approved, as it is left here.
+        'signature' => (string) $item->signature,
     ];
 }
 $settings = json_decode(
@@ -115,14 +126,26 @@ $data = [
     'pending' => $pending,
     'haspending' => (bool) $pending,
     'manage' => $manage,
-    'keepdays' => (int) ($settings['voicekeepdays'] ?? voices::KEEPDAYS),
+    'keeps' => array_map(
+        fn($days) => ['days' => $days, 'label' => in_array($days, [0, 365, 730, 1095, 1825], true)
+        ? $str('voiceskeep' . $days) : $str('voiceskeepdaysn', $days), 'selected' => $days === voices::keepdays(
+            (int) $library->entityid
+        )],
+        array_values(array_unique(array_merge([0, 365, 730, 1095, 1825], [voices::keepdays((int) $library->entityid)])))
+    ),
+    'familyoptions' => array_map(
+        fn($a) => ['value' => $a, 'label' => $str('voicefamilyoption' . $a),
+        'checked' => in_array($a, (array) ($settings['voicefamilyoptions'] ?? voices::FAMILYAUDIENCES), true)],
+        voices::FAMILYAUDIENCES
+    ),
     'voicetext' => (string) ($settings['voicetext'] ?? ''),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
 ];
 foreach (
     ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voiceaudience',
         'voicepermissiongive', 'voicepermissiontake', 'voicepermissionhas', 'voicepermissionnot', 'voicessettings',
-        'voiceskeepdays', 'voicestext', 'voicestexthint', 'voicessave', 'voiceinfo'] as $key
+        'voiceskeepdays', 'voicestext', 'voicestexthint', 'voicessave', 'voiceinfo', 'voicesignaturereview',
+        'voicesignaturereviewhint', 'voicesfamilyoptions'] as $key
 ) {
     $data[$key] = $str($key);
 }

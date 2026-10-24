@@ -43,7 +43,10 @@ final class voices {
     public const INVITEDAYS = 14;
 
     /** @var string[] Whom a family may let hear their voice, beyond the teacher who invited them and the library. */
-    public const FAMILYAUDIENCES = ['students', 'families', 'public'];
+    public const FAMILYAUDIENCES = ['class', 'students', 'families', 'public'];
+
+    /** @var int Longest signature. */
+    public const SIGNATURE = 60;
 
     /**
      * Keeps a recording of a reader, waiting for approval.
@@ -56,6 +59,7 @@ final class voices {
      * @param string $title What it is: a chapter, some pages.
      * @param string $extension Of the recording as the browser made it: webm, ogg or m4a.
      * @param int|null $now
+     * @param string $signature How its author wants it signed, if at all.
      * @return int
      */
     public static function record(
@@ -66,7 +70,8 @@ final class voices {
         string $path,
         string $title,
         string $extension = 'webm',
-        ?int $now = null
+        ?int $now = null,
+        string $signature = ''
     ): int {
         global $DB;
         $extension = in_array($extension, ['webm', 'ogg', 'm4a'], true) ? $extension : 'webm';
@@ -79,9 +84,119 @@ final class voices {
             $userid,
             $now
         );
+        // The signature waits for approval like the voice: nobody sees it before someone has read it.
         $DB->update_record(self::T . 'digital', (object) ['id' => $id, 'kind' => 'voice', 'format' => 'audio',
-            'status' => 'pending', 'readerid' => $readerid ?: null, 'audience' => '']);
+            'status' => 'pending', 'readerid' => $readerid ?: null, 'audience' => '',
+            'signature' => self::signature($signature), 'deletetoken' => bin2hex(random_bytes(24))]);
+        if ($userid) {
+            self::tell_received(digital::get($id, $library), $userid);
+        }
         return $id;
+    }
+
+    /**
+     * The text to read from while recording: the record's first EPUB, or else its first PDF, that someone may open.
+     *
+     * @param int $recordid
+     * @param \stdClass $library
+     * @param array $viewer As digital::viewer() gives it.
+     * @return \stdClass|null
+     */
+    public static function text_of(int $recordid, \stdClass $library, array $viewer): ?\stdClass {
+        $found = null;
+        foreach (digital::of_record($recordid, $library, $viewer) as $item) {
+            if ($item->kind === 'file' && $item->status === 'published' && in_array($item->format, ['epub', 'pdf'], true)) {
+                if ($item->format === 'epub') {
+                    return $item;
+                }
+                $found = $found ?? $item;
+            }
+        }
+        return $found;
+    }
+
+    /**
+     * The link that deletes a voice without logging in or asking anyone.
+     *
+     * @param \stdClass $item
+     * @return string
+     */
+    public static function forget_url(\stdClass $item): string {
+        return (new \moodle_url('/local/oksigeniaayvurenda/forget.php', ['t' => $item->deletetoken]))->out(false);
+    }
+
+    /**
+     * The voice of a delete link.
+     *
+     * @param string $token
+     * @return \stdClass|null
+     */
+    public static function by_token(string $token): ?\stdClass {
+        global $DB;
+        if (!preg_match('/^[0-9a-f]{48}$/', $token)) {
+            return null;
+        }
+        return $DB->get_record(self::T . 'digital', ['deletetoken' => $token, 'kind' => 'voice']) ?: null;
+    }
+
+    /**
+     * Tells whoever recorded a voice that it was received, with the link that deletes it.
+     *
+     * @param \stdClass $item
+     * @param int $userid
+     * @return bool
+     */
+    public static function tell_received(\stdClass $item, int $userid): bool {
+        global $DB;
+        $user = \core_user::get_user($userid);
+        if (!$user || $user->deleted) {
+            return false;
+        }
+        $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
+        return notices::send(
+            'voicereceived',
+            $user,
+            get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title),
+            get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)])
+        );
+    }
+
+    /**
+     * Sends a family, once, the link that deletes what they recorded; the address is not kept.
+     *
+     * @param \stdClass $item
+     * @param string $email
+     * @return bool
+     */
+    public static function email_family(\stdClass $item, string $email): bool {
+        global $DB;
+        if (!validate_email($email)) {
+            return false;
+        }
+        $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
+        $to = \core_user::get_noreply_user();
+        $to->email = $email;
+        $to->firstname = '';
+        $to->lastname = '';
+        $to->mailformat = 0;
+        return (bool) email_to_user(
+            $to,
+            \core_user::get_noreply_user(),
+            get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title),
+            get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)])
+        );
+    }
+
+    /**
+     * How many days the centre keeps voices; 0 is until whoever recorded them deletes them.
+     *
+     * @param int $entityid
+     * @return int
+     */
+    public static function keepdays(int $entityid): int {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        return max(0, (int) ($settings['voicekeepdays'] ?? self::KEEPDAYS));
     }
 
     /**
@@ -102,6 +217,10 @@ final class voices {
         }
         if ($item->status !== 'published' || !self::may_share($item)) {
             return false;
+        }
+        // The class is an audience of voices only, which digital::audience() leaves out.
+        if (in_array('class', explode(',', (string) $item->audience), true) && self::in_class($item, $viewer)) {
+            return true;
         }
         return digital_rules::can_see(
             digital::audience($item),
@@ -136,14 +255,101 @@ final class voices {
         $item = digital::get($id, $library);
         $licence = in_array($data['licence'] ?? '', digital_rules::LICENCES, true) ? $data['licence'] : 'rights';
         // Nobody beyond the recorder and their teachers unless it may be shared, and then only whom was chosen.
-        $audience = self::may_share($item) ? digital_rules::audience((array) ($data['audience'] ?? []), $licence) : [];
+        $wanted = (array) ($data['audience'] ?? []);
+        $share = self::may_share($item);
+        $audience = $share ? digital_rules::audience($wanted, $licence) : [];
+        // One class: the group this school year of the student it is about.
+        $class = $share && in_array('class', $wanted, true) ? self::class_of($item) : null;
+        if ($class) {
+            array_unshift($audience, 'class');
+        }
         $invite = $DB->get_record(self::T . 'voiceinvite', ['digitalid' => $id]);
         if ($invite) {
             $audience = array_values(array_intersect($audience, explode(',', (string) $invite->audience)));
         }
+        $class = in_array('class', $audience, true) ? $class : null;
         digital::update($id, $library, ['title' => $item->title, 'licence' => $licence, 'download' => 0], $now);
         $DB->update_record(self::T . 'digital', (object) ['id' => $id, 'status' => 'published',
-            'audience' => implode(',', $audience)]);
+            'audience' => implode(',', $audience), 'classyearid' => $class ? $class['yearid'] : null,
+            'classgroup' => $class ? $class['group'] : null,
+            'signature' => array_key_exists('signature', $data) ? self::signature((string) $data['signature'])
+                : $item->signature]);
+    }
+
+    /**
+     * A signature as it is kept: trimmed and short, or nothing.
+     *
+     * @param string $signature
+     * @return string|null
+     */
+    public static function signature(string $signature): ?string {
+        $signature = trim(preg_replace('/\s+/u', ' ', $signature));
+        return $signature === '' ? null : \core_text::substr($signature, 0, self::SIGNATURE);
+    }
+
+    /**
+     * The student a voice is about: whoever recorded it, if a student, or the one whose family was invited.
+     *
+     * @param \stdClass $item
+     * @return int Reader id, or 0.
+     */
+    public static function child(\stdClass $item): int {
+        global $DB;
+        if ($item->readerid && $DB->get_field(self::T . 'reader', 'readertype', ['id' => $item->readerid]) === 'student') {
+            return (int) $item->readerid;
+        }
+        $invite = self::invite_of((int) $item->id);
+        return $invite && $invite->readerid ? (int) $invite->readerid : 0;
+    }
+
+    /**
+     * The group this school year of a student.
+     *
+     * @param int $readerid
+     * @param int $entityid
+     * @return array|null yearid, group.
+     */
+    public static function group_of(int $readerid, int $entityid): ?array {
+        global $DB;
+        if (!$readerid) {
+            return null;
+        }
+        $year = years::around($entityid, time());
+        $group = $DB->get_field(
+            self::T . 'member',
+            'groupname',
+            ['readerid' => $readerid, 'yearid' => $year->id],
+            IGNORE_MULTIPLE
+        );
+        return $group ? ['yearid' => (int) $year->id, 'group' => (string) $group] : null;
+    }
+
+    /**
+     * The class a voice could be kept to: the group of the student it is about.
+     *
+     * @param \stdClass $item
+     * @return array|null yearid, group.
+     */
+    public static function class_of(\stdClass $item): ?array {
+        return self::group_of(self::child($item), (int) $item->entityid);
+    }
+
+    /**
+     * What a centre lets families choose with their link, and «their class» only when the link is for a student with
+     * a group.
+     *
+     * @param \stdClass $invite
+     * @return string[]
+     */
+    public static function family_options(\stdClass $invite): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $invite->entityid]), true) ?: [];
+        $options = array_values(array_intersect(self::FAMILYAUDIENCES, (array) ($settings['voicefamilyoptions'] ??
+            self::FAMILYAUDIENCES)));
+        if (!self::group_of((int) $invite->readerid, (int) $invite->entityid)) {
+            $options = array_values(array_diff($options, ['class']));
+        }
+        return $options;
     }
 
     /**
@@ -239,7 +445,13 @@ final class voices {
         $count = 0;
         foreach ($DB->get_records(self::T . 'entity', null, 'id', 'id, settings') as $entity) {
             $settings = json_decode((string) $entity->settings, true) ?: [];
-            $days = (int) ($settings['voicekeepdays'] ?? self::KEEPDAYS);
+            $days = max(0, (int) ($settings['voicekeepdays'] ?? self::KEEPDAYS));
+            // Without a term, voices stay until whoever recorded them deletes them; unused links still go.
+            if (!$days) {
+                $DB->delete_records_select(self::T . 'voiceinvite', 'entityid = :entityid AND digitalid IS NULL
+                    AND timeused IS NULL AND timeexpires < :now', ['entityid' => $entity->id, 'now' => $now]);
+                continue;
+            }
             $old = $DB->get_records_select(
                 self::T . 'digital',
                 "entityid = :entityid AND kind = 'voice' AND timecreated < :limit",
@@ -289,14 +501,23 @@ final class voices {
      * @param int $userid The teacher who sends it, who will approve the voice.
      * @param string $name Who is invited, as the teacher writes it.
      * @param int|null $now
+     * @param int $readerid The student whose family it is, if the teacher says.
      * @return string The token of the link.
      */
-    public static function invite(\stdClass $library, int $recordid, int $userid, string $name, ?int $now = null): string {
+    public static function invite(
+        \stdClass $library,
+        int $recordid,
+        int $userid,
+        string $name,
+        ?int $now = null,
+        int $readerid = 0
+    ): string {
         global $DB;
         $now = $now ?? time();
         $token = bin2hex(random_bytes(24));
         $DB->insert_record(self::T . 'voiceinvite', ['entityid' => $library->entityid, 'recordid' => $recordid,
-            'token' => $token, 'invitedby' => $userid ?: null, 'name' => \core_text::substr(trim($name), 0, 255),
+            'token' => $token, 'invitedby' => $userid ?: null, 'readerid' => $readerid ?: null,
+            'name' => \core_text::substr(trim($name), 0, 255),
             'timecreated' => $now, 'timeexpires' => $now + self::INVITEDAYS * DAYSECS]);
         return $token;
     }
@@ -327,8 +548,10 @@ final class voices {
      * @param string $path
      * @param string $title
      * @param string $extension
-     * @param array $audience Of FAMILYAUDIENCES.
+     * @param array $audience Of what family_options() gives.
      * @param int|null $now
+     * @param string $signature How the family wants it signed, if at all.
+     * @param string $email Where to send, once, the link that deletes it; not kept.
      * @return int
      */
     public static function record_invited(
@@ -337,7 +560,9 @@ final class voices {
         string $title,
         string $extension,
         array $audience,
-        ?int $now = null
+        ?int $now = null,
+        string $signature = '',
+        string $email = ''
     ): int {
         global $DB;
         if ($invite->timeused) {
@@ -345,10 +570,13 @@ final class voices {
         }
         $now = $now ?? time();
         $library = (object) ['entityid' => $invite->entityid];
-        $id = self::record($library, (int) $invite->recordid, 0, 0, $path, $title, $extension, $now);
+        $id = self::record($library, (int) $invite->recordid, 0, 0, $path, $title, $extension, $now, $signature);
         $DB->set_field(self::T . 'digital', 'createdby', null, ['id' => $id]);
         $DB->update_record(self::T . 'voiceinvite', (object) ['id' => $invite->id, 'digitalid' => $id, 'timeused' => $now,
-            'audience' => implode(',', array_values(array_intersect(self::FAMILYAUDIENCES, $audience)))]);
+            'audience' => implode(',', array_values(array_intersect(self::family_options($invite), $audience)))]);
+        if ($email !== '') {
+            self::email_family(digital::get($id, $library), $email);
+        }
         return $id;
     }
 
@@ -377,6 +605,23 @@ final class voices {
     public static function invite_of(int $digitalid): ?\stdClass {
         global $DB;
         return $DB->get_record(self::T . 'voiceinvite', ['digitalid' => $digitalid]) ?: null;
+    }
+
+    /**
+     * Whether someone is in the class a voice is kept to, as a student of its group or as its tutor.
+     *
+     * @param \stdClass $item
+     * @param array $viewer
+     * @return bool
+     */
+    private static function in_class(\stdClass $item, array $viewer): bool {
+        global $DB;
+        if (!$item->classyearid || (string) $item->classgroup === '') {
+            return false;
+        }
+        $where = ['yearid' => $item->classyearid, 'groupname' => $item->classgroup];
+        return (!empty($viewer['readerid']) && $DB->record_exists(self::T . 'member', $where + ['readerid' => $viewer['readerid']]))
+            || (!empty($viewer['userid']) && $DB->record_exists(self::T . 'tutor', $where + ['userid' => $viewer['userid']]));
     }
 
     /**

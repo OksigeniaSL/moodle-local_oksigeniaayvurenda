@@ -127,6 +127,10 @@
             recorder.stop();
         }
         stop.hidden = true;
+        // What was recorded, and how long it lasts.
+        var seconds = Math.floor((Date.now() - started) / 1000);
+        time.textContent = (str.voicelength || '').replace('{$a}', Math.floor(seconds / 60) + ':' +
+            String(seconds % 60).padStart(2, '0'));
     });
     again.addEventListener('click', function() {
         blob = null;
@@ -156,6 +160,12 @@
             body.append('record', config.record);
         }
         body.append('title', what ? what.value : '');
+        var signature = document.getElementById('ayv-signature');
+        body.append('signature', signature ? signature.value : '');
+        var email = document.getElementById('ayv-email');
+        if (email && email.value) {
+            body.append('email', email.value);
+        }
         body.append('ext', extension(blob.type));
         body.append('voice', blob, 'voz.' + extension(blob.type));
         fetch(config.sendurl, {method: 'POST', credentials: 'same-origin', body: body}).then(function(response) {

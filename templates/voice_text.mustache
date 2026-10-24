@@ -1,0 +1,36 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/voice_text
+
+    What is read while recording: the book's text if there is one to open here, or a word about the paper book.
+
+    Example context (json):
+    {
+        "hastext": true, "epub": true, "pdf": false, "fileurl": "#", "heading": "El faro dormido", "marks": false,
+        "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande",
+        "readmark": "Marcar aquí", "readprogress": "Cuánto llevas", "readloading": "Abriendo el libro…",
+        "voicetextheading": "Lee desde aquí", "voicepaper": "Ten delante el libro de papel."
+    }
+}}
+<section class="ayv-voice-text">
+{{#hastext}}
+    <h2 class="ayv-section-title">{{voicetextheading}}</h2>
+    {{#epub}}{{> local_oksigeniaayvurenda/read_book}}{{/epub}}
+    {{#pdf}}<iframe class="ayv-pdf" src="{{fileurl}}" title="{{heading}}"></iframe>{{/pdf}}
+{{/hastext}}
+{{^hastext}}<p class="ayv-voice-paper">{{voicepaper}}</p>{{/hastext}}
+</section>

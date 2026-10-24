@@ -39,6 +39,13 @@ $messageproviders = [
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To whoever recorded a voice: it was received, with the link that deletes it without asking anyone.
+    'voicereceived' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To a tutor: who in the group has books to bring back, without their titles.
     'overduetutor' => [
         'defaults' => [

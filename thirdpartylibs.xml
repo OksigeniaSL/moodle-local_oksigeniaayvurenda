@@ -72,4 +72,52 @@
             <copyright>Copyright (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso</copyright>
         </copyrights>
     </library>
+    <library>
+        <location>templates/icon_mic.mustache</location>
+        <name>Lucide icon «mic»</name>
+        <description>The «mic» icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_stop.mustache</location>
+        <name>Lucide icon «square»</name>
+        <description>The «square» icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_prev.mustache</location>
+        <name>Lucide icon «chevron-left»</name>
+        <description>The «chevron-left» icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_next.mustache</location>
+        <name>Lucide icon «chevron-right»</name>
+        <description>The «chevron-right» icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
 </libraries>

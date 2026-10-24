@@ -45,8 +45,9 @@ $settings = json_decode(
 $data = [
     'heading' => $str('voiceinfo'),
     'points' => array_map(
-        fn($k) => ['text' => $str($k, (int) ($settings['voicekeepdays'] ?? voices::KEEPDAYS))],
-        ['voiceinfo1', 'voiceinfo2', 'voiceinfo3', 'voiceinfo4', 'voiceinfo5', 'voiceinfo6']
+        fn($k) => ['text' => $str($k, voices::keepdays((int) $library->entityid))],
+        ['voiceinfo1', 'voiceinfo2', 'voiceinfo3', 'voiceinfo4', 'voiceinfo5',
+            voices::keepdays((int) $library->entityid) ? 'voiceinfo6' : 'voiceinfo6forever', 'voiceinfo7']
     ),
     'centre' => trim((string) ($settings['voicetext'] ?? '')),
     'centreheading' => $str('voiceinfocentre'),

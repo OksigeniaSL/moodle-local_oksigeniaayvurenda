@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.23.0 (2026-10-27)
+
+- Recording with the book in front: when the book has an EPUB or a PDF that the person may open, it is beside the
+  recorder, which stays in sight while reading; if not, the page says to have the paper book at hand. A family's
+  link opens the text meant for families too.
+- One class: a tutor makes a family's link for a student of their groups, and the family can keep their voice to
+  that student's class this school year. Voices of students can be kept to their class as well.
+- A signature, if wanted («Ana's mum»), read and corrected by whoever approves the voice before anyone sees it; it
+  shows in the centre, never in the public window.
+- The centre chooses what families may pick with their link, and how long voices are kept, now with no term at all
+  (until whoever recorded them deletes them).
+- Whoever records with an account gets a message with a link that deletes the voice without logging in or asking
+  anyone; a family can leave an email to get it, used once and not kept. The link opens a page with one button, so
+  that mail programs that open links by themselves delete nothing.
+- The reader looks like a page: the library's letters, page turns at its sides, a finger turns the page, and how far
+  through the book. Icons for recording and turning pages, from Lucide (ISC).
+- The header search no longer widens a phone's screen, nor does a long option in a card.
+
 ## 0.22.1 (2026-10-27)
 
 - The made-up library can fill its public window: `cli/demo.php --window=N --library=SLUG` writes N short made-up

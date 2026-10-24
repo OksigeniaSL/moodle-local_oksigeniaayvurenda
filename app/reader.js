@@ -120,13 +120,21 @@
         return;
     }
 
-    // An EPUB, with epub.js.
+    // An EPUB, with epub.js, as a page of paper in the library's letters and colours.
     var area = document.getElementById('ayv-epub');
     if (!area || !window.ePub) {
         return;
     }
     var size = 100;
     var where = document.getElementById('ayv-where');
+    var progress = document.getElementById('ayv-progress');
+    var on = function(id, handler) {
+        var element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('click', handler);
+        }
+    };
+    var colours = window.getComputedStyle(area);
     fetch(area.getAttribute('data-url'), {credentials: 'same-origin'}).then(function(response) {
         return response.arrayBuffer();
     }).then(function(data) {
@@ -136,35 +144,99 @@
         var go = function(place) {
             rendition.display(place);
         };
+        rendition.themes.default({
+            'body': {
+                'font-family': '"Ayvurenda Andika", Andika, Georgia, serif !important',
+                'line-height': '1.65 !important',
+                'color': (colours.color || '#1d2a27') + ' !important',
+                'background': 'transparent !important'
+            },
+            'p': {'margin': '0 0 .9em !important'},
+            'h1, h2, h3': {'line-height': '1.25 !important'},
+            'a': {'color': 'inherit !important'}
+        });
+        var keys = function(event) {
+            if (event.key === 'ArrowRight') {
+                rendition.next();
+            } else if (event.key === 'ArrowLeft') {
+                rendition.prev();
+            }
+        };
+        rendition.hooks.content.register(function(contents) {
+            if (config.pagecss) {
+                contents.addStylesheet(config.pagecss);
+            }
+            // A finger turns the page, and so do the arrows while the page has the focus.
+            var startx = null;
+            contents.document.addEventListener('touchstart', function(event) {
+                startx = event.changedTouches[0].clientX;
+            }, {passive: true});
+            contents.document.addEventListener('touchend', function(event) {
+                if (startx === null) {
+                    return;
+                }
+                var moved = event.changedTouches[0].clientX - startx;
+                startx = null;
+                if (Math.abs(moved) > 50) {
+                    if (moved < 0) {
+                        rendition.next();
+                    } else {
+                        rendition.prev();
+                    }
+                }
+            }, {passive: true});
+            contents.document.addEventListener('keydown', keys);
+        });
         rendition.display(config.position || undefined);
-        // The pages epub.js draws go in frames: each with the book's title, for screen readers.
-        rendition.on('rendered', function() {
-            area.querySelectorAll('iframe').forEach(function(frame) {
+        // The pages epub.js draws go in frames, made again when the window changes: each with the book's title, for
+        // screen readers, from the moment it appears.
+        var titled = function() {
+            area.querySelectorAll('iframe:not([title])').forEach(function(frame) {
                 frame.title = area.getAttribute('data-title') || '';
             });
-        });
-        rendition.on('relocated', function(location) {
-            keep(location.start.cfi);
-            if (where && location.start.displayed) {
+        };
+        if (window.MutationObserver) {
+            new MutationObserver(titled).observe(area, {childList: true, subtree: true});
+        }
+        rendition.on('rendered', titled);
+        var showWhere = function(location) {
+            if (where && location && location.start && location.start.displayed) {
                 where.textContent = (str.readpage || '').replace('{$a->page}', location.start.displayed.page)
                     .replace('{$a->total}', location.start.displayed.total);
             }
+            if (progress && location && location.start && book.locations.length()) {
+                progress.value = Math.round((location.start.percentage || 0) * 100);
+                progress.hidden = false;
+            }
+        };
+        rendition.on('relocated', function(location) {
+            keep(location.start.cfi);
+            showWhere(location);
         });
-        document.getElementById('ayv-prev').addEventListener('click', function() {
+        // How far through the whole book: worked out once the book is open, without holding up the first page.
+        book.ready.then(function() {
+            return book.locations.generate(1200);
+        }).then(function() {
+            showWhere(rendition.currentLocation());
+            return true;
+        }).catch(function() {
+            return false;
+        });
+        on('ayv-prev', function() {
             rendition.prev();
         });
-        document.getElementById('ayv-next').addEventListener('click', function() {
+        on('ayv-next', function() {
             rendition.next();
         });
-        document.getElementById('ayv-smaller').addEventListener('click', function() {
+        on('ayv-smaller', function() {
             size = Math.max(70, size - 10);
             rendition.themes.fontSize(size + '%');
         });
-        document.getElementById('ayv-bigger').addEventListener('click', function() {
+        on('ayv-bigger', function() {
             size = Math.min(200, size + 10);
             rendition.themes.fontSize(size + '%');
         });
-        document.getElementById('ayv-mark').addEventListener('click', function() {
+        on('ayv-mark', function() {
             var location = rendition.currentLocation();
             if (!location || !location.start) {
                 return;
@@ -174,10 +246,9 @@
             showMarks(go);
         });
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowRight') {
-                rendition.next();
-            } else if (event.key === 'ArrowLeft') {
-                rendition.prev();
+            // Not while writing in a field of the page, such as what was read.
+            if (!event.target.closest || !event.target.closest('input, textarea, select')) {
+                keys(event);
             }
         });
         showMarks(go);
