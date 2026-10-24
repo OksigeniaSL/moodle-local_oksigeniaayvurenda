@@ -20,7 +20,7 @@
 
     Context variables required for this template:
     * heading, none, pathsheading, booksheading, nobooks, pastheading, showcode - texts
-    * cards - name, group, library, code, barcode (SVG), qr (image address), flower, stage, paths (label, hint, dots),
+    * cards - name, group, library, code, barcode (SVG), qr (image address), flower, stage, paths (label, hint, marks as SVG),
       books (title, cover), past (year, flower, stage), yearname
 
     Example context (json):
@@ -29,7 +29,7 @@
         "hascards": true,
         "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Capullo", "yearname": "2026-2027",
-                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "dots": [{"on": true}, {"on": false}, {"on": false}]}],
+                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": ""}],
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
         "none": "",
         "pathsheading": "Cómo crece",
@@ -61,7 +61,7 @@
     <ul class="ayv-paths">
     {{#paths}}
         <li class="ayv-path"><span class="ayv-path-name">{{label}}</span>
-            <span class="ayv-path-dots" aria-hidden="true">{{#dots}}<span class="ayv-dot{{#on}} ayv-dot-on{{/on}}"></span>{{/dots}}</span>
+            <span class="ayv-path-marks">{{{marks}}}</span>
             <span class="ayv-path-hint">{{hint}}</span></li>
     {{/paths}}
     </ul>

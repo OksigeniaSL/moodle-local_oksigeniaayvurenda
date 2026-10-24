@@ -55,6 +55,9 @@ final class copies {
         'member' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',
         'loan' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'hold' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'stocktake' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'stockread' => 'stocktakeid IN (SELECT s.id FROM {local_oksigeniaayvurenda_stocktake} s
+            JOIN {local_oksigeniaayvurenda_library} l ON l.id = s.libraryid WHERE l.entityid = :entityid)',
         'rule' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'tutor' => 'yearid IN (SELECT id FROM {local_oksigeniaayvurenda_year} WHERE entityid = :entityid)',
         'source' => 'entityid = :entityid',

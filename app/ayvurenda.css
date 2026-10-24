@@ -859,11 +859,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-path-hint { font-size: .9rem; opacity: .85; }
 
-.ayv .ayv-path-dots { display: flex; gap: .35rem; }
-
-.ayv .ayv-dot { width: .9rem; height: .9rem; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--green2); }
-
-.ayv .ayv-dot-on { background: var(--green2); }
+.ayv .ayv-path-marks { display: block; line-height: 0; }
 
 .ayv .ayv-album, .ayv .ayv-garden { list-style: none; margin: 0; padding: 0; display: grid;
     grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: .9rem; }
@@ -1021,3 +1017,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-holds-title { flex: 1 1 14rem; font-weight: 700; }
 
 .ayv .ayv-holds-who, .ayv .ayv-holds-when { font-size: .9rem; }
+
+/* Stocktake: a copy read twice is said quietly. */
+.ayv .ayv-stock-again { opacity: .7; }
+
+.ayv .ayv-stock-scope { font-weight: 700; }

@@ -115,7 +115,7 @@
         <FIELD NAME="callnumber3" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Spine label, third line: usually the title"/>
         <FIELD NAME="locationid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="itemtype" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="normal" SEQUENCE="false" COMMENT="A type of the entity: normal, reference, restricted, device…"/>
-        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="available" SEQUENCE="false" COMMENT="available, onloan, lost, withdrawn or repair"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="available" SEQUENCE="false" COMMENT="available, onloan, held (set aside for a reservation), lost, withdrawn or repair"/>
         <FIELD NAME="serial" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Serial number, for material"/>
         <FIELD NAME="itemcondition" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="State of the item as last checked"/>
         <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
@@ -305,6 +305,43 @@
       <INDEXES>
         <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_stocktake" COMMENT="A stocktake of a library, or of one place in it: going along the shelves reading the copies">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="locationid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The place it covers; the whole library if empty"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="open" SEQUENCE="false" COMMENT="open or closed"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timeclosed" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="locationid" TYPE="foreign" FIELDS="locationid" REFTABLE="local_oksigeniaayvurenda_authority" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_stockread" COMMENT="A code read during a stocktake, and where">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="stocktakeid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The copy; empty for a code the library does not know"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="200" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="locationid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Where the reader said they were"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeread" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="stocktakeid" TYPE="foreign" FIELDS="stocktakeid" REFTABLE="local_oksigeniaayvurenda_stocktake" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+        <KEY NAME="locationid" TYPE="foreign" FIELDS="locationid" REFTABLE="local_oksigeniaayvurenda_authority" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_source" COMMENT="Where a row came from (Abies, a connector, a CSV), so a new import updates it instead of duplicating it">
       <FIELDS>

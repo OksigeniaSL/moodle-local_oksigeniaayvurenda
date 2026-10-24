@@ -98,6 +98,16 @@ class provider implements
             'timenotified' => 'privacy:metadata:hold:timenotified',
             'timeclosed' => 'privacy:metadata:hold:timeclosed',
         ], 'privacy:metadata:hold');
+        $collection->add_database_table(self::T . 'stocktake', [
+            'createdby' => 'privacy:metadata:stocktake:createdby',
+            'name' => 'privacy:metadata:stocktake:name',
+            'timecreated' => 'privacy:metadata:stocktake:timecreated',
+        ], 'privacy:metadata:stocktake');
+        $collection->add_database_table(self::T . 'stockread', [
+            'userid' => 'privacy:metadata:stockread:userid',
+            'code' => 'privacy:metadata:stockread:code',
+            'timeread' => 'privacy:metadata:stockread:timeread',
+        ], 'privacy:metadata:stockread');
         $collection->add_database_table(self::T . 'relay', [
             'userid' => 'privacy:metadata:relay:userid',
             'code' => 'privacy:metadata:relay:code',
@@ -140,6 +150,12 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'relay}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'hold} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql(
+            'createdby',
+            'SELECT createdby FROM {' . self::T . 'stocktake} WHERE createdby IS NOT NULL',
+            []
+        );
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'stockread} WHERE userid IS NOT NULL', []);
     }
 
     /**
@@ -205,6 +221,23 @@ class provider implements
                 (object) ['loans' => array_values(array_map(fn($loan) => self::loan_export($loan), $handled))]
             );
         }
+        $stocktakes = $DB->get_records_sql(
+            'SELECT s.id, s.name, s.timecreated, s.createdby,
+                    (SELECT COUNT(1) FROM {' . self::T . 'stockread} r WHERE r.stocktakeid = s.id AND r.userid = :a) AS codes
+               FROM {' . self::T . 'stocktake} s
+              WHERE s.createdby = :b OR EXISTS (SELECT 1 FROM {' . self::T . 'stockread} r2
+                                                 WHERE r2.stocktakeid = s.id AND r2.userid = :c)
+           ORDER BY s.timecreated',
+            ['a' => $userid, 'b' => $userid, 'c' => $userid]
+        );
+        if ($stocktakes) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:stocktake', 'local_oksigeniaayvurenda')]),
+                (object) ['stocktakes' => array_values(array_map(fn($s) => ['name' => $s->name,
+                    'created' => transform::datetime($s->timecreated), 'started' => (int) $s->createdby === (int) $userid,
+                    'codesread' => (int) $s->codes], $stocktakes))]
+            );
+        }
         $relayed = $DB->get_records(self::T . 'relay', ['userid' => $userid], 'id', 'id, code, timecreated');
         if ($relayed) {
             writer::with_context($context)->export_data(
@@ -251,6 +284,8 @@ class provider implements
         $DB->delete_records(self::T . 'tutor');
         $DB->delete_records(self::T . 'relay');
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
+        $DB->set_field_select(self::T . 'stocktake', 'createdby', null, 'createdby IS NOT NULL');
+        $DB->set_field_select(self::T . 'stockread', 'userid', null, 'userid IS NOT NULL');
     }
 
     /**
@@ -312,6 +347,8 @@ class provider implements
         $DB->delete_records(self::T . 'tutor', ['userid' => $userid]);
         $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
         $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
     }
 
     /**
@@ -332,6 +369,12 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'hold', ['createdby' => $userid])) {
+            return true;
+        }
+        if (
+            $DB->record_exists(self::T . 'stocktake', ['createdby' => $userid]) ||
+            $DB->record_exists(self::T . 'stockread', ['userid' => $userid])
+        ) {
             return true;
         }
         return $DB->record_exists_select(

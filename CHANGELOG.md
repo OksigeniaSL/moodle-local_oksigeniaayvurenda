@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.13.0 (2026-10-27)
+
+- Stocktakes with the phone or the scanner, for the whole library or one place in it, by several people at once and
+  in parts. Each copy read says whether it is in its place, belongs to another place, shows as lent (return it there
+  with a tap), was lost and turned up, or belongs to another library. Where the shelves have no network, the browser
+  keeps what is read and sends it by itself when the network comes back. At the end: what is missing, by place and in
+  a list to download; what was out of its place; and, with one tap each, marking the missing as lost and putting back
+  what turned up. Counted by the database, for libraries with tens of thousands of copies.
+- The legend of how the flower grows shows the flower's own marks (drops, sparkles, speech bubbles, roots), by Gaudí,
+  with what each path has for a screen reader.
+
 ## 0.12.1 (2026-10-27)
 
 - The flower of the card, drawn by Gaudí, Oksigenia's art director: seed, sprout, bud and flower, each with a place

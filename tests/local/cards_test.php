@@ -42,5 +42,12 @@ final class cards_test extends \basic_testcase {
             $this->assertStringContainsString('<title>Capullo &amp; co</title>', $svg);
             $this->assertSame(1, substr_count($svg, '<svg'));
         }
+        // The legend: the three marks of one path in a row.
+        foreach (['back' => 'volver', 'explore' => 'explorar', 'tell' => 'contar', 'stay' => 'quedarse'] as $path => $attribute) {
+            $svg = cards::path_svg($path, 2, 'Dos de tres');
+            $this->assertStringStartsWith('<svg width="62" height="22"', $svg);
+            $this->assertStringContainsString('data-' . $attribute . '="2"', $svg);
+            $this->assertStringContainsString('aria-label="Dos de tres"', $svg);
+        }
     }
 }

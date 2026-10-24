@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/stocktake
+
+    Reading the shelves of a stocktake.
+
+    Example context (json):
+    {
+        "heading": "Inventario de junio", "scope": "Toda la biblioteca", "prompt": "Pasa los libros",
+        "here": "Estoy en", "nowhere": "Sin decir", "hasplaces": true, "places": [{"id": 1, "label": "Narrativa", "count": 120}],
+        "tools": "", "progress": "Leídos: 0 de 600", "resultsurl": "#", "results": "Ver lo que falta",
+        "hint": "Sin red, lo leído se guarda en el móvil."
+    }
+}}
+<section class="ayv-desk ayv-stock">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-stock-scope">{{scope}} · <span id="ayv-progress" role="status">{{progress}}</span></p>
+{{#hasplaces}}
+<label class="ayv-field">{{here}}
+    <select id="ayv-here"><option value="0">{{nowhere}}</option>{{#places}}<option value="{{id}}">{{label}}</option>{{/places}}</select>
+</label>
+{{/hasplaces}}
+<form id="ayv-scan" class="ayv-scan" autocomplete="off">
+    <label for="ayv-code" class="ayv-scan-label">{{prompt}}</label>
+    <input id="ayv-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+        autofocus maxlength="200">
+</form>
+{{{tools}}}
+<p class="ayv-notice" id="ayv-pending" role="status" hidden></p>
+<ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
+<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{resultsurl}}">{{results}}</a></p>
+<p class="ayv-field-hint">{{hint}}</p>
+</section>

@@ -59,7 +59,8 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
     foreach (flower::PATHS as $path) {
         $level = $album['flower']['levels'][$path];
         $paths[] = ['label' => $str('path' . $path), 'hint' => $str('path' . $path . 'hint'), 'level' => $level,
-            'dots' => array_map(fn($i) => ['on' => $i < $level], range(0, 2))];
+            'marks' => cards::path_svg($path, $level, $str('pathlevel', (object) ['path' => $str('path' . $path),
+                'level' => $level]))];
     }
     $past = array_map(
         fn($p) => ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']),

@@ -72,8 +72,34 @@ final class cards {
      * @return string SVG.
      */
     public static function flower_svg(int $stage, array $levels, string $label, int $size): string {
+        return self::drawing(flower::STAGES[$stage] . '.svg', $levels, $label, $size, $size);
+    }
+
+    /**
+     * The three marks of one path in a row, as the flower draws them, for the legend of how it grows.
+     *
+     * @param string $path back, explore, tell or stay.
+     * @param int $level 0 to 3.
+     * @param string $label What it says to a screen reader.
+     * @return string SVG, 22 pixels high.
+     */
+    public static function path_svg(string $path, int $level, string $label): string {
+        return self::drawing('path-' . $path . '.svg', [$path => $level], $label, 62, 22);
+    }
+
+    /**
+     * One of the flower's drawings, with the marks of the paths given lit up to their level.
+     *
+     * @param string $file In app/flor.
+     * @param array $levels Level of each path, 0 to 3.
+     * @param string $label
+     * @param int $width
+     * @param int $height
+     * @return string
+     */
+    private static function drawing(string $file, array $levels, string $label, int $width, int $height): string {
         global $CFG;
-        $svg = (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/flor/' . flower::STAGES[$stage] . '.svg');
+        $svg = (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/flor/' . $file);
         $attributes = ['back' => 'volver', 'explore' => 'explorar', 'tell' => 'contar', 'stay' => 'quedarse'];
         $open = preg_match('/^<svg\b[^>]*>/', $svg, $matches) ? $matches[0] : '';
         if ($open === '') {
@@ -85,7 +111,7 @@ final class cards {
             $new = preg_replace('/\bdata-' . $attribute . '="\d"/', 'data-' . $attribute . '="' . $level . '"', $new);
         }
         $new = preg_replace('/\baria-label="[^"]*"/', 'aria-label="' . s($label) . '"', $new);
-        $new = '<svg width="' . $size . '" height="' . $size . '" focusable="false"' . substr($new, 4);
+        $new = '<svg width="' . $width . '" height="' . $height . '" focusable="false"' . substr($new, 4);
         $svg = $new . substr($svg, strlen($open));
         return preg_replace('/<title>[^<]*<\/title>/', '<title>' . s($label) . '</title>', $svg, 1);
     }
