@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.2 (2026-10-27)
+
+- The two characters of the library, with their screen: the memory, who is asked, and the herald, who tells what
+  happens. By default the two of Ayvurenda (Memoria and Mainumby); each centre gives them a name and a sex, so the
+  words agree, turns them off, and chooses whether the herald signs the notices to readers. They speak little: the
+  memory when a search finds nothing, the herald with the new books and with the flower of the card. Portraits are
+  placeholders until Gaudí's puppets.
+
 ## 0.9.1 (2026-10-27)
 
 - Labels with the barcode and spine labels to print: of the copies added today, since a day, or a list of codes in

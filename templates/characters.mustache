@@ -1,0 +1,65 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/characters
+
+    The two characters: name, sex and whether they appear, with how they speak.
+
+    Context variables required for this template:
+    * heading, intro, notice - texts
+    * action, sesskey - the form
+    * roles - role, title, job, enabled, name, female, male, herald, signs and preview (portrait, name, text)
+    * the words of the fields
+
+    Example context (json):
+    {
+        "heading": "Los personajes",
+        "intro": "Dos personajes con oficios distintos.",
+        "notice": "",
+        "action": "#",
+        "sesskey": "abc",
+        "roles": [{"role": "memory", "title": "La memoria", "job": "Se le pregunta.", "enabled": true, "name": "Memoria",
+                   "female": true, "male": false, "herald": false, "signs": false,
+                   "preview": {"portrait": "", "name": "Memoria", "text": "He buscado por toda la biblioteca."} }],
+        "characterenabled": "Que aparezca", "charactername": "Nombre", "charactersex": "Sexo",
+        "charactersexf": "Femenino", "charactersexm": "Masculino", "charactersigns": "Firma los avisos",
+        "characterpreview": "Así habla:", "sourcessave": "Guardar"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<form method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <div class="ayv-characters">
+    {{#roles}}
+        <section class="ayv-character">
+            <h2 class="ayv-section-title">{{title}}</h2>
+            <p>{{job}}</p>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}enabled" value="1" {{#enabled}}checked{{/enabled}}> {{characterenabled}}</label>
+            <label class="ayv-field">{{charactername}} <input type="text" name="{{role}}name" value="{{name}}" maxlength="60"></label>
+            <span class="ayv-field" role="radiogroup" aria-label="{{charactersex}}">{{charactersex}}
+                <label class="ayv-field-check"><input type="radio" name="{{role}}sex" value="f" {{#female}}checked{{/female}}> {{charactersexf}}</label>
+                <label class="ayv-field-check"><input type="radio" name="{{role}}sex" value="m" {{#male}}checked{{/male}}> {{charactersexm}}</label>
+            </span>
+            {{#herald}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}signs" value="1" {{#signs}}checked{{/signs}}> {{charactersigns}}</label>{{/herald}}
+            <p class="ayv-character-preview">{{characterpreview}}</p>
+            {{#preview}}{{> local_oksigeniaayvurenda/bubble}}{{/preview}}
+        </section>
+    {{/roles}}
+    </div>
+    <p class="ayv-more"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+</form>

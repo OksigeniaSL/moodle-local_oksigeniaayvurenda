@@ -26,6 +26,7 @@
     * match - url and label to match readers without an account, when there are
     * tutors - url and label to choose the tutor of each group, for those who may
     * rules - url and label of the loan rules, for those who may
+    * characters - url and label of the two characters, for those who may
     * year - url and label of the school year, for those who may
 
     Example context (json):
@@ -39,6 +40,7 @@
         "match": {"url": "#", "label": "Casar lectores sin cuenta (12)"},
         "tutors": {"url": "#", "label": "Tutores"},
         "rules": {"url": "#", "label": "Normas"},
+        "characters": {"url": "#", "label": "Personajes"},
         "year": {"url": "#", "label": "Curso escolar"}
     }
 }}
@@ -47,6 +49,7 @@
     {{#manage}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/manage}}
     {{#tutors}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/tutors}}
     {{#rules}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/rules}}
+    {{#characters}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/characters}}
     {{#year}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/year}}
 </div>
 {{#hasgroups}}

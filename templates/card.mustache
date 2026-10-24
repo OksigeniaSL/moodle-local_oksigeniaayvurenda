@@ -30,7 +30,7 @@
         "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
                    "qr": "", "flower": "flor/bud.svg", "stage": "Capullo", "yearname": "2026-2027",
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "dots": [{"on": true}, {"on": false}, {"on": false}]}],
-                   "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
+                   "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
         "none": "",
         "pathsheading": "Cómo crece",
         "booksheading": "Lo que has leído este curso",
@@ -51,6 +51,7 @@
             <p class="ayv-card-stage">{{stage}} · {{yearname}}</p>
         </div>
     </div>
+    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
     <div class="ayv-card-code">
         {{#barcode}}<div class="ayv-card-barcode">{{{barcode}}}</div>{{/barcode}}
         {{#qr}}<img class="ayv-card-qr" src="{{qr}}" alt="{{code}}" width="120" height="120">{{/qr}}

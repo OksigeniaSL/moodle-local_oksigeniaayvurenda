@@ -61,7 +61,7 @@ final class notices {
         $tz = \core_date::get_server_timezone_object();
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $loans = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, rec.title
+            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.entityid, rec.title
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
@@ -94,7 +94,12 @@ final class notices {
                 'local_oksigeniaayvurenda',
                 $a
             );
-            if (self::send('overdue', $user, $subject, get_string('noticereaderbody', 'local_oksigeniaayvurenda', $a))) {
+            $body = get_string('noticereaderbody', 'local_oksigeniaayvurenda', $a);
+            $herald = characters::of((int) $list[0]->entityid)['herald'];
+            if ($herald['enabled'] && $herald['signs']) {
+                $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
+            }
+            if (self::send('overdue', $user, $subject, $body)) {
                 $sent++;
             }
             [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));

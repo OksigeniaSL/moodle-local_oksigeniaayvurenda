@@ -34,6 +34,7 @@
         "hascorners": true,
         "corners": [{"code": "8", "label": "Lengua y literatura", "countlabel": "120 libros", "colour": 2, "url": "#"}],
         "recentheading": "Acaban de llegar",
+        "herald": {"portrait": "", "name": "Mainumby", "text": "¡Los he traído volando!"},
         "hasrecent": true,
         "cards": [{"id": 1, "title": "El faro dormido", "authors": "Ana Montes", "colour": 2, "url": "#",
                    "statelabel": "Libre", "stateclass": "free", "location": null}],
@@ -61,6 +62,7 @@
 {{#hasrecent}}
 <section class="ayv-section" aria-labelledby="ayv-recent">
     <h2 id="ayv-recent" class="ayv-section-title">{{recentheading}}</h2>
+    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
     {{> local_oksigeniaayvurenda/cards}}
 </section>
 {{/hasrecent}}

@@ -931,3 +931,22 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     .ayv .ayv-labelsheet { margin: 0; box-shadow: none; break-after: page; }
     .ayv .ayv-label { outline: none; }
 }
+
+/* What a character says. */
+.ayv .ayv-bubble { display: flex; align-items: flex-start; gap: .8rem; margin: .5rem 0 1rem; }
+
+.ayv .ayv-bubble-portrait { flex: none; width: 56px; height: 56px; border-radius: 50%; }
+
+.ayv .ayv-bubble-text { position: relative; margin: .3rem 0 0; padding: .7rem 1rem; border-radius: 4px 16px 16px 16px;
+    background: var(--surface); box-shadow: 0 0 0 2px var(--line); }
+
+.ayv .ayv-bubble-name { display: block; font-weight: 700; color: var(--accent); }
+
+.ayv .ayv-characters { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.25rem; }
+
+.ayv .ayv-character { display: grid; gap: .6rem; align-content: start; padding: 1rem 1.25rem; border-radius: var(--radius);
+    background: var(--surface); box-shadow: 0 0 0 2px var(--line); }
+
+.ayv .ayv-character p { margin: 0; }
+
+.ayv .ayv-character-preview { font-weight: 700; margin-top: .5rem !important; }

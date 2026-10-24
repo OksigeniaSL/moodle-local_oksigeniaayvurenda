@@ -62,7 +62,13 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
     }
     $past = array_map(fn($p) => ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']),
         'stage' => $str('stage' . flower::STAGES[$p['stage']])], $album['past']);
+    $herald = \local_oksigeniaayvurenda\local\characters::say(
+        (int) $reader->entityid,
+        'herald',
+        'heraldstage' . $album['flower']['stage']
+    );
     $cardsdata[] = $card + [
+        'herald' => $herald,
         'paths' => $paths,
         'books' => $album['books'],
         'hasbooks' => (bool) $album['books'],

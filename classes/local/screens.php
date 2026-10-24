@@ -68,6 +68,7 @@ final class screens {
             'recentheading' => self::str('recent'),
             'cards' => $recent,
             'hasrecent' => (bool) $recent,
+            'herald' => $recent ? characters::say((int) $library->entityid, 'herald', 'heraldnew') : null,
             'empty' => !$corners && !$recent ? self::str('emptycatalogue') : '',
         ];
     }
@@ -118,7 +119,11 @@ final class screens {
             'suggestions' => $suggestions,
             'hassuggestions' => (bool) $suggestions,
             'didyoumean' => self::str('didyoumean'),
-            'tryother' => $found['total'] === 0 && !$suggestions ? self::str('tryother') : '',
+            // The memory speaks when it found nothing; otherwise it keeps quiet.
+            'memory' => $corner === '' && $found['total'] === 0 && $query !== ''
+                ? characters::say((int) $library->entityid, 'memory', 'memorynothing', ['query' => $query]) : null,
+            'tryother' => $found['total'] === 0 && !$suggestions && ($corner !== '' || $query === '' ||
+                !characters::of((int) $library->entityid)['memory']['enabled']) ? self::str('tryother') : '',
             'more' => $more ? ['url' => self::url('search.php', $library, $next), 'label' => self::str('more')] : null,
             'filter' => $found['total'] > 0 || $onlyfree ? [
                 'url' => self::url('search.php', $library, $here + ($onlyfree ? [] : ['free' => 1])),
