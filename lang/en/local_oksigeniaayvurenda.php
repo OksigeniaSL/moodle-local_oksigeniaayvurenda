@@ -720,6 +720,7 @@ $string['pairhint'] = '{$a} readers (from Abies, from a list) are not paired wit
 $string['pairintro'] = 'The readers already in the library against the people of Cifra Educación. A name alone never pairs anyone without you seeing it: those that match by themselves are accepted at once, those in doubt one by one. A reader paired keeps their card, their history and their loans, and Cifra keeps them up to date from now on.';
 $string['pairnone'] = 'Not in Cifra Educación: {$a}';
 $string['pairnoneintro'] = 'Cifra does not have them: most likely they have left the centre. Mark them as former readers and they keep their history; if they are still at the centre, leave them as they are.';
+$string['pairskipped'] = '{$a} readers of other types (teachers, staff…) stay as they are: Cifra Educación does not bring them, so they are not compared with its people nor taken as gone.';
 $string['pathback'] = 'Coming back';
 $string['pathbackhint'] = 'Coming to the library';
 $string['pathexplore'] = 'Exploring';

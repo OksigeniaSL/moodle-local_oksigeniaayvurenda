@@ -48,7 +48,8 @@ final class pairing_test extends \advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = $generator->create_library();
         $entityid = (int) $library->entityid;
-        $irene = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Irene', 'lastname' => 'Duna Sauce']);
+        $irene = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Irene', 'lastname' => 'Duna Sauce',
+            'readertype' => 'teacher']);
         $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Noa', 'lastname' => 'Lago']);
         $bruno = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Bruno', 'lastname' => 'Olmo']);
         $marta = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Marta', 'lastname' => 'Cedro']);
@@ -103,8 +104,12 @@ final class pairing_test extends \advanced_testcase {
         $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = $generator->create_library();
         $entityid = (int) $library->entityid;
-        $irene = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Irene', 'lastname' => 'Duna Sauce']);
+        $irene = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Irene', 'lastname' => 'Duna Sauce',
+            'readertype' => 'teacher']);
         $noa = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Noa', 'lastname' => 'Lago']);
+        // Someone of the staff named like a student of Cifra, which brings no staff: left alone.
+        $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Lía', 'lastname' => 'Olmo Ríos',
+            'readertype' => 'staff']);
         $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => 'abies', 'tablename' => 'reader',
             'externalid' => '12', 'localid' => $irene->id, 'timecreated' => time()]);
         cifra::save($entityid, ['enabled' => 1, 'url' => 'http://cifra-puente.invalid:8080/', 'mode' => 'key',
@@ -114,7 +119,8 @@ final class pairing_test extends \advanced_testcase {
         $this->assertFalse(cifra::brought($entityid));
         $this->assertSame(4, cifra::sync($entityid)['created']);
         $this->assertFalse(cifra::brought($entityid));
-        $this->assertSame(6, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
+        $this->assertSame(7, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
+        $this->assertSame(2, pairing::unpaired($entityid));
         // The one Cifra made for Noa already lent a book: it stays as it is.
         $noas = $DB->get_records(self::T . 'reader', ['entityid' => $entityid, 'firstname' => 'Noa'], 'id');
         $cifranoa = end($noas);
@@ -125,12 +131,13 @@ final class pairing_test extends \advanced_testcase {
         $piles = pairing::piles($entityid);
         $this->assertSame([(int) $irene->id], array_keys($piles['sure']));
         $this->assertSame([(int) $noa->id], $piles['none']);
+        $this->assertSame(1, $piles['skipped']);
         $number = $piles['sure'][$irene->id];
         $made = $piles['people'][$number]['made'];
         $this->assertGreaterThan(0, $made);
         $this->assertTrue(pairing::link($entityid, (int) $irene->id, $piles['people'][$number]['person'], $made));
         $this->assertFalse($DB->record_exists(self::T . 'reader', ['id' => $made]));
-        $this->assertSame(5, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
+        $this->assertSame(6, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
         $this->assertSame(1, $DB->count_records(self::T . 'source', ['entityid' => $entityid, 'system' => 'cifra',
             'localid' => $irene->id]));
         $this->assertSame($irene->cardcode, $DB->get_field(self::T . 'reader', 'cardcode', ['id' => $irene->id]));

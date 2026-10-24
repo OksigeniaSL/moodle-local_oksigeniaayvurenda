@@ -46,13 +46,15 @@
         "noneheading": "No están en Moodle: 1",
         "noneintro": "Siguen siendo lectores sin cuenta.",
         "nonebutton": "Marcarlos como antiguos lectores",
-        "empty": ""
+        "empty": "",
+        "skipped": ""
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
+{{#skipped}}<p class="ayv-field-hint">{{skipped}}</p>{{/skipped}}
 {{#hassure}}
 <section class="ayv-section">
     <h2 class="ayv-section-title">{{sureheading}}</h2>

@@ -68,8 +68,9 @@ final class pairing {
      *
      * @param int $entityid
      * @param array[]|null $people The platform's, or asked for.
-     * @return array sure, doubt, none (as matcher gives them), readers (id => id, name, group) and people (number from
-     *     1 => id, name, group, person, made: the reader the platform made for them, or 0).
+     * @return array sure, doubt, none (as matcher gives them), readers (id => id, name, group, type), people (number from
+     *     1 => id, name, group, person, made: the reader the platform made for them, or 0; type) and skipped (readers of
+     *     types the platform does not bring).
      */
     public static function piles(int $entityid, ?array $people = null): array {
         global $DB;
@@ -90,8 +91,12 @@ final class pairing {
             "entityid = :entityid AND status = 'active'",
             ['entityid' => $entityid],
             'lastname, firstname, id',
-            'id, userid, firstname, lastname'
+            'id, userid, firstname, lastname, readertype'
         );
+        // Each reader is compared only with people of their own type; the types the platform does not bring (teachers,
+        // when it brings only students) stay out, neither in doubt nor as gone.
+        $types = array_flip(array_map(fn($p) => (string) ($p['type'] ?? 'student'), $people));
+        $skipped = 0;
         $names = [];
         $users = array_filter(array_map(fn($r) => (int) $r->userid, $rows));
         if ($users) {
@@ -103,8 +108,12 @@ final class pairing {
             if (isset($pairedreaders[(int) $row->id])) {
                 continue;
             }
+            if (!isset($types[$row->readertype])) {
+                $skipped++;
+                continue;
+            }
             $name = $row->userid ? ($names[(int) $row->userid] ?? '') : trim($row->firstname . ' ' . $row->lastname);
-            $readers[(int) $row->id] = ['id' => (int) $row->id, 'name' => $name, 'group' => ''];
+            $readers[(int) $row->id] = ['id' => (int) $row->id, 'name' => $name, 'group' => '', 'type' => $row->readertype];
         }
         $year = years::around($entityid, time());
         foreach ($DB->get_records(self::T . 'member', ['yearid' => $year->id], '', 'id, readerid, groupname') as $member) {
@@ -120,11 +129,22 @@ final class pairing {
             }
             $name = trim(($person['firstname'] ?? '') . ' ' . ($person['lastname'] ?? ''));
             $candidates[$index + 1] = ['id' => $index + 1, 'name' => $name, 'group' => (string) ($person['group'] ?? ''),
-                'person' => $person, 'made' => $made[csvlist::key($person)] ?? 0];
+                'person' => $person, 'made' => $made[csvlist::key($person)] ?? 0,
+                'type' => (string) ($person['type'] ?? 'student')];
         }
-        $piles = matcher::piles(array_values($readers), array_values(array_map(fn($c) => ['id' => $c['id'],
-            'name' => $c['name'], 'group' => $c['group']], $candidates)));
-        return $piles + ['readers' => $readers, 'people' => $candidates];
+        $piles = [matcher::SURE => [], matcher::DOUBT => [], matcher::NONE => []];
+        foreach (array_keys($types) as $type) {
+            $these = array_values(array_filter($readers, fn($r) => $r['type'] === $type));
+            $those = array_values(array_map(
+                fn($c) => ['id' => $c['id'], 'name' => $c['name'], 'group' => $c['group']],
+                array_filter($candidates, fn($c) => $c['type'] === $type)
+            ));
+            $found = matcher::piles($these, $those);
+            $piles[matcher::SURE] += $found[matcher::SURE];
+            $piles[matcher::DOUBT] += $found[matcher::DOUBT];
+            $piles[matcher::NONE] = array_merge($piles[matcher::NONE], $found[matcher::NONE]);
+        }
+        return $piles + ['readers' => $readers, 'people' => $candidates, 'skipped' => $skipped];
     }
 
     /**
@@ -239,13 +259,28 @@ final class pairing {
      */
     public static function unpaired(int $entityid): int {
         global $DB;
+        $params = ['entityid' => $entityid, 'system' => self::SYSTEM];
+        // Once the platform has brought someone, only the types it brings: teachers it does not have are not waiting.
+        $types = $DB->get_fieldset_sql(
+            "SELECT DISTINCT r.readertype
+               FROM {" . self::T . "reader} r
+               JOIN {" . self::T . "source} s ON s.localid = r.id AND s.entityid = r.entityid
+              WHERE r.entityid = :entityid AND s.system = :system AND s.tablename = 'reader'",
+            $params
+        );
+        $only = '';
+        if ($types) {
+            [$in, $typeparams] = $DB->get_in_or_equal($types, SQL_PARAMS_NAMED, 'type');
+            $only = " AND r.readertype $in";
+            $params += $typeparams;
+        }
         return $DB->count_records_sql(
             "SELECT COUNT(1)
                FROM {" . self::T . "reader} r
-              WHERE r.entityid = :entityid AND r.status = 'active'
+              WHERE r.entityid = :entityid AND r.status = 'active'$only
                 AND NOT EXISTS (SELECT 1 FROM {" . self::T . "source} s WHERE s.entityid = r.entityid
                                 AND s.system = :system AND s.tablename = 'reader' AND s.localid = r.id)",
-            ['entityid' => $entityid, 'system' => self::SYSTEM]
+            $params
         );
     }
 }

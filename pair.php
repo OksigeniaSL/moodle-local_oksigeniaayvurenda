@@ -117,6 +117,7 @@ $data = [
     'hasnone' => (bool) $piles['none'],
     'nonebutton' => $str('matchnonebutton'),
     'empty' => !$piles['sure'] && !$piles['doubt'] && !$piles['none'] ? $str('pairempty') : '',
+    'skipped' => $piles['skipped'] ? $str('pairskipped', $piles['skipped']) : '',
 ];
 $connector = (new moodle_url('/local/oksigeniaayvurenda/connector.php', ['library' => $library->slug]))->out(false);
 shell::output(
