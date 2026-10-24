@@ -522,5 +522,27 @@
         <INDEX NAME="local" UNIQUE="false" FIELDS="tablename, localid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_ltiplatform" COMMENT="A learning platform (Moodle, Canvas…) that opens an entity's library by LTI 1.3">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="As the library calls it"/>
+        <FIELD NAME="issuer" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The platform's identifier (iss)"/>
+        <FIELD NAME="clientid" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The client id the platform gave this tool"/>
+        <FIELD NAME="authloginurl" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="The platform's OpenID authentication address"/>
+        <FIELD NAME="authtokenurl" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false" COMMENT="The platform's access token address, for its services"/>
+        <FIELD NAME="keyseturl" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="The platform's public key set"/>
+        <FIELD NAME="deployments" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Deployment ids accepted, one per line; none means any of this client"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="issuerclient" UNIQUE="true" FIELDS="issuer, clientid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

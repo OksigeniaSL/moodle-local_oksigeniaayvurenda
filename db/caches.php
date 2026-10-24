@@ -36,6 +36,12 @@ $definitions = [
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => true,
     ],
+    // LTI 1.3: the nonces of the logins under way, the launches and the access tokens to the platforms' services.
+    'lti' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 3600,
+    ],
     // The people of a management platform while pairing its readers with those already there: asking takes a while.
     'platformpeople' => [
         'mode' => cache_store::MODE_APPLICATION,

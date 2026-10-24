@@ -1,0 +1,103 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/lti
+    The learning platforms that open the library by LTI 1.3: what to give them, the ones there are, and adding one.
+    Context variables required for this template:
+    * heading, intro, notice, error, authoff, authurl, authlink - texts
+    * toolurls - what the platform asks for (label, value), with copy
+    * platforms - the registered ones (platformid, platformname, issuer, clientid, editurl)
+    * form - the fields (field, label, hint, value, long, required)
+    * the words of each section and button
+    Example context (json):
+    {
+        "heading": "Conectar con una plataforma de aprendizaje",
+        "intro": "Una plataforma con LTI 1.3 abre la biblioteca sin instalar nada.",
+        "notice": "",
+        "error": "",
+        "authoff": "",
+        "authurl": "",
+        "authlink": "Activarlo",
+        "toolheading": "Lo que pide tu plataforma",
+        "toolintro": "Copia cada dato en la herramienta externa.",
+        "toolurls": [{"label": "Dirección de la herramienta", "value": "https://example.org/local/oksigeniaayvurenda/lti/launch.php"}],
+        "copy": "Copiar",
+        "toolhint": "Ábrela en una ventana nueva.",
+        "platformsheading": "Plataformas",
+        "hasplatforms": true,
+        "platforms": [{"platformid": 1, "platformname": "Moodle del centro", "issuer": "https://moodle.example.org",
+            "clientid": "AbC123", "editurl": "https://example.org/e"}],
+        "noplatforms": "Todavía ninguna.",
+        "editlabel": "Cambiar",
+        "deletelabel": "Quitar",
+        "formheading": "Añadir una plataforma",
+        "form": [{"field": "name", "label": "Nombre", "hint": "Como la llamáis", "value": "", "long": false, "required": true}],
+        "editid": 0,
+        "moodlehint": "En Moodle, estos datos salen al guardar la herramienta.",
+        "savelabel": "Guardar",
+        "cancelurl": "",
+        "cancellabel": "Cancelar",
+        "action": "https://example.org/l",
+        "sesskey": "abc"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+{{#authoff}}<p class="ayv-notice ayv-notice-error" role="alert">{{authoff}} {{#authurl}}<a href="{{authurl}}">{{authlink}}</a>{{/authurl}}</p>{{/authoff}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{toolheading}}</h2>
+    <p>{{toolintro}}</p>
+    {{#toolurls}}
+    <p class="ayv-invite-link"><span>{{label}}</span> <input type="text" readonly value="{{value}}" aria-label="{{label}}">
+        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{value}}">{{copy}}</button></p>
+    {{/toolurls}}
+    <p class="ayv-field-hint">{{toolhint}}</p>
+</section>
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{platformsheading}}</h2>
+    {{^hasplatforms}}<p class="ayv-empty">{{noplatforms}}</p>{{/hasplatforms}}
+    {{#hasplatforms}}
+    <ul class="ayv-people">
+    {{#platforms}}
+        <li class="ayv-person"><span class="ayv-person-name">{{platformname}}</span>
+            <span class="ayv-field-hint">{{issuer}} · {{clientid}}</span>
+            <a class="ayv-button ayv-button-quiet" href="{{editurl}}">{{editlabel}}</a>
+            <form method="post" action="{{action}}" class="ayv-inline-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="do" value="delete"><input type="hidden" name="id" value="{{platformid}}">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{deletelabel}}</button></form></li>
+    {{/platforms}}
+    </ul>
+    {{/hasplatforms}}
+</section>
+<section class="ayv-section" id="ayv-lti-form">
+    <h2 class="ayv-section-title">{{formheading}}</h2>
+    <form method="post" action="{{action}}" class="ayv-book" autocomplete="off">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="save">
+        <input type="hidden" name="id" value="{{editid}}">
+        <p class="ayv-field-hint">{{moodlehint}}</p>
+        {{#form}}
+        <label class="ayv-field ayv-field-wide">{{label}} <span class="ayv-field-hint">{{hint}}</span>
+            {{#long}}<textarea name="{{field}}" rows="2" spellcheck="false">{{value}}</textarea>{{/long}}
+            {{^long}}<input type="text" name="{{field}}" value="{{value}}" spellcheck="false" {{#required}}required{{/required}}>{{/long}}</label>
+        {{/form}}
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{savelabel}}</button>
+            {{#cancelurl}}<a class="ayv-button ayv-button-quiet" href="{{cancelurl}}">{{cancellabel}}</a>{{/cancelurl}}</p>
+    </form>
+</section>

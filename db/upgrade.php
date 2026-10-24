@@ -224,5 +224,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102727, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102811) {
+        // The learning platforms that open a library by LTI 1.3.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_ltiplatform')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_ltiplatform');
+        }
+        upgrade_plugin_savepoint(true, 2026102811, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

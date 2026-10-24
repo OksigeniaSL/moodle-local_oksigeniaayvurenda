@@ -98,6 +98,8 @@ $data = [
             'label' => $str('sourcescsv'), 'hint' => $str('sourcescsvhint')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false),
             'label' => $str('sourcesabies'), 'hint' => $str('sourcesabieshint')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/lti.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('sourceslti'), 'hint' => $str('sourcesltihint')],
     ],
     'coursesheading' => $str('sourcescourses'),
     'coursesintro' => $str('sourcescoursesintro'),
