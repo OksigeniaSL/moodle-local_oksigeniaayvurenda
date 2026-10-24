@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.1 (2026-10-27)
+
+- The flower of the card, drawn by Gaudí, Oksigenia's art director: seed, sprout, bud and flower, each with a place
+  for every path (drops for coming back, sparkles for exploring, speech bubbles for telling, roots for staying) whose
+  three marks light up as the reader goes; what is missing shows dotted and nothing withers. Drawn in the page, in
+  light and dark, also for the flowers of other years. The drawings are dual-licensed CC BY-SA 4.0 or GPL v3
+  (`app/flor/LICENSE.md`); the name and the emblem stay marks of Oksigenia SL.
+
 ## 0.12.0 (2026-10-27)
 
 - Reservations with a notice. A reader waits in a queue for a book that is out; when a copy comes back, the desk says

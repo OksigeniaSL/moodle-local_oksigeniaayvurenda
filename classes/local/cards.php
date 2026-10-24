@@ -62,6 +62,35 @@ final class cards {
     }
 
     /**
+     * The flower drawn in the page, with the marks of each path lit up to its level (Gaudí's drawing: drops for back,
+     * sparkles for explore, speech bubbles for tell, roots for stay; what is missing shows dotted, nothing withers).
+     *
+     * @param int $stage
+     * @param array $levels Level of each path, 0 to 3.
+     * @param string $label What it says to a screen reader.
+     * @param int $size Pixels.
+     * @return string SVG.
+     */
+    public static function flower_svg(int $stage, array $levels, string $label, int $size): string {
+        global $CFG;
+        $svg = (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/flor/' . flower::STAGES[$stage] . '.svg');
+        $attributes = ['back' => 'volver', 'explore' => 'explorar', 'tell' => 'contar', 'stay' => 'quedarse'];
+        $open = preg_match('/^<svg\b[^>]*>/', $svg, $matches) ? $matches[0] : '';
+        if ($open === '') {
+            return '';
+        }
+        $new = $open;
+        foreach ($attributes as $path => $attribute) {
+            $level = max(0, min(3, (int) ($levels[$path] ?? 0)));
+            $new = preg_replace('/\bdata-' . $attribute . '="\d"/', 'data-' . $attribute . '="' . $level . '"', $new);
+        }
+        $new = preg_replace('/\baria-label="[^"]*"/', 'aria-label="' . s($label) . '"', $new);
+        $new = '<svg width="' . $size . '" height="' . $size . '" focusable="false"' . substr($new, 4);
+        $svg = $new . substr($svg, strlen($open));
+        return preg_replace('/<title>[^<]*<\/title>/', '<title>' . s($label) . '</title>', $svg, 1);
+    }
+
+    /**
      * The picture of a stage of the flower; the emblem for printed cards.
      *
      * @param int|null $stage

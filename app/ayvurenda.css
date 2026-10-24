@@ -829,7 +829,9 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-card-face { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; padding: 1.25rem;
     border-radius: 18px; background: var(--surface); box-shadow: 0 0 0 2px var(--green2); }
 
-.ayv .ayv-card-flower { width: 160px; height: 160px; }
+.ayv .ayv-card-flower { display: block; width: 160px; height: 160px; }
+
+.ayv .ayv-card-flower svg, .ayv .ayv-garden svg { display: block; max-width: 100%; height: auto; }
 
 .ayv .ayv-card-who p { margin: 0 0 .25rem; }
 

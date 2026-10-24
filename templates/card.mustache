@@ -28,7 +28,7 @@
         "heading": "Mi carné",
         "hascards": true,
         "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
-                   "qr": "app/emblema.svg", "flower": "flor/bud.svg", "stage": "Capullo", "yearname": "2026-2027",
+                   "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Capullo", "yearname": "2026-2027",
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "dots": [{"on": true}, {"on": false}, {"on": false}]}],
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
         "none": "",
@@ -44,7 +44,7 @@
 {{#cards}}
 <section class="ayv-mycard">
     <div class="ayv-card-face">
-        <img class="ayv-card-flower" src="{{flower}}" alt="{{stage}}" width="160" height="160">
+        <span class="ayv-card-flower">{{{flowersvg}}}</span>
         <div class="ayv-card-who">
             <p class="ayv-card-name">{{name}}</p>
             <p>{{group}}{{#group}} · {{/group}}{{library}}</p>
@@ -78,7 +78,7 @@
     {{#haspast}}
     <h2 class="ayv-section-title">{{pastheading}}</h2>
     <ul class="ayv-garden">
-    {{#past}}<li><img src="{{flower}}" alt="{{stage}}" width="72" height="72"><span>{{year}}</span></li>{{/past}}
+    {{#past}}<li>{{{svg}}}<span>{{year}}</span></li>{{/past}}
     </ul>
     {{/haspast}}
 </section>

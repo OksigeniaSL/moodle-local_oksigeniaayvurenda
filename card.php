@@ -54,14 +54,24 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
     );
     $entity = format_string($DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $reader->entityid]));
     $card = cards::card($reader, fullname($USER), $group, $entity, $album['flower']['stage']);
+    $card['flowersvg'] = cards::flower_svg($album['flower']['stage'], $album['flower']['levels'], $card['stage'], 160);
     $paths = [];
     foreach (flower::PATHS as $path) {
         $level = $album['flower']['levels'][$path];
         $paths[] = ['label' => $str('path' . $path), 'hint' => $str('path' . $path . 'hint'), 'level' => $level,
             'dots' => array_map(fn($i) => ['on' => $i < $level], range(0, 2))];
     }
-    $past = array_map(fn($p) => ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']),
-        'stage' => $str('stage' . flower::STAGES[$p['stage']])], $album['past']);
+    $past = array_map(
+        fn($p) => ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']),
+        'stage' => $str('stage' . flower::STAGES[$p['stage']]),
+        'svg' => cards::flower_svg(
+            $p['stage'],
+            $p['levels'],
+            $str('stage' . flower::STAGES[$p['stage']]) . ' · ' . $p['year'],
+            72
+        )],
+        $album['past']
+    );
     $herald = \local_oksigeniaayvurenda\local\characters::say(
         (int) $reader->entityid,
         'herald',

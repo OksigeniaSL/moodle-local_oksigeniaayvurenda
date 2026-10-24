@@ -64,6 +64,10 @@ final class provider_test extends provider_testcase {
             'staffid' => $w->librarian->id,
             'returnnote' => 'loved',
         ]);
+        global $DB;
+        $w->hold = $DB->insert_record(self::T . 'hold', ['libraryid' => $w->library->id, 'recordid' => $w->item->recordid,
+            'readerid' => $w->anareader->id, 'status' => 'waiting', 'createdby' => $w->librarian->id,
+            'timecreated' => time(), 'timemodified' => time()]);
         return $w;
     }
 
@@ -129,6 +133,7 @@ final class provider_test extends provider_testcase {
         $this->assertSame($w->anareader->cardcode, $data->cardcode);
         $this->assertSame('3º Primaria A', $data->groups[0]['group']);
         $this->assertSame('loved', $data->loans[0]['note']);
+        $this->assertSame('waiting', $data->holds[0]['status']);
 
         writer::reset();
         $this->export_context_data_for_user($w->librarian->id, $system, 'local_oksigeniaayvurenda');
@@ -154,6 +159,7 @@ final class provider_test extends provider_testcase {
         $this->assertNull($loan->returnnote);
         $this->assertEquals($w->librarian->id, $loan->staffid);
         $this->assertEquals($w->leo->id, $DB->get_field(self::T . 'reader', 'userid', ['id' => $w->leoreader->id]));
+        $this->assertFalse($DB->record_exists(self::T . 'hold', ['id' => $w->hold]));
     }
 
     /**
@@ -170,6 +176,7 @@ final class provider_test extends provider_testcase {
             [$w->librarian->id, $w->leo->id]
         ));
         $this->assertNull($DB->get_field(self::T . 'loan', 'staffid', ['id' => $w->loan->id]));
+        $this->assertNull($DB->get_field(self::T . 'hold', 'createdby', ['id' => $w->hold]));
         $this->assertNull($DB->get_field(self::T . 'reader', 'userid', ['id' => $w->leoreader->id]));
         $this->assertEquals($w->ana->id, $DB->get_field(self::T . 'reader', 'userid', ['id' => $w->anareader->id]));
     }
