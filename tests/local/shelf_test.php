@@ -40,8 +40,8 @@ final class shelf_test extends \advanced_testcase {
         /** @var \local_oksigeniaayvurenda_generator $gen */
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $central = $gen->create_library();
-        $aula = libraries::create_library((int) $central->entityid, ['name' => 'Aula de 4º B', 'kind' => 'classroom',
-            'parentid' => $central->id, 'group' => '4º B']);
+        $aula = libraries::create_library((int) $central->entityid, ['name' => 'Aula de 4º', 'kind' => 'classroom',
+            'parentid' => $central->id, 'groups' => ['4º B', '4º A']]);
         $now = time();
         $year = $gen->create_year(['entityid' => $central->entityid] + \local_oksigeniaayvurenda\core\school_year::around(
             $now,
@@ -49,10 +49,14 @@ final class shelf_test extends \advanced_testcase {
             \core_date::get_server_timezone_object()
         ));
         $tutor = $this->getDataGenerator()->create_user();
+        $tutora = $this->getDataGenerator()->create_user();
         $other = $this->getDataGenerator()->create_user();
         $DB->insert_record(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => '4º B', 'userid' => $tutor->id,
             'timecreated' => $now, 'timemodified' => $now]);
+        $DB->insert_record(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => '4º A', 'userid' => $tutora->id,
+            'timecreated' => $now, 'timemodified' => $now]);
         $this->assertTrue(shelf::can_use($aula, (int) $tutor->id));
+        $this->assertTrue(shelf::can_use($aula, (int) $tutora->id), 'the tutor of the other group too');
         $this->assertFalse(shelf::can_use($aula, (int) $other->id));
         $this->assertFalse(shelf::can_use($central, (int) $tutor->id));
 
@@ -62,7 +66,12 @@ final class shelf_test extends \advanced_testcase {
         $bruno = $child('Bruno', '4º B');
         $ana = $child('Ana', '4º B');
         $leo = $child('Leo', '5º A');
-        $this->assertSame(['Ana Prueba', 'Bruno Prueba'], array_column(shelf::children($aula), 'name'));
+        $child('Carla', '4º A');
+        $this->assertSame(
+            [['Carla Prueba', '4º A'], ['Ana Prueba', '4º B'], ['Bruno Prueba', '4º B']],
+            array_map(fn($c) => [$c['name'], $c['group']], shelf::children($aula)),
+            'by group, then by name'
+        );
 
         $faro = $gen->create_item(['libraryid' => $aula->id, 'recordid' => $gen->create_record([
             'entityid' => $central->entityid, 'title' => 'El faro dormido'])->id]);
@@ -79,9 +88,8 @@ final class shelf_test extends \advanced_testcase {
         shelf::give_back($aula, (int) $faro->id, (int) $tutor->id);
 
         $read = shelf::read($aula);
-        $this->assertSame(
-            [['name' => 'Ana Prueba', 'books' => ['El faro dormido']], ['name' => 'Bruno Prueba', 'books' => []]],
-            $read
-        );
+        $this->assertSame([['name' => 'Carla Prueba', 'group' => '4º A', 'books' => []],
+            ['name' => 'Ana Prueba', 'group' => '4º B', 'books' => ['El faro dormido']],
+            ['name' => 'Bruno Prueba', 'group' => '4º B', 'books' => []]], $read);
     }
 }

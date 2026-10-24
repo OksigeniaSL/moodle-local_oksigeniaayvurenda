@@ -29,14 +29,14 @@
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
             "libraries": [{"id": 1, "name": "Biblioteca central", "rawname": "Biblioteca central", "url": "#",
                 "address": "/central", "kindlabel": "Central", "copies": "Ejemplares: 600", "group": "",
-                "kinds": [{"value": "central", "label": "Central", "selected": true}], "parents": [], "groups": [],
+                "kinds": [{"value": "central", "label": "Central", "selected": true}], "parents": [], "groups": [], "hasgroups": false,
                 "canremove": false}]}],
         "librariesfirst": "Tu centro", "librariesfirsthint": "Para empezar", "librariesentityname": "Nombre del centro",
         "librarieslibraryname": "Nombre de la biblioteca", "librariesyearstart": "Empieza el curso",
         "librariesyearstarthint": "MM-DD", "librariesclassification": "Clasificación", "librariescontrolletter": "Letra de control",
         "librariescreate": "Crear", "librariesadd": "Añadir una biblioteca", "librariesname": "Nombre", "librarieskind": "Tipo",
         "librariesparent": "Cuelga de", "librariesnoparent": "De ninguna", "librariesslug": "Dirección",
-        "librariesslughint": "Se hace sola", "librariesgroup": "Grupo", "librariesnogroup": "Sin grupo",
+        "librariesslughint": "Se hace sola", "librariesgroup": "Grupos",
         "librariessave": "Guardar", "librariesremove": "Quitarla", "librariesanother": "Otro centro en este sitio",
         "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro"
     }
@@ -59,7 +59,7 @@
                     <label class="ayv-field">{{librariesname}} <input type="text" name="name" value="{{rawname}}" maxlength="255" required></label>
                     <label class="ayv-field">{{librarieskind}} <select name="kind">{{#kinds}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/kinds}}</select></label>
                     <label class="ayv-field">{{librariesparent}} <select name="parentid"><option value="0">{{librariesnoparent}}</option>{{#parents}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/parents}}</select></label>
-                    <label class="ayv-field">{{librariesgroup}} <select name="group"><option value="">{{librariesnogroup}}</option>{{#groups}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/groups}}</select></label>
+                    {{#hasgroups}}<fieldset class="ayv-fieldset"><legend>{{librariesgroup}}</legend><div class="ayv-choices">{{#groups}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="groups[]" value="{{value}}" {{#selected}}checked{{/selected}}> {{label}}</label>{{/groups}}</div></fieldset>{{/hasgroups}}
                     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="library">{{librariessave}}</button>
                     {{#canremove}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{librariesremove}}</button>{{/canremove}}</p>
                 </form>
@@ -73,7 +73,7 @@
             <label class="ayv-field">{{librariesname}} <input type="text" name="name" maxlength="255" required></label>
             <label class="ayv-field">{{librarieskind}} <select name="kind">{{#kinds}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/kinds}}</select></label>
             <label class="ayv-field">{{librariesparent}} <select name="parentid"><option value="0">{{librariesnoparent}}</option>{{#parents}}<option value="{{value}}">{{label}}</option>{{/parents}}</select></label>
-            {{#hasgroups}}<label class="ayv-field">{{librariesgroup}} <select name="group"><option value="">{{librariesnogroup}}</option>{{#groups}}<option value="{{value}}">{{label}}</option>{{/groups}}</select></label>{{/hasgroups}}
+            {{#hasgroups}}<fieldset class="ayv-fieldset"><legend>{{librariesgroup}}</legend><div class="ayv-choices">{{#groups}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="groups[]" value="{{value}}"> {{label}}</label>{{/groups}}</div></fieldset>{{/hasgroups}}
             <label class="ayv-field">{{librariesslug}} <span class="ayv-field-hint">{{librariesslughint}}</span> <input type="text" name="slug" maxlength="64" pattern="[a-z0-9-]*"></label>
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="newlibrary">{{librariescreate}}</button></p>
         </form>

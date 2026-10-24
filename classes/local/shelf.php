@@ -26,27 +26,32 @@ namespace local_oksigeniaayvurenda\local;
 
 /**
  * The teacher is not a librarian and has no scanner: a Chromebook, twenty-five children and five minutes. The children
- * of the group by name, the books of the shelf by cover: a name and a cover lend it, until the end of the school year;
+ * of its groups by name, the books of the shelf by cover: a name and a cover lend it, until the end of the school year;
  * a lent cover brings it back. What each child read comes out by itself, because it is the same history as the
- * central library's. The tutors of the group use it; so does the library staff.
+ * central library's. The tutors of its groups use it; so does the library staff. A shelf may serve one group or several
+ * (two classes that share it, a cycle).
  */
 final class shelf {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
     /**
-     * The group of a classroom library, if it has one.
+     * The groups of a classroom library (one before 0.18.0 was kept as group).
      *
      * @param \stdClass $library
-     * @return string
+     * @return string[]
      */
-    public static function group(\stdClass $library): string {
+    public static function groups(\stdClass $library): array {
+        if ($library->kind !== 'classroom') {
+            return [];
+        }
         $settings = json_decode((string) $library->settings, true) ?: [];
-        return $library->kind === 'classroom' ? trim((string) ($settings['group'] ?? '')) : '';
+        $groups = (array) ($settings['groups'] ?? [$settings['group'] ?? '']);
+        return array_values(array_filter(array_map(fn($g) => trim((string) $g), $groups), fn($g) => $g !== ''));
     }
 
     /**
-     * Whether someone may use the shelf: the library staff, or a tutor of its group this year.
+     * Whether someone may use the shelf: the library staff, or a tutor of one of its groups this year.
      *
      * @param \stdClass $library
      * @param int $userid
@@ -61,36 +66,43 @@ final class shelf {
         if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)) {
             return true;
         }
-        $group = self::group($library);
-        if ($group === '' || !$userid) {
+        $groups = self::groups($library);
+        if (!$groups || !$userid) {
             return false;
         }
         $year = years::around((int) $library->entityid, $now ?? time());
-        return $DB->record_exists(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => $group, 'userid' => $userid]);
+        [$in, $params] = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED);
+        return $DB->record_exists_select(
+            self::T . 'tutor',
+            "yearid = :yearid AND userid = :userid AND groupname $in",
+            $params + ['yearid' => $year->id, 'userid' => $userid]
+        );
     }
 
     /**
-     * The children of the group this year, by name, with how many books of the shelf they have.
+     * The children of its groups this year, by group and name, with how many books of the shelf they have.
      *
      * @param \stdClass $library
      * @param int|null $now
-     * @return array[] id, name, has.
+     * @return array[] id, name, group, has.
      */
     public static function children(\stdClass $library, ?int $now = null): array {
         global $DB;
-        $group = self::group($library);
-        if ($group === '') {
+        $groups = self::groups($library);
+        if (!$groups) {
             return [];
         }
         $year = years::around((int) $library->entityid, $now ?? time());
+        [$in, $params] = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED);
         $rows = $DB->get_records_sql(
-            "SELECT r.id, r.userid, r.firstname, r.lastname, r.cardcode,
+            "SELECT r.id, r.userid, r.firstname, r.lastname, r.cardcode, MIN(m.groupname) AS groupname,
                     (SELECT COUNT(1) FROM {" . self::T . "loan} l
                       WHERE l.readerid = r.id AND l.libraryid = :libraryid AND l.timereturned IS NULL) AS has
                FROM {" . self::T . "member} m
                JOIN {" . self::T . "reader} r ON r.id = m.readerid
-              WHERE m.yearid = :yearid AND m.groupname = :groupname AND r.status = 'active'",
-            ['libraryid' => $library->id, 'yearid' => $year->id, 'groupname' => $group]
+              WHERE m.yearid = :yearid AND m.groupname $in AND r.status = 'active'
+           GROUP BY r.id, r.userid, r.firstname, r.lastname, r.cardcode",
+            $params + ['libraryid' => $library->id, 'yearid' => $year->id]
         );
         // The same in Moodle 4.5 and 5.3, where user_get_users_by_id() is deprecated.
         $users = $DB->get_records_list('user', 'id', array_values(array_filter(array_map(fn($r) => (int) $r->userid, $rows))));
@@ -98,9 +110,10 @@ final class shelf {
         foreach ($rows as $row) {
             $user = $row->userid ? ($users[$row->userid] ?? null) : null;
             $name = $user ? fullname($user) : trim($row->firstname . ' ' . $row->lastname);
-            $children[] = ['id' => (int) $row->id, 'name' => $name !== '' ? $name : $row->cardcode, 'has' => (int) $row->has];
+            $children[] = ['id' => (int) $row->id, 'name' => $name !== '' ? $name : $row->cardcode,
+                'group' => (string) $row->groupname, 'has' => (int) $row->has];
         }
-        usort($children, fn($a, $b) => strcoll($a['name'], $b['name']));
+        usort($children, fn($a, $b) => strnatcasecmp($a['group'], $b['group']) ?: strcoll($a['name'], $b['name']));
         return $children;
     }
 
@@ -140,7 +153,7 @@ final class shelf {
     }
 
     /**
-     * Lends a book of the shelf to a child of the group, until the end of the school year.
+     * Lends a book of the shelf to a child of one of its groups, until the end of the school year.
      *
      * @param \stdClass $library
      * @param int $itemid
@@ -161,13 +174,14 @@ final class shelf {
             return 0;
         }
         $year = years::around((int) $library->entityid, $now);
-        $group = $DB->get_field(
-            self::T . 'member',
-            'groupname',
-            ['readerid' => $readerid, 'yearid' => $year->id],
-            IGNORE_MULTIPLE
-        );
-        if ($group === false || $group !== self::group($library)) {
+        $groups = self::groups($library);
+        if (!$groups) {
+            return 0;
+        }
+        [$in, $params] = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED);
+        $group = $DB->get_field_select(self::T . 'member', 'groupname', "readerid = :readerid AND yearid = :yearid
+            AND groupname $in", $params + ['readerid' => $readerid, 'yearid' => $year->id], IGNORE_MULTIPLE);
+        if ($group === false) {
             return 0;
         }
         $transaction = $DB->start_delegated_transaction();
@@ -225,7 +239,7 @@ final class shelf {
     }
 
     /**
-     * What each child of the group read from the shelf this year, the newest first.
+     * What each child of its groups read from the shelf this year, the newest first.
      *
      * @param \stdClass $library
      * @param int|null $now
@@ -249,7 +263,8 @@ final class shelf {
         }
         $list = [];
         foreach (self::children($library, $now) as $child) {
-            $list[] = ['name' => $child['name'], 'books' => array_values(array_unique($by[$child['id']] ?? []))];
+            $list[] = ['name' => $child['name'], 'group' => $child['group'],
+                'books' => array_values(array_unique($by[$child['id']] ?? []))];
         }
         return $list;
     }

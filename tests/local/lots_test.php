@@ -62,6 +62,16 @@ final class lots_test extends \advanced_testcase {
         $this->assertSame('already', lots::add($lot, $one->barcode)['kind']);
         $this->assertSame('notfree', lots::add($lot, $lent->barcode)['kind']);
         $this->assertSame('notfound', lots::add($lot, '999999Z')['kind']);
+        $title = 'El bosque de los dinosaurios';
+        $DB->update_record(self::T . 'record', (object) ['id' => $lent->recordid, 'title' => $title,
+            'searchtext' => \local_oksigeniaayvurenda\core\text::normalise($title)]);
+        $spare = $gen->create_item(['libraryid' => $central->id, 'recordid' => $lent->recordid]);
+        $this->assertSame(
+            [$spare->barcode],
+            array_column(lots::suggest($lot, $title), 'barcode'),
+            'by its title: the free copy, not the lent one'
+        );
+        $this->assertSame([], lots::suggest($lot, 'zzqqxx'));
         $this->assertFalse(libraries::delete_library((int) $aula->id), 'a library with boxes stays');
 
         $this->assertSame(2, lots::send($lot, $now));

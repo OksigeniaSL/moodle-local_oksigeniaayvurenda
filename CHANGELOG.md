@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.18.0 (2026-10-27)
+
+- A classroom library can serve several groups (two classes that share a shelf, a cycle): they are ticked in
+  «Libraries», the tutors of any of them use the shelf, and the shelf shows the children under each group. A library
+  with a single group from before keeps it.
+- Filling a box, words instead of a code bring the free copies whose book has them (title, author, subject), while
+  typing and on Enter; a tap puts one in the box. A scanner goes on as before.
+- Cifra is called by its name, Cifra Educación, in every text.
+
 ## 0.17.0 (2026-10-27)
 
 - Boxes between the libraries of a centre: the central library fills a box by reading its copies (a theme, a class

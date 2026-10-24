@@ -120,6 +120,43 @@ final class lots {
     }
 
     /**
+     * Copies that could go in a box, for words typed instead of a code: free copies of the library whose book has every
+     * word (title, author, subject), one per book, the best first.
+     *
+     * @param \stdClass $lot
+     * @param string $text
+     * @param int $limit
+     * @return array[] barcode, title, authors, callnumber.
+     */
+    public static function suggest(\stdClass $lot, string $text, int $limit = 8): array {
+        global $DB;
+        $library = $DB->get_record(self::T . 'library', ['id' => $lot->libraryid], '*', MUST_EXIST);
+        $found = catalogue::search($library, $text, 0, true);
+        $suggestions = [];
+        foreach ($found['cards'] as $card) {
+            $item = $DB->get_record_sql(
+                "SELECT i.id, i.barcode, i.callnumber1, i.callnumber2, i.callnumber3
+                   FROM {" . self::T . "item} i
+                  WHERE i.recordid = :recordid AND i.libraryid = :libraryid AND i.status = 'available'
+                        AND i.itemtype <> 'reference'
+                        AND NOT EXISTS (SELECT 1 FROM {" . self::T . "lotitem} li JOIN {" . self::T . "lot} l ON l.id = li.lotid
+                                         WHERE li.itemid = i.id AND li.timeback IS NULL AND l.status <> 'back')
+               ORDER BY i.id",
+                ['recordid' => $card['id'], 'libraryid' => $lot->libraryid],
+                IGNORE_MULTIPLE
+            );
+            if ($item) {
+                $suggestions[] = ['barcode' => $item->barcode, 'title' => $card['title'], 'authors' => $card['authors'],
+                    'callnumber' => trim(implode(' ', array_filter([$item->callnumber1, $item->callnumber2, $item->callnumber3])))];
+            }
+            if (count($suggestions) >= $limit) {
+                break;
+            }
+        }
+        return $suggestions;
+    }
+
+    /**
      * Takes a copy out of a box still being filled.
      *
      * @param \stdClass $lot

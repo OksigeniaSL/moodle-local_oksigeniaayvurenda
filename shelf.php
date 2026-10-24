@@ -72,7 +72,9 @@ if (data_submitted() && confirm_sesskey()) {
     redirect(new moodle_url($url(($readerid ? ['reader' => $readerid] : []) + $params), null, 'ayv-what'));
 }
 
-$group = shelf::group($library);
+$groups = shelf::groups($library);
+$group = implode(', ', $groups);
+$several = count($groups) > 1;
 $nav = [['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
     'label' => $str('deskcatalogue')]];
 if (has_capability('local/oksigeniaayvurenda:catalogue', $context)) {
@@ -81,7 +83,7 @@ if (has_capability('local/oksigeniaayvurenda:catalogue', $context)) {
 }
 
 if ($view === 'read') {
-    $data = ['heading' => $str('shelfread'), 'group' => $group, 'children' => array_map(fn($c) => $c + [
+    $data = ['heading' => $str('shelfread'), 'group' => $group, 'children' => array_map(fn($c) => $c + ['showgroup' => $several,
         'hasbooks' => (bool) $c['books'], 'list' => implode(' · ', $c['books'])], shelf::read($library, $now)),
         'none' => $str('shelfreadnone'), 'back' => $url()->out(false), 'backlabel' => $str('shelfbacktoit')];
     shell::output(
@@ -135,6 +137,15 @@ foreach (\local_oksigeniaayvurenda\local\lots::of_library($library)['received'] 
             'lent' => $box['lent']])];
     }
 }
+// With several groups, the names go under each group.
+$whogroups = [];
+foreach ($children as $child) {
+    $key = $several ? $child['group'] : '';
+    $whogroups[$key] = $whogroups[$key] ?? ['label' => $key, 'names' => []];
+    $whogroups[$key]['names'][] = $child + ['url' => $url(['reader' => $child['id']])->out(false) . '#ayv-what',
+        'current' => $chosen !== null && $child['id'] === $chosen['id']];
+}
+$whogroups = array_values($whogroups);
 $books = array_map(fn($b) => $b + ['lentlabel' => $b['lent'] !== '' ? $str('shelflentto', $b['lent']) : '',
     'canlend' => $b['lent'] === '' && $chosen !== null], shelf::books($library));
 $data = [
@@ -144,8 +155,7 @@ $data = [
     'action' => $url($readerid ? ['reader' => $readerid] : [])->out(false),
     'sesskey' => sesskey(),
     // A name takes the page down to the books, which on a phone are below a whole class of names.
-    'children' => array_map(fn($c) => $c + ['url' => $url(['reader' => $c['id']])->out(false) . '#ayv-what',
-        'current' => $chosen !== null && $c['id'] === $chosen['id']], $children),
+    'whogroups' => $whogroups,
     'haschildren' => (bool) $children,
     'books' => $books,
     'hasbooks' => (bool) $books,

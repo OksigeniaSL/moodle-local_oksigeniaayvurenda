@@ -23,7 +23,8 @@
         "heading": "Lote «Dinosaurios»", "where": "Para Aula de 4º B, hasta el 20 de diciembre", "notice": "", "bad": false,
         "open": true, "out": false, "back": false, "mine": true, "action": "#", "sesskey": "abc", "count": "Libros: 1",
         "copies": [{"itemid": 1, "title": "El faro dormido", "barcode": "100000L", "status": "available", "home": false, "state": ""}],
-        "pending": [], "haspending": false,
+        "pending": [], "haspending": false, "q": "", "suggestions": [{"barcode": "100001C", "title": "El faro dormido",
+            "authors": "Ana Montes", "callnumber": "N MON far"}], "lotscanhint": "O escribe el título", "lotadd": "Meter en la caja",
         "lotscan": "Pasa los libros", "lotremove": "Quitar", "lotsend": "Enviar el lote", "lotgiveback": "Ha vuelto",
         "lotpendingheading": "Falta por volver", "lotallhome": "Ha vuelto todo"
     }
@@ -35,8 +36,18 @@
 <form method="post" action="{{action}}" class="ayv-scan" autocomplete="off">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
     <label for="ayv-code" class="ayv-scan-label">{{lotscan}}</label>
-    <input id="ayv-code" name="code" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus maxlength="200" required>
+    <input id="ayv-code" name="code" type="text" value="{{q}}" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus
+        maxlength="200" required aria-describedby="ayv-code-hint" aria-controls="ayv-suggest">
+    <p class="ayv-field-hint" id="ayv-code-hint">{{lotscanhint}}</p>
 </form>
+<ul class="ayv-holds ayv-suggest" id="ayv-suggest" aria-live="polite">
+{{#suggestions}}
+    <li class="ayv-holds-row"><span class="ayv-holds-title">{{title}}</span>
+        <span class="ayv-holds-who">{{authors}}{{#callnumber}} · {{callnumber}}{{/callnumber}}</span>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
+            <input type="hidden" name="code" value="{{barcode}}"><button type="submit" class="ayv-button ayv-button-quiet">{{lotadd}}</button></form></li>
+{{/suggestions}}
+</ul>
 {{/mine}}{{/open}}
 <ul class="ayv-holds">
 {{#copies}}

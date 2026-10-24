@@ -60,7 +60,7 @@ if (data_submitted() && confirm_sesskey()) {
             'kind' => optional_param('kind', 'central', PARAM_ALPHA),
             'parentid' => optional_param('parentid', 0, PARAM_INT),
             'slug' => optional_param('slug', '', PARAM_ALPHANUMEXT),
-            'group' => optional_param('group', '', PARAM_TEXT),
+            'groups' => optional_param_array('groups', [], PARAM_TEXT),
         ]);
         $notice = $str('librariescreated', format_string($library->name));
     } else if ($do === 'library') {
@@ -68,7 +68,7 @@ if (data_submitted() && confirm_sesskey()) {
             'name' => required_param('name', PARAM_TEXT),
             'kind' => optional_param('kind', 'central', PARAM_ALPHA),
             'parentid' => optional_param('parentid', 0, PARAM_INT),
-            'group' => optional_param('group', '', PARAM_TEXT),
+            'groups' => optional_param_array('groups', [], PARAM_TEXT),
         ]);
         $notice = $str('librariessaved');
     } else if ($do === 'delete') {
@@ -91,13 +91,13 @@ foreach (libraries::all() as $one) {
         'label' => format_string($l->name), 'selected' => (int) $l->id === $chosen],
         array_filter($one['libraries'], fn($l) => (int) $l->id !== $self)
     ));
-    $groupoptions = fn(string $chosen) => array_map(
-        fn($g) => ['value' => $g, 'label' => $g, 'selected' => $g === $chosen],
-        $groups
+    $groupoptions = fn(array $chosen) => array_map(
+        fn($g) => ['value' => $g, 'label' => $g, 'selected' => in_array($g, $chosen, true)],
+        array_values(array_unique(array_merge($groups, $chosen)))
     );
     $libs = [];
     foreach ($one['libraries'] as $library) {
-        $lsettings = json_decode((string) $library->settings, true) ?: [];
+        $lgroups = \local_oksigeniaayvurenda\local\shelf::groups($library);
         $libs[] = [
             'id' => (int) $library->id,
             'name' => format_string($library->name),
@@ -108,8 +108,9 @@ foreach (libraries::all() as $one) {
             'copies' => $str('librariescopies', (int) $library->copies),
             'kinds' => $kinds($library->kind),
             'parents' => $options((int) $library->parentid, (int) $library->id),
-            'groups' => $groupoptions((string) ($lsettings['group'] ?? '')),
-            'group' => (string) ($lsettings['group'] ?? ''),
+            'groups' => $groupoptions($lgroups),
+            'group' => implode(', ', $lgroups),
+            'hasgroups' => (bool) $groups || (bool) $lgroups,
             'canremove' => (int) $library->copies === 0,
         ];
     }
@@ -124,7 +125,7 @@ foreach (libraries::all() as $one) {
         'libraries' => $libs,
         'kinds' => $kinds('classroom'),
         'parents' => $options(0),
-        'groups' => $groupoptions(''),
+        'groups' => $groupoptions([]),
         'hasgroups' => (bool) $groups,
     ];
 }
@@ -142,7 +143,7 @@ foreach (
     ['librariesfirst', 'librariesfirsthint', 'librariesentityname', 'librarieslibraryname', 'librariesyearstart',
         'librariesyearstarthint', 'librariesclassification', 'librariescontrolletter', 'librariescreate', 'librariesadd',
         'librariesname', 'librarieskind', 'librariesparent', 'librariesnoparent', 'librariesslug', 'librariesslughint',
-        'librariesgroup', 'librariesnogroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
+        'librariesgroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
         'librariesedit', 'librariesentity'] as $key
 ) {
     $data[$key] = $str($key);

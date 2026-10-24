@@ -21,7 +21,8 @@
     Example context (json):
     {
         "heading": "Mi estantería · 4º B", "notice": "", "undo": null, "action": "#", "sesskey": "abc",
-        "haschildren": true, "children": [{"id": 1, "name": "Ana Montes", "has": 1, "url": "#", "current": true}],
+        "haschildren": true, "whogroups": [{"label": "4º A", "names": [{"id": 1, "name": "Ana Montes", "group": "4º A", "has": 1,
+            "url": "#", "current": true}]}],
         "hasbooks": true, "books": [{"itemid": 1, "recordid": 1, "title": "El faro dormido", "cover": null, "colour": 1,
             "lent": "", "lentlabel": "", "loanid": 0, "canlend": true}],
         "hint": "Ahora, el libro de Ana Montes", "nogroup": "", "nochildren": "", "empty": "Vacía",
@@ -47,11 +48,14 @@
 {{#nochildren}}<p class="ayv-empty">{{nochildren}}</p>{{/nochildren}}
 {{#haschildren}}
 <h2 class="ayv-section-title">{{shelfwho}}</h2>
+{{#whogroups}}
+{{#label}}<h3 class="ayv-shelf-group">{{label}}</h3>{{/label}}
 <ul class="ayv-shelf-who">
-{{#children}}
+{{#names}}
     <li><a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}" {{#current}}aria-current="true"{{/current}}>{{name}}{{#has}} <span class="ayv-shelf-has">{{has}}</span>{{/has}}</a></li>
-{{/children}}
+{{/names}}
 </ul>
+{{/whogroups}}
 {{/haschildren}}
 <h2 class="ayv-section-title" id="ayv-what">{{shelfwhat}}</h2>
 <p class="ayv-field-hint">{{hint}} · {{shelftapback}}</p>

@@ -59,14 +59,17 @@ final class libraries_test extends \advanced_testcase {
             'parentid' => $central->id, 'group' => '4º B']);
         $this->assertSame('biblioteca-central-2', $aula->slug);
         $this->assertEquals($central->id, $aula->parentid);
-        $this->assertSame(['group' => '4º B'], json_decode($aula->settings, true));
+        $this->assertSame(['groups' => ['4º B']], json_decode($aula->settings, true));
         $this->assertSame('mi-aula', libraries::slug('  Mi   aula! '));
         $this->assertSame('n-a-o', libraries::slug('Ñ á ó'));
 
-        libraries::update_library((int) $aula->id, ['name' => 'Estantería de 4º B', 'kind' => 'classroom',
-            'parentid' => $aula->id, 'group' => '4º B']);
+        libraries::update_library((int) $aula->id, ['name' => 'Estantería de 4º', 'kind' => 'classroom',
+            'parentid' => $aula->id, 'groups' => ['4º B', ' ', '4º A', '4º B']]);
         $aula = $DB->get_record(self::T . 'library', ['id' => $aula->id]);
-        $this->assertSame('Estantería de 4º B', $aula->name);
+        $this->assertSame('Estantería de 4º', $aula->name);
+        $this->assertSame(['4º A', '4º B'], shelf::groups($aula), 'several groups, each once, in order');
+        $old = (object) ['kind' => 'classroom', 'settings' => json_encode(['group' => '3º C'])];
+        $this->assertSame(['3º C'], shelf::groups($old), 'a library from before 0.18.0 keeps its group');
         $this->assertNull($aula->parentid, 'a library does not hang from itself');
 
         $gen->create_item(['libraryid' => $central->id]);

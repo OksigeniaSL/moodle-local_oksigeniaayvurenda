@@ -77,7 +77,12 @@ if (data_submitted() && confirm_sesskey()) {
     $lot = lots::get($id, $library);
     $params = ['id' => $id];
     if ($do === 'add') {
-        $answer = lots::add($lot, required_param('code', PARAM_TEXT));
+        $text = trim(required_param('code', PARAM_TEXT));
+        $answer = lots::add($lot, $text);
+        // Words instead of a code: the books that match, to choose.
+        if ($answer['kind'] === 'notfound' && preg_match('/\p{L}{2,}/u', $text)) {
+            redirect($url($params + ['q' => $text]));
+        }
         $params += ['said' => $answer['kind'], 'title' => $answer['title']];
     } else if ($do === 'remove') {
         lots::remove($lot, required_param('item', PARAM_INT));
@@ -96,11 +101,16 @@ if ($id) {
     $lot = lots::get($id, $library);
     $said = optional_param('said', '', PARAM_ALPHA);
     $copies = lots::copies($lot);
+    $q = $lot->status === 'open' ? trim(optional_param('q', '', PARAM_TEXT)) : '';
+    $suggestions = $q !== '' ? lots::suggest($lot, $q) : [];
     $data = [
         'heading' => $str('lottitle', $lot->name),
         'where' => $str('lotwhere', (object) ['to' => format_string($others[$lot->tolibraryid] ?? ''),
             'due' => $date($lot->timedue) ?: '—']),
-        'notice' => $said !== '' ? $str('lotsaid' . $said, optional_param('title', '', PARAM_TEXT)) : '',
+        'notice' => $said !== '' ? $str('lotsaid' . $said, optional_param('title', '', PARAM_TEXT))
+            : ($q !== '' && !$suggestions ? $str('lotnosuggest', $q) : ''),
+        'suggestions' => $suggestions,
+        'q' => $q,
         'bad' => in_array($said, ['notfound', 'notfree', 'otherlibrary', 'inanother'], true),
         'open' => $lot->status === 'open',
         'out' => $lot->status === 'out',
@@ -115,17 +125,23 @@ if ($id) {
             ? $str('lotpendingwho', (object) $p) : $p['title']], lots::pending($lot)) : [],
     ];
     $data['haspending'] = (bool) $data['pending'];
-    foreach (['lotscan', 'lotremove', 'lotsend', 'lotgiveback', 'lotpendingheading', 'lotallhome'] as $key) {
+    $keys = ['lotscan', 'lotscanhint', 'lotremove', 'lotsend', 'lotgiveback', 'lotpendingheading', 'lotallhome', 'lotadd'];
+    foreach ($keys as $key) {
         $data[$key] = $str($key);
     }
     $nav[] = ['url' => $url(), 'label' => $str('lotsnav')];
-    shell::output(
-        $lot->name,
-        $OUTPUT->render_from_template('local_oksigeniaayvurenda/lot', $data),
-        $library,
-        '',
-        ['search' => false, 'nav' => $nav]
-    );
+    shell::output($lot->name, $OUTPUT->render_from_template('local_oksigeniaayvurenda/lot', $data), $library, '', [
+        'search' => false,
+        'nav' => $nav,
+        'scripts' => ['lots'],
+        'config' => [
+            'suggesturl' => (new moodle_url('/local/oksigeniaayvurenda/lots_ajax.php'))->out(false),
+            'sesskey' => sesskey(),
+            'library' => $library->slug,
+            'lot' => (int) $lot->id,
+            'strings' => ['lotadd' => $str('lotadd')],
+        ],
+    ]);
     exit;
 }
 

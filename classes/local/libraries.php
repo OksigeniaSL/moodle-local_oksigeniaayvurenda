@@ -27,7 +27,8 @@ namespace local_oksigeniaayvurenda\local;
 /**
  * An entity (a school, an institute, a university, an academy) has one catalogue and several libraries: the central one,
  * one per classroom, per department or per faculty, each hanging from another if it wants. A classroom library knows its
- * group, whose readers are its own. A library is only removed while it has no copies.
+ * groups (one or several: a shelf two classes share, a cycle, a department), whose readers are its own. A library is
+ * only removed while it has no copies.
  */
 final class libraries {
     /** @var string Prefix of the plugin tables. */
@@ -113,7 +114,8 @@ final class libraries {
      * Creates a library in an entity.
      *
      * @param int $entityid
-     * @param array $data name, kind, parentid, slug (made from the name when empty), group (for a classroom).
+     * @param array $data name, kind, parentid, slug (made from the name when empty), groups (for a classroom; a single
+     *     group also comes as group).
      * @param int|null $now
      * @return \stdClass
      */
@@ -126,10 +128,7 @@ final class libraries {
         if ($parentid && !$DB->record_exists(self::T . 'library', ['id' => $parentid, 'entityid' => $entityid])) {
             $parentid = 0;
         }
-        $settings = [];
-        if ($kind === 'classroom' && trim((string) ($data['group'] ?? '')) !== '') {
-            $settings['group'] = trim($data['group']);
-        }
+        $settings = self::with_groups([], $kind, $data);
         $id = $DB->insert_record(self::T . 'library', [
             'entityid' => $entityid,
             'parentid' => $parentid ?: null,
@@ -144,7 +143,7 @@ final class libraries {
     }
 
     /**
-     * Renames a library or changes its kind, the library it hangs from or its group.
+     * Renames a library or changes its kind, the library it hangs from or its groups.
      *
      * @param int $libraryid
      * @param array $data
@@ -162,10 +161,7 @@ final class libraries {
         ) {
             $parentid = 0;
         }
-        unset($settings['group']);
-        if ($kind === 'classroom' && trim((string) ($data['group'] ?? '')) !== '') {
-            $settings['group'] = trim($data['group']);
-        }
+        $settings = self::with_groups($settings, $kind, $data);
         $DB->update_record(self::T . 'library', (object) [
             'id' => $library->id,
             'name' => trim((string) ($data['name'] ?? '')) !== '' ? \core_text::substr(trim($data['name']), 0, 255)
@@ -210,6 +206,28 @@ final class libraries {
         }
         $DB->delete_records(self::T . 'library', ['id' => $libraryid]);
         return true;
+    }
+
+    /**
+     * The settings of a library with the groups a form gives: a classroom has one or several; the others, none.
+     *
+     * @param array $settings
+     * @param string $kind
+     * @param array $data groups (a list) or group (one).
+     * @return array
+     */
+    private static function with_groups(array $settings, string $kind, array $data): array {
+        unset($settings['group'], $settings['groups']);
+        $groups = array_key_exists('groups', $data) ? (array) $data['groups'] : [$data['group'] ?? ''];
+        $groups = array_values(array_unique(array_filter(
+            array_map(fn($g) => trim((string) $g), $groups),
+            fn($g) => $g !== ''
+        )));
+        sort($groups, SORT_NATURAL | SORT_FLAG_CASE);
+        if ($kind === 'classroom' && $groups) {
+            $settings['groups'] = $groups;
+        }
+        return $settings;
     }
 
     /**

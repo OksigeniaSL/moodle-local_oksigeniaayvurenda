@@ -21,13 +21,14 @@
     Example context (json):
     {
         "heading": "Qué ha leído cada uno", "group": "4º B", "none": "Nada todavía", "back": "#", "backlabel": "Volver",
-        "children": [{"name": "Ana Montes", "books": ["El faro dormido"], "hasbooks": true, "list": "El faro dormido"}]
+        "children": [{"name": "Ana Montes", "group": "4º B", "showgroup": false, "books": ["El faro dormido"], "hasbooks": true,
+            "list": "El faro dormido"}]
     }
 }}
 <h1 class="ayv-results-title">{{heading}} · {{group}}</h1>
 <ul class="ayv-holds">
 {{#children}}
-    <li class="ayv-holds-row"><span class="ayv-holds-title">{{name}}</span>
+    <li class="ayv-holds-row"><span class="ayv-holds-title">{{name}}{{#showgroup}} · {{group}}{{/showgroup}}</span>
         <span class="ayv-holds-who">{{#hasbooks}}{{list}}{{/hasbooks}}{{^hasbooks}}{{none}}{{/hasbooks}}</span></li>
 {{/children}}
 </ul>
