@@ -1107,12 +1107,14 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-read-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .5rem 0; }
 
 /* The book as a page of paper, with its page turns at the sides. */
-.ayv .ayv-read-book { display: flex; align-items: stretch; gap: .25rem; }
+.ayv .ayv-read-book { display: flex; align-items: stretch; justify-content: center; gap: .25rem; }
+/* A sheet with a book's proportion: the sheet sets the measure of the lines, and the text fills it. */
 .ayv .ayv-epub {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     box-sizing: border-box;
-    height: min(75vh, 900px);
+    height: min(78vh, 860px);
+    aspect-ratio: 2 / 3;
     padding: 1.25rem 1.5rem;
     border-radius: 6px;
     background: var(--surface);
@@ -1132,7 +1134,15 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     cursor: pointer;
 }
 .ayv .ayv-page-turn:hover, .ayv .ayv-page-turn:focus-visible { background: var(--paper2); }
-.ayv .ayv-page-turn .ayv-icon { width: 32px; height: 32px; margin: 0; }
+.ayv .ayv-page-turn .ayv-icon { width: 24px; height: 24px; margin: 0; }
+/* Two facing pages where there is room, with the fold between them. */
+@media (min-width: 1000px) {
+    .ayv .ayv-epub[data-spread="auto"] {
+        aspect-ratio: 4 / 3;
+        background-image: linear-gradient(to right, transparent calc(50% - 12px), rgba(0, 0, 0, .06) 50%,
+            transparent calc(50% + 12px));
+    }
+}
 .ayv .ayv-read-foot { display: flex; align-items: center; gap: 1rem; margin: .75rem 48px; }
 .ayv .ayv-read-foot progress { flex: 1 1 auto; height: 6px; accent-color: var(--accent); }
 @media (max-width: 480px) {
@@ -1142,18 +1152,67 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 }
 
 /* Icons, in the colour of their text. */
-.ayv .ayv-icon { width: 1.15em; height: 1.15em; vertical-align: -.2em; flex: 0 0 auto; }
+.ayv .ayv-icon { width: 20px; height: 20px; vertical-align: -.25em; flex: 0 0 auto; }
 
 /* A long option does not widen its form beyond a phone. */
 .ayv .ayv-field select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
 .ayv .ayv-fieldset { min-width: 0; }
 .ayv .ayv-choices .ayv-field { white-space: normal; }
-.ayv .ayv-button .ayv-icon { margin-right: .35em; }
+.ayv .ayv-button .ayv-icon { margin-right: .4em; }
+
+/* The recorder: a big round coral button with its word, a meter that moves with the voice, and the rest after. */
+.ayv .ayv-rec-controls { display: flex; flex-direction: column; align-items: center; gap: .6rem; padding: .25rem 0; }
+.ayv .ayv-rec-big {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-rec-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--coral);
+    color: #1e2b2a;
+    box-shadow: 0 4px 14px rgba(226, 101, 76, .35);
+    transition: transform .15s ease;
+}
+.ayv .ayv-rec-dot .ayv-icon { width: 24px; height: 24px; margin: 0; }
+.ayv .ayv-rec-big:hover .ayv-rec-dot { transform: scale(1.04); }
+.ayv .ayv-rec-big:focus-visible { outline: none; }
+.ayv .ayv-rec-big:focus-visible .ayv-rec-dot { outline: 3px solid var(--accent); outline-offset: 3px; }
+.ayv .ayv-rec-big:disabled { cursor: not-allowed; opacity: .5; }
+.ayv .ayv-rec-stop .ayv-rec-dot { animation: ayv-rec-pulse 1.6s ease-in-out infinite; }
+@keyframes ayv-rec-pulse { 50% { box-shadow: 0 0 0 12px rgba(226, 101, 76, .18); } }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-rec-stop .ayv-rec-dot { animation: none; }
+}
+.ayv .ayv-meter { width: min(100%, 14rem); height: 8px; border-radius: 999px; background: var(--paper2); overflow: hidden; }
+.ayv .ayv-meter span {
+    display: block;
+    height: 100%;
+    background: var(--coral);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .08s linear;
+}
+.ayv .ayv-rec-after { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+.ayv .ayv-field-quiet { font-size: .9rem; }
 
 /* Recording: the text on one side, the recorder on the other, which stays in sight while reading. */
 .ayv .ayv-voice-grid { display: grid; gap: 1.5rem; align-items: start; margin: 1rem 0 1.5rem; }
 .ayv .ayv-voice-grid > * { min-width: 0; }
-.ayv .ayv-voice-text .ayv-epub { height: min(62vh, 720px); }
+.ayv .ayv-voice-text .ayv-epub { height: min(68vh, 760px); }
 .ayv .ayv-voice-text .ayv-pdf { height: 70vh; }
 .ayv .ayv-voice-paper { margin: 0; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--paper2); }
 .ayv .ayv-voice-side .ayv-book { margin: 0 0 1rem; }
@@ -1188,10 +1247,12 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-window-list .ayv-book { margin: 0; }
 .ayv .ayv-window-record { display: flex; gap: 1rem; align-items: flex-start; }
 .ayv .ayv-window-record > div { flex: 1 1 auto; min-width: 0; }
-.ayv .ayv-window-cover { flex: 0 0 auto; width: 80px; height: auto; border-radius: 4px; }
+.ayv .ayv-window-cover { flex: 0 0 auto; width: 96px; padding: .5rem .45rem; }
+.ayv .ayv-window-cover .ayv-cover-title { font-size: .8rem; }
+.ayv .ayv-window-download { font-weight: 700; color: var(--accent); }
 .ayv .ayv-window-items { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
 .ayv .ayv-window-items li { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .75rem; }
-.ayv .ayv-window-actions { display: flex; flex-wrap: wrap; gap: .5rem; flex-basis: 100%; }
+.ayv .ayv-window-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; flex-basis: 100%; }
 .ayv .ayv-window-foot { margin: .5rem 0; }
 .ayv .ayv-invite-link { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; width: 100%; }
 .ayv .ayv-invite-link input { flex: 1 1 12rem; min-width: 0; }

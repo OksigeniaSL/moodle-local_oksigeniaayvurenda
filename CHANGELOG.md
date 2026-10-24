@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.23.1 (2026-10-27)
+
+- The reader is a sheet with a book's proportion: one page on a phone and beside the recorder, two facing pages with
+  their fold on wide screens. The sheet sets the measure of the lines and the text fills it.
+- The recorder: a big round coral button with its word, a meter that moves with the voice while recording, and what
+  was read, the signature and the email underneath, quieter, once there is something to send.
+- The public window: every book with its cover, drawn when it has none; «Read» as a button and «Download» as a link.
+- Icons thinner (1.75) and at their sizes: 20 px in buttons, 24 px in the big actions.
+
 ## 0.23.0 (2026-10-27)
 
 - Recording with the book in front: when the book has an EPUB or a PDF that the person may open, it is beside the

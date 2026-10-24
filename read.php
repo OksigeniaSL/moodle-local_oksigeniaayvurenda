@@ -68,6 +68,8 @@ $data = [
     'fileurl' => $item->kind === 'link' ? '' : digital::file_url($item),
     'downloadurl' => $candownload && $item->kind !== 'link' ? digital::file_url($item, true) : '',
     'marks' => true,
+    // Two facing pages where the screen is wide; beside the recorder, one.
+    'spread' => true,
     'recordurl' => $anyone ? (new moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug]))->out(false)
         : (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $item->recordid]))
             ->out(false),

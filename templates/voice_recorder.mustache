@@ -27,21 +27,24 @@
     }
 }}
 <div class="ayv-book ayv-recorder" id="ayv-recorder">
-    <p class="ayv-book-actions">
-        <button type="button" class="ayv-button ayv-button-rec" id="ayv-rec" {{#consent}}disabled{{/consent}}>{{> local_oksigeniaayvurenda/icon_mic}} {{voicerecord}}</button>
-        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-stop" hidden>{{> local_oksigeniaayvurenda/icon_stop}} {{voicestop}}</button>
+    <div class="ayv-rec-controls">
+        <button type="button" class="ayv-rec-big" id="ayv-rec" {{#consent}}disabled{{/consent}}><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_mic}}</span><span class="ayv-rec-word">{{voicerecord}}</span></button>
+        <button type="button" class="ayv-rec-big ayv-rec-stop" id="ayv-stop" hidden><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_stop}}</span><span class="ayv-rec-word">{{voicestop}}</span></button>
+        <div class="ayv-meter" aria-hidden="true"><span id="ayv-level"></span></div>
         <span class="ayv-field-hint" id="ayv-time" role="status"></span>
-    </p>
-    <audio id="ayv-preview" class="ayv-media" controls hidden></audio>
-    <label class="ayv-field ayv-field-wide">{{voicewhat}} <span class="ayv-field-hint">{{voicewhathint}}</span>
-        <input type="text" id="ayv-what" maxlength="255"></label>
-    <label class="ayv-field ayv-field-wide">{{voicesignature}} <span class="ayv-field-hint">{{voicesignaturehint}}</span>
-        <input type="text" id="ayv-signature" maxlength="60"></label>
-    {{#askemail}}<label class="ayv-field ayv-field-wide">{{voiceemail}} <span class="ayv-field-hint">{{voiceemailhint}}</span>
-        <input type="email" id="ayv-email" maxlength="254" autocomplete="email"></label>{{/askemail}}
-    <p class="ayv-book-actions">
-        <button type="button" class="ayv-button" id="ayv-send" disabled>{{voicesend}}</button>
-        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-again" hidden>{{voiceagain}}</button>
-    </p>
+    </div>
+    <div class="ayv-rec-after" id="ayv-after" hidden>
+        <audio id="ayv-preview" class="ayv-media" controls></audio>
+        <label class="ayv-field ayv-field-wide ayv-field-quiet">{{voicewhat}} <span class="ayv-field-hint">{{voicewhathint}}</span>
+            <input type="text" id="ayv-what" maxlength="255"></label>
+        <label class="ayv-field ayv-field-wide ayv-field-quiet">{{voicesignature}} <span class="ayv-field-hint">{{voicesignaturehint}}</span>
+            <input type="text" id="ayv-signature" maxlength="60"></label>
+        {{#askemail}}<label class="ayv-field ayv-field-wide ayv-field-quiet">{{voiceemail}} <span class="ayv-field-hint">{{voiceemailhint}}</span>
+            <input type="email" id="ayv-email" maxlength="254" autocomplete="email"></label>{{/askemail}}
+        <p class="ayv-book-actions">
+            <button type="button" class="ayv-button" id="ayv-send" disabled>{{voicesend}}</button>
+            <button type="button" class="ayv-button ayv-button-quiet" id="ayv-again">{{voiceagain}}</button>
+        </p>
+    </div>
     <p class="ayv-field-hint" id="ayv-voice-said" role="status"></p>
 </div>

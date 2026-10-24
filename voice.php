@@ -116,6 +116,7 @@ $data += [
     'pdf' => $text && $text->format === 'pdf',
     'fileurl' => $text ? digital::file_url($text) : '',
     'marks' => false,
+    'spread' => false,
 ];
 foreach (['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading'] as $key) {
     $data[$key] = $str($key);

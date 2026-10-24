@@ -92,6 +92,7 @@ $data = [
     'pdf' => $text && $text->format === 'pdf',
     'fileurl' => $text ? (new moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $token, 'text' => 1]))->out(false) : '',
     'marks' => false,
+    'spread' => false,
 ];
 foreach (
     ['voiceinfocentre', 'voicefamilyconsent', 'voicefamilywho', 'voicefamilywhohint', 'voicefamilydone', 'voicedelete',

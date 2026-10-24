@@ -79,6 +79,7 @@ foreach ($found['records'] as $record) {
         'authors' => implode(', ', $record['authors']),
         'cover' => $record['cover'],
         'hascover' => (bool) $record['cover'],
+        'colour' => $record['id'] % 6,
         'items' => $items,
     ];
 }

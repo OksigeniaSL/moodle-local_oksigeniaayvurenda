@@ -62,6 +62,46 @@
     var started = 0;
     var ticker = null;
     var stream = null;
+    var after = document.getElementById('ayv-after');
+    var level = document.getElementById('ayv-level');
+    var listening = null;
+
+    // A meter that moves with the voice: the loudness of the microphone, many times a second, while recording.
+    var meter = function(source) {
+        var Context = window.AudioContext || window.webkitAudioContext;
+        if (!Context || !level) {
+            return;
+        }
+        var context = new Context();
+        var analyser = context.createAnalyser();
+        analyser.fftSize = 512;
+        context.createMediaStreamSource(source).connect(analyser);
+        var samples = new Uint8Array(analyser.fftSize);
+        var frame = function() {
+            if (!listening) {
+                return;
+            }
+            analyser.getByteTimeDomainData(samples);
+            var sum = 0;
+            for (var i = 0; i < samples.length; i++) {
+                var value = (samples[i] - 128) / 128;
+                sum += value * value;
+            }
+            level.style.transform = 'scaleX(' + Math.min(1, Math.sqrt(sum / samples.length) * 4).toFixed(3) + ')';
+            window.requestAnimationFrame(frame);
+        };
+        listening = context;
+        window.requestAnimationFrame(frame);
+    };
+    var quiet = function() {
+        if (listening) {
+            listening.close();
+            listening = null;
+        }
+        if (level) {
+            level.style.transform = 'scaleX(0)';
+        }
+    };
 
     var type = function() {
         var options = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4'];
@@ -102,14 +142,16 @@
             recorder.addEventListener('stop', function() {
                 blob = new Blob(chunks, {type: recorder.mimeType || mime || 'audio/webm'});
                 preview.src = URL.createObjectURL(blob);
-                preview.hidden = false;
+                // What was read and the signature come once there is something to send.
+                after.hidden = false;
                 send.disabled = false;
-                again.hidden = false;
+                quiet();
                 stream.getTracks().forEach(function(track) {
                     track.stop();
                 });
             });
             recorder.start(1000);
+            meter(stream);
             started = Date.now();
             ticker = setInterval(clock, 500);
             rec.hidden = true;
@@ -134,8 +176,7 @@
     });
     again.addEventListener('click', function() {
         blob = null;
-        preview.hidden = true;
-        again.hidden = true;
+        after.hidden = true;
         send.disabled = true;
         time.textContent = '';
         rec.hidden = false;

@@ -25,7 +25,7 @@
         "loginurl": "#", "manage": true, "sesskey": "abc", "open": true, "voices": true, "index": false,
         "publicurl": "https://example.org/w",
         "records": [{"title": "El faro dormido", "subtitle": "", "authors": "Ana Montes", "cover": "https://example.org/c.jpg",
-            "hascover": true, "items": [{"label": "EPUB", "licence": "Dominio público", "action": "Leer", "url": "#",
+            "hascover": true, "colour": 2, "items": [{"label": "EPUB", "licence": "Dominio público", "action": "Leer", "url": "#",
             "download": "https://example.org/d"}]}],
         "windowsearch": "Buscar", "windowsearchbutton": "Buscar", "windowdownload": "Descargar", "windowopds": "OPDS",
         "windowopdshint": "Para Calibre", "windowlogin": "Entrar", "windownext": "Más", "windowprev": "Antes",
@@ -66,7 +66,10 @@
 <ul class="ayv-window-list">
 {{#records}}
     <li class="ayv-book ayv-window-record">
-        {{#hascover}}<img class="ayv-window-cover" src="{{cover}}" alt="" loading="lazy" width="80" height="120">{{/hascover}}
+        <span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}} ayv-window-cover" aria-hidden="true">
+            {{#hascover}}<img class="ayv-cover-img" src="{{cover}}" alt="" loading="lazy">{{/hascover}}
+            {{^hascover}}<span class="ayv-cover-title">{{title}}</span>{{/hascover}}
+        </span>
         <div>
             <h2 class="ayv-section-title">{{title}}</h2>
             {{#subtitle}}<p>{{subtitle}}</p>{{/subtitle}}
@@ -75,7 +78,7 @@
             {{#items}}
                 <li><span>{{label}}</span> <span class="ayv-field-hint">{{licence}}</span>
                     <span class="ayv-window-actions"><a class="ayv-button" href="{{url}}">{{action}}</a>
-                    {{#download}}<a class="ayv-button ayv-button-quiet" href="{{download}}">{{windowdownload}}</a>{{/download}}</span></li>
+                    {{#download}}<a class="ayv-window-download" href="{{download}}">{{windowdownload}}</a>{{/download}}</span></li>
             {{/items}}
             </ul>
         </div>

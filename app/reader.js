@@ -140,7 +140,8 @@
     }).then(function(data) {
         area.textContent = '';
         var book = window.ePub(data);
-        var rendition = book.renderTo(area, {width: '100%', height: '100%', spread: 'none'});
+        var rendition = book.renderTo(area, {width: '100%', height: '100%',
+            spread: area.getAttribute('data-spread') === 'auto' ? 'auto' : 'none', minSpreadWidth: 760});
         var go = function(place) {
             rendition.display(place);
         };
