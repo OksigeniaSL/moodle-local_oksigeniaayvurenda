@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.27.1 (2026-10-28)
+
+- The names of the plugin's four capabilities are found again: they were kept under the wrong key, so a page refused
+  for lack of a capability showed a developer's notice instead of Moodle's own message.
+
 ## 0.27.0 (2026-10-28)
 
 - The repository: what the centre publishes as its own (its own licence or a Creative Commons one), meant for the
