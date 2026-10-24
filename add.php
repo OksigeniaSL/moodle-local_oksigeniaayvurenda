@@ -100,6 +100,8 @@ shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaay
             'label' => $str('deskcatalogue')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/material.php', ['library' => $library->slug]))->out(false),
             'label' => $str('materialnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('labelsnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'add']))
             ->out(false), 'label' => $str('helpnav')],
     ],

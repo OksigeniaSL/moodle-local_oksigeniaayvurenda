@@ -1,0 +1,79 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/labels
+
+    Labels with the barcode, or spine labels, laid out on the chosen A4 sheet.
+
+    Context variables required for this template:
+    * heading, count, empty - texts
+    * action, library - the form; kinds, whiches, sheets (value, label, selected); since, codes, start
+    * pages - sheets of labels (blank, barcode, title, callnumber lines, library, svg)
+    * spines - whether they are spine labels; style - the measures of the sheet
+
+    Example context (json):
+    {
+        "heading": "Etiquetas",
+        "action": "#",
+        "library": "central",
+        "kinds": [{"value": "labels", "label": "Etiquetas", "selected": true}],
+        "whiches": [{"value": "today", "label": "Lo dado de alta hoy", "selected": true}],
+        "since": "",
+        "codes": "",
+        "sheets": [{"value": "3x8", "label": "3 × 8", "selected": true}],
+        "start": 1,
+        "count": "2 ejemplares",
+        "haspages": true,
+        "pages": [{"labels": [{"blank": false, "barcode": "100000L", "title": "El faro dormido", "callnumber": ["N", "LAU", "far"], "library": "Central", "svg": ""}]}],
+        "empty": "",
+        "spines": false,
+        "style": "",
+        "labelskind": "Qué", "labelswhich": "De qué ejemplares", "labelssince": "Desde", "labelscodes": "Códigos",
+        "labelssheetlabel": "Hoja", "labelsstart": "Empezar en la etiqueta", "labelsshow": "Ver", "printnow": "Imprimir"
+    }
+}}
+<div class="ayv-print-head">
+    <h1 class="ayv-results-title">{{heading}}</h1>
+    <form method="get" action="{{action}}" class="ayv-inline-form">
+        <input type="hidden" name="library" value="{{library}}">
+        <label class="ayv-field">{{labelskind}} <select name="kind">{{#kinds}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/kinds}}</select></label>
+        <label class="ayv-field">{{labelswhich}} <select name="which">{{#whiches}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/whiches}}</select></label>
+        <label class="ayv-field">{{labelssince}} <input type="date" name="since" value="{{since}}"></label>
+        <label class="ayv-field ayv-field-wide">{{labelscodes}} <textarea name="codes" rows="2" spellcheck="false">{{codes}}</textarea></label>
+        <label class="ayv-field">{{labelssheetlabel}} <select name="sheet">{{#sheets}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/sheets}}</select></label>
+        <label class="ayv-field">{{labelsstart}} <input type="number" name="start" min="1" max="65" value="{{start}}"></label>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
+    </form>
+    <p>{{count}}</p>
+    {{#haspages}}<p><button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/haspages}}
+</div>
+{{^haspages}}<p class="ayv-empty">{{empty}}</p>{{/haspages}}
+{{#pages}}
+<div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}" style="{{style}}">
+{{#labels}}
+    <div class="ayv-label{{#blank}} ayv-label-empty{{/blank}}">
+        {{^blank}}
+        {{#spines}}<div class="ayv-spine-lines">{{#callnumber}}<span>{{.}}</span>{{/callnumber}}</div>{{/spines}}
+        {{^spines}}
+        <p class="ayv-label-library">{{library}}</p>
+        <p class="ayv-label-title">{{title}}</p>
+        {{#svg}}<div class="ayv-label-barcode">{{{svg}}}</div>{{/svg}}
+        {{/spines}}
+        {{/blank}}
+    </div>
+{{/labels}}
+</div>
+{{/pages}}

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1 (2026-10-27)
+
+- Labels with the barcode and spine labels to print: of the copies added today, since a day, or a list of codes in
+  its order; on the usual A4 sheets of labels (3 × 8, 3 × 7, 4 × 10, 5 × 13), starting at any label to use up a sheet
+  already started. From «Labels» in the adding screen.
+- Fixed: the phpdoc of the flower, which Moodle's checker could not read.
+
 ## 0.9.0 (2026-10-27)
 
 - My card: each reader with an account sees their card, a flower that grows during the school year by four paths at

@@ -902,3 +902,32 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     .ayv .ayv-main { padding: 0; }
     .ayv .ayv-sheet { margin: 0; box-shadow: none; break-after: page; }
 }
+
+/* Labels and spine labels on A4 sheets: the measures come from the sheet chosen. */
+.ayv .ayv-labelsheet { display: grid; grid-template-columns: repeat(var(--cols), var(--w)); grid-auto-rows: var(--h);
+    align-content: start; width: 210mm; min-height: 297mm; padding: var(--top) 0 0 var(--left); margin: 0 auto 1rem;
+    background: #fff; color: #1e2b2a; box-shadow: 0 1px 6px rgba(0, 0, 0, .15); }
+
+.ayv .ayv-label { display: flex; flex-direction: column; padding: 2mm 3mm; overflow: hidden; outline: .2mm dashed #cfc7b6;
+    outline-offset: -.6mm; }
+
+.ayv .ayv-label p { margin: 0; line-height: 1.15; }
+
+.ayv .ayv-label-library { font-size: 7pt; text-transform: uppercase; letter-spacing: .04em; }
+
+.ayv .ayv-label-title { font-size: 8.5pt; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; }
+
+.ayv .ayv-label-barcode { margin-top: auto; height: 55%; }
+
+.ayv .ayv-label-barcode svg { width: 100%; height: 100%; }
+
+.ayv .ayv-spine-lines { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;
+    font-family: var(--title); font-weight: 600; font-size: 10pt; line-height: 1.15; }
+
+.ayv .ayv-spine-lines span:first-child { font-size: 11pt; }
+
+@media print {
+    .ayv .ayv-labelsheet { margin: 0; box-shadow: none; break-after: page; }
+    .ayv .ayv-label { outline: none; }
+}

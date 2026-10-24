@@ -49,7 +49,7 @@ final class flower {
     /**
      * The level of each path.
      *
-     * @param array<string, int> $counts What the reader did by each path this year.
+     * @param array $counts What the reader did by each path this year.
      * @return array<string, int> Path => 0 to 3.
      */
     public static function levels(array $counts): array {
@@ -64,7 +64,7 @@ final class flower {
     /**
      * The stage of the flower: one more for every three levels, up to the flower.
      *
-     * @param array<string, int> $levels
+     * @param array $levels
      * @return int 0 (seed) to 3 (flower).
      */
     public static function stage(array $levels): int {
