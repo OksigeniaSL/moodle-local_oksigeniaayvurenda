@@ -61,6 +61,8 @@ final class ltitool_test extends \advanced_testcase {
         $redirect = LtiOidcLogin::new(new lti\store(), new lti\cache(), new lti\cookie())
             ->getRedirectUrl(ltitool::urls()['launch'], ['iss' => self::ISS, 'login_hint' => 'u-7', 'client_id' => 'tool-1',
                 'lti_deployment_id' => 'dep-1']);
+        // Moodle 4.5 joins parameters with &amp; (arg_separator.output); redirect() turns it back, as here.
+        $redirect = str_replace('&amp;', '&', $redirect);
         parse_str((string) parse_url($redirect, PHP_URL_QUERY), $query);
         $this->assertStringStartsWith('https://platform.invalid/auth', $redirect);
         return [$private, $query['state'], $query['nonce']];
@@ -176,5 +178,51 @@ final class ltitool_test extends \advanced_testcase {
         $this->assertCount(1, ltitool::platforms($one));
         ltitool::delete_platform($one, $id);
         $this->assertSame([], ltitool::platforms($one));
+    }
+
+    /**
+     * Registering in one go: the address belongs to its entity while it lasts, the platform's configuration has to come
+     * from its issuer, and the platform is kept with what it answers. A new address undoes the one before.
+     */
+    public function test_dynamic_registration(): void {
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $first = ltitool::registration_url($entityid);
+        parse_str((string) parse_url(str_replace('&amp;', '&', $first['url']), PHP_URL_QUERY), $query);
+        $this->assertSame($entityid, ltitool::registration_entity($query['k']));
+        $this->assertSame(0, ltitool::registration_entity(str_repeat('a', 40)));
+        $this->assertSame($first['url'], ltitool::registration_url($entityid)['url']);
+
+        $config = ['issuer' => self::ISS, 'authorization_endpoint' => self::ISS . '/auth', 'token_endpoint' => self::ISS . '/token',
+            'jwks_uri' => self::ISS . '/jwks', 'registration_endpoint' => self::ISS . '/register',
+            'https://purl.imsglobal.org/spec/lti-platform-configuration' => ['product_family_code' => 'moodle']];
+        $answer = ['client_id' => 'abc123', 'https://purl.imsglobal.org/spec/lti-tool-configuration' => ['deployment_id' => '7']];
+        $history = [];
+        $stack = HandlerStack::create(new MockHandler([new Response(200, [], json_encode($config)),
+            new Response(200, [], json_encode($answer)), new Response(200, [], json_encode($config))]));
+        $stack->push(\GuzzleHttp\Middleware::history($history));
+        ltitool::$client = new \GuzzleHttp\Client(['handler' => $stack]);
+        $platform = ltitool::register($entityid, self::ISS . '/mod/lti/openid-configuration.php', 'reg-token');
+        $this->assertSame('abc123', $platform->clientid);
+        $this->assertSame('7', $platform->deployments);
+        $this->assertSame('Moodle · ' . self::ISS, $platform->name);
+        $this->assertSame(self::ISS . '/auth', $platform->authloginurl);
+        $sent = $history[1]['request'];
+        $this->assertSame('Bearer reg-token', $sent->getHeaderLine('Authorization'));
+        $body = json_decode((string) $sent->getBody(), true);
+        $this->assertSame([ltitool::urls()['launch']], $body['redirect_uris']);
+        $this->assertSame(ltitool::urls()['login'], $body['initiate_login_uri']);
+
+        // A configuration that speaks for another platform.
+        try {
+            ltitool::register($entityid, 'https://other.invalid/openid-configuration');
+            $this->fail('Another issuer');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('ltiregisterfailed', $e->errorcode);
+        }
+        $second = ltitool::registration_url($entityid, true);
+        $this->assertNotSame($first['url'], $second['url']);
+        $this->assertSame(0, ltitool::registration_entity($query['k']));
     }
 }

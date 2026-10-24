@@ -183,6 +183,138 @@ final class ltitool {
     }
 
     /**
+     * The address a platform opens to register itself in one go (LTI dynamic registration), for an entity; made, or
+     * made again, on asking. It lasts a week and serves any number of platforms of that entity until then.
+     *
+     * @param int $entityid
+     * @param bool $new A new one, which undoes the one before.
+     * @return array url, expires.
+     */
+    public static function registration_url(int $entityid, bool $new = false): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $current = $settings['ltiregister'] ?? [];
+        if ($new || empty($current['token']) || (int) ($current['expires'] ?? 0) < time()) {
+            $current = ['token' => bin2hex(random_bytes(20)), 'expires' => time() + WEEKSECS];
+            $settings['ltiregister'] = $current;
+            $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        }
+        $url = new \moodle_url('/local/oksigeniaayvurenda/lti/register.php', ['k' => $current['token']]);
+        return ['url' => $url->out(false), 'expires' => (int) $current['expires']];
+    }
+
+    /**
+     * The entity a registration address belongs to, while it lasts.
+     *
+     * @param string $token
+     * @return int 0 when no entity has it.
+     */
+    public static function registration_entity(string $token): int {
+        global $DB;
+        if (!preg_match('/^[0-9a-f]{40}$/', $token)) {
+            return 0;
+        }
+        foreach (
+            $DB->get_records_select(
+                self::T . 'entity',
+                $DB->sql_like('settings', ':token'),
+                ['token' => '%' . $token . '%'],
+                'id',
+                'id, settings'
+            ) as $entity
+        ) {
+            $register = (json_decode((string) $entity->settings, true) ?: [])['ltiregister'] ?? [];
+            if (hash_equals((string) ($register['token'] ?? ''), $token) && (int) ($register['expires'] ?? 0) >= time()) {
+                return (int) $entity->id;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Registers this library in a platform that asks (LTI dynamic registration): reads the platform's configuration,
+     * tells it about the tool, and keeps the platform with what it answers.
+     *
+     * @param int $entityid
+     * @param string $configurl The platform's openid_configuration.
+     * @param string $token The platform's registration_token, if it gave one.
+     * @return \stdClass The platform kept.
+     * @throws \moodle_exception When the platform does not answer as it should.
+     */
+    public static function register(int $entityid, string $configurl, string $token = ''): \stdClass {
+        global $DB, $SITE;
+        $client = self::$client ?? new \core\http_client();
+        $fail = fn(string $why) => new \moodle_exception('ltiregisterfailed', 'local_oksigeniaayvurenda', '', $why);
+        try {
+            $config = json_decode((string) $client->get($configurl, ['timeout' => 20])->getBody(), true);
+        } catch (\Throwable $e) {
+            throw $fail($e->getMessage());
+        }
+        foreach (['issuer', 'authorization_endpoint', 'jwks_uri', 'registration_endpoint'] as $field) {
+            if (!is_array($config) || empty($config[$field]) || !is_string($config[$field])) {
+                throw $fail($field);
+            }
+        }
+        // The configuration has to come from the platform it speaks for.
+        if (!str_starts_with($configurl, rtrim($config['issuer'], '/'))) {
+            throw $fail('issuer');
+        }
+        $libraries = $DB->get_records(self::T . 'library', ['entityid' => $entityid], "CASE WHEN kind = 'central' THEN 0
+            ELSE 1 END, id", 'id, slug, name', 0, 1);
+        $library = reset($libraries);
+        if (!$library) {
+            throw new \moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
+        }
+        $urls = self::urls();
+        $name = get_string('ltitoolname', 'local_oksigeniaayvurenda', format_string($library->name));
+        $request = [
+            'application_type' => 'web',
+            'response_types' => ['id_token'],
+            'grant_types' => ['implicit', 'client_credentials'],
+            'initiate_login_uri' => $urls['login'],
+            'redirect_uris' => [$urls['launch']],
+            'client_name' => $name,
+            'jwks_uri' => $urls['jwks'],
+            'token_endpoint_auth_method' => 'private_key_jwt',
+            'scope' => '',
+            'https://purl.imsglobal.org/spec/lti-tool-configuration' => [
+                'domain' => $urls['domain'],
+                'target_link_uri' => $urls['launch'],
+                'claims' => ['iss', 'sub', 'name', 'given_name', 'family_name', 'email'],
+                'messages' => [['type' => 'LtiResourceLinkRequest', 'label' => $name]],
+                'description' => format_string($SITE->fullname),
+            ],
+        ];
+        $headers = ['Content-Type' => 'application/json', 'Accept' => 'application/json'];
+        if ($token !== '') {
+            $headers['Authorization'] = 'Bearer ' . $token;
+        }
+        try {
+            $answer = json_decode((string) $client->post($config['registration_endpoint'], ['headers' => $headers,
+                'body' => json_encode($request), 'timeout' => 20])->getBody(), true);
+        } catch (\Throwable $e) {
+            throw $fail($e->getMessage());
+        }
+        if (!is_array($answer) || empty($answer['client_id'])) {
+            throw $fail('client_id');
+        }
+        $deployment = (string) ($answer['https://purl.imsglobal.org/spec/lti-tool-configuration']['deployment_id'] ?? '');
+        $product = (string) ($config['https://purl.imsglobal.org/spec/lti-platform-configuration']['product_family_code'] ?? '');
+        $existing = $DB->get_record(self::T . 'ltiplatform', ['issuer' => $config['issuer'],
+            'clientid' => (string) $answer['client_id'], 'entityid' => $entityid]);
+        $id = self::save_platform($entityid, [
+            'name' => $existing->name ?? ($product !== '' ? ucfirst($product) . ' · ' : '') . $config['issuer'],
+            'issuer' => $config['issuer'],
+            'clientid' => (string) $answer['client_id'],
+            'authloginurl' => $config['authorization_endpoint'],
+            'authtokenurl' => (string) ($config['token_endpoint'] ?? ''),
+            'keyseturl' => $config['jwks_uri'],
+            'deployments' => $deployment,
+        ], $existing ? (int) $existing->id : 0);
+        return $DB->get_record(self::T . 'ltiplatform', ['id' => $id], '*', MUST_EXIST);
+    }
+
+    /**
      * Removes a platform: whoever came from it keeps their reader and their history.
      *
      * @param int $entityid

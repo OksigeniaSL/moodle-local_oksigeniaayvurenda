@@ -65,6 +65,9 @@ if (data_submitted() && confirm_sesskey()) {
     } else if ($action === 'delete') {
         ltitool::delete_platform($entityid, $id);
         $notice = $str('ltideleted');
+    } else if ($action === 'newreg') {
+        ltitool::registration_url($entityid, true);
+        $notice = $str('ltiregisternewdone');
     }
 }
 $platforms = [];
@@ -90,6 +93,7 @@ foreach (['launch', 'login', 'jwks', 'domain'] as $key) {
     $toolurls[] = ['label' => $str('ltiurl' . $key), 'value' => $urls[$key]];
 }
 $toolurls[] = ['label' => $str('lticustom'), 'value' => 'library=' . $library->slug];
+$registration = ltitool::registration_url($entityid);
 $authoff = !is_enabled_auth('lti');
 $data = [
     'heading' => $str('ltiheading'),
@@ -100,6 +104,12 @@ $data = [
     'authurl' => $authoff && has_capability('moodle/site:config', $context)
         ? (new moodle_url('/admin/settings.php', ['section' => 'manageauths']))->out(false) : '',
     'authlink' => $str('ltiauthlink'),
+    'regheading' => $str('ltiregisterheading'),
+    'regintro' => $str('ltiregisterintro'),
+    'regurl' => $registration['url'],
+    'reglabel' => $str('ltiregisterlabel'),
+    'regexpires' => $str('ltiregisterexpires', userdate($registration['expires'], get_string('strftimedatetime', 'langconfig'))),
+    'regnew' => $str('ltiregisternew'),
     'toolheading' => $str('ltitoolheading'),
     'toolintro' => $str('ltitoolintro'),
     'toolurls' => $toolurls,

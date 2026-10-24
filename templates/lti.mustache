@@ -32,6 +32,12 @@
         "authoff": "",
         "authurl": "",
         "authlink": "Activarlo",
+        "regheading": "Alta de un toque",
+        "regintro": "Si tu plataforma admite el registro dinámico, copia esta dirección en ella.",
+        "regurl": "https://example.org/local/oksigeniaayvurenda/lti/register.php?k=abc",
+        "reglabel": "Dirección de registro",
+        "regexpires": "Vale hasta el 31 de octubre.",
+        "regnew": "Hacer otra",
         "toolheading": "Lo que pide tu plataforma",
         "toolintro": "Copia cada dato en la herramienta externa.",
         "toolurls": [{"label": "Dirección de la herramienta", "value": "https://example.org/local/oksigeniaayvurenda/lti/launch.php"}],
@@ -60,6 +66,15 @@
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#authoff}}<p class="ayv-notice ayv-notice-error" role="alert">{{authoff}} {{#authurl}}<a href="{{authurl}}">{{authlink}}</a>{{/authurl}}</p>{{/authoff}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{regheading}}</h2>
+    <p>{{regintro}}</p>
+    <p class="ayv-invite-link"><span>{{reglabel}}</span> <input type="text" readonly value="{{regurl}}" aria-label="{{reglabel}}">
+        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{regurl}}">{{copy}}</button></p>
+    <form method="post" action="{{action}}" class="ayv-inline-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="newreg"><span class="ayv-field-hint">{{regexpires}}</span>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{regnew}}</button></form>
+</section>
 <section class="ayv-section">
     <h2 class="ayv-section-title">{{toolheading}}</h2>
     <p>{{toolintro}}</p>
