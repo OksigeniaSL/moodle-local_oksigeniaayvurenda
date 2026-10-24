@@ -1,0 +1,90 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/public
+
+    The public window of a library, and its settings for whoever manages it.
+
+    Example context (json):
+    {
+        "heading": "La ventana de la Biblioteca", "text": "Bienvenidos.", "notice": "", "closednote": "", "query": "", "slug": "demo-1",
+        "action": "#", "hasrecords": true, "empty": "Nada todavía", "nexturl": "", "prevurl": "", "opds": "https://example.org/opds",
+        "loginurl": "#", "manage": true, "sesskey": "abc", "open": true, "voices": true, "index": false,
+        "publicurl": "https://example.org/w",
+        "records": [{"title": "El faro dormido", "subtitle": "", "authors": "Ana Montes", "cover": "https://example.org/c.jpg",
+            "hascover": true, "items": [{"label": "EPUB", "licence": "Dominio público", "action": "Leer", "url": "#",
+            "download": "https://example.org/d"}]}],
+        "windowsearch": "Buscar", "windowsearchbutton": "Buscar", "windowdownload": "Descargar", "windowopds": "OPDS",
+        "windowopdshint": "Para Calibre", "windowlogin": "Entrar", "windownext": "Más", "windowprev": "Antes",
+        "windowmanage": "La ventana", "windowopen": "Abierta", "windowopenhint": "Cualquiera la ve", "windowtext": "Texto",
+        "windowtexthint": "Arriba", "windowvoices": "Voces", "windowindex": "Buscadores", "windowsave": "Guardar",
+        "windowaddress": "Dirección", "voiceinvitecopy": "Copiar"
+    }
+}}
+<section class="ayv-window">
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#closednote}}<p class="ayv-notice">{{closednote}}</p>{{/closednote}}
+{{#text}}<p class="ayv-window-text">{{text}}</p>{{/text}}
+{{#manage}}
+<details class="ayv-book ayv-window-manage" {{^open}}open{{/open}}>
+    <summary>{{windowmanage}}</summary>
+    <form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="open" value="1" {{#open}}checked{{/open}}> {{windowopen}}</label>
+        <p class="ayv-field-hint">{{windowopenhint}}</p>
+        <label class="ayv-field ayv-field-wide">{{windowtext}} <span class="ayv-field-hint">{{windowtexthint}}</span>
+            <textarea name="text" rows="3">{{text}}</textarea></label>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="voices" value="1" {{#voices}}checked{{/voices}}> {{windowvoices}}</label>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="index" value="1" {{#index}}checked{{/index}}> {{windowindex}}</label>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{windowsave}}</button></p>
+    </form>
+    <p class="ayv-invite-link"><span>{{windowaddress}}</span> <input type="text" readonly value="{{publicurl}}" aria-label="{{windowaddress}}">
+        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{publicurl}}">{{voiceinvitecopy}}</button></p>
+</details>
+{{/manage}}
+<form class="ayv-window-search" role="search" method="get" action="{{action}}">
+    <input type="hidden" name="library" value="{{slug}}">
+    <label class="ayv-field ayv-field-wide">{{windowsearch}} <input type="search" name="q" value="{{query}}" maxlength="200"></label>
+    <button type="submit" class="ayv-button">{{windowsearchbutton}}</button>
+</form>
+{{^hasrecords}}<p class="ayv-empty">{{empty}}</p>{{/hasrecords}}
+{{#hasrecords}}
+<ul class="ayv-window-list">
+{{#records}}
+    <li class="ayv-book ayv-window-record">
+        {{#hascover}}<img class="ayv-window-cover" src="{{cover}}" alt="" loading="lazy" width="80" height="120">{{/hascover}}
+        <div>
+            <h2 class="ayv-section-title">{{title}}</h2>
+            {{#subtitle}}<p>{{subtitle}}</p>{{/subtitle}}
+            {{#authors}}<p class="ayv-field-hint">{{authors}}</p>{{/authors}}
+            <ul class="ayv-window-items">
+            {{#items}}
+                <li><span>{{label}}</span> <span class="ayv-field-hint">{{licence}}</span>
+                    <a class="ayv-button" href="{{url}}">{{action}}</a>
+                    {{#download}}<a class="ayv-button ayv-button-quiet" href="{{download}}">{{windowdownload}}</a>{{/download}}</li>
+            {{/items}}
+            </ul>
+        </div>
+    </li>
+{{/records}}
+</ul>
+{{/hasrecords}}
+<p class="ayv-book-actions">{{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}">{{windowprev}}</a>{{/prevurl}}
+    {{#nexturl}}<a class="ayv-button ayv-button-quiet" href="{{nexturl}}">{{windownext}}</a>{{/nexturl}}</p>
+<p class="ayv-window-foot"><a href="{{opds}}">{{windowopds}}</a> <span class="ayv-field-hint">{{windowopdshint}}</span></p>
+<p class="ayv-window-foot"><a href="{{loginurl}}">{{windowlogin}}</a></p>
+</section>

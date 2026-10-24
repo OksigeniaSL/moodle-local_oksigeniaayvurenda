@@ -40,30 +40,42 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
     if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, ['copies', 'cover', 'coverdraft', 'digital'], true)) {
         return false;
     }
-    require_login(null, false);
     $itemid = (int) array_shift($args);
+    // Someone without an account gets only what an open public window shows, and its covers.
+    $anyone = !isloggedin() || isguestuser();
     if ($filearea === 'digital') {
         // A digital book or recording: only for whom it is, and downloaded only where its licence allows.
         global $DB;
         $item = $DB->get_record('local_oksigeniaayvurenda_digital', ['id' => $itemid]);
-        if (
-            !$item || !\local_oksigeniaayvurenda\local\digital::visible(
-                $item,
-                \local_oksigeniaayvurenda\local\digital::viewer((int) $item->entityid, (int) $USER->id)
-            )
-        ) {
+        if (!$item) {
             return false;
+        }
+        if (!$anyone || !\local_oksigeniaayvurenda\local\window::shows($item)) {
+            require_login(null, false);
+            if (
+                !\local_oksigeniaayvurenda\local\digital::visible(
+                    $item,
+                    \local_oksigeniaayvurenda\local\digital::viewer((int) $item->entityid, (int) $USER->id)
+                )
+            ) {
+                return false;
+            }
         }
         $forcedownload = $forcedownload && \local_oksigeniaayvurenda\core\digital_rules::can_download(
             $item->licence,
             (bool) $item->download
         );
     } else if ($filearea === 'copies') {
+        require_login(null, false);
         require_capability('local/oksigeniaayvurenda:desk', $context);
     } else if ($filearea === 'cover') {
-        require_capability('local/oksigeniaayvurenda:view', $context);
+        if (!$anyone || !\local_oksigeniaayvurenda\local\window::shows_record($itemid)) {
+            require_login(null, false);
+            require_capability('local/oksigeniaayvurenda:view', $context);
+        }
         $forcedownload = false;
     } else {
+        require_login(null, false);
         require_capability('local/oksigeniaayvurenda:catalogue', $context);
         if ($itemid !== (int) $USER->id) {
             return false;

@@ -29,7 +29,29 @@
     var box = document.getElementById('ayv-marks');
     var timer = null;
 
+    var stored = 'ayv-read-' + config.item;
+    if (config.local) {
+        try {
+            var saved = JSON.parse(window.localStorage.getItem(stored) || '{}');
+            config.position = saved.position || null;
+            marks = Array.isArray(saved.bookmarks) ? saved.bookmarks : [];
+        } catch (e) {
+            marks = [];
+        }
+    }
     var send = function(params) {
+        if (config.local) {
+            try {
+                var place = JSON.parse(window.localStorage.getItem(stored) || '{}');
+                Object.keys(params).forEach(function(key) {
+                    place[key] = key === 'bookmarks' ? JSON.parse(params[key]) : params[key];
+                });
+                window.localStorage.setItem(stored, JSON.stringify(place));
+            } catch (e) {
+                return Promise.resolve(null);
+            }
+            return Promise.resolve(null);
+        }
         var body = new URLSearchParams();
         body.set('sesskey', config.sesskey);
         body.set('item', config.item);

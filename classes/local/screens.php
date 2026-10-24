@@ -64,7 +64,12 @@ final class screens {
         // Someone with voices to approve (the library staff, the tutors of those who recorded them) sees it here.
         $pending = count(voices::pending($library, (int) $USER->id));
         $voices = $pending ? ['url' => self::url('voices.php', $library), 'label' => self::str('homevoices', $pending)] : null;
+        // The public window: for everyone once it is open, and for whoever manages the library to open it.
+        $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
+        $window = window::settings($library)['open'] || $manage
+            ? ['url' => self::url('public.php', $library), 'label' => self::str('homewindow')] : null;
         return [
+            'window' => $window,
             'voices' => $voices,
             'shelf' => $shelf,
             'desk' => $desk,

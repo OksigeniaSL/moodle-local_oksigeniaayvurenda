@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.22.0 (2026-10-27)
+
+- The public window of each library: a page anyone can open without an account, closed until whoever manages the
+  library opens it from the same page. It shows only the digital forms meant for the public whose licence lets them
+  out, and the voices approved for the public if the centre wants; never who reads nor who recorded. It searches by
+  title and author, reads in the browser keeping the place and the bookmarks in the visitor's own browser, and
+  downloads what the licence allows. The centre writes a few lines for the top and chooses whether search engines may
+  list it.
+- The window as an OPDS 1.2 catalogue, with OpenSearch, for Calibre, KOReader, Thorium and other readers; the page
+  announces it.
+- Files and covers are served without an account only while they are in an open window; everything else asks to log
+  in, as before.
+
 ## 0.21.1 (2026-10-27)
 
 - Families without an account give a book a voice too. A teacher or the library makes a one-time link from the book's

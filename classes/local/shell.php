@@ -37,7 +37,8 @@ final class shell {
      * @param \stdClass|null $library
      * @param string $query What is in the search box.
      * @param array $options search (false to leave the search out), scripts (more scripts of app/), config (more data
-     *     for the scripts), nav (links in the header: a list of url and label).
+     *     for the scripts), nav (links in the header: a list of url and label), index (true to let search engines list
+     *     the page), feed (the address of an OPDS catalogue to announce).
      */
     public static function output(
         string $title,
@@ -94,7 +95,9 @@ final class shell {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f3a33">
-<meta name="robots" content="noindex">
+<meta name="robots" content="' . (!empty($options['index']) ? 'index, follow' : 'noindex') . '">' . (!empty($options['feed'])
+        ? '
+<link rel="alternate" type="' . opds::TYPE . '" href="' . s($options['feed']) . '">' : '') . '
 <title>' . s($title) . ' · ' . s($name) . '</title>
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="' . $app . 'emblema-pequeno.svg" type="image/svg+xml">

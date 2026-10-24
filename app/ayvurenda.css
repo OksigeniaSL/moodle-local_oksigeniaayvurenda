@@ -631,6 +631,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-field { display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
 
 .ayv .ayv-field input[type="text"],
+.ayv .ayv-field input[type="search"],
 .ayv .ayv-field input[type="password"],
 .ayv .ayv-source select,
 .ayv .ayv-field select {
@@ -1112,3 +1113,17 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv [hidden] { display: none !important; }
 
 .ayv .ayv-voiceinfo { display: grid; gap: .6rem; padding-left: 1.2rem; }
+
+.ayv .ayv-window-text { font-size: 1.1rem; }
+.ayv .ayv-window-manage summary { cursor: pointer; font-weight: 700; }
+.ayv .ayv-window-search { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem 1rem; margin: 1rem 0; }
+.ayv .ayv-window-search .ayv-field { flex: 1 1 14rem; margin: 0; }
+.ayv .ayv-window-list { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: 1rem; }
+.ayv .ayv-window-record { display: flex; gap: 1rem; align-items: flex-start; }
+.ayv .ayv-window-record > div { flex: 1 1 auto; min-width: 0; }
+.ayv .ayv-window-cover { flex: 0 0 auto; width: 80px; height: auto; border-radius: 4px; }
+.ayv .ayv-window-items { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.ayv .ayv-window-items li { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .75rem; }
+.ayv .ayv-window-foot { margin: .5rem 0; }
+.ayv .ayv-invite-link { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; width: 100%; }
+.ayv .ayv-invite-link input { flex: 1 1 12rem; min-width: 0; }

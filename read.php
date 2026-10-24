@@ -26,14 +26,14 @@ use local_oksigeniaayvurenda\core\digital_rules;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\window;
 
+// phpcs:ignore moodle.Files.RequireLogin.Missing -- what is in an open window is read without an account; the rest logs in.
 require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $id = required_param('id', PARAM_INT);
-require_login(null, false);
 $context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:view', $context);
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/read.php', ['library' => $ref, 'id' => $id]));
 
@@ -42,12 +42,18 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $item = digital::get($id, $library);
-if (!digital::visible($item, digital::viewer((int) $library->entityid, (int) $USER->id))) {
-    throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+// Someone without an account reads what is in an open window; the place they reach stays in their browser.
+$anyone = (!isloggedin() || isguestuser()) && window::shows($item);
+if (!$anyone) {
+    require_login(null, false);
+    require_capability('local/oksigeniaayvurenda:view', $context);
+    if (!digital::visible($item, digital::viewer((int) $library->entityid, (int) $USER->id))) {
+        throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+    }
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $title = (string) $DB->get_field('local_oksigeniaayvurenda_record', 'title', ['id' => $item->recordid]);
-$place = digital::place((int) $item->id, (int) $USER->id);
+$place = $anyone ? ['position' => null, 'bookmarks' => []] : digital::place((int) $item->id, (int) $USER->id);
 $candownload = digital_rules::can_download($item->licence, (bool) $item->download);
 $data = [
     'heading' => $title,
@@ -61,8 +67,9 @@ $data = [
     'other' => $item->format === 'other',
     'fileurl' => $item->kind === 'link' ? '' : digital::file_url($item),
     'downloadurl' => $candownload && $item->kind !== 'link' ? digital::file_url($item, true) : '',
-    'recordurl' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
-        'id' => $item->recordid]))->out(false),
+    'recordurl' => $anyone ? (new moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug]))->out(false)
+        : (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $item->recordid]))
+            ->out(false),
 ];
 foreach (
     ['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readmarks', 'readdownload', 'readopenlink',
@@ -74,8 +81,9 @@ $scripts = $item->format === 'epub' ? ['epubjs/jszip.min', 'epubjs/epub.min', 'r
 shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/read', $data), $library, '', [
     'search' => false,
     'scripts' => $scripts,
-    'nav' => [['url' => $data['recordurl'], 'label' => $str('backtorecord')]],
+    'nav' => [['url' => $data['recordurl'], 'label' => $str($anyone ? 'windowback' : 'backtorecord')]],
     'config' => [
+        'local' => $anyone,
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/digital_ajax.php'))->out(false),
         'sesskey' => sesskey(),
         'item' => (int) $item->id,
