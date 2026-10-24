@@ -267,9 +267,12 @@ final class screens {
         foreach (catalogue::libraries() as $library) {
             $libraries[] = ['name' => format_string($library->name), 'url' => self::url('index.php', $library)];
         }
+        $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
         return [
             'heading' => self::str($libraries ? 'chooselibrary' : 'nolibrary'),
             'libraries' => $libraries,
+            'manage' => $manage ? ['url' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
+                'label' => self::str($libraries ? 'librariesnav' : 'librariesstart')] : null,
         ];
     }
 

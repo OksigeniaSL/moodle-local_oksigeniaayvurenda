@@ -22,11 +22,13 @@
     Context variables required for this template:
     * heading - title of the screen
     * libraries - list of name and url
+    * manage - url and label of the libraries page, for managers
 
     Example context (json):
     {
         "heading": "Elige una biblioteca",
-        "libraries": [{"name": "Biblioteca central", "url": "#"}, {"name": "Biblioteca de 3º A", "url": "#"}]
+        "libraries": [{"name": "Biblioteca central", "url": "#"}, {"name": "Biblioteca de 3º A", "url": "#"}],
+        "manage": {"url": "#", "label": "Las bibliotecas"}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -35,3 +37,4 @@
     <li><a class="ayv-corner ayv-cover-0" href="{{url}}"><span class="ayv-corner-label">{{name}}</span></a></li>
 {{/libraries}}
 </ul>
+{{#manage}}<p class="ayv-more"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/manage}}

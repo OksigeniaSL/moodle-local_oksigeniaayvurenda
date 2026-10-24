@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.0 (2026-10-27)
+
+- The libraries of a site on a page of their own, without the command line: a centre is created with its first
+  library (with the start of its school year, how its catalogue classifies and whether its codes carry a control
+  letter); then it adds libraries of any kind (central, classroom, department, faculty), each hanging from another if
+  it wants, a classroom one with its group; renames them, and removes those without copies. Several centres can share
+  a site. Managers reach it from the desk and, while there is no library, from the plugin's first page.
+- The third stage of the flower is called «Casi flor» in Spanish.
+- Settings fields go under their label on narrow screens instead of past the edge.
+
 ## 0.14.0 (2026-10-27)
 
 - Weeding: the candidates of a library (lost, worn out or broken, published before a year, not lent for some years),

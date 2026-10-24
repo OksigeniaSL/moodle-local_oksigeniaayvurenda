@@ -119,6 +119,8 @@ shell::output($str('desktitle'), $main, $library, '', [
     ], has_capability('local/oksigeniaayvurenda:catalogue', context_system::instance()) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
             'label' => $str('addnav')],
+    ] : [], has_capability('local/oksigeniaayvurenda:manage', context_system::instance()) ? [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false), 'label' => $str('librariesnav')],
     ] : []),
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/desk_ajax.php'))->out(false),

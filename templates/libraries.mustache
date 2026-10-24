@@ -1,0 +1,103 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/libraries
+
+    The centres of the site and their libraries.
+
+    Example context (json):
+    {
+        "heading": "Las bibliotecas", "intro": "Cada centro, con las suyas.", "notice": "", "action": "#", "sesskey": "abc",
+        "none": false, "newclassifications": [{"value": "udc", "label": "CDU", "selected": true}],
+        "entities": [{"id": 1, "name": "Colegio inventado", "rawname": "Colegio inventado", "yearstart": "09-01",
+            "classifications": [{"value": "udc", "label": "CDU", "selected": true}], "controlletter": true, "demo": false,
+            "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
+            "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
+            "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
+            "libraries": [{"id": 1, "name": "Biblioteca central", "rawname": "Biblioteca central", "url": "#",
+                "address": "/central", "kindlabel": "Central", "copies": "Ejemplares: 600", "group": "",
+                "kinds": [{"value": "central", "label": "Central", "selected": true}], "parents": [], "groups": [],
+                "canremove": false}]}],
+        "librariesfirst": "Tu centro", "librariesfirsthint": "Para empezar", "librariesentityname": "Nombre del centro",
+        "librarieslibraryname": "Nombre de la biblioteca", "librariesyearstart": "Empieza el curso",
+        "librariesyearstarthint": "MM-DD", "librariesclassification": "Clasificación", "librariescontrolletter": "Letra de control",
+        "librariescreate": "Crear", "librariesadd": "Añadir una biblioteca", "librariesname": "Nombre", "librarieskind": "Tipo",
+        "librariesparent": "Cuelga de", "librariesnoparent": "De ninguna", "librariesslug": "Dirección",
+        "librariesslughint": "Se hace sola", "librariesgroup": "Grupo", "librariesnogroup": "Sin grupo",
+        "librariessave": "Guardar", "librariesremove": "Quitarla", "librariesanother": "Otro centro en este sitio",
+        "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#entities}}
+<section class="ayv-book ayv-entity">
+    <h2 class="ayv-section-title">{{name}}{{#demo}} <span class="ayv-field-hint">({{librariesdemo}})</span>{{/demo}}</h2>
+    <ul class="ayv-holds">
+    {{#libraries}}
+        <li class="ayv-holds-row">
+            <a class="ayv-holds-title" href="{{url}}">{{name}}</a>
+            <span class="ayv-holds-who">{{kindlabel}}{{#group}} · {{group}}{{/group}} · {{address}}</span>
+            <span class="ayv-holds-when">{{copies}}</span>
+            <details class="ayv-entity-edit"><summary>{{librariesedit}}</summary>
+                <form method="post" action="{{action}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{id}}">
+                    <label class="ayv-field">{{librariesname}} <input type="text" name="name" value="{{rawname}}" maxlength="255" required></label>
+                    <label class="ayv-field">{{librarieskind}} <select name="kind">{{#kinds}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/kinds}}</select></label>
+                    <label class="ayv-field">{{librariesparent}} <select name="parentid"><option value="0">{{librariesnoparent}}</option>{{#parents}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/parents}}</select></label>
+                    <label class="ayv-field">{{librariesgroup}} <select name="group"><option value="">{{librariesnogroup}}</option>{{#groups}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/groups}}</select></label>
+                    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="library">{{librariessave}}</button>
+                    {{#canremove}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{librariesremove}}</button>{{/canremove}}</p>
+                </form>
+            </details>
+        </li>
+    {{/libraries}}
+    </ul>
+    <details class="ayv-entity-edit"><summary>{{librariesadd}}</summary>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="entity" value="{{id}}">
+            <label class="ayv-field">{{librariesname}} <input type="text" name="name" maxlength="255" required></label>
+            <label class="ayv-field">{{librarieskind}} <select name="kind">{{#kinds}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/kinds}}</select></label>
+            <label class="ayv-field">{{librariesparent}} <select name="parentid"><option value="0">{{librariesnoparent}}</option>{{#parents}}<option value="{{value}}">{{label}}</option>{{/parents}}</select></label>
+            {{#hasgroups}}<label class="ayv-field">{{librariesgroup}} <select name="group"><option value="">{{librariesnogroup}}</option>{{#groups}}<option value="{{value}}">{{label}}</option>{{/groups}}</select></label>{{/hasgroups}}
+            <label class="ayv-field">{{librariesslug}} <span class="ayv-field-hint">{{librariesslughint}}</span> <input type="text" name="slug" maxlength="64" pattern="[a-z0-9-]*"></label>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="newlibrary">{{librariescreate}}</button></p>
+        </form>
+    </details>
+    <details class="ayv-entity-edit"><summary>{{librariesentity}}</summary>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="entity" value="{{id}}">
+            <label class="ayv-field">{{librariesentityname}} <input type="text" name="name" value="{{rawname}}" maxlength="255" required></label>
+            <label class="ayv-field">{{librariesyearstart}} <span class="ayv-field-hint">{{librariesyearstarthint}}</span> <input type="text" name="yearstart" value="{{yearstart}}" maxlength="5" pattern="[0-9]{2}-[0-9]{2}"></label>
+            <label class="ayv-field">{{librariesclassification}} <select name="classification">{{#classifications}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/classifications}}</select></label>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="controlletter" value="1" {{#controlletter}}checked{{/controlletter}}> {{librariescontrolletter}}</label>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="entity">{{librariessave}}</button></p>
+        </form>
+    </details>
+</section>
+{{/entities}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{#none}}{{librariesfirst}}{{/none}}{{^none}}{{librariesanother}}{{/none}}</h2>
+    {{#none}}<p>{{librariesfirsthint}}</p>{{/none}}
+    <label class="ayv-field">{{librariesentityname}} <input type="text" name="name" maxlength="255" required></label>
+    <label class="ayv-field">{{librarieslibraryname}} <input type="text" name="library" maxlength="255"></label>
+    <label class="ayv-field">{{librariesyearstart}} <span class="ayv-field-hint">{{librariesyearstarthint}}</span> <input type="text" name="yearstart" value="09-01" maxlength="5" pattern="[0-9]{2}-[0-9]{2}"></label>
+    <label class="ayv-field">{{librariesclassification}} <select name="classification">{{#newclassifications}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/newclassifications}}</select></label>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="controlletter" value="1"> {{librariescontrolletter}}</label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="newentity">{{librariescreate}}</button></p>
+</form>

@@ -33,13 +33,13 @@ final class cards_test extends \basic_testcase {
      */
     public function test_flower_svg(): void {
         foreach ([0, 1, 2, 3] as $stage) {
-            $svg = cards::flower_svg($stage, ['back' => 3, 'explore' => 1, 'tell' => 0, 'stay' => 9], 'Capullo & co', 160);
+            $svg = cards::flower_svg($stage, ['back' => 3, 'explore' => 1, 'tell' => 0, 'stay' => 9], 'Casi flor & co', 160);
             $this->assertStringStartsWith('<svg width="160" height="160" focusable="false" class="ayv-flor"', $svg);
             foreach (['volver="3"', 'explorar="1"', 'contar="0"', 'quedarse="3"'] as $mark) {
                 $this->assertStringContainsString('data-' . $mark, $svg);
             }
-            $this->assertStringContainsString('aria-label="Capullo &amp; co"', $svg);
-            $this->assertStringContainsString('<title>Capullo &amp; co</title>', $svg);
+            $this->assertStringContainsString('aria-label="Casi flor &amp; co"', $svg);
+            $this->assertStringContainsString('<title>Casi flor &amp; co</title>', $svg);
             $this->assertSame(1, substr_count($svg, '<svg'));
         }
         // The legend: the three marks of one path in a row.

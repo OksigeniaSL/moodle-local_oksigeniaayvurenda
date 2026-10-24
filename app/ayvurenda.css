@@ -1039,3 +1039,15 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     .ayv .ayv-weedrecord { padding: 15mm; color: #1e2b2a; }
     .ayv .ayv-weed-restored { display: none; }
 }
+
+/* Forms of settings: a field and its hint go under their label when the line is short, never past the edge. */
+.ayv .ayv-book .ayv-field:not(.ayv-field-check), .ayv .ayv-entity-edit .ayv-field:not(.ayv-field-check) { flex-wrap: wrap; }
+
+.ayv .ayv-book .ayv-field input[type="text"], .ayv .ayv-entity-edit .ayv-field input[type="text"],
+.ayv .ayv-book .ayv-field select, .ayv .ayv-entity-edit .ayv-field select { flex: 1 1 12rem; min-width: 0; max-width: 100%; }
+
+.ayv .ayv-entity-edit { flex-basis: 100%; }
+
+.ayv .ayv-entity-edit summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+
+.ayv .ayv-entity-edit form { display: grid; gap: .6rem; margin-top: .6rem; }
