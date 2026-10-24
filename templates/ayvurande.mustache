@@ -1,0 +1,57 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/ayvurande
+
+    Ayvu rande: the voices given to the library's books, by book.
+
+    Example context (json):
+    {
+        "heading": "Ayvu rande", "motto": "La fuente de las palabras", "intro": "Las voces de la biblioteca.",
+        "hasrecords": true, "empty": "Todavía no hay voces.", "nexturl": "", "prevurl": "", "windownext": "Más",
+        "windowprev": "Antes", "infourl": "#", "voiceinfo": "Cómo se tratan las voces",
+        "records": [{"title": "El faro dormido", "url": "#", "cover": "https://example.org/c.jpg", "hascover": false, "colour": 3,
+            "voices": [{"label": "Capítulo 1 · La mamá de Ana", "audio": "https://example.org/v.webm"}]}]
+    }
+}}
+<section class="ayv-spring">
+<h1 class="ayv-results-title">{{heading}} <span class="ayv-spring-motto">{{motto}}</span></h1>
+<p>{{intro}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
+{{^hasrecords}}<p class="ayv-empty">{{empty}}</p>{{/hasrecords}}
+{{#hasrecords}}
+<ul class="ayv-window-list">
+{{#records}}
+    <li class="ayv-book ayv-window-record">
+        <a class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}} ayv-window-cover" href="{{url}}" tabindex="-1" aria-hidden="true">
+            {{#hascover}}<img class="ayv-cover-img" src="{{cover}}" alt="" loading="lazy">{{/hascover}}
+            {{^hascover}}<span class="ayv-cover-title">{{title}}</span>{{/hascover}}
+        </a>
+        <div>
+            <h2 class="ayv-section-title"><a href="{{url}}">{{title}}</a></h2>
+            <ul class="ayv-spring-voices">
+            {{#voices}}
+                <li><span>{{label}}</span>
+                    <audio class="ayv-media" controls preload="none" src="{{audio}}" aria-label="{{label}}"></audio></li>
+            {{/voices}}
+            </ul>
+        </div>
+    </li>
+{{/records}}
+</ul>
+{{/hasrecords}}
+<p class="ayv-book-actions">{{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}">{{windowprev}}</a>{{/prevurl}}
+    {{#nexturl}}<a class="ayv-button ayv-button-quiet" href="{{nexturl}}">{{windownext}}</a>{{/nexturl}}</p>
+</section>

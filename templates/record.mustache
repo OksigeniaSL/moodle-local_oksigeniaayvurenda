@@ -46,7 +46,7 @@
                     "callnumber": "821 MON far", "barcode": "100000L"}],
         "back": {"url": "#", "label": "Volver a la biblioteca"},
         "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#", "book": true}],
-                    "manage": null, "readbook": "Leer el libro",
+                    "manage": null, "readbook": "Leer el libro", "spring": null,
                     "voice": {"url": "#", "question": "¿Quieres darle voz a este libro?", "label": "Darle voz"}
         },
         "hold": {"action": "#", "sesskey": "abc", "library": "demo-1", "recordid": 1, "holdid": 0, "notice": "",
@@ -113,6 +113,7 @@
             <h2 class="ayv-section-title">{{heading}}</h2>
             {{#items}}<p>{{#book}}<a class="ayv-button" href="{{url}}">{{> local_oksigeniaayvurenda/icon_book}} {{readbook}}</a> <span class="ayv-field-hint">{{label}}</span>{{/book}}{{^book}}<a class="ayv-button" href="{{url}}">{{action}}: {{label}}</a>{{/book}}</p>{{/items}}
             {{#voice}}<p class="ayv-voice-ask">{{question}}</p><p><a class="ayv-button ayv-button-quiet ayv-button-voice" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a></p>{{/voice}}
+            {{#spring}}<p><a href="{{url}}">{{label}}</a></p>{{/spring}}
             {{#manage}}<p><a href="{{url}}">{{label}}</a></p>{{/manage}}
         </section>
         {{/digital}}

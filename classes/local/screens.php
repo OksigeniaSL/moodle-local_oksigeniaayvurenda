@@ -68,7 +68,11 @@ final class screens {
         $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
         $window = window::settings($library)['open'] || $manage
             ? ['url' => self::url('public.php', $library), 'label' => self::str('homewindow')] : null;
+        // Ayvu rande, the voices of the library: for whoever belongs to the centre.
+        $spring = digital::viewer((int) $library->entityid, (int) $USER->id)['who'] !== 'nobody'
+            ? ['url' => self::url('ayvurande.php', $library), 'label' => self::str('homeayvurande')] : null;
         return [
+            'spring' => $spring,
             'window' => $window,
             'voices' => $voices,
             'shelf' => $shelf,
@@ -308,7 +312,8 @@ final class screens {
             return null;
         }
         return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage, 'voice' => $voice,
-            'readbook' => self::str('digitalreadbook')];
+            'readbook' => self::str('digitalreadbook'), 'spring' => $voice ? ['url' => self::url('ayvurande.php', $library),
+            'label' => self::str('digitalayvurande')] : null];
     }
 
     /**

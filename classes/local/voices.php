@@ -420,6 +420,45 @@ final class voices {
     }
 
     /**
+     * Ayvu rande, the spring of words: the approved voices of a library that someone may hear, newest first, by record.
+     *
+     * @param \stdClass $library
+     * @param array $viewer As digital::viewer() gives it.
+     * @param int $page
+     * @return array records (id, title, cover, voices), and more.
+     */
+    public static function spring(\stdClass $library, array $viewer, int $page = 0): array {
+        global $DB;
+        $rows = $DB->get_records_sql(
+            "SELECT d.*, r.title AS booktitle
+               FROM {" . self::T . "digital} d
+               JOIN {" . self::T . "record} r ON r.id = d.recordid
+              WHERE d.entityid = :entityid AND d.kind = 'voice' AND d.status = 'published'
+           ORDER BY d.timecreated DESC, d.id DESC",
+            ['entityid' => $library->entityid],
+            0,
+            1000
+        );
+        $records = [];
+        foreach ($rows as $row) {
+            if (!self::can_hear($row, $viewer)) {
+                continue;
+            }
+            $id = (int) $row->recordid;
+            $records[$id] = $records[$id] ?? ['id' => $id, 'title' => $row->booktitle, 'voices' => []];
+            $records[$id]['voices'][] = $row;
+        }
+        $per = 20;
+        $more = count($records) > ($page + 1) * $per;
+        $records = array_slice($records, $page * $per, $per, true);
+        $covers = covers::urls(array_keys($records));
+        foreach ($records as $id => $record) {
+            $records[$id]['cover'] = $covers[$id] ?? null;
+        }
+        return ['records' => array_values($records), 'more' => $more];
+    }
+
+    /**
      * The voices someone recorded of a record.
      *
      * @param int $recordid

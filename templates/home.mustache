@@ -26,7 +26,7 @@
 
     Example context (json):
     {
-        "shelf": null, "voices": null, "window": null,
+        "shelf": null, "voices": null, "window": null, "spring": null,
         "desk": {"url": "#", "label": "Abrir el mostrador"},
         "addbooks": {"url": "#", "label": "Dar de alta libros"},
         "mycard": {"url": "#", "label": "Mi carné"},
@@ -43,6 +43,7 @@
     }
 }}
 <h1 class="ayv-sr">{{heading}}</h1>
+{{#spring}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a></p>{{/spring}}
 {{#window}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/window}}
 {{#voices}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/voices}}
 {{#shelf}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/shelf}}

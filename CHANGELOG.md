@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.25.0 (2026-10-27)
+
+- Ayvu rande, «the spring of words» in Guarani: a page with the voices given to the library's books, book by book,
+  that each person may hear, linked from the home and from the record of a book with voices.
+
 ## 0.24.0 (2026-10-27)
 
 - House style D, first part, by Gaudí: a layer after the plugin's own styles (`app/ayvurenda-d.css`). Flat shapes in

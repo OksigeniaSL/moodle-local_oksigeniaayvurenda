@@ -99,6 +99,12 @@ final class voices_test extends \advanced_testcase {
         $this->assertTrue($hears($adult, $leo));
         $this->assertFalse($hears($adult, $stranger));
 
+        // Ayvu rande gathers, book by book, the approved voices each person may hear.
+        $spring = fn($who) => voices::spring($library, digital::viewer($entityid, (int) $who->id))['records'];
+        $this->assertSame(['El faro dormido'], array_column($spring($leo), 'title'));
+        $this->assertCount(1, $spring($leo)[0]['voices']);
+        $this->assertSame([], $spring($stranger));
+
         voices::remove(digital::get($adult, $library));
         $this->assertFalse($DB->record_exists(self::T . 'digital', ['id' => $adult]));
         $DB->set_field(self::T . 'entity', 'settings', json_encode(['voicekeepdays' => 30]), ['id' => $entityid]);
