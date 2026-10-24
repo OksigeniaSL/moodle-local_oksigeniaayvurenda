@@ -65,6 +65,10 @@ if ($group === null) {
             'url' => (new moodle_url('/local/oksigeniaayvurenda/tutors.php', ['library' => $library->slug]))->out(false),
             'label' => $str('tutorsnav'),
         ] : null,
+        'year' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('yearnav'),
+        ] : null,
     ];
     $unlinked = $DB->count_records_select(
         'local_oksigeniaayvurenda_reader',

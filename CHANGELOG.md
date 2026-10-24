@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.1 (2026-10-25)
+
+- The school year, on its own screen: how many groups and readers this year has, how many groups have a tutor, who
+  left with books (in a group last year and in none this year, or gone from the centre), the books out, and last
+  year in numbers (loans, and readers who borrowed of those in each group). Moving the cohorts is enough to start a
+  year; the groups can also be brought at once. The day the year starts is set there, and a change applies from the
+  next year on, which begins where this one ends.
+- The desk shows «Start the school year» while the beginning of a year asks for something (tutors missing, readers
+  who left with books), and the books still out when the year is ending, to those who manage the library.
+
 ## 0.7.0 (2026-10-25)
 
 - Notices of late books, as Moodle messages, so they go by whatever the site and each person use. The reader hears

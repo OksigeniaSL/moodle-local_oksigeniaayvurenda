@@ -1,0 +1,102 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/year
+
+    The school year: what its beginning asks, its end, last year in numbers and the day it starts.
+
+    Context variables required for this template:
+    * heading, dates, notice - texts
+    * ending - text, url and label when the year is ending with books out
+    * cards - number, label, url, late
+    * left - readers who left with books (name, group, bookslabel)
+    * last - last year in numbers: heading, total, groups (group, line, share)
+    * days, months - options of the start day
+
+    Example context (json):
+    {
+        "heading": "Curso 2026-2027",
+        "dates": "Del 1 de septiembre de 2026 al 31 de agosto de 2027.",
+        "notice": "",
+        "ending": null,
+        "cards": [{"number": 30, "label": "grupos, 2000 lectores", "url": "#", "late": false}],
+        "startintro": "Basta con mover las cohortes en Moodle.",
+        "action": "#",
+        "sesskey": "abc",
+        "sync": "Traer ahora los grupos",
+        "hasleft": true,
+        "left": [{"name": "Ana Montes", "group": "6º Primaria A", "bookslabel": "1 libro"}],
+        "leftheading": "Se fueron con libros",
+        "leftintro": "Estaban en un grupo el curso pasado y este no.",
+        "last": {"heading": "2025-2026 en cifras", "total": "1200 préstamos.", "groups": [{"group": "3º A", "line": "18 de 25 lectores", "share": 72}]},
+        "startheading": "Cuándo empieza el curso",
+        "startnote": "Desde el curso que viene.",
+        "days": [{"value": 1, "label": 1, "selected": true}],
+        "months": [{"value": 9, "label": "septiembre", "selected": true}],
+        "daylabel": "Día",
+        "monthlabel": "Mes",
+        "save": "Guardar"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{dates}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#ending}}<p class="ayv-notice">{{text}} <a href="{{url}}">{{label}}</a></p>{{/ending}}
+<ul class="ayv-today">
+{{#cards}}
+    <li><a class="ayv-today-card {{#late}}ayv-today-late{{/late}}" href="{{url}}"><span class="ayv-today-number">{{number}}</span>
+        <span class="ayv-today-label">{{label}}</span></a></li>
+{{/cards}}
+</ul>
+<form method="post" action="{{action}}" class="ayv-section">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sync">
+    <p>{{startintro}}</p>
+    <p><button type="submit" class="ayv-button ayv-button-quiet">{{sync}}</button></p>
+</form>
+{{#hasleft}}
+<section class="ayv-section" id="ayv-left">
+    <h2 class="ayv-section-title">{{leftheading}}</h2>
+    <p>{{leftintro}}</p>
+    <ul class="ayv-people">
+    {{#left}}
+        <li class="ayv-person"><span class="ayv-person-name">{{name}}</span> <span>{{group}}</span>
+            <span class="ayv-person-card ayv-is-late">{{bookslabel}}</span></li>
+    {{/left}}
+    </ul>
+</section>
+{{/hasleft}}
+{{#last}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{heading}}</h2>
+    <p>{{total}}</p>
+    <ul class="ayv-people">
+    {{#groups}}
+        <li class="ayv-person"><span class="ayv-person-name">{{group}}</span> <span>{{line}}</span>
+            <span class="ayv-share" aria-hidden="true"><span style="width: {{share}}%"></span></span></li>
+    {{/groups}}
+    </ul>
+</section>
+{{/last}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{startheading}}</h2>
+    <form method="post" action="{{action}}" class="ayv-inline-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="start">
+        <label class="ayv-field">{{daylabel}} <select name="day">{{#days}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/days}}</select></label>
+        <label class="ayv-field">{{monthlabel}} <select name="month">{{#months}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/months}}</select></label>
+        <button type="submit" class="ayv-button">{{save}}</button>
+    </form>
+    <p>{{startnote}}</p>
+</section>

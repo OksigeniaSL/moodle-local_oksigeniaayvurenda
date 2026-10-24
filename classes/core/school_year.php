@@ -57,4 +57,28 @@ final class school_year {
         $name = $month >= 7 ? $year . '-' . ($year + 1) : (string) $year;
         return ['name' => $name, 'timestart' => $begin->getTimestamp(), 'timeend' => $end->getTimestamp()];
     }
+
+    /** @var int Days after the start of a year when its beginning is still at hand. */
+    public const START_DAYS = 60;
+
+    /** @var int Days before the end of a year when its end is at hand. */
+    public const END_DAYS = 45;
+
+    /**
+     * Whether a moment is at the beginning of its school year, at its end, or in between.
+     *
+     * @param int $time
+     * @param int $timestart
+     * @param int $timeend
+     * @return string 'start', 'end' or ''.
+     */
+    public static function moment(int $time, int $timestart, int $timeend): string {
+        if ($time < $timestart + self::START_DAYS * 86400) {
+            return 'start';
+        }
+        if ($time >= $timeend - self::END_DAYS * 86400) {
+            return 'end';
+        }
+        return '';
+    }
 }

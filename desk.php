@@ -65,6 +65,21 @@ foreach (['today' => 'todaytoday', 'late' => 'todaylate', 'out' => 'todayout'] a
         }
     }
 }
+$yearlink = '';
+if (has_capability('local/oksigeniaayvurenda:manage', context_system::instance())) {
+    $status = \local_oksigeniaayvurenda\local\year_change::status((int) $library->entityid);
+    $label = '';
+    if ($status['moment'] === 'start' && ($status['notutor'] || $status['left'])) {
+        $label = $str('yearbegin', $status['year']->name);
+    } else if ($status['moment'] === 'end' && $status['out']) {
+        $label = $str('yearending', $status['out']);
+    }
+    if ($label !== '') {
+        $yearlink = '<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="' .
+            (new moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug]))->out() . '">' .
+            s($label) . '</a></p>';
+    }
+}
 $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <h1 id="ayv-desk-title" class="ayv-sr">' . s($str('desktitle')) . '</h1>
 <form id="ayv-scan" class="ayv-scan" autocomplete="off">
@@ -75,6 +90,7 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <div id="ayv-reader" class="ayv-reader" hidden></div>
 <ul id="ayv-today" class="ayv-today">' . $cards . '</ul>
 <ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
+' . $yearlink . '
 </section>';
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,

@@ -59,6 +59,20 @@ final class years {
         if ($existing) {
             return $existing;
         }
+        // If the centre changed the day its year starts, the new year begins where the last one ended.
+        $last = $DB->get_records_select(
+            self::T . 'year',
+            'entityid = :entityid AND timeend <= :time',
+            ['entityid' => $entityid, 'time' => $time],
+            'timeend DESC',
+            'id, timeend',
+            0,
+            1
+        );
+        $last = $last ? reset($last) : null;
+        if ($last && $year->timestart < $last->timeend) {
+            $year->timestart = (int) $last->timeend;
+        }
         $year->id = $DB->insert_record(self::T . 'year', $year);
         return $year;
     }

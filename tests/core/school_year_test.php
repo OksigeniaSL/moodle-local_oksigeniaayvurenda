@@ -60,4 +60,17 @@ final class school_year_test extends \basic_testcase {
         $this->expectException(\InvalidArgumentException::class);
         school_year::around(time(), '13-01', new \DateTimeZone('UTC'));
     }
+
+    /**
+     * The first two months are the beginning of the year, the last six weeks its end.
+     */
+    public function test_moment(): void {
+        $start = 1_000_000_000;
+        $end = $start + 365 * 86400;
+        $this->assertSame('start', school_year::moment($start, $start, $end));
+        $this->assertSame('start', school_year::moment($start + 59 * 86400, $start, $end));
+        $this->assertSame('', school_year::moment($start + 60 * 86400, $start, $end));
+        $this->assertSame('', school_year::moment($end - 46 * 86400, $start, $end));
+        $this->assertSame('end', school_year::moment($end - 45 * 86400, $start, $end));
+    }
 }

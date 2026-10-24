@@ -25,6 +25,7 @@
     * manage - url and label to choose where readers come from, for those who may
     * match - url and label to match readers without an account, when there are
     * tutors - url and label to choose the tutor of each group, for those who may
+    * year - url and label of the school year, for those who may
 
     Example context (json):
     {
@@ -35,13 +36,15 @@
         "empty": "",
         "manage": {"url": "#", "label": "De dónde salen los lectores"},
         "match": {"url": "#", "label": "Casar lectores sin cuenta (12)"},
-        "tutors": {"url": "#", "label": "Tutores"}
+        "tutors": {"url": "#", "label": "Tutores"},
+        "year": {"url": "#", "label": "Curso escolar"}
     }
 }}
 <div class="ayv-results-head">
     <h1 class="ayv-results-title">{{heading}}</h1>
     {{#manage}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/manage}}
     {{#tutors}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/tutors}}
+    {{#year}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/year}}
 </div>
 {{#hasgroups}}
 <ul class="ayv-corners">

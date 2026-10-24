@@ -251,8 +251,12 @@ final class demo {
             ['yearid' => $year->id]
         );
         $members = array_values($members);
-        $items = $DB->get_fieldset_select(self::T . 'item', 'id',
-            "libraryid = :libraryid AND status = 'available' AND itemtype = 'normal'", ['libraryid' => $libraryid]);
+        $items = $DB->get_fieldset_select(
+            self::T . 'item',
+            'id',
+            "libraryid = :libraryid AND status = 'available' AND itemtype = 'normal'",
+            ['libraryid' => $libraryid]
+        );
         $stats = ['out' => 0, 'late' => 0, 'returned' => 0, 'tutors' => 0];
         if (!$members || !$items) {
             return $stats;
@@ -285,9 +289,12 @@ final class demo {
                 $stats['returned']++;
             }
         }
-        $teachers = $DB->get_fieldset_select(self::T . 'reader', 'userid',
+        $teachers = $DB->get_fieldset_select(
+            self::T . 'reader',
+            'userid',
             "entityid = :entityid AND userid IS NOT NULL AND readertype <> 'student' AND status = 'active'",
-            ['entityid' => $library->entityid]);
+            ['entityid' => $library->entityid]
+        );
         $groups = array_unique(array_map(fn($m) => $m->groupname, $members));
         sort($groups);
         foreach ($groups as $index => $group) {
