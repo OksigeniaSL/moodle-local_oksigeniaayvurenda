@@ -90,10 +90,13 @@ final class covers {
      *
      * @param int $userid
      * @param string $isbn
-     * @param string $url
+     * @param string|null $url Where the cover is; none in the practice library.
      * @return string|null The address of the draft.
      */
-    public static function draft(int $userid, string $isbn, string $url): ?string {
+    public static function draft(int $userid, string $isbn, ?string $url): ?string {
+        if ($url === null || $url === '') {
+            return null;
+        }
         $fs = get_file_storage();
         $context = \context_system::instance();
         $filename = $isbn . '.jpg';

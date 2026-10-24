@@ -55,7 +55,11 @@ final class catalogue {
      */
     public static function libraries(): array {
         global $DB;
-        return array_values($DB->get_records(self::T . 'library', null, 'name, id'));
+        // The practice library of the guided help is not one of the centre's.
+        return array_values(array_filter(
+            $DB->get_records(self::T . 'library', null, 'name, id'),
+            fn($library) => !practice::is((int) $library->entityid)
+        ));
     }
 
     /**

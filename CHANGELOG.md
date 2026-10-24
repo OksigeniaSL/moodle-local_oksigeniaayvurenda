@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.3 (2026-10-26)
+
+- Guided help for the desk and for adding books, from the «Help» link of each: the real screen, in a practice library
+  with made-up readers and books, moved step by step with a pointer and captions; «Now you» rings a button and waits
+  for the person's tap; a minute each. The practice library is made again before each help, asks a made-up catalogue
+  instead of the world, and is hidden from the libraries, the copies and the notices.
+
 ## 0.8.2 (2026-10-26)
 
 - Material that is not a book (laptops, tablets, calculators, cameras, games…): a record with its brand and model,

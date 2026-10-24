@@ -59,7 +59,8 @@ foreach (cataloguer::itemtypes($entityid) as $type) {
     $types[] = ['value' => $type, 'label' => $sm->string_exists('itemtype' . $type, 'local_oksigeniaayvurenda')
         ? $str('itemtype' . $type) : $type];
 }
-$names = array_map(fn($s) => lookup::PRESETS[$s]['name'], lookup::sources($entityid));
+$names = \local_oksigeniaayvurenda\local\practice::is($entityid) ? [$str('practicecatalogue')]
+    : array_map(fn($s) => lookup::PRESETS[$s]['name'], lookup::sources($entityid));
 $data = [
     'heading' => $str('addtitle'),
     'prompt' => $str('addprompt'),
@@ -86,17 +87,21 @@ foreach (
     $strings[$key] = $str($key);
 }
 $tools = shell::readers_tools($library);
-$data['tools'] = $tools['html'];
+// Inside the guided help, the page shows only the field and what it does.
+$help = optional_param('help', 0, PARAM_BOOL);
+$data['tools'] = $help ? '' : $tools['html'];
 shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/add', $data), $library, '', [
     'search' => false,
     'scripts' => ['camera', 'add'],
-    'nav' => [
+    'nav' => $help ? [] : [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false),
             'label' => $str('desktitle')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'label' => $str('deskcatalogue')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/material.php', ['library' => $library->slug]))->out(false),
             'label' => $str('materialnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'add']))
+            ->out(false), 'label' => $str('helpnav')],
     ],
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php'))->out(false),

@@ -59,6 +59,13 @@ final class lookup {
         if ($isbn === null) {
             return ['valid' => false, 'isbn' => $raw, 'found' => false];
         }
+        if (practice::is($entityid)) {
+            // The practice library asks its own made-up catalogue, never the world.
+            $description = practice::lookup($isbn);
+            return ['valid' => true, 'isbn' => $isbn, 'found' => (bool) $description, 'source' => 'practice',
+                'sourcename' => get_string('practicecatalogue', 'local_oksigeniaayvurenda'), 'description' => $description,
+                'cover' => null, 'tried' => [get_string('practicecatalogue', 'local_oksigeniaayvurenda')]];
+        }
         $sources = self::sources($entityid);
         $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
         $key = $isbn . '_' . substr(md5(implode(',', $sources)), 0, 8);

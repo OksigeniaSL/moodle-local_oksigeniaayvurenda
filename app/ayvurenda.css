@@ -783,3 +783,40 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-field-hint { font-size: .85rem; opacity: .8; }
 
 .ayv .ayv-notice-error { border-left-color: var(--coral); background: var(--no-bg); }
+
+/* The guided help. */
+.ayv .ayv-help-stage { position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: 0 0 0 2px var(--green2); }
+
+.ayv .ayv-help-stage iframe { display: block; width: 100%; height: min(640px, 72vh); border: 0; background: var(--paper); }
+
+.ayv .ayv-help-pointer { position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(240, 180, 60, .55); box-shadow: 0 0 0 3px #f0b43c; opacity: 0; pointer-events: none;
+    transition: transform .65s cubic-bezier(.3, .7, .3, 1), opacity .2s ease; }
+
+.ayv .ayv-help-pointer-on { opacity: 1; }
+
+.ayv .ayv-help-pointer-tap { box-shadow: 0 0 0 10px rgba(240, 180, 60, .35); }
+
+.ayv .ayv-help-ring { position: absolute; border-radius: 14px; box-shadow: 0 0 0 4px #f0b43c, 0 0 0 9999px rgba(15, 58, 51, .25);
+    pointer-events: none; animation: ayv-ring 1.2s ease-in-out infinite; }
+
+@keyframes ayv-ring { 50% { box-shadow: 0 0 0 7px #f0b43c, 0 0 0 9999px rgba(15, 58, 51, .25); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-help-pointer { transition: none; }
+    .ayv .ayv-help-ring { animation: none; }
+}
+
+.ayv .ayv-help-start, .ayv .ayv-help-done { position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1rem; padding: 1.5rem; text-align: center;
+    background: var(--paper); }
+
+.ayv .ayv-help-start[hidden], .ayv .ayv-help-done[hidden] { display: none; }
+
+.ayv .ayv-help-start p, .ayv .ayv-help-done p { margin: 0; font-size: 1.15rem; }
+
+.ayv .ayv-help-done-title { font-family: var(--title); font-weight: 600; font-size: 2rem !important; }
+
+.ayv .ayv-help-caption { min-height: 3.2em; margin: 1rem 0 .5rem; font-size: 1.25rem; font-weight: 700; }
+
+.ayv .ayv-help-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; margin: 0; }

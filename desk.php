@@ -66,8 +66,10 @@ foreach (['today' => 'todaytoday', 'late' => 'todaylate', 'out' => 'todayout'] a
         }
     }
 }
+// Inside the guided help, the page shows only the field and what it does.
+$help = optional_param('help', 0, PARAM_BOOL);
 $yearlink = '';
-if (has_capability('local/oksigeniaayvurenda:manage', context_system::instance())) {
+if (!$help && has_capability('local/oksigeniaayvurenda:manage', context_system::instance())) {
     $status = \local_oksigeniaayvurenda\local\year_change::status((int) $library->entityid);
     $label = '';
     if ($status['moment'] === 'start' && ($status['notutor'] || $status['left'])) {
@@ -82,6 +84,9 @@ if (has_capability('local/oksigeniaayvurenda:manage', context_system::instance()
     }
 }
 $tools = shell::readers_tools($library);
+if ($help) {
+    $tools['html'] = '';
+}
 $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <h1 id="ayv-desk-title" class="ayv-sr">' . s($str('desktitle')) . '</h1>
 <form id="ayv-scan" class="ayv-scan" autocomplete="off">
@@ -98,13 +103,15 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,
     'scripts' => ['camera', 'desk'],
-    'nav' => array_merge([
+    'nav' => $help ? [] : array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false),
             'label' => $str('readers')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'label' => $str('deskcatalogue')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $library->slug]))->out(false),
             'label' => $str('copiesnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
+            ->out(false), 'label' => $str('helpnav')],
     ], has_capability('local/oksigeniaayvurenda:catalogue', context_system::instance()) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
             'label' => $str('addnav')],
