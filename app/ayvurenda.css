@@ -1051,3 +1051,31 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-entity-edit summary { cursor: pointer; font-weight: 700; color: var(--accent); }
 
 .ayv .ayv-entity-edit form { display: grid; gap: .6rem; margin-top: .6rem; }
+
+/* The classroom shelf: names to tap, then covers to tap. */
+.ayv .ayv-shelf-who { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+
+.ayv .ayv-shelf-who .ayv-chip { min-height: 44px; display: inline-flex; align-items: center; gap: .4rem; }
+
+.ayv .ayv-chip-on { background: var(--green2); color: #fff; }
+
+.ayv .ayv-shelf-has { display: inline-block; min-width: 1.4rem; padding: 0 .35rem; border-radius: 1rem; text-align: center;
+    font-size: .8rem; background: var(--paper); color: var(--ink); }
+
+.ayv .ayv-shelf-books { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+
+.ayv .ayv-shelf-book { display: grid; gap: .35rem; width: 100%; padding: 0; border: 0; background: none; color: var(--ink);
+    font: inherit; text-align: left; cursor: pointer; }
+
+.ayv .ayv-shelf-book:disabled { cursor: default; opacity: .75; }
+
+.ayv .ayv-shelf-book .ayv-cover { width: 100%; aspect-ratio: 2 / 3; }
+
+.ayv .ayv-shelf-lent .ayv-cover { filter: grayscale(.7); opacity: .6; }
+
+.ayv .ayv-shelf-title { font-weight: 700; font-size: .9rem; line-height: 1.2; }
+
+.ayv .ayv-shelf-who-has { font-size: .85rem; color: var(--accent); }
+
+.ayv .ayv-shelf-notice { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }

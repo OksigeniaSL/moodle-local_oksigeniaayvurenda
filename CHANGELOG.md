@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.16.0 (2026-10-27)
+
+- The shelf of a classroom library, for its teacher, who is not a librarian and has no scanner: the children of the
+  group by name, the books of the shelf by cover; a name and a cover lend a book until the end of the school year, a
+  lent cover brings it back, and each step can be undone. «What each one read» lists the books of every child this
+  year, from the same history as the central library. The tutors of the group use it, and so does the library staff;
+  the classroom library's page shows them the button.
+
 ## 0.15.0 (2026-10-27)
 
 - The libraries of a site on a page of their own, without the command line: a centre is created with its first

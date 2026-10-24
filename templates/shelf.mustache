@@ -1,0 +1,70 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/shelf
+
+    The shelf of a classroom library: who, by name; what, by cover.
+
+    Example context (json):
+    {
+        "heading": "Mi estantería · 4º B", "notice": "", "undo": null, "action": "#", "sesskey": "abc",
+        "haschildren": true, "children": [{"id": 1, "name": "Ana Montes", "has": 1, "url": "#", "current": true}],
+        "hasbooks": true, "books": [{"itemid": 1, "recordid": 1, "title": "El faro dormido", "cover": null, "colour": 1,
+            "lent": "", "lentlabel": "", "loanid": 0, "canlend": true}],
+        "hint": "Ahora, el libro de Ana Montes", "nogroup": "", "nochildren": "", "empty": "Vacía",
+        "readurl": "#", "shelfwho": "¿Quién?", "shelfwhat": "¿Qué libro?", "shelfundo": "Deshacer",
+        "shelfread": "Qué ha leído cada uno", "shelftapback": "Toca un libro prestado para devolverlo"
+    }
+}}
+<section class="ayv-shelf">
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#notice}}<div class="ayv-notice ayv-shelf-notice" role="status"><span>{{notice}}</span>
+    {{#undo}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="loan" value="{{loan}}"><input type="hidden" name="what" value="{{what}}">
+        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="undo">{{shelfundo}}</button></form>{{/undo}}
+</div>{{/notice}}
+{{#nogroup}}<p class="ayv-empty">{{nogroup}}</p>{{/nogroup}}
+{{#nochildren}}<p class="ayv-empty">{{nochildren}}</p>{{/nochildren}}
+{{#haschildren}}
+<h2 class="ayv-section-title">{{shelfwho}}</h2>
+<ul class="ayv-shelf-who">
+{{#children}}
+    <li><a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}" {{#current}}aria-current="true"{{/current}}>{{name}}{{#has}} <span class="ayv-shelf-has">{{has}}</span>{{/has}}</a></li>
+{{/children}}
+</ul>
+{{/haschildren}}
+<h2 class="ayv-section-title" id="ayv-what">{{shelfwhat}}</h2>
+<p class="ayv-field-hint">{{hint}} · {{shelftapback}}</p>
+{{^hasbooks}}<p class="ayv-empty">{{empty}}</p>{{/hasbooks}}
+<ul class="ayv-shelf-books">
+{{#books}}
+    <li>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{itemid}}">
+            <button type="submit" class="ayv-shelf-book{{#lent}} ayv-shelf-lent{{/lent}}" name="do" value="{{#lent}}back{{/lent}}{{^lent}}lend{{/lent}}" {{^lent}}{{^canlend}}disabled{{/canlend}}{{/lent}}>
+                <span class="ayv-cover ayv-cover-{{colour}}{{#cover}} ayv-cover-photo{{/cover}}" aria-hidden="true">
+                    {{#cover}}<img class="ayv-cover-img" src="{{cover}}" alt="">{{/cover}}
+                    {{^cover}}<span class="ayv-cover-title">{{title}}</span>{{/cover}}
+                </span>
+                <span class="ayv-shelf-title">{{title}}</span>
+                {{#lent}}<span class="ayv-shelf-who-has">{{lentlabel}}</span>{{/lent}}
+            </button>
+        </form>
+    </li>
+{{/books}}
+</ul>
+<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{readurl}}">{{shelfread}}</a></p>
+</section>

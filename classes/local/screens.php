@@ -40,6 +40,7 @@ final class screens {
      * @return array
      */
     public static function home(\stdClass $library): array {
+        global $USER;
         $corners = [];
         foreach (catalogue::corners($library) as $corner) {
             $corners[] = $corner + [
@@ -56,7 +57,12 @@ final class screens {
         if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
             $addbooks = ['url' => self::url('add.php', $library), 'label' => self::str('addopen')];
         }
+        $shelf = null;
+        if ($library->kind === 'classroom' && shelf::can_use($library, (int) $USER->id)) {
+            $shelf = ['url' => self::url('shelf.php', $library), 'label' => self::str('shelfopen')];
+        }
         return [
+            'shelf' => $shelf,
             'desk' => $desk,
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
             'addbooks' => $addbooks,
