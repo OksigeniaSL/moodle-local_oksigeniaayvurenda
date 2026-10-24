@@ -664,6 +664,10 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-share > span { display: block; height: 100%; background: var(--green2); }
 
 .ayv .ayv-inline-form { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+/* Readers that are the same person: one line each, the radio says which stays. */
+.ayv .ayv-twins { margin-bottom: 1rem; }
+.ayv .ayv-twin { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: .1rem .6rem; }
+.ayv .ayv-twin .ayv-field-hint { grid-column: 2; }
 /* Choosing a book for a course: title and author on the left, the button always in the same place. */
 .ayv .ayv-pick .ayv-person { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .15rem 1rem; }
 .ayv .ayv-pick .ayv-person-name, .ayv .ayv-pick .ayv-field-hint { grid-column: 1; }

@@ -61,6 +61,10 @@ if ($group === null) {
             'label' => $str('readerssources'),
         ] : null,
         'match' => null,
+        'twins' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/twins.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('twinsnav'),
+        ] : null,
         'tutors' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
             'url' => (new moodle_url('/local/oksigeniaayvurenda/tutors.php', ['library' => $library->slug]))->out(false),
             'label' => $str('tutorsnav'),

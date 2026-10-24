@@ -1,0 +1,115 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/twins
+    Readers that are the same person: the likely ones and any two by their card codes; the librarian chooses which stays.
+    Context variables required for this template:
+    * heading, intro, notice, error - texts
+    * sets - likely groups (setid, members: id, name, cardcode, typelabel, group, loanslabel, accountlabel, checked)
+    * pair - two readers found by their codes (members, as above), or nothing
+    * action, sesskey, slug, codea, codeb - the forms
+    * the words of each section and button
+    Example context (json):
+    {
+        "heading": "Lectores repetidos",
+        "intro": "Una misma persona con dos fichas.",
+        "notice": "",
+        "error": "",
+        "action": "https://example.org/t",
+        "sesskey": "abc",
+        "slug": "demo-1",
+        "likelyheading": "Parecen la misma persona: 1",
+        "likelyintro": "Mismo nombre y mismo tipo.",
+        "hassets": true,
+        "sets": [{"setid": 0, "members": [
+            {"id": 1, "name": "Jon Mar Prado", "cardcode": "10001A", "typelabel": "Profesor", "group": "",
+             "loanslabel": "Préstamos: 12 (fuera: 1)", "accountlabel": "", "checked": true},
+            {"id": 2, "name": "Jon Mar Prado", "cardcode": "10520K", "typelabel": "Profesor", "group": "",
+             "loanslabel": "Préstamos: 0 (fuera: 0)", "accountlabel": "", "checked": false}]}],
+        "nosets": "No hay ninguno.",
+        "more": "",
+        "query": "",
+        "filterlabel": "Solo los que se llaman",
+        "filterbutton": "Buscar",
+        "keeplabel": "Se queda esta",
+        "joinlabel": "Juntarlas",
+        "handheading": "Juntar dos a mano",
+        "handintro": "Con los códigos de sus carnés.",
+        "codealabel": "Un carné",
+        "codeblabel": "El otro",
+        "codea": "",
+        "codeb": "",
+        "lookuplabel": "Verlas",
+        "lookupnote": "",
+        "pair": null,
+        "cardlabel": "Carné"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+<section class="ayv-section" id="ayv-twins-hand">
+    <h2 class="ayv-section-title">{{handheading}}</h2>
+    <p>{{handintro}}</p>
+    <form method="get" action="{{action}}" class="ayv-inline-form">
+        <input type="hidden" name="library" value="{{slug}}">
+        <label class="ayv-field">{{codealabel}} <input type="text" name="a" value="{{codea}}" size="10" autocomplete="off" spellcheck="false"></label>
+        <label class="ayv-field">{{codeblabel}} <input type="text" name="b" value="{{codeb}}" size="10" autocomplete="off" spellcheck="false"></label>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{lookuplabel}}</button>
+    </form>
+    {{#lookupnote}}<p class="ayv-empty">{{lookupnote}}</p>{{/lookupnote}}
+    {{#pair}}
+    <form method="post" action="{{action}}" class="ayv-book ayv-twins">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <fieldset class="ayv-fieldset"><legend>{{keeplabel}}</legend>
+        {{#members}}
+            <input type="hidden" name="ids[]" value="{{id}}">
+            <label class="ayv-field ayv-field-check ayv-twin"><input type="radio" name="keep" value="{{id}}" {{#checked}}checked{{/checked}}>
+                <span class="ayv-person-name">{{name}}</span>
+                <span class="ayv-field-hint">{{cardlabel}} {{cardcode}} · {{typelabel}}{{#group}} · {{group}}{{/group}} · {{loanslabel}}{{#accountlabel}} · {{accountlabel}}{{/accountlabel}}</span></label>
+        {{/members}}
+        </fieldset>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{joinlabel}}</button></p>
+    </form>
+    {{/pair}}
+</section>
+<section class="ayv-section" id="ayv-twins-likely">
+    <h2 class="ayv-section-title">{{likelyheading}}</h2>
+    <p>{{likelyintro}}</p>
+    <form method="get" action="{{action}}" class="ayv-inline-form" role="search">
+        <input type="hidden" name="library" value="{{slug}}">
+        <label class="ayv-field">{{filterlabel}} <input type="search" name="q" value="{{query}}" maxlength="100"></label>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{filterbutton}}</button>
+    </form>
+    {{^hassets}}<p class="ayv-empty">{{nosets}}</p>{{/hassets}}
+    {{#sets}}
+    <form method="post" action="{{action}}" class="ayv-book ayv-twins">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <fieldset class="ayv-fieldset"><legend>{{keeplabel}}</legend>
+        {{#members}}
+            <input type="hidden" name="ids[]" value="{{id}}">
+            <label class="ayv-field ayv-field-check ayv-twin"><input type="radio" name="keep" value="{{id}}" {{#checked}}checked{{/checked}}>
+                <span class="ayv-person-name">{{name}}</span>
+                <span class="ayv-field-hint">{{cardlabel}} {{cardcode}} · {{typelabel}}{{#group}} · {{group}}{{/group}} · {{loanslabel}}{{#accountlabel}} · {{accountlabel}}{{/accountlabel}}</span></label>
+        {{/members}}
+        </fieldset>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{joinlabel}}</button></p>
+    </form>
+    {{/sets}}
+    {{#more}}<p class="ayv-field-hint">{{more}}</p>{{/more}}
+</section>
