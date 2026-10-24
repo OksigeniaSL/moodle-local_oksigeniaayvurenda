@@ -194,12 +194,14 @@ final class demo {
         }
         foreach ($groups as [$stage, $name]) {
             $id = $DB->get_field('cohort', 'id', ['name' => $name, 'contextid' => $system->id]) ?: cohort_add_cohort(
-                (object) ['name' => $name, 'contextid' => $system->id, 'idnumber' => 'ayvdemo-' . md5($name)]);
+                (object) ['name' => $name, 'contextid' => $system->id, 'idnumber' => 'ayvdemo-' . md5($name)]
+            );
             $cohorts[] = $id;
             $config[$id] = ['type' => 'student', 'stage' => $stage, 'group' => true];
         }
         $staff = $DB->get_field('cohort', 'id', ['name' => 'Claustro', 'contextid' => $system->id]) ?: cohort_add_cohort(
-            (object) ['name' => 'Claustro', 'contextid' => $system->id, 'idnumber' => 'ayvdemo-claustro']);
+            (object) ['name' => 'Claustro', 'contextid' => $system->id, 'idnumber' => 'ayvdemo-claustro']
+        );
         $config[$staff] = ['type' => 'teacher', 'stage' => '', 'group' => false];
         $total = $count + intdiv($count, 10);
         for ($i = 0; $i < $total; $i++) {
