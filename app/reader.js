@@ -246,6 +246,51 @@
             send({bookmarks: JSON.stringify(marks)});
             showMarks(go);
         });
+        // Full screen: the book alone, or with the recorder beside it. Where the browser cannot (an iPhone), the same
+        // part of the page covers everything else.
+        var full = document.getElementById('ayv-full');
+        var stage = area.closest('.ayv-voice-grid') || area.closest('.ayv-read-stage');
+        if (full && stage) {
+            var ask = stage.requestFullscreen || stage.webkitRequestFullscreen;
+            var leave = document.exitFullscreen || document.webkitExitFullscreen;
+            var current = function() {
+                return document.fullscreenElement || document.webkitFullscreenElement || null;
+            };
+            var show = function(on) {
+                stage.classList.toggle('is-reading', on);
+                document.documentElement.classList.toggle('ayv-reading-on', on);
+                full.setAttribute('aria-pressed', on ? 'true' : 'false');
+                window.setTimeout(function() {
+                    rendition.resize();
+                }, 200);
+            };
+            full.addEventListener('click', function() {
+                var on = !stage.classList.contains('is-reading');
+                show(on);
+                if (on && ask) {
+                    var asked = ask.call(stage);
+                    if (asked && asked.catch) {
+                        asked.catch(function() {
+                            return null;
+                        });
+                    }
+                } else if (!on && current() && leave) {
+                    leave.call(document);
+                }
+            });
+            var changed = function() {
+                if (!current() && stage.classList.contains('is-reading')) {
+                    show(false);
+                }
+            };
+            document.addEventListener('fullscreenchange', changed);
+            document.addEventListener('webkitfullscreenchange', changed);
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && stage.classList.contains('is-reading') && !current()) {
+                    show(false);
+                }
+            });
+        }
         document.addEventListener('keydown', function(event) {
             // Not while writing in a field of the page, such as what was read.
             if (!event.target.closest || !event.target.closest('input, textarea, select')) {

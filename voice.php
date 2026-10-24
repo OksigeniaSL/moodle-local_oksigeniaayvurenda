@@ -118,7 +118,10 @@ $data += [
     'marks' => false,
     'spread' => false,
 ];
-foreach (['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading'] as $key) {
+foreach (
+    ['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading', 'readfullscreen',
+        'readfullscreenexit'] as $key
+) {
     $data[$key] = $str($key);
 }
 $place = $text ? digital::place((int) $text->id, (int) $USER->id) : ['position' => null, 'bookmarks' => []];

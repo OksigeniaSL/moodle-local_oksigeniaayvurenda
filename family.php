@@ -97,7 +97,8 @@ $data = [
 foreach (
     ['voiceinfocentre', 'voicefamilyconsent', 'voicefamilywho', 'voicefamilywhohint', 'voicefamilydone', 'voicedelete',
         'voicerecord', 'voicestop', 'voiceagain', 'voicewhat', 'voicewhathint', 'voicesend', 'voicefamilydeletedall',
-        'readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading', 'voicesignature',
+        'readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading', 'readfullscreen',
+        'readfullscreenexit', 'voicesignature',
         'voicesignaturehint', 'voiceemail', 'voiceemailhint', 'voicetextheading', 'voicepaper'] as $key
 ) {
     $data[$key] = $str($key);

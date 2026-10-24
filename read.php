@@ -76,7 +76,7 @@ $data = [
 ];
 foreach (
     ['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readmarks', 'readdownload', 'readopenlink',
-        'readnodownload', 'backtorecord', 'readloading', 'readprogress'] as $key
+        'readnodownload', 'backtorecord', 'readloading', 'readprogress', 'readfullscreen', 'readfullscreenexit'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.23.2 (2026-10-27)
+
+- Full screen in the reader: the book alone, or beside the recorder the book and the recorder, with nothing else on
+  the screen. Where the browser cannot go full screen (an iPhone), the same part of the page covers the rest. Escape
+  or the same button leaves it.
+
 ## 0.23.1 (2026-10-27)
 
 - The reader is a sheet with a book's proportion: one page on a phone and beside the recorder, two facing pages with

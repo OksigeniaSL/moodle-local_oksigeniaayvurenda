@@ -1151,6 +1151,25 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     .ayv .ayv-read-foot { margin: .75rem 0; }
 }
 
+/* Full screen, or the same covering the page where the browser cannot: the book, or the book and the recorder. */
+.ayv #ayv-full .ayv-full-off { display: none; }
+.ayv #ayv-full[aria-pressed="true"] .ayv-full-on { display: none; }
+.ayv #ayv-full[aria-pressed="true"] .ayv-full-off { display: inline; }
+.ayv-reading-on, .ayv-reading-on body { overflow: hidden; }
+.ayv .is-reading {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1rem 1.5rem;
+    overflow: auto;
+    background: var(--paper);
+}
+.ayv .ayv-read-stage.is-reading .ayv-epub { height: calc(100vh - 9rem); height: calc(100dvh - 9rem); }
+.ayv .ayv-voice-grid.is-reading { align-content: start; }
+.ayv .ayv-voice-grid.is-reading .ayv-epub { height: calc(100vh - 11rem); height: calc(100dvh - 11rem); }
+
 /* Icons, in the colour of their text. */
 .ayv .ayv-icon { width: 20px; height: 20px; vertical-align: -.25em; flex: 0 0 auto; }
 

@@ -23,13 +23,15 @@
     {
         "fileurl": "#", "heading": "El faro dormido", "marks": true, "spread": true, "readprev": "Anterior", "readnext": "Siguiente",
         "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande", "readmark": "Marcar aquí",
-        "readprogress": "Cuánto llevas", "readloading": "Abriendo el libro…"
+        "readprogress": "Cuánto llevas", "readloading": "Abriendo el libro…", "readfullscreen": "Pantalla completa",
+        "readfullscreenexit": "Salir de pantalla completa"
     }
 }}
 <div class="ayv-read-bar" role="toolbar" aria-label="{{heading}}">
     <button type="button" class="ayv-button ayv-button-quiet" id="ayv-smaller" aria-label="A− {{readsmaller}}">A−</button>
     <button type="button" class="ayv-button ayv-button-quiet" id="ayv-bigger" aria-label="A+ {{readbigger}}">A+</button>
     {{#marks}}<button type="button" class="ayv-button ayv-button-quiet" id="ayv-mark">{{readmark}}</button>{{/marks}}
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-full" aria-pressed="false"><span class="ayv-full-on">{{> local_oksigeniaayvurenda/icon_full}} {{readfullscreen}}</span><span class="ayv-full-off">{{> local_oksigeniaayvurenda/icon_unfull}} {{readfullscreenexit}}</span></button>
 </div>
 <div class="ayv-read-book">
     <button type="button" class="ayv-page-turn" id="ayv-prev" aria-label="{{readprev}}">{{> local_oksigeniaayvurenda/icon_prev}}</button>

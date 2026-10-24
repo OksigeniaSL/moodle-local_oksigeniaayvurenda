@@ -26,13 +26,14 @@
         "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande",
         "readmark": "Marcar aquí", "readmarks": "Tus marcas", "readdownload": "Descargar", "readopenlink": "Abrirlo",
         "readnodownload": "Se lee aquí", "backtorecord": "Volver a la ficha", "readloading": "Abriendo el libro…",
-        "readprogress": "Cuánto llevas", "marks": true
+        "readprogress": "Cuánto llevas", "marks": true, "readfullscreen": "Pantalla completa",
+        "readfullscreenexit": "Salir de pantalla completa"
     }
 }}
 <section class="ayv-read">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-field-hint">{{subtitle}} · {{licence}}</p>
-{{#epub}}{{> local_oksigeniaayvurenda/read_book}}{{/epub}}
+{{#epub}}<div class="ayv-read-stage">{{> local_oksigeniaayvurenda/read_book}}</div>{{/epub}}
 {{#pdf}}<iframe class="ayv-pdf" src="{{fileurl}}" title="{{heading}}"></iframe>{{/pdf}}
 {{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></audio>{{/audio}}
 {{#video}}<video id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></video>{{/video}}
