@@ -54,12 +54,22 @@ if (data_submitted() && confirm_sesskey()) {
     $done = 0;
     if ($action === 'sure') {
         foreach ($piles['sure'] as $readerid => $index) {
-            $done += (int) pairing::link($entityid, (int) $readerid, $piles['people'][$index]['person']);
+            $done += (int) pairing::link(
+                $entityid,
+                (int) $readerid,
+                $piles['people'][$index]['person'],
+                $piles['people'][$index]['made']
+            );
         }
     } else if ($action === 'doubt') {
         foreach (optional_param_array('pick', [], PARAM_INT) as $readerid => $index) {
             if ($index > 0 && in_array($index, $piles['doubt'][$readerid] ?? [], true)) {
-                $done += (int) pairing::link($entityid, (int) $readerid, $piles['people'][$index]['person']);
+                $done += (int) pairing::link(
+                    $entityid,
+                    (int) $readerid,
+                    $piles['people'][$index]['person'],
+                    $piles['people'][$index]['made']
+                );
             }
         }
     } else if ($action === 'none') {

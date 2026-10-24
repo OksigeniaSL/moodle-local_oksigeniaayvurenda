@@ -45,7 +45,8 @@ class sync_readers extends \core\task\scheduled_task {
         global $DB;
         // The management program first: the cohorts and courses then say the group of whoever is in them too.
         foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
-            if (\local_oksigeniaayvurenda\local\sources\cifra::enabled((int) $entityid)) {
+            $cifra = \local_oksigeniaayvurenda\local\sources\cifra::class;
+            if ($cifra::enabled((int) $entityid) && $cifra::brought((int) $entityid)) {
                 try {
                     $stats = \local_oksigeniaayvurenda\local\sources\cifra::sync((int) $entityid);
                     mtrace('Ayvurenda: readers of entity ' . $entityid . ' from Cifra: ' . json_encode($stats));

@@ -34,6 +34,9 @@ use local_oksigeniaayvurenda\local\sources\csvlist;
  * The same three piles as with the accounts of the site: those that match by themselves, accepted with one tap; those
  * in doubt, one by one; those the platform does not have. Pairing a reader only notes the platform's identifier of
  * that person against them: what the reader has (card, history, loans) stays, and the platform keeps them up to date.
+ *
+ * If the platform brought its readers before pairing, the ones in both are there twice: the reader the platform made,
+ * with nothing of its own yet (no loans, holds, voices), is still offered, and pairing melts it into the one there was.
  */
 final class pairing {
     /** @var string Prefix of the plugin tables. */
@@ -66,14 +69,15 @@ final class pairing {
      * @param int $entityid
      * @param array[]|null $people The platform's, or asked for.
      * @return array sure, doubt, none (as matcher gives them), readers (id => id, name, group) and people (number from
-     *     1 => id, name, group, person).
+     *     1 => id, name, group, person, made: the reader the platform made for them, or 0).
      */
     public static function piles(int $entityid, ?array $people = null): array {
         global $DB;
         $people = $people ?? self::people($entityid);
         $paired = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'system' => self::SYSTEM,
             'tablename' => 'reader'], '', 'id, externalid');
-        $taken = array_flip($paired);
+        $made = self::made($entityid);
+        $taken = array_diff_key(array_flip($paired), $made);
         $pairedreaders = array_flip(array_map('intval', $DB->get_fieldset_select(
             self::T . 'source',
             'localid',
@@ -116,7 +120,7 @@ final class pairing {
             }
             $name = trim(($person['firstname'] ?? '') . ' ' . ($person['lastname'] ?? ''));
             $candidates[$index + 1] = ['id' => $index + 1, 'name' => $name, 'group' => (string) ($person['group'] ?? ''),
-                'person' => $person];
+                'person' => $person, 'made' => $made[csvlist::key($person)] ?? 0];
         }
         $piles = matcher::piles(array_values($readers), array_values(array_map(fn($c) => ['id' => $c['id'],
             'name' => $c['name'], 'group' => $c['group']], $candidates)));
@@ -129,22 +133,81 @@ final class pairing {
      * @param int $entityid
      * @param int $readerid
      * @param array $person As the platform gives it.
+     * @param int|null $made The reader the platform made for that person, as piles() says; null asks for it.
      * @return bool Whether it was paired now: not if either side already was.
      */
-    public static function link(int $entityid, int $readerid, array $person): bool {
+    public static function link(int $entityid, int $readerid, array $person, ?int $made = null): bool {
         global $DB;
         $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $entityid], 'id', MUST_EXIST);
         $key = csvlist::key($person);
         $where = ['entityid' => $entityid, 'system' => self::SYSTEM, 'tablename' => 'reader'];
-        if (
-            $DB->record_exists(self::T . 'source', $where + ['externalid' => $key]) ||
-                $DB->record_exists(self::T . 'source', $where + ['localid' => $readerid])
-        ) {
+        if ($DB->record_exists(self::T . 'source', $where + ['localid' => $readerid])) {
             return false;
         }
-        $DB->insert_record(self::T . 'source', $where + ['externalid' => $key, 'localid' => $readerid,
-            'timecreated' => time()]);
+        $source = $DB->get_record(self::T . 'source', $where + ['externalid' => $key]);
+        if (!$source) {
+            $DB->insert_record(self::T . 'source', $where + ['externalid' => $key, 'localid' => $readerid,
+                'timecreated' => time()]);
+            return true;
+        }
+        $made = $made ?? (int) (self::made($entityid)[$key] ?? 0);
+        if (!$made || $made !== (int) $source->localid) {
+            return false;
+        }
+        self::melt($entityid, $readerid, $made);
         return true;
+    }
+    /**
+     * The readers the platform made that have nothing of their own yet: no loans, holds or voices, and no other source.
+     *
+     * @param int $entityid
+     * @return int[] The platform's key => reader id.
+     */
+    private static function made(int $entityid): array {
+        global $DB;
+        $others = [];
+        foreach (['loan', 'hold', 'digital', 'voiceconsent', 'voiceinvite'] as $table) {
+            $others[] = "NOT EXISTS (SELECT 1 FROM {" . self::T . $table . "} o WHERE o.readerid = r.id)";
+        }
+        return array_map('intval', $DB->get_records_sql_menu(
+            "SELECT s.externalid, r.id
+               FROM {" . self::T . "source} s
+               JOIN {" . self::T . "reader} r ON r.id = s.localid AND r.entityid = s.entityid
+              WHERE s.entityid = :entityid AND s.system = :system AND s.tablename = 'reader'
+                AND NOT EXISTS (SELECT 1 FROM {" . self::T . "source} x WHERE x.entityid = s.entityid
+                                AND x.tablename = 'reader' AND x.localid = r.id AND x.system <> s.system)
+                AND " . implode(' AND ', $others),
+            ['entityid' => $entityid, 'system' => self::SYSTEM]
+        ));
+    }
+
+    /**
+     * Melts the reader the platform made into the one there was: this year's group and the account come with it.
+     *
+     * @param int $entityid
+     * @param int $keepid The reader there was.
+     * @param int $madeid The one the platform made.
+     */
+    private static function melt(int $entityid, int $keepid, int $madeid): void {
+        global $DB;
+        $transaction = $DB->start_delegated_transaction();
+        $keep = $DB->get_record(self::T . 'reader', ['id' => $keepid, 'entityid' => $entityid], '*', MUST_EXIST);
+        $made = $DB->get_record(self::T . 'reader', ['id' => $madeid, 'entityid' => $entityid], '*', MUST_EXIST);
+        // The platform's group wins where both have one the same year.
+        foreach ($DB->get_records(self::T . 'member', ['readerid' => $madeid]) as $member) {
+            $DB->delete_records(self::T . 'member', ['readerid' => $keepid, 'yearid' => $member->yearid]);
+        }
+        $DB->set_field(self::T . 'member', 'readerid', $keepid, ['readerid' => $madeid]);
+        $DB->set_field(self::T . 'source', 'localid', $keepid, ['entityid' => $entityid, 'system' => self::SYSTEM,
+            'tablename' => 'reader', 'localid' => $madeid]);
+        $DB->delete_records(self::T . 'reader', ['id' => $madeid]);
+        $update = ['id' => $keepid, 'status' => 'active', 'timemodified' => time()];
+        if (!$keep->userid && $made->userid) {
+            // The account gives the name from now on: the library does not keep a copy.
+            $update += ['userid' => $made->userid, 'firstname' => null, 'lastname' => null, 'email' => null];
+        }
+        $DB->update_record(self::T . 'reader', (object) $update);
+        $transaction->allow_commit();
     }
 
     /**

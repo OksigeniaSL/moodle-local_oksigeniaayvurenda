@@ -92,4 +92,54 @@ final class pairing_test extends \advanced_testcase {
         $this->assertSame($irene->cardcode, $DB->get_field(self::T . 'reader', 'cardcode', ['id' => $irene->id]));
         $this->assertSame('Olmo Ríos', $DB->get_field(self::T . 'reader', 'lastname', ['id' => $bruno->id]));
     }
+
+    /**
+     * Cifra brought its readers before pairing: the ones in both are there twice. Pairing melts the reader Cifra made
+     * into the one there was, with its group; one Cifra made that already has a loan is not offered.
+     */
+    public function test_melt_after_bringing_first(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $entityid = (int) $library->entityid;
+        $irene = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Irene', 'lastname' => 'Duna Sauce']);
+        $noa = $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Noa', 'lastname' => 'Lago']);
+        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => 'abies', 'tablename' => 'reader',
+            'externalid' => '12', 'localid' => $irene->id, 'timecreated' => time()]);
+        cifra::save($entityid, ['enabled' => 1, 'url' => 'http://cifra-puente.invalid:8080/', 'mode' => 'key',
+            'example' => 1, 'key' => 'made-up-key']);
+        $people = json_decode(file_get_contents(__DIR__ . '/../fixtures/cifra/alumnos.json'), true);
+        cifra::$fetcher = fn(string $method, string $url) => json_encode(str_contains($url, 'page=1&') ? $people : []);
+        $this->assertFalse(cifra::brought($entityid));
+        $this->assertSame(4, cifra::sync($entityid)['created']);
+        $this->assertFalse(cifra::brought($entityid));
+        $this->assertSame(6, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
+        // The one Cifra made for Noa already lent a book: it stays as it is.
+        $noas = $DB->get_records(self::T . 'reader', ['entityid' => $entityid, 'firstname' => 'Noa'], 'id');
+        $cifranoa = end($noas);
+        $DB->insert_record(self::T . 'loan', ['readerid' => $cifranoa->id, 'itemid' => 1, 'libraryid' => $library->id,
+            'timeloaned' => time(), 'timedue' => time() + WEEKSECS, 'renewals' => 0, 'timecreated' => time(),
+            'timemodified' => time()]);
+
+        $piles = pairing::piles($entityid);
+        $this->assertSame([(int) $irene->id], array_keys($piles['sure']));
+        $this->assertSame([(int) $noa->id], $piles['none']);
+        $number = $piles['sure'][$irene->id];
+        $made = $piles['people'][$number]['made'];
+        $this->assertGreaterThan(0, $made);
+        $this->assertTrue(pairing::link($entityid, (int) $irene->id, $piles['people'][$number]['person'], $made));
+        $this->assertFalse($DB->record_exists(self::T . 'reader', ['id' => $made]));
+        $this->assertSame(5, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
+        $this->assertSame(1, $DB->count_records(self::T . 'source', ['entityid' => $entityid, 'system' => 'cifra',
+            'localid' => $irene->id]));
+        $this->assertSame($irene->cardcode, $DB->get_field(self::T . 'reader', 'cardcode', ['id' => $irene->id]));
+
+        // From the connector, by hand: then the night keeps them up to date, and nobody comes twice.
+        $stats = cifra::sync($entityid, null, true);
+        $this->assertSame(0, $stats['created']);
+        $this->assertTrue(cifra::brought($entityid));
+        cifra::save($entityid, ['enabled' => 1, 'url' => 'http://cifra-puente.invalid:8080/', 'mode' => 'key']);
+        $this->assertTrue(cifra::brought($entityid));
+    }
 }

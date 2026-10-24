@@ -65,7 +65,7 @@ if (data_submitted() && confirm_sesskey()) {
             $notice = $str('cifratested', (object) ['people' => count($found['readers']), 'gone' => count($found['gone']),
                 'groups' => count($groups), 'some' => implode(', ', array_slice(array_keys($groups), 0, 6))]);
         } else if ($action === 'sync') {
-            $notice = $str('cifrasynced', (object) cifra::sync($entityid));
+            $notice = $str('cifrasynced', (object) cifra::sync($entityid, null, true));
         }
     } catch (moodle_exception $e) {
         $error = $str('cifrafailed', $e->getMessage());

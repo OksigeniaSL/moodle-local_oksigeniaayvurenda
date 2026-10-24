@@ -69,6 +69,7 @@ final class cifra {
             'mode' => ($settings['mode'] ?? 'key') === 'oauth' ? 'oauth' : 'key',
             'example' => !empty($settings['example']),
             'clientid' => trim((string) ($settings['clientid'] ?? '')),
+            'brought' => $entity['cifra']['brought'] ?? null,
         ];
         $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
         foreach (['key', 'secret'] as $name) {
@@ -138,11 +139,17 @@ final class cifra {
      *
      * @param int $entityid
      * @param int|null $now
+     * @param bool $byhand From the connector: from then on, the night keeps them up to date.
      * @return array created, updated, linked, left, total.
      */
-    public static function sync(int $entityid, ?int $now = null): array {
+    public static function sync(int $entityid, ?int $now = null, bool $byhand = false): array {
         global $DB;
         $now = $now ?? time();
+        if ($byhand) {
+            $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+            $entity['cifra']['brought'] = $entity['cifra']['brought'] ?? $now;
+            $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
+        }
         $found = cifra_people::readers(self::people($entityid), $now);
         $stats = csvlist::load($entityid, $found['readers'], 'student', $now, 'cifra');
         $here = array_flip($stats['ids']);
@@ -168,6 +175,17 @@ final class cifra {
      */
     public static function enabled(int $entityid): bool {
         return !empty(self::all($entityid)['enabled']);
+    }
+
+    /**
+     * Whether someone has brought the readers by hand once: the night only keeps them up to date after that, so that
+     * readers already there are paired first and do not come twice.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function brought(int $entityid): bool {
+        return !empty(self::all($entityid)['brought']);
     }
 
     /**
