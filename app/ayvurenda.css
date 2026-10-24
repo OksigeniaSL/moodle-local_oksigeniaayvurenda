@@ -1085,4 +1085,4 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 /* The sky of the card, from twelve on: its own night, in light mode too. */
 .ayv .ayv-card-sky { border-radius: 50%; overflow: hidden; }
 
-.ayv .ayv-path-level { font-weight: 700; color: var(--accent); }
+.ayv .ayv-path-detail { font-weight: 700; color: var(--accent); }

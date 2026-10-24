@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.19.1 (2026-10-27)
+
+- The classic look of the card says what each path means, concretely, without counts: the last visit («today», «on
+  Tuesday»), the corners by name, what the reader said of their books, what they finished and the series they have
+  half read.
+
 ## 0.19.0 (2026-10-27)
 
 - The card by age. The flower stays for Infantil and Primaria; from Secundaria on, the sky by Gaudí: a constellation

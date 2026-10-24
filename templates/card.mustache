@@ -29,7 +29,7 @@
         "hascards": true,
         "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Casi flor", "yearname": "2026-2027",
-                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "leveltext": "2 de 3"}],
+                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "detail": "Última visita: el martes"}],
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
                    "sky": false, "haschoices": false, "choices": [],
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
@@ -65,7 +65,7 @@
     <ul class="ayv-paths">
     {{#paths}}
         <li class="ayv-path"><span class="ayv-path-name">{{label}}</span>
-            {{#marks}}<span class="ayv-path-marks">{{{marks}}}</span>{{/marks}}{{#leveltext}}<span class="ayv-path-level">{{leveltext}}</span>{{/leveltext}}
+            {{#marks}}<span class="ayv-path-marks">{{{marks}}}</span>{{/marks}}{{#detail}}<span class="ayv-path-detail">{{detail}}</span>{{/detail}}
             <span class="ayv-path-hint">{{hint}}</span></li>
     {{/paths}}
     </ul>

@@ -77,6 +77,7 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
     $card['stage'] = $sky ? $str('stagesky' . $stage) : ($look === 'flower' ? $card['stage'] : '');
     $card['flowersvg'] = $look === 'flower' ? cards::flower_svg($stage, $album['flower']['levels'], $card['stage'], 160)
         : ($sky ? cards::sky_svg($stage, $album['flower']['levels'], $card['stage'], 160, $sober) : '');
+    $classic = $look === 'classic' ? garden::classic($reader, $album['year']) : [];
     $paths = [];
     foreach ($look === 'none' ? [] : flower::PATHS as $path) {
         $level = $album['flower']['levels'][$path];
@@ -84,8 +85,9 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
         $levellabel = $str('pathlevel', (object) ['path' => $name, 'level' => $level]);
         $marks = $look === 'flower' ? cards::path_svg($path, $level, $levellabel)
             : ($sky ? cards::sky_path_svg($path, $level, $levellabel, $sober) : '');
+        // The classic look says what the path means, concretely, without counts.
         $paths[] = ['label' => $name, 'hint' => $str('path' . $path . 'hint'), 'level' => $level, 'marks' => $marks,
-            'leveltext' => $marks === '' ? $str('cardlevel', $level) : ''];
+            'detail' => $classic[$path] ?? ''];
     }
     $past = [];
     foreach ($look === 'flower' || $sky ? $album['past'] : [] as $p) {
