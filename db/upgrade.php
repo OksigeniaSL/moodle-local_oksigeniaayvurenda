@@ -32,6 +32,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
+    if ($oldversion < 2026102300) {
+        // The 0.1.0 had no tables: a site that had it gets them all now, as they are today. The steps after this one
+        // see what is already there and leave it.
+        if (!$dbman->table_exists(new xmldb_table('local_oksigeniaayvurenda_entity'))) {
+            $dbman->install_from_xmldb_file(__DIR__ . '/install.xml');
+        }
+        upgrade_plugin_savepoint(true, 2026102300, 'local', 'oksigeniaayvurenda');
+    }
+
     if ($oldversion < 2026102400) {
         // The fingerprint of each imported row, so that a new import skips what did not change.
         $table = new xmldb_table('local_oksigeniaayvurenda_source');

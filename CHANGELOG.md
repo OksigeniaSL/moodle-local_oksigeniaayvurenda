@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.6 (2026-10-27)
+
+- Fixed: a site with the 0.1.0, which had no tables, could not upgrade; it gets them all now.
+
 ## 0.9.5 (2026-10-27)
 
 - Readers from Moodle courses, for a centre whose classes are courses with groups instead of cohorts: the students of
