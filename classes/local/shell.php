@@ -37,7 +37,7 @@ final class shell {
      * @param \stdClass|null $library
      * @param string $query What is in the search box.
      * @param array $options search (false to leave the search out), scripts (more scripts of app/), config (more data
-     *     for the scripts), nav (a link in the header: url and label).
+     *     for the scripts), nav (links in the header: a list of url and label).
      */
     public static function output(
         string $title,
@@ -73,8 +73,15 @@ final class shell {
             $scripts .= '<script src="' . $app . $script . '.js?v=' . $version . '"></script>' . "\n";
         }
         $nav = '';
-        if (!empty($options['nav'])) {
-            $nav = '<a class="ayv-nav" href="' . s($options['nav']['url']) . '">' . s($options['nav']['label']) . '</a>';
+        $links = $options['nav'] ?? [];
+        if (isset($links['url'])) {
+            $links = [$links];
+        }
+        foreach ($links as $link) {
+            $nav .= '<a class="ayv-nav" href="' . s($link['url']) . '">' . s($link['label']) . '</a>';
+        }
+        if ($nav !== '') {
+            $nav = '<nav class="ayv-navs">' . $nav . '</nav>';
         }
         $name = $library ? format_string($library->name) : get_string('pluginname', 'local_oksigeniaayvurenda');
         @header('Content-Type: text/html; charset=utf-8');

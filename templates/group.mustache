@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/group
+
+    The readers of a group, with the code of their card and what they have out.
+
+    Context variables required for this template:
+    * heading - the group
+    * readers - list of name, cardcode and loans
+    * back - url and label to go back
+
+    Example context (json):
+    {
+        "heading": "3º Primaria A",
+        "hasreaders": true,
+        "readers": [{"name": "Ana Montes", "cardcode": "10000H", "loans": 1}],
+        "cardlabel": "Carné",
+        "loanslabel": "Tiene prestados:",
+        "back": {"url": "#", "label": "Todos los grupos"},
+        "empty": ""
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#hasreaders}}
+<ul class="ayv-people">
+{{#readers}}
+    <li class="ayv-person">
+        <span class="ayv-person-name">{{name}}</span>
+        <span class="ayv-person-card"><span class="ayv-sr">{{cardlabel}}: </span>{{cardcode}}</span>
+        <span class="ayv-person-loans" title="{{loanslabel}}">{{loans}}</span>
+    </li>
+{{/readers}}
+</ul>
+{{/hasreaders}}
+{{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
+{{#back}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/back}}

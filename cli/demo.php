@@ -28,7 +28,8 @@ require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
 
 [$options, $unrecognized] = cli_get_params(
-    ['help' => false, 'name' => 'Biblioteca de demostración', 'records' => 14500, 'readers' => 2000, 'seed' => 20261023],
+    ['help' => false, 'name' => 'Biblioteca de demostración', 'records' => 14500, 'readers' => 2000, 'seed' => 20261023,
+        'accounts' => 0, 'entity' => 0],
     ['h' => 'help']
 );
 
@@ -45,6 +46,9 @@ Options:
   --records=N     Titles in the catalogue; copies come to about a fifth more (default: 14500)
   --readers=N     Readers, most of them students in groups (default: 2000)
   --seed=N        Seed of the random choices (default: 20261023)
+  --accounts=N    Instead, add N made-up Moodle accounts of students (and a tenth more of teachers) in cohorts, one
+                  per group, to the entity given with --entity, and bring them as readers
+  --entity=ID     The entity for --accounts
   -h, --help      This help
 
 Example:
@@ -54,6 +58,15 @@ Example:
 }
 
 $start = microtime(true);
+if ((int) $options['accounts'] > 0) {
+    if (!$DB->record_exists('local_oksigeniaayvurenda_entity', ['id' => (int) $options['entity']])) {
+        cli_error('Say which entity the accounts are for (--entity).');
+    }
+    $stats = \local_oksigeniaayvurenda\local\demo::accounts((int) $options['entity'], (int) $options['accounts']);
+    cli_writeln('Made-up accounts in cohorts, brought as readers: ' . json_encode($stats) . ', in ' .
+        round(microtime(true) - $start, 1) . ' s.');
+    exit(0);
+}
 $entityid = \local_oksigeniaayvurenda\local\demo::create(
     $options['name'],
     (int) $options['records'],

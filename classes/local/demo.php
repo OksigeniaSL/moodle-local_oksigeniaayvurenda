@@ -170,6 +170,62 @@ final class demo {
     }
 
     /**
+     * Made-up Moodle accounts in cohorts, one per group and one for the staff, chosen as the entity's sources of
+     * readers, and the readers brought from them. Usernames start with «ayvdemo» and every name is invented.
+     *
+     * @param int $entityid
+     * @param int $count Students; teachers come to about a tenth more.
+     * @param int $seed
+     * @return array What the sync of the readers did.
+     */
+    public static function accounts(int $entityid, int $count, int $seed = 20261025): array {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/user/lib.php');
+        require_once($CFG->dirroot . '/cohort/lib.php');
+        mt_srand($seed);
+        $system = \context_system::instance();
+        $cohorts = [];
+        $config = [];
+        $groups = [];
+        foreach (self::STAGES as [$stage, $years]) {
+            for ($y = 1; $y <= $years; $y++) {
+                $groups[] = [$stage, $y . 'º ' . $stage . ' A'];
+            }
+        }
+        foreach ($groups as [$stage, $name]) {
+            $id = $DB->get_field('cohort', 'id', ['name' => $name, 'contextid' => $system->id]) ?: cohort_add_cohort(
+                (object) ['name' => $name, 'contextid' => $system->id, 'idnumber' => 'ayvdemo-' . md5($name)]);
+            $cohorts[] = $id;
+            $config[$id] = ['type' => 'student', 'stage' => $stage, 'group' => true];
+        }
+        $staff = $DB->get_field('cohort', 'id', ['name' => 'Claustro', 'contextid' => $system->id]) ?: cohort_add_cohort(
+            (object) ['name' => 'Claustro', 'contextid' => $system->id, 'idnumber' => 'ayvdemo-claustro']);
+        $config[$staff] = ['type' => 'teacher', 'stage' => '', 'group' => false];
+        $total = $count + intdiv($count, 10);
+        for ($i = 0; $i < $total; $i++) {
+            $username = 'ayvdemo' . $entityid . '_' . $i;
+            $userid = $DB->get_field('user', 'id', ['username' => $username]);
+            if (!$userid) {
+                $user = (object) [
+                    'username' => $username,
+                    'firstname' => self::pick(self::FIRSTNAMES),
+                    'lastname' => self::pick(self::SURNAMES) . ' ' . self::pick(self::SURNAMES),
+                    'email' => $username . '@example.invalid',
+                    'auth' => 'nologin',
+                    'confirmed' => 1,
+                    'mnethostid' => $CFG->mnet_localhost_id,
+                ];
+                // Moodle 5.3 moved the creation of users; older versions keep the function.
+                $userid = method_exists('\core\user', 'create_user') ? \core\user::create_user($user, false, false)
+                    : user_create_user($user, false, false);
+            }
+            cohort_add_member($i < $count ? $cohorts[$i % count($cohorts)] : $staff, $userid);
+        }
+        \local_oksigeniaayvurenda\local\sources\cohorts::save($entityid, $config);
+        return \local_oksigeniaayvurenda\local\sources\cohorts::sync($entityid);
+    }
+
+    /**
      * Loan rules as a school usually has them.
      *
      * @param int $libraryid

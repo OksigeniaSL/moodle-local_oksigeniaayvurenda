@@ -70,8 +70,12 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,
     'scripts' => ['desk'],
-    'nav' => ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
-        'label' => $str('deskcatalogue')],
+    'nav' => [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('readers')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('deskcatalogue')],
+    ],
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/desk_ajax.php'))->out(false),
         'sesskey' => sesskey(),

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2026-10-25)
+
+- Readers from the Moodle cohorts the entity chooses: each chosen cohort says what kind of reader its members are and
+  the stage, guessed from its name for the librarian to confirm; when its name is the group, the library keeps the
+  group of every reader for each school year, which Moodle does not. A nightly task, or a button, brings them: new
+  readers get a card code that follows the entity's (with the control letter when its codes carry one), those who moved
+  group get the new one for this year, and those who left every cohort are marked so and keep their card and history.
+- «Readers» for the staff: the groups of this school year, and each reader with the code of the card and the loans out.
+- The made-up library can add made-up Moodle accounts in cohorts (`cli/demo.php --accounts=N --entity=ID`).
+
 ## 0.5.0 (2026-10-25)
 
 - The desk: one field, always ready, with no modes. A reader's card opens the reader (name, group, loans, what is

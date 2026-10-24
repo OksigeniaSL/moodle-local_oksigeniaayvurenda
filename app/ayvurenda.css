@@ -427,7 +427,9 @@
 }
 
 /* The desk. */
-.ayv .ayv-nav { font-weight: 700; margin-left: auto; }
+.ayv .ayv-navs { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin-left: auto; }
+
+.ayv .ayv-nav { font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
 
 .ayv .ayv-desk { display: grid; gap: 1rem; margin-top: .5rem; }
 
@@ -539,3 +541,62 @@
 .ayv .ayv-line-choice { background: #fff; border-color: var(--green2); }
 
 .ayv .ayv-staff { margin: .25rem 0 0; }
+
+/* Readers and where they come from. */
+.ayv .ayv-people { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+
+.ayv .ayv-person {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .25rem 1rem;
+    padding: .55rem .9rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+.ayv .ayv-person-name { font-weight: 700; flex: 1 1 12rem; }
+
+.ayv .ayv-person-card { font-weight: 700; letter-spacing: .04em; color: var(--green); }
+
+.ayv .ayv-person-loans {
+    min-width: 2rem;
+    padding: 0 .5rem;
+    text-align: center;
+    border-radius: 999px;
+    background: var(--paper2);
+}
+
+.ayv .ayv-notice { padding: .75rem 1rem; background: #e6f1ec; border-left: 6px solid var(--green2); border-radius: 8px; }
+
+.ayv .ayv-sources { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
+
+.ayv .ayv-source {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem 1.25rem;
+    padding: .75rem 1rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+
+.ayv .ayv-source-name { flex: 1 1 14rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+
+.ayv .ayv-source-count { font-weight: 400; font-size: .9rem; color: var(--green); }
+
+.ayv .ayv-field { display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
+
+.ayv .ayv-field input[type="text"],
+.ayv .ayv-field select {
+    min-height: 40px;
+    padding: .25rem .6rem;
+    font: inherit;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+}
+
+.ayv input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--green); }

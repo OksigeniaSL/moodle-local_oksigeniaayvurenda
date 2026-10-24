@@ -1,0 +1,68 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/sources
+
+    Which cohorts of the site bring readers, of what kind and stage.
+
+    Context variables required for this template:
+    * heading, intro, notice - texts
+    * action, sesskey - the form
+    * cohorts - list of id, name, memberslabel, chosen, types, stage and group
+    * labels - words of the form
+
+    Example context (json):
+    {
+        "heading": "De dónde salen los lectores",
+        "intro": "Marca las cohortes cuyos miembros son lectores.",
+        "notice": "",
+        "action": "#",
+        "sesskey": "abc",
+        "hascohorts": true,
+        "cohorts": [{"id": 1, "name": "3º Primaria A", "memberslabel": "24 miembros", "chosen": true, "stage": "Primaria",
+                     "group": true, "types": [{"value": "student", "label": "Alumnos", "selected": true}]}],
+        "nocohorts": "",
+        "labels": {"chosen": "Son lectores", "type": "Tipo", "stage": "Etapa", "group": "Su nombre es el grupo",
+                   "save": "Guardar", "syncnow": "Guardar y traer los lectores ahora"}
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#hascohorts}}
+<form class="ayv-form" method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <ul class="ayv-sources">
+    {{#cohorts}}
+        <li class="ayv-source">
+            <label class="ayv-source-name"><input type="checkbox" name="chosen[{{id}}]" value="1" {{#chosen}}checked{{/chosen}}>
+                {{name}} <span class="ayv-source-count">{{memberslabel}}</span></label>
+            <label class="ayv-field">{{labels.type}}
+                <select name="type[{{id}}]">{{#types}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/types}}</select>
+            </label>
+            <label class="ayv-field">{{labels.stage}} <input type="text" name="stage[{{id}}]" value="{{stage}}" maxlength="100"></label>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="group[{{id}}]" value="1" {{#group}}checked{{/group}}>
+                {{labels.group}}</label>
+        </li>
+    {{/cohorts}}
+    </ul>
+    <p class="ayv-more">
+        <button type="submit" class="ayv-button" name="syncnow" value="1">{{labels.syncnow}}</button>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{labels.save}}</button>
+    </p>
+</form>
+{{/hascohorts}}
+{{^hascohorts}}<p class="ayv-empty">{{nocohorts}}</p>{{/hascohorts}}
