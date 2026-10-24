@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.2 (2026-10-25)
+
+- The library's screens follow Moodle 5.3's light and dark modes: the person's choice, or the site's default, and
+  the device's when it is «auto». Where the site has no colour modes, they stay light, as Moodle does. Text, borders
+  and surfaces turn around; the brand's fills keep their colours with light text on them, and the emblem sits on a
+  round of paper.
+
 ## 0.7.1 (2026-10-25)
 
 - The school year, on its own screen: how many groups and readers this year has, how many groups have a tutor, who

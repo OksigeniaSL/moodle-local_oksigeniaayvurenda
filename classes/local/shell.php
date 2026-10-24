@@ -87,7 +87,7 @@ final class shell {
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
         echo '<!DOCTYPE html>
-<html lang="' . s($lang) . '">
+<html lang="' . s($lang) . '"' . self::colour_mode() . '>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -99,6 +99,16 @@ final class shell {
 <link rel="apple-touch-icon" href="' . $app . 'apple-touch-icon.png">
 <link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
+<script>(function() {
+    var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
+    var resolve = function() {
+        if (root.getAttribute(\'data-colourmode\') === \'auto\') {
+            root.setAttribute(\'data-bs-theme\', query.matches ? \'dark\' : \'light\');
+        }
+    };
+    resolve();
+    query.addEventListener(\'change\', resolve);
+})();</script>
 </head>
 <body class="ayv">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
@@ -136,5 +146,21 @@ final class shell {
             debugging('Ayvurenda could not add the panel of Oksigenia Access: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return '';
         }
+    }
+
+    /**
+     * The colour mode of the page, as Moodle 5.3 decides it for its own pages: the person's choice, or the site's
+     * default; light where the site has no colour modes, as Moodle is then.
+     *
+     * @return string Attributes for the html element.
+     */
+    private static function colour_mode(): string {
+        $class = '\\theme_boost\\colour_mode';
+        if (!class_exists($class) || !$class::is_boost_theme() || !$class::is_enabled()) {
+            return '';
+        }
+        $mode = $class::get_current_mode();
+        // Auto is resolved in the browser, before the page is painted.
+        return ' data-bs-theme="' . ($mode === 'dark' ? 'dark' : 'light') . '" data-colourmode="' . s($mode) . '"';
     }
 }

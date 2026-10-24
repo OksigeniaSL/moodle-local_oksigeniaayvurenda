@@ -15,6 +15,15 @@
     --paper: #fbf6ec;
     --paper2: #f2eadb;
     --line: rgba(30, 43, 42, .14);
+    --accent: #17574c;
+    --surface: #fff;
+    --muted: #8b9591;
+    --chip-hover: #e8dcc6;
+    --late: #a3321e;
+    --late-bg: #f7d9d2;
+    --danger: #a3321e;
+    --no-bg: #fdf0ed;
+    --notice-bg: #e6f1ec;
     --title: "Literata", Georgia, serif;
     --text: "Andika", system-ui, sans-serif;
     --radius: 14px;
@@ -30,9 +39,32 @@
     -webkit-text-size-adjust: 100%;
 }
 
+/* Moodle 5.3 dark mode: the shell marks <html data-bs-theme="dark"> as Moodle does. Fills keep the brand colours with
+   light text on them; text, borders and surfaces turn around. */
+html[data-bs-theme="dark"] .ayv {
+    --ink: #ece4d4;
+    --green: #1f6a5c;
+    --paper: #0e1c1a;
+    --paper2: #1b2f2b;
+    --line: rgba(236, 228, 212, .16);
+    --accent: #8fd3c1;
+    --surface: #142624;
+    --muted: #9aa6a2;
+    --chip-hover: #26423c;
+    --late: #ff9f8a;
+    --late-bg: #4a231b;
+    --danger: #b23a24;
+    --no-bg: #3b201a;
+    --notice-bg: #17392f;
+    color-scheme: dark;
+}
+
+/* The emblem's greens vanish on the dark page: it sits on a round of paper. */
+html[data-bs-theme="dark"] .ayv .ayv-brand img { background: #fbf6ec; border-radius: 50%; padding: 3px; }
+
 .ayv *, .ayv *::before, .ayv *::after { box-sizing: border-box; }
 
-.ayv a { color: var(--green); }
+.ayv a { color: var(--accent); }
 
 .ayv :focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; border-radius: 6px; }
 
@@ -51,7 +83,7 @@
     top: -4rem;
     padding: .5rem 1rem;
     background: var(--night);
-    color: var(--paper);
+    color: #fbf6ec;
     border-radius: 8px;
     z-index: 10;
 }
@@ -95,8 +127,8 @@
     font: inherit;
     font-size: 1.125rem;
     color: var(--ink);
-    background: #fff;
-    border: 2px solid var(--green);
+    background: var(--surface);
+    border: 2px solid var(--accent);
     border-radius: 999px;
 }
 
@@ -117,7 +149,7 @@
     cursor: pointer;
 }
 
-.ayv .ayv-button-quiet { color: var(--green); background: transparent; border: 2px solid var(--green); }
+.ayv .ayv-button-quiet { color: var(--accent); background: transparent; border: 2px solid var(--accent); }
 
 .ayv .ayv-exit { font-size: .95rem; white-space: nowrap; }
 
@@ -251,17 +283,17 @@
 
 .ayv .ayv-cover-big .ayv-cover-title { font-size: 1.5rem; }
 
-.ayv .ayv-cover-0 { background: var(--green); color: var(--paper); }
+.ayv .ayv-cover-0 { background: var(--green); color: #fbf6ec; }
 
-.ayv .ayv-cover-1 { background: var(--coral); color: var(--ink); }
+.ayv .ayv-cover-1 { background: var(--coral); color: #1e2b2a; }
 
-.ayv .ayv-cover-2 { background: var(--sun); color: var(--ink); }
+.ayv .ayv-cover-2 { background: var(--sun); color: #1e2b2a; }
 
 .ayv .ayv-cover-3 { background: var(--green2); color: #fff; }
 
 .ayv .ayv-cover-4 { background: var(--night); color: var(--sun); }
 
-.ayv .ayv-cover-5 { background: var(--paper2); color: var(--green); box-shadow: inset 0 0 0 2px var(--green), inset 8px 0 0 rgba(23, 87, 76, .15); }
+.ayv .ayv-cover-5 { background: var(--paper2); color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent), inset 8px 0 0 rgba(23, 87, 76, .15); }
 
 /* Whether it is free: a dot, a word and the corner where it is. */
 .ayv .ayv-state {
@@ -279,7 +311,7 @@
     width: .7rem;
     height: .7rem;
     border-radius: 50%;
-    background: #8b9591;
+    background: var(--muted);
     transform: translateY(.05rem);
 }
 
@@ -288,7 +320,7 @@
 .ayv .ayv-state-consult::before { background: var(--sun); }
 
 .ayv .ayv-state-elsewhere::before,
-.ayv .ayv-state-none::before { background: transparent; box-shadow: inset 0 0 0 2px #8b9591; }
+.ayv .ayv-state-none::before { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
 
 /* Suggestions and topics. */
 .ayv .ayv-suggest { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: 1.125rem; }
@@ -300,12 +332,12 @@
     padding: .25rem .9rem;
     border-radius: 999px;
     background: var(--paper2);
-    color: var(--green);
+    color: var(--accent);
     font-weight: 700;
     text-decoration: none;
 }
 
-.ayv .ayv-chip:hover { background: #e8dcc6; }
+.ayv .ayv-chip:hover { background: var(--chip-hover); }
 
 .ayv .ayv-more { margin: 1.5rem 0 0; }
 
@@ -339,7 +371,7 @@
     margin: 0 0 1.25rem;
 }
 
-.ayv .ayv-facts dt { font-size: .85rem; color: var(--green); }
+.ayv .ayv-facts dt { font-size: .85rem; color: var(--accent); }
 
 .ayv .ayv-facts dd { margin: 0; }
 
@@ -351,7 +383,7 @@
     align-items: baseline;
     gap: .25rem 1rem;
     padding: .65rem .9rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 10px;
 }
@@ -363,7 +395,7 @@
     font-size: 1.15rem;
     letter-spacing: .02em;
     background: var(--paper);
-    border: 2px solid var(--green);
+    border: 2px solid var(--accent);
     border-radius: 6px;
 }
 
@@ -374,12 +406,12 @@
     gap: .5rem 1rem;
     padding: 1rem clamp(.75rem, 3vw, 2rem);
     font-size: .9rem;
-    color: var(--green);
+    color: var(--accent);
     border-top: 1px solid var(--line);
 }
 
 /* Where the book is: on a line of its own, because it is where the child runs to. */
-.ayv .ayv-where { margin: 0; font-weight: 700; font-size: .95rem; color: var(--green); }
+.ayv .ayv-where { margin: 0; font-weight: 700; font-size: .95rem; color: var(--accent); }
 
 .ayv .ayv-where::before { content: "→ "; }
 
@@ -393,7 +425,7 @@
     padding: .3rem 1rem;
     border: 2px solid var(--green2);
     border-radius: 999px;
-    color: var(--green);
+    color: var(--accent);
     font-weight: 700;
     text-decoration: none;
 }
@@ -445,8 +477,8 @@
     font-size: 1.6rem;
     letter-spacing: .04em;
     color: var(--ink);
-    background: #fff;
-    border: 3px solid var(--green);
+    background: var(--surface);
+    border: 3px solid var(--accent);
     border-radius: var(--radius);
 }
 
@@ -454,7 +486,7 @@
 
 .ayv .ayv-reader {
     padding: 1rem 1.25rem;
-    background: #fff;
+    background: var(--surface);
     border: 2px solid var(--green2);
     border-radius: var(--radius);
 }
@@ -465,9 +497,9 @@
 
 .ayv .ayv-reader-name { font-family: var(--title); font-weight: 600; font-size: 1.5rem; }
 
-.ayv .ayv-reader-group { font-weight: 700; color: var(--green); }
+.ayv .ayv-reader-group { font-weight: 700; color: var(--accent); }
 
-.ayv .ayv-reader-late { margin: .5rem 0 0; font-weight: 700; color: #a3321e; }
+.ayv .ayv-reader-late { margin: .5rem 0 0; font-weight: 700; color: var(--late); }
 
 .ayv .ayv-reader-none,
 .ayv .ayv-reader-has { margin: .5rem 0 .25rem; }
@@ -478,7 +510,7 @@
 
 .ayv .ayv-loan-title { font-weight: 700; }
 
-.ayv .ayv-loan-late .ayv-loan-due { font-weight: 700; color: #a3321e; }
+.ayv .ayv-loan-late .ayv-loan-due { font-weight: 700; color: var(--late); }
 
 .ayv .ayv-today { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: .75rem; }
 
@@ -491,7 +523,7 @@
 
 .ayv .ayv-today-number { font-family: var(--title); font-weight: 600; font-size: 2rem; line-height: 1.1; }
 
-.ayv .ayv-today-late { background: #f7d9d2; }
+.ayv .ayv-today-late { background: var(--late-bg); }
 
 .ayv .ayv-log { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
 
@@ -499,7 +531,7 @@
     display: grid;
     gap: .5rem;
     padding: .75rem 1rem;
-    background: #fff;
+    background: var(--surface);
     border-left: 8px solid var(--green2);
     border-radius: 10px;
     box-shadow: 0 1px 3px rgba(15, 58, 51, .12);
@@ -507,7 +539,7 @@
 
 .ayv .ayv-sound-look { border-left-color: var(--sun); }
 
-.ayv .ayv-sound-no { border-left-color: #c2412b; background: #fdf0ed; }
+.ayv .ayv-sound-no { border-left-color: var(--coral); background: var(--no-bg); }
 
 .ayv .ayv-line-text { margin: 0; font-size: 1.15rem; font-weight: 700; }
 
@@ -523,7 +555,7 @@
     padding: .3rem 1rem;
     font: inherit;
     font-weight: 700;
-    color: var(--green);
+    color: var(--accent);
     background: var(--paper2);
     border: 2px solid transparent;
     border-radius: 999px;
@@ -536,9 +568,9 @@
 
 .ayv .ayv-line-renew { color: #fff; background: var(--green); }
 
-.ayv .ayv-line-danger { color: #fff; background: #a3321e; }
+.ayv .ayv-line-danger { color: #fff; background: var(--danger); }
 
-.ayv .ayv-line-choice { background: #fff; border-color: var(--green2); }
+.ayv .ayv-line-choice { background: var(--surface); border-color: var(--green2); }
 
 .ayv .ayv-staff { margin: .25rem 0 0; }
 
@@ -551,14 +583,14 @@
     align-items: baseline;
     gap: .25rem 1rem;
     padding: .55rem .9rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 10px;
 }
 
 .ayv .ayv-person-name { font-weight: 700; flex: 1 1 12rem; }
 
-.ayv .ayv-person-card { font-weight: 700; letter-spacing: .04em; color: var(--green); }
+.ayv .ayv-person-card { font-weight: 700; letter-spacing: .04em; color: var(--accent); }
 
 .ayv .ayv-person-loans {
     min-width: 2rem;
@@ -568,7 +600,7 @@
     background: var(--paper2);
 }
 
-.ayv .ayv-notice { padding: .75rem 1rem; background: #e6f1ec; border-left: 6px solid var(--green2); border-radius: 8px; }
+.ayv .ayv-notice { padding: .75rem 1rem; background: var(--notice-bg); border-left: 6px solid var(--green2); border-radius: 8px; }
 
 .ayv .ayv-sources { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
 
@@ -578,14 +610,14 @@
     align-items: center;
     gap: .5rem 1.25rem;
     padding: .75rem 1rem;
-    background: #fff;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 10px;
 }
 
 .ayv .ayv-source-name { flex: 1 1 14rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
 
-.ayv .ayv-source-count { font-weight: 400; font-size: .9rem; color: var(--green); }
+.ayv .ayv-source-count { font-weight: 400; font-size: .9rem; color: var(--accent); }
 
 .ayv .ayv-field { display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
 
@@ -600,13 +632,13 @@
     background: var(--paper);
 }
 
-.ayv input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--green); }
+.ayv input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--accent); }
 
 .ayv .ayv-choices { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
 
-.ayv input[type="radio"] { width: 1.15rem; height: 1.15rem; accent-color: var(--green); }
+.ayv input[type="radio"] { width: 1.15rem; height: 1.15rem; accent-color: var(--accent); }
 
-.ayv .ayv-is-late { color: #a3321e; }
+.ayv .ayv-is-late { color: var(--late); }
 
 .ayv a.ayv-today-card { height: 100%; color: var(--ink); text-decoration: none; }
 
