@@ -47,6 +47,8 @@ final class mobile_test extends \advanced_testcase {
         $page = mobile::mobile_library_view(['userid' => $ana->id]);
         $html = $page['templates'][0]['html'];
         $this->assertStringContainsString('El faro dormido', $html);
+        // Each book says until when.
+        $this->assertStringContainsString(get_string('mobiledue', 'local_oksigeniaayvurenda', ''), $html);
         $this->assertStringContainsString('10000H', $html);
         $this->assertStringContainsString('data:image/svg+xml;base64,', $html);
         $this->assertStringContainsString('data:image/png;base64,', $html);

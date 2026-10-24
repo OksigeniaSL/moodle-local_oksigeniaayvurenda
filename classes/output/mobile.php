@@ -45,7 +45,8 @@ class mobile {
         $libraries = [];
         foreach (mine::summary((int) $USER->id) as $library) {
             $code = $library['cardcode'];
-            $libraries[] = $library + [
+            // What is worked out here replaces what the summary gave (its lists of loans and holds), so it goes first.
+            $libraries[] = [
                 'hasloans' => (bool) $library['loans'],
                 'hasholds' => (bool) $library['holds'],
                 'loans' => array_map(fn($loan) => $loan + ['when' => $str(
@@ -59,7 +60,7 @@ class mobile {
                     ? 'data:image/svg+xml;base64,' . base64_encode(code39::svg($code, 60, false)) : '',
                 'qrimg' => $code !== ''
                     ? 'data:image/png;base64,' . base64_encode((new \core_qrcode($code))->getBarcodePngData(4, 4)) : '',
-            ];
+            ] + $library;
         }
         $data = [
             'libraries' => $libraries,

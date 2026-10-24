@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.30.2 (2026-10-28)
+
+- In the app, each book out says until when again (and the late ones, that they are late), and each reservation whether
+  it waits for the reader: the lists worked out for the app did not replace the summary's.
+
 ## 0.30.1 (2026-10-28)
 
 - In the app, the pages of the library (each book of the list, the library and Ayvu rande) open inside the app with
