@@ -30,6 +30,14 @@ namespace local_oksigeniaayvurenda\core;
  * Part of the core: plain PHP, with no call to Moodle.
  */
 final class text {
+    /** @var string[] Accented Latin letters and their plain form, for systems without intl. */
+    private const ACCENTS = ['á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'ã' => 'a', 'é' => 'e', 'è' => 'e', 'ë' => 'e',
+        'ê' => 'e', 'ẽ' => 'e', 'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'ĩ' => 'i', 'ó' => 'o', 'ò' => 'o', 'ö' => 'o',
+        'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u', 'ũ' => 'u', 'ñ' => 'n', 'ç' => 'c', 'ỹ' => 'y',
+        'Á' => 'a', 'À' => 'a', 'Ä' => 'a', 'Â' => 'a', 'Ã' => 'a', 'É' => 'e', 'È' => 'e', 'Ë' => 'e', 'Ê' => 'e', 'Í' => 'i',
+        'Ì' => 'i', 'Ï' => 'i', 'Î' => 'i', 'Ó' => 'o', 'Ò' => 'o', 'Ö' => 'o', 'Ô' => 'o', 'Õ' => 'o', 'Ú' => 'u', 'Ù' => 'u',
+        'Ü' => 'u', 'Û' => 'u', 'Ñ' => 'n', 'Ç' => 'c'];
+
     /**
      * Lower case, without accents, with single spaces and no punctuation.
      *
@@ -40,6 +48,9 @@ final class text {
         if (class_exists(\Normalizer::class)) {
             $text = \Normalizer::normalize($text, \Normalizer::FORM_D);
             $text = preg_replace('/\p{Mn}+/u', '', $text);
+        } else {
+            // Without the intl extension, at least the accents of the Latin alphabet.
+            $text = strtr($text, self::ACCENTS);
         }
         $text = mb_strtolower($text, 'UTF-8');
         $text = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $text);

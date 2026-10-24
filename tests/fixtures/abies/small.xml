@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A made-up Abies Web export with the shape of a real one: every name, title and code is invented. -->
+<Fichero>
+  <Boletines/>
+  <Centros>
+    <Centro Nombre="Colegio Inventado" Direccion="Calle Falsa 1" CodPostal="00000" Localidad="Villa Ejemplo" Provincia="Ejemplo" Telefono="000000000" Email="biblioteca@ejemplo.invalid"/>
+  </Centros>
+  <Cursos>
+    <Curso IdCurso="10001" Curso="1 PRI A"/>
+    <Curso IdCurso="10002" Curso="2º PRI A"/>
+  </Cursos>
+  <Documentos>
+    <Catalogo_Auxiliar_Autor id_documento="2001"><Nombre>Montes, Ana</Nombre><TipoAutor>Persona</TipoAutor></Catalogo_Auxiliar_Autor>
+    <Catalogo_Auxiliar_Autor id_documento="2002"><Nombre>Prado, Leo</Nombre><TipoAutor>persona</TipoAutor><FechaAsociada>1970-</FechaAsociada></Catalogo_Auxiliar_Autor>
+    <Catalogo_Auxiliar_Autor id_documento="2003"><Nombre>Ediciones Colibrí</Nombre><TipoAutor>Entidad</TipoAutor></Catalogo_Auxiliar_Autor>
+    <Catalogo_Auxiliar_CDU id_documento="3001"><Codigo>8</Codigo><CodigoPadre></CodigoPadre><Literal>Lengua y literatura</Literal></Catalogo_Auxiliar_CDU>
+    <Catalogo_Auxiliar_CDU id_documento="3002"><Codigo>82</Codigo><CodigoPadre>8</CodigoPadre><Literal>Literatura</Literal></Catalogo_Auxiliar_CDU>
+    <Catalogo_Auxiliar_CDU id_documento="3003"><Codigo>821.134.2-3</Codigo><CodigoPadre>82</CodigoPadre><Literal>Novela</Literal></Catalogo_Auxiliar_CDU>
+    <Catalogo_Auxiliar_Descriptor id_documento="4001"><descripcion>Aventuras</descripcion></Catalogo_Auxiliar_Descriptor>
+    <Catalogo_Auxiliar_Descriptor id_documento="4002"><descripcion>Animales</descripcion></Catalogo_Auxiliar_Descriptor>
+    <Catalogo_Auxiliar_Editorial id_documento="5001"><Editorial>Editorial Faro</Editorial></Catalogo_Auxiliar_Editorial>
+    <Catalogo_Auxiliar_Ubicacion id_documento="6001"><Ubicacion>Estantería infantil</Ubicacion></Catalogo_Auxiliar_Ubicacion>
+    <Catalogo_Auxiliar_Ubicacion id_documento="6002"><Ubicacion>Consulta</Ubicacion></Catalogo_Auxiliar_Ubicacion>
+    <Catalogo_Auxiliar_Aplicacion id_documento="7001"><nombre>Primaria</nombre></Catalogo_Auxiliar_Aplicacion>
+    <Catalogo_Auxiliar_FuncionAutor id_documento="8001"><CodigoFuncion>aut.</CodigoFuncion><Funcion>autor principal</Funcion></Catalogo_Auxiliar_FuncionAutor>
+    <Catalogo_Auxiliar_FuncionAutor id_documento="8002"><CodigoFuncion>il.</CodigoFuncion><Funcion>ilustrador, ilustración</Funcion></Catalogo_Auxiliar_FuncionAutor>
+    <Catalogo_Auxiliar_FondoAutor id_documento="9001"><IdDocumentoPrincipal>1001</IdDocumentoPrincipal><IdDocumentoRelacionado>2001</IdDocumentoRelacionado><ValorRelacionado>aut.</ValorRelacionado></Catalogo_Auxiliar_FondoAutor>
+    <Catalogo_Auxiliar_FondoAutor id_documento="9002"><IdDocumentoPrincipal>1001</IdDocumentoPrincipal><IdDocumentoRelacionado>2002</IdDocumentoRelacionado><ValorRelacionado>Il</ValorRelacionado></Catalogo_Auxiliar_FondoAutor>
+    <Catalogo_Auxiliar_FondoAutor id_documento="9003"><IdDocumentoPrincipal>1002</IdDocumentoPrincipal><IdDocumentoRelacionado>2002</IdDocumentoRelacionado><ValorRelacionado>aut</ValorRelacionado></Catalogo_Auxiliar_FondoAutor>
+    <Catalogo_Auxiliar_FondoAutor id_documento="9004"><IdDocumentoPrincipal>1999</IdDocumentoPrincipal><IdDocumentoRelacionado>2001</IdDocumentoRelacionado><ValorRelacionado>aut.</ValorRelacionado></Catalogo_Auxiliar_FondoAutor>
+    <Libro id_documento="1001">
+      <Titulo>El faro dormido</Titulo>
+      <RestoTitulo>una aventura en la costa</RestoTitulo>
+      <RestoPortada>Ana Montes ; ilustraciones de Leo Prado</RestoPortada>
+      <Autor>Montes, Ana</Autor>
+      <Autor>Prado, Leo</Autor>
+      <Editorial>Editorial Faro</Editorial>
+      <Editorial>Editorial Faro</Editorial>
+      <LugarPublicacion>Villa Ejemplo</LugarPublicacion>
+      <FechaPublicacion>2019</FechaPublicacion>
+      <ISBN>978-0-306-40615-7</ISBN>
+      <ISBN2>9780306406157</ISBN2>
+      <CDU>821.134.2-3</CDU>
+      <Descriptor>Faros</Descriptor>
+      <OtroDescriptor>Aventuras</OtroDescriptor>
+      <AplicacionPedagogica>Primaria</AplicacionPedagogica>
+      <AplicacionPedagogica>Animación a la lectura</AplicacionPedagogica>
+      <Lengua>E</Lengua>
+      <Coleccion>Colección Brújula</Coleccion>
+      <NumeroSerie>12</NumeroSerie>
+      <Extension>96 p.</Extension>
+      <Dimensiones>21 cm</Dimensiones>
+      <Notas>Edición ilustrada.</Notas>
+      <Sinopsis>Un faro que se duerme y una niña que lo despierta.</Sinopsis>
+    </Libro>
+    <Libro id_documento="1002">
+      <Titulo>La isla de los animales</Titulo>
+      <Autor>Prado, Leo</Autor>
+      <Editorial>Ediciones Nube</Editorial>
+      <FechaEdicion>2008.</FechaEdicion>
+      <CDU>82</CDU>
+      <OtroDescriptor>Animales</OtroDescriptor>
+      <Lengua>Español</Lengua>
+      <Extension>120 p.</Extension>
+    </Libro>
+    <Libro id_documento="1003">
+      <Titulo>Diccionario sin ejemplares</Titulo>
+      <Lengua>eng</Lengua>
+    </Libro>
+    <Audio id_documento="1004">
+      <Titulo>Canciones del colibrí</Titulo>
+      <Autor>Ediciones Colibrí</Autor>
+      <CDU>78</CDU>
+      <Lengua>klingon</Lengua>
+    </Audio>
+  </Documentos>
+  <Ejemplares>
+    <Ejemplar Id="1" IdRegistro="1001" CodigoEjemplar="100000L" NumRegistro="100000" Signatura1="821.134.2-3" Signatura2="MON" Signatura3="far" Ubicacion="6001" Estado="0" IdTipoEjemplar="1723" Fecha="2019-09-15" Observaciones="Donado por la clase de 4.º" Procedencia="-1"/>
+    <Ejemplar Id="2" IdRegistro="1001" CodigoEjemplar="100001C" NumRegistro="2001" Signatura1="821.134.2-3" Signatura2="MON" Signatura3="far" Ubicacion="6001" Estado="1" IdTipoEjemplar="1723" Fecha="2019-09-15" Procedencia="-1"/>
+    <Ejemplar Id="3" IdRegistro="1002" CodigoEjemplar="100002K" Signatura1="82" Signatura2="PRA" Signatura3="isl" Ubicacion="-1" Estado="0" IdTipoEjemplar="1724" Fecha="2008-05-02" Procedencia="-1"/>
+    <Ejemplar Id="4" IdRegistro="1004" CodigoEjemplar="100002K" Signatura1="78" Signatura2="EDI" Signatura3="can" Ubicacion="6002" Estado="4" IdTipoEjemplar="1726" Fecha="2010-01-10" Procedencia="-1"/>
+    <Ejemplar Id="6" IdRegistro="1002" CodigoEjemplar="100005A" Signatura1="82" Signatura2="PRA" Signatura3="isl" Ubicacion="6001" Estado="0" IdTipoEjemplar="1723" Fecha="2008-05-02" Procedencia="-1"/>
+    <Ejemplar Id="5" IdRegistro="1888" CodigoEjemplar="100004T" Signatura1="0" Signatura2="XXX" Signatura3="xxx" Ubicacion="6001" Estado="0" IdTipoEjemplar="1723" Fecha="2010-01-10" Procedencia="-1"/>
+  </Ejemplares>
+  <Lectores>
+    <Lector Id="70001" CodLector="10000H" IdUsuario="80001" Nombre="Inventada" Apellido1="Lectora" Apellido2="Uno" Curso="10001" IdTipoLector="2785" FechaAlta="2024-09-10" FechaValidez="2026-09-10"/>
+  </Lectores>
+  <Noticias/>
+  <Prestamos>
+    <Prestamo Id="90001" IdEjemplar="2" IdLector="70001" Fecha="2025-09-20" FechaCalculada="2025-09-27" Estado="1" Anulado="0" Retrasado="0" DiasRetraso="0" NumProrrogas="0"/>
+  </Prestamos>
+  <RelacionesCursos><RelacionesCurso IdCurso="10001" IdCursoSiguiente="10002"/></RelacionesCursos>
+  <Reservas/>
+  <TiposEjemplar>
+    <TipoEjemplar IdTipoEjemplar="1723"><TipoEjemplarI18n IdIdioma="1" TipoEjemplar="Normal"/></TipoEjemplar>
+    <TipoEjemplar IdTipoEjemplar="1724"><TipoEjemplarI18n IdIdioma="1" TipoEjemplar="No prestable"/></TipoEjemplar>
+    <TipoEjemplar IdTipoEjemplar="1726"><TipoEjemplarI18n IdIdioma="1" TipoEjemplar="Video"/></TipoEjemplar>
+  </TiposEjemplar>
+  <TiposEjemplarTiposLector>
+    <TipoEjemplarTipoLector IdTipoLector="2785" IdTipoEjemplar="1723" DiasPrestamo="7" NumPrestamos="1"/>
+    <TipoEjemplarTipoLector IdTipoLector="2785" IdTipoEjemplar="1724" DiasPrestamo="0" NumPrestamos="0"/>
+    <TipoEjemplarTipoLector IdTipoLector="2786" IdTipoEjemplar="1723" DiasPrestamo="30" NumPrestamos="0"/>
+  </TiposEjemplarTiposLector>
+  <TiposLectores>
+    <TipoLector IdTipoLector="2785" DiasRenovacion="7" VecesRenovacion="6" ActivarSanciones="" DiasSancion="0" ValidezCarnet="2"><TipoLectorI18n IdIdioma="1" Descripcion="Alumno"/></TipoLector>
+    <TipoLector IdTipoLector="2786" DiasRenovacion="15" VecesRenovacion="1" ActivarSanciones="1" DiasSancion="1" ValidezCarnet="2"><TipoLectorI18n IdIdioma="1" Descripcion="Profesor"/></TipoLector>
+  </TiposLectores>
+</Fichero>

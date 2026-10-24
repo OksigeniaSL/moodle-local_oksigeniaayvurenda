@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/oksigeniaayvurenda/db" VERSION="20261023" COMMENT="XMLDB file for local_oksigeniaayvurenda"
+<XMLDB PATH="local/oksigeniaayvurenda/db" VERSION="20261024" COMMENT="XMLDB file for local_oksigeniaayvurenda"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -250,6 +250,7 @@
         <FIELD NAME="tablename" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="record, authority, item, reader, loan"/>
         <FIELD NAME="externalid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="localid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="hash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Fingerprint of the row as it came, to skip unchanged rows on a new import"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

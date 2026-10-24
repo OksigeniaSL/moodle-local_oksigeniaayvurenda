@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-10-24)
+
+- Abies Web importer, catalogue first: records of every document type, authors with their role, the UDC tree,
+  subjects, publishers, collections, audiences and places as authorities, copies with their own codes, register
+  numbers and spine labels, copy and reader types, and loan rules. `cli/import_abies.php` takes the zip or the XML.
+- A survey before importing: repeated codes, wrong control letters, copies of missing records, records without copies,
+  languages that cannot be told, copies without a place. It reads no names of people.
+- Running it again with a newer export brings the library up to date: each row keeps its Abies id and a fingerprint,
+  unchanged rows are left alone and nothing is duplicated. A copy code already taken gets the Abies id after it.
+- The core reads the export as a stream, without loading it whole, and works without the intl extension.
+
 ## 0.2.0 (2026-10-23)
 
 - Data model: entities with several libraries (central, classroom, department, faculty), records shared within an
