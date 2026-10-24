@@ -36,4 +36,10 @@ $definitions = [
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => true,
     ],
+    // The people of a management platform while pairing its readers with those already there: asking takes a while.
+    'platformpeople' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 3600,
+    ],
 ];

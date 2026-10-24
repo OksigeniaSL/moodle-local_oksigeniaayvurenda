@@ -83,7 +83,14 @@ $data = $settings + [
     'modeoauth' => $settings['mode'] === 'oauth',
     'keyhint' => $settings['haskey'] ? $str('cifrakeptkey') : '',
     'secrethint' => $settings['hassecret'] ? $str('cifrakeptsecret') : '',
+    'pair' => null,
 ];
+// Readers already there (from Abies, from a list) are paired with Cifra first, or the ones in both would come twice.
+$unpaired = $settings['enabled'] ? \local_oksigeniaayvurenda\local\pairing::unpaired($entityid) : 0;
+if ($unpaired) {
+    $data['pair'] = ['hint' => $str('pairhint', $unpaired), 'label' => $str('pairgo'),
+        'url' => (new moodle_url('/local/oksigeniaayvurenda/pair.php', ['library' => $library->slug]))->out(false)];
+}
 foreach (
     ['cifraenabled', 'cifraurl', 'cifraurlhint', 'cifrahow', 'ciframodekey', 'ciframodeoauth', 'cifrakey', 'cifraclientid',
         'cifrasecret', 'cifraexample', 'cifratest', 'cifrasync', 'sourcessave'] as $key

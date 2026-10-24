@@ -43,7 +43,8 @@
         "cifraenabled": "Traer los lectores de Cifra cada noche", "cifraurl": "Dirección", "cifraurlhint": "La del puente o la de Cifra", "cifrahow": "Cómo se conecta",
         "ciframodekey": "Con la llave del puente", "ciframodeoauth": "Directamente con Cifra", "cifrakey": "Llave",
         "cifraclientid": "Identificador", "cifrasecret": "Secreto", "cifraexample": "Usar los datos de ejemplo del puente",
-        "cifratest": "Probar la conexión", "cifrasync": "Traer los lectores ahora", "sourcessave": "Guardar"
+        "cifratest": "Probar la conexión", "cifrasync": "Traer los lectores ahora", "sourcessave": "Guardar",
+        "pair": {"hint": "Hay 2138 lectores sin casar.", "label": "Casarlos", "url": "https://example.org/p"}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -70,6 +71,7 @@
         <label class="ayv-field ayv-field-wide">{{cifrasecret}} {{#secrethint}}<span class="ayv-field-hint">{{secrethint}}</span>{{/secrethint}}
             <input type="password" name="secret" autocomplete="new-password"></label>
     </div>
+    {{#pair}}<p class="ayv-notice">{{hint}} <a href="{{url}}">{{label}}</a></p>{{/pair}}
     <p class="ayv-book-actions">
         <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="test">{{cifratest}}</button>
         <button type="submit" class="ayv-button" name="do" value="sync">{{cifrasync}}</button>
