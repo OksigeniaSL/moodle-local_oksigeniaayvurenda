@@ -1,0 +1,70 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/readerslist
+
+    Readers from a list: paste or upload it, check what each column is, and load it.
+
+    Context variables required for this template:
+    * heading, intro, notice - texts
+    * action, sesskey - the form
+    * paste - whether it is the first step
+    * check - columns (index, heading, options), preview (cells), types, csv (the text), count
+
+    Example context (json):
+    {
+        "heading": "Lectores desde una lista",
+        "intro": "Un CSV del programa del centro.",
+        "notice": "",
+        "action": "#",
+        "sesskey": "abc",
+        "paste": true,
+        "check": null,
+        "readerslistpaste": "Pega aquí la lista", "readerslistfile": "o sube el fichero", "readerslistnext": "Seguir",
+        "readerslistcolumns": "Qué es cada columna", "readerslisttype": "Tipo de lector si la lista no lo dice",
+        "readerslistload": "Cargar", "readerslistpreview": "Las primeras filas"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#paste}}
+<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <label class="ayv-field ayv-field-wide">{{readerslistpaste}} <textarea name="csv" rows="8" spellcheck="false"></textarea></label>
+    <label class="ayv-field">{{readerslistfile}} <input type="file" name="file" accept=".csv,.txt,text/csv"></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{readerslistnext}}</button></p>
+</form>
+{{/paste}}
+{{#check}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="load" value="1">
+    <textarea name="csv" hidden>{{csv}}</textarea>
+    <h2 class="ayv-section-title">{{readerslistcolumns}}</h2>
+    <div class="ayv-book-copy">
+    {{#columns}}
+        <label class="ayv-field">{{heading}} <select name="column[{{index}}]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>
+    {{/columns}}
+    </div>
+    <h2 class="ayv-section-title">{{readerslistpreview}}</h2>
+    <ul class="ayv-people">
+    {{#preview}}<li class="ayv-person">{{#cells}}<span>{{value}}</span>{{/cells}}</li>{{/preview}}
+    </ul>
+    <label class="ayv-field">{{readerslisttype}} <select name="type">{{#types}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/types}}</select></label>
+    <p>{{count}}</p>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{readerslistload}}</button></p>
+</form>
+{{/check}}

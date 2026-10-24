@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.4 (2026-10-27)
+
+- Readers from a list, for a centre whose readers are not in Moodle cohorts or that has no Moodle: the CSV its
+  management program exports, or a spreadsheet, pasted or uploaded. The separator, the encoding and the usual columns
+  (name, surnames or a full name, group, stage, card, email, user, file number, kind) are found by themselves, and can
+  be corrected before loading. Each reader is found again by the card, the file number, the email or the user, or by
+  the name alone (two of the same name, by their group): the list can be loaded every year without repeating anybody.
+  Whoever has an account on the site with the same file number, user or email is linked to it.
+
 ## 0.9.3 (2026-10-27)
 
 - The six fixed reports, instead of a report builder, each with its CSV: loans by period and group (and how many

@@ -24,6 +24,7 @@
     * nogroup - url and label of readers without a group
     * manage - url and label to choose where readers come from, for those who may
     * match - url and label to match readers without an account, when there are
+    * list - url and label to load readers from a list, for those who may
     * tutors - url and label to choose the tutor of each group, for those who may
     * rules - url and label of the loan rules, for those who may
     * characters - url and label of the two characters, for those who may
@@ -38,6 +39,7 @@
         "empty": "",
         "manage": {"url": "#", "label": "De dónde salen los lectores"},
         "match": {"url": "#", "label": "Casar lectores sin cuenta (12)"},
+        "list": {"url": "#", "label": "Desde una lista"},
         "tutors": {"url": "#", "label": "Tutores"},
         "rules": {"url": "#", "label": "Normas"},
         "characters": {"url": "#", "label": "Personajes"},
@@ -47,6 +49,7 @@
 <div class="ayv-results-head">
     <h1 class="ayv-results-title">{{heading}}</h1>
     {{#manage}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/manage}}
+    {{#list}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/list}}
     {{#tutors}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/tutors}}
     {{#rules}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/rules}}
     {{#characters}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/characters}}
