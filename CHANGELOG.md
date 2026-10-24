@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.27.0 (2026-10-28)
+
+- The repository: what the centre publishes as its own (its own licence or a Creative Commons one), meant for the
+  public, in an open window, by OAI-PMH 2.0 with Dublin Core at `oai.php/<library>`, for repository harvesters. The
+  public-domain works the centre brought and the voices stay out. The window's settings show its address.
+- What a person has in the libraries, in a few lines (their books out and until when, their reservations, the ways
+  in), for the block of the personal area.
+
 ## 0.26.0 (2026-10-28)
 
 - Free works: whoever catalogues searches Project Gutenberg's own OPDS catalogue, looks at a book with its languages

@@ -105,11 +105,12 @@ $data = [
     'voices' => $settings['voices'],
     'index' => $settings['index'],
     'publicurl' => $here(),
+    'oaiurl' => \local_oksigeniaayvurenda\local\oai::base($library),
 ];
 foreach (
     ['windowsearch', 'windowsearchbutton', 'windowdownload', 'windowopds', 'windowopdshint', 'windowlogin', 'windownext',
         'windowprev', 'windowmanage', 'windowopen', 'windowopenhint', 'windowtext', 'windowtexthint', 'windowvoices',
-        'windowindex', 'windowsave', 'windowaddress', 'voiceinvitecopy'] as $key
+        'windowindex', 'windowsave', 'windowaddress', 'voiceinvitecopy', 'windowoai', 'windowoaihint'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -23,7 +23,8 @@
         "heading": "La ventana de la Biblioteca", "text": "Bienvenidos.", "notice": "", "closednote": "", "query": "", "slug": "demo-1",
         "action": "#", "hasrecords": true, "empty": "Nada todavía", "nexturl": "", "prevurl": "", "opds": "https://example.org/opds",
         "loginurl": "#", "manage": true, "sesskey": "abc", "open": true, "voices": true, "index": false,
-        "publicurl": "https://example.org/w",
+        "publicurl": "https://example.org/w", "oaiurl": "https://example.org/oai.php/demo-1",
+        "windowoai": "Dirección OAI-PMH", "windowoaihint": "Para los recolectores",
         "records": [{"title": "El faro dormido", "subtitle": "", "authors": "Ana Montes", "cover": "https://example.org/c.jpg",
             "hascover": true, "colour": 2, "items": [{"label": "EPUB", "licence": "Dominio público", "action": "Leer", "url": "#",
             "download": "https://example.org/d"}]}],
@@ -54,6 +55,9 @@
     </form>
     <p class="ayv-invite-link"><span>{{windowaddress}}</span> <input type="text" readonly value="{{publicurl}}" aria-label="{{windowaddress}}">
         <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{publicurl}}">{{voiceinvitecopy}}</button></p>
+    <p class="ayv-invite-link"><span>{{windowoai}}</span> <input type="text" readonly value="{{oaiurl}}" aria-label="{{windowoai}}">
+        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{oaiurl}}">{{voiceinvitecopy}}</button></p>
+    <p class="ayv-field-hint">{{windowoaihint}}</p>
 </details>
 {{/manage}}
 <form class="ayv-window-search" role="search" method="get" action="{{action}}">
