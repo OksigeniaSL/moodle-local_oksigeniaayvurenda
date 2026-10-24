@@ -34,7 +34,8 @@ final class survey_test extends \basic_testcase {
         $report = survey::run(new export_reader(__DIR__ . '/../../fixtures/abies/small.xml'));
         $this->assertSame(['Libro' => 3, 'Audio' => 1], $report['records']);
         $this->assertSame(6, $report['items']);
-        $this->assertSame(1, $report['readers']);
+        $this->assertSame(3, $report['readers']);
+        $this->assertSame(3, $report['loans']);
         $this->assertSame(1, $report['openloans']);
         $issues = $report['issues'];
         $this->assertSame(['100002K' => 2], $issues['duplicatebarcodes']);

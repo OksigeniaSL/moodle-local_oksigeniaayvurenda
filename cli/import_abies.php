@@ -32,7 +32,8 @@ use local_oksigeniaayvurenda\core\abies\survey;
 use local_oksigeniaayvurenda\local\import\abies_import;
 
 [$options, $unrecognized] = cli_get_params(
-    ['help' => false, 'file' => '', 'library' => 0, 'create' => '', 'dry-run' => false, 'without-notes' => false],
+    ['help' => false, 'file' => '', 'library' => 0, 'create' => '', 'dry-run' => false, 'without-notes' => false,
+        'with-readers' => false],
     ['h' => 'help', 'n' => 'dry-run']
 );
 
@@ -43,7 +44,8 @@ if ($unrecognized) {
 if ($options['help'] || $options['file'] === '') {
     echo "Imports the catalogue of an Abies Web export into a library: records, authors, classification, subjects,
 publishers, places, copies with their own codes, types and loan rules. Run it again with a newer export to bring the
-library up to date: nothing is duplicated. Readers and loans come in a later version.
+library up to date: nothing is duplicated. With --with-readers, also the readers and their loans; they come
+without an account, to be matched with the site's accounts in «Readers».
 
 Options:
   --file=PATH       The export: the zip Abies Web gives, or the XML inside it
@@ -51,6 +53,7 @@ Options:
   --create=NAME     Or create a new entity with a central library of that name
   -n, --dry-run     Only report what the export brings, without importing
   --without-notes   Leave out the free notes of the copies
+  --with-readers    Bring the readers and their loans too
   -h, --help        This help
 
 Example:
@@ -121,7 +124,12 @@ if ($libraryid === 0 || !$DB->record_exists('local_oksigeniaayvurenda_library', 
 }
 
 $start = microtime(true);
-$stats = (new abies_import($libraryid, !$options['without-notes']))->run($export);
+$stats = (new abies_import($libraryid, !$options['without-notes'], (bool) $options['with-readers']))->run($export);
+\local_oksigeniaayvurenda\local\catalogue::purge((int) $DB->get_field(
+    'local_oksigeniaayvurenda_library',
+    'entityid',
+    ['id' => $libraryid]
+));
 cli_heading('Imported into library ' . $libraryid . ' in ' . round(microtime(true) - $start, 1) . ' s');
 foreach ($stats as $table => $counts) {
     cli_writeln($table . ': ' . json_encode($counts));

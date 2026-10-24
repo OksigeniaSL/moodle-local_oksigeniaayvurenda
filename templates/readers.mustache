@@ -31,7 +31,8 @@
         "groups": [{"name": "3º Primaria A", "stage": "Primaria", "countlabel": "24 lectores", "url": "#"}],
         "nogroup": {"url": "#", "label": "Sin grupo"},
         "empty": "",
-        "manage": {"url": "#", "label": "De dónde salen los lectores"}
+        "manage": {"url": "#", "label": "De dónde salen los lectores"},
+        "match": {"url": "#", "label": "Casar lectores sin cuenta (12)"}
     }
 }}
 <div class="ayv-results-head">
@@ -49,4 +50,7 @@
 </ul>
 {{/hasgroups}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
-{{#nogroup}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/nogroup}}
+<p class="ayv-more">
+    {{#nogroup}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/nogroup}}
+    {{#match}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/match}}
+</p>

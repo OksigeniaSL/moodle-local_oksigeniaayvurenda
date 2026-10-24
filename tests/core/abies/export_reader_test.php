@@ -69,8 +69,8 @@ final class export_reader_test extends \basic_testcase {
         $items = iterator_to_array($export->items(), false);
         $this->assertCount(6, $items);
         $this->assertSame('100000L', $items[0]['CodigoEjemplar']);
-        $this->assertCount(1, iterator_to_array($export->readers(), false));
-        $this->assertCount(1, iterator_to_array($export->loans(), false));
+        $this->assertCount(3, iterator_to_array($export->readers(), false));
+        $this->assertCount(3, iterator_to_array($export->loans(), false));
         $this->assertSame(['1723' => 'Normal', '1724' => 'No prestable', '1726' => 'Video'], $export->item_types());
         $this->assertSame('Alumno', $export->reader_types()['2785']['name']);
         $this->assertSame('6', $export->reader_types()['2785']['VecesRenovacion']);

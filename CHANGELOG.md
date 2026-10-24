@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.1 (2026-10-25)
+
+- The Abies importer brings, on request (`--with-readers`), the readers with their card codes, kind and group of the
+  school year of the export, and their loans, out and returned, each in its school year. The printed card wins: a
+  code taken by a reader brought from a cohort goes to the Abies reader, and the other gets a new one.
+- Matching readers without an account with the accounts of the site, in three piles: those that match by themselves
+  (the same words in the same order and, when both sides have one, the same group), accepted with one tap; those in
+  doubt (several accounts, the surnames in another order, one surname less, a letter changed, another group), one by
+  one; and those not on the site, who stay as readers without an account or are marked as former readers, keeping
+  their history. Linking merges the reader the cohort brought: the Abies card and loans stay, the account gives the
+  name and the cohort this year's group.
+
 ## 0.6.0 (2026-10-25)
 
 - Readers from the Moodle cohorts the entity chooses: each chosen cohort says what kind of reader its members are and

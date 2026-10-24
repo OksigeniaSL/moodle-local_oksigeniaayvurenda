@@ -25,7 +25,6 @@
 namespace local_oksigeniaayvurenda\local\sources;
 
 use local_oksigeniaayvurenda\core\readers\card_codes;
-use local_oksigeniaayvurenda\core\school_year;
 
 /**
  * Brings the readers of an entity from the Moodle cohorts it chose: each chosen cohort says what kind of reader its
@@ -140,7 +139,7 @@ final class cohorts {
         $rows->close();
 
         $transaction = $DB->start_delegated_transaction();
-        $year = self::year($entityid, $settings, $now);
+        $year = \local_oksigeniaayvurenda\local\years::around($entityid, $now);
         $readers = $DB->get_records_select(
             self::T . 'reader',
             'entityid = :entityid AND userid IS NOT NULL',
@@ -217,33 +216,6 @@ final class cohorts {
             $DB->update_record(self::T . 'member', (object) ['id' => $existing->id, 'groupname' => $group,
                 'stage' => $stage !== '' ? $stage : null, 'source' => 'cohort']);
         }
-    }
-
-    /**
-     * The school year of now for the entity, created when it does not exist yet.
-     *
-     * @param int $entityid
-     * @param array $settings
-     * @param int $now
-     * @return \stdClass
-     */
-    private static function year(int $entityid, array $settings, int $now): \stdClass {
-        global $DB;
-        $year = $DB->get_record_select(
-            self::T . 'year',
-            'entityid = :entityid AND timestart <= :a AND timeend > :b',
-            ['entityid' => $entityid, 'a' => $now, 'b' => $now],
-            '*',
-            IGNORE_MULTIPLE
-        );
-        if ($year) {
-            return $year;
-        }
-        $start = (string) $DB->get_field(self::T . 'entity', 'yearstart', ['id' => $entityid]);
-        $year = (object) (['entityid' => $entityid] +
-            school_year::around($now, $start ?: '09-01', \core_date::get_server_timezone_object()));
-        $year->id = $DB->insert_record(self::T . 'year', $year);
-        return $year;
     }
 
     /**

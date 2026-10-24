@@ -1,0 +1,105 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/match
+
+    Readers without an account against the accounts of the site, in three piles.
+
+    Context variables required for this template:
+    * heading, intro, notice - texts
+    * action, sesskey - the forms
+    * sure - pairs that match by themselves (reader, readergroup, account, accountgroup)
+    * doubt - readers with candidate accounts (readerid, name, group, options of userid, name, group)
+    * the words of each pile and button
+
+    Example context (json):
+    {
+        "heading": "Casar lectores con sus cuentas",
+        "intro": "Los lectores que llegaron sin cuenta, contra las cuentas del sitio.",
+        "notice": "",
+        "action": "#",
+        "sesskey": "abc",
+        "hassure": true,
+        "sureheading": "Casan solos: 1",
+        "sure": [{"reader": "Ana Montes Prado", "readergroup": "3º A", "account": "Ana Montes Prado", "accountgroup": "4º A"}],
+        "more": "",
+        "surebutton": "Enlazar los 1",
+        "hasdoubt": true,
+        "doubtheading": "Dudosos: 1",
+        "doubt": [{"readerid": 5, "name": "Leo Prado Valle", "group": "", "options": [{"userid": 7, "name": "Leo Prado", "group": "3º A"}]}],
+        "nobody": "Ninguno de estos",
+        "doubtbutton": "Guardar los elegidos",
+        "hasnone": true,
+        "noneheading": "No están en Moodle: 1",
+        "noneintro": "Siguen siendo lectores sin cuenta.",
+        "nonebutton": "Marcarlos como antiguos lectores",
+        "empty": ""
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
+{{#hassure}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{sureheading}}</h2>
+    <ul class="ayv-people">
+    {{#sure}}
+        <li class="ayv-person"><span class="ayv-person-name">{{reader}}</span>
+            <span class="ayv-person-card">{{readergroup}}</span> → <span>{{account}} {{#accountgroup}}· {{accountgroup}}{{/accountgroup}}</span></li>
+    {{/sure}}
+    </ul>
+    {{#more}}<p>{{more}}</p>{{/more}}
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="sure">
+        <p class="ayv-more"><button type="submit" class="ayv-button">{{surebutton}}</button></p>
+    </form>
+</section>
+{{/hassure}}
+{{#hasdoubt}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{doubtheading}}</h2>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="doubt">
+        <ul class="ayv-sources">
+        {{#doubt}}
+            <li class="ayv-source">
+                <span class="ayv-source-name">{{name}} {{#group}}<span class="ayv-source-count">{{group}}</span>{{/group}}</span>
+                <span class="ayv-choices">
+                {{#options}}
+                    <label class="ayv-field ayv-field-check"><input type="radio" name="pick[{{readerid}}]" value="{{userid}}">
+                        {{name}} {{#group}}· {{group}}{{/group}}</label>
+                {{/options}}
+                    <label class="ayv-field ayv-field-check"><input type="radio" name="pick[{{readerid}}]" value="0" checked>
+                        {{nobody}}</label>
+                </span>
+            </li>
+        {{/doubt}}
+        </ul>
+        <p class="ayv-more"><button type="submit" class="ayv-button">{{doubtbutton}}</button></p>
+    </form>
+</section>
+{{/hasdoubt}}
+{{#hasnone}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{noneheading}}</h2>
+    <p>{{noneintro}}</p>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="none">
+        <p class="ayv-more"><button type="submit" class="ayv-button ayv-button-quiet">{{nonebutton}}</button></p>
+    </form>
+</section>
+{{/hasnone}}

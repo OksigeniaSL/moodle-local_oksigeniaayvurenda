@@ -84,10 +84,14 @@
   </Ejemplares>
   <Lectores>
     <Lector Id="70001" CodLector="10000H" IdUsuario="80001" Nombre="Inventada" Apellido1="Lectora" Apellido2="Uno" Curso="10001" IdTipoLector="2785" FechaAlta="2024-09-10" FechaValidez="2026-09-10"/>
+    <Lector Id="70002" CodLector="10001L" IdUsuario="80002" Nombre="Profe" Apellido1="De" Apellido2="Prueba" Curso="" IdTipoLector="2786" FechaAlta="2020-09-01" FechaValidez="2026-09-01"/>
+    <Lector Id="70003" CodLector="10002C" IdUsuario="80003" Nombre="Antigua" Apellido1="Lectora" Apellido2="Ida" Curso="10002" IdTipoLector="2785" Email="antigua@ejemplo.invalid" FechaAlta="2019-09-10" FechaValidez="2021-09-10"/>
   </Lectores>
   <Noticias/>
   <Prestamos>
     <Prestamo Id="90001" IdEjemplar="2" IdLector="70001" Fecha="2025-09-20" FechaCalculada="2025-09-27" Estado="1" Anulado="0" Retrasado="0" DiasRetraso="0" NumProrrogas="0"/>
+    <Prestamo Id="90002" IdEjemplar="1" IdLector="70003" Fecha="2024-10-01" FechaCalculada="2024-10-08" FechaDevolucion="2024-10-05" Estado="0" Anulado="0" Retrasado="0" DiasRetraso="0" NumProrrogas="1"/>
+    <Prestamo Id="90003" IdEjemplar="1" IdLector="79999" Fecha="2024-11-01" FechaCalculada="2024-11-08" FechaDevolucion="2024-11-02" Estado="0" Anulado="0" Retrasado="0" DiasRetraso="0" NumProrrogas="0"/>
   </Prestamos>
   <RelacionesCursos><RelacionesCurso IdCurso="10001" IdCursoSiguiente="10002"/></RelacionesCursos>
   <Reservas/>

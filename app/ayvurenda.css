@@ -600,3 +600,7 @@
 }
 
 .ayv input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--green); }
+
+.ayv .ayv-choices { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
+
+.ayv input[type="radio"] { width: 1.15rem; height: 1.15rem; accent-color: var(--green); }

@@ -60,7 +60,17 @@ if ($group === null) {
             'url' => (new moodle_url('/local/oksigeniaayvurenda/sources.php', ['library' => $library->slug]))->out(false),
             'label' => $str('readerssources'),
         ] : null,
+        'match' => null,
     ];
+    $unlinked = $DB->count_records_select(
+        'local_oksigeniaayvurenda_reader',
+        "entityid = :entityid AND userid IS NULL AND status = 'active'",
+        ['entityid' => $library->entityid]
+    );
+    if ($unlinked && has_capability('local/oksigeniaayvurenda:manage', $context)) {
+        $data['match'] = ['url' => (new moodle_url('/local/oksigeniaayvurenda/match.php', ['library' => $library->slug]))
+            ->out(false), 'label' => $str('matchlink', $unlinked)];
+    }
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/readers', $data);
 } else {
     $list = readers::in_group($library, $group);

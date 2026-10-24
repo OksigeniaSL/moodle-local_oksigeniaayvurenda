@@ -26,7 +26,6 @@ namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\desk\policy;
 use local_oksigeniaayvurenda\core\loan_rules;
-use local_oksigeniaayvurenda\core\school_year;
 
 /**
  * What happens at the desk when a code is read: a reader's card opens the reader; a copy on loan comes back; a free
@@ -337,7 +336,7 @@ final class desk {
                 'readerid' => $readerid,
             ]);
         }
-        $year = $this->year();
+        $year = years::around((int) $this->library->entityid, $this->now);
         $group = $DB->get_field(
             self::T . 'member',
             'groupname',
@@ -427,29 +426,6 @@ final class desk {
             $library = $library->parentid ? $DB->get_record(self::T . 'library', ['id' => $library->parentid]) : null;
         }
         return self::DEFAULT_RULE;
-    }
-
-    /**
-     * The school year of now, created when it is the first loan of the year.
-     *
-     * @return \stdClass
-     */
-    private function year(): \stdClass {
-        global $DB;
-        $year = $DB->get_record_select(
-            self::T . 'year',
-            'entityid = :entityid AND timestart <= :a AND timeend > :b',
-            ['entityid' => $this->library->entityid, 'a' => $this->now, 'b' => $this->now],
-            '*',
-            IGNORE_MULTIPLE
-        );
-        if ($year) {
-            return $year;
-        }
-        $start = (string) $DB->get_field(self::T . 'entity', 'yearstart', ['id' => $this->library->entityid]);
-        $year = (object) (['entityid' => $this->library->entityid] + school_year::around($this->now, $start ?: '09-01', $this->tz));
-        $year->id = $DB->insert_record(self::T . 'year', $year);
-        return $year;
     }
 
     /**

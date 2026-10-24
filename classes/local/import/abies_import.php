@@ -27,11 +27,13 @@ namespace local_oksigeniaayvurenda\local\import;
 use local_oksigeniaayvurenda\core\abies\export_reader;
 use local_oksigeniaayvurenda\core\abies\mapper;
 use local_oksigeniaayvurenda\core\text;
+use local_oksigeniaayvurenda\local\years;
 
 /**
  * Brings the catalogue of an Abies Web export into a library, faithfully: records, authors with their role,
  * classification with its hierarchy, subjects, publishers, places, copies with their own codes and register numbers,
- * copy and reader types, and loan rules. Readers and loans come later.
+ * copy and reader types, and loan rules. On request, also the readers, with their card codes and groups, and their
+ * loans, out and returned; readers come without an account, to be matched with the site's accounts afterwards.
  *
  * It can run again with a newer export: each row keeps its Abies id and a fingerprint, so a second run adds what is
  * new, updates what changed, leaves the rest alone and never duplicates. While a library still works in Abies, Abies
@@ -53,6 +55,9 @@ final class abies_import {
     /** @var bool Whether the free notes of the copies come in. */
     private bool $withnotes;
 
+    /** @var bool Whether readers and loans come in. */
+    private bool $withreaders;
+
     /** @var int */
     private int $now;
 
@@ -70,12 +75,14 @@ final class abies_import {
      *
      * @param int $libraryid
      * @param bool $withnotes
+     * @param bool $withreaders
      */
-    public function __construct(int $libraryid, bool $withnotes = true) {
+    public function __construct(int $libraryid, bool $withnotes = true, bool $withreaders = false) {
         global $DB;
         $this->libraryid = $libraryid;
         $this->entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $libraryid], MUST_EXIST);
         $this->withnotes = $withnotes;
+        $this->withreaders = $withreaders;
         $this->now = time();
     }
 
@@ -94,6 +101,10 @@ final class abies_import {
         $this->records($export, $authorlinks);
         $this->items($export);
         $this->types_and_rules($export);
+        if ($this->withreaders) {
+            $this->readers($export);
+            $this->loans($export);
+        }
         $transaction->allow_commit();
         return $this->stats;
     }
@@ -103,7 +114,7 @@ final class abies_import {
      */
     private function load_maps(): void {
         global $DB;
-        $this->map = ['authority' => [], 'record' => [], 'item' => []];
+        $this->map = ['authority' => [], 'record' => [], 'item' => [], 'reader' => [], 'loan' => []];
         $rows = $DB->get_recordset(
             self::T . 'source',
             ['entityid' => $this->entityid, 'system' => self::SYSTEM],
@@ -377,6 +388,126 @@ final class abies_import {
             ]);
             $this->count('rule', 'created');
         }
+    }
+
+    /**
+     * The readers, without an account, with their card codes and their group of the school year of the export. A card
+     * code taken by a reader that came from somewhere else (a cohort) goes to the Abies reader, because that card is the
+     * one printed; the other reader gets a new code. Two Abies readers with the same code: the second gets its id after.
+     *
+     * @param export_reader $export
+     */
+    private function readers(export_reader $export): void {
+        global $DB;
+        $types = $export->reader_types();
+        $groups = $export->groups();
+        $year = years::around($this->entityid, $this->export_moment($export));
+        $codes = $DB->get_records_menu(self::T . 'reader', ['entityid' => $this->entityid], '', 'cardcode, id');
+        $fromabies = array_flip(array_map(fn($row) => $row[0], $this->map['reader']));
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $this->entityid]), true) ?: [];
+        foreach ($export->readers() as $row) {
+            $abiesid = $row['Id'] ?? '';
+            $known = $this->map['reader'][$abiesid][0] ?? null;
+            $code = strtoupper(trim($row['CodLector'] ?? ''));
+            $holder = $code !== '' ? (int) ($codes[$code] ?? 0) : 0;
+            if ($code === '' || ($holder && $holder !== $known && isset($fromabies[$holder]))) {
+                $code = ($code === '' ? 'ABIES' : $code) . '-' . $abiesid;
+                $this->count('reader', 'recoded');
+            } else if ($holder && $holder !== $known) {
+                $new = \local_oksigeniaayvurenda\core\readers\card_codes::next(
+                    array_keys($codes),
+                    1,
+                    !empty($settings['controlletter'])
+                )[0];
+                $DB->set_field(self::T . 'reader', 'cardcode', $new, ['id' => $holder]);
+                $codes[$new] = $holder;
+                $this->count('reader', 'gavecode');
+            }
+            $type = $types[$row['IdTipoLector'] ?? ''] ?? null;
+            $data = [
+                'cardcode' => $code,
+                'readertype' => mapper::reader_type($type['name'] ?? 'student'),
+                'firstname' => mapper::clean($row['Nombre'] ?? '') ?: null,
+                'lastname' => mapper::clean(($row['Apellido1'] ?? '') . ' ' . ($row['Apellido2'] ?? '')) ?: null,
+                'email' => ($row['Email'] ?? '') !== '' ? $row['Email'] : null,
+            ];
+            [$readerid] = $this->upsert_tracked('reader', $abiesid, $data, [], ['status' => 'active']);
+            $codes[$code] = $readerid;
+            $fromabies[$readerid] = true;
+            $group = $groups[$row['Curso'] ?? ''] ?? '';
+            if ($group !== '' && !$DB->record_exists(self::T . 'member', ['readerid' => $readerid, 'yearid' => $year->id])) {
+                $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $year->id,
+                    'groupname' => $group, 'source' => 'abies', 'timecreated' => $this->now]);
+            }
+        }
+    }
+
+    /**
+     * The loans, out and returned, each in its school year and, when the library knows it, with the reader's group.
+     *
+     * @param export_reader $export
+     */
+    private function loans(export_reader $export): void {
+        global $DB;
+        $tz = \core_date::get_server_timezone_object();
+        $date = function (?string $value, bool $endofday = false) use ($tz): ?int {
+            if ($value === null || !preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
+                return null;
+            }
+            $day = new \DateTimeImmutable(substr($value, 0, 10), $tz);
+            return ($endofday ? $day->setTime(23, 59, 59) : $day->setTime(12, 0))->getTimestamp();
+        };
+        foreach ($export->loans() as $row) {
+            $itemid = $this->map['item'][$row['IdEjemplar'] ?? ''][0] ?? null;
+            $readerid = $this->map['reader'][$row['IdLector'] ?? ''][0] ?? null;
+            $loaned = $date($row['Fecha'] ?? null);
+            if ($itemid === null || $readerid === null || $loaned === null || ($row['Anulado'] ?? '0') === '1') {
+                $this->count('loan', 'skipped');
+                continue;
+            }
+            $year = years::around($this->entityid, $loaned);
+            $group = $DB->get_field(
+                self::T . 'member',
+                'groupname',
+                ['readerid' => $readerid, 'yearid' => $year->id],
+                IGNORE_MULTIPLE
+            );
+            $data = [
+                'itemid' => $itemid,
+                'readerid' => $readerid,
+                'yearid' => (int) $year->id,
+                'groupname' => $group ?: null,
+                'timeloaned' => $loaned,
+                'timedue' => $date($row['FechaCalculada'] ?? null, true) ?? $loaned,
+                'timereturned' => $date($row['FechaDevolucion'] ?? null),
+                'renewals' => (int) ($row['NumProrrogas'] ?? 0),
+            ];
+            $this->upsert_tracked('loan', $row['Id'] ?? '', $data, [], ['libraryid' => $this->libraryid]);
+        }
+    }
+
+    /**
+     * When the export was made, as far as its dates tell: the latest loan or reader registration.
+     *
+     * @param export_reader $export
+     * @return int
+     */
+    private function export_moment(export_reader $export): int {
+        $latest = '';
+        foreach ($export->loans() as $row) {
+            $latest = max(
+                $latest,
+                substr((string) ($row['FechaDevolucion'] ?? ''), 0, 10),
+                substr((string) ($row['Fecha'] ?? ''), 0, 10)
+            );
+        }
+        foreach ($export->readers() as $row) {
+            $latest = max($latest, substr((string) ($row['FechaAlta'] ?? ''), 0, 10));
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $latest)) {
+            return $this->now;
+        }
+        return (new \DateTimeImmutable($latest, \core_date::get_server_timezone_object()))->setTime(12, 0)->getTimestamp();
     }
 
     /**
