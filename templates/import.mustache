@@ -1,0 +1,85 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/import
+
+    Importing a catalogue: bring the file, see what it brings, import it.
+
+    Context variables required for this template:
+    * heading, intro, notice, error, file - texts
+    * action, sesskey - the forms
+    * upload - whether to ask for a file
+    * abies (summary), marc (summary), csv (summary, columns, preview) - what the file brings
+    * the words of the fields and buttons
+
+    Example context (json):
+    {
+        "heading": "Importar un catálogo",
+        "intro": "De Abies, de otro programa en MARC o de una hoja de cálculo.",
+        "notice": "",
+        "error": "",
+        "file": "",
+        "action": "#",
+        "sesskey": "abc",
+        "upload": true,
+        "abies": null,
+        "marc": null,
+        "csv": null,
+        "importfile": "El fichero", "importnext": "Ver qué trae", "importgo": "Importar", "importcancel": "Dejarlo",
+        "importnotes": "Con las notas de los ejemplares", "importreaders": "Con los lectores y sus préstamos",
+        "importreadershint": "Llegan sin cuenta.", "readerslistcolumns": "Qué es cada columna",
+        "readerslistpreview": "Las primeras filas"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+{{#upload}}
+<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="upload">
+    <label class="ayv-field">{{importfile}} <input type="file" name="file" required accept=".zip,.xml,.mrc,.marc,.iso,.csv,.txt"></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{importnext}}</button></p>
+</form>
+{{/upload}}
+{{^upload}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="import">
+    <p class="ayv-book-title">{{file}}</p>
+    {{#abies}}
+    <p>{{summary}}</p>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="notes" value="1" checked> {{importnotes}}</label>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="readers" value="1"> {{importreaders}}</label>
+    <p class="ayv-field-hint">{{importreadershint}}</p>
+    {{/abies}}
+    {{#marc}}<p>{{summary}}</p>{{/marc}}
+    {{#csv}}
+    <p>{{summary}}</p>
+    <h2 class="ayv-section-title">{{readerslistcolumns}}</h2>
+    <div class="ayv-book-copy">
+    {{#columns}}
+        <label class="ayv-field">{{heading}} <select name="column[{{index}}]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>
+    {{/columns}}
+    </div>
+    <h2 class="ayv-section-title">{{readerslistpreview}}</h2>
+    <ul class="ayv-people">{{#preview}}<li class="ayv-person">{{#cells}}<span>{{value}}</span>{{/cells}}</li>{{/preview}}</ul>
+    {{/csv}}
+    <p class="ayv-book-actions">
+        <button type="submit" class="ayv-button">{{importgo}}</button>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="cancel">{{importcancel}}</button>
+    </p>
+</form>
+{{/upload}}

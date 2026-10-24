@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Two made-up records as another library program exports them: copies in 952 (Koha) and in 852. -->
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+<record>
+  <leader>00700cam a2200200 a 4500</leader>
+  <controlfield tag="001">5001</controlfield>
+  <controlfield tag="003">BibliotecaInventada</controlfield>
+  <controlfield tag="008">240101s2024    sp            000 1 spa d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" "><subfield code="a">9798999999993</subfield></datafield>
+  <datafield tag="100" ind1="1" ind2=" "><subfield code="a">Duna Faro, Lía.</subfield></datafield>
+  <datafield tag="245" ind1="1" ind2="3"><subfield code="a">El jardín de las palabras.</subfield></datafield>
+  <datafield tag="952" ind1=" " ind2=" "><subfield code="p">K1001</subfield><subfield code="o">N DUN jar</subfield><subfield code="c">Narrativa</subfield><subfield code="y">BK</subfield><subfield code="d">2024-03-01</subfield></datafield>
+  <datafield tag="952" ind1=" " ind2=" "><subfield code="o">N DUN jar</subfield><subfield code="c">Narrativa</subfield></datafield>
+</record>
+<record>
+  <leader>00600cam a2200180 a 4500</leader>
+  <controlfield tag="001">5002</controlfield>
+  <controlfield tag="003">BibliotecaInventada</controlfield>
+  <datafield tag="245" ind1="0" ind2="0"><subfield code="a">Atlas de los mares inventados.</subfield></datafield>
+  <datafield tag="852" ind1=" " ind2=" "><subfield code="b">Central</subfield><subfield code="c">Consulta</subfield><subfield code="h">91 LAG atl</subfield><subfield code="p">K1002</subfield></datafield>
+</record>
+</collection>

@@ -122,7 +122,7 @@ final class cataloguer {
         $transaction = $DB->start_delegated_transaction();
         $newrecord = false;
         if (!$recordid) {
-            $recordid = self::record($entityid, $description, $now);
+            $recordid = self::create_record($entityid, $description, $now);
             $newrecord = true;
         } else {
             $DB->get_record(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid], 'id', MUST_EXIST);
@@ -262,7 +262,7 @@ final class cataloguer {
      * @param int $now
      * @return int
      */
-    private static function record(int $entityid, array $description, int $now): int {
+    public static function create_record(int $entityid, array $description, int $now): int {
         global $DB;
         $fields = ['doctype', 'title', 'subtitle', 'responsibility', 'isbn', 'edition', 'pubplace', 'pubyear', 'lang',
             'extent', 'summary', 'notes'];

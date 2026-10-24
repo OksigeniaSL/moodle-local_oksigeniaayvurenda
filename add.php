@@ -93,7 +93,7 @@ $data['tools'] = $help ? '' : $tools['html'];
 shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/add', $data), $library, '', [
     'search' => false,
     'scripts' => ['camera', 'add'],
-    'nav' => $help ? [] : [
+    'nav' => $help ? [] : array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false),
             'label' => $str('desktitle')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
@@ -102,9 +102,13 @@ shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaay
             'label' => $str('materialnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $library->slug]))->out(false),
             'label' => $str('labelsnav')],
+    ], has_capability('local/oksigeniaayvurenda:manage', $context) ? [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('importnav')],
+    ] : [], [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'add']))
             ->out(false), 'label' => $str('helpnav')],
-    ],
+    ]),
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php'))->out(false),
         'sesskey' => sesskey(),

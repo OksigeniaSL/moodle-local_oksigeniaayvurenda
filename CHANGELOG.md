@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0 (2026-10-27)
+
+- Importing a catalogue from the screen, for any centre and not only from Abies: an Abies Web export (the zip or its
+  XML, with or without its readers and loans), any library program's MARC21 (ISO 2709 or MARCXML, with the copies in
+  the standard field 852 or in Koha's 952), or a spreadsheet saved as CSV with its columns recognised by their headings
+  and correctable. First it says what the file brings; then it imports. Records are found again by where they came
+  from or by their ISBN, so a file on top of another does not repeat books; copies by their code, and a copy without
+  one gets the next of the library. Also from the command line (`cli/import_catalogue.php`).
+
 ## 0.9.8 (2026-10-27)
 
 - Until Gaudí's puppets arrive, each character shows the initial of its name in a circle, instead of a makeshift
