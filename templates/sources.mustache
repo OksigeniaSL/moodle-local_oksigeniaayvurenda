@@ -35,6 +35,10 @@
         "cohorts": [{"id": 1, "name": "3º Primaria A", "memberslabel": "24 miembros", "chosen": true, "stage": "Primaria",
                      "group": true, "types": [{"value": "student", "label": "Alumnos", "selected": true}]}],
         "nocohorts": "",
+        "cohortsheading": "Cohortes",
+        "coursesheading": "Cursos de Moodle",
+        "coursesintro": "Si las clases están en cursos con grupos.",
+        "courses": [{"id": 2, "name": "Lengua 3º", "groupslabel": "2 grupos", "chosen": false, "stage": "Primaria", "group": true}],
         "labels": {"chosen": "Son lectores", "type": "Tipo", "stage": "Etapa", "group": "Su nombre es el grupo",
                    "save": "Guardar", "syncnow": "Guardar y traer los lectores ahora"}
     }
@@ -45,6 +49,8 @@
 {{#hascohorts}}
 <form class="ayv-form" method="post" action="{{action}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{cohortsheading}}</h2>
+    {{^cohorts}}<p class="ayv-empty">{{nocohorts}}</p>{{/cohorts}}
     <ul class="ayv-sources">
     {{#cohorts}}
         <li class="ayv-source">
@@ -59,10 +65,23 @@
         </li>
     {{/cohorts}}
     </ul>
+    <h2 class="ayv-section-title">{{coursesheading}}</h2>
+    <p>{{coursesintro}}</p>
+    <ul class="ayv-sources">
+    {{#courses}}
+        <li class="ayv-source">
+            <label class="ayv-source-name"><input type="checkbox" name="course[{{id}}]" value="1" {{#chosen}}checked{{/chosen}}>
+                {{name}} <span class="ayv-source-count">{{groupslabel}}</span></label>
+            <label class="ayv-field">{{labels.stage}} <input type="text" name="coursestage[{{id}}]" value="{{stage}}" maxlength="100"></label>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="coursegroup[{{id}}]" value="1" {{#group}}checked{{/group}}>
+                {{labels.group}}</label>
+        </li>
+    {{/courses}}
+    </ul>
     <p class="ayv-more">
         <button type="submit" class="ayv-button" name="syncnow" value="1">{{labels.syncnow}}</button>
         <button type="submit" class="ayv-button ayv-button-quiet">{{labels.save}}</button>
     </p>
 </form>
 {{/hascohorts}}
-{{^hascohorts}}<p class="ayv-empty">{{nocohorts}}</p>{{/hascohorts}}
+

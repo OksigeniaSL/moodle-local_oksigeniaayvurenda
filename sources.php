@@ -54,6 +54,14 @@ if (data_submitted() && confirm_sesskey()) {
         }
     }
     cohorts::save((int) $library->entityid, $config);
+    $courseconfig = [];
+    foreach (optional_param_array('course', [], PARAM_INT) as $courseid => $on) {
+        if ($on) {
+            $courseconfig[$courseid] = ['stage' => optional_param_array('coursestage', [], PARAM_TEXT)[$courseid] ?? '',
+                'group' => !empty(optional_param_array('coursegroup', [], PARAM_INT)[$courseid])];
+        }
+    }
+    \local_oksigeniaayvurenda\local\sources\courses::save((int) $library->entityid, $courseconfig);
     $notice = $str('sourcessaved');
     if (optional_param('syncnow', false, PARAM_BOOL)) {
         $stats = cohorts::sync((int) $library->entityid);
@@ -77,7 +85,14 @@ $data = [
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
     'cohorts' => $rows,
-    'hascohorts' => (bool) $rows,
+    'courses' => array_map(
+        fn($c) => $c + ['groupslabel' => $str('sourcesgroupsof', $c['groups'])],
+        \local_oksigeniaayvurenda\local\sources\courses::options((int) $library->entityid)
+    ),
+    'coursesheading' => $str('sourcescourses'),
+    'coursesintro' => $str('sourcescoursesintro'),
+    'hascohorts' => true,
+    'cohortsheading' => $str('sourcescohorts'),
     'nocohorts' => $str('sourcesnocohorts'),
     'labels' => [
         'chosen' => $str('sourceschosen'),

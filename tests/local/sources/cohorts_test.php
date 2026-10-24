@@ -135,4 +135,46 @@ final class cohorts_test extends \advanced_testcase {
         $this->assertFalse($options['ESO 1º C']['chosen']);
         $this->assertSame('ESO', $options['ESO 1º C']['stage']);
     }
+
+    /**
+     * Courses with groups bring their students with their group (or the course, without one) and their teachers as
+     * teachers; a course no longer chosen lets its readers go.
+     */
+    public function test_courses(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $dg = $this->getDataGenerator();
+        $library = $dg->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $course = $dg->create_course(['fullname' => 'Lengua inventada']);
+        $group = $dg->create_group(['courseid' => $course->id, 'name' => '3º A']);
+        $ana = $dg->create_user();
+        $leo = $dg->create_user();
+        $profe = $dg->create_user();
+        $dg->enrol_user($ana->id, $course->id, 'student');
+        $dg->enrol_user($leo->id, $course->id, 'student');
+        $dg->enrol_user($profe->id, $course->id, 'editingteacher');
+        $dg->create_group_member(['groupid' => $group->id, 'userid' => $ana->id]);
+        courses::save($entityid, [$course->id => ['stage' => 'Primaria', 'group' => true]]);
+        $stats = cohorts::sync($entityid);
+        $this->assertSame(3, $stats['created']);
+        $reader = fn($user) => $DB->get_record('local_oksigeniaayvurenda_reader', ['userid' => $user->id], '*', MUST_EXIST);
+        $group = fn($user) => $DB->get_field(
+            'local_oksigeniaayvurenda_member',
+            'groupname',
+            ['readerid' => $reader($user)->id]
+        );
+        $this->assertSame('3º A', $group($ana));
+        $this->assertSame('Lengua inventada', $group($leo));
+        $this->assertSame('teacher', $reader($profe)->readertype);
+        $this->assertFalse($group($profe));
+
+        courses::save($entityid, []);
+        $this->assertSame(0, cohorts::sync($entityid)['total']);
+        courses::save($entityid, [$course->id => ['stage' => '', 'group' => false]]);
+        $this->assertSame(
+            ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 3],
+            cohorts::sync($entityid)
+        );
+    }
 }

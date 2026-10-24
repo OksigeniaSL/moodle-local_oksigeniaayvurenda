@@ -107,11 +107,11 @@ final class cohorts {
         $stats = ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 0];
         $settings = self::settings($entityid);
         $chosen = $settings['cohorts'] ?? [];
-        if (!$chosen) {
+        if (!$chosen && !courses::chosen($entityid)) {
             return $stats;
         }
         // Who is in the chosen cohorts: the first cohort that has a user says its kind and its group.
-        [$in, $params] = $DB->get_in_or_equal(array_keys($chosen), SQL_PARAMS_NAMED);
+        [$in, $params] = $DB->get_in_or_equal(array_keys($chosen) ?: [0], SQL_PARAMS_NAMED);
         $rows = $DB->get_recordset_sql(
             "SELECT m.id, m.userid, m.cohortid, c.name
                FROM {cohort_members} m
@@ -137,6 +137,10 @@ final class cohorts {
             ];
         }
         $rows->close();
+        // Then the courses: whoever is in a cohort already has their group.
+        foreach (courses::people($entityid) as $userid => $person) {
+            $people[$userid] = $people[$userid] ?? $person;
+        }
 
         $transaction = $DB->start_delegated_transaction();
         $year = \local_oksigeniaayvurenda\local\years::around($entityid, $now);

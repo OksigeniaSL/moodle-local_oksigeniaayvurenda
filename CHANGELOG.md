@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.5 (2026-10-27)
+
+- Readers from Moodle courses, for a centre whose classes are courses with groups instead of cohorts: the students of
+  each course chosen are readers with their group in the course (or the course itself, if it has none), and its
+  teachers are readers as teachers. They come with the cohorts, by the same nightly task; whoever is in a chosen
+  cohort keeps the cohort's group.
+
 ## 0.9.4 (2026-10-27)
 
 - Readers from a list, for a centre whose readers are not in Moodle cohorts or that has no Moodle: the CSV its
