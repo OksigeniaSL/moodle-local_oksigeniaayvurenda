@@ -1,0 +1,61 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/lot
+
+    One box: filling it by reading codes, sending it, and what came back.
+
+    Example context (json):
+    {
+        "heading": "Lote «Dinosaurios»", "where": "Para Aula de 4º B, hasta el 20 de diciembre", "notice": "", "bad": false,
+        "open": true, "out": false, "back": false, "mine": true, "action": "#", "sesskey": "abc", "count": "Libros: 1",
+        "copies": [{"itemid": 1, "title": "El faro dormido", "barcode": "100000L", "status": "available", "home": false, "state": ""}],
+        "pending": [], "haspending": false,
+        "lotscan": "Pasa los libros", "lotremove": "Quitar", "lotsend": "Enviar el lote", "lotgiveback": "Ha vuelto",
+        "lotpendingheading": "Falta por volver", "lotallhome": "Ha vuelto todo"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{where}} · {{count}}</p>
+{{#notice}}<p class="ayv-notice{{#bad}} ayv-notice-error{{/bad}}" role="status">{{notice}}</p>{{/notice}}
+{{#open}}{{#mine}}
+<form method="post" action="{{action}}" class="ayv-scan" autocomplete="off">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
+    <label for="ayv-code" class="ayv-scan-label">{{lotscan}}</label>
+    <input id="ayv-code" name="code" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus maxlength="200" required>
+</form>
+{{/mine}}{{/open}}
+<ul class="ayv-holds">
+{{#copies}}
+    <li class="ayv-holds-row"><span class="ayv-holds-title">{{title}}</span>
+        <span class="ayv-holds-when">{{barcode}}{{#state}} · {{state}}{{/state}}</span>
+        {{#open}}{{#mine}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="item" value="{{itemid}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remove">{{lotremove}}</button></form>{{/mine}}{{/open}}
+    </li>
+{{/copies}}
+</ul>
+{{#back}}
+<h2 class="ayv-section-title">{{lotpendingheading}}</h2>
+{{^haspending}}<p class="ayv-empty">{{lotallhome}}</p>{{/haspending}}
+<ul>{{#pending}}<li>{{line}}</li>{{/pending}}</ul>
+{{/back}}
+<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+    <p class="ayv-more">
+    {{#open}}{{#mine}}<button type="submit" class="ayv-button" name="do" value="send">{{lotsend}}</button>{{/mine}}{{/open}}
+    {{#out}}<button type="submit" class="ayv-button" name="do" value="back">{{lotgiveback}}</button>{{/out}}
+    </p>
+</form>

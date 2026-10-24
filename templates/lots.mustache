@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/lots
+
+    The boxes a library sends and receives, and preparing a new one.
+
+    Example context (json):
+    {
+        "heading": "Lotes", "intro": "Cajas de libros.", "action": "#", "sesskey": "abc", "hasothers": true,
+        "others": [{"id": 2, "name": "Aula de 4º B"}], "hassent": true, "hasreceived": false, "received": [],
+        "sent": [{"url": "#", "name": "Dinosaurios", "state": "Fuera hasta el 20 de diciembre", "late": false,
+                  "counts": "12 libros", "other": "Aula de 4º B"}],
+        "lotssent": "Enviados", "lotsreceived": "Recibidos", "lotsnew": "Preparar un lote", "lotname": "Nombre",
+        "lotnamehint": "un tema o una lectura", "lotto": "Para", "lotdue": "Hasta", "lotcreate": "Empezar a llenarlo",
+        "lotsnoothers": "Hace falta otra biblioteca", "lotlate": "con retraso"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#hassent}}
+<h2 class="ayv-section-title">{{lotssent}}</h2>
+<ul class="ayv-holds">
+{{#sent}}<li class="ayv-holds-row"><a class="ayv-holds-title" href="{{url}}">{{name}}</a>
+    <span class="ayv-holds-who">{{other}} · {{state}}{{#late}} · <strong class="ayv-is-late">{{lotlate}}</strong>{{/late}}</span>
+    <span class="ayv-holds-when">{{counts}}</span></li>{{/sent}}
+</ul>
+{{/hassent}}
+{{#hasreceived}}
+<h2 class="ayv-section-title">{{lotsreceived}}</h2>
+<ul class="ayv-holds">
+{{#received}}<li class="ayv-holds-row"><a class="ayv-holds-title" href="{{url}}">{{name}}</a>
+    <span class="ayv-holds-who">{{other}} · {{state}}</span> <span class="ayv-holds-when">{{counts}}</span></li>{{/received}}
+</ul>
+{{/hasreceived}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{lotsnew}}</h2>
+    {{^hasothers}}<p class="ayv-empty">{{lotsnoothers}}</p>{{/hasothers}}
+    {{#hasothers}}
+    <label class="ayv-field">{{lotname}} <span class="ayv-field-hint">{{lotnamehint}}</span> <input type="text" name="name" maxlength="100" required></label>
+    <label class="ayv-field">{{lotto}} <select name="to">{{#others}}<option value="{{id}}">{{name}}</option>{{/others}}</select></label>
+    <label class="ayv-field">{{lotdue}} <input type="date" name="due"></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="create">{{lotcreate}}</button></p>
+    {{/hasothers}}
+</form>

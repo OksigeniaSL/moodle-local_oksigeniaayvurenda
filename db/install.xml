@@ -375,6 +375,40 @@
         <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_lot" COMMENT="A box of copies one library lends to another of the same entity for a time">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The library the copies belong to"/>
+        <FIELD NAME="tolibraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The library they go to"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="open" SEQUENCE="false" COMMENT="open (being filled), out or back"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timeout" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeback" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="tolibraryid" TYPE="foreign" FIELDS="tolibraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_lotitem" COMMENT="A copy in a box, and when it came home">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="lotid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timeback" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="lotid" TYPE="foreign" FIELDS="lotid" REFTABLE="local_oksigeniaayvurenda_lot" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_source" COMMENT="Where a row came from (Abies, a connector, a CSV), so a new import updates it instead of duplicating it">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

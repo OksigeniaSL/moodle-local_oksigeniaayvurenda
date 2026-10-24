@@ -430,6 +430,8 @@ final class desk {
             'returnstaffid' => $this->staffid, 'timemodified' => $this->now]);
         $material = $this->material($item, (int) $loan->id, 'in');
         $item->status = 'available';
+        // A copy of a box that already went back goes home now.
+        lots::come_home($item, $this->now);
         $hold = holds::place($item, $this->now);
         $transaction->allow_commit();
         $owner = $this->reader((int) $loan->readerid);

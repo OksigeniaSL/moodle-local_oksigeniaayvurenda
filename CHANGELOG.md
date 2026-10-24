@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.17.0 (2026-10-27)
+
+- Boxes between the libraries of a centre: the central library fills a box by reading its copies (a theme, a class
+  reading, a corner for the term) and sends it to a classroom or a department until a date. The copies sit on that
+  shelf meanwhile and its teacher lends them to the children; the shelf shows the box and gives it back with a tap.
+  What is on the shelf goes home at once, what a child has goes home when it is returned, and the central library sees
+  what is still missing and which boxes are late.
+
 ## 0.16.0 (2026-10-27)
 
 - The shelf of a classroom library, for its teacher, who is not a librarian and has no scanner: the children of the

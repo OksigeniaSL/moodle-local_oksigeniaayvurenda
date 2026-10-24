@@ -57,6 +57,12 @@ if (data_submitted() && confirm_sesskey()) {
         $loanid = shelf::give_back($library, $itemid, (int) $USER->id, $now);
         $params = $loanid ? ['done' => 'back', 'loan' => $loanid] : [];
         $readerid = 0;
+    } else if ($do === 'lotback') {
+        $back = \local_oksigeniaayvurenda\local\lots::give_back(\local_oksigeniaayvurenda\local\lots::get(
+            required_param('lot', PARAM_INT),
+            $library
+        ), $now);
+        $params = ['done' => 'lotback', 'home' => $back['home'], 'pending' => count($back['pending'])];
     } else if ($do === 'undo') {
         $loan = $DB->get_record('local_oksigeniaayvurenda_loan', ['id' => required_param('loan', PARAM_INT),
             'libraryid' => $library->id], '*', MUST_EXIST);
@@ -108,10 +114,26 @@ if (in_array($done, ['lent', 'back'], true)) {
         $notice = $str($done === 'lent' ? 'shelflent' : 'shelfreturned', (object) ['title' => $title, 'name' => $who]);
         $undo = ['loan' => (int) $loan->id, 'what' => $done === 'lent' ? 'lent' : 'returned'];
     }
+} else if ($done === 'lotback') {
+    $notice = $str('shelflotback', (object) ['home' => optional_param('home', 0, PARAM_INT),
+        'pending' => optional_param('pending', 0, PARAM_INT)]);
 } else if ($done === 'undone') {
     $notice = $str('shelfundone');
 } else if ($done === 'notlent') {
     $notice = $str('shelfnotlent');
+}
+$date = fn(?int $time) => $time ? userdate($time, get_string('strftimedateshort', 'langconfig')) : '—';
+$boxes = [];
+foreach (\local_oksigeniaayvurenda\local\lots::of_library($library)['received'] as $box) {
+    if ($box['lot']->status === 'out') {
+        $boxes[] = ['id' => (int) $box['lot']->id, 'line' => $str('shelfbox', (object) ['name' => $box['lot']->name,
+            'from' => format_string((string) $DB->get_field(
+                'local_oksigeniaayvurenda_library',
+                'name',
+                ['id' => $box['lot']->libraryid]
+            )), 'due' => $date($box['lot']->timedue), 'copies' => $box['copies'],
+            'lent' => $box['lent']])];
+    }
 }
 $books = array_map(fn($b) => $b + ['lentlabel' => $b['lent'] !== '' ? $str('shelflentto', $b['lent']) : '',
     'canlend' => $b['lent'] === '' && $chosen !== null], shelf::books($library));
@@ -132,8 +154,9 @@ $data = [
     'nochildren' => $group !== '' && !$children ? $str('shelfnochildren', $group) : '',
     'empty' => $str('shelfempty'),
     'readurl' => $url(['view' => 'read'])->out(false),
+    'boxes' => $boxes,
 ];
-foreach (['shelfwho', 'shelfwhat', 'shelfundo', 'shelfread', 'shelftapback'] as $key) {
+foreach (['shelfwho', 'shelfwhat', 'shelfundo', 'shelfread', 'shelftapback', 'shelfboxback'] as $key) {
     $data[$key] = $str($key);
 }
 shell::output(

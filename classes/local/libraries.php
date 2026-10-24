@@ -188,7 +188,9 @@ final class libraries {
         $library = $DB->get_record(self::T . 'library', ['id' => $libraryid]);
         if (
             !$library || $DB->record_exists(self::T . 'item', ['libraryid' => $libraryid]) ||
-                $DB->record_exists(self::T . 'loan', ['libraryid' => $libraryid])
+            $DB->record_exists(self::T . 'loan', ['libraryid' => $libraryid]) ||
+            $DB->record_exists_select(self::T . 'lot', 'libraryid = :a OR tolibraryid = :b', ['a' => $libraryid,
+                'b' => $libraryid])
         ) {
             return false;
         }

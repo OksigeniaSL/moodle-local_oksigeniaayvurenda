@@ -138,5 +138,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102714, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102717) {
+        // Boxes of copies one library lends to another.
+        foreach (['local_oksigeniaayvurenda_lot', 'local_oksigeniaayvurenda_lotitem'] as $name) {
+            if (!$dbman->table_exists($name)) {
+                $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', $name);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026102717, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

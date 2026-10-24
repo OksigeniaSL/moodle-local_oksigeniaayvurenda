@@ -218,6 +218,7 @@ final class shelf {
             'returnstaffid' => $staffid ?: null, 'timemodified' => $now]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'available', 'timemodified' => $now]);
         $item->status = 'available';
+        lots::come_home($item, $now);
         holds::place($item, $now);
         $transaction->allow_commit();
         return (int) $loan->id;

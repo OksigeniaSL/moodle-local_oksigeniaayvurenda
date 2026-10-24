@@ -25,7 +25,8 @@
         "hasbooks": true, "books": [{"itemid": 1, "recordid": 1, "title": "El faro dormido", "cover": null, "colour": 1,
             "lent": "", "lentlabel": "", "loanid": 0, "canlend": true}],
         "hint": "Ahora, el libro de Ana Montes", "nogroup": "", "nochildren": "", "empty": "Vacía",
-        "readurl": "#", "shelfwho": "¿Quién?", "shelfwhat": "¿Qué libro?", "shelfundo": "Deshacer",
+        "readurl": "#", "boxes": [{"id": 1, "line": "Caja «Dinosaurios», de la central"}], "shelfboxback": "Devolver la caja",
+        "shelfwho": "¿Quién?", "shelfwhat": "¿Qué libro?", "shelfundo": "Deshacer",
         "shelfread": "Qué ha leído cada uno", "shelftapback": "Toca un libro prestado para devolverlo"
     }
 }}
@@ -37,6 +38,12 @@
         <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="undo">{{shelfundo}}</button></form>{{/undo}}
 </div>{{/notice}}
 {{#nogroup}}<p class="ayv-empty">{{nogroup}}</p>{{/nogroup}}
+{{#boxes}}
+<div class="ayv-notice ayv-shelf-notice"><span>{{line}}</span>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="lot" value="{{id}}">
+        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="lotback">{{shelfboxback}}</button></form>
+</div>
+{{/boxes}}
 {{#nochildren}}<p class="ayv-empty">{{nochildren}}</p>{{/nochildren}}
 {{#haschildren}}
 <h2 class="ayv-section-title">{{shelfwho}}</h2>

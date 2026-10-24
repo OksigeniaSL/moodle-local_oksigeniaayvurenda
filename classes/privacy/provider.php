@@ -113,6 +113,11 @@ class provider implements
             'reason' => 'privacy:metadata:withdrawal:reason',
             'timecreated' => 'privacy:metadata:withdrawal:timecreated',
         ], 'privacy:metadata:withdrawal');
+        $collection->add_database_table(self::T . 'lot', [
+            'createdby' => 'privacy:metadata:lot:createdby',
+            'name' => 'privacy:metadata:lot:name',
+            'timecreated' => 'privacy:metadata:lot:timecreated',
+        ], 'privacy:metadata:lot');
         $collection->add_database_table(self::T . 'relay', [
             'userid' => 'privacy:metadata:relay:userid',
             'code' => 'privacy:metadata:relay:code',
@@ -166,6 +171,7 @@ class provider implements
             'SELECT createdby FROM {' . self::T . 'withdrawal} WHERE createdby IS NOT NULL',
             []
         );
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'lot} WHERE createdby IS NOT NULL', []);
     }
 
     /**
@@ -256,6 +262,14 @@ class provider implements
                     'created' => transform::datetime($w->timecreated)], $withdrawals))]
             );
         }
+        $lots = $DB->get_records(self::T . 'lot', ['createdby' => $userid], 'timecreated', 'id, name, timecreated');
+        if ($lots) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:lot', 'local_oksigeniaayvurenda')]),
+                (object) ['lots' => array_values(array_map(fn($l) => ['name' => $l->name,
+                    'created' => transform::datetime($l->timecreated)], $lots))]
+            );
+        }
         $relayed = $DB->get_records(self::T . 'relay', ['userid' => $userid], 'id', 'id, code, timecreated');
         if ($relayed) {
             writer::with_context($context)->export_data(
@@ -305,6 +319,7 @@ class provider implements
         $DB->set_field_select(self::T . 'stocktake', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'stockread', 'userid', null, 'userid IS NOT NULL');
         $DB->set_field_select(self::T . 'withdrawal', 'createdby', null, 'createdby IS NOT NULL');
+        $DB->set_field_select(self::T . 'lot', 'createdby', null, 'createdby IS NOT NULL');
     }
 
     /**
@@ -369,6 +384,7 @@ class provider implements
         $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'withdrawal', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'lot', 'createdby', null, ['createdby' => $userid]);
     }
 
     /**
@@ -394,7 +410,8 @@ class provider implements
         if (
             $DB->record_exists(self::T . 'stocktake', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'stockread', ['userid' => $userid]) ||
-            $DB->record_exists(self::T . 'withdrawal', ['createdby' => $userid])
+            $DB->record_exists(self::T . 'withdrawal', ['createdby' => $userid]) ||
+            $DB->record_exists(self::T . 'lot', ['createdby' => $userid])
         ) {
             return true;
         }

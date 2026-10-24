@@ -186,10 +186,13 @@ final class practice {
             implode(',', array_map('intval', $libraries)) . ')') : [];
         $withdrawals = $libraries ? $DB->get_fieldset_select(self::T . 'withdrawal', 'id', 'libraryid IN (' .
             implode(',', array_map('intval', $libraries)) . ')') : [];
+        $lots = $libraries ? $DB->get_fieldset_select(self::T . 'lot', 'id', 'libraryid IN (' .
+            implode(',', array_map('intval', $libraries)) . ')') : [];
         $transaction = $DB->start_delegated_transaction();
         foreach (
             [['stockread', 'stocktakeid', $stocktakes], ['stocktake', 'libraryid', $libraries],
                 ['withdrawn', 'withdrawalid', $withdrawals], ['withdrawal', 'libraryid', $libraries],
+                ['lotitem', 'lotid', $lots], ['lot', 'libraryid', $libraries],
                 ['hold', 'libraryid', $libraries], ['loan', 'libraryid', $libraries], ['rule', 'libraryid', $libraries],
                 ['recauth', 'recordid', $records],
                 ['member', 'readerid', $readers]] as [$table, $field, $ids]
