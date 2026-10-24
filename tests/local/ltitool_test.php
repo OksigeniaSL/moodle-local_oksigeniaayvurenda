@@ -299,16 +299,18 @@ final class ltitool_test extends \advanced_testcase {
 
         $lis = 'http://purl.imsglobal.org/vocab/lis/v2/membership#';
         $members = ['members' => [
-            ['user_id' => 's-1', 'status' => 'Active', 'given_name' => 'Elio', 'family_name' => 'Pino', 'email' => 'elio@example.invalid',
-                'roles' => [$lis . 'Learner']],
+            ['user_id' => 's-1', 'status' => 'Active', 'given_name' => 'Elio', 'family_name' => 'Pino',
+                'email' => 'elio@example.invalid', 'roles' => [$lis . 'Learner']],
             ['user_id' => 's-2', 'status' => 'Inactive', 'given_name' => 'Ada', 'family_name' => 'Ruiz', 'roles' => ['Learner']],
-            ['user_id' => 't-1', 'status' => 'Active', 'given_name' => 'Marta', 'family_name' => 'Soto', 'roles' => [$lis . 'Instructor']],
+            ['user_id' => 't-1', 'status' => 'Active', 'given_name' => 'Marta', 'family_name' => 'Soto',
+                'roles' => [$lis . 'Instructor']],
         ]];
         $history = [];
+        $type = ['Content-Type' => 'application/vnd.ims.lti-nrps.v2.membershipcontainer+json'];
         $stack = HandlerStack::create(new MockHandler([
             new Response(200, [], json_encode(['access_token' => 'tok-1', 'expires_in' => 3600])),
-            new Response(200, ['Content-Type' => 'application/vnd.ims.lti-nrps.v2.membershipcontainer+json'], json_encode($members)),
-            new Response(200, ['Content-Type' => 'application/vnd.ims.lti-nrps.v2.membershipcontainer+json'], json_encode($members)),
+            new Response(200, $type, json_encode($members)),
+            new Response(200, $type, json_encode($members)),
         ]));
         $stack->push(\GuzzleHttp\Middleware::history($history));
         ltitool::$client = new \GuzzleHttp\Client(['handler' => $stack]);

@@ -324,12 +324,13 @@ final class ltitool {
     public static function course(array $launchdata): ?\stdClass {
         global $DB;
         $url = (string) ($launchdata[LtiConstants::NRPS_CLAIM_SERVICE]['context_memberships_url'] ?? '');
-        $contextid = (string) ($launchdata['https://purl.imsglobal.org/spec/lti/claim/context']['id'] ?? '');
+        $context = $launchdata['https://purl.imsglobal.org/spec/lti/claim/context'] ?? [];
+        $contextid = (string) ($context['id'] ?? '');
         if ($url === '' || $contextid === '') {
             return null;
         }
         $platform = self::platform_of($launchdata);
-        $title = \core_text::substr((string) ($launchdata['https://purl.imsglobal.org/spec/lti/claim/context']['title'] ?? ''), 0, 255);
+        $title = \core_text::substr((string) ($context['title'] ?? ''), 0, 255);
         $now = time();
         $course = $DB->get_record(self::T . 'lticontext', ['platformid' => $platform->id,
             'contextid' => \core_text::substr($contextid, 0, 255)]);
