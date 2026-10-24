@@ -24,7 +24,8 @@
         "cardheading": "Tu carné", "cardhint": "Enséñalo en el mostrador", "none": "No tienes libros prestados.",
         "golibrary": "Ir a la biblioteca", "gospring": "Ayvu rande",
         "libraries": [{"name": "Biblioteca", "cardcode": "10000H", "home": "https://example.org/b", "spring": "https://example.org/a",
-            "hasloans": true, "loans": [{"title": "El faro dormido", "when": "hasta el 3 nov", "late": false}],
+            "hasloans": true, "loans": [{"title": "El faro dormido", "url": "https://example.org/r", "when": "hasta el 3 nov",
+                "late": false}],
             "hasholds": false, "holds": [], "barcodeimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
             "qrimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw="}]
     }
@@ -36,17 +37,17 @@
         <ion-list-header><ion-label><h2>{{name}}</h2></ion-label></ion-list-header>
         <ion-item-divider><ion-label>{{loansheading}}</ion-label></ion-item-divider>
         {{^hasloans}}<ion-item><ion-label class="ion-text-wrap">{{none}}</ion-label></ion-item>{{/hasloans}}
-        {{#loans}}<ion-item><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p{{#late}} class="text-danger"{{/late}}>{{when}}</p></ion-label></ion-item>{{/loans}}
+        {{#loans}}<ion-item button detail="true" core-link inApp="true" href="{{url}}"><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p{{#late}} class="text-danger"{{/late}}>{{when}}</p></ion-label></ion-item>{{/loans}}
         {{#hasholds}}
         <ion-item-divider><ion-label>{{holdsheading}}</ion-label></ion-item-divider>
-        {{#holds}}<ion-item><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p>{{when}}</p></ion-label></ion-item>{{/holds}}
+        {{#holds}}<ion-item button detail="true" core-link inApp="true" href="{{url}}"><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p>{{when}}</p></ion-label></ion-item>{{/holds}}
         {{/hasholds}}
         <ion-item-divider><ion-label>{{cardheading}}</ion-label></ion-item-divider>
         <ion-item><ion-label class="ion-text-wrap"><p>{{cardhint}}</p><h2><strong>{{cardcode}}</strong></h2></ion-label></ion-item>
         {{#barcodeimg}}<ion-item><img src="{{barcodeimg}}" alt="{{cardcode}}" style="width: 100%; max-height: 90px; background: #fff;"></ion-item>{{/barcodeimg}}
         {{#qrimg}}<ion-item><img src="{{qrimg}}" alt="{{cardcode}}" style="width: 160px; height: 160px; margin: 8px auto; background: #fff;"></ion-item>{{/qrimg}}
-        <ion-item button detail="true" core-link capture="false" href="{{home}}"><ion-label>{{golibrary}}</ion-label></ion-item>
-        <ion-item button detail="true" core-link capture="false" href="{{spring}}"><ion-label>{{gospring}}</ion-label></ion-item>
+        <ion-item button detail="true" core-link inApp="true" href="{{home}}"><ion-label>{{golibrary}}</ion-label></ion-item>
+        <ion-item button detail="true" core-link inApp="true" href="{{spring}}"><ion-label>{{gospring}}</ion-label></ion-item>
     </ion-list>
 {{/libraries}}
 </div>

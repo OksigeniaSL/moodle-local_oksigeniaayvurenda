@@ -30,7 +30,7 @@ use local_oksigeniaayvurenda\local\mine;
 /**
  * The «Library» of the app's menu: for each centre where someone is a reader, their books out and until when, what is
  * set aside for them, their card's code to show at the desk (in letters, as a barcode and as a QR), and the ways into
- * the library and Ayvu rande, which open in the browser.
+ * the library and Ayvu rande. The pages of the library open inside the app with the session (core-link in the app).
  */
 class mobile {
     /**

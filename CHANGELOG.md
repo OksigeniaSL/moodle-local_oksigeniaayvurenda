@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.30.1 (2026-10-28)
+
+- In the app, the pages of the library (each book of the list, the library and Ayvu rande) open inside the app with
+  the session, not in the phone's browser.
+
 ## 0.30.0 (2026-10-28)
 
 - The library in the Moodle app, and in the apps made from it: an entry «Library» of the main menu with, for each
