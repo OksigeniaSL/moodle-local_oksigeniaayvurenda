@@ -37,8 +37,8 @@ final class mine {
      *
      * @param int $userid
      * @param int|null $now
-     * @return array[] One per centre: name, home, card, spring, loans (title, url, due, late) and holds (title, url,
-     *     ready, until, ahead).
+     * @return array[] One per centre: name, cardcode, home, card, spring, loans (title, url, due, late) and holds
+     *     (title, url, ready, until, ahead).
      */
     public static function summary(int $userid, ?int $now = null): array {
         global $DB;
@@ -86,6 +86,7 @@ final class mine {
             );
             $out[] = [
                 'name' => format_string($library->name),
+                'cardcode' => (string) $reader->cardcode,
                 'home' => $url('index.php', $library),
                 'card' => $url('card.php', $library),
                 'spring' => $url('ayvurande.php', $library),

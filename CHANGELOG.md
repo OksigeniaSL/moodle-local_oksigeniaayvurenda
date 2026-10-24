@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.30.0 (2026-10-28)
+
+- The library in the Moodle app, and in the apps made from it: an entry «Library» of the main menu with, for each
+  centre where someone is a reader, their books out and until when (the late ones marked), what is set aside for
+  them, their card's code to show at the desk (in letters, as a barcode and as a QR), and the ways into the library
+  and Ayvu rande, which open in the browser.
+
 ## 0.29.1 (2026-10-28)
 
 - A page someone may not use no longer ends in an error. Someone not logged in, or in as a guest, goes to log in and
