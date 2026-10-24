@@ -102,6 +102,7 @@ final class screens {
      * @param string $corner
      * @param int $page
      * @param bool $onlyfree
+     * @param int $subject A topic to narrow by, if any.
      * @return array
      */
     public static function results(

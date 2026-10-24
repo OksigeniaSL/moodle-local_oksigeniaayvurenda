@@ -179,6 +179,28 @@ final class cataloguer_test extends \advanced_testcase {
     }
 
     /**
+     * Without a choice, the order depends on the language of the site: Spain's National Library first in Spanish; a
+     * choice of the entity wins.
+     */
+    public function test_sources(): void {
+        global $CFG, $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $CFG->lang = 'en';
+        $this->assertSame(['loc', 'openlibrary', 'bne'], lookup::sources($entityid));
+        $CFG->lang = 'es';
+        $this->assertSame(['bne', 'loc', 'openlibrary'], lookup::sources($entityid));
+        $DB->set_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            json_encode(['sources' => ['openlibrary', 'nowhere']]),
+            ['id' => $entityid]
+        );
+        $this->assertSame(['openlibrary'], lookup::sources($entityid));
+    }
+
+    /**
      * Covers are made small, found in one question for a page of cards, and taken away.
      */
     public function test_covers(): void {

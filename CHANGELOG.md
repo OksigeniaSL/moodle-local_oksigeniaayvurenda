@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.29.0 (2026-10-28)
+
+- Adding by ISBN asks Spain's National Library too, by SRU and without a key: most books in Spanish, little known to
+  the Library of Congress or Open Library, come with their authors and their UDC class. Without a choice of the
+  entity, the order follows the language of the site: in Spanish, the National Library first.
+
 ## 0.28.0 (2026-10-28)
 
 - The corners as each library wants them: whoever manages it gives them the names its readers know them by («Stories

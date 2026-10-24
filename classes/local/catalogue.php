@@ -88,7 +88,9 @@ final class catalogue {
      * @param string $query As typed.
      * @param int $page From 0.
      * @param bool $onlyfree Only records with a copy free in this library.
-     * @return array{total: int, cards: array, suggestions: string[]}
+     * @param string $corner Only records in this corner (a top class), if given.
+     * @param int $subject Only records about this topic (an authority), if given.
+     * @return array total, cards, suggestions, facets (corners and subjects of all the results).
      */
     public static function search(
         \stdClass $library,
@@ -209,7 +211,8 @@ final class catalogue {
      * The corners of the library: the top classes of its classification, with how many records each has.
      *
      * @param \stdClass $library
-     * @return array[] Each with code, label, count and colour.
+     * @param bool $all Also the ones the library hides, for its page of corners.
+     * @return array[] Each with code, label, default, count, hidden, order and colour, in the library's order.
      */
     public static function corners(\stdClass $library, bool $all = false): array {
         global $DB;

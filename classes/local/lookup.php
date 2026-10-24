@@ -39,10 +39,16 @@ final class lookup {
         'loc' => ['type' => 'sru', 'name' => 'Library of Congress', 'url' => 'https://lx2.loc.gov/sru/lcdb',
             'index' => 'bath.isbn', 'version' => '1.1'],
         'openlibrary' => ['type' => 'openlibrary', 'name' => 'Open Library'],
+        // Spain's National Library: its Alma catalogue by SRU, without a key, with most books in Spanish.
+        'bne' => ['type' => 'sru', 'name' => 'Biblioteca Nacional de España',
+            'url' => 'https://catalogo.bne.es/view/sru/34BNE_INST', 'index' => 'alma.isbn', 'version' => '1.2'],
     ];
 
     /** @var string[] The order when the entity has not chosen one. */
-    public const DEFAULT = ['loc', 'openlibrary'];
+    public const DEFAULT = ['loc', 'openlibrary', 'bne'];
+
+    /** @var string[] The order when the entity has not chosen one and the site speaks Spanish. */
+    public const DEFAULT_ES = ['bne', 'loc', 'openlibrary'];
 
     /** @var callable|null How to fetch an address; tests put their own. Given the address, gives the body or null. */
     public static $fetcher = null;
@@ -108,7 +114,13 @@ final class lookup {
             true
         ) ?: [];
         $chosen = array_values(array_filter($settings['sources'] ?? [], fn($s) => isset(self::PRESETS[$s])));
-        return $chosen ?: self::DEFAULT;
+        if ($chosen) {
+            return $chosen;
+        }
+        // Without a choice, the catalogue of the language the site speaks goes first: Spanish books are best known in
+        // Spain's National Library, and little known elsewhere.
+        global $CFG;
+        return str_starts_with((string) $CFG->lang, 'es') ? self::DEFAULT_ES : self::DEFAULT;
     }
 
     /**
