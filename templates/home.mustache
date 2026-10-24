@@ -31,7 +31,7 @@
         "addbooks": {"url": "#", "label": "Dar de alta libros", "freeurl": "#", "freelabel": "Traer obras libres"},
         "mycard": {"url": "#", "label": "Mi carné"},
         "heading": "La biblioteca",
-        "cornersheading": "Rincones",
+        "cornersheading": "Rincones", "cornersedit": null,
         "hascorners": true,
         "corners": [{"code": "8", "label": "Lengua y literatura", "countlabel": "120 libros", "colour": 2, "url": "#"}],
         "recentheading": "Acaban de llegar",
@@ -56,6 +56,7 @@
 {{#hascorners}}
 <section class="ayv-section" aria-labelledby="ayv-corners">
     <h2 id="ayv-corners" class="ayv-section-title">{{cornersheading}}</h2>
+    {{#cornersedit}}<p class="ayv-staff"><a href="{{url}}">{{label}}</a></p>{{/cornersedit}}
     <ul class="ayv-corners">
     {{#corners}}
         <li><a class="ayv-corner ayv-cover-{{colour}}" href="{{url}}">

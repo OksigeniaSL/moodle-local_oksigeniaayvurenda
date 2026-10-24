@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.28.0 (2026-10-28)
+
+- The corners as each library wants them: whoever manages it gives them the names its readers know them by («Stories
+  and poems» rather than «Language and literature»), puts them in the order of the room and hides the ones not
+  wanted. A name left empty goes back to the classification's.
+- Narrowing a search: the results say how many of them are in each corner and about each topic they share, as chips
+  that narrow the search and, pressed again, widen it.
+
 ## 0.27.1 (2026-10-28)
 
 - The names of the plugin's four capabilities are found again: they were kept under the wrong key, so a page refused

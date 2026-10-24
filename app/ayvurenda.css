@@ -1282,3 +1282,10 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-spring-voices { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .75rem; }
 .ayv .ayv-spring-voices .ayv-media { margin: .25rem 0 0; }
 .ayv a.ayv-cover { text-decoration: none; }
+
+/* Narrowing a search: the corners and the topics of its results, as chips with how many. */
+.ayv .ayv-facets { display: grid; gap: .4rem; margin: .5rem 0 1rem; }
+.ayv .ayv-facet { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0; }
+.ayv .ayv-facet-label { font-weight: 700; font-size: .95rem; margin-right: .25rem; }
+.ayv .ayv-chip-count { font-size: .8rem; font-weight: 400; }
+.ayv .ayv-chip[aria-pressed="true"] { background: var(--accent); color: var(--surface); }

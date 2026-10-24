@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/corners
+
+    The corners of a library: their names, order and which are hidden.
+
+    Example context (json):
+    {
+        "heading": "Los rincones", "intro": "Ponles nombre.", "notice": "", "action": "#", "sesskey": "abc", "homeurl": "#",
+        "corners": [{"code": "8", "label": "Cuentos y poemas", "default": "Lengua y literatura", "count": 120,
+            "countlabel": "120 libros", "order": 10, "hidden": false, "colour": 2}],
+        "cornersname": "Nombre", "cornersorder": "Orden", "cornershide": "Ocultarlo", "cornerssave": "Guardar",
+        "cornersback": "Volver"
+    }
+}}
+<section class="ayv-corners-edit">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<form method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <ul class="ayv-window-list">
+    {{#corners}}
+        <li class="ayv-book">
+            <p class="ayv-field-hint">{{code}} · {{default}} · {{countlabel}}</p>
+            <label class="ayv-field ayv-field-wide">{{cornersname}} <input type="text" name="label[{{code}}]" value="{{label}}" maxlength="80"></label>
+            <label class="ayv-field">{{cornersorder}} <input type="number" name="order[{{code}}]" value="{{order}}" min="0" max="999"></label>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="hidden[{{code}}]" value="1" {{#hidden}}checked{{/hidden}}> {{cornershide}}</label>
+        </li>
+    {{/corners}}
+    </ul>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{cornerssave}}</button> <a href="{{homeurl}}">{{cornersback}}</a></p>
+</form>
+</section>

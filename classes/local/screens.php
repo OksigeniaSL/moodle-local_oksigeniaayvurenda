@@ -83,6 +83,7 @@ final class screens {
             'mycard' => self::mycard($library),
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
+            'cornersedit' => $manage ? ['url' => self::url('corners.php', $library), 'label' => self::str('cornersedit')] : null,
             'corners' => $corners,
             'hascorners' => (bool) $corners,
             'recentheading' => self::str('recent'),
@@ -103,8 +104,16 @@ final class screens {
      * @param bool $onlyfree
      * @return array
      */
-    public static function results(\stdClass $library, string $query, string $corner, int $page, bool $onlyfree = false): array {
-        if ($corner !== '') {
+    public static function results(
+        \stdClass $library,
+        string $query,
+        string $corner,
+        int $page,
+        bool $onlyfree = false,
+        int $subject = 0
+    ): array {
+        $facets = null;
+        if ($corner !== '' && $query === '') {
             $found = catalogue::corner($library, $corner, $page, $onlyfree);
             $label = $corner;
             foreach (catalogue::corners($library) as $known) {
@@ -117,12 +126,14 @@ final class screens {
             $next = ['corner' => $corner, 'page' => $page + 1];
             $here = ['corner' => $corner];
         } else {
-            $found = catalogue::search($library, $query, $page, $onlyfree);
-            $here = ['q' => $query];
+            $found = catalogue::search($library, $query, $page, $onlyfree, $corner, $subject);
+            $narrow = array_filter(['corner' => $corner, 'subject' => $subject]);
+            $here = ['q' => $query] + $narrow;
             $a = (object) ['count' => $found['total'], 'query' => $query];
             $heading = $found['total'] === 0 ? self::str('noresults', $query) :
                 self::str($found['total'] === 1 ? 'oneresult' : 'results', $a);
-            $next = ['q' => $query, 'page' => $page + 1];
+            $next = ['q' => $query, 'page' => $page + 1] + $narrow;
+            $facets = self::facets($library, $query, $found['facets'], $corner, $subject, $onlyfree);
         }
         if ($onlyfree) {
             $next['free'] = 1;
@@ -145,12 +156,61 @@ final class screens {
             'tryother' => $found['total'] === 0 && !$suggestions && ($corner !== '' || $query === '' ||
                 !characters::of((int) $library->entityid)['memory']['enabled']) ? self::str('tryother') : '',
             'more' => $more ? ['url' => self::url('search.php', $library, $next), 'label' => self::str('more')] : null,
+            'facets' => $facets,
             'filter' => $found['total'] > 0 || $onlyfree ? [
                 'url' => self::url('search.php', $library, $here + ($onlyfree ? [] : ['free' => 1])),
                 'label' => self::str('onlyfree'),
                 'pressed' => $onlyfree ? 'true' : 'false',
             ] : null,
         ];
+    }
+
+    /**
+     * Ways to narrow a search: the corners its results are in and the topics they share, each with how many; the one
+     * chosen, pressed, takes the narrowing off.
+     *
+     * @param \stdClass $library
+     * @param string $query
+     * @param array $facets As catalogue::search() gives them.
+     * @param string $corner
+     * @param int $subject
+     * @param bool $onlyfree
+     * @return array|null
+     */
+    private static function facets(
+        \stdClass $library,
+        string $query,
+        array $facets,
+        string $corner,
+        int $subject,
+        bool $onlyfree
+    ): ?array {
+        $labels = array_column(catalogue::corners($library, true), 'label', 'code');
+        $free = $onlyfree ? ['free' => 1] : [];
+        $corners = [];
+        foreach ($facets['corners'] as $code => $count) {
+            $on = (string) $code === $corner;
+            $corners[] = ['label' => $labels[$code] ?? (string) $code, 'count' => $count, 'pressed' => $on ? 'true' : 'false',
+                'url' => self::url('search.php', $library, ['q' => $query] + ($on ? [] : ['corner' => $code]) +
+                    ($subject ? ['subject' => $subject] : []) + $free)];
+        }
+        $subjects = [];
+        foreach ($facets['subjects'] as $id => $topic) {
+            $on = (int) $id === $subject;
+            $subjects[] = ['label' => $topic['label'], 'count' => $topic['count'], 'pressed' => $on ? 'true' : 'false',
+                'url' => self::url('search.php', $library, ['q' => $query] + ($corner !== '' ? ['corner' => $corner] : []) +
+                    ($on ? [] : ['subject' => $id]) + $free)];
+        }
+        // A single corner with nothing chosen narrows nothing.
+        if (count($corners) < 2 && $corner === '') {
+            $corners = [];
+        }
+        if (!$corners && !$subjects) {
+            return null;
+        }
+        return ['corners' => $corners, 'hascorners' => (bool) $corners, 'subjects' => $subjects,
+            'hassubjects' => (bool) $subjects, 'cornerslabel' => self::str('facetcorners'),
+            'subjectslabel' => self::str('facetsubjects')];
     }
 
     /**

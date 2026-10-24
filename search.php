@@ -34,12 +34,13 @@ $corner = optional_param('corner', '', PARAM_ALPHANUM);
 $page = max(0, optional_param('page', 0, PARAM_INT));
 $fragment = optional_param('fragment', false, PARAM_BOOL);
 $onlyfree = optional_param('free', false, PARAM_BOOL);
+$subject = optional_param('subject', 0, PARAM_INT);
 require_login(null, false);
 $context = context_system::instance();
 require_capability('local/oksigeniaayvurenda:view', $context);
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/search.php', ['library' => $ref, 'q' => $query,
-    'corner' => $corner, 'page' => $page, 'free' => (int) $onlyfree]));
+    'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree]));
 
 $library = catalogue::library($ref);
 if (!$library) {
@@ -48,7 +49,7 @@ if (!$library) {
 if ($query === '' && $corner === '') {
     redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]));
 }
-$data = screens::results($library, $query, $corner, $page, $onlyfree);
+$data = screens::results($library, $query, $corner, $page, $onlyfree, $subject);
 $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/results', $data);
 if ($fragment) {
     @header('Content-Type: text/html; charset=utf-8');

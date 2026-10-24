@@ -36,7 +36,9 @@
         "suggestions": [{"text": "volcan", "url": "#"}],
         "tryother": "",
         "more": null,
-        "filter": {"url": "#", "label": "Solo los libres", "pressed": "false"}
+        "filter": {"url": "#", "label": "Solo los libres", "pressed": "false"},
+        "facets": {"hascorners": true, "corners": [{"label": "Cuentos y poemas", "count": 12, "pressed": "false", "url": "#"}],
+            "hassubjects": false, "subjects": [], "cornerslabel": "Rincones", "subjectslabel": "Temas"}
     }
 }}
 <div class="ayv-results">
@@ -44,6 +46,14 @@
         <h1 class="ayv-results-title" aria-live="polite">{{heading}}</h1>
         {{#filter}}<a class="ayv-toggle" href="{{url}}" role="button" aria-pressed="{{pressed}}">{{label}}</a>{{/filter}}
     </div>
+    {{#facets}}
+    <div class="ayv-facets">
+        {{#hascorners}}<p class="ayv-facet"><span class="ayv-facet-label">{{cornerslabel}}</span>
+            {{#corners}}<a class="ayv-chip" href="{{url}}" role="button" aria-pressed="{{pressed}}">{{label}} <span class="ayv-chip-count">{{count}}</span></a> {{/corners}}</p>{{/hascorners}}
+        {{#hassubjects}}<p class="ayv-facet"><span class="ayv-facet-label">{{subjectslabel}}</span>
+            {{#subjects}}<a class="ayv-chip" href="{{url}}" role="button" aria-pressed="{{pressed}}">{{label}} <span class="ayv-chip-count">{{count}}</span></a> {{/subjects}}</p>{{/hassubjects}}
+    </div>
+    {{/facets}}
     {{#memory}}{{> local_oksigeniaayvurenda/bubble}}{{/memory}}
     {{#hassuggestions}}
     <p class="ayv-suggest">{{didyoumean}}

@@ -90,11 +90,18 @@ final class catalogue {
      * @param bool $onlyfree Only records with a copy free in this library.
      * @return array{total: int, cards: array, suggestions: string[]}
      */
-    public static function search(\stdClass $library, string $query, int $page = 0, bool $onlyfree = false): array {
+    public static function search(
+        \stdClass $library,
+        string $query,
+        int $page = 0,
+        bool $onlyfree = false,
+        string $corner = '',
+        int $subject = 0
+    ): array {
         global $DB;
         $words = text::words($query);
         if (!$words) {
-            return ['total' => 0, 'cards' => [], 'suggestions' => []];
+            return ['total' => 0, 'cards' => [], 'suggestions' => [], 'facets' => ['corners' => [], 'subjects' => []]];
         }
         $conditions = [];
         $params = ['entityid' => $library->entityid];
@@ -108,6 +115,16 @@ final class catalogue {
         if ($onlyfree) {
             $conditions[] = self::free_condition();
             $params['freelibrary'] = $library->id;
+        }
+        if (preg_match('/^\d$/', $corner)) {
+            $conditions[] = "r.id IN (SELECT fra.recordid FROM {" . self::T . "recauth} fra
+                JOIN {" . self::T . "authority} fa ON fa.id = fra.authorityid
+               WHERE fa.entityid = :fentityid AND fa.kind = 'class' AND " . $DB->sql_like('fa.code', ':fcorner') . ")";
+            $params += ['fentityid' => $library->entityid, 'fcorner' => $corner . '%'];
+        }
+        if ($subject) {
+            $conditions[] = 'r.id IN (SELECT sra.recordid FROM {' . self::T . 'recauth} sra WHERE sra.authorityid = :fsubject)';
+            $params['fsubject'] = $subject;
         }
         $records = $DB->get_records_sql(
             'SELECT r.id, r.title, r.subtitle
@@ -143,7 +160,49 @@ final class catalogue {
         $total = count($scored);
         $slice = array_column(array_slice($scored, $page * self::PERPAGE, self::PERPAGE), 2);
         $suggestions = $total === 0 ? (new suggester(self::vocabulary((int) $library->entityid)))->suggest($query) : [];
-        return ['total' => $total, 'cards' => self::cards($slice, $library), 'suggestions' => $suggestions];
+        return ['total' => $total, 'cards' => self::cards($slice, $library), 'suggestions' => $suggestions,
+            'facets' => self::facets(array_map(fn($row) => (int) $row[2]->id, $scored))];
+    }
+
+    /**
+     * What the results of a search have: how many in each corner, and the topics most of them share.
+     *
+     * @param int[] $ids
+     * @return array corners (code => count), subjects (id => label, count; the most shared first, eight at most).
+     */
+    private static function facets(array $ids): array {
+        global $DB;
+        $corners = [];
+        $subjects = [];
+        foreach (array_chunk($ids, 500) as $chunk) {
+            [$in, $params] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED);
+            $rows = $DB->get_recordset_sql(
+                "SELECT ra.id, ra.recordid, a.id AS authorityid, a.kind, a.code, a.label
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                  WHERE ra.recordid $in AND (a.kind = 'class' OR a.kind = 'subject')",
+                $params
+            );
+            foreach ($rows as $row) {
+                if ($row->kind === 'class') {
+                    $top = self::top_class((string) $row->code);
+                    if ($top !== null) {
+                        $corners[$top][$row->recordid] = true;
+                    }
+                } else {
+                    $subjects[$row->authorityid]['label'] = $row->label;
+                    $subjects[$row->authorityid]['records'][$row->recordid] = true;
+                }
+            }
+            $rows->close();
+        }
+        $corners = array_map('count', $corners);
+        ksort($corners);
+        $subjects = array_map(fn($s) => ['label' => $s['label'], 'count' => count($s['records'])], $subjects);
+        uasort($subjects, fn($a, $b) => [$b['count'], $a['label']] <=> [$a['count'], $b['label']]);
+        // A topic every result shares tells nothing: it is not offered.
+        $subjects = array_filter($subjects, fn($s) => $s['count'] < count($ids));
+        return ['corners' => $corners, 'subjects' => array_slice($subjects, 0, 8, true)];
     }
 
     /**
@@ -152,7 +211,7 @@ final class catalogue {
      * @param \stdClass $library
      * @return array[] Each with code, label, count and colour.
      */
-    public static function corners(\stdClass $library): array {
+    public static function corners(\stdClass $library, bool $all = false): array {
         global $DB;
         $rows = $DB->get_recordset_sql(
             "SELECT ra.recordid, a.code
@@ -177,16 +236,45 @@ final class catalogue {
             '',
             'code, label'
         );
+        // Each library may name its corners its own way, order them and hide some.
+        $own = (array) ((json_decode((string) ($library->settings ?? ''), true) ?: [])['corners'] ?? []);
         $corners = [];
         foreach ($records as $code => $ids) {
             $label = $labels[$code] ?? null;
             if ($label === null && get_string_manager()->string_exists('udc' . $code, 'local_oksigeniaayvurenda')) {
                 $label = get_string('udc' . $code, 'local_oksigeniaayvurenda');
             }
-            $corners[] = ['code' => (string) $code, 'label' => $label ?? (string) $code, 'count' => count($ids),
+            $default = $label ?? (string) $code;
+            $mine = (array) ($own[$code] ?? []);
+            $corners[] = ['code' => (string) $code, 'label' => trim((string) ($mine['label'] ?? '')) !== '' ? trim($mine['label'])
+                : $default, 'default' => $default, 'count' => count($ids), 'hidden' => !empty($mine['hidden']),
+                'order' => (int) ($mine['order'] ?? ((int) $code + 1) * 10),
                 'colour' => self::CORNER_COLOURS[((int) $code) % count(self::CORNER_COLOURS)]];
         }
-        return $corners;
+        usort($corners, fn($a, $b) => [$a['order'], $a['code']] <=> [$b['order'], $b['code']]);
+        return $all ? $corners : array_values(array_filter($corners, fn($corner) => !$corner['hidden']));
+    }
+
+    /**
+     * Keeps how a library names, orders and hides its corners.
+     *
+     * @param \stdClass $library
+     * @param array $corners Code => label, order, hidden.
+     */
+    public static function save_corners(\stdClass $library, array $corners): void {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'library', 'settings', ['id' => $library->id]), true) ?: [];
+        $settings['corners'] = [];
+        foreach ($corners as $code => $corner) {
+            if (!preg_match('/^\d$/', (string) $code)) {
+                continue;
+            }
+            $settings['corners'][(string) $code] = ['label' => \core_text::substr(trim((string) ($corner['label'] ?? '')), 0, 80),
+                'order' => (int) ($corner['order'] ?? 0), 'hidden' => !empty($corner['hidden'])];
+        }
+        $DB->update_record(self::T . 'library', (object) ['id' => $library->id, 'settings' => json_encode($settings),
+            'timemodified' => time()]);
+        $library->settings = json_encode($settings);
     }
 
     /**
