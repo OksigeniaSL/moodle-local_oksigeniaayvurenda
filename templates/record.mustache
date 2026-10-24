@@ -1,0 +1,92 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/record
+
+    A record: its cover, who wrote it, what it is about and where its copies are.
+
+    Context variables required for this template:
+    * card - the card of the record (colour, title, authors, statelabel, stateclass, location)
+    * title, subtitle, authors, facts, subjects, summary, copies - the record
+    * back - url and label to go back
+
+    Example context (json):
+    {
+        "card": {"colour": 1, "title": "El faro dormido", "authors": "Ana Montes", "statelabel": "Libre",
+                 "stateclass": "free", "location": "Estantería infantil"},
+        "title": "El faro dormido",
+        "subtitle": "una aventura en la costa",
+        "authors": [{"name": "Ana Montes", "role": ""}, {"name": "Leo Prado", "role": "ilustraciones"}],
+        "hasfacts": true,
+        "facts": [{"label": "Año", "value": "2019"}],
+        "hassubjects": true,
+        "subjectsheading": "Temas",
+        "subjects": [{"label": "Aventuras", "url": "#"}],
+        "summary": "Un faro que se duerme y una niña que lo despierta.",
+        "summaryheading": "De qué va",
+        "hascopies": true,
+        "copiesheading": "Ejemplares",
+        "callnumberlabel": "Tejuelo",
+        "copies": [{"where": "Aquí", "statelabel": "Libre", "state": "free", "location": "Estantería infantil",
+                    "callnumber": "821 MON far", "barcode": "100000L"}],
+        "back": {"url": "#", "label": "Volver a la biblioteca"}
+    }
+}}
+<article class="ayv-record">
+    <div class="ayv-record-cover">
+        {{#card}}
+        <span class="ayv-cover ayv-cover-big ayv-cover-{{colour}}" aria-hidden="true">
+            <span class="ayv-cover-title">{{title}}</span>
+        </span>
+        <p class="ayv-state ayv-state-{{stateclass}}">{{statelabel}}</p>
+        {{#location}}<p class="ayv-where">{{location}}</p>{{/location}}
+        {{/card}}
+    </div>
+    <div class="ayv-record-body">
+        <h1 class="ayv-record-title">{{title}}</h1>
+        {{#subtitle}}<p class="ayv-record-subtitle">{{subtitle}}</p>{{/subtitle}}
+        <p class="ayv-record-authors">
+            {{#authors}}<span class="ayv-author">{{name}}{{#role}} <span class="ayv-role">({{role}})</span>{{/role}}</span>{{/authors}}
+        </p>
+        {{#summary}}
+        <h2 class="ayv-section-title">{{summaryheading}}</h2>
+        <p class="ayv-summary">{{summary}}</p>
+        {{/summary}}
+        {{#hassubjects}}
+        <h2 class="ayv-section-title">{{subjectsheading}}</h2>
+        <p class="ayv-subjects">{{#subjects}}<a class="ayv-chip" href="{{url}}">{{label}}</a> {{/subjects}}</p>
+        {{/hassubjects}}
+        {{#hasfacts}}
+        <dl class="ayv-facts">
+            {{#facts}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/facts}}
+        </dl>
+        {{/hasfacts}}
+        {{#hascopies}}
+        <h2 class="ayv-section-title">{{copiesheading}}</h2>
+        <ul class="ayv-copies">
+            {{#copies}}
+            <li class="ayv-copy">
+                <span class="ayv-state ayv-state-{{state}}">{{statelabel}}</span>
+                <span class="ayv-copy-where">{{where}}{{#location}} · <strong>{{location}}</strong>{{/location}}</span>
+                {{#callnumber}}<span class="ayv-copy-call" title="{{callnumberlabel}}"><span class="ayv-sr">{{callnumberlabel}}: </span>{{callnumber}}</span>{{/callnumber}}
+            </li>
+            {{/copies}}
+        </ul>
+        {{/hascopies}}
+        {{#back}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/back}}
+    </div>
+</article>

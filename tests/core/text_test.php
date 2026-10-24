@@ -47,4 +47,19 @@ final class text_test extends \basic_testcase {
         $this->assertFalse(text::matches($searchtext, 'aro'));
         $this->assertTrue(text::matches($searchtext, '   '));
     }
+
+    /**
+     * Words a child may spell either way in Spanish share their sound key.
+     */
+    public function test_phonetic(): void {
+        $this->assertSame(text::phonetic('volcán'), text::phonetic('bolcan'));
+        $this->assertSame(text::phonetic('jirafa'), text::phonetic('girafa'));
+        $this->assertSame(text::phonetic('llave'), text::phonetic('yave'));
+        $this->assertSame(text::phonetic('hormiga'), text::phonetic('ormiga'));
+        $this->assertSame(text::phonetic('queso'), text::phonetic('keso'));
+        $this->assertSame(text::phonetic('zapato'), text::phonetic('sapato'));
+        $this->assertSame(text::phonetic('cielo'), text::phonetic('sielo'));
+        $this->assertSame('chokolate', text::phonetic('chocolate'));
+        $this->assertNotSame(text::phonetic('casa'), text::phonetic('cosa'));
+    }
 }

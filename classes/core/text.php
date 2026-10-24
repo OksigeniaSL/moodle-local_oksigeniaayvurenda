@@ -69,6 +69,26 @@ final class text {
     }
 
     /**
+     * A key that sounds the same for words a child may spell either way in Spanish: b and v, ll and y, a silent h, c, z
+     * and s before e and i, qu and k, g and j before e and i. Other languages get the same simplification, which is
+     * harmless: it only finds suggestions.
+     *
+     * @param string $word
+     * @return string
+     */
+    public static function phonetic(string $word): string {
+        $word = self::normalise($word);
+        $word = preg_replace(
+            ['/ch/', '/qu/', '/c([eiy])/', '/g([ei])/', '/ll/', '/h/', '/v/', '/w/', '/z/', '/c/', '/x/'],
+            ['@', 'k', 's$1', 'j$1', 'y', '', 'b', 'b', 's', 'k', 'ks'],
+            $word
+        );
+        // A double letter sounds like one.
+        $word = preg_replace('/(.)\1+/', '$1', $word);
+        return str_replace('@', 'ch', $word);
+    }
+
+    /**
      * Whether every word of a query is in a text, as the start of one of its words.
      *
      * @param string $searchtext Already normalised.

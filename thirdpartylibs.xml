@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<libraries>
+    <library>
+        <location>app/fonts/andika-400.woff2</location>
+        <name>Andika</name>
+        <description>Andika regular, by SIL International, with the Guarani letters and their mark positioning. License text in app/fonts/OFL-andika.txt.</description>
+        <version>6.101</version>
+        <license>OFL</license>
+        <licenseversion>1.1</licenseversion>
+        <repository>https://software.sil.org/andika/</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2004-2022 SIL International</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>app/fonts/andika-700.woff2</location>
+        <name>Andika Bold</name>
+        <description>Andika bold, by SIL International, with the Guarani letters and their mark positioning. License text in app/fonts/OFL-andika.txt.</description>
+        <version>6.101</version>
+        <license>OFL</license>
+        <licenseversion>1.1</licenseversion>
+        <repository>https://software.sil.org/andika/</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2004-2022 SIL International</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>app/fonts/literata-600.woff2</location>
+        <name>Literata SemiBold</name>
+        <description>Literata 600, by TypeTogether for Google, with the Guarani letters and their mark positioning. License text in app/fonts/OFL-literata.txt.</description>
+        <version>3.103</version>
+        <license>OFL</license>
+        <licenseversion>1.1</licenseversion>
+        <repository>https://github.com/googlefonts/literata</repository>
+        <copyrights>
+            <copyright>Copyright 2017 The Literata Project Authors (https://github.com/googlefonts/literata)</copyright>
+        </copyrights>
+    </library>
+</libraries>

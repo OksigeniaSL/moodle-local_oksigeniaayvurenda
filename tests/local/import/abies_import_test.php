@@ -79,8 +79,12 @@ final class abies_import_test extends \advanced_testcase {
         $this->assertSame('reference', $DB->get_field(self::T . 'item', 'itemtype', ['barcode' => '100002K']));
         $this->assertTrue($DB->record_exists(self::T . 'item', ['barcode' => '100002K-4']));
 
-        $rules = $DB->get_records_menu(self::T . 'rule', ['libraryid' => $library->id, 'readertype' => 'student'], '',
-            'itemtype, loandays');
+        $rules = $DB->get_records_menu(
+            self::T . 'rule',
+            ['libraryid' => $library->id, 'readertype' => 'student'],
+            '',
+            'itemtype, loandays'
+        );
         $this->assertEquals(['normal' => 7, 'reference' => 0], $rules);
         $this->assertSame(3, $DB->count_records(self::T . 'rule', ['libraryid' => $library->id]));
         $student = $DB->get_record(self::T . 'rule', ['libraryid' => $library->id, 'readertype' => 'student',

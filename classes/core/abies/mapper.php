@@ -47,7 +47,8 @@ final class mapper {
         'fre' => 'fre', 'fra' => 'fre', 'frances' => 'fre', 'de' => 'ger', 'ger' => 'ger', 'deu' => 'ger', 'aleman' => 'ger',
         'it' => 'ita', 'ita' => 'ita', 'italiano' => 'ita', 'pt' => 'por', 'por' => 'por', 'portugues' => 'por',
         'ca' => 'cat', 'cat' => 'cat', 'catalan' => 'cat', 'gl' => 'glg', 'glg' => 'glg', 'gallego' => 'glg',
-        'eu' => 'baq', 'baq' => 'baq', 'eus' => 'baq', 'euskera' => 'baq', 'gn' => 'grn', 'grn' => 'grn', 'guarani' => 'grn', 'val' => 'cat', 'valenciano' => 'cat',
+        'eu' => 'baq', 'baq' => 'baq', 'eus' => 'baq', 'euskera' => 'baq', 'gn' => 'grn', 'grn' => 'grn', 'guarani' => 'grn',
+        'val' => 'cat', 'valenciano' => 'cat',
         'la' => 'lat', 'lat' => 'lat', 'latin' => 'lat', 'sk' => 'slo', 'slo' => 'slo', 'slk' => 'slo', 'zh' => 'chi',
         'chi' => 'chi', 'ar' => 'ara', 'ara' => 'ara', 'ro' => 'rum', 'rum' => 'rum', 'ron' => 'rum'];
 

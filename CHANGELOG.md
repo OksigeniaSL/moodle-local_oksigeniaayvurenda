@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 (2026-10-24)
+
+- The catalogue, on screens of its own with the library's look (Literata and Andika, served from the plugin): search
+  by words in any order, without accents or case, with the title counting most; suggestions when nothing is found,
+  by sound and by letters ("bolcan" finds "volcán"); results while typing; corners by the top classes of the
+  classification; what came in last; a record with its authors, topics, details and copies, those of this library
+  first; a switch to see only the books free to take home.
+- Whether a book is free, out, only to read in the library or kept in another library of the entity, and where it is.
+- «Library» in the top bar of the site. Capabilities to look up, lend, catalogue and set up.
+- Checked in a headless browser in four sizes (Chromebook with zoom, 800 px frame, 4:3 board, phone): no console
+  errors, no failed requests, no axe-core violations, no horizontal scroll at 320 px.
+
 ## 0.3.0 (2026-10-24)
 
 - Abies Web importer, catalogue first: records of every document type, authors with their role, the UDC tree,
