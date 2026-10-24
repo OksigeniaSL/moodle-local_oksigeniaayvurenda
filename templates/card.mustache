@@ -1,0 +1,84 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/card
+
+    A reader's own card: the flower of the year, its four paths without numbers, the code for the desk and the album.
+
+    Context variables required for this template:
+    * heading, none, pathsheading, booksheading, nobooks, pastheading, showcode - texts
+    * cards - name, group, library, code, barcode (SVG), qr (image address), flower, stage, paths (label, hint, dots),
+      books (title, cover), past (year, flower, stage), yearname
+
+    Example context (json):
+    {
+        "heading": "Mi carné",
+        "hascards": true,
+        "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
+                   "qr": "", "flower": "flor/bud.svg", "stage": "Capullo", "yearname": "2026-2027",
+                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "dots": [{"on": true}, {"on": false}, {"on": false}]}],
+                   "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
+        "none": "",
+        "pathsheading": "Cómo crece",
+        "booksheading": "Lo que has leído este curso",
+        "nobooks": "",
+        "pastheading": "Tus flores de otros cursos",
+        "showcode": "Enséñalo en el mostrador"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{^hascards}}<p class="ayv-empty">{{none}}</p>{{/hascards}}
+{{#cards}}
+<section class="ayv-mycard">
+    <div class="ayv-card-face">
+        <img class="ayv-card-flower" src="{{flower}}" alt="{{stage}}" width="160" height="160">
+        <div class="ayv-card-who">
+            <p class="ayv-card-name">{{name}}</p>
+            <p>{{group}}{{#group}} · {{/group}}{{library}}</p>
+            <p class="ayv-card-stage">{{stage}} · {{yearname}}</p>
+        </div>
+    </div>
+    <div class="ayv-card-code">
+        {{#barcode}}<div class="ayv-card-barcode">{{{barcode}}}</div>{{/barcode}}
+        {{#qr}}<img class="ayv-card-qr" src="{{qr}}" alt="{{code}}" width="120" height="120">{{/qr}}
+        <p class="ayv-card-hint">{{showcode}}</p>
+    </div>
+    <h2 class="ayv-section-title">{{pathsheading}}</h2>
+    <ul class="ayv-paths">
+    {{#paths}}
+        <li class="ayv-path"><span class="ayv-path-name">{{label}}</span>
+            <span class="ayv-path-dots" aria-hidden="true">{{#dots}}<span class="ayv-dot{{#on}} ayv-dot-on{{/on}}"></span>{{/dots}}</span>
+            <span class="ayv-path-hint">{{hint}}</span></li>
+    {{/paths}}
+    </ul>
+    <h2 class="ayv-section-title">{{booksheading}}</h2>
+    {{#hasbooks}}
+    <ul class="ayv-album">
+    {{#books}}
+        <li class="ayv-album-book">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}{{^cover}}<span class="ayv-album-spine">{{title}}</span>{{/cover}}
+            <span class="ayv-album-title">{{title}}</span></li>
+    {{/books}}
+    </ul>
+    {{/hasbooks}}
+    {{^hasbooks}}<p class="ayv-empty">{{nobooks}}</p>{{/hasbooks}}
+    {{#haspast}}
+    <h2 class="ayv-section-title">{{pastheading}}</h2>
+    <ul class="ayv-garden">
+    {{#past}}<li><img src="{{flower}}" alt="{{stage}}" width="72" height="72"><span>{{year}}</span></li>{{/past}}
+    </ul>
+    {{/haspast}}
+</section>
+{{/cards}}

@@ -28,6 +28,7 @@
     {
         "desk": {"url": "#", "label": "Abrir el mostrador"},
         "addbooks": {"url": "#", "label": "Dar de alta libros"},
+        "mycard": {"url": "#", "label": "Mi carné"},
         "heading": "La biblioteca",
         "cornersheading": "Rincones",
         "hascorners": true,
@@ -40,6 +41,7 @@
     }
 }}
 <h1 class="ayv-sr">{{heading}}</h1>
+{{#mycard}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/mycard}}
 {{#desk}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a>
     {{#addbooks}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/addbooks}}</p>{{/desk}}
 {{^desk}}{{#addbooks}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/addbooks}}{{/desk}}

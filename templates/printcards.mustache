@@ -1,0 +1,55 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/printcards
+
+    Reader cards to print: sheets of ten, each card 85.6 × 54 mm.
+
+    Context variables required for this template:
+    * heading, intro, print, empty - texts
+    * sheets - list of cards (name, group, library, code, barcode as SVG, qr image address, flower)
+
+    Example context (json):
+    {
+        "heading": "Carnés de 3º A",
+        "intro": "25 carnés.",
+        "print": "Imprimir",
+        "hassheets": true,
+        "sheets": [{"cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H",
+                               "barcode": "", "qr": "", "flower": "emblema.svg"}]}],
+        "empty": ""
+    }
+}}
+<div class="ayv-print-head">
+    <h1 class="ayv-results-title">{{heading}}</h1>
+    <p>{{intro}}</p>
+    {{#hassheets}}<p><button type="button" class="ayv-button" onclick="window.print()">{{print}}</button></p>{{/hassheets}}
+</div>
+{{^hassheets}}<p class="ayv-empty">{{empty}}</p>{{/hassheets}}
+{{#sheets}}
+<div class="ayv-sheet">
+{{#cards}}
+    <div class="ayv-printcard">
+        <div class="ayv-printcard-top">
+            <img src="{{flower}}" alt="" width="40" height="40">
+            <div><p class="ayv-printcard-name">{{name}}</p><p>{{group}}{{#group}} · {{/group}}{{library}}</p></div>
+            {{#qr}}<img class="ayv-printcard-qr" src="{{qr}}" alt="">{{/qr}}
+        </div>
+        {{#barcode}}<div class="ayv-printcard-barcode">{{{barcode}}}</div>{{/barcode}}
+    </div>
+{{/cards}}
+</div>
+{{/sheets}}

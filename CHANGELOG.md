@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.0 (2026-10-27)
+
+- My card: each reader with an account sees their card, a flower that grows during the school year by four paths at
+  once (coming back, exploring corners they did not know, telling what they thought, and staying with books:
+  finishing them, reading them again), with the code as a barcode and a QR code to show at the desk, the books of the
+  year and the flowers of other years. No path alone makes it flower; it never withers and shows no numbers or
+  rankings. Everything comes from the desk. Only the reader sees it.
+- Reader cards to print, by group, ten to an A4 sheet (85.6 × 54 mm), with the barcode (Code 39) and the QR code.
+- Own Code 39 barcodes as SVG, in plain PHP.
+- The flower's stages are placeholders until Gaudí's art.
+
 ## 0.8.3 (2026-10-26)
 
 - Guided help for the desk and for adding books, from the «Help» link of each: the real screen, in a practice library

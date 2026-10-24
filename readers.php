@@ -94,6 +94,8 @@ if ($group === null) {
         'loanslabel' => $str('deskloans'),
         'back' => ['url' => $url([]), 'label' => $str('readersback')],
         'empty' => $list ? '' : $str('readersnone'),
+        'print' => $list ? ['url' => (new moodle_url('/local/oksigeniaayvurenda/print.php', ['library' => $library->slug,
+            'group' => $group]))->out(false), 'label' => $str('printcards')] : null,
     ];
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/group', $data);
 }

@@ -60,4 +60,31 @@ final class practice_test extends \advanced_testcase {
         $this->assertSame('El jardín de las palabras', $found['description']['record']['title']);
         $this->assertFalse(lookup::isbn((int) $again->entityid, '9780743273565')['found']);
     }
+
+    /**
+     * A reader's flower and album: the books of the year with their notes, and the flowers of other years.
+     */
+    public function test_garden(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = practice::library();
+        $noa = $DB->get_record(
+            'local_oksigeniaayvurenda_reader',
+            ['entityid' => $library->entityid, 'cardcode' => '10002C'],
+            '*',
+            MUST_EXIST
+        );
+        $desk = new desk($library, (int) get_admin()->id);
+        $back = $desk->scan('100003E');
+        $desk->note($back['loanid'], 'loved');
+        $album = garden::album($noa);
+        $this->assertSame(['La ladrona de la tormenta'], array_column($album['books'], 'title'));
+        $this->assertSame('loved', $album['books'][0]['note']);
+        $this->assertSame(['back' => 1, 'explore' => 0, 'tell' => 1, 'stay' => 0], $album['flower']['levels']);
+        $this->assertSame(0, $album['flower']['stage']);
+        $this->assertSame([], $album['past']);
+        $card = cards::card($noa, 'Noa Ríos Lago', '5º B', 'Biblioteca de práctica', $album['flower']['stage']);
+        $this->assertStringContainsString('>10002C</text>', $card['barcode']);
+        $this->assertStringEndsWith('flor/seed.svg', $card['flower']);
+    }
 }

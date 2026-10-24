@@ -31,6 +31,7 @@
         "cardlabel": "Carné",
         "loanslabel": "Tiene prestados:",
         "back": {"url": "#", "label": "Todos los grupos"},
+        "print": {"url": "#", "label": "Imprimir carnés"},
         "empty": ""
     }
 }}
@@ -47,4 +48,7 @@
 </ul>
 {{/hasreaders}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
-{{#back}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/back}}
+<p class="ayv-more">
+    {{#print}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/print}}
+    {{#back}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/back}}
+</p>

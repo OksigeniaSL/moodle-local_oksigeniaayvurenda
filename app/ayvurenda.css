@@ -820,3 +820,85 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-help-caption { min-height: 3.2em; margin: 1rem 0 .5rem; font-size: 1.25rem; font-weight: 700; }
 
 .ayv .ayv-help-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; margin: 0; }
+
+/* A reader's own card and album. */
+.ayv .ayv-mycard { display: grid; gap: .5rem; margin: 0 0 2rem; }
+
+.ayv .ayv-card-face { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; padding: 1.25rem;
+    border-radius: 18px; background: var(--surface); box-shadow: 0 0 0 2px var(--green2); }
+
+.ayv .ayv-card-flower { width: 160px; height: 160px; }
+
+.ayv .ayv-card-who p { margin: 0 0 .25rem; }
+
+.ayv .ayv-card-name { font-family: var(--title); font-weight: 600; font-size: 1.6rem; }
+
+.ayv .ayv-card-stage { color: var(--accent); font-weight: 700; }
+
+.ayv .ayv-card-code { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; padding: 1rem;
+    border-radius: 14px; background: #fff; color: #1e2b2a; }
+
+.ayv .ayv-card-barcode { width: 280px; height: 90px; }
+
+.ayv .ayv-card-barcode svg { width: 100%; height: 100%; }
+
+.ayv .ayv-card-qr { image-rendering: pixelated; }
+
+.ayv .ayv-card-hint { margin: 0; font-weight: 700; }
+
+.ayv .ayv-paths { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: .75rem; }
+
+.ayv .ayv-path { display: grid; gap: .2rem; padding: .8rem 1rem; border-radius: var(--radius); background: var(--paper2); }
+
+.ayv .ayv-path-name { font-weight: 700; }
+
+.ayv .ayv-path-hint { font-size: .9rem; opacity: .85; }
+
+.ayv .ayv-path-dots { display: flex; gap: .35rem; }
+
+.ayv .ayv-dot { width: .9rem; height: .9rem; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--green2); }
+
+.ayv .ayv-dot-on { background: var(--green2); }
+
+.ayv .ayv-album, .ayv .ayv-garden { list-style: none; margin: 0; padding: 0; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: .9rem; }
+
+.ayv .ayv-album-book { display: grid; gap: .3rem; }
+
+.ayv .ayv-album-book img, .ayv .ayv-album-spine { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px 8px 8px 4px; }
+
+.ayv .ayv-album-spine { display: block; padding: .5rem; background: var(--green2); color: #fff; font-family: var(--title);
+    font-weight: 600; font-size: .9rem; line-height: 1.2; overflow: hidden; }
+
+.ayv .ayv-album-title { font-size: .9rem; font-weight: 700; line-height: 1.2; }
+
+.ayv .ayv-garden li { display: grid; justify-items: center; gap: .25rem; font-weight: 700; }
+
+/* Cards to print: ten to an A4 sheet, 85.6 × 54 mm each. */
+.ayv .ayv-sheet { display: grid; grid-template-columns: repeat(2, 85.6mm); grid-auto-rows: 54mm; gap: 4mm 8mm;
+    justify-content: center; align-content: start; width: 210mm; min-height: 297mm; padding: 14mm 0; margin: 0 auto 1rem;
+    background: #fff; color: #1e2b2a; box-shadow: 0 1px 6px rgba(0, 0, 0, .15); }
+
+.ayv .ayv-printcard { display: grid; grid-template-rows: auto 1fr; padding: 3mm 4mm; border: .3mm dashed #b9b2a3;
+    border-radius: 3mm; overflow: hidden; }
+
+.ayv .ayv-printcard-top { display: flex; gap: 3mm; align-items: center; }
+
+.ayv .ayv-printcard-top p { margin: 0; font-size: 9pt; line-height: 1.2; }
+
+.ayv .ayv-printcard-name { font-family: var(--title); font-weight: 600; font-size: 11pt !important; }
+
+.ayv .ayv-printcard-qr { width: 18mm; height: 18mm; margin-left: auto; image-rendering: pixelated; }
+
+.ayv .ayv-printcard-barcode { align-self: end; height: 17mm; }
+
+.ayv .ayv-printcard-barcode svg { width: 100%; height: 100%; }
+
+@media print {
+    @page { size: A4; margin: 0; }
+    .ayv { background: #fff; }
+    .ayv .ayv-top, .ayv .ayv-foot, .ayv .ayv-print-head, .ayv .ayv-skip { display: none !important; }
+    .ayv .ayv-main { padding: 0; }
+    .ayv .ayv-sheet { margin: 0; box-shadow: none; break-after: page; }
+}

@@ -60,6 +60,7 @@ final class screens {
             'desk' => $desk,
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
             'addbooks' => $addbooks,
+            'mycard' => self::mycard($library),
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
             'corners' => $corners,
@@ -203,6 +204,26 @@ final class screens {
             'heading' => self::str($libraries ? 'chooselibrary' : 'nolibrary'),
             'libraries' => $libraries,
         ];
+    }
+
+    /**
+     * The link to the person's own card, when they are a reader of this entity.
+     *
+     * @param \stdClass $library
+     * @return array|null
+     */
+    private static function mycard(\stdClass $library): ?array {
+        global $DB, $USER;
+        if (!isloggedin() || isguestuser()) {
+            return null;
+        }
+        if (
+            !$DB->record_exists('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+                'status' => 'active'])
+        ) {
+            return null;
+        }
+        return ['url' => self::url('card.php', $library), 'label' => self::str('mycard')];
     }
 
     /**
