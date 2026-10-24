@@ -43,9 +43,20 @@ class sync_readers extends \core\task\scheduled_task {
      */
     public function execute(): void {
         global $DB;
+        // The management program first: the cohorts and courses then say the group of whoever is in them too.
+        foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
+            if (\local_oksigeniaayvurenda\local\sources\cifra::enabled((int) $entityid)) {
+                try {
+                    $stats = \local_oksigeniaayvurenda\local\sources\cifra::sync((int) $entityid);
+                    mtrace('Ayvurenda: readers of entity ' . $entityid . ' from Cifra: ' . json_encode($stats));
+                } catch (\moodle_exception $e) {
+                    mtrace('Ayvurenda: Cifra did not answer for entity ' . $entityid . ': ' . $e->getMessage());
+                }
+            }
+        }
         foreach ($DB->get_records('local_oksigeniaayvurenda_entity', null, 'id', 'id, settings') as $entity) {
             $settings = json_decode((string) $entity->settings, true) ?: [];
-            if (empty($settings['cohorts'])) {
+            if (empty($settings['cohorts']) && empty($settings['courses'])) {
                 continue;
             }
             $stats = \local_oksigeniaayvurenda\local\sources\cohorts::sync((int) $entity->id);

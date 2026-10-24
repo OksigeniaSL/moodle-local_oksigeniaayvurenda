@@ -51,7 +51,10 @@ final class csvlist_test extends \advanced_testcase {
             ['firstname' => 'Leo', 'lastname' => 'Faro', 'group' => '3º A', 'type' => 'Profesor'],
             ['firstname' => 'Noa', 'lastname' => 'Ríos', 'cardcode' => '20000c'],
         ];
-        $this->assertSame(['created' => 3, 'updated' => 0, 'linked' => 1, 'total' => 3], csvlist::load($entityid, $list));
+        $first = csvlist::load($entityid, $list);
+        $this->assertCount(3, $first['ids']);
+        unset($first['ids']);
+        $this->assertSame(['created' => 3, 'updated' => 0, 'linked' => 1, 'total' => 3], $first);
         $readers = array_values($DB->get_records('local_oksigeniaayvurenda_reader', ['entityid' => $entityid], 'id'));
         $this->assertSame(
             [control_letter::append('00001'), control_letter::append('00002'), '20000C'],
@@ -64,7 +67,9 @@ final class csvlist_test extends \advanced_testcase {
         $this->assertSame(2, $DB->count_records('local_oksigeniaayvurenda_member', ['groupname' => '3º A']));
 
         $list[1]['group'] = '4º A';
-        $this->assertSame(['created' => 0, 'updated' => 3, 'linked' => 1, 'total' => 3], csvlist::load($entityid, $list));
+        $second = csvlist::load($entityid, $list);
+        unset($second['ids']);
+        $this->assertSame(['created' => 0, 'updated' => 3, 'linked' => 1, 'total' => 3], $second);
         $this->assertSame('4º A', $DB->get_field(
             'local_oksigeniaayvurenda_member',
             'groupname',

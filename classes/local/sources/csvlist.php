@@ -50,18 +50,27 @@ final class csvlist {
      * @param array[] $readers As csv_list gives them.
      * @param string $type The kind of reader when the list does not say it.
      * @param int|null $now
-     * @return array{created: int, updated: int, linked: int, total: int}
+     * @param string $system Where the list comes from: csv, or a management program such as cifra.
+     * @return array{created: int, updated: int, linked: int, total: int, ids: int[]}
      */
-    public static function load(int $entityid, array $readers, string $type = 'student', ?int $now = null): array {
+    public static function load(
+        int $entityid,
+        array $readers,
+        string $type = 'student',
+        ?int $now = null,
+        string $system = 'csv'
+    ): array {
         global $DB;
         $now = $now ?? time();
-        $stats = ['created' => 0, 'updated' => 0, 'linked' => 0, 'total' => 0];
+        $stats = ['created' => 0, 'updated' => 0, 'linked' => 0, 'total' => 0, 'ids' => []];
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $year = years::around($entityid, $now);
         $transaction = $DB->start_delegated_transaction();
         $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
         // Names that come twice in the list are told apart by their group.
         $names = array_count_values(array_map(fn($p) => self::key($p), $readers));
+        // An email that comes twice, a family's, does not say whose account it is.
+        $emails = array_count_values(array_filter(array_map(fn($p) => \core_text::strtolower($p['email'] ?? ''), $readers)));
         foreach ($readers as $person) {
             $key = self::key($person);
             if (($names[$key] ?? 0) > 1 && str_starts_with($key, 'name:')) {
@@ -73,10 +82,14 @@ final class csvlist {
                     $DB->sql_equal('cardcode', ':code', false), ['entityid' => $entityid, 'code' => $person['cardcode']]);
             }
             if (!$readerid) {
-                $readerid = (int) $DB->get_field(self::T . 'source', 'localid', ['entityid' => $entityid, 'system' => 'csv',
-                    'tablename' => 'reader', 'externalid' => $key]);
+                $readerid = (int) $DB->get_field(self::T . 'source', 'localid', ['entityid' => $entityid,
+                    'system' => $system, 'tablename' => 'reader', 'externalid' => $key]);
             }
-            $userid = self::account($person);
+            $lookup = $person;
+            if (($emails[\core_text::strtolower($person['email'] ?? '')] ?? 0) > 1) {
+                unset($lookup['email']);
+            }
+            $userid = self::account($lookup);
             if (!$readerid && $userid) {
                 $readerid = (int) $DB->get_field(self::T . 'reader', 'id', ['entityid' => $entityid, 'userid' => $userid]);
             }
@@ -112,14 +125,15 @@ final class csvlist {
                 $stats['linked']++;
             }
             if (
-                !$DB->record_exists(self::T . 'source', ['entityid' => $entityid, 'system' => 'csv', 'tablename' => 'reader',
+                !$DB->record_exists(self::T . 'source', ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader',
                     'externalid' => $key])
             ) {
-                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => 'csv', 'tablename' => 'reader',
+                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader',
                     'externalid' => $key, 'localid' => $readerid, 'timecreated' => $now]);
             }
+            $stats['ids'][] = (int) $readerid;
             if (($person['group'] ?? '') !== '') {
-                self::member($readerid, (int) $year->id, $person['group'], $person['stage'] ?? '', $now);
+                self::member($readerid, (int) $year->id, $person['group'], $person['stage'] ?? '', $now, $system);
             }
             $stats['total']++;
         }
@@ -135,6 +149,10 @@ final class csvlist {
      * @return string
      */
     public static function key(array $person): string {
+        // A management program gives each person an identifier of their own; an email may be a whole family's.
+        if (($person['externalid'] ?? '') !== '') {
+            return 'id:' . $person['externalid'];
+        }
         foreach (['idnumber', 'email', 'username', 'cardcode'] as $field) {
             if (($person[$field] ?? '') !== '') {
                 return $field . ':' . \core_text::strtolower($person[$field]);
@@ -177,16 +195,24 @@ final class csvlist {
      * @param string $group
      * @param string $stage
      * @param int $now
+     * @param string $source Where the group comes from.
      */
-    private static function member(int $readerid, int $yearid, string $group, string $stage, int $now): void {
+    private static function member(
+        int $readerid,
+        int $yearid,
+        string $group,
+        string $stage,
+        int $now,
+        string $source = 'csv'
+    ): void {
         global $DB;
         $existing = $DB->get_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid], '*', IGNORE_MULTIPLE);
         if (!$existing) {
             $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid, 'groupname' => $group,
-                'stage' => $stage !== '' ? $stage : null, 'source' => 'csv', 'timecreated' => $now]);
+                'stage' => $stage !== '' ? $stage : null, 'source' => $source, 'timecreated' => $now]);
         } else if ($existing->groupname !== $group || (string) $existing->stage !== $stage) {
             $DB->update_record(self::T . 'member', (object) ['id' => $existing->id, 'groupname' => $group,
-                'stage' => $stage !== '' ? $stage : null, 'source' => 'csv']);
+                'stage' => $stage !== '' ? $stage : null, 'source' => $source]);
         }
     }
 }

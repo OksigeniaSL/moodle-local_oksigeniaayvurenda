@@ -89,6 +89,16 @@ $data = [
         fn($c) => $c + ['groupslabel' => $str('sourcesgroupsof', $c['groups'])],
         \local_oksigeniaayvurenda\local\sources\courses::options((int) $library->entityid)
     ),
+    'outsideheading' => $str('sourcesoutside'),
+    'outsideintro' => $str('sourcesoutsideintro'),
+    'outside' => [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/connector.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('sourcescifra'), 'hint' => $str('sourcescifrahint')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/readerslist.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('sourcescsv'), 'hint' => $str('sourcescsvhint')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('sourcesabies'), 'hint' => $str('sourcesabieshint')],
+    ],
     'coursesheading' => $str('sourcescourses'),
     'coursesintro' => $str('sourcescoursesintro'),
     'hascohorts' => true,

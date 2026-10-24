@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.11.0 (2026-10-27)
+
+- Readers from the centre's management program, as an optional connector: Cifra for now. Its students come with
+  their main group and stay up to date every night, before the cohorts and courses; who leaves Cifra stops being an
+  active reader, with the history kept. It reads only, either through a bridge that holds the centre's credentials and
+  gives a key, or straight to Cifra's public API with the centre's identifier and secret. The key and the secret are
+  kept in the plugin's configuration, never in the daily copies. «Try the connection» says what would come without
+  changing anything.
+- Readers are found again by the identifier their origin gives them, so two siblings with the family's email are two
+  readers; an email that comes twice in a list no longer picks an account.
+- The cohorts no longer retire readers who came from a list, a management program or Abies: their origin says when
+  they leave.
+- «Where readers come from» now points to the connector, to the CSV lists and to the Abies import.
+- The counts of the import and connector notices read well with any number.
+
 ## 0.10.0 (2026-10-27)
 
 - Importing a catalogue from the screen, for any centre and not only from Abies: an Abies Web export (the zip or its

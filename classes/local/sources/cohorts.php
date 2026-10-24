@@ -191,8 +191,15 @@ final class cohorts {
             }
             $stats['total']++;
         }
+        // Readers who came from a list, a management program or Abies leave when their origin says so, not here.
+        $elsewhere = array_flip($DB->get_fieldset_select(
+            self::T . 'source',
+            'localid',
+            "entityid = :entityid AND tablename = 'reader'",
+            ['entityid' => $entityid]
+        ));
         foreach ($byuser as $userid => $reader) {
-            if (!isset($people[$userid]) && $reader->status === 'active') {
+            if (!isset($people[$userid]) && $reader->status === 'active' && !isset($elsewhere[$reader->id])) {
                 $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'left', 'timemodified' => $now]);
                 $stats['left']++;
             }
