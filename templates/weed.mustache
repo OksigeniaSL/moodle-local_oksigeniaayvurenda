@@ -1,0 +1,80 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/weed
+
+    Weeding: filters, the candidates to choose, and the records of weeding.
+
+    Example context (json):
+    {
+        "heading": "Expurgo", "intro": "Lo decide la biblioteca.", "self": "#", "action": "#", "sesskey": "abc",
+        "library": "demo-1", "before": "", "worn": true, "lost": true,
+        "unused": [{"value": 5, "label": "5 años", "selected": true}],
+        "places": [{"id": 1, "label": "Narrativa", "selected": false}],
+        "total": "Candidatos: 1", "more": "", "hasrows": true,
+        "rows": [{"id": 1, "title": "El faro dormido", "barcode": "100000L", "callnumber": "N MON far", "why": "unused",
+                  "whylabel": "Sin prestar", "lastlabel": "Nunca prestado"}],
+        "hasrecords": false, "records": [],
+        "weedfilters": "Qué buscar", "weedunused": "Sin prestar desde hace", "weedbefore": "Publicados antes de",
+        "weedworn": "Gastados o rotos", "weedlost": "Perdidos", "weedplace": "Dónde", "stocktakeall": "Toda la biblioteca",
+        "weedshow": "Ver", "weedall": "Marcar todos", "weedreason": "Motivo", "weedreasonhint": "Para el acta",
+        "weedgo": "Dar de baja los marcados", "weednone": "Ninguno", "weedrecords": "Actas", "weedcoltitle": "Título",
+        "callnumber": "Signatura", "weedcolcode": "Código", "weedcolwhy": "Por qué"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+<form method="get" action="{{self}}" class="ayv-book ayv-weed-filters">
+    <input type="hidden" name="library" value="{{library}}">
+    <h2 class="ayv-section-title">{{weedfilters}}</h2>
+    <label class="ayv-field">{{weedunused}} <select name="unused">{{#unused}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/unused}}</select></label>
+    <label class="ayv-field">{{weedbefore}} <input type="number" name="before" value="{{before}}" min="1500" max="2100"></label>
+    <input type="hidden" name="worn" value="0"><label class="ayv-field ayv-field-check"><input type="checkbox" name="worn" value="1" {{#worn}}checked{{/worn}}> {{weedworn}}</label>
+    <input type="hidden" name="lost" value="0"><label class="ayv-field ayv-field-check"><input type="checkbox" name="lost" value="1" {{#lost}}checked{{/lost}}> {{weedlost}}</label>
+    <label class="ayv-field">{{weedplace}} <select name="place"><option value="0">{{stocktakeall}}</option>{{#places}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/places}}</select></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{weedshow}}</button></p>
+</form>
+<h2 class="ayv-section-title">{{total}}</h2>
+{{^hasrows}}<p class="ayv-empty">{{weednone}}</p>{{/hasrows}}
+{{#hasrows}}
+<form method="post" action="{{action}}" class="ayv-weed">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <label class="ayv-field ayv-field-check"><input type="checkbox" onclick="document.querySelectorAll('.ayv-weed .ayv-weed-item').forEach(function(c) { c.checked = this.checked; }, this)"> {{weedall}}</label>
+    <ul class="ayv-holds">
+    {{#rows}}
+        <li class="ayv-holds-row">
+            <label class="ayv-field ayv-field-check ayv-holds-title"><input type="checkbox" class="ayv-weed-item" name="item[{{id}}]" value="1"> {{title}}</label>
+            <input type="hidden" name="why[{{id}}]" value="{{why}}">
+            <span class="ayv-holds-who">{{whylabel}} · {{lastlabel}}</span>
+            <span class="ayv-holds-when">{{callnumber}} · {{barcode}}</span>
+        </li>
+    {{/rows}}
+    </ul>
+    {{#more}}<p class="ayv-field-hint">{{more}}</p>{{/more}}
+    <label class="ayv-field ayv-field-wide">{{weedreason}} <span class="ayv-field-hint">{{weedreasonhint}}</span>
+        <input type="text" name="reason" maxlength="255"></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{weedgo}}</button></p>
+</form>
+{{/hasrows}}
+{{#hasrecords}}
+<h2 class="ayv-section-title">{{weedrecords}}</h2>
+<ul class="ayv-holds">
+{{#records}}
+    <li class="ayv-holds-row"><a class="ayv-holds-title" href="{{url}}">{{when}}</a>
+        <span class="ayv-holds-who">{{reason}}</span> <span class="ayv-holds-when">{{countlabel}}</span></li>
+{{/records}}
+</ul>
+{{/hasrecords}}

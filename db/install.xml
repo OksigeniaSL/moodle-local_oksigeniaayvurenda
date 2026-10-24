@@ -343,6 +343,38 @@
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_withdrawal" COMMENT="A record of weeding: copies taken out of the collection together, with the reason">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="reason" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_withdrawn" COMMENT="A copy in a record of weeding, as it was when taken out">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="withdrawalid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="barcode" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="callnumber" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="why" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="old, unused, worn, lost or chosen"/>
+        <FIELD NAME="statusbefore" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timerestored" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When it went back to the collection, if it did"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="withdrawalid" TYPE="foreign" FIELDS="withdrawalid" REFTABLE="local_oksigeniaayvurenda_withdrawal" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_source" COMMENT="Where a row came from (Abies, a connector, a CSV), so a new import updates it instead of duplicating it">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

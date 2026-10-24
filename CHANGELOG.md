@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.0 (2026-10-27)
+
+- Weeding: the candidates of a library (lost, worn out or broken, published before a year, not lent for some years),
+  by place, the strongest reason first; the library ticks those that leave and they are taken out together, with a
+  record of weeding (library, date, reason, copies and why) to print on A4 and sign. One taken out by mistake goes back
+  to the collection with a tap. What is lent or set aside for a reservation is never a candidate.
+- The catalogue no longer counts copies lost or taken out of the collection: a book whose only copy was lost reads
+  «No copies», not «On loan».
+
 ## 0.13.0 (2026-10-27)
 
 - Stocktakes with the phone or the scanner, for the whole library or one place in it, by several people at once and

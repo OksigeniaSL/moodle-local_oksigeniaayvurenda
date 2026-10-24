@@ -84,6 +84,8 @@ if (!$id) {
     }
     $main = $OUTPUT->render_from_template('local_oksigeniaayvurenda/stocktakes', $data);
     shell::output($str('stocktaketitle'), $main, $library, '', ['search' => false, 'nav' => [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('weednav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
             'label' => $str('addnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),

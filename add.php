@@ -104,6 +104,8 @@ shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaay
             'label' => $str('labelsnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/stocktake.php', ['library' => $library->slug]))->out(false),
             'label' => $str('stocktakenav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('weednav')],
     ], has_capability('local/oksigeniaayvurenda:manage', $context) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false),
             'label' => $str('importnav')],

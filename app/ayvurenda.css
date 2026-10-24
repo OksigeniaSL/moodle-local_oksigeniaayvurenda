@@ -1022,3 +1022,20 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-stock-again { opacity: .7; }
 
 .ayv .ayv-stock-scope { font-weight: 700; }
+
+/* Weeding: the record to print and sign. */
+.ayv .ayv-weedtable { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .95rem; }
+
+.ayv .ayv-weedtable th, .ayv .ayv-weedtable td { padding: .4rem .5rem; border-bottom: 1px solid var(--line); text-align: left;
+    vertical-align: top; }
+
+.ayv .ayv-weed-restored { opacity: .55; }
+
+.ayv .ayv-weedsign { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem; }
+
+.ayv .ayv-weedsign p { margin: 3.5rem 0 0; padding-top: .4rem; border-top: 1px solid var(--ink); }
+
+@media print {
+    .ayv .ayv-weedrecord { padding: 15mm; color: #1e2b2a; }
+    .ayv .ayv-weed-restored { display: none; }
+}

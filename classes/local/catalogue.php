@@ -279,7 +279,12 @@ final class catalogue {
             $by[$authority->kind][] = ['label' => $label, 'role' => $authority->role, 'code' => $authority->code];
         }
         $libraries = $DB->get_records_menu(self::T . 'library', ['entityid' => $library->entityid], '', 'id, name');
-        $items = $DB->get_records(self::T . 'item', ['recordid' => $id], 'libraryid, barcode');
+        $items = $DB->get_records_select(
+            self::T . 'item',
+            "recordid = :recordid AND status <> 'lost' AND status <> 'withdrawn'",
+            ['recordid' => $id],
+            'libraryid, barcode'
+        );
         $locations = self::labels(array_column($items, 'locationid'));
         $copies = [];
         foreach ($items as $item) {
@@ -347,7 +352,7 @@ final class catalogue {
         [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
         $items = $DB->get_records_select(
             self::T . 'item',
-            'recordid ' . $in,
+            'recordid ' . $in . " AND status <> 'lost' AND status <> 'withdrawn'",
             $params,
             '',
             'id, recordid, libraryid, status, itemtype, locationid'
