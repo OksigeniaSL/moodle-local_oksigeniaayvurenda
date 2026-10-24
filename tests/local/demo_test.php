@@ -64,6 +64,35 @@ final class demo_test extends \advanced_testcase {
     }
 
     /**
+     * It fills the public window with made-up EPUBs, each a valid package, and opens it; a second pass adds new titles.
+     */
+    public function test_window(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $entityid = demo::create('Demo', 20, 5);
+        $library = $DB->get_record(self::T . 'library', ['entityid' => $entityid], '*', MUST_EXIST);
+
+        $this->assertSame(['works' => 3, 'window' => 'open'], demo::window((int) $library->id, 3));
+        $library = $DB->get_record(self::T . 'library', ['id' => $library->id]);
+        $this->assertTrue(window::settings($library)['open']);
+        $found = window::records($library);
+        $this->assertSame(3, $found['total']);
+        $item = $found['records'][0]['items'][0];
+        $path = make_request_directory() . '/libro.epub';
+        digital::file($item)->copy_content_to($path);
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($path));
+        $this->assertSame('mimetype', $zip->getNameIndex(0));
+        $this->assertSame('application/epub+zip', $zip->getFromName('mimetype'));
+        $this->assertNotFalse((new \DOMDocument())->loadXML($zip->getFromName('OEBPS/content.opf')));
+        $this->assertStringContainsString('inventado', $zip->getFromName('OEBPS/c1.xhtml'));
+        $zip->close();
+
+        demo::window((int) $library->id, 2);
+        $this->assertSame(5, window::records($library)['total']);
+    }
+
+    /**
      * The same seed gives the same library.
      */
     public function test_seed(): void {

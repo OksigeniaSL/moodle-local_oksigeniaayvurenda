@@ -463,4 +463,96 @@ final class demo {
     private static function pick(array $list): string {
         return $list[mt_rand(0, count($list) - 1)];
     }
+
+    /**
+     * Puts made-up works for everyone in a library's public window and opens it: an EPUB written on the spot, of the
+     * centre's own, on titles of its catalogue that have nothing digital yet.
+     *
+     * @param int $libraryid
+     * @param int $count
+     * @param int $seed
+     * @return array works, window.
+     */
+    public static function window(int $libraryid, int $count, int $seed = 20261027): array {
+        global $DB;
+        mt_srand($seed);
+        $library = $DB->get_record(self::T . 'library', ['id' => $libraryid], '*', MUST_EXIST);
+        $records = $DB->get_records_sql(
+            'SELECT r.id, r.title
+               FROM {' . self::T . 'record} r
+              WHERE r.entityid = :entityid AND NOT EXISTS (SELECT 1 FROM {' . self::T . 'digital} d WHERE d.recordid = r.id)
+           ORDER BY r.id',
+            ['entityid' => $library->entityid],
+            0,
+            $count
+        );
+        $dir = make_request_directory();
+        $works = 0;
+        foreach ($records as $record) {
+            $path = $dir . '/' . $record->id . '.epub';
+            self::epub($path, $record->title);
+            digital::add_file($library, (int) $record->id, $path, clean_filename($record->title) . '.epub', ['title' => '',
+                'licence' => 'own', 'audience' => ['students', 'families', 'public'], 'download' => 1], 0);
+            $works++;
+        }
+        window::save($library, ['open' => 1, 'voices' => 1, 'index' => 0, 'text' => 'Una biblioteca inventada para ' .
+            'enseñar Ayvurenda. Todo lo que hay aquí, títulos, autores y textos, es inventado.']);
+        return ['works' => $works, 'window' => 'open'];
+    }
+
+    /**
+     * Writes a made-up EPUB 3 with three short chapters.
+     *
+     * @param string $path
+     * @param string $title
+     */
+    private static function epub(string $path, string $title): void {
+        $esc = fn(string $text) => htmlspecialchars($text, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $who = self::pick(self::FIRSTNAMES);
+        $chapters = [];
+        foreach (['Uno', 'Dos', 'Tres'] as $n => $name) {
+            $paragraphs = [];
+            if ($n === 0) {
+                $paragraphs[] = 'Este libro es inventado, para enseñar la biblioteca.';
+            }
+            for ($i = 0; $i < 12; $i++) {
+                $paragraphs[] = $who . ' ' . self::pick(['encontró', 'buscó', 'perdió', 'dibujó', 'escuchó', 'soñó']) . ' ' .
+                    self::pick(['un mapa', 'una llave', 'una canción', 'un faro', 'una puerta', 'un río']) . ' ' .
+                    self::pick(['al final del pasillo', 'bajo la lluvia', 'detrás de la biblioteca', 'en lo alto del árbol',
+                        'junto al mar', 'en el último cajón']) . '. ' .
+                    self::pick(['Nadie lo había visto antes.', 'Al día siguiente ya no estaba.', 'Se lo contó a su abuela.',
+                        'Decidió guardarlo en secreto.', 'Lo apuntó en su cuaderno.', 'Pensó que era una señal.']);
+            }
+            $chapters[] = [$name, $paragraphs];
+        }
+        $zip = new \ZipArchive();
+        $zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->addFromString('mimetype', 'application/epub+zip');
+        $zip->setCompressionName('mimetype', \ZipArchive::CM_STORE);
+        $zip->addFromString('META-INF/container.xml', '<?xml version="1.0"?><container version="1.0" ' .
+            'xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" ' .
+            'media-type="application/oebps-package+xml"/></rootfiles></container>');
+        $manifest = '<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>';
+        $spine = '';
+        $toc = '';
+        foreach ($chapters as $n => [$name, $paragraphs]) {
+            $file = 'c' . ($n + 1) . '.xhtml';
+            $manifest .= '<item id="c' . ($n + 1) . '" href="' . $file . '" media-type="application/xhtml+xml"/>';
+            $spine .= '<itemref idref="c' . ($n + 1) . '"/>';
+            $toc .= '<li><a href="' . $file . '">' . $name . '</a></li>';
+            $zip->addFromString('OEBPS/' . $file, '<?xml version="1.0" encoding="UTF-8"?><html ' .
+                'xmlns="http://www.w3.org/1999/xhtml" xml:lang="es"><head><title>' . $name . '</title></head><body><h1>' .
+                $name . '</h1>' . implode('', array_map(fn($p) => '<p>' . $esc($p) . '</p>', $paragraphs)) . '</body></html>');
+        }
+        $zip->addFromString('OEBPS/nav.xhtml', '<?xml version="1.0" encoding="UTF-8"?><html ' .
+            'xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="es"><head><title>' .
+            $esc($title) . '</title></head><body><nav epub:type="toc"><ol>' . $toc . '</ol></nav></body></html>');
+        $zip->addFromString('OEBPS/content.opf', '<?xml version="1.0" encoding="UTF-8"?><package ' .
+            'xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="id"><metadata ' .
+            'xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="id">urn:uuid:' . \core\uuid::generate() .
+            '</dc:identifier><dc:title>' . $esc($title) . '</dc:title><dc:language>es</dc:language><meta ' .
+            'property="dcterms:modified">' . gmdate('Y-m-d\\TH:i:s\\Z') . '</meta></metadata><manifest>' . $manifest .
+            '</manifest><spine>' . $spine . '</spine></package>');
+        $zip->close();
+    }
 }

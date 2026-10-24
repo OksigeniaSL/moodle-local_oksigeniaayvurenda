@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.1 (2026-10-27)
+
+- The made-up library can fill its public window: `cli/demo.php --window=N --library=SLUG` writes N short made-up
+  EPUBs of the centre's own on titles of its catalogue, for everyone, and opens the window, to show it.
+- The public window lays its works out in columns on wide screens.
+
 ## 0.22.0 (2026-10-27)
 
 - The public window of each library: a page anyone can open without an account, closed until whoever manages the

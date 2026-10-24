@@ -74,8 +74,8 @@
             <ul class="ayv-window-items">
             {{#items}}
                 <li><span>{{label}}</span> <span class="ayv-field-hint">{{licence}}</span>
-                    <a class="ayv-button" href="{{url}}">{{action}}</a>
-                    {{#download}}<a class="ayv-button ayv-button-quiet" href="{{download}}">{{windowdownload}}</a>{{/download}}</li>
+                    <span class="ayv-window-actions"><a class="ayv-button" href="{{url}}">{{action}}</a>
+                    {{#download}}<a class="ayv-button ayv-button-quiet" href="{{download}}">{{windowdownload}}</a>{{/download}}</span></li>
             {{/items}}
             </ul>
         </div>
