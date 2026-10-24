@@ -43,4 +43,5 @@ if (!$found) {
 }
 $data = screens::record($found, $library);
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
+$data['digital'] = screens::digital($found, $library);
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library);

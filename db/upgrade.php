@@ -148,5 +148,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102717, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102722) {
+        // The digital collection: files and links of a record, and where each reader is in them.
+        foreach (['local_oksigeniaayvurenda_digital', 'local_oksigeniaayvurenda_digitalread'] as $name) {
+            if (!$dbman->table_exists($name)) {
+                $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', $name);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026102722, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

@@ -1,0 +1,73 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/digital
+
+    The digital forms of a record: those there are, with their licence and audience, and adding one.
+
+    Example context (json):
+    {
+        "heading": "En digital: El faro dormido", "intro": "Lo decide la licencia.", "notice": "", "action": "#",
+        "sesskey": "abc", "hasitems": true, "hasstages": true, "recordurl": "#",
+        "items": [{"id": 1, "title": "EPUB", "rawtitle": "", "format": "EPUB", "licencelabel": "Dominio público", "readurl": "#",
+            "licences": [{"value": "pd", "label": "Dominio público", "selected": true}],
+            "audiences": [{"value": "students", "label": "Alumnos", "checked": true}],
+            "stages": [{"value": "Primaria", "checked": false}], "download": true}],
+        "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
+        "audiences": [{"value": "staff", "label": "Personal", "checked": true}],
+        "stages": [{"value": "Primaria", "checked": false}],
+        "digitaladd": "Añadir", "digitalfile": "Fichero", "digitalurl": "O un enlace", "digitalurlhint": "dónde está",
+        "digitaltitlefield": "Título", "digitallicence": "Licencia", "digitallicencehint": "La licencia manda",
+        "digitalaudience": "Para quién", "digitalstages": "Solo estas etapas", "digitaldownload": "Se puede descargar",
+        "digitalsave": "Guardar", "digitaldelete": "Quitarlo", "digitalread": "Abrirlo", "digitalnone": "Nada todavía",
+        "backtorecord": "Volver a la ficha"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{^hasitems}}<p class="ayv-empty">{{digitalnone}}</p>{{/hasitems}}
+{{#items}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
+    <h2 class="ayv-section-title">{{title}} <span class="ayv-field-hint">{{format}} · {{licencelabel}}</span></h2>
+    <p><a href="{{readurl}}">{{digitalread}}</a></p>
+    <label class="ayv-field">{{digitaltitlefield}} <input type="text" name="title" value="{{rawtitle}}" maxlength="255"></label>
+    <label class="ayv-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
+    <fieldset class="ayv-fieldset"><legend>{{digitalaudience}}</legend><div class="ayv-choices">
+        {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/audiences}}</div></fieldset>
+    {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{digitalstages}}</legend><div class="ayv-choices">
+        {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{value}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{digitalsave}}</button>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{digitaldelete}}</button></p>
+</form>
+{{/items}}
+<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{digitaladd}}</h2>
+    <label class="ayv-field">{{digitalfile}} <input type="file" name="file" accept=".epub,.pdf,.mp3,.m4a,.m4b,.ogg,.oga,.opus,.wav,.flac,.aac,.mp4,.webm,.ogv,.mov"></label>
+    <label class="ayv-field ayv-field-wide">{{digitalurl}} <span class="ayv-field-hint">{{digitalurlhint}}</span> <input type="text" name="url" inputmode="url" spellcheck="false"></label>
+    <label class="ayv-field">{{digitaltitlefield}} <input type="text" name="title" maxlength="255"></label>
+    <label class="ayv-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
+    <p class="ayv-field-hint">{{digitallicencehint}}</p>
+    <fieldset class="ayv-fieldset"><legend>{{digitalaudience}}</legend><div class="ayv-choices">
+        {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/audiences}}</div></fieldset>
+    {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{digitalstages}}</legend><div class="ayv-choices">
+        {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{value}}"> {{value}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="add">{{digitaladd}}</button></p>
+</form>

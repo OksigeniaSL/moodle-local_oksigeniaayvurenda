@@ -37,12 +37,28 @@
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER;
-    if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, ['copies', 'cover', 'coverdraft'], true)) {
+    if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, ['copies', 'cover', 'coverdraft', 'digital'], true)) {
         return false;
     }
     require_login(null, false);
     $itemid = (int) array_shift($args);
-    if ($filearea === 'copies') {
+    if ($filearea === 'digital') {
+        // A digital book or recording: only for whom it is, and downloaded only where its licence allows.
+        global $DB;
+        $item = $DB->get_record('local_oksigeniaayvurenda_digital', ['id' => $itemid]);
+        if (
+            !$item || !\local_oksigeniaayvurenda\local\digital::visible(
+                $item,
+                \local_oksigeniaayvurenda\local\digital::viewer((int) $item->entityid, (int) $USER->id)
+            )
+        ) {
+            return false;
+        }
+        $forcedownload = $forcedownload && \local_oksigeniaayvurenda\core\digital_rules::can_download(
+            $item->licence,
+            (bool) $item->download
+        );
+    } else if ($filearea === 'copies') {
         require_capability('local/oksigeniaayvurenda:desk', $context);
     } else if ($filearea === 'cover') {
         require_capability('local/oksigeniaayvurenda:view', $context);

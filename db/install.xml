@@ -409,6 +409,49 @@
         <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_digital" COMMENT="A digital form of a record: a file (EPUB, PDF, audio, video) or a link, with its licence and who it is for">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="file" SEQUENCE="false" COMMENT="file, link or voice"/>
+        <FIELD NAME="format" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="epub, pdf, audio, video, other or link"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="url" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="For a link"/>
+        <FIELD NAME="licence" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="rights" SEQUENCE="false"/>
+        <FIELD NAME="audience" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="staff" SEQUENCE="false" COMMENT="students, families, staff, public, separated by commas"/>
+        <FIELD NAME="stages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: the stages of the students it is for; all when empty"/>
+        <FIELD NAME="download" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="published" SEQUENCE="false" COMMENT="published, or pending until it is approved"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="recordid" TYPE="foreign" FIELDS="recordid" REFTABLE="local_oksigeniaayvurenda_record" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_digitalread" COMMENT="Where someone is in a digital book or recording, and their bookmarks">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="digitalid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="position" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="A place in an EPUB, or seconds in a recording"/>
+        <FIELD NAME="bookmarks" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: places with a short label"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="digitalid" TYPE="foreign" FIELDS="digitalid" REFTABLE="local_oksigeniaayvurenda_digital" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="digitaluser" UNIQUE="true" FIELDS="digitalid, userid"/>
+      </INDEXES>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_source" COMMENT="Where a row came from (Abies, a connector, a CSV), so a new import updates it instead of duplicating it">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

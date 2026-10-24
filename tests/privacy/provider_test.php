@@ -72,12 +72,12 @@ final class provider_test extends provider_testcase {
     }
 
     /**
-     * The metadata names the ten tables, the messages, the files of the daily copies and covers, and the look of the
+     * The metadata names the twelve tables, the messages, the files of the daily copies and covers, and the look of the
      * card the reader chose.
      */
     public function test_metadata(): void {
         $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
-        $this->assertCount(13, $items);
+        $this->assertCount(15, $items);
     }
 
     /**

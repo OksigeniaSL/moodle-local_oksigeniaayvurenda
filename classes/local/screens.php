@@ -264,6 +264,34 @@ final class screens {
     }
 
     /**
+     * The digital forms of a record that whoever looks may open: read, listen, watch; and, for the catalogue staff, the
+     * way to add or change them.
+     *
+     * @param array $found As catalogue::record() gives it.
+     * @param \stdClass $library
+     * @return array|null
+     */
+    public static function digital(array $found, \stdClass $library): ?array {
+        global $USER;
+        $recordid = (int) $found['record']->id;
+        $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
+        $items = [];
+        foreach (digital::of_record($recordid, $library, $viewer) as $item) {
+            $items[] = [
+                'label' => $item->title !== '' && $item->title !== null ? $item->title : self::str('format' . $item->format),
+                'action' => self::str('digitalaction' . $item->format),
+                'url' => self::url('read.php', $library, ['id' => $item->id]),
+            ];
+        }
+        $manage = has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())
+            ? ['url' => self::url('digital.php', $library, ['record' => $recordid]), 'label' => self::str('digitalmanage')] : null;
+        if (!$items && !$manage) {
+            return null;
+        }
+        return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage];
+    }
+
+    /**
      * The choice of a library, when there are several.
      *
      * @return array

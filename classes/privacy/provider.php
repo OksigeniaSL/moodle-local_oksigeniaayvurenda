@@ -114,6 +114,17 @@ class provider implements
             'reason' => 'privacy:metadata:withdrawal:reason',
             'timecreated' => 'privacy:metadata:withdrawal:timecreated',
         ], 'privacy:metadata:withdrawal');
+        $collection->add_database_table(self::T . 'digital', [
+            'createdby' => 'privacy:metadata:digital:createdby',
+            'title' => 'privacy:metadata:digital:title',
+            'timecreated' => 'privacy:metadata:digital:timecreated',
+        ], 'privacy:metadata:digital');
+        $collection->add_database_table(self::T . 'digitalread', [
+            'userid' => 'privacy:metadata:digitalread:userid',
+            'position' => 'privacy:metadata:digitalread:position',
+            'bookmarks' => 'privacy:metadata:digitalread:bookmarks',
+            'timemodified' => 'privacy:metadata:digitalread:timemodified',
+        ], 'privacy:metadata:digitalread');
         $collection->add_database_table(self::T . 'lot', [
             'createdby' => 'privacy:metadata:lot:createdby',
             'name' => 'privacy:metadata:lot:name',
@@ -191,6 +202,8 @@ class provider implements
             []
         );
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'lot} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'digital} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'digitalread}', []);
     }
 
     /**
@@ -289,6 +302,19 @@ class provider implements
                     'created' => transform::datetime($l->timecreated)], $lots))]
             );
         }
+        $places = $DB->get_records_sql('SELECT d.id, r.title, d.position, d.bookmarks, d.timemodified
+            FROM {' . self::T . 'digitalread} d
+            JOIN {' . self::T . 'digital} g ON g.id = d.digitalid
+            JOIN {' . self::T . 'record} r ON r.id = g.recordid
+           WHERE d.userid = :userid', ['userid' => $userid]);
+        if ($places) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:digitalread', 'local_oksigeniaayvurenda')]),
+                (object) ['reading' => array_values(array_map(fn($p) => ['title' => $p->title, 'position' => $p->position,
+                    'bookmarks' => json_decode((string) $p->bookmarks, true) ?: [],
+                    'modified' => transform::datetime($p->timemodified)], $places))]
+            );
+        }
         $relayed = $DB->get_records(self::T . 'relay', ['userid' => $userid], 'id', 'id, code, timecreated');
         if ($relayed) {
             writer::with_context($context)->export_data(
@@ -339,6 +365,8 @@ class provider implements
         $DB->set_field_select(self::T . 'stockread', 'userid', null, 'userid IS NOT NULL');
         $DB->set_field_select(self::T . 'withdrawal', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'lot', 'createdby', null, 'createdby IS NOT NULL');
+        $DB->set_field_select(self::T . 'digital', 'createdby', null, 'createdby IS NOT NULL');
+        $DB->delete_records(self::T . 'digitalread');
     }
 
     /**
@@ -404,6 +432,8 @@ class provider implements
         $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'withdrawal', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'lot', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'digital', 'createdby', null, ['createdby' => $userid]);
+        $DB->delete_records(self::T . 'digitalread', ['userid' => $userid]);
     }
 
     /**
@@ -430,7 +460,9 @@ class provider implements
             $DB->record_exists(self::T . 'stocktake', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'stockread', ['userid' => $userid]) ||
             $DB->record_exists(self::T . 'withdrawal', ['createdby' => $userid]) ||
-            $DB->record_exists(self::T . 'lot', ['createdby' => $userid])
+            $DB->record_exists(self::T . 'lot', ['createdby' => $userid]) ||
+            $DB->record_exists(self::T . 'digital', ['createdby' => $userid]) ||
+            $DB->record_exists(self::T . 'digitalread', ['userid' => $userid])
         ) {
             return true;
         }

@@ -48,4 +48,28 @@
             <copyright>Copyright (c) ZXing authors</copyright>
         </copyrights>
     </library>
+    <library>
+        <location>app/epubjs/epub.min.js</location>
+        <name>epub.js</name>
+        <description>Reading EPUB books in the browser. The minified build, unchanged. License text in app/epubjs/LICENSE-epubjs.</description>
+        <version>0.3.93</version>
+        <license>BSD</license>
+        <licenseversion>2-Clause</licenseversion>
+        <repository>https://github.com/futurepress/epub.js</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2013, FuturePress</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>app/epubjs/jszip.min.js</location>
+        <name>JSZip</name>
+        <description>Opening the EPUB zip for epub.js. The minified build, unchanged; used under the MIT license of its dual licence. License text in app/epubjs/LICENSE-jszip.md.</description>
+        <version>3.10.1</version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/Stuk/jszip</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso</copyright>
+        </copyrights>
+    </library>
 </libraries>

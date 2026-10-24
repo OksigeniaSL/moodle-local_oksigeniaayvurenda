@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.20.0 (2026-10-27)
+
+- The digital collection. A record can have digital forms: an EPUB read in the browser (a page at a time, with the size
+  of the letters and bookmarks), a PDF, an audiobook or a video that go on from where they were left, or a link to
+  where the work is. Each one says its licence and who it is for (students, all or by stage; families; teachers and
+  staff; the public). The licence wins: a work whose rights are someone else's is only read here, never downloaded nor
+  shown to the public. The files stay in the site and are served only to whom they are for. Where each reader is, and
+  their bookmarks, go into the privacy export.
+- epub.js 0.3.93 (BSD-2-Clause) and JSZip 3.10.1 (MIT) for the EPUB reader.
+
 ## 0.19.2 (2026-10-27)
 
 - The library staff can see any reader's card as the reader sees it, and switch between the flower, both skies, the

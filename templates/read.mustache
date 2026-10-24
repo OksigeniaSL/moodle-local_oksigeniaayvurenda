@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/read
+
+    Reading or listening to a digital form of a record.
+
+    Example context (json):
+    {
+        "heading": "El faro dormido", "subtitle": "EPUB", "licence": "Dominio público",
+        "epub": false, "pdf": false, "audio": true, "video": false, "link": "", "other": false,
+        "fileurl": "#", "downloadurl": "#", "recordurl": "#",
+        "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande",
+        "readmark": "Marcar aquí", "readmarks": "Tus marcas", "readdownload": "Descargar", "readopenlink": "Abrirlo",
+        "readnodownload": "Se lee aquí", "backtorecord": "Volver a la ficha", "readloading": "Abriendo el libro…"
+    }
+}}
+<section class="ayv-read">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-field-hint">{{subtitle}} · {{licence}}</p>
+{{#epub}}
+<div class="ayv-read-bar" role="toolbar" aria-label="{{subtitle}}">
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-prev">{{readprev}}</button>
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-next">{{readnext}}</button>
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-smaller" aria-label="A− {{readsmaller}}">A−</button>
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-bigger" aria-label="A+ {{readbigger}}">A+</button>
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-mark">{{readmark}}</button>
+    <span class="ayv-field-hint" id="ayv-where" role="status"></span>
+</div>
+<div id="ayv-epub" class="ayv-epub" data-url="{{fileurl}}" data-title="{{heading}}"><p class="ayv-empty">{{readloading}}</p></div>
+{{/epub}}
+{{#pdf}}<iframe class="ayv-pdf" src="{{fileurl}}" title="{{heading}}"></iframe>{{/pdf}}
+{{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></audio>{{/audio}}
+{{#video}}<video id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></video>{{/video}}
+{{#link}}<p class="ayv-more"><a class="ayv-button" href="{{link}}" target="_blank" rel="noopener">{{readopenlink}}</a></p>{{/link}}
+<div id="ayv-marks" class="ayv-read-marks" hidden><h2 class="ayv-section-title">{{readmarks}}</h2><ul class="ayv-holds"></ul></div>
+{{#downloadurl}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{downloadurl}}">{{readdownload}}</a></p>{{/downloadurl}}
+{{^downloadurl}}{{^link}}<p class="ayv-field-hint">{{readnodownload}}</p>{{/link}}{{/downloadurl}}
+</section>
