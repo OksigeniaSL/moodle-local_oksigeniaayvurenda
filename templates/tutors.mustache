@@ -1,0 +1,62 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/tutors
+
+    The tutor of each group this school year.
+
+    Context variables required for this template:
+    * heading, intro, notice, empty, nocandidates - texts
+    * action, sesskey, save - the form
+    * rows - list of index, group, proposed and options (value, label, selected)
+
+    Example context (json):
+    {
+        "heading": "Tutores de 2026-2027",
+        "intro": "Reciben cada semana quién de su grupo tiene libros con retraso.",
+        "notice": "",
+        "action": "#",
+        "sesskey": "abc",
+        "hasrows": true,
+        "rows": [{"index": 0, "group": "3º Primaria A", "proposed": true,
+                  "options": [{"value": 0, "label": "Sin tutor", "selected": false}, {"value": 5, "label": "Irene Laurel", "selected": true}]}],
+        "proposedlabel": "Propuesto: el del curso pasado",
+        "save": "Guardar",
+        "empty": "",
+        "nocandidates": ""
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#nocandidates}}<p class="ayv-empty">{{nocandidates}}</p>{{/nocandidates}}
+{{#hasrows}}
+<form method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <ul class="ayv-sources">
+    {{#rows}}
+        <li class="ayv-source">
+            <span class="ayv-source-name">{{group}}</span>
+            <input type="hidden" name="group[{{index}}]" value="{{group}}">
+            <select name="tutor[{{index}}]" aria-label="{{group}}">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select>
+            {{#proposed}}<span class="ayv-source-count">{{proposedlabel}}</span>{{/proposed}}
+        </li>
+    {{/rows}}
+    </ul>
+    <p class="ayv-more"><button type="submit" class="ayv-button">{{save}}</button></p>
+</form>
+{{/hasrows}}
+{{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}

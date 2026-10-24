@@ -590,6 +590,7 @@
 .ayv .ayv-field { display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
 
 .ayv .ayv-field input[type="text"],
+.ayv .ayv-source select,
 .ayv .ayv-field select {
     min-height: 40px;
     padding: .25rem .6rem;
@@ -604,3 +605,9 @@
 .ayv .ayv-choices { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
 
 .ayv input[type="radio"] { width: 1.15rem; height: 1.15rem; accent-color: var(--green); }
+
+.ayv .ayv-is-late { color: #a3321e; }
+
+.ayv a.ayv-today-card { height: 100%; color: var(--ink); text-decoration: none; }
+
+.ayv a.ayv-today-card:hover { box-shadow: inset 0 0 0 2px var(--green2); }

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.0 (2026-10-25)
+
+- Notices of late books, as Moodle messages, so they go by whatever the site and each person use. The reader hears
+  on the first day late and then once a week, kindly and with the titles, which are theirs. The tutor of each group
+  gets, once a week, who in the group has books late and for how long, without the titles: the tutor sees the
+  lateness, not what the child reads. Each person can turn them off in their notification preferences.
+- The tutor of each group in each school year, chosen once a year, with last year's tutor of a group with the same
+  name proposed.
+- The list of late books by group for the staff, with names, titles and days late, and the list of all books out;
+  the desk's «late» and «out» cards lead to it.
+- The daily copy: every night, everything an entity holds in CSV files in a zip, with a note of what each file is,
+  kept in the site for the library staff to download with one tap. The last seven are kept. It does not depend on
+  Moodle's own backups, which only the site administrator sees.
+- The made-up library can get made-up loans and tutors (`cli/demo.php --loans=N --library=SLUG`).
+
 ## 0.6.1 (2026-10-25)
 
 - The Abies importer brings, on request (`--with-readers`), the readers with their card codes, kind and group of the

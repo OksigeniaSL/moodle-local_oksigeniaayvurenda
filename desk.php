@@ -52,8 +52,17 @@ foreach (
 $cards = '';
 foreach (['today' => 'todaytoday', 'late' => 'todaylate', 'out' => 'todayout'] as $key => $label) {
     if ($today[$key] > 0) {
-        $cards .= '<li class="ayv-today-card ayv-today-' . $key . '"><span class="ayv-today-number">' . $today[$key] .
-            '</span><span class="ayv-today-label">' . s($str($label)) . '</span></li>';
+        $inner = '<span class="ayv-today-number">' . $today[$key] . '</span><span class="ayv-today-label">' .
+            s($str($label)) . '</span>';
+        if ($key === 'today') {
+            $cards .= '<li class="ayv-today-card ayv-today-' . $key . '">' . $inner . '</li>';
+        } else {
+            $url = new moodle_url(
+                '/local/oksigeniaayvurenda/late.php',
+                ['library' => $library->slug, 'all' => (int) ($key === 'out')]
+            );
+            $cards .= '<li><a class="ayv-today-card ayv-today-' . $key . '" href="' . $url->out() . '">' . $inner . '</a></li>';
+        }
     }
 }
 $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
@@ -75,6 +84,8 @@ shell::output($str('desktitle'), $main, $library, '', [
             'label' => $str('readers')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'label' => $str('deskcatalogue')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('copiesnav')],
     ],
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/desk_ajax.php'))->out(false),

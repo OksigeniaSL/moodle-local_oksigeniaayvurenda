@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/clilib.php');
 
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'name' => 'Biblioteca de demostración', 'records' => 14500, 'readers' => 2000, 'seed' => 20261023,
-        'accounts' => 0, 'entity' => 0],
+        'accounts' => 0, 'entity' => 0, 'loans' => 0, 'library' => ''],
     ['h' => 'help']
 );
 
@@ -49,6 +49,9 @@ Options:
   --accounts=N    Instead, add N made-up Moodle accounts of students (and a tenth more of teachers) in cohorts, one
                   per group, to the entity given with --entity, and bring them as readers
   --entity=ID     The entity for --accounts
+  --loans=N       Instead, add N made-up loans of the last weeks (most returned, some out, some late) to the library
+                  given with --library, and a tutor for each group among the teachers with an account
+  --library=SLUG  The library for --loans
   -h, --help      This help
 
 Example:
@@ -65,6 +68,15 @@ if ((int) $options['accounts'] > 0) {
     $stats = \local_oksigeniaayvurenda\local\demo::accounts((int) $options['entity'], (int) $options['accounts']);
     cli_writeln('Made-up accounts in cohorts, brought as readers: ' . json_encode($stats) . ', in ' .
         round(microtime(true) - $start, 1) . ' s.');
+    exit(0);
+}
+if ((int) $options['loans'] > 0) {
+    $libraryid = $DB->get_field('local_oksigeniaayvurenda_library', 'id', ['slug' => $options['library']]);
+    if (!$libraryid) {
+        cli_error('Say which library the loans are for (--library).');
+    }
+    $stats = \local_oksigeniaayvurenda\local\demo::activity((int) $libraryid, (int) $options['loans']);
+    cli_writeln('Made-up loans and tutors: ' . json_encode($stats) . ', in ' . round(microtime(true) - $start, 1) . ' s.');
     exit(0);
 }
 $entityid = \local_oksigeniaayvurenda\local\demo::create(

@@ -34,4 +34,22 @@ $tasks = [
         'month' => '*',
         'dayofweek' => '*',
     ],
+    [
+        'classname' => '\local_oksigeniaayvurenda\task\send_notices',
+        'blocking' => 0,
+        'minute' => '30',
+        'hour' => '8',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '1-5',
+    ],
+    [
+        'classname' => '\local_oksigeniaayvurenda\task\make_copies',
+        'blocking' => 0,
+        'minute' => '47',
+        'hour' => '2',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
 ];

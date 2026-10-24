@@ -68,11 +68,30 @@ final class provider_test extends provider_testcase {
     }
 
     /**
-     * The metadata names the three tables.
+     * The metadata names the four tables, the messages and the files of the daily copies.
      */
     public function test_metadata(): void {
         $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
-        $this->assertCount(3, $items);
+        $this->assertCount(6, $items);
+    }
+
+    /**
+     * A tutor has data in the site context, exports the groups they tutored and loses them when deleted.
+     */
+    public function test_tutor(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $tutor = $this->getDataGenerator()->create_user();
+        \local_oksigeniaayvurenda\local\tutors::set((int) $w->year->id, '3º Primaria A', (int) $tutor->id);
+        $system = \context_system::instance();
+        $this->assertEquals([$system->id], provider::get_contexts_for_userid($tutor->id)->get_contextids());
+        $this->export_context_data_for_user($tutor->id, $system, 'local_oksigeniaayvurenda');
+        $data = writer::with_context($system)->get_data([get_string('pluginname', 'local_oksigeniaayvurenda'),
+            get_string('privacy:path:tutor', 'local_oksigeniaayvurenda')]);
+        $this->assertSame('3º Primaria A', $data->groups[0]['group']);
+        provider::delete_data_for_user(new approved_contextlist($tutor, 'local_oksigeniaayvurenda', [$system->id]));
+        $this->assertSame(0, $DB->count_records(self::T . 'tutor'));
     }
 
     /**

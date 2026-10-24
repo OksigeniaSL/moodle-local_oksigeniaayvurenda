@@ -1,0 +1,54 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/late
+
+    Books out of the library by group: the late ones, or all of them.
+
+    Context variables required for this template:
+    * heading, empty - texts
+    * groups - list of heading and lines (name, title, when, islate)
+    * switch - url and label to see the others
+
+    Example context (json):
+    {
+        "heading": "Libros con retraso",
+        "hasgroups": true,
+        "groups": [{"heading": "3º Primaria A", "lines": [{"name": "Ana Montes", "title": "El faro dormido",
+                    "when": "5 días de retraso", "islate": true}]}],
+        "empty": "No hay libros con retraso.",
+        "switch": {"url": "#", "label": "Ver todos los prestados"}
+    }
+}}
+<div class="ayv-results-head">
+    <h1 class="ayv-results-title">{{heading}}</h1>
+    {{#switch}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/switch}}
+</div>
+{{#hasgroups}}
+{{#groups}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{heading}}</h2>
+    <ul class="ayv-people">
+    {{#lines}}
+        <li class="ayv-person"><span class="ayv-person-name">{{name}}</span>
+            <span>«{{title}}»</span>
+            <span class="ayv-person-card {{#islate}}ayv-is-late{{/islate}}">{{when}}</span></li>
+    {{/lines}}
+    </ul>
+</section>
+{{/groups}}
+{{/hasgroups}}
+{{^hasgroups}}<p class="ayv-empty">{{empty}}</p>{{/hasgroups}}

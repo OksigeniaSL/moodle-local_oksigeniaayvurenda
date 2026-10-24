@@ -228,6 +228,79 @@ final class demo {
     }
 
     /**
+     * A term of made-up activity in a library: loans of the last weeks, most of them returned, some out and some late,
+     * by readers who have a group this year; and a tutor for each group among the teachers with an account.
+     *
+     * @param int $libraryid
+     * @param int $count Loans.
+     * @param int $seed
+     * @param int|null $now
+     * @return array Loans out, late and returned, and tutors set.
+     */
+    public static function activity(int $libraryid, int $count, int $seed = 20261026, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        mt_srand($seed);
+        $library = $DB->get_record(self::T . 'library', ['id' => $libraryid], '*', MUST_EXIST);
+        $year = years::around((int) $library->entityid, $now);
+        $members = $DB->get_records_sql(
+            "SELECT m.readerid, m.groupname
+               FROM {" . self::T . "member} m
+               JOIN {" . self::T . "reader} r ON r.id = m.readerid
+              WHERE m.yearid = :yearid AND r.status = 'active' AND m.groupname IS NOT NULL",
+            ['yearid' => $year->id]
+        );
+        $members = array_values($members);
+        $items = $DB->get_fieldset_select(self::T . 'item', 'id',
+            "libraryid = :libraryid AND status = 'available' AND itemtype = 'normal'", ['libraryid' => $libraryid]);
+        $stats = ['out' => 0, 'late' => 0, 'returned' => 0, 'tutors' => 0];
+        if (!$members || !$items) {
+            return $stats;
+        }
+        shuffle($items);
+        for ($i = 0; $i < $count && $items; $i++) {
+            $member = $members[mt_rand(0, count($members) - 1)];
+            $itemid = (int) array_pop($items);
+            $loaned = $now - mt_rand(1, 40) * DAYSECS - mt_rand(0, 6) * HOURSECS;
+            $due = $loaned + 14 * DAYSECS;
+            $returned = $due < $now - 3 * DAYSECS && mt_rand(1, 100) <= 85 ? $loaned + mt_rand(3, 16) * DAYSECS : null;
+            $returned = $returned !== null ? min($returned, $now - HOURSECS) : null;
+            $DB->insert_record(self::T . 'loan', [
+                'libraryid' => $libraryid,
+                'itemid' => $itemid,
+                'readerid' => $member->readerid,
+                'yearid' => $year->id,
+                'groupname' => $member->groupname,
+                'timeloaned' => $loaned,
+                'timedue' => $due,
+                'timereturned' => $returned,
+                'renewals' => 0,
+                'timecreated' => $loaned,
+                'timemodified' => $returned ?? $loaned,
+            ]);
+            if ($returned === null) {
+                $DB->set_field(self::T . 'item', 'status', 'onloan', ['id' => $itemid]);
+                $stats[$due < $now ? 'late' : 'out']++;
+            } else {
+                $stats['returned']++;
+            }
+        }
+        $teachers = $DB->get_fieldset_select(self::T . 'reader', 'userid',
+            "entityid = :entityid AND userid IS NOT NULL AND readertype <> 'student' AND status = 'active'",
+            ['entityid' => $library->entityid]);
+        $groups = array_unique(array_map(fn($m) => $m->groupname, $members));
+        sort($groups);
+        foreach ($groups as $index => $group) {
+            if (!isset($teachers[$index])) {
+                break;
+            }
+            tutors::set((int) $year->id, $group, (int) $teachers[$index]);
+            $stats['tutors']++;
+        }
+        return $stats;
+    }
+
+    /**
      * Loan rules as a school usually has them.
      *
      * @param int $libraryid

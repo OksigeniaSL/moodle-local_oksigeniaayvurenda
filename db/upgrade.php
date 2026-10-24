@@ -48,5 +48,31 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102500, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102503) {
+        // When the reader last heard about a late loan.
+        $table = new xmldb_table('local_oksigeniaayvurenda_loan');
+        $field = new xmldb_field('timenotified', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'returnnote');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // The tutor of each group in each school year.
+        $table = new xmldb_table('local_oksigeniaayvurenda_tutor');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('yearid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('groupname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timenotified', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('yearid', XMLDB_KEY_FOREIGN, ['yearid'], 'local_oksigeniaayvurenda_year', ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_index('yeargroup', XMLDB_INDEX_UNIQUE, ['yearid', 'groupname']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026102503, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

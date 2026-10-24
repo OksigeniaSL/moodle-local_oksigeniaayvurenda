@@ -77,7 +77,15 @@ class provider implements
             'returnnote' => 'privacy:metadata:loan:returnnote',
             'staffid' => 'privacy:metadata:loan:staffid',
             'returnstaffid' => 'privacy:metadata:loan:returnstaffid',
+            'timenotified' => 'privacy:metadata:loan:timenotified',
         ], 'privacy:metadata:loan');
+        $collection->add_database_table(self::T . 'tutor', [
+            'userid' => 'privacy:metadata:tutor:userid',
+            'groupname' => 'privacy:metadata:tutor:groupname',
+            'timenotified' => 'privacy:metadata:tutor:timenotified',
+        ], 'privacy:metadata:tutor');
+        $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
+        $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
         return $collection;
     }
 
@@ -111,6 +119,7 @@ class provider implements
             'SELECT returnstaffid FROM {' . self::T . 'loan} WHERE returnstaffid IS NOT NULL',
             []
         );
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
     }
 
     /**
@@ -163,6 +172,24 @@ class provider implements
                 (object) ['loans' => array_values(array_map(fn($loan) => self::loan_export($loan), $handled))]
             );
         }
+        $tutored = $DB->get_records_sql(
+            'SELECT t.id, y.name AS year, t.groupname, t.timenotified
+               FROM {' . self::T . 'tutor} t
+               JOIN {' . self::T . 'year} y ON y.id = t.yearid
+              WHERE t.userid = :userid
+           ORDER BY y.timestart, t.groupname',
+            ['userid' => $userid]
+        );
+        if ($tutored) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:tutor', 'local_oksigeniaayvurenda')]),
+                (object) ['groups' => array_values(array_map(fn($t) => [
+                    'year' => $t->year,
+                    'group' => $t->groupname,
+                    'timenotified' => $t->timenotified ? transform::datetime($t->timenotified) : null,
+                ], $tutored))]
+            );
+        }
     }
 
     /**
@@ -180,6 +207,7 @@ class provider implements
         }
         $DB->set_field_select(self::T . 'loan', 'staffid', null, 'staffid IS NOT NULL');
         $DB->set_field_select(self::T . 'loan', 'returnstaffid', null, 'returnstaffid IS NOT NULL');
+        $DB->delete_records(self::T . 'tutor');
     }
 
     /**
@@ -231,6 +259,7 @@ class provider implements
         }
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
+        $DB->delete_records(self::T . 'tutor', ['userid' => $userid]);
     }
 
     /**
@@ -242,6 +271,9 @@ class provider implements
     private static function has_data(int $userid): bool {
         global $DB;
         if ($DB->record_exists(self::T . 'reader', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'tutor', ['userid' => $userid])) {
             return true;
         }
         return $DB->record_exists_select(
