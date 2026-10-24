@@ -52,6 +52,11 @@ if (data_submitted() && confirm_sesskey()) {
             'yearstart' => optional_param('yearstart', '09-01', PARAM_TEXT),
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
             'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
+            // Stage names go as values: array keys in Moodle's parameters only take letters, digits, - and _.
+            'cardlooks' => array_combine(
+                optional_param_array('cardstage', [], PARAM_TEXT),
+                optional_param_array('cardlook', [], PARAM_ALPHA)
+            ) ?: [],
         ]);
         $notice = $str('librariessaved');
     } else if ($do === 'newlibrary') {
@@ -127,6 +132,17 @@ foreach (libraries::all() as $one) {
         'parents' => $options(0),
         'groups' => $groupoptions([]),
         'hasgroups' => (bool) $groups,
+        'cardlooks' => array_map(function ($stage) use ($settings, $str) {
+            $guess = \local_oksigeniaayvurenda\core\card_look::guess('student', $stage, '');
+            $chosen = $settings['cardlooks'][$stage] ?? '';
+            return ['stage' => $stage, 'options' => array_merge(
+                [['value' => '', 'label' => $str('cardlookauto', $str('cardlookopt' . $guess)), 'selected' => $chosen === '']],
+                array_map(
+                    fn($l) => ['value' => $l, 'label' => $str('cardlookopt' . $l), 'selected' => $chosen === $l],
+                    \local_oksigeniaayvurenda\core\card_look::LOOKS
+                )
+            )];
+        }, \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
     ];
 }
 $data = [
@@ -144,7 +160,7 @@ foreach (
         'librariesyearstarthint', 'librariesclassification', 'librariescontrolletter', 'librariescreate', 'librariesadd',
         'librariesname', 'librarieskind', 'librariesparent', 'librariesnoparent', 'librariesslug', 'librariesslughint',
         'librariesgroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
-        'librariesedit', 'librariesentity'] as $key
+        'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint'] as $key
 ) {
     $data[$key] = $str($key);
 }

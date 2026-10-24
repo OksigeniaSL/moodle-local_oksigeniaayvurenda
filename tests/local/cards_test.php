@@ -42,6 +42,12 @@ final class cards_test extends \basic_testcase {
             $this->assertStringContainsString('<title>Casi flor &amp; co</title>', $svg);
             $this->assertSame(1, substr_count($svg, '<svg'));
         }
+        // The sky, from twelve on: the same marks, and the sober style as a class.
+        $sky = cards::sky_svg(2, ['back' => 1, 'explore' => 2, 'tell' => 3, 'stay' => 0], 'Media luna', 160, true);
+        $this->assertStringContainsString('data-explorar="2"', $sky);
+        $this->assertMatchesRegularExpression('/^<svg [^>]*class="ayv-cielo sobrio"/', $sky);
+        $this->assertStringNotContainsString('sobrio"', cards::sky_svg(0, [], 'Luna nueva', 160, false));
+        $this->assertStringContainsString('data-contar="3"', cards::sky_path_svg('tell', 3, 'La Voz', false));
         // The legend: the three marks of one path in a row.
         foreach (['back' => 'volver', 'explore' => 'explorar', 'tell' => 'contar', 'stay' => 'quedarse'] as $path => $attribute) {
             $svg = cards::path_svg($path, 2, 'Dos de tres');

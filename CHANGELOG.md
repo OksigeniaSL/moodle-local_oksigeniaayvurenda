@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.19.0 (2026-10-27)
+
+- The card by age. The flower stays for Infantil and Primaria; from Secundaria on, the sky by Gaudí: a constellation
+  for each path (The Tide, The Compass, The Voice, The Anchor) and the moon as the stage, lively from twelve to
+  fourteen and sober from fifteen and for adults. The centre sets it by stage in «Libraries» (automatic by what the
+  stage is called); from twelve on, each reader may choose the sky, a classic look (a list, without a picture) or none
+  at all. Teachers, staff and families see no game unless they turn it on, and it never appears at the desk or in the
+  late notices. Nobody is ranked. The drawings of the sky are dual-licensed CC BY-SA 4.0 or GPL v3
+  (`app/cielo/LICENSE.md`).
+- Texts that readers of every age see, without exclamations: they stay only in the flower's, for the youngest. The
+  signature lines of the weeding record name the role, not a person.
+
 ## 0.18.0 (2026-10-27)
 
 - A classroom library can serve several groups (two classes that share a shelf, a cycle): they are ticked in

@@ -72,7 +72,38 @@ final class cards {
      * @return string SVG.
      */
     public static function flower_svg(int $stage, array $levels, string $label, int $size): string {
-        return self::drawing(flower::STAGES[$stage] . '.svg', $levels, $label, $size, $size);
+        return self::drawing('flor/' . flower::STAGES[$stage] . '.svg', $levels, $label, $size, $size);
+    }
+
+    /** @var string[] The drawings of the sky, by stage: the moon as it grows. */
+    public const SKY = ['new', 'crescent', 'half', 'full'];
+
+    /**
+     * The sky drawn in the page, for twelve and over: a constellation for each path, lit up to its level, and the moon
+     * as the stage (Gaudí's drawing). Sober from fifteen and for adults.
+     *
+     * @param int $stage
+     * @param array $levels
+     * @param string $label
+     * @param int $size
+     * @param bool $sober
+     * @return string
+     */
+    public static function sky_svg(int $stage, array $levels, string $label, int $size, bool $sober): string {
+        return self::drawing('cielo/' . self::SKY[$stage] . '.svg', $levels, $label, $size, $size, $sober);
+    }
+
+    /**
+     * The three stars of one path in a row, as the sky draws them, for its legend.
+     *
+     * @param string $path
+     * @param int $level
+     * @param string $label
+     * @param bool $sober
+     * @return string
+     */
+    public static function sky_path_svg(string $path, int $level, string $label, bool $sober): string {
+        return self::drawing('cielo/path-' . $path . '.svg', [$path => $level], $label, 62, 22, $sober);
     }
 
     /**
@@ -84,22 +115,30 @@ final class cards {
      * @return string SVG, 22 pixels high.
      */
     public static function path_svg(string $path, int $level, string $label): string {
-        return self::drawing('path-' . $path . '.svg', [$path => $level], $label, 62, 22);
+        return self::drawing('flor/path-' . $path . '.svg', [$path => $level], $label, 62, 22);
     }
 
     /**
      * One of the flower's drawings, with the marks of the paths given lit up to their level.
      *
-     * @param string $file In app/flor.
+     * @param string $file In app.
      * @param array $levels Level of each path, 0 to 3.
      * @param string $label
      * @param int $width
      * @param int $height
+     * @param bool $sober The sober style of the sky.
      * @return string
      */
-    private static function drawing(string $file, array $levels, string $label, int $width, int $height): string {
+    private static function drawing(
+        string $file,
+        array $levels,
+        string $label,
+        int $width,
+        int $height,
+        bool $sober = false
+    ): string {
         global $CFG;
-        $svg = (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/flor/' . $file);
+        $svg = (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/' . $file);
         $attributes = ['back' => 'volver', 'explore' => 'explorar', 'tell' => 'contar', 'stay' => 'quedarse'];
         $open = preg_match('/^<svg\b[^>]*>/', $svg, $matches) ? $matches[0] : '';
         if ($open === '') {
@@ -111,6 +150,9 @@ final class cards {
             $new = preg_replace('/\bdata-' . $attribute . '="\d"/', 'data-' . $attribute . '="' . $level . '"', $new);
         }
         $new = preg_replace('/\baria-label="[^"]*"/', 'aria-label="' . s($label) . '"', $new);
+        if ($sober) {
+            $new = preg_replace('/\bclass="([^"]*)"/', 'class="$1 sobrio"', $new, 1);
+        }
         $new = '<svg width="' . $width . '" height="' . $height . '" focusable="false"' . substr($new, 4);
         $svg = $new . substr($svg, strlen($open));
         return preg_replace('/<title>[^<]*<\/title>/', '<title>' . s($label) . '</title>', $svg, 1);

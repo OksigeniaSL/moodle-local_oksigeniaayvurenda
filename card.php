@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\core\flower;
+use local_oksigeniaayvurenda\core\card_look;
 use local_oksigeniaayvurenda\local\cards;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\garden;
@@ -43,44 +44,73 @@ $conditions = ['userid' => $USER->id, 'status' => 'active'];
 if ($library) {
     $conditions['entityid'] = $library->entityid;
 }
+// The reader's own choice of how the card looks (not with the flower, which the centre decides).
+$pref = 'local_oksigeniaayvurenda_cardlook';
+if (data_submitted() && confirm_sesskey()) {
+    $chosen = optional_param('look', '', PARAM_ALPHA);
+    set_user_preference($pref, in_array($chosen, card_look::OWN, true) ? $chosen : null);
+}
+$own = get_user_preferences($pref, null);
 $cardsdata = [];
 foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') as $reader) {
     $album = garden::album($reader);
-    $group = (string) $DB->get_field(
+    $member = $DB->get_record(
         'local_oksigeniaayvurenda_member',
-        'groupname',
         ['readerid' => $reader->id, 'yearid' => $album['year']->id],
+        'id, groupname, stage',
         IGNORE_MULTIPLE
     );
-    $entity = format_string($DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $reader->entityid]));
-    $card = cards::card($reader, fullname($USER), $group, $entity, $album['flower']['stage']);
-    $card['flowersvg'] = cards::flower_svg($album['flower']['stage'], $album['flower']['levels'], $card['stage'], 160);
-    $paths = [];
-    foreach (flower::PATHS as $path) {
-        $level = $album['flower']['levels'][$path];
-        $paths[] = ['label' => $str('path' . $path), 'hint' => $str('path' . $path . 'hint'), 'level' => $level,
-            'marks' => cards::path_svg($path, $level, $str('pathlevel', (object) ['path' => $str('path' . $path),
-                'level' => $level]))];
-    }
-    $past = array_map(
-        fn($p) => ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']),
-        'stage' => $str('stage' . flower::STAGES[$p['stage']]),
-        'svg' => cards::flower_svg(
-            $p['stage'],
-            $p['levels'],
-            $str('stage' . flower::STAGES[$p['stage']]) . ' · ' . $p['year'],
-            72
-        )],
-        $album['past']
+    $group = $member ? (string) $member->groupname : '';
+    $entityrow = $DB->get_record('local_oksigeniaayvurenda_entity', ['id' => $reader->entityid], 'name, settings');
+    $entity = format_string($entityrow->name);
+    $esettings = json_decode((string) $entityrow->settings, true) ?: [];
+    $stagename = $member ? (string) $member->stage : '';
+    $look = card_look::resolve(
+        card_look::guess($reader->readertype, $stagename, $group),
+        $esettings['cardlooks'][$stagename] ?? null,
+        $own
     );
-    $herald = \local_oksigeniaayvurenda\local\characters::say(
+    $sky = $look === 'sky' || $look === 'skysober';
+    $sober = $look === 'skysober';
+    $stage = $album['flower']['stage'];
+    $card = cards::card($reader, fullname($USER), $group, $entity, $stage);
+    $card['stage'] = $sky ? $str('stagesky' . $stage) : ($look === 'flower' ? $card['stage'] : '');
+    $card['flowersvg'] = $look === 'flower' ? cards::flower_svg($stage, $album['flower']['levels'], $card['stage'], 160)
+        : ($sky ? cards::sky_svg($stage, $album['flower']['levels'], $card['stage'], 160, $sober) : '');
+    $paths = [];
+    foreach ($look === 'none' ? [] : flower::PATHS as $path) {
+        $level = $album['flower']['levels'][$path];
+        $name = $sky ? $str('constellation' . $path) . ' · ' . core_text::strtolower($str('path' . $path)) : $str('path' . $path);
+        $levellabel = $str('pathlevel', (object) ['path' => $name, 'level' => $level]);
+        $marks = $look === 'flower' ? cards::path_svg($path, $level, $levellabel)
+            : ($sky ? cards::sky_path_svg($path, $level, $levellabel, $sober) : '');
+        $paths[] = ['label' => $name, 'hint' => $str('path' . $path . 'hint'), 'level' => $level, 'marks' => $marks,
+            'leveltext' => $marks === '' ? $str('cardlevel', $level) : ''];
+    }
+    $past = [];
+    foreach ($look === 'flower' || $sky ? $album['past'] : [] as $p) {
+        $label = ($sky ? $str('stagesky' . $p['stage']) : $str('stage' . flower::STAGES[$p['stage']])) . ' · ' . $p['year'];
+        $past[] = ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']), 'stage' => $label,
+            'svg' => $sky ? cards::sky_svg($p['stage'], $p['levels'], $label, 72, $sober)
+                : cards::flower_svg($p['stage'], $p['levels'], $label, 72)];
+    }
+    $herald = $look === 'flower' || $sky ? \local_oksigeniaayvurenda\local\characters::say(
         (int) $reader->entityid,
         'herald',
-        'heraldstage' . $album['flower']['stage']
-    );
+        ($sky ? 'heraldsky' : 'heraldstage') . $stage
+    ) : null;
+    // From twelve on, and for adults, each reader chooses: the sky, the classic look, or none.
+    $choices = $look === 'flower' ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
+        'checked' => $o === ($sky ? 'sky' : $look)], card_look::OWN);
     $cardsdata[] = $card + [
         'herald' => $herald,
         'paths' => $paths,
+        'haspaths' => (bool) $paths,
+        'pathsheading' => $str($look === 'flower' ? 'cardpaths' : ($sky ? 'cardpathssky' : 'cardpathsclassic')),
+        'pastheading' => $str($sky ? 'cardpastsky' : 'cardpast'),
+        'choices' => $choices,
+        'haschoices' => (bool) $choices,
+        'sky' => $sky,
         'books' => $album['books'],
         'hasbooks' => (bool) $album['books'],
         'past' => $past,
@@ -93,7 +123,10 @@ $data = [
     'cards' => $cardsdata,
     'hascards' => (bool) $cardsdata,
     'none' => $str('cardnone'),
-    'pathsheading' => $str('cardpaths'),
+    'action' => $PAGE->url->out(false),
+    'sesskey' => sesskey(),
+    'lookheading' => $str('cardlookheading'),
+    'looksave' => $str('cardlooksave'),
     'booksheading' => $str('cardbooks'),
     'nobooks' => $str('cardnobooks'),
     'pastheading' => $str('cardpast'),

@@ -29,8 +29,11 @@
         "hascards": true,
         "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Casi flor", "yearname": "2026-2027",
-                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": ""}],
+                   "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "leveltext": "2 de 3"}],
+                   "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
+                   "sky": false, "haschoices": false, "choices": [],
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
+        "action": "#", "sesskey": "abc", "lookheading": "Cómo ves tu carné", "looksave": "Guardar",
         "none": "",
         "pathsheading": "Cómo crece",
         "booksheading": "Lo que has leído este curso",
@@ -44,11 +47,11 @@
 {{#cards}}
 <section class="ayv-mycard">
     <div class="ayv-card-face">
-        <span class="ayv-card-flower">{{{flowersvg}}}</span>
+        {{#flowersvg}}<span class="ayv-card-flower{{#sky}} ayv-card-sky{{/sky}}">{{{flowersvg}}}</span>{{/flowersvg}}
         <div class="ayv-card-who">
             <p class="ayv-card-name">{{name}}</p>
             <p>{{group}}{{#group}} · {{/group}}{{library}}</p>
-            <p class="ayv-card-stage">{{stage}} · {{yearname}}</p>
+            <p class="ayv-card-stage">{{#stage}}{{stage}} · {{/stage}}{{yearname}}</p>
         </div>
     </div>
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
@@ -57,14 +60,16 @@
         {{#qr}}<img class="ayv-card-qr" src="{{qr}}" alt="{{code}}" width="120" height="120">{{/qr}}
         <p class="ayv-card-hint">{{showcode}}</p>
     </div>
+    {{#haspaths}}
     <h2 class="ayv-section-title">{{pathsheading}}</h2>
     <ul class="ayv-paths">
     {{#paths}}
         <li class="ayv-path"><span class="ayv-path-name">{{label}}</span>
-            <span class="ayv-path-marks">{{{marks}}}</span>
+            {{#marks}}<span class="ayv-path-marks">{{{marks}}}</span>{{/marks}}{{#leveltext}}<span class="ayv-path-level">{{leveltext}}</span>{{/leveltext}}
             <span class="ayv-path-hint">{{hint}}</span></li>
     {{/paths}}
     </ul>
+    {{/haspaths}}
     <h2 class="ayv-section-title">{{booksheading}}</h2>
     {{#hasbooks}}
     <ul class="ayv-album">
@@ -81,5 +86,14 @@
     {{#past}}<li>{{{svg}}}<span>{{year}}</span></li>{{/past}}
     </ul>
     {{/haspast}}
+    {{#haschoices}}
+    <form method="post" action="{{action}}" class="ayv-book">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <fieldset class="ayv-fieldset"><legend>{{lookheading}}</legend>
+        {{#choices}}<label class="ayv-field ayv-field-check"><input type="radio" name="look" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/choices}}
+        </fieldset>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{looksave}}</button></p>
+    </form>
+    {{/haschoices}}
 </section>
 {{/cards}}

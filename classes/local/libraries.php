@@ -285,6 +285,19 @@ final class libraries {
         if (array_key_exists('controlletter', $data)) {
             $settings['controlletter'] = !empty($data['controlletter']);
         }
+        // The card each stage sees; what is left automatic is not kept.
+        if (array_key_exists('cardlooks', $data)) {
+            $looks = [];
+            foreach ((array) $data['cardlooks'] as $stage => $look) {
+                if (trim((string) $stage) !== '' && in_array($look, \local_oksigeniaayvurenda\core\card_look::LOOKS, true)) {
+                    $looks[trim((string) $stage)] = $look;
+                }
+            }
+            $settings['cardlooks'] = $looks;
+            if (!$looks) {
+                unset($settings['cardlooks']);
+            }
+        }
         return $settings + ['classification' => 'udc', 'controlletter' => false];
     }
 

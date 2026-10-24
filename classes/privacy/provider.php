@@ -40,7 +40,8 @@ use core_privacy\local\request\writer;
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\core_userlist_provider,
-    \core_privacy\local\request\plugin\provider {
+    \core_privacy\local\request\plugin\provider,
+    \core_privacy\local\request\user_preference_provider {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -124,7 +125,25 @@ class provider implements
         ], 'privacy:metadata:relay');
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
+        $collection->add_user_preference('local_oksigeniaayvurenda_cardlook', 'privacy:metadata:preference:cardlook');
         return $collection;
+    }
+
+    /**
+     * Exports how the user chose to see their card.
+     *
+     * @param int $userid
+     */
+    public static function export_user_preferences(int $userid): void {
+        $look = get_user_preferences('local_oksigeniaayvurenda_cardlook', null, $userid);
+        if ($look !== null) {
+            writer::export_user_preference(
+                'local_oksigeniaayvurenda',
+                'local_oksigeniaayvurenda_cardlook',
+                $look,
+                get_string('privacy:metadata:preference:cardlook', 'local_oksigeniaayvurenda')
+            );
+        }
     }
 
     /**

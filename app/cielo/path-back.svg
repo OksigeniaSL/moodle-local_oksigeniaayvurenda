@@ -1,0 +1,42 @@
+<svg class="ayv-cielo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 22" role="img" aria-label="La Marea: 0 de 3" data-volver="0"><style>
+.ayv-cielo { --s-night:#0f3a33; --s-rim:#1f5248; --s-star:#f6ce6e; --s-off:rgba(236,228,212,.30); --s-line:rgba(246,206,110,.6);
+  --s-fig:rgba(236,228,212,.13); --s-fig-on:rgba(246,206,110,.42); --s-dust:rgba(236,228,212,.35); --s-moon:#f2ead8; --s-sea:#d9cdb3 }
+.ayv-cielo .st { fill:var(--s-off); transform-box:fill-box; transform-origin:center; transform:scale(.5); transition:fill .5s, transform .5s }
+.ayv-cielo .ln { fill:none; stroke:transparent; stroke-width:1.1; stroke-linecap:round; transition:stroke .5s }
+.ayv-cielo .fig { fill:none; stroke:var(--s-fig); stroke-width:1.3; stroke-linejoin:round; stroke-linecap:round; transition:stroke .6s }
+.ayv-cielo .moon-dark { fill:rgba(236,228,212,.08) } .ayv-cielo .moon-rim { fill:none; stroke:rgba(236,228,212,.5); stroke-width:1.2 }
+.ayv-cielo .moon-lit { fill:var(--s-moon) } .ayv-cielo .moon-sea { fill:var(--s-sea) }
+.ayv-cielo.sobrio .fig, .ayv-cielo.sobrio .dust { display:none }
+.ayv-cielo.sobrio .ln { stroke-width:.8 } .ayv-cielo.sobrio .moon-sea { display:none }
+.ayv-cielo:not(.sobrio) .st.on { animation:ayv-glint 4s ease-in-out infinite }
+@keyframes ayv-glint { 0%, 100% { opacity:1 } 50% { opacity:.72 } }
+@media (prefers-reduced-motion: reduce) { .ayv-cielo .st { animation:none !important } }
+.ayv-cielo[data-volver="1"] .v1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-volver="2"] .v1, .ayv-cielo[data-volver="2"] .v2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-volver="3"] .v1, .ayv-cielo[data-volver="3"] .v2, .ayv-cielo[data-volver="3"] .v3 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-explorar="1"] .e1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-explorar="2"] .e1, .ayv-cielo[data-explorar="2"] .e2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-explorar="3"] .e1, .ayv-cielo[data-explorar="3"] .e2, .ayv-cielo[data-explorar="3"] .e3 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-contar="1"] .c1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-contar="2"] .c1, .ayv-cielo[data-contar="2"] .c2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-contar="3"] .c1, .ayv-cielo[data-contar="3"] .c2, .ayv-cielo[data-contar="3"] .c3 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-quedarse="1"] .q1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-quedarse="2"] .q1, .ayv-cielo[data-quedarse="2"] .q2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-quedarse="3"] .q1, .ayv-cielo[data-quedarse="3"] .q2, .ayv-cielo[data-quedarse="3"] .q3 { fill:var(--s-star); transform:scale(1) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-volver="2"] .vl1 { stroke:var(--s-line) }
+.ayv-cielo[data-volver="3"] .vl1, .ayv-cielo[data-volver="3"] .vl2 { stroke:var(--s-line) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-explorar="2"] .el1 { stroke:var(--s-line) }
+.ayv-cielo[data-explorar="3"] .el1, .ayv-cielo[data-explorar="3"] .el2 { stroke:var(--s-line) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-contar="2"] .cl1 { stroke:var(--s-line) }
+.ayv-cielo[data-contar="3"] .cl1, .ayv-cielo[data-contar="3"] .cl2 { stroke:var(--s-line) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-quedarse="2"] .ql1 { stroke:var(--s-line) }
+.ayv-cielo[data-quedarse="3"] .ql1, .ayv-cielo[data-quedarse="3"] .ql2 { stroke:var(--s-line) }
+.ayv-cielo[data-volver="3"] .vf { stroke:var(--s-fig-on) }
+.ayv-cielo[data-explorar="3"] .ef { stroke:var(--s-fig-on) }
+.ayv-cielo[data-contar="3"] .cf { stroke:var(--s-fig-on) }
+.ayv-cielo[data-quedarse="3"] .qf { stroke:var(--s-fig-on) }
+</style><rect x="0" y="0" width="62" height="22" rx="11" fill="var(--s-night)"/><path class="ln vl1" d="M12 11 L31 11"/><path class="ln vl2" d="M31 11 L50 11"/><path class="st v1" d="M12 5 Q13.2 9.8 18 11 Q13.2 12.2 12 17 Q10.8 12.2 6 11 Q10.8 9.8 12 5 Z"/><path class="st v2" d="M31 5 Q32.2 9.8 37 11 Q32.2 12.2 31 17 Q29.8 12.2 25 11 Q29.8 9.8 31 5 Z"/><path class="st v3" d="M50 5 Q51.2 9.8 56 11 Q51.2 12.2 50 17 Q48.8 12.2 44 11 Q48.8 9.8 50 5 Z"/></svg>

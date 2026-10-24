@@ -25,6 +25,7 @@
         "entities": [{"id": 1, "name": "Colegio inventado", "rawname": "Colegio inventado", "yearstart": "09-01",
             "classifications": [{"value": "udc", "label": "CDU", "selected": true}], "controlletter": true, "demo": false,
             "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
+            "cardlooks": [{"stage": "Primaria", "options": [{"value": "", "label": "Automático (la flor)", "selected": true}]}],
             "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
             "libraries": [{"id": 1, "name": "Biblioteca central", "rawname": "Biblioteca central", "url": "#",
@@ -38,7 +39,8 @@
         "librariesparent": "Cuelga de", "librariesnoparent": "De ninguna", "librariesslug": "Dirección",
         "librariesslughint": "Se hace sola", "librariesgroup": "Grupos",
         "librariessave": "Guardar", "librariesremove": "Quitarla", "librariesanother": "Otro centro en este sitio",
-        "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro"
+        "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro",
+        "librariescardlooks": "El carné por etapas", "librariescardlookshint": "Automático, según la etapa"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -85,6 +87,11 @@
             <label class="ayv-field">{{librariesyearstart}} <span class="ayv-field-hint">{{librariesyearstarthint}}</span> <input type="text" name="yearstart" value="{{yearstart}}" maxlength="5" pattern="[0-9]{2}-[0-9]{2}"></label>
             <label class="ayv-field">{{librariesclassification}} <select name="classification">{{#classifications}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/classifications}}</select></label>
             <label class="ayv-field ayv-field-check"><input type="checkbox" name="controlletter" value="1" {{#controlletter}}checked{{/controlletter}}> {{librariescontrolletter}}</label>
+            <fieldset class="ayv-fieldset"><legend>{{librariescardlooks}}</legend>
+                <p class="ayv-field-hint">{{librariescardlookshint}}</p>
+                {{#cardlooks}}<label class="ayv-field">{{stage}} <input type="hidden" name="cardstage[]" value="{{stage}}">
+                    <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
+            </fieldset>
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="entity">{{librariessave}}</button></p>
         </form>
     </details>

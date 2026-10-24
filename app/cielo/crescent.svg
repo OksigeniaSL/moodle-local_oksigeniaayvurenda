@@ -1,0 +1,42 @@
+<svg class="ayv-cielo" xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120" role="img" aria-label="Creciente" data-volver="0" data-explorar="0" data-contar="0" data-quedarse="0"><style>
+.ayv-cielo { --s-night:#0f3a33; --s-rim:#1f5248; --s-star:#f6ce6e; --s-off:rgba(236,228,212,.30); --s-line:rgba(246,206,110,.6);
+  --s-fig:rgba(236,228,212,.13); --s-fig-on:rgba(246,206,110,.42); --s-dust:rgba(236,228,212,.35); --s-moon:#f2ead8; --s-sea:#d9cdb3 }
+.ayv-cielo .st { fill:var(--s-off); transform-box:fill-box; transform-origin:center; transform:scale(.5); transition:fill .5s, transform .5s }
+.ayv-cielo .ln { fill:none; stroke:transparent; stroke-width:1.1; stroke-linecap:round; transition:stroke .5s }
+.ayv-cielo .fig { fill:none; stroke:var(--s-fig); stroke-width:1.3; stroke-linejoin:round; stroke-linecap:round; transition:stroke .6s }
+.ayv-cielo .moon-dark { fill:rgba(236,228,212,.08) } .ayv-cielo .moon-rim { fill:none; stroke:rgba(236,228,212,.5); stroke-width:1.2 }
+.ayv-cielo .moon-lit { fill:var(--s-moon) } .ayv-cielo .moon-sea { fill:var(--s-sea) }
+.ayv-cielo.sobrio .fig, .ayv-cielo.sobrio .dust { display:none }
+.ayv-cielo.sobrio .ln { stroke-width:.8 } .ayv-cielo.sobrio .moon-sea { display:none }
+.ayv-cielo:not(.sobrio) .st.on { animation:ayv-glint 4s ease-in-out infinite }
+@keyframes ayv-glint { 0%, 100% { opacity:1 } 50% { opacity:.72 } }
+@media (prefers-reduced-motion: reduce) { .ayv-cielo .st { animation:none !important } }
+.ayv-cielo[data-volver="1"] .v1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-volver="2"] .v1, .ayv-cielo[data-volver="2"] .v2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-volver="3"] .v1, .ayv-cielo[data-volver="3"] .v2, .ayv-cielo[data-volver="3"] .v3 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-explorar="1"] .e1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-explorar="2"] .e1, .ayv-cielo[data-explorar="2"] .e2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-explorar="3"] .e1, .ayv-cielo[data-explorar="3"] .e2, .ayv-cielo[data-explorar="3"] .e3 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-contar="1"] .c1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-contar="2"] .c1, .ayv-cielo[data-contar="2"] .c2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-contar="3"] .c1, .ayv-cielo[data-contar="3"] .c2, .ayv-cielo[data-contar="3"] .c3 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-quedarse="1"] .q1 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-quedarse="2"] .q1, .ayv-cielo[data-quedarse="2"] .q2 { fill:var(--s-star); transform:scale(1) }
+.ayv-cielo[data-quedarse="3"] .q1, .ayv-cielo[data-quedarse="3"] .q2, .ayv-cielo[data-quedarse="3"] .q3 { fill:var(--s-star); transform:scale(1) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-volver="2"] .vl1 { stroke:var(--s-line) }
+.ayv-cielo[data-volver="3"] .vl1, .ayv-cielo[data-volver="3"] .vl2 { stroke:var(--s-line) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-explorar="2"] .el1 { stroke:var(--s-line) }
+.ayv-cielo[data-explorar="3"] .el1, .ayv-cielo[data-explorar="3"] .el2 { stroke:var(--s-line) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-contar="2"] .cl1 { stroke:var(--s-line) }
+.ayv-cielo[data-contar="3"] .cl1, .ayv-cielo[data-contar="3"] .cl2 { stroke:var(--s-line) }
+ { stroke:var(--s-line) }
+.ayv-cielo[data-quedarse="2"] .ql1 { stroke:var(--s-line) }
+.ayv-cielo[data-quedarse="3"] .ql1, .ayv-cielo[data-quedarse="3"] .ql2 { stroke:var(--s-line) }
+.ayv-cielo[data-volver="3"] .vf { stroke:var(--s-fig-on) }
+.ayv-cielo[data-explorar="3"] .ef { stroke:var(--s-fig-on) }
+.ayv-cielo[data-contar="3"] .cf { stroke:var(--s-fig-on) }
+.ayv-cielo[data-quedarse="3"] .qf { stroke:var(--s-fig-on) }
+</style><title>Creciente</title><circle r="58" fill="var(--s-night)"/><circle r="57" fill="none" stroke="var(--s-rim)" stroke-width="2.5"/><g class="dust"><circle cx="-8" cy="-50" r=".8" fill="var(--s-dust)"/><circle cx="14" cy="-52" r=".8" fill="var(--s-dust)"/><circle cx="-54" cy="-2" r=".8" fill="var(--s-dust)"/><circle cx="54" cy="4" r=".8" fill="var(--s-dust)"/><circle cx="-14" cy="50" r=".8" fill="var(--s-dust)"/><circle cx="8" cy="52" r=".8" fill="var(--s-dust)"/><circle cx="2" cy="-32" r=".8" fill="var(--s-dust)"/><circle cx="-28" cy="0" r=".8" fill="var(--s-dust)"/><circle cx="26" cy="-10" r=".8" fill="var(--s-dust)"/><circle cx="6" cy="34" r=".8" fill="var(--s-dust)"/><circle cx="-50" cy="-46" r=".8" fill="var(--s-dust)"/><circle cx="50" cy="46" r=".8" fill="var(--s-dust)"/><circle cx="-4" cy="22" r=".8" fill="var(--s-dust)"/><circle cx="20" cy="4" r=".8" fill="var(--s-dust)"/></g><path class="fig vf" d="M-54 -22 C-51 -29 -49 -31 -46 -29 C-41 -26 -36 -20 -32 -23 C-28 -26 -25 -35 -20 -35 C-16 -35 -13 -32 -10 -28"/><path class="ln vl1" d="M-46 -29 L-32 -23"/><path class="ln vl2" d="M-32 -23 L-20 -35"/><path class="st v1" d="M-46 -34.6 Q-44.88 -30.12 -40.4 -29 Q-44.88 -27.88 -46 -23.4 Q-47.12 -27.88 -51.6 -29 Q-47.12 -30.12 -46 -34.6 Z"/><path class="st v2" d="M-32 -28.1 Q-30.98 -24.02 -26.9 -23 Q-30.98 -21.98 -32 -17.9 Q-33.02 -21.98 -37.1 -23 Q-33.02 -24.02 -32 -28.1 Z"/><path class="st v3" d="M-20 -39.6 Q-19.08 -35.92 -15.4 -35 Q-19.08 -34.08 -20 -30.4 Q-20.92 -34.08 -24.6 -35 Q-20.92 -35.92 -20 -39.6 Z"/><path class="fig ef" d="M34 -48 L38 -34 L34 -12 L30 -34 Z M16 -30 L30 -26 L52 -30 L30 -34 Z"/><path class="ln el1" d="M34 -46 L50 -30"/><path class="ln el2" d="M50 -30 L34 -30"/><path class="st e1" d="M34 -51.6 Q35.12 -47.12 39.6 -46 Q35.12 -44.88 34 -40.4 Q32.88 -44.88 28.4 -46 Q32.88 -47.12 34 -51.6 Z"/><path class="st e2" d="M50 -35.1 Q51.02 -31.02 55.1 -30 Q51.02 -28.98 50 -24.9 Q48.98 -28.98 44.9 -30 Q48.98 -31.02 50 -35.1 Z"/><path class="st e3" d="M34 -34.6 Q34.92 -30.92 38.6 -30 Q34.92 -29.08 34 -25.4 Q33.08 -29.08 29.4 -30 Q33.08 -30.92 34 -34.6 Z"/><path class="fig cf" d="M34 19 C44 19 50 24 49 31 C48 38 41 41 33 40 L25 46 L27 39 C21 37 19 32 21 27 C23 22 28 19 34 19 Z"/><path class="ln cl1" d="M21 27 L34 19"/><path class="ln cl2" d="M34 19 L48 31"/><path class="st c1" d="M21 21.4 Q22.12 25.88 26.6 27 Q22.12 28.12 21 32.6 Q19.88 28.12 15.4 27 Q19.88 25.88 21 21.4 Z"/><path class="st c2" d="M34 13.9 Q35.02 17.98 39.1 19 Q35.02 20.02 34 24.1 Q32.98 20.02 28.9 19 Q32.98 17.98 34 13.9 Z"/><path class="st c3" d="M48 26.4 Q48.92 30.08 52.6 31 Q48.92 31.92 48 35.6 Q47.08 31.92 43.4 31 Q47.08 30.08 48 26.4 Z"/><path class="fig qf" d="M-34 16 V44 M-41 24 H-27 M-47 34 C-45 42 -39 45 -34 44 C-29 45 -23 42 -21 34 M-34 13 m-3 0 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0"/><path class="ln ql1" d="M-34 13 L-46 36"/><path class="ln ql2" d="M-46 36 L-22 36"/><path class="st q1" d="M-34 7.4 Q-32.88 11.88 -28.4 13 Q-32.88 14.12 -34 18.6 Q-35.12 14.12 -39.6 13 Q-35.12 11.88 -34 7.4 Z"/><path class="st q2" d="M-46 30.9 Q-44.98 34.98 -40.9 36 Q-44.98 37.02 -46 41.1 Q-47.02 37.02 -51.1 36 Q-47.02 34.98 -46 30.9 Z"/><path class="st q3" d="M-22 31.4 Q-21.08 35.08 -17.4 36 Q-21.08 36.92 -22 40.6 Q-22.92 36.92 -26.6 36 Q-22.92 35.08 -22 31.4 Z"/><circle r="14" class="moon-dark"/><path class="moon-lit" d="M0 -14 A14 14 0 0 1 0 14 A7.7 14 0 0 0 0 -14 Z"/></svg>
