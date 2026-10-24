@@ -404,6 +404,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 }
 
 .ayv .ayv-foot {
+    /* Room on the left for the floating button of an accessibility plugin, which sits there. */
+    padding-left: max(4.5rem, clamp(.75rem, 3vw, 2rem)) !important;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -1086,3 +1088,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-card-sky { border-radius: 50%; overflow: hidden; }
 
 .ayv .ayv-path-detail { font-weight: 700; color: var(--accent); }
+
+/* The search box keeps what was searched; a cross clears it (the browser's own is hidden, so there is one). */
+.ayv .ayv-search-clear { display: inline-flex; align-items: center; justify-content: center; min-width: 44px;
+    min-height: 44px; border-radius: 50%; color: var(--accent); font-size: 1.5rem; line-height: 1; text-decoration: none; }
+
+.ayv .ayv-search-clear[hidden] { display: none; }
+
+.ayv .ayv-search input::-webkit-search-cancel-button { display: none; }

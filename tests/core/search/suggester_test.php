@@ -40,11 +40,14 @@ final class suggester_test extends \basic_testcase {
     }
 
     /**
-     * The vocabulary counts the records that have each word, once per record.
+     * The vocabulary counts the records that have each word, once per record; words that say nothing about a book
+     * («el», «de») are not in it, so they are never suggested.
      */
     public function test_vocabulary(): void {
-        $vocabulary = suggester::vocabulary(['el faro el faro', 'el lobo', 'a']);
-        $this->assertSame(2, $vocabulary['el']);
+        $vocabulary = suggester::vocabulary(['el faro el faro', 'el lobo de mar', 'a']);
+        $this->assertArrayNotHasKey('el', $vocabulary);
+        $this->assertArrayNotHasKey('de', $vocabulary);
+        $this->assertSame(1, $vocabulary['lobo']);
         $this->assertSame(1, $vocabulary['faro']);
         $this->assertArrayNotHasKey('a', $vocabulary);
     }

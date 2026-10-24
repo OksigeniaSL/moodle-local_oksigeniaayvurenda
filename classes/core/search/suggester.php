@@ -40,6 +40,14 @@ final class suggester {
     /** @var array Words of the catalogue by their phonetic key. */
     private array $bysound = [];
 
+    /** @var int[] Words that say nothing about a book, in the languages of the catalogues: never a suggestion. */
+    private const EMPTY = ['de' => 1, 'del' => 1, 'la' => 1, 'las' => 1, 'el' => 1, 'los' => 1, 'un' => 1, 'una' => 1,
+        'unos' => 1, 'unas' => 1, 'al' => 1, 'en' => 1, 'con' => 1, 'por' => 1, 'para' => 1, 'sin' => 1, 'que' => 1, 'se' => 1,
+        'su' => 1, 'sus' => 1, 'lo' => 1, 'le' => 1, 'les' => 1, 'mi' => 1, 'tu' => 1, 'es' => 1, 'son' => 1, 'y' => 1,
+        'the' => 1, 'of' => 1, 'and' => 1, 'an' => 1, 'in' => 1, 'on' => 1, 'to' => 1, 'for' => 1, 'with' => 1, 'by' => 1,
+        'els' => 1, 'amb' => 1, 'per' => 1, 'do' => 1, 'da' => 1, 'dos' => 1, 'das' => 1, 'no' => 1, 'na' => 1, 'eta' => 1,
+        'des' => 1, 'du' => 1, 'et' => 1, 'os' => 1, 'as' => 1];
+
     /**
      * Prepares the suggestions for a catalogue.
      *
@@ -62,7 +70,7 @@ final class suggester {
         $vocabulary = [];
         foreach ($searchtexts as $searchtext) {
             foreach (array_unique(explode(' ', (string) $searchtext)) as $word) {
-                if (strlen($word) >= 2) {
+                if (strlen($word) >= 2 && !isset(self::EMPTY[$word])) {
                     $vocabulary[$word] = ($vocabulary[$word] ?? 0) + 1;
                 }
             }

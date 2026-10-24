@@ -60,6 +60,8 @@ final class shell {
     <label class="ayv-sr" for="ayv-q">' . $str('searchlabel') . '</label>
     <input id="ayv-q" name="q" type="search" value="' . s($query) . '" placeholder="' . $str('searchplaceholder') . '"
         autocomplete="off" enterkeyhint="search" maxlength="200">
+    <a class="ayv-search-clear" href="' . $base . 'index.php?library=' . s($library->slug) . '" aria-label="' .
+                $str('searchclear') . '"' . ($query === '' ? ' hidden' : '') . '>×</a>
     <button type="submit">' . $str('searchbutton') . '</button>
 </form>';
         }

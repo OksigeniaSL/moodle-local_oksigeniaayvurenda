@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.19.2 (2026-10-27)
+
+- The library staff can see any reader's card as the reader sees it, and switch between the flower, both skies, the
+  classic look and none; without a card of their own, a link takes them to a practice reader's.
+- The search box keeps what was searched and has a cross to clear it, which takes back to the library's page; clearing
+  the box by hand does the same. Words that say nothing about a book («de», «del», «the») are never suggested.
+- The footer leaves room on the left for the floating button of an accessibility plugin.
+
 ## 0.19.1 (2026-10-27)
 
 - The classic look of the card says what each path means, concretely, without counts: the last visit («today», «on

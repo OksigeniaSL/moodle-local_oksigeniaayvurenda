@@ -51,8 +51,14 @@ if (data_submitted() && confirm_sesskey()) {
     set_user_preference($pref, in_array($chosen, card_look::OWN, true) ? $chosen : null);
 }
 $own = get_user_preferences($pref, null);
+// The library staff may see any reader's card, in any look, as the reader would see it.
+$isdesk = has_capability('local/oksigeniaayvurenda:desk', $context);
+$previewid = $isdesk ? optional_param('reader', 0, PARAM_INT) : 0;
+$previewlook = $isdesk ? optional_param('look', '', PARAM_ALPHA) : '';
+$readers = $previewid ? [$DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $previewid], '*', MUST_EXIST)]
+    : $DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id');
 $cardsdata = [];
-foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') as $reader) {
+foreach ($readers as $reader) {
     $album = garden::album($reader);
     $member = $DB->get_record(
         'local_oksigeniaayvurenda_member',
@@ -65,15 +71,18 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
     $entity = format_string($entityrow->name);
     $esettings = json_decode((string) $entityrow->settings, true) ?: [];
     $stagename = $member ? (string) $member->stage : '';
-    $look = card_look::resolve(
+    $look = in_array($previewlook, card_look::LOOKS, true) ? $previewlook : card_look::resolve(
         card_look::guess($reader->readertype, $stagename, $group),
         $esettings['cardlooks'][$stagename] ?? null,
-        $own
+        $previewid ? null : $own
     );
     $sky = $look === 'sky' || $look === 'skysober';
     $sober = $look === 'skysober';
     $stage = $album['flower']['stage'];
-    $card = cards::card($reader, fullname($USER), $group, $entity, $stage);
+    $previewlibrary = $library ?: \local_oksigeniaayvurenda\local\practice::library();
+    $name = $previewid ? (new \local_oksigeniaayvurenda\local\desk($previewlibrary, 0))->reader((int) $reader->id)['name']
+        : fullname($USER);
+    $card = cards::card($reader, $name, $group, $entity, $stage);
     $card['stage'] = $sky ? $str('stagesky' . $stage) : ($look === 'flower' ? $card['stage'] : '');
     $card['flowersvg'] = $look === 'flower' ? cards::flower_svg($stage, $album['flower']['levels'], $card['stage'], 160)
         : ($sky ? cards::sky_svg($stage, $album['flower']['levels'], $card['stage'], 160, $sober) : '');
@@ -102,7 +111,7 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
         ($sky ? 'heraldsky' : 'heraldstage') . $stage
     ) : null;
     // From twelve on, and for adults, each reader chooses: the sky, the classic look, or none.
-    $choices = $look === 'flower' ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
+    $choices = $look === 'flower' || $previewid ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
         'checked' => $o === ($sky ? 'sky' : $look)], card_look::OWN);
     $cardsdata[] = $card + [
         'herald' => $herald,
@@ -120,8 +129,32 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id') 
         'yearname' => $album['year']->name,
     ];
 }
+// Previewing: the reader's name and the looks to switch between. Without a card: a practice reader's, for the staff.
+$preview = null;
+if ($previewid && $cardsdata) {
+    $base = ['library' => $ref, 'reader' => $previewid];
+    $preview = ['note' => $str('cardpreviewnote', $cardsdata[0]['name']), 'label' => $str('cardpreviewas'),
+        'looks' => array_map(fn($l) => ['url' => (new moodle_url('/local/oksigeniaayvurenda/card.php', $base + ['look' => $l]))
+            ->out(false), 'label' => $str('cardlookopt' . $l), 'current' => $l === $previewlook], card_look::LOOKS)];
+}
+$practice = null;
+if (!$cardsdata && $isdesk) {
+    $plibrary = \local_oksigeniaayvurenda\local\practice::library();
+    $preader = $DB->get_field_sql(
+        'SELECT r.id FROM {local_oksigeniaayvurenda_reader} r WHERE r.entityid = ? AND EXISTS
+        (SELECT 1 FROM {local_oksigeniaayvurenda_loan} l WHERE l.readerid = r.id) ORDER BY r.id',
+        [$plibrary->entityid],
+        IGNORE_MULTIPLE
+    );
+    if ($preader) {
+        $practice = ['url' => (new moodle_url('/local/oksigeniaayvurenda/card.php', ['library' => $plibrary->slug,
+            'reader' => $preader]))->out(false), 'label' => $str('cardpreviewpractice')];
+    }
+}
 $data = [
     'heading' => $str('cardtitle'),
+    'preview' => $preview,
+    'practice' => $practice,
     'cards' => $cardsdata,
     'hascards' => (bool) $cardsdata,
     'none' => $str('cardnone'),

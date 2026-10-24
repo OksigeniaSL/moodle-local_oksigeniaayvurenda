@@ -25,7 +25,7 @@
 
     Example context (json):
     {
-        "heading": "Mi carné",
+        "heading": "Mi carné", "preview": null, "practice": null,
         "hascards": true,
         "cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H", "barcode": "",
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Casi flor", "yearname": "2026-2027",
@@ -43,7 +43,10 @@
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
-{{^hascards}}<p class="ayv-empty">{{none}}</p>{{/hascards}}
+{{#preview}}<div class="ayv-notice"><p>{{note}}</p>
+    <p class="ayv-subjects">{{label}} {{#looks}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}" {{#current}}aria-current="true"{{/current}}>{{label}}</a> {{/looks}}</p></div>{{/preview}}
+{{^hascards}}<p class="ayv-empty">{{none}}</p>
+{{#practice}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/practice}}{{/hascards}}
 {{#cards}}
 <section class="ayv-mycard">
     <div class="ayv-card-face">
