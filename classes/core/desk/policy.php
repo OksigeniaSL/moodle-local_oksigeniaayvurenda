@@ -50,8 +50,11 @@ final class policy {
     /** @var string The reader has a late loan. The librarian may go ahead. */
     public const LATE = 'late';
 
+    /** @var string The copy is set aside for another reader who reserved it. The librarian may go ahead. */
+    public const HELD = 'held';
+
     /** @var string[] Reasons the librarian may override. */
-    public const FORCEABLE = [self::LIMIT, self::LATE];
+    public const FORCEABLE = [self::LIMIT, self::LATE, self::HELD];
 
     /**
      * Whether a copy can be lent to a reader now.
@@ -61,14 +64,25 @@ final class policy {
      * @param int $openloans Loans the reader has out under the same rule.
      * @param int $lateloans Loans the reader has out past their due date.
      * @param bool $force The librarian said to go ahead.
+     * @param bool $heldforother The copy is set aside for someone else.
      * @return string One of the constants.
      */
-    public static function lend(?array $rule, string $status, int $openloans, int $lateloans, bool $force = false): string {
-        if ($status !== 'available' && $status !== 'onloan') {
+    public static function lend(
+        ?array $rule,
+        string $status,
+        int $openloans,
+        int $lateloans,
+        bool $force = false,
+        bool $heldforother = false
+    ): string {
+        if ($status !== 'available' && $status !== 'onloan' && $status !== 'held') {
             return self::UNAVAILABLE;
         }
         if ($rule === null || (int) $rule['loandays'] <= 0) {
             return self::NOT_LENDABLE;
+        }
+        if (!$force && $heldforother) {
+            return self::HELD;
         }
         if (!$force && !loan_rules::can_lend($rule, $openloans)) {
             return self::LIMIT;

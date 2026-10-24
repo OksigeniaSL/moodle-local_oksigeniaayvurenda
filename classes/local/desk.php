@@ -100,6 +100,11 @@ final class desk {
                 return $this->give_back($item, $open, $readerid);
             }
             if (!$readerid) {
+                $hold = $item->status === 'held' ? holds::ready_for((int) $item->id) : null;
+                if ($hold) {
+                    return $this->answer('needreader', 'look', 'deskheldfor', (object) ['title' => $this->title($item),
+                        'who' => $this->who((int) $hold->readerid)]);
+                }
                 return $this->answer('needreader', 'look', 'deskneedreader', $this->title($item));
             }
             return $this->lend($item, $readerid, $force);
@@ -198,7 +203,7 @@ final class desk {
                 ) : '',
             ];
         }
-        return $reader + ['loans' => $loans, 'latecount' => $late];
+        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => holds::of_reader($readerid, $this->now)];
     }
 
     /**
@@ -215,6 +220,9 @@ final class desk {
         $rule = $this->rule($reader->readertype, $item->itemtype);
         if (!loan_rules::can_renew($rule, (int) $loan->renewals)) {
             return $this->answer('stop', 'no', 'desknorenew', $this->title($item), ['readerid' => (int) $reader->id]);
+        }
+        if (holds::blocks_renewal($item)) {
+            return $this->answer('stop', 'no', 'desknorenewheld', $this->title($item), ['readerid' => (int) $reader->id]);
         }
         $previous = (int) $loan->timedue;
         if ($loan->timereturned !== null) {
@@ -277,10 +285,17 @@ final class desk {
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
         $transaction = $DB->start_delegated_transaction();
         if ($what === 'lent' && $loan->timereturned === null) {
+            // A loan that fulfilled a reservation leaves the copy set aside again; any other, back to the shelf, or to
+            // whoever waits for it.
+            if (!holds::undo_loan((int) $loan->id, $this->now)) {
+                $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'available',
+                    'timemodified' => $this->now]);
+                $item->status = 'available';
+                holds::place($item, $this->now);
+            }
             $DB->delete_records(self::T . 'loan', ['id' => $loan->id]);
-            $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'available',
-                'timemodified' => $this->now]);
         } else if ($what === 'returned' && $loan->timereturned !== null) {
+            holds::undo_return((int) $item->id, $this->now);
             $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => null, 'returnstaffid' => null,
                 'returnnote' => null, 'timemodified' => $this->now]);
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
@@ -316,7 +331,8 @@ final class desk {
             $params + ['start' => $start, 'end' => $end]
         );
         $late = $DB->count_records_select(self::T . 'loan', $base . ' AND timedue < :start', $params + ['start' => $start]);
-        return ['out' => $out, 'today' => $today, 'late' => $late];
+        $held = $DB->count_records(self::T . 'hold', ['libraryid' => $this->library->id, 'status' => 'ready']);
+        return ['out' => $out, 'today' => $today, 'late' => $late, 'held' => $held];
     }
 
     /**
@@ -348,9 +364,13 @@ final class desk {
                 $late++;
             }
         }
-        $decision = policy::lend($rule, $item->status, $samerule, $late, $force);
+        $set = $item->status === 'held' ? holds::ready_for((int) $item->id) : null;
+        $decision = policy::lend($rule, $item->status, $samerule, $late, $force, $set && (int) $set->readerid !== $readerid);
         if ($decision !== policy::OK) {
             $a = (object) ['title' => $this->title($item), 'max' => $rule['maxloans'] ?? 0];
+            if ($decision === policy::HELD) {
+                $a->who = $this->who((int) $set->readerid);
+            }
             return $this->answer('stop', 'no', 'deskstop' . $decision, $a, [
                 'reason' => $decision,
                 'forceable' => in_array($decision, policy::FORCEABLE, true),
@@ -381,10 +401,12 @@ final class desk {
             'timemodified' => $this->now,
         ]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
+        $fulfilled = holds::after_loan($item, $readerid, (int) $loanid, $this->now);
         $material = $this->material($item, (int) $loanid, 'out');
         $transaction->allow_commit();
         $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
-        return $this->answer('lent', 'ok', 'desklent', $a, ['loanid' => (int) $loanid, 'readerid' => $readerid,
+        $message = $fulfilled ? 'desklentheld' : 'desklent';
+        return $this->answer('lent', 'ok', $message, $a, ['loanid' => (int) $loanid, 'readerid' => $readerid,
             'reader' => $this->reader_panel($readerid), 'material' => $material]);
     }
 
@@ -407,6 +429,8 @@ final class desk {
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => $this->now,
             'returnstaffid' => $this->staffid, 'timemodified' => $this->now]);
         $material = $this->material($item, (int) $loan->id, 'in');
+        $item->status = 'available';
+        $hold = holds::place($item, $this->now);
         $transaction->allow_commit();
         $owner = $this->reader((int) $loan->readerid);
         $days = loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz);
@@ -416,12 +440,18 @@ final class desk {
         $extra = [
             'loanid' => (int) $loan->id,
             'material' => $material,
-            'canrenew' => loan_rules::can_renew($rule, (int) $loan->renewals),
+            'canrenew' => !$hold && loan_rules::can_renew($rule, (int) $loan->renewals) && !holds::blocks_renewal($item),
             'late' => $days,
             'readerid' => (int) $loan->readerid,
         ];
         if ($readerid) {
             $extra['reader'] = $this->reader_panel($readerid);
+        }
+        if ($hold) {
+            // Set it aside: the other sound, and who it is for.
+            $a->for = $this->who((int) $hold->readerid);
+            $extra['held'] = true;
+            return $this->answer('returned', 'look', $days > 0 ? 'deskreturnedlateheld' : 'deskreturnedheld', $a, $extra);
         }
         return $this->answer(
             'returned',
@@ -459,7 +489,7 @@ final class desk {
      * @param int $readerid
      * @return array
      */
-    private function reader(int $readerid): array {
+    public function reader(int $readerid): array {
         global $DB;
         $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid], '*', MUST_EXIST);
         $name = trim(($reader->firstname ?? '') . ' ' . ($reader->lastname ?? ''));
@@ -484,6 +514,17 @@ final class desk {
             'cardcode' => $reader->cardcode,
             'type' => $reader->readertype,
         ];
+    }
+
+    /**
+     * Who a reader is, as the desk says it: «Hugo Lago (5.º A)».
+     *
+     * @param int $readerid
+     * @return string
+     */
+    private function who(int $readerid): string {
+        $reader = $this->reader($readerid);
+        return $reader['name'] . ($reader['group'] !== '' ? ' (' . $reader['group'] . ')' : '');
     }
 
     /**

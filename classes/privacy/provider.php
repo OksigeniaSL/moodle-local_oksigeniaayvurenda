@@ -86,6 +86,18 @@ class provider implements
             'groupname' => 'privacy:metadata:tutor:groupname',
             'timenotified' => 'privacy:metadata:tutor:timenotified',
         ], 'privacy:metadata:tutor');
+        $collection->add_database_table(self::T . 'hold', [
+            'readerid' => 'privacy:metadata:hold:readerid',
+            'recordid' => 'privacy:metadata:hold:recordid',
+            'itemid' => 'privacy:metadata:hold:itemid',
+            'status' => 'privacy:metadata:hold:status',
+            'createdby' => 'privacy:metadata:hold:createdby',
+            'timecreated' => 'privacy:metadata:hold:timecreated',
+            'timeready' => 'privacy:metadata:hold:timeready',
+            'timeexpires' => 'privacy:metadata:hold:timeexpires',
+            'timenotified' => 'privacy:metadata:hold:timenotified',
+            'timeclosed' => 'privacy:metadata:hold:timeclosed',
+        ], 'privacy:metadata:hold');
         $collection->add_database_table(self::T . 'relay', [
             'userid' => 'privacy:metadata:relay:userid',
             'code' => 'privacy:metadata:relay:code',
@@ -127,6 +139,7 @@ class provider implements
         );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'relay}', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'hold} WHERE createdby IS NOT NULL', []);
     }
 
     /**
@@ -152,6 +165,18 @@ class provider implements
             foreach ($DB->get_records(self::T . 'loan', ['readerid' => $reader->id], 'timeloaned') as $loan) {
                 $loans[] = self::loan_export($loan);
             }
+            $holds = [];
+            foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id], 'timecreated') as $hold) {
+                $holds[] = [
+                    'title' => $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]),
+                    'status' => $hold->status,
+                    'created' => transform::datetime($hold->timecreated),
+                    'ready' => $hold->timeready ? transform::datetime($hold->timeready) : null,
+                    'expires' => $hold->timeexpires ? transform::datetime($hold->timeexpires) : null,
+                    'notified' => $hold->timenotified ? transform::datetime($hold->timenotified) : null,
+                    'closed' => $hold->timeclosed ? transform::datetime($hold->timeclosed) : null,
+                ];
+            }
             writer::with_context($context)->export_data(
                 array_merge($base, [get_string('privacy:path:reader', 'local_oksigeniaayvurenda', $reader->cardcode)]),
                 (object) [
@@ -164,6 +189,7 @@ class provider implements
                     'notes' => $reader->notes,
                     'groups' => $groups,
                     'loans' => $loans,
+                    'holds' => $holds,
                 ]
             );
         }
@@ -224,6 +250,7 @@ class provider implements
         $DB->set_field_select(self::T . 'loan', 'returnstaffid', null, 'returnstaffid IS NOT NULL');
         $DB->delete_records(self::T . 'tutor');
         $DB->delete_records(self::T . 'relay');
+        $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
     }
 
     /**
@@ -272,11 +299,19 @@ class provider implements
                 'timemodified' => $now,
             ]);
             $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $reader->id]);
+            // Their reservations go; a copy set aside for them goes back to the shelf or to the next.
+            foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id]) as $hold) {
+                if ($hold->status === 'ready' || $hold->status === 'waiting') {
+                    \local_oksigeniaayvurenda\local\holds::cancel((int) $hold->id, $now);
+                }
+            }
+            $DB->delete_records(self::T . 'hold', ['readerid' => $reader->id]);
         }
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
         $DB->delete_records(self::T . 'tutor', ['userid' => $userid]);
         $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
+        $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
     }
 
     /**
@@ -294,6 +329,9 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'relay', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'hold', ['createdby' => $userid])) {
             return true;
         }
         return $DB->record_exists_select(

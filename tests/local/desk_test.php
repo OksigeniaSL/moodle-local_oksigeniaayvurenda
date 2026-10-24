@@ -151,7 +151,7 @@ final class desk_test extends \advanced_testcase {
         $DB->set_field(self::T . 'loan', 'timedue', time() - 3 * DAYSECS, ['id' => $lent['loanid']]);
         $panel = $desk->reader_panel((int) $w->ana->id);
         $this->assertSame(1, $panel['latecount']);
-        $this->assertSame(['out' => 1, 'today' => 0, 'late' => 1], $desk->today());
+        $this->assertSame(['out' => 1, 'today' => 0, 'late' => 1, 'held' => 0], $desk->today());
         $stop = $desk->scan('100001C', (int) $w->ana->id);
         $this->assertSame('limit', $stop['reason']);
 

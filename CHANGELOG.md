@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.12.0 (2026-10-27)
+
+- Reservations with a notice. A reader waits in a queue for a book that is out; when a copy comes back, the desk says
+  to set it aside and who for, with the other sound, and the reader gets a Moodle message (by any channel the centre
+  has). The copy waits a few school days, then goes to the next in the queue or back to the shelf. Lending it to
+  someone else shows a red card with «Keep it set aside» first; lending it to the reader who waited fulfils the
+  reservation. Every step can be undone at the desk, and the message waits two minutes so an undo takes it back.
+- Readers reserve online from the book's page («Tell me when it comes back») only where the library switches it on,
+  for everyone or by stage; staff reserve at the desk, for a reader by card or name, whatever the switch says.
+- A page of reservations: copies set aside with their date, the queues, and the settings (online and stages, school
+  days set aside, reservations at a time, renewing while others wait). The desk shows what is set aside today and,
+  with a reader open, what they reserved.
+- A copy set aside reads «Set aside» in the catalogue. Reservations go into the daily copy and the privacy export, and
+  leave with the reader's data.
+- At the desk, the safe answer of a red card comes first.
+- Groups named by the children's age («2 años») no longer give a stage.
+
 ## 0.11.0 (2026-10-27)
 
 - Readers from the centre's management program, as an optional connector: Cifra for now. Its students come with

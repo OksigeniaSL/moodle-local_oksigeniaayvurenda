@@ -983,3 +983,39 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv form:has(input[name="mode"][value="oauth"]:checked) .ayv-connect-key { display: none; }
 
 .ayv form + .ayv-section-title { margin-top: 2rem; }
+
+/* Reservations: what is set aside for the reader at the desk, the copies set aside today, the box on the record. */
+.ayv .ayv-hold-ready .ayv-loan-due { font-weight: 700; color: var(--accent); }
+
+.ayv .ayv-today-held { background: var(--notice-bg); }
+
+.ayv .ayv-hold {
+    display: grid;
+    gap: .6rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.ayv .ayv-hold p { margin: 0; }
+
+.ayv .ayv-hold form { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+
+.ayv .ayv-holds { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: .5rem; }
+
+.ayv .ayv-holds-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .25rem 1rem;
+    padding: .6rem 1rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.ayv .ayv-holds-title { flex: 1 1 14rem; font-weight: 700; }
+
+.ayv .ayv-holds-who, .ayv .ayv-holds-when { font-size: .9rem; }

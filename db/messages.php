@@ -32,6 +32,13 @@ $messageproviders = [
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To a reader: the book they were waiting for is set aside for them.
+    'holdready' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To a tutor: who in the group has books to bring back, without their titles.
     'overduetutor' => [
         'defaults' => [

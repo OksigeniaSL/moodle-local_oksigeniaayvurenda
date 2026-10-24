@@ -417,10 +417,11 @@ final class catalogue {
     }
 
     /**
-     * Whether copies are free, all out, only to read in the library, or not lent.
+     * Whether copies are free, all out, set aside for someone who reserved them, only to read in the library, or not
+     * lent.
      *
      * @param \stdClass[] $items
-     * @return string free, out or consult.
+     * @return string free, out, held or consult.
      */
     private static function state(array $items): string {
         $lendable = array_filter($items, fn($i) => $i->itemtype !== 'reference');
@@ -432,7 +433,7 @@ final class catalogue {
                 return 'free';
             }
         }
-        return 'out';
+        return array_filter($lendable, fn($i) => $i->status !== 'held') ? 'out' : 'held';
     }
 
     /**

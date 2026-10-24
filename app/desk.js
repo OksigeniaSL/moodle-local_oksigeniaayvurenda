@@ -145,6 +145,19 @@
         if (reader.latecount > 0) {
             panel.appendChild(el('p', 'ayv-reader-late', str.desklate));
         }
+        // What they reserved: first what is set aside for them, to hand it over now.
+        if (reader.holds && reader.holds.length) {
+            panel.appendChild(el('p', 'ayv-reader-has', str.deskholds));
+            var holds = el('ul', 'ayv-reader-loans ayv-reader-holds');
+            reader.holds.forEach(function(hold) {
+                var item = el('li', hold.ready ? 'ayv-loan ayv-hold-ready' : 'ayv-loan');
+                item.appendChild(el('span', 'ayv-loan-title', hold.title));
+                item.appendChild(el('span', 'ayv-loan-due', hold.ready ? str.deskholdready.replace('{$a}', hold.until)
+                    : str.deskholdwaiting));
+                holds.appendChild(item);
+            });
+            panel.appendChild(holds);
+        }
         if (!reader.loans.length) {
             panel.appendChild(el('p', 'ayv-reader-none', str.desknoloans));
             return;
@@ -263,15 +276,17 @@
             }
             undo('returned');
         } else if (answer.kind === 'stop' && answer.forceable) {
-            actions.appendChild(button(str.desklendanyway, 'ayv-line-danger', function(b) {
+            // The safe answer first: not lending.
+            var held = answer.reason === 'held';
+            actions.appendChild(button(held ? str.deskkeepheld : str.deskdismiss, 'ayv-line-quiet', function() {
+                li.classList.add('ayv-line-undone');
+                actions.textContent = '';
+            }));
+            actions.appendChild(button(held ? str.desklendheld : str.desklendanyway, 'ayv-line-danger', function(b) {
                 b.disabled = true;
                 li.classList.add('ayv-line-undone');
                 actions.textContent = '';
                 enqueue(answer.code, true);
-            }));
-            actions.appendChild(button(str.deskdismiss, 'ayv-line-quiet', function() {
-                li.classList.add('ayv-line-undone');
-                actions.textContent = '';
             }));
         } else if (answer.kind === 'choose' && answer.readers) {
             answer.readers.forEach(function(reader) {

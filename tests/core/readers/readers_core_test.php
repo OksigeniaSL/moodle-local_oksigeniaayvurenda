@@ -37,6 +37,9 @@ final class readers_core_test extends \basic_testcase {
         $this->assertSame('INF', stage_guesser::guess('INF 2ºA'));
         $this->assertSame('Primaria', stage_guesser::guess('3º de Primaria A'));
         $this->assertSame('Year', stage_guesser::guess('Year 5 Blue'));
+        // Groups named by the children's age: no stage to guess.
+        $this->assertSame('', stage_guesser::guess('2 años La Casita'));
+        $this->assertSame('', stage_guesser::guess('18 months Robins'));
         $this->assertSame('Claustro', stage_guesser::guess('Claustro de Profesores'));
         $this->assertSame('', stage_guesser::guess('3º A'));
     }

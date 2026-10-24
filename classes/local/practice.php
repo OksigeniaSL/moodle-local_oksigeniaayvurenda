@@ -184,7 +184,8 @@ final class practice {
         $readers = $DB->get_fieldset_select(self::T . 'reader', 'id', 'entityid = ?', [$entityid]);
         $transaction = $DB->start_delegated_transaction();
         foreach (
-            [['loan', 'libraryid', $libraries], ['rule', 'libraryid', $libraries], ['recauth', 'recordid', $records],
+            [['hold', 'libraryid', $libraries], ['loan', 'libraryid', $libraries], ['rule', 'libraryid', $libraries],
+                ['recauth', 'recordid', $records],
                 ['member', 'readerid', $readers]] as [$table, $field, $ids]
         ) {
             if ($ids) {

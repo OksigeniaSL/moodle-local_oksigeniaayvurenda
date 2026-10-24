@@ -49,6 +49,11 @@ final class policy_test extends \basic_testcase {
         $this->assertSame(policy::NOT_LENDABLE, policy::lend(['loandays' => 0] + self::RULE, 'available', 0, 0, true));
         $this->assertSame(policy::NOT_LENDABLE, policy::lend(null, 'available', 0, 0, true));
         $this->assertSame(policy::UNAVAILABLE, policy::lend(self::RULE, 'lost', 0, 0, true));
+        // A copy set aside: for its reader it goes; for anyone else, only when the librarian says so.
+        $this->assertSame(policy::OK, policy::lend(self::RULE, 'held', 0, 0));
+        $this->assertSame(policy::HELD, policy::lend(self::RULE, 'held', 0, 0, false, true));
+        $this->assertSame(policy::OK, policy::lend(self::RULE, 'held', 0, 0, true, true));
+        $this->assertContains(policy::HELD, policy::FORCEABLE);
         $this->assertContains(policy::LIMIT, policy::FORCEABLE);
         $this->assertNotContains(policy::NOT_LENDABLE, policy::FORCEABLE);
     }

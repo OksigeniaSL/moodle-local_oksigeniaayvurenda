@@ -46,22 +46,22 @@ $strings = [];
 foreach (
     ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'noteloved', 'noteunfinished', 'notemore',
         'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint',
-        'deskconditionout', 'deskconditionin'] as $key
+        'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
+        'desklendheld'] as $key
 ) {
     $strings[$key] = $str($key);
 }
 $cards = '';
-foreach (['today' => 'todaytoday', 'late' => 'todaylate', 'out' => 'todayout'] as $key => $label) {
+foreach (['today' => 'todaytoday', 'held' => 'todayheld', 'late' => 'todaylate', 'out' => 'todayout'] as $key => $label) {
     if ($today[$key] > 0) {
         $inner = '<span class="ayv-today-number">' . $today[$key] . '</span><span class="ayv-today-label">' .
             s($str($label)) . '</span>';
         if ($key === 'today') {
             $cards .= '<li class="ayv-today-card ayv-today-' . $key . '">' . $inner . '</li>';
         } else {
-            $url = new moodle_url(
-                '/local/oksigeniaayvurenda/late.php',
-                ['library' => $library->slug, 'all' => (int) ($key === 'out')]
-            );
+            $url = $key === 'held' ? new moodle_url('/local/oksigeniaayvurenda/holds.php', ['library' => $library->slug])
+                : new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug,
+                    'all' => (int) ($key === 'out')]);
             $cards .= '<li><a class="ayv-today-card ayv-today-' . $key . '" href="' . $url->out() . '">' . $inner . '</a></li>';
         }
     }
@@ -108,6 +108,8 @@ shell::output($str('desktitle'), $main, $library, '', [
             'label' => $str('readers')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'label' => $str('deskcatalogue')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/holds.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('holdsnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $library->slug]))->out(false),
             'label' => $str('copiesnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/reports.php', ['library' => $library->slug]))->out(false),

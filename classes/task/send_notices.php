@@ -44,5 +44,7 @@ class send_notices extends \core\task\scheduled_task {
     public function execute(): void {
         $stats = \local_oksigeniaayvurenda\local\notices::run();
         mtrace('Ayvurenda: notices of late books: ' . json_encode($stats));
+        $expired = \local_oksigeniaayvurenda\local\holds::expire();
+        mtrace('Ayvurenda: reservations no longer set aside: ' . $expired);
     }
 }

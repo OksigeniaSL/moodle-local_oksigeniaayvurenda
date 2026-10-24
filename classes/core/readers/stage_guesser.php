@@ -35,6 +35,9 @@ final class stage_guesser {
     /** @var string[] Small words that are never a stage. */
     private const SKIP = ['de', 'del', 'la', 'el', 'los', 'las', 'y', 'of', 'the', 'and', 'grupo', 'group', 'curso', 'clase'];
 
+    /** @var string[] Units of an age: «2 años», «18 months». A group named by the children's age has no stage name. */
+    private const AGES = ['año', 'años', 'mes', 'meses', 'month', 'months', 'an', 'ans', 'any', 'anys'];
+
     /**
      * The first word of the name that looks like a stage: letters, two or more, not an ordinal or a group letter.
      *
@@ -43,8 +46,13 @@ final class stage_guesser {
      */
     public static function guess(string $name): string {
         $words = preg_split('/[\s,;:\/\-]+/u', trim($name)) ?: [];
+        $previous = '';
         foreach ($words as $word) {
             $clean = trim($word, " .º°ª()[]");
+            if (ctype_digit($previous) && in_array(mb_strtolower($clean), self::AGES, true)) {
+                return '';
+            }
+            $previous = $clean;
             if (!preg_match('/^\p{L}{2,}$/u', $clean)) {
                 continue;
             }

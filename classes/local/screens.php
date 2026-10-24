@@ -196,6 +196,68 @@ final class screens {
     }
 
     /**
+     * The reservation box of a record: for a reader, what they reserved or the button to reserve it, if their stage
+     * may; for the staff at the desk, reserving it for a reader. Nothing when a copy is free here.
+     *
+     * @param array $found As catalogue::record() gives it.
+     * @param \stdClass $library
+     * @param string $notice A key of what just happened, from hold.php.
+     * @return array|null
+     */
+    public static function hold(array $found, \stdClass $library, string $notice = ''): ?array {
+        global $DB, $USER;
+        $now = time();
+        $recordid = (int) $found['record']->id;
+        $state = $found['card']['state'];
+        $box = ['action' => (new \moodle_url('/local/oksigeniaayvurenda/hold.php'))->out(false), 'sesskey' => sesskey(),
+            'library' => $library->slug, 'recordid' => $recordid, 'notice' => '', 'mine' => '', 'ahead' => '',
+            'holdid' => 0, 'canask' => false, 'staff' => false];
+        $notices = ['holdadded', 'holdfree', 'holdhas', 'holdmax', 'holdnocopies', 'holdnotallowed', 'holdcancelled',
+            'holdfreefor', 'holdhasfor', 'holdmaxfor', 'holdnocopiesfor', 'holdnoreader', 'holdmanyreaders'];
+        if (in_array($notice, $notices, true)) {
+            $box['notice'] = self::str($notice);
+        } else if (str_starts_with($notice, 'holdaddedfor')) {
+            $box['notice'] = self::str('holdaddedfor', (string) optional_param('who', '', PARAM_TEXT));
+        }
+        $reader = isloggedin() && !isguestuser() ? $DB->get_record(
+            'local_oksigeniaayvurenda_reader',
+            ['entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active'],
+            'id',
+            IGNORE_MULTIPLE
+        ) : null;
+        if ($reader) {
+            $mine = holds::open((int) $library->id, $recordid, (int) $reader->id);
+            if ($mine) {
+                $box['holdid'] = (int) $mine->id;
+                if ($mine->status === 'ready') {
+                    $box['mine'] = self::str('holdmineready', userdate(
+                        (int) $mine->timeexpires,
+                        get_string('strftimedateshort', 'langconfig')
+                    ));
+                } else {
+                    $box['mine'] = self::str('holdminewaiting');
+                    $ahead = holds::ahead($mine);
+                    $box['ahead'] = $ahead ? self::str('holdmineahead', $ahead) : '';
+                }
+            } else if (in_array($state, ['out', 'held'], true) && holds::online($library, (int) $reader->id, $now)) {
+                $box['canask'] = true;
+            }
+        }
+        $isdesk = has_capability('local/oksigeniaayvurenda:desk', \context_system::instance());
+        if (in_array($state, ['out', 'held'], true) && $isdesk) {
+            $box['staff'] = true;
+            $box['holdsurl'] = self::url('holds.php', $library);
+        }
+        if (!$box['notice'] && !$box['mine'] && !$box['canask'] && !$box['staff']) {
+            return null;
+        }
+        foreach (['holdask', 'holdaskhint', 'holdcancelmine', 'holdfor', 'holdforhint', 'holdforgo', 'holdslink'] as $key) {
+            $box[$key] = self::str($key);
+        }
+        return $box;
+    }
+
+    /**
      * The choice of a library, when there are several.
      *
      * @return array

@@ -1,0 +1,99 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/holds
+
+    The reservations of a library: copies set aside, the queues, and how readers reserve.
+
+    Context variables required for this template:
+    * heading, intro, notice - texts
+    * ready, waiting - reservations: id, title, url, name, group, barcode, when, aheadlabel
+    * action, self, sesskey, library - the forms
+    * manage, online, renew, days, max, stages, hasstages - the settings, for managers
+
+    Example context (json):
+    {
+        "heading": "Reservas", "intro": "Lo que se espera.", "notice": "",
+        "action": "#", "self": "#", "sesskey": "abc", "library": "demo-1",
+        "readyheading": "Apartados", "noready": "Nada apartado.",
+        "ready": [{"id": 1, "title": "El faro dormido", "url": "#", "name": "Hugo Lago", "group": "5.º A",
+                   "barcode": "100000L", "when": "hasta el 30 de octubre", "aheadlabel": ""}],
+        "waitingheading": "En cola", "nowaiting": "Nadie espera.",
+        "waiting": [],
+        "cancel": "Anular",
+        "manage": true, "online": true, "renew": false, "days": 5, "max": 3,
+        "hasstages": true, "stages": [{"name": "Primaria", "chosen": true}],
+        "holdssettings": "Cómo se reserva", "holdssettingsintro": "En el mostrador, siempre.",
+        "holdsonline": "En línea", "holdsstages": "Etapas", "holdsnostages": "Sin etapas",
+        "holdsdays": "Días", "holdsmax": "A la vez", "holdsrenew": "Ampliar con cola", "holdssave": "Guardar"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<h2 class="ayv-section-title">{{readyheading}}</h2>
+{{^ready}}<p class="ayv-empty">{{noready}}</p>{{/ready}}
+<ul class="ayv-holds">
+{{#ready}}
+    <li class="ayv-holds-row">
+        <a class="ayv-holds-title" href="{{url}}">{{title}}</a>
+        <span class="ayv-holds-who">{{name}}{{#group}} · {{group}}{{/group}}</span>
+        <span class="ayv-holds-when">{{when}}{{#barcode}} · {{barcode}}{{/barcode}}</span>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="library" value="{{library}}">
+            <input type="hidden" name="hold" value="{{id}}">
+            <input type="hidden" name="back" value="holds">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="action" value="cancel">{{cancel}}</button>
+        </form>
+    </li>
+{{/ready}}
+</ul>
+<h2 class="ayv-section-title">{{waitingheading}}</h2>
+{{^waiting}}<p class="ayv-empty">{{nowaiting}}</p>{{/waiting}}
+<ul class="ayv-holds">
+{{#waiting}}
+    <li class="ayv-holds-row">
+        <a class="ayv-holds-title" href="{{url}}">{{title}}</a>
+        <span class="ayv-holds-who">{{name}}{{#group}} · {{group}}{{/group}}</span>
+        <span class="ayv-holds-when">{{when}}{{#aheadlabel}} · {{aheadlabel}}{{/aheadlabel}}</span>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="library" value="{{library}}">
+            <input type="hidden" name="hold" value="{{id}}">
+            <input type="hidden" name="back" value="holds">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="action" value="cancel">{{cancel}}</button>
+        </form>
+    </li>
+{{/waiting}}
+</ul>
+{{#manage}}
+<form method="post" action="{{self}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{holdssettings}}</h2>
+    <p>{{holdssettingsintro}}</p>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="online" value="1" {{#online}}checked{{/online}}> {{holdsonline}}</label>
+    <fieldset class="ayv-fieldset">
+        <legend>{{holdsstages}}</legend>
+        {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}> {{name}}</label>{{/stages}}
+        {{^hasstages}}<p class="ayv-empty">{{holdsnostages}}</p>{{/hasstages}}
+    </fieldset>
+    <label class="ayv-field">{{holdsdays}} <input type="number" name="days" value="{{days}}" min="1" max="30"></label>
+    <label class="ayv-field">{{holdsmax}} <input type="number" name="max" value="{{max}}" min="1" max="20"></label>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="renew" value="1" {{#renew}}checked{{/renew}}> {{holdsrenew}}</label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{holdssave}}</button></p>
+</form>
+{{/manage}}

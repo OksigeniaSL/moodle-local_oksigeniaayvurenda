@@ -202,7 +202,7 @@ final class notices {
      * @param string $body Plain text.
      * @return bool
      */
-    private static function send(string $provider, \stdClass $user, string $subject, string $body): bool {
+    public static function send(string $provider, \stdClass $user, string $subject, string $body): bool {
         $message = new \core\message\message();
         $message->component = 'local_oksigeniaayvurenda';
         $message->name = $provider;

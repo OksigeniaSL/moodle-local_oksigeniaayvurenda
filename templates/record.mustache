@@ -23,6 +23,7 @@
     * card - the card of the record (colour, title, authors, statelabel, stateclass, location)
     * title, subtitle, authors, facts, subjects, summary, copies - the record
     * back - url and label to go back
+    * hold - the reservation box, or nothing
 
     Example context (json):
     {
@@ -43,7 +44,12 @@
         "callnumberlabel": "Tejuelo",
         "copies": [{"where": "Aquí", "statelabel": "Libre", "state": "free", "location": "Estantería infantil",
                     "callnumber": "821 MON far", "barcode": "100000L"}],
-        "back": {"url": "#", "label": "Volver a la biblioteca"}
+        "back": {"url": "#", "label": "Volver a la biblioteca"},
+        "hold": {"action": "#", "sesskey": "abc", "library": "demo-1", "recordid": 1, "holdid": 0, "notice": "",
+                 "mine": "", "ahead": "", "canask": true, "staff": false, "holdsurl": "#",
+                 "holdask": "Avísame cuando vuelva", "holdaskhint": "Ahora están todos prestados.",
+                 "holdcancelmine": "Ya no lo quiero", "holdfor": "Reservar para un lector",
+                 "holdforhint": "El carné o el nombre", "holdforgo": "Reservar", "holdslink": "Todas las reservas"}
     }
 }}
 <article class="ayv-record">
@@ -63,6 +69,41 @@
         <p class="ayv-record-authors">
             {{#authors}}<span class="ayv-author">{{name}}{{#role}} <span class="ayv-role">({{role}})</span>{{/role}}</span>{{/authors}}
         </p>
+        {{#hold}}
+        <section class="ayv-hold" aria-label="{{holdask}}">
+            {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+            {{#mine}}
+            <p class="ayv-hold-mine">{{mine}}{{#ahead}} {{ahead}}{{/ahead}}</p>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="library" value="{{library}}">
+                <input type="hidden" name="record" value="{{recordid}}">
+                <input type="hidden" name="hold" value="{{holdid}}">
+                <button type="submit" class="ayv-button ayv-button-quiet" name="action" value="cancel">{{holdcancelmine}}</button>
+            </form>
+            {{/mine}}
+            {{#canask}}
+            <p>{{holdaskhint}}</p>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="library" value="{{library}}">
+                <input type="hidden" name="record" value="{{recordid}}">
+                <button type="submit" class="ayv-button" name="action" value="ask">{{holdask}}</button>
+            </form>
+            {{/canask}}
+            {{#staff}}
+            <form method="post" action="{{action}}" autocomplete="off">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="library" value="{{library}}">
+                <input type="hidden" name="record" value="{{recordid}}">
+                <label class="ayv-field">{{holdfor}} <span class="ayv-field-hint">{{holdforhint}}</span>
+                    <input type="text" name="reader" required maxlength="100"></label>
+                <button type="submit" class="ayv-button ayv-button-quiet" name="action" value="for">{{holdforgo}}</button>
+                <a href="{{holdsurl}}">{{holdslink}}</a>
+            </form>
+            {{/staff}}
+        </section>
+        {{/hold}}
         {{#summary}}
         <h2 class="ayv-section-title">{{summaryheading}}</h2>
         <p class="ayv-summary">{{summary}}</p>

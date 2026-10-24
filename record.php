@@ -42,4 +42,5 @@ if (!$found) {
     throw new moodle_exception('recordnotfound', 'local_oksigeniaayvurenda');
 }
 $data = screens::record($found, $library);
+$data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library);

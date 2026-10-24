@@ -54,6 +54,7 @@ final class copies {
         'reader' => 'entityid = :entityid',
         'member' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',
         'loan' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'hold' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'rule' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'tutor' => 'yearid IN (SELECT id FROM {local_oksigeniaayvurenda_year} WHERE entityid = :entityid)',
         'source' => 'entityid = :entityid',
