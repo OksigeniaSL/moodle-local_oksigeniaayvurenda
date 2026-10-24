@@ -26,28 +26,18 @@
         "voiceinfo": "Cómo se tratan las voces", "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar",
         "voicewhat": "Qué has leído", "voicewhathint": "un capítulo, unas páginas", "voicesend": "Enviar",
         "voicemine": "Tus voces de este libro", "voicedelete": "Borrarla", "voicenomic": "Sin micrófono",
-        "backtorecord": "Volver a la ficha"
+        "backtorecord": "Volver a la ficha", "consent": false, "caninvite": true, "hasinvites": true,
+        "invites": [{"name": "La familia de Ana", "state": "Sin usar, hasta el 7 de noviembre", "link": "https://example.org/f",
+            "linklabel": "Enlace para La familia de Ana", "copylabel": "Copiar"}],
+        "voiceinvitetitle": "Invitar a una familia", "voiceinvitehint": "Un enlace de un solo uso", "voiceinvitename": "A quién",
+        "voiceinvitenamehint": "como lo reconozcas", "voiceinvitemake": "Hacer el enlace"
     }
 }}
 <section class="ayv-voice">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-notice">{{how}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<div class="ayv-book" id="ayv-recorder">
-    <p class="ayv-book-actions">
-        <button type="button" class="ayv-button" id="ayv-rec">{{voicerecord}}</button>
-        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-stop" hidden>{{voicestop}}</button>
-        <span class="ayv-field-hint" id="ayv-time" role="status"></span>
-    </p>
-    <audio id="ayv-preview" class="ayv-media" controls hidden></audio>
-    <label class="ayv-field ayv-field-wide">{{voicewhat}} <span class="ayv-field-hint">{{voicewhathint}}</span>
-        <input type="text" id="ayv-what" maxlength="255"></label>
-    <p class="ayv-book-actions">
-        <button type="button" class="ayv-button" id="ayv-send" disabled>{{voicesend}}</button>
-        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-again" hidden>{{voiceagain}}</button>
-    </p>
-    <p class="ayv-field-hint" id="ayv-voice-said" role="status"></p>
-</div>
+{{> local_oksigeniaayvurenda/voice_recorder}}
 {{#hasmine}}
 <h2 class="ayv-section-title">{{voicemine}}</h2>
 <ul class="ayv-holds">
@@ -59,4 +49,23 @@
 {{/mine}}
 </ul>
 {{/hasmine}}
+{{#caninvite}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{voiceinvitetitle}}</h2>
+    <p class="ayv-field-hint">{{voiceinvitehint}}</p>
+    <label class="ayv-field ayv-field-wide">{{voiceinvitename}} <span class="ayv-field-hint">{{voiceinvitenamehint}}</span>
+        <input type="text" name="name" maxlength="255" required></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="invite">{{voiceinvitemake}}</button></p>
+</form>
+{{#hasinvites}}
+<ul class="ayv-holds">
+{{#invites}}
+    <li class="ayv-holds-row"><span class="ayv-holds-title">{{name}}</span> <span class="ayv-holds-who">{{state}}</span>
+        {{#link}}<span class="ayv-invite-link"><input type="text" readonly value="{{link}}" aria-label="{{linklabel}}">
+            <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{link}}">{{copylabel}}</button></span>{{/link}}</li>
+{{/invites}}
+</ul>
+{{/hasinvites}}
+{{/caninvite}}
 </section>

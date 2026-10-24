@@ -178,5 +178,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102723, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102724) {
+        // One-time links for families to give a book a voice without an account.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_voiceinvite')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_voiceinvite');
+        }
+        upgrade_plugin_savepoint(true, 2026102724, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/family
+
+    A family gives a book a voice with their one-time link.
+
+    Example context (json):
+    {
+        "heading": "Dale voz a «El faro dormido»", "invitedby": "Te invita Ana Montes.",
+        "points": [{"text": "Tu voz se guarda en el sitio del centro."}], "centre": "", "notice": "", "used": false,
+        "hasvoice": false, "playurl": "#", "action": "#", "sesskey": "abc",
+        "audiences": [{"value": "students", "label": "Los alumnos del centro"}], "consent": true,
+        "voiceinfocentre": "Lo que añade el centro", "voicefamilyconsent": "Doy mi permiso",
+        "voicefamilywho": "Quién más puede oírla", "voicefamilywhohint": "si la aprueban", "voicefamilydone": "Ya has grabado",
+        "voicedelete": "Borrarla", "voicefamilydeletedall": "Borrada", "voicerecord": "Grabar", "voicestop": "Parar",
+        "voiceagain": "Volver a grabar", "voicewhat": "Qué has leído", "voicewhathint": "un capítulo", "voicesend": "Enviar"
+    }
+}}
+<section class="ayv-voice">
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#invitedby}}<p>{{invitedby}}</p>{{/invitedby}}
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<ul class="ayv-voiceinfo">{{#points}}<li>{{text}}</li>{{/points}}</ul>
+{{#centre}}<h2 class="ayv-section-title">{{voiceinfocentre}}</h2><p>{{centre}}</p>{{/centre}}
+{{#used}}
+    {{#hasvoice}}
+    <div class="ayv-book">
+        <p>{{voicefamilydone}}</p>
+        <audio class="ayv-media" controls preload="none" src="{{playurl}}"></audio>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{voicedelete}}</button></form>
+    </div>
+    {{/hasvoice}}
+    {{^hasvoice}}{{^notice}}<p class="ayv-empty">{{voicefamilydeletedall}}</p>{{/notice}}{{/hasvoice}}
+{{/used}}
+{{^used}}
+<div class="ayv-book">
+    <label class="ayv-field ayv-field-check"><input type="checkbox" id="ayv-consent"> {{voicefamilyconsent}}</label>
+    <fieldset class="ayv-fieldset"><legend>{{voicefamilywho}} <span class="ayv-field-hint">{{voicefamilywhohint}}</span></legend>
+        <div class="ayv-choices">{{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}"> {{label}}</label>{{/audiences}}</div>
+    </fieldset>
+</div>
+{{> local_oksigeniaayvurenda/voice_recorder}}
+{{/used}}
+</section>

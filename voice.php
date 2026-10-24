@@ -49,6 +49,12 @@ if ($viewer['who'] === 'nobody') {
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';
+// Teachers and the library invite families who have no account, with a one-time link.
+$caninvite = in_array($viewer['who'], ['desk', 'staff'], true);
+if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'invite' && $caninvite) {
+    voices::invite($library, $recordid, (int) $USER->id, required_param('name', PARAM_TEXT));
+    $notice = $str('voiceinvitemade');
+}
 if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'delete') {
     $item = digital::get(required_param('item', PARAM_INT), $library);
     if ($item->kind === 'voice' && (int) $item->createdby === (int) $USER->id) {
@@ -71,10 +77,29 @@ $data = [
     'sesskey' => sesskey(),
     'mine' => $mine,
     'hasmine' => (bool) $mine,
+    'consent' => false,
+    'caninvite' => $caninvite,
+    'invites' => [],
 ];
+if ($caninvite) {
+    foreach (voices::invites($recordid, (int) $USER->id) as $invite) {
+        $open = !$invite->timeused && $invite->timeexpires > time();
+        $state = $invite->timeused ? ($invite->digitalid ? 'voiceinviterecorded' : 'voiceinvitedeleted')
+            : ($open ? 'voiceinviteopen' : 'voiceinviteexpired');
+        $data['invites'][] = [
+            'name' => (string) $invite->name,
+            'state' => $str($state, userdate($invite->timeexpires, get_string('strftimedate', 'langconfig'))),
+            'link' => $open ? (new moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $invite->token]))->out(false) : '',
+            'linklabel' => $str('voiceinvitelinkfor', (string) $invite->name),
+            'copylabel' => $str('voiceinvitecopy'),
+        ];
+    }
+}
+$data['hasinvites'] = (bool) $data['invites'];
 foreach (
     ['voiceinfo', 'voicerecord', 'voicestop', 'voiceagain', 'voicewhat', 'voicewhathint', 'voicesend', 'voicemine',
-        'voicedelete', 'voicenomic', 'backtorecord'] as $key
+        'voicedelete', 'voicenomic', 'backtorecord', 'voiceinvitetitle', 'voiceinvitehint', 'voiceinvitename',
+        'voiceinvitenamehint', 'voiceinvitemake'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -89,6 +114,7 @@ shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksi
         'sesskey' => sesskey(),
         'record' => $recordid,
         'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicesent'),
-            'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime')],
+            'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
+            'copied' => $str('voiceinvitecopied')],
     ],
 ]);

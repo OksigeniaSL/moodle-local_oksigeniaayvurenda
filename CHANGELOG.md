@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.1 (2026-10-27)
+
+- Families without an account give a book a voice too. A teacher or the library makes a one-time link from the book's
+  recorder page and sends it; it works for 14 days. Whoever opens it reads how their voice is handled, gives their
+  permission before they can record, chooses who else may hear it (the centre's students, its families, the public),
+  records and sends. The teacher who invited them hears it first and approves it, never for more people than the
+  family chose. With the same link the family hears it and deletes it whenever they want; it records only once.
+- The privacy provider finds whoever noted a family's permission or sent a link.
+
 ## 0.21.0 (2026-10-27)
 
 - «Do you want to give this book a voice?». A reader records a reading of a book in the browser, listens to it, records

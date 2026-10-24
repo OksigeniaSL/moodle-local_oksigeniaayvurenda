@@ -32,8 +32,28 @@
     var time = document.getElementById('ayv-time');
     var said = document.getElementById('ayv-voice-said');
     var what = document.getElementById('ayv-what');
+    var consent = document.getElementById('ayv-consent');
+    // Copying a family's link.
+    document.querySelectorAll('[data-copy]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(button.getAttribute('data-copy')).then(function() {
+                    button.textContent = str.copied || button.textContent;
+                    return true;
+                }).catch(function() {
+                    return false;
+                });
+            }
+        });
+    });
     if (!rec || !window.fetch) {
         return;
+    }
+    // A family records once they have given their permission.
+    if (consent) {
+        consent.addEventListener('change', function() {
+            rec.disabled = !consent.checked;
+        });
     }
     var MAX = 20 * 60;
     var recorder = null;
@@ -125,8 +145,16 @@
         said.textContent = str.voicesending || '';
         var body = new FormData();
         body.append('sesskey', config.sesskey);
-        body.append('library', config.library);
-        body.append('record', config.record);
+        if (config.token) {
+            body.append('t', config.token);
+            body.append('consent', consent && consent.checked ? '1' : '0');
+            document.querySelectorAll('input[name="audience[]"]:checked').forEach(function(box) {
+                body.append('audience[]', box.value);
+            });
+        } else {
+            body.append('library', config.library);
+            body.append('record', config.record);
+        }
         body.append('title', what ? what.value : '');
         body.append('ext', extension(blob.type));
         body.append('voice', blob, 'voz.' + extension(blob.type));

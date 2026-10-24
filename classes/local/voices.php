@@ -39,6 +39,12 @@ final class voices {
     /** @var int Days a voice is kept when the centre sets nothing: two school years. */
     public const KEEPDAYS = 730;
 
+    /** @var int Days a family has to use the link they were sent. */
+    public const INVITEDAYS = 14;
+
+    /** @var string[] Whom a family may let hear their voice, beyond the teacher who invited them and the library. */
+    public const FAMILYAUDIENCES = ['students', 'families', 'public'];
+
     /**
      * Keeps a recording of a reader, waiting for approval.
      *
@@ -88,7 +94,10 @@ final class voices {
      */
     public static function can_hear(\stdClass $item, array $viewer): bool {
         $userid = (int) ($viewer['userid'] ?? 0);
-        if ($viewer['who'] === 'desk' || ($userid && (int) $item->createdby === $userid) || self::tutors($item, $userid)) {
+        if (
+            $viewer['who'] === 'desk' || ($userid && (int) $item->createdby === $userid) || self::tutors($item, $userid)
+                || self::inviter($item, $userid)
+        ) {
             return true;
         }
         if ($item->status !== 'published' || !self::may_share($item)) {
@@ -111,7 +120,7 @@ final class voices {
      */
     public static function can_approve(\stdClass $item, int $userid): bool {
         return has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)
-            || self::tutors($item, $userid);
+            || self::tutors($item, $userid) || self::inviter($item, $userid);
     }
 
     /**
@@ -128,6 +137,10 @@ final class voices {
         $licence = in_array($data['licence'] ?? '', digital_rules::LICENCES, true) ? $data['licence'] : 'rights';
         // Nobody beyond the recorder and their teachers unless it may be shared, and then only whom was chosen.
         $audience = self::may_share($item) ? digital_rules::audience((array) ($data['audience'] ?? []), $licence) : [];
+        $invite = $DB->get_record(self::T . 'voiceinvite', ['digitalid' => $id]);
+        if ($invite) {
+            $audience = array_values(array_intersect($audience, explode(',', (string) $invite->audience)));
+        }
         digital::update($id, $library, ['title' => $item->title, 'licence' => $licence, 'download' => 0], $now);
         $DB->update_record(self::T . 'digital', (object) ['id' => $id, 'status' => 'published',
             'audience' => implode(',', $audience)]);
@@ -238,6 +251,13 @@ final class voices {
                 self::remove($item);
                 $count++;
             }
+            // Links: unused ones once they expire; used ones when their voice is gone and their days are over.
+            $DB->delete_records_select(
+                self::T . 'voiceinvite',
+                'entityid = :entityid AND digitalid IS NULL
+                AND ((timeused IS NULL AND timeexpires < :now) OR timecreated < :limit)',
+                ['entityid' => $entity->id, 'now' => $now, 'limit' => $now - $days * DAYSECS]
+            );
         }
         return $count;
     }
@@ -249,6 +269,8 @@ final class voices {
      */
     public static function remove(\stdClass $item): void {
         global $DB;
+        // A family's link stays used: it records once.
+        $DB->set_field(self::T . 'voiceinvite', 'digitalid', null, ['digitalid' => $item->id]);
         get_file_storage()->delete_area_files(
             \context_system::instance()->id,
             'local_oksigeniaayvurenda',
@@ -257,6 +279,117 @@ final class voices {
         );
         $DB->delete_records(self::T . 'digitalread', ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'digital', ['id' => $item->id]);
+    }
+
+    /**
+     * Makes a one-time link for a family to give a book a voice without an account.
+     *
+     * @param \stdClass $library
+     * @param int $recordid
+     * @param int $userid The teacher who sends it, who will approve the voice.
+     * @param string $name Who is invited, as the teacher writes it.
+     * @param int|null $now
+     * @return string The token of the link.
+     */
+    public static function invite(\stdClass $library, int $recordid, int $userid, string $name, ?int $now = null): string {
+        global $DB;
+        $now = $now ?? time();
+        $token = bin2hex(random_bytes(24));
+        $DB->insert_record(self::T . 'voiceinvite', ['entityid' => $library->entityid, 'recordid' => $recordid,
+            'token' => $token, 'invitedby' => $userid ?: null, 'name' => \core_text::substr(trim($name), 0, 255),
+            'timecreated' => $now, 'timeexpires' => $now + self::INVITEDAYS * DAYSECS]);
+        return $token;
+    }
+
+    /**
+     * The link of a token, while it can be used to record or to see and delete what was recorded with it.
+     *
+     * @param string $token
+     * @param int|null $now
+     * @return \stdClass|null
+     */
+    public static function invitation(string $token, ?int $now = null): ?\stdClass {
+        global $DB;
+        if (!preg_match('/^[0-9a-f]{48}$/', $token)) {
+            return null;
+        }
+        $invite = $DB->get_record(self::T . 'voiceinvite', ['token' => $token]);
+        if (!$invite || (!$invite->timeused && $invite->timeexpires < ($now ?? time()))) {
+            return null;
+        }
+        return $invite;
+    }
+
+    /**
+     * Keeps what a family recorded with their link, with their permission and whom they let hear it; the link is used.
+     *
+     * @param \stdClass $invite
+     * @param string $path
+     * @param string $title
+     * @param string $extension
+     * @param array $audience Of FAMILYAUDIENCES.
+     * @param int|null $now
+     * @return int
+     */
+    public static function record_invited(
+        \stdClass $invite,
+        string $path,
+        string $title,
+        string $extension,
+        array $audience,
+        ?int $now = null
+    ): int {
+        global $DB;
+        if ($invite->timeused) {
+            throw new \moodle_exception('voiceinviteused', 'local_oksigeniaayvurenda');
+        }
+        $now = $now ?? time();
+        $library = (object) ['entityid' => $invite->entityid];
+        $id = self::record($library, (int) $invite->recordid, 0, 0, $path, $title, $extension, $now);
+        $DB->set_field(self::T . 'digital', 'createdby', null, ['id' => $id]);
+        $DB->update_record(self::T . 'voiceinvite', (object) ['id' => $invite->id, 'digitalid' => $id, 'timeused' => $now,
+            'audience' => implode(',', array_values(array_intersect(self::FAMILYAUDIENCES, $audience)))]);
+        return $id;
+    }
+
+    /**
+     * The links someone sent for a record, newest first.
+     *
+     * @param int $recordid
+     * @param int $userid
+     * @return \stdClass[]
+     */
+    public static function invites(int $recordid, int $userid): array {
+        global $DB;
+        return array_values($DB->get_records(
+            self::T . 'voiceinvite',
+            ['recordid' => $recordid, 'invitedby' => $userid],
+            'timecreated DESC, id DESC'
+        ));
+    }
+
+    /**
+     * The link a voice was recorded with, if a family recorded it.
+     *
+     * @param int $digitalid
+     * @return \stdClass|null
+     */
+    public static function invite_of(int $digitalid): ?\stdClass {
+        global $DB;
+        return $DB->get_record(self::T . 'voiceinvite', ['digitalid' => $digitalid]) ?: null;
+    }
+
+    /**
+     * Whether someone sent the link a family recorded a voice with.
+     *
+     * @param \stdClass $item
+     * @param int $userid
+     * @return bool
+     */
+    private static function inviter(\stdClass $item, int $userid): bool {
+        global $DB;
+        return $userid && !$item->readerid && $DB->record_exists(self::T . 'voiceinvite', ['digitalid' => $item->id,
+            'invitedby' => $userid]);
     }
 
     /**

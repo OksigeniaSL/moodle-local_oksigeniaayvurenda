@@ -131,6 +131,12 @@ class provider implements
             'timecreated' => 'privacy:metadata:voiceconsent:timecreated',
             'timerevoked' => 'privacy:metadata:voiceconsent:timerevoked',
         ], 'privacy:metadata:voiceconsent');
+        $collection->add_database_table(self::T . 'voiceinvite', [
+            'invitedby' => 'privacy:metadata:voiceinvite:invitedby',
+            'name' => 'privacy:metadata:voiceinvite:name',
+            'timecreated' => 'privacy:metadata:voiceinvite:timecreated',
+            'timeused' => 'privacy:metadata:voiceinvite:timeused',
+        ], 'privacy:metadata:voiceinvite');
         $collection->add_database_table(self::T . 'lot', [
             'createdby' => 'privacy:metadata:lot:createdby',
             'name' => 'privacy:metadata:lot:name',
@@ -211,6 +217,7 @@ class provider implements
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'digital} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'digitalread}', []);
         $userlist->add_from_sql('notedby', 'SELECT notedby FROM {' . self::T . 'voiceconsent} WHERE notedby IS NOT NULL', []);
+        $userlist->add_from_sql('invitedby', 'SELECT invitedby FROM {' . self::T . 'voiceinvite} WHERE invitedby IS NOT NULL', []);
     }
 
     /**
@@ -314,6 +321,21 @@ class provider implements
                     'created' => transform::datetime($l->timecreated)], $lots))]
             );
         }
+        // The links they sent to families.
+        $invites = $DB->get_records(
+            self::T . 'voiceinvite',
+            ['invitedby' => $userid],
+            'timecreated',
+            'id, name, timecreated, timeused'
+        );
+        if ($invites) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:voiceinvites', 'local_oksigeniaayvurenda')]),
+                (object) ['invites' => array_values(array_map(fn($i) => ['name' => $i->name,
+                    'created' => transform::datetime($i->timecreated),
+                    'used' => $i->timeused ? transform::datetime($i->timeused) : null], $invites))]
+            );
+        }
         // The voices they recorded, with their files.
         foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'createdby' => $userid], 'id') as $voice) {
             $path = array_merge($base, [get_string('privacy:path:voices', 'local_oksigeniaayvurenda'), (string) $voice->id]);
@@ -390,6 +412,7 @@ class provider implements
         $DB->set_field_select(self::T . 'digital', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'digitalread');
         $DB->delete_records(self::T . 'voiceconsent');
+        $DB->delete_records(self::T . 'voiceinvite');
     }
 
     /**
@@ -463,6 +486,7 @@ class provider implements
         $DB->set_field(self::T . 'digital', 'createdby', null, ['createdby' => $userid]);
         $DB->delete_records(self::T . 'digitalread', ['userid' => $userid]);
         $DB->set_field(self::T . 'voiceconsent', 'notedby', null, ['notedby' => $userid]);
+        $DB->set_field(self::T . 'voiceinvite', 'invitedby', null, ['invitedby' => $userid]);
     }
 
     /**
@@ -491,7 +515,9 @@ class provider implements
             $DB->record_exists(self::T . 'withdrawal', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'lot', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'digital', ['createdby' => $userid]) ||
-            $DB->record_exists(self::T . 'digitalread', ['userid' => $userid])
+            $DB->record_exists(self::T . 'digitalread', ['userid' => $userid]) ||
+            $DB->record_exists(self::T . 'voiceconsent', ['notedby' => $userid]) ||
+            $DB->record_exists(self::T . 'voiceinvite', ['invitedby' => $userid])
         ) {
             return true;
         }

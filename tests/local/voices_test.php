@@ -106,4 +106,60 @@ final class voices_test extends \advanced_testcase {
         $this->assertSame(1, voices::expire($now));
         $this->assertFalse($DB->record_exists(self::T . 'digital', ['id' => $id]));
     }
+
+    /**
+     * A family without an account records once with the link a teacher sent: the teacher hears and approves it, never
+     * for more people than the family chose; the link does not record twice and an unused one expires.
+     */
+    public function test_family_link(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'El faro dormido']);
+        $teacher = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $student = $this->getDataGenerator()->create_user();
+        $gen->create_reader(['entityid' => $entityid, 'userid' => $teacher->id, 'readertype' => 'teacher']);
+        $gen->create_reader(['entityid' => $entityid, 'userid' => $other->id, 'readertype' => 'teacher']);
+        $gen->create_reader(['entityid' => $entityid, 'userid' => $student->id, 'readertype' => 'student']);
+
+        $token = voices::invite($library, (int) $record->id, (int) $teacher->id, 'La familia de Ana', $now);
+        $this->assertNull(voices::invitation('nonsense'));
+        $invite = voices::invitation($token, $now);
+        $this->assertSame('La familia de Ana', $invite->name);
+        $path = make_request_directory() . '/voz.ogg';
+        file_put_contents($path, 'made-up recording');
+        $id = voices::record_invited($invite, $path, 'Capítulo 1', 'ogg', ['students', 'staff', 'nonsense'], $now);
+        $voice = digital::get($id, $library);
+        $this->assertSame(['pending', null, null], [$voice->status, $voice->createdby, $voice->readerid]);
+        $this->assertSame('students', voices::invite_of($id)->audience, 'only what a family may choose');
+        $this->assertTrue(voices::can_hear($voice, digital::viewer($entityid, (int) $teacher->id)));
+        $this->assertFalse(voices::can_hear($voice, digital::viewer($entityid, (int) $other->id)));
+        $this->assertTrue(voices::can_approve($voice, (int) $teacher->id));
+        $this->assertFalse(voices::can_approve($voice, (int) $other->id));
+        try {
+            voices::record_invited(voices::invitation($token, $now), $path, '', 'ogg', [], $now);
+            $this->fail('a link records once');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('voiceinviteused', $e->errorcode);
+        }
+        // The family chose students: approving for the public too gives students only.
+        voices::approve($id, $library, ['licence' => 'pd', 'audience' => ['students', 'public']]);
+        $this->assertSame('students', digital::get($id, $library)->audience);
+        $this->assertTrue(voices::can_hear(digital::get($id, $library), digital::viewer($entityid, (int) $student->id)));
+        // Deleted with the link, the link stays used and still opens to say so.
+        voices::remove(digital::get($id, $library));
+        $this->assertNotNull(voices::invitation($token, $now + 30 * DAYSECS));
+        $this->assertNull(voices::invitation($token, $now + 30 * DAYSECS)->digitalid);
+        // An unused link expires, and is cleared.
+        $unused = voices::invite($library, (int) $record->id, (int) $teacher->id, 'Otra familia', $now);
+        $this->assertNull(voices::invitation($unused, $now + (voices::INVITEDAYS + 1) * DAYSECS));
+        voices::expire($now + (voices::INVITEDAYS + 1) * DAYSECS);
+        $this->assertFalse($DB->record_exists(self::T . 'voiceinvite', ['token' => $unused]));
+        $this->assertTrue($DB->record_exists(self::T . 'voiceinvite', ['token' => $token]));
+    }
 }

@@ -80,6 +80,13 @@ $pending = [];
 foreach (voices::pending($library, (int) $USER->id) as $item) {
     $who = $item->readerid ? $desk->reader((int) $item->readerid) : ['name' => '', 'group' => '', 'type' => 'staff'];
     $share = voices::may_share($item);
+    // A family who recorded with a link chose who else may hear it: that is the most the approval gives.
+    $invite = voices::invite_of((int) $item->id);
+    $offered = $invite ? array_values(array_filter(explode(',', (string) $invite->audience))) : digital_rules::AUDIENCES;
+    if ($invite) {
+        $who['name'] = $str('voicefamilyfrom', (string) $invite->name);
+        $share = (bool) $offered;
+    }
     $pending[] = [
         'id' => (int) $item->id,
         'book' => $item->booktitle,
@@ -91,7 +98,8 @@ foreach (voices::pending($library, (int) $USER->id) as $item) {
         'permission' => $item->readerid ? voices::has_permission((int) $item->readerid) : false,
         'licences' => array_map(fn($l) => ['value' => $l, 'label' => $str('licence' . str_replace('-', '', $l)),
             'selected' => $l === 'rights'], digital_rules::LICENCES),
-        'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a)], digital_rules::AUDIENCES),
+        'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a)], $offered),
+        'privatehint' => $str($invite ? 'voicefamilyprivate' : 'voiceprivatehint'),
     ];
 }
 $settings = json_decode(
@@ -112,7 +120,7 @@ $data = [
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
 ];
 foreach (
-    ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voiceaudience', 'voiceprivatehint',
+    ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voiceaudience',
         'voicepermissiongive', 'voicepermissiontake', 'voicepermissionhas', 'voicepermissionnot', 'voicessettings',
         'voiceskeepdays', 'voicestext', 'voicestexthint', 'voicessave', 'voiceinfo'] as $key
 ) {

@@ -24,7 +24,7 @@
         "pending": [{"id": 1, "book": "El faro dormido", "title": "Capítulo 1", "who": "Ana Montes (4º B)", "url": "#",
             "share": false, "minor": true, "permission": false,
             "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
-            "audiences": [{"value": "students", "label": "Alumnos"}]}],
+            "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "Sin permiso, solo su docente"}],
         "manage": true, "keepdays": 730, "voicetext": "", "infourl": "#",
         "voicesnone": "Ninguna", "voiceapprove": "Aprobar", "voicereject": "Rechazar", "voicelicence": "Licencia",
         "voiceaudience": "Quién más la oye", "voiceprivatehint": "Sin permiso, solo su docente",
@@ -54,7 +54,7 @@
         <label class="ayv-field">{{voicelicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
         {{#share}}<fieldset class="ayv-fieldset"><legend>{{voiceaudience}}</legend><div class="ayv-choices">
             {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}"> {{label}}</label>{{/audiences}}</div></fieldset>{{/share}}
-        {{^share}}<p class="ayv-field-hint">{{voiceprivatehint}}</p>{{/share}}
+        {{^share}}<p class="ayv-field-hint">{{privatehint}}</p>{{/share}}
         <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{voiceapprove}}</button>
             <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></p>
     </form>
