@@ -125,6 +125,12 @@ class provider implements
             'bookmarks' => 'privacy:metadata:digitalread:bookmarks',
             'timemodified' => 'privacy:metadata:digitalread:timemodified',
         ], 'privacy:metadata:digitalread');
+        $collection->add_database_table(self::T . 'voiceconsent', [
+            'readerid' => 'privacy:metadata:voiceconsent:readerid',
+            'notedby' => 'privacy:metadata:voiceconsent:notedby',
+            'timecreated' => 'privacy:metadata:voiceconsent:timecreated',
+            'timerevoked' => 'privacy:metadata:voiceconsent:timerevoked',
+        ], 'privacy:metadata:voiceconsent');
         $collection->add_database_table(self::T . 'lot', [
             'createdby' => 'privacy:metadata:lot:createdby',
             'name' => 'privacy:metadata:lot:name',
@@ -204,6 +210,7 @@ class provider implements
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'lot} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'digital} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'digitalread}', []);
+        $userlist->add_from_sql('notedby', 'SELECT notedby FROM {' . self::T . 'voiceconsent} WHERE notedby IS NOT NULL', []);
     }
 
     /**
@@ -254,6 +261,11 @@ class provider implements
                     'groups' => $groups,
                     'loans' => $loans,
                     'holds' => $holds,
+                    'voicepermission' => array_values(array_map(
+                        fn($c) => ['noted' => transform::datetime($c->timecreated),
+                        'revoked' => $c->timerevoked ? transform::datetime($c->timerevoked) : null],
+                        $DB->get_records(self::T . 'voiceconsent', ['readerid' => $reader->id], 'timecreated')
+                    )),
                 ]
             );
         }
@@ -301,6 +313,13 @@ class provider implements
                 (object) ['lots' => array_values(array_map(fn($l) => ['name' => $l->name,
                     'created' => transform::datetime($l->timecreated)], $lots))]
             );
+        }
+        // The voices they recorded, with their files.
+        foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'createdby' => $userid], 'id') as $voice) {
+            $path = array_merge($base, [get_string('privacy:path:voices', 'local_oksigeniaayvurenda'), (string) $voice->id]);
+            writer::with_context($context)->export_data($path, (object) ['title' => $voice->title, 'status' => $voice->status,
+                'audience' => $voice->audience, 'created' => transform::datetime($voice->timecreated)]);
+            writer::with_context($context)->export_area_files($path, 'local_oksigeniaayvurenda', 'digital', $voice->id);
         }
         $places = $DB->get_records_sql('SELECT d.id, r.title, d.position, d.bookmarks, d.timemodified
             FROM {' . self::T . 'digitalread} d
@@ -365,8 +384,12 @@ class provider implements
         $DB->set_field_select(self::T . 'stockread', 'userid', null, 'userid IS NOT NULL');
         $DB->set_field_select(self::T . 'withdrawal', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'lot', 'createdby', null, 'createdby IS NOT NULL');
+        foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice']) as $voice) {
+            \local_oksigeniaayvurenda\local\voices::remove($voice);
+        }
         $DB->set_field_select(self::T . 'digital', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'digitalread');
+        $DB->delete_records(self::T . 'voiceconsent');
     }
 
     /**
@@ -415,6 +438,7 @@ class provider implements
                 'timemodified' => $now,
             ]);
             $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $reader->id]);
+            $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $reader->id]);
             // Their reservations go; a copy set aside for them goes back to the shelf or to the next.
             foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id]) as $hold) {
                 if ($hold->status === 'ready' || $hold->status === 'waiting') {
@@ -432,8 +456,13 @@ class provider implements
         $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'withdrawal', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'lot', 'createdby', null, ['createdby' => $userid]);
+        // Their voices go, with their files; the permissions noted for their readers too.
+        foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'createdby' => $userid]) as $voice) {
+            \local_oksigeniaayvurenda\local\voices::remove($voice);
+        }
         $DB->set_field(self::T . 'digital', 'createdby', null, ['createdby' => $userid]);
         $DB->delete_records(self::T . 'digitalread', ['userid' => $userid]);
+        $DB->set_field(self::T . 'voiceconsent', 'notedby', null, ['notedby' => $userid]);
     }
 
     /**

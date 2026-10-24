@@ -1,0 +1,72 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/voices
+
+    Voices waiting for approval, with the family's permission for each minor, and the centre's settings.
+
+    Example context (json):
+    {
+        "heading": "Voces", "intro": "Las que esperan.", "notice": "", "action": "#", "sesskey": "abc", "haspending": true,
+        "pending": [{"id": 1, "book": "El faro dormido", "title": "Capítulo 1", "who": "Ana Montes (4º B)", "url": "#",
+            "share": false, "minor": true, "permission": false,
+            "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
+            "audiences": [{"value": "students", "label": "Alumnos"}]}],
+        "manage": true, "keepdays": 730, "voicetext": "", "infourl": "#",
+        "voicesnone": "Ninguna", "voiceapprove": "Aprobar", "voicereject": "Rechazar", "voicelicence": "Licencia",
+        "voiceaudience": "Quién más la oye", "voiceprivatehint": "Sin permiso, solo su docente",
+        "voicepermissiongive": "Anotar el permiso", "voicepermissiontake": "Retirar el permiso",
+        "voicepermissionhas": "Su familia dio permiso", "voicepermissionnot": "Sin permiso de su familia",
+        "voicessettings": "Cuánto se guardan", "voiceskeepdays": "Días", "voicestext": "Texto del centro",
+        "voicestexthint": "Se añade a la página", "voicessave": "Guardar", "voiceinfo": "Cómo se tratan las voces"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{^haspending}}<p class="ayv-empty">{{voicesnone}}</p>{{/haspending}}
+{{#pending}}
+<section class="ayv-book">
+    <h2 class="ayv-section-title">{{book}}{{#title}} · {{title}}{{/title}}</h2>
+    <p>{{who}}</p>
+    <audio class="ayv-media" controls preload="none" src="{{url}}"></audio>
+    {{#minor}}
+    <form method="post" action="{{action}}" class="ayv-book-actions"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
+        <span class="ayv-field-hint">{{#permission}}{{voicepermissionhas}}{{/permission}}{{^permission}}{{voicepermissionnot}}{{/permission}}</span>
+        {{#permission}}<input type="hidden" name="given" value="0"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="permission">{{voicepermissiontake}}</button>{{/permission}}
+        {{^permission}}<input type="hidden" name="given" value="1"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="permission">{{voicepermissiongive}}</button>{{/permission}}
+    </form>
+    {{/minor}}
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
+        <label class="ayv-field">{{voicelicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
+        {{#share}}<fieldset class="ayv-fieldset"><legend>{{voiceaudience}}</legend><div class="ayv-choices">
+            {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}"> {{label}}</label>{{/audiences}}</div></fieldset>{{/share}}
+        {{^share}}<p class="ayv-field-hint">{{voiceprivatehint}}</p>{{/share}}
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{voiceapprove}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></p>
+    </form>
+</section>
+{{/pending}}
+{{#manage}}
+<form method="post" action="{{action}}" class="ayv-book">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <h2 class="ayv-section-title">{{voicessettings}}</h2>
+    <label class="ayv-field">{{voiceskeepdays}} <input type="number" name="keepdays" value="{{keepdays}}" min="30" max="3650"></label>
+    <label class="ayv-field ayv-field-wide">{{voicestext}} <span class="ayv-field-hint">{{voicestexthint}}</span>
+        <textarea name="voicetext" rows="4">{{voicetext}}</textarea></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="settings">{{voicessave}}</button></p>
+</form>
+{{/manage}}

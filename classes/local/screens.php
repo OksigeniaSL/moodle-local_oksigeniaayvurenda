@@ -61,7 +61,11 @@ final class screens {
         if ($library->kind === 'classroom' && shelf::can_use($library, (int) $USER->id)) {
             $shelf = ['url' => self::url('shelf.php', $library), 'label' => self::str('shelfopen')];
         }
+        // Someone with voices to approve (the library staff, the tutors of those who recorded them) sees it here.
+        $pending = count(voices::pending($library, (int) $USER->id));
+        $voices = $pending ? ['url' => self::url('voices.php', $library), 'label' => self::str('homevoices', $pending)] : null;
         return [
+            'voices' => $voices,
             'shelf' => $shelf,
             'desk' => $desk,
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
@@ -277,18 +281,22 @@ final class screens {
         $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
         $items = [];
         foreach (digital::of_record($recordid, $library, $viewer) as $item) {
+            $label = $item->title !== '' && $item->title !== null ? $item->title : self::str('format' . $item->format);
             $items[] = [
-                'label' => $item->title !== '' && $item->title !== null ? $item->title : self::str('format' . $item->format),
+                'label' => $label . ($item->status === 'pending' ? ' ' . self::str('voicependingshort') : ''),
                 'action' => self::str('digitalaction' . $item->format),
                 'url' => self::url('read.php', $library, ['id' => $item->id]),
             ];
         }
         $manage = has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())
             ? ['url' => self::url('digital.php', $library, ['record' => $recordid]), 'label' => self::str('digitalmanage')] : null;
-        if (!$items && !$manage) {
+        // Readers of the centre and the library staff may give the book a voice.
+        $voice = $viewer['who'] !== 'nobody' ? ['url' => self::url('voice.php', $library, ['record' => $recordid]),
+            'label' => self::str('digitalvoiceask')] : null;
+        if (!$items && !$manage && !$voice) {
             return null;
         }
-        return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage];
+        return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage, 'voice' => $voice];
     }
 
     /**

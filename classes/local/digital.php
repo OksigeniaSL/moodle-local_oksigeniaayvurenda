@@ -46,17 +46,18 @@ final class digital {
      * @param int $entityid
      * @param int $userid
      * @param int|null $now
-     * @return array who (desk, students, families, staff or nobody) and stage.
+     * @return array who (desk, students, families, staff or nobody), stage, userid and readerid.
      */
     public static function viewer(int $entityid, int $userid, ?int $now = null): array {
         global $DB;
-        if ($userid && has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)) {
-            return ['who' => 'desk', 'stage' => null];
-        }
         $reader = $userid ? $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid,
             'status' => 'active'], 'id, readertype', IGNORE_MULTIPLE) : null;
+        $ids = ['userid' => $userid, 'readerid' => $reader ? (int) $reader->id : 0];
+        if ($userid && has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)) {
+            return ['who' => 'desk', 'stage' => null] + $ids;
+        }
         if (!$reader) {
-            return ['who' => 'nobody', 'stage' => null];
+            return ['who' => 'nobody', 'stage' => null] + $ids;
         }
         $who = ['student' => 'students', 'family' => 'families'][$reader->readertype] ?? 'staff';
         $stage = null;
@@ -69,7 +70,7 @@ final class digital {
                 IGNORE_MULTIPLE
             ) ?: null;
         }
-        return ['who' => $who, 'stage' => $stage];
+        return ['who' => $who, 'stage' => $stage] + $ids;
     }
 
     /**
@@ -177,6 +178,9 @@ final class digital {
      * @return bool
      */
     public static function visible(\stdClass $item, array $viewer): bool {
+        if ($item->kind === 'voice') {
+            return voices::can_hear($item, $viewer);
+        }
         if ($item->status !== 'published' && $viewer['who'] !== 'desk') {
             return false;
         }

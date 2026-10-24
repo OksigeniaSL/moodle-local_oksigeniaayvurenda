@@ -56,7 +56,8 @@ final class copies {
         'loan' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'hold' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'stocktake' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
-        'digital' => 'entityid = :entityid',
+        // Voices never leave the site: not even who recorded what goes into the copy.
+        'digital' => "entityid = :entityid AND kind <> 'voice'",
         'lot' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'lotitem' => 'lotid IN (SELECT t.id FROM {local_oksigeniaayvurenda_lot} t
             JOIN {local_oksigeniaayvurenda_library} l ON l.id = t.libraryid WHERE l.entityid = :entityid)',

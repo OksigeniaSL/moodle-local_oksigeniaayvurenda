@@ -45,7 +45,9 @@
         "copies": [{"where": "Aquí", "statelabel": "Libre", "state": "free", "location": "Estantería infantil",
                     "callnumber": "821 MON far", "barcode": "100000L"}],
         "back": {"url": "#", "label": "Volver a la biblioteca"},
-        "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#"}], "manage": null},
+        "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#"}], "manage": null,
+                    "voice": {"url": "#", "label": "¿Quieres darle voz a este libro?"}
+        },
         "hold": {"action": "#", "sesskey": "abc", "library": "demo-1", "recordid": 1, "holdid": 0, "notice": "",
                  "mine": "", "ahead": "", "canask": true, "staff": false, "holdsurl": "#",
                  "holdask": "Avísame cuando vuelva", "holdaskhint": "Ahora están todos prestados.",
@@ -109,6 +111,7 @@
         <section class="ayv-hold" aria-label="{{heading}}">
             <h2 class="ayv-section-title">{{heading}}</h2>
             {{#items}}<p><a class="ayv-button" href="{{url}}">{{action}}: {{label}}</a></p>{{/items}}
+            {{#voice}}<p><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/voice}}
             {{#manage}}<p><a href="{{url}}">{{label}}</a></p>{{/manage}}
         </section>
         {{/digital}}

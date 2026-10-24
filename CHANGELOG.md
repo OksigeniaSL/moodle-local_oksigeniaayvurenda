@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.21.0 (2026-10-27)
+
+- «Do you want to give this book a voice?». A reader records a reading of a book in the browser, listens to it, records
+  it again if they want, and sends it; it waits for a tutor or the library to approve it. A voice is personal data, and
+  it is handled as such:
+  - before recording, the page says in one paragraph where the voice is kept and who hears it, with a link to «How
+    voices are handled», to which the centre can add its own text;
+  - whoever recorded it, their tutors this school year and the library staff hear it; nobody else until it is approved;
+  - a minor's voice reaches more people (the class, the centre, the public) only with the family's permission, which
+    the centre notes with its date; taking it back makes the reader's voices private again; an adult chooses;
+  - whoever recorded it deletes it whenever they want, and the centre keeps voices only for the days it sets (two
+    school years if it sets nothing);
+  - voices never leave the site: not in the daily copy, nor sent to any service; they are in the privacy export and
+    go with the person's data when it is deleted.
+- Whatever a script hides stays hidden, whatever its class.
+
 ## 0.20.0 (2026-10-27)
 
 - The digital collection. A record can have digital forms: an EPUB read in the browser (a page at a time, with the size

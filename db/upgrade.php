@@ -158,5 +158,25 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102722, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102723) {
+        // Voices: who recorded each one, and the families' permissions to share a minor's voice.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $field = new xmldb_field('readerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'status');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            $dbman->add_key($table, new xmldb_key(
+                'readerid',
+                XMLDB_KEY_FOREIGN,
+                ['readerid'],
+                'local_oksigeniaayvurenda_reader',
+                ['id']
+            ));
+        }
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_voiceconsent')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_voiceconsent');
+        }
+        upgrade_plugin_savepoint(true, 2026102723, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
