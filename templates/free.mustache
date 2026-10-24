@@ -1,0 +1,66 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/free
+
+    Free works from Project Gutenberg: a search, its results, and one book to bring.
+
+    Example context (json):
+    {
+        "heading": "Obras libres", "intro": "Libros de dominio público.", "action": "#", "slug": "demo-1", "query": "becquer",
+        "notice": "", "hasresults": true, "sesskey": "abc", "backurl": "#",
+        "results": [{"id": 10814, "title": "Legends, Tales and Poems", "byline": "Gustavo Adolfo Bécquer", "url": "#"}],
+        "book": null,
+        "freeworkssearch": "Título o autor", "freeworkssearchbutton": "Buscar", "freeworkssee": "Verlo",
+        "freeworksconfirm": "Es de dominio público aquí", "freeworksconfirmhint": "Cuenta cuándo murió el autor",
+        "freeworksfor": "Para quién", "freeworksbring": "Traerlo", "freeworksalready": "Ya está", "freeworksopen": "Ver su ficha",
+        "freeworksback": "Volver a la búsqueda", "freeworkslangs": "Idiomas"
+    }
+}}
+<section class="ayv-free">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+<form class="ayv-window-search" role="search" method="get" action="{{action}}">
+    <input type="hidden" name="library" value="{{slug}}">
+    <label class="ayv-field ayv-field-wide">{{freeworkssearch}} <input type="search" name="q" value="{{query}}" maxlength="200"></label>
+    <button type="submit" class="ayv-button">{{freeworkssearchbutton}}</button>
+</form>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#book}}
+<form class="ayv-book" method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="book" value="{{id}}">
+    <h2 class="ayv-section-title">{{title}}</h2>
+    {{#authors}}<p>{{authors}}</p>{{/authors}}
+    {{#langs}}<p class="ayv-field-hint">{{freeworkslangs}}: {{langs}}</p>{{/langs}}
+    <p>{{rights}}</p>
+    {{#brought}}<p class="ayv-notice">{{freeworksalready}} <a href="{{brought}}">{{freeworksopen}}</a></p>{{/brought}}
+    <fieldset class="ayv-fieldset"><legend>{{freeworksfor}}</legend><div class="ayv-choices">
+        {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/audiences}}</div></fieldset>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="confirm" value="1" required> {{freeworksconfirm}}</label>
+    <p class="ayv-field-hint">{{freeworksconfirmhint}}</p>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{freeworksbring}}</button>
+        <a href="{{backurl}}">{{freeworksback}}</a></p>
+</form>
+{{/book}}
+{{#hasresults}}
+<ul class="ayv-holds">
+{{#results}}
+    <li class="ayv-holds-row"><span class="ayv-holds-title">{{title}}</span> <span class="ayv-holds-who">{{byline}}</span>
+        <a class="ayv-button ayv-button-quiet" href="{{url}}">{{freeworkssee}}</a></li>
+{{/results}}
+</ul>
+{{/hasresults}}
+</section>

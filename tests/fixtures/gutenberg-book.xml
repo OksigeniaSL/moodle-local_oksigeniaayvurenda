@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dcterms="http://purl.org/dc/terms/">
+  <id>http://www.gutenberg.org/ebooks/99001.opds</id>
+  <title>El faro dormido</title>
+  <entry>
+    <title>El faro dormido</title>
+    <id>urn:gutenberg:99001:2</id>
+    <rights>Public domain in the USA.</rights>
+    <author><name>Inventada, Autora, 1801-1870</name></author>
+    <dcterms:language>es</dcterms:language>
+    <dcterms:language>en</dcterms:language>
+    <summary>Un faro que se dormía cada noche. Libro inventado para las pruebas.</summary>
+    <link type="application/epub+zip" rel="http://opds-spec.org/acquisition" href="https://www.gutenberg.org/ebooks/99001.epub.noimages"/>
+    <link type="application/epub+zip" rel="http://opds-spec.org/acquisition" href="https://www.gutenberg.org/ebooks/99001.epub3.images"/>
+    <link type="application/x-mobipocket-ebook" rel="http://opds-spec.org/acquisition" href="https://www.gutenberg.org/ebooks/99001.kindle.noimages"/>
+    <link type="image/jpeg" rel="http://opds-spec.org/image" href="/cache/epub/99001/pg99001.cover.medium.jpg"/>
+  </entry>
+</feed>

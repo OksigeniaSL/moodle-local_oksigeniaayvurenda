@@ -55,7 +55,8 @@ final class screens {
         }
         $addbooks = null;
         if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
-            $addbooks = ['url' => self::url('add.php', $library), 'label' => self::str('addopen')];
+            $addbooks = ['url' => self::url('add.php', $library), 'label' => self::str('addopen'),
+                'freeurl' => self::url('free.php', $library), 'freelabel' => self::str('homefreeworks')];
         }
         $shelf = null;
         if ($library->kind === 'classroom' && shelf::can_use($library, (int) $USER->id)) {

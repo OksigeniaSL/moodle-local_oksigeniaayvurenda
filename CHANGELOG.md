@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.26.0 (2026-10-28)
+
+- Free works: whoever catalogues searches Project Gutenberg's own OPDS catalogue, looks at a book with its languages
+  and what Project Gutenberg says of its rights, confirms that it is in the public domain in their country too,
+  chooses who it is for and brings it: a record with its author, language and cover, and its EPUB in the public
+  domain, ready to read and, if meant for the public, in the public window. One question per search and one book at a
+  time, never in bulk; a book brought again keeps its record.
+
 ## 0.25.0 (2026-10-27)
 
 - Ayvu rande, «the spring of words» in Guarani: a page with the voices given to the library's books, book by book,

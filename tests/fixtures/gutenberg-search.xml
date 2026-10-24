@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>http://www.gutenberg.org/ebooks/search.opds/?query=faro</id>
+  <title>Books: faro</title>
+  <entry>
+    <id>https://www.gutenberg.org/ebooks/authors/search.opds/?query=faro</id>
+    <title>Authors</title>
+    <content type="text">One author name matches your search.</content>
+    <link type="application/atom+xml;profile=opds-catalog" rel="subsection" href="/ebooks/authors/search.opds/?query=faro"/>
+  </entry>
+  <entry>
+    <id>https://www.gutenberg.org/ebooks/99001.opds</id>
+    <title>El faro dormido (Spanish)</title>
+    <content type="text">Autora Inventada</content>
+    <link type="application/atom+xml;profile=opds-catalog" rel="subsection" href="/ebooks/99001.opds"/>
+  </entry>
+  <entry>
+    <id>https://www.gutenberg.org/ebooks/99002.opds</id>
+    <title>Cuentos inventados</title>
+    <content type="text">763 downloads</content>
+    <link type="application/atom+xml;profile=opds-catalog" rel="subsection" href="/ebooks/99002.opds"/>
+  </entry>
+</feed>
