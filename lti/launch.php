@@ -39,7 +39,7 @@ try {
 } catch (\Packback\Lti1p3\LtiException $e) {
     throw new moodle_exception('ltifailed', 'local_oksigeniaayvurenda', '', $e->getMessage());
 }
-if (!$launch->isResourceLaunch()) {
+if (!$launch->isResourceLaunch() && !$launch->isDeepLinkLaunch()) {
     throw new moodle_exception('ltionlylinks', 'local_oksigeniaayvurenda');
 }
 $data = $launch->getLaunchData();
@@ -50,4 +50,9 @@ $auth->complete_login(
     auth_plugin_lti::PROVISIONING_MODE_AUTO_ONLY
 );
 require_login(null, false);
+if ($launch->isDeepLinkLaunch()) {
+    // A teacher putting the library, or a book, in a course: they choose it first.
+    ltitool::reader((int) ltitool::platform_of($data)->entityid, (int) $USER->id, ltitool::reader_type($data));
+    redirect(new moodle_url('/local/oksigeniaayvurenda/lti/pick.php', ['launch' => $launch->getLaunchId()]));
+}
 redirect(ltitool::arrive($data, (int) $USER->id));

@@ -225,4 +225,54 @@ final class ltitool_test extends \advanced_testcase {
         $this->assertNotSame($first['url'], $second['url']);
         $this->assertSame(0, ltitool::registration_entity($query['k']));
     }
+
+    /**
+     * Deep linking: a teacher's launch is kept for them alone while they choose, and the answer the platform gets is
+     * signed with the site's key and names the book and its library.
+     */
+    public function test_deep_linking(): void {
+        global $USER;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $entityid = (int) $library->entityid;
+        $record = $generator->create_record(['entityid' => $entityid, 'title' => 'El faro del norte']);
+        ltitool::save_platform($entityid, ['name' => 'Aula virtual', 'issuer' => self::ISS, 'clientid' => 'tool-1',
+            'authloginurl' => 'https://platform.invalid/auth', 'keyseturl' => 'https://platform.invalid/jwks']);
+        [$private, $state, $nonce] = $this->platform();
+        $lti = 'https://purl.imsglobal.org/spec/lti/claim/';
+        $token = $this->token($private, $nonce, [
+            $lti . 'message_type' => 'LtiDeepLinkingRequest',
+            $lti . 'roles' => ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'],
+            'https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings' => [
+                'deep_link_return_url' => 'https://platform.invalid/return', 'accept_types' => ['ltiResourceLink'],
+                'accept_presentation_document_targets' => ['iframe', 'window'], 'data' => 'kept-by-platform'],
+            $lti . 'resource_link' => null,
+        ]);
+        $launch = ltitool::launch(['id_token' => $token, 'state' => $state]);
+        $this->assertTrue($launch->isDeepLinkLaunch());
+        $teacher = get_auth_plugin('lti')->find_or_create_user_from_launch($launch->getLaunchData());
+        $this->setUser($teacher);
+        $this->assertSame('teacher', ltitool::reader_type($launch->getLaunchData()));
+        $kept = ltitool::kept($launch->getLaunchId(), (int) $USER->id);
+        $this->assertNotNull($kept);
+        $this->assertNull(ltitool::kept($launch->getLaunchId(), (int) $USER->id + 1));
+        $this->assertNull(ltitool::kept('lti1p3_launch_unknown', (int) $USER->id));
+
+        $html = ltitool::link_back($kept, ltitool::link_to($library, $record));
+        $this->assertStringContainsString('action="https://platform.invalid/return"', $html);
+        $this->assertMatchesRegularExpression('/name="JWT" value="([^"]+)"/', $html);
+        preg_match('/name="JWT" value="([^"]+)"/', $html, $match);
+        $keys = \Firebase\JWT\JWK::parseKeySet(ltitool::jwks(), 'RS256');
+        $answer = (array) \Firebase\JWT\JWT::decode($match[1], $keys);
+        $this->assertSame('tool-1', $answer['iss']);
+        $this->assertSame('kept-by-platform', $answer['https://purl.imsglobal.org/spec/lti-dl/claim/data']);
+        $items = $answer['https://purl.imsglobal.org/spec/lti-dl/claim/content_items'];
+        $this->assertSame('ltiResourceLink', $items[0]->type);
+        $this->assertSame((string) $record->id, $items[0]->custom->record);
+        $this->assertSame($library->slug, $items[0]->custom->library);
+        $this->assertSame(ltitool::urls()['launch'], $items[0]->url);
+        $whole = ltitool::link_to($library, null);
+        $this->assertSame(['library' => $library->slug], $whole->getCustomParams());
+    }
 }

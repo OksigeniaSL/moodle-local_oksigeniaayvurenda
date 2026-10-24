@@ -281,7 +281,8 @@ final class ltitool {
                 'domain' => $urls['domain'],
                 'target_link_uri' => $urls['launch'],
                 'claims' => ['iss', 'sub', 'name', 'given_name', 'family_name', 'email'],
-                'messages' => [['type' => 'LtiResourceLinkRequest', 'label' => $name]],
+                'messages' => [['type' => 'LtiResourceLinkRequest', 'label' => $name],
+                    ['type' => 'LtiDeepLinkingRequest', 'label' => $name, 'target_link_uri' => $urls['launch']]],
                 'description' => format_string($SITE->fullname),
             ],
         ];
@@ -391,15 +392,44 @@ final class ltitool {
      */
     public static function arrive(array $launchdata, int $userid): \moodle_url {
         global $DB;
+        $entityid = (int) self::platform_of($launchdata)->entityid;
+        self::reader($entityid, $userid, self::reader_type($launchdata));
+        $custom = $launchdata[LtiConstants::CUSTOM] ?? [];
+        $library = self::library_of($entityid, $custom);
+        $recordid = (int) clean_param($custom['record'] ?? 0, PARAM_INT);
+        if ($recordid && $DB->record_exists(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid])) {
+            return new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $recordid]);
+        }
+        return new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]);
+    }
+
+    /**
+     * The platform a launch comes from.
+     *
+     * @param array $launchdata
+     * @return \stdClass
+     * @throws \moodle_exception When it is not registered here any more.
+     */
+    public static function platform_of(array $launchdata): \stdClass {
         $aud = $launchdata['aud'] ?? '';
         $clientid = is_array($aud) ? (string) ($launchdata['azp'] ?? reset($aud)) : (string) $aud;
         $platform = self::platform_by_issuer((string) ($launchdata['iss'] ?? ''), $clientid);
         if (!$platform) {
             throw new \moodle_exception('ltiunknown', 'local_oksigeniaayvurenda');
         }
-        $entityid = (int) $platform->entityid;
-        self::reader($entityid, $userid, self::reader_type($launchdata));
-        $custom = $launchdata[LtiConstants::CUSTOM] ?? [];
+        return $platform;
+    }
+
+    /**
+     * The library a link names, if it is of the entity, or the entity's central one.
+     *
+     * @param int $entityid
+     * @param array $custom The link's custom parameters.
+     * @return \stdClass
+     * @throws \moodle_exception When the entity has no library.
+     */
+    public static function library_of(int $entityid, array $custom): \stdClass {
+        global $DB;
         $library = null;
         if (!empty($custom['library'])) {
             $library = catalogue::library(clean_param($custom['library'], PARAM_ALPHANUMEXT));
@@ -413,10 +443,61 @@ final class ltitool {
         if (!$library) {
             throw new \moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
         }
-        $recordid = (int) clean_param($custom['record'] ?? 0, PARAM_INT);
-        if ($recordid && $DB->record_exists(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid])) {
-            return new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $recordid]);
+        return $library;
+    }
+
+    /**
+     * The link a teacher puts in a course (deep linking): to a book, or to the library itself.
+     *
+     * @param \stdClass $library
+     * @param \stdClass|null $record
+     * @return \Packback\Lti1p3\DeepLinkResources\Resource
+     */
+    public static function link_to(\stdClass $library, ?\stdClass $record): \Packback\Lti1p3\DeepLinkResources\Resource {
+        $resource = \Packback\Lti1p3\DeepLinkResources\Resource::new()->setType(LtiConstants::DL_RESOURCE_LINK_TYPE)
+            ->setUrl(self::urls()['launch']);
+        if ($record) {
+            return $resource->setTitle(\core_text::substr($record->title, 0, 250))
+                ->setCustomParams(['library' => $library->slug, 'record' => (string) $record->id]);
         }
-        return new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]);
+        return $resource->setTitle(format_string($library->name))->setCustomParams(['library' => $library->slug]);
+    }
+
+    /**
+     * The page that takes the chosen link back to the platform: the signed answer in a form that sends itself.
+     *
+     * @param LtiMessageLaunch $launch A deep linking launch.
+     * @param \Packback\Lti1p3\DeepLinkResources\Resource $resource
+     * @return string
+     */
+    public static function link_back(LtiMessageLaunch $launch, \Packback\Lti1p3\DeepLinkResources\Resource $resource): string {
+        $return = (string) ($launch->getLaunchData()[LtiConstants::DL_DEEP_LINK_SETTINGS]['deep_link_return_url'] ?? '');
+        $jwt = $launch->getDeepLink()->getResponseJwt([$resource]);
+        return '<!doctype html><html><head><meta charset="utf-8"><title>' . s(get_string(
+            'ltipicksending',
+            'local_oksigeniaayvurenda'
+        )) . '</title></head><body><form id="ayv-back" method="post" action="' . s($return)
+            . '"><input type="hidden" name="JWT" value="' . s($jwt) . '"><noscript><button type="submit">'
+            . s(get_string('ltipicksend', 'local_oksigeniaayvurenda')) . '</button></noscript></form>'
+            . '<script>document.getElementById("ayv-back").submit();</script></body></html>';
+    }
+
+    /**
+     * A launch kept between pages (the deep linking one, while the teacher chooses), only for whoever started it.
+     *
+     * @param string $launchid
+     * @param int $userid
+     * @return LtiMessageLaunch|null
+     */
+    public static function kept(string $launchid, int $userid): ?LtiMessageLaunch {
+        $cache = new lti\cache();
+        if (!$cache->getLaunchData($launchid)) {
+            return null;
+        }
+        $connector = new LtiServiceConnector($cache, self::$client ?? new \core\http_client());
+        $launch = LtiMessageLaunch::fromCache($launchid, new lti\store(), $cache, new lti\cookie(), $connector);
+        $data = $launch->getLaunchData();
+        $bound = get_auth_plugin('lti')->get_user_binding((string) ($data['iss'] ?? ''), (string) ($data['sub'] ?? ''));
+        return (int) $bound === $userid ? $launch : null;
     }
 }

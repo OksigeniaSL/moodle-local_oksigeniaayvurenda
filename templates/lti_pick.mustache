@@ -1,0 +1,69 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/lti_pick
+    A teacher coming from a learning platform chooses what to put in their course: the library, or one of its books.
+    Context variables required for this template:
+    * heading, intro, libraryname, wholelabel, wholehint, searchlabel, searchbutton, nothing, putlabel - texts
+    * action, launch, sesskey, query - the forms
+    * cards - books found (recordid, title, authors)
+    Example context (json):
+    {
+        "heading": "¿Qué pones en tu curso?",
+        "intro": "La biblioteca entera o uno de sus libros.",
+        "action": "https://example.org/p",
+        "launch": "lti1p3-launch-abc",
+        "sesskey": "abc",
+        "libraryname": "Biblioteca del centro",
+        "wholelabel": "Poner la biblioteca",
+        "wholehint": "Un enlace a su portada.",
+        "searchlabel": "O busca un libro",
+        "searchbutton": "Buscar",
+        "query": "faro",
+        "hascards": true,
+        "cards": [{"recordid": 7, "title": "El faro del norte", "authors": "Inés Mar"}],
+        "nothing": "",
+        "putlabel": "Poner este"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+<section class="ayv-section">
+    <form method="post" action="{{action}}" class="ayv-book ayv-inline-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="record" value="0">
+        <span class="ayv-person-name">{{libraryname}}</span> <span class="ayv-field-hint">{{wholehint}}</span>
+        <button type="submit" class="ayv-button">{{wholelabel}}</button>
+    </form>
+</section>
+<section class="ayv-section">
+    <form method="get" action="{{action}}" role="search" class="ayv-window-search">
+        <input type="hidden" name="launch" value="{{launch}}">
+        <label class="ayv-field ayv-field-wide">{{searchlabel}} <input type="search" name="q" value="{{query}}" maxlength="200"></label>
+        <button type="submit" class="ayv-button">{{searchbutton}}</button>
+    </form>
+    {{#nothing}}<p class="ayv-empty">{{nothing}}</p>{{/nothing}}
+    {{#hascards}}
+    <ul class="ayv-people ayv-pick">
+    {{#cards}}
+        <li class="ayv-person"><span class="ayv-person-name">{{title}}</span> <span class="ayv-field-hint">{{authors}}</span>
+            <form method="post" action="{{action}}" class="ayv-inline-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="record" value="{{recordid}}">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{putlabel}}</button></form></li>
+    {{/cards}}
+    </ul>
+    {{/hascards}}
+</section>
