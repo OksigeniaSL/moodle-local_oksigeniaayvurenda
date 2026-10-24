@@ -60,7 +60,7 @@ $roles = [];
 foreach (characters::of($entityid) as $role => $character) {
     [$key, $a] = $samples[$role];
     $preview = characters::say($entityid, $role, $key, $a) ?? ['name' => $character['name'],
-        'text' => $str('characteroff'), 'portrait' => $character['portrait']];
+        'text' => $str('characteroff'), 'initial' => $character['initial'], 'role' => $role];
     $roles[] = [
         'role' => $role,
         'title' => $str('characterrole' . $role . $character['sex']),

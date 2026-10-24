@@ -21,7 +21,7 @@
     Context variables required for this template:
     * heading, intro, notice - texts
     * action, sesskey - the form
-    * roles - role, title, job, enabled, name, female, male, herald, signs and preview (portrait, name, text)
+    * roles - role, title, job, enabled, name, female, male, herald, signs and preview (initial, role, name, text)
     * the words of the fields
 
     Example context (json):
@@ -33,7 +33,7 @@
         "sesskey": "abc",
         "roles": [{"role": "memory", "title": "La memoria", "job": "Se le pregunta.", "enabled": true, "name": "Memoria",
                    "female": true, "male": false, "herald": false, "signs": false,
-                   "preview": {"portrait": "app/personajes/memory.svg", "name": "Memoria", "text": "He buscado por toda la biblioteca."} }],
+                   "preview": {"initial": "M", "role": "memory", "name": "Memoria", "text": "He buscado por toda la biblioteca."} }],
         "characterenabled": "Que aparezca", "charactername": "Nombre", "charactersex": "Sexo",
         "charactersexf": "Femenino", "charactersexm": "Masculino", "charactersigns": "Firma los avisos",
         "characterpreview": "Así habla:", "sourcessave": "Guardar"

@@ -16,21 +16,23 @@
 {{!
     @template local_oksigeniaayvurenda/bubble
 
-    What a character says: its portrait, its name and its words.
+    What a character says: its initial (its picture, later), its name and its words.
 
     Context variables required for this template:
-    * portrait - address of the picture
+    * initial - the first letter of its name, while it has no picture
+    * role - memory or herald
     * name - the character's name
     * text - what it says
 
     Example context (json):
     {
-        "portrait": "app/personajes/memory.svg",
+        "initial": "M",
+        "role": "memory",
         "name": "Memoria",
         "text": "He buscado por toda la biblioteca."
     }
 }}
 <div class="ayv-bubble">
-    <img class="ayv-bubble-portrait" src="{{portrait}}" alt="" width="56" height="56">
+    <span class="ayv-bubble-portrait ayv-bubble-{{role}}" aria-hidden="true">{{initial}}</span>
     <p class="ayv-bubble-text"><span class="ayv-bubble-name">{{name}}</span> {{text}}</p>
 </div>

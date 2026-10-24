@@ -38,7 +38,7 @@ final class characters {
      * The characters of an entity, as it set them or as they come.
      *
      * @param int $entityid
-     * @return array Role => enabled, name, sex (f or m), signs (the herald signs the notices), portrait.
+     * @return array Role => enabled, name, sex (f or m), signs (the herald signs the notices), initial.
      */
     public static function of(int $entityid): array {
         global $DB;
@@ -58,7 +58,9 @@ final class characters {
                 // The grandmother who remembers and the hummingbird who heralds: one of each.
                 'sex' => ($mine['sex'] ?? ($role === 'herald' ? 'm' : 'f')) === 'm' ? 'm' : 'f',
                 'signs' => $role === 'herald' && !empty($mine['signs']),
-                'portrait' => (new \moodle_url('/local/oksigeniaayvurenda/app/personajes/' . $role . '.svg'))->out(false),
+                // Until the puppets come, the initial of the name, not a makeshift drawing.
+                'initial' => \core_text::strtoupper(\core_text::substr($name !== '' ? $name
+                    : get_string($role . 'defaultname', 'local_oksigeniaayvurenda'), 0, 1)),
             ];
         }
         return $all;
@@ -95,7 +97,7 @@ final class characters {
      * @param string $role
      * @param string $key A string of the plugin; key + 'f' or 'm' if it changes with the sex.
      * @param array $a More for the string; the name is always there.
-     * @return array|null name, text, portrait; null when the character is off.
+     * @return array|null name, text, initial, role; null when the character is off.
      */
     public static function say(int $entityid, string $role, string $key, array $a = []): ?array {
         $character = self::of($entityid)[$role] ?? null;
@@ -108,7 +110,8 @@ final class characters {
         return [
             'name' => $character['name'],
             'text' => get_string($key, 'local_oksigeniaayvurenda', (object) ($a + ['name' => $character['name']])),
-            'portrait' => $character['portrait'],
+            'initial' => $character['initial'],
+            'role' => $role,
         ];
     }
 }

@@ -935,7 +935,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 /* What a character says. */
 .ayv .ayv-bubble { display: flex; align-items: flex-start; gap: .8rem; margin: .5rem 0 1rem; }
 
-.ayv .ayv-bubble-portrait { flex: none; width: 56px; height: 56px; border-radius: 50%; }
+.ayv .ayv-bubble-portrait { flex: none; display: flex; align-items: center; justify-content: center; width: 56px;
+    height: 56px; border-radius: 50%; background: var(--green2); color: #fff; font-family: var(--title); font-weight: 600;
+    font-size: 1.6rem; }
+
+.ayv .ayv-bubble-herald { background: var(--coral); color: #1e2b2a; }
 
 .ayv .ayv-bubble-text { position: relative; margin: .3rem 0 0; padding: .7rem 1rem; border-radius: 4px 16px 16px 16px;
     background: var(--surface); box-shadow: 0 0 0 2px var(--line); }

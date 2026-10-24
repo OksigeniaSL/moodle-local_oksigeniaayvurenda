@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.8 (2026-10-27)
+
+- Until Gaudí's puppets arrive, each character shows the initial of its name in a circle, instead of a makeshift
+  drawing.
+
 ## 0.9.7 (2026-10-27)
 
 - Fixed: a copy made in the same second as another (the nightly task and the button at once) failed; the newer one
