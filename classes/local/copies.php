@@ -107,6 +107,11 @@ final class copies {
         $fs = get_file_storage();
         $context = \context_system::instance();
         $filename = 'ayvurenda-' . $entityid . '-' . date('Ymd-His', $now) . '.zip';
+        // Two copies in the same second (the task and the button at once): the newer one takes the name.
+        $same = $fs->get_file($context->id, 'local_oksigeniaayvurenda', 'copies', $entityid, '/', $filename);
+        if ($same) {
+            $same->delete();
+        }
         $file = $fs->create_file_from_pathname([
             'contextid' => $context->id,
             'component' => 'local_oksigeniaayvurenda',

@@ -168,6 +168,8 @@ final class notices_test extends \advanced_testcase {
         $this->assertCount(1, $records[0]->data_fields('852'));
         $zip->close();
         copies::make((int) $other->entityid, $now);
+        // A second copy in the same second takes the place of the first.
+        copies::make((int) $other->entityid, $now);
         for ($i = 1; $i <= 8; $i++) {
             copies::make((int) $library->entityid, $now + $i * DAYSECS);
         }
