@@ -10,6 +10,8 @@
     --ayv-plate-ink: #1e2b2a;
     --ayv-ring: rgba(15, 58, 51, .10);
     --ayv-radius-lg: 22px;
+    /* Small grey text with 4.5:1 or more: about 5:1 on the paper (--muted, #8b9591, gives only 3:1). */
+    --ayv-muted: #5f6b67;
 }
 html[data-bs-theme="dark"] .ayv {
     --ayv-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 12px 30px -14px rgba(0, 0, 0, .65);
@@ -17,6 +19,7 @@ html[data-bs-theme="dark"] .ayv {
     --ayv-shadow-button: 0 6px 16px -8px rgba(0, 0, 0, .8);
     --ayv-plate: #f3e9d6;
     --ayv-ring: rgba(236, 228, 212, .12);
+    --ayv-muted: #b3bdb9;
 }
 
 /* 2. What every screen shares: the top bar floats a little, the search and the buttons have depth, boxes are cards. */
@@ -77,7 +80,7 @@ html[data-bs-theme="dark"] .ayv {
 .ayv .ayv-record-cover .ayv-state { justify-content: center; font-weight: 700; color: var(--ayv-plate-ink); }
 .ayv .ayv-record-cover .ayv-where, .ayv .ayv-record-cover .ayv-where a { margin: 0; color: #17574c; font-weight: 700; text-align: center; }
 .ayv .ayv-record-title { font-size: clamp(2.1rem, 3.6vw, 3rem); line-height: 1.08; letter-spacing: -.015em; }
-.ayv .ayv-record-subtitle { color: var(--muted); }
+.ayv .ayv-record-subtitle { color: var(--ayv-muted); }
 .ayv .ayv-record-authors { margin: .9rem 0 1.4rem; font-size: 1.125rem; color: var(--accent); }
 .ayv .ayv-record .ayv-hold { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem .75rem; margin: 0 0 1.5rem; padding: 1.1rem 1.25rem; }
 .ayv .ayv-record .ayv-hold > .ayv-section-title { flex-basis: 100%; margin: 0 0 .1rem; font-size: 1.05rem; }
@@ -111,7 +114,7 @@ html[data-bs-theme="dark"] .ayv {
 
 /* 5. The reader: the tools as one floating pill bar; the book as a real book, with the thickness of its pages, the fold
    in the middle and turns that light up; a thin progress with a coral end. */
-.ayv .ayv-read .ayv-field-hint { color: var(--muted); }
+.ayv .ayv-read .ayv-field-hint { color: var(--ayv-muted); }
 .ayv .ayv-read-bar {
     display: inline-flex;
     gap: .35rem;
