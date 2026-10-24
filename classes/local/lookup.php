@@ -1,0 +1,159 @@
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Asking the catalogues for a book by its ISBN.
+ *
+ * @package    local_oksigeniaayvurenda
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace local_oksigeniaayvurenda\local;
+
+use local_oksigeniaayvurenda\core\isbn;
+use local_oksigeniaayvurenda\core\sources\openlibrary;
+use local_oksigeniaayvurenda\core\sources\sru;
+
+/**
+ * The catalogues an entity asks, in its order, until one knows the book; the cover from the first that has it. Each
+ * answer is kept a day, so going back over a book does not ask again. The requests go from the server: the browser
+ * only talks to the site.
+ */
+final class lookup {
+    /** @var array<string, array> The catalogues that can be asked without anything else. */
+    public const PRESETS = [
+        'loc' => ['type' => 'sru', 'name' => 'Library of Congress', 'url' => 'https://lx2.loc.gov/sru/lcdb',
+            'index' => 'bath.isbn', 'version' => '1.1'],
+        'openlibrary' => ['type' => 'openlibrary', 'name' => 'Open Library'],
+    ];
+
+    /** @var string[] The order when the entity has not chosen one. */
+    public const DEFAULT = ['loc', 'openlibrary'];
+
+    /** @var callable|null How to fetch an address; tests put their own. Given the address, gives the body or null. */
+    public static $fetcher = null;
+
+    /**
+     * What the catalogues say of an ISBN.
+     *
+     * @param int $entityid
+     * @param string $raw The ISBN as read or typed.
+     * @return array valid, isbn, found, source, sourcename, description, cover, tried.
+     */
+    public static function isbn(int $entityid, string $raw): array {
+        $isbn = isbn::normalise($raw);
+        if ($isbn === null) {
+            return ['valid' => false, 'isbn' => $raw, 'found' => false];
+        }
+        $sources = self::sources($entityid);
+        $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
+        $key = $isbn . '_' . substr(md5(implode(',', $sources)), 0, 8);
+        $cached = $cache->get($key);
+        if ($cached !== false && $cached['time'] > time() - DAYSECS) {
+            return $cached['result'];
+        }
+        $result = ['valid' => true, 'isbn' => $isbn, 'found' => false, 'source' => null, 'sourcename' => null,
+            'description' => null, 'cover' => null, 'tried' => []];
+        foreach ($sources as $name) {
+            $source = self::PRESETS[$name] ?? null;
+            if (!$source) {
+                continue;
+            }
+            $result['tried'][] = $source['name'];
+            $description = self::ask($source, $isbn);
+            if ($description) {
+                $result['found'] = true;
+                $result['source'] = $name;
+                $result['sourcename'] = $source['name'];
+                $result['description'] = $description;
+                break;
+            }
+        }
+        $result['cover'] = $result['description']['extra']['cover'] ?? openlibrary::cover_url($isbn);
+        $cache->set($key, ['time' => time(), 'result' => $result]);
+        return $result;
+    }
+
+    /**
+     * The catalogues of an entity, in its order.
+     *
+     * @param int $entityid
+     * @return string[]
+     */
+    public static function sources(int $entityid): array {
+        global $DB;
+        $settings = json_decode(
+            (string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]),
+            true
+        ) ?: [];
+        $chosen = array_values(array_filter($settings['sources'] ?? [], fn($s) => isset(self::PRESETS[$s])));
+        return $chosen ?: self::DEFAULT;
+    }
+
+    /**
+     * Fetches an address from the server.
+     *
+     * @param string $url
+     * @return string|null The body, or null when it did not answer well.
+     */
+    public static function fetch(string $url): ?string {
+        global $CFG;
+        if (self::$fetcher) {
+            return (self::$fetcher)($url);
+        }
+        require_once($CFG->libdir . '/filelib.php');
+        $curl = new \curl();
+        $curl->setopt([
+            'CURLOPT_TIMEOUT' => 12,
+            'CURLOPT_CONNECTTIMEOUT' => 5,
+            // Open Library asks to be told who asks, with a way to write back.
+            'CURLOPT_USERAGENT' => 'Oksigenia Ayvurenda/' . get_config('local_oksigeniaayvurenda', 'release') .
+                ' (dev@oksigenia.cc)',
+        ]);
+        $body = $curl->get($url);
+        $code = (int) ($curl->get_info()['http_code'] ?? 0);
+        return $curl->get_errno() || $code !== 200 || !is_string($body) ? null : $body;
+    }
+
+    /**
+     * Asks one catalogue.
+     *
+     * @param array $source
+     * @param string $isbn
+     * @return array|null The description of that very edition.
+     */
+    private static function ask(array $source, string $isbn): ?array {
+        try {
+            if ($source['type'] === 'sru') {
+                $body = self::fetch((new sru($source['url'], $source['index'], $source['version']))->url($isbn));
+                foreach ($body === null ? [] : sru::descriptions($body) as $description) {
+                    // A catalogue may answer with other editions too: only the one asked for counts.
+                    $isbns = $description['extra']['isbns'] ?? [$description['record']['isbn']];
+                    if (in_array($isbn, $isbns, true) && $description['record']['title'] !== '') {
+                        return $description;
+                    }
+                }
+                return null;
+            }
+            $body = self::fetch(openlibrary::url($isbn));
+            return $body === null ? null : openlibrary::description($body, $isbn);
+        } catch (\Throwable $e) {
+            debugging('Ayvurenda: ' . $source['name'] . ' did not answer well: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return null;
+        }
+    }
+}

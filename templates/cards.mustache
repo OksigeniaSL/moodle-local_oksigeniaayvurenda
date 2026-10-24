@@ -36,8 +36,9 @@
 {{#cards}}
     <li class="ayv-card">
         <a class="ayv-card-link" href="{{url}}">
-            <span class="ayv-cover ayv-cover-{{colour}}" aria-hidden="true">
-                <span class="ayv-cover-title">{{title}}</span>
+            <span class="ayv-cover ayv-cover-{{colour}}{{#cover}} ayv-cover-photo{{/cover}}" aria-hidden="true">
+                {{#cover}}<img class="ayv-cover-img" src="{{cover}}" alt="" loading="lazy">{{/cover}}
+                {{^cover}}<span class="ayv-cover-title">{{title}}</span>{{/cover}}
             </span>
             <span class="ayv-card-title">{{title}}</span>
             {{#authors}}<span class="ayv-card-authors">{{authors}}</span>{{/authors}}

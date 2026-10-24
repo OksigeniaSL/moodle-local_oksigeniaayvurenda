@@ -52,8 +52,13 @@ final class screens {
         if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
             $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
         }
+        $add = null;
+        if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
+            $add = ['url' => self::url('add.php', $library), 'label' => self::str('addopen')];
+        }
         return [
             'desk' => $desk,
+            'add' => $add,
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
             'corners' => $corners,

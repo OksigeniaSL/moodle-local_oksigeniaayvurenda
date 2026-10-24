@@ -649,3 +649,86 @@ html[data-bs-theme="dark"] .ayv .ayv-brand img { background: #fbf6ec; border-rad
 .ayv .ayv-share > span { display: block; height: 100%; background: var(--green2); }
 
 .ayv .ayv-inline-form { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+
+.ayv .ayv-cover-photo { padding: 0; background: var(--paper2); }
+
+.ayv .ayv-cover-photo::after { content: none; }
+
+.ayv .ayv-cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* Adding books. */
+.ayv .ayv-add-sources { margin: .4rem 0 0; font-size: .9rem; opacity: .85; }
+
+.ayv .ayv-add-status { min-height: 1.5em; margin: .5rem 0; font-weight: 700; }
+
+.ayv .ayv-book {
+    display: grid;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--green2);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.ayv .ayv-book[hidden] { display: none; }
+
+.ayv .ayv-book-head { display: grid; grid-template-columns: 7rem 1fr; gap: 1.25rem; align-items: start; }
+
+.ayv .ayv-book-cover { aspect-ratio: 2 / 3; border-radius: 4px 8px 8px 4px; overflow: hidden; background: var(--green2); }
+
+.ayv .ayv-book-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.ayv .ayv-book-spine { display: block; padding: .6rem; color: #fff; font-family: var(--title); font-weight: 600; line-height: 1.2; }
+
+.ayv .ayv-book-what p { margin: 0 0 .3rem; }
+
+.ayv .ayv-book-title { font-family: var(--title); font-weight: 600; font-size: 1.35rem; line-height: 1.25; }
+
+.ayv .ayv-book-by { font-weight: 700; }
+
+.ayv .ayv-book-source { font-size: .9rem; color: var(--accent); }
+
+.ayv .ayv-book-existing { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .75rem 1rem;
+    background: var(--notice-bg); border-left: 6px solid var(--sun); border-radius: 8px; }
+
+.ayv .ayv-book-existing[hidden], .ayv .ayv-book-manual[hidden], .ayv [hidden].ayv-field { display: none; }
+
+.ayv .ayv-book-existing p { margin: 0; font-weight: 700; flex: 1 1 100%; }
+
+.ayv .ayv-book-manual { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; margin: 0; padding: 0; border: 0; }
+
+.ayv .ayv-book-copy { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+
+.ayv .ayv-field-wide { flex: 1 1 100%; flex-wrap: wrap; }
+
+.ayv .ayv-field-wide input, .ayv .ayv-field-wide textarea { flex: 1 1 16rem; }
+
+.ayv .ayv-field input[type="number"],
+.ayv .ayv-field textarea,
+.ayv .ayv-spine input {
+    min-height: 40px;
+    padding: .25rem .6rem;
+    font: inherit;
+    color: var(--ink);
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+}
+
+.ayv .ayv-field input[type="number"] { width: 5rem; }
+
+.ayv .ayv-spine { flex-wrap: wrap; }
+
+.ayv .ayv-spine-note { font-size: .85rem; color: var(--accent); }
+
+.ayv .ayv-book-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin: 0; }
+
+.ayv .ayv-add-line { display: flex; align-items: center; gap: .75rem; }
+
+.ayv .ayv-add-thumb { width: 2.5rem; height: auto; border-radius: 2px 4px 4px 2px; }
+
+@media (max-width: 30rem) {
+    .ayv .ayv-book-head { grid-template-columns: 5rem 1fr; gap: .9rem; }
+    .ayv .ayv-book { padding: .9rem; }
+}

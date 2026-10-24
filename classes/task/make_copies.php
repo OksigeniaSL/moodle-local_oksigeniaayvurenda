@@ -42,6 +42,7 @@ class make_copies extends \core\task\scheduled_task {
      */
     public function execute(): void {
         global $DB;
+        \local_oksigeniaayvurenda\local\covers::forget_drafts();
         foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
             $file = \local_oksigeniaayvurenda\local\copies::make((int) $entityid);
             mtrace('Ayvurenda: copy of entity ' . $entityid . ': ' . $file->get_filename() . ' (' .

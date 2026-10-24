@@ -31,4 +31,9 @@ $definitions = [
         'simplekeys' => true,
         'simpledata' => true,
     ],
+    // What the catalogues said of an ISBN, for a day.
+    'lookup' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+    ],
 ];

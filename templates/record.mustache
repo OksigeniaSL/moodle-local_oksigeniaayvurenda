@@ -49,8 +49,9 @@
 <article class="ayv-record">
     <div class="ayv-record-cover">
         {{#card}}
-        <span class="ayv-cover ayv-cover-big ayv-cover-{{colour}}" aria-hidden="true">
-            <span class="ayv-cover-title">{{title}}</span>
+        <span class="ayv-cover ayv-cover-big ayv-cover-{{colour}}{{#cover}} ayv-cover-photo{{/cover}}" aria-hidden="true">
+            {{#cover}}<img class="ayv-cover-img" src="{{cover}}" alt="">{{/cover}}
+            {{^cover}}<span class="ayv-cover-title">{{title}}</span>{{/cover}}
         </span>
         <p class="ayv-state ayv-state-{{stateclass}}">{{statelabel}}</p>
         {{#location}}<p class="ayv-where">{{location}}</p>{{/location}}

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.8.0 (2026-10-26)
+
+- Adding books by their ISBN, one after another, without leaving the keyboard or the scanner: read the book's code
+  and its card appears, with what the catalogues know of it, its cover and a proposed spine (the class, three
+  capitals of the author and three letters of the title); read the labels already stuck on it and they become its
+  codes, or new ones follow the library's; read the next book and this one is saved. Each saved book is a line that
+  can be undone. A book the library already has offers one more copy; one no catalogue knows asks for its title.
+  The library, place, kind and first line of the spine stay from one book to the next, as in a box of new books.
+- The catalogues are asked from the server, in order: the Library of Congress by SRU, then Open Library; each answer
+  is kept a day. A catalogue that answers with other editions only counts for the one asked for, also when it was
+  read as an ISBN-10.
+- Own MARCXML reader and writer and MARC21 descriptions (title without ISBD punctuation, ISBN without its qualifier,
+  year, language, authors, publisher, UDC or Dewey, a few subjects, series, audience), in plain PHP, without
+  dependencies; an SRU client and Open Library's answers too.
+- Covers fetched by the server when a book is added, made small and kept in the site with their source; the browser
+  only sees the site's own files. The catalogue's cards and records show them.
+
 ## 0.7.2 (2026-10-25)
 
 - The library's screens follow Moodle 5.3's light and dark modes: the person's choice, or the site's default, and

@@ -1,0 +1,94 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/add
+
+    Adding books by their ISBN, one after another. The script fills the card of each book.
+
+    Context variables required for this template:
+    * heading, prompt, sources - texts
+    * libraries, locations, types - options (value, label, selected)
+    * multiple - whether the entity has more than one library
+    * the words of the fields and buttons
+
+    Example context (json):
+    {
+        "heading": "Dar de alta libros",
+        "prompt": "Pasa el código del libro (o escríbelo)",
+        "sources": "Se busca en Library of Congress y Open Library.",
+        "libraries": [{"value": "central", "label": "Central", "selected": true}],
+        "multiple": false,
+        "locations": [{"value": 0, "label": "Sin ubicación"}],
+        "types": [{"value": "normal", "label": "Se presta"}],
+        "addlibrary": "Biblioteca", "addspine": "Signatura", "addlocation": "Ubicación", "addtype": "Tipo",
+        "addcount": "Ejemplares", "addcodes": "Códigos", "addcodesnew": "Nuevos", "addcodesscan": "Los que ya llevan",
+        "addcodesscanhint": "Pasa sus etiquetas", "addsave": "Guardar y seguir con otro", "addfieldtitle": "Título",
+        "addfieldsubtitle": "Subtítulo", "addfieldauthor": "Autor", "addfieldpublisher": "Editorial", "addfieldyear": "Año",
+        "addfieldpages": "Páginas", "addcancel": "Dejarlo"
+    }
+}}
+<section class="ayv-desk ayv-add" aria-labelledby="ayv-add-title">
+<h1 id="ayv-add-title" class="ayv-sr">{{heading}}</h1>
+<form id="ayv-scan" class="ayv-scan" autocomplete="off">
+    <label for="ayv-code" class="ayv-scan-label">{{prompt}}</label>
+    <input id="ayv-code" name="code" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" autofocus maxlength="40">
+    <p class="ayv-add-sources">{{sources}}</p>
+</form>
+<p id="ayv-add-status" class="ayv-add-status" role="status" aria-live="polite"></p>
+<form id="ayv-book" class="ayv-book" hidden autocomplete="off">
+    <div class="ayv-book-head">
+        <div class="ayv-book-cover" id="ayv-book-cover" aria-hidden="true"></div>
+        <div class="ayv-book-what">
+            <p class="ayv-book-title" id="ayv-book-title"></p>
+            <p class="ayv-book-by" id="ayv-book-by"></p>
+            <p class="ayv-book-facts" id="ayv-book-facts"></p>
+            <p class="ayv-book-source" id="ayv-book-source"></p>
+        </div>
+    </div>
+    <div class="ayv-book-existing" id="ayv-book-existing" hidden></div>
+    <fieldset class="ayv-book-manual" id="ayv-book-manual" hidden>
+        <label class="ayv-field ayv-field-wide">{{addfieldtitle}} <input type="text" name="title" maxlength="1333"></label>
+        <label class="ayv-field ayv-field-wide">{{addfieldsubtitle}} <input type="text" name="subtitle" maxlength="1333"></label>
+        <label class="ayv-field ayv-field-wide">{{addfieldauthor}} <input type="text" name="author" maxlength="255"></label>
+        <label class="ayv-field">{{addfieldpublisher}} <input type="text" name="publisher" maxlength="255"></label>
+        <label class="ayv-field">{{addfieldyear}} <input type="text" name="year" inputmode="numeric" maxlength="4" size="5"></label>
+        <label class="ayv-field">{{addfieldpages}} <input type="text" name="pages" inputmode="numeric" maxlength="5" size="5"></label>
+    </fieldset>
+    <div class="ayv-book-copy">
+        {{#multiple}}
+        <label class="ayv-field">{{addlibrary}} <select name="target">{{#libraries}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/libraries}}</select></label>
+        {{/multiple}}
+        <span class="ayv-field ayv-spine" role="group" aria-labelledby="ayv-spine-label"><span id="ayv-spine-label">{{addspine}}</span>
+            <input type="text" name="callnumber1" maxlength="100" size="9" aria-label="{{addspine}} 1">
+            <input type="text" name="callnumber2" maxlength="100" size="4" aria-label="{{addspine}} 2">
+            <input type="text" name="callnumber3" maxlength="100" size="4" aria-label="{{addspine}} 3">
+            <span class="ayv-spine-note" id="ayv-spine-note"></span></span>
+        <label class="ayv-field">{{addlocation}} <select name="locationid">{{#locations}}<option value="{{value}}">{{label}}</option>{{/locations}}</select></label>
+        <label class="ayv-field">{{addtype}} <select name="itemtype">{{#types}}<option value="{{value}}">{{label}}</option>{{/types}}</select></label>
+        <label class="ayv-field">{{addcount}} <input type="number" name="count" min="1" max="50" value="1"></label>
+        <span class="ayv-field" role="radiogroup" aria-label="{{addcodes}}">{{addcodes}}
+            <label class="ayv-field-check"><input type="radio" name="codes" value="new" checked> {{addcodesnew}}</label>
+            <label class="ayv-field-check"><input type="radio" name="codes" value="scan"> {{addcodesscan}}</label></span>
+        <label class="ayv-field ayv-field-wide" id="ayv-barcodes" hidden>{{addcodesscanhint}}
+            <textarea name="barcodes" rows="2" spellcheck="false"></textarea></label>
+    </div>
+    <p class="ayv-book-actions">
+        <button type="submit" class="ayv-button">{{addsave}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-book-cancel">{{addcancel}}</button>
+    </p>
+</form>
+<ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
+</section>

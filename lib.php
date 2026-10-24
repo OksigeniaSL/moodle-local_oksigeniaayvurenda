@@ -23,7 +23,8 @@
  */
 
 /**
- * Serves the daily copies to the library staff.
+ * Serves the daily copies to the library staff, the covers to whoever sees the catalogue, and the covers of books being
+ * added to whoever adds them.
  *
  * @param stdClass $course
  * @param stdClass $cm
@@ -35,17 +36,29 @@
  * @return bool false when the file is not served.
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    if ($context->contextlevel != CONTEXT_SYSTEM || $filearea !== 'copies') {
+    global $USER;
+    if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, ['copies', 'cover', 'coverdraft'], true)) {
         return false;
     }
     require_login(null, false);
-    require_capability('local/oksigeniaayvurenda:desk', $context);
     $itemid = (int) array_shift($args);
+    if ($filearea === 'copies') {
+        require_capability('local/oksigeniaayvurenda:desk', $context);
+    } else if ($filearea === 'cover') {
+        require_capability('local/oksigeniaayvurenda:view', $context);
+        $forcedownload = false;
+    } else {
+        require_capability('local/oksigeniaayvurenda:catalogue', $context);
+        if ($itemid !== (int) $USER->id) {
+            return false;
+        }
+        $forcedownload = false;
+    }
     $filename = array_pop($args);
     $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
-    $file = get_file_storage()->get_file($context->id, 'local_oksigeniaayvurenda', 'copies', $itemid, $filepath, $filename);
+    $file = get_file_storage()->get_file($context->id, 'local_oksigeniaayvurenda', $filearea, $itemid, $filepath, $filename);
     if (!$file || $file->is_directory()) {
         return false;
     }
-    send_stored_file($file, 0, 0, true, $options);
+    send_stored_file($file, $filearea === 'cover' ? WEEKSECS : 0, 0, $forcedownload, $options);
 }

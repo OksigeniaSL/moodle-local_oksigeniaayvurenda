@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A made-up book, invented for the tests: no catalogue holds it. -->
+<record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>01234cam a2200301 i 4500</leader>
+  <controlfield tag="001">ayv-0001</controlfield>
+  <controlfield tag="008">250101s2024    sp a   j      000 1 spa d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" "><subfield code="a">9788490000014 (rústica)</subfield><subfield code="q">rústica</subfield></datafield>
+  <datafield tag="020" ind1=" " ind2=" "><subfield code="a">9788490000021</subfield></datafield>
+  <datafield tag="080" ind1=" " ind2=" "><subfield code="a">821.134.2-31</subfield></datafield>
+  <datafield tag="100" ind1="1" ind2=" "><subfield code="a">Laurel Prado, Irene,</subfield><subfield code="e">autora</subfield></datafield>
+  <datafield tag="245" ind1="1" ind2="3"><subfield code="a">El faro dormido /</subfield><subfield code="b">una historia de mar :</subfield><subfield code="c">Irene Laurel ; ilustraciones de Bruno Olmo.</subfield></datafield>
+  <datafield tag="250" ind1=" " ind2=" "><subfield code="a">Primera edición.</subfield></datafield>
+  <datafield tag="264" ind1=" " ind2="1"><subfield code="a">Villanube :</subfield><subfield code="b">Editorial Brújula,</subfield><subfield code="c">[2024]</subfield></datafield>
+  <datafield tag="300" ind1=" " ind2=" "><subfield code="a">96 p. :</subfield><subfield code="b">il. col. ;</subfield><subfield code="c">22 cm</subfield></datafield>
+  <datafield tag="490" ind1="1" ind2=" "><subfield code="a">Colección Linterna ;</subfield><subfield code="v">12</subfield></datafield>
+  <datafield tag="500" ind1=" " ind2=" "><subfield code="a">Libro inventado para las pruebas.</subfield></datafield>
+  <datafield tag="520" ind1=" " ind2=" "><subfield code="a">Un faro que se queda dormido y una niña que lo despierta.</subfield></datafield>
+  <datafield tag="521" ind1=" " ind2=" "><subfield code="a">A partir de 8 años.</subfield></datafield>
+  <datafield tag="650" ind1=" " ind2="7"><subfield code="a">Faros</subfield><subfield code="2">inventado</subfield></datafield>
+  <datafield tag="650" ind1=" " ind2="7"><subfield code="a">Mar.</subfield></datafield>
+  <datafield tag="650" ind1=" " ind2="7"><subfield code="a">Faros</subfield></datafield>
+  <datafield tag="700" ind1="1" ind2=" "><subfield code="a">Olmo, Bruno,</subfield><subfield code="e">ilustrador</subfield></datafield>
+</record>

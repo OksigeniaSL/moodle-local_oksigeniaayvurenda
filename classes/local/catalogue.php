@@ -339,6 +339,7 @@ final class catalogue {
             return [];
         }
         $ids = array_map(fn($r) => (int) $r->id, $records);
+        $covers = covers::urls($ids);
         [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
         $items = $DB->get_records_select(
             self::T . 'item',
@@ -386,6 +387,7 @@ final class catalogue {
             }
             $class = $classes[$record->id] ?? null;
             $cards[] = [
+                'cover' => $covers[(int) $record->id] ?? null,
                 'id' => (int) $record->id,
                 'title' => $record->title,
                 'subtitle' => $record->subtitle,
