@@ -1,0 +1,206 @@
+/* Ayvurenda, house style D (Gaudí, 24 October 2026): one layer after ayvurenda.css. Flat shapes built in layers, soft
+   shadows between them, cream plates for what is drawn and warm light. Made by agents/arte/kit/marca-ayvurenda/estilo-d.py. */
+
+/* 1. Tokens: depth and the plate. In dark mode the plates stay cream, like a lit picture on a dark wall. */
+.ayv {
+    --ayv-shadow: 0 1px 2px rgba(15, 58, 51, .06), 0 10px 28px -14px rgba(15, 58, 51, .32);
+    --ayv-shadow-lift: 0 2px 4px rgba(15, 58, 51, .08), 0 18px 34px -16px rgba(15, 58, 51, .42);
+    --ayv-shadow-button: 0 6px 14px -8px rgba(23, 87, 76, .7);
+    --ayv-plate: #f3e6cc;
+    --ayv-plate-ink: #1e2b2a;
+    --ayv-ring: rgba(15, 58, 51, .10);
+    --ayv-radius-lg: 22px;
+}
+html[data-bs-theme="dark"] .ayv {
+    --ayv-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 12px 30px -14px rgba(0, 0, 0, .65);
+    --ayv-shadow-lift: 0 2px 4px rgba(0, 0, 0, .4), 0 18px 36px -16px rgba(0, 0, 0, .7);
+    --ayv-shadow-button: 0 6px 16px -8px rgba(0, 0, 0, .8);
+    --ayv-plate: #f3e9d6;
+    --ayv-ring: rgba(236, 228, 212, .12);
+}
+
+/* 2. What every screen shares: the top bar floats a little, the search and the buttons have depth, boxes are cards. */
+.ayv .ayv-top { border-bottom: 0; box-shadow: 0 8px 20px -18px rgba(15, 58, 51, .6); }
+.ayv .ayv-search input { border: 0; box-shadow: inset 0 0 0 1.5px var(--ayv-ring), var(--ayv-shadow); }
+.ayv .ayv-search input:focus-visible { box-shadow: inset 0 0 0 2px var(--accent), var(--ayv-shadow); }
+.ayv .ayv-search button,
+.ayv .ayv-button { box-shadow: var(--ayv-shadow-button); transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
+.ayv .ayv-button:hover, .ayv .ayv-search button:hover { transform: translateY(-1px); box-shadow: var(--ayv-shadow-lift); }
+.ayv .ayv-button-quiet { background: var(--surface); border: 0; box-shadow: inset 0 0 0 1.5px var(--ayv-ring), 0 4px 10px -8px rgba(15, 58, 51, .5); }
+.ayv .ayv-button .ayv-icon { flex: none; }
+.ayv .ayv-book,
+.ayv .ayv-hold { border: 0; border-radius: var(--ayv-radius-lg); background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-notice { border-left: 0; border-radius: 16px; padding: .85rem 1.1rem; box-shadow: inset 0 0 0 1px var(--ayv-ring); }
+.ayv .ayv-section-title { letter-spacing: -.005em; }
+.ayv .ayv-results-title { font-size: clamp(1.6rem, 2.6vw, 2.1rem); letter-spacing: -.01em; }
+.ayv .ayv-chip { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ayv-ring); transition: transform .15s ease, box-shadow .15s ease; }
+.ayv .ayv-chip:hover { background: var(--surface); transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+/* 3. Drawn covers: the colour of the house, a motif in the colour of the title, a spine with light and a real shadow.
+   The petal in the corner gives way to the motif. */
+.ayv .ayv-cover { border-radius: 4px 12px 12px 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 14px 22px -14px rgba(15, 58, 51, .6),
+    inset 7px 0 0 rgba(0, 0, 0, .12), inset 9px 0 0 rgba(255, 255, 255, .12); }
+.ayv .ayv-cover::after { display: none; }
+.ayv .ayv-cover:not(.ayv-cover-photo)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: .15;
+    -webkit-mask: var(--ayv-motif) center / cover no-repeat;
+    mask: var(--ayv-motif) center / cover no-repeat;
+    pointer-events: none;
+}
+.ayv .ayv-cover-5 { background: #efe2c8; color: #17574c; box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 14px 22px -14px rgba(15, 58, 51, .6), inset 7px 0 0 rgba(0, 0, 0, .08); }
+.ayv .ayv-cover-0::before { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M0%2030%20Q15%2020%2030%2030%20T60%2030%20T90%2030%20T120%2030%20M0%2050%20Q15%2040%2030%2050%20T60%2050%20T90%2050%20T120%2050%20M0%2070%20Q15%2060%2030%2070%20T60%2070%20T90%2070%20T120%2070%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22/%3E%3C/svg%3E"); }
+.ayv .ayv-cover-1::before { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M20%2020%20l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%20M75%2035%20l2%205%205%202-5%202-2%205-2-5-5-2%205-2z%20M45%2070%20l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%20M95%2080%20l2%205%205%202-5%202-2%205-2-5-5-2%205-2z%22/%3E%3C/svg%3E"); }
+.ayv .ayv-cover-2::before { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M0%20100%20L30%2055%20L50%2080%20L75%2040%20L120%20100%20Z%22/%3E%3C/svg%3E"); }
+.ayv .ayv-cover-3::before { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.5%22%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2222%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2242%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2262%22/%3E%3Cpath%20d%3D%22M100%20100%20L100%2030%20M100%20100%20L50%2050%20M100%20100%20L30%20100%20M100%20100%20L40%2070%20M100%20100%20L70%2040%22/%3E%3C/g%3E%3C/svg%3E"); }
+.ayv .ayv-cover-4::before { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M70%2090%20C70%2060%2090%2045%20115%2045%20C115%2070%2098%2090%2070%2090%20Z%20M10%2040%20C10%2020%2025%2010%2045%2010%20C45%2030%2030%2040%2010%2040%20Z%22/%3E%3C/svg%3E"); }
+.ayv .ayv-cover-5::before { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cg%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2215%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2215%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2275%22%20cy%3D%2215%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%22105%22%20cy%3D%2215%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2245%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2245%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2290%22%20cy%3D%2245%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2275%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2275%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%2275%22%20cy%3D%2275%22%20r%3D%225%22/%3E%3Ccircle%20cx%3D%22105%22%20cy%3D%2275%22%20r%3D%225%22/%3E%3C/g%3E%3C/svg%3E"); }
+
+/* 4. The book's page: the cover stands on a cream plate that stays in sight; the title in the title face, large; the
+   ways to read and listen as one card of actions; the facts as a card; each copy with its spine label (tejuelo). */
+.ayv .ayv-record { grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr); gap: 2rem 3rem; margin-top: 1.25rem; }
+.ayv .ayv-record-cover {
+    position: sticky;
+    top: 6.5rem;
+    align-items: center;
+    gap: .9rem;
+    padding: 1.75rem 1.5rem 1.4rem;
+    border-radius: 28px;
+    background: var(--ayv-plate);
+    color: var(--ayv-plate-ink);
+    box-shadow: inset 0 0 0 1px rgba(15, 58, 51, .05);
+}
+.ayv .ayv-record-cover .ayv-cover-big { width: 100%; max-width: 13.5rem; transform: rotate(-1.5deg); }
+.ayv .ayv-record-cover .ayv-state { justify-content: center; font-weight: 700; color: var(--ayv-plate-ink); }
+.ayv .ayv-record-cover .ayv-where, .ayv .ayv-record-cover .ayv-where a { margin: 0; color: #17574c; font-weight: 700; text-align: center; }
+.ayv .ayv-record-title { font-size: clamp(2.1rem, 3.6vw, 3rem); line-height: 1.08; letter-spacing: -.015em; }
+.ayv .ayv-record-subtitle { color: var(--muted); }
+.ayv .ayv-record-authors { margin: .9rem 0 1.4rem; font-size: 1.125rem; color: var(--accent); }
+.ayv .ayv-record .ayv-hold { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem .75rem; margin: 0 0 1.5rem; padding: 1.1rem 1.25rem; }
+.ayv .ayv-record .ayv-hold > .ayv-section-title { flex-basis: 100%; margin: 0 0 .1rem; font-size: 1.05rem; }
+.ayv .ayv-record .ayv-hold > p { margin: 0; }
+.ayv .ayv-record .ayv-hold > p:has(> a:not(.ayv-button)) { flex-basis: 100%; font-size: .95rem; }
+.ayv .ayv-record .ayv-section-title { margin-top: 1.5rem; }
+.ayv .ayv-summary { font-size: 1.2rem; line-height: 1.6; }
+.ayv .ayv-facts {
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0;
+    padding: .25rem;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--ayv-shadow);
+}
+.ayv .ayv-facts > div { padding: .75rem 1rem; }
+.ayv .ayv-facts > div + div { box-shadow: inset 1px 0 0 var(--line); }
+.ayv .ayv-facts dt { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.ayv .ayv-facts dd { font-size: 1.05rem; }
+.ayv .ayv-copy { align-items: center; padding: .8rem 1rem; border: 0; border-radius: 16px; box-shadow: var(--ayv-shadow); }
+.ayv .ayv-copy-call {
+    padding: .25rem .7rem .25rem .9rem;
+    border: 0;
+    border-radius: 4px 8px 8px 4px;
+    background: #fffdf8;
+    color: #1e2b2a;
+    font-family: var(--title);
+    letter-spacing: .02em;
+    box-shadow: inset 5px 0 0 var(--coral), 0 2px 6px -2px rgba(15, 58, 51, .35);
+}
+
+/* 5. The reader: the tools as one floating pill bar; the book as a real book, with the thickness of its pages, the fold
+   in the middle and turns that light up; a thin progress with a coral end. */
+.ayv .ayv-read .ayv-field-hint { color: var(--muted); }
+.ayv .ayv-read-bar {
+    display: inline-flex;
+    gap: .35rem;
+    margin: .75rem 0 1rem;
+    padding: .35rem;
+    border-radius: 999px;
+    background: var(--surface);
+    box-shadow: var(--ayv-shadow);
+}
+.ayv .ayv-read-bar .ayv-button-quiet { min-height: 40px; padding: .3rem 1rem; box-shadow: none; background: transparent; }
+.ayv .ayv-read-bar .ayv-button-quiet:hover { background: var(--paper2); transform: none; box-shadow: none; }
+.ayv .ayv-read-book { gap: .75rem; padding: 1.25rem 0 .5rem; }
+.ayv .ayv-epub {
+    border-radius: 4px 6px 6px 4px;
+    background-color: #fffdf8;
+    color: #1e2b2a;
+    /* The pages under the open one: two thin edges, then the shadow on the table. */
+    box-shadow: 1px 1px 0 #efe6d4, 2px 2px 0 #fffdf8, 3px 3px 0 #e8dcc4, 4px 4px 0 #fffdf8, 5px 5px 0 #e2d4b8,
+        0 24px 40px -18px rgba(15, 58, 51, .5);
+}
+@media (min-width: 1000px) {
+    .ayv .ayv-epub[data-spread="auto"] {
+        border-radius: 6px;
+        background-image: linear-gradient(to right, transparent calc(50% - 26px), rgba(30, 43, 42, .07) calc(50% - 2px),
+            rgba(30, 43, 42, .14) 50%, rgba(30, 43, 42, .07) calc(50% + 2px), transparent calc(50% + 26px));
+        box-shadow: -1px 1px 0 #efe6d4, 1px 1px 0 #efe6d4, -3px 3px 0 #e8dcc4, 3px 3px 0 #e8dcc4, -5px 5px 0 #e2d4b8, 5px 5px 0 #e2d4b8,
+            0 26px 44px -18px rgba(15, 58, 51, .55);
+    }
+}
+/* In dark mode the page follows the screen, as before: dim paper and light letters (the reader takes the letters'
+   colour from this box when it opens the book), with the edges of the pages in the dark. */
+/* The book lives in an iframe. If the page says «color-scheme: dark» and the book's own document says nothing, Chrome
+   paints the iframe with an opaque white ground, and the light letters of dark mode vanish on it. Declaring the same
+   scheme on the book's box keeps the iframe transparent. */
+.ayv .ayv-epub, .ayv .ayv-epub iframe { color-scheme: light; }
+html[data-bs-theme="dark"] .ayv .ayv-epub {
+    background-color: #1a2a26;
+    color: #ece4d4;
+    box-shadow: 1px 1px 0 #24372f, 2px 2px 0 #1a2a26, 3px 3px 0 #2c4239, 4px 4px 0 #1a2a26, 5px 5px 0 #33493f,
+        0 24px 40px -18px rgba(0, 0, 0, .7);
+}
+@media (min-width: 1000px) {
+    html[data-bs-theme="dark"] .ayv .ayv-epub[data-spread="auto"] {
+        background-image: linear-gradient(to right, transparent calc(50% - 26px), rgba(0, 0, 0, .18) calc(50% - 2px),
+            rgba(0, 0, 0, .32) 50%, rgba(0, 0, 0, .18) calc(50% + 2px), transparent calc(50% + 26px));
+        box-shadow: -1px 1px 0 #24372f, 1px 1px 0 #24372f, -3px 3px 0 #2c4239, 3px 3px 0 #2c4239, -5px 5px 0 #33493f, 5px 5px 0 #33493f,
+            0 26px 44px -18px rgba(0, 0, 0, .7);
+    }
+}
+.ayv .ayv-page-turn { flex-basis: 52px; align-self: center; height: 52px; border-radius: 50%; background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-page-turn:hover, .ayv .ayv-page-turn:focus-visible { background: var(--surface); box-shadow: var(--ayv-shadow-lift); transform: scale(1.05); }
+.ayv .ayv-read-foot progress { height: 4px; border-radius: 2px; accent-color: var(--coral); }
+.ayv .ayv-read-marks .ayv-holds-row { border: 0; border-radius: 14px; box-shadow: var(--ayv-shadow); }
+
+/* 6. The recorder: the text on its sheet, and beside it a card with a soft halo round the coral button. */
+.ayv .ayv-voice .ayv-notice { position: relative; padding-left: 3.6rem; background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-voice .ayv-notice::before {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    top: .8rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--notice-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317574c' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / 1.1rem no-repeat;
+}
+.ayv .ayv-recorder { padding: 1.75rem 1.5rem; border-radius: 28px; background: var(--ayv-plate); color: var(--ayv-plate-ink); }
+.ayv .ayv-recorder .ayv-field-hint, .ayv .ayv-recorder .ayv-field { color: var(--ayv-plate-ink); }
+.ayv .ayv-rec-dot {
+    width: 104px;
+    height: 104px;
+    box-shadow: 0 0 0 10px rgba(226, 101, 76, .14), 0 0 0 22px rgba(226, 101, 76, .07), 0 14px 26px -10px rgba(226, 101, 76, .8);
+}
+.ayv .ayv-rec-dot .ayv-icon { width: 34px; height: 34px; }
+.ayv .ayv-rec-word { margin-top: 1.1rem; font-size: 1.1rem; }
+.ayv .ayv-rec-stop .ayv-rec-dot { background: #c94f38; color: #fff; }
+@keyframes ayv-rec-pulse { 50% { box-shadow: 0 0 0 16px rgba(226, 101, 76, .2), 0 0 0 32px rgba(226, 101, 76, .08), 0 14px 26px -10px rgba(226, 101, 76, .8); } }
+.ayv .ayv-meter { height: 10px; background: rgba(30, 43, 42, .1); }
+.ayv .ayv-recorder input { background: #fff; color: #1e2b2a; }
+.ayv .ayv-voice > .ayv-book { margin-top: .5rem; }
+.ayv .ayv-voice .ayv-holds-row { border: 0; border-radius: 16px; background: var(--surface); box-shadow: var(--ayv-shadow); }
+
+@media (max-width: 40rem) {
+    .ayv .ayv-record { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-record-cover { position: static; padding: 1.25rem; }
+    .ayv .ayv-record-cover .ayv-cover-big { max-width: 10rem; }
+    .ayv .ayv-facts > div + div { box-shadow: none; }
+    .ayv .ayv-page-turn { flex-basis: 40px; height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-record-cover .ayv-cover-big { transform: none; }
+}

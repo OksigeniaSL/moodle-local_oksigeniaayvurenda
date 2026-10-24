@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.24.0 (2026-10-27)
+
+- House style D, first part, by Gaudí: a layer after the plugin's own styles (`app/ayvurenda-d.css`). Flat shapes in
+  layers with soft shadows and warm light: the header floats, boxes are cards, drawn covers carry a motif by colour,
+  the record has its cover on a cream plate and its actions in one card, the reader is an open book with round page
+  turns, and the recorder sits on a cream plate with a halo round the coral button. In dark mode the book's page is
+  dark with light letters.
+- «Read the book» with an open-book icon, and what it is in small beside; «Give it a voice» under its question.
+
 ## 0.23.2 (2026-10-27)
 
 - Full screen in the reader: the book alone, or beside the recorder the book and the recorder, with nothing else on

@@ -104,6 +104,7 @@ final class shell {
 <link rel="apple-touch-icon" href="' . $app . 'apple-touch-icon.png">
 <link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
 <script>(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
     var resolve = function() {

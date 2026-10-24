@@ -45,8 +45,9 @@
         "copies": [{"where": "Aquí", "statelabel": "Libre", "state": "free", "location": "Estantería infantil",
                     "callnumber": "821 MON far", "barcode": "100000L"}],
         "back": {"url": "#", "label": "Volver a la biblioteca"},
-        "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#"}], "manage": null,
-                    "voice": {"url": "#", "label": "¿Quieres darle voz a este libro?"}
+        "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#", "book": true}],
+                    "manage": null, "readbook": "Leer el libro",
+                    "voice": {"url": "#", "question": "¿Quieres darle voz a este libro?", "label": "Darle voz"}
         },
         "hold": {"action": "#", "sesskey": "abc", "library": "demo-1", "recordid": 1, "holdid": 0, "notice": "",
                  "mine": "", "ahead": "", "canask": true, "staff": false, "holdsurl": "#",
@@ -110,8 +111,8 @@
         {{#digital}}
         <section class="ayv-hold" aria-label="{{heading}}">
             <h2 class="ayv-section-title">{{heading}}</h2>
-            {{#items}}<p><a class="ayv-button" href="{{url}}">{{action}}: {{label}}</a></p>{{/items}}
-            {{#voice}}<p><a class="ayv-button ayv-button-quiet ayv-button-voice" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a></p>{{/voice}}
+            {{#items}}<p>{{#book}}<a class="ayv-button" href="{{url}}">{{> local_oksigeniaayvurenda/icon_book}} {{readbook}}</a> <span class="ayv-field-hint">{{label}}</span>{{/book}}{{^book}}<a class="ayv-button" href="{{url}}">{{action}}: {{label}}</a>{{/book}}</p>{{/items}}
+            {{#voice}}<p class="ayv-voice-ask">{{question}}</p><p><a class="ayv-button ayv-button-quiet ayv-button-voice" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a></p>{{/voice}}
             {{#manage}}<p><a href="{{url}}">{{label}}</a></p>{{/manage}}
         </section>
         {{/digital}}

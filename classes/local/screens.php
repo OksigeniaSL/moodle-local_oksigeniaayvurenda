@@ -294,6 +294,8 @@ final class screens {
             $items[] = [
                 'label' => $label . ($item->status === 'pending' ? ' ' . self::str('voicependingshort') : ''),
                 'action' => self::str('digitalaction' . $item->format),
+                // A book to read: «Read the book», with what it is in small beside.
+                'book' => $item->kind === 'file' && in_array($item->format, ['epub', 'pdf'], true),
                 'url' => self::url('read.php', $library, ['id' => $item->id]),
             ];
         }
@@ -301,11 +303,12 @@ final class screens {
             ? ['url' => self::url('digital.php', $library, ['record' => $recordid]), 'label' => self::str('digitalmanage')] : null;
         // Readers of the centre and the library staff may give the book a voice.
         $voice = $viewer['who'] !== 'nobody' ? ['url' => self::url('voice.php', $library, ['record' => $recordid]),
-            'label' => self::str('digitalvoiceask')] : null;
+            'question' => self::str('digitalvoiceask'), 'label' => self::str('digitalvoicego')] : null;
         if (!$items && !$manage && !$voice) {
             return null;
         }
-        return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage, 'voice' => $voice];
+        return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage, 'voice' => $voice,
+            'readbook' => self::str('digitalreadbook')];
     }
 
     /**
