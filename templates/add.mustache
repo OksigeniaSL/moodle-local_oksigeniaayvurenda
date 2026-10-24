@@ -22,6 +22,7 @@
     * heading, prompt, sources - texts
     * libraries, locations, types - options (value, label, selected)
     * multiple - whether the entity has more than one library
+    * tools - the camera and phone buttons and panel, as HTML
     * the words of the fields and buttons
 
     Example context (json):
@@ -31,6 +32,7 @@
         "sources": "Se busca en Library of Congress y Open Library.",
         "libraries": [{"value": "central", "label": "Central", "selected": true}],
         "multiple": false,
+        "tools": "",
         "locations": [{"value": 0, "label": "Sin ubicación"}],
         "types": [{"value": "normal", "label": "Se presta"}],
         "addlibrary": "Biblioteca", "addspine": "Signatura", "addlocation": "Ubicación", "addtype": "Tipo",
@@ -47,6 +49,7 @@
     <input id="ayv-code" name="code" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" autofocus maxlength="40">
     <p class="ayv-add-sources">{{sources}}</p>
 </form>
+{{{tools}}}
 <p id="ayv-add-status" class="ayv-add-status" role="status" aria-live="polite"></p>
 <form id="ayv-book" class="ayv-book" hidden autocomplete="off">
     <div class="ayv-book-head">

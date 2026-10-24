@@ -36,4 +36,16 @@
             <copyright>Copyright 2017 The Literata Project Authors (https://github.com/googlefonts/literata)</copyright>
         </copyrights>
     </library>
+    <library>
+        <location>app/zxing</location>
+        <name>ZXing (JavaScript port)</name>
+        <description>Barcode reading with the camera where the browser has no BarcodeDetector. The UMD build of @zxing/library, unchanged but for the source map reference. License text in app/zxing/LICENSE.</description>
+        <version>0.23.0</version>
+        <license>Apache</license>
+        <licenseversion>2.0</licenseversion>
+        <repository>https://github.com/zxing-js/library</repository>
+        <copyrights>
+            <copyright>Copyright (c) ZXing authors</copyright>
+        </copyrights>
+    </library>
 </libraries>

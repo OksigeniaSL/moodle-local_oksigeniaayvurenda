@@ -80,6 +80,7 @@ if (has_capability('local/oksigeniaayvurenda:manage', context_system::instance()
             s($label) . '</a></p>';
     }
 }
+$tools = shell::readers_tools($library);
 $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <h1 id="ayv-desk-title" class="ayv-sr">' . s($str('desktitle')) . '</h1>
 <form id="ayv-scan" class="ayv-scan" autocomplete="off">
@@ -87,6 +88,7 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
     <input id="ayv-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
         autofocus maxlength="200">
 </form>
+' . $tools['html'] . '
 <div id="ayv-reader" class="ayv-reader" hidden></div>
 <ul id="ayv-today" class="ayv-today">' . $cards . '</ul>
 <ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
@@ -94,7 +96,7 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 </section>';
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,
-    'scripts' => ['desk'],
+    'scripts' => ['camera', 'desk'],
     'nav' => array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false),
             'label' => $str('readers')],
@@ -110,6 +112,6 @@ shell::output($str('desktitle'), $main, $library, '', [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/desk_ajax.php'))->out(false),
         'sesskey' => sesskey(),
         'controlletter' => !empty($settings['controlletter']),
-        'strings' => $strings,
-    ],
+        'strings' => $strings + $tools['strings'],
+    ] + $tools['config'],
 ]);

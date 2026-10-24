@@ -85,9 +85,11 @@ foreach (
 ) {
     $strings[$key] = $str($key);
 }
+$tools = shell::readers_tools($library);
+$data['tools'] = $tools['html'];
 shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/add', $data), $library, '', [
     'search' => false,
-    'scripts' => ['add'],
+    'scripts' => ['camera', 'add'],
     'nav' => [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false),
             'label' => $str('desktitle')],
@@ -98,6 +100,6 @@ shell::output($str('addtitle'), $OUTPUT->render_from_template('local_oksigeniaay
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php'))->out(false),
         'sesskey' => sesskey(),
         'controlletter' => !empty($settings['controlletter']),
-        'strings' => $strings,
-    ],
+        'strings' => $strings + $tools['strings'],
+    ] + $tools['config'],
 ]);

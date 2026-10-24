@@ -59,8 +59,12 @@ html[data-bs-theme="dark"] .ayv {
     color-scheme: dark;
 }
 
-/* The emblem's greens vanish on the dark page: it sits on a round of paper. */
-html[data-bs-theme="dark"] .ayv .ayv-brand img { background: #fbf6ec; border-radius: 50%; padding: 3px; }
+/* The emblem for dark pages, by Gaudí: light petals and the coral seed. */
+.ayv .ayv-brand-dark { display: none; }
+
+html[data-bs-theme="dark"] .ayv .ayv-brand-light { display: none; }
+
+html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv *, .ayv *::before, .ayv *::after { box-sizing: border-box; }
 
@@ -426,8 +430,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand img { background: #fbf6ec; border-rad
     border: 2px solid var(--green2);
     border-radius: 999px;
     color: var(--accent);
+    background: transparent;
+    font: inherit;
     font-weight: 700;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .ayv .ayv-toggle::before {
@@ -732,3 +739,39 @@ html[data-bs-theme="dark"] .ayv .ayv-brand img { background: #fbf6ec; border-rad
     .ayv .ayv-book-head { grid-template-columns: 5rem 1fr; gap: .9rem; }
     .ayv .ayv-book { padding: .9rem; }
 }
+
+/* The camera and the phone as readers. */
+.ayv .ayv-tools { display: flex; flex-wrap: wrap; gap: .5rem .75rem; margin: .6rem 0 0; }
+
+.ayv .ayv-tools [hidden] { display: none; }
+
+.ayv .ayv-phone-panel { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; margin: .75rem 0 0;
+    padding: 1rem; border-radius: var(--radius); background: var(--surface); border: 2px dashed var(--green2); }
+
+.ayv .ayv-phone-panel[hidden] { display: none; }
+
+.ayv .ayv-phone-panel p { margin: 0 0 .5rem; }
+
+.ayv .ayv-phone-qr { padding: 8px; background: #fff; border-radius: 8px; image-rendering: pixelated; }
+
+.ayv .ayv-phone-url { font-size: .9rem; word-break: break-all; opacity: .85; }
+
+.ayv .ayv-phone-waiting { font-weight: 700; color: var(--accent); }
+
+.ayv .ayv-phone-open { min-height: 64px; width: 100%; font-size: 1.2rem; }
+
+.ayv-camera { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 1rem; padding: 1rem; background: #0b1513; color: #fbf6ec; }
+
+.ayv-camera-view { position: relative; width: 100%; max-width: 960px; }
+
+.ayv-camera-video { display: block; width: 100%; max-height: 70vh; object-fit: contain; border-radius: 12px; background: #000; }
+
+.ayv-camera-frame { position: absolute; top: 30%; bottom: 30%; left: 15%; right: 15%; border: 3px solid rgba(240, 180, 60, .85);
+    border-radius: 14px; pointer-events: none; transition: border-color .15s ease, box-shadow .15s ease; }
+
+.ayv-camera-frame.ayv-camera-read { border-color: #6fd1a0; box-shadow: 0 0 0 9999px rgba(111, 209, 160, .12); }
+
+.ayv-camera-hint { margin: 0; font-weight: 700; font-size: 1.1rem; text-align: center; }
+
+.ayv .ayv-camera-close { background: #fbf6ec; color: #0f3a33; border-color: #fbf6ec; }

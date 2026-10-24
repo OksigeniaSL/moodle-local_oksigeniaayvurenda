@@ -113,7 +113,8 @@ final class shell {
 <body class="ayv">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
 <header class="ayv-top">
-<a class="ayv-brand" href="' . s($home) . '"><img src="' . $app . 'emblema.svg" alt="" width="44" height="44">
+<a class="ayv-brand" href="' . s($home) . '"><img class="ayv-brand-light" src="' . $app . 'emblema.svg" alt="" width="44"
+    height="44"><img class="ayv-brand-dark" src="' . $app . 'emblema-oscuro.svg" alt="" width="44" height="44">
     <span class="ayv-brand-name">' . s($name) . '</span></a>
 ' . $search . $nav . '
 </header>
@@ -146,6 +147,47 @@ final class shell {
             debugging('Ayvurenda could not add the panel of Oksigenia Access: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return '';
         }
+    }
+
+    /**
+     * The camera and the phone, under a page's reading field: the buttons, the panel with the phone's address as a QR
+     * code, and what the scripts need.
+     *
+     * @param \stdClass $library
+     * @return array html, config (relayurl, zxing, phoneurl) and strings for the scripts.
+     */
+    public static function readers_tools(\stdClass $library): array {
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $phone = new \moodle_url('/local/oksigeniaayvurenda/phone.php', ['library' => $library->slug]);
+        $qr = '';
+        if (function_exists('imagecreate')) {
+            $qr = '<img class="ayv-phone-qr" alt="" width="148" height="148" src="data:image/png;base64,' .
+                base64_encode((new \core_qrcode($phone->out(false)))->getBarcodePngData(4, 4)) . '">';
+        }
+        $html = '<div class="ayv-tools">
+    <button type="button" class="ayv-toggle" id="ayv-camera-open" hidden>' . s($str('camerabutton')) . '</button>
+    <button type="button" class="ayv-toggle" id="ayv-phone-pair" aria-expanded="false" aria-controls="ayv-phone-panel">' .
+            s($str('phonebutton')) . '</button>
+</div>
+<div class="ayv-phone-panel" id="ayv-phone-panel" hidden>
+    ' . $qr . '
+    <div><p>' . s($str('phonepanel')) . '</p>
+    <p class="ayv-phone-url">' . s($phone->out(false)) . '</p>
+    <p class="ayv-phone-waiting" id="ayv-phone-waiting" role="status">' . s($str('phonewaiting')) . '</p>
+    <button type="button" class="ayv-button ayv-button-quiet" id="ayv-phone-stop">' . s($str('phonestop')) . '</button></div>
+</div>';
+        $strings = [];
+        foreach (['cameratitle', 'camerahint', 'cameraclose', 'cameranone', 'camerastarting', 'cameraread'] as $key) {
+            $strings[$key] = $str($key);
+        }
+        return [
+            'html' => $html,
+            'config' => [
+                'relayurl' => (new \moodle_url('/local/oksigeniaayvurenda/relay_ajax.php'))->out(false),
+                'zxing' => (new \moodle_url('/local/oksigeniaayvurenda/app/zxing/zxing.min.js'))->out(false),
+            ],
+            'strings' => $strings,
+        ];
     }
 
     /**

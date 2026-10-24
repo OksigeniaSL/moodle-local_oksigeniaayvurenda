@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.8.1 (2026-10-26)
+
+- The camera as a reader, at the desk and when adding books: the browser's own BarcodeDetector where it has one, and
+  ZXing (Apache-2.0, in the plugin, loaded only then) where it has not, as in the Chromebooks and computers of many
+  schools. It stays open between books; each code read goes the same way as a scanner's.
+- A phone as the reader of a computer, for a desk without a scanner: «Read with the phone» shows the phone's address
+  as a QR code; whatever the phone's camera reads there appears on the desk or the adding screen the same person has
+  open. Codes wait at most five minutes.
+- The emblem for dark pages, by Gaudí, instead of the round of paper.
+- Fixed: the home page failed for those who may not add books, because Mustache took the name «add» for one of its
+  own methods.
+
 ## 0.8.0 (2026-10-26)
 
 - Adding books by their ISBN, one after another, without leaving the keyboard or the scanner: read the book's code

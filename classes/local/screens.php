@@ -52,13 +52,14 @@ final class screens {
         if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
             $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
         }
-        $add = null;
+        $addbooks = null;
         if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
-            $add = ['url' => self::url('add.php', $library), 'label' => self::str('addopen')];
+            $addbooks = ['url' => self::url('add.php', $library), 'label' => self::str('addopen')];
         }
         return [
             'desk' => $desk,
-            'add' => $add,
+            // Not «add»: Mustache would find the method of its helpers by that name when there is none.
+            'addbooks' => $addbooks,
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
             'corners' => $corners,

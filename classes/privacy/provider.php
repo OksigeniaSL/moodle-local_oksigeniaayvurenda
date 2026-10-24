@@ -84,6 +84,10 @@ class provider implements
             'groupname' => 'privacy:metadata:tutor:groupname',
             'timenotified' => 'privacy:metadata:tutor:timenotified',
         ], 'privacy:metadata:tutor');
+        $collection->add_database_table(self::T . 'relay', [
+            'userid' => 'privacy:metadata:relay:userid',
+            'code' => 'privacy:metadata:relay:code',
+        ], 'privacy:metadata:relay');
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
         return $collection;
@@ -120,6 +124,7 @@ class provider implements
             []
         );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'relay}', []);
     }
 
     /**
@@ -172,6 +177,14 @@ class provider implements
                 (object) ['loans' => array_values(array_map(fn($loan) => self::loan_export($loan), $handled))]
             );
         }
+        $relayed = $DB->get_records(self::T . 'relay', ['userid' => $userid], 'id', 'id, code, timecreated');
+        if ($relayed) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:relay', 'local_oksigeniaayvurenda')]),
+                (object) ['codes' => array_values(array_map(fn($r) => ['code' => $r->code,
+                    'timecreated' => transform::datetime($r->timecreated)], $relayed))]
+            );
+        }
         $tutored = $DB->get_records_sql(
             'SELECT t.id, y.name AS year, t.groupname, t.timenotified
                FROM {' . self::T . 'tutor} t
@@ -208,6 +221,7 @@ class provider implements
         $DB->set_field_select(self::T . 'loan', 'staffid', null, 'staffid IS NOT NULL');
         $DB->set_field_select(self::T . 'loan', 'returnstaffid', null, 'returnstaffid IS NOT NULL');
         $DB->delete_records(self::T . 'tutor');
+        $DB->delete_records(self::T . 'relay');
     }
 
     /**
@@ -260,6 +274,7 @@ class provider implements
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
         $DB->delete_records(self::T . 'tutor', ['userid' => $userid]);
+        $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
     }
 
     /**
@@ -274,6 +289,9 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'tutor', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'relay', ['userid' => $userid])) {
             return true;
         }
         return $DB->record_exists_select(

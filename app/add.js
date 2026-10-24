@@ -406,5 +406,13 @@
     });
 
     $('ayv-book-cancel').addEventListener('click', close);
+    if (window.AYVCamera) {
+        window.AYVCamera.wire(config, function(code) {
+            queue.push(code);
+            next();
+        }, function() {
+            input.focus();
+        });
+    }
     input.focus();
 })();

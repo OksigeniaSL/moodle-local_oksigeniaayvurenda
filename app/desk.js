@@ -300,20 +300,29 @@
         next();
     };
 
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        var code = input.value.trim();
-        input.value = '';
-        if (!code) {
-            return;
-        }
+    var read = function(code) {
         if (!control(code)) {
             tone('no');
             line({kind: 'badletter', sound: 'no', message: str.deskbadletter}, code);
             return;
         }
         enqueue(code, false);
+    };
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        var code = input.value.trim();
+        input.value = '';
+        if (code) {
+            read(code);
+        }
     });
+
+    if (window.AYVCamera) {
+        window.AYVCamera.wire(config, read, function() {
+            input.focus();
+        });
+    }
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape' && readerid) {

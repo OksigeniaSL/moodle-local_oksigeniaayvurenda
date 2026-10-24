@@ -262,6 +262,18 @@
         <INDEX NAME="yeargroup" UNIQUE="true" FIELDS="yearid, groupname"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_relay" COMMENT="Codes read with a phone, on their way to the same person's desk or adding screen">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="200" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_source" COMMENT="Where a row came from (Abies, a connector, a CSV), so a new import updates it instead of duplicating it">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
