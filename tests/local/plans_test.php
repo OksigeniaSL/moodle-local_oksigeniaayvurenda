@@ -118,6 +118,8 @@ final class plans_test extends \advanced_testcase {
     public function test_within(): void {
         global $DB;
         $this->resetAfterTest();
+        // Undoing an import is a transaction of its own: PostgreSQL would otherwise run the test inside one.
+        $this->preventResetByRollback();
         $this->site_plan('Free', 4, 0);
         $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = libraries::create_entity(['name' => 'Invented school']);
@@ -144,6 +146,7 @@ final class plans_test extends \advanced_testcase {
     public function test_readers(): void {
         global $DB;
         $this->resetAfterTest();
+        $this->preventResetByRollback();
         $this->site_plan('Free', 0, 2);
         $library = libraries::create_entity(['name' => 'Invented school']);
         $entityid = (int) $library->entityid;
