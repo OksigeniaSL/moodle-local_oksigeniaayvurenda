@@ -43,7 +43,10 @@ final class garden {
      * @return array levels and stage.
      */
     public static function flower(\stdClass $reader, \stdClass $year): array {
-        $levels = flower::levels(flower::counts(self::loans((int) $reader->id, (int) $year->id)));
+        $counts = flower::counts(self::loans((int) $reader->id, (int) $year->id));
+        // A review the library published counts on the path of telling, as a note at the desk does.
+        $counts['tell'] += reviews::told((int) $reader->id, $year);
+        $levels = flower::levels($counts);
         return ['levels' => $levels, 'stage' => flower::stage($levels)];
     }
 

@@ -68,16 +68,24 @@ final class provider_test extends provider_testcase {
         $w->hold = $DB->insert_record(self::T . 'hold', ['libraryid' => $w->library->id, 'recordid' => $w->item->recordid,
             'readerid' => $w->anareader->id, 'status' => 'waiting', 'createdby' => $w->librarian->id,
             'timecreated' => time(), 'timemodified' => time()]);
+        // Ana told about the book, and the librarian published it.
+        $w->review = \local_oksigeniaayvurenda\local\reviews::write(
+            (int) $w->library->entityid,
+            (int) $w->item->recordid,
+            (int) $w->anareader->id,
+            'Me encantó.'
+        );
+        \local_oksigeniaayvurenda\local\reviews::decide($w->review, (int) $w->library->entityid, true, (int) $w->librarian->id);
         return $w;
     }
 
     /**
-     * The metadata names the fourteen tables, the messages, the files of the daily copies and covers, and the look of the
+     * The metadata names the tables, the messages, the files of the daily copies and covers, and the look of the
      * card the reader chose.
      */
     public function test_metadata(): void {
         $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
-        $this->assertCount(17, $items);
+        $this->assertCount(18, $items);
     }
 
     /**
@@ -135,6 +143,7 @@ final class provider_test extends provider_testcase {
         $this->assertSame('3º Primaria A', $data->groups[0]['group']);
         $this->assertSame('loved', $data->loans[0]['note']);
         $this->assertSame('waiting', $data->holds[0]['status']);
+        $this->assertSame('Me encantó.', $data->reviews[0]['text']);
 
         writer::reset();
         $this->export_context_data_for_user($w->librarian->id, $system, 'local_oksigeniaayvurenda');
@@ -161,6 +170,7 @@ final class provider_test extends provider_testcase {
         $this->assertEquals($w->librarian->id, $loan->staffid);
         $this->assertEquals($w->leo->id, $DB->get_field(self::T . 'reader', 'userid', ['id' => $w->leoreader->id]));
         $this->assertFalse($DB->record_exists(self::T . 'hold', ['id' => $w->hold]));
+        $this->assertFalse($DB->record_exists(self::T . 'review', ['id' => $w->review]));
     }
 
     /**
@@ -178,6 +188,8 @@ final class provider_test extends provider_testcase {
         ));
         $this->assertNull($DB->get_field(self::T . 'loan', 'staffid', ['id' => $w->loan->id]));
         $this->assertNull($DB->get_field(self::T . 'hold', 'createdby', ['id' => $w->hold]));
+        $this->assertNull($DB->get_field(self::T . 'review', 'decidedby', ['id' => $w->review]));
+        $this->assertSame('published', $DB->get_field(self::T . 'review', 'status', ['id' => $w->review]));
         $this->assertNull($DB->get_field(self::T . 'reader', 'userid', ['id' => $w->leoreader->id]));
         $this->assertEquals($w->ana->id, $DB->get_field(self::T . 'reader', 'userid', ['id' => $w->anareader->id]));
     }
@@ -193,5 +205,6 @@ final class provider_test extends provider_testcase {
         $this->assertSame(0, $DB->count_records_select(self::T . 'reader', 'userid IS NOT NULL'));
         $this->assertSame(0, $DB->count_records_select(self::T . 'loan', 'staffid IS NOT NULL'));
         $this->assertSame(1, $DB->count_records(self::T . 'loan'));
+        $this->assertSame(0, $DB->count_records(self::T . 'review'));
     }
 }

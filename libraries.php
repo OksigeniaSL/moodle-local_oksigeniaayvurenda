@@ -57,6 +57,7 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param_array('cardstage', [], PARAM_TEXT),
                 optional_param_array('cardlook', [], PARAM_ALPHA)
             ) ?: [],
+            'reviewsign' => optional_param('reviewsign', 'name', PARAM_ALPHA),
             // The stages listed on the form whose box is left empty play no class challenge.
             'challengesoff' => array_values(array_diff(
                 optional_param_array('challengestage', [], PARAM_TEXT),
@@ -187,6 +188,8 @@ foreach (libraries::all() as $one) {
                 )
             )];
         }, \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'reviewsigns' => array_map(fn($s) => ['value' => $s, 'label' => $str('reviewsign' . $s),
+            'selected' => $s === ($settings['reviewsign'] ?? 'name')], \local_oksigeniaayvurenda\local\reviews::SIGNS),
         'challengestages' => array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
             $stage,
             \local_oksigeniaayvurenda\local\challenges::stages_off((int) $entity->id),
@@ -213,7 +216,7 @@ foreach (
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
-        'librarieschallengeshint'] as $key
+        'librarieschallengeshint', 'librariesreviewsign'] as $key
 ) {
     $data[$key] = $str($key);
 }

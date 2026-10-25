@@ -1,0 +1,49 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/reviews
+
+    The reviews waiting for the library: the book, what the reader says and who, and a touch to publish it or not.
+
+    Example context (json):
+    {
+        "heading": "Reseñas por revisar", "intro": "Un toque y sale en la ficha.", "notice": "", "empty": "No hay.",
+        "action": "#", "sesskey": "abc", "publish": "Publicar", "decline": "No publicar", "hasitems": true,
+        "items": [{"id": 1, "title": "El faro dormido", "url": "#", "text": "Me gustó el final.", "who": "Leo, 3.º A",
+            "when": "25/10/26"}]
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#hasitems}}
+<ul class="ayv-review-queue">
+    {{#items}}
+    <li class="ayv-review-card">
+        <a class="ayv-review-book" href="{{url}}">{{title}}</a>
+        <p class="ayv-review-text">«{{text}}»</p>
+        <p class="ayv-review-who">{{who}} · {{when}}</p>
+        <form method="post" action="{{action}}" class="ayv-book-actions">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="review" value="{{id}}">
+            <button type="submit" class="ayv-button" name="do" value="publish">{{publish}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="decline">{{decline}}</button>
+        </form>
+    </li>
+    {{/items}}
+</ul>
+{{/hasitems}}
+{{^hasitems}}<p class="ayv-empty">{{empty}}</p>{{/hasitems}}

@@ -1810,3 +1810,37 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     .ayv .ayv-listen[aria-pressed="true"] svg { animation: ayv-listen 1s ease-in-out infinite; }
 }
 @keyframes ayv-listen { 50% { transform: scale(1.18); } }
+
+/* What readers tell: each review a card with its words and who; the library's queue, the same cards with two buttons. */
+.ayv .ayv-reviews { margin: 1.5rem 0; }
+.ayv .ayv-review-list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .75rem; }
+.ayv .ayv-review {
+    padding: .9rem 1.1rem;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 8px 20px -16px rgba(15, 58, 51, .5);
+}
+.ayv .ayv-review-text { margin: 0; font-family: var(--title); font-size: 1.1rem; line-height: 1.4; overflow-wrap: anywhere; }
+.ayv .ayv-review-who { margin: .35rem 0 0; font-size: .9rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-review-ask { font-weight: 700; }
+.ayv .ayv-review-form textarea { width: 100%; }
+.ayv .ayv-review-queue {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}
+.ayv .ayv-review-card {
+    display: grid;
+    align-content: start;
+    gap: .4rem;
+    min-width: 0;
+    padding: 1rem 1.15rem;
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: 0 12px 28px -20px rgba(15, 58, 51, .55);
+}
+.ayv .ayv-review-book { font-weight: 700; color: var(--accent); }
+.ayv .ayv-review-card form { margin-top: .4rem; }

@@ -154,6 +154,8 @@ final class twins {
             $DB->delete_records(self::T . 'member', ['readerid' => $goneid, 'yearid' => $member->yearid]);
         }
         $DB->set_field(self::T . 'member', 'readerid', $keepid, ['readerid' => $goneid]);
+        // One review per reader and book: where both told about the same book, the one that stays keeps theirs.
+        reviews::move($goneid, $keepid);
         foreach (self::OWNED as $table) {
             $DB->set_field(self::T . $table, 'readerid', $keepid, ['readerid' => $goneid]);
         }

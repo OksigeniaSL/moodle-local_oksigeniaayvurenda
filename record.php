@@ -41,7 +41,29 @@ $found = $library ? catalogue::record($id, $library) : null;
 if (!$found) {
     throw new moodle_exception('recordnotfound', 'local_oksigeniaayvurenda');
 }
+// A reader who took the book home tells what they thought, or takes it back.
+$do = optional_param('review', '', PARAM_ALPHA);
+if ($do !== '' && data_submitted() && confirm_sesskey()) {
+    $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+        'status' => 'active']);
+    $done = '';
+    if ($reader && \local_oksigeniaayvurenda\local\reviews::can_write($id, (int) $reader->id)) {
+        if ($do === 'send') {
+            \local_oksigeniaayvurenda\local\reviews::write((int) $library->entityid, $id, (int) $reader->id, optional_param(
+                'text',
+                '',
+                PARAM_TEXT
+            ));
+            $done = 'sent';
+        } else if ($do === 'remove') {
+            \local_oksigeniaayvurenda\local\reviews::remove($id, (int) $reader->id);
+            $done = 'removed';
+        }
+    }
+    redirect(new moodle_url($PAGE->url, ['reviewed' => $done], 'ayv-reviews'));
+}
 $data = screens::record($found, $library);
+$data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library);

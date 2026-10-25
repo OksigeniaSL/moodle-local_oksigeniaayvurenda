@@ -218,6 +218,7 @@ final class pairing {
             $DB->delete_records(self::T . 'member', ['readerid' => $keepid, 'yearid' => $member->yearid]);
         }
         $DB->set_field(self::T . 'member', 'readerid', $keepid, ['readerid' => $madeid]);
+        reviews::move($madeid, $keepid);
         $DB->set_field(self::T . 'source', 'localid', $keepid, ['entityid' => $entityid, 'system' => self::SYSTEM,
             'tablename' => 'reader', 'localid' => $madeid]);
         $DB->delete_records(self::T . 'reader', ['id' => $madeid]);

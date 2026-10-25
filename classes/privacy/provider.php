@@ -139,6 +139,13 @@ class provider implements
             'timecreated' => 'privacy:metadata:voiceinvite:timecreated',
             'timeused' => 'privacy:metadata:voiceinvite:timeused',
         ], 'privacy:metadata:voiceinvite');
+        $collection->add_database_table(self::T . 'review', [
+            'readerid' => 'privacy:metadata:review:readerid',
+            'text' => 'privacy:metadata:review:text',
+            'status' => 'privacy:metadata:review:status',
+            'decidedby' => 'privacy:metadata:review:decidedby',
+            'timecreated' => 'privacy:metadata:review:timecreated',
+        ], 'privacy:metadata:review');
         $collection->add_database_table(self::T . 'lot', [
             'createdby' => 'privacy:metadata:lot:createdby',
             'name' => 'privacy:metadata:lot:name',
@@ -220,6 +227,7 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'digitalread}', []);
         $userlist->add_from_sql('notedby', 'SELECT notedby FROM {' . self::T . 'voiceconsent} WHERE notedby IS NOT NULL', []);
         $userlist->add_from_sql('invitedby', 'SELECT invitedby FROM {' . self::T . 'voiceinvite} WHERE invitedby IS NOT NULL', []);
+        $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'review} WHERE decidedby IS NOT NULL', []);
     }
 
     /**
@@ -270,6 +278,11 @@ class provider implements
                     'groups' => $groups,
                     'loans' => $loans,
                     'holds' => $holds,
+                    'reviews' => array_values(array_map(
+                        fn($v) => ['title' => $DB->get_field(self::T . 'record', 'title', ['id' => $v->recordid]),
+                        'text' => $v->text, 'status' => $v->status, 'written' => transform::datetime($v->timecreated)],
+                        $DB->get_records(self::T . 'review', ['readerid' => $reader->id], 'timecreated')
+                    )),
                     'voicepermission' => array_values(array_map(
                         fn($c) => ['noted' => transform::datetime($c->timecreated),
                         'revoked' => $c->timerevoked ? transform::datetime($c->timerevoked) : null],
@@ -416,6 +429,7 @@ class provider implements
         $DB->delete_records(self::T . 'digitalread');
         $DB->delete_records(self::T . 'voiceconsent');
         $DB->delete_records(self::T . 'voiceinvite');
+        $DB->delete_records(self::T . 'review');
     }
 
     /**
@@ -465,6 +479,7 @@ class provider implements
             ]);
             $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $reader->id]);
             $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $reader->id]);
+            $DB->delete_records(self::T . 'review', ['readerid' => $reader->id]);
             // Their reservations go; a copy set aside for them goes back to the shelf or to the next.
             foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id]) as $hold) {
                 if ($hold->status === 'ready' || $hold->status === 'waiting') {
@@ -490,6 +505,7 @@ class provider implements
         $DB->delete_records(self::T . 'digitalread', ['userid' => $userid]);
         $DB->set_field(self::T . 'voiceconsent', 'notedby', null, ['notedby' => $userid]);
         $DB->set_field(self::T . 'voiceinvite', 'invitedby', null, ['invitedby' => $userid]);
+        $DB->set_field(self::T . 'review', 'decidedby', null, ['decidedby' => $userid]);
     }
 
     /**
@@ -520,7 +536,8 @@ class provider implements
             $DB->record_exists(self::T . 'digital', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'digitalread', ['userid' => $userid]) ||
             $DB->record_exists(self::T . 'voiceconsent', ['notedby' => $userid]) ||
-            $DB->record_exists(self::T . 'voiceinvite', ['invitedby' => $userid])
+            $DB->record_exists(self::T . 'voiceinvite', ['invitedby' => $userid]) ||
+            $DB->record_exists(self::T . 'review', ['decidedby' => $userid])
         ) {
             return true;
         }

@@ -396,6 +396,9 @@ final class libraries {
         if (array_key_exists('controlletter', $data)) {
             $settings['controlletter'] = !empty($data['controlletter']);
         }
+        if (isset($data['reviewsign'])) {
+            $settings['reviewsign'] = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : 'name';
+        }
         // The stages that play no class challenge; all play when none is listed.
         if (array_key_exists('challengesoff', $data)) {
             $off = array_values(array_unique(array_filter(array_map(

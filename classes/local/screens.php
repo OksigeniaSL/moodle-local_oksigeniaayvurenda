@@ -52,8 +52,13 @@ final class screens {
         $recent = self::cards(catalogue::recent($library), $library);
         $hero = self::hero($library);
         $desk = null;
+        $toread = null;
         if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
             $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
+            // The reviews waiting for the library, only when there are some.
+            $waiting = reviews::waiting((int) $library->entityid);
+            $toread = $waiting ? ['url' => self::url('reviews.php', $library), 'label' => self::str('reviewswaiting', $waiting)]
+                : null;
         }
         $addbooks = null;
         if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
@@ -80,6 +85,7 @@ final class screens {
             'voices' => $voices,
             'shelf' => $shelf,
             'desk' => $desk,
+            'toread' => $toread,
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
             'addbooks' => $addbooks,
             'mycard' => self::mycard($library),
@@ -442,6 +448,44 @@ final class screens {
             return null;
         }
         return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.webp'))->out(false);
+    }
+
+    /**
+     * What readers tell about a book: the published reviews, signed, and for a reader who took it home, their own.
+     *
+     * @param array $found The record, as catalogue::record() gives it.
+     * @param \stdClass $library
+     * @param string $done What the reader just did: sent, removed or nothing.
+     * @return array
+     */
+    public static function reviews(array $found, \stdClass $library, string $done = ''): array {
+        global $DB, $USER;
+        $recordid = (int) $found['record']->id;
+        $reader = isloggedin() && !isguestuser() ? $DB->get_record('local_oksigeniaayvurenda_reader', [
+            'entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active']) : null;
+        $mine = $reader ? reviews::mine($recordid, (int) $reader->id) : null;
+        $canwrite = $reader && reviews::can_write($recordid, (int) $reader->id);
+        $list = reviews::published($recordid, (int) $library->entityid);
+        return [
+            'show' => $list || $canwrite,
+            'heading' => self::str('reviewsheading'),
+            'none' => self::str('reviewsnone'),
+            'list' => $list,
+            'haslist' => (bool) $list,
+            'done' => in_array($done, ['sent', 'removed'], true) ? self::str('reviewdone' . $done) : '',
+            'write' => $canwrite ? [
+                'action' => self::url('record.php', $library, ['id' => $recordid]),
+                'sesskey' => sesskey(),
+                'label' => self::str('reviewask'),
+                'hint' => self::str('reviewhint', reviews::MAX),
+                'max' => reviews::MAX,
+                'text' => $mine ? $mine->text : '',
+                'send' => self::str($mine ? 'reviewresend' : 'reviewsend'),
+                'hasmine' => (bool) $mine,
+                'state' => $mine ? self::str('reviewstate' . $mine->status) : '',
+                'remove' => self::str('reviewremove'),
+            ] : null,
+        ];
     }
 
     /**
