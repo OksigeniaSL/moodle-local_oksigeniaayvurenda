@@ -82,6 +82,7 @@ if (data_submitted() && confirm_sesskey()) {
             'colour' => optional_param('colour', 0, PARAM_INT),
             'motto' => optional_param('motto', '', PARAM_TEXT),
             'featured' => optional_param('featured', 0, PARAM_BOOL),
+            'scene' => optional_param('scene', '', PARAM_ALPHANUMEXT),
         ]);
         if (optional_param('noimage', 0, PARAM_BOOL)) {
             \local_oksigeniaayvurenda\local\images::remove('libraryimage', $libraryid, 'image');
@@ -131,10 +132,15 @@ foreach (libraries::all() as $one) {
             'canremove' => (int) $library->copies === 0,
             'look' => (function () use ($library) {
                 $look = libraries::look($library);
+                $scenes = [];
+                foreach (libraries::scenes() as $name => $url) {
+                    $scenes[] = ['value' => $name, 'url' => $url, 'selected' => $name === $look['scene']];
+                }
                 return $look + ['colours' => array_map(
                     fn($c) => ['value' => $c, 'selected' => $c === $look['colour']],
                     range(0, libraries::COLOURS - 1)
-                )];
+                ), 'scenes' => $scenes, 'hasscenes' => (bool) $scenes,
+                    'noscene' => $look['scene'] === ''];
             })(),
         ];
     }
@@ -181,7 +187,7 @@ foreach (
         'librariesgroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
         'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint', 'librarieslook',
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
-        'librariesimagehint', 'librariesnoimage', 'librariesfeatured'] as $key
+        'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -185,12 +185,34 @@ final class libraries {
     public static function look(\stdClass $library): array {
         $settings = json_decode((string) $library->settings, true) ?: [];
         $look = (array) ($settings['look'] ?? []);
+        $scene = (string) ($look['scene'] ?? '');
         return [
             'colour' => isset($look['colour']) ? max(0, min(self::COLOURS - 1, (int) $look['colour'])) : ((int) $library->id) % 5,
             'motto' => (string) ($look['motto'] ?? ''),
             'featured' => !empty($look['featured']),
-            'image' => images::url('libraryimage', (int) $library->id, 'image'),
+            'scene' => $scene,
+            // Its own picture first; else the header of Ayvurenda it chose, if the site has the art package.
+            'image' => images::url('libraryimage', (int) $library->id, 'image') ?? ($scene !== '' ? screens::art($scene) : null),
+            'own' => images::url('libraryimage', (int) $library->id, 'image') !== null,
         ];
+    }
+
+    /**
+     * The headers of Ayvurenda a library can choose, from the art package (none without it).
+     *
+     * @return string[] name => address, in order.
+     */
+    public static function scenes(): array {
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        $scenes = [];
+        foreach ($dir ? (glob($dir . '/pix/cabecera-*.webp') ?: []) : [] as $file) {
+            $name = basename($file, '.webp');
+            if (preg_match('/^cabecera-\d{1,2}$/', $name)) {
+                $scenes[$name] = screens::art($name);
+            }
+        }
+        uksort($scenes, 'strnatcmp');
+        return $scenes;
     }
 
     /**
@@ -207,6 +229,7 @@ final class libraries {
             'colour' => max(0, min(self::COLOURS - 1, (int) ($data['colour'] ?? 0))),
             'motto' => \core_text::substr(trim((string) ($data['motto'] ?? '')), 0, 120),
             'featured' => !empty($data['featured']),
+            'scene' => preg_match('/^cabecera-\d{1,2}$/', (string) ($data['scene'] ?? '')) ? (string) $data['scene'] : '',
         ];
         $DB->set_field(self::T . 'library', 'settings', json_encode($settings), ['id' => $libraryid]);
         if ($settings['look']['featured']) {

@@ -129,8 +129,19 @@ final class shell {
         if (isset($links['url'])) {
             $links = [$links];
         }
-        // The page's own links, then the global ones (the libraries; the desk for the staff), without repeating one.
+        // First the library's catalogue, where everyone goes back most (marked when you are on it); then the page's own
+        // links and the global ones (the libraries; the desk for the staff), without repeating one.
         $system = \context_system::instance();
+        $catalogue = '';
+        $seen = [];
+        if ($library) {
+            global $OUTPUT, $PAGE;
+            $here = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/local/oksigeniaayvurenda/index.php');
+            $seen[$home] = true;
+            $catalogue = '<a class="ayv-nav ayv-nav-home" href="' . s($home) . '"' . ($here ? ' aria-current="page"' : '') . '>'
+                . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_book', []) . ' '
+                . s(get_string('deskcatalogue', 'local_oksigeniaayvurenda')) . '</a>';
+        }
         if (count(catalogue::libraries()) > 1 || has_capability('local/oksigeniaayvurenda:manage', $system)) {
             $links[] = ['url' => $base . 'index.php', 'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
         }
@@ -138,7 +149,7 @@ final class shell {
             $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($library->slug),
                 'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
         }
-        $seen = [];
+        $nav = $catalogue;
         foreach ($links as $link) {
             if (isset($seen[$link['url']])) {
                 continue;

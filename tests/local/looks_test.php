@@ -87,6 +87,12 @@ final class looks_test extends \advanced_testcase {
         $look = libraries::look($DB->get_record('local_oksigeniaayvurenda_library', ['id' => $classroom->id]));
         $this->assertSame([5, 'El lugar de la palabra', true, null], [$look['colour'], $look['motto'], $look['featured'],
             $look['image']]);
+        libraries::save_look((int) $classroom->id, ['scene' => 'cabecera-3']);
+        $scene = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $classroom->id]);
+        $this->assertSame('cabecera-3', libraries::look($scene)['scene']);
+        libraries::save_look((int) $classroom->id, ['scene' => '../portada']);
+        $scene = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $classroom->id]);
+        $this->assertSame('', libraries::look($scene)['scene']);
         libraries::save_look((int) $central->id, ['featured' => 1]);
         $after = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $classroom->id]);
         $this->assertFalse(libraries::look($after)['featured']);

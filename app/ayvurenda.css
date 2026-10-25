@@ -121,7 +121,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-brand-name { font-family: var(--title); font-weight: 600; font-size: 1.3rem; line-height: 1.15; }
 
-.ayv .ayv-search { flex: 1 1 18rem; display: flex; gap: .5rem; min-width: 0; }
+/* The search keeps room to type; when the header does not hold it all, the menu goes to a second line. */
+.ayv .ayv-search { flex: 1 1 22rem; display: flex; gap: .5rem; min-width: min(100%, 16rem); }
 
 .ayv .ayv-search input {
     flex: 1;
@@ -1474,6 +1475,10 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 }
 .ayv .ayv-nav-exit:hover { filter: brightness(1.08); }
 .ayv .ayv-navs { align-items: center; }
+/* The catalogue, first and with its book: where everyone goes back most. */
+.ayv .ayv-nav-home { gap: .4rem; padding: 0 .9rem; border-radius: 999px; box-shadow: inset 0 0 0 2px var(--accent); }
+.ayv .ayv-nav-home svg { width: 20px; height: 20px; }
+.ayv .ayv-nav-home[aria-current="page"] { background: var(--paper2); box-shadow: inset 0 0 0 2px var(--accent); }
 
 /* Choosing a library: the featured one big, with its picture (or its colour and motif); the others as cards. */
 .ayv .ayv-featured {
@@ -1563,4 +1568,30 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     font-size: 1.15rem; color: var(--accent); text-align: center; }
 .ayv .ayv-credits-portrait { display: block; width: 96px; height: 96px; margin: 1.2rem auto -.4rem; border-radius: 50%;
     background: var(--paper); box-shadow: 0 10px 24px -12px rgba(15, 58, 51, .5), 0 0 0 4px var(--paper); }
+
+/* Choosing a file, in the house's style: a quiet rounded button, not the browser's grey one. */
+.ayv input[type="file"] { font: inherit; color: var(--ink); max-width: 100%; }
+.ayv input[type="file"]::file-selector-button {
+    margin-right: .75rem;
+    padding: .55rem 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    box-shadow: inset 0 0 0 2px var(--accent), 0 4px 12px -8px rgba(15, 58, 51, .5);
+    cursor: pointer;
+}
+.ayv input[type="file"]::file-selector-button:hover { background: var(--paper2); }
+.ayv input[type="file"]:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; border-radius: 999px; }
+/* The headers of Ayvurenda to choose from, as small pictures. */
+.ayv .ayv-scenes { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .6rem; }
+.ayv .ayv-scene { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; border-radius: 12px;
+    overflow: hidden; background: var(--paper2); cursor: pointer; }
+.ayv .ayv-scene img { width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-scene input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.ayv .ayv-scene:has(input:checked) { outline: 3px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-scene:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-scene-none span { font-weight: 700; color: var(--ink); padding: .5rem; text-align: center; }
 
