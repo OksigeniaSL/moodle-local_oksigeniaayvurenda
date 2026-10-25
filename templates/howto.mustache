@@ -1,0 +1,54 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/howto
+
+    How do I…? A search of the staff's tasks, and each task found with its steps, its screen and its guided help.
+
+    Example context (json):
+    {
+        "heading": "¿Cómo hago…?", "intro": "Las tareas de la biblioteca.", "action": "#", "library": "demo-1",
+        "query": "prestar", "label": "¿Qué quieres hacer?", "placeholder": "Por ejemplo", "search": "Buscar",
+        "searched": true, "hasfound": true, "none": "No lo encuentro.", "allheading": "Todas las tareas",
+        "found": [{"title": "Prestar un libro", "steps": [{"step": "Abre el mostrador"}], "url": "#", "help": "#"}],
+        "hasall": true, "all": [{"title": "Prestar un libro", "url": "#"}], "go": "Ir a la pantalla", "helplabel": "Ayuda guiada"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+<form class="ayv-howto-search" role="search" method="get" action="{{action}}">
+    <input type="hidden" name="library" value="{{library}}">
+    <label class="ayv-field ayv-field-wide">{{label}} <input type="search" name="q" value="{{query}}" placeholder="{{placeholder}}" maxlength="200"></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{search}}</button></p>
+</form>
+{{#searched}}{{^hasfound}}<p class="ayv-empty">{{none}}</p>{{/hasfound}}{{/searched}}
+{{#hasfound}}
+<ul class="ayv-howto-list">
+    {{#found}}
+    <li class="ayv-review-card ayv-howto">
+        <h2 class="ayv-section-title">{{title}}</h2>
+        <ol class="ayv-howto-steps">{{#steps}}<li>{{step}}</li>{{/steps}}</ol>
+        <p class="ayv-book-actions"><a class="ayv-button" href="{{url}}">{{go}}</a>
+            {{#help}}<a class="ayv-button ayv-button-quiet" href="{{help}}">{{helplabel}}</a>{{/help}}</p>
+    </li>
+    {{/found}}
+</ul>
+{{/hasfound}}
+{{#hasall}}
+<h2 class="ayv-section-title">{{allheading}}</h2>
+<p class="ayv-subjects">{{#all}}<a class="ayv-chip" href="{{url}}">{{title}}</a> {{/all}}</p>
+{{/hasall}}

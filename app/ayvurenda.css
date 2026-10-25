@@ -1890,3 +1890,32 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 @media (prefers-reduced-motion: no-preference) {
     .ayv .ayv-speak-on svg { animation: ayv-listen 1s ease-in-out infinite; }
 }
+
+/* How do I…? The box at the foot of the staff's screens, and the tasks found, as cards with their steps. */
+.ayv .ayv-howto-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .75rem;
+    margin: 2rem auto 0;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 10px 24px -18px rgba(15, 58, 51, .5);
+}
+.ayv .ayv-howto-box label { font-weight: 700; color: var(--accent); }
+.ayv .ayv-howto-box input[type="search"] {
+    flex: 1 1 16rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: .4rem .85rem;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+}
+.ayv .ayv-howto-search { display: grid; gap: .5rem; margin: 0 0 1.25rem; }
+.ayv .ayv-howto-list { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: 1rem; }
+.ayv .ayv-howto .ayv-section-title { margin: 0; }
+.ayv .ayv-howto-steps { margin: 0; padding-left: 1.4rem; display: grid; gap: .3rem; }

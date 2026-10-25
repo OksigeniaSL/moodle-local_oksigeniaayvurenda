@@ -219,6 +219,7 @@ final class shell {
 <main id="ayv-main" class="ayv-main" tabindex="-1">
 ' . $main . '
 </main>
+' . self::howto_box($library, $base) . '
 <footer class="ayv-foot"><button type="button" class="ayv-foot-credits" data-ayv-credits aria-haspopup="dialog">
 Oksigenia Ayvurenda</button>
 <a class="ayv-exit" href="' . $CFG->wwwroot . '/">' . $str('backto', format_string($SITE->shortname)) . '</a></footer>
@@ -264,6 +265,33 @@ Oksigenia Ayvurenda</button>
 <p class="ayv-credits-dedication">' . $str('creditsdedication') . '</p>
 <form method="dialog"><button class="ayv-button">' . $str('creditsclose') . '</button></form>
 </dialog>';
+    }
+
+    /**
+     * «How do I…?» at the foot of the staff's screens: a question that goes to the guide of tasks.
+     *
+     * @param \stdClass|null $library
+     * @param string $base The address of the plugin, ending in a slash.
+     * @return string
+     */
+    private static function howto_box(?\stdClass $library, string $base): string {
+        global $PAGE;
+        $context = \context_system::instance();
+        $staff = has_capability('local/oksigeniaayvurenda:desk', $context)
+            || has_capability('local/oksigeniaayvurenda:catalogue', $context);
+        $help = optional_param('help', 0, PARAM_BOOL);
+        $here = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/howto.php');
+        if (!$library || !$staff || $help || $here) {
+            return '';
+        }
+        $str = fn(string $key) => s(get_string($key, 'local_oksigeniaayvurenda'));
+        return '<form class="ayv-howto-box" role="search" aria-label="' . $str('howtobox') . '" method="get" action="' . $base .
+            'howto.php">
+<input type="hidden" name="library" value="' . s($library->slug) . '">
+<label for="ayv-howto-q">' . $str('howtobox') . '</label>
+<input id="ayv-howto-q" type="search" name="q" placeholder="' . $str('howtoplaceholder') . '" maxlength="200">
+<button type="submit" class="ayv-button ayv-button-quiet">' . $str('howtosearch') . '</button>
+</form>';
     }
 
     /**
