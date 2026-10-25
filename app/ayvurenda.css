@@ -1844,3 +1844,9 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 }
 .ayv .ayv-review-book { font-weight: 700; color: var(--accent); }
 .ayv .ayv-review-card form { margin-top: .4rem; }
+
+/* The class reward: each challenge met, what the class chose or the form to choose it. */
+.ayv .ayv-reward { margin: 0 0 .9rem; padding: .9rem 1.1rem; border-radius: 16px; background: var(--paper2); }
+.ayv .ayv-reward-label { margin: 0 0 .3rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-reward-state { margin: 0; }
+.ayv .ayv-reward-form { display: grid; gap: .6rem; margin-top: .5rem; }

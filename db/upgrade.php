@@ -256,5 +256,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102833, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102834) {
+        // The books classes choose as the reward for a challenge met.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_wish')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_wish');
+        }
+        upgrade_plugin_savepoint(true, 2026102834, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

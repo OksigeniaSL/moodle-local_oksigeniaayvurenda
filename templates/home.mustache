@@ -81,11 +81,13 @@
         {{#drawing}}<span class="ayv-duo-drawing">{{{drawing}}}</span>{{/drawing}}
         <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span>{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</span>
         <a class="ayv-button" href="{{url}}">{{label}}</a></div>{{/hero.you}}
+    {{#hero.wishherald}}<div class="ayv-duo-card">{{> local_oksigeniaayvurenda/bubble}}</div>{{/hero.wishherald}}
     {{#hero.challenge}}<div class="ayv-duo-card ayv-challenge-card">{{> local_oksigeniaayvurenda/challenge}}</div>{{/hero.challenge}}
 </div>
 <p class="ayv-staff ayv-staff-row">
     {{#desk}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/desk}}
     {{#toread}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/toread}}
+    {{#wishes}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/wishes}}
     {{#shelf}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/shelf}}
     {{^hero.you}}{{#mycard}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/mycard}}{{/hero.you}}
     {{#addbooks}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>

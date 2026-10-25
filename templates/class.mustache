@@ -32,7 +32,10 @@
                 "marks": [{"lit": true}, {"lit": false}], "progresslabel": "1 de 2", "left": "", "complete": false,
                 "herald": null},
             "kinds": [{"value": "corners", "label": "Rincones", "checked": true}],
-            "garden": [{"label": "Trimestre 1 · Rincones"}], "hasgarden": true, "cards": [], "hasreads": false}]
+            "garden": [{"label": "Trimestre 1 · Rincones"}], "hasgarden": true, "cards": [], "hasreads": false,
+            "hasrewards": true, "rewards": [{"challengeid": 4, "label": "Trimestre 1 · Rincones", "ask": true, "state": ""}]}],
+        "rewardheading": "El premio de la clase", "rewardhint": "Más lectura.", "wishtitle": "El libro", "wishnote": "Por qué",
+        "wishnotehint": "Opcional.", "wishsend": "Enviar"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -55,6 +58,22 @@
     <h3 class="ayv-section-title">{{gardenheading}}</h3>
     {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}
     {{^hasgarden}}<p class="ayv-empty">{{gardenempty}}</p>{{/hasgarden}}
+    {{#hasrewards}}
+    <h3 class="ayv-section-title">{{rewardheading}}</h3>
+    <p class="ayv-field-hint">{{rewardhint}}</p>
+    {{#rewards}}<div class="ayv-reward">
+        <p class="ayv-reward-label">{{label}}</p>
+        {{#state}}<p class="ayv-reward-state">{{state}}</p>{{/state}}
+        {{#ask}}<form method="post" action="{{action}}" class="ayv-reward-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
+            <input type="hidden" name="challengeid" value="{{challengeid}}"><input type="hidden" name="do" value="wish">
+            <label class="ayv-field ayv-field-wide">{{wishtitle}} <input type="text" name="title" maxlength="255" required></label>
+            <label class="ayv-field ayv-field-wide">{{wishnote}} <span class="ayv-field-hint">{{wishnotehint}}</span>
+                <input type="text" name="note" maxlength="255"></label>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{wishsend}}</button></p>
+        </form>{{/ask}}
+    </div>{{/rewards}}
+    {{/hasrewards}}
     <h3 class="ayv-section-title">{{readsheading}}</h3>
     <p class="ayv-field-hint">{{readshint}}</p>
     {{#hasreads}}<div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>{{/hasreads}}

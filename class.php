@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\challenges;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\wishes;
 use local_oksigeniaayvurenda\local\years;
 
 require(__DIR__ . '/../../config.php');
@@ -56,10 +57,25 @@ if ($asked !== '' && !in_array($asked, $groups, true) && has_capability('local/o
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $group = required_param('group', PARAM_TEXT);
-    $kind = required_param('challenge', PARAM_ALPHA);
-    if (in_array($group, $groups, true) && ($kind === 'off' || isset(challenges::KINDS[$kind]))) {
-        challenges::choose($entityid, $group, $kind, $now);
-        $notice = $str('challengesaved');
+    if (in_array($group, $groups, true) && optional_param('do', '', PARAM_ALPHA) === 'wish') {
+        // The book the class chose for a challenge it met.
+        $challengeid = required_param('challengeid', PARAM_INT);
+        $theirs = $DB->record_exists('local_oksigeniaayvurenda_challenge', ['id' => $challengeid, 'groupname' => $group]);
+        if (
+            $theirs && wishes::ask($entityid, $challengeid, required_param('title', PARAM_TEXT), optional_param(
+                'note',
+                '',
+                PARAM_TEXT
+            ), (int) $USER->id, $now)
+        ) {
+            $notice = $str('wishsaved');
+        }
+    } else if (in_array($group, $groups, true)) {
+        $kind = required_param('challenge', PARAM_ALPHA);
+        if ($kind === 'off' || isset(challenges::KINDS[$kind])) {
+            challenges::choose($entityid, $group, $kind, $now);
+            $notice = $str('challengesaved');
+        }
     }
 }
 
@@ -78,6 +94,18 @@ foreach ($groups as $i => $group) {
         challenges::garden($entityid, $group, $now)
     );
     $reads = screens::cards(catalogue::class_reads($library, $group, (int) $year->id, $now), $library);
+    // Each challenge met is rewarded with more reading: the class chooses the next book.
+    $rewards = [];
+    foreach (wishes::rewards($entityid, $group, $now) as $reward) {
+        $wish = $reward['wish'];
+        $rewards[] = [
+            'challengeid' => (int) $reward['challenge']->id,
+            'label' => $str('challengeplanted', $reward['challenge']->term) . ' · ' .
+                $str('challengekind' . $reward['challenge']->kind),
+            'ask' => !$wish || $wish->status === 'declined',
+            'state' => $wish ? $str('wishstate' . $wish->status, format_string($wish->title)) : '',
+        ];
+    }
     $data[] = [
         'index' => $i,
         'group' => $group,
@@ -89,6 +117,8 @@ foreach ($groups as $i => $group) {
         'hasgarden' => (bool) $garden,
         'cards' => $reads,
         'hasreads' => (bool) $reads,
+        'rewards' => $rewards,
+        'hasrewards' => (bool) $rewards,
     ];
 }
 
@@ -110,4 +140,10 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
     'readsempty' => $str('classreadsempty'),
     'shelfprev' => $str('shelfprev'),
     'shelfnext' => $str('shelfnext'),
+    'rewardheading' => $str('rewardheading'),
+    'rewardhint' => $str('rewardhint'),
+    'wishtitle' => $str('wishtitle'),
+    'wishnote' => $str('wishnote'),
+    'wishnotehint' => $str('wishnotehint'),
+    'wishsend' => $str('wishsend'),
 ]), $library, '', ['search' => false]);

@@ -53,12 +53,16 @@ final class screens {
         $hero = self::hero($library);
         $desk = null;
         $toread = null;
+        $wishes = null;
         if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
             $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
             // The reviews waiting for the library, only when there are some.
             $waiting = reviews::waiting((int) $library->entityid);
             $toread = $waiting ? ['url' => self::url('reviews.php', $library), 'label' => self::str('reviewswaiting', $waiting)]
                 : null;
+            // The books classes chose as their reward, until the library gets them.
+            $asked = wishes::waiting((int) $library->entityid);
+            $wishes = $asked ? ['url' => self::url('wishes.php', $library), 'label' => self::str('wisheswaiting', $asked)] : null;
         }
         $addbooks = null;
         if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
@@ -86,6 +90,7 @@ final class screens {
             'shelf' => $shelf,
             'desk' => $desk,
             'toread' => $toread,
+            'wishes' => $wishes,
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
             'addbooks' => $addbooks,
             'mycard' => self::mycard($library),
@@ -555,6 +560,7 @@ final class screens {
             'young' => false,
             'heraldsex' => 'm',
             'listenquestion' => null,
+            'wishherald' => null,
         ];
         if (!$reader) {
             return $hero;
@@ -604,6 +610,10 @@ final class screens {
                     ['ui/{lang}/challengeheading', 'ui/{lang}/challenge' . $challenge->kind]
                 );
             }
+            // The book the class chose as its reward is here: the herald tells.
+            $arrived = wishes::arrived((int) $library->entityid, (string) $member->groupname);
+            $hero['wishherald'] = $arrived !== null
+                ? characters::say((int) $library->entityid, 'herald', 'heraldwish', ['title' => $arrived]) : null;
             $hero['classreads'] = self::cards(catalogue::class_reads(
                 $library,
                 (string) $member->groupname,

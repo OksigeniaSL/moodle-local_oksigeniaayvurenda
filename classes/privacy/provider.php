@@ -146,6 +146,13 @@ class provider implements
             'decidedby' => 'privacy:metadata:review:decidedby',
             'timecreated' => 'privacy:metadata:review:timecreated',
         ], 'privacy:metadata:review');
+        $collection->add_database_table(self::T . 'wish', [
+            'userid' => 'privacy:metadata:wish:userid',
+            'title' => 'privacy:metadata:wish:title',
+            'note' => 'privacy:metadata:wish:note',
+            'decidedby' => 'privacy:metadata:wish:decidedby',
+            'timecreated' => 'privacy:metadata:wish:timecreated',
+        ], 'privacy:metadata:wish');
         $collection->add_database_table(self::T . 'lot', [
             'createdby' => 'privacy:metadata:lot:createdby',
             'name' => 'privacy:metadata:lot:name',
@@ -228,6 +235,8 @@ class provider implements
         $userlist->add_from_sql('notedby', 'SELECT notedby FROM {' . self::T . 'voiceconsent} WHERE notedby IS NOT NULL', []);
         $userlist->add_from_sql('invitedby', 'SELECT invitedby FROM {' . self::T . 'voiceinvite} WHERE invitedby IS NOT NULL', []);
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'review} WHERE decidedby IS NOT NULL', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'wish} WHERE userid IS NOT NULL', []);
+        $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'wish} WHERE decidedby IS NOT NULL', []);
     }
 
     /**
@@ -297,6 +306,15 @@ class provider implements
             ['a' => $userid, 'b' => $userid],
             'timeloaned'
         );
+        // The books they asked for as the tutor of a class that met its challenge.
+        $wishes = $DB->get_records(self::T . 'wish', ['userid' => $userid], 'timecreated');
+        if ($wishes) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:wishes', 'local_oksigeniaayvurenda')]),
+                (object) ['wishes' => array_values(array_map(fn($w) => ['title' => $w->title, 'note' => $w->note,
+                    'status' => $w->status, 'asked' => transform::datetime($w->timecreated)], $wishes))]
+            );
+        }
         if ($handled) {
             writer::with_context($context)->export_data(
                 array_merge($base, [get_string('privacy:path:desk', 'local_oksigeniaayvurenda')]),
@@ -430,6 +448,8 @@ class provider implements
         $DB->delete_records(self::T . 'voiceconsent');
         $DB->delete_records(self::T . 'voiceinvite');
         $DB->delete_records(self::T . 'review');
+        $DB->set_field_select(self::T . 'wish', 'userid', null, 'userid IS NOT NULL');
+        $DB->set_field_select(self::T . 'wish', 'decidedby', null, 'decidedby IS NOT NULL');
     }
 
     /**
@@ -506,6 +526,8 @@ class provider implements
         $DB->set_field(self::T . 'voiceconsent', 'notedby', null, ['notedby' => $userid]);
         $DB->set_field(self::T . 'voiceinvite', 'invitedby', null, ['invitedby' => $userid]);
         $DB->set_field(self::T . 'review', 'decidedby', null, ['decidedby' => $userid]);
+        $DB->set_field(self::T . 'wish', 'userid', null, ['userid' => $userid]);
+        $DB->set_field(self::T . 'wish', 'decidedby', null, ['decidedby' => $userid]);
     }
 
     /**
@@ -537,7 +559,9 @@ class provider implements
             $DB->record_exists(self::T . 'digitalread', ['userid' => $userid]) ||
             $DB->record_exists(self::T . 'voiceconsent', ['notedby' => $userid]) ||
             $DB->record_exists(self::T . 'voiceinvite', ['invitedby' => $userid]) ||
-            $DB->record_exists(self::T . 'review', ['decidedby' => $userid])
+            $DB->record_exists(self::T . 'review', ['decidedby' => $userid]) ||
+            $DB->record_exists(self::T . 'wish', ['userid' => $userid]) ||
+            $DB->record_exists(self::T . 'wish', ['decidedby' => $userid])
         ) {
             return true;
         }
