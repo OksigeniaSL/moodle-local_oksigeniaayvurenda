@@ -17,6 +17,7 @@
     --line: rgba(30, 43, 42, .14);
     --accent: #17574c;
     --surface: #fff;
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317574c' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     --muted: #8b9591;
     --chip-hover: #e8dcc6;
     --late: #a3321e;
@@ -49,6 +50,7 @@ html[data-bs-theme="dark"] .ayv {
     --line: rgba(236, 228, 212, .16);
     --accent: #8fd3c1;
     --surface: #142624;
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238fd3c1' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     --muted: #9aa6a2;
     --chip-hover: #26423c;
     --late: #ff9f8a;
@@ -639,14 +641,44 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-field input[type="password"],
 .ayv .ayv-source select,
 .ayv .ayv-field select {
-    min-height: 40px;
-    padding: .25rem .6rem;
+    min-height: 44px;
+    padding: .4rem .85rem;
     font: inherit;
     color: var(--ink);
     border: 2px solid var(--line);
-    border-radius: 8px;
-    background: var(--paper);
+    border-radius: 12px;
+    background-color: var(--surface);
+    transition: border-color .15s ease;
 }
+
+/* The house's dropdown: no browser arrow, a soft chevron of ours, and room for it. */
+.ayv .ayv-source select,
+.ayv .ayv-field select {
+    appearance: none;
+    padding-right: 2.6rem;
+    background-image: var(--chevron);
+    background-repeat: no-repeat;
+    background-position: right .8rem center;
+    background-size: 1.1rem;
+    cursor: pointer;
+}
+
+.ayv .ayv-field select:hover,
+.ayv .ayv-source select:hover,
+.ayv .ayv-field textarea:hover,
+.ayv .ayv-field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):hover { border-color: var(--accent); }
+
+.ayv .ayv-field select:focus-visible,
+.ayv .ayv-source select:focus-visible,
+.ayv .ayv-field textarea:focus-visible,
+.ayv .ayv-field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible {
+    border-color: var(--accent);
+    border-radius: 12px;
+}
+
+/* A date as three dropdowns (day, month by its name, year) in the library's language, not the browser's. */
+.ayv .ayv-date { display: inline-flex; flex-wrap: wrap; gap: .4rem; }
+.ayv .ayv-date select { min-width: 0; }
 
 .ayv input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--accent); }
 
@@ -731,15 +763,17 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-field-wide input, .ayv .ayv-field-wide textarea, .ayv .ayv-field-wide select { flex: 1 1 16rem; }
 
 .ayv .ayv-field input[type="number"],
+.ayv .ayv-field input[type="date"],
 .ayv .ayv-field textarea,
 .ayv .ayv-spine input {
-    min-height: 40px;
-    padding: .25rem .6rem;
+    min-height: 44px;
+    padding: .4rem .85rem;
     font: inherit;
     color: var(--ink);
     border: 2px solid var(--line);
-    border-radius: 8px;
-    background: var(--paper);
+    border-radius: 12px;
+    background-color: var(--surface);
+    transition: border-color .15s ease;
 }
 
 .ayv .ayv-field input[type="number"] { width: 5rem; }
@@ -1610,3 +1644,135 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-scene:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
 .ayv .ayv-scene-none span { font-weight: 700; color: var(--ink); padding: .5rem; text-align: center; }
 
+
+/* The libraries page: each centre with its libraries as cards (its picture or its colour, its groups, its copies),
+   a dashed card to add one, and every form in a sheet over the page. */
+.ayv .ayv-entity { margin: 1.5rem 0 2.25rem; }
+.ayv .ayv-entity-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+.ayv .ayv-entity-head .ayv-section-title { margin: 0; }
+.ayv .ayv-entity-demo {
+    display: inline-block;
+    margin-left: .4rem;
+    padding: .1rem .65rem;
+    border-radius: 999px;
+    background: var(--paper2);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+.ayv .ayv-libcards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+}
+.ayv .ayv-libcard {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-radius: 22px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: 0 12px 28px -20px rgba(15, 58, 51, .55);
+}
+.ayv .ayv-libcard-top { height: 7.5rem; }
+.ayv .ayv-libcard-top img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-libcard-body { flex: 1; display: grid; align-content: start; gap: .35rem; padding: 1rem 1.15rem .5rem; }
+.ayv .ayv-libcard-seat {
+    justify-self: start;
+    padding: .15rem .7rem;
+    border-radius: 999px;
+    background: var(--sun);
+    color: #1e2b2a;
+    font-size: .8rem;
+    font-weight: 700;
+}
+.ayv .ayv-libcard-name { margin: 0; font-family: var(--title); font-size: 1.3rem; line-height: 1.2; overflow-wrap: anywhere; }
+.ayv .ayv-libcard-name a { color: var(--accent); text-decoration: none; }
+.ayv .ayv-libcard-name a:hover { text-decoration: underline; }
+.ayv .ayv-libcard-kind { margin: 0; font-size: .95rem; }
+.ayv .ayv-libcard-address { margin-left: .35rem; opacity: .78; overflow-wrap: anywhere; }
+.ayv .ayv-libcard-groups { list-style: none; margin: .15rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .3rem; }
+.ayv .ayv-libcard-groups li { padding: .1rem .6rem; border-radius: 999px; background: var(--paper2); font-size: .85rem; }
+.ayv .ayv-libcard-count { margin: .3rem 0 0; font-size: .95rem; }
+.ayv .ayv-libcard-count strong { font-family: var(--title); font-size: 1.6rem; color: var(--accent); }
+.ayv .ayv-libcard-actions { display: flex; flex-wrap: wrap; gap: .5rem; padding: .5rem 1.15rem 1.15rem; }
+.ayv .ayv-libcard-new {
+    background: transparent;
+    box-shadow: none;
+    border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.ayv .ayv-libcard-new:hover { border-color: var(--accent); background: var(--surface); }
+.ayv .ayv-libcard-new button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    min-height: 14rem;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-libcard-new svg { width: 34px; height: 34px; }
+.ayv .ayv-libraries-more { margin: 0 0 2rem; }
+.ayv .ayv-modal {
+    width: min(44rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 0 1.5rem 1.5rem;
+    border: 0;
+    border-radius: 22px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 24px 60px -20px rgba(15, 58, 51, .55);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 35%, transparent) transparent;
+}
+.ayv .ayv-modal::backdrop { background: rgba(15, 30, 27, .45); }
+.ayv .ayv-modal-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 0 .75rem;
+    background: var(--surface);
+}
+.ayv .ayv-modal-head .ayv-section-title { margin: 0; overflow-wrap: anywhere; }
+.ayv .ayv-modal .ayv-modal-head form { display: block; margin: 0; }
+.ayv .ayv-modal-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--paper2);
+    color: var(--ink);
+    cursor: pointer;
+}
+.ayv .ayv-modal-close:hover { background: var(--chip-hover); }
+.ayv .ayv-modal-part { margin: .25rem 0 0; font-size: 1rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-modal .ayv-library-look { margin-top: 1.25rem; }
+@media (max-width: 40rem) {
+    .ayv .ayv-libcard-new button { flex-direction: row; min-height: 5rem; }
+    .ayv .ayv-libcard-new svg { width: 24px; height: 24px; }
+}

@@ -55,6 +55,13 @@ for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
     $steps[] = $str(sprintf('help%s%02d', $piece, $i));
 }
 $code = fn(int $number) => control_letter::append((string) $number);
+// The voice of each step, from the art package (voz/<piece>/<language>/<nn>.mp3); a step without it is only read.
+$art = core_component::get_component_directory('local_oksigeniaayvurendaarte');
+$voices = [];
+for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
+    $file = sprintf('/voz/%s/%s/%02d.mp3', $piece, substr(current_language(), 0, 2), $i);
+    $voices[] = $art && is_readable($art . $file) ? (new moodle_url('/local/oksigeniaayvurendaarte' . $file))->out(false) : null;
+}
 $back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' => $library->slug]);
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <h1 id="ayv-help-title" class="ayv-results-title">' . s($str('helptitle' . $piece)) . '</h1>
@@ -77,7 +84,8 @@ $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 </div>
 <p class="ayv-help-caption" id="ayv-help-caption" role="status" aria-live="polite"></p>
 <p class="ayv-help-actions"><button type="button" class="ayv-toggle" id="ayv-help-skip">' . s($str('helpskip')) .
-    '</button></p>
+    '</button>' . (array_filter($voices) ? ' <button type="button" class="ayv-toggle" id="ayv-help-voice" aria-pressed="true">' .
+    s($str('helpvoice')) . '</button>' : '') . '</p>
 </section>';
 shell::output($str('helptitle' . $piece), $main, $library, '', [
     'search' => false,
@@ -95,6 +103,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             )] : [])
         ))->out(false),
         'steps' => $steps,
+        'voices' => $voices,
         'now' => $str('helpnow'),
         'codes' => [
             'ana' => $code(practice::READERS[0][0]),

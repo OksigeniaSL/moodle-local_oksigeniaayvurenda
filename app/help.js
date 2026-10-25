@@ -43,6 +43,44 @@
             setTimeout(resolve, skipping ? 0 : ms);
         });
     };
+    // The voice of each step, when the art package brings it; the caption stays, and «Voice» turns it off (remembered
+    // in this browser).
+    var voices = config.voices || [];
+    var muted = false;
+    try {
+        muted = window.localStorage.getItem('ayv-help-voice') === 'off';
+    } catch (e) {
+        muted = false;
+    }
+    var playing = null;
+    var hush = function() {
+        if (playing) {
+            playing.pause();
+            playing.dispatchEvent(new Event('ended'));
+        }
+    };
+    var speak = function(index) {
+        var url = voices[index];
+        if (!url || muted || skipping) {
+            return null;
+        }
+        return new Promise(function(resolve) {
+            var audio = new Audio(url);
+            playing = audio;
+            audio.addEventListener('ended', function() {
+                if (playing === audio) {
+                    playing = null;
+                }
+                resolve(true);
+            }, {once: true});
+            audio.addEventListener('error', function() {
+                resolve(false);
+            }, {once: true});
+            audio.play().catch(function() {
+                resolve(false);
+            });
+        });
+    };
     var doc = function() {
         return frame.contentDocument;
     };
@@ -78,8 +116,13 @@
         say: function(index) {
             var text = config.steps[index] || '';
             caption.textContent = text;
-            // Time to read it: about a word every quarter of a second, never less than two seconds.
-            return sleep(Math.max(2200, text.split(/\s+/).length * 260));
+            // Time to read it: about a word every quarter of a second, never less than two seconds. With a voice, until
+            // it has finished, and a breath.
+            var reading = sleep(Math.max(2200, text.split(/\s+/).length * 260));
+            var voice = speak(index);
+            return voice ? voice.then(function(spoke) {
+                return spoke ? sleep(350) : reading;
+            }) : reading;
         },
         point: function(selector) {
             return wait(selector).then(function(element) {
@@ -174,6 +217,7 @@
         // «Now you»: a ring round the button, and nothing moves until it is tapped.
         you: function(index, selector) {
             caption.textContent = config.now + ' ' + (config.steps[index] || '');
+            speak(index);
             return wait(selector).then(function(element) {
                 element.scrollIntoView({block: 'nearest'});
                 var at = place(element);
@@ -234,7 +278,24 @@
     });
     document.getElementById('ayv-help-skip').addEventListener('click', function() {
         skipping = true;
+        hush();
     });
+    var voiceButton = document.getElementById('ayv-help-voice');
+    if (voiceButton) {
+        voiceButton.setAttribute('aria-pressed', muted ? 'false' : 'true');
+        voiceButton.addEventListener('click', function() {
+            muted = !muted;
+            voiceButton.setAttribute('aria-pressed', muted ? 'false' : 'true');
+            if (muted) {
+                hush();
+            }
+            try {
+                window.localStorage.setItem('ayv-help-voice', muted ? 'off' : 'on');
+            } catch (e) {
+                // Without storage, it only lasts this visit.
+            }
+        });
+    }
     if (config.auto) {
         run();
     }

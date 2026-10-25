@@ -30,6 +30,8 @@
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
             "libraries": [{"id": 1, "name": "Biblioteca central", "rawname": "Biblioteca central", "url": "#",
                 "address": "/central", "kindlabel": "Central", "copies": "Ejemplares: 600", "group": "",
+                "colour": 2, "hascardimage": false, "featured": true, "count": "600", "countword": "ejemplares",
+                "hasgroupchips": true, "groupchips": [{"chip": "4º B"}],
                 "kinds": [{"value": "central", "label": "Central", "selected": true}], "parents": [], "groups": [], "hasgroups": false,
                 "canremove": false}]}],
         "librariesfirst": "Tu centro", "librariesfirsthint": "Para empezar", "librariesentityname": "Nombre del centro",
@@ -40,22 +42,39 @@
         "librariesslughint": "Se hace sola", "librariesgroup": "Grupos",
         "librariessave": "Guardar", "librariesremove": "Quitarla", "librariesanother": "Otro centro en este sitio",
         "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro",
-        "librariescardlooks": "El carné por etapas", "librariescardlookshint": "Automático, según la etapa"
+        "librariescardlooks": "El carné por etapas", "librariescardlookshint": "Automático, según la etapa",
+        "librariesenter": "Entrar", "librariesseat": "Sede principal", "librariesclose": "Cerrar",
+        "librariesdata": "Nombre, tipo y grupos"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#entities}}
-<section class="ayv-book ayv-entity">
-    <h2 class="ayv-section-title">{{name}}{{#demo}} <span class="ayv-field-hint">({{librariesdemo}})</span>{{/demo}}</h2>
-    <ul class="ayv-holds">
+<section class="ayv-entity" aria-labelledby="ayv-entity-{{id}}-name">
+    <div class="ayv-entity-head">
+        <h2 id="ayv-entity-{{id}}-name" class="ayv-section-title">{{name}}{{#demo}} <span class="ayv-entity-demo">{{librariesdemo}}</span>{{/demo}}</h2>
+        <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-entity-{{id}}">{{> local_oksigeniaayvurenda/icon_settings}} {{librariesentity}}</button>
+    </div>
+    <ul class="ayv-libcards">
     {{#libraries}}
-        <li class="ayv-holds-row">
-            <a class="ayv-holds-title" href="{{url}}">{{name}}</a>
-            <span class="ayv-holds-who">{{kindlabel}}{{#group}} · {{group}}{{/group}} · {{address}}</span>
-            <span class="ayv-holds-when">{{copies}}</span>
-            <details class="ayv-entity-edit"><summary>{{librariesedit}}</summary>
+        <li class="ayv-libcard">
+            <div class="ayv-libcard-top ayv-cover-{{colour}}">{{#hascardimage}}<img src="{{cardimage}}" alt="" loading="lazy">{{/hascardimage}}</div>
+            <div class="ayv-libcard-body">
+                {{#featured}}<span class="ayv-libcard-seat">{{librariesseat}}</span>{{/featured}}
+                <h3 class="ayv-libcard-name"><a href="{{url}}">{{name}}</a></h3>
+                <p class="ayv-libcard-kind">{{kindlabel}} <span class="ayv-libcard-address">{{address}}</span></p>
+                {{#hasgroupchips}}<ul class="ayv-libcard-groups">{{#groupchips}}<li>{{chip}}</li>{{/groupchips}}</ul>{{/hasgroupchips}}
+                <p class="ayv-libcard-count"><strong>{{count}}</strong> {{countword}}</p>
+            </div>
+            <div class="ayv-libcard-actions">
+                <a class="ayv-button" href="{{url}}">{{librariesenter}}</a>
+                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-library-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{librariesedit}}</button>
+            </div>
+            <dialog class="ayv-modal ayv-entity-edit" id="ayv-library-{{id}}" aria-labelledby="ayv-library-{{id}}-title">
+                <div class="ayv-modal-head"><h3 id="ayv-library-{{id}}-title" class="ayv-section-title">{{name}}</h3>
+                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{librariesclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                <h4 class="ayv-modal-part">{{librariesdata}}</h4>
                 <form method="post" action="{{action}}">
                     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{id}}">
                     <label class="ayv-field">{{librariesname}} <input type="text" name="name" value="{{rawname}}" maxlength="255" required></label>
@@ -86,11 +105,14 @@
                     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="look">{{librariessave}}</button></p>
                 </form>
                 {{/look}}
-            </details>
+            </dialog>
         </li>
     {{/libraries}}
+        <li class="ayv-libcard ayv-libcard-new"><button type="button" data-ayv-open="ayv-add-{{id}}">{{> local_oksigeniaayvurenda/icon_plus}} <span>{{librariesadd}}</span></button></li>
     </ul>
-    <details class="ayv-entity-edit"><summary>{{librariesadd}}</summary>
+    <dialog class="ayv-modal ayv-entity-edit" id="ayv-add-{{id}}" aria-labelledby="ayv-add-{{id}}-title">
+        <div class="ayv-modal-head"><h3 id="ayv-add-{{id}}-title" class="ayv-section-title">{{librariesadd}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{librariesclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
         <form method="post" action="{{action}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="entity" value="{{id}}">
             <label class="ayv-field">{{librariesname}} <input type="text" name="name" maxlength="255" required></label>
@@ -100,8 +122,10 @@
             <label class="ayv-field">{{librariesslug}} <span class="ayv-field-hint">{{librariesslughint}}</span> <input type="text" name="slug" maxlength="64" pattern="[a-z0-9-]*"></label>
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="newlibrary">{{librariescreate}}</button></p>
         </form>
-    </details>
-    <details class="ayv-entity-edit"><summary>{{librariesentity}}</summary>
+    </dialog>
+    <dialog class="ayv-modal ayv-entity-edit" id="ayv-entity-{{id}}" aria-labelledby="ayv-entity-{{id}}-title">
+        <div class="ayv-modal-head"><h3 id="ayv-entity-{{id}}-title" class="ayv-section-title">{{librariesentity}}: {{name}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{librariesclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
         <form method="post" action="{{action}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="entity" value="{{id}}">
             <label class="ayv-field">{{librariesentityname}} <input type="text" name="name" value="{{rawname}}" maxlength="255" required></label>
@@ -115,17 +139,15 @@
             </fieldset>
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="entity">{{librariessave}}</button></p>
         </form>
-    </details>
+    </dialog>
 </section>
 {{/entities}}
-<form method="post" action="{{action}}" class="ayv-book">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <h2 class="ayv-section-title">{{#none}}{{librariesfirst}}{{/none}}{{^none}}{{librariesanother}}{{/none}}</h2>
-    {{#none}}<p>{{librariesfirsthint}}</p>{{/none}}
-    <label class="ayv-field">{{librariesentityname}} <input type="text" name="name" maxlength="255" required></label>
-    <label class="ayv-field">{{librarieslibraryname}} <input type="text" name="library" maxlength="255"></label>
-    <label class="ayv-field">{{librariesyearstart}} <span class="ayv-field-hint">{{librariesyearstarthint}}</span> <input type="text" name="yearstart" value="09-01" maxlength="5" pattern="[0-9]{2}-[0-9]{2}"></label>
-    <label class="ayv-field">{{librariesclassification}} <select name="classification">{{#newclassifications}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/newclassifications}}</select></label>
-    <label class="ayv-field ayv-field-check"><input type="checkbox" name="controlletter" value="1"> {{librariescontrolletter}}</label>
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="newentity">{{librariescreate}}</button></p>
-</form>
+{{#none}}{{> local_oksigeniaayvurenda/libraries_newentity}}{{/none}}
+{{^none}}
+<p class="ayv-libraries-more"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-newentity">{{> local_oksigeniaayvurenda/icon_plus}} {{librariesanother}}</button></p>
+<dialog class="ayv-modal ayv-entity-edit" id="ayv-newentity" aria-labelledby="ayv-newentity-title">
+    <div class="ayv-modal-head"><h2 id="ayv-newentity-title" class="ayv-section-title">{{librariesanother}}</h2>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{librariesclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    {{> local_oksigeniaayvurenda/libraries_newentity}}
+</dialog>
+{{/none}}

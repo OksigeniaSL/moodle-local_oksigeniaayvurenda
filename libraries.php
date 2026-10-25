@@ -116,7 +116,17 @@ foreach (libraries::all() as $one) {
     $libs = [];
     foreach ($one['libraries'] as $library) {
         $lgroups = \local_oksigeniaayvurenda\local\shelf::groups($library);
+        $card = libraries::look($library);
         $libs[] = [
+            // The card: its colour or its picture, whether it is the main seat, its groups and its copies.
+            'colour' => $card['colour'],
+            'hascardimage' => $card['image'] !== null,
+            'cardimage' => (string) $card['image'],
+            'featured' => $card['featured'],
+            'groupchips' => array_map(fn($g) => ['chip' => $g], $lgroups),
+            'hasgroupchips' => (bool) $lgroups,
+            'count' => number_format((int) $library->copies, 0, '', get_string('thousandssep', 'langconfig')),
+            'countword' => $str((int) $library->copies === 1 ? 'librariescopyone' : 'librariescopymany'),
             'id' => (int) $library->id,
             'name' => format_string($library->name),
             'rawname' => $library->name,
@@ -191,7 +201,8 @@ foreach (
         'librariesgroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
         'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint', 'librarieslook',
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
-        'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene'] as $key
+        'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
+        'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata'] as $key
 ) {
     $data[$key] = $str($key);
 }

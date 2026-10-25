@@ -63,6 +63,122 @@
             show();
         });
     }
+    // Dates as three dropdowns (day, month by its name, year) in the library's language: the browser's date field writes
+    // the date its own way (mm/dd/yyyy in an English browser). The field stays, hidden, and carries the value.
+    var dateParts = function(lang) {
+        try {
+            var name = new Intl.DateTimeFormat(lang, {month: 'long', timeZone: 'UTC'});
+            var months = [];
+            for (var m = 0; m < 12; m++) {
+                months.push(name.format(new Date(Date.UTC(2026, m, 15))));
+            }
+            var order = new Intl.DateTimeFormat(lang, {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'})
+                .formatToParts(new Date(Date.UTC(2026, 8, 15))).map(function(part) {
+                    return part.type;
+                }).filter(function(type) {
+                    return type === 'day' || type === 'month' || type === 'year';
+                });
+            return order.length === 3 ? {months: months, order: order} : null;
+        } catch (e) {
+            return null;
+        }
+    };
+    var parts = config.dateday ? dateParts(document.documentElement.lang || 'en') : null;
+    if (parts) {
+        var pad = function(n) {
+            return (n < 10 ? '0' : '') + n;
+        };
+        document.querySelectorAll('input[type="date"]').forEach(function(input) {
+            var now = new Date().getFullYear();
+            var value = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input.value);
+            var low = parseInt((input.min || '').slice(0, 4), 10) || now - 10;
+            var high = parseInt((input.max || '').slice(0, 4), 10) || now + 2;
+            if (value) {
+                low = Math.min(low, +value[1]);
+                high = Math.max(high, +value[1]);
+            }
+            var label = input.closest('label');
+            var said = label ? label.textContent.trim() : '';
+            var box = document.createElement('span');
+            box.className = 'ayv-date';
+            var lists = {};
+            var options = {
+                day: function(add) {
+                    for (var d = 1; d <= 31; d++) {
+                        add(String(d), String(d));
+                    }
+                },
+                month: function(add) {
+                    parts.months.forEach(function(month, i) {
+                        add(String(i + 1), month);
+                    });
+                },
+                year: function(add) {
+                    for (var y = low; y <= high; y++) {
+                        add(String(y), String(y));
+                    }
+                }
+            };
+            var sync = function() {
+                var y = lists.year.value, m = lists.month.value, d = lists.day.value;
+                if (y && m && d) {
+                    var last = new Date(Date.UTC(+y, +m, 0)).getUTCDate();
+                    if (+d > last) {
+                        d = String(last);
+                        lists.day.value = d;
+                    }
+                    input.value = y + '-' + pad(+m) + '-' + pad(+d);
+                } else {
+                    input.value = '';
+                }
+                input.dispatchEvent(new Event('change', {bubbles: true}));
+            };
+            parts.order.forEach(function(part) {
+                var list = document.createElement('select');
+                list.setAttribute('aria-label', (said ? said + ' · ' : '') + config['date' + part]);
+                list.required = input.required;
+                var add = function(v, text) {
+                    var option = document.createElement('option');
+                    option.value = v;
+                    option.textContent = text;
+                    list.appendChild(option);
+                };
+                if (!input.required) {
+                    add('', '—');
+                }
+                options[part](add);
+                if (value) {
+                    list.value = String(+value[{year: 1, month: 2, day: 3}[part]]);
+                }
+                list.addEventListener('change', sync);
+                lists[part] = list;
+                box.appendChild(list);
+            });
+            input.parentNode.insertBefore(box, input);
+            input.type = 'hidden';
+            box.appendChild(input);
+        });
+    }
+    // Sheets: a form over the page, opened by its button. They close with their cross, Escape or a click outside the
+    // sheet (not in its margin, which is still the dialog: what was typed is not lost by a near miss).
+    document.querySelectorAll('[data-ayv-open]').forEach(function(button) {
+        var sheet = document.getElementById(button.getAttribute('data-ayv-open'));
+        if (!sheet || !sheet.showModal) {
+            return;
+        }
+        button.addEventListener('click', function() {
+            sheet.showModal();
+        });
+    });
+    document.querySelectorAll('dialog.ayv-modal').forEach(function(sheet) {
+        sheet.addEventListener('click', function(event) {
+            var box = sheet.getBoundingClientRect();
+            if (event.target === sheet && (event.clientX < box.left || event.clientX > box.right ||
+                    event.clientY < box.top || event.clientY > box.bottom)) {
+                sheet.close();
+            }
+        });
+    });
     // The shelves slide without a scrollbar: two arrows, shown when there is more that way.
     document.querySelectorAll('.ayv-wood').forEach(function(wood) {
         var list = wood.querySelector('.ayv-cards');

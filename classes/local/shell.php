@@ -122,6 +122,9 @@ final class shell {
             // The words of the file button, in the library's language and not the browser's.
             'filechoose' => get_string('filechoose', 'local_oksigeniaayvurenda'),
             'filenone' => get_string('filenone', 'local_oksigeniaayvurenda'),
+            'dateday' => get_string('dateday', 'local_oksigeniaayvurenda'),
+            'datemonth' => get_string('datemonth', 'local_oksigeniaayvurenda'),
+            'dateyear' => get_string('dateyear', 'local_oksigeniaayvurenda'),
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
         $scripts = '';
         foreach ($options['scripts'] ?? [] as $script) {

@@ -171,7 +171,7 @@ window.AYVHelpPieces = {
         return h.point('.ayv-tabs').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('input[name="from"]');
+            return h.point('label:has(input[name="from"])');
         }).then(function() {
             return h.say(1);
         }).then(function() {
