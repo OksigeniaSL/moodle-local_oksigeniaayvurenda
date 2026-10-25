@@ -44,7 +44,7 @@
         "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro",
         "librariescardlooks": "El carné por etapas", "librariescardlookshint": "Automático, según la etapa",
         "librariesenter": "Entrar", "librariesseat": "Sede principal", "librariesclose": "Cerrar",
-        "librariesdata": "Nombre, tipo y grupos"
+        "librariesdata": "Nombre, tipo y grupos", "librariescentre": "Centro"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -53,6 +53,7 @@
 {{#entities}}
 <section class="ayv-entity" aria-labelledby="ayv-entity-{{id}}-name">
     <div class="ayv-entity-head">
+        <p class="ayv-entity-kicker">{{librariescentre}}</p>
         <h2 id="ayv-entity-{{id}}-name" class="ayv-section-title">{{name}}{{#demo}} <span class="ayv-entity-demo">{{librariesdemo}}</span>{{/demo}}</h2>
         <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-entity-{{id}}">{{> local_oksigeniaayvurenda/icon_settings}} {{librariesentity}}</button>
     </div>

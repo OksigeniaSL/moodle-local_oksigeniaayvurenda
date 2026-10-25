@@ -1648,13 +1648,22 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 /* The libraries page: each centre with its libraries as cards (its picture or its colour, its groups, its copies),
    a dashed card to add one, and every form in a sheet over the page. */
 .ayv .ayv-entity { margin: 1.5rem 0 2.25rem; }
+/* The centre's name with «Centre» above it and its settings right beside it: one per centre, plainly its own. */
 .ayv .ayv-entity-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: .75rem 1rem;
+    gap: .25rem 1rem;
     margin-bottom: 1rem;
+}
+.ayv .ayv-entity-kicker {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
 }
 .ayv .ayv-entity-head .ayv-section-title { margin: 0; }
 .ayv .ayv-entity-demo {

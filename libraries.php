@@ -202,7 +202,7 @@ foreach (
         'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint', 'librarieslook',
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
-        'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata'] as $key
+        'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre'] as $key
 ) {
     $data[$key] = $str($key);
 }
