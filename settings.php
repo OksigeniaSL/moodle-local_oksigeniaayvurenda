@@ -29,6 +29,15 @@ if ($hassiteconfig) {
     $ADMIN->add('localplugins', $settings);
     if ($ADMIN->fulltree) {
         $str = fn(string $key) => new lang_string($key, 'local_oksigeniaayvurenda');
+        // The Z39.50 bridge: catalogues that only speak Z39.50 (REBECA), asked as SRU through a service of Oksigenia.
+        $settings->add(new admin_setting_configtext(
+            'local_oksigeniaayvurenda/z3950bridge',
+            $str('z3950bridge'),
+            $str('z3950bridge_desc'),
+            '',
+            PARAM_URL,
+            50
+        ));
         // Several centres on one site: each with its own category, where the roles of its staff are given.
         $settings->add(new admin_setting_heading(
             'local_oksigeniaayvurenda/centresheading',

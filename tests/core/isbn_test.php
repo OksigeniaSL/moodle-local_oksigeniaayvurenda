@@ -48,6 +48,21 @@ final class isbn_test extends \basic_testcase {
     }
 
     /**
+     * Every way of writing an ISBN with hyphens holds the one it is kept as; a 979 has no ISBN-10.
+     */
+    public function test_hyphenations(): void {
+        $ways = isbn::hyphenations('9788478884452');
+        $this->assertCount(25, $ways['13']);
+        $this->assertCount(25, $ways['10']);
+        $this->assertContains('978-84-7888-445-2', $ways['13']);
+        $this->assertContains('84-7888-445-9', $ways['10']);
+        foreach (array_merge($ways['13'], $ways['10']) as $way) {
+            $this->assertSame('9788478884452', isbn::normalise($way));
+        }
+        $this->assertSame([], isbn::hyphenations('9791040000075')['10']);
+    }
+
+    /**
      * A scanned EAN-13 is a book when it starts with 978 or 979 and its check digit is right.
      */
     public function test_book_ean(): void {

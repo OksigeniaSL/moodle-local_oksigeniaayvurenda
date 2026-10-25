@@ -61,7 +61,7 @@ foreach (cataloguer::itemtypes($entityid) as $type) {
         ? $str('itemtype' . $type) : $type];
 }
 $names = \local_oksigeniaayvurenda\local\practice::is($entityid) ? [$str('practicecatalogue')]
-    : array_map(fn($s) => lookup::PRESETS[$s]['name'], lookup::sources($entityid));
+    : array_map(fn($s) => lookup::PRESETS[$s]['name'], array_filter(lookup::sources($entityid), fn($s) => lookup::source($s)));
 $data = [
     'heading' => $str('addtitle'),
     'prompt' => $str('addprompt'),

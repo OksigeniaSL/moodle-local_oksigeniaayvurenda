@@ -1762,3 +1762,5 @@ $string['yearstartnote'] = 'It applies from the next school year on; this one ke
 $string['yearsync'] = 'Bring the groups now';
 $string['yearsynced'] = 'Groups brought: {$a->created} new readers, {$a->updated} changed, {$a->left} left, {$a->back} back.';
 $string['yeartutors'] = 'groups with a tutor';
+$string['z3950bridge'] = 'Z39.50 bridge';
+$string['z3950bridge_desc'] = 'Address of the service that asks, as SRU, the catalogues that only speak Z39.50, such as REBECA (Spain\'s public libraries, with their CDU). With it, a site in Spanish asks REBECA first when adding books by ISBN. Empty, those catalogues are not asked.';

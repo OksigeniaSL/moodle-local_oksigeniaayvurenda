@@ -69,6 +69,23 @@ final class sru {
     }
 
     /**
+     * The address that asks for any of several ways of writing one number, in a single question.
+     *
+     * @param string[] $terms
+     * @return string
+     */
+    public function url_any(array $terms): string {
+        $query = http_build_query([
+            'version' => $this->version,
+            'operation' => 'searchRetrieve',
+            'query' => implode(' or ', array_map(fn($t) => $this->index . '="' . preg_replace('/[^0-9X-]/', '', $t) . '"', $terms)),
+            'maximumRecords' => 5,
+            'recordSchema' => 'marcxml',
+        ], '', '&', PHP_QUERY_RFC3986);
+        return rtrim($this->base, '?&') . (str_contains($this->base, '?') ? '&' : '?') . $query;
+    }
+
+    /**
      * The descriptions in an answer.
      *
      * @param string $xml

@@ -1762,3 +1762,5 @@ $string['yearstartnote'] = 'Se aplica desde el curso que viene; este conserva su
 $string['yearsync'] = 'Traer ahora los grupos';
 $string['yearsynced'] = 'Grupos traídos: {$a->created} lectores nuevos, {$a->updated} cambiados, {$a->left} se fueron y {$a->back} volvieron.';
 $string['yeartutors'] = 'grupos con tutor';
+$string['z3950bridge'] = 'Puente Z39.50';
+$string['z3950bridge_desc'] = 'Dirección del servicio que pregunta, como SRU, a los catálogos que solo hablan Z39.50, como REBECA (las bibliotecas públicas de España, con su CDU). Con él, un sitio en español pregunta primero a REBECA al dar de alta por ISBN. Vacío, a esos catálogos no se les pregunta.';

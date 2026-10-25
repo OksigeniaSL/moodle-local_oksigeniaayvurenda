@@ -75,6 +75,32 @@ final class isbn {
     }
 
     /**
+     * Every way an ISBN could be written with hyphens, for catalogues that only find it as they keep it (REBECA keeps
+     * «978-84-7888-445-2» and does not find 9788478884452). Where the hyphens go depends on the group and the publisher,
+     * which only the ranges of the ISBN agency say; trying every split finds it without them, and whatever is found is
+     * that very ISBN, for the digits are the same.
+     *
+     * @param string $isbn13 Digits.
+     * @return array<string, string[]> 13: the ISBN-13 split in every way; 10: the ISBN-10, when there is one.
+     */
+    public static function hyphenations(string $isbn13): array {
+        $nine = substr($isbn13, 3, 9);
+        $ways = ['13' => [], '10' => []];
+        // The group has one to five digits and the publisher one to seven; at least one digit is left for the book.
+        for ($group = 1; $group <= 5; $group++) {
+            for ($publisher = 1; $group + $publisher <= 8; $publisher++) {
+                $split = substr($nine, 0, $group) . '-' . substr($nine, $group, $publisher) . '-' .
+                    substr($nine, $group + $publisher);
+                $ways['13'][] = substr($isbn13, 0, 3) . '-' . $split . '-' . $isbn13[12];
+                if (str_starts_with($isbn13, '978')) {
+                    $ways['10'][] = $split . '-' . self::checksum10($nine);
+                }
+            }
+        }
+        return $ways;
+    }
+
+    /**
      * Check digit of the first twelve digits of an ISBN-13.
      *
      * @param string $twelve

@@ -42,13 +42,17 @@ final class lookup {
         // Spain's National Library: its Alma catalogue by SRU, without a key, with most books in Spanish.
         'bne' => ['type' => 'sru', 'name' => 'Biblioteca Nacional de España',
             'url' => 'https://catalogo.bne.es/view/sru/34BNE_INST', 'index' => 'alma.isbn', 'version' => '1.2'],
+        // REBECA, the shared catalogue of Spain's public libraries, with their CDU: it only speaks Z39.50, so it is asked
+        // through the Z39.50 bridge the site sets, and it only finds an ISBN written with its hyphens.
+        'rebeca' => ['type' => 'sru', 'name' => 'REBECA', 'bridge' => 'rebeca', 'index' => 'bath.isbn', 'version' => '1.1',
+            'hyphens' => true],
     ];
 
     /** @var string[] The order when the entity has not chosen one. */
     public const DEFAULT = ['loc', 'openlibrary', 'bne'];
 
     /** @var string[] The order when the entity has not chosen one and the site speaks Spanish. */
-    public const DEFAULT_ES = ['bne', 'loc', 'openlibrary'];
+    public const DEFAULT_ES = ['rebeca', 'bne', 'loc', 'openlibrary'];
 
     /** @var callable|null How to fetch an address; tests put their own. Given the address, gives the body or null. */
     public static $fetcher = null;
@@ -72,7 +76,7 @@ final class lookup {
                 'sourcename' => get_string('practicecatalogue', 'local_oksigeniaayvurenda'), 'description' => $description,
                 'cover' => null, 'tried' => [get_string('practicecatalogue', 'local_oksigeniaayvurenda')]];
         }
-        $sources = self::sources($entityid);
+        $sources = array_values(array_filter(self::sources($entityid), fn($name) => self::source($name) !== null));
         $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
         $key = $isbn . '_' . substr(md5(implode(',', $sources)), 0, 8);
         $cached = $cache->get($key);
@@ -82,10 +86,7 @@ final class lookup {
         $result = ['valid' => true, 'isbn' => $isbn, 'found' => false, 'source' => null, 'sourcename' => null,
             'description' => null, 'cover' => null, 'tried' => []];
         foreach ($sources as $name) {
-            $source = self::PRESETS[$name] ?? null;
-            if (!$source) {
-                continue;
-            }
+            $source = self::source($name);
             $result['tried'][] = $source['name'];
             $description = self::ask($source, $isbn);
             if ($description) {
@@ -124,6 +125,25 @@ final class lookup {
     }
 
     /**
+     * A catalogue ready to be asked, with its address; null when it cannot be (one through the bridge, when the site
+     * has none).
+     *
+     * @param string $name
+     * @return array|null
+     */
+    public static function source(string $name): ?array {
+        $source = self::PRESETS[$name] ?? null;
+        if ($source && isset($source['bridge'])) {
+            $bridge = trim((string) get_config('local_oksigeniaayvurenda', 'z3950bridge'));
+            if ($bridge === '') {
+                return null;
+            }
+            $source['url'] = rtrim($bridge, '/') . '/' . $source['bridge'];
+        }
+        return $source;
+    }
+
+    /**
      * Fetches an address from the server.
      *
      * @param string $url
@@ -158,12 +178,19 @@ final class lookup {
     private static function ask(array $source, string $isbn): ?array {
         try {
             if ($source['type'] === 'sru') {
-                $body = self::fetch((new sru($source['url'], $source['index'], $source['version']))->url($isbn));
-                foreach ($body === null ? [] : sru::descriptions($body) as $description) {
-                    // A catalogue may answer with other editions too: only the one asked for counts.
-                    $isbns = $description['extra']['isbns'] ?? [$description['record']['isbn']];
-                    if (in_array($isbn, $isbns, true) && $description['record']['title'] !== '') {
-                        return $description;
+                $sru = new sru($source['url'], $source['index'], $source['version']);
+                // A catalogue that keeps the hyphens is asked every way of writing them: the ISBN-13 first, then the
+                // ISBN-10 of older books (two questions: it takes some thirty ways at a time).
+                $urls = empty($source['hyphens']) ? [$sru->url($isbn)]
+                    : array_map(fn($ways) => $sru->url_any($ways), array_filter(isbn::hyphenations($isbn)));
+                foreach ($urls as $url) {
+                    $body = self::fetch($url);
+                    foreach ($body === null ? [] : sru::descriptions($body) as $description) {
+                        // A catalogue may answer with other editions too: only the one asked for counts.
+                        $isbns = $description['extra']['isbns'] ?? [$description['record']['isbn']];
+                        if (in_array($isbn, $isbns, true) && $description['record']['title'] !== '') {
+                            return $description;
+                        }
                     }
                 }
                 return null;

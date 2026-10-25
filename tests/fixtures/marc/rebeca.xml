@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!-- An SRU answer shaped like the Z39.50 bridge gives from REBECA, with a made-up book kept by its hyphenated ISBN-10. -->
+<zs:searchRetrieveResponse xmlns:zs="http://www.loc.gov/zing/srw/"><zs:version>1.1</zs:version><zs:numberOfRecords>1</zs:numberOfRecords><zs:records><zs:record><zs:recordSchema>marcxml</zs:recordSchema><zs:recordPacking>xml</zs:recordPacking><zs:recordData><record xmlns="http://www.loc.gov/MARC21/slim">
+  <leader>00450nam a2200169 i 4500</leader>
+  <controlfield tag="001">INVENTADO-0001</controlfield>
+  <controlfield tag="008">071001s2007    sp     j      ||| ||spa d</controlfield>
+  <datafield tag="020" ind1=" " ind2=" ">
+    <subfield code="a">84-90000-01-8</subfield>
+  </datafield>
+  <datafield tag="080" ind1=" " ind2=" ">
+    <subfield code="a">821.134.2-31</subfield>
+  </datafield>
+  <datafield tag="100" ind1="1" ind2=" ">
+    <subfield code="a">Lago Brisa, Hugo (</subfield>
+    <subfield code="d">1970-)</subfield>
+  </datafield>
+  <datafield tag="245" ind1="1" ind2="0">
+    <subfield code="a">El faro dormido / </subfield>
+    <subfield code="c">Hugo Lago Brisa</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">Madrid : </subfield>
+    <subfield code="b">Editorial Inventada, </subfield>
+    <subfield code="c">2007</subfield>
+  </datafield>
+</record></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record></zs:records></zs:searchRetrieveResponse>

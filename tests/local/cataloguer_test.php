@@ -179,6 +179,42 @@ final class cataloguer_test extends \advanced_testcase {
     }
 
     /**
+     * REBECA is asked only when the site has a Z39.50 bridge, every way of writing the ISBN with hyphens: the ISBN-13
+     * first, then the ISBN-10, which is how it keeps this (made-up) book, with its CDU.
+     */
+    public function test_rebeca(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $CFG->lang = 'es';
+        $asked = [];
+        lookup::$fetcher = function (string $url) use (&$asked) {
+            $asked[] = $url;
+            if (str_contains($url, 'puente.invented.example/rebeca')) {
+                return file_get_contents(__DIR__ . '/../fixtures/marc/' .
+                    (str_contains(urldecode($url), '"84-90000-01-8"') ? 'rebeca.xml' : 'sru-empty.xml'));
+            }
+            return null;
+        };
+        $without = lookup::isbn((int) $library->entityid, '978-84-90000-01-4');
+        $this->assertNotContains('REBECA', $without['tried']);
+        $this->assertSame([], array_filter($asked, fn($u) => str_contains($u, 'puente')));
+
+        set_config('z3950bridge', 'https://puente.invented.example/', 'local_oksigeniaayvurenda');
+        $asked = [];
+        $found = lookup::isbn((int) $library->entityid, '9788490000014');
+        $this->assertSame('rebeca', $found['source']);
+        $this->assertSame('El faro dormido', $found['description']['record']['title']);
+        $this->assertContains('821.134.2-31', $found['description']['authorities']['class']);
+        $this->assertCount(2, $asked);
+        $first = urldecode($asked[0]);
+        $this->assertStringStartsWith('https://puente.invented.example/rebeca?', $asked[0]);
+        $this->assertStringContainsString('bath.isbn="978-8-4-9000001-4" or ', $first);
+        $this->assertSame(25, substr_count($first, 'bath.isbn='));
+        $this->assertStringContainsString('"84-90000-01-8"', urldecode($asked[1]));
+    }
+
+    /**
      * Without a choice, the order depends on the language of the site: Spain's National Library first in Spanish; a
      * choice of the entity wins.
      */
@@ -190,7 +226,7 @@ final class cataloguer_test extends \advanced_testcase {
         $CFG->lang = 'en';
         $this->assertSame(['loc', 'openlibrary', 'bne'], lookup::sources($entityid));
         $CFG->lang = 'es';
-        $this->assertSame(['bne', 'loc', 'openlibrary'], lookup::sources($entityid));
+        $this->assertSame(['rebeca', 'bne', 'loc', 'openlibrary'], lookup::sources($entityid));
         $DB->set_field(
             'local_oksigeniaayvurenda_entity',
             'settings',
