@@ -51,12 +51,16 @@ final class characters {
         foreach (self::ROLES as $role) {
             $mine = $chosen[$role] ?? [];
             $name = trim((string) ($mine['name'] ?? ''));
+            $sex = ($mine['sex'] ?? ($role === 'herald' ? 'm' : 'f')) === 'm' ? 'm' : 'f';
+            $drawn = $role === 'herald' ? 'pregonero' : 'memoria';
             $all[$role] = [
                 'role' => $role,
                 'enabled' => (bool) ($mine['enabled'] ?? true),
                 'name' => $name !== '' ? $name : get_string($role . 'defaultname', 'local_oksigeniaayvurenda'),
                 // The grandmother who remembers and the hummingbird who heralds: one of each.
-                'sex' => ($mine['sex'] ?? ($role === 'herald' ? 'm' : 'f')) === 'm' ? 'm' : 'f',
+                'sex' => $sex,
+                // Gaudí's portrait, when the art package is there (one of the other sex, if it has it).
+                'portrait' => screens::art($drawn . ($sex === ($role === 'herald' ? 'm' : 'f') ? '' : '-' . $sex)),
                 'signs' => $role === 'herald' && !empty($mine['signs']),
                 // Until the puppets come, the initial of the name, not a makeshift drawing.
                 'initial' => \core_text::strtoupper(\core_text::substr($name !== '' ? $name
@@ -111,6 +115,7 @@ final class characters {
             'name' => $character['name'],
             'text' => get_string($key, 'local_oksigeniaayvurenda', (object) ($a + ['name' => $character['name']])),
             'initial' => $character['initial'],
+            'portrait' => $character['portrait'],
             'role' => $role,
         ];
     }

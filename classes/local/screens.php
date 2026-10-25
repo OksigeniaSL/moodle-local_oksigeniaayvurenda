@@ -446,6 +446,7 @@ final class screens {
             'slug' => $library->slug,
             'placeholder' => $asks ? self::str('homeaskmemory', $memory['name']) : self::str('searchplaceholder'),
             'memoryinitial' => $asks ? $memory['initial'] : '',
+            'memoryportrait' => $asks ? $memory['portrait'] : null,
             'searchlabel' => self::str('searchbutton'),
             'ideas' => $ideas,
             'hasideas' => (bool) $ideas,

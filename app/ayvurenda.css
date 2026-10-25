@@ -1390,6 +1390,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-duo-title { font-family: var(--title); font-weight: 700; color: var(--accent); }
 .ayv .ayv-duo-card > .ayv-button { flex: 0 0 auto; white-space: nowrap; }
 .ayv .ayv-corner-art { padding-top: 0; }
+.ayv .ayv-corner.ayv-corner-art { background: var(--surface); color: var(--ink); box-shadow: 0 10px 24px -18px rgba(15, 58, 51, .5); }
+.ayv .ayv-corner-art .ayv-corner-label { color: var(--accent); }
+.ayv .ayv-corner-art .ayv-corner-count { color: var(--muted); opacity: 1; }
+.ayv .ayv-bubble-img, .ayv .ayv-hero-memory img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.ayv .ayv-bubble-portrait:has(img), .ayv .ayv-hero-memory:has(img) { background: var(--paper); overflow: hidden; }
 .ayv .ayv-corner-img { width: 100%; aspect-ratio: 1; object-fit: contain; margin-bottom: .5rem; border-radius: 12px; }
 .ayv .ayv-wood { position: relative; padding-bottom: 1.1rem; }
 .ayv .ayv-wood::after {

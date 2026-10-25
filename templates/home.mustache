@@ -32,7 +32,8 @@
         "addbooks": {"url": "#", "label": "Dar de alta libros", "freeurl": "#", "freelabel": "Traer obras libres"},
         "mycard": {"url": "#", "label": "Mi carné"},
         "hero": {"greeting": "Hola, Leo", "question": "¿Qué te apetece leer hoy?", "action": "https://example.org/s",
-            "slug": "demo-1", "placeholder": "Pregúntale a la memoria", "memoryinitial": "A", "searchlabel": "Buscar",
+            "slug": "demo-1", "placeholder": "Pregúntale a la memoria", "memoryinitial": "A", "memoryportrait": null,
+            "searchlabel": "Buscar",
             "hasideas": true, "ideas": [{"label": "Animales", "url": "#"}], "art": null, "emblem": "https://example.org/e.svg",
             "you": {"title": "Tu flor: Brote", "text": "Explora rincones nuevos.", "drawing": "", "url": "#", "label": "Mi carné"},
             "classreads": []},
@@ -57,7 +58,7 @@
         <p class="ayv-hero-question">{{question}}</p>
         <form class="ayv-hero-search" role="search" method="get" action="{{action}}">
             <input type="hidden" name="library" value="{{slug}}">
-            {{#memoryinitial}}<span class="ayv-hero-memory" aria-hidden="true">{{memoryinitial}}</span>{{/memoryinitial}}
+            {{#memoryinitial}}<span class="ayv-hero-memory" aria-hidden="true">{{#memoryportrait}}<img src="{{memoryportrait}}" alt="">{{/memoryportrait}}{{^memoryportrait}}{{memoryinitial}}{{/memoryportrait}}</span>{{/memoryinitial}}
             <label class="ayv-sr" for="ayv-q">{{searchlabel}}</label>
             <input id="ayv-q" name="q" type="search" placeholder="{{placeholder}}" autocomplete="off" enterkeyhint="search"
                 maxlength="200">
