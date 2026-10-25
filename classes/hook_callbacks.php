@@ -37,7 +37,7 @@ final class hook_callbacks {
      */
     public static function primary_extend(primary_extend $hook): void {
         global $DB;
-        if (!isloggedin() || isguestuser() || !has_capability('local/oksigeniaayvurenda:view', \context_system::instance())) {
+        if (!isloggedin() || isguestuser() || !\local_oksigeniaayvurenda\local\access::can('local/oksigeniaayvurenda:view', null)) {
             return;
         }
         if (!$DB->record_exists('local_oksigeniaayvurenda_library', [])) {

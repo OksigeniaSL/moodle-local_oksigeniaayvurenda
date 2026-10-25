@@ -53,7 +53,7 @@ final class digital {
         $reader = $userid ? $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid,
             'status' => 'active'], 'id, readertype', IGNORE_MULTIPLE) : null;
         $ids = ['userid' => $userid, 'readerid' => $reader ? (int) $reader->id : 0];
-        if ($userid && has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)) {
+        if ($userid && access::can('local/oksigeniaayvurenda:desk', $entityid, $userid)) {
             return ['who' => 'desk', 'stage' => null] + $ids;
         }
         if (!$reader) {

@@ -45,13 +45,15 @@ $pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 1
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
-shell::require('local/oksigeniaayvurenda:' . $pieces[$piece]['capability']);
+// The help plays on the practice library; the library given, whose header it wears, must be one of theirs.
+$theirs = $ref !== '' ? catalogue::library($ref) : null;
+shell::require('local/oksigeniaayvurenda:' . $pieces[$piece]['capability'], $theirs);
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $ref, 'piece' => $piece]));
 
 // The practice library, as new: the help always finds the same readers and books.
 $practice = practice::reset();
-$library = catalogue::library($ref) ?? $practice;
+$library = $theirs ?? $practice;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $steps = [];
 for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {

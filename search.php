@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
@@ -36,13 +37,13 @@ $fragment = optional_param('fragment', false, PARAM_BOOL);
 $onlyfree = optional_param('free', false, PARAM_BOOL);
 $subject = optional_param('subject', 0, PARAM_INT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:view');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:view', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/search.php', ['library' => $ref, 'q' => $query,
     'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree]));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

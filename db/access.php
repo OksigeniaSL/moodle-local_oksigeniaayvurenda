@@ -24,11 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Checked in the category of each centre when it has one (several centres on one site), else on the whole site.
 $capabilities = [
     // Look up the catalogue: readers, families, teachers.
     'local/oksigeniaayvurenda:view' => [
         'captype' => 'read',
-        'contextlevel' => CONTEXT_SYSTEM,
+        'contextlevel' => CONTEXT_COURSECAT,
         'archetypes' => [
             'user' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
@@ -38,7 +39,7 @@ $capabilities = [
     'local/oksigeniaayvurenda:desk' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
+        'contextlevel' => CONTEXT_COURSECAT,
         'archetypes' => [
             'manager' => CAP_ALLOW,
         ],
@@ -46,7 +47,7 @@ $capabilities = [
     // Catalogue: add and change records and copies, import.
     'local/oksigeniaayvurenda:catalogue' => [
         'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
+        'contextlevel' => CONTEXT_COURSECAT,
         'archetypes' => [
             'manager' => CAP_ALLOW,
         ],
@@ -62,7 +63,7 @@ $capabilities = [
     'local/oksigeniaayvurenda:manage' => [
         'riskbitmask' => RISK_CONFIG | RISK_PERSONAL,
         'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
+        'contextlevel' => CONTEXT_COURSECAT,
         'archetypes' => [
             'manager' => CAP_ALLOW,
         ],

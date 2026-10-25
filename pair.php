@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\pairing;
 use local_oksigeniaayvurenda\local\shell;
@@ -30,14 +31,14 @@ require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:manage');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:manage', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/pair.php', ['library' => $ref]));
 // Asking the platform for everyone takes a while the first time.
 core_php_time_limit::raise(300);
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

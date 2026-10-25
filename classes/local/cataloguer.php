@@ -169,7 +169,7 @@ final class cataloguer {
                 'callnumber1' => self::line($copy['callnumber1'] ?? ''),
                 'callnumber2' => self::line($copy['callnumber2'] ?? ''),
                 'callnumber3' => self::line($copy['callnumber3'] ?? ''),
-                'locationid' => !empty($copy['locationid']) ? (int) $copy['locationid'] : null,
+                'locationid' => self::own_location($entityid, (int) ($copy['locationid'] ?? 0)),
                 'itemtype' => ($copy['itemtype'] ?? '') !== '' ? $copy['itemtype'] : 'normal',
                 'serial' => ($serials[$index] ?? '') !== '' ? \core_text::substr($serials[$index], 0, 100) : null,
                 'itemcondition' => $device ? 'good' : null,
@@ -198,7 +198,7 @@ final class cataloguer {
      */
     public static function undo(int $entityid, int $recordid, array $itemids, bool $newrecord): bool {
         global $DB;
-        if (!$itemids) {
+        if (!$itemids || !$DB->record_exists(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid])) {
             return false;
         }
         [$in, $params] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
@@ -218,6 +218,19 @@ final class cataloguer {
         }
         $transaction->allow_commit();
         return true;
+    }
+
+    /**
+     * A place of the entity's libraries, or nothing when the id is not one of them.
+     *
+     * @param int $entityid
+     * @param int|null $locationid
+     * @return int|null
+     */
+    public static function own_location(int $entityid, ?int $locationid): ?int {
+        global $DB;
+        return $locationid && $DB->record_exists(self::T . 'authority', ['id' => $locationid, 'entityid' => $entityid,
+            'kind' => 'location']) ? $locationid : null;
     }
 
     /**

@@ -42,12 +42,15 @@ final class courses {
     public static function options(int $entityid): array {
         global $DB;
         $chosen = self::chosen($entityid);
+        // A centre with its own category, only the courses in it.
+        $categories = \local_oksigeniaayvurenda\local\access::categories($entityid);
+        [$in, $params] = $categories === null ? ['IS NOT NULL', []] : $DB->get_in_or_equal($categories ?: [0], SQL_PARAMS_NAMED);
         $rows = $DB->get_records_sql(
-            'SELECT c.id, c.fullname, (SELECT COUNT(1) FROM {groups} g WHERE g.courseid = c.id) AS groups
+            "SELECT c.id, c.fullname, (SELECT COUNT(1) FROM {groups} g WHERE g.courseid = c.id) AS groups
                FROM {course} c
-              WHERE c.id <> :site
-           ORDER BY c.fullname, c.id',
-            ['site' => SITEID]
+              WHERE c.id <> :site AND c.category $in
+           ORDER BY c.fullname, c.id",
+            $params + ['site' => SITEID]
         );
         $options = [];
         foreach ($rows as $row) {
@@ -73,7 +76,16 @@ final class courses {
     public static function chosen(int $entityid): array {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        return $settings['courses'] ?? [];
+        $chosen = $settings['courses'] ?? [];
+        // A centre with its own category, only the courses in it.
+        $categories = \local_oksigeniaayvurenda\local\access::categories($entityid);
+        if ($categories !== null && $chosen) {
+            [$in, $params] = $DB->get_in_or_equal(array_map('intval', array_keys($chosen)), SQL_PARAMS_NAMED);
+            [$incat, $catparams] = $DB->get_in_or_equal($categories ?: [0], SQL_PARAMS_NAMED, 'cat');
+            $inside = $DB->get_fieldset_select('course', 'id', "id $in AND category $incat", $params + $catparams);
+            $chosen = array_intersect_key($chosen, array_flip($inside));
+        }
+        return $chosen;
     }
 
     /**
@@ -86,7 +98,11 @@ final class courses {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $clean = [];
+        $allowed = array_flip(array_column(self::options($entityid), 'id'));
         foreach ($courses as $courseid => $config) {
+            if (!isset($allowed[(int) $courseid])) {
+                continue;
+            }
             $clean[(int) $courseid] = [
                 'stage' => \core_text::substr(trim((string) ($config['stage'] ?? '')), 0, 100),
                 'group' => !empty($config['group']),

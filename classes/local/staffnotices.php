@@ -41,11 +41,13 @@ final class staffnotices {
         global $DB;
         $now = $now ?? time();
         $stats = ['centres' => 0, 'sent' => 0];
-        $staff = get_users_by_capability(\context_system::instance(), 'local/oksigeniaayvurenda:desk', 'u.id');
-        if (!$staff) {
-            return $stats;
-        }
         foreach ($DB->get_records(self::T . 'entity', null, 'id') as $entity) {
+            // Its staff, in its own category when it has one.
+            $context = access::context((int) $entity->id);
+            $staff = get_users_by_capability($context, 'local/oksigeniaayvurenda:desk', 'u.id');
+            if (!$staff) {
+                continue;
+            }
             $reviews = reviews::waiting((int) $entity->id);
             $wishes = wishes::waiting((int) $entity->id);
             if (!$reviews && !$wishes) {
@@ -61,7 +63,17 @@ final class staffnotices {
                 1
             );
             $library = reset($library);
-            // Its staff: who works at the desk and is one of its readers; if nobody is, whoever works at a desk.
+            // Who was given the role in the centre's category; else who works at the desk and is one of its readers; if
+            // nobody is, whoever works at a desk.
+            $own = [];
+            if ($context->contextlevel === CONTEXT_COURSECAT) {
+                $own = array_values(array_intersect(array_keys($staff), $DB->get_fieldset_select(
+                    'role_assignments',
+                    'userid',
+                    'contextid = :contextid',
+                    ['contextid' => $context->id]
+                )));
+            }
             [$in, $params] = $DB->get_in_or_equal(array_keys($staff), SQL_PARAMS_NAMED);
             $theirs = $DB->get_fieldset_select(
                 self::T . 'reader',
@@ -69,7 +81,7 @@ final class staffnotices {
                 "entityid = :entityid AND userid $in",
                 $params + ['entityid' => $entity->id]
             );
-            foreach ($theirs ?: array_keys($staff) as $userid) {
+            foreach ($own ?: ($theirs ?: array_keys($staff)) as $userid) {
                 $told = (int) get_user_preferences(self::PREFERENCE, 0, (int) $userid);
                 if (!self::anything_new((int) $entity->id, $told)) {
                     continue;

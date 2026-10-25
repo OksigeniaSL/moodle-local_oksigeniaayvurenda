@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\shell;
@@ -30,12 +31,12 @@ require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:desk');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:desk', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $ref]));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
@@ -76,7 +77,7 @@ foreach (
 // Inside the guided help, the page shows only the field and what it does.
 $help = optional_param('help', 0, PARAM_BOOL);
 $yearlink = '';
-if (!$help && has_capability('local/oksigeniaayvurenda:manage', context_system::instance())) {
+if (!$help && access::can('local/oksigeniaayvurenda:manage', $library)) {
     $status = \local_oksigeniaayvurenda\local\year_change::status((int) $library->entityid);
     $label = '';
     if ($status['moment'] === 'start' && ($status['notutor'] || $status['left'])) {
@@ -125,10 +126,10 @@ shell::output($str('desktitle'), $main, $library, '', [
             'label' => $str('reportsnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
             ->out(false), 'label' => $str('helpnav')],
-    ], has_capability('local/oksigeniaayvurenda:catalogue', context_system::instance()) ? [
+    ], access::can('local/oksigeniaayvurenda:catalogue', $library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
             'label' => $str('addnav')],
-    ] : [], has_capability('local/oksigeniaayvurenda:manage', context_system::instance()) ? [
+    ] : [], access::can('local/oksigeniaayvurenda:manage', $library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false), 'label' => $str('librariesnav')],
     ] : []),
     'config' => [

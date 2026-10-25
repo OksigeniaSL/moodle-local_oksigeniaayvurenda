@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\holds;
@@ -31,9 +32,8 @@ require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
 require_sesskey();
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:view');
 $library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
+shell::require('local/oksigeniaayvurenda:view', $library);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
@@ -41,7 +41,7 @@ $action = required_param('action', PARAM_ALPHA);
 $recordid = optional_param('record', 0, PARAM_INT);
 $back = optional_param('back', '', PARAM_ALPHA);
 $now = time();
-$isdesk = has_capability('local/oksigeniaayvurenda:desk', $context);
+$isdesk = access::can('local/oksigeniaayvurenda:desk', $library);
 $mine = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
     'status' => 'active'], 'id', IGNORE_MULTIPLE);
 $notice = '';
@@ -54,7 +54,7 @@ if ($action === 'ask') {
         $notice = $result['ok'] ? 'holdadded' : 'hold' . $result['reason'];
     }
 } else if ($action === 'for') {
-    shell::require('local/oksigeniaayvurenda:desk');
+    shell::require('local/oksigeniaayvurenda:desk', $library);
     $text = trim(required_param('reader', PARAM_TEXT));
     $desk = new desk($library, (int) $USER->id, $now);
     $readerid = (int) $DB->get_field_select('local_oksigeniaayvurenda_reader', 'id', 'entityid = :entityid AND ' .

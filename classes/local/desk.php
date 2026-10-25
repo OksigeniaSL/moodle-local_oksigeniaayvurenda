@@ -495,7 +495,8 @@ final class desk {
      */
     public function reader(int $readerid): array {
         global $DB;
-        $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid], '*', MUST_EXIST);
+        // Only a reader of this library's centre: an id of another centre is not found.
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $this->library->entityid], '*', MUST_EXIST);
         $name = trim(($reader->firstname ?? '') . ' ' . ($reader->lastname ?? ''));
         if ($reader->userid) {
             $user = \core_user::get_user($reader->userid);

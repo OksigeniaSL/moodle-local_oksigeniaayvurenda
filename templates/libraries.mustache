@@ -21,7 +21,7 @@
     Example context (json):
     {
         "heading": "Las bibliotecas", "intro": "Cada centro, con las suyas.", "notice": "", "action": "#", "sesskey": "abc",
-        "none": false, "newclassifications": [{"value": "udc", "label": "CDU", "selected": true}],
+        "none": false, "sitewide": true, "newclassifications": [{"value": "udc", "label": "CDU", "selected": true}],
         "entities": [{"id": 1, "name": "Colegio inventado", "rawname": "Colegio inventado", "yearstart": "09-01",
             "classifications": [{"value": "udc", "label": "CDU", "selected": true}], "controlletter": true, "demo": false,
             "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
@@ -30,6 +30,8 @@
             "plansummary": "Plan Gratis: 812 de 1.000 ejemplares · 140 de 150 lectores",
             "planform": {"plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
                 "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
+            "staffpart": {"staffparthint": "Da el rol de bibliotecario en la categoría del centro.", "staffentity": 1,
+                "staffassign": "#"},
             "reviewsigns": [{"value": "name", "label": "Nombre y grupo", "selected": true}],
             "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
@@ -53,7 +55,9 @@
         "librarieschallenges": "Retos de la clase", "librarieschallengeshint": "Las etapas que juegan",
         "librariesreviewsign": "Cómo se firman las reseñas", "librariesplan": "Plan",
         "librariesplanhint": "Solo lo ven y lo cambian quienes administran el sitio.", "planname": "Nombre del plan",
-        "plancopies": "Ejemplares", "planreaders": "Lectores", "planlimithint": "Con 0, sin tope"
+        "plancopies": "Ejemplares", "planreaders": "Lectores", "planlimithint": "Con 0, sin tope",
+        "librariesstaff": "Personal del centro", "librariesstaffassign": "Dar roles en el centro",
+        "librariesstaffseparate": "Darle al centro su categoría"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -111,7 +115,7 @@
                         <label class="ayv-field ayv-field-wide">{{librariesimage}} <span class="ayv-field-hint">{{librariesimagehint}}</span>
                             <input type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif"></label>
                         {{#own}}<p class="ayv-library-thumb"><img src="{{image}}" alt=""> <label class="ayv-field ayv-field-check"><input type="checkbox" name="noimage" value="1"> {{librariesnoimage}}</label></p>{{/own}}
-                        <label class="ayv-field ayv-field-check"><input type="checkbox" name="featured" value="1" {{#featured}}checked{{/featured}}> {{librariesfeatured}}</label>
+                        {{#sitewide}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="featured" value="1" {{#featured}}checked{{/featured}}> {{librariesfeatured}}</label>{{/sitewide}}
                     </fieldset>
                     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="look">{{librariessave}}</button></p>
                 </form>
@@ -165,9 +169,17 @@
             {{/planform}}
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="entity">{{librariessave}}</button></p>
         </form>
+        {{#staffpart}}
+        <h4 class="ayv-modal-part">{{librariesstaff}}</h4>
+        <p class="ayv-field-hint">{{staffparthint}}</p>
+        {{#staffassign}}<p><a class="ayv-button ayv-button-quiet" href="{{staffassign}}">{{librariesstaffassign}}</a></p>{{/staffassign}}
+        {{^staffassign}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="entity" value="{{staffentity}}">
+            <p><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="category">{{librariesstaffseparate}}</button></p></form>{{/staffassign}}
+        {{/staffpart}}
     </dialog>
 </section>
 {{/entities}}
+{{#sitewide}}
 {{#none}}{{> local_oksigeniaayvurenda/libraries_newentity}}{{/none}}
 {{^none}}
 <p class="ayv-libraries-more"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-newentity">{{> local_oksigeniaayvurenda/icon_plus}} {{librariesanother}}</button></p>
@@ -177,3 +189,4 @@
     {{> local_oksigeniaayvurenda/libraries_newentity}}
 </dialog>
 {{/none}}
+{{/sitewide}}

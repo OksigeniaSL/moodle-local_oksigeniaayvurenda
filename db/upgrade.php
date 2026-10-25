@@ -282,5 +282,17 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102841, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102846) {
+        // Each centre can have a course category of its own, where the roles of its staff are given.
+        $table = new xmldb_table('local_oksigeniaayvurenda_entity');
+        $field = new xmldb_field('categoryid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'settings');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // The librarian role can then be given in a category, not only on the whole site.
+        \local_oksigeniaayvurenda\local\roles::ensure_librarian();
+        upgrade_plugin_savepoint(true, 2026102846, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

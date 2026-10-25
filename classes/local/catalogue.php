@@ -63,6 +63,17 @@ final class catalogue {
     }
 
     /**
+     * The libraries someone may look up: of the centres where they have the capability or are a reader.
+     *
+     * @param int|null $userid The current user when not given.
+     * @return \stdClass[]
+     */
+    public static function visible(?int $userid = null): array {
+        $entities = array_flip(access::entities('local/oksigeniaayvurenda:view', $userid));
+        return array_values(array_filter(self::libraries(), fn($library) => isset($entities[(int) $library->entityid])));
+    }
+
+    /**
      * A library by its short name or id; with nothing given, the only one there is.
      *
      * @param string $ref
@@ -77,7 +88,7 @@ final class catalogue {
             }
             return $library ?: null;
         }
-        $all = self::libraries();
+        $all = self::visible();
         return count($all) === 1 ? $all[0] : null;
     }
 

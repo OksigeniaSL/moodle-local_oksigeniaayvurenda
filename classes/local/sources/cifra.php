@@ -231,7 +231,9 @@ final class cifra {
             return $answer;
         }
         require_once($CFG->libdir . '/filelib.php');
-        $curl = new \curl(['ignoresecurity' => $internal]);
+        // On a site shared by several centres nobody reaches the site's own network: the administrator lets the bridge's
+        // address through in Moodle's HTTP security settings instead.
+        $curl = new \curl(['ignoresecurity' => $internal && !get_config('local_oksigeniaayvurenda', 'entitycategories')]);
         $curl->setHeader($headers);
         $curl->setopt(['CURLOPT_TIMEOUT' => 60, 'CURLOPT_CONNECTTIMEOUT' => 10]);
         $answer = $method === 'POST' ? $curl->post($url, $body) : $curl->get($url);

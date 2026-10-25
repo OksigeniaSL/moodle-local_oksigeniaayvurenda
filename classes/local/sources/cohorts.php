@@ -49,12 +49,15 @@ final class cohorts {
         global $DB;
         $settings = self::settings($entityid);
         $chosen = $settings['cohorts'] ?? [];
+        [$where, $params] = self::where($entityid);
         $rows = $DB->get_records_sql(
-            'SELECT c.id, c.name, c.idnumber, COUNT(m.id) AS members
+            "SELECT c.id, c.name, c.idnumber, COUNT(m.id) AS members
                FROM {cohort} c
           LEFT JOIN {cohort_members} m ON m.cohortid = c.id
+              WHERE $where
            GROUP BY c.id, c.name, c.idnumber
-           ORDER BY c.name, c.id'
+           ORDER BY c.name, c.id",
+            $params
         );
         $options = [];
         foreach ($rows as $row) {
@@ -81,7 +84,7 @@ final class cohorts {
     public static function save(int $entityid, array $cohorts): void {
         global $DB;
         $clean = [];
-        foreach ($cohorts as $cohortid => $config) {
+        foreach (self::only_allowed($entityid, $cohorts) as $cohortid => $config) {
             $type = preg_replace('/[^a-z0-9\-]/', '', strtolower((string) ($config['type'] ?? 'student'))) ?: 'student';
             $clean[(int) $cohortid] = [
                 'type' => substr($type, 0, 30),
@@ -107,7 +110,7 @@ final class cohorts {
         $now = $now ?? time();
         $stats = ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 0, 'overlimit' => 0];
         $settings = self::settings($entityid);
-        $chosen = $settings['cohorts'] ?? [];
+        $chosen = self::only_allowed($entityid, $settings['cohorts'] ?? []);
         if (!$chosen && !courses::chosen($entityid)) {
             return $stats;
         }
@@ -248,5 +251,41 @@ final class cohorts {
     private static function settings(int $entityid): array {
         global $DB;
         return json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+    }
+
+    /**
+     * Which cohorts a centre may bring readers from: with its own category, the cohorts of that category and those
+     * inside it; else all of the site's.
+     *
+     * @param int $entityid
+     * @return array SQL condition on {cohort} c, and its parameters.
+     */
+    private static function where(int $entityid): array {
+        global $DB;
+        $categories = \local_oksigeniaayvurenda\local\access::categories($entityid);
+        if ($categories === null) {
+            return ['1 = 1', []];
+        }
+        $contexts = array_map(fn($id) => (int) \context_coursecat::instance($id)->id, $categories);
+        [$in, $params] = $DB->get_in_or_equal($contexts ?: [0], SQL_PARAMS_NAMED, 'ctx');
+        return ["c.contextid $in", $params];
+    }
+
+    /**
+     * Keeps only the cohorts a centre may bring readers from.
+     *
+     * @param int $entityid
+     * @param array $cohorts Cohort id => anything.
+     * @return array
+     */
+    private static function only_allowed(int $entityid, array $cohorts): array {
+        global $DB;
+        if (!$cohorts || \local_oksigeniaayvurenda\local\access::categories($entityid) === null) {
+            return $cohorts;
+        }
+        [$where, $params] = self::where($entityid);
+        [$in, $idparams] = $DB->get_in_or_equal(array_map('intval', array_keys($cohorts)), SQL_PARAMS_NAMED, 'id');
+        $ids = $DB->get_fieldset_sql("SELECT c.id FROM {cohort} c WHERE c.id $in AND $where", $idparams + $params);
+        return array_intersect_key($cohorts, array_flip($ids));
     }
 }

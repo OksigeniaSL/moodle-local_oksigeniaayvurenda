@@ -27,15 +27,15 @@ define('AJAX_SCRIPT', true);
 
 require(__DIR__ . '/../../config.php');
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\stocktake;
 
 require_login(null, false);
 require_sesskey();
-$context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:catalogue', $context);
 $library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
+access::require('local/oksigeniaayvurenda:catalogue', $library);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
@@ -55,7 +55,7 @@ if ($action === 'read') {
     }
     $answer = ['answers' => $answers, 'counts' => stocktake::counts($stocktake)];
 } else if ($action === 'return') {
-    require_capability('local/oksigeniaayvurenda:desk', $context);
+    access::require('local/oksigeniaayvurenda:desk', $library);
     $returned = (new desk($library, (int) $USER->id))->scan(required_param('code', PARAM_TEXT));
     $answer = ['kind' => $returned['kind'], 'message' => $returned['message'], 'counts' => stocktake::counts($stocktake)];
 }

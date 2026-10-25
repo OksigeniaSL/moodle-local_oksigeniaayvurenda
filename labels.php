@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\labels;
 use local_oksigeniaayvurenda\local\shell;
@@ -36,12 +37,12 @@ $codestext = optional_param('codes', '', PARAM_TEXT);
 $sheet = optional_param('sheet', $kind === 'spines' ? '5x13' : '3x8', PARAM_ALPHANUMEXT);
 $start = optional_param('start', 1, PARAM_INT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:catalogue');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:catalogue', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $ref, 'kind' => $kind]));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

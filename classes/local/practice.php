@@ -95,12 +95,15 @@ final class practice {
      */
     public static function is(int $entityid): bool {
         global $DB;
-        static $cache = [];
-        if (!isset($cache[$entityid])) {
+        // For one request: a static one would outlive the tests, whose ids come again.
+        $cache = \cache::make('local_oksigeniaayvurenda', 'access');
+        $practice = $cache->get('practice_' . $entityid);
+        if ($practice === false) {
             $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-            $cache[$entityid] = !empty($settings['practice']);
+            $practice = empty($settings['practice']) ? 0 : 1;
+            $cache->set('practice_' . $entityid, $practice);
         }
-        return $cache[$entityid];
+        return (bool) $practice;
     }
 
     /**

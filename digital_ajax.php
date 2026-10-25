@@ -26,14 +26,20 @@ define('AJAX_SCRIPT', true);
 
 require(__DIR__ . '/../../config.php');
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\digital;
 
 require_login(null, false);
 require_sesskey();
-require_capability('local/oksigeniaayvurenda:view', context_system::instance());
 $item = $DB->get_record('local_oksigeniaayvurenda_digital', ['id' => required_param('item', PARAM_INT)], '*', MUST_EXIST);
+access::require('local/oksigeniaayvurenda:view', (int) $item->entityid);
 if (!digital::visible($item, digital::viewer((int) $item->entityid, (int) $USER->id))) {
-    throw new required_capability_exception(context_system::instance(), 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+    throw new required_capability_exception(
+        access::context((int) $item->entityid),
+        'local/oksigeniaayvurenda:desk',
+        'nopermissions',
+        ''
+    );
 }
 $position = optional_param('position', null, PARAM_RAW_TRIMMED);
 $bookmarks = optional_param('bookmarks', null, PARAM_RAW);

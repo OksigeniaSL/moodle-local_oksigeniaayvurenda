@@ -54,7 +54,7 @@ final class screens {
         $desk = null;
         $toread = null;
         $wishes = null;
-        if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
+        if (access::can('local/oksigeniaayvurenda:desk', $library)) {
             $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
             // The reviews waiting for the library, only when there are some.
             $waiting = reviews::waiting((int) $library->entityid);
@@ -65,7 +65,7 @@ final class screens {
             $wishes = $asked ? ['url' => self::url('wishes.php', $library), 'label' => self::str('wisheswaiting', $asked)] : null;
         }
         $addbooks = null;
-        if (has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())) {
+        if (access::can('local/oksigeniaayvurenda:catalogue', $library)) {
             $addbooks = ['url' => self::url('add.php', $library), 'label' => self::str('addopen'),
                 'freeurl' => self::url('free.php', $library), 'freelabel' => self::str('homefreeworks')];
         }
@@ -77,7 +77,7 @@ final class screens {
         $pending = count(voices::pending($library, (int) $USER->id));
         $voices = $pending ? ['url' => self::url('voices.php', $library), 'label' => self::str('homevoices', $pending)] : null;
         // The public window: for everyone once it is open, and for whoever manages the library to open it.
-        $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
+        $manage = access::can('local/oksigeniaayvurenda:manage', $library);
         $window = window::settings($library)['open'] || $manage
             ? ['url' => self::url('public.php', $library), 'label' => self::str('homewindow')] : null;
         // Ayvu rande, the voices of the library: for whoever belongs to the centre.
@@ -345,7 +345,7 @@ final class screens {
                 $box['canask'] = true;
             }
         }
-        $isdesk = has_capability('local/oksigeniaayvurenda:desk', \context_system::instance());
+        $isdesk = access::can('local/oksigeniaayvurenda:desk', $library);
         if (in_array($state, ['out', 'held'], true) && $isdesk) {
             $box['staff'] = true;
             $box['holdsurl'] = self::url('holds.php', $library);
@@ -386,7 +386,7 @@ final class screens {
                 'url' => self::url('read.php', $library, ['id' => $item->id]),
             ];
         }
-        $manage = has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())
+        $manage = access::can('local/oksigeniaayvurenda:catalogue', $library)
             ? ['url' => self::url('digital.php', $library, ['record' => $recordid]), 'label' => self::str('digitalmanage')] : null;
         // Readers of the centre and the library staff may give the book a voice, when the centre's plan brings voices.
         $known = $viewer['who'] !== 'nobody';
@@ -410,7 +410,7 @@ final class screens {
      */
     public static function choose(): array {
         global $USER;
-        $all = catalogue::libraries();
+        $all = catalogue::visible();
         $featured = libraries::featured($all, isloggedin() && !isguestuser() ? (int) $USER->id : 0);
         $card = function (\stdClass $library) {
             $look = libraries::look($library);

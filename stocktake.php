@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\stocktake;
@@ -32,12 +33,12 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $id = optional_param('id', 0, PARAM_INT);
 $view = optional_param('view', '', PARAM_ALPHA);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:catalogue');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:catalogue', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/stocktake.php', ['library' => $ref, 'id' => $id, 'view' => $view]));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

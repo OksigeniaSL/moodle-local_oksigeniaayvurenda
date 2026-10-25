@@ -50,7 +50,8 @@ final class stocktake {
         global $DB;
         $now = $now ?? time();
         return (int) $DB->insert_record(self::T . 'stocktake', ['libraryid' => $library->id,
-            'name' => \core_text::substr(trim($name), 0, 100), 'locationid' => $locationid ?: null, 'status' => 'open',
+            'name' => \core_text::substr(trim($name), 0, 100),
+            'locationid' => cataloguer::own_location((int) $library->entityid, $locationid), 'status' => 'open',
             'createdby' => $userid ?: null, 'timecreated' => $now, 'timemodified' => $now]);
     }
 
@@ -118,8 +119,8 @@ final class stocktake {
         global $DB;
         $now = $now ?? time();
         $code = trim($code);
-        $here = $here ?: ($stocktake->locationid ? (int) $stocktake->locationid : null);
         $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $stocktake->libraryid]);
+        $here = cataloguer::own_location($entityid, $here) ?: ($stocktake->locationid ? (int) $stocktake->locationid : null);
         $item = $code === '' ? null : $DB->get_record_select(self::T . 'item', 'entityid = :entityid AND ' .
             $DB->sql_equal('barcode', ':code', false), ['entityid' => $entityid, 'code' => $code], '*', IGNORE_MULTIPLE);
         $answer = ['code' => $code, 'kind' => 'unknown', 'title' => '', 'where' => ''];

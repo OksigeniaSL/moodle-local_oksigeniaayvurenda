@@ -23,6 +23,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\challenges;
 use local_oksigeniaayvurenda\local\screens;
@@ -35,13 +36,13 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $asked = optional_param('group', '', PARAM_TEXT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:view');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:view', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => $ref] +
     ($asked !== '' ? ['group' => $asked] : []) + (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('invalidparameter', 'debug');
 }

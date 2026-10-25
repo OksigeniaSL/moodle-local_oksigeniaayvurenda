@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 
@@ -33,11 +34,9 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $action = required_param('action', PARAM_ALPHA);
 require_login(null, false);
 require_sesskey();
-$context = context_system::instance();
-require_capability('local/oksigeniaayvurenda:desk', $context);
-$PAGE->set_context($context);
-
 $library = catalogue::library($ref);
+access::require('local/oksigeniaayvurenda:desk', $library);
+$PAGE->set_context(context_system::instance());
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

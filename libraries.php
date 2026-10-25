@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\libraries;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
@@ -30,7 +31,9 @@ require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
 $context = context_system::instance();
+// Whoever manages a centre sees and changes only theirs; new centres and the site's main seat are for the site's managers.
 shell::require('local/oksigeniaayvurenda:manage');
+$sitewide = has_capability('local/oksigeniaayvurenda:manage', $context);
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/libraries.php'));
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
@@ -38,6 +41,21 @@ $notice = '';
 
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
+    // The centre each action touches: the one given, or the one of the library given.
+    if ($do === 'newentity') {
+        require_capability('local/oksigeniaayvurenda:manage', $context);
+    } else if ($do === 'category') {
+        require_capability('moodle/category:manage', $context);
+    } else if (in_array($do, ['entity', 'newlibrary'], true)) {
+        access::require('local/oksigeniaayvurenda:manage', required_param('entity', PARAM_INT));
+    } else {
+        access::require('local/oksigeniaayvurenda:manage', (int) $DB->get_field(
+            'local_oksigeniaayvurenda_library',
+            'entityid',
+            ['id' => required_param('library', PARAM_INT)],
+            MUST_EXIST
+        ));
+    }
     if ($do === 'newentity') {
         $library = libraries::create_entity([
             'name' => required_param('name', PARAM_TEXT),
@@ -75,6 +93,9 @@ if (data_submitted() && confirm_sesskey()) {
             plans::save(required_param('entity', PARAM_INT), $plan);
         }
         $notice = $str('librariessaved');
+    } else if ($do === 'category') {
+        access::category(required_param('entity', PARAM_INT));
+        $notice = $str('librariessaved');
     } else if ($do === 'newlibrary') {
         $library = libraries::create_library(required_param('entity', PARAM_INT), [
             'name' => required_param('name', PARAM_TEXT),
@@ -97,7 +118,9 @@ if (data_submitted() && confirm_sesskey()) {
         libraries::save_look($libraryid, [
             'colour' => optional_param('colour', 0, PARAM_INT),
             'motto' => optional_param('motto', '', PARAM_TEXT),
-            'featured' => optional_param('featured', 0, PARAM_BOOL),
+            'featured' => $sitewide ? optional_param('featured', 0, PARAM_BOOL) : libraries::look(
+                $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $libraryid], '*', MUST_EXIST)
+            )['featured'],
             'scene' => optional_param('scene', '', PARAM_ALPHANUMEXT),
         ]);
         if (optional_param('noimage', 0, PARAM_BOOL)) {
@@ -116,9 +139,15 @@ $kinds = fn(string $chosen) => array_map(fn($k) => ['value' => $k, 'label' => $s
 $classifications = fn(string $chosen) => array_map(fn($c) => ['value' => $c, 'label' => $str('classification' . $c),
     'selected' => $c === $chosen], libraries::CLASSIFICATIONS);
 $setsplans = has_capability('local/oksigeniaayvurenda:plans', $context);
+// Who runs the site gives each centre its category and the roles of its staff there.
+$setsstaff = has_capability('moodle/category:manage', $context) && has_capability('moodle/role:assign', $context);
+$librarian = (int) $DB->get_field('role', 'id', ['shortname' => \local_oksigeniaayvurenda\local\roles::LIBRARIAN]);
 $entities = [];
 foreach (libraries::all() as $one) {
     $entity = $one['entity'];
+    if (!access::can('local/oksigeniaayvurenda:manage', (int) $entity->id)) {
+        continue;
+    }
     $settings = json_decode((string) $entity->settings, true) ?: [];
     $groups = libraries::groups((int) $entity->id);
     $options = fn(int $chosen, int $self = 0) => array_values(array_map(
@@ -207,6 +236,13 @@ foreach (libraries::all() as $one) {
             true
         )], \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
         'plansummary' => plans::summary((int) $entity->id),
+        'staffpart' => $setsstaff ? (function () use ($entity, $str, $librarian) {
+            $context = access::context((int) $entity->id);
+            $own = $context->contextlevel === CONTEXT_COURSECAT;
+            return ['staffentity' => (int) $entity->id, 'staffparthint' => $str($own ? 'librariesstaffhint' : 'librariesstaffnone'),
+                'staffassign' => $own ? (new moodle_url('/admin/roles/assign.php', ['contextid' => $context->id,
+                    'roleid' => $librarian]))->out(false) : ''];
+        })() : null,
         'planform' => $setsplans ? (function () use ($entity, $str) {
             $plan = plans::of((int) $entity->id);
             return ['plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
@@ -223,6 +259,7 @@ $data = [
     'sesskey' => sesskey(),
     'entities' => $entities,
     'none' => !$entities,
+    'sitewide' => $sitewide,
     'newclassifications' => $classifications('udc'),
 ];
 foreach (
@@ -235,7 +272,7 @@ foreach (
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
         'librarieschallengeshint', 'librariesreviewsign', 'librariesplan', 'librariesplanhint', 'planname', 'plancopies',
-        'planreaders', 'planlimithint'] as $key
+        'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate'] as $key
 ) {
     $data[$key] = $str($key);
 }

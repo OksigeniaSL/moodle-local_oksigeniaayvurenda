@@ -26,14 +26,15 @@ define('AJAX_SCRIPT', true);
 
 require(__DIR__ . '/../../config.php');
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\voices;
 
 require_login(null, false);
 require_sesskey();
-require_capability('local/oksigeniaayvurenda:view', context_system::instance());
 $library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
+access::require('local/oksigeniaayvurenda:view', $library);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

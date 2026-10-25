@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
@@ -30,12 +31,12 @@ require(__DIR__ . '/../../config.php');
 
 $ref = optional_param('library', '', PARAM_ALPHANUMEXT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:view');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:view', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/index.php', $ref !== '' ? ['library' => $ref] : []));
 
-$library = catalogue::library($ref);
 if (!$library) {
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/choose', screens::choose());
     shell::output(get_string('pluginname', 'local_oksigeniaayvurenda'), $html);

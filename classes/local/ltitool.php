@@ -172,6 +172,21 @@ final class ltitool {
         if ($other && (int) $other->id !== $id) {
             throw new \moodle_exception('ltitaken', 'local_oksigeniaayvurenda');
         }
+        // A platform belongs to one centre. Moodle logs people in by the platform and their id there, so the same
+        // platform in a second centre, or one another tool of the site already logs in from, could log in as someone
+        // else.
+        $ours = $DB->record_exists(self::T . 'ltiplatform', ['issuer' => $clean['issuer'], 'entityid' => $entityid]);
+        if (
+            $DB->record_exists_select(
+                self::T . 'ltiplatform',
+                'issuer = :issuer AND entityid <> :entityid',
+                ['issuer' => $clean['issuer'], 'entityid' => $entityid]
+            )
+                || (!$ours && $DB->record_exists_select('auth_lti_linked_login', $DB->sql_compare_text('issuer', 255) .
+                    ' = ' . $DB->sql_compare_text(':issuer', 255), ['issuer' => $clean['issuer']]))
+        ) {
+            throw new \moodle_exception('ltiissuertaken', 'local_oksigeniaayvurenda');
+        }
         $now = time();
         if ($id) {
             $DB->get_record(self::T . 'ltiplatform', ['id' => $id, 'entityid' => $entityid], 'id', MUST_EXIST);

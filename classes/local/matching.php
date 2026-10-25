@@ -152,7 +152,21 @@ final class matching {
         global $DB, $CFG;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $cohorts = array_keys($settings['cohorts'] ?? []);
-        if ($cohorts) {
+        // A centre with its own category: its chosen cohorts that are there, or whoever has a role inside it.
+        $own = access::context($entityid);
+        if ($own->contextlevel === CONTEXT_COURSECAT) {
+            $cohorts = array_column(array_filter(sources\cohorts::options($entityid), fn($c) => $c['chosen']), 'id');
+        }
+        if (!$cohorts && $own->contextlevel === CONTEXT_COURSECAT) {
+            $rows = $DB->get_recordset_sql(
+                "SELECT ra.id AS rowid, u.id, u.firstname, u.lastname
+                   FROM {role_assignments} ra
+                   JOIN {context} ctx ON ctx.id = ra.contextid
+                   JOIN {user} u ON u.id = ra.userid
+                  WHERE u.deleted = 0 AND (ctx.id = :contextid OR " . $DB->sql_like('ctx.path', ':path') . ')',
+                ['contextid' => $own->id, 'path' => $own->path . '/%']
+            );
+        } else if ($cohorts) {
             [$in, $params] = $DB->get_in_or_equal($cohorts, SQL_PARAMS_NAMED);
             $rows = $DB->get_recordset_sql(
                 "SELECT m.id AS rowid, u.id, u.firstname, u.lastname, c.name AS groupname

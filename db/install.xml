@@ -10,6 +10,7 @@
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="yearstart" TYPE="char" LENGTH="5" NOTNULL="true" DEFAULT="09-01" SEQUENCE="false" COMMENT="MM-DD on which its school year starts"/>
         <FIELD NAME="settings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: classification scheme, item and reader types, options"/>
+        <FIELD NAME="categoryid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Its own course category, where the roles of its staff are given; none, the site"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>

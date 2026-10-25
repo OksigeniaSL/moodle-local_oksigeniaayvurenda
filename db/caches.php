@@ -42,6 +42,12 @@ $definitions = [
         'simplekeys' => true,
         'ttl' => 3600,
     ],
+    // Who reads in which centre and which centre is the practice one, for one request (emptied between tests).
+    'access' => [
+        'mode' => cache_store::MODE_REQUEST,
+        'simplekeys' => true,
+        'simpledata' => true,
+    ],
     // The people of a management platform while pairing its readers with those already there: asking takes a while.
     'platformpeople' => [
         'mode' => cache_store::MODE_APPLICATION,

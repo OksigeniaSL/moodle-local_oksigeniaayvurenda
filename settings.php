@@ -29,6 +29,18 @@ if ($hassiteconfig) {
     $ADMIN->add('localplugins', $settings);
     if ($ADMIN->fulltree) {
         $str = fn(string $key) => new lang_string($key, 'local_oksigeniaayvurenda');
+        // Several centres on one site: each with its own category, where the roles of its staff are given.
+        $settings->add(new admin_setting_heading(
+            'local_oksigeniaayvurenda/centresheading',
+            $str('centresheading'),
+            $str('centresheading_desc')
+        ));
+        $settings->add(new admin_setting_configcheckbox(
+            'local_oksigeniaayvurenda/entitycategories',
+            $str('entitycategories'),
+            $str('entitycategories_desc'),
+            0
+        ));
         $settings->add(new admin_setting_heading(
             'local_oksigeniaayvurenda/planheading',
             $str('planheading'),

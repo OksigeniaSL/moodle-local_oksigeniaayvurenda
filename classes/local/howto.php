@@ -71,14 +71,13 @@ final class howto {
      * @return array[] key, title, steps, url, help (address or null).
      */
     public static function find(string $query, \stdClass $library, int $userid): array {
-        $context = \context_system::instance();
         $words = array_values(array_filter(
             preg_split('/[^\p{L}\p{N}]+/u', text::normalise($query)) ?: [],
             fn($w) => \core_text::strlen($w) >= 3 && !in_array($w, self::QUIET, true)
         ));
         $found = [];
         foreach (self::TASKS as $key => [$page, $capability, $piece]) {
-            if (!has_capability('local/oksigeniaayvurenda:' . $capability, $context, $userid)) {
+            if (!access::can('local/oksigeniaayvurenda:' . $capability, $library, $userid)) {
                 continue;
             }
             $task = self::task($key, $library);

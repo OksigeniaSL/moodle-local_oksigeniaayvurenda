@@ -87,6 +87,10 @@ final class libraries {
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
+        // On a site shared by several centres, each one gets its category, where the roles of its staff are given.
+        if (get_config('local_oksigeniaayvurenda', 'entitycategories')) {
+            access::category((int) $entityid);
+        }
         $library = trim((string) ($data['library'] ?? '')) !== '' ? trim($data['library']) : $name;
         return self::create_library((int) $entityid, ['name' => $library, 'kind' => 'central'], $now);
     }

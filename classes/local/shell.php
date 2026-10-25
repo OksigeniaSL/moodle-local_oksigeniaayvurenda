@@ -35,15 +35,17 @@ final class shell {
      * an error.
      *
      * @param string $capability
-     * @param \stdClass|null $library
+     * @param \stdClass|null $library The library of the page: the capability is checked in its centre; with none, in any.
      */
     public static function require(string $capability, ?\stdClass $library = null): void {
-        if (has_capability($capability, \context_system::instance())) {
+        if (access::can($capability, $library)) {
             return;
         }
         self::login_first();
         $name = get_string(str_replace('local/', '', $capability), 'local_oksigeniaayvurenda');
-        self::refuse(get_string('staffonlyhint', 'local_oksigeniaayvurenda', $name), $library);
+        // A library of a centre that is not theirs is not even named.
+        $theirs = $library && access::can('local/oksigeniaayvurenda:view', $library) ? $library : null;
+        self::refuse(get_string('staffonlyhint', 'local_oksigeniaayvurenda', $name), $theirs);
     }
 
     /**
@@ -65,9 +67,22 @@ final class shell {
      * @param string|null $title What the page says first; that it is only for the staff when not given.
      */
     public static function refuse(string $why, ?\stdClass $library = null, ?string $title = null): void {
-        $title = $title ?? get_string('staffonly', 'local_oksigeniaayvurenda');
-        $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
         http_response_code(403);
+        self::refuse_page($title ?? get_string('staffonly', 'local_oksigeniaayvurenda'), $why, $library);
+    }
+
+    /**
+     * The page that says why someone does not go on, with the way back.
+     *
+     * @param string $title
+     * @param string $why
+     * @param \stdClass|null $library
+     */
+    private static function refuse_page(string $title, string $why, ?\stdClass $library): void {
+        global $PAGE;
+        // It can come before the page set its own context: every page of the library is on the site's.
+        $PAGE->set_context(\context_system::instance());
+        $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
         self::output(
             $title,
             '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
@@ -77,6 +92,18 @@ final class shell {
             ['search' => false]
         );
         die;
+    }
+
+    /**
+     * A page of the library that says something is not here (an address of another centre, or of something gone),
+     * with the way back, and ends there.
+     *
+     * @param string $why
+     * @param \stdClass|null $library
+     */
+    public static function missing(string $why, ?\stdClass $library = null): void {
+        http_response_code(404);
+        self::refuse_page(get_string('notherehead', 'local_oksigeniaayvurenda'), $why, $library);
     }
 
     /**
@@ -138,7 +165,6 @@ final class shell {
         }
         // First the library's catalogue, where everyone goes back most (marked when you are on it); then the page's own
         // links and the global ones (the libraries; the desk for the staff), without repeating one.
-        $system = \context_system::instance();
         $catalogue = '';
         $seen = [];
         if ($library) {
@@ -156,12 +182,12 @@ final class shell {
                 'label' => get_string('classnav', 'local_oksigeniaayvurenda')];
         }
         // The libraries: to choose one; for whoever manages them, their page, whose cards also go in (one link, not two).
-        $manage = has_capability('local/oksigeniaayvurenda:manage', $system);
-        if (count(catalogue::libraries()) > 1 || $manage) {
+        $manage = access::can('local/oksigeniaayvurenda:manage', $library);
+        if (count(catalogue::visible()) > 1 || $manage) {
             $links[] = ['url' => $base . ($manage ? 'libraries.php' : 'index.php'),
                 'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
         }
-        if ($library && has_capability('local/oksigeniaayvurenda:desk', $system)) {
+        if ($library && access::can('local/oksigeniaayvurenda:desk', $library)) {
             $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($library->slug),
                 'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
         }
@@ -292,9 +318,8 @@ Oksigenia Ayvurenda</button>
      */
     private static function howto_box(?\stdClass $library, string $base): string {
         global $PAGE;
-        $context = \context_system::instance();
-        $staff = has_capability('local/oksigeniaayvurenda:desk', $context)
-            || has_capability('local/oksigeniaayvurenda:catalogue', $context);
+        $staff = $library && (access::can('local/oksigeniaayvurenda:desk', $library)
+            || access::can('local/oksigeniaayvurenda:catalogue', $library));
         $help = optional_param('help', 0, PARAM_BOOL);
         $here = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/howto.php');
         if (!$library || !$staff || $help || $here) {

@@ -25,8 +25,9 @@
 namespace local_oksigeniaayvurenda\local;
 
 /**
- * A role for the people who run the library, given at site level: they look up, lend, take back and catalogue. Created
- * when the plugin is installed, so that the administrator only has to give it.
+ * A role for the people who run the library: they look up, lend, take back and catalogue. Given at site level, or in the
+ * category of their centre when several share the site. Created when the plugin is installed, so that the administrator
+ * only has to give it.
  */
 final class roles {
     /** @var string Short name of the role. */
@@ -48,8 +49,12 @@ final class roles {
                 self::LIBRARIAN,
                 get_string('rolelibrarian_desc', 'local_oksigeniaayvurenda')
             );
-            set_role_contextlevels($roleid, [CONTEXT_SYSTEM]);
         }
+        // Given on the whole site, or in the category of a centre on a site shared by several.
+        set_role_contextlevels($roleid, array_unique(array_merge(
+            get_role_contextlevels($roleid),
+            [CONTEXT_SYSTEM, CONTEXT_COURSECAT]
+        )));
         $system = \context_system::instance();
         foreach (['view', 'desk', 'catalogue'] as $capability) {
             assign_capability('local/oksigeniaayvurenda:' . $capability, CAP_ALLOW, $roleid, $system->id, true);

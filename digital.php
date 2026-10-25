@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\core\digital_rules;
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\holds;
@@ -33,12 +34,12 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $recordid = required_param('record', PARAM_INT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:catalogue');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:catalogue', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/digital.php', ['library' => $ref, 'record' => $recordid]));
 
-$library = catalogue::library($ref);
 $found = $library ? catalogue::record($recordid, $library) : null;
 if (!$found) {
     throw new moodle_exception('recordnotfound', 'local_oksigeniaayvurenda');

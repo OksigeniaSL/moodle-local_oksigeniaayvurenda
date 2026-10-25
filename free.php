@@ -24,6 +24,7 @@
  */
 
 use local_oksigeniaayvurenda\core\digital_rules;
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\freeworks;
 use local_oksigeniaayvurenda\local\shell;
@@ -38,11 +39,11 @@ $from = optional_param('from', 'gutenberg', PARAM_ALPHA) === 'wikisource' ? 'wik
 $worktitle = trim(optional_param('work', '', PARAM_TEXT));
 $wslang = freeworks::wikisource_lang();
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:catalogue');
-$PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/free.php', ['library' => $ref]));
 $library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:catalogue', $library);
+$PAGE->set_context(context_system::instance());
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/free.php', ['library' => $ref]));
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

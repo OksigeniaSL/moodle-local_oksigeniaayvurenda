@@ -22,8 +22,9 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use local_oksigeniaayvurenda\core\flower;
 use local_oksigeniaayvurenda\core\card_look;
+use local_oksigeniaayvurenda\core\flower;
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\cards;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\garden;
@@ -33,12 +34,12 @@ require(__DIR__ . '/../../config.php');
 
 $ref = optional_param('library', '', PARAM_ALPHANUMEXT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:view');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:view', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/card.php', ['library' => $ref]));
 
-$library = catalogue::library($ref);
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $conditions = ['userid' => $USER->id, 'status' => 'active'];
 if ($library) {
@@ -55,7 +56,12 @@ $own = get_user_preferences($pref, null);
 $isdesk = has_capability('local/oksigeniaayvurenda:desk', $context);
 $previewid = $isdesk ? optional_param('reader', 0, PARAM_INT) : 0;
 $previewlook = $isdesk ? optional_param('look', '', PARAM_ALPHA) : '';
-$readers = $previewid ? [$DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $previewid], '*', MUST_EXIST)]
+$preview = $previewid ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $previewid,
+    'entityid' => $library->entityid]) : null;
+if ($previewid && !$preview) {
+    shell::missing(get_string('readernothere', 'local_oksigeniaayvurenda'), $library);
+}
+$readers = $preview ? [$preview]
     : $DB->get_records('local_oksigeniaayvurenda_reader', $conditions, 'id');
 $cardsdata = [];
 foreach ($readers as $reader) {

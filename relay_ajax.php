@@ -24,6 +24,7 @@
 
 define('AJAX_SCRIPT', true);
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\relay;
 
 require(__DIR__ . '/../../config.php');
@@ -31,11 +32,11 @@ require(__DIR__ . '/../../config.php');
 $action = required_param('action', PARAM_ALPHA);
 require_login(null, false);
 require_sesskey();
-$context = context_system::instance();
-if (!has_capability('local/oksigeniaayvurenda:desk', $context)) {
-    require_capability('local/oksigeniaayvurenda:catalogue', $context);
+// The phone sends codes to its own user's desk or adding screen: for whoever works at a desk or catalogues anywhere.
+if (!access::can('local/oksigeniaayvurenda:desk', null)) {
+    access::require('local/oksigeniaayvurenda:catalogue', null);
 }
-$PAGE->set_context($context);
+$PAGE->set_context(context_system::instance());
 
 if ($action === 'push') {
     relay::push((int) $USER->id, required_param('code', PARAM_TEXT));

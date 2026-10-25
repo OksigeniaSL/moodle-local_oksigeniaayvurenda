@@ -239,7 +239,7 @@ final class voices {
      * @return bool
      */
     public static function can_approve(\stdClass $item, int $userid): bool {
-        return has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)
+        return access::can('local/oksigeniaayvurenda:desk', (int) $item->entityid, $userid)
             || self::tutors($item, $userid) || self::inviter($item, $userid);
     }
 

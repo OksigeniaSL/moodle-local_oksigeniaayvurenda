@@ -24,6 +24,7 @@
  */
 
 use local_oksigeniaayvurenda\core\digital_rules;
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\shell;
@@ -41,7 +42,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/public.php', ['library'
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 
 $library = catalogue::library($ref);
-$manage = $library && isloggedin() && !isguestuser() && has_capability('local/oksigeniaayvurenda:manage', $context);
+$manage = $library && isloggedin() && !isguestuser() && access::can('local/oksigeniaayvurenda:manage', $library);
 $notice = '';
 if ($manage && data_submitted() && confirm_sesskey()) {
     window::save($library, ['open' => optional_param('open', 0, PARAM_BOOL), 'text' => optional_param('text', '', PARAM_TEXT),

@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\shell;
 
@@ -29,14 +30,13 @@ require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
-$context = context_system::instance();
-if (!has_capability('local/oksigeniaayvurenda:desk', $context)) {
-    shell::require('local/oksigeniaayvurenda:catalogue');
+$library = catalogue::library($ref);
+if (!access::can('local/oksigeniaayvurenda:desk', $library)) {
+    shell::require('local/oksigeniaayvurenda:catalogue', $library);
 }
-$PAGE->set_context($context);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/phone.php', ['library' => $ref]));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

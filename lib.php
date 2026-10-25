@@ -67,17 +67,22 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
             (bool) $item->download
         );
     } else if ($filearea === 'copies') {
+        // The daily copies of a centre (the item is the centre): for its staff.
         require_login(null, false);
-        require_capability('local/oksigeniaayvurenda:desk', $context);
+        \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:desk', $itemid);
     } else if ($filearea === 'libraryimage' || $filearea === 'portrait') {
-        // A library's own picture, or its characters' portraits: for whoever sees the library, and for anyone where its
-        // public window is open.
+        // A library's own picture, or its characters' portraits (the item is the centre): for whoever sees the library,
+        // and for anyone where its public window is open.
         global $DB;
         $library = $filearea === 'libraryimage' ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $itemid])
             : null;
+        $entityid = $library ? (int) $library->entityid : ($filearea === 'portrait' ? $itemid : 0);
+        if (!$entityid) {
+            return false;
+        }
         if (!$anyone || !$library || empty(\local_oksigeniaayvurenda\local\window::settings($library)['open'])) {
             require_login(null, false);
-            require_capability('local/oksigeniaayvurenda:view', $context);
+            \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:view', $entityid);
         }
         $forcedownload = false;
     } else if ($filearea === 'reviewdrawing') {
@@ -89,9 +94,9 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
             return false;
         }
         if ($review->status === 'published') {
-            require_capability('local/oksigeniaayvurenda:view', $context);
+            \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:view', (int) $review->entityid);
         } else if (
-            !has_capability('local/oksigeniaayvurenda:desk', $context) &&
+            !\local_oksigeniaayvurenda\local\access::can('local/oksigeniaayvurenda:desk', (int) $review->entityid) &&
             (int) $DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $review->readerid]) !== (int) $USER->id
         ) {
             return false;
@@ -107,14 +112,21 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         }
         $forcedownload = false;
     } else if ($filearea === 'cover') {
+        // A record's cover: for whoever sees its centre's library, and for anyone where an open window shows it.
         if (!$anyone || !\local_oksigeniaayvurenda\local\window::shows_record($itemid)) {
+            global $DB;
             require_login(null, false);
-            require_capability('local/oksigeniaayvurenda:view', $context);
+            $entityid = (int) $DB->get_field('local_oksigeniaayvurenda_record', 'entityid', ['id' => $itemid]);
+            if (!$entityid) {
+                return false;
+            }
+            \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:view', $entityid);
         }
         $forcedownload = false;
     } else {
+        // A cover being chosen, kept for its user only.
         require_login(null, false);
-        require_capability('local/oksigeniaayvurenda:catalogue', $context);
+        \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:catalogue', null);
         if ($itemid !== (int) $USER->id) {
             return false;
         }

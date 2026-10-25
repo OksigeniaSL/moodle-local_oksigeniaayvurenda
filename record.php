@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
@@ -31,15 +32,15 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $id = required_param('id', PARAM_INT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:view');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:view', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $ref, 'id' => $id]));
 
-$library = catalogue::library($ref);
 $found = $library ? catalogue::record($id, $library) : null;
 if (!$found) {
-    throw new moodle_exception('recordnotfound', 'local_oksigeniaayvurenda');
+    shell::missing(get_string('recordnotfound', 'local_oksigeniaayvurenda'), $library);
 }
 // A reader who took the book home tells what they thought, or takes it back.
 $do = optional_param('review', '', PARAM_ALPHA);

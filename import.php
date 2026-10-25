@@ -25,24 +25,25 @@
 use local_oksigeniaayvurenda\core\abies\export_reader;
 use local_oksigeniaayvurenda\core\abies\survey;
 use local_oksigeniaayvurenda\core\import\catalogue_csv;
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\import\abies_import;
 use local_oksigeniaayvurenda\local\import\catalogue_import;
+use local_oksigeniaayvurenda\local\import\files;
 use local_oksigeniaayvurenda\local\plan_full;
 use local_oksigeniaayvurenda\local\plans;
-use local_oksigeniaayvurenda\local\import\files;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
-$context = context_system::instance();
-shell::require('local/oksigeniaayvurenda:manage');
-$PAGE->set_context($context);
+$library = catalogue::library($ref);
+$context = access::context($library);
+shell::require('local/oksigeniaayvurenda:manage', $library);
+$PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $ref]));
 
-$library = catalogue::library($ref);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }

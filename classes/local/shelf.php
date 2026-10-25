@@ -63,7 +63,7 @@ final class shelf {
         if ($library->kind !== 'classroom') {
             return false;
         }
-        if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)) {
+        if (access::can('local/oksigeniaayvurenda:desk', $library, $userid)) {
             return true;
         }
         $groups = self::groups($library);

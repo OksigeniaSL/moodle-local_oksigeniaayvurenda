@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\core\digital_rules;
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\shell;
@@ -46,9 +47,9 @@ $item = digital::get($id, $library);
 $anyone = (!isloggedin() || isguestuser()) && window::shows($item);
 if (!$anyone) {
     require_login(null, false);
-    shell::require('local/oksigeniaayvurenda:view');
+    shell::require('local/oksigeniaayvurenda:view', $library);
     if (!digital::visible($item, digital::viewer((int) $library->entityid, (int) $USER->id))) {
-        throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+        throw new required_capability_exception(access::context($library), 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
     }
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);

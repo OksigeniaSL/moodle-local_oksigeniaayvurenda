@@ -233,11 +233,13 @@ final class reviews {
         $author = (int) $DB->get_field(self::T . 'reader', 'userid', ['id' => $review->readerid]);
         if (
             ($userid && $author === $userid) || voices::tutors($review, $userid)
-                || has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)
+                || access::can('local/oksigeniaayvurenda:desk', (int) $review->entityid, $userid)
         ) {
             return true;
         }
-        return $review->status === 'published' && voices::may_share($review);
+        // Published, for whoever looks up that centre's library, if it may be shared.
+        return $review->status === 'published' && access::can('local/oksigeniaayvurenda:view', (int) $review->entityid, $userid)
+            && voices::may_share($review);
     }
 
     /**
