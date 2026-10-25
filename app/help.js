@@ -83,7 +83,8 @@
         },
         point: function(selector) {
             return wait(selector).then(function(element) {
-                element.scrollIntoView({block: 'nearest'});
+                // In the middle, not at an edge: a sticky header would cover it there.
+                element.scrollIntoView({block: 'center'});
                 var at = place(element);
                 pointer.style.transform = 'translate(' + Math.round(at.x) + 'px, ' + Math.round(at.y) + 'px)';
                 pointer.classList.add('ayv-help-pointer-on');

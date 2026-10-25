@@ -133,8 +133,12 @@ foreach (libraries::all() as $one) {
             'look' => (function () use ($library) {
                 $look = libraries::look($library);
                 $scenes = [];
+                $strings = get_string_manager();
                 foreach (libraries::scenes() as $name => $url) {
-                    $scenes[] = ['value' => $name, 'url' => $url, 'selected' => $name === $look['scene']];
+                    // The art package says what each picture shows; without words, its number.
+                    $label = $strings->string_exists($name, 'local_oksigeniaayvurendaarte')
+                        ? get_string($name, 'local_oksigeniaayvurendaarte') : $name;
+                    $scenes[] = ['value' => $name, 'url' => $url, 'label' => $label, 'selected' => $name === $look['scene']];
                 }
                 return $look + ['colours' => array_map(
                     fn($c) => ['value' => $c, 'selected' => $c === $look['colour']],

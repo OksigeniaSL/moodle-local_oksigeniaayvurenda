@@ -76,7 +76,7 @@
                         {{#hasscenes}}<fieldset class="ayv-fieldset"><legend>{{librariesscenes}}</legend>
                             <div class="ayv-scenes">
                                 <label class="ayv-scene ayv-scene-none"><input type="radio" name="scene" value="" {{#noscene}}checked{{/noscene}}><span>{{librariesnoscene}}</span></label>
-                                {{#scenes}}<label class="ayv-scene"><input type="radio" name="scene" value="{{value}}" {{#selected}}checked{{/selected}}><img src="{{url}}" alt="{{value}}" loading="lazy"></label>{{/scenes}}
+                                {{#scenes}}<label class="ayv-scene"><input type="radio" name="scene" value="{{value}}" {{#selected}}checked{{/selected}}><img src="{{url}}" alt="{{label}}" title="{{label}}" loading="lazy"></label>{{/scenes}}
                             </div></fieldset>{{/hasscenes}}
                         <label class="ayv-field ayv-field-wide">{{librariesimage}} <span class="ayv-field-hint">{{librariesimagehint}}</span>
                             <input type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif"></label>
