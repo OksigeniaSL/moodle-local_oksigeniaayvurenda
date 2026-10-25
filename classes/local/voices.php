@@ -74,6 +74,7 @@ final class voices {
         string $signature = ''
     ): int {
         global $DB;
+        plans::require((int) $library->entityid, 'voices');
         $extension = in_array($extension, ['webm', 'ogg', 'm4a'], true) ? $extension : 'webm';
         $id = digital::add_file(
             $library,

@@ -24,6 +24,7 @@
  */
 
 use local_oksigeniaayvurenda\local\ltitool;
+use local_oksigeniaayvurenda\local\plans;
 
 require(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
@@ -43,6 +44,7 @@ if (!$launch->isResourceLaunch() && !$launch->isDeepLinkLaunch()) {
     throw new moodle_exception('ltionlylinks', 'local_oksigeniaayvurenda');
 }
 $data = $launch->getLaunchData();
+plans::require((int) ltitool::platform_of($data)->entityid, 'lti');
 $auth = get_auth_plugin('lti');
 $auth->complete_login(
     $data,

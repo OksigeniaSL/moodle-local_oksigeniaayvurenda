@@ -26,6 +26,7 @@ namespace local_oksigeniaayvurenda\local\sources;
 
 use local_oksigeniaayvurenda\core\readers\card_codes;
 use local_oksigeniaayvurenda\core\text;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\years;
 
 /**
@@ -51,18 +52,22 @@ final class csvlist {
      * @param string $type The kind of reader when the list does not say it.
      * @param int|null $now
      * @param string $system Where the list comes from: csv, or a management program such as cifra.
-     * @return array{created: int, updated: int, linked: int, total: int, ids: int[]}
+     * @param bool $partly Past the centre's plan, leave out the readers who do not fit (a sync); when false, the caller
+     *     refuses the whole list (plans::within).
+     * @return array{created: int, updated: int, linked: int, total: int, overlimit: int, ids: int[]}
      */
     public static function load(
         int $entityid,
         array $readers,
         string $type = 'student',
         ?int $now = null,
-        string $system = 'csv'
+        string $system = 'csv',
+        bool $partly = true
     ): array {
         global $DB;
         $now = $now ?? time();
-        $stats = ['created' => 0, 'updated' => 0, 'linked' => 0, 'total' => 0, 'ids' => []];
+        $stats = ['created' => 0, 'updated' => 0, 'linked' => 0, 'total' => 0, 'overlimit' => 0, 'ids' => []];
+        $room = $partly ? plans::left($entityid, 'readers') : null;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $year = years::around($entityid, $now);
         $transaction = $DB->start_delegated_transaction();
@@ -102,6 +107,14 @@ final class csvlist {
                 )
             ) {
                 $userid = 0;
+            }
+            // A new reader, or one who had left, takes a place in the plan.
+            if ($room !== null && (!$readerid || $DB->get_field(self::T . 'reader', 'status', ['id' => $readerid]) !== 'active')) {
+                if ($room < 1) {
+                    $stats['overlimit']++;
+                    continue;
+                }
+                $room--;
             }
             $kind = self::TYPES[text::normalise($person['type'] ?? '')] ?? $type;
             // An account gives the name: the library does not keep a copy of it.

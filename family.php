@@ -25,6 +25,7 @@
  */
 
 use local_oksigeniaayvurenda\local\digital;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
 
@@ -36,7 +37,8 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $token]));
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $invite = voices::invitation($token);
-if (!$invite) {
+// A link not yet used stops working when the centre's plan no longer brings voices.
+if (!$invite || (!$invite->timeused && !plans::allows((int) $invite->entityid, 'voices'))) {
     shell::output($str('voicefamilygone'), '<h1 class="ayv-results-title">' . s($str('voicefamilygone')) . '</h1><p>' .
         s($str('voicefamilygonehint')) . '</p>', null, '', ['search' => false]);
     die;

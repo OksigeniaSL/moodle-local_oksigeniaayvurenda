@@ -51,6 +51,13 @@ $capabilities = [
             'manager' => CAP_ALLOW,
         ],
     ],
+    // Set the plan of each centre, for libraries hosted as a service: for the site's administrators, never the staff.
+    'local/oksigeniaayvurenda:plans' => [
+        'riskbitmask' => RISK_CONFIG,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
     // Set up libraries, rules, readers and options.
     'local/oksigeniaayvurenda:manage' => [
         'riskbitmask' => RISK_CONFIG | RISK_PERSONAL,

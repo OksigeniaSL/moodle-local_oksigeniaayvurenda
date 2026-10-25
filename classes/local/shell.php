@@ -62,14 +62,15 @@ final class shell {
      *
      * @param string $why
      * @param \stdClass|null $library
+     * @param string|null $title What the page says first; that it is only for the staff when not given.
      */
-    public static function refuse(string $why, ?\stdClass $library = null): void {
+    public static function refuse(string $why, ?\stdClass $library = null, ?string $title = null): void {
+        $title = $title ?? get_string('staffonly', 'local_oksigeniaayvurenda');
         $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
         http_response_code(403);
         self::output(
-            get_string('staffonly', 'local_oksigeniaayvurenda'),
-            '<h1 class="ayv-results-title">' .
-            s(get_string('staffonly', 'local_oksigeniaayvurenda')) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
+            $title,
+            '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
             s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>',
             $library,
             '',
@@ -222,7 +223,8 @@ final class shell {
 ' . self::howto_box($library, $base) . '
 <footer class="ayv-foot"><button type="button" class="ayv-foot-credits" data-ayv-credits aria-haspopup="dialog">
 Oksigenia Ayvurenda</button>
-<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' . $str('backto', format_string($SITE->shortname)) . '</a></footer>
+' . self::made_with($library) . '<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' .
+        $str('backto', format_string($SITE->shortname)) . '</a></footer>
 ' . self::credits() . '
 <script>window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
@@ -231,6 +233,20 @@ Oksigenia Ayvurenda</button>
 ' . $scripts . self::access() . '
 </body>
 </html>';
+    }
+
+    /**
+     * «Made with Ayvurenda» at the foot, when the centre's plan asks for it.
+     *
+     * @param \stdClass|null $library
+     * @return string
+     */
+    private static function made_with(?\stdClass $library): string {
+        if (!$library || !plans::allows((int) $library->entityid, 'madewith')) {
+            return '';
+        }
+        return '<a class="ayv-foot-made" href="https://ayvurenda.com/">' .
+            s(get_string('planmadewithfoot', 'local_oksigeniaayvurenda')) . '</a>' . "\n";
     }
 
     /**

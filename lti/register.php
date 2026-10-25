@@ -24,6 +24,7 @@
  */
 
 use local_oksigeniaayvurenda\local\ltitool;
+use local_oksigeniaayvurenda\local\plans;
 
 define('NO_MOODLE_COOKIES', true);
 
@@ -36,6 +37,9 @@ $configurl = optional_param('openid_configuration', '', PARAM_URL);
 $regtoken = optional_param('registration_token', '', PARAM_RAW_TRIMMED);
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $entityid = ltitool::registration_entity($token);
+if ($entityid) {
+    plans::require($entityid, 'lti');
+}
 $done = false;
 if (!$entityid) {
     $message = $str('ltiregisterexpired');

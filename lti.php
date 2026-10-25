@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\ltitool;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -41,6 +42,9 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $entityid = (int) $library->entityid;
+if (!plans::allows($entityid, 'lti')) {
+    shell::refuse(plans::without($entityid, 'lti'), $library, get_string('planofftitle', 'local_oksigeniaayvurenda'));
+}
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $fields = ['name', 'issuer', 'clientid', 'authloginurl', 'authtokenurl', 'keyseturl', 'deployments'];
 $notice = '';

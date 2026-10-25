@@ -19,7 +19,7 @@
     Importing a catalogue: bring the file, see what it brings, import it.
 
     Context variables required for this template:
-    * heading, intro, notice, error, file - texts
+    * heading, intro, notice, error, file, plansummary - texts
     * action, sesskey - the forms
     * upload - whether to ask for a file
     * abies (summary), marc (summary), csv (summary, columns, preview) - what the file brings
@@ -29,6 +29,7 @@
     {
         "heading": "Importar un catálogo",
         "intro": "De Abies, de otro programa en MARC o de una hoja de cálculo.",
+        "plansummary": "Plan Gratis: 812 de 1.000 ejemplares",
         "notice": "",
         "error": "",
         "file": "",
@@ -46,6 +47,7 @@
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
+{{#plansummary}}<p class="ayv-field-hint">{{plansummary}}</p>{{/plansummary}}
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#upload}}

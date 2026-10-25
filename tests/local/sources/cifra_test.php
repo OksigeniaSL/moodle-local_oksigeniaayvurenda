@@ -62,7 +62,7 @@ final class cifra_test extends \advanced_testcase {
         $now = strtotime('2026-10-24 12:00:00 UTC');
         $stats = cifra::sync($entityid, $now);
         $this->assertSame(['GET http://cifra-puente.invalid:8080/ejemplo/v1/alumnos?page=1&per_page=100'], $asked);
-        $this->assertSame(['created' => 4, 'updated' => 0, 'linked' => 1, 'total' => 4, 'left' => 0], $stats);
+        $this->assertSame(['created' => 4, 'updated' => 0, 'linked' => 1, 'total' => 4, 'overlimit' => 0, 'left' => 0], $stats);
         $this->assertSame('teacher', $DB->get_field(self::T . 'reader', 'readertype', ['userid' => $user->id]));
         $bruno = $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'firstname' => 'Bruno'], '*', MUST_EXIST);
         $this->assertNull($bruno->userid);
@@ -73,7 +73,7 @@ final class cifra_test extends \advanced_testcase {
         // Noa is no longer in Cifra; a second night repeats nobody and she leaves.
         $people = array_values(array_filter($people, fn($p) => $p['id'] !== 7002));
         $again = cifra::sync($entityid, $now + DAYSECS);
-        $this->assertSame(['created' => 0, 'updated' => 3, 'linked' => 1, 'total' => 3, 'left' => 1], $again);
+        $this->assertSame(['created' => 0, 'updated' => 3, 'linked' => 1, 'total' => 3, 'overlimit' => 0, 'left' => 1], $again);
         $this->assertSame('left', $DB->get_field(self::T . 'reader', 'status', ['entityid' => $entityid, 'lastname' => 'Lago']));
         $this->assertSame(4, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
     }

@@ -315,7 +315,10 @@ final class ltitool_test extends \advanced_testcase {
         $stack->push(\GuzzleHttp\Middleware::history($history));
         ltitool::$client = new \GuzzleHttp\Client(['handler' => $stack]);
         $stats = ltitool::bring($course, '3.º B');
-        $this->assertSame(['created' => 2, 'existing' => 0, 'grouped' => 1, 'skipped' => 1, 'total' => 2], $stats);
+        $this->assertSame(
+            ['created' => 2, 'existing' => 0, 'grouped' => 1, 'skipped' => 1, 'total' => 2, 'overlimit' => 0],
+            $stats
+        );
         $this->assertSame('Bearer tok-1', $history[1]['request']->getHeaderLine('Authorization'));
         $elio = $DB->get_record('user', ['auth' => 'lti', 'firstname' => 'Elio'], '*', MUST_EXIST);
         $reader = $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $elio->id], '*', MUST_EXIST);
@@ -328,7 +331,10 @@ final class ltitool_test extends \advanced_testcase {
 
         // The night: the token kept, nobody twice.
         $again = ltitool::bring_all();
-        $this->assertSame(['created' => 0, 'existing' => 2, 'grouped' => 0, 'skipped' => 1, 'total' => 2], $again[$course->id]);
+        $this->assertSame(
+            ['created' => 0, 'existing' => 2, 'grouped' => 0, 'skipped' => 1, 'total' => 2, 'overlimit' => 0],
+            $again[$course->id]
+        );
         $this->assertCount(3, $history);
         $this->assertSame(1, $DB->count_records(self::T . 'member', ['readerid' => $reader->id]));
     }

@@ -24,6 +24,8 @@
 
 use local_oksigeniaayvurenda\core\readers\csv_list;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\plan_full;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\sources\csvlist;
 
@@ -57,14 +59,25 @@ if (data_submitted() && confirm_sesskey()) {
     }
     if (optional_param('load', 0, PARAM_BOOL)) {
         $type = optional_param('type', 'student', PARAM_ALPHA);
-        $stats = csvlist::load((int) $library->entityid, csv_list::readers($list['rows'], $map), $type);
-        $notice = $str('readerslistloaded', (object) $stats);
-        $text = '';
+        try {
+            $stats = plans::within((int) $library->entityid, fn() => csvlist::load(
+                (int) $library->entityid,
+                csv_list::readers($list['rows'], $map),
+                $type,
+                null,
+                'csv',
+                false
+            ));
+            $notice = $str('readerslistloaded', (object) $stats);
+            $text = '';
+        } catch (plan_full $e) {
+            $error = $e->getMessage();
+        }
     } else if ($list['columns']) {
         $step = 'check';
     }
 }
-$data = ['heading' => $str('readerslisttitle'), 'intro' => $str('readerslistintro'), 'notice' => $notice,
+$data = ['heading' => $str('readerslisttitle'), 'intro' => $str('readerslistintro'), 'notice' => $notice, 'error' => $error,
     'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'paste' => $step === 'paste', 'check' => null];
 if ($step === 'check') {
     $columns = [];

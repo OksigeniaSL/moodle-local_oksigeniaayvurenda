@@ -166,6 +166,10 @@ final class reviews {
      * @return bool Whether it was a recording of a sensible size and was kept.
      */
     public static function speak(int $id, string $path): bool {
+        global $DB;
+        if (!plans::allows((int) $DB->get_field(self::T . 'review', 'entityid', ['id' => $id]), 'voices')) {
+            return false;
+        }
         if (!is_readable($path) || filesize($path) === 0 || filesize($path) > self::VOICEMAX) {
             return false;
         }

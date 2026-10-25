@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\local\ltitool;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../../config.php');
@@ -52,7 +53,7 @@ if (data_submitted() && confirm_sesskey()) {
     $group = $nogroup ? null : optional_param('group', '', PARAM_TEXT);
     try {
         $stats = ltitool::bring($course, $group);
-        $notice = $str('lticoursebrought', (object) $stats);
+        $notice = $str('lticoursebrought', (object) $stats) . plans::left_out($stats);
         $course = ltitool::course($data);
     } catch (moodle_exception $e) {
         $error = $e->getMessage();

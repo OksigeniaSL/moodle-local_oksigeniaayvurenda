@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\local\libraries;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -64,6 +65,15 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param_array('challengeon', [], PARAM_TEXT)
             )),
         ]);
+        // The plan only goes with the form of whoever may set it.
+        if (optional_param('planform', 0, PARAM_BOOL) && has_capability('local/oksigeniaayvurenda:plans', $context)) {
+            $plan = ['name' => optional_param('planname', '', PARAM_TEXT), 'copies' => optional_param('plancopies', 0, PARAM_INT),
+                'readers' => optional_param('planreaders', 0, PARAM_INT)];
+            foreach (plans::FEATURES as $feature) {
+                $plan[$feature] = optional_param('plan' . $feature, 0, PARAM_BOOL);
+            }
+            plans::save(required_param('entity', PARAM_INT), $plan);
+        }
         $notice = $str('librariessaved');
     } else if ($do === 'newlibrary') {
         $library = libraries::create_library(required_param('entity', PARAM_INT), [
@@ -105,6 +115,7 @@ $kinds = fn(string $chosen) => array_map(fn($k) => ['value' => $k, 'label' => $s
     'selected' => $k === $chosen], libraries::KINDS);
 $classifications = fn(string $chosen) => array_map(fn($c) => ['value' => $c, 'label' => $str('classification' . $c),
     'selected' => $c === $chosen], libraries::CLASSIFICATIONS);
+$setsplans = has_capability('local/oksigeniaayvurenda:plans', $context);
 $entities = [];
 foreach (libraries::all() as $one) {
     $entity = $one['entity'];
@@ -195,6 +206,13 @@ foreach (libraries::all() as $one) {
             \local_oksigeniaayvurenda\local\challenges::stages_off((int) $entity->id),
             true
         )], \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'plansummary' => plans::summary((int) $entity->id),
+        'planform' => $setsplans ? (function () use ($entity, $str) {
+            $plan = plans::of((int) $entity->id);
+            return ['plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
+                'planfeatures' => array_map(fn($f) => ['feature' => $f, 'featurelabel' => $str('plan' . $f),
+                    'featureon' => $plan[$f]], plans::FEATURES)];
+        })() : null,
     ];
 }
 $data = [
@@ -216,7 +234,8 @@ foreach (
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
-        'librarieschallengeshint', 'librariesreviewsign'] as $key
+        'librarieschallengeshint', 'librariesreviewsign', 'librariesplan', 'librariesplanhint', 'planname', 'plancopies',
+        'planreaders', 'planlimithint'] as $key
 ) {
     $data[$key] = $str($key);
 }

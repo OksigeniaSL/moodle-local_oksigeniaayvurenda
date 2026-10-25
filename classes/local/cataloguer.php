@@ -107,6 +107,7 @@ final class cataloguer {
      * @param int $recordid An existing record of the entity, or 0.
      * @return array recordid, newrecord, itemids, barcodes.
      * @throws \invalid_parameter_exception When a barcode is taken.
+     * @throws plan_full When the copies do not fit in the centre's plan.
      */
     public static function add(\stdClass $library, array $description, array $copy, int $recordid = 0): array {
         global $DB;
@@ -119,6 +120,7 @@ final class cataloguer {
                 throw new \invalid_parameter_exception('taken:' . $barcode);
             }
         }
+        plans::check($entityid, 'copies', $count);
         $transaction = $DB->start_delegated_transaction();
         $newrecord = false;
         if (!$recordid) {

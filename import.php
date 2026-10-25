@@ -28,6 +28,8 @@ use local_oksigeniaayvurenda\core\import\catalogue_csv;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\import\abies_import;
 use local_oksigeniaayvurenda\local\import\catalogue_import;
+use local_oksigeniaayvurenda\local\plan_full;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\import\files;
 use local_oksigeniaayvurenda\local\shell;
 
@@ -52,7 +54,8 @@ if ($pending && (!is_file($pending['path']) || $pending['library'] !== $library-
     $pending = null;
 }
 $data = ['heading' => $str('importtitle'), 'intro' => $str('importintro'), 'action' => $PAGE->url->out(false),
-    'sesskey' => sesskey(), 'notice' => '', 'error' => '', 'upload' => true, 'abies' => null, 'marc' => null, 'csv' => null];
+    'sesskey' => sesskey(), 'notice' => '', 'error' => '', 'upload' => true, 'abies' => null, 'marc' => null, 'csv' => null,
+    'plansummary' => plans::summary((int) $library->entityid)];
 if (data_submitted() && confirm_sesskey()) {
     $step = optional_param('step', '', PARAM_ALPHA);
     if ($step === 'upload' && !empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
@@ -73,11 +76,12 @@ if (data_submitted() && confirm_sesskey()) {
         try {
             if ($pending['kind'] === 'abies') {
                 $xml = files::abies_xml($pending['path']);
-                $stats = (new abies_import(
+                $importer = new abies_import(
                     (int) $library->id,
                     optional_param('notes', 0, PARAM_BOOL),
                     optional_param('readers', 0, PARAM_BOOL)
-                ))->run(new export_reader($xml));
+                );
+                $stats = plans::within((int) $library->entityid, fn() => $importer->run(new export_reader($xml)));
                 $data['notice'] = $str('importdoneabies', (object) [
                     'records' => $stats['record']['created'] ?? 0,
                     'items' => $stats['item']['created'] ?? 0,
@@ -92,9 +96,12 @@ if (data_submitted() && confirm_sesskey()) {
                 );
                 $records = $pending['kind'] === 'csv' ? files::csv_records($pending['path'], $map)
                     : files::marc($pending['path'], $pending['kind']);
-                $stats = (new catalogue_import($library, $pending['kind'] === 'csv' ? 'csv' : 'marc'))->run($records);
+                $importer = new catalogue_import($library, $pending['kind'] === 'csv' ? 'csv' : 'marc');
+                $stats = plans::within((int) $library->entityid, fn() => $importer->run($records));
                 $data['notice'] = $str('importdone', (object) $stats);
             }
+        } catch (plan_full $e) {
+            $data['error'] = $e->getMessage();
         } catch (Throwable $e) {
             $data['error'] = $str('importfailed', $e->getMessage());
         }

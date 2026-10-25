@@ -25,6 +25,7 @@
 namespace local_oksigeniaayvurenda\local\sources;
 
 use local_oksigeniaayvurenda\core\readers\cifra_people;
+use local_oksigeniaayvurenda\local\plans;
 
 /**
  * An optional connector: the readers of a centre that keeps its students in Cifra, each with its group, kept up to date
@@ -174,7 +175,7 @@ final class cifra {
      * @return bool
      */
     public static function enabled(int $entityid): bool {
-        return !empty(self::all($entityid)['enabled']);
+        return !empty(self::all($entityid)['enabled']) && plans::allows($entityid, 'connectors');
     }
 
     /**

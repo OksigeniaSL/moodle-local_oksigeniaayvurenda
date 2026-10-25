@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\core\readers\cifra_people;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\sources\cifra;
 
@@ -41,6 +42,9 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $entityid = (int) $library->entityid;
+if (!plans::allows($entityid, 'connectors')) {
+    shell::refuse(plans::without($entityid, 'connectors'), $library, get_string('planofftitle', 'local_oksigeniaayvurenda'));
+}
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 core_php_time_limit::raise(300);
 $notice = '';
@@ -65,7 +69,8 @@ if (data_submitted() && confirm_sesskey()) {
             $notice = $str('cifratested', (object) ['people' => count($found['readers']), 'gone' => count($found['gone']),
                 'groups' => count($groups), 'some' => implode(', ', array_slice(array_keys($groups), 0, 6))]);
         } else if ($action === 'sync') {
-            $notice = $str('cifrasynced', (object) cifra::sync($entityid, null, true));
+            $stats = cifra::sync($entityid, null, true);
+            $notice = $str('cifrasynced', (object) $stats) . plans::left_out($stats);
         }
     } catch (moodle_exception $e) {
         $error = $str('cifrafailed', $e->getMessage());

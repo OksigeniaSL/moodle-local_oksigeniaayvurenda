@@ -41,7 +41,10 @@ final class libraries_test extends \advanced_testcase {
             'yearstart' => '13-45', 'classification' => 'dewey', 'controlletter' => 1]);
         $entity = $DB->get_record(self::T . 'entity', ['id' => $central->entityid], '*', MUST_EXIST);
         $this->assertSame('09-01', $entity->yearstart, 'a date that is not one becomes September the first');
-        $this->assertSame(['classification' => 'dewey', 'controlletter' => true], json_decode($entity->settings, true));
+        $this->assertSame(
+            ['classification' => 'dewey', 'controlletter' => true, 'plan' => plans::defaults()],
+            json_decode($entity->settings, true)
+        );
         $this->assertSame('biblioteca-central', $central->slug);
         $this->assertSame('central', $central->kind);
 

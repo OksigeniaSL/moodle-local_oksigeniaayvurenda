@@ -27,6 +27,9 @@
             "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
             "cardlooks": [{"stage": "Primaria", "options": [{"value": "", "label": "Automático (la flor)", "selected": true}]}],
             "challengestages": [{"stage": "Primaria", "on": true}],
+            "plansummary": "Plan Gratis: 812 de 1.000 ejemplares · 140 de 150 lectores",
+            "planform": {"plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
+                "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
             "reviewsigns": [{"value": "name", "label": "Nombre y grupo", "selected": true}],
             "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
@@ -48,7 +51,9 @@
         "librariesenter": "Entrar", "librariesseat": "Sede principal", "librariesclose": "Cerrar",
         "librariesdata": "Nombre, tipo y grupos", "librariescentre": "Centro",
         "librarieschallenges": "Retos de la clase", "librarieschallengeshint": "Las etapas que juegan",
-        "librariesreviewsign": "Cómo se firman las reseñas"
+        "librariesreviewsign": "Cómo se firman las reseñas", "librariesplan": "Plan",
+        "librariesplanhint": "Solo lo ven y lo cambian quienes administran el sitio.", "planname": "Nombre del plan",
+        "plancopies": "Ejemplares", "planreaders": "Lectores", "planlimithint": "Con 0, sin tope"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -60,6 +65,7 @@
         <p class="ayv-entity-kicker">{{librariescentre}}</p>
         <h2 id="ayv-entity-{{id}}-name" class="ayv-section-title">{{name}}{{#demo}} <span class="ayv-entity-demo">{{librariesdemo}}</span>{{/demo}}</h2>
         <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-entity-{{id}}">{{> local_oksigeniaayvurenda/icon_settings}} {{librariesentity}}</button>
+        {{#plansummary}}<p class="ayv-entity-plan">{{plansummary}}</p>{{/plansummary}}
     </div>
     <ul class="ayv-libcards">
     {{#libraries}}
@@ -147,6 +153,16 @@
                 <p class="ayv-field-hint">{{librarieschallengeshint}}</p>
                 <div class="ayv-choices">{{#challengestages}}<label class="ayv-field ayv-field-check"><input type="hidden" name="challengestage[]" value="{{stage}}"><input type="checkbox" name="challengeon[]" value="{{stage}}" {{#on}}checked{{/on}}> {{stage}}</label>{{/challengestages}}</div>
             </fieldset>
+            {{#planform}}
+            <fieldset class="ayv-fieldset"><legend>{{librariesplan}}</legend>
+                <p class="ayv-field-hint">{{librariesplanhint}}</p>
+                <input type="hidden" name="planform" value="1">
+                <label class="ayv-field">{{planname}} <input type="text" name="planname" value="{{plannamenow}}" maxlength="60"></label>
+                <label class="ayv-field">{{plancopies}} <span class="ayv-field-hint">{{planlimithint}}</span> <input type="number" name="plancopies" value="{{plancopiesnow}}" min="0" step="1" class="ayv-plan-limit"></label>
+                <label class="ayv-field">{{planreaders}} <span class="ayv-field-hint">{{planlimithint}}</span> <input type="number" name="planreaders" value="{{planreadersnow}}" min="0" step="1" class="ayv-plan-limit"></label>
+                <div class="ayv-choices">{{#planfeatures}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="plan{{feature}}" value="1" {{#featureon}}checked{{/featureon}}> {{featurelabel}}</label>{{/planfeatures}}</div>
+            </fieldset>
+            {{/planform}}
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="entity">{{librariessave}}</button></p>
         </form>
     </dialog>

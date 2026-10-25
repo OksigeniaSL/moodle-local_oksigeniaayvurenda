@@ -54,7 +54,7 @@ final class csvlist_test extends \advanced_testcase {
         $first = csvlist::load($entityid, $list);
         $this->assertCount(3, $first['ids']);
         unset($first['ids']);
-        $this->assertSame(['created' => 3, 'updated' => 0, 'linked' => 1, 'total' => 3], $first);
+        $this->assertSame(['created' => 3, 'updated' => 0, 'linked' => 1, 'total' => 3, 'overlimit' => 0], $first);
         $readers = array_values($DB->get_records('local_oksigeniaayvurenda_reader', ['entityid' => $entityid], 'id'));
         $this->assertSame(
             [control_letter::append('00001'), control_letter::append('00002'), '20000C'],
@@ -69,7 +69,7 @@ final class csvlist_test extends \advanced_testcase {
         $list[1]['group'] = '4º A';
         $second = csvlist::load($entityid, $list);
         unset($second['ids']);
-        $this->assertSame(['created' => 0, 'updated' => 3, 'linked' => 1, 'total' => 3], $second);
+        $this->assertSame(['created' => 0, 'updated' => 3, 'linked' => 1, 'total' => 3, 'overlimit' => 0], $second);
         $this->assertSame('4º A', $DB->get_field(
             'local_oksigeniaayvurenda_member',
             'groupname',

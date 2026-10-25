@@ -777,6 +777,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 }
 
 .ayv .ayv-field input[type="number"] { width: 5rem; }
+/* The limits of a plan go up to six figures. */
+.ayv .ayv-field input.ayv-plan-limit { width: 8rem; }
 
 .ayv .ayv-spine { flex-wrap: wrap; }
 
@@ -1584,6 +1586,9 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     overflow: hidden;
 }
 
+/* «Made with Ayvurenda», when the centre's plan asks for it. */
+.ayv .ayv-foot-made { color: inherit; }
+
 /* The credits: the name in the footer opens them in a small window. */
 .ayv .ayv-foot-credits { border: 0; background: none; padding: 0; color: inherit; font: inherit; cursor: pointer;
     text-decoration: underline dotted; text-underline-offset: 3px; }
@@ -1666,6 +1671,8 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     color: var(--accent);
 }
 .ayv .ayv-entity-head .ayv-section-title { margin: 0; }
+/* What the centre uses of its plan, when it has one. */
+.ayv .ayv-entity-plan { flex-basis: 100%; margin: 0; font-size: .95rem; font-weight: 600; color: var(--accent); }
 .ayv .ayv-entity-demo {
     display: inline-block;
     margin-left: .4rem;

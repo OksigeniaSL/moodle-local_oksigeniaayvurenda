@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\sources\cohorts;
 
@@ -65,7 +66,7 @@ if (data_submitted() && confirm_sesskey()) {
     $notice = $str('sourcessaved');
     if (optional_param('syncnow', false, PARAM_BOOL)) {
         $stats = cohorts::sync((int) $library->entityid);
-        $notice = $str('sourcessynced', (object) $stats);
+        $notice = $str('sourcessynced', (object) $stats) . plans::left_out($stats);
     }
 }
 $types = [];

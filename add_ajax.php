@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\cataloguer;
 use local_oksigeniaayvurenda\local\covers;
 use local_oksigeniaayvurenda\local\lookup;
+use local_oksigeniaayvurenda\local\plan_full;
 
 require(__DIR__ . '/../../config.php');
 
@@ -131,6 +132,9 @@ switch ($action) {
         } catch (invalid_parameter_exception $e) {
             $taken = preg_replace('/^.*taken:/', '', $e->debuginfo ?? $e->getMessage());
             echo json_encode(['error' => $str('addtaken', $taken)], JSON_UNESCAPED_UNICODE);
+            die();
+        } catch (plan_full $e) {
+            echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
             die();
         }
         if ($added['newrecord'] && $found['valid']) {

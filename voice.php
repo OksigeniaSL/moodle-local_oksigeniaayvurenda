@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
 
@@ -47,6 +48,13 @@ $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
 if ($viewer['who'] === 'nobody') {
     shell::login_first();
     shell::refuse(get_string('voicenotreader', 'local_oksigeniaayvurenda'), $library);
+}
+if (!plans::allows((int) $library->entityid, 'voices')) {
+    shell::refuse(
+        plans::without((int) $library->entityid, 'voices'),
+        $library,
+        get_string('planofftitle', 'local_oksigeniaayvurenda')
+    );
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';

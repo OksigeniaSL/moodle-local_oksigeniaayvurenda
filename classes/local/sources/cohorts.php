@@ -25,6 +25,7 @@
 namespace local_oksigeniaayvurenda\local\sources;
 
 use local_oksigeniaayvurenda\core\readers\card_codes;
+use local_oksigeniaayvurenda\local\plans;
 
 /**
  * Brings the readers of an entity from the Moodle cohorts it chose: each chosen cohort says what kind of reader its
@@ -99,12 +100,12 @@ final class cohorts {
      *
      * @param int $entityid
      * @param int|null $now
-     * @return array{created: int, updated: int, left: int, back: int, total: int}
+     * @return array{created: int, updated: int, left: int, back: int, total: int, overlimit: int}
      */
     public static function sync(int $entityid, ?int $now = null): array {
         global $DB;
         $now = $now ?? time();
-        $stats = ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 0];
+        $stats = ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 0, 'overlimit' => 0];
         $settings = self::settings($entityid);
         $chosen = $settings['cohorts'] ?? [];
         if (!$chosen && !courses::chosen($entityid)) {
@@ -161,8 +162,17 @@ final class cohorts {
             count($newusers),
             !empty($settings['controlletter'])
         );
+        // Past the centre's plan, who does not fit is left out until there is room.
+        $room = plans::left($entityid, 'readers');
         foreach ($people as $userid => $person) {
             $reader = $byuser[$userid] ?? null;
+            if ($room !== null && ($reader === null || $reader->status !== 'active')) {
+                if ($room < 1) {
+                    $stats['overlimit']++;
+                    continue;
+                }
+                $room--;
+            }
             if ($reader === null) {
                 $readerid = $DB->insert_record(self::T . 'reader', [
                     'entityid' => $entityid,

@@ -82,7 +82,8 @@ final class libraries {
         $entityid = $DB->insert_record(self::T . 'entity', [
             'name' => \core_text::substr($name, 0, 255),
             'yearstart' => self::yearstart((string) ($data['yearstart'] ?? '09-01')),
-            'settings' => json_encode(self::entity_settings([], $data)),
+            // A new centre starts with the site's plan.
+            'settings' => json_encode(self::entity_settings([], $data) + ['plan' => plans::defaults()]),
             'timecreated' => $now,
             'timemodified' => $now,
         ]);

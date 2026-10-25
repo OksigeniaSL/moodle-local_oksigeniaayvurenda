@@ -382,7 +382,7 @@ final class ltitool {
      * @param \stdClass $course
      * @param string|null $group The group of its students; null, only readers.
      * @param int|null $now
-     * @return array created, existing, grouped, skipped (inactive), total.
+     * @return array created, existing, grouped, skipped (inactive), total, overlimit (past the plan).
      */
     public static function bring(\stdClass $course, ?string $group, ?int $now = null): array {
         global $DB;
@@ -391,10 +391,11 @@ final class ltitool {
         $entityid = (int) $platform->entityid;
         $group = $group !== null ? \core_text::substr(trim($group), 0, 255) : null;
         $group = $group === '' ? null : $group;
+        plans::require($entityid, 'lti');
         $members = self::members($course);
         $year = years::around($entityid, $now);
         $auth = get_auth_plugin('lti');
-        $stats = ['created' => 0, 'existing' => 0, 'grouped' => 0, 'skipped' => 0, 'total' => 0];
+        $stats = ['created' => 0, 'existing' => 0, 'grouped' => 0, 'skipped' => 0, 'total' => 0, 'overlimit' => 0];
         foreach ($members as $member) {
             if (empty($member['user_id']) || strcasecmp((string) ($member['status'] ?? 'Active'), 'Active') !== 0) {
                 $stats['skipped']++;
@@ -404,7 +405,12 @@ final class ltitool {
             $type = self::type_of_roles((array) ($member['roles'] ?? []));
             $user = $auth->find_or_create_user_from_membership($member, $platform->issuer);
             $had = $DB->record_exists(self::T . 'reader', ['entityid' => $entityid, 'userid' => $user->id]);
-            $readerid = self::reader($entityid, (int) $user->id, $type, $now);
+            try {
+                $readerid = self::reader($entityid, (int) $user->id, $type, $now);
+            } catch (plan_full $e) {
+                $stats['overlimit']++;
+                continue;
+            }
             $stats[$had ? 'existing' : 'created']++;
             if (
                 $type === 'student' && $group !== null &&
@@ -499,11 +505,15 @@ final class ltitool {
      * @param string $type For a new reader.
      * @param int|null $now
      * @return int The reader's id.
+     * @throws plan_full When a new reader does not fit in the centre's plan.
      */
     public static function reader(int $entityid, int $userid, string $type, ?int $now = null): int {
         global $DB;
         $now = $now ?? time();
         $reader = $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid]);
+        if (!$reader || $reader->status !== 'active') {
+            plans::check($entityid, 'readers');
+        }
         if ($reader) {
             if ($reader->status !== 'active') {
                 $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'active',

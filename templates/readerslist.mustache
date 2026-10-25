@@ -19,7 +19,7 @@
     Readers from a list: paste or upload it, check what each column is, and load it.
 
     Context variables required for this template:
-    * heading, intro, notice - texts
+    * heading, intro, notice, error - texts
     * action, sesskey - the form
     * paste - whether it is the first step
     * check - columns (index, heading, options), preview (cells), types, csv (the text), count
@@ -29,6 +29,7 @@
         "heading": "Lectores desde una lista",
         "intro": "Un CSV del programa del centro.",
         "notice": "",
+        "error": "",
         "action": "#",
         "sesskey": "abc",
         "paste": true,
@@ -41,6 +42,7 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#paste}}
 <form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
     <input type="hidden" name="sesskey" value="{{sesskey}}">

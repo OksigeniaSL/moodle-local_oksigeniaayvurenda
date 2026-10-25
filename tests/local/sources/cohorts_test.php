@@ -173,7 +173,7 @@ final class cohorts_test extends \advanced_testcase {
         $this->assertSame(0, cohorts::sync($entityid)['total']);
         courses::save($entityid, [$course->id => ['stage' => '', 'group' => false]]);
         $this->assertSame(
-            ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 3],
+            ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 3, 'overlimit' => 0],
             cohorts::sync($entityid)
         );
     }

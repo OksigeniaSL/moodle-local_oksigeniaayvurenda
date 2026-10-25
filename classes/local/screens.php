@@ -388,14 +388,18 @@ final class screens {
         }
         $manage = has_capability('local/oksigeniaayvurenda:catalogue', \context_system::instance())
             ? ['url' => self::url('digital.php', $library, ['record' => $recordid]), 'label' => self::str('digitalmanage')] : null;
-        // Readers of the centre and the library staff may give the book a voice.
-        $voice = $viewer['who'] !== 'nobody' ? ['url' => self::url('voice.php', $library, ['record' => $recordid]),
-            'question' => self::str('digitalvoiceask'), 'label' => self::str('digitalvoicego')] : null;
+        // Readers of the centre and the library staff may give the book a voice, when the centre's plan brings voices.
+        $known = $viewer['who'] !== 'nobody';
+        $voice = $known && plans::allows((int) $library->entityid, 'voices') ? ['url' => self::url(
+            'voice.php',
+            $library,
+            ['record' => $recordid]
+        ), 'question' => self::str('digitalvoiceask'), 'label' => self::str('digitalvoicego')] : null;
         if (!$items && !$manage && !$voice) {
             return null;
         }
         return ['heading' => self::str('digitalheading'), 'items' => $items, 'manage' => $manage, 'voice' => $voice,
-            'readbook' => self::str('digitalreadbook'), 'spring' => $voice ? ['url' => self::url('ayvurande.php', $library),
+            'readbook' => self::str('digitalreadbook'), 'spring' => $known ? ['url' => self::url('ayvurande.php', $library),
             'label' => self::str('digitalayvurande')] : null];
     }
 
@@ -516,7 +520,8 @@ final class screens {
                 'draweraser' => self::str('draweraser'),
                 'drawundo' => self::str('drawundo'),
                 'drawclear' => self::str('drawclear'),
-                // The recorder: for whoever would rather say it.
+                // The recorder: for whoever would rather say it, when the centre's plan brings voices.
+                'canspeak' => plans::allows((int) $library->entityid, 'voices'),
                 'speakopen' => self::str('reviewspeakopen'),
                 'speakrecord' => self::str('reviewspeakrecord'),
                 'speakstop' => self::str('reviewspeakstop'),
