@@ -178,5 +178,7 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/reports', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $deskurl, 'label' => $str('desktitle')]]]
+    ['search' => false, 'nav' => [['url' => $deskurl, 'label' => $str('desktitle')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'reports']))
+            ->out(false), 'label' => $str('helpnav')]]]
 );

@@ -101,5 +101,7 @@ foreach (
 $url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($data['heading'], $OUTPUT->render_from_template('local_oksigeniaayvurenda/labels', $data), $library, '', [
     'search' => false,
-    'nav' => [['url' => $url('add.php'), 'label' => $str('addnav')], ['url' => $url('desk.php'), 'label' => $str('desktitle')]],
+    'nav' => [['url' => $url('add.php'), 'label' => $str('addnav')], ['url' => $url('desk.php'), 'label' => $str('desktitle')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'labels']))
+            ->out(false), 'label' => $str('helpnav')]],
 ]);

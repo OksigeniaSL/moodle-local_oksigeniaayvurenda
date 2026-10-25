@@ -35,7 +35,10 @@ $auto = optional_param('auto', 0, PARAM_BOOL);
 require_login(null, false);
 $context = context_system::instance();
 $pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 10],
-    'add' => ['capability' => 'catalogue', 'page' => 'add.php', 'steps' => 6]];
+    'add' => ['capability' => 'catalogue', 'page' => 'add.php', 'steps' => 6],
+    'card' => ['capability' => 'desk', 'page' => 'card.php', 'steps' => 7],
+    'labels' => ['capability' => 'catalogue', 'page' => 'labels.php', 'steps' => 6],
+    'reports' => ['capability' => 'desk', 'page' => 'reports.php', 'steps' => 5]];
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
@@ -85,7 +88,11 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
         'auto' => $auto,
         'frame' => (new moodle_url(
             '/local/oksigeniaayvurenda/' . $pieces[$piece]['page'],
-            ['library' => practice::SLUG, 'help' => 1]
+            ['library' => practice::SLUG, 'help' => 1] + ($piece === 'card' ? ['reader' => $DB->get_field(
+                'local_oksigeniaayvurenda_reader',
+                'id',
+                ['entityid' => $practice->entityid, 'cardcode' => $code(practice::READERS[0][0])]
+            )] : [])
         ))->out(false),
         'steps' => $steps,
         'now' => $str('helpnow'),

@@ -125,6 +125,51 @@
             });
         },
         wait: wait,
+        // Writes into any field, a character at a time.
+        type: function(selector, text) {
+            return h.point(selector).then(function(field) {
+                field.focus();
+                field.value = '';
+                var i = 0;
+                return new Promise(function(resolve) {
+                    var next = function() {
+                        if (i < text.length) {
+                            field.value += text[i++];
+                            setTimeout(next, skipping ? 0 : 45);
+                        } else {
+                            resolve(sleep(400));
+                        }
+                    };
+                    next();
+                });
+            });
+        },
+        // Chooses an option of a list.
+        choose: function(selector, value) {
+            return h.point(selector).then(function(list) {
+                list.value = value;
+                list.dispatchEvent(new Event('change', {bubbles: true}));
+                return sleep(500);
+            });
+        },
+        // Taps something that loads another page in the frame, and waits for it.
+        go: function(selector) {
+            return h.point(selector).then(function(element) {
+                pointer.classList.add('ayv-help-pointer-tap');
+                var loaded = new Promise(function(resolve) {
+                    frame.addEventListener('load', resolve, {once: true});
+                });
+                return sleep(250).then(function() {
+                    pointer.classList.remove('ayv-help-pointer-tap');
+                    element.click();
+                    return loaded;
+                }).then(function() {
+                    // The new page has nothing under the old spot: the pointer waits out of sight.
+                    pointer.classList.remove('ayv-help-pointer-on');
+                    return sleep(400);
+                });
+            });
+        },
         // «Now you»: a ring round the button, and nothing moves until it is tapped.
         you: function(index, selector) {
             caption.textContent = config.now + ' ' + (config.steps[index] || '');

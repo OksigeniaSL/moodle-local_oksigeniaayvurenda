@@ -180,4 +180,15 @@ $data = [
     'pastheading' => $str('cardpast'),
     'showcode' => $str('cardshowcode'),
 ];
-shell::output($str('cardtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/card', $data), $library, '');
+// The staff find here the guided help of the card (not inside the help itself).
+$nav = $isdesk && !optional_param('help', 0, PARAM_BOOL) ? [['url' => (new moodle_url(
+    '/local/oksigeniaayvurenda/help.php',
+    ['library' => $library->slug, 'piece' => 'card']
+))->out(false), 'label' => $str('helpnav')]] : [];
+shell::output(
+    $str('cardtitle'),
+    $OUTPUT->render_from_template('local_oksigeniaayvurenda/card', $data),
+    $library,
+    '',
+    ['nav' => $nav]
+);

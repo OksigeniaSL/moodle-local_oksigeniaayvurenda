@@ -97,5 +97,99 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.you(5, '#ayv-book button[type="submit"]');
         });
+    },
+    // The card: how a reader sees it, what grows it, the code for the desk, the looks by age.
+    card: function(h) {
+        'use strict';
+        return h.point('.ayv-mycard').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-card-flower');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-card-code');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('.ayv-paths');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point('.ayv-notice .ayv-subjects');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.go(function(doc) {
+                var chips = doc.querySelectorAll('.ayv-notice .ayv-chip');
+                return chips.length > 1 ? chips[1] : chips[0];
+            });
+        }).then(function() {
+            return h.point('.ayv-mycard');
+        }).then(function() {
+            return h.say(5);
+        }).then(function() {
+            return h.say(6);
+        });
+    },
+    // Labels and spine labels: which, a couple of codes, the sheet, where to start, print.
+    labels: function(h) {
+        'use strict';
+        var c = h.codes;
+        return h.point('select[name="kind"]').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.choose('select[name="which"]', 'codes');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.type('textarea[name="codes"]', c.faro + ' ' + c.ladrona);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.go('.ayv-print-head form button[type="submit"]');
+        }).then(function() {
+            return h.point('.ayv-labelsheet');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point('input[name="start"]');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.point('.ayv-print-head .ayv-button[onclick]');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    // The six reports: their tabs, a period, a row, the most lent, the CSV, the year in numbers.
+    reports: function(h) {
+        'use strict';
+        var tab = function(n) {
+            return '.ayv-tabs a:nth-child(' + n + ')';
+        };
+        return h.point('.ayv-tabs').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('input[name="from"]');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.go(tab(3));
+        }).then(function() {
+            return h.point('.ayv-report');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('.ayv-more .ayv-button');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.go(tab(6));
+        }).then(function() {
+            return h.point('.ayv-results-title');
+        }).then(function() {
+            return h.say(4);
+        });
     }
 };
