@@ -1850,3 +1850,5 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-reward-label { margin: 0 0 .3rem; font-weight: 700; color: var(--accent); }
 .ayv .ayv-reward-state { margin: 0; }
 .ayv .ayv-reward-form { display: grid; gap: .6rem; margin-top: .5rem; }
+/* In a grid of words, «Listen» keeps its own width. */
+.ayv .ayv-duo-words .ayv-listen, .ayv .ayv-challenge-text .ayv-listen { justify-self: start; margin-top: .3rem; }
