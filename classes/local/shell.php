@@ -208,7 +208,8 @@ Oksigenia Ayvurenda</button>
 
     /**
      * The credits, in a small window from the footer: the version, who makes it, its licence, what it is made with (as
-     * thirdpartylibs.xml says), and the dedication.
+     * thirdpartylibs.xml says), and the dedication, with the drawing of the memory that was made thinking of her (ours,
+     * from the art package, whatever portrait a centre gives its own memory).
      *
      * @return string
      */
@@ -232,6 +233,8 @@ Oksigenia Ayvurenda</button>
 <p><a href="https://github.com/OksigeniaSL/moodle-local_oksigeniaayvurenda" target="_blank" rel="noopener">'
             . $str('creditscode') . '</a></p>
 ' . $art . '<p class="ayv-field-hint">' . $str('creditswith', implode(', ', $with)) . '</p>
+' . (($carmita = screens::art('memoria')) ? '<img class="ayv-credits-portrait" src="' . s($carmita) . '" alt="" width="96"
+    height="96">' : '') . '
 <p class="ayv-credits-dedication">' . $str('creditsdedication') . '</p>
 <form method="dialog"><button class="ayv-button">' . $str('creditsclose') . '</button></form>
 </dialog>';

@@ -1561,4 +1561,6 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-credits p { margin: 0 0 .6rem; }
 .ayv .ayv-credits-dedication { margin: 1.1rem 0 1.1rem !important; font-family: var(--title); font-style: italic;
     font-size: 1.15rem; color: var(--accent); text-align: center; }
+.ayv .ayv-credits-portrait { display: block; width: 96px; height: 96px; margin: 1.2rem auto -.4rem; border-radius: 50%;
+    background: var(--paper); box-shadow: 0 10px 24px -12px rgba(15, 58, 51, .5), 0 0 0 4px var(--paper); }
 
