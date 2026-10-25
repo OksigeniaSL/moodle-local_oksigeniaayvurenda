@@ -25,6 +25,7 @@ namespace local_oksigeniaayvurenda\local;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_oksigeniaayvurenda\local\images
  * @covers     \local_oksigeniaayvurenda\local\libraries
+ * @covers     \local_oksigeniaayvurenda\local\catalogue
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(images::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(libraries::class)]
@@ -63,6 +64,15 @@ final class looks_test extends \advanced_testcase {
     }
 
     /**
+     * Labels that come in capitals, as a person writes them.
+     */
+    public function test_tidy_label(): void {
+        $this->assertSame('Ciencias puras. Matemáticas', catalogue::tidy_label('CIENCIAS PURAS. MATEMÁTICAS.'));
+        $this->assertSame('Arte, música, juegos', catalogue::tidy_label('ARTE, MÚSICA, JUEGOS..'));
+        $this->assertSame('Lengua y literatura', catalogue::tidy_label('Lengua y literatura'));
+    }
+
+    /**
      * A library's colour and line; featured, it is the only one of its entity; the featured library to show first is
      * the person's own, then the site's featured one, then a central one.
      */
@@ -81,11 +91,20 @@ final class looks_test extends \advanced_testcase {
         $after = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $classroom->id]);
         $this->assertFalse(libraries::look($after)['featured']);
 
+        // The main seat is the site's: marking another library unmarks it, wherever it is.
+        libraries::save_look((int) $other->id, ['featured' => 1]);
+        $after = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $central->id]);
+        $this->assertFalse(libraries::look($after)['featured']);
         $all = array_values($DB->get_records('local_oksigeniaayvurenda_library', null, 'id'));
-        $this->assertSame((int) $central->id, (int) libraries::featured($all, 0)->id);
         $user = $this->getDataGenerator()->create_user();
-        $generator->create_reader(['entityid' => $other->entityid, 'userid' => $user->id]);
+        $generator->create_reader(['entityid' => $central->entityid, 'userid' => $user->id]);
+        $this->assertSame((int) $other->id, (int) libraries::featured($all, 0)->id);
         $this->assertSame((int) $other->id, (int) libraries::featured($all, (int) $user->id)->id);
+        // Without a main seat: the person's own central library, else the first central one.
+        libraries::save_look((int) $other->id, ['featured' => 0]);
+        $all = array_values($DB->get_records('local_oksigeniaayvurenda_library', null, 'id'));
+        $this->assertSame((int) $central->id, (int) libraries::featured($all, (int) $user->id)->id);
+        $this->assertSame((int) $central->id, (int) libraries::featured($all, 0)->id);
         $this->assertNull(libraries::featured([], 0));
     }
 }

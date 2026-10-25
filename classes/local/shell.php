@@ -129,9 +129,24 @@ final class shell {
         if (isset($links['url'])) {
             $links = [$links];
         }
+        // The page's own links, then the global ones (the libraries; the desk for the staff), without repeating one.
+        $system = \context_system::instance();
+        if (count(catalogue::libraries()) > 1 || has_capability('local/oksigeniaayvurenda:manage', $system)) {
+            $links[] = ['url' => $base . 'index.php', 'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
+        }
+        if ($library && has_capability('local/oksigeniaayvurenda:desk', $system)) {
+            $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($library->slug),
+                'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
+        }
+        $seen = [];
         foreach ($links as $link) {
+            if (isset($seen[$link['url']])) {
+                continue;
+            }
+            $seen[$link['url']] = true;
             $nav .= '<a class="ayv-nav" href="' . s($link['url']) . '">' . s($link['label']) . '</a>';
         }
+        // The way back to Moodle, always at the end and in sight.
         $mine = isloggedin() && !isguestuser();
         $nav .= '<a class="ayv-nav ayv-nav-exit" href="' . s($CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
             . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname))) . '</a>';
@@ -178,8 +193,10 @@ final class shell {
 <main id="ayv-main" class="ayv-main" tabindex="-1">
 ' . $main . '
 </main>
-<footer class="ayv-foot"><span>Oksigenia Ayvurenda</span>
+<footer class="ayv-foot"><button type="button" class="ayv-foot-credits" data-ayv-credits aria-haspopup="dialog">
+Oksigenia Ayvurenda</button>
 <a class="ayv-exit" href="' . $CFG->wwwroot . '/">' . $str('backto', format_string($SITE->shortname)) . '</a></footer>
+' . self::credits() . '
 <script>window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
 <script src="' . $app . 'marcapaginas.js?v=' . $version . '"></script>
@@ -187,6 +204,37 @@ final class shell {
 ' . $scripts . self::access() . '
 </body>
 </html>';
+    }
+
+    /**
+     * The credits, in a small window from the footer: the version, who makes it, its licence, what it is made with (as
+     * thirdpartylibs.xml says), and the dedication.
+     *
+     * @return string
+     */
+    private static function credits(): string {
+        $str = fn(string $key, $a = null) => s(get_string($key, 'local_oksigeniaayvurenda', $a));
+        $info = \core_plugin_manager::instance()->get_plugin_info('local_oksigeniaayvurenda');
+        $with = [];
+        $libs = @simplexml_load_file(__DIR__ . '/../../thirdpartylibs.xml');
+        foreach ($libs ? $libs->library : [] as $lib) {
+            // One line per work: the fonts' weights and each icon are the same one.
+            $name = preg_replace('/ (Bold|SemiBold)$| icon «.*»$| \(.*\)$/u', '', (string) $lib->name);
+            $licence = ['OFL' => 'SIL OFL', 'Apache' => 'Apache 2.0'][(string) $lib->license] ?? (string) $lib->license;
+            $with[$name] = s($name) . ' (' . s($licence) . ')';
+        }
+        $art = \core_component::get_component_directory('local_oksigeniaayvurendaarte')
+            ? '<p>' . $str('creditsart') . '</p>' : '';
+        return '<dialog class="ayv-credits" id="ayv-credits" aria-labelledby="ayv-credits-title">
+<h2 id="ayv-credits-title" class="ayv-section-title">Oksigenia Ayvurenda</h2>
+<p class="ayv-field-hint">' . $str('creditsversion', $info->release ?? '') . '</p>
+<p>' . $str('creditsmade') . ' · <a href="https://oksigenia.com" target="_blank" rel="noopener">oksigenia.com</a></p>
+<p><a href="https://github.com/OksigeniaSL/moodle-local_oksigeniaayvurenda" target="_blank" rel="noopener">'
+            . $str('creditscode') . '</a></p>
+' . $art . '<p class="ayv-field-hint">' . $str('creditswith', implode(', ', $with)) . '</p>
+<p class="ayv-credits-dedication">' . $str('creditsdedication') . '</p>
+<form method="dialog"><button class="ayv-button">' . $str('creditsclose') . '</button></form>
+</dialog>';
     }
 
     /**

@@ -241,10 +241,14 @@ final class catalogue {
         );
         // Each library may name its corners its own way, order them and hide some.
         $own = (array) ((json_decode((string) ($library->settings ?? ''), true) ?: [])['corners'] ?? []);
+        // With the UDC, the plugin's short names («Ciencias naturales»): a program's are long and in capitals
+        // («CIENCIAS PURAS. CIENCIAS EXACTAS Y NATURALES. MATEMÁTICAS.»). Otherwise the catalogue's, tidied.
+        $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $library->entityid]), true) ?: [];
+        $udc = ($entity['classification'] ?? 'udc') === 'udc';
         $corners = [];
         foreach ($records as $code => $ids) {
-            $label = $labels[$code] ?? null;
-            if ($label === null && get_string_manager()->string_exists('udc' . $code, 'local_oksigeniaayvurenda')) {
+            $label = isset($labels[$code]) ? self::tidy_label((string) $labels[$code]) : null;
+            if (($udc || $label === null) && get_string_manager()->string_exists('udc' . $code, 'local_oksigeniaayvurenda')) {
                 $label = get_string('udc' . $code, 'local_oksigeniaayvurenda');
             }
             $default = $label ?? (string) $code;
@@ -633,6 +637,25 @@ final class catalogue {
         }
         [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
         return $DB->get_records_select_menu(self::T . 'authority', 'id ' . $in, $params, '', 'id, label');
+    }
+
+    /**
+     * A label as a person writes it: without the dots at the end, and in lower case with its first letter in capitals
+     * when it came all in capitals.
+     *
+     * @param string $label
+     * @return string
+     */
+    public static function tidy_label(string $label): string {
+        $label = trim(preg_replace('/[.\s]+$/u', '', trim($label)));
+        if ($label !== '' && \core_text::strtoupper($label) === $label && \core_text::strtolower($label) !== $label) {
+            // Each sentence with its first letter in capitals: «Ciencias puras. Matemáticas».
+            $label = implode('. ', array_map(
+                fn($part) => \core_text::strtoupper(\core_text::substr($part, 0, 1)) . \core_text::substr($part, 1),
+                explode('. ', \core_text::strtolower($label))
+            ));
+        }
+        return $label;
     }
 
     /**

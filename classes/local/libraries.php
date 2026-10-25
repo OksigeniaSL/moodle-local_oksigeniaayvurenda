@@ -177,7 +177,7 @@ final class libraries {
     public const COLOURS = 6;
 
     /**
-     * How a library's card looks: its colour, its line, whether it is the entity's featured one, and its picture.
+     * How a library's card looks: its colour, its line, whether it is the site's main seat, and its picture.
      *
      * @param \stdClass $library
      * @return array colour, motto, featured, image (address or null).
@@ -194,7 +194,7 @@ final class libraries {
     }
 
     /**
-     * Changes how a library's card looks; featured, it is the only one of its entity.
+     * Changes how a library's card looks; marked as the main seat, it is the only one of the site.
      *
      * @param int $libraryid
      * @param array $data colour, motto, featured.
@@ -210,13 +210,7 @@ final class libraries {
         ];
         $DB->set_field(self::T . 'library', 'settings', json_encode($settings), ['id' => $libraryid]);
         if ($settings['look']['featured']) {
-            foreach (
-                $DB->get_records_select(
-                    self::T . 'library',
-                    'entityid = :entityid AND id <> :id',
-                    ['entityid' => $library->entityid, 'id' => $libraryid]
-                ) as $other
-            ) {
+            foreach ($DB->get_records_select(self::T . 'library', 'id <> :id', ['id' => $libraryid]) as $other) {
                 $theirs = json_decode((string) $other->settings, true) ?: [];
                 if (!empty($theirs['look']['featured'])) {
                     $theirs['look']['featured'] = false;
@@ -227,8 +221,8 @@ final class libraries {
     }
 
     /**
-     * The library to show first, big: the one of the person's own entity (its featured one, or its central one); else
-     * the first featured of the site; else the first central one.
+     * The library to show first, big: the main seat the administrator marked (the school's, the faculty's…); else the
+     * central one of the person's own entity; else the first central one.
      *
      * @param \stdClass[] $libraries
      * @param int $userid
@@ -245,12 +239,12 @@ final class libraries {
             "userid = :userid AND status = 'active'",
             ['userid' => $userid]
         )) : [];
-        $pick = function (array $among) {
-            foreach ($among as $library) {
-                if (self::look($library)['featured']) {
-                    return $library;
-                }
+        foreach ($libraries as $library) {
+            if (self::look($library)['featured']) {
+                return $library;
             }
+        }
+        $pick = function (array $among) {
             foreach ($among as $library) {
                 if ($library->kind === 'central') {
                     return $library;

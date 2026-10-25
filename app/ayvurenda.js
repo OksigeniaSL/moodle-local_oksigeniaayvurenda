@@ -22,6 +22,20 @@
 (function() {
     'use strict';
     var config = window.AYV || {};
+    // The credits, from the footer, in a small window; it closes with its button, Escape or outside it.
+    var credits = document.getElementById('ayv-credits');
+    if (credits && credits.showModal) {
+        document.querySelectorAll('[data-ayv-credits]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                credits.showModal();
+            });
+        });
+        credits.addEventListener('click', function(event) {
+            if (event.target === credits) {
+                credits.close();
+            }
+        });
+    }
     // The shelves slide without a scrollbar: two arrows, shown when there is more that way.
     document.querySelectorAll('.ayv-wood').forEach(function(wood) {
         var list = wood.querySelector('.ayv-cards');

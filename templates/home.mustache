@@ -41,7 +41,7 @@
         "classheading": "Lo que lee tu clase", "classhint": "Libros que han pedido varios de tu grupo.", "classblock": null,
         "heading": "La biblioteca",
         "cornersheading": "Rincones", "cornersedit": null,
-        "hascorners": true,
+        "hascorners": true, "cornercols": 1,
         "corners": [{"code": "8", "label": "Lengua y literatura", "countlabel": "120 libros", "colour": 2, "url": "#"}],
         "recentheading": "Acaban de llegar",
         "herald": {"initial": "M", "role": "memory", "name": "Mainumby", "text": "¡Los he traído volando!"},
@@ -97,7 +97,7 @@
 <section class="ayv-section" aria-labelledby="ayv-corners">
     <h2 id="ayv-corners" class="ayv-section-title">{{cornersheading}}</h2>
     {{#cornersedit}}<p class="ayv-staff"><a href="{{url}}">{{label}}</a></p>{{/cornersedit}}
-    <ul class="ayv-corners">
+    <ul class="ayv-corners ayv-corners-even" style="--ayv-cols: {{cornercols}}">
     {{#corners}}
         <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
             {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}

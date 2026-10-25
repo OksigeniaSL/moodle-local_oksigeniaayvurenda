@@ -133,17 +133,26 @@ final class catalogue_test extends \advanced_testcase {
     }
 
     /**
-     * Corners are the top classes with their books; a corner lists its books.
+     * Corners are the top classes with their books; a corner lists its books. With the UDC they take the plugin's short
+     * names; with another classification, the catalogue's, tidied.
      */
     public function test_corners(): void {
+        global $DB;
         $this->resetAfterTest();
         $w = $this->make_world();
         $corners = catalogue::corners($w->central);
         $this->assertSame(['5', '8'], array_column($corners, 'code'));
-        $this->assertSame('Ciencias', $corners[0]['label']);
+        $this->assertSame(get_string('udc5', 'local_oksigeniaayvurenda'), $corners[0]['label']);
         $this->assertSame(2, $corners[0]['count']);
         $this->assertSame(get_string('udc8', 'local_oksigeniaayvurenda'), $corners[1]['label']);
         $this->assertSame(2, catalogue::corner($w->central, '5')['total']);
+        $DB->set_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            json_encode(['classification' => 'other']),
+            ['id' => $w->central->entityid]
+        );
+        $this->assertSame('Ciencias', catalogue::corners($w->central)[0]['label']);
     }
 
     /**

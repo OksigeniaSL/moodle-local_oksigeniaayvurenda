@@ -91,6 +91,7 @@ final class screens {
             'classhint' => self::str('homeclasshint'),
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
+            'cornercols' => $corners ? (int) ceil(count($corners) / ceil(count($corners) / 6)) : 1,
             'cornersedit' => $manage ? ['url' => self::url('corners.php', $library), 'label' => self::str('cornersedit')] : null,
             'corners' => $corners,
             'hascorners' => (bool) $corners,
@@ -410,6 +411,9 @@ final class screens {
         $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
         $top = $featured ? $card($featured) : null;
         if ($top) {
+            if (libraries::look($featured)['featured']) {
+                $top['kindlabel'] = self::str('choosemain');
+            }
             // Without a picture of its own, the scene of the art package, if the site has it.
             $top['image'] = $top['image'] ?? self::art('portada');
             $top['enter'] = self::str('chooseenter');

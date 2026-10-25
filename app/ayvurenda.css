@@ -1462,7 +1462,18 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     .ayv .ayv-shelf-go { display: none; }
 }
 /* The way back to Moodle, in the header. */
-.ayv .ayv-nav-exit { font-weight: 600; }
+.ayv .ayv-nav-exit {
+    min-height: 40px;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--paper);
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 6px 14px -8px rgba(15, 58, 51, .6);
+}
+.ayv .ayv-nav-exit:hover { filter: brightness(1.08); }
+.ayv .ayv-navs { align-items: center; }
 
 /* Choosing a library: the featured one big, with its picture (or its colour and motif); the others as cards. */
 .ayv .ayv-featured {
@@ -1520,4 +1531,34 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     .ayv .ayv-featured { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-featured-img { order: -1; max-height: 12rem; }
 }
+
+/* The corners of the home in even rows (nine: five and four), all the same height, names in two lines at most. */
+.ayv .ayv-corners-even {
+    grid-template-columns: repeat(auto-fill, minmax(max(10.5rem, calc((100% - (var(--ayv-cols, 6) - 1) * 1rem) / var(--ayv-cols, 6))), 1fr));
+}
+.ayv .ayv-corners-even > li { display: flex; }
+.ayv .ayv-corners-even .ayv-corner { flex: 1 1 auto; }
+.ayv .ayv-corners-even .ayv-corner-label {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+/* The credits: the name in the footer opens them in a small window. */
+.ayv .ayv-foot-credits { border: 0; background: none; padding: 0; color: inherit; font: inherit; cursor: pointer;
+    text-decoration: underline dotted; text-underline-offset: 3px; }
+.ayv .ayv-credits {
+    max-width: min(30rem, calc(100vw - 2rem));
+    padding: 1.5rem 1.75rem;
+    border: 0;
+    border-radius: 22px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 24px 60px -20px rgba(15, 58, 51, .55);
+}
+.ayv .ayv-credits::backdrop { background: rgba(15, 30, 27, .45); }
+.ayv .ayv-credits p { margin: 0 0 .6rem; }
+.ayv .ayv-credits-dedication { margin: 1.1rem 0 1.1rem !important; font-family: var(--title); font-style: italic;
+    font-size: 1.15rem; color: var(--accent); text-align: center; }
 
