@@ -559,6 +559,7 @@ $string['howtoaianswer'] = 'An automatic answer from the library\'s guide: check
 $string['howtoaifailed'] = 'It could not answer now. Look at the guide\'s tasks.';
 $string['howtoaihint'] = 'An automatic answer that only uses the library\'s guide. Do not write readers\' names.';
 $string['howtoaipolicy'] = 'To ask in your own words, the site asks you to accept its AI policy once.';
+$string['howtoaipolicyread'] = 'Read the policy';
 $string['howtoaiprompt'] = 'You are the help of Ayvurenda, a school library inside Moodle. Answer the library staff\'s question only with what this guide says. If the guide does not say it, answer only: «I do not know: look at the guide\'s tasks». Answer in English, in short numbered steps, without inventing buttons or screens.
 
 The guide:

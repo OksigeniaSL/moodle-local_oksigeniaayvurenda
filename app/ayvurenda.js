@@ -40,6 +40,10 @@
     // the work underneath (it takes the click and the keyboard, and says what it is to a screen reader).
     if (config.filechoose) {
         document.querySelectorAll('input[type="file"]').forEach(function(input) {
+            // A field a script fills by itself (the recorder's voice) stays out of sight.
+            if (input.hidden) {
+                return;
+            }
             var box = document.createElement('span');
             var button = document.createElement('span');
             var name = document.createElement('span');

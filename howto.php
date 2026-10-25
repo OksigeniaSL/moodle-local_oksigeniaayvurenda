@@ -87,6 +87,7 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
         'accepted' => $accepted,
         'policy' => $accepted ? '' : get_string('userpolicy', 'ai'),
         'policyhint' => $str('howtoaipolicy'),
+        'policyread' => $str('howtoaipolicyread'),
         'accept' => $str('howtoaiaccept'),
         'ask' => $str('howtoai'),
         'hint' => $str('howtoaihint'),

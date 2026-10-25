@@ -48,7 +48,7 @@
     {{^accepted}}<form method="post" action="{{action}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="policy" value="1"><input type="hidden" name="ask" value="1">
         <p>{{policyhint}}</p>
-        <details><summary>{{ask}}</summary><div class="ayv-howto-policy">{{{policy}}}</div></details>
+        <details><summary>{{policyread}}</summary><div class="ayv-howto-policy">{{{policy}}}</div></details>
         <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{accept}}</button></p>
     </form>{{/accepted}}
 </section>
