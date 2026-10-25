@@ -34,5 +34,5 @@
 }}
 <div class="ayv-bubble">
     <span class="ayv-bubble-portrait ayv-bubble-{{role}}" aria-hidden="true">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>
-    <p class="ayv-bubble-text"><span class="ayv-bubble-name">{{name}}</span> {{text}}</p>
+    <p class="ayv-bubble-text"><span class="ayv-bubble-name">{{name}}</span> {{text}}{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</p>
 </div>

@@ -98,7 +98,7 @@ final class screens {
             'recentheading' => self::str('recent'),
             'cards' => $recent,
             'hasrecent' => (bool) $recent,
-            'herald' => $recent ? characters::say((int) $library->entityid, 'herald', 'heraldnew') : null,
+            'herald' => $recent ? self::herald_new($library, $hero) : null,
             'empty' => !$corners && !$recent ? self::str('emptycatalogue') : '',
         ];
     }
@@ -445,6 +445,32 @@ final class screens {
     }
 
     /**
+     * A voice clip of the art package (voz/<path>.mp3), when the site has it.
+     *
+     * @param string $path Like ui/es/homequestion.
+     * @return string|null Its address.
+     */
+    public static function spoken(string $path): ?string {
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        if (!$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+)*$#', $path) || !is_readable($dir . '/voz/' . $path . '.mp3')) {
+            return null;
+        }
+        return (new \moodle_url('/local/oksigeniaayvurendaarte/voz/' . $path . '.mp3'))->out(false);
+    }
+
+    /**
+     * «Listen» for a young reader: the clips of some lines, in the reader's language, played in turn.
+     *
+     * @param string[] $paths With {lang} for the language, like ui/{lang}/homequestion.
+     * @return array|null urls and label; null when none of them has a voice.
+     */
+    public static function listen(array $paths): ?array {
+        $lang = substr(current_language(), 0, 2);
+        $urls = array_values(array_filter(array_map(fn($p) => self::spoken(str_replace('{lang}', $lang, $p)), $paths)));
+        return $urls ? ['urls' => implode(' ', $urls), 'label' => self::str('listen')] : null;
+    }
+
+    /**
      * The top of the home: the greeting, the search with its ideas and, for a reader, their card as it grows.
      *
      * @param \stdClass $library
@@ -481,6 +507,10 @@ final class screens {
             'you' => null,
             'challenge' => null,
             'classreads' => [],
+            // The young (the card with the flower) can hear what they may not read yet.
+            'young' => false,
+            'heraldsex' => 'm',
+            'listenquestion' => null,
         ];
         if (!$reader) {
             return $hero;
@@ -508,8 +538,12 @@ final class screens {
         $levels = $album['flower']['levels'];
         if ($look === 'flower') {
             $name = get_string('stage' . \local_oksigeniaayvurenda\core\flower::STAGES[$stage], 'local_oksigeniaayvurenda');
+            $hero['young'] = true;
+            $hero['heraldsex'] = (characters::of((int) $library->entityid)['herald']['sex'] ?? 'm') === 'f' ? 'f' : 'm';
+            $hero['listenquestion'] = self::listen(['ui/{lang}/homequestion']);
             $hero['you'] = ['title' => self::str('homeflower', $name), 'text' => self::str('heraldstage' . $stage),
-                'drawing' => cards::flower_svg($stage, $levels, $name, 72)];
+                'drawing' => cards::flower_svg($stage, $levels, $name, 72),
+                'listen' => self::listen(['herald-' . $hero['heraldsex'] . '/{lang}/heraldstage' . $stage])];
         } else if ($look === 'sky' || $look === 'skysober') {
             $name = self::str('stagesky' . $stage);
             $hero['you'] = ['title' => self::str('homesky', $name), 'text' => self::str('homeskytext'),
@@ -517,10 +551,15 @@ final class screens {
         } else {
             $hero['you'] = ['title' => self::str('homeclassic'), 'text' => self::str('homeclassictext'), 'drawing' => ''];
         }
-        $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard')];
+        $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard'), 'listen' => null];
         if ($member && (string) $member->groupname !== '') {
             $challenge = challenges::of((int) $library->entityid, (string) $member->groupname);
             $hero['challenge'] = $challenge ? challenges::view($challenge, (int) $library->entityid) : null;
+            if ($challenge && $hero['young']) {
+                $hero['challenge']['listen'] = self::listen(
+                    ['ui/{lang}/challengeheading', 'ui/{lang}/challenge' . $challenge->kind]
+                );
+            }
             $hero['classreads'] = self::cards(catalogue::class_reads(
                 $library,
                 (string) $member->groupname,
@@ -528,6 +567,21 @@ final class screens {
             ), $library);
         }
         return $hero;
+    }
+
+    /**
+     * The herald announcing new books, with its voice for a young reader.
+     *
+     * @param \stdClass $library
+     * @param array $hero The top of the home, which knows the reader.
+     * @return array|null
+     */
+    private static function herald_new(\stdClass $library, array $hero): ?array {
+        $said = characters::say((int) $library->entityid, 'herald', 'heraldnew');
+        if ($said && $hero['young']) {
+            $said['listen'] = self::listen(['herald-' . $hero['heraldsex'] . '/{lang}/heraldnew']);
+        }
+        return $said;
     }
 
     /**

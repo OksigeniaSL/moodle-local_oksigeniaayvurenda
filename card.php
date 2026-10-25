@@ -119,6 +119,12 @@ foreach ($readers as $reader) {
         'herald',
         ($sky ? 'heraldsky' : 'heraldstage') . $stage
     ) : null;
+    // The young (the flower) hear what they may not read yet: the herald, the paths, the garden and the empty album.
+    $young = $look === 'flower';
+    $sex = (\local_oksigeniaayvurenda\local\characters::of((int) $reader->entityid)['herald']['sex'] ?? 'm') === 'f' ? 'f' : 'm';
+    if ($herald && $young) {
+        $herald['listen'] = \local_oksigeniaayvurenda\local\screens::listen(['herald-' . $sex . '/{lang}/heraldstage' . $stage]);
+    }
     // From twelve on, and for adults, each reader chooses: the sky, the classic look, or none.
     $choices = $look === 'flower' || $previewid ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
         'checked' => $o === ($sky ? 'sky' : $look)], card_look::OWN);
@@ -126,6 +132,14 @@ foreach ($readers as $reader) {
         'herald' => $herald,
         'paths' => $paths,
         'haspaths' => (bool) $paths,
+        'listenpaths' => $young ? \local_oksigeniaayvurenda\local\screens::listen(array_map(
+            fn($p) => 'ui/{lang}/path' . $p,
+            ['back', 'explore', 'tell', 'stay']
+        )) : null,
+        'listennobooks' => $young ? \local_oksigeniaayvurenda\local\screens::listen(['ui/{lang}/cardnobooks']) : null,
+        'listengarden' => $young ? \local_oksigeniaayvurenda\local\screens::listen(
+            ['ui/{lang}/challengegarden', 'ui/{lang}/challengegardenhint']
+        ) : null,
         'pathsheading' => $str($look === 'flower' ? 'cardpaths' : ($sky ? 'cardpathssky' : 'cardpathsclassic')),
         'pastheading' => $str($sky ? 'cardpastsky' : 'cardpast'),
         'choices' => $choices,

@@ -273,6 +273,7 @@ final class challenges {
             'progresslabel' => $str('challengeprogress', (object) ['done' => $challenge->done, 'target' => $challenge->target]),
             'left' => $left,
             'complete' => $challenge->complete,
+            'listen' => null,
             'herald' => $challenge->complete
                 ? characters::say($entityid, 'herald', 'challengeherald', ['group' => $challenge->group]) : null,
         ];

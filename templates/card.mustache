@@ -66,6 +66,7 @@
     </div>
     {{#haspaths}}
     <h2 class="ayv-section-title">{{pathsheading}}</h2>
+    {{#listenpaths}}<p class="ayv-listen-row">{{> local_oksigeniaayvurenda/listen}}</p>{{/listenpaths}}
     <ul class="ayv-paths">
     {{#paths}}
         <li class="ayv-path"><span class="ayv-path-name">{{label}}</span>
@@ -83,10 +84,10 @@
     {{/books}}
     </ul>
     {{/hasbooks}}
-    {{^hasbooks}}<p class="ayv-empty">{{nobooks}}</p>{{/hasbooks}}
+    {{^hasbooks}}<p class="ayv-empty">{{nobooks}}{{#listennobooks}} {{> local_oksigeniaayvurenda/listen}}{{/listennobooks}}</p>{{/hasbooks}}
     {{#hasclassgarden}}
     <h2 class="ayv-section-title">{{classgardenheading}}</h2>
-    <p class="ayv-field-hint">{{classgardenhint}}</p>
+    <p class="ayv-field-hint">{{classgardenhint}}{{#listengarden}} {{> local_oksigeniaayvurenda/listen}}{{/listengarden}}</p>
     <ul class="ayv-garden">
     {{#classgarden}}<li>{{{svg}}}<span>{{label}}</span></li>{{/classgarden}}
     </ul>

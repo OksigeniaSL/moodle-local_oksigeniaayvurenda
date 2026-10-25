@@ -119,6 +119,8 @@ final class characters {
             'initial' => $character['initial'],
             'portrait' => $character['portrait'],
             'role' => $role,
+            // Its voice, for a young reader, is added by the screen that knows the reader.
+            'listen' => null,
         ];
     }
 }

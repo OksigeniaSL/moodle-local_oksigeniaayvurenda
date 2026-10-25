@@ -56,7 +56,7 @@
 <section class="ayv-hero{{#art}} ayv-hero-art{{/art}}">
     <div class="ayv-hero-text">
         <p class="ayv-hero-hello">{{greeting}}</p>
-        <p class="ayv-hero-question">{{question}}</p>
+        <p class="ayv-hero-question">{{question}}{{#listenquestion}} {{> local_oksigeniaayvurenda/listen}}{{/listenquestion}}</p>
         <form class="ayv-hero-search" role="search" method="get" action="{{action}}">
             <input type="hidden" name="library" value="{{slug}}">
             {{#memoryinitial}}<span class="ayv-hero-memory" aria-hidden="true">{{#memoryportrait}}<img src="{{memoryportrait}}" alt="">{{/memoryportrait}}{{^memoryportrait}}{{memoryinitial}}{{/memoryportrait}}</span>{{/memoryinitial}}
@@ -79,7 +79,7 @@
         <a class="ayv-duo-go" href="#ayv-recent">{{recentheading}}</a></div>{{/hasrecent}}{{/herald}}
     {{#hero.you}}<div class="ayv-duo-card ayv-duo-you">
         {{#drawing}}<span class="ayv-duo-drawing">{{{drawing}}}</span>{{/drawing}}
-        <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span></span>
+        <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span>{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</span>
         <a class="ayv-button" href="{{url}}">{{label}}</a></div>{{/hero.you}}
     {{#hero.challenge}}<div class="ayv-duo-card ayv-challenge-card">{{> local_oksigeniaayvurenda/challenge}}</div>{{/hero.challenge}}
 </div>

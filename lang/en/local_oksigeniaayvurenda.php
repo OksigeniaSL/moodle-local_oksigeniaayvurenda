@@ -634,6 +634,7 @@ $string['licenceccbysa'] = 'CC BY-SA';
 $string['licenceown'] = 'The centre\'s own';
 $string['licencepd'] = 'Public domain';
 $string['licencerights'] = 'Someone else\'s rights: read here only';
+$string['listen'] = 'Listen';
 $string['lotadd'] = 'Put it in the box';
 $string['lotallhome'] = 'Everything is home.';
 $string['lotcount'] = 'Books: {$a}';

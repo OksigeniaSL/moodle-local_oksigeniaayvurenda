@@ -179,6 +179,43 @@
             }
         });
     });
+    // «Listen»: the voice of a line for a young reader, its clips in turn. A second touch stops it, and only one plays.
+    var listening = null;
+    var hushListening = function() {
+        if (listening) {
+            listening.audio.pause();
+            listening.button.setAttribute('aria-pressed', 'false');
+            listening = null;
+        }
+    };
+    document.addEventListener('click', function(event) {
+        var button = event.target.closest ? event.target.closest('.ayv-listen') : null;
+        if (!button) {
+            return;
+        }
+        var again = listening && listening.button === button;
+        hushListening();
+        if (again) {
+            return;
+        }
+        var urls = (button.getAttribute('data-ayv-say') || '').split(' ').filter(Boolean);
+        var play = function(i) {
+            if (i >= urls.length) {
+                hushListening();
+                return;
+            }
+            var audio = new Audio(urls[i]);
+            listening = {button: button, audio: audio};
+            button.setAttribute('aria-pressed', 'true');
+            audio.addEventListener('ended', function() {
+                if (listening && listening.audio === audio) {
+                    play(i + 1);
+                }
+            });
+            audio.play().catch(hushListening);
+        };
+        play(0);
+    });
     // The shelves slide without a scrollbar: two arrows, shown when there is more that way.
     document.querySelectorAll('.ayv-wood').forEach(function(wood) {
         var list = wood.querySelector('.ayv-cards');

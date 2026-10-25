@@ -96,4 +96,14 @@ final class home_test extends \advanced_testcase {
         $this->assertNull($home['hero']['you']);
         $this->assertSame(format_string($library->name), $home['hero']['greeting']);
     }
+
+    /**
+     * «Listen» only finds clips inside the art package's voices, and has nothing to say without them.
+     */
+    public function test_listen_paths(): void {
+        $this->assertNull(screens::spoken('../../config'));
+        $this->assertNull(screens::spoken('ui/es/../../x'));
+        $this->assertNull(screens::spoken('nobody/es/nothing'));
+        $this->assertNull(screens::listen(['nobody/{lang}/nothing', 'none/{lang}/at-all']));
+    }
 }

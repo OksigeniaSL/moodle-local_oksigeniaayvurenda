@@ -35,7 +35,7 @@
 }}
 <div class="ayv-challenge{{#complete}} ayv-challenge-done{{/complete}}">
     <span class="ayv-duo-title">{{heading}}</span>
-    <span class="ayv-challenge-text">{{text}}</span>
+    <span class="ayv-challenge-text">{{text}}{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</span>
     <span class="ayv-challenge-marks" role="img" aria-label="{{progresslabel}}">{{#marks}}<span class="ayv-mark{{#lit}} ayv-mark-lit{{/lit}}"></span>{{/marks}}</span>
     {{#left}}<span class="ayv-field-hint">{{left}}</span>{{/left}}
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
