@@ -23,7 +23,8 @@
     'use strict';
     var config = window.AYV || {};
     var input = document.getElementById('ayv-q');
-    var main = document.getElementById('ayv-main');
+    // On the home the search is in the page: the results come under it, and the box stays where it is.
+    var main = document.getElementById('ayv-live') || document.getElementById('ayv-main');
     if (!input || !main || !window.fetch || !config.library) {
         return;
     }
@@ -68,8 +69,8 @@
         timer = window.setTimeout(function() {
             var query = input.value.trim();
             // An empty box means no search: back to the library's page.
-            if (query === '' && last !== '' && clear) {
-                window.location.assign(clear.href);
+            if (query === '' && last !== '') {
+                window.location.assign(clear ? clear.href : config.homeurl);
                 return;
             }
             if (query === last || query.length < 2) {

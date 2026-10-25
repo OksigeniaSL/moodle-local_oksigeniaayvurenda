@@ -17,7 +17,8 @@
 {{!
     @template local_oksigeniaayvurenda/home
 
-    The home of a library: its corners and what came in last.
+    The home of a library (style D): the greeting with the search and its ideas, the herald and the reader's card as it
+    grows, the corners, what came in last and what the class reads (never who).
 
     Context variables required for this template:
     * heading - title of the screen
@@ -30,6 +31,12 @@
         "desk": {"url": "#", "label": "Abrir el mostrador"},
         "addbooks": {"url": "#", "label": "Dar de alta libros", "freeurl": "#", "freelabel": "Traer obras libres"},
         "mycard": {"url": "#", "label": "Mi carné"},
+        "hero": {"greeting": "Hola, Leo", "question": "¿Qué te apetece leer hoy?", "action": "https://example.org/s",
+            "slug": "demo-1", "placeholder": "Pregúntale a la memoria", "memoryinitial": "A", "searchlabel": "Buscar",
+            "hasideas": true, "ideas": [{"label": "Animales", "url": "#"}], "art": null, "emblem": "https://example.org/e.svg",
+            "you": {"title": "Tu flor: Brote", "text": "Explora rincones nuevos.", "drawing": "", "url": "#", "label": "Mi carné"},
+            "classreads": []},
+        "classheading": "Lo que lee tu clase", "classhint": "Libros que han pedido varios de tu grupo.", "classblock": null,
         "heading": "La biblioteca",
         "cornersheading": "Rincones", "cornersedit": null,
         "hascorners": true,
@@ -43,23 +50,54 @@
     }
 }}
 <h1 class="ayv-sr">{{heading}}</h1>
-{{#spring}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a></p>{{/spring}}
-{{#window}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/window}}
-{{#voices}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/voices}}
-{{#shelf}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/shelf}}
-{{#mycard}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/mycard}}
-{{#desk}}<p class="ayv-staff"><a class="ayv-button" href="{{url}}">{{label}}</a>
+{{#hero}}
+<section class="ayv-hero{{#art}} ayv-hero-art{{/art}}">
+    <div class="ayv-hero-text">
+        <p class="ayv-hero-hello">{{greeting}}</p>
+        <p class="ayv-hero-question">{{question}}</p>
+        <form class="ayv-hero-search" role="search" method="get" action="{{action}}">
+            <input type="hidden" name="library" value="{{slug}}">
+            {{#memoryinitial}}<span class="ayv-hero-memory" aria-hidden="true">{{memoryinitial}}</span>{{/memoryinitial}}
+            <label class="ayv-sr" for="ayv-q">{{searchlabel}}</label>
+            <input id="ayv-q" name="q" type="search" placeholder="{{placeholder}}" autocomplete="off" enterkeyhint="search"
+                maxlength="200">
+            <button type="submit" class="ayv-button">{{searchlabel}}</button>
+        </form>
+        {{#hasideas}}<p class="ayv-hero-ideas">{{#ideas}}<a class="ayv-chip" href="{{url}}">{{label}}</a>{{/ideas}}</p>{{/hasideas}}
+    </div>
+    <div class="ayv-hero-picture" aria-hidden="true">
+        {{#art}}<img src="{{art}}" alt="">{{/art}}
+        {{^art}}<img class="ayv-hero-emblem" src="{{emblem}}" alt="">{{/art}}
+    </div>
+</section>
+{{/hero}}
+<div id="ayv-live">
+<div class="ayv-duo">
+    {{#herald}}{{#hasrecent}}<div class="ayv-duo-card">{{> local_oksigeniaayvurenda/bubble}}
+        <a class="ayv-duo-go" href="#ayv-recent">{{recentheading}}</a></div>{{/hasrecent}}{{/herald}}
+    {{#hero.you}}<div class="ayv-duo-card ayv-duo-you">
+        {{#drawing}}<span class="ayv-duo-drawing">{{{drawing}}}</span>{{/drawing}}
+        <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span></span>
+        <a class="ayv-button" href="{{url}}">{{label}}</a></div>{{/hero.you}}
+</div>
+<p class="ayv-staff ayv-staff-row">
+    {{#desk}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/desk}}
+    {{#shelf}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/shelf}}
+    {{^hero.you}}{{#mycard}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/mycard}}{{/hero.you}}
     {{#addbooks}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>
-    <a class="ayv-button ayv-button-quiet" href="{{freeurl}}">{{freelabel}}</a>{{/addbooks}}</p>{{/desk}}
-{{^desk}}{{#addbooks}}<p class="ayv-staff"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>
-    <a class="ayv-button ayv-button-quiet" href="{{freeurl}}">{{freelabel}}</a></p>{{/addbooks}}{{/desk}}
+    <a class="ayv-button ayv-button-quiet" href="{{freeurl}}">{{freelabel}}</a>{{/addbooks}}
+    {{#spring}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a>{{/spring}}
+    {{#window}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/window}}
+    {{#voices}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/voices}}
+</p>
 {{#hascorners}}
 <section class="ayv-section" aria-labelledby="ayv-corners">
     <h2 id="ayv-corners" class="ayv-section-title">{{cornersheading}}</h2>
     {{#cornersedit}}<p class="ayv-staff"><a href="{{url}}">{{label}}</a></p>{{/cornersedit}}
     <ul class="ayv-corners">
     {{#corners}}
-        <li><a class="ayv-corner ayv-cover-{{colour}}" href="{{url}}">
+        <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
+            {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}
             <span class="ayv-corner-label">{{label}}</span>
             <span class="ayv-corner-count">{{countlabel}}</span>
         </a></li>
@@ -68,10 +106,17 @@
 </section>
 {{/hascorners}}
 {{#hasrecent}}
-<section class="ayv-section" aria-labelledby="ayv-recent">
+<section class="ayv-section ayv-shelf-section" aria-labelledby="ayv-recent">
     <h2 id="ayv-recent" class="ayv-section-title">{{recentheading}}</h2>
-    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
-    {{> local_oksigeniaayvurenda/cards}}
+    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}</div>
 </section>
 {{/hasrecent}}
+{{#classblock}}
+<section class="ayv-section ayv-shelf-section" aria-labelledby="ayv-class">
+    <h2 id="ayv-class" class="ayv-section-title">{{classheading}}</h2>
+    <p class="ayv-field-hint">{{classhint}}</p>
+    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}</div>
+</section>
+{{/classblock}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
+</div>

@@ -46,9 +46,11 @@ final class screens {
             $corners[] = $corner + [
                 'url' => self::url('search.php', $library, ['corner' => $corner['code']]),
                 'countlabel' => self::str($corner['count'] === 1 ? 'onebook' : 'books', $corner['count']),
+                'art' => self::art('rincon-' . preg_replace('/[^a-z0-9]/', '', \core_text::strtolower((string) $corner['code']))),
             ];
         }
         $recent = self::cards(catalogue::recent($library), $library);
+        $hero = self::hero($library);
         $desk = null;
         if (has_capability('local/oksigeniaayvurenda:desk', \context_system::instance())) {
             $desk = ['url' => self::url('desk.php', $library), 'label' => self::str('deskopen')];
@@ -81,6 +83,10 @@ final class screens {
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
             'addbooks' => $addbooks,
             'mycard' => self::mycard($library),
+            'hero' => $hero,
+            'classblock' => $hero['classreads'] ? ['cards' => $hero['classreads']] : null,
+            'classheading' => self::str('homeclass'),
+            'classhint' => self::str('homeclasshint'),
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
             'cornersedit' => $manage ? ['url' => self::url('corners.php', $library), 'label' => self::str('cornersedit')] : null,
@@ -395,6 +401,103 @@ final class screens {
             'manage' => $manage ? ['url' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
                 'label' => self::str($libraries ? 'librariesnav' : 'librariesstart')] : null,
         ];
+    }
+
+    /**
+     * A picture of the art package, if the site has it: the plugin carries none of its own (it goes apart, with its
+     * own licence), and without it every screen keeps its drawn look.
+     *
+     * @param string $name
+     * @return string|null Its address.
+     */
+    public static function art(string $name): ?string {
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        if (!$dir || !preg_match('/^[a-z0-9-]+$/', $name) || !is_readable($dir . '/pix/' . $name . '.webp')) {
+            return null;
+        }
+        return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.webp'))->out(false);
+    }
+
+    /**
+     * The top of the home: the greeting, the search with its ideas and, for a reader, their card as it grows.
+     *
+     * @param \stdClass $library
+     * @return array greeting, question, search (action, slug, placeholder, label), ideas, you, art.
+     */
+    private static function hero(\stdClass $library): array {
+        global $DB, $USER;
+        $reader = null;
+        if (isloggedin() && !isguestuser()) {
+            $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid,
+                'userid' => $USER->id, 'status' => 'active']) ?: null;
+        }
+        $year = years::around((int) $library->entityid, time());
+        $memory = characters::of((int) $library->entityid)['memory'] ?? null;
+        $asks = $memory && $memory['enabled'];
+        $ideas = [];
+        foreach (catalogue::ideas($library, (int) $year->timestart, $reader ? (int) $reader->id : 0) as $idea) {
+            $ideas[] = ['label' => $idea['last'] ? self::str('homelikelast') : $idea['label'],
+                'url' => self::url('search.php', $library, ['subject' => $idea['id'], 'q' => $idea['label']])];
+        }
+        $hero = [
+            'greeting' => $reader ? self::str('homehello', format_string($USER->firstname)) : format_string($library->name),
+            'question' => self::str('homequestion'),
+            'action' => self::url('search.php', $library),
+            'slug' => $library->slug,
+            'placeholder' => $asks ? self::str('homeaskmemory', $memory['name']) : self::str('searchplaceholder'),
+            'memoryinitial' => $asks ? $memory['initial'] : '',
+            'searchlabel' => self::str('searchbutton'),
+            'ideas' => $ideas,
+            'hasideas' => (bool) $ideas,
+            'art' => self::art('portada'),
+            'emblem' => (new \moodle_url('/local/oksigeniaayvurenda/app/emblema.svg'))->out(false),
+            'you' => null,
+            'classreads' => [],
+        ];
+        if (!$reader) {
+            return $hero;
+        }
+        $album = garden::album($reader);
+        $member = $DB->get_record(
+            'local_oksigeniaayvurenda_member',
+            ['readerid' => $reader->id, 'yearid' => $album['year']->id],
+            'id, groupname, stage',
+            IGNORE_MULTIPLE
+        );
+        $settings = json_decode((string) $DB->get_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            ['id' => $library->entityid]
+        ), true) ?: [];
+        $stagename = $member ? (string) $member->stage : '';
+        $group = $member ? (string) $member->groupname : '';
+        $look = \local_oksigeniaayvurenda\core\card_look::resolve(
+            \local_oksigeniaayvurenda\core\card_look::guess($reader->readertype, $stagename, $group),
+            $settings['cardlooks'][$stagename] ?? null,
+            get_user_preferences('local_oksigeniaayvurenda_cardlook') ?: null
+        );
+        $stage = $album['flower']['stage'];
+        $levels = $album['flower']['levels'];
+        if ($look === 'flower') {
+            $name = get_string('stage' . \local_oksigeniaayvurenda\core\flower::STAGES[$stage], 'local_oksigeniaayvurenda');
+            $hero['you'] = ['title' => self::str('homeflower', $name), 'text' => self::str('heraldstage' . $stage),
+                'drawing' => cards::flower_svg($stage, $levels, $name, 72)];
+        } else if ($look === 'sky' || $look === 'skysober') {
+            $name = self::str('stagesky' . $stage);
+            $hero['you'] = ['title' => self::str('homesky', $name), 'text' => self::str('homeskytext'),
+                'drawing' => cards::sky_svg($stage, $levels, $name, 72, $look === 'skysober')];
+        } else {
+            $hero['you'] = ['title' => self::str('homeclassic'), 'text' => self::str('homeclassictext'), 'drawing' => ''];
+        }
+        $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard')];
+        if ($member && (string) $member->groupname !== '') {
+            $hero['classreads'] = self::cards(catalogue::class_reads(
+                $library,
+                (string) $member->groupname,
+                (int) $album['year']->id
+            ), $library);
+        }
+        return $hero;
     }
 
     /**

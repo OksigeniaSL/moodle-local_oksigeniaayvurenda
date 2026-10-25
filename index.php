@@ -42,4 +42,5 @@ if (!$library) {
     die();
 }
 $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', screens::home($library));
-shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library);
+// The home has its own search, at the top.
+shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);

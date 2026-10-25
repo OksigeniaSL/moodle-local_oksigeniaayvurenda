@@ -312,6 +312,93 @@ final class catalogue {
     }
 
     /**
+     * What a class reads: books that two readers or more of a group lent lately, never who.
+     *
+     * @param \stdClass $library
+     * @param string $group
+     * @param int $yearid
+     * @param int|null $now
+     * @param int $limit
+     * @return array Cards.
+     */
+    public static function class_reads(\stdClass $library, string $group, int $yearid, ?int $now = null, int $limit = 6): array {
+        global $DB;
+        $now = $now ?? time();
+        $rows = $DB->get_records_sql(
+            'SELECT i.recordid, COUNT(DISTINCT l.readerid) AS readers
+               FROM {' . self::T . 'loan} l
+               JOIN {' . self::T . 'item} i ON i.id = l.itemid
+               JOIN {' . self::T . 'member} m ON m.readerid = l.readerid AND m.yearid = :yearid
+              WHERE i.entityid = :entityid AND m.groupname = :groupname AND l.timeloaned > :since
+           GROUP BY i.recordid
+             HAVING COUNT(DISTINCT l.readerid) >= 2
+           ORDER BY readers DESC, i.recordid DESC',
+            ['yearid' => $yearid, 'entityid' => $library->entityid, 'groupname' => $group, 'since' => $now - 120 * DAYSECS],
+            0,
+            $limit
+        );
+        if (!$rows) {
+            return [];
+        }
+        $records = $DB->get_records_list(self::T . 'record', 'id', array_keys($rows), '', 'id, title, subtitle');
+        $ordered = [];
+        foreach (array_keys($rows) as $id) {
+            if (isset($records[$id])) {
+                $ordered[] = $records[$id];
+            }
+        }
+        return self::cards($ordered, $library);
+    }
+
+    /**
+     * Ideas to start a search: the subjects lent most this school year and, for a reader, the one of their last book.
+     *
+     * @param \stdClass $library
+     * @param int $since
+     * @param int $readerid 0 for nobody in particular.
+     * @return array[] id, label and last (the subject of the reader's last book).
+     */
+    public static function ideas(\stdClass $library, int $since, int $readerid = 0): array {
+        global $DB;
+        $ideas = [];
+        if ($readerid) {
+            $last = $DB->get_record_sql(
+                "SELECT a.id, a.label
+                   FROM {" . self::T . "loan} l
+                   JOIN {" . self::T . "item} i ON i.id = l.itemid
+                   JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'subject'
+                  WHERE l.readerid = :readerid
+               ORDER BY l.timeloaned DESC, ra.sortorder",
+                ['readerid' => $readerid],
+                IGNORE_MULTIPLE
+            );
+            if ($last) {
+                $ideas[(int) $last->id] = ['id' => (int) $last->id, 'label' => $last->label, 'last' => true];
+            }
+        }
+        $top = $DB->get_records_sql(
+            "SELECT a.id, a.label, COUNT(1) AS lent
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
+               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'subject'
+              WHERE i.entityid = :entityid AND l.timeloaned > :since
+           GROUP BY a.id, a.label
+           ORDER BY lent DESC, a.id",
+            ['entityid' => $library->entityid, 'since' => $since],
+            0,
+            4
+        );
+        foreach ($top as $row) {
+            if (count($ideas) < 3 && !isset($ideas[(int) $row->id])) {
+                $ideas[(int) $row->id] = ['id' => (int) $row->id, 'label' => $row->label, 'last' => false];
+            }
+        }
+        return array_values($ideas);
+    }
+
+    /**
      * What came in last to the library.
      *
      * @param \stdClass $library

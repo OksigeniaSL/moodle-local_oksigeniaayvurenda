@@ -10,6 +10,8 @@
     --ayv-plate-ink: #1e2b2a;
     --ayv-ring: rgba(15, 58, 51, .10);
     --ayv-radius-lg: 22px;
+    --ayv-wood: #d8b98f;
+    --ayv-wood2: #b8915f;
     /* Small grey text with 4.5:1 or more: about 5:1 on the paper (--muted, #8b9591, gives only 3:1). */
     --ayv-muted: #5f6b67;
 }
@@ -20,6 +22,8 @@ html[data-bs-theme="dark"] .ayv {
     --ayv-plate: #f3e9d6;
     --ayv-ring: rgba(236, 228, 212, .12);
     --ayv-muted: #b3bdb9;
+    --ayv-wood: #5b4a36;
+    --ayv-wood2: #3c3022;
 }
 
 /* 2. What every screen shares: the top bar floats a little, the search and the buttons have depth, boxes are cards. */
@@ -38,6 +42,7 @@ html[data-bs-theme="dark"] .ayv {
 .ayv .ayv-results-title { font-size: clamp(1.6rem, 2.6vw, 2.1rem); letter-spacing: -.01em; }
 .ayv .ayv-chip { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ayv-ring); transition: transform .15s ease, box-shadow .15s ease; }
 .ayv .ayv-chip:hover { background: var(--surface); transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.ayv .ayv-chip.ayv-chip-on { background: var(--green2); color: #fff; box-shadow: var(--ayv-shadow-button); }
 
 /* 3. Drawn covers: the colour of the house, a motif in the colour of the title, a spine with light and a real shadow.
    The petal in the corner gives way to the motif. */
@@ -197,12 +202,179 @@ html[data-bs-theme="dark"] .ayv .ayv-epub {
 .ayv .ayv-voice > .ayv-book { margin-top: .5rem; }
 .ayv .ayv-voice .ayv-holds-row { border: 0; border-radius: 16px; background: var(--surface); box-shadow: var(--ayv-shadow); }
 
+/* 7. The search: the filters in one card, their labels as small captions and their counts as pills; «only the free
+   ones» as a switch with depth; where each book is, as a small tag with a pin. */
+.ayv .ayv-results-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; margin: .75rem 0 1rem; }
+.ayv .ayv-results-head .ayv-results-title { margin: 0; }
+.ayv .ayv-toggle { border: 0; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ayv-ring), var(--ayv-shadow); }
+.ayv .ayv-toggle[aria-pressed="true"] { box-shadow: var(--ayv-shadow-button); }
+.ayv .ayv-facets { display: grid; gap: .55rem; margin: 0 0 1.75rem; padding: .9rem 1.1rem; border-radius: 18px; background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-facet { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0; }
+.ayv .ayv-facet-label { flex: 0 0 7rem; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ayv-muted); }
+.ayv .ayv-facet .ayv-chip { min-height: 36px; padding: .2rem .75rem; background: var(--paper2); box-shadow: none; }
+.ayv .ayv-facet .ayv-chip:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.ayv .ayv-chip-count { margin-left: .4rem; padding: 0 .45rem; border-radius: 999px; background: var(--surface); color: var(--ayv-muted);
+    font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ayv .ayv-suggest { padding: .75rem 1rem; border-radius: 16px; background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-cards { gap: 1.75rem 1.25rem; }
+.ayv .ayv-card-title { margin-top: .4rem; }
+.ayv .ayv-where { display: inline-flex; align-items: center; gap: .3rem; align-self: flex-start; margin-top: .2rem; padding: .05rem .6rem .05rem .45rem;
+    border-radius: 999px; background: var(--paper2); font-size: .85rem; }
+.ayv .ayv-where::before {
+    content: "";
+    width: .85rem;
+    height: .85rem;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* 8. The reader's card: its two faces side by side (the front in the library's green, with the flower on a cream plate
+   or the sky as it is, and the back in paper, with the codes); the herald's news; the four ways as cards; the album as
+   a shelf where each book stands on its board; past years' flowers on plates; the choice of look as pills. */
+.ayv .ayv-mycard { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 1rem 1.25rem; align-items: stretch; }
+.ayv .ayv-mycard > * { grid-column: 1 / -1; }
+.ayv .ayv-mycard > .ayv-card-face { grid-column: 1; grid-row: 1; }
+.ayv .ayv-mycard > .ayv-card-code { grid-column: 2; grid-row: 1; }
+.ayv .ayv-card-face {
+    position: relative;
+    overflow: hidden;
+    gap: 1rem 1.6rem;
+    padding: 1.5rem 1.75rem;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #17574c 0%, #1f6a5c 55%, #2c7a6a 100%);
+    color: #fbf6ec;
+    box-shadow: var(--ayv-shadow-lift);
+}
+/* Rings like a ñandutí in the corner of the card, very faint. */
+.ayv .ayv-card-face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-radial-gradient(circle at 108% 118%, rgba(251, 246, 236, .08) 0 2px, transparent 2px 22px);
+    pointer-events: none;
+}
+.ayv .ayv-card-flower { position: relative; z-index: 1; flex: none; width: 172px; height: 172px; padding: 10px; border-radius: 50%;
+    background: var(--ayv-plate); box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .35), 0 12px 24px -12px rgba(0, 0, 0, .55); }
+.ayv .ayv-card-flower.ayv-card-sky { padding: 0; background: none; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, .6); }
+.ayv .ayv-card-who { position: relative; z-index: 1; min-width: 0; }
+.ayv .ayv-card-who p { color: rgba(251, 246, 236, .9); }
+.ayv .ayv-card-name { color: #fff; font-size: clamp(1.6rem, 2.6vw, 2.2rem); line-height: 1.1; letter-spacing: -.01em; }
+.ayv .ayv-card-stage { display: inline-block; margin-top: .45rem !important; padding: .2rem .8rem; border-radius: 999px;
+    background: rgba(251, 246, 236, .16); color: #fbf6ec !important; }
+.ayv .ayv-card-code { flex-direction: column; justify-content: center; gap: .75rem; padding: 1.25rem; border-radius: 24px;
+    background: #ffffff; box-shadow: var(--ayv-shadow-lift), inset 0 0 0 1px rgba(15, 58, 51, .06); }
+.ayv .ayv-card-barcode { width: 100%; max-width: 280px; height: 78px; }
+.ayv .ayv-card-qr { width: 104px; height: 104px; }
+.ayv .ayv-card-hint { font-size: .9rem; color: #5f6b67; text-align: center; }
+.ayv .ayv-path { gap: .35rem; padding: 1rem 1.1rem; border-radius: 18px; background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-path-hint { color: var(--ayv-muted); opacity: 1; }
+.ayv .ayv-album { grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); column-gap: 0; row-gap: 1.75rem; }
+.ayv .ayv-album-book { grid-template-rows: auto 12px auto; gap: 0; padding: 0 .55rem; }
+.ayv .ayv-album-book > img, .ayv .ayv-album-spine { grid-row: 1; box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 14px 20px -14px rgba(15, 58, 51, .6), inset 6px 0 0 rgba(0, 0, 0, .12); }
+.ayv .ayv-album-book:nth-child(3n + 1) > img, .ayv .ayv-album-book:nth-child(3n + 1) .ayv-album-spine { transform: rotate(-1.2deg); }
+.ayv .ayv-album-book:nth-child(4n + 2) > img, .ayv .ayv-album-book:nth-child(4n + 2) .ayv-album-spine { transform: rotate(1deg); }
+.ayv .ayv-album-book::after { content: ""; grid-row: 2; margin: 0 -.55rem; background: linear-gradient(var(--ayv-wood), var(--ayv-wood2));
+    box-shadow: 0 8px 10px -8px rgba(0, 0, 0, .45); }
+.ayv .ayv-album-title { grid-row: 3; margin-top: .5rem; }
+.ayv .ayv-garden li > svg { padding: 8px; border-radius: 50%; background: var(--ayv-plate); }
+.ayv .ayv-mycard .ayv-fieldset { display: flex; flex-wrap: wrap; gap: .5rem; border: 0; padding: 0; margin: 0; }
+.ayv .ayv-mycard .ayv-fieldset legend { flex-basis: 100%; margin-bottom: .4rem; font-family: var(--title); font-weight: 600; font-size: 1.1rem; }
+.ayv .ayv-mycard .ayv-field-check { padding: .45rem .95rem; border-radius: 999px; background: var(--paper2); cursor: pointer; }
+.ayv .ayv-mycard .ayv-field-check:has(input:checked) { background: var(--accent); color: var(--surface); }
+
+/* 9. The public window, the library's shop window: a big title, the search as one pill, and each book as a card with
+   its cover standing on a cream plate, «Read» as the button and the download as a link. */
+.ayv .ayv-window > .ayv-results-title { font-size: clamp(2rem, 4vw, 2.8rem); }
+.ayv .ayv-window-text { color: var(--ayv-muted); }
+.ayv .ayv-window-search { padding: .5rem; border-radius: 999px; background: var(--surface); box-shadow: var(--ayv-shadow); align-items: center; }
+.ayv .ayv-window-search .ayv-field { flex-direction: row; align-items: center; gap: .6rem; padding-left: .9rem; }
+.ayv .ayv-window-search .ayv-field input, .ayv .ayv-window-search input[type] { border: 0; border-radius: 999px; padding: 0 1rem; background: var(--paper2); box-shadow: none; min-height: 44px; }
+.ayv .ayv-window-search input:focus-visible { outline: none; }
+.ayv .ayv-window-search:focus-within { box-shadow: inset 0 0 0 2px var(--accent), var(--ayv-shadow); }
+.ayv .ayv-window-list { gap: 1.25rem; }
+.ayv .ayv-window-record { align-items: stretch; padding: 1rem; gap: 1.1rem; }
+.ayv .ayv-window-cover { width: 104px; align-self: flex-start; box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 14px 20px -12px rgba(15, 58, 51, .6),
+    inset 6px 0 0 rgba(0, 0, 0, .12); }
+.ayv .ayv-window-record .ayv-section-title { margin: .1rem 0 .3rem; font-size: 1.2rem; }
+.ayv .ayv-window-record .ayv-section-title a { color: var(--ink); text-decoration: none; }
+.ayv .ayv-window-record .ayv-section-title a:hover { text-decoration: underline; }
+.ayv .ayv-window-items li { padding: .5rem .7rem; border-radius: 12px; background: var(--paper2); }
+.ayv .ayv-window-actions .ayv-button { min-height: 40px; padding: .35rem 1.1rem; }
+
+/* 10. Ayvu rande, the fountain of words: faint ripples behind the title; the voices as pills with their player; and an
+   empty state that says what will be there and how to start. */
+.ayv .ayv-spring { background: radial-gradient(circle at 12% 2.2rem, transparent 0 1.6rem, rgba(44, 122, 106, .1) 1.6rem 1.75rem, transparent 1.75rem 3.1rem,
+    rgba(44, 122, 106, .08) 3.1rem 3.25rem, transparent 3.25rem 4.7rem, rgba(44, 122, 106, .06) 4.7rem 4.85rem, transparent 4.85rem) no-repeat; }
+.ayv .ayv-spring > .ayv-results-title { font-size: clamp(2rem, 4vw, 2.8rem); }
+.ayv .ayv-spring-motto { color: var(--accent); font-size: 1.05rem; margin-top: .2rem; letter-spacing: 0; }
+.ayv .ayv-spring > .ayv-empty {
+    display: grid;
+    justify-items: center;
+    gap: .6rem;
+    margin: 1.5rem 0;
+    padding: 2.25rem 1.5rem;
+    border: 2px dashed var(--ayv-ring);
+    border-radius: 24px;
+    background: var(--surface);
+    text-align: center;
+    color: var(--ayv-muted);
+}
+.ayv .ayv-spring > .ayv-empty::before {
+    content: "";
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--coral) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e2b2a' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='3' width='6' height='11' rx='3'/%3E%3Cpath d='M5 11a7 7 0 0 0 14 0M12 18v3'/%3E%3C/svg%3E") center / 28px no-repeat;
+    box-shadow: 0 0 0 10px rgba(226, 101, 76, .12), 0 0 0 20px rgba(226, 101, 76, .06);
+    margin-bottom: 1rem;
+}
+.ayv .ayv-spring-voices li { display: grid; gap: .3rem; padding: .6rem .8rem; border-radius: 14px; background: var(--paper2); font-weight: 700; }
+
+/* 11. The staff: the navigation as pills instead of underlined links; the desk fast and calm: the scanner field large
+   with a barcode drawn in it, today's figures as cards with their colour at the side, and each line of the log as a
+   card. Nothing here waits for an animation. */
+.ayv .ayv-navs { gap: .25rem; }
+.ayv .ayv-nav { padding: 0 .8rem; border-radius: 999px; text-decoration: none; }
+.ayv .ayv-nav:hover { background: var(--paper2); }
+.ayv .ayv-nav[aria-current="page"] { background: var(--green2); color: #fff; }
+.ayv .ayv-scan { padding: 1.1rem 1.25rem 1.25rem; border-radius: 22px; background: var(--surface); box-shadow: var(--ayv-shadow); }
+.ayv .ayv-scan input {
+    min-height: 72px;
+    padding-left: 4.4rem;
+    border: 0;
+    border-radius: 16px;
+    background: var(--paper2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232c7a6a' stroke-width='1.75' stroke-linecap='round'%3E%3Cpath d='M3 5v14M6 5v14M10 5v14M13 5v14M17 5v14M21 5v14M8 5v14M19 5v14'/%3E%3C/svg%3E") 1.2rem center / 2.2rem no-repeat;
+    box-shadow: inset 0 0 0 2px var(--ayv-ring);
+}
+.ayv .ayv-scan input:focus { outline: 4px solid var(--sun); outline-offset: 2px; box-shadow: inset 0 0 0 2px var(--accent); }
+.ayv .ayv-reader { border: 0; border-radius: 22px; padding: 1.1rem 1.35rem; box-shadow: var(--ayv-shadow-lift); }
+.ayv .ayv-today { gap: 1rem; margin-top: 1rem; }
+.ayv .ayv-today-card { position: relative; padding: 1rem 1.1rem 1rem 1.35rem; border-radius: 18px; background: var(--surface); color: var(--ink);
+    text-decoration: none; box-shadow: var(--ayv-shadow); overflow: hidden; }
+.ayv .ayv-today-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--green2); }
+.ayv .ayv-today-late::before { background: var(--coral); }
+.ayv .ayv-today-held::before { background: var(--sun); }
+.ayv .ayv-today-late .ayv-today-number { color: var(--late); }
+.ayv a.ayv-today-card:hover { transform: translateY(-2px); box-shadow: var(--ayv-shadow-lift); }
+.ayv .ayv-today-number { font-size: 2.4rem; }
+.ayv .ayv-today-label { color: var(--ayv-muted); font-weight: 700; }
+.ayv .ayv-line { border: 0; border-radius: 16px; box-shadow: var(--ayv-shadow); }
+
 @media (max-width: 40rem) {
     .ayv .ayv-record { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-record-cover { position: static; padding: 1.25rem; }
     .ayv .ayv-record-cover .ayv-cover-big { max-width: 10rem; }
     .ayv .ayv-facts > div + div { box-shadow: none; }
     .ayv .ayv-page-turn { flex-basis: 40px; height: 40px; }
+    .ayv .ayv-facet-label { flex-basis: 100%; }
+    .ayv .ayv-window-search { border-radius: 22px; padding: .75rem; }
+    .ayv .ayv-window-search .ayv-field { flex-direction: column; align-items: stretch; padding-left: 0; }
+    .ayv .ayv-window-search .ayv-field input, .ayv .ayv-window-search input[type] { flex: none; }
+    .ayv .ayv-mycard { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-mycard > .ayv-card-code { grid-column: 1; grid-row: auto; }
+    .ayv .ayv-card-face { padding: 1.25rem; }
+    .ayv .ayv-card-flower { width: 132px; height: 132px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-record-cover .ayv-cover-big { transform: none; }
