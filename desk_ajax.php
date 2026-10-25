@@ -74,6 +74,12 @@ switch ($action) {
             optional_param('previousdue', 0, PARAM_INT)
         );
         break;
+    case 'room':
+        $answer = $desk->room(required_param('itemid', PARAM_INT));
+        break;
+    case 'roomundo':
+        $answer = $desk->room_undo(required_param('roomid', PARAM_INT));
+        break;
     case 'today':
         $answer = ['kind' => 'today'] + $desk->today();
         break;

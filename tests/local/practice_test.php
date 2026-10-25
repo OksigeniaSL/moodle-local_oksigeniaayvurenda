@@ -87,4 +87,26 @@ final class practice_test extends \advanced_testcase {
         $this->assertStringContainsString('>10002C</text>', $card['barcode']);
         $this->assertStringEndsWith('flor/seed.svg', $card['flower']);
     }
+
+    /**
+     * A book from the tables, passed without a card, can be noted as read in the library: it counts in the school
+     * year, with no reader, and can be undone.
+     */
+    public function test_read_in_the_room(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = practice::library();
+        $desk = new desk($library, (int) get_admin()->id);
+        $answer = $desk->scan('100000L');
+        $this->assertSame('needreader', $answer['kind']);
+        $this->assertTrue($answer['room']);
+        $read = $desk->room($answer['itemid']);
+        $this->assertSame('roomread', $read['kind']);
+        $year = years::around((int) $library->entityid, time());
+        $this->assertSame(1, reports::year($library, $year)['room']);
+        $this->assertSame(0, $DB->count_records('local_oksigeniaayvurenda_loan', ['itemid' => $answer['itemid'],
+            'timereturned' => null]));
+        $desk->room_undo($read['roomid']);
+        $this->assertSame(0, reports::year($library, $year)['room']);
+    }
 }

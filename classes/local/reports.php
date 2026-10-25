@@ -184,8 +184,15 @@ final class reports {
             'libraryid = :libraryid AND timecreated >= :a AND timecreated < :b',
             ['libraryid' => $library->id, 'a' => $year->timestart, 'b' => $year->timeend]
         );
+        // The books read here without going home.
+        $room = $DB->count_records_select(
+            self::T . 'roomread',
+            'libraryid = :libraryid AND timecreated >= :a AND timecreated < :b',
+            ['libraryid' => $library->id, 'a' => $year->timestart, 'b' => $year->timeend]
+        );
         return $summary + [
             'acquired' => $acquired,
+            'room' => $room,
             'top' => self::top($library, (int) $year->timestart, (int) $year->timeend, 10),
         ];
     }

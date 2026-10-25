@@ -226,6 +226,7 @@ final class practice {
                 ['withdrawn', 'withdrawalid', $withdrawals], ['withdrawal', 'libraryid', $libraries],
                 ['lotitem', 'lotid', $lots], ['lot', 'libraryid', $libraries],
                 ['hold', 'libraryid', $libraries], ['loan', 'libraryid', $libraries], ['rule', 'libraryid', $libraries],
+                ['roomread', 'libraryid', $libraries],
                 ['recauth', 'recordid', $records],
                 ['member', 'readerid', $readers]] as [$table, $field, $ids]
         ) {

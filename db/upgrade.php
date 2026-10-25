@@ -274,5 +274,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102835, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102841) {
+        // The books read in the library without being taken home.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_roomread')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_roomread');
+        }
+        upgrade_plugin_savepoint(true, 2026102841, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

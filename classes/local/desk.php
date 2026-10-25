@@ -105,7 +105,9 @@ final class desk {
                     return $this->answer('needreader', 'look', 'deskheldfor', (object) ['title' => $this->title($item),
                         'who' => $this->who((int) $hold->readerid)]);
                 }
-                return $this->answer('needreader', 'look', 'deskneedreader', $this->title($item));
+                // Or it was read here, without going home: one touch counts it.
+                return $this->answer('needreader', 'look', 'deskneedreader', $this->title($item), ['itemid' => (int) $item->id,
+                    'room' => true]);
             }
             return $this->lend($item, $readerid, $force);
         }
@@ -597,6 +599,32 @@ final class desk {
      */
     private function date(int $time): string {
         return userdate($time, get_string('strftimedateshort', 'langconfig'), $this->tz->getName());
+    }
+
+    /**
+     * A book read in the library without being taken home: it counts in the numbers, with no reader.
+     *
+     * @param int $itemid
+     * @return array The answer, with the id that undoes it.
+     */
+    public function room(int $itemid): array {
+        global $DB;
+        $item = $DB->get_record(self::T . 'item', ['id' => $itemid, 'libraryid' => $this->library->id], '*', MUST_EXIST);
+        $id = $DB->insert_record(self::T . 'roomread', ['libraryid' => $this->library->id, 'itemid' => $item->id,
+            'recordid' => $item->recordid, 'staffid' => $this->staffid ?: null, 'timecreated' => $this->now]);
+        return $this->answer('roomread', 'ok', 'deskroomread', $this->title($item), ['roomid' => (int) $id]);
+    }
+
+    /**
+     * Takes back a book noted as read in the library.
+     *
+     * @param int $roomid
+     * @return array
+     */
+    public function room_undo(int $roomid): array {
+        global $DB;
+        $DB->delete_records(self::T . 'roomread', ['id' => $roomid, 'libraryid' => $this->library->id]);
+        return $this->answer('undone', 'ok', 'deskroomundone');
     }
 
     /**

@@ -275,6 +275,34 @@
                 actions.appendChild(renew);
             }
             undo('returned');
+        } else if (answer.kind === 'needreader' && answer.room) {
+            // A book from the tables: read here, without going home. One touch counts it, and it can be undone.
+            var room = button(str.deskroom, 'ayv-line-room', function(b) {
+                b.disabled = true;
+                post({action: 'room', itemid: answer.itemid}).then(function(read) {
+                    actions.textContent = '';
+                    li.querySelector('.ayv-line-text').textContent = read.message;
+                    tone('ok');
+                    actions.appendChild(button(str.deskundo, 'ayv-line-quiet', function(u) {
+                        u.disabled = true;
+                        post({action: 'roomundo', roomid: read.roomid}).then(function(undone) {
+                            li.classList.add('ayv-line-undone');
+                            actions.textContent = '';
+                            li.appendChild(el('p', 'ayv-line-note', undone.message));
+                            return undone;
+                        }).catch(function() {
+                            tone('no');
+                            u.disabled = false;
+                        });
+                    }));
+                    return read;
+                }).catch(function() {
+                    tone('no');
+                    b.disabled = false;
+                });
+            });
+            room.setAttribute('aria-keyshortcuts', 'Alt+S');
+            actions.appendChild(room);
         } else if (answer.kind === 'stop' && answer.forceable) {
             // The safe answer first: not lending.
             var held = answer.reason === 'held';
@@ -389,6 +417,8 @@
             target = lastline.querySelectorAll('.ayv-note')[Number(key) - 1];
         } else if (event.altKey && key === 'a') {
             target = lastline.querySelector('.ayv-line-renew');
+        } else if (event.altKey && key === 's') {
+            target = lastline.querySelector('.ayv-line-room');
         } else if (event.ctrlKey && key === 'z' && document.activeElement === input && input.value === '') {
             var undos = lastline.querySelectorAll('.ayv-line-quiet');
             target = undos.length ? undos[undos.length - 1] : null;

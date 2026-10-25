@@ -119,7 +119,8 @@ switch ($report) {
     case 'year':
         $found = reports::year($library, $year);
         $summary = $str('reportyearsummary', (object) ['name' => $found['name'], 'loans' => $found['loans'],
-            'borrowers' => $found['borrowers'], 'members' => $found['members'], 'acquired' => $found['acquired']]);
+            'borrowers' => $found['borrowers'], 'members' => $found['members'], 'acquired' => $found['acquired']]) .
+            ($found['room'] ? ' ' . $str('reportyearroom', $found['room']) : '');
         $columns = [$str('reportgroup'), $str('reportloans'), $str('reportreaders'), $str('reportmembers')];
         $max = max(array_merge([1], array_column($found['groups'], 'loans')));
         foreach ($found['groups'] as $row) {

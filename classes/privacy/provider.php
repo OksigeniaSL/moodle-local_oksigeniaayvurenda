@@ -146,6 +146,10 @@ class provider implements
             'decidedby' => 'privacy:metadata:review:decidedby',
             'timecreated' => 'privacy:metadata:review:timecreated',
         ], 'privacy:metadata:review');
+        $collection->add_database_table(self::T . 'roomread', [
+            'staffid' => 'privacy:metadata:roomread:staffid',
+            'timecreated' => 'privacy:metadata:roomread:timecreated',
+        ], 'privacy:metadata:roomread');
         $collection->add_database_table(self::T . 'wish', [
             'userid' => 'privacy:metadata:wish:userid',
             'title' => 'privacy:metadata:wish:title',
@@ -246,6 +250,7 @@ class provider implements
         $userlist->add_from_sql('invitedby', 'SELECT invitedby FROM {' . self::T . 'voiceinvite} WHERE invitedby IS NOT NULL', []);
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'review} WHERE decidedby IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'wish} WHERE userid IS NOT NULL', []);
+        $userlist->add_from_sql('staffid', 'SELECT staffid FROM {' . self::T . 'roomread} WHERE staffid IS NOT NULL', []);
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'wish} WHERE decidedby IS NOT NULL', []);
     }
 
@@ -473,6 +478,7 @@ class provider implements
         get_file_storage()->delete_area_files($context->id, 'local_oksigeniaayvurenda', 'reviewvoice');
         $DB->delete_records(self::T . 'review');
         $DB->set_field_select(self::T . 'wish', 'userid', null, 'userid IS NOT NULL');
+        $DB->set_field_select(self::T . 'roomread', 'staffid', null, 'staffid IS NOT NULL');
         $DB->set_field_select(self::T . 'wish', 'decidedby', null, 'decidedby IS NOT NULL');
     }
 
@@ -562,6 +568,7 @@ class provider implements
         $DB->set_field(self::T . 'voiceinvite', 'invitedby', null, ['invitedby' => $userid]);
         $DB->set_field(self::T . 'review', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'wish', 'userid', null, ['userid' => $userid]);
+        $DB->set_field(self::T . 'roomread', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'wish', 'decidedby', null, ['decidedby' => $userid]);
     }
 
@@ -596,7 +603,8 @@ class provider implements
             $DB->record_exists(self::T . 'voiceinvite', ['invitedby' => $userid]) ||
             $DB->record_exists(self::T . 'review', ['decidedby' => $userid]) ||
             $DB->record_exists(self::T . 'wish', ['userid' => $userid]) ||
-            $DB->record_exists(self::T . 'wish', ['decidedby' => $userid])
+            $DB->record_exists(self::T . 'wish', ['decidedby' => $userid]) ||
+            $DB->record_exists(self::T . 'roomread', ['staffid' => $userid])
         ) {
             return true;
         }
