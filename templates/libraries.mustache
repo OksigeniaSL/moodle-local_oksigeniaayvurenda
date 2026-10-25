@@ -26,6 +26,7 @@
             "classifications": [{"value": "udc", "label": "CDU", "selected": true}], "controlletter": true, "demo": false,
             "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
             "cardlooks": [{"stage": "Primaria", "options": [{"value": "", "label": "Automático (la flor)", "selected": true}]}],
+            "challengestages": [{"stage": "Primaria", "on": true}],
             "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
             "libraries": [{"id": 1, "name": "Biblioteca central", "rawname": "Biblioteca central", "url": "#",
@@ -44,7 +45,8 @@
         "librariesdemo": "Inventada", "librariesedit": "Cambiar", "librariesentity": "El centro",
         "librariescardlooks": "El carné por etapas", "librariescardlookshint": "Automático, según la etapa",
         "librariesenter": "Entrar", "librariesseat": "Sede principal", "librariesclose": "Cerrar",
-        "librariesdata": "Nombre, tipo y grupos", "librariescentre": "Centro"
+        "librariesdata": "Nombre, tipo y grupos", "librariescentre": "Centro",
+        "librarieschallenges": "Retos de la clase", "librarieschallengeshint": "Las etapas que juegan"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -137,6 +139,10 @@
                 <p class="ayv-field-hint">{{librariescardlookshint}}</p>
                 {{#cardlooks}}<label class="ayv-field">{{stage}} <input type="hidden" name="cardstage[]" value="{{stage}}">
                     <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
+            </fieldset>
+            <fieldset class="ayv-fieldset"><legend>{{librarieschallenges}}</legend>
+                <p class="ayv-field-hint">{{librarieschallengeshint}}</p>
+                <div class="ayv-choices">{{#challengestages}}<label class="ayv-field ayv-field-check"><input type="hidden" name="challengestage[]" value="{{stage}}"><input type="checkbox" name="challengeon[]" value="{{stage}}" {{#on}}checked{{/on}}> {{stage}}</label>{{/challengestages}}</div>
             </fieldset>
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="entity">{{librariessave}}</button></p>
         </form>

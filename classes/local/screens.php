@@ -557,7 +557,7 @@ final class screens {
      * @param \stdClass $library
      * @return array
      */
-    private static function cards(array $cards, \stdClass $library): array {
+    public static function cards(array $cards, \stdClass $library): array {
         foreach ($cards as &$card) {
             $card['url'] = self::url('record.php', $library, ['id' => $card['id']]);
             $card['statelabel'] = self::str('state' . $card['state']);

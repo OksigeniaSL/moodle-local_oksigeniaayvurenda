@@ -396,6 +396,17 @@ final class libraries {
         if (array_key_exists('controlletter', $data)) {
             $settings['controlletter'] = !empty($data['controlletter']);
         }
+        // The stages that play no class challenge; all play when none is listed.
+        if (array_key_exists('challengesoff', $data)) {
+            $off = array_values(array_unique(array_filter(array_map(
+                fn($s) => trim((string) $s),
+                (array) $data['challengesoff']
+            ), fn($s) => $s !== '')));
+            $settings['challengesoff'] = $off;
+            if (!$off) {
+                unset($settings['challengesoff']);
+            }
+        }
         // The card each stage sees; what is left automatic is not kept.
         if (array_key_exists('cardlooks', $data)) {
             $looks = [];

@@ -148,6 +148,12 @@ final class shell {
                 . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_book', []) . ' '
                 . s(get_string('deskcatalogue', 'local_oksigeniaayvurenda')) . '</a>';
         }
+        // A tutor's class: the challenge of the term, which the tutor chooses.
+        global $USER;
+        if ($library && challenges::tutored((int) $library->entityid, (int) ($USER->id ?? 0))) {
+            $links[] = ['url' => $base . 'class.php?library=' . rawurlencode($library->slug),
+                'label' => get_string('classnav', 'local_oksigeniaayvurenda')];
+        }
         if (count(catalogue::libraries()) > 1 || has_capability('local/oksigeniaayvurenda:manage', $system)) {
             $links[] = ['url' => $base . 'index.php', 'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
         }

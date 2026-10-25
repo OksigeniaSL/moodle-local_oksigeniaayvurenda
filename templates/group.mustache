@@ -39,6 +39,7 @@
 {{#challenge}}
 <section class="ayv-section ayv-book">
     {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+    {{#offstage}}<p class="ayv-field-hint">{{offstage}}</p>{{/offstage}}
     {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
     {{^locked}}<form method="post" action="{{action}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}">

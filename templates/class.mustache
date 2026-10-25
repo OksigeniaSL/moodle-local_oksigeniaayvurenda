@@ -1,0 +1,63 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/class
+
+    My class: for each group someone is tutor of, the challenge of the term (chosen there while it is not met), the
+    class's garden and what the class reads, never who.
+
+    Example context (json):
+    {
+        "heading": "Mi clase", "intro": "El reto, el jardín y lo que leen.", "notice": "", "none": "",
+        "action": "#", "sesskey": "abc", "choose": "El reto de este trimestre", "choosehint": "Cooperativo y anónimo.",
+        "save": "Guardar", "gardenheading": "El jardín de la clase", "gardenempty": "Todavía no hay nada plantado.",
+        "readsheading": "Lo que lee tu clase", "readshint": "Nunca quién.", "readsempty": "Todavía nada.",
+        "shelfprev": "Anteriores", "shelfnext": "Siguientes",
+        "groups": [{"index": 0, "group": "3º A", "offstage": "", "canchoose": true,
+            "current": {"heading": "Trimestre 1", "text": "Libros de 6 rincones distintos, entre todos",
+                "marks": [{"lit": true}, {"lit": false}], "progresslabel": "1 de 2", "left": "", "complete": false,
+                "herald": null},
+            "kinds": [{"value": "corners", "label": "Rincones", "checked": true}],
+            "garden": [{"label": "Trimestre 1 · Rincones"}], "hasgarden": true, "cards": [], "hasreads": false}]
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#none}}<p class="ayv-empty">{{none}}</p>{{/none}}
+{{#groups}}
+<section class="ayv-section ayv-book ayv-myclass" aria-labelledby="ayv-class-{{index}}">
+    <h2 id="ayv-class-{{index}}" class="ayv-section-title">{{group}}</h2>
+    {{#offstage}}<p class="ayv-field-hint">{{offstage}}</p>{{/offstage}}
+    {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
+    {{#canchoose}}<form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
+        <fieldset class="ayv-fieldset"><legend>{{choose}}</legend>
+            <p class="ayv-field-hint">{{choosehint}}</p>
+            <div class="ayv-choices">{{#kinds}}<label class="ayv-field ayv-field-check"><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/kinds}}</div>
+        </fieldset>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></p>
+    </form>{{/canchoose}}
+    <h3 class="ayv-section-title">{{gardenheading}}</h3>
+    {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}
+    {{^hasgarden}}<p class="ayv-empty">{{gardenempty}}</p>{{/hasgarden}}
+    <h3 class="ayv-section-title">{{readsheading}}</h3>
+    <p class="ayv-field-hint">{{readshint}}</p>
+    {{#hasreads}}<div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>{{/hasreads}}
+    {{^hasreads}}<p class="ayv-empty">{{readsempty}}</p>{{/hasreads}}
+</section>
+{{/groups}}

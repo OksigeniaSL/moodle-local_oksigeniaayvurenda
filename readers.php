@@ -118,10 +118,16 @@ if ($group === null) {
             fn($p) => ['label' => $str('challengeplanted', $p['term']) . ' · ' . $str('challengekind' . $p['kind'])],
             \local_oksigeniaayvurenda\local\challenges::garden((int) $library->entityid, $group)
         );
+        $off = \local_oksigeniaayvurenda\local\challenges::stage_off(
+            (int) $library->entityid,
+            (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time())->id,
+            $group
+        );
         $challengeview = [
+            'offstage' => $off !== null ? $str('classoff', $off) : '',
             'current' => $challenge ? \local_oksigeniaayvurenda\local\challenges::view($challenge, (int) $library->entityid, true)
                 : null,
-            'locked' => $challenge && $challenge->complete,
+            'locked' => ($challenge && $challenge->complete) || $off !== null,
             'kinds' => $kinds,
             'choose' => $str('challengechoose'),
             'choosehint' => $str('challengechoosehint'),

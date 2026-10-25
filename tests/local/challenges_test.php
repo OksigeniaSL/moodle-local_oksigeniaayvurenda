@@ -109,4 +109,42 @@ final class challenges_test extends \advanced_testcase {
         challenges::choose($entityid, '4.º A', 'off', $now);
         $this->assertNull(challenges::of($entityid, '4.º A', $now));
     }
+
+    /**
+     * A centre can leave a stage without challenges, and a tutor finds the groups they tutor this year.
+     */
+    public function test_stages_off_and_tutors(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $year = years::around($entityid, $now);
+        foreach (['Infantil' => 'Infantil 5 A', 'Primaria' => '1.º A'] as $stage => $group) {
+            $reader = $generator->create_reader(['entityid' => $entityid]);
+            $generator->create_member(['readerid' => $reader->id, 'yearid' => $year->id, 'groupname' => $group,
+                'stage' => $stage]);
+        }
+        $this->assertNotNull(challenges::of($entityid, 'Infantil 5 A', $now));
+
+        libraries::update_entity($entityid, ['challengesoff' => ['Infantil', ' ']]);
+        $this->assertSame(['Infantil'], challenges::stages_off($entityid));
+        $this->assertSame('Infantil', challenges::stage_off($entityid, (int) $year->id, 'Infantil 5 A'));
+        $this->assertNull(challenges::of($entityid, 'Infantil 5 A', $now));
+        $this->assertNull(challenges::stage_off($entityid, (int) $year->id, '1.º A'));
+        $this->assertNotNull(challenges::of($entityid, '1.º A', $now));
+        libraries::update_entity($entityid, ['challengesoff' => []]);
+        $this->assertSame([], challenges::stages_off($entityid));
+        $this->assertNotNull(challenges::of($entityid, 'Infantil 5 A', $now));
+
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->assertSame([], challenges::tutored($entityid, (int) $teacher->id, $now));
+        tutors::set((int) $year->id, '1.º A', (int) $teacher->id);
+        $this->assertSame(['1.º A'], challenges::tutored($entityid, (int) $teacher->id, $now));
+        // Last year's tutoring is not this year's, and looking never opens a year.
+        $years = $DB->count_records(self::T . 'year');
+        $this->assertSame([], challenges::tutored($entityid, (int) $teacher->id, (int) $year->timeend + 10 * DAYSECS));
+        $this->assertSame($years, $DB->count_records(self::T . 'year'));
+    }
 }

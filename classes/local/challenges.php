@@ -73,6 +73,9 @@ final class challenges {
         global $DB;
         $now = $now ?? time();
         $year = years::around($entityid, $now);
+        if (self::stage_off($entityid, (int) $year->id, $group) !== null) {
+            return null;
+        }
         $term = self::term($year, $now);
         $row = $DB->get_record(self::T . 'challenge', ['yearid' => $year->id, 'groupname' => $group, 'term' => $term]);
         if ($row && $row->kind === 'off') {
@@ -97,6 +100,63 @@ final class challenges {
             $challenge->id = self::keep($challenge, $row, $now);
         }
         return $challenge;
+    }
+
+    /**
+     * The stages of an entity that play no class challenge, from its settings.
+     *
+     * @param int $entityid
+     * @return string[]
+     */
+    public static function stages_off(int $entityid): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        return array_values(array_map('strval', (array) ($settings['challengesoff'] ?? [])));
+    }
+
+    /**
+     * The stage of a group (that of most of its members this school year), if the centre turned its challenges off.
+     *
+     * @param int $entityid
+     * @param int $yearid
+     * @param string $group
+     * @return string|null The stage, or null when the group plays.
+     */
+    public static function stage_off(int $entityid, int $yearid, string $group): ?string {
+        global $DB;
+        $off = self::stages_off($entityid);
+        if (!$off) {
+            return null;
+        }
+        $rows = $DB->get_records_sql('SELECT stage, COUNT(1) AS members
+               FROM {' . self::T . 'member}
+              WHERE yearid = :yearid AND groupname = :groupname AND stage IS NOT NULL
+           GROUP BY stage
+           ORDER BY members DESC, stage', ['yearid' => $yearid, 'groupname' => $group], 0, 1);
+        $row = reset($rows);
+        return $row && in_array((string) $row->stage, $off, true) ? (string) $row->stage : null;
+    }
+
+    /**
+     * The groups someone is tutor of in an entity this school year. It only looks: it never opens a year.
+     *
+     * @param int $entityid
+     * @param int $userid
+     * @param int|null $now
+     * @return string[]
+     */
+    public static function tutored(int $entityid, int $userid, ?int $now = null): array {
+        global $DB;
+        if (!$userid) {
+            return [];
+        }
+        $now = $now ?? time();
+        $groups = $DB->get_fieldset_sql('SELECT t.groupname
+               FROM {' . self::T . 'tutor} t
+               JOIN {' . self::T . 'year} y ON y.id = t.yearid
+              WHERE t.userid = :userid AND y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b
+           ORDER BY t.groupname', ['userid' => $userid, 'entityid' => $entityid, 'a' => $now, 'b' => $now]);
+        return array_values(array_unique(array_map('strval', $groups)));
     }
 
     /**

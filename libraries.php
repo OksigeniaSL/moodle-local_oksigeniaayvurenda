@@ -57,6 +57,11 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param_array('cardstage', [], PARAM_TEXT),
                 optional_param_array('cardlook', [], PARAM_ALPHA)
             ) ?: [],
+            // The stages listed on the form whose box is left empty play no class challenge.
+            'challengesoff' => array_values(array_diff(
+                optional_param_array('challengestage', [], PARAM_TEXT),
+                optional_param_array('challengeon', [], PARAM_TEXT)
+            )),
         ]);
         $notice = $str('librariessaved');
     } else if ($do === 'newlibrary') {
@@ -182,6 +187,11 @@ foreach (libraries::all() as $one) {
                 )
             )];
         }, \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'challengestages' => array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
+            $stage,
+            \local_oksigeniaayvurenda\local\challenges::stages_off((int) $entity->id),
+            true
+        )], \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
     ];
 }
 $data = [
@@ -202,7 +212,8 @@ foreach (
         'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint', 'librarieslook',
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
-        'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre'] as $key
+        'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
+        'librarieschallengeshint'] as $key
 ) {
     $data[$key] = $str($key);
 }
