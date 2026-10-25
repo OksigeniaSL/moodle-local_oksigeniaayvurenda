@@ -96,6 +96,7 @@ final class screens {
             'mycard' => self::mycard($library),
             'hero' => $hero,
             'classblock' => $hero['classreads'] ? ['cards' => $hero['classreads']] : null,
+            'eldersblock' => $hero['young'] ? self::elders($library) : null,
             'classheading' => self::str('homeclass'),
             'shelfprev' => self::str('shelfprev'),
             'shelfnext' => self::str('shelfnext'),
@@ -470,6 +471,8 @@ final class screens {
             'entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active']) : null;
         $mine = $reader ? reviews::mine($recordid, (int) $reader->id) : null;
         $canwrite = $reader && reviews::can_write($recordid, (int) $reader->id);
+        // The older readers (not the flower) may recommend it to the young.
+        $older = $canwrite && cards::look_of($reader) !== 'flower';
         $list = reviews::published($recordid, (int) $library->entityid);
         return [
             'show' => $list || $canwrite,
@@ -489,6 +492,9 @@ final class screens {
                 'hasmine' => (bool) $mine,
                 'state' => $mine ? self::str('reviewstate' . $mine->status) : '',
                 'remove' => self::str('reviewremove'),
+                'canrecommend' => $older,
+                'recommend' => self::str('reviewforlittle'),
+                'recommended' => $mine && $mine->forlittle,
             ] : null,
         ];
     }
@@ -621,6 +627,21 @@ final class screens {
             ), $library);
         }
         return $hero;
+    }
+
+    /**
+     * What the older readers recommend to the young, for the home of a young reader.
+     *
+     * @param \stdClass $library
+     * @return array|null heading, hint and items (url, title, quote, who); null when there is none.
+     */
+    private static function elders(\stdClass $library): ?array {
+        $items = array_map(
+            fn($r) => ['url' => self::url('record.php', $library, ['id' => $r['recordid']]),
+            'title' => format_string($r['title']), 'quote' => $r['text'], 'who' => $r['who']],
+            reviews::for_little((int) $library->entityid)
+        );
+        return $items ? ['heading' => self::str('homeelders'), 'hint' => self::str('homeeldershint'), 'items' => $items] : null;
     }
 
     /**

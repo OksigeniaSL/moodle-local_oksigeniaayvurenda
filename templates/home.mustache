@@ -124,5 +124,13 @@
     <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>
 </section>
 {{/classblock}}
+{{#eldersblock}}
+<section class="ayv-section" aria-labelledby="ayv-elders">
+    <h2 id="ayv-elders" class="ayv-section-title">{{heading}}</h2>
+    <p class="ayv-field-hint">{{hint}}</p>
+    <ul class="ayv-review-queue">{{#items}}<li class="ayv-review-card"><a class="ayv-review-book" href="{{url}}">{{title}}</a>
+        <p class="ayv-review-text">«{{quote}}»</p><p class="ayv-review-who">{{who}}</p></li>{{/items}}</ul>
+</section>
+{{/eldersblock}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
 </div>

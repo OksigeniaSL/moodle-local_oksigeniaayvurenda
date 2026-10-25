@@ -69,9 +69,17 @@ final class reviews {
      * @param int $readerid
      * @param string $text
      * @param int|null $now
+     * @param bool $forlittle An older reader recommends it to the young.
      * @return int Its id, or 0 when there was nothing to say.
      */
-    public static function write(int $entityid, int $recordid, int $readerid, string $text, ?int $now = null): int {
+    public static function write(
+        int $entityid,
+        int $recordid,
+        int $readerid,
+        string $text,
+        ?int $now = null,
+        bool $forlittle = false
+    ): int {
         global $DB;
         $text = \core_text::substr(trim(preg_replace('/\s+/u', ' ', $text)), 0, self::MAX);
         if ($text === '') {
@@ -81,11 +89,12 @@ final class reviews {
         $row = self::mine($recordid, $readerid);
         if ($row) {
             $DB->update_record(self::T . 'review', (object) ['id' => $row->id, 'text' => $text, 'status' => 'pending',
-                'decidedby' => null, 'timedecided' => null, 'timemodified' => $now]);
+                'forlittle' => (int) $forlittle, 'decidedby' => null, 'timedecided' => null, 'timemodified' => $now]);
             return (int) $row->id;
         }
         return (int) $DB->insert_record(self::T . 'review', (object) ['entityid' => $entityid, 'recordid' => $recordid,
-            'readerid' => $readerid, 'text' => $text, 'status' => 'pending', 'timecreated' => $now, 'timemodified' => $now]);
+            'readerid' => $readerid, 'text' => $text, 'status' => 'pending', 'forlittle' => (int) $forlittle,
+            'timecreated' => $now, 'timemodified' => $now]);
     }
 
     /**
@@ -183,6 +192,32 @@ final class reviews {
             fn($r) => ['text' => $r->text, 'who' => self::who((int) $r->readerid, $entityid, $sign)],
             $rows
         ));
+    }
+
+    /**
+     * What the older readers recommend to the young: their published recommendations, newest first, one per book.
+     *
+     * @param int $entityid
+     * @param int $limit
+     * @return array[] recordid, title, text and who.
+     */
+    public static function for_little(int $entityid, int $limit = 6): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $sign = in_array($settings['reviewsign'] ?? '', self::SIGNS, true) ? $settings['reviewsign'] : 'name';
+        $rows = $DB->get_records_sql('SELECT v.id, v.recordid, v.readerid, v.text, r.title
+               FROM {' . self::T . 'review} v
+               JOIN {' . self::T . 'record} r ON r.id = v.recordid
+              WHERE v.entityid = :entityid AND v.status = :status AND v.forlittle = 1
+           ORDER BY v.timedecided DESC, v.id DESC', ['entityid' => $entityid, 'status' => 'published'], 0, $limit * 3);
+        $items = [];
+        foreach ($rows as $row) {
+            if (count($items) < $limit && !isset($items[$row->recordid])) {
+                $items[$row->recordid] = ['recordid' => (int) $row->recordid, 'title' => (string) $row->title,
+                    'text' => $row->text, 'who' => self::who((int) $row->readerid, $entityid, $sign)];
+            }
+        }
+        return array_values($items);
     }
 
     /**

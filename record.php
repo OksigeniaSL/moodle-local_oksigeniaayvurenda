@@ -49,11 +49,14 @@ if ($do !== '' && data_submitted() && confirm_sesskey()) {
     $done = '';
     if ($reader && \local_oksigeniaayvurenda\local\reviews::can_write($id, (int) $reader->id)) {
         if ($do === 'send') {
-            \local_oksigeniaayvurenda\local\reviews::write((int) $library->entityid, $id, (int) $reader->id, optional_param(
-                'text',
-                '',
-                PARAM_TEXT
-            ));
+            \local_oksigeniaayvurenda\local\reviews::write(
+                (int) $library->entityid,
+                $id,
+                (int) $reader->id,
+                optional_param('text', '', PARAM_TEXT),
+                null,
+                optional_param('forlittle', 0, PARAM_BOOL) && \local_oksigeniaayvurenda\local\cards::look_of($reader) !== 'flower'
+            );
             $done = 'sent';
         } else if ($do === 'remove') {
             \local_oksigeniaayvurenda\local\reviews::remove($id, (int) $reader->id);

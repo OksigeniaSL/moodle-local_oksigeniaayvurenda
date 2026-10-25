@@ -24,7 +24,7 @@
         "heading": "Reseñas por revisar", "intro": "Un toque y sale en la ficha.", "notice": "", "empty": "No hay.",
         "action": "#", "sesskey": "abc", "publish": "Publicar", "decline": "No publicar", "hasitems": true,
         "items": [{"id": 1, "title": "El faro dormido", "url": "#", "text": "Me gustó el final.", "who": "Leo, 3.º A",
-            "when": "25/10/26"}]
+            "when": "25/10/26", "forlittle": ""}]
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -37,6 +37,7 @@
         <a class="ayv-review-book" href="{{url}}">{{title}}</a>
         <p class="ayv-review-text">«{{text}}»</p>
         <p class="ayv-review-who">{{who}} · {{when}}</p>
+        {{#forlittle}}<p class="ayv-field-hint">{{forlittle}}</p>{{/forlittle}}
         <form method="post" action="{{action}}" class="ayv-book-actions">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="review" value="{{id}}">
             <button type="submit" class="ayv-button" name="do" value="publish">{{publish}}</button>

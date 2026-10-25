@@ -264,5 +264,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102834, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102835) {
+        // An older reader's review can be a recommendation for the young.
+        $table = new xmldb_table('local_oksigeniaayvurenda_review');
+        $field = new xmldb_field('forlittle', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'status');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026102835, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

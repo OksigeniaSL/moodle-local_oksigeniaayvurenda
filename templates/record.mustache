@@ -136,6 +136,7 @@
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <label class="ayv-field ayv-field-wide"><span class="ayv-review-ask">{{label}}</span> <span class="ayv-field-hint">{{hint}}</span>
                     <textarea name="text" maxlength="{{max}}" rows="3" required>{{text}}</textarea></label>
+                {{#canrecommend}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="forlittle" value="1" {{#recommended}}checked{{/recommended}}> {{recommend}}</label>{{/canrecommend}}
                 {{#hasmine}}<p class="ayv-field-hint">{{state}}</p>{{/hasmine}}
                 <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="review" value="send">{{send}}</button>
                     {{#hasmine}}<button type="submit" class="ayv-button ayv-button-quiet" name="review" value="remove" formnovalidate>{{remove}}</button>{{/hasmine}}</p>

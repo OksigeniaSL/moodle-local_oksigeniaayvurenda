@@ -83,5 +83,15 @@ final class reviews_test extends \advanced_testcase {
         reviews::move((int) $other->id, (int) $reader->id);
         $this->assertSame('La mía.', reviews::mine($recordid, (int) $reader->id)->text);
         $this->assertNull(reviews::mine($recordid, (int) $other->id));
+
+        // An older reader's recommendation reaches the young once published, one per book.
+        $this->assertSame([], reviews::for_little($entityid));
+        $id = reviews::write($entityid, $recordid, (int) $reader->id, 'Para los pequeños: tiene un faro.', $now, true);
+        $this->assertSame([], reviews::for_little($entityid));
+        reviews::decide($id, $entityid, true, (int) get_admin()->id, $now);
+        $little = reviews::for_little($entityid);
+        $this->assertCount(1, $little);
+        $this->assertSame($recordid, $little[0]['recordid']);
+        $this->assertSame('Para los pequeños: tiene un faro.', $little[0]['text']);
     }
 }

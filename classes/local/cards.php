@@ -34,6 +34,38 @@ use local_oksigeniaayvurenda\core\flower;
  */
 final class cards {
     /**
+     * The look of a reader's card this school year: the flower, the sky (lively or sober) or the classic one, as their
+     * stage, the centre and their own choice say.
+     *
+     * @param \stdClass $reader
+     * @param int|null $now
+     * @return string One of card_look::LOOKS.
+     */
+    public static function look_of(\stdClass $reader, ?int $now = null): string {
+        global $DB;
+        $year = years::around((int) $reader->entityid, $now ?? time());
+        $member = $DB->get_record(
+            'local_oksigeniaayvurenda_member',
+            ['readerid' => $reader->id, 'yearid' => $year->id],
+            'id, groupname, stage',
+            IGNORE_MULTIPLE
+        );
+        $settings = json_decode((string) $DB->get_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            ['id' => $reader->entityid]
+        ), true) ?: [];
+        $stage = $member ? (string) $member->stage : '';
+        $own = $reader->userid ? get_user_preferences('local_oksigeniaayvurenda_cardlook', null, (int) $reader->userid) : null;
+        $group = $member ? (string) $member->groupname : '';
+        return \local_oksigeniaayvurenda\core\card_look::resolve(
+            \local_oksigeniaayvurenda\core\card_look::guess($reader->readertype, $stage, $group),
+            $settings['cardlooks'][$stage] ?? null,
+            $own ?: null
+        );
+    }
+
+    /**
      * A card.
      *
      * @param \stdClass $reader With id, entityid, cardcode and the name to show.
