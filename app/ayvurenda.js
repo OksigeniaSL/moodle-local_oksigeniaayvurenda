@@ -36,6 +36,33 @@
             }
         });
     }
+    // Choosing a file: our button and words, in the library's language, over the browser's control, which still does
+    // the work underneath (it takes the click and the keyboard, and says what it is to a screen reader).
+    if (config.filechoose) {
+        document.querySelectorAll('input[type="file"]').forEach(function(input) {
+            var box = document.createElement('span');
+            var button = document.createElement('span');
+            var name = document.createElement('span');
+            box.className = 'ayv-file';
+            button.className = 'ayv-file-button';
+            name.className = 'ayv-file-name';
+            button.setAttribute('aria-hidden', 'true');
+            name.setAttribute('aria-hidden', 'true');
+            button.textContent = config.filechoose;
+            var show = function() {
+                var names = Array.prototype.map.call(input.files || [], function(file) {
+                    return file.name;
+                });
+                name.textContent = names.length ? names.join(', ') : config.filenone;
+            };
+            input.parentNode.insertBefore(box, input);
+            box.appendChild(input);
+            box.appendChild(button);
+            box.appendChild(name);
+            input.addEventListener('change', show);
+            show();
+        });
+    }
     // The shelves slide without a scrollbar: two arrows, shown when there is more that way.
     document.querySelectorAll('.ayv-wood').forEach(function(wood) {
         var list = wood.querySelector('.ayv-cards');
