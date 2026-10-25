@@ -51,15 +51,22 @@ foreach (
 ) {
     $strings[$key] = $str($key);
 }
+// What waits for the staff besides the desk: reviews to read and books the classes asked for.
+$today['reviews'] = \local_oksigeniaayvurenda\local\reviews::waiting((int) $library->entityid);
+$today['wishes'] = \local_oksigeniaayvurenda\local\wishes::waiting((int) $library->entityid);
 $cards = '';
-foreach (['today' => 'todaytoday', 'held' => 'todayheld', 'late' => 'todaylate', 'out' => 'todayout'] as $key => $label) {
+foreach (
+    ['today' => 'todaytoday', 'held' => 'todayheld', 'late' => 'todaylate', 'out' => 'todayout', 'reviews' => 'todayreviews',
+        'wishes' => 'todaywishes'] as $key => $label
+) {
     if ($today[$key] > 0) {
         $inner = '<span class="ayv-today-number">' . $today[$key] . '</span><span class="ayv-today-label">' .
             s($str($label)) . '</span>';
         if ($key === 'today') {
             $cards .= '<li class="ayv-today-card ayv-today-' . $key . '">' . $inner . '</li>';
         } else {
-            $url = $key === 'held' ? new moodle_url('/local/oksigeniaayvurenda/holds.php', ['library' => $library->slug])
+            $page = ['held' => 'holds.php', 'reviews' => 'reviews.php', 'wishes' => 'wishes.php'][$key] ?? null;
+            $url = $page ? new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug])
                 : new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug,
                     'all' => (int) ($key === 'out')]);
             $cards .= '<li><a class="ayv-today-card ayv-today-' . $key . '" href="' . $url->out() . '">' . $inner . '</a></li>';

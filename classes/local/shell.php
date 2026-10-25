@@ -154,8 +154,11 @@ final class shell {
             $links[] = ['url' => $base . 'class.php?library=' . rawurlencode($library->slug),
                 'label' => get_string('classnav', 'local_oksigeniaayvurenda')];
         }
-        if (count(catalogue::libraries()) > 1 || has_capability('local/oksigeniaayvurenda:manage', $system)) {
-            $links[] = ['url' => $base . 'index.php', 'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
+        // The libraries: to choose one; for whoever manages them, their page, whose cards also go in (one link, not two).
+        $manage = has_capability('local/oksigeniaayvurenda:manage', $system);
+        if (count(catalogue::libraries()) > 1 || $manage) {
+            $links[] = ['url' => $base . ($manage ? 'libraries.php' : 'index.php'),
+                'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
         }
         if ($library && has_capability('local/oksigeniaayvurenda:desk', $system)) {
             $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($library->slug),

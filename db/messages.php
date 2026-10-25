@@ -46,6 +46,13 @@ $messageproviders = [
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To the library's staff: what waits for them (reviews to read, books classes asked for), once a day at most.
+    'stafftodo' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To a tutor: who in the group has books to bring back, without their titles.
     'overduetutor' => [
         'defaults' => [

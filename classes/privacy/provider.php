@@ -165,6 +165,7 @@ class provider implements
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
         $collection->add_user_preference('local_oksigeniaayvurenda_cardlook', 'privacy:metadata:preference:cardlook');
+        $collection->add_user_preference('local_oksigeniaayvurenda_stafftold', 'privacy:metadata:preference:stafftold');
         return $collection;
     }
 
@@ -181,6 +182,15 @@ class provider implements
                 'local_oksigeniaayvurenda_cardlook',
                 $look,
                 get_string('privacy:metadata:preference:cardlook', 'local_oksigeniaayvurenda')
+            );
+        }
+        $told = get_user_preferences('local_oksigeniaayvurenda_stafftold', null, $userid);
+        if ($told !== null) {
+            writer::export_user_preference(
+                'local_oksigeniaayvurenda',
+                'local_oksigeniaayvurenda_stafftold',
+                transform::datetime((int) $told),
+                get_string('privacy:metadata:preference:stafftold', 'local_oksigeniaayvurenda')
             );
         }
     }

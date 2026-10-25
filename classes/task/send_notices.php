@@ -48,5 +48,7 @@ class send_notices extends \core\task\scheduled_task {
         mtrace('Ayvurenda: reservations no longer set aside: ' . $expired);
         $voices = \local_oksigeniaayvurenda\local\voices::expire();
         mtrace('Ayvurenda: voices past the days the centre keeps them: ' . $voices);
+        $staff = \local_oksigeniaayvurenda\local\staffnotices::run();
+        mtrace('Ayvurenda: what waits for the staff: ' . json_encode($staff));
     }
 }
