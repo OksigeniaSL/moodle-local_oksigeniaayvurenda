@@ -32,7 +32,8 @@
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "detail": "Última visita: el martes"}],
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
                    "sky": false, "haschoices": false, "choices": [],
-                   "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": []}],
+                   "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": [],
+                   "hasclassgarden": false, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": ""}],
         "action": "#", "sesskey": "abc", "lookheading": "Cómo ves tu carné", "looksave": "Guardar",
         "none": "",
         "pathsheading": "Cómo crece",
@@ -83,6 +84,13 @@
     </ul>
     {{/hasbooks}}
     {{^hasbooks}}<p class="ayv-empty">{{nobooks}}</p>{{/hasbooks}}
+    {{#hasclassgarden}}
+    <h2 class="ayv-section-title">{{classgardenheading}}</h2>
+    <p class="ayv-field-hint">{{classgardenhint}}</p>
+    <ul class="ayv-garden">
+    {{#classgarden}}<li>{{{svg}}}<span>{{label}}</span></li>{{/classgarden}}
+    </ul>
+    {{/hasclassgarden}}
     {{#haspast}}
     <h2 class="ayv-section-title">{{pastheading}}</h2>
     <ul class="ayv-garden">

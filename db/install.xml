@@ -564,5 +564,24 @@
         <INDEX NAME="platformcontext" UNIQUE="true" FIELDS="platformid, contextid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_challenge" COMMENT="The challenge of a class in a term: cooperative, measured at the desk; met, it is the class's garden">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="yearid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="groupname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="term" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="1, 2 or 3: the thirds of the school year"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="corners, notes, everyone, or off"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="yeargroupterm" UNIQUE="true" FIELDS="yearid, groupname, term"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

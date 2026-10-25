@@ -240,5 +240,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102816, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102820) {
+        // The challenges of the classes.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_challenge')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_challenge');
+        }
+        upgrade_plugin_savepoint(true, 2026102820, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

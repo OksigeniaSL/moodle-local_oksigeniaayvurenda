@@ -453,6 +453,7 @@ final class screens {
             'art' => self::art('portada'),
             'emblem' => (new \moodle_url('/local/oksigeniaayvurenda/app/emblema.svg'))->out(false),
             'you' => null,
+            'challenge' => null,
             'classreads' => [],
         ];
         if (!$reader) {
@@ -492,6 +493,8 @@ final class screens {
         }
         $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard')];
         if ($member && (string) $member->groupname !== '') {
+            $challenge = challenges::of((int) $library->entityid, (string) $member->groupname);
+            $hero['challenge'] = $challenge ? challenges::view($challenge, (int) $library->entityid) : null;
             $hero['classreads'] = self::cards(catalogue::class_reads(
                 $library,
                 (string) $member->groupname,

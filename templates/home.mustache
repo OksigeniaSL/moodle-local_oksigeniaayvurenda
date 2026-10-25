@@ -36,6 +36,7 @@
             "searchlabel": "Buscar",
             "hasideas": true, "ideas": [{"label": "Animales", "url": "#"}], "art": null, "emblem": "https://example.org/e.svg",
             "you": {"title": "Tu flor: Brote", "text": "Explora rincones nuevos.", "drawing": "", "url": "#", "label": "Mi carné"},
+            "challenge": null,
             "classreads": []},
         "classheading": "Lo que lee tu clase", "classhint": "Libros que han pedido varios de tu grupo.", "classblock": null,
         "heading": "La biblioteca",
@@ -80,6 +81,7 @@
         {{#drawing}}<span class="ayv-duo-drawing">{{{drawing}}}</span>{{/drawing}}
         <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span></span>
         <a class="ayv-button" href="{{url}}">{{label}}</a></div>{{/hero.you}}
+    {{#hero.challenge}}<div class="ayv-duo-card ayv-challenge-card">{{> local_oksigeniaayvurenda/challenge}}</div>{{/hero.challenge}}
 </div>
 <p class="ayv-staff ayv-staff-row">
     {{#desk}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/desk}}

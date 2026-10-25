@@ -1,0 +1,42 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/challenge
+    The challenge of a class: what it is, its marks lit, how many are still to come (never who), and the herald when met.
+    Context variables required for this template:
+    * heading, text, progresslabel, left - texts
+    * marks - one per step (lit)
+    * complete - whether it is met
+    * herald - what the herald says when it is met (see local_oksigeniaayvurenda/bubble)
+    Example context (json):
+    {
+        "heading": "El reto de tu clase",
+        "text": "Libros de 6 rincones distintos, entre todos",
+        "marks": [{"lit": true}, {"lit": true}, {"lit": false}],
+        "progresslabel": "2 de 3",
+        "left": "",
+        "complete": false,
+        "herald": null
+    }
+}}
+<div class="ayv-challenge{{#complete}} ayv-challenge-done{{/complete}}">
+    <span class="ayv-duo-title">{{heading}}</span>
+    <span class="ayv-challenge-text">{{text}}</span>
+    <span class="ayv-challenge-marks" role="img" aria-label="{{progresslabel}}">{{#marks}}<span class="ayv-mark{{#lit}} ayv-mark-lit{{/lit}}"></span>{{/marks}}</span>
+    {{#left}}<span class="ayv-field-hint">{{left}}</span>{{/left}}
+    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
+</div>

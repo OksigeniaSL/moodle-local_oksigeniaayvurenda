@@ -36,6 +36,23 @@
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
+{{#challenge}}
+<section class="ayv-section ayv-book">
+    {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+    {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
+    {{^locked}}<form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <fieldset class="ayv-fieldset"><legend>{{choose}}</legend>
+            <p class="ayv-field-hint">{{choosehint}}</p>
+            {{#kinds}}<label class="ayv-field ayv-field-check"><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/kinds}}
+        </fieldset>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></p>
+    </form>{{/locked}}
+    <h2 class="ayv-section-title">{{gardenheading}}</h2>
+    {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}
+    {{^hasgarden}}<p class="ayv-empty">{{gardenempty}}</p>{{/hasgarden}}
+</section>
+{{/challenge}}
 {{#hasreaders}}
 <ul class="ayv-people">
 {{#readers}}

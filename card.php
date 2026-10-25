@@ -105,6 +105,15 @@ foreach ($readers as $reader) {
             'svg' => $sky ? cards::sky_svg($p['stage'], $p['levels'], $label, 72, $sober)
                 : cards::flower_svg($p['stage'], $p['levels'], $label, 72)];
     }
+    // The class garden: what the class met this school year, a flower (or a full sky) for each; nothing in classic.
+    $classgarden = [];
+    if ($group !== '' && ($look === 'flower' || $sky)) {
+        foreach (\local_oksigeniaayvurenda\local\challenges::garden((int) $reader->entityid, $group) as $planted) {
+            $label = $str('challengeplanted', $planted['term']) . ' · ' . $str('challengekind' . $planted['kind']);
+            $classgarden[] = ['label' => $label, 'svg' => $sky ? cards::sky_svg(3, [], $label, 56, $sober)
+                : cards::flower_svg(3, [], $label, 56)];
+        }
+    }
     $herald = $look === 'flower' || $sky ? \local_oksigeniaayvurenda\local\characters::say(
         (int) $reader->entityid,
         'herald',
@@ -126,6 +135,10 @@ foreach ($readers as $reader) {
         'hasbooks' => (bool) $album['books'],
         'past' => $past,
         'haspast' => (bool) $past,
+        'classgarden' => $classgarden,
+        'hasclassgarden' => (bool) $classgarden,
+        'classgardenheading' => $str('challengegarden'),
+        'classgardenhint' => $str('challengegardenhint'),
         'yearname' => $album['year']->name,
     ];
 }

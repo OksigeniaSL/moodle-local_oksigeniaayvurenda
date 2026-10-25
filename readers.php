@@ -97,6 +97,44 @@ if ($group === null) {
     }
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/readers', $data);
 } else {
+    // The challenge of the class this term: the staff choose it, or none.
+    $notice = '';
+    if ($group !== '' && data_submitted() && confirm_sesskey()) {
+        $kind = optional_param('challenge', '', PARAM_ALPHA);
+        if ($kind === 'off' || isset(\local_oksigeniaayvurenda\local\challenges::KINDS[$kind])) {
+            \local_oksigeniaayvurenda\local\challenges::choose((int) $library->entityid, $group, $kind);
+            $notice = $str('challengesaved');
+        }
+    }
+    $challengeview = null;
+    if ($group !== '') {
+        $challenge = \local_oksigeniaayvurenda\local\challenges::of((int) $library->entityid, $group);
+        $kinds = [];
+        foreach (array_merge(array_keys(\local_oksigeniaayvurenda\local\challenges::KINDS), ['off']) as $kind) {
+            $kinds[] = ['value' => $kind, 'label' => $str('challengekind' . $kind),
+                'checked' => $challenge ? $challenge->kind === $kind : $kind === 'off'];
+        }
+        $garden = array_map(
+            fn($p) => ['label' => $str('challengeplanted', $p['term']) . ' · ' . $str('challengekind' . $p['kind'])],
+            \local_oksigeniaayvurenda\local\challenges::garden((int) $library->entityid, $group)
+        );
+        $challengeview = [
+            'current' => $challenge ? \local_oksigeniaayvurenda\local\challenges::view($challenge, (int) $library->entityid, true)
+                : null,
+            'locked' => $challenge && $challenge->complete,
+            'kinds' => $kinds,
+            'choose' => $str('challengechoose'),
+            'choosehint' => $str('challengechoosehint'),
+            'save' => $str('challengesave'),
+            'action' => $PAGE->url->out(false),
+            'sesskey' => sesskey(),
+            'garden' => $garden,
+            'hasgarden' => (bool) $garden,
+            'gardenheading' => $str('challengegarden'),
+            'gardenempty' => $str('challengegardenempty'),
+            'notice' => $notice,
+        ];
+    }
     $list = readers::in_group($library, $group);
     $data = [
         'heading' => $group !== '' ? $group : $str('readersnogroup'),
@@ -108,6 +146,7 @@ if ($group === null) {
         'empty' => $list ? '' : $str('readersnone'),
         'print' => $list ? ['url' => (new moodle_url('/local/oksigeniaayvurenda/print.php', ['library' => $library->slug,
             'group' => $group]))->out(false), 'label' => $str('printcards')] : null,
+        'challenge' => $challengeview,
     ];
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/group', $data);
 }
