@@ -1852,3 +1852,30 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-reward-form { display: grid; gap: .6rem; margin-top: .5rem; }
 /* In a grid of words, «Listen» keeps its own width. */
 .ayv .ayv-duo-words .ayv-listen, .ayv .ayv-challenge-text .ayv-listen { justify-self: start; margin-top: .3rem; }
+
+/* The drawing pad of a review: white paper, round pencils of the house's colours, and room for a finger. */
+.ayv .ayv-draw { display: grid; gap: .6rem; margin: .4rem 0 .8rem; }
+.ayv .ayv-draw[hidden] { display: none; }
+.ayv .ayv-draw-canvas {
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 8 / 5;
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    touch-action: none;
+    cursor: crosshair;
+}
+.ayv .ayv-draw-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+.ayv .ayv-draw-colour {
+    width: 44px;
+    height: 44px;
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    background: var(--ayv-pencil);
+    box-shadow: 0 0 0 2px var(--line);
+    cursor: pointer;
+}
+.ayv .ayv-draw-colour[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--accent); }
+.ayv .ayv-review-drawing { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 0 .5rem; border-radius: 12px;
+    border: 1px solid var(--line); background: #fff; }

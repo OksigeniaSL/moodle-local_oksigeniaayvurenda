@@ -49,15 +49,27 @@ if ($do !== '' && data_submitted() && confirm_sesskey()) {
     $done = '';
     if ($reader && \local_oksigeniaayvurenda\local\reviews::can_write($id, (int) $reader->id)) {
         if ($do === 'send') {
-            \local_oksigeniaayvurenda\local\reviews::write(
+            // A drawing comes from the drawing pad as a PNG in a data address.
+            $drawing = optional_param('drawing', '', PARAM_RAW_TRIMMED);
+            $png = str_starts_with($drawing, 'data:image/png;base64,')
+                ? (string) base64_decode(substr($drawing, strlen('data:image/png;base64,')), true) : '';
+            $reviewid = \local_oksigeniaayvurenda\local\reviews::write(
                 (int) $library->entityid,
                 $id,
                 (int) $reader->id,
                 optional_param('text', '', PARAM_TEXT),
                 null,
-                optional_param('forlittle', 0, PARAM_BOOL) && \local_oksigeniaayvurenda\local\cards::look_of($reader) !== 'flower'
+                optional_param('forlittle', 0, PARAM_BOOL) && \local_oksigeniaayvurenda\local\cards::look_of($reader) !== 'flower',
+                $png !== ''
             );
-            $done = 'sent';
+            if ($reviewid && $png !== '' && !\local_oksigeniaayvurenda\local\reviews::draw($reviewid, $png)) {
+                // Not a picture after all: without words either, there is nothing to tell.
+                $kept = \local_oksigeniaayvurenda\local\reviews::mine($id, (int) $reader->id);
+                if ($kept && $kept->text === '' && !\local_oksigeniaayvurenda\local\reviews::drawing($reviewid)) {
+                    \local_oksigeniaayvurenda\local\reviews::remove($id, (int) $reader->id);
+                }
+            }
+            $done = $reviewid ? 'sent' : '';
         } else if ($do === 'remove') {
             \local_oksigeniaayvurenda\local\reviews::remove($id, (int) $reader->id);
             $done = 'removed';
@@ -69,4 +81,6 @@ $data = screens::record($found, $library);
 $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);
-shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library);
+shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
+    'scripts' => !empty($data['reviews']['write']) ? ['draw'] : [],
+]);

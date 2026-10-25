@@ -456,6 +456,10 @@ final class screens {
         return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.webp'))->out(false);
     }
 
+    /** @var string[] The pencils of the drawing pad: the house's colours, by name. */
+    private const DRAWCOLOURS = ['ink' => '#1e2b2a', 'green' => '#17574c', 'coral' => '#e2654c', 'sun' => '#f0b43c',
+        'blue' => '#3d7cc9', 'brown' => '#8a5a3b'];
+
     /**
      * What readers tell about a book: the published reviews, signed, and for a reader who took it home, their own.
      *
@@ -473,7 +477,10 @@ final class screens {
         $canwrite = $reader && reviews::can_write($recordid, (int) $reader->id);
         // The older readers (not the flower) may recommend it to the young.
         $older = $canwrite && cards::look_of($reader) !== 'flower';
-        $list = reviews::published($recordid, (int) $library->entityid);
+        $list = array_map(
+            fn($r) => $r + ['drawingalt' => self::str('reviewdrawingof', $r['who'])],
+            reviews::published($recordid, (int) $library->entityid)
+        );
         return [
             'show' => $list || $canwrite,
             'heading' => self::str('reviewsheading'),
@@ -495,6 +502,19 @@ final class screens {
                 'canrecommend' => $older,
                 'recommend' => self::str('reviewforlittle'),
                 'recommended' => $mine && $mine->forlittle,
+                // The drawing pad: for whoever would rather draw than write.
+                'drawopen' => self::str('reviewdrawopen'),
+                'mydrawing' => $mine ? reviews::drawing((int) $mine->id) : null,
+                'mydrawingalt' => self::str('reviewdrawingmine'),
+                'drawcanvas' => self::str('drawcanvas'),
+                'drawtools' => self::str('drawtools'),
+                'drawcolours' => array_map(fn($c, $name) => ['value' => $c, 'label' => self::str('drawcolour' . $name),
+                    'pressed' => $name === 'ink' ? 'true' : 'false'], self::DRAWCOLOURS, array_keys(self::DRAWCOLOURS)),
+                'drawthin' => self::str('drawthin'),
+                'drawthick' => self::str('drawthick'),
+                'draweraser' => self::str('draweraser'),
+                'drawundo' => self::str('drawundo'),
+                'drawclear' => self::str('drawclear'),
             ] : null,
         ];
     }

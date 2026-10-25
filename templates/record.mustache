@@ -129,13 +129,28 @@
         <section class="ayv-reviews" id="ayv-reviews" aria-labelledby="ayv-reviews-title">
             <h2 id="ayv-reviews-title" class="ayv-section-title">{{heading}}</h2>
             {{#done}}<p class="ayv-notice" role="status">{{done}}</p>{{/done}}
-            {{#haslist}}<ul class="ayv-review-list">{{#list}}<li class="ayv-review"><p class="ayv-review-text">«{{text}}»</p>
+            {{#haslist}}<ul class="ayv-review-list">{{#list}}<li class="ayv-review">{{#drawing}}<img class="ayv-review-drawing" src="{{drawing}}" alt="{{drawingalt}}" loading="lazy">{{/drawing}}
+                {{#text}}<p class="ayv-review-text">«{{text}}»</p>{{/text}}
                 <p class="ayv-review-who">{{who}}</p></li>{{/list}}</ul>{{/haslist}}
             {{^haslist}}<p class="ayv-empty">{{none}}</p>{{/haslist}}
             {{#write}}<form class="ayv-review-form" method="post" action="{{action}}#ayv-reviews">
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <label class="ayv-field ayv-field-wide"><span class="ayv-review-ask">{{label}}</span> <span class="ayv-field-hint">{{hint}}</span>
                     <textarea name="text" maxlength="{{max}}" rows="3" required>{{text}}</textarea></label>
+                {{#mydrawing}}<img class="ayv-review-drawing" src="{{mydrawing}}" alt="{{mydrawingalt}}">{{/mydrawing}}
+                <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-draw-open>{{drawopen}}</button></p>
+                <div class="ayv-draw" data-ayv-draw hidden>
+                    <canvas class="ayv-draw-canvas" width="800" height="500" role="img" aria-label="{{drawcanvas}}"></canvas>
+                    <div class="ayv-draw-tools" role="toolbar" aria-label="{{drawtools}}">
+                        {{#drawcolours}}<button type="button" class="ayv-draw-colour" data-colour="{{value}}" style="--ayv-pencil: {{value}}" aria-label="{{label}}" aria-pressed="{{pressed}}"></button>{{/drawcolours}}
+                        <button type="button" class="ayv-toggle" data-size="6" aria-pressed="true">{{drawthin}}</button>
+                        <button type="button" class="ayv-toggle" data-size="18" aria-pressed="false">{{drawthick}}</button>
+                        <button type="button" class="ayv-toggle" data-erase aria-pressed="false">{{draweraser}}</button>
+                        <button type="button" class="ayv-button ayv-button-quiet" data-undo>{{drawundo}}</button>
+                        <button type="button" class="ayv-button ayv-button-quiet" data-clear>{{drawclear}}</button>
+                    </div>
+                    <input type="hidden" name="drawing" value="">
+                </div>
                 {{#canrecommend}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="forlittle" value="1" {{#recommended}}checked{{/recommended}}> {{recommend}}</label>{{/canrecommend}}
                 {{#hasmine}}<p class="ayv-field-hint">{{state}}</p>{{/hasmine}}
                 <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="review" value="send">{{send}}</button>

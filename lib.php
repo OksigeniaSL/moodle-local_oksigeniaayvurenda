@@ -37,7 +37,7 @@
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER;
-    $areas = ['copies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait'];
+    $areas = ['copies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'reviewdrawing'];
     if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, $areas, true)) {
         return false;
     }
@@ -78,6 +78,23 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         if (!$anyone || !$library || empty(\local_oksigeniaayvurenda\local\window::settings($library)['open'])) {
             require_login(null, false);
             require_capability('local/oksigeniaayvurenda:view', $context);
+        }
+        $forcedownload = false;
+    } else if ($filearea === 'reviewdrawing') {
+        // A reader's drawing about a book: published, for whoever sees the library; before, for its author and the staff.
+        global $DB;
+        require_login(null, false);
+        $review = $DB->get_record('local_oksigeniaayvurenda_review', ['id' => $itemid]);
+        if (!$review) {
+            return false;
+        }
+        if ($review->status === 'published') {
+            require_capability('local/oksigeniaayvurenda:view', $context);
+        } else if (
+            !has_capability('local/oksigeniaayvurenda:desk', $context) &&
+            (int) $DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $review->readerid]) !== (int) $USER->id
+        ) {
+            return false;
         }
         $forcedownload = false;
     } else if ($filearea === 'cover') {

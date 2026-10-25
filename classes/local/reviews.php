@@ -31,6 +31,12 @@ final class reviews {
     /** @var int Characters a review may have. */
     public const MAX = 280;
 
+    /** @var string The file area of the drawings. */
+    public const AREA = 'reviewdrawing';
+
+    /** @var int Bytes a drawing may have. */
+    public const DRAWINGMAX = 1024 * 1024;
+
     /** @var string[] How a review is signed: first name and group, first name and initial, or no name. */
     public const SIGNS = ['name', 'initial', 'none'];
 
@@ -70,6 +76,7 @@ final class reviews {
      * @param string $text
      * @param int|null $now
      * @param bool $forlittle An older reader recommends it to the young.
+     * @param bool $drawn It comes with a drawing, so it may have no words.
      * @return int Its id, or 0 when there was nothing to say.
      */
     public static function write(
@@ -78,11 +85,12 @@ final class reviews {
         int $readerid,
         string $text,
         ?int $now = null,
-        bool $forlittle = false
+        bool $forlittle = false,
+        bool $drawn = false
     ): int {
         global $DB;
         $text = \core_text::substr(trim(preg_replace('/\s+/u', ' ', $text)), 0, self::MAX);
-        if ($text === '') {
+        if ($text === '' && !$drawn) {
             return 0;
         }
         $now = $now ?? time();
@@ -109,10 +117,15 @@ final class reviews {
         $theirs = $DB->get_fieldset_select(self::T . 'review', 'recordid', 'readerid = :readerid', ['readerid' => $toid]);
         if ($theirs) {
             [$in, $params] = $DB->get_in_or_equal($theirs, SQL_PARAMS_NAMED);
+            $params += ['readerid' => $fromid];
+            $ids = $DB->get_fieldset_select(self::T . 'review', 'id', "readerid = :readerid AND recordid $in", $params);
+            foreach ($ids as $gone) {
+                images::remove(self::AREA, (int) $gone, 'drawing');
+            }
             $DB->delete_records_select(
                 self::T . 'review',
                 "readerid = :readerid AND recordid $in",
-                $params + ['readerid' => $fromid]
+                $params
             );
         }
         $DB->set_field(self::T . 'review', 'readerid', $toid, ['readerid' => $fromid]);
@@ -126,7 +139,38 @@ final class reviews {
      */
     public static function remove(int $recordid, int $readerid): void {
         global $DB;
-        $DB->delete_records(self::T . 'review', ['recordid' => $recordid, 'readerid' => $readerid]);
+        $row = self::mine($recordid, $readerid);
+        if ($row) {
+            images::remove(self::AREA, (int) $row->id, 'drawing');
+            $DB->delete_records(self::T . 'review', ['id' => $row->id]);
+        }
+    }
+
+    /**
+     * Keeps the drawing of a review (a PNG the drawing pad made), in place of the one it had.
+     *
+     * @param int $id
+     * @param string $png The picture itself.
+     * @return bool Whether it was a picture of a sensible size and was kept.
+     */
+    public static function draw(int $id, string $png): bool {
+        $info = $png !== '' && strlen($png) <= self::DRAWINGMAX ? @getimagesizefromstring($png) : false;
+        if (!$info || $info[2] !== IMAGETYPE_PNG || $info[0] > 2000 || $info[1] > 2000) {
+            return false;
+        }
+        $path = make_request_directory() . '/drawing.png';
+        file_put_contents($path, $png);
+        return images::store(self::AREA, $id, 'drawing', $path);
+    }
+
+    /**
+     * The address of a review's drawing, if it has one.
+     *
+     * @param int $id
+     * @return string|null
+     */
+    public static function drawing(int $id): ?string {
+        return images::url(self::AREA, $id, 'drawing');
     }
 
     /**
@@ -144,6 +188,7 @@ final class reviews {
            ORDER BY v.timemodified, v.id', ['entityid' => $entityid, 'status' => 'pending']);
         foreach ($rows as $row) {
             $row->who = self::who((int) $row->readerid, $entityid, 'name');
+            $row->drawing = self::drawing((int) $row->id);
         }
         return array_values($rows);
     }
@@ -189,7 +234,8 @@ final class reviews {
         $rows = $DB->get_records(self::T . 'review', ['recordid' => $recordid, 'entityid' => $entityid,
             'status' => 'published'], 'timedecided DESC, id DESC', '*', 0, 20);
         return array_values(array_map(
-            fn($r) => ['text' => $r->text, 'who' => self::who((int) $r->readerid, $entityid, $sign)],
+            fn($r) => ['text' => $r->text, 'who' => self::who((int) $r->readerid, $entityid, $sign),
+                'drawing' => self::drawing((int) $r->id)],
             $rows
         ));
     }

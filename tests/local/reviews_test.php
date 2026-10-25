@@ -94,4 +94,34 @@ final class reviews_test extends \advanced_testcase {
         $this->assertSame($recordid, $little[0]['recordid']);
         $this->assertSame('Para los pequeños: tiene un faro.', $little[0]['text']);
     }
+
+    /**
+     * A drawing can stand without words; only a real PNG of a sensible size is kept, and it goes with its review.
+     */
+    public function test_drawing(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $entityid = (int) $library->entityid;
+        $item = $generator->create_item(['libraryid' => $library->id]);
+        $recordid = (int) $item->recordid;
+        $reader = $generator->create_reader(['entityid' => $entityid]);
+        $generator->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id]);
+        $image = imagecreatetruecolor(80, 50);
+        ob_start();
+        imagepng($image);
+        $png = (string) ob_get_clean();
+
+        $this->assertSame(0, reviews::write($entityid, $recordid, (int) $reader->id, ''));
+        $id = reviews::write($entityid, $recordid, (int) $reader->id, '', null, false, true);
+        $this->assertNotSame(0, $id);
+        $this->assertFalse(reviews::draw($id, 'not a picture'));
+        $this->assertNull(reviews::drawing($id));
+        $this->assertTrue(reviews::draw($id, $png));
+        $this->assertNotNull(reviews::drawing($id));
+        reviews::decide($id, $entityid, true, (int) get_admin()->id);
+        $this->assertNotNull(reviews::published($recordid, $entityid)[0]['drawing']);
+        reviews::remove($recordid, (int) $reader->id);
+        $this->assertNull(reviews::drawing($id));
+    }
 }
