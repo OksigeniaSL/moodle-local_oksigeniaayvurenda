@@ -39,7 +39,7 @@ $context = context_system::instance();
 shell::require('local/oksigeniaayvurenda:view');
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => $ref] +
-    ($asked !== '' ? ['group' => $asked] : [])));
+    ($asked !== '' ? ['group' => $asked] : []) + (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 $library = catalogue::library($ref);
 if (!$library) {
@@ -49,6 +49,11 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 $entityid = (int) $library->entityid;
 $now = time();
 $groups = challenges::tutored($entityid, (int) $USER->id, $now);
+// Inside the guided help, the practice library's groups, as their tutor would see them.
+$help = optional_param('help', 0, PARAM_BOOL) && \local_oksigeniaayvurenda\local\practice::is($entityid);
+if ($help) {
+    $groups = \local_oksigeniaayvurenda\local\practice::groups();
+}
 // The library's staff may open any group's page as its tutor sees it.
 if ($asked !== '' && !in_array($asked, $groups, true) && has_capability('local/oksigeniaayvurenda:desk', $context)) {
     $groups = [$asked];
@@ -146,4 +151,10 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
     'wishnote' => $str('wishnote'),
     'wishnotehint' => $str('wishnotehint'),
     'wishsend' => $str('wishsend'),
-]), $library, '', ['search' => false]);
+]), $library, '', [
+    'search' => false,
+    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
+        '/local/oksigeniaayvurenda/help.php',
+        ['library' => $library->slug, 'piece' => 'myclass']
+    ))->out(false), 'label' => $str('helpnav')]],
+]);

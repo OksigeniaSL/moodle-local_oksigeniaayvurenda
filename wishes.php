@@ -33,7 +33,8 @@ require_login(null, false);
 $context = context_system::instance();
 shell::require('local/oksigeniaayvurenda:desk');
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/wishes.php', ['library' => $ref]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/wishes.php', ['library' => $ref] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 $library = catalogue::library($ref);
 if (!$library) {
@@ -70,4 +71,10 @@ shell::output($str('wishestitle'), $OUTPUT->render_from_template('local_oksigeni
     'got' => $str('wishesgot'),
     'declined' => $str('wishesdeclined'),
     'searchlabel' => $str('wishessearch'),
-]), $library, '', ['search' => false]);
+]), $library, '', [
+    'search' => false,
+    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
+        '/local/oksigeniaayvurenda/help.php',
+        ['library' => $library->slug, 'piece' => 'wishes']
+    ))->out(false), 'label' => $str('helpnav')]],
+]);

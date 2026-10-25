@@ -38,7 +38,10 @@ $pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 1
     'add' => ['capability' => 'catalogue', 'page' => 'add.php', 'steps' => 6],
     'card' => ['capability' => 'desk', 'page' => 'card.php', 'steps' => 7],
     'labels' => ['capability' => 'catalogue', 'page' => 'labels.php', 'steps' => 6],
-    'reports' => ['capability' => 'desk', 'page' => 'reports.php', 'steps' => 5]];
+    'reports' => ['capability' => 'desk', 'page' => 'reports.php', 'steps' => 5],
+    'reviews' => ['capability' => 'desk', 'page' => 'reviews.php', 'steps' => 6],
+    'wishes' => ['capability' => 'desk', 'page' => 'wishes.php', 'steps' => 4],
+    'myclass' => ['capability' => 'view', 'page' => 'class.php', 'steps' => 7]];
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
@@ -112,6 +115,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'ladrona' => $code(practice::BOOKS[3][0]),
             'isbn1' => practice::ISBNS[0][0],
             'isbn2' => practice::ISBNS[1][0],
+            'wish' => $str('practicewishmine'),
         ],
     ],
 ]);

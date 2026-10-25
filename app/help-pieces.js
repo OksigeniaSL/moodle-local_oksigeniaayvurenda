@@ -191,5 +191,73 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(4);
         });
+    },
+    // The reviews waiting for the library: what and who, publish or not, and «now you»: publish Leo's.
+    reviews: function(h) {
+        'use strict';
+        var first = '.ayv-review-card:first-child ';
+        return h.point(first + '.ayv-review-text').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point(first + '.ayv-review-who');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point(first + 'button[value="publish"]');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point(first + 'button[value="decline"]');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.you(4, first + 'button[value="publish"]');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    // What the classes ask for: the book, looking for it, and «now you»: here it is.
+    wishes: function(h) {
+        'use strict';
+        var first = '.ayv-review-card:first-child ';
+        return h.point(first + '.ayv-review-text').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point(first + 'a');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.you(2, first + 'button[value="got"]');
+        }).then(function() {
+            return h.say(3);
+        });
+    },
+    // My class: a challenge met, its reward (a book the class chooses), and the challenge of a group still playing.
+    myclass: function(h) {
+        'use strict';
+        var second = '.ayv-myclass ~ .ayv-myclass ';
+        return h.point('.ayv-myclass h2').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-myclass .ayv-challenge');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.type('.ayv-reward-form input[name="title"]', h.codes.wish);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.go('.ayv-reward-form button[type="submit"]');
+        }).then(function() {
+            return h.point(second + 'fieldset');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.you(5, second + 'input[value="notes"]');
+        }).then(function() {
+            return h.say(6);
+        });
     }
 };

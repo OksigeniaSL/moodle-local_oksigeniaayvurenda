@@ -168,8 +168,40 @@ final class practice {
                     'timemodified' => $loaned]);
             }
         }
+        // What the helps of the reviews, the class books and My class show: Leo and Noa told about a book (the reviews
+        // are there as sent; no loan is added, so the reports keep their numbers); 3º A met this term's challenge and
+        // has not chosen its book; 4º C met it and asked for one.
+        $records = $DB->get_records_menu(self::T . 'record', ['entityid' => $entityid], '', 'title, id');
+        $cloud = (int) $records[self::BOOKS[1][1]];
+        $told = [[10001, $cloud, 'practicereviewleo', 3], [10002, (int) $records[self::BOOKS[3][1]], 'practicereviewnoa', 1]];
+        foreach ($told as [$reader, $recordid, $key, $hoursago]) {
+            $DB->insert_record(self::T . 'review', ['entityid' => $entityid, 'recordid' => $recordid,
+                'readerid' => $readers[$reader], 'text' => get_string($key, 'local_oksigeniaayvurenda'), 'status' => 'pending',
+                'forlittle' => 0, 'timecreated' => $now - $hoursago * HOURSECS, 'timemodified' => $now - $hoursago * HOURSECS]);
+        }
+        $term = challenges::term($year, $now);
+        foreach (['3º A' => 'corners', '4º C' => 'everyone'] as $group => $kind) {
+            $challengeid = $DB->insert_record(self::T . 'challenge', ['yearid' => $year->id, 'groupname' => $group,
+                'term' => $term, 'kind' => $kind, 'timecompleted' => $now - DAYSECS, 'timecreated' => $now - 30 * DAYSECS,
+                'timemodified' => $now - DAYSECS]);
+            if ($group === '4º C') {
+                $DB->insert_record(self::T . 'wish', ['entityid' => $entityid, 'challengeid' => $challengeid,
+                    'title' => get_string('practicewishtitle', 'local_oksigeniaayvurenda'),
+                    'note' => get_string('practicewishnote', 'local_oksigeniaayvurenda'), 'status' => 'asked',
+                    'timecreated' => $now - 5 * HOURSECS, 'timemodified' => $now - 5 * HOURSECS]);
+            }
+        }
         $transaction->allow_commit();
         return $DB->get_record(self::T . 'library', ['id' => $libraryid], '*', MUST_EXIST);
+    }
+
+    /**
+     * The groups of the practice library, for the help of My class.
+     *
+     * @return string[]
+     */
+    public static function groups(): array {
+        return array_values(array_unique(array_column(self::READERS, 3)));
     }
 
     /**
@@ -204,6 +236,17 @@ final class practice {
         }
         foreach ($records as $recordid) {
             covers::remove((int) $recordid);
+        }
+        // The reviews (with their drawings), the class books and the challenges of its years.
+        foreach ($DB->get_fieldset_select(self::T . 'review', 'id', 'entityid = ?', [$entityid]) as $reviewid) {
+            images::remove(reviews::AREA, (int) $reviewid, 'drawing');
+        }
+        $DB->delete_records(self::T . 'review', ['entityid' => $entityid]);
+        $DB->delete_records(self::T . 'wish', ['entityid' => $entityid]);
+        $years = $DB->get_fieldset_select(self::T . 'year', 'id', 'entityid = ?', [$entityid]);
+        if ($years) {
+            [$in, $params] = $DB->get_in_or_equal($years);
+            $DB->delete_records_select(self::T . 'challenge', 'yearid ' . $in, $params);
         }
         foreach (['item', 'record', 'reader', 'authority', 'year', 'library'] as $table) {
             $DB->delete_records(self::T . $table, ['entityid' => $entityid]);
