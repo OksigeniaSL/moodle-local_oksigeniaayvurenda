@@ -553,6 +553,17 @@ $string['homewindow'] = 'The public window';
 $string['howtoadd'] = 'Add new books';
 $string['howtoaddsteps'] = 'Open «Add books»|Pass the ISBN, the code that starts with 978 or 979: Ayvurenda looks for the record in the catalogues|Check the call number and the location, which stay for the next book|Passing the next one saves the one before';
 $string['howtoaddwords'] = 'add, new, catalogue, isbn, register, bought, acquisition';
+$string['howtoai'] = 'Ask it in your own words';
+$string['howtoaiaccept'] = 'Accept and ask';
+$string['howtoaianswer'] = 'An automatic answer from the library\'s guide: check it against the steps below.';
+$string['howtoaifailed'] = 'It could not answer now. Look at the guide\'s tasks.';
+$string['howtoaihint'] = 'An automatic answer that only uses the library\'s guide. Do not write readers\' names.';
+$string['howtoaipolicy'] = 'To ask in your own words, the site asks you to accept its AI policy once.';
+$string['howtoaiprompt'] = 'You are the help of Ayvurenda, a school library inside Moodle. Answer the library staff\'s question only with what this guide says. If the guide does not say it, answer only: «I do not know: look at the guide\'s tasks». Answer in English, in short numbered steps, without inventing buttons or screens.
+
+The guide:
+{$a->guide}
+The question: {$a->question}';
 $string['howtoall'] = 'All the tasks';
 $string['howtobox'] = 'How do I…?';
 $string['howtocards'] = 'Print a group\'s cards';

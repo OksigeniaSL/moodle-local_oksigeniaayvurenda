@@ -45,6 +45,11 @@ final class howto_test extends \advanced_testcase {
         $this->assertCount(count(howto::TASKS), howto::find('', $library, $admin));
         $this->assertNotNull(howto::find('labels', $library, $admin)[0]['help']);
 
+        // Without the site's AI, nothing changes: no answer in words, and the guide is there as text.
+        $this->assertFalse(howto::ai_ready());
+        $this->assertNull(howto::ask('How do I lend a book?', $library, $admin));
+        $this->assertStringContainsString('## Lend a book', howto::guide($library, $admin));
+
         // A teacher who only sees the library: only what is theirs.
         $teacher = $this->getDataGenerator()->create_user();
         $keys = array_column(howto::find('', $library, (int) $teacher->id), 'key');

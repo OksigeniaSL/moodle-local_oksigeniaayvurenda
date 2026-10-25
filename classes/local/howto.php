@@ -97,6 +97,70 @@ final class howto {
     }
 
     /**
+     * Whether the site's own AI (Moodle's, set up by the site's administrator) can answer in words.
+     *
+     * @return bool
+     */
+    public static function ai_ready(): bool {
+        if (!class_exists(\core_ai\manager::class) || !class_exists(\core_ai\aiactions\generate_text::class)) {
+            return false;
+        }
+        try {
+            return \core\di::get(\core_ai\manager::class)->is_action_available(\core_ai\aiactions\generate_text::class);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * The guide, as text: the tasks someone may do, with their steps. It is all the site's AI is given, besides the
+     * question: nothing about readers or loans.
+     *
+     * @param \stdClass $library
+     * @param int $userid
+     * @return string
+     */
+    public static function guide(\stdClass $library, int $userid): string {
+        $text = '';
+        foreach (self::find('', $library, $userid) as $task) {
+            $text .= '## ' . $task['title'] . "\n";
+            foreach ($task['steps'] as $i => $step) {
+                $text .= ($i + 1) . '. ' . $step . "\n";
+            }
+            $text .= "\n";
+        }
+        return $text;
+    }
+
+    /**
+     * A question answered in words by the site's AI, with the guide as its only source.
+     *
+     * @param string $question
+     * @param \stdClass $library
+     * @param int $userid
+     * @return string|null The answer, or null when it could not answer.
+     */
+    public static function ask(string $question, \stdClass $library, int $userid): ?string {
+        $question = \core_text::substr(trim($question), 0, 300);
+        if ($question === '' || !self::ai_ready()) {
+            return null;
+        }
+        $prompt = get_string('howtoaiprompt', 'local_oksigeniaayvurenda', (object) ['guide' => self::guide($library, $userid),
+            'question' => $question]);
+        try {
+            $action = new \core_ai\aiactions\generate_text(\context_system::instance()->id, $userid, $prompt);
+            $response = \core\di::get(\core_ai\manager::class)->process_action($action);
+        } catch (\Throwable $e) {
+            return null;
+        }
+        if (!$response->get_success()) {
+            return null;
+        }
+        $answer = trim((string) ($response->get_response_data()['generatedcontent'] ?? ''));
+        return $answer !== '' ? $answer : null;
+    }
+
+    /**
      * One task, in the reader's language.
      *
      * @param string $key

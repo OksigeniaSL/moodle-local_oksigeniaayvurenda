@@ -553,6 +553,17 @@ $string['homewindow'] = 'La ventana pública';
 $string['howtoadd'] = 'Dar de alta libros nuevos';
 $string['howtoaddsteps'] = 'Abre «Altas»|Pasa el ISBN, el código que empieza por 978 o 979: Ayvurenda busca la ficha en los catálogos|Revisa la signatura y la ubicación, que se quedan para el libro siguiente|Al pasar el siguiente, el anterior se guarda solo';
 $string['howtoaddwords'] = 'alta, altas, nuevo, nuevos, catalogar, isbn, añadir, compra, registrar';
+$string['howtoai'] = 'Pregúntalo con tus palabras';
+$string['howtoaiaccept'] = 'Aceptar y preguntar';
+$string['howtoaianswer'] = 'Respuesta automática a partir de la guía de la biblioteca: compruébala con los pasos de abajo.';
+$string['howtoaifailed'] = 'Ahora no ha podido contestar. Mira las tareas de la guía.';
+$string['howtoaihint'] = 'Una respuesta automática que solo usa la guía de la biblioteca. No escribas nombres de lectores.';
+$string['howtoaipolicy'] = 'Para preguntar con tus palabras, el sitio pide aceptar una vez su política de uso de la IA.';
+$string['howtoaiprompt'] = 'Eres la ayuda de Ayvurenda, una biblioteca escolar dentro de Moodle. Contesta a la pregunta del personal de la biblioteca solo con lo que dice esta guía. Si la guía no lo dice, contesta solo: «No lo sé: mira las tareas de la guía». Contesta en español, de tú, en pasos cortos y numerados, sin inventar botones ni pantallas.
+
+La guía:
+{$a->guide}
+La pregunta: {$a->question}';
 $string['howtoall'] = 'Todas las tareas';
 $string['howtobox'] = '¿Cómo hago…?';
 $string['howtocards'] = 'Imprimir los carnés de un grupo';

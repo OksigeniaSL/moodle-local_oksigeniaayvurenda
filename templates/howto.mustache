@@ -25,7 +25,8 @@
         "query": "prestar", "label": "¿Qué quieres hacer?", "placeholder": "Por ejemplo", "search": "Buscar",
         "searched": true, "hasfound": true, "none": "No lo encuentro.", "allheading": "Todas las tareas",
         "found": [{"title": "Prestar un libro", "steps": [{"step": "Abre el mostrador"}], "url": "#", "help": "#"}],
-        "hasall": true, "all": [{"title": "Prestar un libro", "url": "#"}], "go": "Ir a la pantalla", "helplabel": "Ayuda guiada"
+        "hasall": true, "all": [{"title": "Prestar un libro", "url": "#"}], "go": "Ir a la pantalla", "helplabel": "Ayuda guiada",
+        "ai": null
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -35,6 +36,23 @@
     <label class="ayv-field ayv-field-wide">{{label}} <input type="search" name="q" value="{{query}}" placeholder="{{placeholder}}" maxlength="200"></label>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{search}}</button></p>
 </form>
+{{#ai}}
+<section class="ayv-review-card ayv-howto-ai" aria-label="{{ask}}">
+    {{#answer}}<p class="ayv-field-hint">{{answerlabel}}</p><div class="ayv-howto-answer">{{{answer}}}</div>{{/answer}}
+    {{#failed}}<p class="ayv-empty">{{failed}}</p>{{/failed}}
+    {{#accepted}}{{^answer}}<form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="ask" value="1">
+        <p class="ayv-field-hint">{{hint}}</p>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{ask}}</button></p>
+    </form>{{/answer}}{{/accepted}}
+    {{^accepted}}<form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="policy" value="1"><input type="hidden" name="ask" value="1">
+        <p>{{policyhint}}</p>
+        <details><summary>{{ask}}</summary><div class="ayv-howto-policy">{{{policy}}}</div></details>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{accept}}</button></p>
+    </form>{{/accepted}}
+</section>
+{{/ai}}
 {{#searched}}{{^hasfound}}<p class="ayv-empty">{{none}}</p>{{/hasfound}}{{/searched}}
 {{#hasfound}}
 <ul class="ayv-howto-list">

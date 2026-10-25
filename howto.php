@@ -41,6 +41,20 @@ if (!$library) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+// In words, when the site has its own AI: first its policy, accepted once; then the answer, from the guide only.
+$ai = $query !== '' && howto::ai_ready();
+$answer = null;
+$failed = false;
+if ($ai && data_submitted() && confirm_sesskey()) {
+    if (optional_param('policy', 0, PARAM_BOOL)) {
+        \core_ai\manager::user_policy_accepted((int) $USER->id, $context->id);
+    }
+    if (optional_param('ask', 0, PARAM_BOOL) && \core_ai\manager::get_user_policy_status((int) $USER->id)) {
+        $answer = howto::ask($query, $library, (int) $USER->id);
+        $failed = $answer === null;
+    }
+}
+$accepted = $ai && \core_ai\manager::get_user_policy_status((int) $USER->id);
 $found = howto::find($query, $library, (int) $USER->id);
 $all = $query !== '' ? howto::find('', $library, (int) $USER->id) : [];
 $card = fn(array $task) => ['title' => $task['title'], 'steps' => array_map(fn($s) => ['step' => $s], $task['steps']),
@@ -67,4 +81,17 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
     'hasall' => (bool) $all,
     'go' => $str('howtogo'),
     'helplabel' => $str('howtohelp'),
+    'ai' => $ai ? [
+        'action' => $PAGE->url->out(false),
+        'sesskey' => sesskey(),
+        'accepted' => $accepted,
+        'policy' => $accepted ? '' : get_string('userpolicy', 'ai'),
+        'policyhint' => $str('howtoaipolicy'),
+        'accept' => $str('howtoaiaccept'),
+        'ask' => $str('howtoai'),
+        'hint' => $str('howtoaihint'),
+        'answer' => $answer !== null ? nl2br(s($answer)) : '',
+        'answerlabel' => $str('howtoaianswer'),
+        'failed' => $failed ? $str('howtoaifailed') : '',
+    ] : null,
 ]), $library, '', ['search' => false]);
