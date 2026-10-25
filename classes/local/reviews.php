@@ -37,6 +37,16 @@ final class reviews {
     /** @var int Bytes a drawing may have. */
     public const DRAWINGMAX = 1024 * 1024;
 
+    /** @var string The file area of the voices. */
+    public const VOICEAREA = 'reviewvoice';
+
+    /** @var int Bytes a voice may have: half a minute is a tenth of that. */
+    public const VOICEMAX = 2 * 1024 * 1024;
+
+    /** @var string[] What a browser records in, by its media type. */
+    public const VOICETYPES = ['audio/webm' => 'webm', 'video/webm' => 'webm', 'audio/ogg' => 'ogg', 'audio/mp4' => 'm4a',
+        'video/mp4' => 'm4a', 'audio/x-m4a' => 'm4a'];
+
     /** @var string[] How a review is signed: first name and group, first name and initial, or no name. */
     public const SIGNS = ['name', 'initial', 'none'];
 
@@ -76,7 +86,7 @@ final class reviews {
      * @param string $text
      * @param int|null $now
      * @param bool $forlittle An older reader recommends it to the young.
-     * @param bool $drawn It comes with a drawing, so it may have no words.
+     * @param bool $drawn It comes with a drawing or a voice, so it may have no words.
      * @return int Its id, or 0 when there was nothing to say.
      */
     public static function write(
@@ -121,6 +131,7 @@ final class reviews {
             $ids = $DB->get_fieldset_select(self::T . 'review', 'id', "readerid = :readerid AND recordid $in", $params);
             foreach ($ids as $gone) {
                 images::remove(self::AREA, (int) $gone, 'drawing');
+                self::hush((int) $gone);
             }
             $DB->delete_records_select(
                 self::T . 'review',
@@ -142,8 +153,117 @@ final class reviews {
         $row = self::mine($recordid, $readerid);
         if ($row) {
             images::remove(self::AREA, (int) $row->id, 'drawing');
+            self::hush((int) $row->id);
             $DB->delete_records(self::T . 'review', ['id' => $row->id]);
         }
+    }
+
+    /**
+     * Keeps the voice of a review (what the browser recorded), in place of the one it had.
+     *
+     * @param int $id
+     * @param string $path Where the recording is now.
+     * @return bool Whether it was a recording of a sensible size and was kept.
+     */
+    public static function speak(int $id, string $path): bool {
+        if (!is_readable($path) || filesize($path) === 0 || filesize($path) > self::VOICEMAX) {
+            return false;
+        }
+        $type = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
+        $ending = self::VOICETYPES[$type] ?? null;
+        if (!$ending) {
+            return false;
+        }
+        self::hush($id);
+        get_file_storage()->create_file_from_pathname(['contextid' => \context_system::instance()->id,
+            'component' => 'local_oksigeniaayvurenda', 'filearea' => self::VOICEAREA, 'itemid' => $id, 'filepath' => '/',
+            'filename' => 'voice.' . $ending], $path);
+        return true;
+    }
+
+    /**
+     * Takes the voice of a review away.
+     *
+     * @param int $id
+     */
+    public static function hush(int $id): void {
+        get_file_storage()->delete_area_files(\context_system::instance()->id, 'local_oksigeniaayvurenda', self::VOICEAREA, $id);
+    }
+
+    /**
+     * The address of a review's voice, if it has one.
+     *
+     * @param int $id
+     * @return string|null
+     */
+    public static function voice(int $id): ?string {
+        $files = get_file_storage()->get_area_files(
+            \context_system::instance()->id,
+            'local_oksigeniaayvurenda',
+            self::VOICEAREA,
+            $id,
+            'id',
+            false
+        );
+        $file = reset($files);
+        return $file ? \moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            'local_oksigeniaayvurenda',
+            self::VOICEAREA,
+            $id,
+            '/',
+            $file->get_filename()
+        )->out(false) : null;
+    }
+
+    /**
+     * Whether someone hears the voice of a review: its author, their tutors and the library staff always; anyone else
+     * once it is published, and for a minor only with the family's permission noted by the centre.
+     *
+     * @param \stdClass $review
+     * @param int $userid
+     * @return bool
+     */
+    public static function can_hear(\stdClass $review, int $userid): bool {
+        global $DB;
+        $author = (int) $DB->get_field(self::T . 'reader', 'userid', ['id' => $review->readerid]);
+        if (
+            ($userid && $author === $userid) || voices::tutors($review, $userid)
+                || has_capability('local/oksigeniaayvurenda:desk', \context_system::instance(), $userid)
+        ) {
+            return true;
+        }
+        return $review->status === 'published' && voices::may_share($review);
+    }
+
+    /**
+     * Takes away the voices of reviews older than the days the centre keeps voices.
+     *
+     * @param int|null $now
+     * @return int How many.
+     */
+    public static function expire_voices(?int $now = null): int {
+        global $DB;
+        $now = $now ?? time();
+        $gone = 0;
+        $files = $DB->get_records_sql('SELECT DISTINCT f.itemid
+               FROM {files} f
+              WHERE f.component = :component AND f.filearea = :area AND f.filename <> :dot', ['component' =>
+            'local_oksigeniaayvurenda', 'area' => self::VOICEAREA, 'dot' => '.']);
+        foreach ($files as $file) {
+            $review = $DB->get_record(self::T . 'review', ['id' => $file->itemid]);
+            if (!$review) {
+                self::hush((int) $file->itemid);
+                $gone++;
+                continue;
+            }
+            $days = voices::keepdays((int) $review->entityid);
+            if ($days && (int) $review->timemodified < $now - $days * DAYSECS) {
+                self::hush((int) $review->id);
+                $gone++;
+            }
+        }
+        return $gone;
     }
 
     /**
@@ -189,6 +309,7 @@ final class reviews {
         foreach ($rows as $row) {
             $row->who = self::who((int) $row->readerid, $entityid, 'name');
             $row->drawing = self::drawing((int) $row->id);
+            $row->voice = self::voice((int) $row->id);
         }
         return array_values($rows);
     }
@@ -225,19 +346,25 @@ final class reviews {
      *
      * @param int $recordid
      * @param int $entityid
-     * @return array[] text and who.
+     * @param int $viewerid Who looks: the voice only for whom may hear it.
+     * @return array[] text, who, drawing and voice; a review with nothing they may see or hear is left out.
      */
-    public static function published(int $recordid, int $entityid): array {
+    public static function published(int $recordid, int $entityid, int $viewerid = 0): array {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $sign = in_array($settings['reviewsign'] ?? '', self::SIGNS, true) ? $settings['reviewsign'] : 'name';
         $rows = $DB->get_records(self::T . 'review', ['recordid' => $recordid, 'entityid' => $entityid,
             'status' => 'published'], 'timedecided DESC, id DESC', '*', 0, 20);
-        return array_values(array_map(
-            fn($r) => ['text' => $r->text, 'who' => self::who((int) $r->readerid, $entityid, $sign),
-                'drawing' => self::drawing((int) $r->id)],
-            $rows
-        ));
+        $list = [];
+        foreach ($rows as $r) {
+            $voice = self::voice((int) $r->id);
+            $item = ['text' => $r->text, 'who' => self::who((int) $r->readerid, $entityid, $sign),
+                'drawing' => self::drawing((int) $r->id), 'voice' => $voice && self::can_hear($r, $viewerid) ? $voice : null];
+            if ($item['text'] !== '' || $item['drawing'] || $item['voice']) {
+                $list[] = $item;
+            }
+        }
+        return $list;
     }
 
     /**

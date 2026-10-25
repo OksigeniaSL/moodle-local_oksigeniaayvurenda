@@ -24,7 +24,8 @@
         "heading": "Reseñas por revisar", "intro": "Un toque y sale en la ficha.", "notice": "", "empty": "No hay.",
         "action": "#", "sesskey": "abc", "publish": "Publicar", "decline": "No publicar", "hasitems": true,
         "items": [{"id": 1, "title": "El faro dormido", "url": "#", "text": "Me gustó el final.", "who": "Leo, 3.º A",
-            "when": "25/10/26", "forlittle": "", "drawing": null, "drawingalt": "Dibujo de Leo"}]
+            "when": "25/10/26", "forlittle": "", "drawing": null, "drawingalt": "Dibujo de Leo", "voice": null,
+            "voicelabel": "La voz de Leo"}]
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -36,6 +37,7 @@
     <li class="ayv-review-card">
         <a class="ayv-review-book" href="{{url}}">{{title}}</a>
         {{#drawing}}<img class="ayv-review-drawing" src="{{drawing}}" alt="{{drawingalt}}">{{/drawing}}
+        {{#voice}}<audio class="ayv-review-voice" controls preload="none" src="{{voice}}" aria-label="{{voicelabel}}"></audio>{{/voice}}
         {{#text}}<p class="ayv-review-text">«{{text}}»</p>{{/text}}
         <p class="ayv-review-who">{{who}} · {{when}}</p>
         {{#forlittle}}<p class="ayv-field-hint">{{forlittle}}</p>{{/forlittle}}

@@ -478,8 +478,9 @@ final class screens {
         // The older readers (not the flower) may recommend it to the young.
         $older = $canwrite && cards::look_of($reader) !== 'flower';
         $list = array_map(
-            fn($r) => $r + ['drawingalt' => self::str('reviewdrawingof', $r['who'])],
-            reviews::published($recordid, (int) $library->entityid)
+            fn($r) => $r + ['drawingalt' => self::str('reviewdrawingof', $r['who']),
+                'voicelabel' => self::str('reviewvoiceof', $r['who'])],
+            reviews::published($recordid, (int) $library->entityid, (int) ($USER->id ?? 0))
         );
         return [
             'show' => $list || $canwrite,
@@ -515,6 +516,15 @@ final class screens {
                 'draweraser' => self::str('draweraser'),
                 'drawundo' => self::str('drawundo'),
                 'drawclear' => self::str('drawclear'),
+                // The recorder: for whoever would rather say it.
+                'speakopen' => self::str('reviewspeakopen'),
+                'speakrecord' => self::str('reviewspeakrecord'),
+                'speakstop' => self::str('reviewspeakstop'),
+                'speakagain' => self::str('reviewspeakagain'),
+                'speakhint' => self::str('reviewspeakhint'),
+                'speaknomic' => self::str('reviewspeaknomic'),
+                'myvoice' => $mine ? reviews::voice((int) $mine->id) : null,
+                'myvoicelabel' => self::str('reviewvoicemine'),
             ] : null,
         ];
     }

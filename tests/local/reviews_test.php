@@ -124,4 +124,46 @@ final class reviews_test extends \advanced_testcase {
         reviews::remove($recordid, (int) $reader->id);
         $this->assertNull(reviews::drawing($id));
     }
+
+    /**
+     * A voice is heard by its author, their tutor and the staff; anyone else once published, and for a minor only with
+     * the family's permission. A review that is only a voice nobody else may hear is not shown to them.
+     */
+    public function test_voice(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $entityid = (int) $library->entityid;
+        $item = $generator->create_item(['libraryid' => $library->id]);
+        $recordid = (int) $item->recordid;
+        $child = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $reader = $generator->create_reader(['entityid' => $entityid, 'userid' => $child->id]);
+        $generator->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id]);
+        // The first bytes of a WebM recording, as a browser makes it.
+        $path = make_request_directory() . '/voz.webm';
+        file_put_contents($path, "\x1a\x45\xdf\xa3\x9f\x42\x86\x81\x01\x42\xf7\x81\x01\x42\xf2\x81\x04\x42\xf3\x81\x08" .
+            "\x42\x82\x84webm\x42\x87\x81\x04\x42\x85\x81\x02" . str_repeat("\0", 200));
+
+        $id = reviews::write($entityid, $recordid, (int) $reader->id, '', null, false, true);
+        $this->assertFalse(reviews::speak($id, __FILE__));
+        $this->assertTrue(reviews::speak($id, $path));
+        $this->assertNotNull(reviews::voice($id));
+        $review = reviews::mine($recordid, (int) $reader->id);
+        $this->assertTrue(reviews::can_hear($review, (int) $child->id));
+        $this->assertTrue(reviews::can_hear($review, (int) get_admin()->id));
+        $this->assertFalse(reviews::can_hear($review, (int) $other->id));
+
+        reviews::decide($id, $entityid, true, (int) get_admin()->id);
+        $review = reviews::mine($recordid, (int) $reader->id);
+        $this->assertFalse(reviews::can_hear($review, (int) $other->id));
+        $this->assertSame([], reviews::published($recordid, $entityid, (int) $other->id));
+        $this->assertNotNull(reviews::published($recordid, $entityid, (int) $child->id)[0]['voice']);
+        voices::permission((int) $reader->id, true, (int) get_admin()->id);
+        $this->assertTrue(reviews::can_hear($review, (int) $other->id));
+        $this->assertNotNull(reviews::published($recordid, $entityid, (int) $other->id)[0]['voice']);
+
+        reviews::remove($recordid, (int) $reader->id);
+        $this->assertNull(reviews::voice($id));
+    }
 }

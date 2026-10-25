@@ -37,7 +37,7 @@
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER;
-    $areas = ['copies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'reviewdrawing'];
+    $areas = ['copies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'reviewdrawing', 'reviewvoice'];
     if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, $areas, true)) {
         return false;
     }
@@ -94,6 +94,15 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
             !has_capability('local/oksigeniaayvurenda:desk', $context) &&
             (int) $DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $review->readerid]) !== (int) $USER->id
         ) {
+            return false;
+        }
+        $forcedownload = false;
+    } else if ($filearea === 'reviewvoice') {
+        // A reader's voice about a book: a voice is personal data, so only for whom it may be.
+        global $DB;
+        require_login(null, false);
+        $review = $DB->get_record('local_oksigeniaayvurenda_review', ['id' => $itemid]);
+        if (!$review || !\local_oksigeniaayvurenda\local\reviews::can_hear($review, (int) $USER->id)) {
             return false;
         }
         $forcedownload = false;

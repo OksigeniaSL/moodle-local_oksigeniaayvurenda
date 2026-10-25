@@ -53,6 +53,10 @@ if ($do !== '' && data_submitted() && confirm_sesskey()) {
             $drawing = optional_param('drawing', '', PARAM_RAW_TRIMMED);
             $png = str_starts_with($drawing, 'data:image/png;base64,')
                 ? (string) base64_decode(substr($drawing, strlen('data:image/png;base64,')), true) : '';
+            // A voice comes from the recorder as an uploaded file.
+            $upload = $_FILES['voice'] ?? null;
+            $spoken = $upload && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK && is_uploaded_file($upload['tmp_name'])
+                ? $upload['tmp_name'] : '';
             $reviewid = \local_oksigeniaayvurenda\local\reviews::write(
                 (int) $library->entityid,
                 $id,
@@ -60,14 +64,22 @@ if ($do !== '' && data_submitted() && confirm_sesskey()) {
                 optional_param('text', '', PARAM_TEXT),
                 null,
                 optional_param('forlittle', 0, PARAM_BOOL) && \local_oksigeniaayvurenda\local\cards::look_of($reader) !== 'flower',
-                $png !== ''
+                $png !== '' || $spoken !== ''
             );
-            if ($reviewid && $png !== '' && !\local_oksigeniaayvurenda\local\reviews::draw($reviewid, $png)) {
-                // Not a picture after all: without words either, there is nothing to tell.
-                $kept = \local_oksigeniaayvurenda\local\reviews::mine($id, (int) $reader->id);
-                if ($kept && $kept->text === '' && !\local_oksigeniaayvurenda\local\reviews::drawing($reviewid)) {
-                    \local_oksigeniaayvurenda\local\reviews::remove($id, (int) $reader->id);
-                }
+            if ($reviewid && $png !== '') {
+                \local_oksigeniaayvurenda\local\reviews::draw($reviewid, $png);
+            }
+            if ($reviewid && $spoken !== '') {
+                \local_oksigeniaayvurenda\local\reviews::speak($reviewid, $spoken);
+            }
+            // Neither a picture nor a recording after all, and no words: there is nothing to tell.
+            $kept = $reviewid ? \local_oksigeniaayvurenda\local\reviews::mine($id, (int) $reader->id) : null;
+            if (
+                $kept && $kept->text === '' && !\local_oksigeniaayvurenda\local\reviews::drawing($reviewid)
+                    && !\local_oksigeniaayvurenda\local\reviews::voice($reviewid)
+            ) {
+                \local_oksigeniaayvurenda\local\reviews::remove($id, (int) $reader->id);
+                $reviewid = 0;
             }
             $done = $reviewid ? 'sent' : '';
         } else if ($do === 'remove') {
@@ -82,5 +94,5 @@ $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed',
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
-    'scripts' => !empty($data['reviews']['write']) ? ['draw'] : [],
+    'scripts' => !empty($data['reviews']['write']) ? ['draw', 'speak'] : [],
 ]);

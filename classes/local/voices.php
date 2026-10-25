@@ -683,7 +683,7 @@ final class voices {
      * @param int $userid
      * @return bool
      */
-    private static function tutors(\stdClass $item, int $userid): bool {
+    public static function tutors(\stdClass $item, int $userid): bool {
         global $DB;
         if (!$userid || !$item->readerid) {
             return false;

@@ -312,12 +312,14 @@ class provider implements
             // The drawings of their reviews.
             $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $reader->id]);
             foreach ($drawn as $id) {
-                writer::with_context($context)->export_area_files(
-                    array_merge($base, [get_string('privacy:path:reader', 'local_oksigeniaayvurenda', $reader->cardcode)]),
-                    'local_oksigeniaayvurenda',
-                    'reviewdrawing',
-                    (int) $id
-                );
+                foreach (['reviewdrawing', 'reviewvoice'] as $area) {
+                    writer::with_context($context)->export_area_files(
+                        array_merge($base, [get_string('privacy:path:reader', 'local_oksigeniaayvurenda', $reader->cardcode)]),
+                        'local_oksigeniaayvurenda',
+                        $area,
+                        (int) $id
+                    );
+                }
             }
         }
         $handled = $DB->get_records_select(
@@ -468,6 +470,7 @@ class provider implements
         $DB->delete_records(self::T . 'voiceconsent');
         $DB->delete_records(self::T . 'voiceinvite');
         get_file_storage()->delete_area_files($context->id, 'local_oksigeniaayvurenda', 'reviewdrawing');
+        get_file_storage()->delete_area_files($context->id, 'local_oksigeniaayvurenda', 'reviewvoice');
         $DB->delete_records(self::T . 'review');
         $DB->set_field_select(self::T . 'wish', 'userid', null, 'userid IS NOT NULL');
         $DB->set_field_select(self::T . 'wish', 'decidedby', null, 'decidedby IS NOT NULL');
@@ -522,12 +525,14 @@ class provider implements
             $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $reader->id]);
             $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $reader->id]);
             foreach ($drawn as $id) {
-                get_file_storage()->delete_area_files(
-                    \context_system::instance()->id,
-                    'local_oksigeniaayvurenda',
-                    'reviewdrawing',
-                    (int) $id
-                );
+                foreach (['reviewdrawing', 'reviewvoice'] as $area) {
+                    get_file_storage()->delete_area_files(
+                        \context_system::instance()->id,
+                        'local_oksigeniaayvurenda',
+                        $area,
+                        (int) $id
+                    );
+                }
             }
             $DB->delete_records(self::T . 'review', ['readerid' => $reader->id]);
             // Their reservations go; a copy set aside for them goes back to the shelf or to the next.

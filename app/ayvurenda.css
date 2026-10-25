@@ -1879,3 +1879,14 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-draw-colour[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--accent); }
 .ayv .ayv-review-drawing { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 0 .5rem; border-radius: 12px;
     border: 1px solid var(--line); background: #fff; }
+
+/* The voice of a review: its player, and the recorder's button, coral while it records. */
+.ayv .ayv-review-voice { display: block; width: 100%; max-width: 420px; margin: 0 0 .5rem; }
+.ayv .ayv-review-voice[hidden] { display: none; }
+.ayv .ayv-speak { display: grid; gap: .3rem; margin: .2rem 0 .6rem; }
+.ayv .ayv-speak[hidden] { display: none; }
+.ayv .ayv-speak-time { font-variant-numeric: tabular-nums; }
+.ayv .ayv-speak-on { background: var(--coral); }
+@media (prefers-reduced-motion: no-preference) {
+    .ayv .ayv-speak-on svg { animation: ayv-listen 1s ease-in-out infinite; }
+}

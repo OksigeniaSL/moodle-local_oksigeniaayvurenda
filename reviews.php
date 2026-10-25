@@ -58,6 +58,8 @@ $items = array_map(fn($r) => [
     'who' => $r->who,
     'forlittle' => $r->forlittle ? $str('reviewforlittleflag') : '',
     'drawing' => $r->drawing,
+    'voice' => $r->voice,
+    'voicelabel' => $str('reviewvoiceof', $r->who),
     'drawingalt' => $str('reviewdrawingof', $r->who),
     'when' => userdate((int) $r->timemodified, get_string('strftimedateshort', 'langconfig')),
 ], reviews::pending((int) $library->entityid));

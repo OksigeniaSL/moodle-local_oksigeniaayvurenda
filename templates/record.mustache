@@ -130,15 +130,26 @@
             <h2 id="ayv-reviews-title" class="ayv-section-title">{{heading}}</h2>
             {{#done}}<p class="ayv-notice" role="status">{{done}}</p>{{/done}}
             {{#haslist}}<ul class="ayv-review-list">{{#list}}<li class="ayv-review">{{#drawing}}<img class="ayv-review-drawing" src="{{drawing}}" alt="{{drawingalt}}" loading="lazy">{{/drawing}}
+                {{#voice}}<audio class="ayv-review-voice" controls preload="none" src="{{voice}}" aria-label="{{voicelabel}}"></audio>{{/voice}}
                 {{#text}}<p class="ayv-review-text">«{{text}}»</p>{{/text}}
                 <p class="ayv-review-who">{{who}}</p></li>{{/list}}</ul>{{/haslist}}
             {{^haslist}}<p class="ayv-empty">{{none}}</p>{{/haslist}}
-            {{#write}}<form class="ayv-review-form" method="post" action="{{action}}#ayv-reviews">
+            {{#write}}<form class="ayv-review-form" method="post" action="{{action}}#ayv-reviews" enctype="multipart/form-data">
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <label class="ayv-field ayv-field-wide"><span class="ayv-review-ask">{{label}}</span> <span class="ayv-field-hint">{{hint}}</span>
                     <textarea name="text" maxlength="{{max}}" rows="3" required>{{text}}</textarea></label>
                 {{#mydrawing}}<img class="ayv-review-drawing" src="{{mydrawing}}" alt="{{mydrawingalt}}">{{/mydrawing}}
                 <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-draw-open>{{drawopen}}</button></p>
+                {{#myvoice}}<audio class="ayv-review-voice" controls preload="none" src="{{myvoice}}" aria-label="{{myvoicelabel}}"></audio>{{/myvoice}}
+                <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-speak-open>{{> local_oksigeniaayvurenda/icon_mic}} {{speakopen}}</button></p>
+                <div class="ayv-speak" data-ayv-speak hidden data-nomic="{{speaknomic}}" data-stop="{{speakstop}}" data-record="{{speakrecord}}">
+                    <p class="ayv-field-hint">{{speakhint}}</p>
+                    <p class="ayv-book-actions"><button type="button" class="ayv-button" data-speak-record>{{> local_oksigeniaayvurenda/icon_mic}} <span>{{speakrecord}}</span></button>
+                        <span class="ayv-speak-time" aria-live="polite"></span>
+                        <button type="button" class="ayv-button ayv-button-quiet" data-speak-again hidden>{{speakagain}}</button></p>
+                    <audio class="ayv-review-voice" controls hidden></audio>
+                    <input type="file" name="voice" accept="audio/*" hidden>
+                </div>
                 <div class="ayv-draw" data-ayv-draw hidden>
                     <canvas class="ayv-draw-canvas" width="800" height="500" role="img" aria-label="{{drawcanvas}}"></canvas>
                     <div class="ayv-draw-tools" role="toolbar" aria-label="{{drawtools}}">
