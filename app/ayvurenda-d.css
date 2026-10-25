@@ -361,6 +361,73 @@ html[data-bs-theme="dark"] .ayv .ayv-epub {
 .ayv .ayv-today-label { color: var(--ayv-muted); font-weight: 700; }
 .ayv .ayv-line { border: 0; border-radius: 16px; box-shadow: var(--ayv-shadow); }
 
+/* 12. The home. Without the art package, the emblem sits on a cream plate with two faint rings, like a ñandutí. With
+   it, the greeting goes over the scene as in the mock-up: the picture fills the right of the plate and fades into the
+   paper, and the plate stays cream in dark mode too, a lit picture on a dark wall. */
+.ayv .ayv-hero-picture .ayv-hero-emblem { width: min(16rem, 80%); aspect-ratio: 1; padding: 2.4rem; border-radius: 50%; object-fit: contain; opacity: 1;
+    background: var(--ayv-plate); filter: none;
+    box-shadow: 0 0 0 14px rgba(240, 180, 60, .1), 0 0 0 30px rgba(44, 122, 106, .06), 0 26px 40px -22px rgba(15, 58, 51, .5); }
+.ayv .ayv-hero-art {
+    --ink: #1e2b2a; --accent: #17574c; --surface: #fff; --paper: #fbf6ec; --paper2: #f2eadb; --line: rgba(15, 58, 51, .14);
+    --chip-hover: #e9dfcc; --muted: #5f6b67; --ayv-muted: #5f6b67;
+    position: relative;
+    overflow: hidden;
+    grid-template-columns: minmax(0, 44%) minmax(0, 1fr);
+    min-height: clamp(20rem, 34vw, 27rem);
+    padding: 0;
+    background: #fbf6ec;
+    color: #1e2b2a;
+    color-scheme: light;
+}
+.ayv .ayv-hero-art .ayv-hero-text { position: relative; z-index: 2; padding: clamp(1.25rem, 3.5vw, 2.75rem); }
+.ayv .ayv-hero-art .ayv-hero-hello { color: #0f3a33; }
+.ayv .ayv-hero-art .ayv-hero-picture { position: absolute; top: 0; right: 0; bottom: 0; left: 30%; display: block; min-height: 0; }
+.ayv .ayv-hero-art .ayv-hero-picture img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: right center; border-radius: 0; }
+.ayv .ayv-hero-art .ayv-hero-picture::before { content: ""; position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; width: 30%;
+    background: linear-gradient(90deg, #fbf6ec 25%, rgba(251, 246, 236, 0)); }
+/* The reader's card in the pair: its drawing on a round plate, as on the card itself. */
+.ayv .ayv-duo-drawing { border-radius: 50%; background: var(--ayv-plate); }
+/* The corners: deeper tiles with the motif of their colour peeping from the top corner; with the art package, the
+   drawing on its cream plate. In dark mode the cream corner turns to sand, so it does not light up the page. */
+.ayv .ayv-corners { gap: 1rem; }
+.ayv .ayv-corner { min-height: 7.5rem; border-radius: 18px; box-shadow: var(--ayv-shadow); }
+.ayv .ayv-corner:hover { box-shadow: var(--ayv-shadow-lift); }
+.ayv .ayv-corner:not(.ayv-corner-art)::before { content: ""; position: absolute; top: -1.4rem; right: -1.4rem; width: 7rem; height: 7rem;
+    border-radius: 50%; background: currentColor; opacity: .18;
+    -webkit-mask: var(--ayv-motif) center / cover no-repeat; mask: var(--ayv-motif) center / cover no-repeat; }
+.ayv .ayv-corner-art { padding: .55rem .55rem .9rem; }
+.ayv .ayv-corner-art .ayv-corner-img { margin-bottom: .7rem; border-radius: 12px; box-shadow: 0 8px 16px -10px rgba(0, 0, 0, .5); }
+.ayv .ayv-corner-art .ayv-corner-label, .ayv .ayv-corner-art .ayv-corner-count { padding: 0 .4rem; }
+html[data-bs-theme="dark"] .ayv .ayv-corner.ayv-cover-5 { background: #3a3326; color: #f3e6cc; box-shadow: var(--ayv-shadow), inset 0 0 0 1.5px rgba(243, 230, 204, .22); }
+/* The shelves: each book stands on its own piece of board, the pieces meet into one shelf, and the row fades at the
+   right edge to say it goes on. */
+.ayv .ayv-wood { padding-bottom: 0; }
+.ayv .ayv-wood::after { display: none; }
+.ayv .ayv-wood .ayv-cards { column-gap: 0; padding: .25rem 3.5rem 1rem 0;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 3.5rem), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 3.5rem), transparent); }
+.ayv .ayv-wood .ayv-card { padding: 0 .7rem; }
+.ayv .ayv-wood .ayv-card-link { display: grid; grid-template-rows: auto 12px; gap: 0; align-content: start; }
+.ayv .ayv-wood .ayv-card-link > .ayv-cover { grid-row: 1; }
+.ayv .ayv-wood .ayv-card-link::after { content: ""; grid-row: 2; margin: 0 -.7rem; background: linear-gradient(var(--ayv-wood), var(--ayv-wood2));
+    box-shadow: 0 8px 10px -8px rgba(0, 0, 0, .45); }
+.ayv .ayv-wood .ayv-card-title { margin-top: .65rem; }
+.ayv .ayv-wood .ayv-card-link > :not(.ayv-cover):not(.ayv-card-title) { margin-top: .25rem; justify-self: start; }
+@media (max-width: 760px) {
+    .ayv .ayv-hero-art { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+    .ayv .ayv-hero-art .ayv-hero-picture { position: static; order: -1; height: 190px; }
+    .ayv .ayv-hero-art .ayv-hero-picture img { object-position: 75% center; }
+    .ayv .ayv-hero-art .ayv-hero-picture::before { display: none; }
+    .ayv .ayv-hero-art .ayv-hero-text { padding-top: 1.1rem; }
+}
+/* On a phone the search button keeps its name for screen readers and shows a magnifier, so the question fits. */
+@media (max-width: 420px) {
+    .ayv .ayv-hero-search .ayv-button { display: grid; place-items: center; flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px; min-height: 44px;
+        padding: 0; border-radius: 50%; font-size: 0; }
+    .ayv .ayv-hero-search .ayv-button::before { content: ""; width: 20px; height: 20px; background: currentColor;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E") center / contain no-repeat; }
+}
+
 @media (max-width: 40rem) {
     .ayv .ayv-record { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-record-cover { position: static; padding: 1.25rem; }
