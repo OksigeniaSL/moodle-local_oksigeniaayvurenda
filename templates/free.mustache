@@ -25,7 +25,7 @@
         "results": [{"id": 10814, "title": "Legends, Tales and Poems", "byline": "Gustavo Adolfo Bécquer", "url": "#"}],
         "book": null,
         "freeworkssearch": "Título o autor", "freeworkssearchbutton": "Buscar", "freeworkssee": "Verlo",
-        "freeworksconfirm": "Es de dominio público aquí", "freeworksconfirmhint": "Cuenta cuándo murió el autor",
+        "freeworksconfirm": "Es de dominio público aquí", "confirmhint": "Project Gutenberg mira las leyes de Estados Unidos.", "sources": [{"label": "Project Gutenberg", "url": "https://example.org/g", "current": true}], "from": "", "freeworksread": "Leerla en Wikisource",
         "freeworksfor": "Para quién", "freeworksbring": "Traerlo", "freeworksalready": "Ya está", "freeworksopen": "Ver su ficha",
         "freeworksback": "Volver a la búsqueda", "freeworkslangs": "Idiomas"
     }
@@ -33,24 +33,28 @@
 <section class="ayv-free">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
+<p class="ayv-staff-row">{{#sources}}<a class="ayv-button{{^current}} ayv-button-quiet{{/current}}" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/sources}}</p>
 <form class="ayv-window-search" role="search" method="get" action="{{action}}">
     <input type="hidden" name="library" value="{{slug}}">
+    {{#from}}<input type="hidden" name="from" value="{{from}}">{{/from}}
     <label class="ayv-field ayv-field-wide">{{freeworkssearch}} <input type="search" name="q" value="{{query}}" maxlength="200"></label>
     <button type="submit" class="ayv-button">{{freeworkssearchbutton}}</button>
 </form>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#book}}
 <form class="ayv-book" method="post" action="{{action}}">
-    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="book" value="{{id}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">{{#id}}<input type="hidden" name="book" value="{{id}}">{{/id}}
+    {{#work}}<input type="hidden" name="work" value="{{work}}">{{/work}}
     <h2 class="ayv-section-title">{{title}}</h2>
     {{#authors}}<p>{{authors}}</p>{{/authors}}
     {{#langs}}<p class="ayv-field-hint">{{freeworkslangs}}: {{langs}}</p>{{/langs}}
     <p>{{rights}}</p>
+    {{#readurl}}<p><a href="{{readurl}}" target="_blank" rel="noopener">{{freeworksread}}</a></p>{{/readurl}}
     {{#brought}}<p class="ayv-notice">{{freeworksalready}} <a href="{{brought}}">{{freeworksopen}}</a></p>{{/brought}}
     <fieldset class="ayv-fieldset"><legend>{{freeworksfor}}</legend><div class="ayv-choices">
         {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/audiences}}</div></fieldset>
     <label class="ayv-field ayv-field-check"><input type="checkbox" name="confirm" value="1" required> {{freeworksconfirm}}</label>
-    <p class="ayv-field-hint">{{freeworksconfirmhint}}</p>
+    <p class="ayv-field-hint">{{confirmhint}}</p>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{freeworksbring}}</button>
         <a href="{{backurl}}">{{freeworksback}}</a></p>
 </form>

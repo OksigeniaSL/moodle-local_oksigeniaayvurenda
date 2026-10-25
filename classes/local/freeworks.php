@@ -25,6 +25,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\sources\gutenberg;
+use local_oksigeniaayvurenda\core\sources\wikisource;
 
 /**
  * One question to the catalogue per search and one book at a time, when someone of the library asks: never in bulk.
@@ -59,6 +60,117 @@ final class freeworks {
         $xml = lookup::fetch(gutenberg::book_url($id));
         $book = $xml === null ? null : gutenberg::parse_book($xml);
         return $book && $book['epub'] !== '' ? $book : null;
+    }
+
+    /**
+     * The language of the site's Wikisource.
+     *
+     * @return string
+     */
+    public static function wikisource_lang(): string {
+        return substr(current_language(), 0, 2);
+    }
+
+    /**
+     * Searches Wikisource: the works whose pages say those words.
+     *
+     * @param string $query
+     * @param string $lang
+     * @return array[]|null title and url; null if it did not answer.
+     */
+    public static function wikisource_search(string $query, string $lang): ?array {
+        if (trim($query) === '') {
+            return [];
+        }
+        $json = lookup::fetch(wikisource::search_url($lang, $query));
+        if ($json === null) {
+            return null;
+        }
+        $titles = wikisource::parse_search($json);
+        if (!$titles) {
+            return [];
+        }
+        $json = lookup::fetch(wikisource::works_url($lang, $titles));
+        return $json === null ? null : wikisource::parse_works($json, $titles);
+    }
+
+    /**
+     * One work of Wikisource, with its authors from Wikidata (or those of the work it is an edition of).
+     *
+     * @param string $title
+     * @param string $lang
+     * @return array|null title, url, item, authors.
+     */
+    public static function wikisource_work(string $title, string $lang): ?array {
+        $json = lookup::fetch(wikisource::works_url($lang, [$title]));
+        $work = $json === null ? null : (wikisource::parse_works($json, [$title])[0] ?? null);
+        if (!$work) {
+            return null;
+        }
+        $work['authors'] = [];
+        if ($work['item'] !== '') {
+            $json = lookup::fetch(wikisource::wikidata_url([$work['item']], $lang));
+            $found = $json === null ? ['authors' => [], 'edition' => ''] : wikisource::parse_work_item($json, $work['item']);
+            if (!$found['authors'] && $found['edition'] !== '') {
+                $json = lookup::fetch(wikisource::wikidata_url([$found['edition']], $lang));
+                $found = $json === null ? $found : wikisource::parse_work_item($json, $found['edition']);
+            }
+            if ($found['authors']) {
+                $json = lookup::fetch(wikisource::wikidata_url($found['authors'], $lang));
+                $names = $json === null ? [] : wikisource::parse_labels($json, $lang);
+                $work['authors'] = array_values(array_filter(array_map(fn($a) => $names[$a] ?? '', $found['authors'])));
+            }
+        }
+        return $work;
+    }
+
+    /**
+     * The record already brought from that work of Wikisource, if any.
+     *
+     * @param int $entityid
+     * @param string $url
+     * @return int
+     */
+    public static function wikisource_brought(int $entityid, string $url): int {
+        global $DB;
+        return (int) $DB->get_field_select(
+            self::T . 'record',
+            'id',
+            'entityid = :entityid AND ' .
+            $DB->sql_like('extra', ':mark'),
+            ['entityid' => $entityid, 'mark' => '%"wikisourceid":"' . sha1($url) . '"%'],
+            IGNORE_MULTIPLE
+        );
+    }
+
+    /**
+     * Brings a work of Wikisource: its record, and a link to read it there, for whom the library says.
+     *
+     * @param \stdClass $library
+     * @param string $title
+     * @param string $lang
+     * @param array $audience
+     * @param int $userid
+     * @return int The record.
+     */
+    public static function bring_wikisource(\stdClass $library, string $title, string $lang, array $audience, int $userid): int {
+        $work = self::wikisource_work($title, $lang);
+        if (!$work) {
+            throw new \moodle_exception('freeworksnoanswerws', 'local_oksigeniaayvurenda');
+        }
+        $recordid = self::wikisource_brought((int) $library->entityid, $work['url']);
+        if ($recordid) {
+            return $recordid;
+        }
+        $recordid = cataloguer::create_record((int) $library->entityid, [
+            'record' => ['doctype' => 'electronic', 'title' => $work['title'], 'lang' => wikisource::lang3($lang),
+                'notes' => 'Wikisource'],
+            'authorities' => ['author' => $work['authors']],
+            'extra' => ['wikisource' => $work['url'], 'wikisourceid' => sha1($work['url'])],
+        ], time());
+        digital::add_link($library, $recordid, $work['url'], ['title' => '', 'licence' => 'cc-by-sa',
+            'audience' => $audience, 'download' => 0], $userid);
+        return $recordid;
     }
 
     /**

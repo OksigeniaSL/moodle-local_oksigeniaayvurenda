@@ -33,6 +33,10 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $query = trim(optional_param('q', '', PARAM_TEXT));
 $bookid = optional_param('book', 0, PARAM_INT);
+// Where from: Project Gutenberg (EPUB) or Wikisource (read there, by a link).
+$from = optional_param('from', 'gutenberg', PARAM_ALPHA) === 'wikisource' ? 'wikisource' : 'gutenberg';
+$worktitle = trim(optional_param('work', '', PARAM_TEXT));
+$wslang = freeworks::wikisource_lang();
 require_login(null, false);
 $context = context_system::instance();
 shell::require('local/oksigeniaayvurenda:catalogue');
@@ -44,10 +48,20 @@ if (!$library) {
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $here = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/free.php', ['library' => $library->slug] +
-    $params))->out(false);
+    ($from === 'wikisource' ? ['from' => 'wikisource'] : []) + $params))->out(false);
 $recordurl = fn(int $id) => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
     'id' => $id]))->out(false);
 
+if (data_submitted() && confirm_sesskey() && $worktitle !== '' && optional_param('confirm', 0, PARAM_BOOL)) {
+    $recordid = freeworks::bring_wikisource(
+        $library,
+        $worktitle,
+        $wslang,
+        optional_param_array('audience', [], PARAM_ALPHA),
+        (int) $USER->id
+    );
+    redirect($recordurl($recordid));
+}
 if (data_submitted() && confirm_sesskey() && $bookid && optional_param('confirm', 0, PARAM_BOOL)) {
     $recordid = freeworks::bring($library, $bookid, optional_param_array('audience', [], PARAM_ALPHA), (int) $USER->id);
     redirect($recordurl($recordid));
@@ -73,6 +87,34 @@ if ($bookid) {
                 'checked' => in_array($a, ['students', 'families'], true)], digital_rules::AUDIENCES),
         ];
     }
+} else if ($from === 'wikisource' && $worktitle !== '') {
+    $found = freeworks::wikisource_work($worktitle, $wslang);
+    if (!$found) {
+        $notice = $str('freeworksnoanswerws');
+    } else {
+        $brought = freeworks::wikisource_brought((int) $library->entityid, $found['url']);
+        $book = [
+            'work' => $found['title'],
+            'title' => $found['title'],
+            'authors' => implode(' · ', $found['authors']),
+            'langs' => '',
+            'rights' => $str('freeworksrightsws'),
+            'readurl' => $found['url'],
+            'brought' => $brought ? $recordurl($brought) : '',
+            'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a),
+                'checked' => in_array($a, ['students', 'families'], true)], digital_rules::AUDIENCES),
+        ];
+    }
+} else if ($from === 'wikisource' && $query !== '') {
+    $found = freeworks::wikisource_search($query, $wslang);
+    if ($found === null) {
+        $notice = $str('freeworksnoanswerws');
+    } else {
+        foreach ($found as $item) {
+            $results[] = ['title' => $item['title'], 'byline' => '', 'url' => $here(['work' => $item['title'], 'q' => $query])];
+        }
+        $notice = $found ? '' : $str('freeworksnone');
+    }
 } else if ($query !== '') {
     $found = freeworks::search($query);
     if ($found === null) {
@@ -84,9 +126,18 @@ if ($bookid) {
         $notice = $found ? '' : $str('freeworksnone');
     }
 }
+$source = fn(string $name) => (new moodle_url('/local/oksigeniaayvurenda/free.php', ['library' => $library->slug,
+    'from' => $name] + ($query !== '' ? ['q' => $query] : [])))->out(false);
 $data = [
     'heading' => $str('freeworks'),
-    'intro' => $str('freeworksintro'),
+    'intro' => $str($from === 'wikisource' ? 'freeworksintrows' : 'freeworksintro'),
+    'sources' => [
+        ['label' => 'Project Gutenberg', 'url' => $source('gutenberg'), 'current' => $from === 'gutenberg'],
+        ['label' => 'Wikisource', 'url' => $source('wikisource'), 'current' => $from === 'wikisource'],
+    ],
+    'from' => $from === 'wikisource' ? 'wikisource' : '',
+    'confirmhint' => $str($from === 'wikisource' ? 'freeworksconfirmhintws' : 'freeworksconfirmhint'),
+    'freeworksread' => $str('freeworksread'),
     'action' => $here(),
     'slug' => $library->slug,
     'query' => $query,
@@ -98,7 +149,7 @@ $data = [
     'backurl' => $here(['q' => $query]),
 ];
 foreach (
-    ['freeworkssearch', 'freeworkssearchbutton', 'freeworkssee', 'freeworksconfirm', 'freeworksconfirmhint',
+    ['freeworkssearch', 'freeworkssearchbutton', 'freeworkssee', 'freeworksconfirm',
         'freeworksfor', 'freeworksbring', 'freeworksalready', 'freeworksopen', 'freeworksback', 'freeworkslangs'] as $key
 ) {
     $data[$key] = $str($key);

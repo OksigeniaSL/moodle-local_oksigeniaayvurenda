@@ -86,6 +86,8 @@ final class screens {
             'hero' => $hero,
             'classblock' => $hero['classreads'] ? ['cards' => $hero['classreads']] : null,
             'classheading' => self::str('homeclass'),
+            'shelfprev' => self::str('shelfprev'),
+            'shelfnext' => self::str('shelfnext'),
             'classhint' => self::str('homeclasshint'),
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),

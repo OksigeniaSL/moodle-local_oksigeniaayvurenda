@@ -132,9 +132,10 @@ final class shell {
         foreach ($links as $link) {
             $nav .= '<a class="ayv-nav" href="' . s($link['url']) . '">' . s($link['label']) . '</a>';
         }
-        if ($nav !== '') {
-            $nav = '<nav class="ayv-navs">' . $nav . '</nav>';
-        }
+        $mine = isloggedin() && !isguestuser();
+        $nav .= '<a class="ayv-nav ayv-nav-exit" href="' . s($CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
+            . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname))) . '</a>';
+        $nav = '<nav class="ayv-navs">' . $nav . '</nav>';
         $name = $library ? format_string($library->name) : get_string('pluginname', 'local_oksigeniaayvurenda');
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');

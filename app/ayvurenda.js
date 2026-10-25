@@ -22,6 +22,32 @@
 (function() {
     'use strict';
     var config = window.AYV || {};
+    // The shelves slide without a scrollbar: two arrows, shown when there is more that way.
+    document.querySelectorAll('.ayv-wood').forEach(function(wood) {
+        var list = wood.querySelector('.ayv-cards');
+        var prev = wood.querySelector('.ayv-shelf-prev');
+        var next = wood.querySelector('.ayv-shelf-next');
+        if (!list || !prev || !next) {
+            return;
+        }
+        var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var update = function() {
+            prev.hidden = list.scrollLeft <= 4;
+            next.hidden = list.scrollLeft + list.clientWidth >= list.scrollWidth - 4;
+        };
+        var go = function(way) {
+            list.scrollBy({left: way * list.clientWidth * 0.8, behavior: still ? 'auto' : 'smooth'});
+        };
+        prev.addEventListener('click', function() {
+            go(-1);
+        });
+        next.addEventListener('click', function() {
+            go(1);
+        });
+        list.addEventListener('scroll', update, {passive: true});
+        window.addEventListener('resize', update);
+        update();
+    });
     var input = document.getElementById('ayv-q');
     // On the home the search is in the page: the results come under it, and the box stays where it is.
     var main = document.getElementById('ayv-live') || document.getElementById('ayv-main');

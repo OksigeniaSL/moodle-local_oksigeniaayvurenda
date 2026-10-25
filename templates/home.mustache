@@ -111,14 +111,14 @@
 {{#hasrecent}}
 <section class="ayv-section ayv-shelf-section" aria-labelledby="ayv-recent">
     <h2 id="ayv-recent" class="ayv-section-title">{{recentheading}}</h2>
-    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}</div>
+    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>
 </section>
 {{/hasrecent}}
 {{#classblock}}
 <section class="ayv-section ayv-shelf-section" aria-labelledby="ayv-class">
     <h2 id="ayv-class" class="ayv-section-title">{{classheading}}</h2>
     <p class="ayv-field-hint">{{classhint}}</p>
-    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}</div>
+    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>
 </section>
 {{/classblock}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}

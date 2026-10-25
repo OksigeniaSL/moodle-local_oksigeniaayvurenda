@@ -85,4 +85,44 @@ final class freeworks_test extends \advanced_testcase {
         $this->expectException(\moodle_exception::class);
         freeworks::bring($library, 99001, ['students'], 0);
     }
+
+    /**
+     * Bringing a work of Wikisource: the record with its author from Wikidata and a link to read it, once.
+     */
+    public function test_bring_wikisource(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $fixtures = __DIR__ . '/../fixtures/';
+        $asked = [];
+        lookup::$fetcher = function (string $url) use ($fixtures, &$asked) {
+            $asked[] = $url;
+            if (str_contains($url, 'list=search')) {
+                return file_get_contents($fixtures . 'wikisource-search.json');
+            }
+            if (str_contains($url, 'wikisource.org/w/api.php')) {
+                return file_get_contents($fixtures . 'wikisource-roots.json');
+            }
+            if (str_contains($url, 'ids=Q131318')) {
+                return file_get_contents($fixtures . 'wikisource-authors.json');
+            }
+            return file_get_contents($fixtures . 'wikisource-works.json');
+        };
+        $found = freeworks::wikisource_search('Platero', 'es');
+        $this->assertSame('Platero y yo', $found[0]['title']);
+        $recordid = freeworks::bring_wikisource($library, 'Platero y yo', 'es', ['students'], 2);
+        $record = $DB->get_record('local_oksigeniaayvurenda_record', ['id' => $recordid], '*', MUST_EXIST);
+        $this->assertSame('Platero y yo', $record->title);
+        $this->assertSame('spa', $record->lang);
+        $this->assertSame(1, $DB->count_records_sql(
+            "SELECT COUNT(1) FROM {local_oksigeniaayvurenda_recauth} ra
+            JOIN {local_oksigeniaayvurenda_authority} a ON a.id = ra.authorityid WHERE ra.recordid = ? AND a.label = ?",
+            [$recordid, 'Juan Ramón Jiménez']
+        ));
+        $link = $DB->get_record('local_oksigeniaayvurenda_digital', ['recordid' => $recordid], '*', MUST_EXIST);
+        $this->assertSame('https://es.wikisource.org/wiki/Platero_y_yo', $link->url);
+        $this->assertSame('cc-by-sa', $link->licence);
+        $this->assertSame($recordid, freeworks::bring_wikisource($library, 'Platero y yo', 'es', ['students'], 2));
+    }
 }

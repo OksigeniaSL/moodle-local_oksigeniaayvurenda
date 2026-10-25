@@ -1433,3 +1433,34 @@ html[data-bs-theme="dark"] .ayv .ayv-hero { box-shadow: 0 18px 40px -24px rgba(0
 }
 @keyframes ayv-mark-in { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+/* The page's own scrollbar, thin and in the library's colours (the browser's grey one stood out on the paper). */
+html { scrollbar-width: thin; scrollbar-color: rgba(23, 87, 76, .45) transparent; }
+html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transparent; }
+/* The shelves: no scrollbar of their own; two round arrows on the books' sides, and the finger slides them. */
+.ayv .ayv-wood .ayv-cards { scrollbar-width: none; }
+.ayv .ayv-wood .ayv-cards::-webkit-scrollbar { display: none; }
+.ayv .ayv-shelf-go {
+    position: absolute;
+    top: 6.5rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 8px 20px -8px rgba(15, 58, 51, .5), inset 0 0 0 1px var(--line);
+    cursor: pointer;
+}
+.ayv .ayv-shelf-go:hover { transform: scale(1.06); }
+.ayv .ayv-shelf-go:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-shelf-prev { left: -.75rem; }
+.ayv .ayv-shelf-next { right: -.75rem; }
+@media (hover: none) {
+    .ayv .ayv-shelf-go { display: none; }
+}
+/* The way back to Moodle, in the header. */
+.ayv .ayv-nav-exit { font-weight: 600; }
+
