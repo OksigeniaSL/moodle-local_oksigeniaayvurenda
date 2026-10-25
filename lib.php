@@ -37,7 +37,8 @@
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER;
-    if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, ['copies', 'cover', 'coverdraft', 'digital'], true)) {
+    $areas = ['copies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait'];
+    if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, $areas, true)) {
         return false;
     }
     $itemid = (int) array_shift($args);
@@ -68,6 +69,17 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
     } else if ($filearea === 'copies') {
         require_login(null, false);
         require_capability('local/oksigeniaayvurenda:desk', $context);
+    } else if ($filearea === 'libraryimage' || $filearea === 'portrait') {
+        // A library's own picture, or its characters' portraits: for whoever sees the library, and for anyone where its
+        // public window is open.
+        global $DB;
+        $library = $filearea === 'libraryimage' ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $itemid])
+            : null;
+        if (!$anyone || !$library || empty(\local_oksigeniaayvurenda\local\window::settings($library)['open'])) {
+            require_login(null, false);
+            require_capability('local/oksigeniaayvurenda:view', $context);
+        }
+        $forcedownload = false;
     } else if ($filearea === 'cover') {
         if (!$anyone || !\local_oksigeniaayvurenda\local\window::shows_record($itemid)) {
             require_login(null, false);
@@ -88,5 +100,11 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
     if (!$file || $file->is_directory()) {
         return false;
     }
-    send_stored_file($file, $filearea === 'cover' ? WEEKSECS : 0, 0, $forcedownload, $options);
+    send_stored_file(
+        $file,
+        in_array($filearea, ['cover', 'libraryimage', 'portrait'], true) ? WEEKSECS : 0,
+        0,
+        $forcedownload,
+        $options
+    );
 }

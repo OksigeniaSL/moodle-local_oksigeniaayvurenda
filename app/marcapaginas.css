@@ -1,0 +1,95 @@
+/* Ayvurenda's bookmark (marcapaginas.js): the fore-edge of a book with its pages, a thumb index and a satin ribbon.
+   Colours from Ayvurenda's tokens, so it follows light and dark mode. GPL v3 or later, with the plugin. */
+html { scrollbar-color: var(--green2, #2c7a6a) transparent; scrollbar-width: thin; }
+
+.ayv-bm { display: none; }
+
+@media (min-width: 1000px) {
+    html.ayv-has-bm body { padding-right: 34px; }
+
+    .ayv-bm:not([hidden]) {
+        position: fixed;
+        z-index: 20;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        display: block;
+        width: 34px;
+        pointer-events: none;
+        user-select: none;
+        /* The pages seen from the side: fine lines, a little darker towards the cover. */
+        background:
+            linear-gradient(90deg, rgba(30, 43, 42, .10), transparent 30%, transparent 85%, rgba(30, 43, 42, .08)),
+            repeating-linear-gradient(to bottom, transparent 0 2px, var(--ayv-bm-page, rgba(30, 43, 42, .09)) 2px 3px),
+            var(--paper2, #f2eadb);
+        border-left: 1px solid var(--line, rgba(30, 43, 42, .14));
+        box-shadow: -6px 0 14px -10px rgba(15, 58, 51, .35);
+    }
+}
+
+html[data-bs-theme="dark"] .ayv-bm { --ayv-bm-page: rgba(236, 228, 212, .07); }
+
+/* The ribbon: satin, coral, with a swallow-tailed end that sits where you are reading. */
+.ayv-bm-ribbon {
+    position: absolute;
+    top: 0;
+    right: 9px;
+    width: 13px;
+    background: linear-gradient(90deg, #c94f38, var(--coral, #e2654c) 35%, #f08a73 55%, var(--coral, #e2654c) 75%, #c94f38);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 8px), 0 100%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    transition: height .25s cubic-bezier(.3, .7, .3, 1);
+}
+
+/* The thumb index: a half-round notch in the edge of the pages, with the initial of the section. */
+.ayv-bm-tab {
+    position: absolute;
+    left: -1px;
+    width: 18px;
+    height: 22px;
+    margin-top: -11px;
+    display: grid;
+    place-items: center;
+    padding-right: 3px;
+    border-radius: 0 11px 11px 0;
+    background: var(--night, #0f3a33);
+    color: var(--paper, #fbf6ec);
+    font: 600 11px/1 var(--title, "Literata", Georgia, serif);
+    transition: background-color .2s ease-out, width .2s ease-out;
+}
+
+.ayv-bm-tab.on { width: 22px; background: var(--coral, #e2654c); color: #1e2b2a; }
+
+html[data-bs-theme="dark"] .ayv-bm-tab:not(.on) { background: #2f4a43; color: #ece4d4; }
+
+/* The name of the section, for a moment, beside its notch. */
+.ayv-bm-name {
+    position: absolute;
+    right: calc(100% + 8px);
+    margin-top: -14px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--surface, #fff);
+    color: var(--ink, #1e2b2a);
+    box-shadow: 0 4px 14px -6px rgba(15, 58, 51, .45);
+    font: 700 13px/20px var(--text, "Andika", system-ui, sans-serif);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(6px);
+    transition: opacity .15s ease-out, transform .15s ease-out;
+}
+
+.ayv-bm-name.on { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .ayv-bm-ribbon, .ayv-bm-tab, .ayv-bm-name { transition: none; }
+}
+
+/* In the plugin, on wide screens it is the scrollbar: the browser's goes, the edge is pressed and dragged. */
+html.ayv-has-bm { scrollbar-width: none; }
+html.ayv-has-bm::-webkit-scrollbar { width: 0; height: 0; }
+.ayv-bm:not([hidden]) { pointer-events: auto; cursor: grab; touch-action: none; }
+.ayv-bm.ayv-bm-drag { cursor: grabbing; }
+.ayv-bm-tab { cursor: pointer; height: 24px; margin-top: -12px; }
+.ayv-bm-tab:hover { width: 24px; }
+

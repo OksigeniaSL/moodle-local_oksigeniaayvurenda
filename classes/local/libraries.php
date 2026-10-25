@@ -173,6 +173,100 @@ final class libraries {
         ]);
     }
 
+    /** @var int The colours a library's card can take (the six of the covers). */
+    public const COLOURS = 6;
+
+    /**
+     * How a library's card looks: its colour, its line, whether it is the entity's featured one, and its picture.
+     *
+     * @param \stdClass $library
+     * @return array colour, motto, featured, image (address or null).
+     */
+    public static function look(\stdClass $library): array {
+        $settings = json_decode((string) $library->settings, true) ?: [];
+        $look = (array) ($settings['look'] ?? []);
+        return [
+            'colour' => isset($look['colour']) ? max(0, min(self::COLOURS - 1, (int) $look['colour'])) : ((int) $library->id) % 5,
+            'motto' => (string) ($look['motto'] ?? ''),
+            'featured' => !empty($look['featured']),
+            'image' => images::url('libraryimage', (int) $library->id, 'image'),
+        ];
+    }
+
+    /**
+     * Changes how a library's card looks; featured, it is the only one of its entity.
+     *
+     * @param int $libraryid
+     * @param array $data colour, motto, featured.
+     */
+    public static function save_look(int $libraryid, array $data): void {
+        global $DB;
+        $library = $DB->get_record(self::T . 'library', ['id' => $libraryid], '*', MUST_EXIST);
+        $settings = json_decode((string) $library->settings, true) ?: [];
+        $settings['look'] = [
+            'colour' => max(0, min(self::COLOURS - 1, (int) ($data['colour'] ?? 0))),
+            'motto' => \core_text::substr(trim((string) ($data['motto'] ?? '')), 0, 120),
+            'featured' => !empty($data['featured']),
+        ];
+        $DB->set_field(self::T . 'library', 'settings', json_encode($settings), ['id' => $libraryid]);
+        if ($settings['look']['featured']) {
+            foreach (
+                $DB->get_records_select(
+                    self::T . 'library',
+                    'entityid = :entityid AND id <> :id',
+                    ['entityid' => $library->entityid, 'id' => $libraryid]
+                ) as $other
+            ) {
+                $theirs = json_decode((string) $other->settings, true) ?: [];
+                if (!empty($theirs['look']['featured'])) {
+                    $theirs['look']['featured'] = false;
+                    $DB->set_field(self::T . 'library', 'settings', json_encode($theirs), ['id' => $other->id]);
+                }
+            }
+        }
+    }
+
+    /**
+     * The library to show first, big: the one of the person's own entity (its featured one, or its central one); else
+     * the first featured of the site; else the first central one.
+     *
+     * @param \stdClass[] $libraries
+     * @param int $userid
+     * @return \stdClass|null
+     */
+    public static function featured(array $libraries, int $userid): ?\stdClass {
+        global $DB;
+        if (!$libraries) {
+            return null;
+        }
+        $mine = $userid ? array_map('intval', $DB->get_fieldset_select(
+            self::T . 'reader',
+            'entityid',
+            "userid = :userid AND status = 'active'",
+            ['userid' => $userid]
+        )) : [];
+        $pick = function (array $among) {
+            foreach ($among as $library) {
+                if (self::look($library)['featured']) {
+                    return $library;
+                }
+            }
+            foreach ($among as $library) {
+                if ($library->kind === 'central') {
+                    return $library;
+                }
+            }
+            return null;
+        };
+        if ($mine) {
+            $own = $pick(array_filter($libraries, fn($l) => in_array((int) $l->entityid, $mine, true)));
+            if ($own) {
+                return $own;
+            }
+        }
+        return $pick($libraries) ?? reset($libraries);
+    }
+
     /**
      * Removes a library that has no copies, with its loan rules.
      *

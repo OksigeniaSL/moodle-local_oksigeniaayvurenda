@@ -155,6 +155,7 @@ final class shell {
 <link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">
 <script>(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
     var resolve = function() {
@@ -181,6 +182,8 @@ final class shell {
 <a class="ayv-exit" href="' . $CFG->wwwroot . '/">' . $str('backto', format_string($SITE->shortname)) . '</a></footer>
 <script>window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
+<script src="' . $app . 'marcapaginas.js?v=' . $version . '"></script>
+<script>ayvBookmark({root: document.getElementById(\'ayv-main\'), minWidth: 1000});</script>
 ' . $scripts . self::access() . '
 </body>
 </html>';

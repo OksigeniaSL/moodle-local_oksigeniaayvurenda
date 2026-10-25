@@ -32,7 +32,7 @@
         "action": "#",
         "sesskey": "abc",
         "roles": [{"role": "memory", "title": "La memoria", "job": "Se le pregunta.", "enabled": true, "name": "Memoria",
-                   "female": true, "male": false, "herald": false, "signs": false,
+                   "female": true, "male": false, "herald": false, "signs": false, "own": false,
                    "preview": {"initial": "M", "role": "memory", "name": "Memoria", "text": "He buscado por toda la biblioteca."} }],
         "characterenabled": "Que aparezca", "charactername": "Nombre", "charactersex": "Sexo",
         "charactersexf": "Femenino", "charactersexm": "Masculino", "charactersigns": "Firma los avisos",
@@ -42,7 +42,7 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<form method="post" action="{{action}}">
+<form method="post" action="{{action}}" enctype="multipart/form-data">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
     <div class="ayv-characters">
     {{#roles}}
@@ -56,6 +56,9 @@
                 <label class="ayv-field-check"><input type="radio" name="{{role}}sex" value="m" {{#male}}checked{{/male}}> {{charactersexm}}</label>
             </span>
             {{#herald}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}signs" value="1" {{#signs}}checked{{/signs}}> {{charactersigns}}</label>{{/herald}}
+            <label class="ayv-field ayv-field-wide">{{characterportrait}} <span class="ayv-field-hint">{{characterportraithint}}</span>
+                <input type="file" name="{{role}}portrait" accept="image/png,image/jpeg,image/webp,image/gif"></label>
+            {{#own}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}noportrait" value="1"> {{characternoportrait}}</label>{{/own}}
             <p class="ayv-character-preview">{{characterpreview}}</p>
             {{#preview}}{{> local_oksigeniaayvurenda/bubble}}{{/preview}}
         </section>

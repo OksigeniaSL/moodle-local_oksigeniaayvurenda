@@ -65,6 +65,22 @@
                     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="library">{{librariessave}}</button>
                     {{#canremove}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{librariesremove}}</button>{{/canremove}}</p>
                 </form>
+                {{#look}}
+                <form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-library-look">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{id}}">
+                    <fieldset class="ayv-fieldset"><legend>{{librarieslook}}</legend>
+                        <p class="ayv-field-hint">{{librarieslookhint}}</p>
+                        <div class="ayv-swatches">{{#colours}}<label class="ayv-swatch ayv-cover-{{value}}"><input type="radio" name="colour" value="{{value}}" {{#selected}}checked{{/selected}}><span class="ayv-sr">{{librariescolour}} {{value}}</span></label>{{/colours}}</div>
+                        <label class="ayv-field ayv-field-wide">{{librariesmotto}} <span class="ayv-field-hint">{{librariesmottohint}}</span>
+                            <input type="text" name="motto" value="{{motto}}" maxlength="120"></label>
+                        <label class="ayv-field ayv-field-wide">{{librariesimage}} <span class="ayv-field-hint">{{librariesimagehint}}</span>
+                            <input type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif"></label>
+                        {{#image}}<p class="ayv-library-thumb"><img src="{{image}}" alt=""> <label class="ayv-field ayv-field-check"><input type="checkbox" name="noimage" value="1"> {{librariesnoimage}}</label></p>{{/image}}
+                        <label class="ayv-field ayv-field-check"><input type="checkbox" name="featured" value="1" {{#featured}}checked{{/featured}}> {{librariesfeatured}}</label>
+                    </fieldset>
+                    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="look">{{librariessave}}</button></p>
+                </form>
+                {{/look}}
             </details>
         </li>
     {{/libraries}}

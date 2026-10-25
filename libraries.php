@@ -76,6 +76,18 @@ if (data_submitted() && confirm_sesskey()) {
             'groups' => optional_param_array('groups', [], PARAM_TEXT),
         ]);
         $notice = $str('librariessaved');
+    } else if ($do === 'look') {
+        $libraryid = required_param('library', PARAM_INT);
+        libraries::save_look($libraryid, [
+            'colour' => optional_param('colour', 0, PARAM_INT),
+            'motto' => optional_param('motto', '', PARAM_TEXT),
+            'featured' => optional_param('featured', 0, PARAM_BOOL),
+        ]);
+        if (optional_param('noimage', 0, PARAM_BOOL)) {
+            \local_oksigeniaayvurenda\local\images::remove('libraryimage', $libraryid, 'image');
+        }
+        $kept = \local_oksigeniaayvurenda\local\images::store_upload('image', 'libraryimage', $libraryid, 'image');
+        $notice = $str($kept === false ? 'librarieslookbadimage' : 'librariessaved');
     } else if ($do === 'delete') {
         $notice = $str(libraries::delete_library(required_param('library', PARAM_INT)) ? 'librariesdeleted'
             : 'librariesnotempty');
@@ -117,6 +129,13 @@ foreach (libraries::all() as $one) {
             'group' => implode(', ', $lgroups),
             'hasgroups' => (bool) $groups || (bool) $lgroups,
             'canremove' => (int) $library->copies === 0,
+            'look' => (function () use ($library) {
+                $look = libraries::look($library);
+                return $look + ['colours' => array_map(
+                    fn($c) => ['value' => $c, 'selected' => $c === $look['colour']],
+                    range(0, libraries::COLOURS - 1)
+                )];
+            })(),
         ];
     }
     $entities[] = [
@@ -160,7 +179,9 @@ foreach (
         'librariesyearstarthint', 'librariesclassification', 'librariescontrolletter', 'librariescreate', 'librariesadd',
         'librariesname', 'librarieskind', 'librariesparent', 'librariesnoparent', 'librariesslug', 'librariesslughint',
         'librariesgroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
-        'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint'] as $key
+        'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint', 'librarieslook',
+        'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
+        'librariesimagehint', 'librariesnoimage', 'librariesfeatured'] as $key
 ) {
     $data[$key] = $str($key);
 }

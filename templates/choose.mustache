@@ -17,24 +17,47 @@
 {{!
     @template local_oksigeniaayvurenda/choose
 
-    The choice of a library, when the site has several.
+    The choice of a library, when the site has several: the featured one big (the person's own, or the one the centre
+    marks), the others as cards with their colour, their picture and their line.
 
     Context variables required for this template:
     * heading - title of the screen
-    * libraries - list of name and url
+    * featured - the big one (name, url, kindlabel, motto, colour, image, enter), or nothing
+    * libraries - the others (name, url, kindlabel, motto, colour, image)
     * manage - url and label of the libraries page, for managers
 
     Example context (json):
     {
         "heading": "Elige una biblioteca",
-        "libraries": [{"name": "Biblioteca central", "url": "#"}, {"name": "Biblioteca de 3º A", "url": "#"}],
+        "featured": {"name": "Biblioteca central", "url": "#", "kindlabel": "Central", "motto": "El lugar de la palabra",
+            "colour": 2, "image": null, "enter": "Entrar"},
+        "hasothers": true, "othersheading": "Las demás bibliotecas",
+        "libraries": [{"name": "Biblioteca de 3º A", "url": "#", "kindlabel": "De aula", "motto": "", "colour": 3, "image": null}],
         "manage": {"url": "#", "label": "Las bibliotecas"}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
-<ul class="ayv-corners">
+{{#featured}}
+<a class="ayv-featured ayv-cover-{{colour}}{{#image}} ayv-featured-picture{{/image}}" href="{{url}}">
+    <span class="ayv-featured-text">
+        <span class="ayv-featured-kind">{{kindlabel}}</span>
+        <span class="ayv-featured-name">{{name}}</span>
+        {{#motto}}<span class="ayv-featured-motto">{{motto}}</span>{{/motto}}
+        <span class="ayv-button">{{enter}}</span>
+    </span>
+    {{#image}}<img class="ayv-featured-img" src="{{image}}" alt="">{{/image}}
+</a>
+{{/featured}}
+{{#hasothers}}
+<h2 class="ayv-section-title">{{othersheading}}</h2>
+<ul class="ayv-library-cards">
 {{#libraries}}
-    <li><a class="ayv-corner ayv-cover-0" href="{{url}}"><span class="ayv-corner-label">{{name}}</span></a></li>
+    <li><a class="ayv-library-card ayv-cover-{{colour}}" href="{{url}}">
+        {{#image}}<img class="ayv-library-card-img" src="{{image}}" alt="" loading="lazy">{{/image}}
+        <span class="ayv-library-card-text"><span class="ayv-library-card-name">{{name}}</span>
+            <span class="ayv-library-card-kind">{{kindlabel}}{{#motto}} · {{motto}}{{/motto}}</span></span>
+    </a></li>
 {{/libraries}}
 </ul>
-{{#manage}}<p class="ayv-more"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/manage}}
+{{/hasothers}}
+{{#manage}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/manage}}

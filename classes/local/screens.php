@@ -392,14 +392,34 @@ final class screens {
      * @return array
      */
     public static function choose(): array {
+        global $USER;
+        $all = catalogue::libraries();
+        $featured = libraries::featured($all, isloggedin() && !isguestuser() ? (int) $USER->id : 0);
+        $card = function (\stdClass $library) {
+            $look = libraries::look($library);
+            return ['name' => format_string($library->name), 'url' => self::url('index.php', $library),
+                'kindlabel' => self::str('librarykind' . $library->kind), 'motto' => format_string($look['motto']),
+                'colour' => $look['colour'], 'image' => $look['image']];
+        };
         $libraries = [];
-        foreach (catalogue::libraries() as $library) {
-            $libraries[] = ['name' => format_string($library->name), 'url' => self::url('index.php', $library)];
+        foreach ($all as $library) {
+            if (!$featured || (int) $library->id !== (int) $featured->id) {
+                $libraries[] = $card($library);
+            }
         }
         $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
+        $top = $featured ? $card($featured) : null;
+        if ($top) {
+            // Without a picture of its own, the scene of the art package, if the site has it.
+            $top['image'] = $top['image'] ?? self::art('portada');
+            $top['enter'] = self::str('chooseenter');
+        }
         return [
-            'heading' => self::str($libraries ? 'chooselibrary' : 'nolibrary'),
+            'heading' => self::str($all ? 'chooselibrary' : 'nolibrary'),
+            'featured' => $top,
             'libraries' => $libraries,
+            'hasothers' => (bool) $libraries,
+            'othersheading' => self::str('chooseothers'),
             'manage' => $manage ? ['url' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
                 'label' => self::str($libraries ? 'librariesnav' : 'librariesstart')] : null,
         ];

@@ -54,6 +54,15 @@ if (data_submitted() && confirm_sesskey()) {
     }
     characters::save($entityid, $chosen);
     $notice = $str('sourcessaved');
+    // A portrait of the centre's own (its mascot, the person the library is named after), or back to the default.
+    foreach (characters::ROLES as $role) {
+        if (optional_param($role . 'noportrait', 0, PARAM_BOOL)) {
+            \local_oksigeniaayvurenda\local\images::remove('portrait', $entityid, $role);
+        }
+        if (\local_oksigeniaayvurenda\local\images::store_upload($role . 'portrait', 'portrait', $entityid, $role) === false) {
+            $notice = $str('librarieslookbadimage');
+        }
+    }
 }
 $samples = ['memory' => ['memorynothing', ['query' => $str('charactersamplequery')]], 'herald' => ['heraldnew', []]];
 $roles = [];
@@ -71,6 +80,7 @@ foreach (characters::of($entityid) as $role => $character) {
         'male' => $character['sex'] === 'm',
         'herald' => $role === 'herald',
         'signs' => $character['signs'],
+        'own' => $character['own'],
         'preview' => $preview,
     ];
 }
@@ -84,7 +94,7 @@ $data = [
 ];
 foreach (
     ['characterenabled', 'charactername', 'charactersex', 'charactersexf', 'charactersexm', 'charactersigns',
-        'characterpreview', 'sourcessave'] as $key
+        'characterpreview', 'sourcessave', 'characterportrait', 'characterportraithint', 'characternoportrait'] as $key
 ) {
     $data[$key] = $str($key);
 }
