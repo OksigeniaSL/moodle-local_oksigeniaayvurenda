@@ -75,19 +75,33 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 puppet.draw(ctx, ox + puppet.feet[0] * s, oy + puppet.feet[1] * s, s, false);
             };
+            // Where a looping clip is in its turn (0..1).
+            var phase = function() {
+                return (puppet.time % puppet.clip.duration) / puppet.clip.duration;
+            };
             var tick = function(now) {
                 frame = 0;
+                var before = puppet.clip && puppet.clip.loop ? phase() : 0;
                 puppet.update(last ? Math.min(0.05, (now - last) / 1000) : 0);
                 last = now;
                 if (puppet.done()) {
                     puppet.play('idle');
+                    before = 0;
+                }
+                if (now >= until && puppet.clip && puppet.clip.loop) {
+                    // Time to rest: the loop goes on to its still pose (the one drawn on the page) and stops there, so a
+                    // bird is never left frozen in the middle of a wingbeat.
+                    var still = puppet.clip.still || 0, after = phase();
+                    var passed = before <= after ? before < still && still <= after : still > before || still <= after;
+                    if (passed || now > until + 6000) {
+                        puppet.time = still * puppet.clip.duration;
+                        draw();
+                        last = 0;
+                        return;
+                    }
                 }
                 draw();
-                if (now < until) {
-                    frame = window.requestAnimationFrame(tick);
-                } else {
-                    last = 0;
-                }
+                frame = window.requestAnimationFrame(tick);
             };
             var start = function(name) {
                 puppet.play('idle');
@@ -99,6 +113,8 @@
             };
             img.parentNode.insertBefore(canvas, img.nextSibling);
             img.hidden = true;
+            // The first frame is the gesture's own, so reading or arriving never shows the rest pose for an instant.
+            puppet.play(gesture);
             draw();
             canvas.addEventListener('click', function() {
                 start(gesture);
