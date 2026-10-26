@@ -212,6 +212,17 @@ final class cataloguer_test extends \advanced_testcase {
         $this->assertStringContainsString('bath.isbn="978-8-4-9000001-4" or ', $first);
         $this->assertSame(25, substr_count($first, 'bath.isbn='));
         $this->assertStringContainsString('"84-90000-01-8"', urldecode($asked[1]));
+
+        // Asked too much, the bridge answers 429: nothing is kept for the day, so the next time it is asked again.
+        lookup::$fetcher = function (string $url) use (&$asked) {
+            $asked[] = $url;
+            return str_contains($url, 'puente.invented.example') ? 429 : null;
+        };
+        $asked = [];
+        $this->assertFalse(lookup::isbn((int) $library->entityid, '9780306406157')['found']);
+        $first = count($asked);
+        lookup::isbn((int) $library->entityid, '9780306406157');
+        $this->assertSame(2 * $first, count($asked));
     }
 
     /**

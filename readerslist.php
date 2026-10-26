@@ -46,6 +46,7 @@ if (!$library) {
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $text = '';
 $notice = '';
+$error = '';
 $step = 'paste';
 if (data_submitted() && confirm_sesskey()) {
     $text = optional_param('csv', '', PARAM_RAW);

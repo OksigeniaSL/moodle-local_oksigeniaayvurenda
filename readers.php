@@ -74,6 +74,10 @@ if ($group === null) {
             'url' => (new moodle_url('/local/oksigeniaayvurenda/readerslist.php', ['library' => $library->slug]))->out(false),
             'label' => $str('readerslistnav'),
         ] : null,
+        'oneroster' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/oneroster.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('onerosternav'),
+        ] : null,
         'characters' => has_capability('local/oksigeniaayvurenda:manage', $context) ? [
             'url' => (new moodle_url('/local/oksigeniaayvurenda/characters.php', ['library' => $library->slug]))->out(false),
             'label' => $str('charactersnav'),

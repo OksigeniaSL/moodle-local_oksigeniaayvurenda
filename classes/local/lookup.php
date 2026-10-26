@@ -54,8 +54,14 @@ final class lookup {
     /** @var string[] The order when the entity has not chosen one and the site speaks Spanish. */
     public const DEFAULT_ES = ['rebeca', 'bne', 'loc', 'openlibrary'];
 
-    /** @var callable|null How to fetch an address; tests put their own. Given the address, gives the body or null. */
+    /** @var callable|null How to fetch an address; tests put their own. Given the address, gives the body, null, or 429. */
     public static $fetcher = null;
+
+    /** @var bool Whether a catalogue said, in this request, that it was asked too much (HTTP 429). */
+    private static bool $limited = false;
+
+    /** @var int Seconds to wait before asking again a catalogue that said it was asked too much. */
+    public static int $wait = 2;
 
     /**
      * What the catalogues say of an ISBN.
@@ -85,6 +91,7 @@ final class lookup {
         }
         $result = ['valid' => true, 'isbn' => $isbn, 'found' => false, 'source' => null, 'sourcename' => null,
             'description' => null, 'cover' => null, 'tried' => []];
+        self::$limited = false;
         foreach ($sources as $name) {
             $source = self::source($name);
             $result['tried'][] = $source['name'];
@@ -98,7 +105,10 @@ final class lookup {
             }
         }
         $result['cover'] = $result['description']['extra']['cover'] ?? openlibrary::cover_url($isbn);
-        $cache->set($key, ['time' => time(), 'result' => $result]);
+        // What a catalogue could not say because it was asked too much is not kept for the day.
+        if (!self::$limited) {
+            $cache->set($key, ['time' => time(), 'result' => $result]);
+        }
         return $result;
     }
 
@@ -152,7 +162,12 @@ final class lookup {
     public static function fetch(string $url): ?string {
         global $CFG;
         if (self::$fetcher) {
-            return (self::$fetcher)($url);
+            $body = (self::$fetcher)($url);
+            if ($body === 429) {
+                self::$limited = true;
+                return null;
+            }
+            return $body;
         }
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
@@ -165,6 +180,15 @@ final class lookup {
         ]);
         $body = $curl->get($url);
         $code = (int) ($curl->get_info()['http_code'] ?? 0);
+        // A catalogue that limits how often it is asked (the Z39.50 bridge: some 60 a minute) is asked once more.
+        if ($code === 429) {
+            sleep(self::$wait);
+            $body = $curl->get($url);
+            $code = (int) ($curl->get_info()['http_code'] ?? 0);
+            if ($code === 429) {
+                self::$limited = true;
+            }
+        }
         return $curl->get_errno() || $code !== 200 || !is_string($body) ? null : $body;
     }
 
