@@ -130,7 +130,11 @@ foreach ($groups as $i => $group) {
             in_array('everyone', array_column($planted, 'kind'), true),
             $boat
         )) ? ['islandlayers' => array_map(fn($u) => ['layer' => $u], $layers),
-            'islandlabel' => $str('islandlabel', count($planted))] : null,
+            'islandlabel' => $str('islandlabel', count($planted)),
+            // The same island in 3D, over the layers, where the site allows it.
+            'islandstate' => get_config('local_oksigeniaayvurenda', 'island3d') !== '0' ? json_encode(['met' => count($planted),
+                'everyone' => in_array('everyone', array_column($planted, 'kind'), true), 'boat' => $boat]) : '',
+            'islandkey' => $library->id . '-' . md5($group)] : null,
         'cards' => $reads,
         'hasreads' => (bool) $reads,
         'rewards' => $rewards,
@@ -164,6 +168,8 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
     'wishsend' => $str('wishsend'),
 ]), $library, '', [
     'search' => false,
+    // The island in 3D, only where there is one to draw.
+    'scripts' => array_filter(array_map(fn($g) => $g['island']['islandstate'] ?? '', $data)) ? ['isla3d', 'island'] : [],
     'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/help.php',
         ['library' => $library->slug, 'piece' => 'myclass']

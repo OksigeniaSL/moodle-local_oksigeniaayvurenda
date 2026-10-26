@@ -38,6 +38,13 @@ if ($hassiteconfig) {
             PARAM_URL,
             50
         ));
+        // The class island in 3D, in «My class»: on unless the site's computers cannot carry it.
+        $settings->add(new admin_setting_configcheckbox(
+            'local_oksigeniaayvurenda/island3d',
+            $str('island3d'),
+            $str('island3d_desc'),
+            1
+        ));
         // Several centres on one site: each with its own category, where the roles of its staff are given.
         $settings->add(new admin_setting_heading(
             'local_oksigeniaayvurenda/centresheading',

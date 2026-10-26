@@ -216,4 +216,15 @@
             <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
         </copyrights>
     </library>
+    <library>
+        <location>app/isla3d.js</location>
+        <name>three.js</name>
+        <description>The 3D library of the class island, bundled with its code (app/isla3d/src) for Chrome 93. License text in app/isla3d/LICENSE-three.txt.</description>
+        <version>0.186.1</version>
+        <license>MIT</license>
+        <repository>https://github.com/mrdoob/three.js</repository>
+        <copyrights>
+            <copyright>2010-2026 three.js authors</copyright>
+        </copyrights>
+    </library>
 </libraries>

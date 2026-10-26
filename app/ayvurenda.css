@@ -620,6 +620,9 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 /* The class's island: layers of the same size, one on top of another, as Gaudí draws them. */
 .ayv .ayv-island { position: relative; aspect-ratio: 16 / 10; margin: 1rem 0 0; border-radius: var(--radius); overflow: hidden; }
 .ayv .ayv-island img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* The island in 3D, over its layers (0.65.0); the layers stay underneath for when it cannot be drawn. */
+.ayv .ayv-island-3d { position: absolute; inset: 0; }
+.ayv .ayv-island-on img { visibility: hidden; }
 
 .ayv .ayv-source {
     display: flex;

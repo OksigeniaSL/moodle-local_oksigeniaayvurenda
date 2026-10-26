@@ -56,7 +56,7 @@
         <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></p>
     </form>{{/canchoose}}
     <h3 class="ayv-section-title">{{gardenheading}}</h3>
-    {{#island}}<figure class="ayv-island" role="img" aria-label="{{islandlabel}}">{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/island}}
+    {{#island}}<figure class="ayv-island" role="img" aria-label="{{islandlabel}}"{{#islandstate}} data-island="{{islandstate}}" data-island-key="{{islandkey}}"{{/islandstate}}>{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/island}}
     {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}
     {{^hasgarden}}<p class="ayv-empty">{{gardenempty}}</p>{{/hasgarden}}
     {{#hasrewards}}

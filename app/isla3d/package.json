@@ -1,0 +1,14 @@
+{
+  "name": "ayvurenda-isla3d",
+  "private": true,
+  "version": "0.1.0",
+  "description": "The class island of Ayvurenda in 3D",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "build": "esbuild src/mount.js --bundle --minify --format=iife --target=chrome93 --supported:class-static-blocks=false --legal-comments=eof --outfile=../isla3d.js"
+  },
+  "devDependencies": {
+    "three": "0.186.1",
+    "esbuild": "0.25.11"
+  }
+}
