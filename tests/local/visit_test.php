@@ -156,6 +156,7 @@ final class visit_test extends \advanced_testcase {
         $this->assertStringContainsString('corner=5', $board['rows'][1]['url']);
         $this->assertStringStartsWith('matrix3d(', $board['transform']);
         $this->assertSame('--visit-ink: #3A2A1C;', $board['ink'], 'only a colour gets into the style');
+        $this->assertEquals(93.3, $board['rowheight'], 'two corners on a board of nine spread as six would');
         $stand = array_values(array_filter($page['surfaces'], fn($s) => $s['book']));
         $this->assertSame(['Las plantas', 'Cuento dos', 'Cuento uno'], array_column($stand, 'title'));
         $this->assertStringContainsString(

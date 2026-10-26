@@ -1,5 +1,280 @@
 # Changelog
 
+## 0.68.0 (2026-10-26)
+
+- The library one visits: rooms painted for the art package (a hall and a room for each corner, by day and by night,
+  with their sound) that the library fills with its own. Doors lead to the rooms there are, or to the shelves of their
+  corner; the board names the corners as the library names and orders them; the stand shows real covers of what came
+  in last; the blackboard says what moved today, never who; the fountain leads to Ayvu rande; the characters stand in
+  the room as puppets, and the memory asks what one is looking for. Every place is a real link, also in a row of words
+  for the keyboard and the screen reader. Without WebGL; still with «reduce motion»; for anyone when the centre shows
+  its catalogue. The way in is a card on the home and at the door. Without the art package's hall, there is no visit.
+
+## 0.67.1 (2026-10-26)
+
+- The puppets start on their gesture and come to rest on its still pose, never in the middle of a wingbeat.
+
+## 0.67.0 (2026-10-26)
+
+- The characters' puppets: where the art package brings them, a pose becomes the character doing its gesture, then
+  breathing a while and holding still; a touch plays it again. Only while in sight, never with «reduce motion».
+
+## 0.66.1 (2026-10-26)
+
+- The characters stand bigger on a soft shadow of ground, and the bubble points to the face of whoever speaks.
+
+## 0.66.0 (2026-10-26)
+
+- The characters whole, in a pose, beside what they say and in the empty states (a search that finds nothing, a book
+  that is not here, an empty album, a challenge met, the book a class asked for), from the art package and only for a
+  centre without a portrait of its own.
+
+## 0.65.3 (2026-10-26)
+
+- Made-up covers on servers whose GD reads no WebP: a small JPEG is kept as it is, and the demo takes the JPEG first.
+
+## 0.65.2 (2026-10-26)
+
+- The class island loads the reading hut modelled for the art package; the drawn one stays without it.
+
+## 0.65.1 (2026-10-26)
+
+- The class island after its art review: flat facets, one crown, the sun of the drawing, cut-paper grass, a deeper sea,
+  a shingled roof and warm halos.
+
+## 0.65.0 (2026-10-26)
+
+- The class island, alive in 3D in My class: what the class met since this browser last saw it grows in front of the
+  tutor, and then everything stops. About 20,000 triangles, tested in a real Chrome 93. With «reduce motion», without
+  WebGL2 or with the setting off, the drawn island stays. Three.js under MIT.
+
+## 0.64.0 (2026-10-26)
+
+- Posters for the shelves, two to an A4 sheet: each place's name on its colour and a QR code that opens that shelf
+  online.
+
+## 0.63.0 (2026-10-26)
+
+- A shelf of the newest books for the school's website, in a frame, when the catalogue is shown to anyone; the door and
+  each public record show their title and cover when a link to them is shared.
+
+## 0.62.0 (2026-10-26)
+
+- Where is it? What each line of a book's label says, and the place to look in, to find it on the real shelf.
+
+## 0.61.0 (2026-10-26)
+
+- The door: the public window as the library's entrance, with its picture, colour and motto, what moves today (never
+  who), its places and corners, what came in last and, if the centre wants, the catalogue and the shelves for anyone,
+  with whether each book is free and where it stands.
+
+## 0.60.0 (2026-10-26)
+
+- The album's collector cards: one for each corner the library shows, won with the first book taken home from it.
+
+## 0.59.0 (2026-10-26)
+
+- The shelves: each place or corner with its books as spines in the order of the room, as tall and thick as the record
+  says and in the colour of their cover; a book that is out leaves its gap; taking a spine out turns the book on a
+  lectern. Each record shows the books beside it on its shelf.
+
+## 0.58.3 (2026-10-26)
+
+- How do I…? always at hand, as a button down on the right that opens a small box.
+
+## 0.58.2 (2026-10-26)
+
+- Privacy: the key a reader's origin knew them by is declared and deleted with their data.
+
+## 0.58.1 (2026-10-26)
+
+- Fields fit a phone: the control goes below its label when they do not fit, and a long dropdown is cut short.
+
+## 0.58.0 (2026-10-26)
+
+- The daily copy carries the catalogue in Dublin Core and RIS too, and a record can be cited in a reference manager.
+
+## 0.57.1 (2026-10-26)
+
+- My class shows the class garden as an island from the art package; the album keeps what each past class met.
+
+## 0.57.0 (2026-10-26)
+
+- Readers from a OneRoster 1.1 or 1.2 export, with their homeroom as their group, its tutor when they have an account,
+  and who left in a whole export. Adding by ISBN asks the Z39.50 bridge again when it says it is asked too much.
+
+## 0.56.1 (2026-10-26)
+
+- The OPDS catalogue checked with the reading code of Thorium, KOReader and Calibre; its search name is cut between
+  words.
+
+## 0.56.0 (2026-10-25)
+
+- Adding by ISBN asks REBECA, the shared catalogue of Spain's public libraries, through a Z39.50 bridge whose address
+  the site sets; first, on a site in Spanish.
+
+## 0.55.0 (2026-10-25)
+
+- Centres kept apart on a shared site: each centre's staff get their roles in its own hidden category, and every page,
+  answer and file checks its permission in the centre it serves. Ids of another centre lead nowhere.
+
+## 0.54.0 (2026-10-25)
+
+- Plans for hosted libraries: limits of copies and readers per centre and what each plan brings. Past a limit nothing
+  is removed; what would not fit is refused or undone whole.
+
+## 0.53.1 (2026-10-25)
+
+- Small fixes to the recorder and to the setting of How do I…?.
+
+## 0.53.0 (2026-10-25)
+
+- How do I…? answers in its own words when the site has Moodle's text generation set up, with the guide as its only
+  source, after the site's policy is accepted, and saying the answer is automatic.
+
+## 0.52.0 (2026-10-25)
+
+- How do I…? at the foot of the staff's screens: the library's tasks step by step, found in one's own words, with their
+  screen and guided help.
+
+## 0.51.0 (2026-10-25)
+
+- Read in the library: a book passed at the desk without a card counts with one touch, with no reader.
+
+## 0.50.0 (2026-10-25)
+
+- Reviews with a voice, under the rules of recorded voices.
+
+## 0.49.0 (2026-10-25)
+
+- The guided helps of the reviews, what the classes ask for and My class.
+
+## 0.48.0 (2026-10-25)
+
+- The staff hear what waits for them: cards on the desk and a Moodle notice a day at most.
+
+## 0.47.0 (2026-10-25)
+
+- Reviews with a drawing, for whoever would rather draw than write.
+
+## 0.46.1 (2026-10-25)
+
+- Listen keeps its own width.
+
+## 0.46.0 (2026-10-25)
+
+- The older readers recommend books to the young ones.
+
+## 0.45.0 (2026-10-25)
+
+- The class reward: a class that meets its challenge chooses the next book with its tutor.
+
+## 0.44.0 (2026-10-25)
+
+- Reviews: a reader tells what they thought of a book, and the library publishes it with a touch.
+
+## 0.43.0 (2026-10-25)
+
+- Listen, for the young: the home, the card, the herald and the class challenge in a voice.
+
+## 0.42.0 (2026-10-25)
+
+- My class for the tutor, and class challenges on or off by stage.
+
+## 0.41.1 (2026-10-25)
+
+- Each centre says it is one, with its settings beside its name.
+
+## 0.41.0 (2026-10-25)
+
+- The libraries as cards with their forms in windows, the house's dropdowns, dates in the library's language, and a
+  voice for each step of the guided helps.
+
+## 0.40.2 (2026-10-25)
+
+- The file button speaks the library's language, not the browser's.
+
+## 0.40.1 (2026-10-25)
+
+- The help pointer finds what sits under a sticky header.
+
+## 0.40.0 (2026-10-25)
+
+- The guided helps of the card, the labels and the reports.
+
+## 0.39.3 (2026-10-25)
+
+- The catalogue first in the header, the house's file buttons and headers to choose from.
+
+## 0.39.2 (2026-10-25)
+
+- The memory drawn above the dedication of the credits.
+
+## 0.39.1 (2026-10-25)
+
+- Corners with short names in even rows, the global menu in the header, the main seat chosen by the administrator,
+  and the credits.
+
+## 0.39.0 (2026-10-25)
+
+- A bookmark as the scrollbar on wide screens, the featured library, each library's own card and the characters' own
+  portraits.
+
+## 0.38.0 (2026-10-25)
+
+- Free works from Wikisource; shelves with arrows instead of a scrollbar; the way back to the dashboard in the header.
+
+## 0.37.0 (2026-10-25)
+
+- The class challenge of each term, cooperative and anonymous, and the class garden.
+
+## 0.36.2 (2026-10-25)
+
+- The home page after its art review.
+
+## 0.36.1 (2026-10-25)
+
+- The characters' portraits and the drawn corners from the art package, when the site has it.
+
+## 0.36.0 (2026-10-25)
+
+- A new home page: the greeting with the search and its ideas, the herald, the reader's card, the corners, the shelves
+  and what the class reads (never who).
+
+## 0.35.0 (2026-10-24)
+
+- A teacher brings the students of their course from their platform, with their group, kept up to date every night
+  (LTI Names and Roles).
+
+## 0.34.0 (2026-10-24)
+
+- Repeated readers, joined into the one the librarian chooses.
+
+## 0.33.1 (2026-10-24)
+
+- Pairing with a platform compares each reader with people of their type.
+
+## 0.33.0 (2026-10-24)
+
+- A teacher puts a book of the library, or the library, in a course of their platform (LTI Deep Linking).
+
+## 0.32.1 (2026-10-24)
+
+- A platform registers in one go (LTI Dynamic Registration).
+
+## 0.32.0 (2026-10-24)
+
+- The library as an LTI 1.3 tool: a learning platform opens it without installing anything, and whoever comes in
+  becomes a reader.
+
+## 0.31.1 (2026-10-24)
+
+- The nightly task brings readers from a management program only after a first time by hand.
+
+## 0.31.0 (2026-10-24)
+
+- Readers already there are paired with a management program's before it brings them, so none come twice.
+
 ## 0.30.2 (2026-10-28)
 
 - In the app, each book out says until when again (and the late ones, that they are late), and each reservation whether

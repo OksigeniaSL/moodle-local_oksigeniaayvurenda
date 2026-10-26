@@ -19,7 +19,8 @@
     A room of the library one visits: its painted layers (by day, or by night in dark mode), the places one touches,
     the surfaces where the library writes its own (the board of corners, the stand of new books, the blackboard), the
     characters standing in it, and the same places as a row of words. The script scales the painting to the screen and
-    shows it; without the script, the row of words is the visit.
+    shows it (the layers wait as a blank pixel, so a dark page never loads the day); without the script, the row of words
+    is the visit.
     Context variables required for this template:
     * title, width, height, focus, depth, sound, door - the room
     * back, front - layers: day, night, depth
@@ -70,7 +71,7 @@
             <div class="ayv-visit-room">
             <div class="ayv-visit-stage" style="width: {{width}}px; height: {{height}}px">
                 {{#back}}
-                <img class="ayv-visit-layer" alt="" data-day="{{day}}" data-night="{{night}}" data-depth="{{depth}}">
+                <img class="ayv-visit-layer" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" data-day="{{day}}" data-night="{{night}}" data-depth="{{depth}}">
                 {{/back}}
                 {{#haszones}}
                 <svg class="ayv-visit-zones" viewBox="0 0 {{width}} {{height}}" aria-hidden="true" focusable="false" data-depth="{{depth}}">
@@ -110,7 +111,7 @@
                 </div>
                 {{/characters}}
                 {{#front}}
-                <img class="ayv-visit-layer ayv-visit-front" alt="" data-day="{{day}}" data-night="{{night}}" data-depth="{{depth}}">
+                <img class="ayv-visit-layer ayv-visit-front" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" data-day="{{day}}" data-night="{{night}}" data-depth="{{depth}}">
                 {{/front}}
             </div>
             </div>

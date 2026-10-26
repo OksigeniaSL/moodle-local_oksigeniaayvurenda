@@ -313,7 +313,9 @@ final class visit {
         }
         return ['directory' => true, 'pulse' => false, 'book' => false, 'width' => round($w), 'height' => round($h),
             'transform' => homography::css($w, $h, $zone['quad']), 'rows' => $rows, 'ink' => self::ink($zone),
-            'rowheight' => round($h / $zone['rows'], 1), 'fontsize' => round(min($h / $zone['rows'] * .5, $w / 14), 1)];
+            // Letters as for a full board; a library with fewer corners spreads them, not crammed at the top.
+            'rowheight' => round($h / max(count($rows), min($zone['rows'], 6)), 1),
+            'fontsize' => round(min($h / $zone['rows'] * .5, $w / 14), 1)];
     }
 
     /**
