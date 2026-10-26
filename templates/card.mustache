@@ -102,7 +102,7 @@
     {{/books}}
     </ul>
     {{/hasbooks}}
-    {{^hasbooks}}<div class="ayv-posed">{{#nobooksfigure}}<img class="ayv-posed-figure" src="{{nobooksfigure}}" alt="" width="512" height="512">{{/nobooksfigure}}<p class="ayv-empty">{{nobooks}}{{#listennobooks}} {{> local_oksigeniaayvurenda/listen}}{{/listennobooks}}</p></div>{{/hasbooks}}
+    {{^hasbooks}}<div class="ayv-posed">{{#nobooksfigure}}<span class="ayv-figure"><img class="ayv-posed-figure" src="{{nobooksfigure}}" alt="" width="512" height="512"></span>{{/nobooksfigure}}<p class="ayv-empty">{{nobooks}}{{#listennobooks}} {{> local_oksigeniaayvurenda/listen}}{{/listennobooks}}</p></div>{{/hasbooks}}
     {{#hasclassgarden}}
     <h2 class="ayv-section-title">{{classgardenheading}}</h2>
     <p class="ayv-field-hint">{{classgardenhint}}{{#listengarden}} {{> local_oksigeniaayvurenda/listen}}{{/listengarden}}</p>

@@ -86,8 +86,8 @@ final class shell {
         $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
         self::output(
             $title,
-            ($figure !== '' ? '<div class="ayv-posed"><img class="ayv-posed-figure" src="' . s($figure) .
-            '" alt="" width="512" height="512"><div>' : '') .
+            ($figure !== '' ? '<div class="ayv-posed"><span class="ayv-figure"><img class="ayv-posed-figure" src="' . s($figure) .
+            '" alt="" width="512" height="512"></span><div>' : '') .
             '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
             s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>' .
             ($figure !== '' ? '</div></div>' : ''),
