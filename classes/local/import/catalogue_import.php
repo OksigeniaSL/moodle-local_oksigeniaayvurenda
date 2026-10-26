@@ -27,6 +27,7 @@ namespace local_oksigeniaayvurenda\local\import;
 use local_oksigeniaayvurenda\core\control_letter;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\cataloguer;
+use local_oksigeniaayvurenda\local\stacks;
 
 /**
  * Records with their copies, from any library program's MARC file or from a spreadsheet, written into a library in
@@ -124,6 +125,7 @@ final class catalogue_import {
         }
         $transaction->allow_commit();
         catalogue::purge($entityid);
+        stacks::refresh_keys($entityid);
         return $this->stats;
     }
 

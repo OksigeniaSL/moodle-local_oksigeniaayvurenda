@@ -44,6 +44,7 @@ final class howto {
         'reviews' => ['reviews.php', 'desk', 'reviews'],
         'wishes' => ['wishes.php', 'desk', 'wishes'],
         'myclass' => ['class.php', 'view', 'myclass'],
+        'stacks' => ['stacks.php', 'view', 'stacks'],
         'reports' => ['reports.php', 'desk', 'reports'],
         'copies' => ['copies.php', 'desk', ''],
         'stocktake' => ['stocktake.php', 'catalogue', ''],

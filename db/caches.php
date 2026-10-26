@@ -48,6 +48,11 @@ $definitions = [
         'simplekeys' => true,
         'simpledata' => true,
     ],
+    // The main colour of each cover, by its content, for the spines on the shelves.
+    'spinecolour' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+    ],
     // The people of a management platform while pairing its readers with those already there: asking takes a while.
     'platformpeople' => [
         'mode' => cache_store::MODE_APPLICATION,

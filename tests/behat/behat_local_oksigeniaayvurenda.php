@@ -89,12 +89,14 @@ class behat_local_oksigeniaayvurenda extends behat_base {
     /**
      * Opens a page of the plugin for a library.
      *
-     * @When /^I open the Ayvurenda page "(?P<page>[a-z_]+\.php)" of library "(?P<slug>[a-z0-9-]+)"$/
+     * @When /^I open the Ayvurenda page "(?P<page>[a-z_]+\.php)" of library "(?P<slug>[\w-]+)"(?: with "(?P<query>[\w=&]+)")?$/
      * @param string $page
      * @param string $slug
+     * @param string $query More parameters, as in an address («all=1»).
      */
-    public function i_open_the_ayvurenda_page(string $page, string $slug): void {
-        $this->visit('/local/oksigeniaayvurenda/' . $page, ['library' => $slug]);
+    public function i_open_the_ayvurenda_page(string $page, string $slug, string $query = ''): void {
+        parse_str($query, $params);
+        $this->visit('/local/oksigeniaayvurenda/' . $page, ['library' => $slug] + $params);
     }
 
     /**

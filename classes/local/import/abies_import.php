@@ -105,6 +105,8 @@ final class abies_import {
             $this->readers($export);
             $this->loans($export);
         }
+        // Each copy in its place on the shelf, with the call numbers and titles that came.
+        \local_oksigeniaayvurenda\local\stacks::refresh_keys($this->entityid);
         $transaction->allow_commit();
         return $this->stats;
     }

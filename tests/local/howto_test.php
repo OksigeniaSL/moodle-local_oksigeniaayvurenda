@@ -53,6 +53,6 @@ final class howto_test extends \advanced_testcase {
         // A teacher who only sees the library: only what is theirs.
         $teacher = $this->getDataGenerator()->create_user();
         $keys = array_column(howto::find('', $library, (int) $teacher->id), 'key');
-        $this->assertSame(['myclass'], $keys);
+        $this->assertSame(['myclass', 'stacks'], $keys);
     }
 }

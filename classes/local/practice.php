@@ -24,6 +24,7 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\callnumber;
 use local_oksigeniaayvurenda\core\control_letter;
 use local_oksigeniaayvurenda\core\text;
 
@@ -159,7 +160,8 @@ final class practice {
                 'timemodified' => $now]);
             $itemid = $DB->insert_record(self::T . 'item', ['entityid' => $entityid, 'libraryid' => $libraryid,
                 'recordid' => $recordid, 'barcode' => control_letter::append((string) $number), 'itemtype' => 'normal',
-                'callnumber1' => $class, 'status' => $lent ? 'onloan' : 'available', 'timecreated' => $now,
+                'callnumber1' => $class, 'callnumber2' => callnumber::author($author),
+                'callnumber3' => callnumber::title($title), 'status' => $lent ? 'onloan' : 'available', 'timecreated' => $now,
                 'timemodified' => $now]);
             if ($lent) {
                 [$reader, $daysago] = $lent;

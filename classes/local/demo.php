@@ -141,6 +141,8 @@ final class demo {
                 ['recordid' => $recordid, 'authorityid' => $class, 'role' => null, 'sortorder' => 3],
             ]);
             $copies = mt_rand(1, 100) <= 85 ? 1 : mt_rand(2, 4);
+            $call = [$classes[$class], strtoupper(mb_substr($authors[$author], 0, 3)),
+                mb_strtolower(mb_substr(preg_replace('/^(El|La|Un|Una) /', '', $title), 0, 3))];
             $items = [];
             for ($c = 0; $c < $copies; $c++) {
                 $items[] = [
@@ -149,9 +151,10 @@ final class demo {
                     'recordid' => $recordid,
                     'barcode' => control_letter::append(sprintf('%06d', $barcode)),
                     'regnumber' => (string) $barcode,
-                    'callnumber1' => $classes[$class],
-                    'callnumber2' => strtoupper(mb_substr($authors[$author], 0, 3)),
-                    'callnumber3' => mb_strtolower(mb_substr(preg_replace('/^(El|La|Un|Una) /', '', $title), 0, 3)),
+                    'callnumber1' => $call[0],
+                    'callnumber2' => $call[1],
+                    'callnumber3' => $call[2],
+                    'shelfkey' => \local_oksigeniaayvurenda\core\shelf_order::key($call[0], $call[1], $call[2], $title, $recordid),
                     'locationid' => array_rand($locations),
                     'itemtype' => mt_rand(1, 100) <= 3 ? 'reference' : 'normal',
                     'status' => 'available',

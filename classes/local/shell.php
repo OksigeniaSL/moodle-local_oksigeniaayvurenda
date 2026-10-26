@@ -174,6 +174,13 @@ final class shell {
             $catalogue = '<a class="ayv-nav ayv-nav-home" href="' . s($home) . '"' . ($here ? ' aria-current="page"' : '') . '>'
                 . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_book', []) . ' '
                 . s(get_string('deskcatalogue', 'local_oksigeniaayvurenda')) . '</a>';
+            // The shelves, as they stand in the room.
+            $stacks = $base . 'stacks.php?library=' . rawurlencode($library->slug);
+            $onstacks = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/local/oksigeniaayvurenda/stacks.php');
+            $seen[$stacks] = true;
+            $catalogue .= '<a class="ayv-nav ayv-nav-stacks" href="' . s($stacks) . '"' . ($onstacks ? ' aria-current="page"' : '')
+                . '>' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_shelf', []) . ' '
+                . s(get_string('stacksnav', 'local_oksigeniaayvurenda')) . '</a>';
         }
         // A tutor's class: the challenge of the term, which the tutor chooses.
         global $USER;

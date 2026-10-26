@@ -94,6 +94,16 @@ $data = screens::record($found, $library);
 $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);
+// The books beside it on its shelf, to find it in the room and to come across another.
+$beside = \local_oksigeniaayvurenda\local\stacks::neighbours($library, $id);
+$data['beside'] = $beside && count($beside['spines']) > 1 ? [
+    'heading' => get_string('stacksbeside', 'local_oksigeniaayvurenda'),
+    'spines' => screens::spines($beside['spines']),
+    'walk' => get_string('stackswalkhere', 'local_oksigeniaayvurenda'),
+    'walkurl' => (new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library' => $library->slug,
+        'place' => $beside['place'], 'at' => $id]))->out(false),
+    'bird' => screens::art('estanteria/mainumby', 'svg'),
+] : null;
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
     'scripts' => !empty($data['reviews']['write']) ? ['draw', 'speak'] : [],
 ]);

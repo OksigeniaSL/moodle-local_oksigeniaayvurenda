@@ -24,6 +24,7 @@
     * title, subtitle, authors, facts, subjects, summary, copies - the record
     * back - url and label to go back
     * hold - the reservation box, or nothing
+    * beside - the books beside it on its shelf (heading, spines, walk, walkurl, bird), or nothing
 
     Example context (json):
     {
@@ -189,6 +190,15 @@
             {{/copies}}
         </ul>
         {{/hascopies}}
+        {{#beside}}
+        <section class="ayv-beside" aria-labelledby="ayv-beside-title">
+            <h2 id="ayv-beside-title" class="ayv-section-title">{{heading}}</h2>
+            <div class="ayv-bookcase-wrap ayv-bookcase-mini"{{#bird}} style="--ayv-bird: url('{{bird}}')"{{/bird}}>
+                <ul class="ayv-bookcase" aria-label="{{heading}}">{{#spines}}{{> local_oksigeniaayvurenda/spine}}{{/spines}}</ul>
+            </div>
+            <p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{walkurl}}">{{> local_oksigeniaayvurenda/icon_shelf}} {{walk}}</a></p>
+        </section>
+        {{/beside}}
         {{#back}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/back}}
     </div>
 </article>

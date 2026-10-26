@@ -41,7 +41,8 @@ $pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 1
     'reports' => ['capability' => 'desk', 'page' => 'reports.php', 'steps' => 5],
     'reviews' => ['capability' => 'desk', 'page' => 'reviews.php', 'steps' => 6],
     'wishes' => ['capability' => 'desk', 'page' => 'wishes.php', 'steps' => 4],
-    'myclass' => ['capability' => 'view', 'page' => 'class.php', 'steps' => 7]];
+    'myclass' => ['capability' => 'view', 'page' => 'class.php', 'steps' => 7],
+    'stacks' => ['capability' => 'view', 'page' => 'stacks.php', 'steps' => 7]];
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
@@ -105,7 +106,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
                 'local_oksigeniaayvurenda_reader',
                 'id',
                 ['entityid' => $practice->entityid, 'cardcode' => $code(practice::READERS[0][0])]
-            )] : [])
+            )] : []) + ($piece === 'stacks' ? ['all' => 1] : [])
         ))->out(false),
         'steps' => $steps,
         'voices' => $voices,

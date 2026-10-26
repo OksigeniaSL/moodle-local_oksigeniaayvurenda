@@ -1961,3 +1961,344 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-howto-list { list-style: none; margin: 0 0 1.5rem; padding: 0; display: grid; gap: 1rem; }
 .ayv .ayv-howto .ayv-section-title { margin: 0; }
 .ayv .ayv-howto-steps { margin: 0; padding-left: 1.4rem; display: grid; gap: .3rem; }
+
+/* The shelves (0.59.0, with Gaudí's adjustments of 26 October 2026): books as spines, as tall and thick as they are,
+   in the colour of their cover, with their label at the foot and the gap of the ones that are out. Wood planks drawn
+   by a repeating gradient, one each row: every slot is a row tall, so rows and planks always meet. */
+.ayv .ayv-bookcase-wrap {
+    --u: 8px;
+    --row: calc(30 * var(--u) + 40px);
+    --wall: #efe3cc;
+    --ayv-bird: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 7h.01'/%3E%3Cpath d='M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20'/%3E%3Cpath d='m20 7 2 .5-2 .5'/%3E%3Cpath d='M10 18v3'/%3E%3Cpath d='M14 17.75V21'/%3E%3Cpath d='M7 18a6 6 0 0 0 3.84-10.61'/%3E%3C/svg%3E");
+    margin: 1rem 0;
+    border: 10px solid var(--ayv-wood2, #b8915f);
+    border-bottom-width: 0;
+    border-radius: 12px 12px 4px 4px;
+    background: var(--wall);
+    box-shadow: var(--ayv-shadow, 0 10px 28px -14px rgba(15, 58, 51, .32)), inset 0 10px 18px -12px rgba(60, 40, 20, .45);
+    overflow: hidden;
+}
+html[data-bs-theme="dark"] .ayv .ayv-bookcase-wrap { --wall: #23302c; }
+.ayv .ayv-bookcase {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0 1px;
+    margin: 0;
+    padding: 0 10px;
+    list-style: none;
+    background-image: repeating-linear-gradient(to bottom,
+        rgba(60, 40, 20, .18) 0, rgba(60, 40, 20, 0) 12px,
+        transparent 12px, transparent calc(var(--row) - 14px),
+        #e6cba2 calc(var(--row) - 14px), #e6cba2 calc(var(--row) - 11px),
+        var(--ayv-wood2, #b8915f) calc(var(--row) - 11px), var(--ayv-wood2, #b8915f) var(--row));
+    background-position: 0 0;
+}
+html[data-bs-theme="dark"] .ayv .ayv-bookcase {
+    background-image: repeating-linear-gradient(to bottom,
+        rgba(0, 0, 0, .35) 0, rgba(0, 0, 0, 0) 12px,
+        transparent 12px, transparent calc(var(--row) - 14px),
+        #7a6448 calc(var(--row) - 14px), #7a6448 calc(var(--row) - 11px),
+        var(--ayv-wood2, #3c3022) calc(var(--row) - 11px), var(--ayv-wood2, #3c3022) var(--row));
+}
+.ayv .ayv-spine-slot {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: flex-end;
+    width: var(--w);
+    height: var(--row);
+    padding-bottom: 14px;
+}
+.ayv .ayv-spine {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: calc(var(--cm) * var(--u));
+    border-radius: 3px 3px 2px 2px;
+    background: var(--bg);
+    text-decoration: none;
+    box-shadow: inset 2px 0 0 rgba(255, 255, 255, .2), inset -3px 0 0 rgba(0, 0, 0, .18), 0 1px 0 rgba(0, 0, 0, .25);
+    transition: transform .18s ease;
+    overflow: hidden;
+}
+html[data-bs-theme="dark"] .ayv .ayv-spine { background: var(--bgd); }
+.ayv a.ayv-spine.ayv-spine-cream { color: #fbf6ec; }
+.ayv a.ayv-spine.ayv-spine-ink { color: #1e2b2a; }
+/* The two headbands: thin strips a shade darker, at the head and the foot. */
+.ayv .ayv-spine::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(0, 0, 0, .22), rgba(0, 0, 0, .22)) left 0 top 6px / 100% 3px no-repeat,
+        linear-gradient(rgba(0, 0, 0, .22), rgba(0, 0, 0, .22)) left 0 bottom 6px / 100% 3px no-repeat;
+    pointer-events: none;
+}
+/* One in three thick enough carries a band with a motif of the house, chosen by its record so it never changes. */
+.ayv .ayv-spine-band::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 14px;
+    height: 22%;
+    background: currentColor;
+    opacity: .2;
+    -webkit-mask: var(--ayv-motif) center / cover no-repeat;
+    mask: var(--ayv-motif) center / cover no-repeat;
+    pointer-events: none;
+}
+.ayv .ayv-spine-band-0 { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M0%2030%20Q15%2020%2030%2030%20T60%2030%20T90%2030%20T120%2030%20M0%2050%20Q15%2040%2030%2050%20T60%2050%20T90%2050%20T120%2050%20M0%2070%20Q15%2060%2030%2070%20T60%2070%20T90%2070%20T120%2070%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%228%22/%3E%3C/svg%3E"); }
+.ayv .ayv-spine-band-1 { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M20%2020%20l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%20M75%2035%20l2%205%205%202-5%202-2%205-2-5-5-2%205-2z%20M45%2070%20l3%207%207%203-7%203-3%207-3-7-7-3%207-3z%20M95%2080%20l2%205%205%202-5%202-2%205-2-5-5-2%205-2z%22/%3E%3C/svg%3E"); }
+.ayv .ayv-spine-band-2 { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M0%20100%20L30%2055%20L50%2080%20L75%2040%20L120%20100%20Z%22/%3E%3C/svg%3E"); }
+.ayv .ayv-spine-band-3 { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2260%22%20r%3D%2222%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2260%22%20r%3D%2242%22/%3E%3Cpath%20d%3D%22M60%2010%20L60%20110%20M10%2060%20L110%2060%20M25%2025%20L95%2095%20M95%2025%20L25%2095%22/%3E%3C/g%3E%3C/svg%3E"); }
+.ayv .ayv-spine-band-4 { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cpath%20d%3D%22M70%2090%20C70%2060%2090%2045%20115%2045%20C115%2070%2098%2090%2070%2090%20Z%20M10%2040%20C10%2020%2025%2010%2045%2010%20C45%2030%2030%2040%2010%2040%20Z%22/%3E%3C/svg%3E"); }
+.ayv .ayv-spine-band-5 { --ayv-motif: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%20preserveAspectRatio%3D%22xMidYMid%20slice%22%3E%3Cg%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2215%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2215%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2275%22%20cy%3D%2215%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%22105%22%20cy%3D%2215%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2245%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2245%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2290%22%20cy%3D%2245%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2275%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2245%22%20cy%3D%2275%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%2275%22%20cy%3D%2275%22%20r%3D%227%22/%3E%3Ccircle%20cx%3D%22105%22%20cy%3D%2275%22%20r%3D%227%22/%3E%3C/g%3E%3C/svg%3E"); }
+/* The title along the spine: in Spanish and most of Europe it reads from the foot up; in English, from the head down. */
+.ayv .ayv-spine-title {
+    position: absolute;
+    z-index: 1;
+    top: 14px;
+    bottom: 58px;
+    left: 0;
+    right: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font: 600 13px/var(--w) var(--title);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ayv .ayv-spine-topdown .ayv-spine-title { transform: none; }
+.ayv .ayv-spine-small .ayv-spine-title { font-size: 11px; }
+/* The label at the foot, in the order of Gaudí's figure: class, three capitals of the author, three letters of the
+   title; with a stripe of its place's colour when the place is a colour, like the sticker in the room. */
+.ayv .ayv-spine-label {
+    position: absolute;
+    z-index: 1;
+    left: 3px;
+    right: 3px;
+    bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    padding: 2px 0;
+    border-radius: 3px;
+    background: #fffdf7;
+    color: #1e2b2a;
+    font: 700 9px/1.2 var(--text);
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .15);
+}
+.ayv .ayv-spine-label > span { display: block; white-space: nowrap; overflow: hidden; }
+.ayv .ayv-spine-label-place { border-top: 4px solid var(--place); }
+.ayv .ayv-spine-room { position: absolute; z-index: 1; top: 12px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 1.5px #fffdf7; }
+.ayv a.ayv-spine:hover,
+.ayv a.ayv-spine:focus-visible { transform: translateY(-12px); }
+.ayv a.ayv-spine:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 3px; }
+.ayv .ayv-spine-open .ayv-spine { transform: translateY(-12px); box-shadow: 0 0 0 3px var(--sun), 0 10px 16px -8px rgba(0, 0, 0, .5); }
+/* The gap of a book that is out: its outline and Mainumby, who took it travelling. */
+.ayv .ayv-spine-gap .ayv-spine {
+    background: transparent;
+    box-shadow: none;
+    border: 2px dashed rgba(30, 43, 42, .28);
+    color: var(--ayv-muted, #5f6b67);
+}
+html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transparent; border-color: rgba(236, 228, 212, .3); }
+.ayv .ayv-spine-gap .ayv-spine::before { display: none; }
+.ayv .ayv-spine-bird {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: min(30px, calc(var(--w) - 8px));
+    height: min(25px, calc((var(--w) - 8px) * .84));
+    transform: translateX(-50%);
+    background: currentColor;
+    -webkit-mask: var(--ayv-bird) center / contain no-repeat;
+    mask: var(--ayv-bird) center / contain no-repeat;
+}
+.ayv .ayv-spine-away {
+    position: absolute;
+    top: 46px;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font: 700 12px/calc(var(--w) - 4px) var(--text);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.ayv .ayv-spine-here .ayv-spine { transform: translateY(-12px); box-shadow: 0 0 0 3px var(--sun), 0 10px 16px -8px rgba(0, 0, 0, .5); }
+/* A bookend at the end of each plank, put there by the script once it knows where rows end. */
+.ayv .ayv-row-end::after {
+    content: "";
+    position: absolute;
+    right: -26px;
+    bottom: 14px;
+    width: 22px;
+    height: 44px;
+    border-radius: 2px 18px 2px 2px;
+    background: var(--green2);
+    pointer-events: none;
+}
+.ayv .ayv-bookcase-art .ayv-row-end::after {
+    border-radius: 0;
+    -webkit-mask: var(--ayv-bookend) center / contain no-repeat;
+    mask: var(--ayv-bookend) center / contain no-repeat;
+}
+/* The lectern: the book out of the shelf, turning to show its cover, with what it is and where it lives. As tall as
+   one or more rows, so the planks after it still meet their books. */
+.ayv .ayv-lectern {
+    flex: 0 0 100%;
+    height: calc(var(--row) * var(--rows, 1));
+    padding: 12px 0 26px;
+}
+.ayv .ayv-lectern-in {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    height: 100%;
+    padding: 1rem 1.25rem;
+    border-radius: var(--ayv-radius-lg, 22px);
+    background: var(--surface);
+    box-shadow: var(--ayv-shadow-lift, 0 18px 34px -16px rgba(15, 58, 51, .42));
+    overflow: hidden;
+    animation: ayv-lectern-in .25s ease both;
+}
+.ayv .ayv-lectern-book { flex: none; width: 140px; height: 200px; perspective: 900px; }
+.ayv .ayv-lectern-turn {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform: rotateY(22deg);
+    animation: ayv-lectern-turn .5s cubic-bezier(.2, .8, .2, 1) both;
+}
+.ayv .ayv-lectern-cover,
+.ayv .ayv-lectern-spine { position: absolute; top: 0; bottom: 0; backface-visibility: hidden; }
+.ayv .ayv-lectern-cover {
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: .25rem;
+    padding: .75rem;
+    border-radius: 2px 8px 8px 2px;
+    background: var(--bg) center / cover no-repeat;
+    box-shadow: inset 6px 0 0 rgba(0, 0, 0, .14), 0 14px 22px -12px rgba(0, 0, 0, .55);
+}
+.ayv .ayv-lectern-cover-title { font: 600 1rem/1.2 var(--title); }
+.ayv .ayv-lectern-cover-author { font-size: .8rem; }
+.ayv .ayv-lectern-photo .ayv-lectern-cover-title,
+.ayv .ayv-lectern-photo .ayv-lectern-cover-author { display: none; }
+.ayv .ayv-lectern-spine {
+    left: 0;
+    width: var(--w, 30px);
+    background: var(--bg);
+    transform-origin: left center;
+    transform: rotateY(-90deg);
+    box-shadow: inset -3px 0 0 rgba(0, 0, 0, .2);
+}
+.ayv .ayv-lectern-text { min-width: 0; flex: 1; }
+/* Wide, the facts go in a column of their own, so the lectern takes one row. */
+@media (min-width: 40.01rem) {
+    .ayv .ayv-lectern-text {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "title facts" "authors facts" "state facts" "actions facts";
+        align-content: center;
+        column-gap: 2rem;
+    }
+    .ayv .ayv-lectern-title { grid-area: title; }
+    .ayv .ayv-lectern-authors { grid-area: authors; }
+    .ayv .ayv-lectern-state { grid-area: state; justify-self: start; }
+    .ayv .ayv-lectern-actions { grid-area: actions; margin-top: .75rem; }
+    .ayv .ayv-lectern-facts { grid-area: facts; flex-direction: column; align-self: center; margin: 0; }
+}
+.ayv .ayv-lectern-title { margin: 0 0 .25rem; font: 600 1.35rem/1.2 var(--title); }
+.ayv .ayv-lectern-title:focus { outline: none; }
+.ayv .ayv-lectern-authors { margin: 0 0 .5rem; color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-lectern-facts { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin: .5rem 0 .75rem; }
+.ayv .ayv-lectern-facts dt { font-size: .8rem; color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-lectern-facts dd { margin: 0; font-weight: 700; }
+.ayv .ayv-lectern-label { display: inline-flex; flex-direction: column; min-width: 3.2rem; padding: .2rem .5rem; border-radius: 4px; background: #fffdf7; color: #1e2b2a; font: 700 .85rem/1.25 var(--text); text-align: center; box-shadow: inset 0 0 0 1px rgba(30, 43, 42, .2); }
+.ayv .ayv-lectern-label[style] { border-top: 5px solid var(--place); }
+.ayv .ayv-lectern-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; }
+@keyframes ayv-lectern-turn { from { transform: rotateY(88deg); } to { transform: rotateY(22deg); } }
+@keyframes ayv-lectern-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ayv-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
+/* The record: the books beside it, a short shelf. */
+.ayv .ayv-bookcase-mini { --u: 6px; width: fit-content; max-width: 100%; }
+.ayv .ayv-beside { margin-top: 1.5rem; }
+/* The page: the places of the library, each a little shelf with its colour. */
+.ayv .ayv-stacks-intro { margin: .25rem 0 0; color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-stacks-back { margin: .5rem 0 0; }
+.ayv .ayv-stacks-back a { display: inline-flex; gap: .25rem; align-items: center; }
+.ayv .ayv-stacks-walk { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.ayv .ayv-stacks-walk .ayv-button { display: inline-flex; gap: .35rem; align-items: center; }
+.ayv .ayv-stacks-next { margin-left: auto; }
+.ayv .ayv-stacks-all { margin: 1.5rem 0; }
+.ayv .ayv-places { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-place {
+    --place: var(--green2);
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0 .75rem;
+    align-items: end;
+    min-height: 4.5rem;
+    padding: .75rem 1rem;
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: var(--ayv-shadow, 0 10px 28px -14px rgba(15, 58, 51, .32)), inset 6px 0 0 var(--place);
+    transition: transform .15s ease;
+}
+.ayv .ayv-place:hover { transform: translateY(-2px); }
+.ayv .ayv-place-books { grid-row: 1 / 3; display: flex; align-items: flex-end; gap: 2px; height: 2.6rem; padding-bottom: 3px; border-bottom: 3px solid var(--ayv-wood2, #b8915f); }
+.ayv .ayv-place-books span { width: 7px; border-radius: 2px 2px 0 0; background: var(--place); }
+.ayv .ayv-place-books span:nth-child(1) { height: 70%; opacity: .95; }
+.ayv .ayv-place-books span:nth-child(2) { height: 92%; opacity: .7; }
+.ayv .ayv-place-books span:nth-child(3) { height: 80%; opacity: .85; }
+.ayv .ayv-place-books span:nth-child(4) { height: 100%; opacity: .6; }
+.ayv .ayv-place-books span:nth-child(5) { height: 64%; opacity: .8; }
+.ayv .ayv-place-label { font: 600 1.05rem/1.25 var(--title); overflow-wrap: anywhere; }
+.ayv .ayv-place-count { font-size: .85rem; color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-nav-stacks svg { width: 20px; height: 20px; }
+.ayv .ayv-nav-stacks { gap: .4rem; }
+@media (max-width: 40rem) {
+    /* On a phone the header goes up with the page: fixed, it would take a third of the screen. */
+    .ayv .ayv-top { position: relative; }
+    .ayv .ayv-bookcase-wrap { --u: 6.2px; border-width: 6px; border-bottom-width: 0; margin-left: -.25rem; margin-right: -.25rem; }
+    .ayv .ayv-bookcase { padding: 0 4px; }
+    /* On a phone the lectern is a sheet that comes up from the foot of the screen, over the shelf, which stays as it is. */
+    .ayv .ayv-lectern { position: fixed; z-index: 45; left: 0; right: 0; bottom: 0; height: auto; padding: 0 .5rem .5rem; }
+    .ayv .ayv-lectern-in {
+        height: auto;
+        max-height: 85vh;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        overflow-y: auto;
+        border-radius: 22px 22px 16px 16px;
+        box-shadow: 0 -10px 40px -10px rgba(15, 58, 51, .55);
+        animation: ayv-sheet-in .3s cubic-bezier(.2, .8, .2, 1) both;
+    }
+    .ayv .ayv-lectern-book { width: 76px; height: 108px; }
+    .ayv .ayv-lectern-cover { padding: .4rem; }
+    .ayv .ayv-lectern-cover-title { font-size: .7rem; }
+    .ayv .ayv-lectern-cover-author { display: none; }
+    .ayv .ayv-lectern-title { font-size: 1.15rem; }
+    .ayv .ayv-stacks-next { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-spine { transition: none; }
+    .ayv .ayv-lectern-turn { animation: none; }
+    .ayv .ayv-lectern-in { animation: ayv-lectern-in .2s ease both; }
+}

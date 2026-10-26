@@ -294,5 +294,22 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026102846, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026102855) {
+        // Each copy keeps its place in the order of the shelf, for walking along the shelves.
+        $table = new xmldb_table('local_oksigeniaayvurenda_item');
+        $field = new xmldb_field('shelfkey', XMLDB_TYPE_CHAR, '200', null, null, null, null, 'timeacquired');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $index = new xmldb_index('libraryshelfkey', XMLDB_INDEX_NOTUNIQUE, ['libraryid', 'shelfkey']);
+        if ($dbman->table_exists($table) && !$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
+            \local_oksigeniaayvurenda\local\stacks::refresh_keys((int) $entityid);
+        }
+        upgrade_plugin_savepoint(true, 2026102855, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

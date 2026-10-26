@@ -121,6 +121,7 @@
         <FIELD NAME="itemcondition" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="State of the item as last checked"/>
         <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timeacquired" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="shelfkey" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="Its place in the order of the shelf (class as the UDC files it, author, title), made of digits and small letters so any collation sorts it alike"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
@@ -133,6 +134,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="entitybarcode" UNIQUE="true" FIELDS="entityid, barcode"/>
+        <INDEX NAME="libraryshelfkey" UNIQUE="false" FIELDS="libraryid, shelfkey"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_reader" COMMENT="A reader of an entity, linked to a Moodle account when there is one">

@@ -21,6 +21,36 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 window.AYVHelpPieces = {
+    // The shelves: spines as tall as the books, the label at their foot, the gap of a book that is out, the lectern.
+    stacks: function(h) {
+        'use strict';
+        var spine = '.ayv-spine-slot:not(.ayv-spine-gap) a.ayv-spine';
+        return h.point(spine).then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-spine-label');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-spine-gap a.ayv-spine');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.you(3, spine);
+        }).then(function() {
+            return h.point('.ayv-lectern-in');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.point('.ayv-lectern-close');
+        }).then(function() {
+            return h.say(5);
+        }).then(function() {
+            return h.point('.ayv-stacks-back');
+        }).then(function() {
+            return h.say(6);
+        });
+    },
     // The desk: lend, undo, give back without the card, the note of one tap.
     desk: function(h) {
         'use strict';

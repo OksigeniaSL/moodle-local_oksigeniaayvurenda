@@ -75,6 +75,12 @@ Feature: Centres that share a site see nothing of each other
     When I open the Ayvurenda page "howto.php" of library "beta"
     Then I should see "This page is not for your account"
     And the page has nothing of centre "beta"
+    When I open the Ayvurenda page "stacks.php" of library "beta"
+    Then I should see "This page is not for your account"
+    And the page has nothing of centre "beta"
+    When I open the Ayvurenda page "stacks.php" of library "alfa" with "all=1"
+    Then I should see "El faro de Alfa"
+    And the page has nothing of centre "beta"
 
   Scenario: Whoever runs a centre manages only its own, and is turned away from the other's settings
     Given I log in as "jefealfa"

@@ -1,0 +1,126 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/stacks
+    Walking along the shelves: first the places of the library and its corners; then a stretch of shelf, book after book
+    in the order of their labels, with the lectern where a book comes out to be looked at.
+    Context variables required for this template:
+    * heading, intro - the title of the page and what it says
+    * map - true for the places and corners; then places (id, label, countlabel, url, colour, hascolour), corners
+      (label, countlabel, url, colour, art) and allurl
+    * shelf - true for a stretch of shelf; then spines (see spine), prevurl, nexturl, mapurl, empty, bookcase, bookend,
+      bird
+    * strings: stacksplaces, stackscorners, stacksall, stacksprev, stacksnext, stacksmap, stackslectern, stacksrecord,
+      stackswhere, stackslabel, stacksputback, stackswalk
+    Example context (json):
+    {
+        "heading": "La estantería", "intro": "Los libros están como en la biblioteca.",
+        "map": true, "shelf": false,
+        "places": [{"id": 3, "label": "Rojo", "countlabel": "120 libros", "url": "#", "colour": "#d63a2f", "hascolour": true}],
+        "corners": [{"label": "Lengua y literatura", "countlabel": "900 libros", "url": "#", "colour": 2, "art": null}],
+        "allurl": "#", "spines": [], "prevurl": "", "nexturl": "", "mapurl": "#", "empty": "Aquí no hay libros.",
+        "bookcase": "Libros de la estantería, en orden", "bookend": null, "bird": null,
+        "stacksplaces": "Los sitios de la biblioteca", "stackscorners": "Por rincones",
+        "stacksall": "Toda la biblioteca, de principio a fin", "stacksprev": "Hacia atrás", "stacksnext": "Seguir",
+        "stacksmap": "Todos los sitios", "stackslectern": "El libro, fuera de la balda", "stacksrecord": "Ver la ficha",
+        "stackswhere": "Dónde está", "stackslabel": "Su tejuelo", "stacksputback": "Dejarlo en su sitio",
+        "stackswalk": "Recorrer la estantería"
+    }
+}}
+<div class="ayv-stacks-page"{{#bookend}} style="--ayv-bookend: url('{{bookend}}')"{{/bookend}}>
+<header class="ayv-stacks-head">
+    <h1 class="ayv-results-title">{{heading}}</h1>
+    {{#intro}}<p class="ayv-stacks-intro">{{intro}}</p>{{/intro}}
+    {{#shelf}}<p class="ayv-stacks-back"><a href="{{mapurl}}">{{> local_oksigeniaayvurenda/icon_prev}} {{stacksmap}}</a></p>{{/shelf}}
+</header>
+
+{{#map}}
+{{#places.0}}
+<section class="ayv-section" aria-labelledby="ayv-stacks-places">
+    <h2 id="ayv-stacks-places" class="ayv-section-title">{{stacksplaces}}</h2>
+    <ul class="ayv-places">
+    {{#places}}
+        <li><a class="ayv-place" href="{{url}}"{{#hascolour}} style="--place: {{colour}}"{{/hascolour}}>
+            <span class="ayv-place-books" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+            <span class="ayv-place-label">{{label}}</span>
+            <span class="ayv-place-count">{{countlabel}}</span>
+        </a></li>
+    {{/places}}
+    </ul>
+</section>
+{{/places.0}}
+{{#corners.0}}
+<section class="ayv-section" aria-labelledby="ayv-stacks-corners">
+    <h2 id="ayv-stacks-corners" class="ayv-section-title">{{stackscorners}}</h2>
+    <ul class="ayv-corners">
+    {{#corners}}
+        <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
+            {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}
+            <span class="ayv-corner-label">{{label}}</span>
+            <span class="ayv-corner-count">{{countlabel}}</span>
+        </a></li>
+    {{/corners}}
+    </ul>
+</section>
+{{/corners.0}}
+<p class="ayv-stacks-all"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{stacksall}}</a></p>
+{{/map}}
+
+{{#shelf}}
+<nav class="ayv-stacks-walk" aria-label="{{stackswalk}}">
+    {{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}" rel="prev">{{> local_oksigeniaayvurenda/icon_prev}} {{stacksprev}}</a>{{/prevurl}}
+    {{#nexturl}}<a class="ayv-button ayv-button-quiet ayv-stacks-next" href="{{nexturl}}" rel="next">{{stacksnext}} {{> local_oksigeniaayvurenda/icon_next}}</a>{{/nexturl}}
+</nav>
+{{#spines.0}}
+<div class="ayv-bookcase-wrap"{{#bird}} style="--ayv-bird: url('{{bird}}')"{{/bird}}>
+    <ul class="ayv-bookcase{{#bookend}} ayv-bookcase-art{{/bookend}}" aria-label="{{bookcase}}">
+    {{#spines}}
+        {{> local_oksigeniaayvurenda/spine}}
+    {{/spines}}
+    </ul>
+</div>
+{{/spines.0}}
+{{^spines.0}}<p class="ayv-stacks-empty">{{empty}}</p>{{/spines.0}}
+<div class="ayv-stacks-walk">
+    {{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}" rel="prev">{{> local_oksigeniaayvurenda/icon_prev}} {{stacksprev}}</a>{{/prevurl}}
+    {{#nexturl}}<a class="ayv-button ayv-button-quiet ayv-stacks-next" href="{{nexturl}}" rel="next">{{stacksnext}} {{> local_oksigeniaayvurenda/icon_next}}</a>{{/nexturl}}
+</div>
+<template id="ayv-lectern">
+    <li class="ayv-lectern"><section class="ayv-lectern-in" aria-label="{{stackslectern}}">
+        <div class="ayv-lectern-book" aria-hidden="true">
+            <div class="ayv-lectern-turn">
+                <div class="ayv-lectern-spine"></div>
+                <div class="ayv-lectern-cover"><span class="ayv-lectern-cover-title"></span><span class="ayv-lectern-cover-author"></span></div>
+            </div>
+        </div>
+        <div class="ayv-lectern-text">
+            <h2 class="ayv-lectern-title" tabindex="-1"></h2>
+            <p class="ayv-lectern-authors"></p>
+            <p class="ayv-lectern-state"></p>
+            <dl class="ayv-lectern-facts">
+                <div><dt>{{stackswhere}}</dt><dd class="ayv-lectern-place"></dd></div>
+                <div><dt>{{stackslabel}}</dt><dd><span class="ayv-lectern-label"></span></dd></div>
+            </dl>
+            <p class="ayv-lectern-actions">
+                <a class="ayv-button ayv-lectern-record" href="#">{{> local_oksigeniaayvurenda/icon_book}} {{stacksrecord}}</a>
+                <button type="button" class="ayv-button ayv-button-quiet ayv-lectern-close">{{stacksputback}}</button>
+            </p>
+        </div>
+    </section></li>
+</template>
+{{/shelf}}
+</div>

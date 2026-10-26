@@ -458,14 +458,35 @@ final class screens {
      * own licence), and without it every screen keeps its drawn look.
      *
      * @param string $name
+     * @param string $type webp, or svg for the drawings used as masks.
      * @return string|null Its address.
      */
-    public static function art(string $name): ?string {
+    public static function art(string $name, string $type = 'webp'): ?string {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
-        if (!$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+)?$#', $name) || !is_readable($dir . '/pix/' . $name . '.webp')) {
+        if (
+            !$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+)?$#', $name) || !in_array($type, ['webp', 'svg'], true)
+                || !is_readable($dir . '/pix/' . $name . '.' . $type)
+        ) {
             return null;
         }
-        return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.webp'))->out(false);
+        return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.' . $type))->out(false);
+    }
+
+    /**
+     * Spines with what they say: their state in words, what the gap of one that is out says, and all of it for a
+     * screen reader (title, author, call number, state).
+     *
+     * @param array[] $spines From stacks.
+     * @return array[]
+     */
+    public static function spines(array $spines): array {
+        foreach ($spines as &$spine) {
+            $spine['statetext'] = self::str('state' . $spine['state']);
+            $spine['awaytext'] = $spine['out'] ? self::str($spine['held'] ? 'stateheld' : 'stacksaway') : '';
+            $spine['label'] = implode(', ', array_filter([$spine['title'], $spine['authors'], $spine['callnumber'],
+                $spine['statetext']], fn($part) => (string) $part !== ''));
+        }
+        return $spines;
     }
 
     /**
