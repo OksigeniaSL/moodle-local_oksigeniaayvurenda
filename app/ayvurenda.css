@@ -2449,3 +2449,14 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 @media print {
     .ayv .ayv-postersheet { margin: 0; box-shadow: none; break-after: page; }
 }
+
+/* The characters whole, in a pose (0.66.0): Gaudí's drawings beside what they say, and in the empty states. */
+.ayv .ayv-bubble-posed { align-items: center; }
+.ayv .ayv-bubble-figure { flex: none; width: 128px; height: 128px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(15, 58, 51, .22)); }
+.ayv .ayv-posed { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
+.ayv .ayv-posed > div, .ayv .ayv-posed > p { flex: 1 1 16rem; min-width: 0; }
+.ayv .ayv-posed-figure { flex: none; width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(15, 58, 51, .22)); }
+@media (max-width: 40rem) {
+    .ayv .ayv-bubble-figure { width: 96px; height: 96px; }
+    .ayv .ayv-posed-figure { width: 112px; height: 112px; }
+}

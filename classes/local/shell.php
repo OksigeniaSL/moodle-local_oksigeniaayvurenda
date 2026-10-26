@@ -77,16 +77,20 @@ final class shell {
      * @param string $title
      * @param string $why
      * @param \stdClass|null $library
+     * @param string $figure Gaudí's drawing of the memory in a pose, or ''.
      */
-    private static function refuse_page(string $title, string $why, ?\stdClass $library): void {
+    private static function refuse_page(string $title, string $why, ?\stdClass $library, string $figure = ''): void {
         global $PAGE;
         // It can come before the page set its own context: every page of the library is on the site's.
         $PAGE->set_context(\context_system::instance());
         $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
         self::output(
             $title,
+            ($figure !== '' ? '<div class="ayv-posed"><img class="ayv-posed-figure" src="' . s($figure) .
+            '" alt="" width="512" height="512"><div>' : '') .
             '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
-            s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>',
+            s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>' .
+            ($figure !== '' ? '</div></div>' : ''),
             $library,
             '',
             ['search' => false]
@@ -103,7 +107,9 @@ final class shell {
      */
     public static function missing(string $why, ?\stdClass $library = null): void {
         http_response_code(404);
-        self::refuse_page(get_string('notherehead', 'local_oksigeniaayvurenda'), $why, $library);
+        $memory = $library ? (characters::of((int) $library->entityid)['memory'] ?? null) : null;
+        $figure = $memory && $memory['enabled'] && empty($memory['own']) ? characters::figure('memory', 'senala') : null;
+        self::refuse_page(get_string('notherehead', 'local_oksigeniaayvurenda'), $why, $library, (string) $figure);
     }
 
     /**

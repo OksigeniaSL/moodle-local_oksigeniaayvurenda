@@ -97,15 +97,29 @@ final class characters {
     }
 
     /**
+     * Gaudí's drawing of a character whole, in a pose, from the art package (null without it): the memory, or
+     * Mainumby for the herald.
+     *
+     * @param string $role memory or herald.
+     * @param string $pose saluda, senala, celebra, lee or piensa.
+     * @return string|null
+     */
+    public static function figure(string $role, string $pose): ?string {
+        return screens::art('personajes/' . ($role === 'herald' ? 'mainumby' : 'memoria') . '-' . $pose);
+    }
+
+    /**
      * What a character says, in words that agree with its sex: a string key with the ending f or m, when there is one.
      *
      * @param int $entityid
      * @param string $role
      * @param string $key A string of the plugin; key + 'f' or 'm' if it changes with the sex.
      * @param array $a More for the string; the name is always there.
-     * @return array|null name, text, initial, role; null when the character is off.
+     * @param string $pose How it stands, when the art package draws it whole (saluda, senala, celebra, lee, piensa):
+     *     only for a character without a portrait of the centre's own.
+     * @return array|null name, text, initial, role, figure; null when the character is off.
      */
-    public static function say(int $entityid, string $role, string $key, array $a = []): ?array {
+    public static function say(int $entityid, string $role, string $key, array $a = [], string $pose = ''): ?array {
         $character = self::of($entityid)[$role] ?? null;
         if (!$character || !$character['enabled']) {
             return null;
@@ -118,6 +132,7 @@ final class characters {
             'text' => get_string($key, 'local_oksigeniaayvurenda', (object) ($a + ['name' => $character['name']])),
             'initial' => $character['initial'],
             'portrait' => $character['portrait'],
+            'figure' => $pose !== '' && empty($character['own']) ? self::figure($role, $pose) : null,
             'role' => $role,
             // Its voice, for a young reader, is added by the screen that knows the reader.
             'listen' => null,

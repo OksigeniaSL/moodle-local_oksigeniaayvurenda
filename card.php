@@ -153,6 +153,10 @@ foreach ($readers as $reader) {
             ['back', 'explore', 'tell', 'stay']
         )) : null,
         'listennobooks' => $young ? \local_oksigeniaayvurenda\local\screens::listen(['ui/{lang}/cardnobooks']) : null,
+        // Mainumby reading beside an empty album, when the herald is on and has no portrait of the centre's own.
+        'nobooksfigure' => ($heraldchar = \local_oksigeniaayvurenda\local\characters::of((int) $reader->entityid)['herald'] ?? null)
+            && $heraldchar['enabled'] && empty($heraldchar['own'])
+            ? \local_oksigeniaayvurenda\local\characters::figure('herald', 'lee') : null,
         'listengarden' => $young ? \local_oksigeniaayvurenda\local\screens::listen(
             ['ui/{lang}/challengegarden', 'ui/{lang}/challengegardenhint']
         ) : null,

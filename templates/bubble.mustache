@@ -23,16 +23,19 @@
     * role - memory or herald
     * name - the character's name
     * text - what it says
+    * figure - Gaudí's drawing of it whole, in a pose, or nothing
 
     Example context (json):
     {
         "initial": "M",
         "role": "memory",
         "name": "Memoria",
-        "text": "He buscado por toda la biblioteca."
+        "text": "He buscado por toda la biblioteca.",
+        "figure": null, "portrait": null
     }
 }}
-<div class="ayv-bubble">
-    <span class="ayv-bubble-portrait ayv-bubble-{{role}}" aria-hidden="true">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>
+<div class="ayv-bubble{{#figure}} ayv-bubble-posed{{/figure}}">
+    {{#figure}}<img class="ayv-bubble-figure" src="{{figure}}" alt="" width="512" height="512">{{/figure}}
+    {{^figure}}<span class="ayv-bubble-portrait ayv-bubble-{{role}}" aria-hidden="true">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>{{/figure}}
     <p class="ayv-bubble-text"><span class="ayv-bubble-name">{{name}}</span> {{text}}{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</p>
 </div>

@@ -174,7 +174,7 @@ final class screens {
             'didyoumean' => self::str('didyoumean'),
             // The memory speaks when it found nothing; otherwise it keeps quiet.
             'memory' => $corner === '' && $found['total'] === 0 && $query !== ''
-                ? characters::say((int) $library->entityid, 'memory', 'memorynothing', ['query' => $query]) : null,
+                ? characters::say((int) $library->entityid, 'memory', 'memorynothing', ['query' => $query], 'piensa') : null,
             'tryother' => $found['total'] === 0 && !$suggestions && ($corner !== '' || $query === '' ||
                 !characters::of((int) $library->entityid)['memory']['enabled']) ? self::str('tryother') : '',
             'more' => $more ? ['url' => self::url('search.php', $library, $next), 'label' => self::str('more')] : null,
@@ -757,7 +757,7 @@ final class screens {
             // The book the class chose as its reward is here: the herald tells.
             $arrived = wishes::arrived((int) $library->entityid, (string) $member->groupname);
             $hero['wishherald'] = $arrived !== null
-                ? characters::say((int) $library->entityid, 'herald', 'heraldwish', ['title' => $arrived]) : null;
+                ? characters::say((int) $library->entityid, 'herald', 'heraldwish', ['title' => $arrived], 'celebra') : null;
             $hero['classreads'] = self::cards(catalogue::class_reads(
                 $library,
                 (string) $member->groupname,

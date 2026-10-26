@@ -275,7 +275,7 @@ final class challenges {
             'complete' => $challenge->complete,
             'listen' => null,
             'herald' => $challenge->complete
-                ? characters::say($entityid, 'herald', 'challengeherald', ['group' => $challenge->group]) : null,
+                ? characters::say($entityid, 'herald', 'challengeherald', ['group' => $challenge->group], 'celebra') : null,
         ];
     }
 
