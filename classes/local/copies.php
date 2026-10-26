@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\export\dublincore;
+use local_oksigeniaayvurenda\core\export\ris;
 use local_oksigeniaayvurenda\core\marc\encoder;
 use local_oksigeniaayvurenda\core\marc\iso2709;
 use local_oksigeniaayvurenda\core\marc\marcxml;
@@ -108,6 +110,8 @@ final class copies {
         $counts['marc'] = self::marc($entityid, format_string($entity->name), $dir);
         $zip->addFile($dir . '/catalogo.mrc', 'catalogo.mrc');
         $zip->addFile($dir . '/catalogo.xml', 'catalogo.xml');
+        $zip->addFile($dir . '/catalogo-dc.xml', 'catalogo-dc.xml');
+        $zip->addFile($dir . '/catalogo.ris', 'catalogo.ris');
         $zip->addFromString('LEEME.txt', get_string('copyreadme', 'local_oksigeniaayvurenda', (object) [
             'entity' => format_string($entity->name),
             'date' => userdate($now, get_string('strftimedatetime', 'langconfig')),
@@ -141,7 +145,8 @@ final class copies {
     }
 
     /**
-     * The catalogue in MARC21, as ISO 2709 (catalogo.mrc) and MARCXML (catalogo.xml), a few hundred records at a time.
+     * The catalogue in MARC21, as ISO 2709 (catalogo.mrc) and MARCXML (catalogo.xml), and also in Dublin Core
+     * (catalogo-dc.xml) and RIS (catalogo.ris), a few hundred records at a time.
      *
      * @param int $entityid
      * @param string $entityname
@@ -153,6 +158,9 @@ final class copies {
         $mrc = fopen($dir . '/catalogo.mrc', 'w');
         $xml = fopen($dir . '/catalogo.xml', 'w');
         fwrite($xml, '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<collection xmlns="' . marcxml::NS . '">' . "\n");
+        $dc = fopen($dir . '/catalogo-dc.xml', 'w');
+        fwrite($dc, '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<collection>' . "\n");
+        $ris = fopen($dir . '/catalogo.ris', 'w');
         $count = 0;
         $last = 0;
         do {
@@ -203,13 +211,19 @@ final class copies {
                 $marc = encoder::encode((array) $record, $authorities[$record->id] ?? [], $items[$record->id] ?? [], $entityname);
                 fwrite($mrc, iso2709::write($marc));
                 fwrite($xml, marcxml::element($marc) . "\n");
+                fwrite($dc, dublincore::element((array) $record, $authorities[$record->id] ?? []) . "\n");
+                $first = ($items[$record->id] ?? [])[0]['callnumber'] ?? [];
+                fwrite($ris, ris::entry((array) $record, $authorities[$record->id] ?? [], implode(' ', array_filter($first))));
                 $count++;
                 $last = (int) $record->id;
             }
         } while (count($records) === 500);
         fwrite($xml, '</collection>' . "\n");
+        fwrite($dc, '</collection>' . "\n");
         fclose($mrc);
         fclose($xml);
+        fclose($dc);
+        fclose($ris);
         return $count;
     }
 

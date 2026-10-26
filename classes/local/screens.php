@@ -277,8 +277,16 @@ final class screens {
             ];
         }
         $card = self::cards([$found['card']], $library)[0];
+        // To cite the book in a reference manager: for whoever is past the flower, and never for material.
+        global $DB, $USER;
+        $reader = isloggedin() && !isguestuser() ? $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' =>
+            $library->entityid, 'userid' => $USER->id, 'status' => 'active'], '*', IGNORE_MULTIPLE) : null;
+        $young = $reader && cards::look_of($reader) === 'flower' && !access::can('local/oksigeniaayvurenda:desk', $library);
+        $cite = !$young && $record->doctype !== 'device' ? ['citeurl' => self::url('cite.php', $library, ['id' => $record->id]),
+            'citelabel' => self::str('citeris')] : null;
         return [
             'card' => $card,
+            'cite' => $cite,
             'title' => $record->title,
             'subtitle' => $record->subtitle,
             'authors' => $authors,

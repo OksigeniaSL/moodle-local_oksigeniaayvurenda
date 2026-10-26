@@ -166,6 +166,11 @@ final class notices_test extends \advanced_testcase {
         $titles = array_map(fn($r) => $r->first(['245'], 'a'), $records);
         $this->assertContains('Mapas del sur.', $titles);
         $this->assertCount(1, $records[0]->data_fields('852'));
+        // And in Dublin Core and RIS, a record each.
+        $dc = new \DOMDocument();
+        $this->assertTrue($dc->loadXML($zip->getFromName('catalogo-dc.xml')));
+        $this->assertSame(4, $dc->getElementsByTagNameNS('http://www.openarchives.org/OAI/2.0/oai_dc/', 'dc')->length);
+        $this->assertSame(4, substr_count($zip->getFromName('catalogo.ris'), "ER  - \r\n"));
         $zip->close();
         copies::make((int) $other->entityid, $now);
         // A second copy in the same second takes the place of the first.
