@@ -89,7 +89,7 @@
 <div class="ayv-bookcase-wrap"{{#bird}} style="--ayv-bird: url('{{bird}}')"{{/bird}}>
     <ul class="ayv-bookcase{{#bookend}} ayv-bookcase-art{{/bookend}}" aria-label="{{bookcase}}">
     {{#spines}}
-        {{> local_oksigeniaayvurenda/spine}}
+        <li class="ayv-spine-slot{{#out}} ayv-spine-gap{{/out}}{{#here}} ayv-spine-here{{/here}}" style="--cm: {{cm}}; --w: {{width}}px">{{> local_oksigeniaayvurenda/spine}}</li>
     {{/spines}}
     </ul>
 </div>

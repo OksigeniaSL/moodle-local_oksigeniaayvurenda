@@ -18,7 +18,7 @@
     @template local_oksigeniaayvurenda/spine
     A book on the shelf: its spine, as tall and thick as the book, in the colour of its cover, with its label at the foot.
     A book that is out leaves its gap, with the bird that took it. Without the script, it is a link to its record; with
-    it, it comes out onto the lectern.
+    it, it comes out onto the lectern. It goes inside its slot, a li that whoever includes it writes (as stacks and record do).
     Context variables required for this template:
     * id, url, title, shown (the title as it fits), authors, callnumber, place, label (what a screen reader hears)
     * cm, width, background, dark - its size and colours
@@ -37,8 +37,7 @@
         "state": "free", "statetext": "Libre", "awaytext": ""
     }
 }}
-<li class="ayv-spine-slot{{#out}} ayv-spine-gap{{/out}}{{#here}} ayv-spine-here{{/here}}" style="--cm: {{cm}}; --w: {{width}}px">
-    <a class="ayv-spine ayv-spine-{{ink}}{{#small}} ayv-spine-small{{/small}}{{#topdown}} ayv-spine-topdown{{/topdown}} {{band}}" href="{{url}}"
+<a class="ayv-spine ayv-spine-{{ink}}{{#small}} ayv-spine-small{{/small}}{{#topdown}} ayv-spine-topdown{{/topdown}} {{band}}" href="{{url}}"
         style="--bg: {{background}}; --bgd: {{dark}}{{#placecolour}}; --place: {{placecolour}}{{/placecolour}}"
         data-id="{{id}}" data-title="{{title}}" data-authors="{{authors}}" data-call="{{callnumber}}" data-lines="{{joined}}"
         data-place="{{place}}" data-state="{{state}}" data-statetext="{{statetext}}"{{#cover}} data-cover="{{cover}}"{{/cover}}{{#here}} aria-current="true"{{/here}}>
@@ -53,4 +52,3 @@
         {{#consult}}<span class="ayv-spine-room" aria-hidden="true"></span>{{/consult}}
         {{/out}}
     </a>
-</li>
