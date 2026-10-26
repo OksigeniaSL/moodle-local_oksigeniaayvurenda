@@ -243,6 +243,11 @@ final class covers {
      * @return string|null
      */
     public static function prepare(string $data): ?string {
+        // A JPEG already as small as covers are kept goes as it is: no GD needed (some servers' GD reads no WebP).
+        $height = @getimagesizefromstring($data)[1] ?? 0;
+        if ($height > 0 && $height <= self::HEIGHT && str_starts_with($data, "\xFF\xD8")) {
+            return $data;
+        }
         return self::shrink($data);
     }
 

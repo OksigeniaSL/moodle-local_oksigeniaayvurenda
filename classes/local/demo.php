@@ -478,9 +478,14 @@ final class demo {
             $words = explode(' ', \local_oksigeniaayvurenda\core\text::normalise((string) $row->title));
             $key = $keys ? $keys[$row->id % count($keys)] : ($words[1] ?? '');
             if (!array_key_exists($key, $prepared)) {
-                $file = $dir . '/pix/portadas/libro-' . $key . '.webp';
-                $prepared[$key] = preg_match('/^[a-z]+$/', $key) && is_readable($file)
-                    ? covers::prepare((string) file_get_contents($file)) : null;
+                // The JPEG first, which needs no GD; the WebP where the art package brings only that.
+                $prepared[$key] = null;
+                foreach (['jpg', 'webp'] as $type) {
+                    $file = $dir . '/pix/portadas/libro-' . $key . '.' . $type;
+                    if ($prepared[$key] === null && preg_match('/^[a-z]+$/', $key) && is_readable($file)) {
+                        $prepared[$key] = covers::prepare((string) file_get_contents($file));
+                    }
+                }
             }
             if ($prepared[$key] !== null && covers::store((int) $row->id, $prepared[$key], 'demo')) {
                 $given++;
