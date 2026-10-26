@@ -21,7 +21,7 @@
     Context variables required for this template:
     * heading, intro - the title of the page and what it says
     * map - true for the places and corners; then places (id, label, countlabel, url, colour, hascolour), corners
-      (label, countlabel, url, colour, art) and allurl
+      (label, countlabel, url, colour, art), allurl and posters (url and label of the printable posters, for the staff)
     * shelf - true for a stretch of shelf; then spines (see spine), prevurl, nexturl, mapurl, empty, bookcase, bookend,
       bird
     * strings: stacksplaces, stackscorners, stacksall, stacksprev, stacksnext, stacksmap, stackslectern, stacksrecord,
@@ -33,7 +33,7 @@
         "places": [{"id": 3, "label": "Rojo", "countlabel": "120 libros", "url": "#", "colour": "#d63a2f", "hascolour": true}],
         "corners": [{"label": "Lengua y literatura", "countlabel": "900 libros", "url": "#", "colour": 2, "art": null}],
         "allurl": "#", "spines": [], "prevurl": "", "nexturl": "", "mapurl": "#", "empty": "Aquí no hay libros.",
-        "bookcase": "Libros de la estantería, en orden", "bookend": null, "bird": null,
+        "bookcase": "Libros de la estantería, en orden", "bookend": null, "bird": null, "posters": null,
         "stacksplaces": "Los sitios de la biblioteca", "stackscorners": "Por rincones",
         "stacksall": "Toda la biblioteca, de principio a fin", "stacksprev": "Hacia atrás", "stacksnext": "Seguir",
         "stacksmap": "Todos los sitios", "stackslectern": "El libro, fuera de la balda", "stacksrecord": "Ver la ficha",
@@ -78,7 +78,8 @@
     </ul>
 </section>
 {{/corners.0}}
-<p class="ayv-stacks-all"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{stacksall}}</a></p>
+<p class="ayv-stacks-all"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{stacksall}}</a>
+    {{#posters}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/posters}}</p>
 {{/map}}
 
 {{#shelf}}

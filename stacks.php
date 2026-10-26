@@ -91,6 +91,10 @@ $data = [
     'bird' => screens::art('estanteria/mainumby', 'svg'),
     'prevurl' => '',
     'nexturl' => '',
+    'posters' => !$public && access::can('local/oksigeniaayvurenda:catalogue', $library) ? ['url' => (new moodle_url(
+        '/local/oksigeniaayvurenda/posters.php',
+        ['library' => $library->slug]
+    ))->out(false), 'label' => $str('postersnav')] : null,
 ];
 if ($shelf) {
     $stretch = stacks::page($library, $filter, $after, $before, $at);

@@ -2430,3 +2430,19 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-embed-shelf { max-height: var(--row); overflow: hidden; }
 .ayv .ayv-embed-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-size: .9rem; }
 .ayv .ayv-embed-made { color: var(--ayv-muted, #5f6b67); }
+
+/* Posters for the shelves (0.64.0): two to an A4 sheet, each with its place's colour, its name big and the QR code of
+   its shelf online. Cream paper and ink, whatever the screen's mode, as they are printed. */
+.ayv .ayv-postersheet { display: grid; grid-template-rows: 1fr 1fr; width: 210mm; height: 297mm; margin: 0 auto 1rem; background: #fff; color: #1e2b2a; box-shadow: 0 1px 6px rgba(0, 0, 0, .15); }
+.ayv .ayv-poster { display: flex; flex-direction: column; margin: 8mm 10mm; border: 1.5mm solid var(--place); border-radius: 6mm; overflow: hidden; background: #fbf6ec; }
+.ayv .ayv-poster-band { padding: 6mm 9mm 5mm; background: var(--place); color: var(--place-ink); }
+.ayv .ayv-poster-library { margin: 0; font: 700 11pt/1.2 var(--text); letter-spacing: .04em; text-transform: uppercase; }
+.ayv .ayv-poster-name { margin: 1mm 0 0; font: 600 34pt/1.05 var(--title); overflow-wrap: anywhere; }
+.ayv .ayv-poster-body { display: flex; flex: 1; gap: 8mm; align-items: center; padding: 6mm 9mm; }
+.ayv .ayv-poster-qr { flex: none; width: 52mm; height: 52mm; padding: 2mm; background: #fff; border-radius: 2mm; }
+.ayv .ayv-poster-text { display: flex; flex-direction: column; justify-content: space-between; align-self: stretch; }
+.ayv .ayv-poster-scan { margin: 0; font: 400 15pt/1.35 var(--text); }
+.ayv .ayv-poster-brand { display: flex; gap: 2mm; align-items: center; margin: 0; font: 600 11pt var(--title); color: #17574c; }
+@media print {
+    .ayv .ayv-postersheet { margin: 0; box-shadow: none; break-after: page; }
+}
