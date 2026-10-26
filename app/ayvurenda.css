@@ -2214,7 +2214,8 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     .ayv .ayv-lectern-text {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas: "title facts" "authors facts" "state facts" "actions facts";
+        grid-template-rows: auto auto auto auto 1fr;
+        grid-template-areas: "title facts" "authors facts" "state facts" "actions facts" ". facts";
         align-content: center;
         column-gap: 2rem;
     }
@@ -2222,7 +2223,8 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     .ayv .ayv-lectern-authors { grid-area: authors; }
     .ayv .ayv-lectern-state { grid-area: state; justify-self: start; }
     .ayv .ayv-lectern-actions { grid-area: actions; margin-top: .75rem; }
-    .ayv .ayv-lectern-facts { grid-area: facts; flex-direction: column; align-self: center; margin: 0; }
+    .ayv .ayv-lectern-side { grid-area: facts; align-self: center; max-width: 22rem; }
+    .ayv .ayv-lectern-facts { flex-direction: column; margin: 0; }
 }
 .ayv .ayv-lectern-title { margin: 0 0 .25rem; font: 600 1.35rem/1.2 var(--title); }
 .ayv .ayv-lectern-title:focus { outline: none; }
@@ -2391,3 +2393,29 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-pulse li::before { animation: none; }
 }
+
+/* Where is it? (0.62.0): the label of a book, big, with what each line says (in the order of Gaudí's figure, «the label
+   inside out»), on the record and folded on the lectern. */
+.ayv .ayv-where-box { margin-top: 1.5rem; }
+.ayv .ayv-where-in { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; padding: 1rem 1.25rem; border-radius: 18px; background: var(--surface); box-shadow: var(--ayv-shadow, 0 10px 28px -14px rgba(15, 58, 51, .32)); }
+.ayv .ayv-where-in > div { flex: 1 1 14rem; min-width: 0; }
+.ayv .ayv-where-label {
+    display: inline-flex;
+    flex-direction: column;
+    flex: none;
+    min-width: 4.5rem;
+    padding: .45rem .7rem;
+    border-radius: 6px;
+    background: #fffdf7;
+    color: #1e2b2a;
+    font: 700 1.25rem/1.25 var(--text);
+    text-align: center;
+    box-shadow: inset 0 0 0 1.5px rgba(30, 43, 42, .2), 0 6px 14px -8px rgba(15, 58, 51, .5);
+}
+.ayv .ayv-where-label.ayv-spine-label-place { border-top: 7px solid var(--place); }
+.ayv .ayv-where-place { margin: 0 0 .4rem; font-weight: 700; }
+.ayv .ayv-why-list { margin: 0 0 .4rem; padding-left: 1.1rem; }
+.ayv .ayv-why-list li { margin: .15rem 0; }
+.ayv .ayv-why { margin-top: .6rem; }
+.ayv .ayv-why summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 32px; display: flex; align-items: center; }
+.ayv .ayv-why-order { margin: 0; font-size: .9rem; color: var(--ayv-muted, #5f6b67); }

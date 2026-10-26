@@ -108,6 +108,20 @@
             label.style.setProperty('--place', tint);
         }
         label.parentNode.parentNode.hidden = !label.childNodes.length;
+        // What each line of the label says, folded until asked.
+        var whys = (spine.dataset.whys || '').split('|').filter(function (line) {
+            return line;
+        });
+        var why = lectern.querySelector('.ayv-why');
+        whys.forEach(function (line) {
+            var item = document.createElement('li');
+            item.textContent = line;
+            why.querySelector('.ayv-why-list').appendChild(item);
+        });
+        why.hidden = !whys.length;
+        why.addEventListener('toggle', function () {
+            fit(lectern, slot);
+        });
         lectern.querySelector('.ayv-lectern-record').href = spine.href;
         lectern.querySelector('.ayv-lectern-close').addEventListener('click', function () {
             close(shelf, true);

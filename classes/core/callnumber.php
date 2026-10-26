@@ -47,6 +47,52 @@ final class callnumber {
     }
 
     /**
+     * What each line of a book's label says, to find it on the shelf: the subject (the class and the corner it opens),
+     * the author's letters, the title's letters. A line that is not what the house's rule would write is only named,
+     * never explained wrongly: each library writes its labels its own way.
+     *
+     * @param string[] $lines The lines of the label, as written.
+     * @param string|null $classlabel The name of the class of the first line, when the catalogue has it.
+     * @param string|null $corner The name of the corner its first digit opens.
+     * @param string $author The first author, as catalogued.
+     * @param string $title
+     * @return array[] One for each line: line, kind (class, section, author, title or other) and word (what it stands
+     *     for: the class's name, the surname, the title's word), or '' when unknown.
+     */
+    public static function explain(array $lines, ?string $classlabel, ?string $corner, string $author, string $title): array {
+        $explained = [];
+        foreach (array_values($lines) as $i => $line) {
+            $line = trim((string) $line);
+            if ($line === '') {
+                continue;
+            }
+            $kind = 'other';
+            $word = '';
+            if ($i === 0) {
+                $kind = preg_match('/^\d/', $line) ? 'class' : 'section';
+                $word = $kind === 'class' ? (string) ($classlabel ?? $corner ?? '') : '';
+            } else if ($i === 1 && $author !== '' && self::author($author) === strtoupper(text::normalise($line))) {
+                $kind = 'author';
+                $word = str_contains($author, ',') ? trim(strstr($author, ',', true)) : (string) preg_replace(
+                    '/^.*\s/u',
+                    '',
+                    trim($author)
+                );
+            } else if ($i === 2 && self::title($title) === text::normalise($line)) {
+                $kind = 'title';
+                $words = preg_split('/\s+/u', trim($title)) ?: [];
+                while (count($words) > 1 && in_array(text::normalise($words[0]), self::ARTICLES, true)) {
+                    array_shift($words);
+                }
+                $word = (string) preg_replace('/^[\p{P}\s]+|[\p{P}\s]+$/u', '', (string) ($words[0] ?? ''));
+            }
+            $explained[] = ['line' => $line, 'kind' => $kind, 'word' => $word,
+                'corner' => $i === 0 && $kind === 'class' && $corner !== null && $corner !== $word ? $corner : ''];
+        }
+        return $explained;
+    }
+
+    /**
      * Three capitals of the surname.
      *
      * @param string $author

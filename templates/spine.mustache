@@ -24,7 +24,7 @@
     * cm, width, background, dark - its size and colours
     * ink - cream or ink, the colour of its letters
     * small, topdown, band, out, held, consult, here - how it looks
-    * lines - the lines of its label; joined - the same, joined with |
+    * lines - the lines of its label; joined - the same, joined with |; whyjoined - what each line says, joined with |
     * placecolour - the colour of its place, when the place is a colour
     * cover, state, statetext - for the lectern; awaytext - what the gap of a book that is out says
     Example context (json):
@@ -33,13 +33,13 @@
         "callnumber": "82-3 MON dra", "place": "Rojo", "label": "El dragón que leía, Ana Montes, 82-3 MON dra",
         "cm": 22, "width": 34, "background": "#2c7a6a", "dark": "#246a5c", "ink": "cream", "small": false,
         "topdown": false, "band": "", "out": false, "held": false, "consult": false, "here": false,
-        "lines": [{"line": "82-3"}, {"line": "MON"}, {"line": "dra"}], "joined": "82-3|MON|dra", "placecolour": "#d63a2f", "cover": null,
+        "lines": [{"line": "82-3"}, {"line": "MON"}, {"line": "dra"}], "joined": "82-3|MON|dra", "whyjoined": "82-3: de qué trata, Novela|MON: las primeras letras del autor, Montes", "placecolour": "#d63a2f", "cover": null,
         "state": "free", "statetext": "Libre", "awaytext": ""
     }
 }}
 <a class="ayv-spine ayv-spine-{{ink}}{{#small}} ayv-spine-small{{/small}}{{#topdown}} ayv-spine-topdown{{/topdown}} {{band}}" href="{{url}}" title="{{title}}"
         style="--bg: {{background}}; --bgd: {{dark}}{{#placecolour}}; --place: {{placecolour}}{{/placecolour}}"
-        data-id="{{id}}" data-title="{{title}}" data-authors="{{authors}}" data-call="{{callnumber}}" data-lines="{{joined}}"
+        data-id="{{id}}" data-title="{{title}}" data-authors="{{authors}}" data-call="{{callnumber}}" data-lines="{{joined}}" data-whys="{{whyjoined}}"
         data-place="{{place}}" data-state="{{state}}" data-statetext="{{statetext}}"{{#cover}} data-cover="{{cover}}"{{/cover}}{{#here}} aria-current="true"{{/here}}>
         <span class="ayv-sr">{{label}}</span>
         {{#out}}

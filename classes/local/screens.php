@@ -481,12 +481,42 @@ final class screens {
      */
     public static function spines(array $spines): array {
         foreach ($spines as &$spine) {
+            $spine['whys'] = array_map(fn($why) => ['text' => self::str(
+                $why['kind'] === 'class' ? ($why['word'] === ''
+                ? 'whyclassonly' : ($why['corner'] !== '' ? 'whyclasscorner' : 'whyclass')) : 'why' . $why['kind'],
+                (object) $why
+            )], $spine['why'] ?? []);
+            $spine['whyjoined'] = implode('|', array_column($spine['whys'], 'text'));
             $spine['statetext'] = self::str('state' . $spine['state']);
             $spine['awaytext'] = $spine['out'] ? self::str($spine['held'] ? 'stateheld' : 'stacksaway') : '';
             $spine['label'] = implode(', ', array_filter([$spine['title'], $spine['authors'], $spine['callnumber'],
                 $spine['statetext']], fn($part) => (string) $part !== ''));
         }
         return $spines;
+    }
+
+    /**
+     * How to find a record on the shelf of this library: its label, big, what each line says and the place it stands
+     * in. Nothing when the library has no copy of it.
+     *
+     * @param \stdClass $library
+     * @param int $recordid
+     * @return array|null heading, lines, placecolour, placeline, whys, order.
+     */
+    public static function where(\stdClass $library, int $recordid): ?array {
+        $spine = stacks::spines($library, [(object) ['recordid' => $recordid, 'k' => '']])[0] ?? null;
+        if (!$spine || !$spine['lines']) {
+            return null;
+        }
+        $spine = self::spines([$spine])[0];
+        return [
+            'heading' => self::str('whyheading'),
+            'lines' => $spine['lines'],
+            'placecolour' => $spine['placecolour'],
+            'placeline' => $spine['place'] !== '' ? self::str('whyplace', $spine['place']) : '',
+            'whys' => $spine['whys'],
+            'order' => self::str('whyorder'),
+        ];
     }
 
     /**

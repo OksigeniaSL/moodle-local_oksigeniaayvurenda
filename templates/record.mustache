@@ -24,6 +24,7 @@
     * title, subtitle, authors, facts, subjects, summary, copies - the record
     * back - url and label to go back
     * hold - the reservation box, or nothing
+    * where - how to find it on the shelf (heading, lines, placecolour, placeline, whys, order), or nothing
     * beside - the books beside it on its shelf (heading, spines, walk, walkurl, bird, bookend), or nothing
 
     Example context (json):
@@ -190,6 +191,19 @@
             {{/copies}}
         </ul>
         {{/hascopies}}
+        {{#where}}
+        <section class="ayv-where-box" aria-labelledby="ayv-where-title">
+            <h2 id="ayv-where-title" class="ayv-section-title">{{heading}}</h2>
+            <div class="ayv-where-in">
+                <span class="ayv-where-label{{#placecolour}} ayv-spine-label-place{{/placecolour}}"{{#placecolour}} style="--place: {{placecolour}}"{{/placecolour}} aria-hidden="true">{{#lines}}<span>{{line}}</span>{{/lines}}</span>
+                <div>
+                    {{#placeline}}<p class="ayv-where-place">{{placeline}}</p>{{/placeline}}
+                    <ul class="ayv-why-list">{{#whys}}<li>{{text}}</li>{{/whys}}</ul>
+                    <p class="ayv-field-hint">{{order}}</p>
+                </div>
+            </div>
+        </section>
+        {{/where}}
         {{#beside}}
         <section class="ayv-beside" aria-labelledby="ayv-beside-title">
             <h2 id="ayv-beside-title" class="ayv-section-title">{{heading}}</h2>

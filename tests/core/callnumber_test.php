@@ -39,4 +39,21 @@ final class callnumber_test extends \basic_testcase {
         $this->assertSame(['', 'ACE', 'arb'], callnumber::propose('', 'Ácebo, Lía', 'Árbol'));
         $this->assertSame(['N', '', 'el'], callnumber::propose(' N ', '', 'El'));
     }
+
+    /**
+     * What each line of a label says: the subject and the corner it opens, the author's and the title's letters as the
+     * house writes them (accents aside); a line written another way is only named.
+     */
+    public function test_explain(): void {
+        $why = callnumber::explain(['59', 'EST', 'río'], 'Zoología', 'Ciencias', 'Estrada Galán, Olivia', 'El río perdido');
+        $this->assertSame([
+            ['line' => '59', 'kind' => 'class', 'word' => 'Zoología', 'corner' => 'Ciencias'],
+            ['line' => 'EST', 'kind' => 'author', 'word' => 'Estrada Galán', 'corner' => ''],
+            ['line' => 'río', 'kind' => 'title', 'word' => 'río', 'corner' => ''],
+        ], $why);
+        $why = callnumber::explain(['N', 'XYZ', '', 'azul'], null, null, 'Montes, Ana', 'El faro');
+        $this->assertSame(['section', 'other', 'other'], array_column($why, 'kind'));
+        $why = callnumber::explain(['5'], null, 'Ciencias', '', 'Agua');
+        $this->assertSame(['line' => '5', 'kind' => 'class', 'word' => 'Ciencias', 'corner' => ''], $why[0]);
+    }
 }

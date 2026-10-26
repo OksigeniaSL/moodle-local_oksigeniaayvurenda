@@ -25,7 +25,7 @@
     * shelf - true for a stretch of shelf; then spines (see spine), prevurl, nexturl, mapurl, empty, bookcase, bookend,
       bird
     * strings: stacksplaces, stackscorners, stacksall, stacksprev, stacksnext, stacksmap, stackslectern, stacksrecord,
-      stackswhere, stackslabel, stacksputback, stackswalk
+      stackswhere, stackslabel, stacksputback, stackswalk, whyask, whyorder
     Example context (json):
     {
         "heading": "La estantería", "intro": "Los libros están como en la biblioteca.",
@@ -38,7 +38,8 @@
         "stacksall": "Toda la biblioteca, de principio a fin", "stacksprev": "Hacia atrás", "stacksnext": "Seguir",
         "stacksmap": "Todos los sitios", "stackslectern": "El libro, fuera de la balda", "stacksrecord": "Ver la ficha",
         "stackswhere": "Dónde está", "stackslabel": "Su tejuelo", "stacksputback": "Dejarlo en su sitio",
-        "stackswalk": "Recorrer la estantería"
+        "stackswalk": "Recorrer la estantería", "whyask": "¿Qué dice el tejuelo?",
+        "whyorder": "En la estantería van por el número, después por el autor y después por el título."
     }
 }}
 <div class="ayv-stacks-page"{{#bookend}} style="--ayv-bookend: url('{{bookend}}')"{{/bookend}}>
@@ -111,10 +112,17 @@
             <h2 class="ayv-lectern-title" tabindex="-1"></h2>
             <p class="ayv-lectern-authors"></p>
             <p class="ayv-lectern-state"></p>
-            <dl class="ayv-lectern-facts">
-                <div><dt>{{stackswhere}}</dt><dd class="ayv-lectern-place"></dd></div>
-                <div><dt>{{stackslabel}}</dt><dd><span class="ayv-lectern-label"></span></dd></div>
-            </dl>
+            <div class="ayv-lectern-side">
+                <dl class="ayv-lectern-facts">
+                    <div><dt>{{stackswhere}}</dt><dd class="ayv-lectern-place"></dd></div>
+                    <div><dt>{{stackslabel}}</dt><dd><span class="ayv-lectern-label"></span></dd></div>
+                </dl>
+                <details class="ayv-why" hidden>
+                    <summary>{{whyask}}</summary>
+                    <ul class="ayv-why-list"></ul>
+                    <p class="ayv-why-order">{{whyorder}}</p>
+                </details>
+            </div>
             <p class="ayv-lectern-actions">
                 <a class="ayv-button ayv-lectern-record" href="#">{{> local_oksigeniaayvurenda/icon_book}} {{stacksrecord}}</a>
                 <button type="button" class="ayv-button ayv-button-quiet ayv-lectern-close">{{stacksputback}}</button>

@@ -24,6 +24,7 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\callnumber;
 use local_oksigeniaayvurenda\core\shelf_order;
 use local_oksigeniaayvurenda\core\spine;
 
@@ -421,18 +422,30 @@ final class stacks {
             }
         }
         $authors = [];
+        $firstauthor = [];
+        $classlabel = [];
         $links = $DB->get_records_sql(
-            "SELECT ra.id, ra.recordid, a.label
+            "SELECT ra.id, ra.recordid, a.kind, a.label
                FROM {" . self::T . "recauth} ra
                JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
-              WHERE ra.recordid $in AND a.kind = 'author'
+              WHERE ra.recordid $in AND (a.kind = 'author' OR a.kind = 'class')
            ORDER BY ra.sortorder, ra.id",
             $params
         );
         foreach ($links as $link) {
+            if ($link->kind === 'class') {
+                $classlabel[$link->recordid] = $classlabel[$link->recordid] ?? catalogue::tidy_label((string) $link->label);
+                continue;
+            }
+            $firstauthor[$link->recordid] = $firstauthor[$link->recordid] ?? (string) $link->label;
             if (count($authors[$link->recordid] ?? []) < 2) {
                 $authors[$link->recordid][] = catalogue::display_name($link->label);
             }
+        }
+        // The corners by their first digit, to say which one a label's class opens.
+        $corners = [];
+        foreach (catalogue::corners($library, true) as $corner) {
+            $corners[$corner['code']] = $corner['label'];
         }
         $placeids = array_filter(array_map(fn($c) => (int) $c[0]->locationid, $copies));
         $places = [];
@@ -486,6 +499,9 @@ final class stacks {
                 'lines' => array_map(fn($l) => ['line' => $l], $lines),
                 'callnumber' => implode(' ', $lines),
                 'joined' => implode('|', $lines),
+                // What each line of its label stands for, to find it on the real shelf.
+                'why' => callnumber::explain($lines, $classlabel[$id] ?? null, preg_match('/^\s*(\d)/', $lines[0] ?? '', $c)
+                    ? ($corners[$c[1]] ?? null) : null, $firstauthor[$id] ?? '', (string) $record->title),
                 'place' => $place,
                 'placecolour' => $place !== '' ? spine::place_colour($place) : null,
                 'cm' => $size['cm'],

@@ -94,7 +94,8 @@ $data = screens::record($found, $library);
 $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);
-// The books beside it on its shelf, to find it in the room and to come across another.
+// How to find it on the shelf, and the books beside it there, to find it in the room and to come across another.
+$data['where'] = screens::where($library, $id);
 $beside = \local_oksigeniaayvurenda\local\stacks::neighbours($library, $id);
 $data['beside'] = $beside && count($beside['spines']) > 1 ? [
     'heading' => get_string('stacksbeside', 'local_oksigeniaayvurenda'),

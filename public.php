@@ -126,6 +126,7 @@ if ($recordid) {
     }
     unset($subject);
     $data['back'] = ['url' => $here(), 'label' => $str('windowbackdoor')];
+    $data['where'] = screens::where($library, $recordid);
     $beside = stacks::neighbours($library, $recordid);
     $data['beside'] = $beside && count($beside['spines']) > 1 ? [
         'heading' => $str('stacksbeside'),
