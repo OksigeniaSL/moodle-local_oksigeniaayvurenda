@@ -108,6 +108,7 @@ foreach ($readers as $reader) {
     foreach ($look === 'flower' || $sky ? $album['past'] : [] as $p) {
         $label = ($sky ? $str('stagesky' . $p['stage']) : $str('stage' . flower::STAGES[$p['stage']])) . ' · ' . $p['year'];
         $past[] = ['year' => $p['year'], 'flower' => cards::flower_url($p['stage']), 'stage' => $label,
+            'pastclass' => $p['met'] ? $str('cardpastclass', (object) ['group' => $p['group'], 'met' => $p['met']]) : '',
             'svg' => $sky ? cards::sky_svg($p['stage'], $p['levels'], $label, 72, $sober)
                 : cards::flower_svg($p['stage'], $p['levels'], $label, 72)];
     }

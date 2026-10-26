@@ -617,6 +617,9 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-notice { padding: .75rem 1rem; background: var(--notice-bg); border-left: 6px solid var(--green2); border-radius: 8px; }
 
 .ayv .ayv-sources { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
+/* The class's island: layers of the same size, one on top of another, as Gaudí draws them. */
+.ayv .ayv-island { position: relative; aspect-ratio: 16 / 10; margin: 1rem 0 0; border-radius: var(--radius); overflow: hidden; }
+.ayv .ayv-island img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 .ayv .ayv-source {
     display: flex;

@@ -454,10 +454,38 @@ final class screens {
      */
     public static function art(string $name): ?string {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
-        if (!$dir || !preg_match('/^[a-z0-9-]+$/', $name) || !is_readable($dir . '/pix/' . $name . '.webp')) {
+        if (!$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+)?$#', $name) || !is_readable($dir . '/pix/' . $name . '.webp')) {
             return null;
         }
         return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.webp'))->out(false);
+    }
+
+    /**
+     * The class's garden as Gaudí's island: its base, a piece for each challenge met this school year (three, one a
+     * term), the lighthouse when one was of everyone, and the boat when the book the class asked for arrived. Layers of
+     * the same size, one on top of another; null without the art package, and then the garden stays a list.
+     *
+     * @param int $met Challenges met this school year.
+     * @param bool $everyone Whether one of them was of everyone in the class.
+     * @param bool $boat Whether a book the class asked for arrived.
+     * @return string[]|null Addresses of the layers, from the bottom.
+     */
+    public static function island(int $met, bool $everyone, bool $boat): ?array {
+        $base = self::art('isla/base');
+        if (!$base) {
+            return null;
+        }
+        $names = array_map(fn($n) => 'isla/reto-' . $n, range(1, min(3, $met)));
+        if ($met < 1) {
+            $names = [];
+        }
+        if ($everyone) {
+            $names[] = 'isla/faro';
+        }
+        if ($boat) {
+            $names[] = 'isla/barco';
+        }
+        return array_merge([$base], array_values(array_filter(array_map([self::class, 'art'], $names))));
     }
 
     /** @var string[] The pencils of the drawing pad: the house's colours, by name. */

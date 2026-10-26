@@ -95,15 +95,18 @@ foreach ($groups as $i => $group) {
         $kinds[] = ['value' => $kind, 'label' => $str('challengekind' . $kind),
             'checked' => $challenge ? $challenge->kind === $kind : $kind === 'off'];
     }
+    $planted = challenges::garden($entityid, $group, $now);
     $garden = array_map(
         fn($p) => ['label' => $str('challengeplanted', $p['term']) . ' · ' . $str('challengekind' . $p['kind'])],
-        challenges::garden($entityid, $group, $now)
+        $planted
     );
     $reads = screens::cards(catalogue::class_reads($library, $group, (int) $year->id, $now), $library);
     // Each challenge met is rewarded with more reading: the class chooses the next book.
     $rewards = [];
+    $boat = false;
     foreach (wishes::rewards($entityid, $group, $now) as $reward) {
         $wish = $reward['wish'];
+        $boat = $boat || ($wish && $wish->status === 'got');
         $rewards[] = [
             'challengeid' => (int) $reward['challenge']->id,
             'label' => $str('challengeplanted', $reward['challenge']->term) . ' · ' .
@@ -121,6 +124,13 @@ foreach ($groups as $i => $group) {
         'kinds' => $kinds,
         'garden' => $garden,
         'hasgarden' => (bool) $garden,
+        // The garden drawn, when the art package brings the island.
+        'island' => ($layers = screens::island(
+            count($planted),
+            in_array('everyone', array_column($planted, 'kind'), true),
+            $boat
+        )) ? ['islandlayers' => array_map(fn($u) => ['layer' => $u], $layers),
+            'islandlabel' => $str('islandlabel', count($planted))] : null,
         'cards' => $reads,
         'hasreads' => (bool) $reads,
         'rewards' => $rewards,

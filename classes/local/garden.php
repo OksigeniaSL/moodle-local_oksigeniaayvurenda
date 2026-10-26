@@ -55,7 +55,8 @@ final class garden {
      *
      * @param \stdClass $reader
      * @param int|null $now
-     * @return array year, flower, books (id, title, cover, note), past (year name and stage).
+     * @return array year, flower, books (id, title, cover, note), past (year name, stage, the reader's group then and how
+     *     many challenges that class met).
      */
     public static function album(\stdClass $reader, ?int $now = null): array {
         global $DB;
@@ -74,7 +75,7 @@ final class garden {
         }
         $past = [];
         $years = $DB->get_records_sql(
-            'SELECT DISTINCT y.id, y.name, y.timestart
+            'SELECT DISTINCT y.id, y.name, y.timestart, y.timeend
                FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'year} y ON y.id = l.yearid
               WHERE l.readerid = :readerid AND y.id <> :yearid
@@ -82,7 +83,17 @@ final class garden {
             ['readerid' => $reader->id, 'yearid' => $year->id]
         );
         foreach ($years as $other) {
-            $past[] = ['year' => $other->name] + self::flower($reader, $other);
+            // The class garden of that year stays in the album: what their group then met together.
+            $group = (string) $DB->get_field_select(
+                self::T . 'member',
+                'groupname',
+                'readerid = :readerid AND yearid = :yearid',
+                ['readerid' => $reader->id, 'yearid' => $other->id],
+                IGNORE_MULTIPLE
+            );
+            $met = $group === '' ? 0 : $DB->count_records_select(self::T . 'challenge', 'yearid = :yearid AND
+                groupname = :groupname AND timecompleted IS NOT NULL', ['yearid' => $other->id, 'groupname' => $group]);
+            $past[] = ['year' => $other->name, 'group' => $group, 'met' => $met] + self::flower($reader, $other);
         }
         return ['year' => $year, 'flower' => self::flower($reader, $year), 'books' => array_values($books), 'past' => $past];
     }

@@ -21,7 +21,7 @@
     Context variables required for this template:
     * heading, none, pathsheading, booksheading, nobooks, pastheading, showcode - texts
     * cards - name, group, library, code, barcode (SVG), qr (image address), flower, stage, paths (label, hint, marks as SVG),
-      books (title, cover), past (year, flower, stage), yearname
+      books (title, cover), past (year, flower, stage, pastclass), yearname
 
     Example context (json):
     {
@@ -95,7 +95,7 @@
     {{#haspast}}
     <h2 class="ayv-section-title">{{pastheading}}</h2>
     <ul class="ayv-garden">
-    {{#past}}<li>{{{svg}}}<span>{{year}}</span></li>{{/past}}
+    {{#past}}<li>{{{svg}}}<span>{{year}}</span>{{#pastclass}}<span class="ayv-field-hint">{{pastclass}}</span>{{/pastclass}}</li>{{/past}}
     </ul>
     {{/haspast}}
     {{#haschoices}}

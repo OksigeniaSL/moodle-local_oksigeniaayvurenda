@@ -80,4 +80,40 @@ final class garden_test extends \advanced_testcase {
         $this->assertSame('«El faro dormido». ' . $str('cardseries', 'Los misterios del faro'), $classic['stay']);
         $this->assertStringNotContainsString('3', implode(' ', $classic), 'no counts');
     }
+
+    /**
+     * The album keeps the flowers of other years and, with each, what the reader's class of that year met together.
+     */
+    public function test_album_past_class(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $tz = \core_date::get_server_timezone_object();
+        $current = $gen->create_year(['entityid' => $entityid] + \local_oksigeniaayvurenda\core\school_year::around(
+            $now,
+            '09-01',
+            $tz
+        ));
+        $before = $gen->create_year(['entityid' => $entityid, 'name' => 'Curso anterior']
+            + \local_oksigeniaayvurenda\core\school_year::around($now - YEARSECS, '09-01', $tz));
+        $reader = $gen->create_reader(['entityid' => $entityid]);
+        $gen->create_member(['readerid' => $reader->id, 'yearid' => $before->id, 'groupname' => '2º A']);
+        $item = $gen->create_item(['libraryid' => $library->id]);
+        $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id,
+            'yearid' => $before->id, 'timeloaned' => $before->timestart + DAYSECS,
+            'timereturned' => $before->timestart + 2 * DAYSECS]);
+        foreach ([1, 2] as $term) {
+            $DB->insert_record(self::T . 'challenge', ['yearid' => $before->id, 'groupname' => '2º A', 'term' => $term,
+                'kind' => 'corners', 'timecompleted' => $before->timestart + $term * WEEKSECS,
+                'timecreated' => $before->timestart, 'timemodified' => $before->timestart]);
+        }
+        $album = garden::album($reader, $now);
+        $this->assertCount(1, $album['past']);
+        $this->assertSame(['2º A', 2], [$album['past'][0]['group'], $album['past'][0]['met']]);
+        unset($current);
+    }
 }
