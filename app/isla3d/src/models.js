@@ -47,12 +47,14 @@ export function materials() {
     solid: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
     leaf: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide, flatShading: true }),
     glow: new THREE.MeshBasicMaterial({ color: '#ffd77a' }),
+    // The bulbs of a model of the art package keep their own colours.
+    bulb: new THREE.MeshBasicMaterial({ vertexColors: true }),
     halo: new THREE.SpriteMaterial({ map: halo, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }),
   };
 }
 
 // The glow around a lamp.
-function halo(mat, x, y, z, size = 0.3) {
+export function halo(mat, x, y, z, size = 0.3) {
   const sprite = new THREE.Sprite(mat.halo);
   sprite.position.set(x, y, z);
   sprite.scale.set(size, size, size);

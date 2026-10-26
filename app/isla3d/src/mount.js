@@ -22,11 +22,12 @@
 //   island.update({met: 3, everyone: true, boat: false});  // the new pieces grow
 //   island.destroy();                                      // frees geometries, textures and the WebGL context
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { makeSea } from './sea.js';
 import { makeGround, grassOf } from './terrain.js';
 import {
   materials, makePalm, makeBushes, makeRocks, ROCKS, makeTree, makeHut, makeGarden, makeLighthouse, makeDock,
-  makeSparkles, makeGrass,
+  makeSparkles, makeGrass, halo,
 } from './models.js';
 import { SPOTS, SEA_Y } from './shape.js';
 
@@ -96,6 +97,41 @@ export function mount(element, options = {}) {
   scene.add(sea.mesh);
   const sparkles = makeSparkles();
   scene.add(sparkles);
+
+  // Pieces Gaudí modelled (GLB in the art package) replace the drawn ones once loaded; the drawn ones stay without them.
+  const assets = options.assets || {};
+  let gone = false;
+  function dress(name, group) {
+    if (!assets[name]) {
+      return;
+    }
+    new GLTFLoader().load(assets[name], (gltf) => {
+      if (gone) {
+        return;
+      }
+      for (const child of [...group.children]) {
+        group.remove(child);
+        child.traverse((o) => {
+          if (o.geometry) {
+            o.geometry.dispose();
+          }
+        });
+      }
+      gltf.scene.traverse((o) => {
+        if (o.isMesh) {
+          o.material = o.name === 'pantalla' ? mat.bulb : mat.solid;
+        }
+      });
+      const light = gltf.scene.getObjectByName('luz');
+      if (light) {
+        light.add(halo(mat, 0, 0, 0, 0.32));
+      }
+      group.add(gltf.scene);
+      render();
+    }, undefined, () => {
+      // Without the model, the drawn piece stays.
+    });
+  }
 
   const shown = new Map();
   let growing = [];
@@ -201,6 +237,7 @@ export function mount(element, options = {}) {
       group.scale.setScalar(group.userData.size);
       shown.set(piece.name, group);
       scene.add(group);
+      dress(piece.name, group);
       // Its grass, cut paper on the sand, grows with it.
       const grass = makeGrass(grassOf(piece.name), piece.name.length * 7);
       grass.userData.size = 1;
@@ -240,6 +277,7 @@ export function mount(element, options = {}) {
       show({ met: state.met || 0, everyone: !!state.everyone, boat: !!state.boat }, true);
     },
     destroy() {
+      gone = true;
       cancelAnimationFrame(frame);
       resize.disconnect();
       scene.traverse((object) => {

@@ -134,7 +134,9 @@ foreach ($groups as $i => $group) {
             // The same island in 3D, over the layers, where the site allows it.
             'islandstate' => get_config('local_oksigeniaayvurenda', 'island3d') !== '0' ? json_encode(['met' => count($planted),
                 'everyone' => in_array('everyone', array_column($planted, 'kind'), true), 'boat' => $boat]) : '',
-            'islandkey' => $library->id . '-' . md5($group)] : null,
+            'islandkey' => $library->id . '-' . md5($group),
+            // Gaudí's models of the art package, for the pieces that have one; the drawn ones without them.
+            'islandassets' => json_encode(array_filter(['hut' => screens::art('isla3d/caseta-q', 'glb')]))] : null,
         'cards' => $reads,
         'hasreads' => (bool) $reads,
         'rewards' => $rewards,

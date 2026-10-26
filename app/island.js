@@ -42,7 +42,13 @@
         var stage = document.createElement('div');
         stage.className = 'ayv-island-3d';
         figure.appendChild(stage);
-        var island = window.AYVIsland3D.mount(stage, seen);
+        var assets = {};
+        try {
+            assets = JSON.parse(figure.getAttribute('data-island-assets') || '{}');
+        } catch (e) {
+            assets = {};
+        }
+        var island = window.AYVIsland3D.mount(stage, {met: seen.met, everyone: seen.everyone, boat: seen.boat, assets: assets});
         if (!island) {
             stage.parentNode.removeChild(stage);
             return;
