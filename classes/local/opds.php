@@ -144,7 +144,7 @@ final class opds {
         $xml->setIndent(true);
         $xml->startDocument('1.0', 'UTF-8');
         $xml->startElementNs(null, 'OpenSearchDescription', 'http://a9.com/-/spec/opensearch/1.1/');
-        $xml->writeElement('ShortName', \core_text::substr(format_string($library->name), 0, 16));
+        $xml->writeElement('ShortName', self::short_name(format_string($library->name)));
         $xml->writeElement('Description', get_string('windowtitle', 'local_oksigeniaayvurenda', format_string($library->name)));
         $xml->startElement('Url');
         $xml->writeAttribute('type', self::TYPE);
@@ -174,5 +174,31 @@ final class opds {
             $xml->writeAttribute('title', $title);
         }
         $xml->endElement();
+    }
+
+    /**
+     * A name of at most sixteen characters, as OpenSearch asks, cut between words and without a word as short as «de»
+     * left hanging («Biblioteca de demostración» is «Biblioteca», not «Biblioteca de de»).
+     *
+     * @param string $name
+     * @return string
+     */
+    public static function short_name(string $name): string {
+        $name = trim($name);
+        if (\core_text::strlen($name) <= 16) {
+            return $name;
+        }
+        $words = preg_split('/\s+/u', $name);
+        $short = '';
+        foreach ($words as $word) {
+            $next = $short === '' ? $word : $short . ' ' . $word;
+            if (\core_text::strlen($next) > 16) {
+                break;
+            }
+            $short = $next;
+        }
+        // Small words that only join the next one go too.
+        $short = preg_replace('/(\s+\S{1,3})+$/u', '', $short);
+        return $short !== '' ? $short : \core_text::substr($words[0], 0, 16);
     }
 }

@@ -95,4 +95,15 @@ final class window_test extends \advanced_testcase {
         $this->assertFalse(window::shows($get($open)));
         $this->assertFalse(window::shows_record((int) $faro->id));
     }
+
+    /**
+     * The name a reader shows for the search: at most sixteen characters, cut between words, nothing hanging.
+     */
+    public function test_short_name(): void {
+        $this->assertSame('Biblioteca', opds::short_name('Biblioteca de demostración'));
+        $this->assertSame('Colegio Alfa', opds::short_name(' Colegio Alfa '));
+        $this->assertSame('Colegio', opds::short_name('Colegio Inventado'));
+        $this->assertSame('Biblioteca Alfa', opds::short_name('Biblioteca Alfa del barrio norte'));
+        $this->assertSame('Supercalifragilí', opds::short_name('Supercalifragilístico'));
+    }
 }
