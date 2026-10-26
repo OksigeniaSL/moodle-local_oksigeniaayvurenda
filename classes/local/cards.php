@@ -181,13 +181,15 @@ final class cards {
             $level = max(0, min(3, (int) ($levels[$path] ?? 0)));
             $new = preg_replace('/\bdata-' . $attribute . '="\d"/', 'data-' . $attribute . '="' . $level . '"', $new);
         }
-        $new = preg_replace('/\baria-label="[^"]*"/', 'aria-label="' . s($label) . '"', $new);
+        // The label goes in as it is: a «$1» in a name is not a back reference.
+        $quoted = str_replace(['\\', '$'], ['\\\\', '\\$'], s($label));
+        $new = preg_replace('/\baria-label="[^"]*"/', 'aria-label="' . $quoted . '"', $new);
         if ($sober) {
             $new = preg_replace('/\bclass="([^"]*)"/', 'class="$1 sobrio"', $new, 1);
         }
         $new = '<svg width="' . $width . '" height="' . $height . '" focusable="false"' . substr($new, 4);
         $svg = $new . substr($svg, strlen($open));
-        return preg_replace('/<title>[^<]*<\/title>/', '<title>' . s($label) . '</title>', $svg, 1);
+        return preg_replace('/<title>[^<]*<\/title>/', '<title>' . $quoted . '</title>', $svg, 1);
     }
 
     /**

@@ -85,7 +85,7 @@ final class provider_test extends provider_testcase {
      */
     public function test_metadata(): void {
         $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
-        $this->assertCount(21, $items);
+        $this->assertCount(22, $items);
     }
 
     /**
@@ -160,7 +160,12 @@ final class provider_test extends provider_testcase {
         $this->resetAfterTest();
         $w = $this->make_world();
         $system = \context_system::instance();
+        // Ana came from a list, which knew her by her email.
+        $DB->insert_record(self::T . 'source', ['entityid' => $w->anareader->entityid, 'system' => 'csv',
+            'tablename' => 'reader', 'externalid' => 'email:ana@example.invalid', 'localid' => $w->anareader->id,
+            'timecreated' => time()]);
         provider::delete_data_for_user(new approved_contextlist($w->ana, 'local_oksigeniaayvurenda', [$system->id]));
+        $this->assertFalse($DB->record_exists(self::T . 'source', ['localid' => $w->anareader->id, 'tablename' => 'reader']));
         $reader = $DB->get_record(self::T . 'reader', ['id' => $w->anareader->id]);
         $this->assertNull($reader->userid);
         $this->assertSame('deleted', $reader->status);

@@ -67,6 +67,10 @@ class provider implements
             'groupname' => 'privacy:metadata:member:groupname',
             'stage' => 'privacy:metadata:member:stage',
         ], 'privacy:metadata:member');
+        $collection->add_database_table(self::T . 'source', [
+            'externalid' => 'privacy:metadata:source:externalid',
+            'localid' => 'privacy:metadata:source:localid',
+        ], 'privacy:metadata:source');
         $collection->add_database_table(self::T . 'loan', [
             'readerid' => 'privacy:metadata:loan:readerid',
             'itemid' => 'privacy:metadata:loan:itemid',
@@ -529,6 +533,8 @@ class provider implements
             ]);
             $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $reader->id]);
             $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $reader->id]);
+            // The key their origin knew them by (a file number, an email, a name) goes too.
+            $DB->delete_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $reader->id]);
             $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $reader->id]);
             foreach ($drawn as $id) {
                 foreach (['reviewdrawing', 'reviewvoice'] as $area) {
