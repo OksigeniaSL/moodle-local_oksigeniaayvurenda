@@ -57,7 +57,8 @@ $qr = function (string $url): string {
     $svg = substr($svg, (int) strpos($svg, '<svg'));
     $svg = preg_replace('/<desc>.*?<\/desc>/s', '', $svg);
     $svg = str_replace(' id="elements"', '', $svg);
-    return (string) preg_replace('/<svg width="(\d+)" height="(\d+)"/', '<svg class="ayv-poster-qr" viewBox="0 0 $1 $2" aria-hidden="true"', $svg, 1);
+    $box = '<svg class="ayv-poster-qr" viewBox="0 0 $1 $2" aria-hidden="true"';
+    return (string) preg_replace('/<svg width="(\d+)" height="(\d+)"/', $box, $svg, 1);
 };
 $cards = [];
 foreach ($posters as $i => $poster) {
