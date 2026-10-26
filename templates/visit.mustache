@@ -22,17 +22,20 @@
     shows it (the layers wait as a blank pixel, so a dark page never loads the day); without the script, the row of words
     is the visit.
     Context variables required for this template:
-    * name, title, width, height, focus, depth, sound, door - the room
+    * name, title, width, height, focus, depth, sound, door, touch - the room
     * back, front - layers: day, night, depth
     * zones - places: id, url, label, points, tipx, tipy, cy, enters
     * surfaces - each directory (rows: label, url, colour; rowheight), pulse (heading, lines) or book (title, cover,
       colour, url), with width, height, transform, fontsize and ink (the colours the painting asks, as CSS)
-    * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug)
+    * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug), play (the herald
+      offers the room's game)
+    * hunt - the room's game, or nothing: target, heading, name, clue, figure, puppet, cheer, cheerpuppet, huntcover,
+      huntlines, huntplace, labelsr, spines, title, found, foundhint, recordurl, againurl, messages; hasplaces
     * visitplaces, visitsound, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
     Example context (json):
     {
         "name": "vestibulo", "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "depth": 0.35,
-        "sound": "https://example.com/vestibulo.mp3", "door": "https://example.com/puerta.mp3",
+        "sound": "https://example.com/vestibulo.mp3", "door": "https://example.com/puerta.mp3", "touch": "",
         "back": [{"day": "https://example.com/fondo.webp", "night": "https://example.com/fondo-noche.webp", "depth": 0}],
         "front": [{"day": "https://example.com/frente.webp", "night": "https://example.com/frente-noche.webp", "depth": 1}],
         "haszones": true,
@@ -51,13 +54,28 @@
         ],
         "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?",
             "figure": "https://example.com/memoria-saluda.webp", "puppet": "", "size": 520, "left": 400, "top": 500,
-            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"} }],
+            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "" }],
+        "hunt": {"target": 7, "heading": "El libro escondido", "name": "Memoria", "clue": "He escondido un libro.",
+            "figure": "https://example.com/memoria-piensa.webp", "puppet": "", "cheer": "https://example.com/memoria-celebra.webp",
+            "cheerpuppet": "", "huntcover": "https://example.com/cover.jpg", "huntlines": [{"line": "82-3"}, {"line": "MON"}],
+            "huntplace": "#d63a2f", "labelsr": "El tejuelo del libro escondido: 82-3 MON", "title": "El dragón que leía",
+            "found": "¡Lo has encontrado! Está en Rojo.", "foundhint": "Búscalo allí.", "recordurl": "#", "againurl": "#",
+            "messages": "{}",
+            "spines": [{"id": 7, "url": "#", "title": "El dragón que leía", "shown": "El dragón que leía", "authors": "Ana Montes",
+                "callnumber": "82-3 MON dra", "place": "Rojo", "label": "El dragón que leía, Ana Montes, 82-3 MON dra",
+                "cm": 22, "width": 34, "background": "#2c7a6a", "dark": "#246a5c", "ink": "cream", "small": false,
+                "topdown": false, "band": "", "out": false, "held": false, "consult": false, "here": false,
+                "lines": [{"line": "82-3"}, {"line": "MON"}], "joined": "82-3|MON", "whyjoined": "", "placecolour": null,
+                "cover": null, "state": "free", "statetext": "Libre", "awaytext": ""}]
+        },
+        "hasplaces": true, "huntplay": "Busca el libro escondido", "huntshelf": "La estantería",
+        "huntrecord": "Ver su ficha", "huntagain": "Otro libro", "huntlens": "Pasa por los lomos y aquí verás su tejuelo",
         "visitplaces": "Lo que hay aquí", "visitsound": "Sonido", "visitpanleft": "Mirar a la izquierda",
         "visitpanright": "Mirar a la derecha", "visitclose": "Cerrar", "searchlabel": "Buscar en el catálogo",
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
     }
 }}
-<section class="ayv-visit" data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}>
+<section class="ayv-visit" data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}
@@ -130,17 +148,60 @@
                 <button type="submit" class="ayv-button">{{searchbutton}}</button>
             </form>
             {{/search}}
+            {{#play}}<p class="ayv-visit-offer"><button type="button" class="ayv-button" data-open="ayv-hunt">{{play}}</button></p>{{/play}}
             <button type="button" class="ayv-visit-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button>
         </div>
         {{/characters}}
     </div>
-    {{#haszones}}
+    {{#hasplaces}}
     <nav class="ayv-visit-places" aria-label="{{visitplaces}}">
         <ul>
             {{#zones}}
             <li><a class="ayv-visit-place" href="{{url}}" data-zone="{{id}}" data-tip="{{tipx}} {{tipy}} {{cy}}"{{#enters}} data-enters="1"{{/enters}}>{{label}}</a></li>
             {{/zones}}
+            {{#hunt}}
+            <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-hunt" hidden>{{huntplay}}</button></li>
+            {{/hunt}}
         </ul>
     </nav>
-    {{/haszones}}
+    {{/hasplaces}}
+    {{#hunt}}
+    <dialog class="ayv-modal ayv-hunt" id="ayv-hunt" aria-labelledby="ayv-hunt-title" data-target="{{target}}" data-messages="{{messages}}">
+        <div class="ayv-modal-head">
+            <h2 id="ayv-hunt-title" class="ayv-section-title">{{heading}}</h2>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form>
+        </div>
+        <div class="ayv-hunt-ask">
+            {{#figure}}
+            <span class="ayv-figure ayv-hunt-who"><img class="ayv-bubble-figure" src="{{figure}}" alt="" width="170" height="170"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span>
+            {{/figure}}
+            <div class="ayv-hunt-clue">
+                <p>{{#name}}<strong>{{name}}</strong> {{/name}}{{clue}}</p>
+                <div class="ayv-hunt-card">
+                    {{#huntcover}}<img class="ayv-hunt-cover" src="{{huntcover}}" alt="">{{/huntcover}}
+                    <span class="ayv-where-label{{#huntplace}} ayv-spine-label-place{{/huntplace}}"{{#huntplace}} style="--place: {{huntplace}}"{{/huntplace}} role="img" aria-label="{{labelsr}}">{{#huntlines}}<span>{{line}}</span>{{/huntlines}}</span>
+                </div>
+            </div>
+        </div>
+        <p class="ayv-hunt-say" aria-live="polite"></p>
+        <div class="ayv-hunt-lens" aria-hidden="true"><span class="ayv-hunt-lens-hint">{{huntlens}}</span></div>
+        <div class="ayv-bookcase-wrap ayv-hunt-shelf">
+            <ul class="ayv-bookcase" aria-label="{{huntshelf}}">{{#spines}}<li class="ayv-spine-slot{{#out}} ayv-spine-gap{{/out}}" style="--cm: {{cm}}; --w: {{width}}px">{{> local_oksigeniaayvurenda/spine}}</li>{{/spines}}</ul>
+        </div>
+        <div class="ayv-hunt-found" hidden>
+            {{#cheer}}
+            <span class="ayv-figure ayv-hunt-who"><img class="ayv-bubble-figure" src="{{cheer}}" alt="" width="170" height="170"{{#cheerpuppet}} data-puppet="{{cheerpuppet}}"{{/cheerpuppet}}></span>
+            {{/cheer}}
+            <div>
+                <p class="ayv-hunt-found-title" tabindex="-1">{{found}}</p>
+                <p><strong>{{title}}</strong></p>
+                <p>{{foundhint}}</p>
+                <p class="ayv-book-actions">
+                    <a class="ayv-button" href="{{recordurl}}">{{huntrecord}}</a>
+                    <a class="ayv-button ayv-button-quiet" href="{{againurl}}">{{huntagain}}</a>
+                </p>
+            </div>
+        </div>
+    </dialog>
+    {{/hunt}}
 </section>

@@ -173,9 +173,23 @@
         tip.style.left = Math.max(tip.offsetWidth / 2 + 4, Math.min(view.clientWidth - tip.offsetWidth / 2 - 4, x)) + 'px';
         tip.style.top = Math.max(tip.offsetHeight + 4, p[1] * k - 6) + 'px';
     };
+    // A soft touch of a book's cover when a place lights up under the pointer, with the sound on.
+    var touch = null;
+    var tap = function() {
+        if (!on || !visit.getAttribute('data-touch') || !window.Audio) {
+            return;
+        }
+        touch = touch || new window.Audio(visit.getAttribute('data-touch'));
+        touch.volume = 0.5;
+        touch.currentTime = 0;
+        touch.play().catch(function() {
+            // Silence, then.
+        });
+    };
     Array.prototype.forEach.call(visit.querySelectorAll('.ayv-visit-zones a'), function(a) {
         a.addEventListener('pointerenter', function() {
             light(a, false);
+            tap();
         });
         a.addEventListener('pointerleave', function() {
             light(null);

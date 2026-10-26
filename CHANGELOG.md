@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.69.0 (2026-10-26)
+
+- Find the hidden book, a game in each room of the library one visits: the memory hides a real book of the room's
+  corner that is free to take home and gives its label as the clue (and its cover, to the young). It is found on the
+  room's shelf, among the books really beside it, with a magnifier that shows the label of the spine under the pointer,
+  the keyboard or the finger. A spine that is not it says which way to go and which line of the label to look at;
+  after three, the hidden one glows a little; never lost. Found, it comes out and the memory cheers, with where it
+  stands, to find it on the real shelf. A book of the day for each reader, better one they have not taken home;
+  nothing is kept. The visit plays a soft touch when a place lights up, with the sound on.
+
 ## 0.68.1 (2026-10-26)
 
 - The library one visits: the first time in a room in a session, every place one can touch glows a moment, since a

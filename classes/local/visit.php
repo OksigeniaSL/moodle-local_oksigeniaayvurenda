@@ -179,7 +179,8 @@ final class visit {
             'corner' => preg_match('/^\d$/', (string) ($json['corner'] ?? '')) ? (string) $json['corner'] : $corner,
             'sound' => is_readable($art['dir'] . '/sonido/visita/' . $name . '.mp3')
                 ? $art['url'] . '/sonido/visita/' . $name . '.mp3' : '',
-            'door' => is_readable($art['dir'] . '/sonido/visita/puerta.mp3') ? $art['url'] . '/sonido/visita/puerta.mp3' : ''];
+            'door' => is_readable($art['dir'] . '/sonido/visita/puerta.mp3') ? $art['url'] . '/sonido/visita/puerta.mp3' : '',
+            'touch' => is_readable($art['dir'] . '/sonido/visita/toque.mp3') ? $art['url'] . '/sonido/visita/toque.mp3' : ''];
     }
 
     /**
@@ -189,9 +190,10 @@ final class visit {
      * @param string $name
      * @param bool $public Seen by someone without an account, through the window.
      * @param array|null $art
+     * @param int $turn Which hidden book, in a room with its game.
      * @return array|null
      */
-    public static function page(\stdClass $library, string $name, bool $public, ?array $art = null): ?array {
+    public static function page(\stdClass $library, string $name, bool $public, ?array $art = null, int $turn = 0): ?array {
         $scene = self::scene($name, $art);
         if (!$scene) {
             return null;
@@ -269,6 +271,9 @@ final class visit {
                 // Going into another room of the visit: the page walks through the door.
                 'enters' => str_contains($link, '/visit.php')];
         }
+        // In a room of a corner, the memory hides a book of it.
+        $hunt = $scene['corner'] !== '' && isset($corners[$scene['corner']])
+            ? self::hunt($library, $scene['corner'], $public, $turn, $url, $name) : null;
         $depth = 0.0;
         $back = $scene['layers'];
         $front = [];
@@ -289,10 +294,13 @@ final class visit {
             'zones' => $zones,
             'haszones' => (bool) $zones,
             'surfaces' => $surfaces,
-            'characters' => self::characters($library, $scene, $depth, $public, $url),
+            'characters' => self::characters($library, $scene, $depth, $public, $url, (bool) $hunt),
+            'hunt' => $hunt,
+            'hasplaces' => $zones || $hunt,
             'focus' => $scene['focus'],
             'sound' => $scene['sound'],
             'door' => $scene['door'],
+            'touch' => $scene['touch'],
             'hall' => $hall ? $url('visit.php') : '',
         ];
     }
@@ -386,9 +394,17 @@ final class visit {
      * @param float $depth
      * @param bool $public
      * @param callable $url
+     * @param bool $game Whether the room has its game, which the herald offers.
      * @return array[]
      */
-    private static function characters(\stdClass $library, array $scene, float $depth, bool $public, callable $url): array {
+    private static function characters(
+        \stdClass $library,
+        array $scene,
+        float $depth,
+        bool $public,
+        callable $url,
+        bool $game
+    ): array {
         $out = [];
         foreach ($scene['characters'] as $role => $one) {
             $news = '';
@@ -405,7 +421,8 @@ final class visit {
                 'puppet' => $said['puppet'] ?? '', 'size' => $one['height'], 'depth' => $depth,
                 'left' => round($one['feet'][0] - $one['height'] / 2), 'top' => round($one['feet'][1] - $one['height']),
                 'search' => $role === 'memory' ? ['action' => $public ? $url('public.php') : $url('search.php'),
-                    'slug' => $library->slug] : null];
+                    'slug' => $library->slug] : null,
+                'play' => $role === 'herald' && $game ? get_string('huntherald', 'local_oksigeniaayvurenda') : ''];
         }
         return $out;
     }
@@ -419,6 +436,63 @@ final class visit {
     private static function ink(array $zone): string {
         return trim(($zone['ink'] !== '' ? '--visit-ink: ' . $zone['ink'] . '; ' : '') .
             ($zone['inknight'] !== '' ? '--visit-ink-night: ' . $zone['inknight'] . ';' : ''));
+    }
+
+    /**
+     * The game of the room, ready for the page: the memory's clue, the shelf, and what is said when the book is found.
+     *
+     * @param \stdClass $library
+     * @param string $corner
+     * @param bool $public
+     * @param int $turn
+     * @param callable $url
+     * @param string $room
+     * @return array|null
+     */
+    private static function hunt(\stdClass $library, string $corner, bool $public, int $turn, callable $url, string $room): ?array {
+        $game = hunt::for_visit($library, $corner, $public, $turn);
+        if (!$game) {
+            return null;
+        }
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $entityid = (int) $library->entityid;
+        $said = characters::say($entityid, 'memory', $game['young'] ? 'huntclueyoung' : 'huntclue', [], 'piensa');
+        $label = implode(' ', array_column($game['lines'], 'line'));
+        $placecolour = '';
+        foreach ($game['spines'] as $spine) {
+            if ($spine['id'] === $game['target']) {
+                $placecolour = (string) ($spine['placecolour'] ?? '');
+            }
+        }
+        $cheer = $said && !empty($said['figure']) ? characters::figure('memory', 'celebra') : null;
+        return [
+            'target' => $game['target'],
+            'heading' => $str('huntheading'),
+            'name' => $said['name'] ?? '',
+            'clue' => $said['text'] ?? $str($game['young'] ? 'huntclueyoung' : 'huntclue', (object) ['name' => '']),
+            'figure' => $said['figure'] ?? null,
+            'puppet' => $said['puppet'] ?? '',
+            'cheer' => $cheer,
+            'cheerpuppet' => $cheer ? characters::puppet('memory', 'celebra') : '',
+            // Not «cover», «lines» nor «placecolour»: a spine without its own would take the hidden book's.
+            'huntcover' => $game['cover'],
+            'huntlines' => $game['lines'],
+            'huntplace' => $placecolour,
+            'labelsr' => $str('huntlabel', $label),
+            'spines' => $game['spines'],
+            'title' => $game['title'],
+            'found' => $str('huntfound', $game['place'] !== '' ? $game['place'] : $str('stacksnoplace')),
+            'foundhint' => $str($public ? 'huntfoundhintpublic' : 'huntfoundhint'),
+            'recordurl' => $public ? $url('public.php', ['record' => $game['target']])
+                : $url('record.php', ['id' => $game['target']]),
+            'againurl' => $url('visit.php', ['room' => $room, 'hunt' => $turn + 1]) . '#busca',
+            'messages' => json_encode(
+                ['before' => $str('huntbefore'), 'after' => $str('huntafter'),
+                'line1' => $str('huntline1', '{line}'), 'line2' => $str('huntline2', '{line}'),
+                'line3' => $str('huntline3', '{line}'), 'gap' => $str('huntgap'), 'glow' => $str('huntglow')],
+                JSON_UNESCAPED_UNICODE
+            ),
+        ];
     }
 
     /**

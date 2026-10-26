@@ -47,17 +47,17 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 if (!$library) {
     shell::missing($str('visitnone'));
 }
-$data = visit::page($library, $room, $public);
+$data = visit::page($library, $room, $public, null, max(0, optional_param('hunt', 0, PARAM_INT)));
 if (!$data) {
     shell::missing($str('visitnone'), $library);
 }
 foreach (
     ['visitplaces', 'visitsound', 'visitpanleft', 'visitpanright', 'visitclose', 'searchlabel', 'searchplaceholder',
-        'searchbutton'] as $key
+        'searchbutton', 'huntplay', 'huntshelf', 'huntrecord', 'huntagain', 'huntlens'] as $key
 ) {
     $data[$key] = $str($key);
 }
 shell::output($data['title'], $OUTPUT->render_from_template('local_oksigeniaayvurenda/visit', $data), $library, '', [
     'search' => false,
-    'scripts' => ['visit'],
+    'scripts' => $data['hunt'] ? ['visit', 'hunt'] : ['visit'],
 ]);

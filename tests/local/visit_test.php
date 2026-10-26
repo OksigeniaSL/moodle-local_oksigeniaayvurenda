@@ -100,6 +100,7 @@ final class visit_test extends \advanced_testcase {
         $this->assertSame(1100.0, $hall['focus']);
         $this->assertSame('https://example.com/arte/sonido/visita/vestibulo.mp3', $hall['sound']);
         $this->assertSame('', $hall['door']);
+        $this->assertSame('', $hall['touch']);
         $this->assertSame('8', visit::scene('literatura', $art)['corner'], 'a room is of the corner of its shelves');
     }
 
@@ -126,7 +127,8 @@ final class visit_test extends \advanced_testcase {
             $record = $gen->create_record(['entityid' => $library->entityid, 'title' => $title]);
             $DB->insert_record('local_oksigeniaayvurenda_recauth', ['recordid' => $record->id,
                 'authorityid' => $classes[$code], 'sortorder' => 0]);
-            $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => $now - $days * DAYSECS]);
+            $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => $now - $days * DAYSECS,
+                'callnumber1' => $code, 'callnumber2' => 'AUT', 'callnumber3' => \core_text::strtolower(substr($title, 0, 3))]);
             $books[$title] = (int) $record->id;
         }
         catalogue::save_corners($library, ['8' => ['label' => 'Cuentos', 'order' => 1], '5' => ['label' => '', 'order' => 2]]);
@@ -191,6 +193,9 @@ final class visit_test extends \advanced_testcase {
         $this->assertStringContainsString('visit.php?library=' . $library->slug, $room['zones'][1]['url']);
         $this->assertTrue($room['zones'][1]['enters']);
         $this->assertSame(['Cuento dos', 'Cuento uno'], array_column($room['surfaces'], 'title'), 'only books of its corner');
+        $this->assertContains($room['hunt']['target'], [$books['Cuento uno'], $books['Cuento dos']], 'the room hides a book');
+        $this->assertStringContainsString('room=literatura&hunt=1#busca', $room['hunt']['againurl']);
+        $this->assertNull($page['hunt'], 'the hall has no corner to hide a book in');
 
         // Without an account: to the window, and the voices only if it shows them.
         window::save($library, ['open' => 1, 'voices' => 0, 'catalogue' => 1]);
