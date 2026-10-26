@@ -21,7 +21,8 @@
     Context variables required for this template:
     * heading, none, pathsheading, booksheading, nobooks, pastheading, showcode - texts
     * cards - name, group, library, code, barcode (SVG), qr (image address), flower, stage, paths (label, hint, marks as SVG),
-      books (title, cover), past (year, flower, stage, pastclass), yearname
+      books (title, cover), past (year, flower, stage, pastclass), yearname, cromos (name, art, won, state, label),
+      hascromos, cromosheading, cromoscount
 
     Example context (json):
     {
@@ -33,7 +34,12 @@
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
                    "sky": false, "haschoices": false, "choices": [],
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": [],
-                   "hasclassgarden": false, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": ""}],
+                   "hasclassgarden": false, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
+                   "hascromos": true, "cromosheading": "Tus cromos", "cromoscount": "1 de 2",
+                   "cromos": [{"name": "Ciencias", "art": "app/emblema.svg", "won": true, "state": "3 de octubre",
+                               "label": "Ciencias: lo conseguiste el 3 de octubre"},
+                              {"name": "Artes", "art": "app/emblema.svg", "won": false, "state": "Todavía no",
+                               "label": "Artes: todavía no"}]}],
         "action": "#", "sesskey": "abc", "lookheading": "Cómo ves tu carné", "looksave": "Guardar",
         "none": "",
         "pathsheading": "Cómo crece",
@@ -75,6 +81,18 @@
     {{/paths}}
     </ul>
     {{/haspaths}}
+    {{#hascromos}}
+    <h2 class="ayv-section-title">{{cromosheading}} <span class="ayv-cromos-count">{{cromoscount}}</span></h2>
+    <ul class="ayv-cromos">
+    {{#cromos}}
+        <li class="ayv-cromo{{^won}} ayv-cromo-missing{{/won}}">
+            <img src="{{art}}" alt="" loading="lazy" width="600" height="840">
+            <span class="ayv-cromo-band" aria-hidden="true"><span class="ayv-cromo-name">{{name}}</span><span class="ayv-cromo-when">{{state}}</span></span>
+            <span class="ayv-sr">{{label}}</span>
+        </li>
+    {{/cromos}}
+    </ul>
+    {{/hascromos}}
     <h2 class="ayv-section-title">{{booksheading}}</h2>
     {{#hasbooks}}
     <ul class="ayv-album">

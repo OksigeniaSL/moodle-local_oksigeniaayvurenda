@@ -132,6 +132,15 @@ foreach ($readers as $reader) {
     if ($herald && $young) {
         $herald['listen'] = \local_oksigeniaayvurenda\local\screens::listen(['herald-' . $sex . '/{lang}/heraldstage' . $stage]);
     }
+    // The collector cards of the corners: pictures, so not in the classic look.
+    $cromos = $look === 'flower' || $sky ? (garden::cromos($reader, $library) ?? []) : [];
+    foreach ($cromos as &$cromo) {
+        $cromo['state'] = $cromo['won'] ? $cromo['when'] : $str('cromonotyet');
+        $cromo['label'] = $str($cromo['won'] ? 'cromowon' : 'cromomissing', (object) ['name' => $cromo['name'],
+            'when' => $cromo['when']]);
+    }
+    unset($cromo);
+    $woncromos = count(array_filter(array_column($cromos, 'won')));
     // From twelve on, and for adults, each reader chooses: the sky, the classic look, or none.
     $choices = $look === 'flower' || $previewid ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
         'checked' => $o === ($sky ? 'sky' : $look)], card_look::OWN);
@@ -161,6 +170,10 @@ foreach ($readers as $reader) {
         'classgardenheading' => $str('challengegarden'),
         'classgardenhint' => $str('challengegardenhint'),
         'yearname' => $album['year']->name,
+        'cromos' => $cromos,
+        'hascromos' => (bool) $cromos,
+        'cromosheading' => $str('cromosheading'),
+        'cromoscount' => $str('cromoscount', (object) ['won' => $woncromos, 'all' => count($cromos)]),
     ];
 }
 // Previewing: the reader's name and the looks to switch between. Without a card: a practice reader's, for the staff.

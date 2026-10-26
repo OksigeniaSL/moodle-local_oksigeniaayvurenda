@@ -99,6 +99,83 @@ final class garden {
     }
 
     /**
+     * The album's collector cards: one for each corner of the library, won with the first book taken home from it, in
+     * any school year, and kept for good. Only the corners the library shows (a card nobody could win is no game) and
+     * the ones already won. Only with Gaudí's cards in the art package; without them, nothing.
+     *
+     * @param \stdClass $reader
+     * @param \stdClass $library Whose corners name the cards.
+     * @return array[]|null code, name, art, won (bool) and when (the day it was won, or ''), in the order of the classes.
+     */
+    public static function cromos(\stdClass $reader, \stdClass $library): ?array {
+        $codes = [];
+        foreach (range(0, 9) as $code) {
+            $art = screens::art('cromos/cromo-' . $code);
+            if ($art !== null) {
+                $codes[(string) $code] = $art;
+            }
+        }
+        if (!$codes) {
+            return null;
+        }
+        $won = self::corners_won($reader);
+        $names = [];
+        $shown = [];
+        foreach (catalogue::corners($library, true) as $corner) {
+            $names[$corner['code']] = $corner['label'];
+            $shown[$corner['code']] = !$corner['hidden'];
+        }
+        $cromos = [];
+        foreach ($codes as $code => $art) {
+            if (empty($shown[$code]) && !isset($won[$code])) {
+                continue;
+            }
+            $name = $names[$code] ?? (get_string_manager()->string_exists('udc' . $code, 'local_oksigeniaayvurenda')
+                ? get_string('udc' . $code, 'local_oksigeniaayvurenda') : (string) $code);
+            $cromos[] = [
+                'code' => $code,
+                'name' => $name,
+                'art' => $art,
+                'won' => isset($won[$code]),
+                'when' => isset($won[$code]) ? userdate($won[$code], get_string('strftimedateshort', 'langconfig')) : '',
+            ];
+        }
+        return $cromos ?: null;
+    }
+
+    /**
+     * The corners a reader has taken a book home from, in any school year, and when the first time: the first sign of
+     * the class, as the catalogue's corners.
+     *
+     * @param \stdClass $reader
+     * @return int[] Corner => the moment of its first loan.
+     */
+    public static function corners_won(\stdClass $reader): array {
+        global $DB;
+        $rows = $DB->get_recordset_sql(
+            "SELECT l.id, l.timeloaned,
+                    (SELECT MIN(a.code)
+                       FROM {" . self::T . "recauth} ra
+                       JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+                      WHERE ra.recordid = i.recordid) AS class
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+              WHERE l.readerid = :readerid",
+            ['readerid' => $reader->id]
+        );
+        $won = [];
+        foreach ($rows as $row) {
+            $first = $row->class !== null ? \core_text::substr(trim($row->class), 0, 1) : '';
+            if ($first !== '' && ctype_digit($first) && (!isset($won[$first]) || $row->timeloaned < $won[$first])) {
+                $won[$first] = (int) $row->timeloaned;
+            }
+        }
+        $rows->close();
+        ksort($won);
+        return $won;
+    }
+
+    /**
      * The classic look of the card, for those who want no picture and no counts: what each path means, concretely.
      * When they last came, which corners they went to, what they said of their books, what they finished and which
      * series they have half read.

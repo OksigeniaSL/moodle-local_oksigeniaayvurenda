@@ -2302,3 +2302,30 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     .ayv .ayv-lectern-turn { animation: none; }
     .ayv .ayv-lectern-in { animation: ayv-lectern-in .2s ease both; }
 }
+
+/* The album's collector cards (0.60.0), by Gaudí: one for each corner, with the corner's name and the day it was won
+   written in the plain band at the foot (y 672 to 780 of 840, 58 px in from each side of 600). One not yet won, grey. */
+.ayv .ayv-cromos-count { margin-left: .4rem; font: 400 1rem var(--text); color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-cromos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr)); gap: 1rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
+.ayv .ayv-cromo { position: relative; }
+.ayv .ayv-cromo img { display: block; width: 100%; height: auto; filter: drop-shadow(0 8px 14px rgba(15, 58, 51, .28)); }
+.ayv .ayv-cromo-band {
+    position: absolute;
+    left: 9.7%;
+    right: 9.7%;
+    top: 80%;
+    height: 12.9%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #1e2b2a;
+    text-align: center;
+    line-height: 1.1;
+    overflow: hidden;
+}
+.ayv .ayv-cromo-name { max-width: 100%; font: 600 .85rem/1.1 var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ayv .ayv-cromo-when { font-size: .72rem; }
+.ayv .ayv-cromo-missing img { filter: grayscale(1); opacity: .35; }
+.ayv .ayv-cromo-missing .ayv-cromo-band { color: var(--ayv-muted, #5f6b67); }
+html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3bdb9; }
