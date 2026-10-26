@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.68.1 (2026-10-26)
+
+- The library one visits: the first time in a room in a session, every place one can touch glows a moment, since a
+  painting does not say what is a door; never with «reduce motion».
+
 ## 0.68.0 (2026-10-26)
 
 - The library one visits: rooms painted for the art package (a hall and a room for each corner, by day and by night,

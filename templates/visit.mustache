@@ -22,7 +22,7 @@
     shows it (the layers wait as a blank pixel, so a dark page never loads the day); without the script, the row of words
     is the visit.
     Context variables required for this template:
-    * title, width, height, focus, depth, sound, door - the room
+    * name, title, width, height, focus, depth, sound, door - the room
     * back, front - layers: day, night, depth
     * zones - places: id, url, label, points, tipx, tipy, cy, enters
     * surfaces - each directory (rows: label, url, colour; rowheight), pulse (heading, lines) or book (title, cover,
@@ -31,7 +31,7 @@
     * visitplaces, visitsound, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
     Example context (json):
     {
-        "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "depth": 0.35,
+        "name": "vestibulo", "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "depth": 0.35,
         "sound": "https://example.com/vestibulo.mp3", "door": "https://example.com/puerta.mp3",
         "back": [{"day": "https://example.com/fondo.webp", "night": "https://example.com/fondo-noche.webp", "depth": 0}],
         "front": [{"day": "https://example.com/frente.webp", "night": "https://example.com/frente-noche.webp", "depth": 1}],
@@ -57,7 +57,7 @@
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
     }
 }}
-<section class="ayv-visit" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}>
+<section class="ayv-visit" data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}>
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}

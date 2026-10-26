@@ -241,6 +241,19 @@
         }
     }
 
+    // What can be touched is not plain in a painting: the first time in a room this session, every place glows a moment.
+    var key = 'ayv-visit-seen-' + (visit.getAttribute('data-room') || '');
+    var zonesvg = stage.querySelector('.ayv-visit-zones');
+    if (!reduce && zonesvg && store('sessionStorage', key) !== '1') {
+        store('sessionStorage', key, '1');
+        window.setTimeout(function() {
+            zonesvg.classList.add('ayv-visit-hint');
+            window.setTimeout(function() {
+                zonesvg.classList.remove('ayv-visit-hint');
+            }, 1400);
+        }, 700);
+    }
+
     // Through a door: the room draws one in towards it, and the next opens around.
     if (!reduce && store('sessionStorage', 'ayv-visit-in') === '1') {
         store('sessionStorage', 'ayv-visit-in', null);

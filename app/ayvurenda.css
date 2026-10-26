@@ -2483,6 +2483,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-visit-zones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .ayv .ayv-visit-zones a { cursor: pointer; }
 .ayv .ayv-visit-zones polygon { fill: transparent; stroke: transparent; stroke-width: 7; stroke-linejoin: round; transition: fill .25s ease, stroke .25s ease; }
+.ayv .ayv-visit-zones.ayv-visit-hint polygon { fill: rgba(255, 233, 184, .12); stroke: rgba(255, 233, 184, .6); transition-duration: .5s; }
 .ayv .ayv-visit-zones a:hover polygon,
 .ayv .ayv-visit-zones a.ayv-visit-lit polygon { fill: rgba(255, 233, 184, .18); stroke: rgba(255, 233, 184, .9); filter: drop-shadow(0 0 14px rgba(255, 214, 140, .95)); }
 .ayv .ayv-visit-surface { position: absolute; top: 0; left: 0; box-sizing: border-box; transform-origin: 0 0; }
