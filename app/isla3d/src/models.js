@@ -19,6 +19,7 @@
 // class asked for. Each piece is a group whose origin is its foot, so it can grow from the ground.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { rng, terrainH, SPOTS, SEA_Y } from './shape.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -29,11 +30,76 @@ const tmpC = new THREE.Color();
 
 // Shared materials: vertex colours, both lit the same warm way.
 export function materials() {
+  // A soft warm disc for the halo of a lamp, added to what is behind it.
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255, 220, 140, 0.95)');
+  g.addColorStop(0.35, 'rgba(255, 200, 110, 0.4)');
+  g.addColorStop(1, 'rgba(255, 190, 100, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 64, 64);
+  const halo = new THREE.CanvasTexture(canvas);
+  halo.colorSpace = THREE.SRGBColorSpace;
   return {
-    solid: new THREE.MeshLambertMaterial({ vertexColors: true }),
-    leaf: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }),
+    // Flat facets, as the house's style D and the dioramas of campus (Gaudí).
+    solid: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
+    leaf: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide, flatShading: true }),
     glow: new THREE.MeshBasicMaterial({ color: '#ffd77a' }),
+    halo: new THREE.SpriteMaterial({ map: halo, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }),
   };
+}
+
+// The glow around a lamp.
+function halo(mat, x, y, z, size = 0.3) {
+  const sprite = new THREE.Sprite(mat.halo);
+  sprite.position.set(x, y, z);
+  sprite.scale.set(size, size, size);
+  return sprite;
+}
+
+// Grass like cut paper: flat patches with a wavy edge, a couple of centimetres above the sand, around (cx, cz).
+export function makeGrass(patches, seed) {
+  const group = new THREE.Group();
+  if (!patches.length) {
+    return group;
+  }
+  const [cx, cz] = patches[0];
+  group.position.set(cx, 0, cz);
+  const rand = rng(seed);
+  const geos = [];
+  const shades = ['#7fb83a', '#8fc441', '#6fa835'];
+  patches.forEach(([x, z, r], k) => {
+    // A polar mesh (rings of points out to a wavy edge), so the patch follows the dome of sand instead of cutting it.
+    const n = 28, rings = 4;
+    const edge = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      edge.push(r * (0.78 + 0.22 * Math.sin(a * 3 + k) + 0.12 * (rand() - 0.5)));
+    }
+    const pos = [];
+    const vertex = (ring, i) => {
+      const a = (i / n) * Math.PI * 2, f = ring / rings;
+      const wx = x + Math.cos(a) * edge[i % n] * f, wz = z + Math.sin(a) * edge[i % n] * f * 0.82;
+      return [wx - cx, terrainH(wx, wz) + 0.022 + k * 0.004, wz - cz];
+    };
+    for (let ring = 0; ring < rings; ring++) {
+      for (let i = 0; i < n; i++) {
+        const a = vertex(ring, i), b = vertex(ring + 1, i), c = vertex(ring + 1, i + 1), d = vertex(ring, i + 1);
+        pos.push(...a, ...c, ...b);
+        if (ring > 0) {
+          pos.push(...a, ...d, ...c);
+        }
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.computeVertexNormals();
+    geos.push(paint(geo, shades[k % 3], null, 0.04, seed + k));
+  });
+  group.add(mesh(geos, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })));
+  return group;
 }
 
 // Paints a geometry one colour, or a gradient from its foot (c2) to its top (c1); a light jitter keeps it from looking
@@ -199,7 +265,14 @@ export function makeTree(mat) {
   const group = place(new THREE.Group(), SPOTS.tree);
   const rand = rng(41);
   const wood = [];
-  wood.push(paint(new THREE.CylinderGeometry(0.1, 0.17, 0.62, 10), '#9a6a3a', '#6e4522', 0.12, 2).translate(0, 0.31, 0));
+  wood.push(paint(new THREE.CylinderGeometry(0.1, 0.2, 0.62, 9), '#9a6a3a', '#6e4522', 0.12, 2).translate(0, 0.31, 0));
+  for (let i = 0; i < 3; i++) {
+    const a = i * 2.1 + 0.5;
+    const root = paint(new THREE.ConeGeometry(0.07, 0.3, 4), '#8a5c30', '#6e4522', 0.1, i + 40);
+    root.rotateZ(-1.05);
+    root.rotateY(-a);
+    wood.push(root.translate(Math.cos(a) * 0.17, 0.05, Math.sin(a) * 0.17));
+  }
   for (let i = 0; i < 4; i++) {
     const a = i * 1.6 + 0.4;
     const g = paint(new THREE.CylinderGeometry(0.03, 0.06, 0.38, 6), '#9a6a3a', '#7b5029', 0.1, i + 5);
@@ -218,20 +291,31 @@ export function makeTree(mat) {
   // The crown: leafy balls in a dome, sprinkled with white and red flowers.
   const crown = [];
   const greens = ['#9cd14a', '#b6dc52', '#7fbe3e', '#c8e35c'];
-  for (let i = 0; i < 19; i++) {
-    const ring = i === 0 ? 0 : i < 8 ? 1 : 2;
-    const a = (i / (ring === 1 ? 7 : 11)) * Math.PI * 2 + ring;
-    const d = ring === 0 ? 0 : ring === 1 ? 0.2 + rand() * 0.06 : 0.38 + rand() * 0.08;
-    const r = ring === 0 ? 0.3 : ring === 1 ? 0.21 + rand() * 0.05 : 0.15 + rand() * 0.05;
-    const y = ring === 0 ? 1.0 : ring === 1 ? 0.98 + rand() * 0.1 : 0.82 + rand() * 0.1;
-    crown.push(at(paint(new THREE.IcosahedronGeometry(r, 2), greens[i % 4], '#5c9a2e', 0.16, i + 20),
-      Math.cos(a) * d, y, Math.sin(a) * d));
+  // Eleven lumps, deep into each other, so it reads as one mass with bumps (Gaudí): each one welded and jittered by a
+  // tenth of its radius, so it shows no cracks.
+  for (let i = 0; i < 11; i++) {
+    const ring = i === 0 ? 0 : i < 6 ? 1 : 2;
+    const a = ((ring === 1 ? i - 1 : i - 6) / 5) * Math.PI * 2 + ring * 0.6;
+    const d = ring === 0 ? 0 : ring === 1 ? 0.16 : 0.3;
+    const r = ring === 0 ? 0.34 : ring === 1 ? 0.27 + rand() * 0.04 : 0.21 + rand() * 0.04;
+    const y = ring === 0 ? 1.02 : ring === 1 ? 1.0 + rand() * 0.08 : 0.84 + rand() * 0.08;
+    let lump = new THREE.IcosahedronGeometry(r, 1);
+    lump.deleteAttribute('normal');
+    lump.deleteAttribute('uv');
+    lump = mergeVertices(lump);
+    const p = lump.attributes.position;
+    for (let v = 0; v < p.count; v++) {
+      const k = 1 + (rand() - 0.5) * 0.2;
+      p.setXYZ(v, p.getX(v) * k, p.getY(v) * k, p.getZ(v) * k);
+    }
+    lump.computeVertexNormals();
+    crown.push(at(paint(lump, greens[i % 4], '#5c9a2e', 0.16, i + 20), Math.cos(a) * d, y, Math.sin(a) * d));
   }
-  for (let i = 0; i < 90; i++) {
-    const a = rand() * Math.PI * 2, e = 0.1 + rand() * 1.2;
+  for (let i = 0; i < 40; i++) {
+    const a = rand() * Math.PI * 2, e = 0.15 + rand() * 1.15;
     const r = 0.5 + rand() * 0.04;
-    crown.push(at(paint(new THREE.IcosahedronGeometry(0.034, 0), i % 3 ? '#fff9ef' : '#e0473a'),
-      Math.cos(a) * Math.cos(e) * r, 0.86 + Math.sin(e) * r * 0.62, Math.sin(a) * Math.cos(e) * r));
+    crown.push(at(paint(new THREE.IcosahedronGeometry(0.045, 0), i % 3 ? '#fff9ef' : '#e0473a'),
+      Math.cos(a) * Math.cos(e) * r, 0.88 + Math.sin(e) * r * 0.6, Math.sin(a) * Math.cos(e) * r));
   }
   group.add(mesh(crown, mat.solid));
   // A cushion and an open book on the bench, at the front.
@@ -250,7 +334,7 @@ export function makeHut(mat) {
   const rand = rng(57);
   const wood = [];
   wood.push(box(0.66, 0.06, 0.5, '#b5773d', 0, 0.03, 0, 0, 1));
-  wood.push(box(0.66, 0.5, 0.04, '#a0652f', 0, 0.31, -0.23, 0, 2));
+  wood.push(box(0.66, 0.5, 0.04, '#6e4220', 0, 0.31, -0.23, 0, 2));
   wood.push(box(0.04, 0.5, 0.5, '#a0652f', -0.31, 0.31, 0, 0, 3));
   wood.push(box(0.04, 0.5, 0.5, '#a0652f', 0.31, 0.31, 0, 0, 4));
   for (const y of [0.18, 0.32, 0.46]) {
@@ -258,10 +342,17 @@ export function makeHut(mat) {
   }
   // The roof: two pitched halves of shingles, the ridge running from the open front to the back, the gable closed
   // at the back.
-  wood.push(box(0.42, 0.035, 0.66, '#c98b48', -0.16, 0.66, 0.02, 0, 5, 0, 0.66));
-  wood.push(box(0.42, 0.035, 0.66, '#b0703a', 0.16, 0.66, 0.02, 0, 6, 0, -0.66));
-  wood.push(box(0.045, 0.045, 0.7, '#7a4a22', 0, 0.8, 0.02, 0, 7));
-  const gable = new THREE.Shape([new THREE.Vector2(-0.33, 0), new THREE.Vector2(0.33, 0), new THREE.Vector2(0, 0.26)]);
+  // Three rows of shingles on each side, stepped, steeper, with an eave of 0.08 at the front (Gaudí).
+  for (const side of [-1, 1]) {
+    for (let row = 0; row < 3; row++) {
+      const along = 0.07 + row * 0.11;
+      const x = side * along * Math.cos(0.75), y = 0.84 - along * Math.sin(0.75) - row * 0.012;
+      const tone = side < 0 ? ['#d39352', '#c98b48', '#bd7f40'][row] : ['#b97a3c', '#ad7036', '#a0652f'][row];
+      wood.push(box(0.15, 0.03, 0.76, tone, x, y, 0.06, 0, 5 + row + (side > 0 ? 3 : 0), 0, -side * 0.75));
+    }
+  }
+  wood.push(box(0.045, 0.045, 0.78, '#7a4a22', 0, 0.86, 0.06, 0, 12));
+  const gable = new THREE.Shape([new THREE.Vector2(-0.33, 0), new THREE.Vector2(0.33, 0), new THREE.Vector2(0, 0.3)]);
   wood.push(paint(new THREE.ExtrudeGeometry(gable, { depth: 0.035, bevelEnabled: false }), '#a0652f', null, 0.06, 8)
     .translate(0, 0.56, -0.25));
   group.add(mesh(wood, mat.solid));
@@ -281,7 +372,7 @@ export function makeHut(mat) {
   group.add(mesh(books, mat.solid));
   const lamp = new THREE.Mesh(new THREE.IcosahedronGeometry(0.035, 1), mat.glow);
   lamp.position.set(-0.16, 0.2, 0.02);
-  group.add(lamp);
+  group.add(lamp, halo(mat, -0.16, 0.2, 0.02, 0.32));
   return group;
 }
 
@@ -346,7 +437,7 @@ export function makeLighthouse(mat) {
   group.add(mesh(geos, mat.solid));
   const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.075, 12), mat.glow);
   lamp.position.y = y + 0.07;
-  group.add(lamp);
+  group.add(lamp, halo(mat, 0, y + 0.07, 0, 0.42));
   return group;
 }
 
@@ -369,7 +460,7 @@ export function makeDock(mat) {
   dock.add(mesh(geos, mat.solid));
   const lantern = new THREE.Mesh(new THREE.IcosahedronGeometry(0.03, 1), mat.glow);
   lantern.position.set(D.length - 0.05, deck + 0.1, -0.17);
-  dock.add(lantern);
+  dock.add(lantern, halo(mat, D.length - 0.05, deck + 0.1, -0.17, 0.26));
   dock.add(mesh([paint(new THREE.CylinderGeometry(0.018, 0.024, 0.06, 8), '#3a2a1a').translate(D.length - 0.05, deck + 0.05, -0.17)],
     mat.solid));
   group.add(dock);

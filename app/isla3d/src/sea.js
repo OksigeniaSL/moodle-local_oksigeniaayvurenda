@@ -82,22 +82,25 @@ void main() {
 
   vec3 cShallow = vec3(0.44, 0.86, 0.75);
   vec3 cMid = vec3(0.09, 0.75, 0.72);
-  vec3 cDeep = vec3(0.02, 0.65, 0.70);
+  // Darker with the distance, from turquoise at the shore to #0f6f86 far away (Gaudí).
+  vec3 cDeep = vec3(0.059, 0.435, 0.525);
   vec3 base = mix(cShallow, cMid, smoothstep(0.05, 0.95, sd));
-  base = mix(base, cDeep, smoothstep(0.7, 2.6, sd));
+  base = mix(base, cDeep, smoothstep(0.6, 3.6, sd));
   base *= 0.95 + 0.08 * vnoise(p * 0.45 + t * 0.03);
   base *= mix(0.93, 1.07, smoothstep(-3.5, 3.0, p.y + 0.35 * p.x));
   vec3 blob = base * (0.8 + 0.14 * v1.z + 0.05 * smoothstep(0.0, 0.7, v1.x)) * (0.94 + 0.1 * v2.z);
   vec3 light = mix(base * 1.12 + vec3(0.04, 0.06, 0.03), vec3(0.62, 0.93, 0.80), 0.55 * shallow);
-  vec3 col = mix(blob, light, gap * mix(0.2, 0.85, shallow));
-  col = mix(col, col * 1.06 + 0.02, gap2 * 0.4);
-  col += vec3(0.12, 0.13, 0.09) * thin * mix(0.03, 0.65, shallow);
+  // The light cells, at a third of their strength: they weighed too much (Gaudí).
+  vec3 col = mix(blob, light, gap * mix(0.2, 0.85, shallow) * 0.3);
+  col = mix(col, col * 1.06 + 0.02, gap2 * 0.12);
+  col += vec3(0.12, 0.13, 0.09) * thin * mix(0.03, 0.65, shallow) * 0.3;
 
   float a = mix(0.6, 1.0, smoothstep(0.0, 0.7, sd));
   a = max(a, (gap * 0.45 + thin * 0.3) * shallow);
 
   // foam ring at the shoreline, breathing in and out
-  float wob = 0.025 * sin(ang * 13.0 + t * 1.1) + 0.02 * sin(ang * 29.0 - t * 0.7) + 0.05 * (vnoise(p * 6.0 + t * 0.2) - 0.5);
+  float wob = 0.03 * sin(ang * 13.0 + t * 1.1) + 0.025 * sin(ang * 29.0 - t * 0.7) + 0.09 * (vnoise(p * 6.0 + t * 0.2) - 0.5)
+    + 0.04 * (vnoise(p * 15.0 - t * 0.3) - 0.5);
   float surge = 0.03 * sin(t * 0.9 + ang * 2.0);
   float fs = sd + wob - surge;
   float foam = (1.0 - smoothstep(0.03, 0.075, fs)) * smoothstep(-0.1, -0.065, fs) * (0.82 + 0.18 * thin);

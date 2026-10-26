@@ -23,10 +23,10 @@
 //   island.destroy();                                      // frees geometries, textures and the WebGL context
 import * as THREE from 'three';
 import { makeSea } from './sea.js';
-import { makeGround } from './terrain.js';
+import { makeGround, grassOf } from './terrain.js';
 import {
   materials, makePalm, makeBushes, makeRocks, ROCKS, makeTree, makeHut, makeGarden, makeLighthouse, makeDock,
-  makeSparkles,
+  makeSparkles, makeGrass,
 } from './models.js';
 import { SPOTS, SEA_Y } from './shape.js';
 
@@ -70,23 +70,24 @@ export function mount(element, options = {}) {
   element.appendChild(canvas);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#0aa5ae');
-  scene.add(new THREE.HemisphereLight('#d8eef4', '#c9a36a', 1.35));
-  const sun = new THREE.DirectionalLight('#ffe2b0', 2.1);
-  sun.position.set(3.2, 5.5, -2.4);
+  scene.background = new THREE.Color('#0f6f86');
+  scene.add(new THREE.HemisphereLight('#cdeefa', '#e2c38a', 1.2));
+  // The sun from the top left and in front, as in Gaudí's 2D island.
+  const sun = new THREE.DirectionalLight('#ffe2b0', 2.3);
+  sun.position.set(-3, 5, 3.5);
   scene.add(sun);
-  const fill = new THREE.DirectionalLight('#ffe9cc', 0.55);
-  fill.position.set(-2, 2.5, 3.5);
+  const fill = new THREE.DirectionalLight('#ffe9cc', 0.35);
+  fill.position.set(3, 2.5, -2);
   scene.add(fill);
 
   const camera = new THREE.PerspectiveCamera(26, 16 / 10, 0.1, 60);
-  const look = new THREE.Vector3(0.22, 0.1, 0.18);
+  const look = new THREE.Vector3(0.22, 0.2, 0.12);
 
   const mat = materials();
   const time = { value: 0 };
   const ground = makeGround();
   scene.add(ground.mesh);
-  scene.add(makePalm(mat), makeBushes(mat), makeRocks(mat));
+  scene.add(makeGrass(grassOf('base'), 5), makePalm(mat), makeBushes(mat), makeRocks(mat));
   const rings = ROCKS.filter(([x, z]) => Math.hypot(x / 2.55, z / 1.62) > 0.92).map(([x, z, r]) => ({ x, z, r: r * 0.9 }));
   rings.push({ x: SPOTS.lighthouse.x, z: SPOTS.lighthouse.z, r: 0.2 });
   const sea = makeSea(rings);
@@ -107,7 +108,7 @@ export function mount(element, options = {}) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     // A box narrower than 16:10 sees the island from further away, so it always fits whole.
-    const far = 8.2 * Math.max(1, 1.6 / camera.aspect);
+    const far = 8.7 * Math.max(1, 1.6 / camera.aspect);
     camera.position.set(0.55, far * 0.68, far * 0.78);
     camera.lookAt(look);
     camera.updateProjectionMatrix();
@@ -200,14 +201,19 @@ export function mount(element, options = {}) {
       group.scale.setScalar(group.userData.size);
       shown.set(piece.name, group);
       scene.add(group);
+      // Its grass, cut paper on the sand, grows with it.
+      const grass = makeGrass(grassOf(piece.name), piece.name.length * 7);
+      grass.userData.size = 1;
+      scene.add(grass);
       if (animate && !reduce) {
         // Where the sparks rise: the middle of the piece at its full size, a little above its foot.
         const box = new THREE.Box3().setFromObject(group);
         const at = box.getCenter(new THREE.Vector3());
         at.y = box.min.y + 0.15;
         group.scale.set(0.001, 0.001, 0.001);
+        grass.scale.set(0.001, 0.001, 0.001);
         const start = performance.now() + delay;
-        growing.push({ group, start });
+        growing.push({ group, start }, { group: grass, start });
         setTimeout(() => spark(at), delay);
         delay += 700;
       }

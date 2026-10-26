@@ -19,6 +19,7 @@
 import * as THREE from 'three';
 import { shoreSD, terrainH, vnoise, rng, smooth, SPOTS } from './shape.js';
 
+
 export const BOUNDS = { x0: -3.2, x1: 3.2, z0: -2.15, z1: 2.15 };
 const W = 1024;
 const H = Math.round(W * (BOUNDS.z1 - BOUNDS.z0) / (BOUNDS.x1 - BOUNDS.x0));
@@ -26,34 +27,27 @@ const px = (x) => (x - BOUNDS.x0) / (BOUNDS.x1 - BOUNDS.x0) * W;
 const pz = (z) => (z - BOUNDS.z0) / (BOUNDS.z1 - BOUNDS.z0) * H;
 const scale = W / (BOUNDS.x1 - BOUNDS.x0);
 
-// The sun comes from the back right, so shadows fall to the front left.
-const SHADOW = { dx: -0.16, dz: 0.11 };
+// The sun comes from the top left and in front (Gaudí's 2D), so shadows fall to the back right.
+const SHADOW = { dx: 0.15, dz: -0.12 };
 
 // What each piece leaves on the ground: grass around it, and its shadow.
 const GROUND = {
-  base: { grass: [[SPOTS.palm.x + 0.05, SPOTS.palm.z + 0.05, 0.42], [SPOTS.palm.x - 0.25, SPOTS.palm.z + 0.3, 0.22]],
+  base: { grass: [[SPOTS.palm.x + 0.05, SPOTS.palm.z + 0.05, 0.6], [SPOTS.palm.x - 0.3, SPOTS.palm.z + 0.36, 0.3]],
     shadows: [[SPOTS.palm.x + 0.05, SPOTS.palm.z + 0.12, 0.34, 0.2]] },
-  tree: { grass: [[SPOTS.tree.x, SPOTS.tree.z + 0.02, 0.62], [SPOTS.tree.x + 0.55, SPOTS.tree.z + 0.1, 0.25]],
+  tree: { grass: [[SPOTS.tree.x, SPOTS.tree.z + 0.04, 0.82], [SPOTS.tree.x + 0.62, SPOTS.tree.z + 0.14, 0.36]],
     shadows: [[SPOTS.tree.x - 0.12, SPOTS.tree.z + 0.16, 0.62, 0.36]] },
-  hut: { grass: [[SPOTS.hut.x + 0.32, SPOTS.hut.z - 0.1, 0.18]], shadows: [[SPOTS.hut.x - 0.1, SPOTS.hut.z + 0.18, 0.42, 0.26]] },
+  hut: { grass: [[SPOTS.hut.x + 0.36, SPOTS.hut.z - 0.12, 0.28]], shadows: [[SPOTS.hut.x - 0.1, SPOTS.hut.z + 0.18, 0.42, 0.26]] },
   garden: { grass: [], shadows: [[SPOTS.garden.x - 0.08, SPOTS.garden.z + 0.08, 0.6, 0.34]] },
   lighthouse: { grass: [], shadows: [[SPOTS.lighthouse.x - 0.1, SPOTS.lighthouse.z + 0.1, 0.22, 0.14]] },
   dock: { grass: [], shadows: [] },
 };
 
-function blob(ctx, x, z, r, colours, rand, n = 160) {
-  for (let i = 0; i < n; i++) {
-    const a = rand() * Math.PI * 2, d = Math.sqrt(rand()) * r;
-    const bx = x + Math.cos(a) * d, bz = z + Math.sin(a) * d;
-    const rr = (0.05 + rand() * 0.08) * scale * (1 - d / r * 0.6);
-    ctx.fillStyle = colours[Math.floor(rand() * colours.length)];
-    ctx.beginPath();
-    ctx.ellipse(px(bx), pz(bz), rr, rr * 0.8, rand() * Math.PI, 0, Math.PI * 2);
-    ctx.fill();
-  }
+// The grass patches of the base and of each piece (x, z, radius), for the cut-paper grass of the models.
+export function grassOf(name) {
+  return GROUND[name] ? GROUND[name].grass : [];
 }
 
-function shadow(ctx, x, z, rx, rz, strength = 0.32) {
+function shadow(ctx, x, z, rx, rz, strength = 0.42) {
   const cx = px(x + SHADOW.dx), cz = pz(z + SHADOW.dz);
   const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
   g.addColorStop(0, `rgba(96, 62, 24, ${strength})`);
@@ -63,6 +57,18 @@ function shadow(ctx, x, z, rx, rz, strength = 0.32) {
   ctx.translate(cx, cz);
   ctx.scale(rx * scale, rz * scale);
   ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  // A contact shadow right under the piece, tighter and darker.
+  const g2 = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  g2.addColorStop(0, `rgba(80, 50, 18, ${strength * 0.8})`);
+  g2.addColorStop(1, 'rgba(80, 50, 18, 0)');
+  ctx.save();
+  ctx.translate(px(x + SHADOW.dx * 0.3), pz(z + SHADOW.dz * 0.3));
+  ctx.scale(rx * 0.6 * scale, rz * 0.6 * scale);
+  ctx.fillStyle = g2;
   ctx.beginPath();
   ctx.arc(0, 0, 1, 0, Math.PI * 2);
   ctx.fill();
@@ -82,7 +88,9 @@ export function paintGround(canvas, pieces) {
       const sd = shoreSD(x, z);
       const k = smooth(-0.05, -0.55, sd);
       const n = vnoise(x * 6, z * 6) * 0.06 + vnoise(x * 23, z * 23) * 0.04 - 0.05;
-      const c = sd > 0 ? deep : wet.map((w, m) => w + (dry[m] - w) * k);
+      // The wet band right before the foam (Gaudí: #d9b26a).
+      const band = smooth(-0.22, -0.12, sd) * (1 - smooth(-0.02, 0.02, sd));
+      const c = sd > 0 ? deep : wet.map((w, m) => w + (dry[m] - w) * k).map((v, m) => v + ([217, 178, 106][m] - v) * band);
       const o = (j * W + i) * 4;
       img.data[o] = Math.min(255, c[0] * (1 + n));
       img.data[o + 1] = Math.min(255, c[1] * (1 + n));
@@ -101,7 +109,6 @@ export function paintGround(canvas, pieces) {
       ctx.fill();
     }
   }
-  const greens = ['#5f9a2c', '#77b236', '#4c8526', '#8cc043'];
   for (const name of ['base', ...pieces]) {
     const ground = GROUND[name];
     if (!ground) {
@@ -110,9 +117,9 @@ export function paintGround(canvas, pieces) {
     for (const [x, z, rx, rz] of ground.shadows) {
       shadow(ctx, x, z, rx, rz);
     }
-    const r = rng(name.length * 31);
+    // The grass patches stand a little above the sand, like cut paper: their soft shadow, here.
     for (const [x, z, rad] of ground.grass) {
-      blob(ctx, x, z, rad, greens, r);
+      shadow(ctx, x, z, rad * 0.9, rad * 0.75, 0.16);
     }
   }
 }

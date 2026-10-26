@@ -74,10 +74,14 @@ export const SEA_Y = 0.02;
 export function terrainH(x, z) {
   const sd = shoreSD(x, z);
   if (sd < 0) {
-    return SEA_Y + 0.09 * smooth(0, 0.8, -sd) + 0.012 * (vnoise(x * 2.3, z * 2.3) - 0.5) * smooth(0, 0.5, -sd);
+    // A soft dome (a quarter of a unit in the middle) and a low mound under the tree (Gaudí).
+    const mound = 0.07 * Math.exp(-((x - MOUND.x) ** 2 + (z - MOUND.z) ** 2) / 0.22);
+    return SEA_Y + 0.25 * smooth(0, 1.5, -sd) + mound * smooth(0, 0.4, -sd)
+      + 0.012 * (vnoise(x * 2.3, z * 2.3) - 0.5) * smooth(0, 0.5, -sd);
   }
   return SEA_Y - 0.16 * smooth(0, 0.55, sd);
 }
+const MOUND = { x: -0.05, z: -0.88 };
 
 // Where everything stands, after Gaudí's layers: the palm and the rocks of the base, and the pieces the class wins.
 export const SPOTS = {
