@@ -236,6 +236,17 @@ final class covers {
     }
 
     /**
+     * An image as covers are kept (made small, as JPEG), to keep the same one for many records without making it small
+     * each time.
+     *
+     * @param string $data
+     * @return string|null
+     */
+    public static function prepare(string $data): ?string {
+        return self::shrink($data);
+    }
+
+    /**
      * An image made small, as JPEG.
      *
      * @param string $data

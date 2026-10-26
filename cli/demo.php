@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/clilib.php');
 
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'name' => 'Biblioteca de demostración', 'records' => 14500, 'readers' => 2000, 'seed' => 20261023,
-        'accounts' => 0, 'entity' => 0, 'loans' => 0, 'library' => '', 'window' => 0],
+        'accounts' => 0, 'entity' => 0, 'loans' => 0, 'library' => '', 'window' => 0, 'covers' => false],
     ['h' => 'help']
 );
 
@@ -53,7 +53,9 @@ Options:
                   given with --library, and a tutor for each group among the teachers with an account
   --window=N      Instead, put N made-up works for everyone (an EPUB written on the spot) on titles of the library given
                   with --library, and open its public window
-  --library=SLUG  The library for --loans or --window
+  --covers        Instead, give the made-up books of the library given with --library the made-up covers of the art
+                  package (pix/portadas/)
+  --library=SLUG  The library for --loans, --window or --covers
   -h, --help      This help
 
 Example:
@@ -70,6 +72,18 @@ if ((int) $options['accounts'] > 0) {
     $stats = \local_oksigeniaayvurenda\local\demo::accounts((int) $options['entity'], (int) $options['accounts']);
     cli_writeln('Made-up accounts in cohorts, brought as readers: ' . json_encode($stats) . ', in ' .
         round(microtime(true) - $start, 1) . ' s.');
+    exit(0);
+}
+if ($options['covers']) {
+    $libraryid = $DB->get_field('local_oksigeniaayvurenda_library', 'id', ['slug' => $options['library']]);
+    if (!$libraryid) {
+        cli_error('Say which library the covers are for (--library).');
+    }
+    $given = \local_oksigeniaayvurenda\local\demo::covers((int) $libraryid);
+    if ($given < 0) {
+        cli_error('This library has books brought from a catalogue: made-up covers are only for made-up books.');
+    }
+    cli_writeln('Made-up covers given: ' . $given . ', in ' . round(microtime(true) - $start, 1) . ' s.');
     exit(0);
 }
 if ((int) $options['window'] > 0) {

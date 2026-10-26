@@ -106,4 +106,42 @@ final class window_test extends \advanced_testcase {
         $this->assertSame('Biblioteca Alfa', opds::short_name('Biblioteca Alfa del barrio norte'));
         $this->assertSame('Supercalifragilí', opds::short_name('Supercalifragilístico'));
     }
+
+    /**
+     * The catalogue for anyone: only with the window open and the centre's yes; then every cover of the centre is
+     * served to anyone. What moves in the library: books out today, the busiest corner of the week, what arrived this
+     * month by when it was acquired, never by when it was typed in.
+     */
+    public function test_catalogue_and_pulse(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $record = $gen->create_record(['entityid' => $entityid]);
+        $this->assertFalse(window::catalogue_open($library));
+        window::save($library, ['open' => false, 'catalogue' => true]);
+        $this->assertFalse(window::catalogue_open($library));
+        $this->assertFalse(window::shows_record((int) $record->id));
+        window::save($library, ['open' => true, 'catalogue' => true]);
+        $this->assertTrue(window::catalogue_open($library));
+        $this->assertTrue(window::shows_record((int) $record->id));
+        $other = $gen->create_record(['entityid' => $gen->create_library()->entityid]);
+        $this->assertFalse(window::shows_record((int) $other->id));
+
+        $now = time();
+        $class = (int) $DB->insert_record('local_oksigeniaayvurenda_authority', ['entityid' => $entityid, 'kind' => 'class',
+            'code' => '5', 'label' => 'Ciencias', 'timecreated' => $now, 'timemodified' => $now]);
+        $DB->insert_record('local_oksigeniaayvurenda_recauth', ['recordid' => $record->id, 'authorityid' => $class,
+            'sortorder' => 0]);
+        $reader = $gen->create_reader(['entityid' => $entityid]);
+        $item = $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => $now - 400 * DAYSECS]);
+        $gen->create_item(['libraryid' => $library->id, 'timeacquired' => $now - 3 * DAYSECS]);
+        $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id, 'timeloaned' => $now]);
+        $pulse = window::pulse($library, $now);
+        $this->assertSame(1, $pulse['today']);
+        $this->assertSame(1, $pulse['new']);
+        $this->assertNotSame('', $pulse['corner']);
+    }
 }

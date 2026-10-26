@@ -14,12 +14,14 @@
         return Array.prototype.slice.call(shelf.querySelectorAll('a.ayv-spine'));
     }
 
-    // Marks the last book of each row, for its bookend, and tells the rows apart.
+    // Marks the first and the last book of each row, for their bookends.
     function markRows(shelf) {
         var list = slots(shelf);
         list.forEach(function (slot, i) {
             var next = list[i + 1];
+            var prev = list[i - 1];
             slot.classList.toggle('ayv-row-end', !next || next.offsetTop !== slot.offsetTop);
+            slot.classList.toggle('ayv-row-start', !prev || prev.offsetTop !== slot.offsetTop);
         });
     }
 
@@ -178,9 +180,11 @@
             here.scrollIntoView({block: 'center'});
             here.focus({preventScroll: true});
         }
+        // Without a lectern (the short shelf of a record), a spine is just its link.
+        var lectern = !!document.getElementById('ayv-lectern');
         shelf.addEventListener('click', function (event) {
             var spine = event.target.closest('a.ayv-spine');
-            if (!spine || event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) {
+            if (!lectern || !spine || event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) {
                 return;
             }
             event.preventDefault();
@@ -210,7 +214,7 @@
                 next = all[0];
             } else if (event.key === 'End') {
                 next = all[all.length - 1];
-            } else if (event.key === 'Enter' || event.key === ' ') {
+            } else if (lectern && (event.key === 'Enter' || event.key === ' ')) {
                 event.preventDefault();
                 open(shelf, spine);
                 return;

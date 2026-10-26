@@ -103,4 +103,39 @@ final class demo_test extends \advanced_testcase {
         $titles = fn($entityid) => $DB->get_fieldset_select(self::T . 'record', 'title', 'entityid = ? ORDER BY id', [$entityid]);
         $this->assertSame($titles($first), $titles($second));
     }
+
+    /**
+     * Made-up covers go only to made-up books: a centre with records brought from a catalogue gets none. With the art
+     * package, one book in seven keeps its drawn cover; without it, nothing changes.
+     */
+    public function test_covers(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $real = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $real->entityid, 'title' => 'El faro dormido']);
+        $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $real->entityid, 'system' => 'abies',
+            'tablename' => 'record', 'externalid' => '1', 'localid' => $record->id, 'hash' => 'x', 'timecreated' => time()]);
+        $this->assertSame(-1, demo::covers((int) $real->id));
+        $this->assertNull(covers::url((int) $record->id));
+
+        $made = $gen->create_library();
+        $ids = [];
+        for ($i = 0; $i < 14; $i++) {
+            $ids[] = (int) $gen->create_record(['entityid' => $made->entityid, 'title' => 'El faro perdido'])->id;
+        }
+        $given = demo::covers((int) $made->id);
+        if (
+            \core_component::get_component_directory('local_oksigeniaayvurendaarte') === null
+                || !is_readable(\core_component::get_component_directory('local_oksigeniaayvurendaarte') .
+                    '/pix/portadas/libro-faro.webp')
+        ) {
+            $this->assertSame(0, $given);
+            return;
+        }
+        $kept = count(array_filter($ids, fn($id) => $id % 7 === 0));
+        $this->assertSame(14 - $kept, $given);
+        $this->assertSame(0, demo::covers((int) $made->id), 'a second pass gives none');
+    }
 }

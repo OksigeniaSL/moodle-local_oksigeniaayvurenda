@@ -41,10 +41,11 @@ final class window {
     public const ANYONE = ['who' => 'nobody', 'stage' => null, 'userid' => 0, 'readerid' => 0];
 
     /**
-     * The window's settings: open or not, the centre's words, whether voices show, whether search engines may list it.
+     * The window's settings: open or not, the centre's words, whether voices show, whether search engines may list it,
+     * and whether anyone may see the catalogue and the shelves (what there is and whether it is free; never who has it).
      *
      * @param \stdClass $library
-     * @return array open, text, voices, index.
+     * @return array open, text, voices, index, catalogue.
      */
     public static function settings(\stdClass $library): array {
         $settings = json_decode((string) ($library->settings ?? ''), true) ?: [];
@@ -54,14 +55,85 @@ final class window {
             'text' => (string) ($window['text'] ?? ''),
             'voices' => (bool) ($window['voices'] ?? true),
             'index' => (bool) ($window['index'] ?? false),
+            'catalogue' => (bool) ($window['catalogue'] ?? false),
         ];
+    }
+
+    /**
+     * Whether anyone, without an account, may walk the catalogue and the shelves of a library: its window is open and
+     * the centre chose to show them.
+     *
+     * @param \stdClass|null $library
+     * @return bool
+     */
+    public static function catalogue_open(?\stdClass $library): bool {
+        if (!$library) {
+            return false;
+        }
+        $settings = self::settings($library);
+        return $settings['open'] && $settings['catalogue'];
+    }
+
+    /**
+     * What is moving in the library, with no one in it: how many books went out today, the corner most books came from
+     * this week, how many arrived this month. Only what is more than nothing.
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return array today, corner (its name, or '') and new, as numbers.
+     */
+    public static function pulse(\stdClass $library, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        $tz = \core_date::get_server_timezone_object();
+        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
+        $out = $DB->count_records_select(
+            self::T . 'loan',
+            'libraryid = :libraryid AND timeloaned >= :today',
+            ['libraryid' => $library->id, 'today' => $today]
+        );
+        $rows = $DB->get_records_sql(
+            "SELECT l.id, (SELECT MIN(a.code)
+                             FROM {" . self::T . "recauth} ra
+                             JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+                            WHERE ra.recordid = i.recordid) AS class
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+              WHERE l.libraryid = :libraryid AND l.timeloaned >= :week",
+            ['libraryid' => $library->id, 'week' => $now - WEEKSECS],
+            0,
+            2000
+        );
+        $corners = [];
+        foreach ($rows as $row) {
+            $first = $row->class !== null ? \core_text::substr(trim($row->class), 0, 1) : '';
+            if ($first !== '' && ctype_digit($first)) {
+                $corners[$first] = ($corners[$first] ?? 0) + 1;
+            }
+        }
+        $corner = '';
+        if ($corners) {
+            arsort($corners);
+            $top = (string) array_key_first($corners);
+            foreach (catalogue::corners($library) as $known) {
+                if ($known['code'] === $top) {
+                    $corner = $known['label'];
+                }
+            }
+        }
+        $new = (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT recordid) FROM {" . self::T . "item}
+              WHERE libraryid = :libraryid AND COALESCE(timeacquired, timecreated) >= :month AND status <> 'withdrawn'",
+            ['libraryid' => $library->id, 'month' => $now - 30 * DAYSECS]
+        );
+        return ['today' => $out, 'corner' => $corner, 'new' => $new];
     }
 
     /**
      * Saves the window's settings.
      *
      * @param \stdClass $library
-     * @param array $data open, text, voices, index.
+     * @param array $data open, text, voices, index, catalogue.
      */
     public static function save(\stdClass $library, array $data): void {
         global $DB;
@@ -71,6 +143,7 @@ final class window {
             'text' => \core_text::substr(trim((string) ($data['text'] ?? '')), 0, 4000),
             'voices' => !empty($data['voices']),
             'index' => !empty($data['index']),
+            'catalogue' => !empty($data['catalogue']),
         ];
         $DB->update_record(self::T . 'library', (object) ['id' => $library->id, 'settings' => json_encode($settings),
             'timemodified' => time()]);
@@ -109,13 +182,21 @@ final class window {
     }
 
     /**
-     * Whether a record has something in an open window, so that its cover can be shown there.
+     * Whether a record has something in an open window, or its centre shows its catalogue there, so that its cover
+     * can be shown.
      *
      * @param int $recordid
      * @return bool
      */
     public static function shows_record(int $recordid): bool {
         global $DB;
+        // A library that shows its catalogue to anyone shows every cover of its centre.
+        $entityid = (int) $DB->get_field(self::T . 'record', 'entityid', ['id' => $recordid]);
+        foreach ($DB->get_records(self::T . 'library', ['entityid' => $entityid], 'id', 'id, settings') as $library) {
+            if (self::catalogue_open($library)) {
+                return true;
+            }
+        }
         foreach ($DB->get_records(self::T . 'digital', ['recordid' => $recordid, 'status' => 'published']) as $item) {
             if (self::shows($item)) {
                 return true;

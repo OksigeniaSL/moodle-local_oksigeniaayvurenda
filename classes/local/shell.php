@@ -131,14 +131,21 @@ final class shell {
         $lang = str_replace('_', '-', current_language());
         $str = fn(string $key, $a = null) => s(get_string($key, 'local_oksigeniaayvurenda', $a));
         $home = $library ? $base . 'index.php?library=' . rawurlencode($library->slug) : $base . 'index.php';
+        // Someone without an account goes home to the library's door, when it has its window open.
+        $outsider = !isloggedin() || isguestuser();
+        if ($library && $outsider && window::settings($library)['open']) {
+            $home = $base . 'public.php?library=' . rawurlencode($library->slug);
+        }
         $search = '';
-        if ($library && ($options['search'] ?? true)) {
-            $search = '<form class="ayv-search" role="search" action="' . $base . 'search.php" method="get">
+        // Without an account, the search of a catalogue shown to anyone is the window's; with none shown, there is none.
+        $searchpage = $outsider && $library ? (window::catalogue_open($library) ? 'public.php' : '') : 'search.php';
+        if ($library && $searchpage !== '' && ($options['search'] ?? true)) {
+            $search = '<form class="ayv-search" role="search" action="' . $base . $searchpage . '" method="get">
     <input type="hidden" name="library" value="' . s($library->slug) . '">
     <label class="ayv-sr" for="ayv-q">' . $str('searchlabel') . '</label>
     <input id="ayv-q" name="q" type="search" value="' . s($query) . '" placeholder="' . $str('searchplaceholder') . '"
         autocomplete="off" enterkeyhint="search" maxlength="200">
-    <a class="ayv-search-clear" href="' . $base . 'index.php?library=' . s($library->slug) . '" aria-label="' .
+    <a class="ayv-search-clear" href="' . s($home) . '" aria-label="' .
                 $str('searchclear') . '"' . ($query === '' ? ' hidden' : '') . '>×</a>
     <button type="submit">' . $str('searchbutton') . '</button>
 </form>';
@@ -169,7 +176,8 @@ final class shell {
         $seen = [];
         if ($library) {
             global $OUTPUT, $PAGE;
-            $here = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/local/oksigeniaayvurenda/index.php');
+            $here = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/local/oksigeniaayvurenda/' .
+                ($outsider && str_contains($home, 'public.php') ? 'public.php' : 'index.php'));
             $seen[$home] = true;
             $catalogue = '<a class="ayv-nav ayv-nav-home" href="' . s($home) . '"' . ($here ? ' aria-current="page"' : '') . '>'
                 . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_book', []) . ' '

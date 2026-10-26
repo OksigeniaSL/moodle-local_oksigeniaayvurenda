@@ -490,6 +490,22 @@ final class screens {
     }
 
     /**
+     * Spines for someone without an account, in a library that shows its catalogue: each leads to the record in the
+     * window, not to the library's own page.
+     *
+     * @param array[] $spines From stacks.
+     * @param \stdClass $library
+     * @return array[]
+     */
+    public static function public_spines(array $spines, \stdClass $library): array {
+        foreach ($spines as &$spine) {
+            $spine['url'] = (new \moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug,
+                'record' => $spine['id']]))->out(false);
+        }
+        return $spines;
+    }
+
+    /**
      * The class's garden as Gaudí's island: its base, a piece for each challenge met this school year (three, one a
      * term), the lighthouse when one was of everyone, and the boat when the book the class asked for arrived. Layers of
      * the same size, one on top of another; null without the art package, and then the garden stays a list.

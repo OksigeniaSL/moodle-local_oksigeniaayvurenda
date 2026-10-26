@@ -16,30 +16,58 @@
 {{!
     @template local_oksigeniaayvurenda/public
 
-    The public window of a library, and its settings for whoever manages it.
+    The public window of a library: its door. Its picture, colour and words; what moves in it today, never who; its
+    places and corners as doors to the shelves, what came in last and the catalogue with what is free, when the centre
+    shows them; and what it has for everyone to read, hear or download. For whoever manages it, its settings.
 
     Example context (json):
     {
-        "heading": "La ventana de la Biblioteca", "text": "Bienvenidos.", "notice": "", "closednote": "", "query": "", "slug": "demo-1",
-        "action": "#", "hasrecords": true, "empty": "Nada todavía", "nexturl": "", "prevurl": "", "opds": "https://example.org/opds",
-        "loginurl": "#", "manage": true, "sesskey": "abc", "open": true, "voices": true, "index": false,
+        "door": {"name": "Biblioteca de demostración", "motto": "Un lugar para leer", "colour": 2, "image": null,
+                 "kicker": "La ventana de la biblioteca"},
+        "heading": "La ventana de la Biblioteca", "text": "Bienvenidos.", "notice": "", "closednote": "", "query": "",
+        "slug": "demo-1", "action": "#", "searchlabel": "Busca en la biblioteca",
+        "haspulse": true, "pulse": [{"text": "Hoy han salido 12 libros"}],
+        "hasdoors": true, "doorsheading": "Pasea por la biblioteca", "stacksplaces": "Los sitios", "stackscorners": "Rincones",
+        "places": [{"label": "Rojo", "countlabel": "120 libros", "url": "#", "colour": "#d63a2f", "hascolour": true}],
+        "corners": [{"label": "Ciencias", "countlabel": "90 libros", "url": "#", "colour": 3, "art": null}],
+        "hascards": true, "recentheading": "Lo último que ha llegado", "shelfprev": "Antes", "shelfnext": "Después",
+        "cards": [{"id": 1, "title": "El faro dormido", "authors": "Ana Montes", "colour": 2, "url": "#",
+                   "statelabel": "Libre", "stateclass": "free", "location": "Rojo", "cover": null}],
+        "results": null, "showdigital": true, "digitalheading": "Para leer y escuchar aquí",
+        "hasrecords": true, "empty": "Nada todavía", "nexturl": "", "prevurl": "", "opds": "https://example.org/opds",
+        "loginurl": "#", "manage": true, "sesskey": "abc", "open": true, "voices": true, "index": false, "catalogue": true,
         "publicurl": "https://example.org/w", "oaiurl": "https://example.org/oai.php/demo-1",
         "windowoai": "Dirección OAI-PMH", "windowoaihint": "Para los recolectores",
         "records": [{"title": "El faro dormido", "subtitle": "", "authors": "Ana Montes", "cover": "https://example.org/c.jpg",
             "hascover": true, "colour": 2, "items": [{"label": "EPUB", "licence": "Dominio público", "action": "Leer", "url": "#",
             "download": "https://example.org/d"}]}],
-        "windowsearch": "Buscar", "windowsearchbutton": "Buscar", "windowdownload": "Descargar", "windowopds": "OPDS",
+        "windowsearchbutton": "Buscar", "windowdownload": "Descargar", "windowopds": "OPDS",
         "windowopdshint": "Para Calibre", "windowlogin": "Entrar", "windownext": "Más", "windowprev": "Antes",
         "windowmanage": "La ventana", "windowopen": "Abierta", "windowopenhint": "Cualquiera la ve", "windowtext": "Texto",
         "windowtexthint": "Arriba", "windowvoices": "Voces", "windowindex": "Buscadores", "windowsave": "Guardar",
-        "windowaddress": "Dirección", "voiceinvitecopy": "Copiar"
+        "windowaddress": "Dirección", "voiceinvitecopy": "Copiar", "windowcatalogue": "El catálogo y la estantería",
+        "windowcataloguehint": "Lo que hay y si está libre", "windowbackdoor": "Volver a la entrada"
     }
 }}
 <section class="ayv-window">
-<h1 class="ayv-results-title">{{heading}}</h1>
+{{#door}}
+<header class="ayv-door ayv-cover-{{colour}}{{#image}} ayv-door-art{{/image}}">
+    {{#image}}<img class="ayv-door-img" src="{{image}}" alt="">{{/image}}
+    <div class="ayv-door-in">
+        <p class="ayv-door-kicker">{{kicker}}</p>
+        <h1 class="ayv-door-name">{{name}}</h1>
+        {{#motto}}<p class="ayv-door-motto">{{motto}}</p>{{/motto}}
+        <form class="ayv-door-search" role="search" method="get" action="{{action}}">
+            <input type="hidden" name="library" value="{{slug}}">
+            <label class="ayv-sr" for="ayv-door-q">{{searchlabel}}</label>
+            <input id="ayv-door-q" type="search" name="q" value="{{query}}" maxlength="200" placeholder="{{searchlabel}}">
+            <button type="submit" class="ayv-button">{{windowsearchbutton}}</button>
+        </form>
+    </div>
+</header>
+{{/door}}
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#closednote}}<p class="ayv-notice">{{closednote}}</p>{{/closednote}}
-{{#text}}<p class="ayv-window-text">{{text}}</p>{{/text}}
 {{#manage}}
 <details class="ayv-book ayv-window-manage" {{^open}}open{{/open}}>
     <summary>{{windowmanage}}</summary>
@@ -47,6 +75,8 @@
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="open" value="1" {{#open}}checked{{/open}}> {{windowopen}}</label>
         <p class="ayv-field-hint">{{windowopenhint}}</p>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="catalogue" value="1" {{#catalogue}}checked{{/catalogue}}> {{windowcatalogue}}</label>
+        <p class="ayv-field-hint">{{windowcataloguehint}}</p>
         <label class="ayv-field ayv-field-wide">{{windowtext}} <span class="ayv-field-hint">{{windowtexthint}}</span>
             <textarea name="text" rows="3">{{text}}</textarea></label>
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="voices" value="1" {{#voices}}checked{{/voices}}> {{windowvoices}}</label>
@@ -60,11 +90,57 @@
     <p class="ayv-field-hint">{{windowoaihint}}</p>
 </details>
 {{/manage}}
-<form class="ayv-window-search" role="search" method="get" action="{{action}}">
-    <input type="hidden" name="library" value="{{slug}}">
-    <label class="ayv-field ayv-field-wide">{{windowsearch}} <input type="search" name="q" value="{{query}}" maxlength="200"></label>
-    <button type="submit" class="ayv-button">{{windowsearchbutton}}</button>
-</form>
+{{#text}}<p class="ayv-window-text">{{text}}</p>{{/text}}
+{{#haspulse}}
+<ul class="ayv-pulse">
+{{#pulse}}<li>{{text}}</li>{{/pulse}}
+</ul>
+{{/haspulse}}
+{{#results}}
+<section class="ayv-section" aria-labelledby="ayv-window-results">
+    <h2 id="ayv-window-results" class="ayv-section-title">{{heading}}</h2>
+    {{#hascards}}{{> local_oksigeniaayvurenda/cards}}{{/hascards}}
+    {{^hascards}}<p class="ayv-empty">{{empty}}</p>{{/hascards}}
+    <p class="ayv-book-actions">{{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}">{{windowprev}}</a>{{/prevurl}}
+        {{#nexturl}}<a class="ayv-button ayv-button-quiet" href="{{nexturl}}">{{windownext}}</a>{{/nexturl}}</p>
+</section>
+{{/results}}
+{{#hasdoors}}
+<section class="ayv-section" aria-labelledby="ayv-window-doors">
+    <h2 id="ayv-window-doors" class="ayv-section-title">{{doorsheading}}</h2>
+    {{#places.0}}
+    <ul class="ayv-places">
+    {{#places}}
+        <li><a class="ayv-place" href="{{url}}"{{#hascolour}} style="--place: {{colour}}"{{/hascolour}}>
+            <span class="ayv-place-books" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+            <span class="ayv-place-label">{{label}}</span>
+            <span class="ayv-place-count">{{countlabel}}</span>
+        </a></li>
+    {{/places}}
+    </ul>
+    {{/places.0}}
+    {{#corners.0}}
+    <ul class="ayv-corners ayv-window-corners">
+    {{#corners}}
+        <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
+            {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}
+            <span class="ayv-corner-label">{{label}}</span>
+            <span class="ayv-corner-count">{{countlabel}}</span>
+        </a></li>
+    {{/corners}}
+    </ul>
+    {{/corners.0}}
+</section>
+{{/hasdoors}}
+{{#hascards}}
+<section class="ayv-section" aria-labelledby="ayv-window-recent">
+    <h2 id="ayv-window-recent" class="ayv-section-title">{{recentheading}}</h2>
+    <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>
+</section>
+{{/hascards}}
+{{#showdigital}}
+<section class="ayv-section" aria-labelledby="ayv-window-digital">
+<h2 id="ayv-window-digital" class="ayv-section-title">{{digitalheading}}</h2>
 {{^hasrecords}}<p class="ayv-empty">{{empty}}</p>{{/hasrecords}}
 {{#hasrecords}}
 <ul class="ayv-window-list">
@@ -75,7 +151,7 @@
             {{^hascover}}<span class="ayv-cover-title">{{title}}</span>{{/hascover}}
         </span>
         <div>
-            <h2 class="ayv-section-title">{{title}}</h2>
+            <h3 class="ayv-section-title">{{title}}</h3>
             {{#subtitle}}<p>{{subtitle}}</p>{{/subtitle}}
             {{#authors}}<p class="ayv-field-hint">{{authors}}</p>{{/authors}}
             <ul class="ayv-window-items">
@@ -92,6 +168,8 @@
 {{/hasrecords}}
 <p class="ayv-book-actions">{{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}">{{windowprev}}</a>{{/prevurl}}
     {{#nexturl}}<a class="ayv-button ayv-button-quiet" href="{{nexturl}}">{{windownext}}</a>{{/nexturl}}</p>
+</section>
+{{/showdigital}}
 <p class="ayv-window-foot"><a href="{{opds}}">{{windowopds}}</a> <span class="ayv-field-hint">{{windowopdshint}}</span></p>
 <p class="ayv-window-foot"><a href="{{loginurl}}">{{windowlogin}}</a></p>
 </section>

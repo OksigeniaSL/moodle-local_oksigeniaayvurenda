@@ -37,10 +37,15 @@ $all = optional_param('all', 0, PARAM_BOOL);
 $after = optional_param('after', '', PARAM_ALPHANUM);
 $before = optional_param('before', '', PARAM_ALPHANUM);
 $at = optional_param('at', 0, PARAM_INT);
-require_login(null, false);
 $library = catalogue::library($ref);
-$context = access::context($library);
-shell::require('local/oksigeniaayvurenda:view', $library);
+// Whoever is not of the library walks its shelves only where its window shows them, as anyone would.
+$public = $library && \local_oksigeniaayvurenda\local\window::catalogue_open($library)
+    && (!isloggedin() || isguestuser() || !access::can('local/oksigeniaayvurenda:view', $library));
+if (!$public) {
+    require_login(null, false);
+    $context = access::context($library);
+    shell::require('local/oksigeniaayvurenda:view', $library);
+}
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library' => $ref]));
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
@@ -89,7 +94,7 @@ $data = [
 ];
 if ($shelf) {
     $stretch = stacks::page($library, $filter, $after, $before, $at);
-    $data['spines'] = screens::spines($stretch['spines']);
+    $data['spines'] = screens::spines($public ? screens::public_spines($stretch['spines'], $library) : $stretch['spines']);
     // Coming from a record: that book, marked and in sight.
     foreach ($data['spines'] as &$spine) {
         $spine['here'] = $at && $spine['id'] === $at;
@@ -130,7 +135,7 @@ foreach (
 }
 shell::output($heading, $OUTPUT->render_from_template('local_oksigeniaayvurenda/stacks', $data), $library, '', [
     'scripts' => $shelf ? ['stacks'] : [],
-    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
+    'nav' => optional_param('help', 0, PARAM_BOOL) || $public ? [] : [['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/help.php',
         ['library' => $library->slug, 'piece' => 'stacks']
     ))->out(false), 'label' => $str('helpnav')]],

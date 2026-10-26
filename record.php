@@ -103,7 +103,8 @@ $data['beside'] = $beside && count($beside['spines']) > 1 ? [
     'walkurl' => (new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library' => $library->slug,
         'place' => $beside['place'], 'at' => $id]))->out(false),
     'bird' => screens::art('estanteria/mainumby', 'svg'),
+    'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
 ] : null;
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
-    'scripts' => !empty($data['reviews']['write']) ? ['draw', 'speak'] : [],
+    'scripts' => array_merge(!empty($data['reviews']['write']) ? ['draw', 'speak'] : [], $data['beside'] ? ['stacks'] : []),
 ]);

@@ -433,6 +433,63 @@ final class demo {
         }
     }
 
+    /** @var string[][] Covers of the art package for the books of some classes, before the noun of their title. */
+    private const CLASS_COVERS = ['52' => ['astronomia', 'planetas'], '51' => ['matematicas'], '59' => ['zoologia', 'erizo'],
+        '57' => ['erizo'], '78' => ['musica'], '7' => ['colores'], '94' => ['historia', 'mapa'], '9' => ['tren', 'mapa'],
+        '03' => ['cartas'], '0' => ['cartas']];
+
+    /**
+     * Gives the made-up books of a library the made-up covers of the art package (Gaudí's, pix/portadas/): by the class
+     * of a book that is not a story, else by the noun of its title. One book in seven keeps its drawn cover, as in any
+     * library; books that already have one keep it.
+     *
+     * @param int $libraryid
+     * @return int How many covers were given; -1 if the centre has records brought from a catalogue, which are not
+     *     made-up and never get a made-up cover.
+     */
+    public static function covers(int $libraryid): int {
+        global $DB;
+        $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $libraryid], MUST_EXIST);
+        if ($DB->record_exists(self::T . 'source', ['entityid' => $entityid, 'tablename' => 'record'])) {
+            return -1;
+        }
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        if (!$dir || !is_dir($dir . '/pix/portadas')) {
+            return 0;
+        }
+        $rows = $DB->get_recordset_sql(
+            "SELECT r.id, r.title, r.extra,
+                    (SELECT MIN(a.code)
+                       FROM {" . self::T . "recauth} ra
+                       JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+                      WHERE ra.recordid = r.id) AS class
+               FROM {" . self::T . "record} r
+              WHERE r.entityid = :entityid
+           ORDER BY r.id",
+            ['entityid' => $entityid]
+        );
+        $prepared = [];
+        $given = 0;
+        foreach ($rows as $row) {
+            if ($row->id % 7 === 0 || str_contains((string) $row->extra, '"cover"')) {
+                continue;
+            }
+            $keys = self::CLASS_COVERS[(string) $row->class] ?? [];
+            $words = explode(' ', \local_oksigeniaayvurenda\core\text::normalise((string) $row->title));
+            $key = $keys ? $keys[$row->id % count($keys)] : ($words[1] ?? '');
+            if (!array_key_exists($key, $prepared)) {
+                $file = $dir . '/pix/portadas/libro-' . $key . '.webp';
+                $prepared[$key] = preg_match('/^[a-z]+$/', $key) && is_readable($file)
+                    ? covers::prepare((string) file_get_contents($file)) : null;
+            }
+            if ($prepared[$key] !== null && covers::store((int) $row->id, $prepared[$key], 'demo')) {
+                $given++;
+            }
+        }
+        $rows->close();
+        return $given;
+    }
+
     /**
      * A made-up title.
      *
