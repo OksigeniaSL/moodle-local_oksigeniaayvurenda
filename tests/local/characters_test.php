@@ -96,4 +96,20 @@ final class characters_test extends \advanced_testcase {
             $messages[0]->fullmessage
         );
     }
+
+    /**
+     * A character's puppet comes only with the art package's puppet: without it, nothing, and the pose stays.
+     */
+    public function test_puppet(): void {
+        $this->resetAfterTest();
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        $whole = $dir && is_readable($dir . '/pix/marionetas/memoria.anim.json');
+        $puppet = characters::puppet('memory', 'senala');
+        if (!$whole) {
+            $this->assertSame('', $puppet);
+            return;
+        }
+        $this->assertSame('point', json_decode($puppet, true)['gesture']);
+        $this->assertSame('arrive', json_decode(characters::puppet('herald', 'saluda'), true)['gesture'] ?? 'arrive');
+    }
 }

@@ -109,6 +109,31 @@ final class characters {
     }
 
     /**
+     * Gaudí's puppet of a character doing the gesture of a pose, from the art package: what the page needs to bring it to
+     * life over the pose drawn still ('' without it, and the pose stays).
+     *
+     * @param string $role memory or herald.
+     * @param string $pose saluda, senala, celebra, lee or piensa.
+     * @return string JSON: image, atlas, rig, anim and gesture.
+     */
+    public static function puppet(string $role, string $pose): string {
+        $name = $role === 'herald' ? 'mainumby' : 'memoria';
+        $parts = [
+            'image' => screens::art('marionetas/' . $name),
+            'atlas' => screens::art('marionetas/' . $name . '.atlas', 'json'),
+            'rig' => screens::art('marionetas/' . $name . '.rig', 'json'),
+            'anim' => screens::art('marionetas/' . $name . '.anim', 'json'),
+        ];
+        if (in_array(null, $parts, true)) {
+            return '';
+        }
+        $gestures = $role === 'herald'
+            ? ['saluda' => 'arrive', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'idle']
+            : ['saluda' => 'greet', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'think'];
+        return (string) json_encode($parts + ['gesture' => $gestures[$pose] ?? 'idle']);
+    }
+
+    /**
      * What a character says, in words that agree with its sex: a string key with the ending f or m, when there is one.
      *
      * @param int $entityid
@@ -117,7 +142,7 @@ final class characters {
      * @param array $a More for the string; the name is always there.
      * @param string $pose How it stands, when the art package draws it whole (saluda, senala, celebra, lee, piensa):
      *     only for a character without a portrait of the centre's own.
-     * @return array|null name, text, initial, role, figure; null when the character is off.
+     * @return array|null name, text, initial, role, figure, puppet; null when the character is off.
      */
     public static function say(int $entityid, string $role, string $key, array $a = [], string $pose = ''): ?array {
         $character = self::of($entityid)[$role] ?? null;
@@ -133,6 +158,7 @@ final class characters {
             'initial' => $character['initial'],
             'portrait' => $character['portrait'],
             'figure' => $pose !== '' && empty($character['own']) ? self::figure($role, $pose) : null,
+            'puppet' => $pose !== '' && empty($character['own']) ? self::puppet($role, $pose) : '',
             'role' => $role,
             // Its voice, for a young reader, is added by the screen that knows the reader.
             'listen' => null,

@@ -458,13 +458,15 @@ final class screens {
      * own licence), and without it every screen keeps its drawn look.
      *
      * @param string $name
-     * @param string $type webp, svg for the drawings used as masks, or glb for the models of the island in 3D.
+     * @param string $type webp, svg for the drawings used as masks, glb for the models of the island in 3D, or json for
+     *     the puppets' data (a name may then carry one more part, «marionetas/memoria.atlas»).
      * @return string|null Its address.
      */
     public static function art(string $name, string $type = 'webp'): ?string {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
         if (
-            !$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+)?$#', $name) || !in_array($type, ['webp', 'svg', 'glb'], true)
+            !$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+(\.[a-z]+)?)?$#', $name)
+                || !in_array($type, ['webp', 'svg', 'glb', 'json'], true)
                 || !is_readable($dir . '/pix/' . $name . '.' . $type)
         ) {
             return null;

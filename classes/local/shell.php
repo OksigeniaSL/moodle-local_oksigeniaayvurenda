@@ -78,8 +78,15 @@ final class shell {
      * @param string $why
      * @param \stdClass|null $library
      * @param string $figure Gaudí's drawing of the memory in a pose, or ''.
+     * @param string $puppet Its puppet for that pose (JSON), or ''.
      */
-    private static function refuse_page(string $title, string $why, ?\stdClass $library, string $figure = ''): void {
+    private static function refuse_page(
+        string $title,
+        string $why,
+        ?\stdClass $library,
+        string $figure = '',
+        string $puppet = ''
+    ): void {
         global $PAGE;
         // It can come before the page set its own context: every page of the library is on the site's.
         $PAGE->set_context(\context_system::instance());
@@ -87,7 +94,8 @@ final class shell {
         self::output(
             $title,
             ($figure !== '' ? '<div class="ayv-posed"><span class="ayv-figure"><img class="ayv-posed-figure" src="' . s($figure) .
-            '" alt="" width="512" height="512"></span><div>' : '') .
+            '" alt="" width="512" height="512"' . ($puppet !== '' ? ' data-puppet="' . s($puppet) . '"' : '') .
+            '></span><div>' : '') .
             '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
             s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>' .
             ($figure !== '' ? '</div></div>' : ''),
@@ -108,8 +116,15 @@ final class shell {
     public static function missing(string $why, ?\stdClass $library = null): void {
         http_response_code(404);
         $memory = $library ? (characters::of((int) $library->entityid)['memory'] ?? null) : null;
-        $figure = $memory && $memory['enabled'] && empty($memory['own']) ? characters::figure('memory', 'senala') : null;
-        self::refuse_page(get_string('notherehead', 'local_oksigeniaayvurenda'), $why, $library, (string) $figure);
+        $alive = $memory && $memory['enabled'] && empty($memory['own']);
+        $figure = $alive ? characters::figure('memory', 'senala') : null;
+        self::refuse_page(
+            get_string('notherehead', 'local_oksigeniaayvurenda'),
+            $why,
+            $library,
+            (string) $figure,
+            $alive ? characters::puppet('memory', 'senala') : ''
+        );
     }
 
     /**
@@ -169,6 +184,9 @@ final class shell {
             'dateyear' => get_string('dateyear', 'local_oksigeniaayvurenda'),
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
         $scripts = '';
+        if (str_contains($main, 'data-puppet=')) {
+            $options['scripts'] = array_merge($options['scripts'] ?? [], ['puppet', 'characters']);
+        }
         foreach ($options['scripts'] ?? [] as $script) {
             $scripts .= '<script src="' . $app . $script . '.js?v=' . $version . '"></script>' . "\n";
         }

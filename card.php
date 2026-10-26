@@ -157,6 +157,8 @@ foreach ($readers as $reader) {
         'nobooksfigure' => ($heraldchar = \local_oksigeniaayvurenda\local\characters::of((int) $reader->entityid)['herald'] ?? null)
             && $heraldchar['enabled'] && empty($heraldchar['own'])
             ? \local_oksigeniaayvurenda\local\characters::figure('herald', 'lee') : null,
+        'nobookspuppet' => !empty($heraldchar['enabled']) && empty($heraldchar['own'])
+            ? \local_oksigeniaayvurenda\local\characters::puppet('herald', 'lee') : '',
         'listengarden' => $young ? \local_oksigeniaayvurenda\local\screens::listen(
             ['ui/{lang}/challengegarden', 'ui/{lang}/challengegardenhint']
         ) : null,
