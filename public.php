@@ -65,6 +65,11 @@ if (!$library || (!$settings['open'] && !$manage)) {
 }
 // The catalogue and the shelves, for anyone when the centre shows them; whoever manages it sees how they will look.
 $catalogue = $settings['catalogue'];
+// The newest books as a shelf for the school's website, in a frame.
+if (optional_param('embed', 0, PARAM_BOOL) && window::catalogue_open($library)) {
+    shell::embed($library);
+    die;
+}
 $here = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug] +
     $params))->out(false);
 $public = function (array $cards) use ($here, $str) {
@@ -99,12 +104,14 @@ $shared = [
     'opds' => $opds,
     'loginurl' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
     'searchlabel' => $str($catalogue ? 'windowsearchall' : 'windowsearch'),
+    'embedcode' => $catalogue ? '<iframe src="' . s($here(['embed' => 1])) . '" title="' . s(format_string($library->name)) .
+        '" width="100%" height="390" style="border: 0" loading="lazy"></iframe>' : '',
 ];
 foreach (
     ['windowsearchbutton', 'windowdownload', 'windowopds', 'windowopdshint', 'windowlogin', 'windownext',
         'windowprev', 'windowmanage', 'windowopen', 'windowopenhint', 'windowtext', 'windowtexthint', 'windowvoices',
         'windowindex', 'windowsave', 'windowaddress', 'voiceinvitecopy', 'windowoai', 'windowoaihint', 'windowcatalogue',
-        'windowcataloguehint', 'windowbackdoor'] as $key
+        'windowcataloguehint', 'windowbackdoor', 'windowembed', 'windowembedhint'] as $key
 ) {
     $shared[$key] = $str($key);
 }
@@ -137,12 +144,17 @@ if ($recordid) {
         'bird' => screens::art('estanteria/mainumby', 'svg'),
         'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
     ] : null;
+    $share = ['title' => $found['record']->title, 'url' => $here(['record' => $recordid]),
+        'description' => trim(implode(' · ', array_filter([$data['card']['authors'] ?? '', format_string($library->name)])) .
+            ($found['record']->summary ? '. ' . $found['record']->summary : '')),
+        'image' => \local_oksigeniaayvurenda\local\covers::url($recordid)];
     shell::output(
         $found['record']->title,
         $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data),
         $library,
         '',
-        ['search' => false, 'index' => $settings['open'] && $settings['index'], 'scripts' => $data['beside'] ? ['stacks'] : []]
+        ['search' => false, 'index' => $settings['open'] && $settings['index'], 'scripts' => $data['beside'] ? ['stacks'] : [],
+            'share' => $settings['open'] ? $share : null]
     );
     die;
 }
@@ -242,6 +254,8 @@ shell::output($data['door']['name'], $OUTPUT->render_from_template('local_oksige
     'search' => false,
     'index' => $settings['open'] && $settings['index'],
     'feed' => $settings['open'] ? $opds : '',
+    'share' => $settings['open'] ? ['title' => $data['door']['name'], 'url' => $here(), 'image' => $data['door']['image'],
+        'description' => $data['door']['motto'] !== '' ? $data['door']['motto'] : $settings['text']] : null,
     'scripts' => $manage ? ['voice'] : [],
     'config' => ['strings' => ['copied' => $str('voiceinvitecopied')]],
 ]);

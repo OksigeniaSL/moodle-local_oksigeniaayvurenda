@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/embed
+    The newest books of a library as one plank of spines, for another website (a school's) to frame: each one opens its
+    record in the window, in a new tab.
+    Context variables required for this template:
+    * name, heading, door, more - the library, what the plank is and the way to the whole library
+    * spines - see spine
+    * bird, bookend - Gaudí's drawings, or nothing
+    * madewith - «Made with Ayvurenda», or nothing
+    Example context (json):
+    {
+        "name": "Biblioteca de demostración", "heading": "Lo último que ha llegado", "door": "#",
+        "more": "Toda la biblioteca", "bird": null, "bookend": null, "madewith": "Hecho con Ayvurenda",
+        "spines": [{"id": 7, "url": "#", "title": "El dragón que leía", "shown": "El dragón que leía",
+            "authors": "Ana Montes", "callnumber": "82-3 MON dra", "place": "Rojo", "label": "El dragón que leía",
+            "cm": 22, "width": 34, "background": "#2c7a6a", "dark": "#246a5c", "ink": "cream", "small": false,
+            "topdown": false, "band": "", "out": false, "held": false, "consult": false, "here": false,
+            "lines": [{"line": "82-3"}, {"line": "MON"}, {"line": "dra"}], "joined": "82-3|MON|dra", "whyjoined": "",
+            "placecolour": null, "cover": null, "state": "free", "statetext": "Libre", "awaytext": ""}]
+    }
+}}
+<main class="ayv-embed-main">
+<div class="ayv-embed-head">
+    <h1 class="ayv-embed-name"><a href="{{door}}">{{name}}</a></h1>
+    <span class="ayv-embed-heading">{{heading}}</span>
+</div>
+<div class="ayv-bookcase-wrap ayv-embed-wrap"{{#bird}} style="--ayv-bird: url('{{bird}}')"{{/bird}}>
+    <ul class="ayv-bookcase ayv-embed-shelf{{#bookend}} ayv-bookcase-art{{/bookend}}"{{#bookend}} style="--ayv-bookend: url('{{bookend}}')"{{/bookend}} aria-label="{{heading}}">
+    {{#spines}}<li class="ayv-spine-slot{{#out}} ayv-spine-gap{{/out}}" style="--cm: {{cm}}; --w: {{width}}px">{{> local_oksigeniaayvurenda/spine}}</li>{{/spines}}
+    </ul>
+</div>
+<div class="ayv-embed-foot">
+    <a href="{{door}}">{{more}}</a>
+    {{#madewith}}<a class="ayv-embed-made" href="https://ayvurenda.com/">{{madewith}}</a>{{/madewith}}
+</div>
+</main>

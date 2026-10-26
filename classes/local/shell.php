@@ -115,7 +115,8 @@ final class shell {
      * @param string $query What is in the search box.
      * @param array $options search (false to leave the search out), scripts (more scripts of app/), config (more data
      *     for the scripts), nav (links in the header: a list of url and label), index (true to let search engines list
-     *     the page), feed (the address of an OPDS catalogue to announce).
+     *     the page), feed (the address of an OPDS catalogue to announce), share (title, description, image and url
+     *     for the preview a link shows where it is shared: messaging apps, social networks, a school's website).
      */
     public static function output(
         string $title,
@@ -231,7 +232,8 @@ final class shell {
 <meta name="theme-color" content="#0f3a33">
 <meta name="robots" content="' . (!empty($options['index']) ? 'index, follow' : 'noindex') . '">' . (!empty($options['feed'])
         ? '
-<link rel="alternate" type="' . opds::TYPE . '" href="' . s($options['feed']) . '">' : '') . '
+<link rel="alternate" type="' . opds::TYPE . '" href="' . s($options['feed']) . '">' : '') .
+            self::share($options['share'] ?? null) . '
 <title>' . s($title) . ' · ' . s($name) . '</title>
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="' . $app . 'emblema-pequeno.svg" type="image/svg+xml">
@@ -289,6 +291,83 @@ Oksigenia Ayvurenda</button>
         }
         return '<a class="ayv-foot-made" href="https://ayvurenda.com/">' .
             s(get_string('planmadewithfoot', 'local_oksigeniaayvurenda')) . '</a>' . "\n";
+    }
+
+    /**
+     * The library's newest books as a shelf for another website (a school's), in a frame: one plank of spines, each
+     * opening its record in the window in a new tab. Only for a library that shows its catalogue to anyone.
+     *
+     * @param \stdClass $library
+     */
+    public static function embed(\stdClass $library): void {
+        global $CFG, $OUTPUT;
+        $version = (int) get_config('local_oksigeniaayvurenda', 'version');
+        $app = $CFG->wwwroot . '/local/oksigeniaayvurenda/app/';
+        $rows = array_map(fn($card) => (object) ['recordid' => $card['id'], 'k' => ''], catalogue::recent($library, 24));
+        $spines = screens::spines(screens::public_spines(stacks::spines($library, $rows), $library));
+        $door = (new \moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug]))->out(false);
+        $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/embed', [
+            'name' => format_string($library->name),
+            'heading' => get_string('embedheading', 'local_oksigeniaayvurenda'),
+            'door' => $door,
+            'more' => get_string('embedmore', 'local_oksigeniaayvurenda'),
+            'spines' => $spines,
+            'bird' => screens::art('estanteria/mainumby', 'svg'),
+            'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
+            'madewith' => plans::allows((int) $library->entityid, 'madewith')
+                ? get_string('planmadewithfoot', 'local_oksigeniaayvurenda') : '',
+        ]);
+        // Another website frames it: no X-Frame-Options, and any page may.
+        @header('Content-Type: text/html; charset=utf-8');
+        @header('Content-Security-Policy: frame-ancestors *');
+        echo '<!DOCTYPE html>
+<html lang="' . s(str_replace('_', '-', current_language())) . '">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<base target="_blank">
+<title>' . s(format_string($library->name)) . '</title>
+<link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
+<script>if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
+    document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');
+}</script>
+</head>
+<body class="ayv ayv-embed">
+' . $html . '
+<script src="' . $app . 'stacks.js?v=' . $version . '"></script>
+</body>
+</html>';
+    }
+
+    /**
+     * What a link to the page shows where it is shared (Open Graph): its title, a line, a picture and its address.
+     *
+     * @param array|null $share title, description, image (an address, or null) and url.
+     * @return string
+     */
+    private static function share(?array $share): string {
+        if (!$share) {
+            return '';
+        }
+        $description = trim((string) preg_replace('/\s+/u', ' ', (string) ($share['description'] ?? '')));
+        $description = \core_text::substr($description, 0, 200);
+        $meta = [
+            ['property', 'og:type', 'website'],
+            ['property', 'og:title', (string) ($share['title'] ?? '')],
+            ['property', 'og:description', $description],
+            ['property', 'og:url', (string) ($share['url'] ?? '')],
+            ['property', 'og:image', (string) ($share['image'] ?? '')],
+            ['name', 'twitter:card', !empty($share['image']) ? 'summary_large_image' : 'summary'],
+            ['name', 'description', $description],
+        ];
+        $out = '';
+        foreach ($meta as [$attribute, $key, $content]) {
+            if ($content !== '') {
+                $out .= "\n" . '<meta ' . $attribute . '="' . $key . '" content="' . s($content) . '">';
+            }
+        }
+        return $out;
     }
 
     /**

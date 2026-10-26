@@ -46,7 +46,8 @@
         "windowmanage": "La ventana", "windowopen": "Abierta", "windowopenhint": "Cualquiera la ve", "windowtext": "Texto",
         "windowtexthint": "Arriba", "windowvoices": "Voces", "windowindex": "Buscadores", "windowsave": "Guardar",
         "windowaddress": "Dirección", "voiceinvitecopy": "Copiar", "windowcatalogue": "El catálogo y la estantería",
-        "windowcataloguehint": "Lo que hay y si está libre", "windowbackdoor": "Volver a la entrada"
+        "windowcataloguehint": "Lo que hay y si está libre", "windowbackdoor": "Volver a la entrada",
+        "embedcode": "<iframe></iframe>", "windowembed": "En la web del centro", "windowembedhint": "Cópialo en la web"
     }
 }}
 <section class="ayv-window">
@@ -88,6 +89,11 @@
     <p class="ayv-invite-link"><span>{{windowoai}}</span> <input type="text" readonly value="{{oaiurl}}" aria-label="{{windowoai}}">
         <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{oaiurl}}">{{voiceinvitecopy}}</button></p>
     <p class="ayv-field-hint">{{windowoaihint}}</p>
+    {{#embedcode}}
+    <p class="ayv-invite-link"><span>{{windowembed}}</span> <input type="text" readonly value="{{embedcode}}" aria-label="{{windowembed}}">
+        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{embedcode}}">{{voiceinvitecopy}}</button></p>
+    <p class="ayv-field-hint">{{windowembedhint}}</p>
+    {{/embedcode}}
 </details>
 {{/manage}}
 {{#text}}<p class="ayv-window-text">{{text}}</p>{{/text}}

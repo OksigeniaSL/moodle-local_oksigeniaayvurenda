@@ -2419,3 +2419,14 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-why { margin-top: .6rem; }
 .ayv .ayv-why summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 32px; display: flex; align-items: center; }
 .ayv .ayv-why-order { margin: 0; font-size: .9rem; color: var(--ayv-muted, #5f6b67); }
+
+/* The shelf for another website (0.63.0): one plank of the newest books, in a frame; the rest of the row hidden. */
+.ayv.ayv-embed { min-height: 0; padding: .5rem .75rem; background: transparent; }
+.ayv .ayv-embed-head { display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; margin: 0 0 .25rem; }
+.ayv .ayv-embed-name { margin: 0; font: 600 1.15rem/1.2 var(--title); }
+.ayv .ayv-embed-name a { color: var(--ink); text-decoration: none; }
+.ayv .ayv-embed-heading { color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-embed-wrap { margin: .25rem 0; }
+.ayv .ayv-embed-shelf { max-height: var(--row); overflow: hidden; }
+.ayv .ayv-embed-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-size: .9rem; }
+.ayv .ayv-embed-made { color: var(--ayv-muted, #5f6b67); }
