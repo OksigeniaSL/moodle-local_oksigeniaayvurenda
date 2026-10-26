@@ -632,11 +632,13 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     border-radius: 10px;
 }
 
-.ayv .ayv-source-name { flex: 1 1 14rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+.ayv .ayv-source-name { flex: 1 1 14rem; min-width: 0; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+.ayv .ayv-source > * { max-width: 100%; }
 
 .ayv .ayv-source-count { font-weight: 400; font-size: .9rem; color: var(--accent); }
 
-.ayv .ayv-field { display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
+/* A label and its control side by side, the control below when they do not fit (a long dropdown on a phone). */
+.ayv .ayv-field { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; max-width: 100%; font-size: .95rem; }
 
 .ayv .ayv-field input[type="text"],
 .ayv .ayv-field input[type="search"],
@@ -644,6 +646,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-field input[type="password"],
 .ayv .ayv-source select,
 .ayv .ayv-field select {
+    max-width: 100%;
     min-height: 44px;
     padding: .4rem .85rem;
     font: inherit;
@@ -1002,7 +1005,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-bubble-name { display: block; font-weight: 700; color: var(--accent); }
 
-.ayv .ayv-characters { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.25rem; }
+.ayv .ayv-characters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr)); gap: 1.25rem; }
 
 .ayv .ayv-character { display: grid; gap: .6rem; align-content: start; padding: 1rem 1.25rem; border-radius: var(--radius);
     background: var(--surface); box-shadow: 0 0 0 2px var(--line); }
