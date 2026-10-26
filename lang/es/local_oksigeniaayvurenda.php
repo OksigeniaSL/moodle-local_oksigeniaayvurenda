@@ -575,6 +575,7 @@ La guía:
 {$a->guide}
 La pregunta: {$a->question}';
 $string['howtoall'] = 'Todas las tareas';
+$string['howtoask'] = '¿Qué quieres hacer?';
 $string['howtobox'] = '¿Cómo hago…?';
 $string['howtocards'] = 'Imprimir los carnés de un grupo';
 $string['howtocardssteps'] = 'Abre «Lectores»|Entra en el grupo|Pulsa «Imprimir carnés»';

@@ -36,6 +36,40 @@
             }
         });
     }
+    // How do I…?, down on the right: it stays open or folded as it was left (in this browser only), the field takes the
+    // cursor when it opens, and Escape folds it.
+    var howto = document.querySelector('[data-ayv-howto]');
+    if (howto) {
+        // Opened by the page as it was left, the cursor stays where it is; opened by someone, it goes to the field.
+        var restoring = false;
+        try {
+            restoring = window.localStorage.getItem('ayv-howto-open') === '1';
+            howto.open = restoring;
+        } catch (e) {
+            // Without storage it starts folded.
+        }
+        howto.addEventListener('toggle', function() {
+            if (restoring) {
+                restoring = false;
+                return;
+            }
+            try {
+                window.localStorage.setItem('ayv-howto-open', howto.open ? '1' : '0');
+            } catch (e) {
+                // Nothing kept: it still opens and folds.
+            }
+            var field = howto.querySelector('input[type="search"]');
+            if (howto.open && field) {
+                field.focus();
+            }
+        });
+        howto.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && howto.open) {
+                howto.open = false;
+                howto.querySelector('summary').focus();
+            }
+        });
+    }
     // Choosing a file: our button and words, in the library's language, over the browser's control, which still does
     // the work underneath (it takes the click and the keyboard, and says what it is to a screen reader).
     if (config.filechoose) {

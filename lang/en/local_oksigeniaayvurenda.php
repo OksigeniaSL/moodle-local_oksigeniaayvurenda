@@ -575,6 +575,7 @@ The guide:
 {$a->guide}
 The question: {$a->question}';
 $string['howtoall'] = 'All the tasks';
+$string['howtoask'] = 'What do you want to do?';
 $string['howtobox'] = 'How do I…?';
 $string['howtocards'] = 'Print a group\'s cards';
 $string['howtocardssteps'] = 'Open «Readers»|Go into the group|Press «Print cards»';

@@ -207,6 +207,7 @@ final class shell {
         $name = $library ? format_string($library->name) : get_string('pluginname', 'local_oksigeniaayvurenda');
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
+        $howto = self::howto_box($library, $base);
         echo '<!DOCTYPE html>
 <html lang="' . s($lang) . '"' . self::colour_mode() . '>
 <head>
@@ -235,7 +236,7 @@ final class shell {
     query.addEventListener(\'change\', resolve);
 })();</script>
 </head>
-<body class="ayv">
+<body class="ayv' . ($howto !== '' ? ' ayv-has-howto' : '') . '">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
 <header class="ayv-top">
 <a class="ayv-brand" href="' . s($home) . '"><img class="ayv-brand-light" src="' . $app . 'emblema.svg" alt="" width="44"
@@ -246,7 +247,7 @@ final class shell {
 <main id="ayv-main" class="ayv-main" tabindex="-1">
 ' . $main . '
 </main>
-' . self::howto_box($library, $base) . '
+' . $howto . '
 <footer class="ayv-foot"><button type="button" class="ayv-foot-credits" data-ayv-credits aria-haspopup="dialog">
 Oksigenia Ayvurenda</button>
 ' . self::made_with($library) . '<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' .
@@ -325,14 +326,19 @@ Oksigenia Ayvurenda</button>
         if (!$library || !$staff || $help || $here) {
             return '';
         }
+        global $OUTPUT;
         $str = fn(string $key) => s(get_string($key, 'local_oksigeniaayvurenda'));
-        return '<form class="ayv-howto-box" role="search" aria-label="' . $str('howtobox') . '" method="get" action="' . $base .
-            'howto.php">
+        // Always at hand, down on the right, folded until it is opened; it remembers how it was left.
+        return '<details class="ayv-howto-dock" data-ayv-howto>
+<summary class="ayv-howto-toggle">' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_help', []) . ' ' .
+            $str('howtobox') . '</summary>
+<form class="ayv-howto-box" role="search" aria-label="' . $str('howtobox') . '" method="get" action="' . $base . 'howto.php">
 <input type="hidden" name="library" value="' . s($library->slug) . '">
-<label for="ayv-howto-q">' . $str('howtobox') . '</label>
+<label for="ayv-howto-q">' . $str('howtoask') . '</label>
 <input id="ayv-howto-q" type="search" name="q" placeholder="' . $str('howtoplaceholder') . '" maxlength="200">
-<button type="submit" class="ayv-button ayv-button-quiet">' . $str('howtosearch') . '</button>
-</form>';
+<button type="submit" class="ayv-button">' . $str('howtosearch') . '</button>
+</form>
+</details>';
     }
 
     /**

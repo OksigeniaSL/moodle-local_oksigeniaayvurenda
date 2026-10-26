@@ -1904,19 +1904,48 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     .ayv .ayv-speak-on svg { animation: ayv-listen 1s ease-in-out infinite; }
 }
 
-/* How do I…? The box at the foot of the staff's screens, and the tasks found, as cards with their steps. */
+/* How do I…? Down on the right of the staff's screens, folded into a button that opens a small box; and the tasks
+   found, as cards with their steps. */
+.ayv .ayv-howto-dock { position: fixed; right: 1rem; bottom: 1rem; z-index: 40; max-width: calc(100vw - 2rem); }
+@media (min-width: 1000px) {
+    html.ayv-has-bm .ayv .ayv-howto-dock { right: calc(34px + 1rem); }
+}
+.ayv .ayv-howto-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    min-height: 44px;
+    padding: .5rem 1.1rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--paper);
+    font-weight: 700;
+    list-style: none;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -12px rgba(15, 58, 51, .6);
+}
+.ayv .ayv-howto-toggle::-webkit-details-marker { display: none; }
+.ayv .ayv-howto-toggle:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-howto-dock[open] .ayv-howto-toggle { float: right; }
 .ayv .ayv-howto-box {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: .5rem .75rem;
-    margin: 2rem auto 0;
+    margin: 0 0 .6rem;
     padding: 1rem 1.25rem;
     border-radius: 18px;
     background: var(--surface);
-    box-shadow: 0 10px 24px -18px rgba(15, 58, 51, .5);
+    box-shadow: 0 16px 32px -18px rgba(15, 58, 51, .6);
+    width: min(26rem, calc(100vw - 2rem));
 }
-.ayv .ayv-howto-box label { font-weight: 700; color: var(--accent); }
+.ayv .ayv-howto-dock[open] { display: flex; flex-direction: column-reverse; align-items: flex-end; }
+/* The last lines of a page are not left under the button. */
+.ayv.ayv-has-howto .ayv-foot { padding-bottom: 5rem; }
+@media print {
+    .ayv .ayv-howto-dock { display: none; }
+}
+.ayv .ayv-howto-box label { flex-basis: 100%; font-weight: 700; color: var(--accent); }
 .ayv .ayv-howto-box input[type="search"] {
     flex: 1 1 16rem;
     min-width: 0;
