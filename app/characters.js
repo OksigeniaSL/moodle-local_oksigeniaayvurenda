@@ -62,6 +62,9 @@
             canvas.className = img.className + ' ayv-puppet';
             canvas.setAttribute('aria-hidden', 'true');
             var w = img.clientWidth || 170, h = img.clientHeight || 170, ratio = Math.min(window.devicePixelRatio || 1, 2);
+            // In a painted room scaled to the screen, as many pixels as it shows, not as it measures in the painting.
+            var shown = img.getBoundingClientRect().width / w;
+            ratio *= shown > 0 && shown < 1 ? shown : 1;
             canvas.width = Math.round(w * ratio);
             canvas.height = Math.round(h * ratio);
             canvas.style.width = w + 'px';

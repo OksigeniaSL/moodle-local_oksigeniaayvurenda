@@ -2464,3 +2464,88 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
     .ayv .ayv-bubble-figure, .ayv .ayv-posed-figure { width: 120px; height: 120px; }
     .ayv .ayv-bubble-posed .ayv-bubble-text { margin-top: 1rem; }
 }
+
+/* The library one visits (0.68.0): Gaudí's painted rooms, scaled to the screen by the script; the places light up as
+   lamplight, the board and the blackboard carry the library's own words, real covers stand on the painted stand, and
+   the same places go as words below. */
+.ayv .ayv-visit { margin: 0 0 2rem; }
+.ayv .ayv-visit-bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: space-between; margin: 0 0 .75rem; }
+.ayv .ayv-visit-title { margin: 0; font: 600 1.7rem/1.2 var(--title); }
+.ayv .ayv-visit-sound[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+.ayv .ayv-visit-frame { position: relative; border-radius: 18px; overflow: hidden; background: var(--paper2); box-shadow: 0 14px 34px -18px rgba(15, 58, 51, .55); }
+.ayv .ayv-visit-view { position: relative; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
+.ayv .ayv-visit-view::-webkit-scrollbar { display: none; }
+.ayv .ayv-visit-room { position: relative; overflow: hidden; transition: transform .42s cubic-bezier(.5, 0, .75, 0), opacity .42s ease-in; }
+.ayv .ayv-visit-room.ayv-visit-leaving { transform: scale(1.45); opacity: 0; }
+.ayv .ayv-visit-room.ayv-visit-arriving { transform: scale(1.06); opacity: 0; transition: none; }
+.ayv .ayv-visit-stage { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.ayv .ayv-visit-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.ayv .ayv-visit-zones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.ayv .ayv-visit-zones a { cursor: pointer; }
+.ayv .ayv-visit-zones polygon { fill: transparent; stroke: transparent; stroke-width: 7; stroke-linejoin: round; transition: fill .25s ease, stroke .25s ease; }
+.ayv .ayv-visit-zones a:hover polygon,
+.ayv .ayv-visit-zones a.ayv-visit-lit polygon { fill: rgba(255, 233, 184, .18); stroke: rgba(255, 233, 184, .9); filter: drop-shadow(0 0 14px rgba(255, 214, 140, .95)); }
+.ayv .ayv-visit-surface { position: absolute; top: 0; left: 0; box-sizing: border-box; transform-origin: 0 0; }
+.ayv .ayv-visit-board ul,
+.ayv .ayv-visit-chalk ul { margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-visit-board li { display: flex; }
+.ayv .ayv-visit-board a { display: flex; flex: 1; gap: .45em; align-items: center; min-width: 0; padding: 0 .45em; border-radius: .3em; color: var(--visit-ink, #2b2118); font-family: var(--title); font-weight: 600; line-height: 1.1; text-decoration: none; }
+.ayv .ayv-visit-board a:hover,
+.ayv .ayv-visit-board a:focus-visible { background: rgba(255, 246, 222, .55); outline: none; }
+html[data-bs-theme="dark"] .ayv .ayv-visit-board a { color: var(--visit-ink-night, #f6ead2); }
+html[data-bs-theme="dark"] .ayv .ayv-visit-board a:hover,
+html[data-bs-theme="dark"] .ayv .ayv-visit-board a:focus-visible { background: rgba(255, 233, 184, .16); }
+.ayv .ayv-visit-dot { flex: none; width: .55em; height: .55em; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 .08em rgba(43, 33, 24, .45); }
+.ayv .ayv-visit-dot::after { content: none; }
+.ayv .ayv-visit-chalk { padding: .7em .9em; color: var(--visit-ink, rgba(250, 247, 238, .93)); font-family: var(--text); line-height: 1.25; text-shadow: 0 0 1px rgba(255, 255, 255, .45), 0 0 6px rgba(255, 255, 255, .12); }
+html[data-bs-theme="dark"] .ayv .ayv-visit-chalk { color: var(--visit-ink-night, rgba(250, 247, 238, .93)); }
+.ayv .ayv-visit-chalk-title { margin: 0 0 .45em; font: 600 1.3em/1.15 var(--title); }
+.ayv .ayv-visit-chalk li { margin: 0 0 .35em; }
+.ayv .ayv-visit-book .ayv-cover { width: 100%; height: 100%; padding: .5em; aspect-ratio: auto; box-shadow: 0 .4em .9em rgba(0, 0, 0, .35); }
+.ayv .ayv-visit-book .ayv-cover-photo { padding: 0; }
+.ayv .ayv-visit-book .ayv-cover:hover,
+.ayv .ayv-visit-book .ayv-cover:focus-visible { outline: .25em solid var(--sun); outline-offset: .15em; }
+.ayv .ayv-visit-who { position: absolute; }
+.ayv .ayv-visit-figure { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.ayv .ayv-visit-figure:focus-visible { outline: 8px solid var(--sun); outline-offset: 4px; border-radius: 24px; }
+.ayv .ayv-visit-pose { display: block; width: 100%; height: 100%; object-fit: contain; }
+.ayv .ayv-visit-tip { position: absolute; z-index: 3; padding: .3rem .75rem; border-radius: 999px; background: var(--night); color: #fbf6ec; font-weight: 700; font-size: .95rem; white-space: nowrap; transform: translate(-50%, -100%); pointer-events: none; box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .5); }
+html[data-bs-theme="dark"] .ayv .ayv-visit-tip { background: #f6ead2; color: #0f3a33; }
+.ayv .ayv-visit-pan { top: 50%; transform: translateY(-50%); }
+.ayv .ayv-visit-pan:hover { transform: translateY(-50%) scale(1.06); }
+.ayv .ayv-visit-pan-left { left: .6rem; }
+.ayv .ayv-visit-pan-right { right: .6rem; }
+.ayv .ayv-visit-say { position: absolute; z-index: 4; box-sizing: border-box; width: min(23rem, calc(100% - 1rem)); padding: .9rem 2.8rem 1rem 1rem; border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 0 16px 34px -14px rgba(15, 58, 51, .6), inset 0 0 0 1px var(--line); }
+.ayv .ayv-visit-say p { margin: 0; }
+.ayv .ayv-visit-say strong { display: block; font-family: var(--title); }
+.ayv .ayv-visit-ask { display: flex; gap: .5rem; margin: .75rem 0 0; }
+.ayv .ayv-visit-ask input[type="search"] { flex: 1; width: 0; min-width: 0; min-height: 44px; padding: 0 .75rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--ink); font: inherit; }
+.ayv .ayv-visit-close { position: absolute; top: .45rem; right: .45rem; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink); cursor: pointer; }
+.ayv .ayv-visit-close:hover { background: var(--paper2); }
+.ayv .ayv-visit-places ul { display: flex; flex-wrap: wrap; gap: .5rem; margin: .9rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-visit-place { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); font-weight: 700; text-decoration: none; }
+.ayv .ayv-visit-place:hover,
+.ayv .ayv-visit-place.ayv-visit-lit { background: var(--accent); color: var(--paper); }
+.ayv .ayv-visit-place:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-visit-room,
+    .ayv .ayv-visit-zones polygon { transition: none; }
+}
+.ayv .ayv-visit-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 1rem; margin: 0 0 1.75rem; border-radius: 18px; overflow: hidden; background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: 0 10px 26px -16px rgba(15, 58, 51, .55), inset 0 0 0 1px var(--line); }
+.ayv .ayv-visit-card > svg { margin-right: 1.1rem; color: var(--accent); }
+.ayv .ayv-visit-card-picture { grid-column: 1 / -1; display: block; aspect-ratio: 16 / 5; overflow: hidden; }
+.ayv .ayv-visit-card-picture img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.ayv .ayv-visit-card:hover .ayv-visit-card-picture img { transform: scale(1.03); }
+.ayv .ayv-visit-card-night { display: none; }
+html[data-bs-theme="dark"] .ayv .ayv-visit-card-day { display: none; }
+html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
+.ayv .ayv-visit-card-text { display: flex; flex-direction: column; gap: .15rem; padding: .9rem 1.1rem 1rem; }
+.ayv .ayv-visit-card-label { font: 600 1.35rem/1.2 var(--title); color: var(--accent); }
+.ayv .ayv-visit-card-hint { opacity: .9; }
+.ayv .ayv-visit-card:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+@media (max-width: 40rem) {
+    .ayv .ayv-visit-card-picture { aspect-ratio: 16 / 8; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-visit-card-picture img { transition: none; }
+}

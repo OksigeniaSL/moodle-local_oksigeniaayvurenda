@@ -107,6 +107,8 @@ final class screens {
             'cornersedit' => $manage ? ['url' => self::url('corners.php', $library), 'label' => self::str('cornersedit')] : null,
             'corners' => $corners,
             'hascorners' => (bool) $corners,
+            // The library one visits, when the art package paints it.
+            'visitcard' => visit::card($library, false),
             'recentheading' => self::str('recent'),
             'cards' => $recent,
             'hasrecent' => (bool) $recent,

@@ -168,6 +168,7 @@ $data = $shared + [
     'cards' => [],
     'results' => null,
     'records' => [],
+    'visitcard' => null,
 ];
 if ($catalogue && $query !== '') {
     // Searching the catalogue: what there is, whether it is free and where.
@@ -206,6 +207,7 @@ if ($catalogue && $query !== '') {
             'art' => screens::art('rincon-' . $corner['code'])];
     }
     $data['cards'] = $public(catalogue::recent($library));
+    $data['visitcard'] = \local_oksigeniaayvurenda\local\visit::card($library, true);
 }
 // What the window has to read, hear or download, as always: below the catalogue, or alone without it.
 $found = window::records($library, $catalogue ? '' : $query, $page);

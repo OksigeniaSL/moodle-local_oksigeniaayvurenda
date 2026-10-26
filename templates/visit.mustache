@@ -1,0 +1,145 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/visit
+    A room of the library one visits: its painted layers (by day, or by night in dark mode), the places one touches,
+    the surfaces where the library writes its own (the board of corners, the stand of new books, the blackboard), the
+    characters standing in it, and the same places as a row of words. The script scales the painting to the screen and
+    shows it; without the script, the row of words is the visit.
+    Context variables required for this template:
+    * title, width, height, focus, depth, sound, door - the room
+    * back, front - layers: day, night, depth
+    * zones - places: id, url, label, points, tipx, tipy, cy, enters
+    * surfaces - each directory (rows: label, url, colour; rowheight), pulse (heading, lines) or book (title, cover,
+      colour, url), with width, height, transform, fontsize and ink (the colours the painting asks, as CSS)
+    * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug)
+    * visitplaces, visitsound, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
+    Example context (json):
+    {
+        "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "depth": 0.35,
+        "sound": "https://example.com/vestibulo.mp3", "door": "https://example.com/puerta.mp3",
+        "back": [{"day": "https://example.com/fondo.webp", "night": "https://example.com/fondo-noche.webp", "depth": 0}],
+        "front": [{"day": "https://example.com/frente.webp", "night": "https://example.com/frente-noche.webp", "depth": 1}],
+        "haszones": true,
+        "zones": [{"id": "z0", "url": "#", "label": "Lengua y literatura", "points": "100,100 300,100 300,600 100,600",
+            "tipx": 200, "tipy": 100, "cy": 350, "enters": true}],
+        "surfaces": [
+            {"directory": true, "pulse": false, "book": false, "width": 600, "height": 720, "fontsize": 40, "ink": "--visit-ink: #3a2a1c;",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 700, 200, 0, 1)", "rowheight": 80,
+                "rows": [{"label": "Ciencias", "url": "#", "colour": 3}]},
+            {"directory": false, "pulse": true, "book": false, "width": 800, "height": 500, "fontsize": 42, "ink": "",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1400, 200, 0, 1)", "heading": "Hoy en la biblioteca",
+                "lines": [{"text": "Hoy se han ido a casa 12 libros"}]},
+            {"directory": false, "pulse": false, "book": true, "width": 200, "height": 300, "fontsize": 22, "ink": "",
+                "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1000, 900, 0, 1)", "title": "El faro",
+                "cover": "https://example.com/cover.jpg", "colour": 2, "url": "#"}
+        ],
+        "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?",
+            "figure": "https://example.com/memoria-saluda.webp", "puppet": "", "size": 520, "left": 400, "top": 500,
+            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"} }],
+        "visitplaces": "Lo que hay aquí", "visitsound": "Sonido", "visitpanleft": "Mirar a la izquierda",
+        "visitpanright": "Mirar a la derecha", "visitclose": "Cerrar", "searchlabel": "Buscar en el catálogo",
+        "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
+    }
+}}
+<section class="ayv-visit" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}>
+    <div class="ayv-visit-bar">
+        <h1 class="ayv-visit-title">{{title}}</h1>
+        {{#sound}}
+        <button type="button" class="ayv-button ayv-visit-sound" aria-pressed="false" hidden>
+            {{> local_oksigeniaayvurenda/icon_volume}} {{visitsound}}
+        </button>
+        {{/sound}}
+    </div>
+    <div class="ayv-visit-frame" hidden>
+        <div class="ayv-visit-view">
+            <div class="ayv-visit-room">
+            <div class="ayv-visit-stage" style="width: {{width}}px; height: {{height}}px">
+                {{#back}}
+                <img class="ayv-visit-layer" alt="" data-day="{{day}}" data-night="{{night}}" data-depth="{{depth}}">
+                {{/back}}
+                {{#haszones}}
+                <svg class="ayv-visit-zones" viewBox="0 0 {{width}} {{height}}" aria-hidden="true" focusable="false" data-depth="{{depth}}">
+                    {{#zones}}
+                    <a href="{{url}}" tabindex="-1" data-zone="{{id}}" data-tip="{{tipx}} {{tipy}} {{cy}}"{{#enters}} data-enters="1"{{/enters}}><polygon points="{{points}}"></polygon></a>
+                    {{/zones}}
+                </svg>
+                {{/haszones}}
+                {{#surfaces}}
+                <div class="ayv-visit-surface{{#directory}} ayv-visit-board{{/directory}}{{#pulse}} ayv-visit-chalk{{/pulse}}{{#book}} ayv-visit-book{{/book}}" data-depth="{{depth}}"
+                    style="width: {{width}}px; height: {{height}}px; font-size: {{fontsize}}px; transform: {{transform}};{{#ink}} {{ink}}{{/ink}}">
+                    {{#directory}}
+                    <ul>
+                        {{#rows}}
+                        <li style="height: {{rowheight}}px"><a href="{{url}}"><span class="ayv-visit-dot ayv-cover-{{colour}}" aria-hidden="true"></span>{{label}}</a></li>
+                        {{/rows}}
+                    </ul>
+                    {{/directory}}
+                    {{#pulse}}
+                    <p class="ayv-visit-chalk-title">{{heading}}</p>
+                    <ul>{{#lines}}<li>{{text}}</li>{{/lines}}</ul>
+                    {{/pulse}}
+                    {{#book}}
+                    <a class="ayv-cover ayv-cover-{{colour}}{{#cover}} ayv-cover-photo{{/cover}}" href="{{url}}">
+                        {{#cover}}<img class="ayv-cover-img" src="{{cover}}" alt="">{{/cover}}
+                        <span class="{{#cover}}ayv-sr{{/cover}}{{^cover}}ayv-cover-title{{/cover}}">{{title}}</span>
+                    </a>
+                    {{/book}}
+                </div>
+                {{/surfaces}}
+                {{#characters}}
+                <div class="ayv-visit-who" style="left: {{left}}px; top: {{top}}px; width: {{size}}px; height: {{size}}px" data-depth="{{depth}}">
+                    <button type="button" class="ayv-visit-figure" aria-expanded="false" aria-controls="ayv-visit-say-{{role}}">
+                        <span class="ayv-sr">{{name}}</span>
+                        <img class="ayv-visit-pose" src="{{figure}}" alt="" width="{{size}}" height="{{size}}"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}>
+                    </button>
+                </div>
+                {{/characters}}
+                {{#front}}
+                <img class="ayv-visit-layer ayv-visit-front" alt="" data-day="{{day}}" data-night="{{night}}" data-depth="{{depth}}">
+                {{/front}}
+            </div>
+            </div>
+        </div>
+        <button type="button" class="ayv-shelf-go ayv-visit-pan ayv-visit-pan-left" aria-label="{{visitpanleft}}" hidden>{{> local_oksigeniaayvurenda/icon_prev}}</button>
+        <button type="button" class="ayv-shelf-go ayv-visit-pan ayv-visit-pan-right" aria-label="{{visitpanright}}" hidden>{{> local_oksigeniaayvurenda/icon_next}}</button>
+        <span class="ayv-visit-tip" aria-hidden="true" hidden></span>
+        {{#characters}}
+        <div class="ayv-visit-say" id="ayv-visit-say-{{role}}" data-role="{{role}}" hidden>
+            <p><strong>{{name}}</strong> {{text}}</p>
+            {{#search}}
+            <form class="ayv-visit-ask" role="search" action="{{action}}" method="get">
+                <input type="hidden" name="library" value="{{slug}}">
+                <label class="ayv-sr" for="ayv-visit-q">{{searchlabel}}</label>
+                <input id="ayv-visit-q" name="q" type="search" placeholder="{{searchplaceholder}}" autocomplete="off" maxlength="200">
+                <button type="submit" class="ayv-button">{{searchbutton}}</button>
+            </form>
+            {{/search}}
+            <button type="button" class="ayv-visit-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button>
+        </div>
+        {{/characters}}
+    </div>
+    {{#haszones}}
+    <nav class="ayv-visit-places" aria-label="{{visitplaces}}">
+        <ul>
+            {{#zones}}
+            <li><a class="ayv-visit-place" href="{{url}}" data-zone="{{id}}" data-tip="{{tipx}} {{tipy}} {{cy}}"{{#enters}} data-enters="1"{{/enters}}>{{label}}</a></li>
+            {{/zones}}
+        </ul>
+    </nav>
+    {{/haszones}}
+</section>

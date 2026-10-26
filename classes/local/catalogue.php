@@ -418,17 +418,28 @@ final class catalogue {
      *
      * @param \stdClass $library
      * @param int $limit
+     * @param string $corner Only of this corner (the top class), when given.
      * @return array Cards.
      */
-    public static function recent(\stdClass $library, int $limit = 12): array {
+    public static function recent(\stdClass $library, int $limit = 12, string $corner = ''): array {
         global $DB;
+        $params = ['libraryid' => $library->id];
+        $where = '';
+        if ($corner !== '') {
+            $where = " AND i.recordid IN (SELECT ra.recordid
+                                           FROM {" . self::T . "recauth} ra
+                                           JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                                          WHERE a.entityid = :entityid AND a.kind = 'class' AND " .
+                $DB->sql_like('a.code', ':code') . ')';
+            $params += ['entityid' => $library->entityid, 'code' => $DB->sql_like_escape($corner) . '%'];
+        }
         $latest = $DB->get_records_sql(
             'SELECT i.recordid, MAX(COALESCE(i.timeacquired, i.timecreated)) AS acquired
                FROM {' . self::T . 'item} i
-              WHERE i.libraryid = :libraryid
+              WHERE i.libraryid = :libraryid' . $where . '
            GROUP BY i.recordid
            ORDER BY acquired DESC, i.recordid DESC',
-            ['libraryid' => $library->id],
+            $params,
             0,
             $limit
         );
