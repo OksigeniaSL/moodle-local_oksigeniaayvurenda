@@ -196,6 +196,14 @@ final class visit_test extends \advanced_testcase {
         $this->assertContains($room['hunt']['target'], [$books['Cuento uno'], $books['Cuento dos']], 'the room hides a book');
         $this->assertStringContainsString('room=literatura&hunt=1#busca', $room['hunt']['againurl']);
         $this->assertNull($page['hunt'], 'the hall has no corner to hide a book in');
+        $this->assertSame(
+            ['Las plantas', 'Cuento dos', 'Cuento uno'],
+            array_column($page['sort']['books'], 'title'),
+            'the herald brings the new books to the hall'
+        );
+        $this->assertSame(['8', '5'], array_column($page['sort']['doors'], 'code'));
+        $this->assertStringContainsString('visit.php?library=' . $library->slug . '&sort=1#coloca', $page['sort']['againurl']);
+        $this->assertNull($room['sort']);
 
         // Without an account: to the window, and the voices only if it shows them.
         window::save($library, ['open' => 1, 'voices' => 0, 'catalogue' => 1]);

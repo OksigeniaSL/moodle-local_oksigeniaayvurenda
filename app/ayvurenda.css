@@ -2567,7 +2567,7 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 .ayv .ayv-hunt-say { min-height: 1.5em; margin: .75rem 0 0; font-weight: 700; color: var(--accent); }
 .ayv .ayv-hunt-lens { display: flex; gap: .9rem; align-items: center; justify-content: center; min-height: 6.4rem; margin: .5rem 0 0; }
 .ayv .ayv-hunt-lens .ayv-where-label { font-size: 1.3rem; }
-.ayv .ayv-hunt-lens-hint { color: var(--muted); }
+.ayv .ayv-hunt-lens-hint { color: var(--ink); font-style: italic; }
 .ayv .ayv-hunt-lens-title { max-width: 14rem; font-family: var(--title); font-weight: 600; overflow-wrap: anywhere; }
 .ayv .ayv-hunt-shelf { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
 .ayv .ayv-hunt-shelf .ayv-spine { cursor: pointer; }
@@ -2585,3 +2585,30 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
     .ayv .ayv-hunt-yes .ayv-spine { transition: none; }
 }
 .ayv .ayv-visit-offer { margin: .6rem 0 0; }
+/* The herald's shelf (0.70.0): the new book of the turn with its label, and the corners as doors, with Gaudí's
+   drawing of each corner when the art package has it. */
+.ayv .ayv-sort-books { margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-sort-book { display: flex; gap: 1rem; align-items: center; }
+.ayv .ayv-sort-book[hidden] { display: none; }
+.ayv .ayv-sort-book .ayv-cover { flex: none; width: 84px; padding: .45rem; }
+.ayv .ayv-sort-book .ayv-cover-title { font-size: .8rem; }
+.ayv .ayv-sort-about { display: flex; flex-direction: column; gap: .35rem; align-items: flex-start; min-width: 0; }
+.ayv .ayv-sort-count { color: var(--ink); font-size: .9rem; font-weight: 600; }
+.ayv .ayv-sort-which { margin: .75rem 0 .5rem; font-weight: 700; }
+.ayv .ayv-sort-play[hidden] { display: none; }
+.ayv .ayv-sort-doors { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-sort-door { position: relative; display: flex; flex-direction: column; justify-content: flex-end; width: 100%; min-height: 7rem; padding: 0; border: 0; border-radius: 48px 48px 10px 10px; overflow: hidden; font: inherit; text-align: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .12), 0 6px 14px -8px rgba(15, 58, 51, .5); transition: transform .15s ease; }
+.ayv .ayv-sort-door::after { content: none; }
+.ayv .ayv-sort-door:hover { transform: translateY(-2px); }
+.ayv .ayv-sort-door:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+.ayv .ayv-sort-door-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-sort-door-label { position: relative; padding: .45rem .5rem; background: rgba(15, 30, 27, .72); color: #fbf6ec; font-weight: 700; font-size: .9rem; line-height: 1.2; }
+.ayv .ayv-sort-glow { animation: ayv-hunt-glow 1.6s ease-in-out infinite; }
+.ayv .ayv-sort-yes { box-shadow: 0 0 0 4px var(--sun), 0 0 22px 6px rgba(240, 180, 60, .6); }
+.ayv .ayv-hunt-no-door { animation: ayv-hunt-nudge .4s ease; }
+.ayv .ayv-sort-list { margin: 0 0 .75rem; padding-left: 1.1rem; }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-sort-glow { animation: none; box-shadow: 0 0 0 4px rgba(240, 180, 60, .85); }
+    .ayv .ayv-hunt-no-door { animation: none; }
+    .ayv .ayv-sort-door { transition: none; }
+}

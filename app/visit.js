@@ -29,6 +29,27 @@
     if (!visit) {
         return;
     }
+    // A few bright notes for the games' good moments, only with the visit's sound on.
+    window.AYVVisit = {
+        chime: function() {
+            var Context = window.AudioContext || window.webkitAudioContext;
+            if (!on || !Context) {
+                return;
+            }
+            var audio = new Context();
+            [[784, 0], [988, 0.1], [1319, 0.2]].forEach(function(note) {
+                var osc = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime + note[1];
+                osc.frequency.value = note[0];
+                gain.gain.setValueAtTime(0.0001, at);
+                gain.gain.exponentialRampToValueAtTime(0.12, at + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
+                osc.connect(gain);
+                gain.connect(audio.destination);
+                osc.start(at);
+                osc.stop(at + 0.4);
+            });
+        },
+    };
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     var W = parseFloat(visit.getAttribute('data-width')) || 2400;

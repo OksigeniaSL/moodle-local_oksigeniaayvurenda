@@ -271,9 +271,10 @@ final class visit {
                 // Going into another room of the visit: the page walks through the door.
                 'enters' => str_contains($link, '/visit.php')];
         }
-        // In a room of a corner, the memory hides a book of it.
+        // In a room of a corner, the memory hides a book of it; in the hall, the herald brings the new books.
         $hunt = $scene['corner'] !== '' && isset($corners[$scene['corner']])
             ? self::hunt($library, $scene['corner'], $public, $turn, $url, $name) : null;
+        $sort = $name === self::HALL ? self::sort($library, $public, $turn, $url, $art) : null;
         $depth = 0.0;
         $back = $scene['layers'];
         $front = [];
@@ -294,9 +295,17 @@ final class visit {
             'zones' => $zones,
             'haszones' => (bool) $zones,
             'surfaces' => $surfaces,
-            'characters' => self::characters($library, $scene, $depth, $public, $url, (bool) $hunt),
+            'characters' => self::characters(
+                $library,
+                $scene,
+                $depth,
+                $public,
+                $url,
+                $hunt ? 'ayv-hunt' : ($sort ? 'ayv-sort' : '')
+            ),
             'hunt' => $hunt,
-            'hasplaces' => $zones || $hunt,
+            'sort' => $sort,
+            'hasplaces' => $zones || $hunt || $sort,
             'focus' => $scene['focus'],
             'sound' => $scene['sound'],
             'door' => $scene['door'],
@@ -394,7 +403,7 @@ final class visit {
      * @param float $depth
      * @param bool $public
      * @param callable $url
-     * @param bool $game Whether the room has its game, which the herald offers.
+     * @param string $game The room's game, which the herald offers ('' for none): the id of its window.
      * @return array[]
      */
     private static function characters(
@@ -403,7 +412,7 @@ final class visit {
         float $depth,
         bool $public,
         callable $url,
-        bool $game
+        string $game
     ): array {
         $out = [];
         foreach ($scene['characters'] as $role => $one) {
@@ -422,7 +431,11 @@ final class visit {
                 'left' => round($one['feet'][0] - $one['height'] / 2), 'top' => round($one['feet'][1] - $one['height']),
                 'search' => $role === 'memory' ? ['action' => $public ? $url('public.php') : $url('search.php'),
                     'slug' => $library->slug] : null,
-                'play' => $role === 'herald' && $game ? get_string('huntherald', 'local_oksigeniaayvurenda') : ''];
+                'play' => $role === 'herald' && $game !== '' ? get_string(
+                    $game === 'ayv-hunt' ? 'huntherald' : 'sortherald',
+                    'local_oksigeniaayvurenda'
+                ) : '',
+                'playid' => $game];
         }
         return $out;
     }
@@ -492,6 +505,56 @@ final class visit {
                 'line3' => $str('huntline3', '{line}'), 'gap' => $str('huntgap'), 'glow' => $str('huntglow')],
                 JSON_UNESCAPED_UNICODE
             ),
+        ];
+    }
+
+    /**
+     * The herald's game of the hall, ready for the page: the new books, one after another, and the corners as doors.
+     *
+     * @param \stdClass $library
+     * @param bool $public
+     * @param int $turn
+     * @param callable $url
+     * @param array|null $art
+     * @return array|null
+     */
+    private static function sort(\stdClass $library, bool $public, int $turn, callable $url, ?array $art): ?array {
+        $books = shelve::books($library, $turn);
+        if (!$books) {
+            return null;
+        }
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $said = characters::say((int) $library->entityid, 'herald', 'sortintro', [], 'saluda');
+        foreach ($books as $i => &$book) {
+            $book['count'] = $str('sortcount', (object) ['n' => $i + 1, 'total' => count($books)]);
+            $book['labelsr'] = $str('sortlabel', implode(' ', array_column($book['lines'], 'line')));
+            $book['url'] = $public ? $url('public.php', ['record' => $book['id']]) : $url('record.php', ['id' => $book['id']]);
+            // Without a cover, one drawn with its title; never the key of a page («cover» of the stand is another).
+            $book['photo'] = $book['cover'];
+            unset($book['cover']);
+            $book['first'] = $i === 0;
+        }
+        unset($book);
+        $doors = [];
+        foreach (catalogue::corners($library) as $corner) {
+            $doors[] = ['code' => $corner['code'], 'label' => $corner['label'], 'colour' => $corner['colour'],
+                'art' => screens::art('rincon-' . $corner['code'])];
+        }
+        $cheer = $said && !empty($said['figure']) ? characters::figure('herald', 'celebra') : null;
+        return [
+            'heading' => $str('sortheading'),
+            'name' => $said['name'] ?? '',
+            'intro' => $said['text'] ?? $str('sortintro', (object) ['name' => '']),
+            'figure' => $said['figure'] ?? null,
+            'puppet' => $said['puppet'] ?? '',
+            'cheer' => $cheer,
+            'cheerpuppet' => $cheer ? characters::puppet('herald', 'celebra') : '',
+            'books' => $books,
+            'doors' => $doors,
+            'againurl' => $url('visit.php', ['sort' => $turn + 1]) . '#coloca',
+            'messages' => json_encode(['no' => $str('sortno', (object) ['corner' => '{corner}', 'digit' => '{digit}',
+                'mine' => '{mine}']), 'topic' => $str('sorttopic', '{topic}'), 'glow' => $str('sortglow'),
+                'yes' => $str('sortyes', '{corner}')], JSON_UNESCAPED_UNICODE),
         ];
     }
 

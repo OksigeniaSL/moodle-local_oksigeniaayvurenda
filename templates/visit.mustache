@@ -30,7 +30,10 @@
     * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug), play (the herald
       offers the room's game)
     * hunt - the room's game, or nothing: target, heading, name, clue, figure, puppet, cheer, cheerpuppet, huntcover,
-      huntlines, huntplace, labelsr, spines, title, found, foundhint, recordurl, againurl, messages; hasplaces
+      huntlines, huntplace, labelsr, spines, title, found, foundhint, recordurl, againurl, messages
+    * sort - the hall's game, or nothing: heading, name, intro, figure, puppet, cheer, cheerpuppet, books (id, title,
+      photo, colour, corner, cornerlabel, topic, lines, count, labelsr, url, first), doors (code, label, colour, art),
+      againurl, messages; hasplaces
     * visitplaces, visitsound, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
     Example context (json):
     {
@@ -54,7 +57,17 @@
         ],
         "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?",
             "figure": "https://example.com/memoria-saluda.webp", "puppet": "", "size": 520, "left": 400, "top": 500,
-            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "" }],
+            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "", "playid": "" }],
+        "sort": {"heading": "Las novedades", "name": "Mainumby", "intro": "Han llegado libros nuevos.",
+            "figure": "https://example.com/mainumby-saluda.webp", "puppet": "", "cheer": null, "cheerpuppet": "",
+            "againurl": "#", "messages": "{}",
+            "books": [{"id": 3, "title": "El agua", "photo": null, "colour": 3, "corner": "5", "cornerlabel": "Ciencias",
+                "topic": "", "lines": [{"line": "5"}, {"line": "LAU"}], "count": "Libro 1 de 3",
+                "labelsr": "Su tejuelo: 5 LAU", "url": "#", "first": true}],
+            "doors": [{"code": "5", "label": "Ciencias", "colour": 3, "art": "https://example.com/rincon-5.webp"}]
+        },
+        "sortplay": "Coloca las novedades", "sortwhich": "¿A qué rincón va?", "sortdone": "¡Gracias!",
+        "sortdonehint": "Son las novedades.", "sortagain": "Otras novedades",
         "hunt": {"target": 7, "heading": "El libro escondido", "name": "Memoria", "clue": "He escondido un libro.",
             "figure": "https://example.com/memoria-piensa.webp", "puppet": "", "cheer": "https://example.com/memoria-celebra.webp",
             "cheerpuppet": "", "huntcover": "https://example.com/cover.jpg", "huntlines": [{"line": "82-3"}, {"line": "MON"}],
@@ -148,7 +161,7 @@
                 <button type="submit" class="ayv-button">{{searchbutton}}</button>
             </form>
             {{/search}}
-            {{#play}}<p class="ayv-visit-offer"><button type="button" class="ayv-button" data-open="ayv-hunt">{{play}}</button></p>{{/play}}
+            {{#play}}<p class="ayv-visit-offer"><button type="button" class="ayv-button" data-open="{{playid}}">{{play}}</button></p>{{/play}}
             <button type="button" class="ayv-visit-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button>
         </div>
         {{/characters}}
@@ -162,6 +175,9 @@
             {{#hunt}}
             <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-hunt" hidden>{{huntplay}}</button></li>
             {{/hunt}}
+            {{#sort}}
+            <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-sort" hidden>{{sortplay}}</button></li>
+            {{/sort}}
         </ul>
     </nav>
     {{/hasplaces}}
@@ -204,4 +220,58 @@
         </div>
     </dialog>
     {{/hunt}}
+    {{#sort}}
+    <dialog class="ayv-modal ayv-hunt ayv-sort" id="ayv-sort" aria-labelledby="ayv-sort-title" data-messages="{{messages}}">
+        <div class="ayv-modal-head">
+            <h2 id="ayv-sort-title" class="ayv-section-title">{{heading}}</h2>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form>
+        </div>
+        <div class="ayv-hunt-ask">
+            {{#figure}}
+            <span class="ayv-figure ayv-hunt-who"><img class="ayv-bubble-figure" src="{{figure}}" alt="" width="170" height="170"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span>
+            {{/figure}}
+            <div class="ayv-hunt-clue">
+                <p>{{#name}}<strong>{{name}}</strong> {{/name}}{{intro}}</p>
+                <ol class="ayv-sort-books">
+                    {{#books}}
+                    <li class="ayv-sort-book" data-corner="{{corner}}" data-cornerlabel="{{cornerlabel}}" data-topic="{{topic}}"{{^first}} hidden{{/first}}>
+                        <span class="ayv-cover ayv-cover-{{colour}}{{#photo}} ayv-cover-photo{{/photo}}" aria-hidden="true">
+                            {{#photo}}<img class="ayv-cover-img" src="{{photo}}" alt="">{{/photo}}
+                            {{^photo}}<span class="ayv-cover-title">{{title}}</span>{{/photo}}
+                        </span>
+                        <span class="ayv-sort-about">
+                            <span class="ayv-sort-count">{{count}}</span>
+                            <strong>{{title}}</strong>
+                            <span class="ayv-where-label" role="img" aria-label="{{labelsr}}">{{#lines}}<span>{{line}}</span>{{/lines}}</span>
+                        </span>
+                    </li>
+                    {{/books}}
+                </ol>
+            </div>
+        </div>
+        <p class="ayv-hunt-say" aria-live="polite"></p>
+        <div class="ayv-sort-play">
+            <p class="ayv-sort-which" id="ayv-sort-which">{{sortwhich}}</p>
+            <ul class="ayv-sort-doors" aria-labelledby="ayv-sort-which">
+                {{#doors}}
+                <li><button type="button" class="ayv-sort-door ayv-cover-{{colour}}" data-corner="{{code}}">
+                    {{#art}}<img class="ayv-sort-door-img" src="{{art}}" alt="">{{/art}}
+                    <span class="ayv-sort-door-label">{{label}}</span>
+                </button></li>
+                {{/doors}}
+            </ul>
+        </div>
+        <div class="ayv-hunt-found ayv-sort-done" hidden>
+            {{#cheer}}
+            <span class="ayv-figure ayv-hunt-who"><img class="ayv-bubble-figure" src="{{cheer}}" alt="" width="170" height="170"{{#cheerpuppet}} data-puppet="{{cheerpuppet}}"{{/cheerpuppet}}></span>
+            {{/cheer}}
+            <div>
+                <p class="ayv-hunt-found-title" tabindex="-1">{{sortdone}}</p>
+                <p>{{sortdonehint}}</p>
+                <ul class="ayv-sort-list">{{#books}}<li><a href="{{url}}">{{title}}</a> · {{cornerlabel}}</li>{{/books}}</ul>
+                <p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{againurl}}">{{sortagain}}</a></p>
+            </div>
+        </div>
+    </dialog>
+    {{/sort}}
 </section>

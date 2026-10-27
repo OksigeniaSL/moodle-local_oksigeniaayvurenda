@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.70.0 (2026-10-27)
+
+- The herald's shelf, a game in the hall of the library one visits: the herald brings the library's new books, four at
+  a time, and each goes to its corner, the corners being doors with their names and pictures. A wrong door says what
+  numbers it keeps, what number the book has and what it is about, never the answer; after two, the right door glows.
+  With all in their place, the herald cheers and the books are there to take home. The herald offers each room's game.
+
 ## 0.69.0 (2026-10-26)
 
 - Find the hidden book, a game in each room of the library one visits: the memory hides a real book of the room's

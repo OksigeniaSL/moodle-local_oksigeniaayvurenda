@@ -50,30 +50,11 @@
     var misses = 0;
     var done = false;
 
-    // A small sound when it is found, only with the visit's sound on.
+    // A small sound when it is found, with the visit's sound on.
     var chime = function() {
-        var on = false;
-        try {
-            on = window.localStorage.getItem('ayv-visit-sound') === 'on';
-        } catch (e) {
-            on = false;
+        if (window.AYVVisit) {
+            window.AYVVisit.chime();
         }
-        var Context = window.AudioContext || window.webkitAudioContext;
-        if (!on || !Context) {
-            return;
-        }
-        var audio = new Context();
-        [[784, 0], [988, 0.1], [1319, 0.2]].forEach(function(note) {
-            var osc = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime + note[1];
-            osc.frequency.value = note[0];
-            gain.gain.setValueAtTime(0.0001, at);
-            gain.gain.exponentialRampToValueAtTime(0.12, at + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
-            osc.connect(gain);
-            gain.connect(audio.destination);
-            osc.start(at);
-            osc.stop(at + 0.4);
-        });
     };
 
     var tell = function(text) {
