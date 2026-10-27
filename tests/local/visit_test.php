@@ -220,6 +220,88 @@ final class visit_test extends \advanced_testcase {
     }
 
     /**
+     * Every room the art package paints is a room of the library, whether the hall has a door to it or only the board
+     * names it; its things lead to where their class begins on the shelf, by the name the library gives that class, and
+     * a thing whose class the library has no book of is only painted. The room of a corner the library hides is none.
+     */
+    public function test_rooms(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $art = $this->art();
+        $box = fn($x, $y) => [[$x, $y], [$x + 200, $y], [$x + 200, $y + 400], [$x, $y + 400]];
+        file_put_contents($art['dir'] . '/pix/visita/ciencias-fondo.webp', 'made-up');
+        file_put_contents($art['dir'] . '/pix/visita/ciencias.json', json_encode([
+            'layers' => [['name' => 'fondo', 'depth' => 0]],
+            'zones' => [
+                ['kind' => 'stacks', 'class' => '52', 'shape' => $box(100, 100)],
+                ['kind' => 'stacks', 'corner' => '5', 'shape' => $box(400, 100)],
+                ['kind' => 'stacks', 'corner' => '5', 'class' => '59', 'shape' => $box(700, 100)],
+                ['kind' => 'stacks', 'corner' => '5', 'class' => '57', 'shape' => $box(1000, 100)],
+                ['kind' => 'stacks', 'corner' => '5', 'class' => '51', 'shape' => $box(1300, 100)],
+                ['kind' => 'stacks', 'corner' => '5', 'class' => '82', 'shape' => $box(1600, 100)],
+                ['kind' => 'exit', 'to' => 'vestibulo', 'shape' => $box(2150, 420)],
+            ],
+        ]));
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $now = time();
+        $classes = [];
+        foreach (['52' => 'Astronomía', '590' => 'Zoología', '57' => '57', '8' => 'Literatura'] as $code => $label) {
+            $classes[$code] = $DB->insert_record('local_oksigeniaayvurenda_authority', ['entityid' => $library->entityid,
+                'kind' => 'class', 'code' => $code, 'label' => $label, 'timecreated' => $now, 'timemodified' => $now]);
+        }
+        $books = [['Las estrellas', '52', '52'], ['Los erizos', '591', '590'], ['Las células', '57', '57'],
+            ['El faro', '821', '8']];
+        foreach ($books as [$title, $call, $code]) {
+            $record = $gen->create_record(['entityid' => $library->entityid, 'title' => $title]);
+            $DB->insert_record('local_oksigeniaayvurenda_recauth', ['recordid' => $record->id,
+                'authorityid' => $classes[$code], 'sortorder' => 0]);
+            $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'callnumber1' => $call,
+                'callnumber2' => 'AUT', 'callnumber3' => 'tit']);
+        }
+        stacks::refresh_keys((int) $library->entityid);
+
+        $this->assertSame('5', visit::scene('ciencias', $art)['corner'], 'a room is of the corner of its big bookcase');
+        $hall = visit::page($library, 'vestibulo', false, $art);
+        $board = array_values(array_filter($hall['surfaces'], fn($s) => $s['directory']))[0];
+        $rows = array_column($board['rows'], null, 'label');
+        $science = $rows[get_string('udc5', 'local_oksigeniaayvurenda')];
+        $this->assertStringContainsString('visit.php?library=' . $library->slug . '&room=ciencias', $science['url']);
+        $this->assertTrue($science['enters'], 'the board walks through the door of a room with no door in the hall');
+        $this->assertStringContainsString('room=ciencias', array_column($hall['zones'], null, 'kind')['corner']['url']);
+
+        $room = visit::page($library, 'ciencias', false, $art);
+        $things = array_values(array_filter($room['zones'], fn($z) => $z['kind'] === 'stacks'));
+        $this->assertSame([
+            get_string('visitclass', 'local_oksigeniaayvurenda', 'Astronomía'),
+            get_string('visitstacks', 'local_oksigeniaayvurenda', get_string('udc5', 'local_oksigeniaayvurenda')),
+            get_string('visitclass', 'local_oksigeniaayvurenda', 'Zoología'),
+            get_string('visitclassnumber', 'local_oksigeniaayvurenda', (object) ['corner' => get_string(
+                'udc5',
+                'local_oksigeniaayvurenda'
+            ), 'class' => '57']),
+            get_string('visitstacks', 'local_oksigeniaayvurenda', get_string('udc5', 'local_oksigeniaayvurenda')),
+        ], array_column($things, 'label'), 'nothing of 51 here; 82 is not a class of this corner');
+        $this->assertStringContainsString(
+            'stacks.php?library=' . $library->slug . '&corner=5&after=' . \local_oksigeniaayvurenda\core\shelf_order::prefix('52'),
+            $things[0]['url']
+        );
+        $shelf = stacks::page($library, ['corner' => '5'], \local_oksigeniaayvurenda\core\shelf_order::prefix('57'));
+        $this->assertSame(['Las células', 'Los erizos'], array_column($shelf['spines'], 'title'), 'the shelf from the class on');
+
+        catalogue::save_corners($library, ['5' => ['hidden' => 1]]);
+        $this->assertNull(visit::page($library, 'ciencias', false, $art), 'a hidden corner has no room');
+        $this->assertArrayNotHasKey(
+            get_string('udc5', 'local_oksigeniaayvurenda'),
+            array_column(array_values(array_filter(
+                visit::page($library, 'vestibulo', false, $art)['surfaces'],
+                fn($s) => $s['directory']
+            ))[0]['rows'], null, 'label')
+        );
+    }
+
+    /**
      * The way in, on the home always and at the door only when anyone may walk the catalogue; none without a hall.
      */
     public function test_card(): void {

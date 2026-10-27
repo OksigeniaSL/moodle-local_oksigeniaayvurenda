@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.72.0 (2026-10-27)
+
+- Every room the art package paints is a room of the library one visits: the board of the hall walks into the room of
+  each corner that has one, through its door, without a new painting of the hall.
+- Things of a room lead to where their class begins on the shelf (a telescope, to astronomy), named as the library
+  names that class; a thing whose class the library has no book of is only painted. The room of a corner the library
+  hides is none of its rooms.
+- Some air between the buttons of the home and the way into the library.
+
 ## 0.71.1 (2026-10-27)
 
 - The library one visits by night on a site without Moodle's colour modes too: the painting then follows the visitor's

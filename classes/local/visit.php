@@ -25,6 +25,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\homography;
+use local_oksigeniaayvurenda\core\shelf_order;
 
 /**
  * Each room is a scene of the art package (pix/visita/<scene>.json, its layers by day and by night, its sound), and
@@ -34,6 +35,9 @@ use local_oksigeniaayvurenda\core\homography;
  * art package there is no visit.
  */
 final class visit {
+    /** @var string Prefix of the plugin tables. */
+    private const T = 'local_oksigeniaayvurenda_';
+
     /** @var int[] The size of the scenes, in pixels of the painting. */
     public const SIZE = [2400, 1350];
 
@@ -136,6 +140,7 @@ final class visit {
         }
         $zones = [];
         $corner = '';
+        $thing = '';
         foreach ((array) ($json['zones'] ?? []) as $i => $zone) {
             $kind = (string) ($zone['kind'] ?? '');
             if (!in_array($kind, self::KINDS, true)) {
@@ -143,7 +148,14 @@ final class visit {
             }
             $clean = ['id' => 'z' . $i, 'kind' => $kind,
                 'corner' => preg_match('/^\d$/', (string) ($zone['corner'] ?? '')) ? (string) $zone['corner'] : '',
-                'to' => preg_match('/^[a-z0-9-]{0,40}$/', (string) ($zone['to'] ?? '')) ? (string) ($zone['to'] ?? '') : ''];
+                'to' => preg_match('/^[a-z0-9-]{0,40}$/', (string) ($zone['to'] ?? '')) ? (string) ($zone['to'] ?? '') : '',
+                'class' => ''];
+            // A thing of a room that leads to where its class begins on the shelf (the telescope, to astronomy).
+            $class = trim((string) ($zone['class'] ?? ''));
+            if ($kind === 'stacks' && preg_match('/^\d[\d.]{0,11}$/', $class)) {
+                $clean['corner'] = $clean['corner'] ?: $class[0];
+                $clean['class'] = $clean['corner'] === $class[0] ? $class : '';
+            }
             if (in_array($kind, ['directory', 'pulse'], true)) {
                 $clean['quad'] = self::quad($zone['quad'] ?? null);
                 $clean['rows'] = max(1, min(12, (int) ($zone['rows'] ?? 9)));
@@ -168,15 +180,18 @@ final class visit {
                     continue;
                 }
             }
-            if ($kind === 'stacks' && $corner === '') {
+            // The room is of the corner of its big bookcase, or else of its things.
+            if ($kind === 'stacks' && $clean['class'] === '' && $corner === '') {
                 $corner = $clean['corner'];
+            } else if ($kind === 'stacks' && $thing === '') {
+                $thing = $clean['corner'];
             }
             $zones[] = $clean;
         }
         $focus = (float) ($json['focus'] ?? self::SIZE[0] / 2);
         return ['name' => $name, 'layers' => $layers, 'characters' => $characters, 'zones' => $zones,
             'focus' => max(0.0, min((float) self::SIZE[0], $focus)),
-            'corner' => preg_match('/^\d$/', (string) ($json['corner'] ?? '')) ? (string) $json['corner'] : $corner,
+            'corner' => preg_match('/^\d$/', (string) ($json['corner'] ?? '')) ? (string) $json['corner'] : ($corner ?: $thing),
             'sound' => is_readable($art['dir'] . '/sonido/visita/' . $name . '.mp3')
                 ? $art['url'] . '/sonido/visita/' . $name . '.mp3' : '',
             'door' => is_readable($art['dir'] . '/sonido/visita/puerta.mp3') ? $art['url'] . '/sonido/visita/puerta.mp3' : '',
@@ -207,8 +222,13 @@ final class visit {
         foreach (catalogue::corners($library) as $known) {
             $corners[$known['code']] = $known;
         }
-        // A room exists when the art package paints it; a corner without its room leads to its shelves.
-        $rooms = [];
+        if ($scene['corner'] !== '' && !isset($corners[$scene['corner']])) {
+            // The room of a corner this library does not show is not one of its rooms.
+            return null;
+        }
+        // A room exists when the art package paints it, behind a door of this scene or not; a corner without its room
+        // leads to its shelves.
+        $rooms = self::rooms($art);
         foreach ($scene['zones'] as $zone) {
             $room = $zone['kind'] === 'room' && $zone['to'] !== '' ? self::scene($zone['to'], $art) : null;
             if ($room && ($zone['corner'] ?: $room['corner']) !== '') {
@@ -238,6 +258,13 @@ final class visit {
             } else if ($kind === 'corner' && isset($corners[$zone['corner']])) {
                 $link = $goes($zone['corner']);
                 $label = $corners[$zone['corner']]['label'];
+            } else if ($kind === 'stacks' && $zone['class'] !== '' && isset($corners[$zone['corner']])) {
+                // Without a book of its class here, the thing is only painted.
+                $shelf = self::shelf($library, $zone['class']);
+                $link = $shelf ? $url('stacks.php', ['corner' => $zone['corner'], 'after' => $shelf['after']]) : '';
+                $number = (object) ['corner' => $corners[$zone['corner']]['label'], 'class' => $zone['class']];
+                $label = !$shelf ? '' : ($shelf['label'] !== '' ? $str('visitclass', $shelf['label'])
+                    : $str('visitclassnumber', $number));
             } else if ($kind === 'stacks' && isset($corners[$zone['corner']])) {
                 $link = $url('stacks.php', ['corner' => $zone['corner']]);
                 $label = $str('visitstacks', $corners[$zone['corner']]['label']);
@@ -317,6 +344,61 @@ final class visit {
     }
 
     /**
+     * The rooms the art package paints, by the corner each one is of; of two of the same corner, the first by name.
+     *
+     * @param array|null $art
+     * @return string[] Scene names by corner.
+     */
+    private static function rooms(?array $art): array {
+        $art = self::art($art);
+        $rooms = [];
+        foreach ($art ? (glob($art['dir'] . '/pix/visita/*.json') ?: []) : [] as $file) {
+            $name = basename($file, '.json');
+            $room = $name !== self::HALL ? self::scene($name, $art) : null;
+            if ($room && $room['corner'] !== '' && !isset($rooms[$room['corner']])) {
+                $rooms[$room['corner']] = $name;
+            }
+        }
+        return $rooms;
+    }
+
+    /**
+     * Where a class begins on the shelves of this library and what the library calls it (its label as filed, or the
+     * one of the class with a zero more, as Dewey writes 520 for 52); null when it has no book of it.
+     *
+     * @param \stdClass $library
+     * @param string $class
+     * @return array|null after (the key to start after) and label ('' when the library only knows its number).
+     */
+    private static function shelf(\stdClass $library, string $class): ?array {
+        global $DB;
+        $after = shelf_order::prefix($class);
+        $there = $after !== '' && $DB->record_exists_select(
+            self::T . 'item',
+            'libraryid = :libraryid AND ' . $DB->sql_like('shelfkey', ':key') . " AND status <> 'lost' AND status <> 'withdrawn'",
+            ['libraryid' => $library->id, 'key' => $DB->sql_like_escape($after) . '%']
+        );
+        if (!$there) {
+            return null;
+        }
+        $label = '';
+        $known = $DB->get_records_select_menu(
+            self::T . 'authority',
+            "entityid = :entityid AND kind = 'class' AND (code = :class OR code = :dewey)",
+            ['entityid' => $library->entityid, 'class' => $class, 'dewey' => $class . '0'],
+            'id',
+            'code, label'
+        );
+        foreach ([$class, $class . '0'] as $code) {
+            $text = catalogue::tidy_label((string) ($known[$code] ?? ''));
+            if ($label === '' && $text !== '' && $text !== $code) {
+                $label = $text;
+            }
+        }
+        return ['after' => $after, 'label' => $label];
+    }
+
+    /**
      * The board of the hall with the corners as the library names them, one row each, each a way to its room or shelf.
      *
      * @param array $zone
@@ -328,7 +410,9 @@ final class visit {
         [$w, $h] = self::box($zone['quad']);
         $rows = [];
         foreach ($corners as $corner) {
-            $rows[] = ['label' => $corner['label'], 'url' => $goes($corner['code']), 'colour' => $corner['colour']];
+            $link = $goes($corner['code']);
+            $rows[] = ['label' => $corner['label'], 'url' => $link, 'colour' => $corner['colour'],
+                'enters' => str_contains($link, '/visit.php')];
         }
         return ['directory' => true, 'pulse' => false, 'book' => false, 'width' => round($w), 'height' => round($h),
             'transform' => homography::css($w, $h, $zone['quad']), 'rows' => $rows, 'ink' => self::ink($zone),

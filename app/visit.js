@@ -334,9 +334,16 @@
             return;
         }
         e.preventDefault();
-        var p = zone(link.getAttribute('data-zone')).getAttribute('data-tip').split(' ').map(parseFloat);
+        var place = link.hasAttribute('data-zone') ? zone(link.getAttribute('data-zone')) : null;
+        if (place) {
+            var p = place.getAttribute('data-tip').split(' ').map(parseFloat);
+            room.style.transformOrigin = (p[0] * k) + 'px ' + (p[2] * k) + 'px';
+        } else {
+            // A row of the board: towards the row itself.
+            var r = room.getBoundingClientRect(), b = link.getBoundingClientRect();
+            room.style.transformOrigin = (b.left + b.width / 2 - r.left) + 'px ' + (b.top + b.height / 2 - r.top) + 'px';
+        }
         light(null);
-        room.style.transformOrigin = (p[0] * k) + 'px ' + (p[2] * k) + 'px';
         room.classList.add('ayv-visit-leaving');
         if (on && visit.getAttribute('data-door') && window.Audio) {
             var door = new window.Audio(visit.getAttribute('data-door'));

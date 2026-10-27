@@ -63,6 +63,17 @@ final class shelf_order {
     }
 
     /**
+     * Where a class begins on the shelf: every key of a copy of that class, or of a class under it, starts with it and
+     * is longer, so it is the key to start after.
+     *
+     * @param string $class A number of the classification, such as 52 or 821.134.2.
+     * @return string
+     */
+    public static function prefix(string $class): string {
+        return self::part($class, true, 40);
+    }
+
+    /**
      * A line coded for the key.
      *
      * @param string $text

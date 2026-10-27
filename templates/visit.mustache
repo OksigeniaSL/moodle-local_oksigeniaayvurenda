@@ -25,7 +25,7 @@
     * name, title, width, height, focus, depth, sound, door, touch - the room
     * back, front - layers: day, night, depth
     * zones - places: id, url, label, points, tipx, tipy, cy, enters
-    * surfaces - each directory (rows: label, url, colour; rowheight), pulse (heading, lines) or book (title, cover,
+    * surfaces - each directory (rows: label, url, colour, enters; rowheight), pulse (heading, lines) or book (title, cover,
       colour, url), with width, height, transform, fontsize and ink (the colours the painting asks, as CSS)
     * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug), play and playid (the
       herald offers the room's game), voice (the memory's hello)
@@ -48,7 +48,7 @@
         "surfaces": [
             {"directory": true, "pulse": false, "book": false, "width": 600, "height": 720, "fontsize": 40, "ink": "--visit-ink: #3a2a1c;",
                 "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 700, 200, 0, 1)", "rowheight": 80,
-                "rows": [{"label": "Ciencias", "url": "#", "colour": 3}]},
+                "rows": [{"label": "Ciencias", "url": "#", "colour": 3, "enters": false}]},
             {"directory": false, "pulse": true, "book": false, "width": 800, "height": 500, "fontsize": 42, "ink": "",
                 "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1400, 200, 0, 1)", "heading": "Hoy en la biblioteca",
                 "lines": [{"text": "Hoy se han ido a casa 12 libros"}]},
@@ -119,7 +119,7 @@
                     {{#directory}}
                     <ul>
                         {{#rows}}
-                        <li style="height: {{rowheight}}px"><a href="{{url}}"><span class="ayv-visit-dot ayv-cover-{{colour}}" aria-hidden="true"></span>{{label}}</a></li>
+                        <li style="height: {{rowheight}}px"><a href="{{url}}"{{#enters}} data-enters="1"{{/enters}}><span class="ayv-visit-dot ayv-cover-{{colour}}" aria-hidden="true"></span>{{label}}</a></li>
                         {{/rows}}
                     </ul>
                     {{/directory}}
