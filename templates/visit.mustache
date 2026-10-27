@@ -27,13 +27,14 @@
     * zones - places: id, url, label, points, tipx, tipy, cy, enters
     * surfaces - each directory (rows: label, url, colour; rowheight), pulse (heading, lines) or book (title, cover,
       colour, url), with width, height, transform, fontsize and ink (the colours the painting asks, as CSS)
-    * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug), play (the herald
-      offers the room's game)
+    * characters - role, name, text, figure, puppet, size, left, top, depth, search (action, slug), play and playid (the
+      herald offers the room's game), voice (the memory's hello)
+    * young - a reader of the flower: the sound is on unless they turned it off
     * hunt - the room's game, or nothing: target, heading, name, clue, figure, puppet, cheer, cheerpuppet, huntcover,
-      huntlines, huntplace, labelsr, spines, title, found, foundhint, recordurl, againurl, messages
+      huntlines, huntplace, labelsr, spines, title, found, foundhint, recordurl, againurl, messages, voices
     * sort - the hall's game, or nothing: heading, name, intro, figure, puppet, cheer, cheerpuppet, books (id, title,
       photo, colour, corner, cornerlabel, topic, lines, count, labelsr, url, first), doors (code, label, colour, art),
-      againurl, messages; hasplaces
+      againurl, messages, voices; hasplaces
     * visitplaces, visitsound, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
     Example context (json):
     {
@@ -57,10 +58,11 @@
         ],
         "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?",
             "figure": "https://example.com/memoria-saluda.webp", "puppet": "", "size": 520, "left": 400, "top": 500,
-            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "", "playid": "" }],
+            "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "", "playid": "", "voice": "https://example.com/hola.mp3" }],
+        "young": false,
         "sort": {"heading": "Las novedades", "name": "Mainumby", "intro": "Han llegado libros nuevos.",
             "figure": "https://example.com/mainumby-saluda.webp", "puppet": "", "cheer": null, "cheerpuppet": "",
-            "againurl": "#", "messages": "{}",
+            "againurl": "#", "messages": "{}", "voices": "{}",
             "books": [{"id": 3, "title": "El agua", "photo": null, "colour": 3, "corner": "5", "cornerlabel": "Ciencias",
                 "topic": "", "lines": [{"line": "5"}, {"line": "LAU"}], "count": "Libro 1 de 3",
                 "labelsr": "Su tejuelo: 5 LAU", "url": "#", "first": true}],
@@ -73,7 +75,7 @@
             "cheerpuppet": "", "huntcover": "https://example.com/cover.jpg", "huntlines": [{"line": "82-3"}, {"line": "MON"}],
             "huntplace": "#d63a2f", "labelsr": "El tejuelo del libro escondido: 82-3 MON", "title": "El dragón que leía",
             "found": "¡Lo has encontrado! Está en Rojo.", "foundhint": "Búscalo allí.", "recordurl": "#", "againurl": "#",
-            "messages": "{}",
+            "messages": "{}", "voices": "{}",
             "spines": [{"id": 7, "url": "#", "title": "El dragón que leía", "shown": "El dragón que leía", "authors": "Ana Montes",
                 "callnumber": "82-3 MON dra", "place": "Rojo", "label": "El dragón que leía, Ana Montes, 82-3 MON dra",
                 "cm": 22, "width": 34, "background": "#2c7a6a", "dark": "#246a5c", "ink": "cream", "small": false,
@@ -88,7 +90,7 @@
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
     }
 }}
-<section class="ayv-visit" data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
+<section class="ayv-visit"{{#young}} data-young="1"{{/young}} data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}
@@ -151,7 +153,7 @@
         <button type="button" class="ayv-shelf-go ayv-visit-pan ayv-visit-pan-right" aria-label="{{visitpanright}}" hidden>{{> local_oksigeniaayvurenda/icon_next}}</button>
         <span class="ayv-visit-tip" aria-hidden="true" hidden></span>
         {{#characters}}
-        <div class="ayv-visit-say" id="ayv-visit-say-{{role}}" data-role="{{role}}" hidden>
+        <div class="ayv-visit-say" id="ayv-visit-say-{{role}}" data-role="{{role}}"{{#voice}} data-voice="{{voice}}"{{/voice}} hidden>
             <p><strong>{{name}}</strong> {{text}}</p>
             {{#search}}
             <form class="ayv-visit-ask" role="search" action="{{action}}" method="get">
@@ -182,7 +184,7 @@
     </nav>
     {{/hasplaces}}
     {{#hunt}}
-    <dialog class="ayv-modal ayv-hunt" id="ayv-hunt" aria-labelledby="ayv-hunt-title" data-target="{{target}}" data-messages="{{messages}}">
+    <dialog class="ayv-modal ayv-hunt" id="ayv-hunt" aria-labelledby="ayv-hunt-title" data-target="{{target}}" data-messages="{{messages}}" data-voices="{{voices}}">
         <div class="ayv-modal-head">
             <h2 id="ayv-hunt-title" class="ayv-section-title">{{heading}}</h2>
             <form method="dialog"><button class="ayv-modal-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form>
@@ -221,7 +223,7 @@
     </dialog>
     {{/hunt}}
     {{#sort}}
-    <dialog class="ayv-modal ayv-hunt ayv-sort" id="ayv-sort" aria-labelledby="ayv-sort-title" data-messages="{{messages}}">
+    <dialog class="ayv-modal ayv-hunt ayv-sort" id="ayv-sort" aria-labelledby="ayv-sort-title" data-messages="{{messages}}" data-voices="{{voices}}">
         <div class="ayv-modal-head">
             <h2 id="ayv-sort-title" class="ayv-section-title">{{heading}}</h2>
             <form method="dialog"><button class="ayv-modal-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form>

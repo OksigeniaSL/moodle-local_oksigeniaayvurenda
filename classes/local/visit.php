@@ -305,6 +305,8 @@ final class visit {
             ),
             'hunt' => $hunt,
             'sort' => $sort,
+            // A reader of the flower hears the visit unless they turned the sound off.
+            'young' => self::young($library, $public),
             'hasplaces' => $zones || $hunt || $sort,
             'focus' => $scene['focus'],
             'sound' => $scene['sound'],
@@ -431,6 +433,10 @@ final class visit {
                 'left' => round($one['feet'][0] - $one['height'] / 2), 'top' => round($one['feet'][1] - $one['height']),
                 'search' => $role === 'memory' ? ['action' => $public ? $url('public.php') : $url('search.php'),
                     'slug' => $library->slug] : null,
+                'voice' => $role === 'memory' ? (json_decode(
+                    self::voices($library, 'memory', ['hello' => 'hello']),
+                    true
+                )['hello'] ?? '') : '',
                 'play' => $role === 'herald' && $game !== '' ? get_string(
                     $game === 'ayv-hunt' ? 'huntherald' : 'sortherald',
                     'local_oksigeniaayvurenda'
@@ -499,6 +505,9 @@ final class visit {
             'recordurl' => $public ? $url('public.php', ['record' => $game['target']])
                 : $url('record.php', ['id' => $game['target']]),
             'againurl' => $url('visit.php', ['room' => $room, 'hunt' => $turn + 1]) . '#busca',
+            'voices' => self::voices($library, 'memory', ['clue' => $game['young'] ? 'huntclueyoung' : 'huntclue',
+                'before' => 'huntbefore', 'after' => 'huntafter', 'gap' => 'huntgap', 'glow' => 'huntglow',
+                'found' => 'huntfound']),
             'messages' => json_encode(
                 ['before' => $str('huntbefore'), 'after' => $str('huntafter'),
                 'line1' => $str('huntline1', '{line}'), 'line2' => $str('huntline2', '{line}'),
@@ -552,10 +561,52 @@ final class visit {
             'books' => $books,
             'doors' => $doors,
             'againurl' => $url('visit.php', ['sort' => $turn + 1]) . '#coloca',
+            'voices' => self::voices($library, 'herald', ['intro' => 'sortintro', 'no' => 'sortno', 'glow' => 'sortglow',
+                'yes' => 'sortyes', 'done' => 'sortdone']),
             'messages' => json_encode(['no' => $str('sortno', (object) ['corner' => '{corner}', 'digit' => '{digit}',
                 'mine' => '{mine}']), 'topic' => $str('sorttopic', '{topic}'), 'glow' => $str('sortglow'),
                 'yes' => $str('sortyes', '{corner}')], JSON_UNESCAPED_UNICODE),
         ];
+    }
+
+    /**
+     * The clips of what a character says in the games, from the art package, in the page's language: the memory, or
+     * the herald in the voice of the sex the centre chose.
+     *
+     * @param \stdClass $library
+     * @param string $role memory or herald.
+     * @param array $keys What the script calls each one => its clip.
+     * @return string JSON: what the script calls each one => its address, for those that have one.
+     */
+    private static function voices(\stdClass $library, string $role, array $keys): string {
+        $who = $role === 'memory' ? 'memoria'
+            : ((characters::of((int) $library->entityid)['herald']['sex'] ?? 'm') === 'f' ? 'herald-f' : 'herald-m');
+        $lang = substr(current_language(), 0, 2);
+        $urls = [];
+        foreach ($keys as $name => $clip) {
+            $url = screens::spoken('juegos/' . $who . '/' . $lang . '/' . $clip);
+            if ($url) {
+                $urls[$name] = $url;
+            }
+        }
+        return (string) json_encode((object) $urls);
+    }
+
+    /**
+     * Whether whoever visits is a reader of the flower of this library's centre.
+     *
+     * @param \stdClass $library
+     * @param bool $public
+     * @return bool
+     */
+    private static function young(\stdClass $library, bool $public): bool {
+        global $DB, $USER;
+        if ($public || !isloggedin() || isguestuser()) {
+            return false;
+        }
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid,
+            'userid' => $USER->id, 'status' => 'active']);
+        return $reader && cards::look_of($reader) === 'flower';
     }
 
     /**

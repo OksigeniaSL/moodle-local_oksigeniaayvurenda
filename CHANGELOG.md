@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.71.0 (2026-10-27)
+
+- The characters speak in the games of the library one visits, from the art package's voices: the memory gives her
+  clue, says which way to go, points at the glow and cheers the find; the herald welcomes, says when a door is not the
+  one, points at the glowing door, cheers each book and thanks at the end. One clip at a time, the room's sound lower
+  meanwhile, only with the visit's sound on; what changes each time (the label, the line to look at) stays written.
+  The memory greets aloud when touched in the hall. A reader of the flower hears the visit unless they turn the sound
+  off.
+
 ## 0.70.0 (2026-10-27)
 
 - The herald's shelf, a game in the hall of the library one visits: the herald brings the library's new books, four at

@@ -42,6 +42,18 @@
     var at = 0;
     var misses = 0;
     var busy = false;
+    var voices = {};
+    try {
+        voices = JSON.parse(dialog.getAttribute('data-voices')) || {};
+    } catch (e) {
+        voices = {};
+    }
+    // The herald says it too, with the visit's sound on.
+    var speak = function(key) {
+        if (window.AYVVisit) {
+            window.AYVVisit.say(voices[key]);
+        }
+    };
 
     var tell = function(text) {
         say.textContent = '';
@@ -79,6 +91,7 @@
         if (window.AYVVisit) {
             window.AYVVisit.chime();
         }
+        speak('done');
         end.querySelector('.ayv-hunt-found-title').focus();
     };
 
@@ -92,6 +105,7 @@
             if (door.getAttribute('data-corner') === book.getAttribute('data-corner')) {
                 busy = true;
                 tell(fill(messages.yes, {corner: label}));
+                speak('yes');
                 door.classList.add('ayv-sort-yes');
                 window.setTimeout(function() {
                     door.classList.remove('ayv-sort-yes');
@@ -114,6 +128,7 @@
                 parts.push(messages.glow);
             }
             tell(parts.join(' '));
+            speak(misses >= 2 ? 'glow' : 'no');
             if (!reduce) {
                 door.classList.remove('ayv-hunt-no-door');
                 void door.offsetWidth;
@@ -125,6 +140,7 @@
     var open = function() {
         if (!dialog.open) {
             dialog.showModal();
+            speak('intro');
         }
     };
     Array.prototype.forEach.call(document.querySelectorAll('[data-open="ayv-sort"]'), function(button) {

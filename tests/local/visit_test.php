@@ -204,6 +204,8 @@ final class visit_test extends \advanced_testcase {
         $this->assertSame(['8', '5'], array_column($page['sort']['doors'], 'code'));
         $this->assertStringContainsString('visit.php?library=' . $library->slug . '&sort=1#coloca', $page['sort']['againurl']);
         $this->assertNull($room['sort']);
+        $this->assertIsArray(json_decode($room['hunt']['voices'], true), 'the voices the art package has, by what they say');
+        $this->assertFalse($page['young'], 'the administrator is not a reader of the flower');
 
         // Without an account: to the window, and the voices only if it shows them.
         window::save($library, ['open' => 1, 'voices' => 0, 'catalogue' => 1]);

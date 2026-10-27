@@ -30,7 +30,30 @@
         return;
     }
     // A few bright notes for the games' good moments, only with the visit's sound on.
+    // What a character says, one clip at a time, never over another; the room's sound goes down meanwhile.
+    var voice = null;
+    var duck = function(down) {
+        if (ambience) {
+            ambience.volume = down ? 0.15 : 0.5;
+        }
+    };
     window.AYVVisit = {
+        say: function(url) {
+            if (!on || !url || !window.Audio) {
+                return;
+            }
+            if (voice) {
+                voice.pause();
+            }
+            voice = new window.Audio(url);
+            duck(true);
+            voice.addEventListener('ended', function() {
+                duck(false);
+            });
+            voice.play().catch(function() {
+                duck(false);
+            });
+        },
         chime: function() {
             var Context = window.AudioContext || window.webkitAudioContext;
             if (!on || !Context) {
@@ -234,7 +257,9 @@
     // The sound of the room, off until one turns it on; the choice is remembered for the next rooms.
     var soundbutton = visit.querySelector('.ayv-visit-sound');
     var ambience = null;
-    var on = store('localStorage', 'ayv-visit-sound') === 'on';
+    // The sound is off until one turns it on; a reader of the flower hears it unless they turned it off.
+    var chosen = store('localStorage', 'ayv-visit-sound');
+    var on = chosen === 'on' || (chosen !== 'off' && visit.getAttribute('data-young') === '1');
     var play = function() {
         if (!ambience) {
             ambience = new window.Audio(visit.getAttribute('data-sound'));
@@ -248,7 +273,7 @@
         soundbutton.setAttribute('aria-pressed', on ? 'true' : 'false');
         soundbutton.addEventListener('click', function() {
             on = !on;
-            store('localStorage', 'ayv-visit-sound', on ? 'on' : null);
+            store('localStorage', 'ayv-visit-sound', on ? 'on' : 'off');
             soundbutton.setAttribute('aria-pressed', on ? 'true' : 'false');
             if (on) {
                 play().catch(function() {
@@ -357,6 +382,7 @@
             }
             open = {say: say, button: button};
             say.hidden = false;
+            window.AYVVisit.say(say.getAttribute('data-voice'));
             button.setAttribute('aria-expanded', 'true');
             var box = frame.getBoundingClientRect(), who = button.getBoundingClientRect();
             var x = who.left - box.left + who.width / 2 - say.offsetWidth / 2;

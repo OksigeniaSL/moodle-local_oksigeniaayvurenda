@@ -49,6 +49,18 @@
     };
     var misses = 0;
     var done = false;
+    var voices = {};
+    try {
+        voices = JSON.parse(dialog.getAttribute('data-voices')) || {};
+    } catch (e) {
+        voices = {};
+    }
+    // The memory says it too, with the visit's sound on.
+    var speak = function(key) {
+        if (window.AYVVisit) {
+            window.AYVVisit.say(voices[key]);
+        }
+    };
 
     // A small sound when it is found, with the visit's sound on.
     var chime = function() {
@@ -69,9 +81,11 @@
         misses++;
         var slot = spine.closest('.ayv-spine-slot');
         var parts = [];
+        var heard = 'gap';
         if (slot && slot.classList.contains('ayv-spine-gap')) {
             parts.push(messages.gap);
         } else {
+            heard = spines.indexOf(spine) < spines.indexOf(mine) ? 'before' : 'after';
             parts.push(spines.indexOf(spine) < spines.indexOf(mine) ? messages.before : messages.after);
             var theirs = lines(spine), ours = lines(mine);
             for (var i = 0; i < Math.min(3, ours.length); i++) {
@@ -84,8 +98,10 @@
         if (misses >= 3) {
             mine.closest('.ayv-spine-slot').classList.add('ayv-hunt-glow');
             parts.push(messages.glow);
+            heard = 'glow';
         }
         tell(parts.filter(Boolean).join(' '));
+        speak(heard);
         if (!reduce && slot) {
             slot.classList.remove('ayv-hunt-no');
             // Restart the nudge.
@@ -100,6 +116,7 @@
         mine.closest('.ayv-spine-slot').classList.remove('ayv-hunt-glow');
         mine.closest('.ayv-spine-slot').classList.add('ayv-hunt-yes');
         chime();
+        speak('found');
         window.setTimeout(function() {
             var ask = dialog.querySelector('.ayv-hunt-ask');
             if (ask) {
@@ -153,6 +170,7 @@
     var open = function() {
         if (!dialog.open) {
             dialog.showModal();
+            speak('clue');
         }
     };
     Array.prototype.forEach.call(document.querySelectorAll('[data-open="ayv-hunt"]'), function(button) {
