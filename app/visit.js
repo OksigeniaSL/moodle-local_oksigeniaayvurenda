@@ -140,6 +140,35 @@
         new window.ResizeObserver(fit).observe(frame);
     }
     view.addEventListener('scroll', arrows, {passive: true});
+
+    // The words on the painted boards fit them: a busy day or a long name gets smaller letters, never out of the board.
+    var settle = function() {
+        Array.prototype.forEach.call(stage.querySelectorAll('.ayv-visit-chalk, .ayv-visit-board'), function(surface) {
+            var size = parseFloat(surface.getAttribute('data-size') || surface.style.fontSize);
+            surface.setAttribute('data-size', size);
+            surface.style.fontSize = size + 'px';
+            var least = size * 0.55;
+            var board = surface.classList.contains('ayv-visit-board');
+            // A row of the board has its height; the letters' strokes may go a little past their line.
+            var over = function() {
+                return surface.scrollHeight > surface.clientHeight + 1 || board && Array.prototype.some.call(
+                    surface.querySelectorAll('li'),
+                    function(li) {
+                        return li.scrollHeight > li.clientHeight + size * 0.3 || li.scrollWidth > li.clientWidth + 1;
+                    }
+                );
+            };
+            while (over() && size > least) {
+                size *= 0.93;
+                surface.style.fontSize = size.toFixed(1) + 'px';
+            }
+        });
+    };
+    settle();
+    if (document.fonts && document.fonts.ready) {
+        // With the house's letters loaded, again from the start: they are not as wide as the ones before.
+        document.fonts.ready.then(settle);
+    }
     var pan = function(way) {
         view.scrollBy({left: way * view.clientWidth * 0.7, behavior: reduce ? 'auto' : 'smooth'});
     };

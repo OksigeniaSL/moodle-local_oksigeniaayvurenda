@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.72.3 (2026-10-27)
+
+- The words on the painted boards of the library one visits fit them: on a busy day the blackboard's lines, and a long
+  name on the board of corners, get smaller letters instead of going out of the board (found in dev).
+
 ## 0.72.2 (2026-10-27)
 
 - Made-up loans leave a fifth of the made-up library's copies out at most, however often they are made, as in a school
