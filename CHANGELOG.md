@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.72.1 (2026-10-27)
+
+- The made-up library has books in more classes (computing, libraries, botany, painting, games and sports, geography,
+  biographies), so that every thing of the rooms of the visit leads to books; `cli/demo.php --refine` brings a made-up
+  library made before up to them. Never in a centre with records brought from a catalogue.
+
 ## 0.72.0 (2026-10-27)
 
 - Every room the art package paints is a room of the library one visits: the board of the hall walks into the room of

@@ -55,11 +55,12 @@ final class demo {
         'Brisa', 'Cardo', 'Encina', 'Fresno', 'Granado', 'Laurel', 'Mirto', 'Rocío'];
     /** @var string[][] Classification codes (UDC) with their label, and the parent code. */
     private const CLASSES = [
-        ['0', 'Generalidades', null], ['03', 'Enciclopedias', '0'], ['5', 'Ciencias', null], ['51', 'Matemáticas', '5'],
-        ['52', 'Astronomía', '5'], ['57', 'Biología', '5'], ['59', 'Zoología', '57'], ['7', 'Artes', null],
-        ['78', 'Música', '7'], ['8', 'Lengua y literatura', null], ['82', 'Literatura', '8'],
+        ['0', 'Generalidades', null], ['004', 'Informática', '0'], ['02', 'Bibliotecas', '0'], ['03', 'Enciclopedias', '0'],
+        ['5', 'Ciencias', null], ['51', 'Matemáticas', '5'], ['52', 'Astronomía', '5'], ['57', 'Biología', '5'],
+        ['58', 'Botánica', '5'], ['59', 'Zoología', '57'], ['7', 'Artes', null], ['75', 'Pintura', '7'], ['78', 'Música', '7'],
+        ['79', 'Juegos y deportes', '7'], ['8', 'Lengua y literatura', null], ['82', 'Literatura', '8'],
         ['821', 'Literaturas nacionales', '82'], ['821.134.2-3', 'Novela', '821'], ['821.134.2-1', 'Poesía', '821'],
-        ['9', 'Geografía e historia', null], ['94', 'Historia', '9'],
+        ['9', 'Geografía e historia', null], ['91', 'Geografía', '9'], ['929', 'Biografías', '9'], ['94', 'Historia', '9'],
     ];
     /** @var string[] Subjects. */
     private const SUBJECTS = ['Aventuras', 'Misterio', 'Animales', 'Amistad', 'Ciencia', 'Humor', 'Fantasía', 'Historia',
@@ -437,6 +438,64 @@ final class demo {
     private const CLASS_COVERS = ['52' => ['astronomia', 'planetas'], '51' => ['matematicas'], '59' => ['zoologia', 'erizo'],
         '57' => ['erizo'], '78' => ['musica'], '7' => ['colores'], '94' => ['historia', 'mapa'], '9' => ['tren', 'mapa'],
         '03' => ['cartas'], '0' => ['cartas']];
+
+    /**
+     * Brings a made-up library made before a class was in the list up to it: the class comes in under its parent, and
+     * the books filed only under the parent share it with its new classes (one stays, one goes to each), so that every
+     * thing of the rooms of the visit has books behind it. Nothing changes the second time.
+     *
+     * @param int $libraryid
+     * @return int How many books changed class; -1 if the centre has records brought from a catalogue, which are not
+     *     made-up and keep their classes.
+     */
+    public static function refine(int $libraryid): int {
+        global $DB;
+        $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $libraryid], MUST_EXIST);
+        if ($DB->record_exists(self::T . 'source', ['entityid' => $entityid, 'tablename' => 'record'])) {
+            return -1;
+        }
+        $now = time();
+        $transaction = $DB->start_delegated_transaction();
+        $ids = $DB->get_records_select_menu(
+            self::T . 'authority',
+            "entityid = :entityid AND kind = 'class'",
+            ['entityid' => $entityid],
+            'id',
+            'code, id'
+        );
+        $new = [];
+        foreach (self::CLASSES as [$code, $label, $parent]) {
+            if (!isset($ids[$code]) && $parent !== null && isset($ids[$parent])) {
+                $ids[$code] = $DB->insert_record(self::T . 'authority', ['entityid' => $entityid, 'kind' => 'class',
+                    'code' => $code, 'label' => $label, 'parentid' => $ids[$parent], 'timecreated' => $now,
+                    'timemodified' => $now]);
+                $new[$parent][] = $code;
+            }
+        }
+        $moved = 0;
+        foreach ($new as $parent => $codes) {
+            $records = $DB->get_fieldset_sql(
+                "SELECT recordid FROM {" . self::T . "recauth} WHERE authorityid = :id ORDER BY recordid",
+                ['id' => $ids[$parent]]
+            );
+            foreach (array_values($records) as $i => $recordid) {
+                $slot = $i % (count($codes) + 1);
+                if ($slot === 0) {
+                    continue;
+                }
+                $code = $codes[$slot - 1];
+                $DB->set_field(self::T . 'recauth', 'authorityid', $ids[$code], ['recordid' => $recordid,
+                    'authorityid' => $ids[$parent]]);
+                $DB->set_field(self::T . 'item', 'callnumber1', $code, ['recordid' => $recordid, 'callnumber1' => $parent]);
+                $moved++;
+            }
+        }
+        if ($moved) {
+            stacks::refresh_keys($entityid);
+        }
+        $transaction->allow_commit();
+        return $moved;
+    }
 
     /**
      * Gives the made-up books of a library the made-up covers of the art package (Gaudí's, pix/portadas/): by the class

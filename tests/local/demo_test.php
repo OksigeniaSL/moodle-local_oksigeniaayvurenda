@@ -64,6 +64,53 @@ final class demo_test extends \advanced_testcase {
     }
 
     /**
+     * A made-up library made before some classes were in the list gets them, under their parent, with a share of the
+     * books filed only under the parent and their copies in the new place on the shelf; nothing more the second time,
+     * and nothing at all in a centre with records brought from a catalogue.
+     */
+    public function test_refine(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $entityid = demo::create('Demo', 120, 0);
+        $library = $DB->get_record(self::T . 'library', ['entityid' => $entityid], '*', MUST_EXIST);
+        $class = fn(string $code) => (int) $DB->get_field(self::T . 'authority', 'id', ['entityid' => $entityid,
+            'kind' => 'class', 'code' => $code]);
+        // As if it were made before 91 and 929 were in the list: their books back under 9.
+        foreach (['91', '929'] as $code) {
+            $DB->set_field(self::T . 'recauth', 'authorityid', $class('9'), ['authorityid' => $class($code)]);
+            $DB->set_field(self::T . 'item', 'callnumber1', '9', ['entityid' => $entityid, 'callnumber1' => $code]);
+            $DB->delete_records(self::T . 'authority', ['id' => $class($code)]);
+        }
+        stacks::refresh_keys($entityid);
+        $nine = $DB->count_records(self::T . 'recauth', ['authorityid' => $class('9')]);
+        $this->assertGreaterThan(2, $nine);
+
+        $moved = demo::refine((int) $library->id);
+        $this->assertSame($nine - (int) ceil($nine / 3), $moved, 'one in three stays under 9');
+        $this->assertSame($class('9'), (int) $DB->get_field(self::T . 'authority', 'parentid', ['id' => $class('91')]));
+        $this->assertSame(
+            $DB->count_records(self::T . 'recauth', ['authorityid' => $class('91')]),
+            (int) $DB->count_records_select(
+                self::T . 'item',
+                'entityid = ? AND callnumber1 = ?',
+                [$entityid, '91'],
+                'COUNT(DISTINCT recordid)'
+            ),
+            'the copies of a book move with it'
+        );
+        $item = $DB->get_record(self::T . 'item', ['entityid' => $entityid, 'callnumber1' => '929'], '*', IGNORE_MULTIPLE);
+        $this->assertStringStartsWith(\local_oksigeniaayvurenda\core\shelf_order::prefix('929'), $item->shelfkey);
+        $this->assertSame(0, demo::refine((int) $library->id), 'nothing more the second time');
+
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $real = $gen->create_library();
+        $DB->insert_record(self::T . 'source', ['entityid' => $real->entityid, 'system' => 'abies', 'tablename' => 'record',
+            'externalid' => '1', 'localid' => 1, 'hash' => 'x', 'timecreated' => time()]);
+        $this->assertSame(-1, demo::refine((int) $real->id));
+    }
+
+    /**
      * It fills the public window with made-up EPUBs, each a valid package, and opens it; a second pass adds new titles.
      */
     public function test_window(): void {

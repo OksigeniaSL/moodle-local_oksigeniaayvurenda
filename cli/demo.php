@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/clilib.php');
 
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'name' => 'Biblioteca de demostración', 'records' => 14500, 'readers' => 2000, 'seed' => 20261023,
-        'accounts' => 0, 'entity' => 0, 'loans' => 0, 'library' => '', 'window' => 0, 'covers' => false],
+        'accounts' => 0, 'entity' => 0, 'loans' => 0, 'library' => '', 'window' => 0, 'covers' => false, 'refine' => false],
     ['h' => 'help']
 );
 
@@ -55,7 +55,9 @@ Options:
                   with --library, and open its public window
   --covers        Instead, give the made-up books of the library given with --library the made-up covers of the art
                   package (pix/portadas/)
-  --library=SLUG  The library for --loans, --window or --covers
+  --refine        Instead, bring the made-up library given with --library up to the classes of today's made-up
+                  libraries, moving some of the books filed only under a corner's number to its new classes
+  --library=SLUG  The library for --loans, --window, --covers or --refine
   -h, --help      This help
 
 Example:
@@ -72,6 +74,18 @@ if ((int) $options['accounts'] > 0) {
     $stats = \local_oksigeniaayvurenda\local\demo::accounts((int) $options['entity'], (int) $options['accounts']);
     cli_writeln('Made-up accounts in cohorts, brought as readers: ' . json_encode($stats) . ', in ' .
         round(microtime(true) - $start, 1) . ' s.');
+    exit(0);
+}
+if ($options['refine']) {
+    $libraryid = $DB->get_field('local_oksigeniaayvurenda_library', 'id', ['slug' => $options['library']]);
+    if (!$libraryid) {
+        cli_error('Say which library to bring up to date (--library).');
+    }
+    $moved = \local_oksigeniaayvurenda\local\demo::refine((int) $libraryid);
+    if ($moved < 0) {
+        cli_error('This library has books brought from a catalogue: only made-up books change class.');
+    }
+    cli_writeln('Books in a new class: ' . $moved . ', in ' . round(microtime(true) - $start, 1) . ' s.');
     exit(0);
 }
 if ($options['covers']) {
