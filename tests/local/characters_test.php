@@ -114,6 +114,22 @@ final class characters_test extends \advanced_testcase {
     }
 
     /**
+     * A herald of the other sex keeps Gaudí's hummingbird when the art package has no portrait of her: never the
+     * initial while there is a drawing.
+     */
+    public function test_portrait_of_either_sex(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        characters::save($entityid, ['herald' => ['name' => 'Rosa', 'sex' => 'f', 'enabled' => true]]);
+        $herald = characters::of($entityid)['herald'];
+        $drawn = screens::art('pregonero');
+        $this->assertSame(screens::art('pregonero-f') ?? $drawn, $herald['portrait']);
+        $this->assertSame('R', $herald['initial']);
+    }
+
+    /**
      * The characters grow with the reader: a reader of the flower sees the flower's, one of secondary and the adults
      * the sky's; whoever is not a reader of the centre (the staff, a visitor), the flower's. Without the sky's drawing,
      * the flower's, and its puppet goes with it.

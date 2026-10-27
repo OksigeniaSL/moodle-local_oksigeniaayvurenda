@@ -59,9 +59,11 @@ final class characters {
                 'name' => $name !== '' ? $name : get_string($role . 'defaultname', 'local_oksigeniaayvurenda'),
                 // The grandmother who remembers and the hummingbird who heralds: one of each.
                 'sex' => $sex,
-                // Gaudí's portrait, when the art package is there (one of the other sex, if it has it).
+                // Gaudí's portrait, when the art package is there: one of the other sex if it has it, else the same
+                // grandmother and hummingbird as their drawings whole.
                 'portrait' => images::url('portrait', $entityid, $role)
-                    ?? screens::art($drawn . ($sex === ($role === 'herald' ? 'm' : 'f') ? '' : '-' . $sex)),
+                    ?? ($sex === ($role === 'herald' ? 'm' : 'f') ? null : screens::art($drawn . '-' . $sex))
+                    ?? screens::art($drawn),
                 'own' => images::url('portrait', $entityid, $role) !== null,
                 'signs' => $role === 'herald' && !empty($mine['signs']),
                 // Until the puppets come, the initial of the name, not a makeshift drawing.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.73.4 (2026-10-27)
+
+- A herald of the other sex keeps Gaudí's hummingbird on the home and the card when the art package has no portrait
+  of her, instead of the initial of her name.
+
 ## 0.73.3 (2026-10-27)
 
 - The sound of a room in the visit is heard: at full volume, and lowered to a third while a character speaks. When the
