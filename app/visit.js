@@ -34,7 +34,7 @@
     var voice = null;
     var duck = function(down) {
         if (ambience) {
-            ambience.volume = down ? 0.15 : 0.5;
+            ambience.volume = down ? 0.3 : 1;
         }
     };
     window.AYVVisit = {
@@ -297,7 +297,7 @@
         if (!ambience) {
             ambience = new window.Audio(visit.getAttribute('data-sound'));
             ambience.loop = true;
-            ambience.volume = 0.5;
+            ambience.volume = 1;
         }
         return ambience.play();
     };
@@ -305,6 +305,13 @@
         soundbutton.hidden = false;
         soundbutton.setAttribute('aria-pressed', on ? 'true' : 'false');
         soundbutton.addEventListener('click', function() {
+            // On, but the browser kept it quiet until a touch: this one starts it rather than turning it off.
+            if (on && (!ambience || ambience.paused)) {
+                play().catch(function() {
+                    // The browser would not; the button stays as chosen.
+                });
+                return;
+            }
             on = !on;
             store('localStorage', 'ayv-visit-sound', on ? 'on' : 'off');
             soundbutton.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -319,10 +326,11 @@
         if (on) {
             // A browser may wait for a first touch before it lets a page sound.
             play().catch(function() {
-                var first = function() {
+                var first = function(event) {
                     document.removeEventListener('pointerdown', first, true);
                     document.removeEventListener('keydown', first, true);
-                    if (on) {
+                    // A touch of the sound button is left to its own click.
+                    if (on && !soundbutton.contains(event.target)) {
                         play().catch(function() {
                             // Still not: silence.
                         });

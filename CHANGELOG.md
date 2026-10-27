@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.73.3 (2026-10-27)
+
+- The sound of a room in the visit is heard: at full volume, and lowered to a third while a character speaks. When the
+  sound was on from before and the browser kept it quiet until a first touch, that touch on «Sound» starts it instead
+  of turning it off.
+
 ## 0.73.2 (2026-10-27)
 
 - The made-up library has books of engineering, vehicles and cooking in the corner of the applied sciences, for the
