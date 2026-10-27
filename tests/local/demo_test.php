@@ -102,6 +102,43 @@ final class demo_test extends \advanced_testcase {
         $this->assertStringStartsWith(\local_oksigeniaayvurenda\core\shelf_order::prefix('929'), $item->shelfkey);
         $this->assertSame(0, demo::refine((int) $library->id), 'nothing more the second time');
 
+        // As if it were made before the corner of the social sciences: neither its classes nor its books.
+        $codes = ['3', '33', '37', '398'];
+        [$in, $params] = $DB->get_in_or_equal(array_map($class, $codes));
+        $gone = $DB->get_fieldset_select(self::T . 'recauth', 'recordid', 'authorityid ' . $in, $params);
+        foreach ($gone as $recordid) {
+            $DB->delete_records(self::T . 'item', ['recordid' => $recordid]);
+            $DB->delete_records(self::T . 'recauth', ['recordid' => $recordid]);
+            $DB->delete_records(self::T . 'record', ['id' => $recordid]);
+        }
+        $DB->delete_records_select(self::T . 'authority', 'id ' . $in, $params);
+        $corners = fn() => array_column(catalogue::corners($library, true), 'count', 'code');
+        $this->assertArrayNotHasKey('3', $corners());
+        $smallest = min($corners());
+
+        $made = demo::refine((int) $library->id);
+        $this->assertSame(max(12, $smallest), $made, 'as many books as its smallest corner has');
+        $this->assertSame($made, $corners()['3']);
+        $this->assertNull($DB->get_field(self::T . 'authority', 'parentid', ['id' => $class('3')]));
+        $this->assertSame($class('3'), (int) $DB->get_field(self::T . 'authority', 'parentid', ['id' => $class('398')]));
+        [$in, $params] = $DB->get_in_or_equal($codes);
+        $items = $DB->get_records_select(
+            self::T . 'item',
+            'entityid = ? AND callnumber1 ' . $in,
+            array_merge([$entityid], $params)
+        );
+        $this->assertGreaterThanOrEqual($made, count($items));
+        foreach ($items as $item) {
+            $this->assertStringStartsWith('13', $item->shelfkey);
+            $this->assertTrue(control_letter::is_valid($item->barcode), $item->barcode);
+        }
+        $this->assertSame(
+            count($DB->get_fieldset_select(self::T . 'item', 'barcode', 'entityid = ?', [$entityid])),
+            count(array_unique($DB->get_fieldset_select(self::T . 'item', 'barcode', 'entityid = ?', [$entityid]))),
+            'no barcode twice'
+        );
+        $this->assertSame(0, demo::refine((int) $library->id));
+
         /** @var \local_oksigeniaayvurenda_generator $gen */
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $real = $gen->create_library();

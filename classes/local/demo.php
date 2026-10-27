@@ -56,9 +56,11 @@ final class demo {
     /** @var string[][] Classification codes (UDC) with their label, and the parent code. */
     private const CLASSES = [
         ['0', 'Generalidades', null], ['004', 'Informática', '0'], ['02', 'Bibliotecas', '0'], ['03', 'Enciclopedias', '0'],
+        ['3', 'Ciencias sociales', null], ['33', 'Economía', '3'], ['37', 'Educación', '3'], ['398', 'Cuentos populares', '3'],
         ['5', 'Ciencias', null], ['51', 'Matemáticas', '5'], ['52', 'Astronomía', '5'], ['57', 'Biología', '5'],
-        ['58', 'Botánica', '5'], ['59', 'Zoología', '57'], ['7', 'Artes', null], ['75', 'Pintura', '7'], ['78', 'Música', '7'],
-        ['79', 'Juegos y deportes', '7'], ['8', 'Lengua y literatura', null], ['82', 'Literatura', '8'],
+        ['58', 'Botánica', '5'], ['59', 'Zoología', '57'], ['6', 'Ciencias aplicadas', null], ['7', 'Artes', null],
+        ['75', 'Pintura', '7'], ['78', 'Música', '7'], ['79', 'Juegos y deportes', '7'], ['8', 'Lengua y literatura', null],
+        ['82', 'Literatura', '8'],
         ['821', 'Literaturas nacionales', '82'], ['821.134.2-3', 'Novela', '821'], ['821.134.2-1', 'Poesía', '821'],
         ['9', 'Geografía e historia', null], ['91', 'Geografía', '9'], ['929', 'Biografías', '9'], ['94', 'Historia', '9'],
     ];
@@ -118,7 +120,28 @@ final class demo {
         }
         $authors = self::authorities($entityid, 'author', array_values(array_unique($authornames)), $now);
 
-        $barcode = 100000;
+        self::books($entityid, $libraryid, $records, ['classes' => $classes, 'authors' => $authors, 'subjects' => $subjects,
+            'publishers' => $publishers, 'locations' => $locations], 100000, $now);
+        self::readers($entityid, $yearid, $readers, $now);
+        $transaction->allow_commit();
+        return $entityid;
+    }
+
+    /**
+     * Made-up titles with their copies, each of one of the classes given.
+     *
+     * @param int $entityid
+     * @param int $libraryid
+     * @param int $records
+     * @param array $kinds classes (their codes), authors, subjects, publishers and locations, by authority id.
+     * @param int $barcode The number of the first copy.
+     * @param int $now
+     * @return int The number of the next copy.
+     */
+    private static function books(int $entityid, int $libraryid, int $records, array $kinds, int $barcode, int $now): int {
+        global $DB;
+        ['classes' => $classes, 'authors' => $authors, 'subjects' => $subjects, 'publishers' => $publishers,
+            'locations' => $locations] = $kinds;
         for ($i = 0; $i < $records; $i++) {
             $title = self::title();
             $author = array_rand($authors);
@@ -167,10 +190,7 @@ final class demo {
             }
             $DB->insert_records(self::T . 'item', $items);
         }
-
-        self::readers($entityid, $yearid, $readers, $now);
-        $transaction->allow_commit();
-        return $entityid;
+        return $barcode;
     }
 
     /**
@@ -501,11 +521,12 @@ final class demo {
     /**
      * Brings a made-up library made before a class was in the list up to it: the class comes in under its parent, and
      * the books filed only under the parent share it with its new classes (one stays, one goes to each), so that every
-     * thing of the rooms of the visit has books behind it. Nothing changes the second time.
+     * thing of the rooms of the visit has books behind it; a corner it did not have comes with made-up books of its
+     * own, as many as its smallest corner has. Nothing changes the second time.
      *
      * @param int $libraryid
-     * @return int How many books changed class; -1 if the centre has records brought from a catalogue, which are not
-     *     made-up and keep their classes.
+     * @return int How many books changed class or came; -1 if the centre has records brought from a catalogue, which
+     *     are not made-up and keep their classes.
      */
     public static function refine(int $libraryid): int {
         global $DB;
@@ -523,15 +544,56 @@ final class demo {
             'code, id'
         );
         $new = [];
+        $corners = [];
         foreach (self::CLASSES as [$code, $label, $parent]) {
-            if (!isset($ids[$code]) && $parent !== null && isset($ids[$parent])) {
-                $ids[$code] = $DB->insert_record(self::T . 'authority', ['entityid' => $entityid, 'kind' => 'class',
-                    'code' => $code, 'label' => $label, 'parentid' => $ids[$parent], 'timecreated' => $now,
-                    'timemodified' => $now]);
+            if (isset($ids[$code]) || ($parent !== null && !isset($ids[$parent]))) {
+                continue;
+            }
+            $ids[$code] = $DB->insert_record(self::T . 'authority', ['entityid' => $entityid, 'kind' => 'class',
+                'code' => $code, 'label' => $label, 'parentid' => $parent === null ? null : $ids[$parent],
+                'timecreated' => $now, 'timemodified' => $now]);
+            if ($parent === null || isset($corners[$parent])) {
+                // A new corner, and the classes under it: its books are made below.
+                $corners[$parent ?? $code][$ids[$code]] = $code;
+            } else {
                 $new[$parent][] = $code;
             }
         }
         $moved = 0;
+        if ($corners) {
+            $library = $DB->get_record(self::T . 'library', ['id' => $libraryid], '*', MUST_EXIST);
+            $counts = array_column(array_filter(
+                catalogue::corners($library, true),
+                fn($corner) => !isset($corners[$corner['code']])
+            ), 'count');
+            $kinds = ['locations' => 'location', 'authors' => 'author', 'subjects' => 'subject', 'publishers' => 'publisher'];
+            foreach ($kinds as $key => $kind) {
+                $kinds[$key] = $DB->get_records_select_menu(
+                    self::T . 'authority',
+                    'entityid = :entityid AND kind = :kind',
+                    ['entityid' => $entityid, 'kind' => $kind],
+                    'id',
+                    'id, label'
+                );
+            }
+            $barcode = 1 + (int) $DB->get_field_sql(
+                "SELECT MAX(regnumber) FROM {" . self::T . "item} WHERE entityid = :entityid",
+                ['entityid' => $entityid]
+            );
+            $count = $counts ? max(12, min($counts)) : 60;
+            // Without the made-up names of the library (authors, places...) there is nothing to make books with.
+            foreach (in_array([], $kinds, true) ? [] : $corners as $classes) {
+                $barcode = self::books(
+                    $entityid,
+                    $libraryid,
+                    $count,
+                    ['classes' => $classes] + $kinds,
+                    max(100000, $barcode),
+                    $now
+                );
+                $moved += $count;
+            }
+        }
         foreach ($new as $parent => $codes) {
             $records = $DB->get_fieldset_sql(
                 "SELECT recordid FROM {" . self::T . "recauth} WHERE authorityid = :id ORDER BY recordid",

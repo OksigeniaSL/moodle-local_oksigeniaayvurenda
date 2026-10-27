@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.73.1 (2026-10-27)
+
+- The made-up library has the corners of the social sciences (economy, education, folk tales) and of the applied
+  sciences, for the rooms of the visit to come; `cli/demo.php --refine` gives an earlier made-up library made-up books
+  of its own in a corner it did not have, with their covers, as many as its smallest corner has.
+
 ## 0.73.0 (2026-10-27)
 
 - The characters grow with the reader, as the card does: a reader whose card is not the flower, and an adult reader,
