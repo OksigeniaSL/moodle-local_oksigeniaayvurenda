@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.73.2 (2026-10-27)
+
+- The made-up library has books of engineering, vehicles and cooking in the corner of the applied sciences, for the
+  things of its room in the visit; `cli/demo.php --refine` brings them to an earlier one.
+
 ## 0.73.1 (2026-10-27)
 
 - The made-up library has the corners of the social sciences (economy, education, folk tales) and of the applied
