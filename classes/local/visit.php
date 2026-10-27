@@ -567,7 +567,8 @@ final class visit {
                 $placecolour = (string) ($spine['placecolour'] ?? '');
             }
         }
-        $cheer = $said && !empty($said['figure']) ? characters::figure('memory', 'celebra') : null;
+        $step = characters::step($entityid);
+        $cheer = $said && !empty($said['figure']) ? characters::figure('memory', 'celebra', $step) : null;
         return [
             'target' => $game['target'],
             'heading' => $str('huntheading'),
@@ -576,7 +577,7 @@ final class visit {
             'figure' => $said['figure'] ?? null,
             'puppet' => $said['puppet'] ?? '',
             'cheer' => $cheer,
-            'cheerpuppet' => $cheer ? characters::puppet('memory', 'celebra') : '',
+            'cheerpuppet' => $cheer ? characters::puppet('memory', 'celebra', $step) : '',
             // Not «cover», «lines» nor «placecolour»: a spine without its own would take the hidden book's.
             'huntcover' => $game['cover'],
             'huntlines' => $game['lines'],
@@ -633,7 +634,8 @@ final class visit {
             $doors[] = ['code' => $corner['code'], 'label' => $corner['label'], 'colour' => $corner['colour'],
                 'art' => screens::art('rincon-' . $corner['code'])];
         }
-        $cheer = $said && !empty($said['figure']) ? characters::figure('herald', 'celebra') : null;
+        $step = characters::step((int) $library->entityid);
+        $cheer = $said && !empty($said['figure']) ? characters::figure('herald', 'celebra', $step) : null;
         return [
             'heading' => $str('sortheading'),
             'name' => $said['name'] ?? '',
@@ -641,7 +643,7 @@ final class visit {
             'figure' => $said['figure'] ?? null,
             'puppet' => $said['puppet'] ?? '',
             'cheer' => $cheer,
-            'cheerpuppet' => $cheer ? characters::puppet('herald', 'celebra') : '',
+            'cheerpuppet' => $cheer ? characters::puppet('herald', 'celebra', $step) : '',
             'books' => $books,
             'doors' => $doors,
             'againurl' => $url('visit.php', ['sort' => $turn + 1]) . '#coloca',

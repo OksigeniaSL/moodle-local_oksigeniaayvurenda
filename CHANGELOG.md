@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.73.0 (2026-10-27)
+
+- The characters grow with the reader, as the card does: a reader whose card is not the flower, and an adult reader,
+  sees the memory and Mainumby of the sky's step when the art package draws them (`pix/personajes/<name>-cielo-<pose>`
+  and `pix/marionetas/<name>-cielo`); a reader of the flower, the staff and whoever comes without an account see the
+  flower's. Without the sky's drawing, the flower's, with its puppet.
+
 ## 0.72.3 (2026-10-27)
 
 - The words on the painted boards of the library one visits fit them: on a busy day the blackboard's lines, and a long

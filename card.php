@@ -156,9 +156,9 @@ foreach ($readers as $reader) {
         // Mainumby reading beside an empty album, when the herald is on and has no portrait of the centre's own.
         'nobooksfigure' => ($heraldchar = \local_oksigeniaayvurenda\local\characters::of((int) $reader->entityid)['herald'] ?? null)
             && $heraldchar['enabled'] && empty($heraldchar['own'])
-            ? \local_oksigeniaayvurenda\local\characters::figure('herald', 'lee') : null,
+            ? \local_oksigeniaayvurenda\local\characters::figure('herald', 'lee', $look === 'flower' ? '' : 'cielo') : null,
         'nobookspuppet' => !empty($heraldchar['enabled']) && empty($heraldchar['own'])
-            ? \local_oksigeniaayvurenda\local\characters::puppet('herald', 'lee') : '',
+            ? \local_oksigeniaayvurenda\local\characters::puppet('herald', 'lee', $look === 'flower' ? '' : 'cielo') : '',
         'listengarden' => $young ? \local_oksigeniaayvurenda\local\screens::listen(
             ['ui/{lang}/challengegarden', 'ui/{lang}/challengegardenhint']
         ) : null,

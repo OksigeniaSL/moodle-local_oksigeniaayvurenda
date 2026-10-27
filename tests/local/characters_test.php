@@ -112,4 +112,54 @@ final class characters_test extends \advanced_testcase {
         $this->assertSame('point', json_decode($puppet, true)['gesture']);
         $this->assertSame('arrive', json_decode(characters::puppet('herald', 'saluda'), true)['gesture'] ?? 'arrive');
     }
+
+    /**
+     * The characters grow with the reader: a reader of the flower sees the flower's, one of secondary and the adults
+     * the sky's; whoever is not a reader of the centre (the staff, a visitor), the flower's. Without the sky's drawing,
+     * the flower's, and its puppet goes with it.
+     */
+    public function test_step(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $year = $gen->create_year(['entityid' => $entityid]);
+        $people = [];
+        foreach (
+            [
+                'young' => ['student', 'Primaria', '3º Primaria A'],
+                'older' => ['student', 'ESO', '2º ESO B'],
+                'teacher' => ['teacher', '', ''],
+            ] as $who => [$type, $stage, $group]
+        ) {
+            $user = $this->getDataGenerator()->create_user();
+            $reader = $gen->create_reader(['entityid' => $entityid, 'userid' => $user->id, 'readertype' => $type]);
+            if ($stage !== '') {
+                $gen->create_member(['readerid' => $reader->id, 'yearid' => $year->id, 'stage' => $stage,
+                    'groupname' => $group]);
+            }
+            $people[$who] = $user;
+        }
+        $this->setAdminUser();
+        $this->assertSame('', characters::step($entityid), 'the staff see the flower\'s');
+        $this->setUser($people['young']);
+        $this->assertSame('', characters::step($entityid));
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
+        $this->setUser($people['older']);
+        $this->assertSame('cielo', characters::step($entityid));
+        $this->setUser($people['teacher']);
+        $this->assertSame('cielo', characters::step($entityid));
+        $this->assertSame('', characters::step($entityid + 1), 'not a reader of another centre');
+        $this->setUser(0);
+        $this->assertSame('', characters::step($entityid));
+
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        if (!$dir || !is_readable($dir . '/pix/personajes/memoria-cielo-senala.webp')) {
+            $this->assertSame(characters::figure('memory', 'senala'), characters::figure('memory', 'senala', 'cielo'));
+            $this->assertSame(characters::puppet('memory', 'senala'), characters::puppet('memory', 'senala', 'cielo'));
+        } else {
+            $this->assertStringContainsString('memoria-cielo-senala', characters::figure('memory', 'senala', 'cielo'));
+        }
+    }
 }

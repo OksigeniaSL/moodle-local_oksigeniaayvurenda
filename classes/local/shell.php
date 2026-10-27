@@ -117,13 +117,14 @@ final class shell {
         http_response_code(404);
         $memory = $library ? (characters::of((int) $library->entityid)['memory'] ?? null) : null;
         $alive = $memory && $memory['enabled'] && empty($memory['own']);
-        $figure = $alive ? characters::figure('memory', 'senala') : null;
+        $step = $alive ? characters::step((int) $library->entityid) : '';
+        $figure = $alive ? characters::figure('memory', 'senala', $step) : null;
         self::refuse_page(
             get_string('notherehead', 'local_oksigeniaayvurenda'),
             $why,
             $library,
             (string) $figure,
-            $alive ? characters::puppet('memory', 'senala') : ''
+            $alive ? characters::puppet('memory', 'senala', $step) : ''
         );
     }
 

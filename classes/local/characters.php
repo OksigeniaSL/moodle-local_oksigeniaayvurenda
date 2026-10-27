@@ -97,15 +97,46 @@ final class characters {
     }
 
     /**
+     * Which step of the characters the one looking sees in a centre (they grow with the reader, as the card does): the
+     * sky's for a reader of the centre whose card is not the flower; the flower's for everyone else (the young, the
+     * staff, whoever comes without an account).
+     *
+     * @param int $entityid
+     * @return string '' for the flower's, or cielo.
+     */
+    public static function step(int $entityid): string {
+        global $DB, $USER;
+        if (!$entityid || !isloggedin() || isguestuser()) {
+            return '';
+        }
+        $cache = \cache::make('local_oksigeniaayvurenda', 'access');
+        $key = 'step_' . $entityid . '_' . $USER->id;
+        $step = $cache->get($key);
+        if ($step === false) {
+            $reader = $DB->get_record(
+                'local_oksigeniaayvurenda_reader',
+                ['entityid' => $entityid, 'userid' => $USER->id, 'status' => 'active'],
+                '*',
+                IGNORE_MULTIPLE
+            );
+            $step = $reader && cards::look_of($reader) !== 'flower' ? 'cielo' : '';
+            $cache->set($key, $step);
+        }
+        return (string) $step;
+    }
+
+    /**
      * Gaudí's drawing of a character whole, in a pose, from the art package (null without it): the memory, or
-     * Mainumby for the herald.
+     * Mainumby for the herald; of the sky's step when asked and drawn, else the flower's.
      *
      * @param string $role memory or herald.
      * @param string $pose saluda, senala, celebra, lee or piensa.
+     * @param string $step '' or cielo.
      * @return string|null
      */
-    public static function figure(string $role, string $pose): ?string {
-        return screens::art('personajes/' . ($role === 'herald' ? 'mainumby' : 'memoria') . '-' . $pose);
+    public static function figure(string $role, string $pose, string $step = ''): ?string {
+        $name = 'personajes/' . ($role === 'herald' ? 'mainumby' : 'memoria');
+        return ($step === 'cielo' ? screens::art($name . '-cielo-' . $pose) : null) ?? screens::art($name . '-' . $pose);
     }
 
     /**
@@ -114,10 +145,15 @@ final class characters {
      *
      * @param string $role memory or herald.
      * @param string $pose saluda, senala, celebra, lee or piensa.
+     * @param string $step '' or cielo.
      * @return string JSON: image, atlas, rig, anim and gesture.
      */
-    public static function puppet(string $role, string $pose): string {
+    public static function puppet(string $role, string $pose, string $step = ''): string {
         $name = $role === 'herald' ? 'mainumby' : 'memoria';
+        // The puppet goes with the drawing it brings to life: the sky's drawing without its puppet stays still.
+        if ($step === 'cielo' && screens::art('personajes/' . $name . '-cielo-' . $pose)) {
+            $name .= '-cielo';
+        }
         $parts = [
             'image' => screens::art('marionetas/' . $name),
             'atlas' => screens::art('marionetas/' . $name . '.atlas', 'json'),
@@ -150,6 +186,7 @@ final class characters {
             return null;
         }
         $sm = get_string_manager();
+        $step = $pose !== '' && empty($character['own']) ? self::step($entityid) : '';
         $gendered = $key . $character['sex'];
         $key = $sm->string_exists($gendered, 'local_oksigeniaayvurenda') ? $gendered : $key;
         return [
@@ -157,8 +194,8 @@ final class characters {
             'text' => get_string($key, 'local_oksigeniaayvurenda', (object) ($a + ['name' => $character['name']])),
             'initial' => $character['initial'],
             'portrait' => $character['portrait'],
-            'figure' => $pose !== '' && empty($character['own']) ? self::figure($role, $pose) : null,
-            'puppet' => $pose !== '' && empty($character['own']) ? self::puppet($role, $pose) : '',
+            'figure' => $pose !== '' && empty($character['own']) ? self::figure($role, $pose, $step) : null,
+            'puppet' => $pose !== '' && empty($character['own']) ? self::puppet($role, $pose, $step) : '',
             'role' => $role,
             // Its voice, for a young reader, is added by the screen that knows the reader.
             'listen' => null,
