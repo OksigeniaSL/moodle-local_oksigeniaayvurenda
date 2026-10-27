@@ -265,6 +265,12 @@ final class demo {
         if (!$members || !$items) {
             return $stats;
         }
+        // As in a school library, most of the books are on their shelves: a fifth of the copies out at most.
+        $room = self::most_out($libraryid) - $DB->count_records_select(
+            self::T . 'item',
+            "libraryid = :libraryid AND status = 'onloan'",
+            ['libraryid' => $libraryid]
+        );
         shuffle($items);
         for ($i = 0; $i < $count && $items; $i++) {
             $member = $members[mt_rand(0, count($members) - 1)];
@@ -272,7 +278,11 @@ final class demo {
             $loaned = $now - mt_rand(1, 40) * DAYSECS - mt_rand(0, 6) * HOURSECS;
             $due = $loaned + 14 * DAYSECS;
             $returned = $due < $now - 3 * DAYSECS && mt_rand(1, 100) <= 85 ? $loaned + mt_rand(3, 16) * DAYSECS : null;
+            if ($returned === null && $room <= 0) {
+                $returned = $loaned + mt_rand(3, 16) * DAYSECS;
+            }
             $returned = $returned !== null ? min($returned, $now - HOURSECS) : null;
+            $room -= $returned === null ? 1 : 0;
             $DB->insert_record(self::T . 'loan', [
                 'libraryid' => $libraryid,
                 'itemid' => $itemid,
@@ -438,6 +448,55 @@ final class demo {
     private const CLASS_COVERS = ['52' => ['astronomia', 'planetas'], '51' => ['matematicas'], '59' => ['zoologia', 'erizo'],
         '57' => ['erizo'], '78' => ['musica'], '7' => ['colores'], '94' => ['historia', 'mapa'], '9' => ['tren', 'mapa'],
         '03' => ['cartas'], '0' => ['cartas']];
+
+    /**
+     * The most copies of a library its made-up loans leave out: a fifth of the ones that lend.
+     *
+     * @param int $libraryid
+     * @return int
+     */
+    private static function most_out(int $libraryid): int {
+        global $DB;
+        return intdiv($DB->count_records_select(
+            self::T . 'item',
+            "libraryid = :libraryid AND itemtype = 'normal' AND status <> 'lost' AND status <> 'withdrawn'",
+            ['libraryid' => $libraryid]
+        ), 5);
+    }
+
+    /**
+     * Brings the made-up loans of a made-up library back to a school's: the oldest come back, some days after they went
+     * out, until a fifth of the copies are out at most (made-up loans of earlier versions left most of them out).
+     *
+     * @param int $libraryid
+     * @param int|null $now
+     * @return int How many came back; -1 if the centre has records brought from a catalogue, whose loans are real.
+     */
+    public static function settle(int $libraryid, ?int $now = null): int {
+        global $DB;
+        $now = $now ?? time();
+        $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $libraryid], MUST_EXIST);
+        if ($DB->record_exists(self::T . 'source', ['entityid' => $entityid, 'tablename' => 'record'])) {
+            return -1;
+        }
+        $open = $DB->get_records_sql(
+            "SELECT l.id, l.itemid, l.timeloaned
+               FROM {" . self::T . "loan} l
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL
+           ORDER BY l.timeloaned, l.id",
+            ['libraryid' => $libraryid]
+        );
+        $back = 0;
+        $transaction = $DB->start_delegated_transaction();
+        foreach (array_slice(array_values($open), 0, max(0, count($open) - self::most_out($libraryid))) as $loan) {
+            $when = min((int) $loan->timeloaned + (3 + $loan->id % 14) * DAYSECS, $now - HOURSECS);
+            $DB->update_record(self::T . 'loan', ['id' => $loan->id, 'timereturned' => $when, 'timemodified' => $when]);
+            $DB->set_field(self::T . 'item', 'status', 'available', ['id' => $loan->itemid, 'status' => 'onloan']);
+            $back++;
+        }
+        $transaction->allow_commit();
+        return $back;
+    }
 
     /**
      * Brings a made-up library made before a class was in the list up to it: the class comes in under its parent, and

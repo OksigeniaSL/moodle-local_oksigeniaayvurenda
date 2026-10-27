@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.72.2 (2026-10-27)
+
+- Made-up loans leave a fifth of the made-up library's copies out at most, however often they are made, as in a school
+  library: its shelves had become all gaps and the game of the hidden book had nothing free to hide. `cli/demo.php
+  --refine` brings the made-up loans of an earlier made-up library back to that, the oldest first.
+
 ## 0.72.1 (2026-10-27)
 
 - The made-up library has books in more classes (computing, libraries, botany, painting, games and sports, geography,

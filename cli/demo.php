@@ -55,8 +55,9 @@ Options:
                   with --library, and open its public window
   --covers        Instead, give the made-up books of the library given with --library the made-up covers of the art
                   package (pix/portadas/)
-  --refine        Instead, bring the made-up library given with --library up to the classes of today's made-up
-                  libraries, moving some of the books filed only under a corner's number to its new classes
+  --refine        Instead, bring the made-up library given with --library up to today's made-up libraries: the
+                  classes they have, moving some of the books filed only under a corner's number to the new ones,
+                  and a fifth of its copies out at most, the oldest made-up loans coming back
   --library=SLUG  The library for --loans, --window, --covers or --refine
   -h, --help      This help
 
@@ -83,9 +84,11 @@ if ($options['refine']) {
     }
     $moved = \local_oksigeniaayvurenda\local\demo::refine((int) $libraryid);
     if ($moved < 0) {
-        cli_error('This library has books brought from a catalogue: only made-up books change class.');
+        cli_error('This library has books brought from a catalogue: only made-up books change.');
     }
-    cli_writeln('Books in a new class: ' . $moved . ', in ' . round(microtime(true) - $start, 1) . ' s.');
+    $back = \local_oksigeniaayvurenda\local\demo::settle((int) $libraryid);
+    cli_writeln('Books in a new class: ' . $moved . '; made-up loans back: ' . $back . ', in ' .
+        round(microtime(true) - $start, 1) . ' s.');
     exit(0);
 }
 if ($options['covers']) {

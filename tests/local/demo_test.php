@@ -111,6 +111,58 @@ final class demo_test extends \advanced_testcase {
     }
 
     /**
+     * Made-up loans leave a fifth of the copies out at most, however many are asked for; the made-up library of an
+     * earlier version, with most of them out, gets back its oldest, some days after they went out, and nothing more the
+     * second time. A centre with records brought from a catalogue keeps its loans.
+     */
+    public function test_settle(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $entityid = demo::create('Demo', 80, 40);
+        $library = $DB->get_record(self::T . 'library', ['entityid' => $entityid], '*', MUST_EXIST);
+        $copies = $DB->count_records(self::T . 'item', ['libraryid' => $library->id, 'itemtype' => 'normal']);
+        $now = time();
+        demo::activity((int) $library->id, 500, 1, $now);
+        demo::activity((int) $library->id, 500, 2, $now);
+        $out = fn() => $DB->count_records(self::T . 'item', ['libraryid' => $library->id, 'status' => 'onloan']);
+        $this->assertGreaterThan(0, $out());
+        $this->assertLessThanOrEqual(intdiv($copies, 5), $out(), 'a fifth out at most, after two passes too');
+        $this->assertSame(0, demo::settle((int) $library->id, $now));
+
+        // As an earlier version left it: the last loan of every copy lent still out.
+        $last = [];
+        foreach ($DB->get_records(self::T . 'loan', ['libraryid' => $library->id], 'timeloaned, id') as $loan) {
+            $last[$loan->itemid] = $loan->id;
+        }
+        foreach ($last as $itemid => $loanid) {
+            $DB->set_field(self::T . 'loan', 'timereturned', null, ['id' => $loanid]);
+            $DB->set_field(self::T . 'item', 'status', 'onloan', ['id' => $itemid]);
+        }
+        $before = $out();
+        $newest = (int) $DB->get_field_sql(
+            "SELECT id FROM {" . self::T . "loan} WHERE libraryid = ? ORDER BY timeloaned DESC, id DESC",
+            [$library->id],
+            IGNORE_MULTIPLE
+        );
+        $this->assertSame($before - intdiv($copies, 5), demo::settle((int) $library->id, $now));
+        $this->assertSame(intdiv($copies, 5), $out());
+        $this->assertNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $newest]), 'the newest stay out');
+        $back = $DB->get_records_select(self::T . 'loan', 'libraryid = ? AND timereturned IS NOT NULL', [$library->id]);
+        foreach ($back as $loan) {
+            $this->assertGreaterThan((int) $loan->timeloaned, (int) $loan->timereturned);
+            $this->assertLessThan($now, (int) $loan->timereturned);
+        }
+        $this->assertSame(0, demo::settle((int) $library->id, $now), 'nothing more the second time');
+
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $real = $gen->create_library();
+        $DB->insert_record(self::T . 'source', ['entityid' => $real->entityid, 'system' => 'abies', 'tablename' => 'record',
+            'externalid' => '1', 'localid' => 1, 'hash' => 'x', 'timecreated' => time()]);
+        $this->assertSame(-1, demo::settle((int) $real->id));
+    }
+
+    /**
      * It fills the public window with made-up EPUBs, each a valid package, and opens it; a second pass adds new titles.
      */
     public function test_window(): void {
