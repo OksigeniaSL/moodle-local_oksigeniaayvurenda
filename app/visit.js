@@ -102,8 +102,12 @@
         return null;
     };
 
-    // By day, or by night when the page is dark: the library with its lamps lit.
-    var night = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    // By day, or by night when the page is dark: the library with its lamps lit. A site without Moodle's colour modes
+    // says nothing, and then the painting follows the visitor's system.
+    var theme = document.documentElement.getAttribute('data-bs-theme');
+    var night = theme ? theme === 'dark'
+        : !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    visit.classList.toggle('ayv-visit-night', night);
     Array.prototype.forEach.call(visit.querySelectorAll('.ayv-visit-layer'), function(img) {
         img.src = img.getAttribute(night ? 'data-night' : 'data-day');
     });

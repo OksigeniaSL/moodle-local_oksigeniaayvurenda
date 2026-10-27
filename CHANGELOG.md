@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.71.1 (2026-10-27)
+
+- The library one visits by night on a site without Moodle's colour modes too: the painting then follows the visitor's
+  system (found on campus).
+
 ## 0.71.0 (2026-10-27)
 
 - The characters speak in the games of the library one visits, from the art package's voices: the memory gives her
