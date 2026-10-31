@@ -1507,6 +1507,26 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 @media (hover: none) {
     .ayv .ayv-shelf-go { display: none; }
 }
+/* A button at work: a ring turning before its words (still, with reduced motion), and no second press. */
+.ayv .ayv-button-busy { cursor: progress; pointer-events: none; }
+.ayv .ayv-button-busy::before {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: .5em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    vertical-align: -.15em;
+    animation: ayv-busy-turn .8s linear infinite;
+}
+@keyframes ayv-busy-turn {
+    to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-button-busy::before { animation: none; border-right-color: currentColor; opacity: .5; }
+}
 /* The way back to Moodle, in the header. */
 .ayv .ayv-nav-exit {
     min-height: 40px;
@@ -1617,6 +1637,8 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-credits p { margin: 0 0 .6rem; }
 .ayv .ayv-credits-dedication { margin: 1.1rem 0 1.1rem !important; font-family: var(--title); font-style: italic;
     font-size: 1.15rem; color: var(--accent); text-align: center; }
+/* What the name means, under the dedication. */
+.ayv .ayv-credits-name { margin: -.7rem 0 1.2rem !important; text-align: center; font-size: .92rem; color: var(--ayv-muted, inherit); }
 .ayv .ayv-credits-portrait { display: block; width: 96px; height: 96px; margin: 1.2rem auto -.4rem; border-radius: 50%;
     background: var(--paper); box-shadow: 0 10px 24px -12px rgba(15, 58, 51, .5), 0 0 0 4px var(--paper); }
 

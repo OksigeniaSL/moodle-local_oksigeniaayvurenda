@@ -151,7 +151,8 @@ $data = [
 ];
 foreach (
     ['freeworkssearch', 'freeworkssearchbutton', 'freeworkssee', 'freeworksconfirm',
-        'freeworksfor', 'freeworksbring', 'freeworksalready', 'freeworksopen', 'freeworksback', 'freeworkslangs'] as $key
+        'freeworksfor', 'freeworksbring', 'freeworksalready', 'freeworksopen', 'freeworksback', 'freeworkslangs',
+        'freeworkssearching', 'freeworksbringing', 'freeworksbringinghint'] as $key
 ) {
     $data[$key] = $str($key);
 }

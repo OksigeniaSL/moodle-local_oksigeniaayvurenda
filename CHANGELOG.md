@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.74.1 (2026-10-31)
+
+- Bringing a free work, and searching for one, shows that it is working: the button turns with «Bringing it into the
+  catalogue…» or «Searching…», and a line says that a long work takes a while. It cannot be sent twice.
+- The credits say what the name means, under the dedication: «The place of words · Ayvu renda (Guarani)».
+
 ## 0.74.0 (2026-10-31)
 
 - Works of Wikisource come with their EPUB, from Wikisource's own export, and are read in the library like those of

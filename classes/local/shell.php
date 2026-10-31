@@ -425,6 +425,8 @@ Oksigenia Ayvurenda</button>
 ' . (($carmita = screens::art('memoria')) ? '<img class="ayv-credits-portrait" src="' . s($carmita) . '" alt="" width="96"
     height="96">' : '') . '
 <p class="ayv-credits-dedication">' . $str('creditsdedication') . '</p>
+<p class="ayv-credits-name">' . $str('creditsmeaning') . ' · <span lang="gn" translate="no">Ayvu renda</span> (' .
+            $str('creditsguarani') . ')</p>
 <form method="dialog"><button class="ayv-button">' . $str('creditsclose') . '</button></form>
 </dialog>';
     }

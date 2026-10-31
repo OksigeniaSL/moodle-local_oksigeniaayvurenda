@@ -26,6 +26,8 @@
         "book": null,
         "freeworkssearch": "Título o autor", "freeworkssearchbutton": "Buscar", "freeworkssee": "Verlo",
         "freeworksconfirm": "Es de dominio público aquí", "confirmhint": "Project Gutenberg mira las leyes de Estados Unidos.", "sources": [{"label": "Project Gutenberg", "url": "https://example.org/g", "current": true}], "from": "", "freeworksread": "Verla en Wikisource",
+        "freeworkssearching": "Buscando…", "freeworksbringing": "Trayéndolo al catálogo…",
+        "freeworksbringinghint": "Una obra larga tarda un poco.",
         "freeworksfor": "Para quién", "freeworksbring": "Traerlo", "freeworksalready": "Ya está", "freeworksopen": "Ver su ficha",
         "freeworksback": "Volver a la búsqueda", "freeworkslangs": "Idiomas"
     }
@@ -34,7 +36,7 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 <p class="ayv-staff-row">{{#sources}}<a class="ayv-button{{^current}} ayv-button-quiet{{/current}}" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/sources}}</p>
-<form class="ayv-window-search" role="search" method="get" action="{{action}}">
+<form class="ayv-window-search" role="search" method="get" action="{{action}}" data-busy="{{freeworkssearching}}">
     <input type="hidden" name="library" value="{{slug}}">
     {{#from}}<input type="hidden" name="from" value="{{from}}">{{/from}}
     <label class="ayv-field ayv-field-wide">{{freeworkssearch}} <input type="search" name="q" value="{{query}}" maxlength="200"></label>
@@ -42,7 +44,7 @@
 </form>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#book}}
-<form class="ayv-book" method="post" action="{{action}}">
+<form class="ayv-book" method="post" action="{{action}}" data-busy="{{freeworksbringing}}" data-busyhint="{{freeworksbringinghint}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}">{{#id}}<input type="hidden" name="book" value="{{id}}">{{/id}}
     {{#work}}<input type="hidden" name="work" value="{{work}}">{{/work}}
     <h2 class="ayv-section-title">{{title}}</h2>

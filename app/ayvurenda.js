@@ -281,6 +281,50 @@
         update();
     });
     var input = document.getElementById('ayv-q');
+    // A form that takes a while (a work brought from far away, a search in another catalogue) shows that it is working:
+    // its button waits with the words of what it does, turning, and a line under it says how long it may take. Sent once;
+    // back to it from the next page, it is as it was.
+    var busy = function(form, on) {
+        var button = form.querySelector('button[type="submit"], button:not([type])');
+        var said = form.querySelector('.ayv-busy-said');
+        form.setAttribute('aria-busy', on ? 'true' : 'false');
+        if (button) {
+            if (on && !button.hasAttribute('data-words')) {
+                button.setAttribute('data-words', button.textContent);
+            }
+            button.textContent = on ? form.getAttribute('data-busy') : (button.getAttribute('data-words') || button.textContent);
+            button.classList.toggle('ayv-button-busy', on);
+            button.setAttribute('aria-disabled', on ? 'true' : 'false');
+        }
+        if (form.getAttribute('data-busyhint')) {
+            if (!said) {
+                said = document.createElement('p');
+                said.className = 'ayv-field-hint ayv-busy-said';
+                said.setAttribute('role', 'status');
+                form.appendChild(said);
+            }
+            said.textContent = on ? form.getAttribute('data-busyhint') : '';
+        }
+    };
+    Array.prototype.forEach.call(document.querySelectorAll('form[data-busy]'), function(form) {
+        form.addEventListener('submit', function(event) {
+            if (form.getAttribute('aria-busy') === 'true') {
+                event.preventDefault();
+                return;
+            }
+            if (!event.defaultPrevented) {
+                busy(form, true);
+            }
+        });
+    });
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            Array.prototype.forEach.call(document.querySelectorAll('form[data-busy][aria-busy="true"]'), function(form) {
+                busy(form, false);
+            });
+        }
+    });
+
     // On the home the search is in the page: the results come under it, and the box stays where it is.
     var main = document.getElementById('ayv-live') || document.getElementById('ayv-main');
     if (!input || !main || !window.fetch || !config.library) {
