@@ -78,6 +78,7 @@ if (data_submitted() && confirm_sesskey()) {
             ) ?: [],
             'reviewsign' => optional_param('reviewsign', 'name', PARAM_ALPHA),
             'skin' => optional_param('skin', 'school', PARAM_ALPHA),
+            'photos' => optional_param('photos', 0, PARAM_BOOL),
             // What is on, only with the form that lists it.
             'play' => optional_param('playform', 0, PARAM_BOOL) ? optional_param_array('play', [], PARAM_ALPHA) : null,
             // The stages listed on the form whose box is left empty play no class challenge.
@@ -240,6 +241,7 @@ foreach (libraries::all() as $one) {
             'selected' => $s === \local_oksigeniaayvurenda\local\skins::of((int) $entity->id)],
             \local_oksigeniaayvurenda\local\skins::SKINS
         ),
+        'photos' => \local_oksigeniaayvurenda\local\profile::photos_on((int) $entity->id),
         'play' => array_map(
             fn($what, $on) => ['what' => $what, 'label' => $str('play' . $what), 'on' => $on],
             array_keys(\local_oksigeniaayvurenda\local\skins::play((int) $entity->id)),
@@ -290,7 +292,7 @@ foreach (
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
         'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplay',
-        'librariesplayhint', 'librariesplan',
+        'librariesplayhint', 'librariesphotos', 'librariesphotoshint', 'librariesplan',
         'librariesplanhint', 'planname', 'plancopies',
         'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',
         'librariesreadersopen', 'librariesreadersopenhint', 'librarieskeptby', 'librarieskeepers', 'librarieskeepershint',

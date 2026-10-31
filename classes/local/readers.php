@@ -65,7 +65,7 @@ final class readers {
      * @param \stdClass $library
      * @param string $group
      * @param int|null $now
-     * @return array[] id, name, cardcode, type and loans out.
+     * @return array[] id, name, photo, initial, url (their record), cardcode, type and loans out.
      */
     public static function in_group(\stdClass $library, string $group, ?int $now = null): array {
         global $DB;
@@ -91,12 +91,22 @@ final class readers {
             $params + ['entityid2' => $library->entityid]
         );
         $readers = [];
+        // Their photos, from their accounts, where the centre shows them.
+        $users = profile::photos_on((int) $library->entityid) ? $DB->get_records_list('user', 'id', array_values(array_filter(
+            array_map(fn($r) => (int) $r->userid, $rows)
+        ))) : [];
         foreach ($rows as $row) {
             $first = $row->userid ? $row->ufirstname : $row->firstname;
             $last = $row->userid ? $row->ulastname : $row->lastname;
+            $name = trim($first . ' ' . $last) ?: $row->cardcode;
             $readers[] = [
                 'id' => (int) $row->id,
-                'name' => trim($first . ' ' . $last) ?: $row->cardcode,
+                'name' => $name,
+                'photo' => isset($users[$row->userid]) ? profile::photo((object) ['userid' => $row->userid,
+                    'entityid' => $library->entityid], $users[$row->userid]) : '',
+                'initial' => profile::initial($name),
+                'url' => (new \moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug,
+                    'id' => $row->id]))->out(false),
                 'sortname' => \local_oksigeniaayvurenda\core\text::normalise($last . ' ' . $first),
                 'cardcode' => $row->cardcode,
                 'type' => $row->readertype,

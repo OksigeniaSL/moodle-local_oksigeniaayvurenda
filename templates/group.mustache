@@ -20,14 +20,14 @@
 
     Context variables required for this template:
     * heading - the group
-    * readers - list of name, cardcode and loans
+    * readers - list of name, photo, initial, url (their record), cardcode and loans
     * back - url and label to go back
 
     Example context (json):
     {
         "heading": "3º Primaria A",
         "hasreaders": true,
-        "readers": [{"name": "Ana Montes", "cardcode": "10000H", "loans": 1}],
+        "readers": [{"name": "Ana Montes", "photo": false, "initial": "A", "url": "#", "cardcode": "10000H", "loans": 1}],
         "cardlabel": "Carné",
         "loanslabel": "Tiene prestados:",
         "back": {"url": "#", "label": "Todos los grupos"},
@@ -58,7 +58,8 @@
 <ul class="ayv-people">
 {{#readers}}
     <li class="ayv-person">
-        <span class="ayv-person-name">{{name}}</span>
+        <span class="ayv-person-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>
+        <a class="ayv-person-name" href="{{url}}">{{name}}</a>
         <span class="ayv-person-card"><span class="ayv-sr">{{cardlabel}}: </span>{{cardcode}}</span>
         <span class="ayv-person-loans" title="{{loanslabel}}">{{loans}}</span>
     </li>

@@ -27,7 +27,7 @@
             "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
             "cardlooks": [{"stage": "Primaria", "options": [{"value": "", "label": "Automático (la flor)", "selected": true}]}],
             "challengestages": [{"stage": "Primaria", "on": true}],
-            "play": [{"what": "visit", "label": "La biblioteca que se visita", "on": true}],
+            "play": [{"what": "visit", "label": "La biblioteca que se visita", "on": true}], "photos": true,
             "plansummary": "Plan Gratis: 812 de 1.000 ejemplares · 140 de 150 lectores",
             "planform": {"readersopen": true, "plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
                 "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
@@ -165,6 +165,8 @@
                 <input type="hidden" name="playform" value="1">
                 <div class="ayv-choices">{{#play}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="play[]" value="{{what}}" {{#on}}checked{{/on}}> {{label}}</label>{{/play}}</div>
             </fieldset>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="photos" value="1" {{#photos}}checked{{/photos}}> {{librariesphotos}}</label>
+            <p class="ayv-field-hint">{{librariesphotoshint}}</p>
             <label class="ayv-field">{{librariesreviewsign}} <select name="reviewsign">{{#reviewsigns}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/reviewsigns}}</select></label>
             <fieldset class="ayv-fieldset"><legend>{{librarieschallenges}}</legend>
                 <p class="ayv-field-hint">{{librarieschallengeshint}}</p>

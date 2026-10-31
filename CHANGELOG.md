@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.87.0 (2026-10-31)
+
+- A reader's record for the library staff (`reader.php`): their photo, from their Moodle account (or their initial),
+  so the child is known even without the card; who they are this year (group, stage, tutor), their card with its
+  barcode, their flower or sky, what they have now in any library of the centre with what is late, their reservations,
+  what they took home this year and in the years before (not the textbooks), and the staff's own notes. It opens from
+  the desk («Their record», beside the reader's name), from the list of a group (each name) and «Open at the desk»
+  brings the desk with the reader already there. Whoever keeps a classroom library sees only its readers.
+- At the desk, the reader's photo beside their name, and when two readers share a name, their photos to tell them apart.
+- In the centre's settings, «The reader's photo at the desk and in their record», on unless the centre turns it off.
+  Photos are only on the staff's pages.
+
 ## 0.86.0 (2026-10-31)
 
 - «Just for you» on the card of every reader past the flower (from twelve, and adults), in any skin, as the skins'

@@ -116,6 +116,20 @@
             });
     };
 
+    // A reader's photo, or the initial of their name in a round.
+    var face = function(reader, cls) {
+        var box = el('span', cls);
+        box.setAttribute('aria-hidden', 'true');
+        if (reader.photo) {
+            var img = document.createElement('img');
+            img.src = reader.photo;
+            img.alt = '';
+            box.appendChild(img);
+        } else {
+            box.textContent = reader.initial || '';
+        }
+        return box;
+    };
     var showReader = function(reader) {
         panel.textContent = '';
         if (!reader) {
@@ -132,10 +146,19 @@
             today.hidden = true;
         }
         var head = el('div', 'ayv-reader-head');
+        head.appendChild(face(reader, 'ayv-reader-face'));
         var who = el('div', 'ayv-reader-who');
         who.appendChild(el('span', 'ayv-reader-name', reader.name));
         if (reader.group) {
             who.appendChild(el('span', 'ayv-reader-group', reader.group));
+        }
+        if (reader.url) {
+            // Their record opens apart, so the desk stays as it is.
+            var record = el('a', 'ayv-reader-record', str.profileview);
+            record.href = reader.url;
+            record.target = '_blank';
+            record.rel = 'noopener';
+            who.appendChild(record);
         }
         head.appendChild(who);
         head.appendChild(button(str.deskclose, 'ayv-line-quiet', function() {
@@ -331,7 +354,7 @@
             }));
         } else if (answer.kind === 'choose' && answer.readers) {
             answer.readers.forEach(function(reader) {
-                actions.appendChild(button(reader.name + (reader.group ? ' · ' + reader.group : ''), 'ayv-line-choice', function() {
+                var choice = button(reader.name + (reader.group ? ' · ' + reader.group : ''), 'ayv-line-choice', function() {
                     post({action: 'reader', readerid: reader.id}).then(function(found) {
                         li.classList.add('ayv-line-undone');
                         actions.textContent = '';
@@ -341,7 +364,10 @@
                     }).catch(function() {
                         tone('no');
                     });
-                }));
+                });
+                // Two readers of the same name: their photos tell them apart.
+                choice.insertBefore(face(reader, 'ayv-choice-face'), choice.firstChild);
+                actions.appendChild(choice);
             });
         }
         if (actions.childNodes.length) {
@@ -441,6 +467,11 @@
             target.click();
         }
     });
+
+    // Opened from a reader's record: the desk starts with them.
+    if (config.preload) {
+        showReader(config.preload);
+    }
 
     // The field keeps the focus: after a click anywhere that is not a button or a link, it comes back.
     document.addEventListener('click', function(event) {

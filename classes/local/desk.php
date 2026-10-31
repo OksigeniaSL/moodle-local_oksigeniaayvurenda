@@ -180,7 +180,8 @@ final class desk {
                 continue;
             }
             $reader = $this->reader((int) $id);
-            $found[] = ['id' => (int) $id, 'name' => $reader['name'], 'group' => $reader['group']];
+            $found[] = ['id' => (int) $id, 'name' => $reader['name'], 'group' => $reader['group'], 'photo' => $reader['photo'],
+                'initial' => $reader['initial']];
         }
         return $found;
     }
@@ -535,11 +536,9 @@ final class desk {
         // Only a reader of this library's centre: an id of another centre is not found.
         $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $this->library->entityid], '*', MUST_EXIST);
         $name = trim(($reader->firstname ?? '') . ' ' . ($reader->lastname ?? ''));
-        if ($reader->userid) {
-            $user = \core_user::get_user($reader->userid);
-            if ($user) {
-                $name = fullname($user);
-            }
+        $user = $reader->userid ? \core_user::get_user($reader->userid) : null;
+        if ($user) {
+            $name = fullname($user);
         }
         $group = $DB->get_field_sql(
             'SELECT m.groupname
@@ -549,12 +548,18 @@ final class desk {
             ['readerid' => $readerid, 'a' => $this->now, 'b' => $this->now],
             IGNORE_MULTIPLE
         );
+        $name = $name !== '' ? $name : $reader->cardcode;
         return [
             'id' => $readerid,
-            'name' => $name !== '' ? $name : $reader->cardcode,
+            'name' => $name,
             'group' => $group ?: '',
             'cardcode' => $reader->cardcode,
             'type' => $reader->readertype,
+            // So the child is known even without the card; and their record, a click away.
+            'photo' => profile::photo($reader, $user ?: null),
+            'initial' => profile::initial($name),
+            'url' => (new \moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $this->library->slug,
+                'id' => $readerid]))->out(false),
         ];
     }
 
@@ -594,7 +599,7 @@ final class desk {
      * @param int $readerid
      * @return bool
      */
-    private function allowed(int $readerid): bool {
+    public function allowed(int $readerid): bool {
         global $DB;
         if (!$this->own) {
             return true;

@@ -1,0 +1,132 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/reader
+
+    A reader's record, for the library staff: their photo (or initial), who they are this year, their card, their flower
+    or sky, what they have now and their reservations, what they took home this year and before, and the staff's notes.
+
+    Context variables required for this template:
+    * name, hasphoto, photo, initial, type, facts (fact), cardcode, barcode, since, gone, drawing, stagename
+    * loans - title, url, hascover, coverurl, colour, due, library, late; hasloans
+    * holds - title, state; hasholds
+    * readheading, read (title, url, hascover, coverurl, colour, when, note), hasread, readmore
+    * past - year, loans; haspast
+    * notes, notice, action, sesskey, deskurl, cardurl
+    * profiledesk, profilecard, profilenow, profilenothing, profileholds, profilenoread, profilepastheading,
+      profilenotes, profilenoteshint, profilesave, profilegone, profilecode
+
+    Example context (json):
+    {
+        "name": "Lucía Arenas Faro", "hasphoto": true, "photo": "https://example.com/foto.jpg", "initial": "L", "type": "Alumno",
+        "facts": [{"fact": "2.º A · Primaria"}], "cardcode": "12018N", "barcode": "", "since": "Lectora desde mayo",
+        "gone": false, "drawing": false, "stagename": "Brote",
+        "loans": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
+            "due": "Hasta el 14 de noviembre", "library": "Biblioteca", "late": ""}], "hasloans": true,
+        "holds": [], "hasholds": false, "readheading": "2026-2027: 3 libros",
+        "read": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
+            "when": "14 de octubre", "note": "Le encantó"}], "hasread": true, "readmore": "",
+        "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
+        "notes": "", "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#",
+        "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
+        "profilenothing": "Nada prestado.", "profileholds": "Reservas", "profilenoread": "Nada este curso todavía.",
+        "profilepastheading": "Cursos anteriores", "profilenotes": "Notas del personal",
+        "profilenoteshint": "Solo las ve el personal.", "profilesave": "Guardar", "profilegone": "Ya no está en el centro",
+        "profilecode": "Carné"
+    }
+}}
+<section class="ayv-profile">
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<header class="ayv-profile-head">
+    <div class="ayv-profile-face">
+        {{#hasphoto}}<img src="{{photo}}" alt="" width="200" height="200">{{/hasphoto}}
+        {{^hasphoto}}<span aria-hidden="true">{{initial}}</span>{{/hasphoto}}
+    </div>
+    <div class="ayv-profile-who">
+        {{#type}}<p class="ayv-profile-type">{{type}}</p>{{/type}}
+        <h1 class="ayv-profile-name">{{name}}</h1>
+        {{#gone}}<p class="ayv-profile-gone">{{profilegone}}</p>{{/gone}}
+        <ul class="ayv-profile-facts">{{#facts}}<li>{{fact}}</li>{{/facts}}<li>{{since}}</li></ul>
+        <p class="ayv-profile-actions">
+            <a class="ayv-button" href="{{deskurl}}">{{profiledesk}}</a>
+            <a class="ayv-button ayv-button-quiet" href="{{cardurl}}">{{profilecard}}</a>
+        </p>
+    </div>
+    <div class="ayv-profile-card">
+        {{#drawing}}<div class="ayv-profile-drawing">{{{drawing}}}<span>{{stagename}}</span></div>{{/drawing}}
+        <div class="ayv-profile-code">
+            <span class="ayv-profile-codelabel">{{profilecode}}</span>
+            {{#barcode}}<span class="ayv-profile-barcode">{{{barcode}}}</span>{{/barcode}}
+            <span class="ayv-profile-codetext">{{cardcode}}</span>
+        </div>
+    </div>
+</header>
+
+<div class="ayv-profile-grid">
+    <div class="ayv-profile-col">
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{profilenow}}</h2>
+            {{^hasloans}}<p class="ayv-profile-empty">{{profilenothing}}</p>{{/hasloans}}
+            <ul class="ayv-profile-books">
+                {{#loans}}
+                <li class="{{#late}}ayv-profile-late{{/late}}">
+                    <a class="ayv-profile-book" href="{{url}}">
+                        <span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
+                        <span class="ayv-profile-booktext"><b>{{title}}</b><span>{{due}} · {{library}}</span>{{#late}}<span class="ayv-profile-latetag">{{late}}</span>{{/late}}</span>
+                    </a>
+                </li>
+                {{/loans}}
+            </ul>
+        </section>
+        {{#hasholds}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{profileholds}}</h2>
+            <ul class="ayv-profile-holds">{{#holds}}<li><b>{{title}}</b> <span>{{state}}</span></li>{{/holds}}</ul>
+        </section>
+        {{/hasholds}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{profilenotes}}</h2>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <label class="ayv-sr" for="ayv-profile-notes">{{profilenotes}}</label>
+                <textarea id="ayv-profile-notes" name="notes" rows="4" maxlength="1000">{{notes}}</textarea>
+                <p class="ayv-field-hint">{{profilenoteshint}}</p>
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
+            </form>
+        </section>
+    </div>
+    <div class="ayv-profile-col">
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{readheading}}</h2>
+            {{^hasread}}<p class="ayv-profile-empty">{{profilenoread}}</p>{{/hasread}}
+            <ul class="ayv-profile-read">
+                {{#read}}
+                <li><a href="{{url}}"><span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
+                    <span><b>{{title}}</b><span>{{when}}{{#note}} · {{note}}{{/note}}</span></span></a></li>
+                {{/read}}
+            </ul>
+            {{#readmore}}<p class="ayv-profile-empty">{{readmore}}</p>{{/readmore}}
+        </section>
+        {{#haspast}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{profilepastheading}}</h2>
+            <ul class="ayv-profile-past">{{#past}}<li><span>{{year}}</span><b>{{loans}}</b></li>{{/past}}</ul>
+        </section>
+        {{/haspast}}
+    </div>
+</div>
+</section>

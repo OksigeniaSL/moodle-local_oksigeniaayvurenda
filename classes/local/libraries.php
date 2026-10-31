@@ -405,6 +405,9 @@ final class libraries {
         if (isset($data['reviewsign'])) {
             $settings['reviewsign'] = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : 'name';
         }
+        if (array_key_exists('photos', $data)) {
+            $settings['photos'] = !empty($data['photos']);
+        }
         $before = $settings['skin'] ?? skins::SKINS[0];
         if (isset($data['skin'])) {
             $settings['skin'] = in_array($data['skin'], skins::SKINS, true) ? $data['skin'] : skins::SKINS[0];

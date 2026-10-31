@@ -44,12 +44,18 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' =
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$today = (new desk($library, (int) $USER->id, null, $own))->today();
+$desk = new desk($library, (int) $USER->id, null, $own);
+$today = $desk->today();
+// From a reader's record: the desk opens with them.
+$preload = optional_param('reader', 0, PARAM_INT);
+$preload = $preload && $DB->record_exists('local_oksigeniaayvurenda_reader', ['id' => $preload, 'entityid' => $library->entityid])
+    && $desk->allowed($preload) ? $desk->reader_panel($preload) : null;
 $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $library->entityid]), true);
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $strings = [];
 foreach (
-    ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'noteloved', 'noteunfinished', 'notemore',
+    ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'profileview', 'noteloved', 'noteunfinished',
+        'notemore',
         'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint',
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
         'deskbankset', 'deskbankmissing', 'deskbankdone', 'deskbankcontract',
@@ -156,6 +162,7 @@ shell::output($str('desktitle'), $main, $library, '', [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/desk_ajax.php'))->out(false),
         'sesskey' => sesskey(),
         'controlletter' => !empty($settings['controlletter']),
+        'preload' => $preload,
         'strings' => $strings + $tools['strings'],
     ] + $tools['config'],
 ]);
