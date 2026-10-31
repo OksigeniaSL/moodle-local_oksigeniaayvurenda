@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.99.0 (2026-10-31)
+
+The rest of the review of the whole project:
+
+- Names with «&» or quotes come out once escaped, not twice, in the header, the tab, the cards, OAI-PMH and OPDS.
+- Undoing an addition only takes back what was added today, and never a record that anything else hangs from (digital
+  items, reviews, holds, course readings) nor a copy on reserve.
+- Uploaded zips: a OneRoster file or a catalogue that says it is far too big is not read, and a catalogue is copied out
+  of its zip by streams; an Abies export with a document type is refused.
+- LTI: a deep link only goes back to a web address; two entries at once never make two readers of one account.
+- Accessibility: the class challenge is saved with its button (choosing with the arrows no longer saves halfway);
+  what a live search found is announced; the focus stays in the camera; the button that removes a bookmark says so;
+  groups of buttons without arrow keys are groups, not toolbars.
+- An administrator logged in as someone else sees it on every page of the library.
+- The quotes and list separators of the classic card follow the language of the page; a title with «$&» in it shows as
+  it is.
+- Faster with many centres and big libraries: the site's menu asks the cheap question first and stops at the first
+  centre; each centre's category is kept for the request; the corners' counts are kept a few minutes; the desk and the
+  stocktake find a code by its index before trying without minding capitals; new indexes for loans, copies and groups.
+- The dashboard block 0.1.4 looks at each centre's permissions and gives a library's desk to whoever keeps it.
+
 ## 0.98.0 (2026-10-31)
 
 - `\local_oksigeniaayvurenda\api::new_books($since, $limit, $entityid)`: the books that have just come to the

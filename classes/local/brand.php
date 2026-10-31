@@ -70,8 +70,12 @@ final class brand {
             }
             $look = libraries::look($main);
             return [
-                'name' => format_string((string) $DB->get_field(self::T . 'entity', 'name', ['id' => $entityid])),
-                'library' => format_string($main->name),
+                'name' => format_string(
+                    (string) $DB->get_field(self::T . 'entity', 'name', ['id' => $entityid]),
+                    true,
+                    ['escape' => false]
+                ),
+                'library' => format_string($main->name, true, ['escape' => false]),
                 'colour' => self::COLOURS[$look['colour']] ?? self::COLOURS[0],
                 'logo' => $look['image'],
                 'tagline' => $look['motto'],

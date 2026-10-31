@@ -49,10 +49,10 @@
             if (!answer || answer.error) {
                 throw new Error('relay');
             }
-            li.textContent = String(str.phonesent).replace('{$a}', code);
+            li.textContent = String(str.phonesent).replace('{$a}', function() { return code; });
             return answer;
         }).catch(function() {
-            li.textContent = String(str.phonefailed).replace('{$a}', code);
+            li.textContent = String(str.phonefailed).replace('{$a}', function() { return code; });
             li.className = 'ayv-line ayv-sound-no';
         });
     };

@@ -437,8 +437,12 @@ final class screens {
         $featured = libraries::featured($all, isloggedin() && !isguestuser() ? (int) $USER->id : 0);
         $card = function (\stdClass $library) {
             $look = libraries::look($library);
-            return ['name' => format_string($library->name), 'url' => self::url('index.php', $library),
-                'kindlabel' => self::str('librarykind' . $library->kind), 'motto' => format_string($look['motto']),
+            return ['name' => format_string($library->name, true, ['escape' => false]), 'url' => self::url('index.php', $library),
+                'kindlabel' => self::str('librarykind' . $library->kind), 'motto' => format_string(
+                    $look['motto'],
+                    true,
+                    ['escape' => false]
+                ),
                 'colour' => $look['colour'], 'image' => $look['image']];
         };
         $libraries = [];
@@ -713,7 +717,11 @@ final class screens {
                 'url' => self::url('search.php', $library, ['subject' => $idea['id'], 'q' => $idea['label']])];
         }
         $hero = [
-            'greeting' => $reader ? self::str('homehello', format_string($USER->firstname)) : format_string($library->name),
+            'greeting' => $reader ? self::str('homehello', format_string(
+                $USER->firstname,
+                true,
+                ['escape' => false]
+            )) : format_string($library->name, true, ['escape' => false]),
             'question' => self::said($library, 'homequestion'),
             'action' => self::url('search.php', $library),
             'slug' => $library->slug,
@@ -804,7 +812,7 @@ final class screens {
     private static function elders(\stdClass $library): ?array {
         $items = array_map(
             fn($r) => ['url' => self::url('record.php', $library, ['id' => $r['recordid']]),
-            'title' => format_string($r['title']), 'quote' => $r['text'], 'who' => $r['who']],
+            'title' => format_string($r['title'], true, ['escape' => false]), 'quote' => $r['text'], 'who' => $r['who']],
             reviews::for_little((int) $library->entityid)
         );
         return $items ? ['heading' => self::str('homeelders'), 'hint' => self::str('homeeldershint'), 'items' => $items] : null;

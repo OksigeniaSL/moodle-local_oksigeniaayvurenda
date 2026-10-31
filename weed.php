@@ -73,7 +73,7 @@ if ($recordid) {
     $copies = array_map(fn($c) => $c + ['whylabel' => $str('weedwhy' . ($c['why'] ?: 'chosen'))], $found['copies']);
     $data = [
         'heading' => $str('weedrecordtitle'),
-        'library' => format_string($library->name),
+        'library' => format_string($library->name, true, ['escape' => false]),
         'date' => $date((int) $found['record']->timecreated),
         'reason' => (string) $found['record']->reason,
         'count' => $str('weedrecordcount', count(array_filter($copies, fn($c) => !$c['restored']))),

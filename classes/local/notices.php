@@ -93,7 +93,7 @@ final class notices {
                 $lines[] = get_string($words('noticereaderline'), 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
                     'due' => userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'))]);
             }
-            $a = (object) ['name' => $user->firstname, 'library' => format_string($list[0]->library),
+            $a = (object) ['name' => $user->firstname, 'library' => format_string($list[0]->library, true, ['escape' => false]),
                 'books' => implode("\n", $lines)];
             $subject = get_string(
                 $words(count($list) === 1 ? 'noticereadersubject' : 'noticereadersubjectmany'),
@@ -107,7 +107,7 @@ final class notices {
             }
             // The library of the oldest one, where the reader sees what they have.
             $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
-            if (self::send('overdue', $user, $subject, $body, $url, format_string($list[0]->library))) {
+            if (self::send('overdue', $user, $subject, $body, $url, format_string($list[0]->library, true, ['escape' => false]))) {
                 $sent++;
             }
             [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
@@ -172,7 +172,7 @@ final class notices {
                 );
             }
             $a = (object) ['name' => $user->firstname, 'group' => $tutor->groupname,
-                'library' => format_string(reset($late)->library), 'readers' => implode("\n", $lines)];
+                'library' => format_string(reset($late)->library, true, ['escape' => false]), 'readers' => implode("\n", $lines)];
             if (
                 self::send(
                     'overduetutor',

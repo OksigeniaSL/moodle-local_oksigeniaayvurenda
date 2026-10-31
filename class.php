@@ -112,7 +112,7 @@ foreach ($groups as $i => $group) {
             'label' => $str('challengeplanted', $reward['challenge']->term) . ' · ' .
                 $str('challengekind' . $reward['challenge']->kind),
             'ask' => !$wish || $wish->status === 'declined',
-            'state' => $wish ? $str('wishstate' . $wish->status, format_string($wish->title)) : '',
+            'state' => $wish ? $str('wishstate' . $wish->status, format_string($wish->title, true, ['escape' => false])) : '',
         ];
     }
     $data[] = [

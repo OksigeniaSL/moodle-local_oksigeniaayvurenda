@@ -281,7 +281,7 @@ final class ltitool {
             throw new \moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
         }
         $urls = self::urls();
-        $name = get_string('ltitoolname', 'local_oksigeniaayvurenda', format_string($library->name));
+        $name = get_string('ltitoolname', 'local_oksigeniaayvurenda', format_string($library->name, true, ['escape' => false]));
         $request = [
             'application_type' => 'web',
             'response_types' => ['id_token'],
@@ -298,7 +298,7 @@ final class ltitool {
                 'claims' => ['iss', 'sub', 'name', 'given_name', 'family_name', 'email'],
                 'messages' => [['type' => 'LtiResourceLinkRequest', 'label' => $name],
                     ['type' => 'LtiDeepLinkingRequest', 'label' => $name, 'target_link_uri' => $urls['launch']]],
-                'description' => format_string($SITE->fullname),
+                'description' => format_string($SITE->fullname, true, ['escape' => false]),
             ],
         ];
         $headers = ['Content-Type' => 'application/json', 'Accept' => 'application/json'];
@@ -525,22 +525,33 @@ final class ltitool {
     public static function reader(int $entityid, int $userid, string $type, ?int $now = null): int {
         global $DB;
         $now = $now ?? time();
-        $reader = $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid]);
-        if (!$reader || $reader->status !== 'active') {
-            plans::check($entityid, 'readers');
-        }
-        if ($reader) {
-            if ($reader->status !== 'active') {
-                $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'active',
-                    'timemodified' => $now]);
+        // Two entries at once (a frame that reloads, two tabs) must not make two readers, nor two the same card: the
+        // centre's new readers are made one at a time.
+        $lock = \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock('readers_' . $entityid, 15);
+        try {
+            $found = $DB->get_records(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid], 'id', '*', 0, 1);
+            $reader = $found ? reset($found) : null;
+            if (!$reader || $reader->status !== 'active') {
+                plans::check($entityid, 'readers');
             }
-            return (int) $reader->id;
+            if ($reader) {
+                if ($reader->status !== 'active') {
+                    $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'active',
+                        'timemodified' => $now]);
+                }
+                return (int) $reader->id;
+            }
+            $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+            $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
+            $code = card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
+            return (int) $DB->insert_record(self::T . 'reader', (object) ['entityid' => $entityid, 'userid' => $userid,
+                'cardcode' => $code, 'readertype' => $type, 'status' => 'active', 'timecreated' => $now,
+                'timemodified' => $now]);
+        } finally {
+            if ($lock) {
+                $lock->release();
+            }
         }
-        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
-        $code = card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
-        return (int) $DB->insert_record(self::T . 'reader', (object) ['entityid' => $entityid, 'userid' => $userid,
-            'cardcode' => $code, 'readertype' => $type, 'status' => 'active', 'timecreated' => $now, 'timemodified' => $now]);
     }
 
     /**
@@ -622,7 +633,11 @@ final class ltitool {
             return $resource->setTitle(\core_text::substr($record->title, 0, 250))
                 ->setCustomParams(['library' => $library->slug, 'record' => (string) $record->id]);
         }
-        return $resource->setTitle(format_string($library->name))->setCustomParams(['library' => $library->slug]);
+        return $resource->setTitle(format_string(
+            $library->name,
+            true,
+            ['escape' => false]
+        ))->setCustomParams(['library' => $library->slug]);
     }
 
     /**
@@ -634,6 +649,11 @@ final class ltitool {
      */
     public static function link_back(LtiMessageLaunch $launch, \Packback\Lti1p3\DeepLinkResources\Resource $resource): string {
         $return = (string) ($launch->getLaunchData()[LtiConstants::DL_DEEP_LINK_SETTINGS]['deep_link_return_url'] ?? '');
+        // Only a web address goes back (never «javascript:» from a platform that was registered by mistake or on purpose).
+        $scheme = strtolower((string) parse_url($return, PHP_URL_SCHEME));
+        if (!in_array($scheme, ['https', 'http'], true) || clean_param($return, PARAM_URL) !== $return) {
+            throw new \moodle_exception('ltibadreturn', 'local_oksigeniaayvurenda');
+        }
         $jwt = $launch->getDeepLink()->getResponseJwt([$resource]);
         return '<!doctype html><html><head><meta charset="utf-8"><title>' . s(get_string(
             'ltipicksending',

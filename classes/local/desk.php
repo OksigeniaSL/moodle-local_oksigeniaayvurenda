@@ -78,6 +78,38 @@ final class desk {
     }
 
     /**
+     * A copy or a card by its code, as the scanner or the keyboard gives it: first as it is and in capitals, which the
+     * index finds at once; only if neither is there, without minding capitals (a read of every code of the centre).
+     *
+     * @param string $table item or reader.
+     * @param string $field barcode or cardcode.
+     * @param int $entityid
+     * @param string $code
+     * @param string $extra More conditions, starting with « AND ».
+     * @return \stdClass|null
+     */
+    public static function by_code(string $table, string $field, int $entityid, string $code, string $extra = ''): ?\stdClass {
+        global $DB;
+        foreach (array_unique([$code, \core_text::strtoupper($code)]) as $exact) {
+            $found = $DB->get_records_select(
+                self::T . $table,
+                "entityid = :entityid AND $field = :code" . $extra,
+                ['entityid' => $entityid, 'code' => $exact],
+                'id',
+                '*',
+                0,
+                1
+            );
+            if ($found) {
+                return reset($found);
+            }
+        }
+        $found = $DB->get_records_select(self::T . $table, 'entityid = :entityid AND ' . $DB->sql_equal($field, ':code', false)
+            . $extra, ['entityid' => $entityid, 'code' => $code], 'id', '*', 0, 1);
+        return $found ? reset($found) : null;
+    }
+
+    /**
      * A code was read, or a name typed.
      *
      * @param string $code
@@ -91,8 +123,7 @@ final class desk {
         if ($code === '') {
             return $this->answer('unknown', 'no', 'deskunknown', $code);
         }
-        $item = $DB->get_record_select(self::T . 'item', 'entityid = :entityid AND ' .
-            $DB->sql_equal('barcode', ':code', false), ['entityid' => $this->library->entityid, 'code' => $code]);
+        $item = self::by_code('item', 'barcode', (int) $this->library->entityid, $code);
         if ($item && $this->own && (int) $item->libraryid !== (int) $this->library->id) {
             return $this->answer('unknown', 'no', 'deskotherlibrary', $this->title($item));
         }
@@ -119,12 +150,7 @@ final class desk {
             }
             return $this->lend($item, $readerid, $force);
         }
-        $reader = $DB->get_record_select(
-            self::T . 'reader',
-            'entityid = :entityid AND ' .
-            $DB->sql_equal('cardcode', ':code', false) . " AND status <> 'deleted'",
-            ['entityid' => $this->library->entityid, 'code' => $code]
-        );
+        $reader = self::by_code('reader', 'cardcode', (int) $this->library->entityid, $code, " AND status <> 'deleted'");
         if ($reader && !$this->allowed((int) $reader->id)) {
             return $this->answer('unknown', 'no', 'deskotherreader');
         }
@@ -467,7 +493,11 @@ final class desk {
         $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
         $message = $fulfilled ? 'desklentheld' : ($reserve ? 'desklentreserve' : 'desklent');
         if ($reserve) {
-            $a->course = format_string((string) $DB->get_field('course', 'shortname', ['id' => $reserve->courseid]));
+            $a->course = format_string(
+                (string) $DB->get_field('course', 'shortname', ['id' => $reserve->courseid]),
+                true,
+                ['escape' => false]
+            );
         }
         return $this->answer('lent', 'ok', $message, $a, ['loanid' => (int) $loanid, 'readerid' => $readerid,
             'reader' => $this->reader_panel($readerid), 'material' => $material]);

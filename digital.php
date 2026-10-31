@@ -126,7 +126,7 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
         'pages' => $only ? (string) $only->pages : '',
         'until' => date('Y-m-d', $only ? (int) $only->timeend : $yearend),
         'onlyline' => $only ? $str('fragmentline', (object) ['course' => $courses[$only->courseid]
-            ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $only->courseid])),
+            ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $only->courseid]), true, ['escape' => false]),
             'until' => userdate((int) $only->timeend, get_string('strftimedateshort', 'langconfig'))]) : '',
         'id' => (int) $item->id,
         'title' => $item->title !== '' && $item->title !== null ? $item->title : $str('format' . $item->format),

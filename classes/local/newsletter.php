@@ -162,7 +162,7 @@ final class newsletter {
         if ($news['total'] > count($news['titles'])) {
             $lines[] = get_string('newbooksmore', 'local_oksigeniaayvurenda', $news['total'] - count($news['titles']));
         }
-        $a = (object) ['name' => $user->firstname, 'library' => format_string($news['library']->name),
+        $a = (object) ['name' => $user->firstname, 'library' => format_string($news['library']->name, true, ['escape' => false]),
             'books' => implode("\n", $lines)];
         $body = $str('newbooksbody', $a);
         $herald = characters::of($entityid)['herald'];
@@ -176,7 +176,7 @@ final class newsletter {
             $news['total'] === 1 ? $str('newbookssubjectone') : $str('newbookssubject', $news['total']),
             $body,
             $url,
-            format_string($news['library']->name)
+            format_string($news['library']->name, true, ['escape' => false])
         );
     }
 }

@@ -117,7 +117,7 @@
     };
     var clock = function() {
         var seconds = Math.floor((Date.now() - started) / 1000);
-        time.textContent = (str.voicetime || '').replace('{$a}', Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'));
+        time.textContent = (str.voicetime || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'); });
         if (seconds >= MAX) {
             stop.click();
         }
@@ -171,8 +171,8 @@
         stop.hidden = true;
         // What was recorded, and how long it lasts.
         var seconds = Math.floor((Date.now() - started) / 1000);
-        time.textContent = (str.voicelength || '').replace('{$a}', Math.floor(seconds / 60) + ':' +
-            String(seconds % 60).padStart(2, '0'));
+        time.textContent = (str.voicelength || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' +
+            String(seconds % 60).padStart(2, '0'); });
     });
     again.addEventListener('click', function() {
         blob = null;

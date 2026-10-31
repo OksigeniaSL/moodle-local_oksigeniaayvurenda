@@ -86,7 +86,11 @@ $public = function (array $cards) use ($here, $str) {
 $opds = (new moodle_url('/local/oksigeniaayvurenda/opds.php', ['library' => $library->slug]))->out(false);
 $look = libraries::look($library);
 $shared = [
-    'door' => ['name' => format_string($library->name), 'motto' => format_string($look['motto']),
+    'door' => ['name' => format_string($library->name, true, ['escape' => false]), 'motto' => format_string(
+        $look['motto'],
+        true,
+        ['escape' => false]
+    ),
         'colour' => $look['colour'], 'image' => $look['image'] ?? screens::art('portada'), 'kicker' => $str('windowkicker')],
     'notice' => $notice,
     'closednote' => !$settings['open'] ? $str('windowclosednote') : '',
@@ -105,7 +109,11 @@ $shared = [
     'opds' => $opds,
     'loginurl' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
     'searchlabel' => $str($catalogue ? 'windowsearchall' : 'windowsearch'),
-    'embedcode' => $catalogue ? '<iframe src="' . s($here(['embed' => 1])) . '" title="' . s(format_string($library->name)) .
+    'embedcode' => $catalogue ? '<iframe src="' . s($here(['embed' => 1])) . '" title="' . s(format_string(
+        $library->name,
+        true,
+        ['escape' => false]
+    )) .
         '" width="100%" height="390" style="border: 0" loading="lazy"></iframe>' : '',
 ];
 foreach (
@@ -146,7 +154,11 @@ if ($recordid) {
         'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
     ] : null;
     $share = ['title' => $found['record']->title, 'url' => $here(['record' => $recordid]),
-        'description' => trim(implode(' · ', array_filter([$data['card']['authors'] ?? '', format_string($library->name)])) .
+        'description' => trim(implode(' · ', array_filter([$data['card']['authors'] ?? '', format_string(
+            $library->name,
+            true,
+            ['escape' => false]
+        )])) .
             ($found['record']->summary ? '. ' . $found['record']->summary : '')),
         'image' => \local_oksigeniaayvurenda\local\covers::url($recordid)];
     shell::output(

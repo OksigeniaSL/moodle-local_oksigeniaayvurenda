@@ -46,7 +46,8 @@ if (!$library || !bank::is($library)) {
 $url = fn(array $params) => (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug] + $params))
     ->out(false);
 $now = time();
-$data = ['heading' => $str('bankrollheading', format_string($library->name)), 'intro' => $str('bankrollintro'),
+$data = ['heading' => $str('bankrollheading', format_string($library->name, true, ['escape' => false])),
+    'intro' => $str('bankrollintro'),
     'isclass' => $group !== ''];
 if ($group === '') {
     $data['classes'] = array_map(fn($c) => [

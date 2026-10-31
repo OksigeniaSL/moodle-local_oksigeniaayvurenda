@@ -96,7 +96,7 @@ final class mine {
                 holds::of_reader((int) $reader->id, $now)
             );
             $out[] = [
-                'name' => format_string($library->name),
+                'name' => format_string($library->name, true, ['escape' => false]),
                 'slug' => (string) $library->slug,
                 'cardcode' => (string) $reader->cardcode,
                 'home' => $url('index.php', $library),

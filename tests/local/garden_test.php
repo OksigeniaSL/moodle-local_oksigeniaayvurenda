@@ -77,7 +77,10 @@ final class garden_test extends \advanced_testcase {
             $str('cardtold', (object) ['title' => 'El faro dormido', 'note' => $str('cardnoteloved')]),
             $classic['tell']
         );
-        $this->assertSame('«El faro dormido». ' . $str('cardseries', 'Los misterios del faro'), $classic['stay']);
+        $this->assertSame(
+            $str('cardquoted', 'El faro dormido') . '. ' . $str('cardseries', 'Los misterios del faro'),
+            $classic['stay']
+        );
         $this->assertStringNotContainsString('3', implode(' ', $classic), 'no counts');
     }
 

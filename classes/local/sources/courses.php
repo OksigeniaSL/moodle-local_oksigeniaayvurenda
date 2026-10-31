@@ -57,7 +57,7 @@ final class courses {
             $config = $chosen[$row->id] ?? null;
             $options[] = [
                 'id' => (int) $row->id,
-                'name' => format_string($row->fullname),
+                'name' => format_string($row->fullname, true, ['escape' => false]),
                 'groups' => (int) $row->groups,
                 'chosen' => $config !== null,
                 'stage' => $config['stage'] ?? \local_oksigeniaayvurenda\core\readers\stage_guesser::guess($row->fullname),
@@ -149,7 +149,11 @@ final class courses {
                 $student = $row->archetype === 'student';
                 $group = '';
                 if ($student && $config['group']) {
-                    $group = $row->groupname !== null ? format_string($row->groupname) : format_string($course->fullname);
+                    $group = $row->groupname !== null ? format_string(
+                        $row->groupname,
+                        true,
+                        ['escape' => false]
+                    ) : format_string($course->fullname, true, ['escape' => false]);
                 }
                 $people[(int) $row->userid] = ['cohortid' => 0, 'type' => $student ? 'student' : 'teacher',
                     'group' => $group, 'stage' => $student ? $config['stage'] : ''];

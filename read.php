@@ -94,6 +94,7 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
         'position' => $place['position'],
         'bookmarks' => $place['bookmarks'],
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
-        'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage')],
+        'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage'),
+            'readmarkdrop' => $str('readmarkdrop')],
     ],
 ]);

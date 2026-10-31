@@ -70,7 +70,7 @@ if (!$notice) {
     }
 }
 $template = [
-    'heading' => $str('lticourseheading', format_string((string) $course->title)),
+    'heading' => $str('lticourseheading', format_string((string) $course->title, true, ['escape' => false])),
     'intro' => $students !== null ? $str('lticourseintro', $students) : '',
     'notice' => $notice,
     'error' => $error,

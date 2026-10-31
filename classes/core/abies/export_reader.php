@@ -267,11 +267,26 @@ final class export_reader {
     }
 
     /**
-     * A fresh reader on the file. External entities are never loaded.
+     * A fresh reader on the file. External entities are never loaded, and a file with a document type is refused: an
+     * export of Abies has none, and its entities could grow without end (the reader has no size limits, for big
+     * catalogues).
      *
      * @return \XMLReader
      */
     private function open(): \XMLReader {
+        $probe = new \XMLReader();
+        if ($probe->open($this->path, null, LIBXML_NONET)) {
+            while (@$probe->read()) {
+                if ($probe->nodeType === \XMLReader::DOC_TYPE) {
+                    $probe->close();
+                    throw new \InvalidArgumentException('The Abies export has a document type: ' . $this->path);
+                }
+                if ($probe->nodeType === \XMLReader::ELEMENT) {
+                    break;
+                }
+            }
+            $probe->close();
+        }
         $reader = new \XMLReader();
         if (!$reader->open($this->path, null, LIBXML_NONET | LIBXML_COMPACT | LIBXML_PARSEHUGE)) {
             throw new \InvalidArgumentException('The Abies export cannot be opened: ' . $this->path);

@@ -117,7 +117,7 @@ class mobile {
         }
         $data = [
             'library' => $library ? $library->slug : '',
-            'name' => $library ? format_string($library->name) : '',
+            'name' => $library ? format_string($library->name, true, ['escape' => false]) : '',
             'cards' => array_map(
                 fn($c) => ['id' => $c['id'], 'title' => $c['title'], 'authors' => $c['authors'],
                 'statelabel' => $c['statelabel'], 'free' => $c['state'] === 'free', 'location' => $c['location'] ?? ''],

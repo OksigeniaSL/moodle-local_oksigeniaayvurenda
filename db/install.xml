@@ -135,6 +135,7 @@
       <INDEXES>
         <INDEX NAME="entitybarcode" UNIQUE="true" FIELDS="entityid, barcode"/>
         <INDEX NAME="libraryshelfkey" UNIQUE="false" FIELDS="libraryid, shelfkey"/>
+        <INDEX NAME="librarycreated" UNIQUE="false" FIELDS="libraryid, timecreated"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_reader" COMMENT="A reader of an entity, linked to a Moodle account when there is one">
@@ -192,6 +193,9 @@
         <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
         <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="yeargroup" UNIQUE="false" FIELDS="yearid, groupname"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_loan" COMMENT="A loan, with the group and school year of that moment">
       <FIELDS>
@@ -225,6 +229,8 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="libraryreturned" UNIQUE="false" FIELDS="libraryid, timereturned"/>
+        <INDEX NAME="libraryloaned" UNIQUE="false" FIELDS="libraryid, timeloaned"/>
+        <INDEX NAME="returneddue" UNIQUE="false" FIELDS="timereturned, timedue"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_rule" COMMENT="Loan rules of a library by reader type and item type; * matches any">

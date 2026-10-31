@@ -125,6 +125,7 @@ final class demo {
             'publishers' => $publishers, 'locations' => $locations], 100000, $now);
         self::readers($entityid, $yearid, $readers, $now);
         $transaction->allow_commit();
+        catalogue::purge($entityid);
         return $entityid;
     }
 
@@ -616,6 +617,7 @@ final class demo {
             stacks::refresh_keys($entityid);
         }
         $transaction->allow_commit();
+        catalogue::purge($entityid);
         return $moved;
     }
 

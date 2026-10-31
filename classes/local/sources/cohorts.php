@@ -64,7 +64,7 @@ final class cohorts {
             $config = $chosen[$row->id] ?? null;
             $options[] = [
                 'id' => (int) $row->id,
-                'name' => format_string($row->name),
+                'name' => format_string($row->name, true, ['escape' => false]),
                 'members' => (int) $row->members,
                 'chosen' => $config !== null,
                 'type' => $config['type'] ?? 'student',
@@ -136,7 +136,7 @@ final class cohorts {
             $people[$row->userid] = [
                 'cohortid' => (int) $row->cohortid,
                 'type' => $config['type'],
-                'group' => $config['group'] ? format_string($row->name) : '',
+                'group' => $config['group'] ? format_string($row->name, true, ['escape' => false]) : '',
                 'stage' => $config['stage'],
             ];
         }

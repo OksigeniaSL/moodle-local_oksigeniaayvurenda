@@ -58,7 +58,7 @@ final class opds {
         foreach ($found['records'] as $record) {
             $updated = max($updated, $record['updated']);
         }
-        $name = format_string($library->name);
+        $name = format_string($library->name, true, ['escape' => false]);
         $xml = new \XMLWriter();
         $xml->openMemory();
         $xml->setIndent(true);
@@ -144,8 +144,12 @@ final class opds {
         $xml->setIndent(true);
         $xml->startDocument('1.0', 'UTF-8');
         $xml->startElementNs(null, 'OpenSearchDescription', 'http://a9.com/-/spec/opensearch/1.1/');
-        $xml->writeElement('ShortName', self::short_name(format_string($library->name)));
-        $xml->writeElement('Description', get_string('windowtitle', 'local_oksigeniaayvurenda', format_string($library->name)));
+        $xml->writeElement('ShortName', self::short_name(format_string($library->name, true, ['escape' => false])));
+        $xml->writeElement('Description', get_string(
+            'windowtitle',
+            'local_oksigeniaayvurenda',
+            format_string($library->name, true, ['escape' => false])
+        ));
         $xml->startElement('Url');
         $xml->writeAttribute('type', self::TYPE);
         $xml->writeAttribute('template', (new \moodle_url('/local/oksigeniaayvurenda/opds.php', ['library' => $library->slug]))

@@ -89,7 +89,7 @@
             drop.type = 'button';
             drop.className = 'ayv-line-button ayv-line-quiet';
             drop.textContent = '×';
-            drop.setAttribute('aria-label', mark.label);
+            drop.setAttribute('aria-label', (str.readmarkdrop || '{$a}').replace('{$a}', function() { return mark.label; }));
             drop.addEventListener('click', function() {
                 marks.splice(index, 1);
                 send({bookmarks: JSON.stringify(marks)});
@@ -202,8 +202,8 @@
         rendition.on('rendered', titled);
         var showWhere = function(location) {
             if (where && location && location.start && location.start.displayed) {
-                where.textContent = (str.readpage || '').replace('{$a->page}', location.start.displayed.page)
-                    .replace('{$a->total}', location.start.displayed.total);
+                where.textContent = (str.readpage || '').replace('{$a->page}', function() { return location.start.displayed.page; })
+                    .replace('{$a->total}', function() { return location.start.displayed.total; });
             }
             if (progress && location && location.start && book.locations.length()) {
                 progress.value = Math.round((location.start.percentage || 0) * 100);
@@ -242,7 +242,7 @@
             if (!location || !location.start) {
                 return;
             }
-            marks.push({place: location.start.cfi, label: (str.readmarklabel || '').replace('{$a}', marks.length + 1)});
+            marks.push({place: location.start.cfi, label: (str.readmarklabel || '').replace('{$a}', function() { return marks.length + 1; })});
             send({bookmarks: JSON.stringify(marks)});
             showMarks(go);
         });

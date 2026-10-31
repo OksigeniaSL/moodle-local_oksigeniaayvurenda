@@ -121,8 +121,7 @@ final class stocktake {
         $code = trim($code);
         $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $stocktake->libraryid]);
         $here = cataloguer::own_location($entityid, $here) ?: ($stocktake->locationid ? (int) $stocktake->locationid : null);
-        $item = $code === '' ? null : $DB->get_record_select(self::T . 'item', 'entityid = :entityid AND ' .
-            $DB->sql_equal('barcode', ':code', false), ['entityid' => $entityid, 'code' => $code], '*', IGNORE_MULTIPLE);
+        $item = $code === '' ? null : desk::by_code('item', 'barcode', $entityid, $code);
         $answer = ['code' => $code, 'kind' => 'unknown', 'title' => '', 'where' => ''];
         if (!$item) {
             if (
@@ -141,7 +140,11 @@ final class stocktake {
         ) : '';
         if ((int) $item->libraryid !== (int) $stocktake->libraryid) {
             $answer['kind'] = 'otherlibrary';
-            $answer['where'] = format_string((string) $DB->get_field(self::T . 'library', 'name', ['id' => $item->libraryid]));
+            $answer['where'] = format_string((string) $DB->get_field(
+                self::T . 'library',
+                'name',
+                ['id' => $item->libraryid]
+            ), true, ['escape' => false]);
             return $answer;
         }
         $already = $DB->record_exists(self::T . 'stockread', ['stocktakeid' => $stocktake->id, 'itemid' => $item->id]);

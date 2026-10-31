@@ -134,7 +134,7 @@ foreach (\local_oksigeniaayvurenda\local\lots::of_library($library)['received'] 
                 'local_oksigeniaayvurenda_library',
                 'name',
                 ['id' => $box['lot']->libraryid]
-            )), 'due' => $date($box['lot']->timedue), 'copies' => $box['copies'],
+            ), true, ['escape' => false]), 'due' => $date($box['lot']->timedue), 'copies' => $box['copies'],
             'lent' => $box['lent']])];
     }
 }
@@ -150,7 +150,7 @@ $whogroups = array_values($whogroups);
 $books = array_map(fn($b) => $b + ['lentlabel' => $b['lent'] !== '' ? $str('shelflentto', $b['lent']) : '',
     'canlend' => $b['lent'] === '' && $chosen !== null], shelf::books($library));
 $data = [
-    'heading' => $str('shelftitle', $group !== '' ? $group : format_string($library->name)),
+    'heading' => $str('shelftitle', $group !== '' ? $group : format_string($library->name, true, ['escape' => false])),
     'notice' => $notice,
     'undo' => $undo,
     'action' => $url($readerid ? ['reader' => $readerid] : [])->out(false),

@@ -171,6 +171,10 @@
             var onkey = function(e) {
                 if (e.key === 'Escape') {
                     stop();
+                } else if (e.key === 'Tab') {
+                    // The focus stays in the camera (its only control is the button that closes it).
+                    e.preventDefault();
+                    close.focus();
                 }
             };
             document.addEventListener('keydown', onkey);
@@ -205,7 +209,7 @@
                             setTimeout(function() {
                                 frame.classList.remove('ayv-camera-read');
                             }, 300);
-                            hint.textContent = String(str.cameraread || '').replace('{$a}', code);
+                            hint.textContent = String(str.cameraread || '').replace('{$a}', function() { return code; });
                             if (navigator.vibrate) {
                                 navigator.vibrate(40);
                             }

@@ -93,7 +93,7 @@ $parent = $library->parentid ? $DB->get_record('local_oksigeniaayvurenda_library
 $data = [
     'heading' => $str('rulestitle'),
     'intro' => $str('rulesintro'),
-    'inherited' => count($rows) > 1 ? '' : ($parent ? $str('rulesparent', format_string($parent->name))
+    'inherited' => count($rows) > 1 ? '' : ($parent ? $str('rulesparent', format_string($parent->name, true, ['escape' => false]))
         : $str('rulesdefault')),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),

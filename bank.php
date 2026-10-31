@@ -98,7 +98,7 @@ foreach (bank::needs($library, time()) as $need) {
     ];
 }
 $data = [
-    'heading' => $str('bankheading', format_string($library->name)),
+    'heading' => $str('bankheading', format_string($library->name, true, ['escape' => false])),
     'intro' => $str('bankintro'),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),

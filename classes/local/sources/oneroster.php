@@ -51,7 +51,14 @@ final class oneroster {
         $files = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = basename((string) $zip->getNameIndex($i));
-            if (in_array($name, self::FILES, true) && !isset($files[$name])) {
+            // A list of a whole school is a few megabytes; a file that says it is far bigger is not read.
+            if (
+                in_array(
+                    $name,
+                    self::FILES,
+                    true
+                ) && !isset($files[$name]) && ($zip->statIndex($i)['size'] ?? 0) <= 100 * 1048576
+            ) {
                 $files[$name] = (string) $zip->getFromIndex($i);
             }
         }

@@ -85,7 +85,7 @@ foreach ($readers as $reader) {
     );
     $group = $member ? (string) $member->groupname : '';
     $entityrow = $DB->get_record('local_oksigeniaayvurenda_entity', ['id' => $reader->entityid], 'name, settings');
-    $entity = format_string($entityrow->name);
+    $entity = format_string($entityrow->name, true, ['escape' => false]);
     $esettings = json_decode((string) $entityrow->settings, true) ?: [];
     $stagename = $member ? (string) $member->stage : '';
     $look = in_array($previewlook, card_look::LOOKS, true) ? $previewlook : card_look::resolve(

@@ -247,9 +247,17 @@ final class shell {
         // The way back to Moodle, always at the end and in sight, but quiet.
         $mine = isloggedin() && !isguestuser();
         $nav .= '<a class="ayv-nav-out" href="' . s($CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
-            . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname)))
+            . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname, true, ['escape' => false])))
             . ' <span aria-hidden="true">→</span></a>';
         $nav = '<nav class="ayv-navs" aria-label="' . $str('menulabel') . '">' . $nav . '</nav>';
+        // An administrator who logged in as someone else sees it on every page, as in the rest of Moodle.
+        $as = '';
+        if (\core\session\manager::is_loggedinas()) {
+            global $USER;
+            $as = '<p class="ayv-loggedinas">' . s(get_string('loggedinas', 'moodle', fullname($USER))) . ' <a href="'
+                . s((new \moodle_url('/login/logout.php', ['sesskey' => sesskey()]))->out(false)) . '">'
+                . s(get_string('logout')) . '</a></p>';
+        }
         // What only this page needs (back to a course, its guided help), in a small row, without what the header has.
         $links = $options['nav'] ?? [];
         if (isset($links['url'])) {
@@ -268,7 +276,10 @@ final class shell {
         // The sheet of «More» goes in the page, not in the header (a dialog inside the header is not centred).
         $main = $sheet . ($row !== '' ? '<nav class="ayv-subnav" aria-label="' . $str('menuthispage') . '">' . $row . '</nav>' : '')
             . $main;
-        $name = $library ? format_string($library->name) : get_string('pluginname', 'local_oksigeniaayvurenda');
+        $name = $library ? format_string($library->name, true, ['escape' => false]) : get_string(
+            'pluginname',
+            'local_oksigeniaayvurenda'
+        );
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
         $howto = self::howto_box($library, $base);
@@ -306,7 +317,7 @@ final class shell {
 </head>
 <body class="ayv ayv-skin-' . $skin . ($howto !== '' ? ' ayv-has-howto' : '') . '">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
-<header class="ayv-top">
+' . $as . '<header class="ayv-top">
 <a class="ayv-brand" href="' . s($home) . '"><img class="ayv-brand-light" src="' . $app . 'emblema.svg" alt="" width="44"
     height="44"><img class="ayv-brand-dark" src="' . $app . 'emblema-oscuro.svg" alt="" width="44" height="44">
     <span class="ayv-brand-name">' . s($name) . '</span></a>
@@ -319,7 +330,7 @@ final class shell {
 <footer class="ayv-foot"><button type="button" class="ayv-foot-credits" data-ayv-credits aria-haspopup="dialog">
 Oksigenia Ayvurenda</button>
 ' . self::made_with($library) . '<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' .
-        $str('backto', format_string($SITE->shortname)) . '</a></footer>
+        $str('backto', format_string($SITE->shortname, true, ['escape' => false])) . '</a></footer>
 ' . self::credits() . '
 <script>window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
@@ -358,7 +369,7 @@ Oksigenia Ayvurenda</button>
         $spines = screens::spines(screens::public_spines(stacks::spines($library, $rows), $library));
         $door = (new \moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug]))->out(false);
         $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/embed', [
-            'name' => format_string($library->name),
+            'name' => format_string($library->name, true, ['escape' => false]),
             'heading' => get_string('embedheading', 'local_oksigeniaayvurenda'),
             'door' => $door,
             'more' => get_string('embedmore', 'local_oksigeniaayvurenda'),
@@ -378,7 +389,7 @@ Oksigenia Ayvurenda</button>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <base target="_blank">
-<title>' . s(format_string($library->name)) . '</title>
+<title>' . s(format_string($library->name, true, ['escape' => false])) . '</title>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <script>if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
     document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');

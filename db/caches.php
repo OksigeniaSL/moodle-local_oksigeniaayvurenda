@@ -31,6 +31,12 @@ $definitions = [
         'simplekeys' => true,
         'simpledata' => true,
     ],
+    // How many records each corner of a centre has, for a few minutes (and gone when the catalogue changes).
+    'corners' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 300,
+    ],
     // What the catalogues said of an ISBN, for a day.
     'lookup' => [
         'mode' => cache_store::MODE_APPLICATION,

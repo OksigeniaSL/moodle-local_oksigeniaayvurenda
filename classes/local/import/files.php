@@ -81,8 +81,18 @@ final class files {
         $xml = null;
         for ($i = 0; $i < $zip->numFiles; $i++) {
             if (strtolower(pathinfo($zip->getNameIndex($i), PATHINFO_EXTENSION)) === 'xml') {
+                // Copied by streams, never whole in memory, and only up to what a big catalogue weighs (1 GB).
+                if (($zip->statIndex($i)['size'] ?? 0) > 1024 * 1048576) {
+                    break;
+                }
                 $xml = make_request_directory() . '/export.xml';
-                file_put_contents($xml, $zip->getFromIndex($i));
+                $in = $zip->getStream((string) $zip->getNameIndex($i));
+                $out = fopen($xml, 'wb');
+                if ($in && $out) {
+                    stream_copy_to_stream($in, $out, 1024 * 1048576);
+                }
+                $in && fclose($in);
+                $out && fclose($out);
                 break;
             }
         }

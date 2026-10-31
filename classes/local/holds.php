@@ -392,7 +392,7 @@ final class holds {
         }
         $a = (object) [
             'title' => (string) $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]),
-            'library' => format_string($library->name),
+            'library' => format_string($library->name, true, ['escape' => false]),
             'until' => userdate((int) $hold->timeexpires, get_string('strftimedateshort', 'langconfig')),
         ];
         // In the tone of the centre's skin.

@@ -43,7 +43,11 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
-$entity = format_string($DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $library->entityid]));
+$entity = format_string(
+    $DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $library->entityid]),
+    true,
+    ['escape' => false]
+);
 $printed = [];
 foreach (readers::in_group($library, $group) as $reader) {
     $printed[] = cards::card((object) ['id' => $reader['id'], 'entityid' => $library->entityid,

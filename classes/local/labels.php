@@ -80,7 +80,7 @@ final class labels {
                 ['libraryid' => $library->id, 'start' => $start]
             ));
         }
-        $name = format_string($library->name);
+        $name = format_string($library->name, true, ['escape' => false]);
         return array_map(fn($row) => [
             'blank' => false,
             'barcode' => $row->barcode,

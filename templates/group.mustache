@@ -47,10 +47,10 @@
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <fieldset>
             <legend class="ayv-classbar-label">{{choose}}</legend>
-            <div class="ayv-segmented">{{#kinds}}<label><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}} onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()"><span>{{label}}</span></label>{{/kinds}}</div>
+            <div class="ayv-segmented">{{#kinds}}<label><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/kinds}}</div>
         </fieldset>
         <p class="ayv-classbar-hint">{{choosehint}}</p>
-        <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></noscript>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></p>
     </form>{{/locked}}
     <div class="ayv-classbar-box ayv-classbar-garden">
         <p class="ayv-classbar-label">{{gardenheading}}</p>

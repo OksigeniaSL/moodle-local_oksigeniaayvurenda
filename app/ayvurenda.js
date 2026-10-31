@@ -359,6 +359,17 @@
             })
             .then(function(html) {
                 main.innerHTML = html;
+                // What was found is said from a region that stays (a live region put in new is seldom announced).
+                var status = document.getElementById('ayv-search-status');
+                if (!status) {
+                    status = document.createElement('p');
+                    status.id = 'ayv-search-status';
+                    status.className = 'ayv-sr';
+                    status.setAttribute('role', 'status');
+                    main.parentNode.insertBefore(status, main);
+                }
+                var heading = main.querySelector('.ayv-results-title');
+                status.textContent = heading ? heading.textContent.trim() : '';
                 if (window.history && window.history.replaceState) {
                     window.history.replaceState(null, '', url);
                 }

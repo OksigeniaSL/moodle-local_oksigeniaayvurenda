@@ -101,7 +101,7 @@ final class fragments {
            ORDER BY c.fullname",
             ['libraryid' => $library->id, 'recordid' => $recordid]
         );
-        return array_map(fn($c) => format_string($c->fullname), $rows);
+        return array_map(fn($c) => format_string($c->fullname, true, ['escape' => false]), $rows);
     }
 
     /**
@@ -129,7 +129,11 @@ final class fragments {
                 'title' => $row->title,
                 'isbn' => (string) $row->isbn,
                 'pages' => (string) $row->pages,
-                'course' => format_string((string) $DB->get_field('course', 'fullname', ['id' => $row->courseid])),
+                'course' => format_string(
+                    (string) $DB->get_field('course', 'fullname', ['id' => $row->courseid]),
+                    true,
+                    ['escape' => false]
+                ),
                 'students' => $context ? count_enrolled_users($context, 'moodle/course:isincompletionreports') : 0,
                 'from' => userdate((int) $row->timecreated, '%Y-%m-%d'),
                 'until' => userdate((int) $row->timeend, '%Y-%m-%d'),

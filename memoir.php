@@ -102,7 +102,11 @@ $came = $figures['readers'] ? [
 ] : false;
 $data = [
     'heading' => $str('memoirheading', $year->name),
-    'centre' => format_string($DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $entityid])),
+    'centre' => format_string(
+        $DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $entityid]),
+        true,
+        ['escape' => false]
+    ),
     'intro' => $str('memoirintro'),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),

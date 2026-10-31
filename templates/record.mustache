@@ -156,7 +156,7 @@
                 {{/canspeak}}
                 <div class="ayv-draw" data-ayv-draw hidden>
                     <canvas class="ayv-draw-canvas" width="800" height="500" role="img" aria-label="{{drawcanvas}}"></canvas>
-                    <div class="ayv-draw-tools" role="toolbar" aria-label="{{drawtools}}">
+                    <div class="ayv-draw-tools" role="group" aria-label="{{drawtools}}">
                         {{#drawcolours}}<button type="button" class="ayv-draw-colour" data-colour="{{value}}" style="--ayv-pencil: {{value}}" aria-label="{{label}}" aria-pressed="{{pressed}}"></button>{{/drawcolours}}
                         <button type="button" class="ayv-toggle" data-size="6" aria-pressed="true">{{drawthin}}</button>
                         <button type="button" class="ayv-toggle" data-size="18" aria-pressed="false">{{drawthick}}</button>

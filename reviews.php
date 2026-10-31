@@ -52,7 +52,7 @@ $done = optional_param('done', '', PARAM_ALPHA);
 
 $items = array_map(fn($r) => [
     'id' => (int) $r->id,
-    'title' => format_string($r->title),
+    'title' => format_string($r->title, true, ['escape' => false]),
     'url' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $r->recordid]))
         ->out(false),
     'text' => $r->text,

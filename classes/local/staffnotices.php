@@ -143,7 +143,8 @@ final class staffnotices {
             $lines[] = end($parts) . ': ' . $url('wishes.php');
         }
         $what = implode($str('stafftodoand'), $parts);
-        return [$str('stafftodosubject', (object) ['centre' => format_string($entity->name), 'what' => $what]),
-            $str('stafftodobody', format_string($entity->name)) . "\n\n" . implode("\n", $lines)];
+        return [$str('stafftodosubject', (object) ['centre' => format_string($entity->name, true, ['escape' => false]),
+            'what' => $what]),
+            $str('stafftodobody', format_string($entity->name, true, ['escape' => false])) . "\n\n" . implode("\n", $lines)];
     }
 }

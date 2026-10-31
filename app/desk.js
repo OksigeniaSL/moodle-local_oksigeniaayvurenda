@@ -171,9 +171,9 @@
         // At a textbook bank: the set of their grade, what is still to give, and the contract for the family.
         if (reader.bank) {
             var set = el('div', 'ayv-reader-bank');
-            set.appendChild(el('p', 'ayv-reader-has', str.deskbankset.replace('{$a}', reader.bank.set)));
+            set.appendChild(el('p', 'ayv-reader-has', str.deskbankset.replace('{$a}', function() { return reader.bank.set; })));
             set.appendChild(el('p', reader.bank.missing ? 'ayv-reader-bank-missing' : 'ayv-reader-bank-done',
-                reader.bank.missing ? str.deskbankmissing.replace('{$a}', reader.bank.pending.join(', ')) : str.deskbankdone));
+                reader.bank.missing ? str.deskbankmissing.replace('{$a}', function() { return reader.bank.pending.join(', '); }) : str.deskbankdone));
             var contract = el('a', 'ayv-button ayv-button-quiet', str.deskbankcontract);
             contract.href = reader.bank.contract;
             contract.target = '_blank';
@@ -188,7 +188,7 @@
             reader.holds.forEach(function(hold) {
                 var item = el('li', hold.ready ? 'ayv-loan ayv-hold-ready' : 'ayv-loan');
                 item.appendChild(el('span', 'ayv-loan-title', hold.title));
-                item.appendChild(el('span', 'ayv-loan-due', hold.ready ? str.deskholdready.replace('{$a}', hold.until)
+                item.appendChild(el('span', 'ayv-loan-due', hold.ready ? str.deskholdready.replace('{$a}', function() { return hold.until; })
                     : str.deskholdwaiting));
                 holds.appendChild(item);
             });
@@ -412,7 +412,7 @@
             // Without storage they are kept while the page is open.
         }
         bar.hidden = !pending.length;
-        bar.textContent = pending.length === 1 ? str.deskofflineone : (str.deskofflinemany || '').replace('{$a}', pending.length);
+        bar.textContent = pending.length === 1 ? str.deskofflineone : (str.deskofflinemany || '').replace('{$a}', function() { return pending.length; });
     };
     var lostNetwork = function(error) {
         return !navigator.onLine || error instanceof TypeError || error instanceof SyntaxError;
@@ -435,7 +435,7 @@
                 offline = false;
                 replaying = false;
                 keepPending();
-                line({kind: 'online', sound: 'ok', message: (str.deskbackonline || '').replace('{$a}', passed)}, '');
+                line({kind: 'online', sound: 'ok', message: (str.deskbackonline || '').replace('{$a}', function() { return passed; })}, '');
                 return null;
             }
             var job = pending[0];

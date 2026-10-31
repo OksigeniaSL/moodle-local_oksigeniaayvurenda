@@ -377,5 +377,23 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103136, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026103137) {
+        // Indexes for what is asked every day: the pulse and the new books, the notices, the tutors and the challenges.
+        $indexes = [
+            ['local_oksigeniaayvurenda_loan', 'libraryloaned', ['libraryid', 'timeloaned']],
+            ['local_oksigeniaayvurenda_loan', 'returneddue', ['timereturned', 'timedue']],
+            ['local_oksigeniaayvurenda_item', 'librarycreated', ['libraryid', 'timecreated']],
+            ['local_oksigeniaayvurenda_member', 'yeargroup', ['yearid', 'groupname']],
+        ];
+        foreach ($indexes as [$tablename, $name, $fields]) {
+            $table = new xmldb_table($tablename);
+            $index = new xmldb_index($name, XMLDB_INDEX_NOTUNIQUE, $fields);
+            if (!$dbman->index_exists($table, $index)) {
+                $dbman->add_index($table, $index);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026103137, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

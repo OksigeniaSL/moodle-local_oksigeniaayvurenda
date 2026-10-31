@@ -110,7 +110,7 @@
                 return a[key] !== undefined ? a[key] : '';
             });
         }
-        return text.replace('{$a}', a);
+        return text.replace('{$a}', function() { return a; });
     };
 
     var counts = function(c) {

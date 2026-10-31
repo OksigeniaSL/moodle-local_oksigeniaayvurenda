@@ -96,6 +96,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-skip:focus { top: .5rem; }
 
+/* An administrator logged in as someone else: a band above everything. */
+.ayv .ayv-loggedinas { margin: 0; padding: .5rem 1rem; background: var(--sun); color: #1e2b2a; text-align: center; font-weight: 600; }
+
+.ayv .ayv-loggedinas a { color: #1e2b2a; text-decoration: underline; }
+
 /* The header: emblem and name, the search, the way back. */
 .ayv .ayv-top {
     position: sticky;

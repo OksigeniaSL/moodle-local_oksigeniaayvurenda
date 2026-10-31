@@ -251,23 +251,32 @@ final class catalogue {
      */
     public static function corners(\stdClass $library, bool $all = false): array {
         global $DB;
-        $rows = $DB->get_recordset_sql(
-            "SELECT ra.recordid, a.code
-               FROM {" . self::T . "recauth} ra
-               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
-              WHERE a.entityid = :entityid AND a.kind = 'class'",
-            ['entityid' => $library->entityid]
-        );
-        $records = [];
-        $only = bank::is($library) ? [] : array_flip(bank::only((int) $library->entityid));
-        foreach ($rows as $row) {
-            $top = self::top_class((string) $row->code);
-            if ($top !== null && !isset($only[$row->recordid])) {
-                $records[$top][$row->recordid] = true;
+        // How many records each corner has: counted over every class of the catalogue (thousands of rows), so kept a
+        // while for the centre, apart for a bank (where textbooks count) and for reading.
+        $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
+        $key = $library->entityid . '_' . (bank::is($library) ? 'bank' : 'reading');
+        $counts = $cache->get($key);
+        if ($counts === false) {
+            $rows = $DB->get_recordset_sql(
+                "SELECT ra.recordid, a.code
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                  WHERE a.entityid = :entityid AND a.kind = 'class'",
+                ['entityid' => $library->entityid]
+            );
+            $records = [];
+            $only = bank::is($library) ? [] : array_flip(bank::only((int) $library->entityid));
+            foreach ($rows as $row) {
+                $top = self::top_class((string) $row->code);
+                if ($top !== null && !isset($only[$row->recordid])) {
+                    $records[$top][$row->recordid] = true;
+                }
             }
+            $rows->close();
+            $counts = array_map('count', $records);
+            ksort($counts);
+            $cache->set($key, $counts);
         }
-        $rows->close();
-        ksort($records);
         $labels = $DB->get_records_select_menu(
             self::T . 'authority',
             "entityid = :entityid AND kind = 'class' AND " . $DB->sql_length('code') . ' = 1',
@@ -282,7 +291,7 @@ final class catalogue {
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $library->entityid]), true) ?: [];
         $udc = ($entity['classification'] ?? 'udc') === 'udc';
         $corners = [];
-        foreach ($records as $code => $ids) {
+        foreach ($counts as $code => $count) {
             $label = isset($labels[$code]) ? self::tidy_label((string) $labels[$code]) : null;
             if (($udc || $label === null) && get_string_manager()->string_exists('udc' . $code, 'local_oksigeniaayvurenda')) {
                 $label = get_string('udc' . $code, 'local_oksigeniaayvurenda');
@@ -290,7 +299,7 @@ final class catalogue {
             $default = $label ?? (string) $code;
             $mine = (array) ($own[$code] ?? []);
             $corners[] = ['code' => (string) $code, 'label' => trim((string) ($mine['label'] ?? '')) !== '' ? trim($mine['label'])
-                : $default, 'default' => $default, 'count' => count($ids), 'hidden' => !empty($mine['hidden']),
+                : $default, 'default' => $default, 'count' => (int) $count, 'hidden' => !empty($mine['hidden']),
                 'order' => (int) ($mine['order'] ?? ((int) $code + 1) * 10),
                 'colour' => self::CORNER_COLOURS[((int) $code) % count(self::CORNER_COLOURS)]];
         }
@@ -563,6 +572,7 @@ final class catalogue {
      */
     public static function purge(int $entityid): void {
         \cache::make('local_oksigeniaayvurenda', 'vocabulary')->delete($entityid);
+        \cache::make('local_oksigeniaayvurenda', 'corners')->delete_many([$entityid . '_reading', $entityid . '_bank']);
     }
 
     /**

@@ -67,7 +67,7 @@ $template = [
     'action' => $action,
     'launch' => $launchid,
     'sesskey' => sesskey(),
-    'libraryname' => format_string($library->name),
+    'libraryname' => format_string($library->name, true, ['escape' => false]),
     'wholelabel' => $str('ltipickwhole'),
     'wholehint' => $str('ltipickwholehint'),
     'searchlabel' => $str('ltipicksearch'),

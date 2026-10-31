@@ -37,10 +37,11 @@ final class hook_callbacks {
      */
     public static function primary_extend(primary_extend $hook): void {
         global $DB;
-        if (!isloggedin() || isguestuser() || !\local_oksigeniaayvurenda\local\access::can('local/oksigeniaayvurenda:view', null)) {
+        // The cheap question first: a site without libraries asks nothing more.
+        if (!isloggedin() || isguestuser() || !$DB->record_exists('local_oksigeniaayvurenda_library', [])) {
             return;
         }
-        if (!$DB->record_exists('local_oksigeniaayvurenda_library', [])) {
+        if (!\local_oksigeniaayvurenda\local\access::can('local/oksigeniaayvurenda:view', null)) {
             return;
         }
         $hook->get_primaryview()->add(

@@ -48,7 +48,8 @@ $sm = get_string_manager();
 $libraries = [];
 foreach (catalogue::libraries() as $other) {
     if ((int) $other->entityid === $entityid) {
-        $libraries[] = ['value' => $other->slug, 'label' => format_string($other->name), 'selected' => $other->id == $library->id];
+        $libraries[] = ['value' => $other->slug, 'label' => format_string($other->name, true, ['escape' => false]),
+            'selected' => $other->id == $library->id];
     }
 }
 $locations = [['value' => 0, 'label' => $str('addnolocation')]];

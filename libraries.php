@@ -64,7 +64,7 @@ if (data_submitted() && confirm_sesskey()) {
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
             'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
         ]);
-        $notice = $str('librariescreated', format_string($library->name));
+        $notice = $str('librariescreated', format_string($library->name, true, ['escape' => false]));
     } else if ($do === 'entity') {
         libraries::update_entity(required_param('entity', PARAM_INT), [
             'name' => required_param('name', PARAM_TEXT),
@@ -109,7 +109,7 @@ if (data_submitted() && confirm_sesskey()) {
             'slug' => optional_param('slug', '', PARAM_ALPHANUMEXT),
             'groups' => optional_param_array('groups', [], PARAM_TEXT),
         ]);
-        $notice = $str('librariescreated', format_string($library->name));
+        $notice = $str('librariescreated', format_string($library->name, true, ['escape' => false]));
     } else if ($do === 'library') {
         libraries::update_library(required_param('library', PARAM_INT), [
             'name' => required_param('name', PARAM_TEXT),
@@ -157,7 +157,7 @@ foreach (libraries::all() as $one) {
     $groups = libraries::groups((int) $entity->id);
     $options = fn(int $chosen, int $self = 0) => array_values(array_map(
         fn($l) => ['value' => (int) $l->id,
-        'label' => format_string($l->name), 'selected' => (int) $l->id === $chosen],
+        'label' => format_string($l->name, true, ['escape' => false]), 'selected' => (int) $l->id === $chosen],
         array_filter($one['libraries'], fn($l) => (int) $l->id !== $self)
     ));
     $groupoptions = fn(array $chosen) => array_map(
@@ -179,7 +179,7 @@ foreach (libraries::all() as $one) {
             'count' => number_format((int) $library->copies, 0, '', get_string('thousandssep', 'langconfig')),
             'countword' => $str((int) $library->copies === 1 ? 'librariescopyone' : 'librariescopymany'),
             'id' => (int) $library->id,
-            'name' => format_string($library->name),
+            'name' => format_string($library->name, true, ['escape' => false]),
             'rawname' => $library->name,
             'url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'address' => '/' . $library->slug,
@@ -214,7 +214,7 @@ foreach (libraries::all() as $one) {
     }
     $entities[] = [
         'id' => (int) $entity->id,
-        'name' => format_string($entity->name),
+        'name' => format_string($entity->name, true, ['escape' => false]),
         'rawname' => $entity->name,
         'yearstart' => $entity->yearstart,
         'classifications' => $classifications((string) ($settings['classification'] ?? 'udc')),

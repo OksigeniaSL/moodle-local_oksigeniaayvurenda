@@ -88,12 +88,16 @@ if (!$courseid) {
     $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now)->timeend - 1;
     foreach (readings::demand($library) as $row) {
         foreach ($row['courses'] as $id) {
-            $names[$id] = $names[$id] ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $id]));
+            $names[$id] = $names[$id] ?? format_string(
+                (string) $DB->get_field('course', 'fullname', ['id' => $id]),
+                true,
+                ['escape' => false]
+            );
         }
         $reserved = [];
         foreach ($onreserve[$row['recordid']] ?? [] as $courseid => $r) {
             $reserved[] = ['courseid' => $courseid, 'text' => $str('reserveline', (object) ['course' => $names[$courseid]
-                ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $courseid])),
+                ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $courseid]), true, ['escape' => false]),
                 'copies' => $count($r['copies'], 'readingscopiesone', 'readingscopies'), 'how' => reserves::words($r['days']),
                 'until' => userdate($r['timeend'], get_string('strftimedateshort', 'langconfig'))])];
         }
@@ -118,7 +122,8 @@ if (!$courseid) {
             'short' => !$row['copies'] || $row['waiting'] > 0,
         ];
     }
-    $data = ['heading' => $str('readingsdemandheading', format_string($library->name)), 'intro' => $str('readingsdemandintro'),
+    $data = ['heading' => $str('readingsdemandheading', format_string($library->name, true, ['escape' => false])),
+        'intro' => $str('readingsdemandintro'),
         'titles' => $titles, 'hastitles' => (bool) $titles, 'none' => $str('readingsdemandnone'), 'notice' => $notice,
         'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'reserveuntil' => date('Y-m-d', $yearend),
         'fragmentsurl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $library->slug,
@@ -238,12 +243,12 @@ $topics = array_filter($topics, fn($t) => $t['books']);
 $query = $canedit ? trim(core_text::substr(optional_param('q', '', PARAM_TEXT), 0, 200)) : '';
 $found = $query !== '' ? array_slice(catalogue::search($library, $query)['cards'], 0, 8) : [];
 $data = [
-    'heading' => $str('readingsheading', format_string($course->fullname)),
+    'heading' => $str('readingsheading', format_string($course->fullname, true, ['escape' => false])),
     'risurl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['course' => $course->id,
         'export' => 'ris']))->out(false),
     'biburl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['course' => $course->id,
         'export' => 'bibtex']))->out(false),
-    'intro' => $str('readingsintro', format_string($library->name)),
+    'intro' => $str('readingsintro', format_string($library->name, true, ['escape' => false])),
     'notice' => $notice,
     'canedit' => $canedit,
     'action' => $PAGE->url->out(false),

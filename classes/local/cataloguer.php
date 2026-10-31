@@ -59,7 +59,7 @@ final class cataloguer {
                 ['recordid' => $record->id]
             );
             $list[] = ['id' => (int) $record->id, 'title' => $record->title, 'copies' => array_values(array_map(
-                fn($c) => ['library' => format_string($c->name), 'count' => (int) $c->copies],
+                fn($c) => ['library' => format_string($c->name, true, ['escape' => false]), 'count' => (int) $c->copies],
                 $copies
             ))];
         }
@@ -188,7 +188,8 @@ final class cataloguer {
     }
 
     /**
-     * Takes back an addition just made: its copies, never lent, and the record if it was new and has no others.
+     * Takes back an addition just made (today): its copies, never lent, and the record if it was new, has no other copies
+     * and nothing else hangs from it.
      *
      * @param int $entityid
      * @param int $recordid
@@ -202,16 +203,27 @@ final class cataloguer {
             return false;
         }
         [$in, $params] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
-        if ($DB->record_exists_select(self::T . 'loan', 'itemid ' . $in, $params)) {
+        if (
+            $DB->record_exists_select(self::T . 'loan', 'itemid ' . $in, $params)
+            || $DB->record_exists_select(self::T . 'reserve', 'itemid ' . $in, $params)
+        ) {
             return false;
         }
+        // Only what was just added (today) is taken back, never older copies or an older record passed by mistake.
+        $since = time() - DAYSECS;
         $transaction = $DB->start_delegated_transaction();
         $DB->delete_records_select(
             self::T . 'item',
-            "entityid = :entityid AND recordid = :recordid AND id $in",
-            $params + ['entityid' => $entityid, 'recordid' => $recordid]
+            "entityid = :entityid AND recordid = :recordid AND id $in AND timecreated >= :since",
+            $params + ['entityid' => $entityid, 'recordid' => $recordid, 'since' => $since]
         );
-        if ($newrecord && !$DB->record_exists(self::T . 'item', ['recordid' => $recordid])) {
+        $fresh = $DB->record_exists_select(self::T . 'record', 'id = :id AND timecreated >= :since', ['id' => $recordid,
+            'since' => $since]);
+        $held = false;
+        foreach (['digital', 'review', 'hold', 'readingitem'] as $table) {
+            $held = $held || $DB->record_exists(self::T . $table, ['recordid' => $recordid]);
+        }
+        if ($newrecord && $fresh && !$held && !$DB->record_exists(self::T . 'item', ['recordid' => $recordid])) {
             $DB->delete_records(self::T . 'recauth', ['recordid' => $recordid]);
             $DB->delete_records(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid]);
             covers::remove($recordid);

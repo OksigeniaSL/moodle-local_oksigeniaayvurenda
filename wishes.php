@@ -52,7 +52,7 @@ $done = optional_param('done', '', PARAM_ALPHA);
 
 $items = array_map(fn($w) => [
     'id' => (int) $w->id,
-    'title' => format_string($w->title),
+    'title' => format_string($w->title, true, ['escape' => false]),
     'note' => (string) $w->note,
     'from' => $str('wishesfrom', (object) ['group' => $w->groupname,
         'when' => userdate((int) $w->timemodified, get_string('strftimedateshort', 'langconfig'))]),

@@ -49,8 +49,12 @@ if (!$DB->record_exists('local_oksigeniaayvurenda_reader', ['id' => $readerid, '
 }
 $contract = bank::contract($library, $readerid, time());
 $data = [
-    'centre' => format_string($DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $library->entityid])),
-    'library' => format_string($library->name),
+    'centre' => format_string(
+        $DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $library->entityid]),
+        true,
+        ['escape' => false]
+    ),
+    'library' => format_string($library->name, true, ['escape' => false]),
     'title' => $str('contracttitle'),
     'who' => $str('contractwho', (object) ['name' => $contract['name'], 'group' => $contract['group'],
         'year' => $contract['year']]),

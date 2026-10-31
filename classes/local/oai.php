@@ -154,7 +154,7 @@ final class oai {
             $records = self::records($library);
             $earliest = $records ? min(array_column($records, 'datestamp')) : time();
             $xml->startElement('Identify');
-            $xml->writeElement('repositoryName', format_string($library->name));
+            $xml->writeElement('repositoryName', format_string($library->name, true, ['escape' => false]));
             $xml->writeElement('baseURL', self::base($library));
             $xml->writeElement('protocolVersion', '2.0');
             $xml->writeElement('adminEmail', \core_user::get_support_user()->email);
@@ -333,7 +333,7 @@ final class oai {
         if ($record['summary'] !== '') {
             $xml->writeElementNs('dc', 'description', null, \core_text::substr(strip_tags($record['summary']), 0, 4000));
         }
-        $xml->writeElementNs('dc', 'publisher', null, format_string($library->name));
+        $xml->writeElementNs('dc', 'publisher', null, format_string($library->name, true, ['escape' => false]));
         $xml->writeElementNs('dc', 'date', null, preg_match('/^\d{4}$/', $record['pubyear']) ? $record['pubyear']
             : gmdate('Y-m-d', $record['datestamp']));
         $xml->writeElementNs('dc', 'type', null, 'Text');

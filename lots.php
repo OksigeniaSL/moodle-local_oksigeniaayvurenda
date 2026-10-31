@@ -106,7 +106,7 @@ if ($id) {
     $suggestions = $q !== '' ? lots::suggest($lot, $q) : [];
     $data = [
         'heading' => $str('lottitle', $lot->name),
-        'where' => $str('lotwhere', (object) ['to' => format_string($others[$lot->tolibraryid] ?? ''),
+        'where' => $str('lotwhere', (object) ['to' => format_string($others[$lot->tolibraryid] ?? '', true, ['escape' => false]),
             'due' => $date($lot->timedue) ?: '—']),
         'notice' => $said !== '' ? $str('lotsaid' . $said, optional_param('title', '', PARAM_TEXT))
             : ($q !== '' && !$suggestions ? $str('lotnosuggest', $q) : ''),
@@ -155,7 +155,7 @@ $row = fn(array $e) => [
     'late' => $e['lot']->status === 'out' && $e['lot']->timedue && $e['lot']->timedue < $now,
     'counts' => $str('lotcounts', (object) ['copies' => $e['copies'], 'lent' => $e['lent'], 'missing' => $e['missing']]),
     'other' => format_string($others[$e['lot']->libraryid === $library->id ? $e['lot']->tolibraryid : $e['lot']->libraryid]
-        ?? ''),
+        ?? '', true, ['escape' => false]),
 ];
 $data = [
     'heading' => $str('lotstitle'),
@@ -164,7 +164,11 @@ $data = [
     'received' => array_map($row, $all['received']),
     'action' => $url(),
     'sesskey' => sesskey(),
-    'others' => array_map(fn($id, $name) => ['id' => $id, 'name' => format_string($name)], array_keys($others), $others),
+    'others' => array_map(
+        fn($id, $name) => ['id' => $id, 'name' => format_string($name, true, ['escape' => false])],
+        array_keys($others),
+        $others
+    ),
     'hasothers' => (bool) $others,
 ];
 $data['hassent'] = (bool) $data['sent'];

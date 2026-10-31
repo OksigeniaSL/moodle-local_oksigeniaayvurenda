@@ -107,13 +107,13 @@ final class copies {
             $counts[$table] = $count;
         }
         $entity = $DB->get_record(self::T . 'entity', ['id' => $entityid], '*', MUST_EXIST);
-        $counts['marc'] = self::marc($entityid, format_string($entity->name), $dir);
+        $counts['marc'] = self::marc($entityid, format_string($entity->name, true, ['escape' => false]), $dir);
         $zip->addFile($dir . '/catalogo.mrc', 'catalogo.mrc');
         $zip->addFile($dir . '/catalogo.xml', 'catalogo.xml');
         $zip->addFile($dir . '/catalogo-dc.xml', 'catalogo-dc.xml');
         $zip->addFile($dir . '/catalogo.ris', 'catalogo.ris');
         $zip->addFromString('LEEME.txt', get_string('copyreadme', 'local_oksigeniaayvurenda', (object) [
-            'entity' => format_string($entity->name),
+            'entity' => format_string($entity->name, true, ['escape' => false]),
             'date' => userdate($now, get_string('strftimedatetime', 'langconfig')),
             'counts' => json_encode($counts, JSON_PRETTY_PRINT),
             'release' => get_config('local_oksigeniaayvurenda', 'release'),
@@ -203,7 +203,7 @@ final class copies {
             );
             foreach ($rows as $row) {
                 $items[$row->recordid][] = ['barcode' => $row->barcode, 'serial' => $row->serial,
-                    'library' => format_string($row->library), 'location' => $row->location,
+                    'library' => format_string($row->library, true, ['escape' => false]), 'location' => $row->location,
                     'callnumber' => [$row->callnumber1, $row->callnumber2, $row->callnumber3]];
             }
             $rows->close();

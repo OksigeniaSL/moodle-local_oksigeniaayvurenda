@@ -86,7 +86,7 @@ foreach ($posters as $i => $poster) {
 $data = [
     'heading' => $str('posterstitle'),
     'hint' => $str('postershint'),
-    'library' => format_string($library->name),
+    'library' => format_string($library->name, true, ['escape' => false]),
     'scan' => $str('postersscan'),
     'printnow' => $str('printnow'),
     'empty' => $str('postersempty'),

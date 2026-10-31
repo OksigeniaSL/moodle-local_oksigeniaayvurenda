@@ -44,7 +44,13 @@ final class access {
         global $DB;
         $entityid = self::entity_of($where);
         if ($entityid) {
-            $categoryid = (int) $DB->get_field(self::T . 'entity', 'categoryid', ['id' => $entityid]);
+            // Asked many times a page: kept for the request.
+            $cache = \cache::make('local_oksigeniaayvurenda', 'access');
+            $categoryid = $cache->get('category_' . $entityid);
+            if ($categoryid === false) {
+                $categoryid = (int) $DB->get_field(self::T . 'entity', 'categoryid', ['id' => $entityid]);
+                $cache->set('category_' . $entityid, $categoryid);
+            }
             if ($categoryid) {
                 $context = \context_coursecat::instance($categoryid, IGNORE_MISSING);
                 if ($context) {
@@ -75,7 +81,7 @@ final class access {
         if (!$entityid) {
             // With centres apart, looking up is only ever in a centre: the site's grant to everyone does not count.
             return (!($view && self::apart()) && has_capability($capability, \context_system::instance(), $userid)) ||
-                (bool) self::entities($capability, $userid);
+                self::anywhere($capability, $userid);
         }
         if (!$view) {
             return has_capability($capability, self::context($entityid), $userid);
@@ -122,6 +128,33 @@ final class access {
         if (!self::can($capability, $where)) {
             throw new \required_capability_exception(self::context($where), $capability, 'nopermissions', '');
         }
+    }
+
+    /**
+     * Whether someone may do something in at least one centre: it stops at the first (the site's menu asks it on every
+     * page of Moodle).
+     *
+     * @param string $capability
+     * @param int $userid
+     * @return bool
+     */
+    private static function anywhere(string $capability, int $userid): bool {
+        global $DB;
+        $cache = \cache::make('local_oksigeniaayvurenda', 'access');
+        $key = 'anywhere_' . md5($capability . '/' . $userid);
+        $known = $cache->get($key);
+        if ($known !== false) {
+            return (bool) $known;
+        }
+        $found = false;
+        foreach ($DB->get_fieldset_select(self::T . 'entity', 'id', '1 = 1') as $entityid) {
+            if (!practice::is((int) $entityid) && self::can($capability, (int) $entityid, $userid)) {
+                $found = true;
+                break;
+            }
+        }
+        $cache->set($key, $found ? 1 : 0);
+        return $found;
     }
 
     /**
@@ -262,6 +295,8 @@ final class access {
             ])->id;
         }
         $DB->set_field(self::T . 'entity', 'categoryid', $categoryid, ['id' => $entityid]);
+        // What was kept of who may do what no longer holds.
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
         return $categoryid;
     }
 

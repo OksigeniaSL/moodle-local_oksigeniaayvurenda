@@ -222,25 +222,31 @@ final class garden {
         ) ? $str('udc' . $c) : $c), $codes);
         $told = [];
         $finished = [];
+        // The quotes and the commas of the language of the page.
+        $sep = get_string('listsep', 'langconfig') . ' ';
         foreach (array_reverse($loans) as $loan) {
             if (!empty($loan['note']) && count($told) < 4) {
                 $told[] = $str('cardtold', (object) ['title' => $loan['title'], 'note' => $str('cardnote' . $loan['note'])]);
             }
+            $quoted = $str('cardquoted', $loan['title']);
             if (
-                $loan['returned'] && $loan['note'] !== 'unfinished' && count($finished) < 4 &&
-                    !in_array('«' . $loan['title'] . '»', $finished, true)
+                $loan['returned'] && $loan['note'] !== 'unfinished' && count($finished) < 4 && !in_array(
+                    $quoted,
+                    $finished,
+                    true
+                )
             ) {
-                $finished[] = '«' . $loan['title'] . '»';
+                $finished[] = $quoted;
             }
         }
-        $stay = $finished ? implode(', ', $finished) : $str('cardnofinished');
+        $stay = $finished ? implode($sep, $finished) : $str('cardnofinished');
         $series = self::series_half_read($reader, array_values(array_unique(array_column($loans, 'recordid'))));
         if ($series) {
-            $stay .= '. ' . $str('cardseries', implode(', ', $series));
+            $stay = $str('cardstayseries', (object) ['finished' => $stay, 'series' => $str('cardseries', implode($sep, $series))]);
         }
         return [
             'back' => $back,
-            'explore' => $corners ? implode(', ', $corners) : $str('cardnocorner'),
+            'explore' => $corners ? implode($sep, $corners) : $str('cardnocorner'),
             'tell' => $told ? implode(' · ', $told) : $str('cardnotold'),
             'stay' => $stay,
         ];
