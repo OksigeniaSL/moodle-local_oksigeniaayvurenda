@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.103.1 (2026-10-31)
+
+- The sky's medallion on the card wears a thin ring of cream paper and a soft shadow, so that it stands apart from the
+  card's green as the flower does on its plate (Gaudí's review).
+
 ## 0.103.0 (2026-10-31)
 
 - The card's drawing by Gaudí, in cut paper, when the art package brings it (`pix/carne/flor/` and `pix/carne/cielo/`,

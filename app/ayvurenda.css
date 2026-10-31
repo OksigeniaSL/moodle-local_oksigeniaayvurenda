@@ -3369,3 +3369,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-card-flower .ayv-layered { width: 100% !important; }
 .ayv .ayv-profile-drawing .ayv-layered { width: 7.5rem !important; }
 .ayv .ayv-garden li > .ayv-layered { padding: 8px; border-radius: 50%; background: var(--ayv-plate); box-sizing: content-box; }
+
+/* The sky's medallion on the card: a thin ring of paper and a soft shadow, so that it reads as a piece apart from the
+   card's green, as the flower does on its cream plate (Gaudí, 31 October 2026). */
+.ayv .ayv-card-face .ayv-card-flower.ayv-card-sky { box-shadow: 0 0 0 3px #efe3c4, 0 12px 24px -12px rgba(0, 0, 0, .55); }
