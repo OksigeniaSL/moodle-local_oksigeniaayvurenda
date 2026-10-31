@@ -1527,6 +1527,9 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-button-busy::before { animation: none; border-right-color: currentColor; opacity: .5; }
 }
+/* The skin of a university or academy: the interface in the font the adult already uses everywhere (no download);
+   titles and records stay in Literata. */
+.ayv.ayv-skin-university { --text: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
 /* The way back to Moodle, in the header. */
 .ayv .ayv-nav-exit {
     min-height: 40px;

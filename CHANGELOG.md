@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.79.0 (2026-10-31)
+
+- The skin of a centre's library, first part: each centre chooses in its settings whether its library is a school's
+  (as until now), a secondary school's, or a university's or academy's. Every page carries the skin's class; at a
+  university or academy the interface goes to the system's font (titles and records stay in Literata) and the characters
+  are a portrait and a signature: they stand whole nowhere and have no voice of their own. Each reader's own step by age
+  goes on under every skin. The skins' own art and words come next.
+
 ## 0.78.0 (2026-10-31)
 
 - Guided helps for free works and for who keeps a library, from their pages and from «How do I…?», where who keeps a

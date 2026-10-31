@@ -113,6 +113,7 @@ final class libraries {
             'settings' => json_encode(self::entity_settings($settings, $data)),
             'timemodified' => $now ?? time(),
         ]);
+        skins::forget($entityid);
     }
 
     /**
@@ -403,6 +404,9 @@ final class libraries {
         }
         if (isset($data['reviewsign'])) {
             $settings['reviewsign'] = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : 'name';
+        }
+        if (isset($data['skin'])) {
+            $settings['skin'] = in_array($data['skin'], skins::SKINS, true) ? $data['skin'] : skins::SKINS[0];
         }
         // The stages that play no class challenge; all play when none is listed.
         if (array_key_exists('challengesoff', $data)) {

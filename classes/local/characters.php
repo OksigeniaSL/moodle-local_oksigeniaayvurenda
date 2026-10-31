@@ -290,6 +290,8 @@ final class characters {
         }
         $sm = get_string_manager();
         $own = !empty($character['own']);
+        // At a university or academy they are a portrait and a signature: they do not stand whole nor move.
+        $pose = skins::lively($entityid) ? $pose : '';
         $step = $pose !== '' && !$own ? self::step($entityid) : '';
         // A character of the centre's own stands as it drew it, when it drew it whole; else, only its portrait.
         $figure = $pose === '' ? null : ($own ? self::own_figure($entityid, $role, $pose) : self::figure($role, $pose, $step));

@@ -32,6 +32,7 @@
                 "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
             "staffpart": {"staffparthint": "Da el rol de bibliotecario en la categoría del centro.", "staffentity": 1,
                 "staffassign": "#"},
+            "skins": [{"value": "school", "label": "Colegio", "selected": true}],
             "reviewsigns": [{"value": "name", "label": "Nombre y grupo", "selected": true}],
             "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
@@ -156,6 +157,7 @@
                 {{#cardlooks}}<label class="ayv-field">{{stage}} <input type="hidden" name="cardstage[]" value="{{stage}}">
                     <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
             </fieldset>
+            <label class="ayv-field">{{librariesskin}} <span class="ayv-field-hint">{{librariesskinhint}}</span> <select name="skin">{{#skins}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/skins}}</select></label>
             <label class="ayv-field">{{librariesreviewsign}} <select name="reviewsign">{{#reviewsigns}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/reviewsigns}}</select></label>
             <fieldset class="ayv-fieldset"><legend>{{librarieschallenges}}</legend>
                 <p class="ayv-field-hint">{{librarieschallengeshint}}</p>

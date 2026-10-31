@@ -1,0 +1,58 @@
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+namespace local_oksigeniaayvurenda\local;
+
+/**
+ * Tests for the skin of a centre's library.
+ *
+ * @package    local_oksigeniaayvurenda
+ * @category   test
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \local_oksigeniaayvurenda\local\skins
+ */
+#[\PHPUnit\Framework\Attributes\CoversClass(skins::class)]
+final class skins_test extends \advanced_testcase {
+    /**
+     * A centre is a school until it chooses; at a university or academy its characters are a portrait and a signature,
+     * standing nowhere whole and with no voice; back to a school, they come alive again.
+     */
+    public function test_skin(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $this->assertSame('school', skins::of($entityid));
+        $this->assertTrue(skins::lively($entityid));
+        libraries::update_entity($entityid, ['skin' => 'university']);
+        $this->assertSame('university', skins::of($entityid));
+        $this->assertFalse(skins::lively($entityid));
+        $said = characters::say($entityid, 'herald', 'heraldnew', [], 'saluda');
+        $this->assertNull($said['figure']);
+        $this->assertSame('', $said['puppet']);
+        $this->assertSame(characters::of($entityid)['herald']['portrait'], $said['portrait']);
+        libraries::update_entity($entityid, ['skin' => 'nonsense']);
+        $this->assertSame('school', skins::of($entityid));
+        $this->assertSame(characters::figure('herald', 'saluda'), characters::say(
+            $entityid,
+            'herald',
+            'heraldnew',
+            [],
+            'saluda'
+        )['figure']);
+    }
+}

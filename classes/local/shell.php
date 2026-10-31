@@ -273,6 +273,8 @@ final class shell {
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
         $howto = self::howto_box($library, $base);
+        // The skin of the library's centre: what changes in the look hangs from its class.
+        $skin = skins::of($library ? (int) $library->entityid : 0);
         echo '<!DOCTYPE html>
 <html lang="' . s($lang) . '"' . self::colour_mode() . '>
 <head>
@@ -287,7 +289,8 @@ final class shell {
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="' . $app . 'emblema-pequeno.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="' . $app . 'apple-touch-icon.png">
-<link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2" crossorigin>
+' . ($skin === 'university' ? '' : '<link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2"
+    crossorigin>') . '
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">
@@ -302,7 +305,7 @@ final class shell {
     query.addEventListener(\'change\', resolve);
 })();</script>
 </head>
-<body class="ayv' . ($howto !== '' ? ' ayv-has-howto' : '') . '">
+<body class="ayv ayv-skin-' . $skin . ($howto !== '' ? ' ayv-has-howto' : '') . '">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
 <header class="ayv-top">
 <a class="ayv-brand" href="' . s($home) . '"><img class="ayv-brand-light" src="' . $app . 'emblema.svg" alt="" width="44"

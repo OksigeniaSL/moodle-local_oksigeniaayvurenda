@@ -77,6 +77,7 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param_array('cardlook', [], PARAM_ALPHA)
             ) ?: [],
             'reviewsign' => optional_param('reviewsign', 'name', PARAM_ALPHA),
+            'skin' => optional_param('skin', 'school', PARAM_ALPHA),
             // The stages listed on the form whose box is left empty play no class challenge.
             'challengesoff' => array_values(array_diff(
                 optional_param_array('challengestage', [], PARAM_TEXT),
@@ -232,6 +233,11 @@ foreach (libraries::all() as $one) {
                 )
             )];
         }, \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'skins' => array_map(
+            fn($s) => ['value' => $s, 'label' => $str('skin' . $s),
+            'selected' => $s === \local_oksigeniaayvurenda\local\skins::of((int) $entity->id)],
+            \local_oksigeniaayvurenda\local\skins::SKINS
+        ),
         'reviewsigns' => array_map(fn($s) => ['value' => $s, 'label' => $str('reviewsign' . $s),
             'selected' => $s === ($settings['reviewsign'] ?? 'name')], \local_oksigeniaayvurenda\local\reviews::SIGNS),
         'challengestages' => array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
@@ -276,7 +282,8 @@ foreach (
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
-        'librarieschallengeshint', 'librariesreviewsign', 'librariesplan', 'librariesplanhint', 'planname', 'plancopies',
+        'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplan',
+        'librariesplanhint', 'planname', 'plancopies',
         'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',
         'librariesreadersopen', 'librariesreadersopenhint', 'librarieskeptby', 'librarieskeepers', 'librarieskeepershint',
         'librarieskeepersgo'] as $key

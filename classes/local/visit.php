@@ -669,6 +669,10 @@ final class visit {
      * @return string JSON: what the script calls each one => its address, for those that have one.
      */
     private static function voices(\stdClass $library, string $role, array $keys): string {
+        // At a university or academy the characters have no voice of their own.
+        if (!skins::lively((int) $library->entityid)) {
+            return '{}';
+        }
         $who = $role === 'memory' ? 'memoria'
             : ((characters::of((int) $library->entityid)['herald']['sex'] ?? 'm') === 'f' ? 'herald-f' : 'herald-m');
         $lang = substr(current_language(), 0, 2);
