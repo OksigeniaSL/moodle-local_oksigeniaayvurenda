@@ -25,6 +25,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\loan_rules;
+use local_oksigeniaayvurenda\core\group_order;
 
 /**
  * The late loans of a library, by group, for the staff: who, which book and since when. Also the list for the end of
@@ -75,8 +76,9 @@ final class late {
         }
         $list = [];
         foreach ($groups as $group => $lines) {
-            $list[] = ['group' => $group, 'lines' => $lines];
+            $list[] = ['group' => (string) $group, 'lines' => $lines];
         }
+        usort($list, fn($a, $b) => group_order::compare($a['group'], $b['group']));
         return $list;
     }
 }

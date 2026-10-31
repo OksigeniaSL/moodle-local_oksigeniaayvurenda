@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\group_order;
+
 /**
  * The teacher is not a librarian and has no scanner: a Chromebook, twenty-five children and five minutes. The children
  * of its groups by name, the books of the shelf by cover: a name and a cover lend it, until the end of the school year;
@@ -113,7 +115,10 @@ final class shelf {
             $children[] = ['id' => (int) $row->id, 'name' => $name !== '' ? $name : $row->cardcode,
                 'group' => (string) $row->groupname, 'has' => (int) $row->has];
         }
-        usort($children, fn($a, $b) => strnatcasecmp($a['group'], $b['group']) ?: strcoll($a['name'], $b['name']));
+        usort($children, fn($a, $b) => group_order::compare(
+            (string) $a['group'],
+            (string) $b['group']
+        ) ?: strcoll($a['name'], $b['name']));
         return $children;
     }
 

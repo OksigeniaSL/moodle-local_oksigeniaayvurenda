@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\group_order;
+
 /**
  * Each set of a bank is a grade's textbooks (its titles) for the groups it serves; a pupil gets the set of their group
  * this year, lent until the year ends, with the state of each copy noted when it goes and when it comes back. What the
@@ -254,7 +256,7 @@ final class bank {
                 'holding' => (int) ($held[$group]->holding ?? 0), 'out' => (int) ($held[$group]->lent ?? 0),
                 'waiting' => count(array_filter($roll, fn($p) => $p['missing']))];
         }
-        usort($out, fn($a, $b) => strnatcasecmp($a['group'], $b['group']));
+        usort($out, fn($a, $b) => group_order::compare((string) $a['group'], (string) $b['group']));
         return $out;
     }
 

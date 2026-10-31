@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\group_order;
+
 /**
  * Who is the tutor of each group in a school year, to hear about late books. Where the platform of the centre does not
  * say it, the librarian chooses it once a year; the screen proposes last year's tutor of a group with the same name.
@@ -45,6 +47,7 @@ final class tutors {
             'SELECT DISTINCT m.groupname FROM {' . self::T . 'member} m WHERE m.yearid = :yearid ORDER BY m.groupname',
             ['yearid' => $yearid]
         );
+        usort($names, fn($a, $b) => group_order::compare((string) $a, (string) $b));
         $current = $DB->get_records_menu(self::T . 'tutor', ['yearid' => $yearid], '', 'groupname, userid');
         $year = $DB->get_record(self::T . 'year', ['id' => $yearid], '*', MUST_EXIST);
         $previous = $DB->get_records_select(

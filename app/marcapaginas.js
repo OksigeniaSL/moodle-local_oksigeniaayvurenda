@@ -77,6 +77,10 @@ function ayvBookmark(options) {
         }
         span = Math.max(1, window.innerHeight - 2 * PAD);
         heads = Array.from(root.querySelectorAll('h2')).filter((el) => el.offsetParent !== null && el.textContent.trim());
+        // A notch per section of the page, not per item of a long list: more than twelve say nothing.
+        if (heads.length > 12) {
+            heads = [];
+        }
         tabs.innerHTML = '';
         heads.forEach((el) => {
             const y = el.getBoundingClientRect().top + window.scrollY;
@@ -86,6 +90,13 @@ function ayvBookmark(options) {
             tab.style.top = `${PAD + span * Math.min(1, y / docH)}px`;
             tab.dataset.name = el.textContent.trim();
             tab.dataset.index = String(tabs.children.length);
+            // Its name, while the pointer is on the notch.
+            tab.addEventListener('mouseenter', () => {
+                name.textContent = tab.dataset.name;
+                name.style.top = tab.style.top;
+                name.classList.add('on');
+            });
+            tab.addEventListener('mouseleave', () => name.classList.remove('on'));
             tabs.appendChild(tab);
             el.ayvY = y;
         });
@@ -111,7 +122,8 @@ function ayvBookmark(options) {
         if (now !== current) {
             current = now;
             Array.from(tabs.children).forEach((t, i) => t.classList.toggle('on', i === now));
-            if (now >= 0) {
+            // The name of the section, only while dragging the edge (it covered the text when it came up on its own).
+            if (now >= 0 && dragging) {
                 const tab = tabs.children[now];
                 name.textContent = tab.dataset.name;
                 name.style.top = tab.style.top;

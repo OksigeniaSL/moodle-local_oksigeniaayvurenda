@@ -206,69 +206,68 @@ final class shell {
         foreach ($options['scripts'] ?? [] as $script) {
             $scripts .= '<script src="' . $app . $script . '.js?v=' . $version . '"></script>' . "\n";
         }
+        global $OUTPUT, $USER;
+        // The same doors on every page (menu::doors), the one you are in marked; then the way back to Moodle.
+        $doors = $library ? menu::doors($library, (int) ($USER->id ?? 0)) : [];
+        if (!$library && access::can('local/oksigeniaayvurenda:manage', null)) {
+            $doors[] = ['key' => 'libraries', 'url' => $base . 'libraries.php', 'label' => $str('navlibraries'),
+                'current' => menu::here() === 'libraries.php'];
+        }
+        if ($library && !access::can('local/oksigeniaayvurenda:desk', $library) && count(catalogue::visible()) > 1) {
+            $doors[] = ['key' => 'libraries', 'url' => $base . 'index.php', 'label' => $str('navlibraries'), 'current' => false];
+        }
         $nav = '';
+        $sheet = '';
+        foreach ($doors as $door) {
+            $on = $door['current'] ? ' ayv-nav-on' : '';
+            if ($door['key'] === 'more') {
+                $nav .= '<button type="button" class="ayv-nav ayv-nav-more' . $on . '" data-ayv-open="ayv-more"'
+                    . ' aria-haspopup="dialog">' . s($door['label']) . '</button>';
+                $parts = '';
+                foreach ($door['groups'] as $group) {
+                    $items = '';
+                    foreach ($group['links'] as $link) {
+                        $items .= '<li><a class="ayv-more-link" href="' . s($link['url']) . '"'
+                            . ($link['current'] ? ' aria-current="page"' : '') . '>' . s($link['label']) . '</a></li>';
+                    }
+                    $parts .= '<section class="ayv-more-group"><h4>' . s($group['title']) . '</h4><ul>' . $items
+                        . '</ul></section>';
+                }
+                $sheet = '<dialog class="ayv-modal ayv-more" id="ayv-more" aria-labelledby="ayv-more-title">'
+                    . '<div class="ayv-modal-head"><h3 id="ayv-more-title" class="ayv-section-title">' . s($door['label'])
+                    . '</h3><form method="dialog">'
+                    . '<button class="ayv-modal-close" aria-label="' . $str('librariesclose') . '">'
+                    . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_x', []) . '</button></form></div>'
+                    . '<div class="ayv-more-groups">' . $parts . '</div></dialog>';
+                continue;
+            }
+            $nav .= '<a class="ayv-nav' . $on . '" href="' . s($door['url']) . '"'
+                . ($door['current'] ? ' aria-current="page"' : '') . '>' . s($door['label']) . '</a>';
+        }
+        // The way back to Moodle, always at the end and in sight, but quiet.
+        $mine = isloggedin() && !isguestuser();
+        $nav .= '<a class="ayv-nav-out" href="' . s($CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
+            . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname)))
+            . ' <span aria-hidden="true">→</span></a>';
+        $nav = '<nav class="ayv-navs" aria-label="' . $str('menulabel') . '">' . $nav . '</nav>';
+        // What only this page needs (back to a course, its guided help), in a small row, without what the header has.
         $links = $options['nav'] ?? [];
         if (isset($links['url'])) {
             $links = [$links];
         }
-        // First the library's catalogue, where everyone goes back most (marked when you are on it); then the page's own
-        // links and the global ones (the libraries; the desk for the staff), without repeating one.
-        $catalogue = '';
-        $seen = [];
-        if ($library) {
-            global $OUTPUT, $PAGE;
-            $here = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/local/oksigeniaayvurenda/' .
-                ($outsider && str_contains($home, 'public.php') ? 'public.php' : 'index.php'));
-            $seen[$home] = true;
-            $catalogue = '<a class="ayv-nav ayv-nav-home" href="' . s($home) . '"' . ($here ? ' aria-current="page"' : '') . '>'
-                . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_book', []) . ' '
-                . s(get_string('deskcatalogue', 'local_oksigeniaayvurenda')) . '</a>';
-            // The shelves, as they stand in the room.
-            $stacks = $base . 'stacks.php?library=' . rawurlencode($library->slug);
-            $onstacks = $PAGE->has_set_url() && str_ends_with($PAGE->url->get_path(), '/local/oksigeniaayvurenda/stacks.php');
-            $seen[$stacks] = true;
-            $catalogue .= '<a class="ayv-nav ayv-nav-stacks" href="' . s($stacks) . '"' . ($onstacks ? ' aria-current="page"' : '')
-                . '>' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_shelf', []) . ' '
-                . s(get_string('stacksnav', 'local_oksigeniaayvurenda')) . '</a>';
-        }
-        // A tutor's class: the challenge of the term, which the tutor chooses.
-        global $USER;
-        if ($library && challenges::tutored((int) $library->entityid, (int) ($USER->id ?? 0))) {
-            $links[] = ['url' => $base . 'class.php?library=' . rawurlencode($library->slug),
-                'label' => get_string('classnav', 'local_oksigeniaayvurenda')];
-        }
-        // The libraries: to choose one; for whoever manages them, their page, whose cards also go in (one link, not two).
-        $manage = access::can('local/oksigeniaayvurenda:manage', $library);
-        if (count(catalogue::visible()) > 1 || $manage) {
-            $links[] = ['url' => $base . ($manage ? 'libraries.php' : 'index.php'),
-                'label' => get_string('navlibraries', 'local_oksigeniaayvurenda')];
-        }
-        if ($library && access::can('local/oksigeniaayvurenda:desk', $library)) {
-            $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($library->slug),
-                'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
-        } else if ($library) {
-            // Whoever keeps a library of this centre goes to its desk from anywhere in it.
-            foreach (keepers::libraries((int) ($USER->id ?? 0)) as $kept) {
-                if ((int) $kept->entityid === (int) $library->entityid) {
-                    $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($kept->slug),
-                        'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
-                    break;
-                }
-            }
-        }
-        $nav = $catalogue;
+        $covered = menu::covered($doors);
+        $row = '';
         foreach ($links as $link) {
-            if (isset($seen[$link['url']])) {
+            $page = basename((string) parse_url($link['url'], PHP_URL_PATH));
+            $inside = str_contains($link['url'], '/local/oksigeniaayvurenda/');
+            if ($inside && in_array($page, $covered, true)) {
                 continue;
             }
-            $seen[$link['url']] = true;
-            $nav .= '<a class="ayv-nav" href="' . s($link['url']) . '">' . s($link['label']) . '</a>';
+            $row .= '<a class="ayv-subnav-link" href="' . s($link['url']) . '">' . s($link['label']) . '</a>';
         }
-        // The way back to Moodle, always at the end and in sight.
-        $mine = isloggedin() && !isguestuser();
-        $nav .= '<a class="ayv-nav ayv-nav-exit" href="' . s($CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
-            . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname))) . '</a>';
-        $nav = '<nav class="ayv-navs">' . $nav . '</nav>';
+        // The sheet of «More» goes in the page, not in the header (a dialog inside the header is not centred).
+        $main = $sheet . ($row !== '' ? '<nav class="ayv-subnav" aria-label="' . $str('menuthispage') . '">' . $row . '</nav>' : '')
+            . $main;
         $name = $library ? format_string($library->name) : get_string('pluginname', 'local_oksigeniaayvurenda');
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');

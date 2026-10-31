@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\group_order;
+
 /**
  * Six reports that answer what libraries are asked, instead of a report builder: loans by period and group, late
  * books, the most lent, the never lent (to weed), the holdings by subject and age, and the school year for the
@@ -66,7 +68,7 @@ final class reports {
             $list[] = ['label' => $row->groupname, 'value' => (int) $row->loans, 'readers' => (int) $row->readers,
                 'members' => (int) ($members[$row->groupname] ?? 0)];
         }
-        usort($list, fn($a, $b) => strnatcmp($a['label'], $b['label']));
+        usort($list, fn($a, $b) => group_order::compare((string) $a['label'], (string) $b['label']));
         return ['rows' => $list, 'total' => $total];
     }
 

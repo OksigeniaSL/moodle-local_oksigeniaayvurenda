@@ -26,6 +26,7 @@ namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\hold_rules;
 use local_oksigeniaayvurenda\core\loan_rules;
+use local_oksigeniaayvurenda\core\group_order;
 
 /**
  * A reader asks for a book that is out, online if their stage may or at the desk. When a copy comes back, the desk says
@@ -82,8 +83,7 @@ final class holds {
             ['yearid' => $year->id]
         );
         $stages = array_values(array_filter(array_map('strval', $stages), fn($s) => trim($s) !== ''));
-        sort($stages, SORT_NATURAL | SORT_FLAG_CASE);
-        return $stages;
+        return group_order::stages($stages);
     }
 
     /**

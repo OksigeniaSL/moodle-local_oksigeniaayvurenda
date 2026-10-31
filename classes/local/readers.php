@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\group_order;
+
 /**
  * The groups of this school year with their readers, and each reader with the code of the card and what they have
  * out. For the staff: to find a card, see a group before the class comes, or print the cards later.
@@ -56,6 +58,8 @@ final class readers {
         foreach ($rows as $row) {
             $groups[] = ['name' => $row->groupname, 'stage' => (string) $row->stage, 'count' => (int) $row->readers];
         }
+        // As a school lists them: by stage, year and letter.
+        usort($groups, fn($a, $b) => group_order::compare((string) $a['name'], (string) $b['name'], $a['stage'], $b['stage']));
         return $groups;
     }
 

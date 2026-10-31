@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.96.0 (2026-10-31)
+
+- The same header on every page (`classes/local/menu.php`), after a design review of every screen: for the staff,
+  the desk, the catalogue, the readers, the reports and «More», a sheet with the rest in groups (lending, catalogue,
+  to review, settings, help), each shown to whoever may open it; for a reader, the catalogue, the shelves and their
+  card. The page you are in is underlined; the way back to Moodle is a quiet link at the end. What only one page needs
+  (back to a course, its guided help) goes in a small row under the header.
+- Groups and stages in a school's order everywhere (readers, reports, tutors, late loans, the memoir, the bank, the
+  classroom shelf and the stages of reservations): infant, primary, secondary, upper secondary, vocational, then by
+  year and letter (`core\group_order`).
+- The floating «How do I…?» leaves room at the end of every page, and the bookmark shows a section's name only while
+  dragging or on its notch, with no notches at all on long lists.
+
 ## 0.95.0 (2026-10-31)
 
 - A course's readings, for a reference manager: «Download the list» in RIS (Zotero, Mendeley, EndNote) or BibTeX

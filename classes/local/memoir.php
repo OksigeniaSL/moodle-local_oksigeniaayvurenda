@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\group_order;
+
 /**
  * What a centre hands in at the end of the year about its library and its reading plan, without counting by hand: the
  * year's figures beside the year before, by stage and by group, what went out most and from which corners, what the
@@ -166,6 +168,9 @@ final class memoir {
            ORDER BY COALESCE(m.stage, '')",
             ['yearid' => $year->id]
         );
+        $rows = array_values($rows);
+        usort($rows, fn($a, $b) => [group_order::stage($a->stage), (string) $a->stage]
+            <=> [group_order::stage($b->stage), (string) $b->stage]);
         return array_values(array_map(fn($r) => ['stage' => $r->stage !== '' ? $r->stage : '—',
             'readers' => (int) $r->readers, 'borrowers' => (int) $r->borrowers, 'loans' => (int) $r->loans], $rows));
     }
