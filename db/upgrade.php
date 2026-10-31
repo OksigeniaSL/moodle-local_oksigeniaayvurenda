@@ -329,5 +329,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103109, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026103122) {
+        // The reading lists of the courses and their books.
+        foreach (['local_oksigeniaayvurenda_readinglist', 'local_oksigeniaayvurenda_readingitem'] as $table) {
+            if (!$dbman->table_exists($table)) {
+                $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', $table);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026103122, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

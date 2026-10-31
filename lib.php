@@ -157,3 +157,34 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
 function local_oksigeniaayvurenda_oksigeniaaty_user_brand(int $userid): ?array {
     return \local_oksigeniaayvurenda\local\brand::of_user($userid);
 }
+
+/**
+ * «Readings» in a course's menu: for whoever can change the course, always (to make its list); for the rest, when the
+ * course has some.
+ *
+ * @param navigation_node $navigation
+ * @param stdClass $course
+ * @param context $context
+ */
+function local_oksigeniaayvurenda_extend_navigation_course(navigation_node $navigation, stdClass $course, context $context): void {
+    global $DB;
+    if ((int) $course->id === (int) SITEID) {
+        return;
+    }
+    $list = \local_oksigeniaayvurenda\local\readings::of_course((int) $course->id);
+    if (has_capability('moodle/course:update', $context)) {
+        if (!$list && !$DB->record_exists_select('local_oksigeniaayvurenda_library', 'kind <> :bank', ['bank' => 'bank'])) {
+            return;
+        }
+    } else if (!$list || !$DB->record_exists('local_oksigeniaayvurenda_readingitem', ['listid' => $list->id])) {
+        return;
+    }
+    $navigation->add(
+        get_string('readingsnav', 'local_oksigeniaayvurenda'),
+        new moodle_url('/local/oksigeniaayvurenda/readings.php', ['course' => $course->id]),
+        navigation_node::TYPE_CUSTOM,
+        null,
+        'local_oksigeniaayvurenda_readings',
+        new pix_icon('i/book', '')
+    );
+}

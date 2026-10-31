@@ -85,7 +85,7 @@ final class provider_test extends provider_testcase {
      */
     public function test_metadata(): void {
         $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
-        $this->assertCount(26, $items);
+        $this->assertCount(27, $items);
     }
 
     /**
@@ -105,6 +105,27 @@ final class provider_test extends provider_testcase {
         $this->assertSame('3º Primaria A', $data->groups[0]['group']);
         provider::delete_data_for_user(new approved_contextlist($tutor, 'local_oksigeniaayvurenda', [$system->id]));
         $this->assertSame(0, $DB->count_records(self::T . 'tutor'));
+    }
+
+    /**
+     * A teacher who started a course's reading list has data in the site context, exports it and is forgotten in it;
+     * the list stays for the course.
+     */
+    public function test_teacher_readings(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $teacher = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $list = \local_oksigeniaayvurenda\local\readings::start($course, $w->library, (int) $teacher->id);
+        $system = \context_system::instance();
+        $this->assertEquals([$system->id], provider::get_contexts_for_userid($teacher->id)->get_contextids());
+        $this->export_context_data_for_user($teacher->id, $system, 'local_oksigeniaayvurenda');
+        $data = writer::with_context($system)->get_data([get_string('pluginname', 'local_oksigeniaayvurenda'),
+            get_string('privacy:path:readings', 'local_oksigeniaayvurenda')]);
+        $this->assertSame((int) $course->id, $data->lists[0]['course']);
+        provider::delete_data_for_user(new approved_contextlist($teacher, 'local_oksigeniaayvurenda', [$system->id]));
+        $this->assertNull($DB->get_field(self::T . 'readinglist', 'createdby', ['id' => $list->id]));
     }
 
     /**

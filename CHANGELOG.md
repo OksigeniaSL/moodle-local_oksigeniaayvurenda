@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.89.0 (2026-10-31)
+
+- Course readings: «Readings» in a course's menu. Its teacher makes the list from the library's own search, by topic
+  if they like, each book required or recommended and with a word on it, moved within its topic or taken off; the
+  students see it in the course, each book with its cover, whether it is free and where, and the way to read it online
+  when the library has it for them. A course takes its books from the library of the centre whose category holds it.
+- What the courses ask (from «Reports»): each required title with its courses, their students against the library's
+  copies and who is waiting for it, the ones with no copy first. To know what to buy.
+- A course deleted takes its list with it; the privacy provider knows who started each list.
+
 ## 0.88.0 (2026-10-31)
 
 - The desk without a network: if it goes down, the desk goes on; each scan is kept in that browser, in order and with

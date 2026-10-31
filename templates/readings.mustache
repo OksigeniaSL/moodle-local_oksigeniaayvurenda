@@ -1,0 +1,117 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/readings
+
+    The readings of a course: by topic, each book with its cover, whether it is free and where, required or not, the
+    teacher's word and, if it can be read online, the way to it; for its teacher, a search to add a book and, on each,
+    its topic, its word, its place and taking it off.
+
+    Context variables required for this template:
+    * heading, intro, notice, canedit, action, courseid, sesskey, hasbooks, empty, query, topic, searched, hasfound
+    * topics - topic, hastopic, books (id, title, authors, url, hascover, coverurl, colour, statelabel, stateclass,
+      location, required, note, digital, topic, first, last)
+    * found - recordid, title, authors
+    * topiclist - value
+    * readingsadd, readingsfind, readingsfindbutton, readingstopic, readingstopichint, readingsrequired,
+      readingsrecommended, readingsnote, readingssave, readingsremove, readingsup, readingsdown, readingschange,
+      readingsaddthis, readingsnothing, readingsread
+
+    Example context (json):
+    {
+        "heading": "Lecturas de Lengua 2.º", "intro": "Los libros de este curso.", "notice": "", "canedit": true,
+        "action": "#", "courseid": 2, "sesskey": "x", "hasbooks": true, "empty": "", "query": "", "topic": "", "searched": false,
+        "hasfound": false, "found": [], "topiclist": [{"value": "Tema 1"}],
+        "topics": [{"topic": "Tema 1", "hastopic": true, "books": [{"id": 1, "title": "El faro dormido",
+            "authors": "Ana Ruiz", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg",
+            "colour": 2, "statelabel": "Libre", "stateclass": "free", "location": "Estantería", "required": true,
+            "note": "Para la semana 3", "digital": false, "topic": "Tema 1", "first": true, "last": true} ]} ],
+        "readingsadd": "Añadir un libro", "readingsfind": "Título, autor o ISBN", "readingsfindbutton": "Buscar",
+        "readingstopic": "Tema", "readingstopichint": "Opcional", "readingsrequired": "Obligatoria",
+        "readingsrecommended": "Recomendada", "readingsnote": "Una palabra", "readingssave": "Guardar",
+        "readingsremove": "Quitar", "readingsup": "Subir", "readingsdown": "Bajar", "readingschange": "Cambiar",
+        "readingsaddthis": "Añadir", "readingsnothing": "Nada.", "readingsread": "Leer en línea"
+    }
+}}
+<section class="ayv-readings">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-readings-intro">{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{^hasbooks}}<p class="ayv-empty">{{empty}}</p>{{/hasbooks}}
+{{#topics}}
+<section class="ayv-readings-topic">
+    {{#hastopic}}<h2 class="ayv-readings-heading">{{topic}}</h2>{{/hastopic}}
+    <ul class="ayv-readings-books">
+        {{#books}}
+        <li class="ayv-reading">
+            <a class="ayv-reading-cover ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" href="{{url}}" tabindex="-1" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</a>
+            <div class="ayv-reading-text">
+                <p class="ayv-reading-tags">{{#required}}<span class="ayv-reading-required">{{readingsrequired}}</span>{{/required}}{{^required}}<span class="ayv-reading-optional">{{readingsrecommended}}</span>{{/required}}</p>
+                <a class="ayv-reading-title" href="{{url}}">{{title}}</a>
+                {{#authors}}<span class="ayv-reading-authors">{{authors}}</span>{{/authors}}
+                {{#note}}<p class="ayv-reading-note">{{note}}</p>{{/note}}
+                <p class="ayv-reading-state"><span class="ayv-state ayv-state-{{stateclass}}">{{statelabel}}</span>{{#location}} · {{location}}{{/location}}{{#digital}} · <a href="{{url}}">{{readingsread}}</a>{{/digital}}</p>
+                {{#canedit}}
+                <details class="ayv-reading-edit">
+                    <summary>{{readingschange}}</summary>
+                    <form method="post" action="{{action}}" class="ayv-reading-form">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
+                        <label class="ayv-reading-label">{{readingstopic}} <input type="text" name="topic" value="{{topic}}" maxlength="100" list="ayv-reading-topics"></label>
+                        <label class="ayv-reading-label">{{readingsnote}} <input type="text" name="note" value="{{note}}" maxlength="255"></label>
+                        <label class="ayv-field-check"><input type="checkbox" name="required" value="1" {{#required}}checked{{/required}}> {{readingsrequired}}</label>
+                        <p class="ayv-reading-moves">
+                            <button type="submit" name="do" value="change" class="ayv-button">{{readingssave}}</button>
+                            {{^first}}<button type="submit" name="do" value="up" class="ayv-button ayv-button-quiet">{{readingsup}}</button>{{/first}}
+                            {{^last}}<button type="submit" name="do" value="down" class="ayv-button ayv-button-quiet">{{readingsdown}}</button>{{/last}}
+                            <button type="submit" name="do" value="remove" class="ayv-button ayv-button-quiet">{{readingsremove}}</button>
+                        </p>
+                    </form>
+                </details>
+                {{/canedit}}
+            </div>
+        </li>
+        {{/books}}
+    </ul>
+</section>
+{{/topics}}
+{{#canedit}}
+<section class="ayv-readings-add">
+    <h2 class="ayv-readings-heading">{{readingsadd}}</h2>
+    <form class="ayv-window-search" role="search" method="get" action="{{action}}">
+        <input type="hidden" name="course" value="{{courseid}}">
+        <label class="ayv-field ayv-field-wide">{{readingsfind}} <input type="search" id="ayv-readings-q" name="q" value="{{query}}" maxlength="200"></label>
+        <label class="ayv-field ayv-field-wide">{{readingstopic}} <input type="text" id="ayv-readings-topic" name="topic" value="{{topic}}" maxlength="100" list="ayv-reading-topics"></label>
+        <button type="submit" class="ayv-button">{{readingsfindbutton}}</button>
+    </form>
+    <p class="ayv-field-hint">{{readingstopichint}}</p>
+    {{#searched}}{{^hasfound}}<p class="ayv-empty">{{readingsnothing}}</p>{{/hasfound}}{{/searched}}
+    <ul class="ayv-readings-found">
+        {{#found}}
+        <li><span><b>{{title}}</b>{{#authors}} · {{authors}}{{/authors}}</span>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
+                <input type="hidden" name="record" value="{{recordid}}"><input type="hidden" name="topic" value="{{topic}}">
+                <label class="ayv-field-check"><input type="checkbox" name="required" value="1"> {{readingsrequired}}</label>
+                <button type="submit" class="ayv-button ayv-button-quiet">{{readingsaddthis}}</button>
+            </form>
+        </li>
+        {{/found}}
+    </ul>
+    <datalist id="ayv-reading-topics">{{#topiclist}}<option value="{{value}}">{{/topiclist}}</datalist>
+</section>
+{{/canedit}}
+</section>

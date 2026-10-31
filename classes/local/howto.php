@@ -50,6 +50,7 @@ final class howto {
         'posters' => ['posters.php', 'catalogue', ''],
         'reports' => ['reports.php', 'desk', 'reports'],
         'memoir' => ['memoir.php', 'desk', ''],
+        'readings' => ['readings.php', 'desk', ''],
         'copies' => ['copies.php', 'desk', ''],
         'stocktake' => ['stocktake.php', 'catalogue', ''],
         'weed' => ['weed.php', 'catalogue', ''],

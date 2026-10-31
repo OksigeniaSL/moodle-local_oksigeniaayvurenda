@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/readings_demand
+
+    What the courses ask of a library: each title some course requires, with its courses, its students against the
+    library's copies and who waits for it; the most students per copy first.
+
+    Context variables required for this template:
+    * heading, intro, hastitles, none
+    * titles - title, url, courses, facts, ratio, short
+
+    Example context (json):
+    {
+        "heading": "Lo que piden los cursos", "intro": "Para saber qué comprar.", "hastitles": true, "none": "",
+        "titles": [{"title": "El faro dormido", "url": "#", "courses": "En: Lengua 2.º", "facts": "38 alumnos · 2 ejemplares",
+            "ratio": "1 ejemplar por cada 19 alumnos", "short": true}]
+    }
+}}
+<section class="ayv-readings">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-readings-intro">{{intro}}</p>
+{{^hastitles}}<p class="ayv-empty">{{none}}</p>{{/hastitles}}
+<ul class="ayv-demand">
+    {{#titles}}
+    <li class="ayv-demand-row{{#short}} ayv-demand-short{{/short}}">
+        <a class="ayv-demand-title" href="{{url}}">{{title}}</a>
+        <span class="ayv-demand-courses">{{courses}}</span>
+        <span class="ayv-demand-facts">{{facts}}</span>
+        {{#ratio}}<span class="ayv-demand-ratio">{{ratio}}</span>{{/ratio}}
+    </li>
+    {{/titles}}
+</ul>
+</section>

@@ -167,6 +167,10 @@ class provider implements
             'decidedby' => 'privacy:metadata:wish:decidedby',
             'timecreated' => 'privacy:metadata:wish:timecreated',
         ], 'privacy:metadata:wish');
+        $collection->add_database_table(self::T . 'readinglist', [
+            'createdby' => 'privacy:metadata:readinglist:createdby',
+            'timecreated' => 'privacy:metadata:readinglist:timecreated',
+        ], 'privacy:metadata:readinglist');
         $collection->add_database_table(self::T . 'lot', [
             'createdby' => 'privacy:metadata:lot:createdby',
             'name' => 'privacy:metadata:lot:name',
@@ -278,6 +282,7 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'wish} WHERE userid IS NOT NULL', []);
         $userlist->add_from_sql('staffid', 'SELECT staffid FROM {' . self::T . 'roomread} WHERE staffid IS NOT NULL', []);
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'wish} WHERE decidedby IS NOT NULL', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'readinglist} WHERE createdby IS NOT NULL', []);
     }
 
     /**
@@ -366,6 +371,15 @@ class provider implements
                 array_merge($base, [get_string('privacy:path:wishes', 'local_oksigeniaayvurenda')]),
                 (object) ['wishes' => array_values(array_map(fn($w) => ['title' => $w->title, 'note' => $w->note,
                     'status' => $w->status, 'asked' => transform::datetime($w->timecreated)], $wishes))]
+            );
+        }
+        // The reading lists they started for their courses.
+        $lists = $DB->get_records(self::T . 'readinglist', ['createdby' => $userid], 'timecreated');
+        if ($lists) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:readings', 'local_oksigeniaayvurenda')]),
+                (object) ['lists' => array_values(array_map(fn($l) => ['course' => (int) $l->courseid,
+                    'started' => transform::datetime($l->timecreated)], $lists))]
             );
         }
         if ($handled) {
@@ -524,6 +538,7 @@ class provider implements
         $DB->set_field_select(self::T . 'wish', 'userid', null, 'userid IS NOT NULL');
         $DB->set_field_select(self::T . 'roomread', 'staffid', null, 'staffid IS NOT NULL');
         $DB->set_field_select(self::T . 'wish', 'decidedby', null, 'decidedby IS NOT NULL');
+        $DB->set_field_select(self::T . 'readinglist', 'createdby', null, 'createdby IS NOT NULL');
     }
 
     /**
@@ -618,6 +633,7 @@ class provider implements
         $DB->set_field(self::T . 'wish', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'roomread', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'wish', 'decidedby', null, ['decidedby' => $userid]);
+        $DB->set_field(self::T . 'readinglist', 'createdby', null, ['createdby' => $userid]);
     }
 
     /**
@@ -655,7 +671,8 @@ class provider implements
             $DB->record_exists(self::T . 'review', ['decidedby' => $userid]) ||
             $DB->record_exists(self::T . 'wish', ['userid' => $userid]) ||
             $DB->record_exists(self::T . 'wish', ['decidedby' => $userid]) ||
-            $DB->record_exists(self::T . 'roomread', ['staffid' => $userid])
+            $DB->record_exists(self::T . 'roomread', ['staffid' => $userid]) ||
+            $DB->record_exists(self::T . 'readinglist', ['createdby' => $userid])
         ) {
             return true;
         }

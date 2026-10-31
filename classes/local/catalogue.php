@@ -549,6 +549,33 @@ final class catalogue {
     }
 
     /**
+     * Cards of some records, in the order given (for a list someone made, such as a course's readings).
+     *
+     * @param int[] $ids
+     * @param \stdClass $library
+     * @return array[] As the search gives them, by record id.
+     */
+    public static function cards_of(array $ids, \stdClass $library): array {
+        global $DB;
+        if (!$ids) {
+            return [];
+        }
+        [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+        $records = $DB->get_records_select(
+            self::T . 'record',
+            "id $in AND entityid = :entityid",
+            $params + ['entityid' => $library->entityid],
+            '',
+            'id, title, subtitle'
+        );
+        $cards = [];
+        foreach (self::cards(array_values($records), $library) as $card) {
+            $cards[$card['id']] = $card;
+        }
+        return $cards;
+    }
+
+    /**
      * Cards of records: title, authors, the colour of the drawn cover and whether it is free in this library.
      *
      * @param \stdClass[] $records With id, title and subtitle.
