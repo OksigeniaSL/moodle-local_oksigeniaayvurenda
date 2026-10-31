@@ -341,7 +341,7 @@ final class bank {
      *
      * @param \stdClass $library
      * @param int $now
-     * @return array[] Per set: id, name, pupils, titles (recordid, title, out, free, short).
+     * @return array[] Per set: id, name, pupils, titles (recordid, title, out, free, short, broken, lost).
      */
     public static function needs(\stdClass $library, int $now): array {
         global $DB;
@@ -367,7 +367,17 @@ final class bank {
                 $free = $DB->count_records_select(self::T . 'item', "libraryid = :libraryid AND recordid = :recordid AND
                     status = 'available' AND (itemcondition IS NULL OR " . $DB->sql_compare_text('itemcondition') .
                     " <> 'broken')", $params);
-                $titles[] = $title + ['out' => $lent, 'free' => $free, 'short' => max(0, $pupils - $lent - $free)];
+                // What has to be replaced: copies broken (or being mended) and copies lost.
+                $broken = $DB->count_records_select(
+                    self::T . 'item',
+                    "libraryid = :libraryid AND recordid = :recordid AND
+                    (status = 'repair' OR (status = 'available' AND " . $DB->sql_compare_text('itemcondition') . " = 'broken'))",
+                    $params
+                );
+                $lost = $DB->count_records_select(self::T . 'item', "libraryid = :libraryid AND recordid = :recordid AND
+                    status = 'lost'", $params);
+                $titles[] = $title + ['out' => $lent, 'free' => $free, 'short' => max(0, $pupils - $lent - $free),
+                    'broken' => $broken, 'lost' => $lost];
             }
             $out[] = ['id' => $set['id'], 'name' => $set['name'], 'pupils' => $pupils, 'titles' => $titles];
         }

@@ -90,6 +90,7 @@ final class bank_test extends \advanced_testcase {
         $needs = bank::needs($bank, $now)[0];
         $this->assertSame(1, $needs['pupils']);
         $this->assertSame([1, 0, 0], [$needs['titles'][0]['out'], $needs['titles'][0]['free'], $needs['titles'][0]['short']]);
+        $this->assertSame([1, 0], [$needs['titles'][0]['broken'], $needs['titles'][0]['lost']]);
 
         $contract = bank::contract($bank, (int) $ana->id, $now);
         $this->assertSame('Ana Inventada', $contract['name']);

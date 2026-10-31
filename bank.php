@@ -62,6 +62,19 @@ $lookingfor = optional_param('set', 0, PARAM_INT);
 $query = trim(core_text::substr(optional_param('q', '', PARAM_TEXT), 0, 200));
 $found = $query !== '' ? catalogue::search($library, $query)['cards'] : [];
 $groups = libraries::groups((int) $library->entityid);
+// How a title stands: lent, free and short, each with its number.
+$counts = fn(array $t) => implode(' · ', array_map(
+    fn($k) => $t[$k] === 1 ? $str('bankcount' . $k . 'one') : $str('bankcount' . $k, $t[$k]),
+    ['out', 'free', 'short']
+));
+// What has to be replaced of a title, in words; '' when nothing.
+$mend = function (array $t) use ($str): string {
+    $parts = array_merge(
+        $t['broken'] ? [$t['broken'] === 1 ? $str('bankbrokenone') : $str('bankbroken', $t['broken'])] : [],
+        $t['lost'] ? [$t['lost'] === 1 ? $str('banklostone') : $str('banklost', $t['lost'])] : []
+    );
+    return $parts ? $str('bankmend', implode(' · ', $parts)) : '';
+};
 $sets = [];
 foreach (bank::needs($library, time()) as $need) {
     $set = array_values(array_filter(bank::sets($library), fn($s) => $s['id'] === $need['id']))[0];
@@ -71,8 +84,8 @@ foreach (bank::needs($library, time()) as $need) {
         'pupils' => $str('bankpupils', $need['pupils']),
         'chips' => array_map(fn($g) => ['chip' => $g], $set['groups']),
         'haschips' => (bool) $set['groups'],
-        'titles' => array_map(fn($t) => $t + ['counts' => $str('bankcounts', (object) $t),
-            'isshort' => $t['short'] > 0], $need['titles']),
+        'titles' => array_map(fn($t) => $t + ['counts' => $counts($t),
+            'isshort' => $t['short'] > 0, 'mend' => $mend($t)], $need['titles']),
         'hastitles' => (bool) $need['titles'],
         'groupoptions' => array_map(
             fn($g) => ['value' => $g, 'label' => $g, 'checked' => in_array($g, $set['groups'], true)],

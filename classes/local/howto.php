@@ -53,6 +53,7 @@ final class howto {
         'weed' => ['weed.php', 'catalogue', ''],
         'lots' => ['lots.php', 'desk', ''],
         'bank' => ['libraries.php', 'manage', ''],
+        'bankround' => ['libraries.php', 'desk', ''],
         'import' => ['import.php', 'manage', ''],
         'year' => ['year.php', 'manage', ''],
         'tutors' => ['tutors.php', 'manage', ''],

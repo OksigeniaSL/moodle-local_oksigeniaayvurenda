@@ -2664,6 +2664,7 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 /* A set of the bank: the titles that are short, marked. */
 .ayv .ayv-bankset { margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--surface); }
 .ayv .ayv-bank-short .ayv-holds-when { color: var(--late); font-weight: 700; }
+.ayv .ayv-bank-mend { display: block; color: var(--late); font-size: .95rem; }
 .ayv .ayv-bank-edit summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
 .ayv .ayv-reader-bank { margin: .5rem 0 1rem; }
 .ayv .ayv-reader-bank-missing { color: var(--late); font-weight: 700; }

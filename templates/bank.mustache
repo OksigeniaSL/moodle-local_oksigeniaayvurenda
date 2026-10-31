@@ -22,7 +22,7 @@
 
     Context variables required for this template:
     * heading, intro, notice, action, slug, sesskey, hassets, hasgroups
-    * sets - id, name, pupils, chips, haschips, titles (recordid, title, counts, isshort), hastitles, groupoptions,
+    * sets - id, name, pupils, chips, haschips, titles (recordid, title, counts, isshort, mend), hastitles, groupoptions,
       searching, query, found (recordid, title, authors)
     * groupoptions - value, label, checked
     * banknone, banknewset, bankname, bankgroups, banknogroups, banksave, bankremove, bankaddtitle, bankfind,
@@ -33,7 +33,7 @@
         "heading": "Banco de libros", "intro": "Un lote por curso.", "notice": "", "action": "#", "slug": "banco",
         "sesskey": "x", "hassets": true, "hasgroups": true,
         "sets": [{"id": 1, "name": "1.º de ESO", "pupils": "52 alumnos", "chips": [{"chip": "1.º ESO A"}], "haschips": true,
-            "titles": [{"recordid": 7, "title": "Matemáticas 1", "counts": "48 prestados · 2 libres", "isshort": true}],
+            "titles": [{"recordid": 7, "title": "Matemáticas 1", "counts": "48 prestados · 2 libres", "isshort": true, "mend": "Para reponer: 1 roto"}],
             "hastitles": true, "groupoptions": [{"value": "1.º ESO A", "label": "1.º ESO A", "checked": true}],
             "searching": false, "query": "", "found": []}],
         "groupoptions": [{"value": "1.º ESO A", "label": "1.º ESO A", "checked": false}],
@@ -60,6 +60,7 @@
         <li class="ayv-holds-row{{#isshort}} ayv-bank-short{{/isshort}}">
             <span class="ayv-holds-title">{{title}}</span>
             <span class="ayv-holds-when">{{counts}}</span>
+            {{#mend}}<span class="ayv-bank-mend">{{mend}}</span>{{/mend}}
             <form method="post" action="{{action}}">
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{id}}">
                 <input type="hidden" name="record" value="{{recordid}}">

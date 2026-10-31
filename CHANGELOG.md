@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.84.2 (2026-10-31)
+
+- The textbook bank's sets say what has to be replaced of each title (copies broken or being mended, and lost), and
+  count lent, free and short in the singular when there is one.
+- «How do I…?» explains handing out the sets in September and collecting them in June, class by class.
+
 ## 0.84.1 (2026-10-31)
 
 - What the library tells a reader comes in the tone of the centre's skin (`skins::words()`): a school's greets and
