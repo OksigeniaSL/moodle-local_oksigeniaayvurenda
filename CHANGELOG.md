@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.78.0 (2026-10-31)
+
+- Guided helps for free works and for who keeps a library, from their pages and from «How do I…?», where who keeps a
+  library is a task of its own; the task of the characters tells about the zip of a character of the centre's own.
+
 ## 0.77.0 (2026-10-31)
 
 - A centre can give its own character whole, in a zip on «Characters»: its portrait, its five poses and its puppet

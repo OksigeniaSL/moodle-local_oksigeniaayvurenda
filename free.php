@@ -161,5 +161,8 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/free', $data),
     $library,
     '',
-    ['search' => false]
+    ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
+        '/local/oksigeniaayvurenda/help.php',
+        ['library' => $library->slug, 'piece' => 'free']
+    ))->out(false), 'label' => $str('helpnav')]]]
 );

@@ -35,7 +35,7 @@ final class howto {
         'renew' => ['desk.php', 'desk', ''],
         'room' => ['desk.php', 'desk', ''],
         'add' => ['add.php', 'catalogue', 'add'],
-        'free' => ['free.php', 'catalogue', ''],
+        'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
         'cards' => ['readers.php', 'desk', 'card'],
         'readers' => ['readers.php', 'desk', ''],
@@ -56,6 +56,7 @@ final class howto {
         'tutors' => ['tutors.php', 'manage', ''],
         'rules' => ['rules.php', 'manage', ''],
         'libraries' => ['libraries.php', 'manage', ''],
+        'keepers' => ['keepers.php', 'manage', 'keepers'],
         'characters' => ['characters.php', 'manage', ''],
         'window' => ['public.php', 'manage', ''],
     ];

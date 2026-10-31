@@ -82,6 +82,9 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/keepers', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
-        'label' => $str('librariesnav')]]]
+    ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false), 'label' => $str('librariesnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'keepers']))
+            ->out(false), 'label' => $str('helpnav')],
+    ]]
 );

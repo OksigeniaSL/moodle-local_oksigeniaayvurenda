@@ -247,6 +247,38 @@ window.AYVHelpPieces = {
         });
     },
     // What the classes ask for: the book, looking for it, and «now you»: here it is.
+    // Free works: the two sources, a title typed, and what bringing one does (nothing is fetched from outside).
+    free: function(h) {
+        'use strict';
+        return h.point('.ayv-staff-row').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.type('input[name="q"]', 'Platero');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.say(4);
+        });
+    },
+    // Who keeps a library: what it is for, a name looked for, and how it is given and taken away.
+    keepers: function(h) {
+        'use strict';
+        return h.point('.ayv-keepers h2').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.type('input[name="q"]', 'Ana');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.say(3);
+        });
+    },
     wishes: function(h) {
         'use strict';
         var first = '.ayv-review-card:first-child ';

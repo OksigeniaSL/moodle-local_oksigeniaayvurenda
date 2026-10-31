@@ -42,7 +42,9 @@ $pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 1
     'reviews' => ['capability' => 'desk', 'page' => 'reviews.php', 'steps' => 6],
     'wishes' => ['capability' => 'desk', 'page' => 'wishes.php', 'steps' => 4],
     'myclass' => ['capability' => 'view', 'page' => 'class.php', 'steps' => 7],
-    'stacks' => ['capability' => 'view', 'page' => 'stacks.php', 'steps' => 7]];
+    'stacks' => ['capability' => 'view', 'page' => 'stacks.php', 'steps' => 7],
+    'free' => ['capability' => 'catalogue', 'page' => 'free.php', 'steps' => 5],
+    'keepers' => ['capability' => 'manage', 'page' => 'keepers.php', 'steps' => 4]];
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
