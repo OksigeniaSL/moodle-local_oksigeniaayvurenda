@@ -42,6 +42,20 @@ if (!$courseid) {
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $ref]));
     $now = time();
+    if (optional_param('fragments', 0, PARAM_BOOL)) {
+        // The record of the parts given to the courses, for whoever the rights are paid to.
+        $out = fopen('php://output', 'w');
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="fragmentos-' . $library->slug . '-' . date('Y-m-d') . '.csv"');
+        fwrite($out, "\xEF\xBB\xBF");
+        fputcsv($out, array_map(fn($k) => $str('fragmentcsv' . $k), ['title', 'isbn', 'pages', 'course', 'students', 'from',
+            'until', 'opened']), ',', '"', '');
+        foreach (\local_oksigeniaayvurenda\local\fragments::log($library) as $row) {
+            fputcsv($out, array_values($row), ',', '"', '');
+        }
+        fclose($out);
+        exit;
+    }
     $notice = '';
     if (data_submitted() && confirm_sesskey()) {
         // Copies on reserve for a course, or off it.
@@ -107,6 +121,8 @@ if (!$courseid) {
     $data = ['heading' => $str('readingsdemandheading', format_string($library->name)), 'intro' => $str('readingsdemandintro'),
         'titles' => $titles, 'hastitles' => (bool) $titles, 'none' => $str('readingsdemandnone'), 'notice' => $notice,
         'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'reserveuntil' => date('Y-m-d', $yearend),
+        'fragmentsurl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $library->slug,
+            'fragments' => 1]))->out(false), 'fragmentslabel' => $str('fragmentslog'),
         'reservedays' => array_map(
             fn($d) => ['value' => $d, 'label' => reserves::words($d), 'selected' => $d === 1],
             reserves::DAYS

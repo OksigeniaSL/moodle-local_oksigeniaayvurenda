@@ -202,15 +202,21 @@ final class readings {
             $library
         );
         $byid = array_column($cards, null, 'id');
-        // What its students may read online: a file or a link (not a voice) published for them or for anyone.
+        // What its students may read online: a file or a link (not a voice) published for them or for anyone, and not
+        // kept for another course; or one given to this course, while it lasts.
         $digital = [];
         if ($items) {
             [$in, $params] = $DB->get_in_or_equal(array_map(fn($i) => (int) $i->recordid, $items), SQL_PARAMS_NAMED);
             $digital = $DB->get_fieldset_sql(
-                "SELECT DISTINCT recordid FROM {" . self::T . "digital}
-                  WHERE status = 'published' AND kind <> 'voice' AND recordid $in
-                        AND (" . $DB->sql_like('audience', ':students') . " OR " . $DB->sql_like('audience', ':public') . ")",
-                $params + ['students' => '%students%', 'public' => '%public%']
+                "SELECT DISTINCT d.recordid
+                   FROM {" . self::T . "digital} d
+              LEFT JOIN {" . self::T . "fragment} f ON f.digitalid = d.id
+                  WHERE d.status = 'published' AND d.kind <> 'voice' AND d.recordid $in
+                        AND ((f.id IS NULL AND (" . $DB->sql_like('d.audience', ':students') . " OR " .
+                        $DB->sql_like('d.audience', ':public') . "))
+                         OR (f.courseid = :courseid AND f.timeend >= :now))",
+                $params + ['students' => '%students%', 'public' => '%public%', 'courseid' => $list->courseid,
+                    'now' => time()]
             );
         }
         $out = [];
@@ -278,6 +284,7 @@ final class readings {
     public static function course_deleted(\core\event\course_deleted $event): void {
         global $DB;
         $DB->delete_records(self::T . 'reserve', ['courseid' => $event->objectid]);
+        fragments::course_gone((int) $event->objectid);
         $list = self::of_course((int) $event->objectid);
         if ($list) {
             $DB->delete_records(self::T . 'readingitem', ['listid' => $list->id]);

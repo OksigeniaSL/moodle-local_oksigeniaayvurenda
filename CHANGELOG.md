@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.94.0 (2026-10-31)
+
+- Course fragments: a digital form of a book (a scanned chapter, some pages, a link) can be given only to the students
+  of a course whose readings have the book, until a date, as the law or the centre's licence allows teaching to use
+  them: its enrolled students open it (and the course's readings offer it), no one else; after the date, only the
+  library. «Record of fragments (CSV)», from «What the courses ask», lists the work, ISBN, part, course, students,
+  dates and how many opened it, for whoever the rights are paid to. Also in «How do I…?».
+
 ## 0.93.1 (2026-10-31)
 
 - The course memoir: «Save» and «Print» no longer sit against the box of text above them.

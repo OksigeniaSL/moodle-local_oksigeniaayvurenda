@@ -53,28 +53,44 @@ $fields = fn() => [
     'stages' => optional_param_array('stages', [], PARAM_TEXT),
     'download' => optional_param('download', 0, PARAM_BOOL),
 ];
+// Only for the students of a course, until a date, with the part of the work it is.
+$fragment = function (int $id) use ($str) {
+    $until = DateTimeImmutable::createFromFormat(
+        '!Y-m-d',
+        (string) optional_param('until', '', PARAM_TEXT),
+        core_date::get_server_timezone_object()
+    );
+    \local_oksigeniaayvurenda\local\fragments::set(
+        $id,
+        $until ? optional_param('forcourse', 0, PARAM_INT) : 0,
+        optional_param('pages', '', PARAM_TEXT),
+        $until ? $until->setTime(23, 59, 59)->getTimestamp() : 0,
+        time()
+    );
+};
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     if ($do === 'add') {
         $url = trim(optional_param('url', '', PARAM_URL));
         if (!empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
-            digital::add_file(
+            $fragment(digital::add_file(
                 $library,
                 $recordid,
                 $_FILES['file']['tmp_name'],
                 (string) $_FILES['file']['name'],
                 $fields(),
                 (int) $USER->id
-            );
+            ));
             $notice = $str('digitaladded');
         } else if ($url !== '') {
-            digital::add_link($library, $recordid, $url, $fields(), (int) $USER->id);
+            $fragment(digital::add_link($library, $recordid, $url, $fields(), (int) $USER->id));
             $notice = $str('digitaladded');
         } else {
             $notice = $str('digitalnothing');
         }
     } else if ($do === 'save') {
         digital::update(required_param('item', PARAM_INT), $library, $fields());
+        $fragment((int) digital::get(required_param('item', PARAM_INT), $library)->id);
         $notice = $str('digitalsaved');
     } else if ($do === 'delete') {
         digital::delete(required_param('item', PARAM_INT), $library);
@@ -88,10 +104,21 @@ $licences = fn(string $chosen) => array_map(fn($l) => ['value' => $l, 'label' =>
 $audiences = fn(array $chosen) => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a),
     'checked' => in_array($a, $chosen, true)], digital_rules::AUDIENCES);
 $stagelist = fn(array $chosen) => array_map(fn($s) => ['value' => $s, 'checked' => in_array($s, $chosen, true)], $stages);
+$courses = \local_oksigeniaayvurenda\local\fragments::courses($library, $recordid);
+$yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time())->timeend - 1;
+$courselist = fn(int $chosen) => array_values(array_map(fn($id, $name) => ['id' => $id, 'name' => $name,
+    'selected' => $id === $chosen], array_keys($courses), $courses));
 $items = [];
 foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => null]) as $item) {
     $chosenstages = json_decode((string) $item->stages, true) ?: [];
+    $only = \local_oksigeniaayvurenda\local\fragments::of_item((int) $item->id);
     $items[] = [
+        'courses' => $courselist($only ? (int) $only->courseid : 0),
+        'pages' => $only ? (string) $only->pages : '',
+        'until' => date('Y-m-d', $only ? (int) $only->timeend : $yearend),
+        'onlyline' => $only ? $str('fragmentline', (object) ['course' => $courses[$only->courseid]
+            ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $only->courseid])),
+            'until' => userdate((int) $only->timeend, get_string('strftimedateshort', 'langconfig'))]) : '',
         'id' => (int) $item->id,
         'title' => $item->title !== '' && $item->title !== null ? $item->title : $str('format' . $item->format),
         'rawtitle' => (string) $item->title,
@@ -117,13 +144,17 @@ $data = [
     'audiences' => $audiences(['staff']),
     'stages' => $stagelist([]),
     'hasstages' => (bool) $stages,
+    'hascourses' => (bool) $courses,
+    'courses' => $courselist(0),
+    'until' => date('Y-m-d', $yearend),
     'recordurl' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $recordid]))
         ->out(false),
 ];
 foreach (
     ['digitaladd', 'digitalfile', 'digitalurl', 'digitalurlhint', 'digitaltitlefield', 'digitallicence',
         'digitallicencehint', 'digitalaudience', 'digitalstages', 'digitaldownload', 'digitalsave', 'digitaldelete',
-        'digitalread', 'digitalnone', 'backtorecord'] as $key
+        'digitalread', 'digitalnone', 'backtorecord', 'fragmentcourse', 'fragmentnone', 'fragmentpages',
+        'fragmentpageshint', 'fragmentuntil', 'fragmenthint'] as $key
 ) {
     $data[$key] = $str($key);
 }

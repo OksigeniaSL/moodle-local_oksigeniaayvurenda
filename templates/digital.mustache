@@ -21,11 +21,16 @@
     Example context (json):
     {
         "heading": "En digital: El faro dormido", "intro": "Lo decide la licencia.", "notice": "", "action": "#",
-        "sesskey": "abc", "hasitems": true, "hasstages": true, "recordurl": "#",
+        "sesskey": "abc", "hasitems": true, "hasstages": true, "recordurl": "#", "hascourses": true, "until": "2027-06-30",
+        "courses": [{"id": 3, "name": "Lengua 2.º", "selected": false}],
+        "fragmentcourse": "Solo para los alumnos de un curso", "fragmentnone": "Ninguno", "fragmentpages": "Qué parte",
+        "fragmentpageshint": "pp. 12-34", "fragmentuntil": "Hasta", "fragmenthint": "Lo abren solo sus matriculados.",
         "items": [{"id": 1, "title": "EPUB", "rawtitle": "", "format": "EPUB", "licencelabel": "Dominio público", "readurl": "#",
             "licences": [{"value": "pd", "label": "Dominio público", "selected": true}],
             "audiences": [{"value": "students", "label": "Alumnos", "checked": true}],
-            "stages": [{"value": "Primaria", "checked": false}], "download": true}],
+            "stages": [{"value": "Primaria", "checked": false}], "download": true,
+            "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "Capítulo 3", "until": "2027-06-30",
+            "onlyline": "Solo para Lengua 2.º, hasta el 30 jun"}],
         "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
         "audiences": [{"value": "staff", "label": "Personal", "checked": true}],
         "stages": [{"value": "Primaria", "checked": false}],
@@ -44,6 +49,7 @@
 <form method="post" action="{{action}}" class="ayv-book">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
     <h2 class="ayv-section-title">{{title}} <span class="ayv-field-hint">{{format}} · {{licencelabel}}</span></h2>
+    {{#onlyline}}<p class="ayv-digital-only">{{onlyline}}</p>{{/onlyline}}
     <p><a href="{{readurl}}">{{digitalread}}</a></p>
     <label class="ayv-field">{{digitaltitlefield}} <input type="text" name="title" value="{{rawtitle}}" maxlength="255"></label>
     <label class="ayv-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
@@ -52,6 +58,12 @@
     {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{digitalstages}}</legend><div class="ayv-choices">
         {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{value}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
     <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
+    {{#hascourses}}
+    <fieldset class="ayv-fieldset"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
+        <label class="ayv-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}</select></label>
+        <label class="ayv-field">{{fragmentpages}} <input type="text" name="pages" value="{{pages}}" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
+        <label class="ayv-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></fieldset>
+    {{/hascourses}}
     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{digitalsave}}</button>
         <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{digitaldelete}}</button></p>
 </form>
@@ -69,5 +81,11 @@
     {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{digitalstages}}</legend><div class="ayv-choices">
         {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{value}}"> {{value}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
     <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
+    {{#hascourses}}
+    <fieldset class="ayv-fieldset"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
+        <label class="ayv-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}">{{name}}</option>{{/courses}}</select></label>
+        <label class="ayv-field">{{fragmentpages}} <input type="text" name="pages" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
+        <label class="ayv-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></fieldset>
+    {{/hascourses}}
     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="add">{{digitaladd}}</button></p>
 </form>

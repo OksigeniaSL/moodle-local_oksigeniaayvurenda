@@ -155,6 +155,7 @@ final class digital {
             $item->id
         );
         $DB->delete_records(self::T . 'digitalread', ['digitalid' => $item->id]);
+        $DB->delete_records(self::T . 'fragment', ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'digital', ['id' => $item->id]);
     }
 
@@ -183,6 +184,11 @@ final class digital {
         }
         if ($item->status !== 'published' && $viewer['who'] !== 'desk') {
             return false;
+        }
+        // Only for the students of a course, until a date: they, and the library.
+        $fragment = fragments::of_item((int) $item->id);
+        if ($fragment) {
+            return $viewer['who'] === 'desk' || fragments::open($fragment, (int) ($viewer['userid'] ?? 0), time());
         }
         return digital_rules::can_see(
             self::audience($item),
