@@ -1,0 +1,46 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+{{!
+    @template local_oksigeniaayvurenda/mobile_search
+
+    A search of a library's catalogue in the Moodle app: the box to search again and each book with whether it is free
+    and where; a book opens its page in the app.
+
+    Example context (json):
+    {
+        "library": "demo-1", "name": "Biblioteca", "hascards": true, "searched": true, "cannot": false,
+        "notreader": "No eres lector", "nothing": "Nada con «faro».", "searchplaceholder": "Título, autor o tema",
+        "searchbutton": "Buscar",
+        "cards": [{"id": 1, "title": "El faro dormido", "authors": "Ana Ruiz", "statelabel": "Libre", "free": true,
+            "location": "Estantería juvenil"}]
+    }
+}}
+<div class="local-oksigeniaayvurenda-mobile">
+{{#cannot}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{notreader}}</ion-label></ion-item></ion-list>{{/cannot}}
+{{^cannot}}
+<ion-list>
+    <ion-item><ion-input [(ngModel)]="CONTENT_OTHERDATA.q" placeholder="{{searchplaceholder}}" aria-label="{{searchbutton}}"></ion-input>
+        <ion-button slot="end" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_search_view" samePage="true" [args]="{library: '{{library}}', q: CONTENT_OTHERDATA.q }">{{searchbutton}}</ion-button></ion-item>
+    {{#searched}}{{^hascards}}<ion-item><ion-label class="ion-text-wrap">{{nothing}}</ion-label></ion-item>{{/hascards}}{{/searched}}
+    {{#cards}}
+    <ion-item button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{library}}', id: {{id}} }">
+        <ion-label class="ion-text-wrap"><h3>{{title}}</h3>{{#authors}}<p>{{authors}}</p>{{/authors}}<p>{{#free}}<strong>{{/free}}{{statelabel}}{{#free}}</strong>{{/free}}{{#location}} · {{location}}{{/location}}</p></ion-label>
+    </ion-item>
+    {{/cards}}
+</ion-list>
+{{/cannot}}
+</div>

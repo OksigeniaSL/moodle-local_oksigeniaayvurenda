@@ -100,4 +100,28 @@ final class skins_test extends \advanced_testcase {
         $this->assertSame('holdreadysubjectuniversity', skins::words($entityid, 'holdreadysubject'));
         $this->assertSame('noticetutorbody', skins::words($entityid, 'noticetutorbody'));
     }
+
+    /**
+     * The reader's card speaks in the tone of the skin: a secondary school's and a university's say the same in their
+     * own words.
+     */
+    public function test_card_words(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $reader = $gen->create_reader(['entityid' => $entityid]);
+        $year = years::around($entityid, time());
+        $said = fn() => garden::classic($reader, $year)['back'];
+        $this->assertSame(get_string('cardnovisit', 'local_oksigeniaayvurenda'), $said());
+        libraries::update_entity($entityid, ['skin' => 'secondary']);
+        $this->assertSame(get_string('cardnovisitsecondary', 'local_oksigeniaayvurenda'), $said());
+        libraries::update_entity($entityid, ['skin' => 'university']);
+        $this->assertSame(get_string('cardnovisituniversity', 'local_oksigeniaayvurenda'), $said());
+        // The memory too, when it has nothing.
+        $nothing = characters::say($entityid, 'memory', 'memorynothing', ['query' => 'faro']);
+        $this->assertSame(get_string('memorynothinguniversity', 'local_oksigeniaayvurenda', (object) ['query' => 'faro',
+            'name' => $nothing['name']]), $nothing['text']);
+    }
 }

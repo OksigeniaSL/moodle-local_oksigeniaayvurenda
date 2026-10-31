@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+{{!
+    @template local_oksigeniaayvurenda/mobile_record
+
+    A book of a library in the Moodle app: its cover, whether it is free and where, its copies here, what the reader
+    asked for, the button to ask for it when it is out and the way to its page in the library.
+
+    Example context (json):
+    {
+        "cannot": false, "notreader": "No eres lector", "library": "demo-1", "recordid": 1, "title": "El faro dormido",
+        "subtitle": "", "authors": "Ana Ruiz", "cover": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "statelabel": "Prestado",
+        "free": false, "hascopies": true, "copiesheading": "Ejemplares",
+        "copies": [{"state": "Prestado", "location": "Estantería juvenil", "callnumber": "N RUI fa"}],
+        "mine": "", "ahead": "", "canask": true, "holdask": "Avísame cuando vuelva", "holdaskhint": "Te avisamos.",
+        "holdadded": "Hecho.", "url": "https://example.org/r", "openweb": "Abrir en la biblioteca"
+    }
+}}
+<div class="local-oksigeniaayvurenda-mobile">
+{{#cannot}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{notreader}}</ion-label></ion-item></ion-list>{{/cannot}}
+{{^cannot}}
+<ion-list>
+    {{#cover}}<ion-item lines="none"><img src="{{cover}}" alt="" style="display: block; width: 128px; margin: 12px auto; border-radius: 6px;"></ion-item>{{/cover}}
+    <ion-item lines="none"><ion-label class="ion-text-wrap"><h2>{{title}}</h2>{{#subtitle}}<p>{{subtitle}}</p>{{/subtitle}}{{#authors}}<p>{{authors}}</p>{{/authors}}</ion-label></ion-item>
+    <ion-item><ion-label class="ion-text-wrap"><p>{{#free}}<strong>{{/free}}{{statelabel}}{{#free}}</strong>{{/free}}</p></ion-label></ion-item>
+    {{#mine}}<ion-item><ion-label class="ion-text-wrap"><p><strong>{{mine}}</strong></p>{{#ahead}}<p>{{ahead}}</p>{{/ahead}}</ion-label></ion-item>{{/mine}}
+    {{#canask}}
+    <ion-item lines="none"><ion-label class="ion-text-wrap"><p>{{holdaskhint}}</p></ion-label></ion-item>
+    <ion-button expand="block" class="ion-margin" core-site-plugins-call-ws name="local_oksigeniaayvurenda_ask_hold" [params]="{library: '{{library}}', record: {{recordid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{holdadded}}" refreshOnSuccess="true">{{holdask}}</ion-button>
+    {{/canask}}
+    {{#hascopies}}
+    <ion-item-divider><ion-label>{{copiesheading}}</ion-label></ion-item-divider>
+    {{#copies}}<ion-item><ion-label class="ion-text-wrap"><h3>{{state}}</h3><p>{{location}}{{#callnumber}} · {{callnumber}}{{/callnumber}}</p></ion-label></ion-item>{{/copies}}
+    {{/hascopies}}
+    <ion-item button detail="true" core-link inApp="true" href="{{url}}"><ion-label>{{openweb}}</ion-label></ion-item>
+</ion-list>
+{{/cannot}}
+</div>

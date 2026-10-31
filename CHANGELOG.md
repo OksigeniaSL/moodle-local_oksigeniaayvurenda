@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.90.0 (2026-10-31)
+
+- What the library says to a reader comes in the tone of its centre's skin, at home, on the card and in its
+  characters' lines: a secondary school's says it plainly and dry («¿Qué vas a leer ahora?», «Recién llegados. Échales
+  un ojo.»), a university's or academy's like a newsletter («¿Qué buscas?», «Novedades de esta semana.», «Último
+  préstamo», «Sin resultados para…»). A school's stays as it was.
+- The library in the Moodle app (and in Oksigenia Aty) without leaving it: a search box for each library, the results
+  with whether each book is free and where, and a book's page with its cover, its copies here, what the reader asked for
+  and, when it is out and they may ask online, «Tell me when it comes back», answered by the new web service
+  `local_oksigeniaayvurenda_ask_hold` (in the app's service). Tried with the official app.
+
 ## 0.89.0 (2026-10-31)
 
 - Course readings: «Readings» in a course's menu. Its teacher makes the list from the library's own search, by topic

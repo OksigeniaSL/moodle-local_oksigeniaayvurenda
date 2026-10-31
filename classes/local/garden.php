@@ -188,7 +188,12 @@ final class garden {
     public static function classic(\stdClass $reader, \stdClass $year, ?int $now = null): array {
         global $DB;
         $now = $now ?? time();
-        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        // In the tone of the reader's library.
+        $str = fn(string $key, $a = null) => get_string(
+            skins::words((int) $reader->entityid, $key),
+            'local_oksigeniaayvurenda',
+            $a
+        );
         $loans = self::loans((int) $reader->id, (int) $year->id);
         $params = ['readerid' => $reader->id, 'yearid' => $year->id];
         $reading = ' AND ' . bank::reading('libraryid');

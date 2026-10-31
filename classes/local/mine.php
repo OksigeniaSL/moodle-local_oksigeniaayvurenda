@@ -89,6 +89,7 @@ final class mine {
             );
             $out[] = [
                 'name' => format_string($library->name),
+                'slug' => (string) $library->slug,
                 'cardcode' => (string) $reader->cardcode,
                 'home' => $url('index.php', $library),
                 'card' => $url('card.php', $library),

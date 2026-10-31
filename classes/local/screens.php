@@ -97,10 +97,10 @@ final class screens {
             'hero' => $hero,
             'classblock' => $hero['classreads'] ? ['cards' => $hero['classreads']] : null,
             'eldersblock' => $hero['young'] ? self::elders($library) : null,
-            'classheading' => self::str('homeclass'),
+            'classheading' => self::said($library, 'homeclass'),
             'shelfprev' => self::str('shelfprev'),
             'shelfnext' => self::str('shelfnext'),
-            'classhint' => self::str('homeclasshint'),
+            'classhint' => self::said($library, 'homeclasshint'),
             'heading' => self::str('homeheading'),
             'cornersheading' => self::str('corners'),
             'cornercols' => $corners ? (int) ceil(count($corners) / ceil(count($corners) / 6)) : 1,
@@ -696,15 +696,15 @@ final class screens {
         $asks = $memory && $memory['enabled'];
         $ideas = [];
         foreach (catalogue::ideas($library, (int) $year->timestart, $reader ? (int) $reader->id : 0) as $idea) {
-            $ideas[] = ['label' => $idea['last'] ? self::str('homelikelast') : $idea['label'],
+            $ideas[] = ['label' => $idea['last'] ? self::said($library, 'homelikelast') : $idea['label'],
                 'url' => self::url('search.php', $library, ['subject' => $idea['id'], 'q' => $idea['label']])];
         }
         $hero = [
             'greeting' => $reader ? self::str('homehello', format_string($USER->firstname)) : format_string($library->name),
-            'question' => self::str('homequestion'),
+            'question' => self::said($library, 'homequestion'),
             'action' => self::url('search.php', $library),
             'slug' => $library->slug,
-            'placeholder' => $asks ? self::str('homeaskmemory', $memory['name']) : self::str('searchplaceholder'),
+            'placeholder' => $asks ? self::said($library, 'homeaskmemory', $memory['name']) : self::str('searchplaceholder'),
             'memoryinitial' => $asks ? $memory['initial'] : '',
             'memoryportrait' => $asks ? $memory['portrait'] : null,
             'searchlabel' => self::str('searchbutton'),
@@ -888,5 +888,17 @@ final class screens {
      */
     private static function str(string $key, $a = null): string {
         return get_string($key, 'local_oksigeniaayvurenda', $a);
+    }
+
+    /**
+     * Something said to a reader, in the tone of the library's skin.
+     *
+     * @param \stdClass $library
+     * @param string $key
+     * @param mixed $a
+     * @return string
+     */
+    private static function said(\stdClass $library, string $key, $a = null): string {
+        return get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda', $a);
     }
 }

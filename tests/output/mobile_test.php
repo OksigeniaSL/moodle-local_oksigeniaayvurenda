@@ -58,4 +58,42 @@ final class mobile_test extends \advanced_testcase {
         $html = mobile::mobile_library_view([])['templates'][0]['html'];
         $this->assertStringContainsString(get_string('mobilenotreader', 'local_oksigeniaayvurenda'), $html);
     }
+
+    /**
+     * In the app, a reader searches the catalogue and opens a book: whether it is free, its copies and, when it is out
+     * and they may ask online, the button to ask for it, which the web service answers; asked, the page says so.
+     */
+    public function test_search_record_and_hold(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $ana = $this->getDataGenerator()->create_user();
+        $gen->create_reader(['entityid' => $library->entityid, 'userid' => $ana->id, 'readertype' => 'teacher']);
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'El faro dormido',
+            'searchtext' => 'el faro dormido']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'status' => 'onloan']);
+        \local_oksigeniaayvurenda\local\catalogue::purge((int) $library->entityid);
+        $this->setUser($ana);
+        $search = mobile::mobile_search_view(['library' => $library->slug, 'q' => 'faro']);
+        $this->assertStringContainsString('El faro dormido', $search['templates'][0]['html']);
+        $this->assertStringContainsString('mobile_record_view', $search['templates'][0]['html']);
+        $this->assertSame('faro', $search['otherdata']['q']);
+        $html = mobile::mobile_record_view(['library' => $library->slug, 'id' => $record->id])['templates'][0]['html'];
+        $this->assertStringNotContainsString('local_oksigeniaayvurenda_ask_hold', $html);
+        \local_oksigeniaayvurenda\local\holds::save_settings((int) $library->entityid, ['online' => true]);
+        $html = mobile::mobile_record_view(['library' => $library->slug, 'id' => $record->id])['templates'][0]['html'];
+        $this->assertStringContainsString('local_oksigeniaayvurenda_ask_hold', $html);
+        $answer = \local_oksigeniaayvurenda\external\ask_hold::execute($library->slug, (int) $record->id);
+        $this->assertTrue($answer['ok']);
+        $answer = \local_oksigeniaayvurenda\external\ask_hold::execute($library->slug, (int) $record->id);
+        $this->assertFalse($answer['ok']);
+        $this->assertSame(get_string('holdhas', 'local_oksigeniaayvurenda'), $answer['message']);
+        $html = mobile::mobile_record_view(['library' => $library->slug, 'id' => $record->id])['templates'][0]['html'];
+        $this->assertStringContainsString(get_string('holdminewaiting', 'local_oksigeniaayvurenda'), $html);
+        // Someone who may not see the library is told they are no reader.
+        $this->setUser($this->getDataGenerator()->create_user());
+        $html = mobile::mobile_record_view(['library' => 'no-such-library', 'id' => $record->id])['templates'][0]['html'];
+        $this->assertStringContainsString(get_string('mobilenotreader', 'local_oksigeniaayvurenda'), $html);
+    }
 }

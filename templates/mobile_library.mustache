@@ -22,8 +22,9 @@
     {
         "haslibraries": true, "notreader": "No eres lector", "loansheading": "Tus libros", "holdsheading": "Te esperan",
         "cardheading": "Tu carné", "cardhint": "Enséñalo en el mostrador", "none": "No tienes libros prestados.",
-        "golibrary": "Ir a la biblioteca", "gospring": "Ayvu rande",
-        "libraries": [{"name": "Biblioteca", "cardcode": "10000H", "home": "https://example.org/b", "spring": "https://example.org/a",
+        "golibrary": "Ir a la biblioteca", "gospring": "Ayvu rande", "searchheading": "Buscar",
+        "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar",
+        "libraries": [{"name": "Biblioteca", "slug": "demo-1", "qkey": "q0", "cardcode": "10000H", "home": "https://example.org/b", "spring": "https://example.org/a",
             "hasloans": true, "loans": [{"title": "El faro dormido", "url": "https://example.org/r", "when": "hasta el 3 nov",
                 "late": false}],
             "hasholds": false, "holds": [], "barcodeimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
@@ -35,6 +36,8 @@
 {{#libraries}}
     <ion-list>
         <ion-list-header><ion-label><h2>{{name}}</h2></ion-label></ion-list-header>
+        <ion-item><ion-input [(ngModel)]="CONTENT_OTHERDATA.{{qkey}}" placeholder="{{searchplaceholder}}" aria-label="{{searchheading}}"></ion-input>
+            <ion-button slot="end" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{qkey}} }">{{searchbutton}}</ion-button></ion-item>
         <ion-item-divider><ion-label>{{loansheading}}</ion-label></ion-item-divider>
         {{^hasloans}}<ion-item><ion-label class="ion-text-wrap">{{none}}</ion-label></ion-item>{{/hasloans}}
         {{#loans}}<ion-item button detail="true" core-link inApp="true" href="{{url}}"><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p{{#late}} class="text-danger"{{/late}}>{{when}}</p></ion-label></ion-item>{{/loans}}

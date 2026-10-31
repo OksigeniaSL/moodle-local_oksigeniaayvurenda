@@ -297,6 +297,8 @@ final class characters {
         $figure = $pose === '' ? null : ($own ? self::own_figure($entityid, $role, $pose) : self::figure($role, $pose, $step));
         $puppet = $pose === '' || !$figure ? '' : ($own ? self::own_puppet($entityid, $role, $pose)
             : self::puppet($role, $pose, $step));
+        // In the tone of the centre's skin, then as the character is (a herald or a heraldess).
+        $key = skins::words($entityid, $key);
         $gendered = $key . $character['sex'];
         $key = $sm->string_exists($gendered, 'local_oksigeniaayvurenda') ? $gendered : $key;
         return [
