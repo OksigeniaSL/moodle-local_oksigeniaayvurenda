@@ -26,7 +26,8 @@
     * holds - title, state; hasholds
     * readheading, read (title, url, hascover, coverurl, colour, when, note), hasread, readmore
     * past - year, loans; haspast
-    * notes, notice, action, sesskey, deskurl, cardurl
+    * notes, notice, action, sesskey, deskurl, cardurl, appheading
+    * app - false, or can, button and hint: the way into the app, by e-mail
     * profiledesk, profilecard, profilenow, profilenothing, profileholds, profilenoread, profilepastheading,
       profilenotes, profilenoteshint, profilesave, profilegone, profilecode
 
@@ -41,7 +42,8 @@
         "read": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
             "when": "14 de octubre", "note": "Le encantó"}], "hasread": true, "readmore": "",
         "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
-        "notes": "", "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#",
+        "notes": "", "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "appheading": "La app",
+        "app": {"can": true, "button": "Mandarle la app", "hint": "Le llega un correo con un enlace."},
         "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
         "profilenothing": "Nada prestado.", "profileholds": "Reservas", "profilenoread": "Nada este curso todavía.",
         "profilepastheading": "Cursos anteriores", "profilenotes": "Notas del personal",
@@ -101,13 +103,25 @@
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profilenotes}}</h2>
             <form method="post" action="{{action}}">
-                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notes">
                 <label class="ayv-sr" for="ayv-profile-notes">{{profilenotes}}</label>
                 <textarea id="ayv-profile-notes" name="notes" rows="4" maxlength="1000">{{notes}}</textarea>
                 <p class="ayv-field-hint">{{profilenoteshint}}</p>
                 <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
             </form>
         </section>
+        {{#app}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{appheading}}</h2>
+            <p class="ayv-field-hint">{{hint}}</p>
+            {{#can}}
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="app">
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{button}}</button></p>
+            </form>
+            {{/can}}
+        </section>
+        {{/app}}
     </div>
     <div class="ayv-profile-col">
         <section class="ayv-profile-box">

@@ -41,6 +41,7 @@ final class howto {
         'cards' => ['readers.php', 'desk', 'card'],
         'readers' => ['readers.php', 'desk', ''],
         'profile' => ['readers.php', 'desk', ''],
+        'applink' => ['readers.php', 'desk', ''],
         'late' => ['late.php', 'desk', ''],
         'holds' => ['holds.php', 'desk', ''],
         'reviews' => ['reviews.php', 'desk', 'reviews'],

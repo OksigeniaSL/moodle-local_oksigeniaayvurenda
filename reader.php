@@ -24,6 +24,7 @@
  */
 
 use local_oksigeniaayvurenda\local\access;
+use local_oksigeniaayvurenda\local\applink;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\covers;
 use local_oksigeniaayvurenda\local\desk;
@@ -52,10 +53,18 @@ if (!(new desk($library, (int) $USER->id, $now, $own))->allowed($id)) {
     shell::missing($str('readernothere'), $library);
 }
 $notice = '';
+$reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id, 'entityid' => $library->entityid]);
 if (data_submitted() && confirm_sesskey()) {
-    profile::save_notes($library, $id, optional_param('notes', '', PARAM_TEXT));
-    $notice = $str('profilenotessaved');
+    if (optional_param('do', '', PARAM_ALPHA) === 'app' && $reader) {
+        // The way into the app, by e-mail.
+        $notice = $str(applink::send($reader));
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else {
+        profile::save_notes($library, $id, optional_param('notes', '', PARAM_TEXT));
+        $notice = $str('profilenotessaved');
+    }
 }
+$app = $reader ? applink::state($reader) : 'none';
 $record = profile::of($library, $id, $now);
 if (!$record) {
     shell::missing($str('readernothere'), $library);
@@ -133,10 +142,15 @@ $data = [
     'sesskey' => sesskey(),
     'deskurl' => $link('desk.php', ['reader' => $id]),
     'cardurl' => $link('card.php', ['reader' => $id]),
+    'app' => $app !== 'none' ? [
+        'can' => $app !== 'noemail',
+        'button' => $str($app === 'create' ? 'appcreatebutton' : 'appsendbutton'),
+        'hint' => $str($app === 'noemail' ? 'appnoemailhint' : 'apphint', applink::DAYS),
+    ] : false,
 ];
 foreach (
     ['profiledesk', 'profilecard', 'profilenow', 'profilenothing', 'profileholds', 'profilenoread', 'profilepastheading',
-        'profilenotes', 'profilenoteshint', 'profilesave', 'profilegone', 'profilecode'] as $key
+        'profilenotes', 'profilenoteshint', 'profilesave', 'profilegone', 'profilecode', 'appheading'] as $key
 ) {
     $data[$key] = $str($key);
 }

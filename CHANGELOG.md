@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.91.0 (2026-10-31)
+
+- The way into the app, from a reader's record: where Oksigenia Aty is installed, «Send them the app» e-mails the
+  reader a link that opens the app already signed in, once and for 7 days (Aty's `api::send_link()`). A reader without
+  an account gets one first from the e-mail the library has, if whoever asks may create accounts on the site; never
+  when another account already has that e-mail (a sibling's or the family's). Also in «How do I…?».
+
 ## 0.90.0 (2026-10-31)
 
 - What the library says to a reader comes in the tone of its centre's skin, at home, on the card and in its

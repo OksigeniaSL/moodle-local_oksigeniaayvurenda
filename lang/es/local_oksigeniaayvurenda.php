@@ -73,6 +73,17 @@ $string['addtitle'] = 'Dar de alta libros';
 $string['addtype'] = 'Tipo';
 $string['addundo'] = 'Deshacer';
 $string['addundone'] = 'Deshecho.';
+$string['appcreatebutton'] = 'Crearle una cuenta y mandarle la app';
+$string['appcreated'] = 'Su cuenta está hecha y le llega el correo con su entrada a la app.';
+$string['appheading'] = 'La app';
+$string['apphint'] = 'Le llega un correo con un enlace que abre la app ya con su cuenta: sirve una vez y dura {$a} días.';
+$string['appnoemailhint'] = 'Para mandarle la app, la biblioteca necesita su correo.';
+$string['appnomail'] = 'No se ha podido mandar el correo. Prueba más tarde.';
+$string['appnone'] = 'No hay nada que mandar.';
+$string['appnotallowed'] = 'A esta cuenta no se le puede mandar la app (es de administración o no puede entrar).';
+$string['appsendbutton'] = 'Mandarle la app';
+$string['appsent'] = 'Enviado: le llega el correo con su entrada a la app.';
+$string['apptaken'] = 'Ya hay otra cuenta con ese correo en el sitio, y no se hace otra: puede ser de un hermano o de la familia. Revisa el correo de este lector.';
 $string['audience'] = 'Para';
 $string['audienceclass'] = 'Su clase ({$a})';
 $string['audiencefamilies'] = 'Familias';
@@ -727,6 +738,9 @@ La guía:
 {$a->guide}
 La pregunta: {$a->question}';
 $string['howtoall'] = 'Todas las tareas';
+$string['howtoapplink'] = 'Mandarle la app a un lector';
+$string['howtoapplinksteps'] = 'Abre la ficha del lector: desde el mostrador («Su ficha») o desde la lista de su grupo|En «La app», pulsa «Mandarle la app»: le llega un correo con un enlace que abre la app ya con su cuenta|El enlace sirve una vez y dura 7 días; si caduca, vuelve a mandarlo|A un lector sin cuenta se le hace una con el correo que tiene la biblioteca, si puedes crear cuentas en el sitio';
+$string['howtoapplinkwords'] = 'app, aplicación, móvil, teléfono, enlace, entrar, cuenta, correo, aty';
 $string['howtoask'] = '¿Qué quieres hacer?';
 $string['howtobank'] = 'Prestar los libros de texto de un curso (el banco de libros)';
 $string['howtobankround'] = 'Repartir los lotes en septiembre y recogerlos en junio, clase a clase';

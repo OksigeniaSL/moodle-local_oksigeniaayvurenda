@@ -73,6 +73,17 @@ $string['addtitle'] = 'Add books';
 $string['addtype'] = 'Kind';
 $string['addundo'] = 'Undo';
 $string['addundone'] = 'Undone.';
+$string['appcreatebutton'] = 'Make their account and send them the app';
+$string['appcreated'] = 'Their account is made and the e-mail with their way into the app is on its way.';
+$string['appheading'] = 'The app';
+$string['apphint'] = 'They get an e-mail with a link that opens the app already signed in: it works once and lasts {$a} days.';
+$string['appnoemailhint'] = 'To send them the app, the library needs their e-mail.';
+$string['appnomail'] = 'The e-mail could not be sent. Try again later.';
+$string['appnone'] = 'Nothing to send.';
+$string['appnotallowed'] = 'The app cannot be sent to this account (an administrator\'s, or one that cannot sign in).';
+$string['appsendbutton'] = 'Send them the app';
+$string['appsent'] = 'Sent: the e-mail with their way into the app is on its way.';
+$string['apptaken'] = 'Another account on the site already has that e-mail, so no new one is made: it may be a sibling\'s or the family\'s. Check this reader\'s e-mail.';
 $string['audience'] = 'For';
 $string['audienceclass'] = 'Their class ({$a})';
 $string['audiencefamilies'] = 'Families';
@@ -727,6 +738,9 @@ The guide:
 {$a->guide}
 The question: {$a->question}';
 $string['howtoall'] = 'All the tasks';
+$string['howtoapplink'] = 'Send a reader the app';
+$string['howtoapplinksteps'] = 'Open the reader\'s record: from the desk («Their record») or from the list of their group|In «The app», press «Send them the app»: they get an e-mail with a link that opens the app already signed in|The link works once and lasts 7 days; if it runs out, send it again|A reader without an account gets one made from the e-mail the library has for them, if you may create accounts on the site';
+$string['howtoapplinkwords'] = 'app, mobile, phone, link, sign in, account, e-mail, aty';
 $string['howtoask'] = 'What do you want to do?';
 $string['howtobank'] = 'Lend the textbooks of a grade (the textbook bank)';
 $string['howtobankround'] = 'Hand out the sets in September and collect them in June, class by class';
