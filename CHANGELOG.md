@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.83.0 (2026-10-31)
+
+- The textbook bank by class (`roll.php`, «By class» from the bank's desk and its sets): a card for each class with its
+  pupils, who is still waiting for books and who still has them; in a class, each pupil with the books they hold (code
+  and state) and the titles of their set still to give them, filtered (everyone, waiting, have books) and to print, for
+  handing out in September and collecting in June class by class. Whoever left the class with books still shows.
+- Textbooks are not reading: the titles only a bank has stay out of the reading catalogue's search and corners (the bank
+  itself still finds them), and the bank's loans are not counted in the challenges, the flower, the cards, «What your
+  class reads», the search ideas, the year in figures or the year's report.
+
 ## 0.82.1 (2026-10-31)
 
 - The year's report, redone to be read and not only filed: the share of the year's readers who came as one big figure

@@ -1,0 +1,88 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/roll
+
+    A textbook bank by classes: without a class, a card for each one with its pupils, who is waiting for books and who
+    still has them; with a class, each pupil with the books they hold and the titles of their set still to give them,
+    filtered, and to print.
+
+    Context variables required for this template:
+    * heading, intro, isclass, hasclasses, group, back, haspupils
+    * classes - group, url, pupils, waiting, holding
+    * filters - url, label, current, count
+    * pupils - name, card, gone, held (title, barcode, condition), hasheld, missing (title), hasmissing, complete
+    * bankrollnone, bankrollhas, bankrollmissing, bankrollgone, bankrollcomplete, bankrollempty, bankrollback, bankrollprint
+
+    Example context (json):
+    {
+        "heading": "Por clases en el Banco de libros", "intro": "En septiembre, en junio.", "isclass": true,
+        "hasclasses": false, "classes": [], "group": "1º ESO A", "back": "#", "haspupils": true,
+        "filters": [{"url": "#", "label": "Todos", "current": true, "count": 2}],
+        "pupils": [{"name": "Ana Inventada", "card": "Carné 10000H", "gone": false,
+            "held": [{"title": "Matemáticas 1", "barcode": "500001K", "condition": ""}], "hasheld": true,
+            "missing": [{"title": "Lengua 1"}], "hasmissing": true, "complete": false}],
+        "bankrollnone": "Sin clases.", "bankrollhas": "Tiene", "bankrollmissing": "Le falta",
+        "bankrollgone": "Ya no está en esta clase", "bankrollcomplete": "Tiene todo su lote", "bankrollempty": "Nadie.",
+        "bankrollback": "Todas las clases", "bankrollprint": "Imprimir"
+    }
+}}
+<section class="ayv-roll">
+{{^isclass}}
+    <h1 class="ayv-results-title">{{heading}}</h1>
+    <p>{{intro}}</p>
+    {{^hasclasses}}<p class="ayv-roll-empty">{{bankrollnone}}</p>{{/hasclasses}}
+    <ul class="ayv-roll-classes">
+        {{#classes}}
+        <li><a class="ayv-roll-class" href="{{url}}">
+            <span class="ayv-roll-class-name">{{group}}</span>
+            <span class="ayv-roll-class-line">{{pupils}}</span>
+            {{#waiting}}<span class="ayv-roll-class-line ayv-roll-waiting">{{waiting}}</span>{{/waiting}}
+            {{#holding}}<span class="ayv-roll-class-line">{{holding}}</span>{{/holding}}
+        </a></li>
+        {{/classes}}
+    </ul>
+{{/isclass}}
+{{#isclass}}
+    <p class="ayv-roll-backline"><a href="{{back}}">{{bankrollback}}</a></p>
+    <div class="ayv-roll-head">
+        <h1 class="ayv-results-title">{{group}}</h1>
+        <button type="button" class="ayv-button ayv-button-quiet ayv-roll-print" onclick="window.print()">{{bankrollprint}}</button>
+    </div>
+    <p class="ayv-roll-filters">
+        {{#filters}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}<span class="ayv-chip-count">{{count}}</span></a> {{/filters}}
+    </p>
+    {{^haspupils}}<p class="ayv-roll-empty">{{bankrollempty}}</p>{{/haspupils}}
+    <ul class="ayv-roll-pupils">
+        {{#pupils}}
+        <li class="ayv-roll-pupil">
+            <p class="ayv-roll-name">{{name}} {{#card}}<span class="ayv-roll-card">{{card}}</span>{{/card}}</p>
+            {{#gone}}<p class="ayv-roll-gone">{{bankrollgone}}</p>{{/gone}}
+            {{#complete}}<p class="ayv-roll-complete">{{bankrollcomplete}}</p>{{/complete}}
+            {{#hasheld}}
+            <p class="ayv-roll-label">{{bankrollhas}}</p>
+            <ul class="ayv-roll-books">{{#held}}<li class="ayv-roll-book">{{title}} <span class="ayv-roll-code">{{barcode}}</span>{{#condition}} · {{condition}}{{/condition}}</li>{{/held}}</ul>
+            {{/hasheld}}
+            {{#hasmissing}}
+            <p class="ayv-roll-label">{{bankrollmissing}}</p>
+            <ul class="ayv-roll-books">{{#missing}}<li class="ayv-roll-book ayv-roll-book-missing">{{title}}</li>{{/missing}}</ul>
+            {{/hasmissing}}
+        </li>
+        {{/pupils}}
+    </ul>
+{{/isclass}}
+</section>

@@ -47,6 +47,41 @@ final class bank {
     }
 
     /**
+     * A condition that leaves out the loans of the textbook banks: reading is counted without them (challenges, the
+     * flower, the year's figures), since a pupil takes a whole set of textbooks at once.
+     *
+     * @param string $column The loan's library column, as the query names it.
+     * @return string SQL without parameters.
+     */
+    public static function reading(string $column): string {
+        return "$column NOT IN (SELECT bk.id FROM {" . self::T . "library} bk WHERE bk.kind = '" . self::KIND . "')";
+    }
+
+    /**
+     * The titles of a centre that only its textbook banks have: they stay out of the reading catalogue.
+     *
+     * @param int $entityid
+     * @return int[] Record ids.
+     */
+    public static function only(int $entityid): array {
+        global $DB;
+        if (!$DB->record_exists(self::T . 'library', ['entityid' => $entityid, 'kind' => self::KIND])) {
+            return [];
+        }
+        return array_map('intval', $DB->get_fieldset_sql(
+            "SELECT DISTINCT i.recordid
+               FROM {" . self::T . "item} i
+               JOIN {" . self::T . "library} b ON b.id = i.libraryid
+              WHERE b.entityid = :entityid AND b.kind = :kind
+                AND NOT EXISTS (SELECT 1
+                                  FROM {" . self::T . "item} o
+                                  JOIN {" . self::T . "library} ol ON ol.id = o.libraryid
+                                 WHERE o.recordid = i.recordid AND ol.kind <> :kind2)",
+            ['entityid' => $entityid, 'kind' => self::KIND, 'kind2' => self::KIND]
+        ));
+    }
+
+    /**
      * The sets of a bank, in order, each with its groups and titles.
      *
      * @param \stdClass $library
@@ -183,6 +218,121 @@ final class bank {
                 'missing' => count(array_filter($titles, fn($t) => !$t['out']))];
         }
         return null;
+    }
+
+    /**
+     * The classes of a bank, for handing out in September and collecting in June: the groups of its sets this year and
+     * the groups that still have books from it (as they were called when they took them), each with its pupils, the
+     * pupils who still hold books, the books out and the pupils still waiting for some of their set.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @return array[] group, pupils, holding, out, waiting.
+     */
+    public static function classes(\stdClass $library, int $now): array {
+        global $DB;
+        $groups = [];
+        foreach (self::sets($library) as $set) {
+            foreach ($set['groups'] as $group) {
+                $groups[$group] = true;
+            }
+        }
+        $held = $DB->get_records_sql(
+            "SELECT l.groupname, COUNT(DISTINCT l.readerid) AS holding, COUNT(1) AS lent
+               FROM {" . self::T . "loan} l
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL AND l.groupname IS NOT NULL
+           GROUP BY l.groupname",
+            ['libraryid' => $library->id]
+        );
+        foreach (array_keys($held) as $group) {
+            $groups[$group] = true;
+        }
+        $out = [];
+        foreach (array_keys($groups) as $group) {
+            $roll = self::roll($library, (string) $group, $now);
+            $out[] = ['group' => (string) $group, 'pupils' => count(array_filter($roll, fn($p) => $p['member'])),
+                'holding' => (int) ($held[$group]->holding ?? 0), 'out' => (int) ($held[$group]->lent ?? 0),
+                'waiting' => count(array_filter($roll, fn($p) => $p['missing']))];
+        }
+        usort($out, fn($a, $b) => strnatcasecmp($a['group'], $b['group']));
+        return $out;
+    }
+
+    /**
+     * One class of a bank: its pupils this year and whoever still has books taken while in it, each with the books they
+     * hold (with the state they went in) and the titles of their set still to give them.
+     *
+     * @param \stdClass $library
+     * @param string $group
+     * @param int $now
+     * @return array[] readerid, name, card, member, held (title, barcode, condition, due), missing (titles).
+     */
+    public static function roll(\stdClass $library, string $group, int $now): array {
+        global $DB;
+        $year = years::around((int) $library->entityid, $now);
+        $fields = 'r.id, r.firstname, r.lastname, r.cardcode, r.userid';
+        $members = $DB->get_records_sql(
+            "SELECT $fields
+               FROM {" . self::T . "reader} r
+               JOIN {" . self::T . "member} m ON m.readerid = r.id
+              WHERE m.yearid = :yearid AND m.groupname = :groupname AND r.entityid = :entityid",
+            ['yearid' => $year->id, 'groupname' => $group, 'entityid' => $library->entityid]
+        );
+        $holders = $DB->get_records_sql(
+            "SELECT DISTINCT $fields
+               FROM {" . self::T . "reader} r
+               JOIN {" . self::T . "loan} l ON l.readerid = r.id
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL AND l.groupname = :groupname",
+            ['libraryid' => $library->id, 'groupname' => $group]
+        );
+        $readers = $members + $holders;
+        if (!$readers) {
+            return [];
+        }
+        $titles = [];
+        foreach (self::sets($library) as $set) {
+            if (in_array($group, $set['groups'], true)) {
+                $titles = $set['titles'];
+                break;
+            }
+        }
+        [$in, $params] = $DB->get_in_or_equal(array_keys($readers), SQL_PARAMS_NAMED);
+        $loans = $DB->get_records_sql(
+            "SELECT l.id, l.readerid, l.timedue, l.conditionout, i.recordid, i.barcode, r.title
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL AND l.readerid $in
+           ORDER BY r.title, l.id",
+            ['libraryid' => $library->id] + $params
+        );
+        // The same in Moodle 4.5 and 5.3, where user_get_users_by_id() is deprecated.
+        $users = $DB->get_records_list('user', 'id', array_values(array_filter(array_map(fn($r) => (int) $r->userid, $readers))));
+        $roll = [];
+        foreach ($readers as $reader) {
+            $held = array_values(array_filter($loans, fn($l) => (int) $l->readerid === (int) $reader->id));
+            $have = array_map(fn($l) => (int) $l->recordid, $held);
+            $member = isset($members[$reader->id]);
+            // By surname, as a class list goes; a reader with an account is called as Moodle calls them.
+            $who = $users[$reader->userid] ?? $reader;
+            $name = isset($users[$reader->userid]) ? fullname($who) : trim($reader->firstname . ' ' . $reader->lastname);
+            $roll[] = ['readerid' => (int) $reader->id, 'name' => $name, 'sort' => \core_text::strtolower(
+                trim($who->lastname . ' ' . $who->firstname) ?: $name
+            ), 'card' => (string) $reader->cardcode,
+                'member' => $member,
+                'held' => array_map(fn($l) => ['title' => $l->title, 'barcode' => $l->barcode,
+                    'condition' => (string) ($l->conditionout ?: 'good'), 'due' => (int) $l->timedue], $held),
+                // Only a pupil of the class this year waits for its set.
+                'missing' => $member ? array_values(array_map(
+                    fn($t) => $t['title'],
+                    array_filter($titles, fn($t) => !in_array((int) $t['recordid'], $have, true))
+                )) : []];
+        }
+        usort($roll, fn($a, $b) => strnatcasecmp($a['sort'], $b['sort']));
+        return array_map(function ($p) {
+            unset($p['sort']);
+            return $p;
+        }, $roll);
     }
 
     /**

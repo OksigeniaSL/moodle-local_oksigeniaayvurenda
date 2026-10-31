@@ -122,7 +122,7 @@ final class year_change {
         );
         $loans = $DB->get_records_sql(
             'SELECT groupname, COUNT(1) AS loans, COUNT(DISTINCT readerid) AS borrowers
-               FROM {' . self::T . 'loan} WHERE yearid = :yearid GROUP BY groupname',
+               FROM {' . self::T . 'loan} WHERE yearid = :yearid AND ' . bank::reading('libraryid') . ' GROUP BY groupname',
             ['yearid' => $year->id]
         );
         $groups = [];
@@ -138,7 +138,7 @@ final class year_change {
             }
         }
         $total['borrowers'] = (int) $DB->count_records_sql(
-            'SELECT COUNT(DISTINCT readerid) FROM {' . self::T . 'loan} WHERE yearid = :yearid',
+            'SELECT COUNT(DISTINCT readerid) FROM {' . self::T . 'loan} WHERE yearid = :yearid AND ' . bank::reading('libraryid'),
             ['yearid' => $year->id]
         );
         ksort($groups, SORT_NATURAL);

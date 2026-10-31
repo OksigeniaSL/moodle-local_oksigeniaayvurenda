@@ -125,6 +125,13 @@ final class catalogue {
             $params['start' . $i] = $escaped . '%';
             $params['inner' . $i] = '% ' . $escaped . '%';
         }
+        // The textbooks only a bank has stay out of the reading catalogue; in the bank itself they are found.
+        $only = bank::is($library) ? [] : bank::only((int) $library->entityid);
+        if ($only) {
+            [$notin, $onlyparams] = $DB->get_in_or_equal($only, SQL_PARAMS_NAMED, 'only', false);
+            $conditions[] = "r.id $notin";
+            $params += $onlyparams;
+        }
         if ($onlyfree) {
             $conditions[] = self::free_condition();
             $params['freelibrary'] = $library->id;
@@ -235,9 +242,10 @@ final class catalogue {
             ['entityid' => $library->entityid]
         );
         $records = [];
+        $only = bank::is($library) ? [] : array_flip(bank::only((int) $library->entityid));
         foreach ($rows as $row) {
             $top = self::top_class((string) $row->code);
-            if ($top !== null) {
+            if ($top !== null && !isset($only[$row->recordid])) {
                 $records[$top][$row->recordid] = true;
             }
         }
@@ -345,6 +353,7 @@ final class catalogue {
                JOIN {' . self::T . 'item} i ON i.id = l.itemid
                JOIN {' . self::T . 'member} m ON m.readerid = l.readerid AND m.yearid = :yearid
               WHERE i.entityid = :entityid AND m.groupname = :groupname AND l.timeloaned > :since
+                AND ' . bank::reading('l.libraryid') . '
            GROUP BY i.recordid
              HAVING COUNT(DISTINCT l.readerid) >= 2
            ORDER BY readers DESC, i.recordid DESC',
@@ -383,7 +392,7 @@ final class catalogue {
                    JOIN {" . self::T . "item} i ON i.id = l.itemid
                    JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
                    JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'subject'
-                  WHERE l.readerid = :readerid
+                  WHERE l.readerid = :readerid AND " . bank::reading('l.libraryid') . "
                ORDER BY l.timeloaned DESC, ra.sortorder",
                 ['readerid' => $readerid],
                 IGNORE_MULTIPLE
@@ -398,7 +407,7 @@ final class catalogue {
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
                JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'subject'
-              WHERE i.entityid = :entityid AND l.timeloaned > :since
+              WHERE i.entityid = :entityid AND l.timeloaned > :since AND " . bank::reading('l.libraryid') . "
            GROUP BY a.id, a.label
            ORDER BY lent DESC, a.id",
             ['entityid' => $library->entityid, 'since' => $since],

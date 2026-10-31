@@ -108,5 +108,7 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/bank', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $desk, 'label' => $str('desktitle')]]]
+    ['search' => false, 'nav' => [['url' => $desk, 'label' => $str('desktitle')], ['url' =>
+        (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug]))->out(false),
+        'label' => $str('bankrollnav')]]]
 );

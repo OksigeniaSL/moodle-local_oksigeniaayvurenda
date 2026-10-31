@@ -110,13 +110,14 @@ final class memoir {
         global $DB;
         $summary = year_change::summary($year);
         $range = ['entityid' => $entityid, 'a' => $year->timestart, 'b' => $year->timeend];
-        $libraries = "SELECT id FROM {" . self::T . "library} WHERE entityid = :entityid";
+        // The textbook banks have their own part of the report.
+        $libraries = "SELECT id FROM {" . self::T . "library} WHERE entityid = :entityid AND kind <> '" . bank::KIND . "'";
         // Of the readers of the year (its groups), those who came: the staff borrow too, and are not of a group.
         $came = (int) $DB->count_records_sql(
             "SELECT COUNT(DISTINCT l.readerid)
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "member} m ON m.readerid = l.readerid AND m.yearid = l.yearid
-              WHERE l.yearid = :yearid",
+              WHERE l.yearid = :yearid AND " . bank::reading('l.libraryid'),
             ['yearid' => $year->id]
         );
         return [
@@ -131,7 +132,7 @@ final class memoir {
             ),
             'acquired' => $DB->count_records_select(
                 self::T . 'item',
-                'entityid = :entityid AND timecreated >= :a AND timecreated < :b',
+                "libraryid IN ($libraries) AND timecreated >= :a AND timecreated < :b",
                 $range
             ),
             'withdrawn' => (int) $DB->count_records_sql("SELECT COUNT(1) FROM {" . self::T . "withdrawn} w
@@ -140,7 +141,7 @@ final class memoir {
                     AND w.timerestored IS NULL", $range),
             'holdings' => $DB->count_records_select(
                 self::T . 'item',
-                "entityid = :entityid AND status <> 'withdrawn'",
+                "libraryid IN ($libraries) AND status <> 'withdrawn'",
                 ['entityid' => $entityid]
             ),
         ];
@@ -159,6 +160,7 @@ final class memoir {
                     COUNT(DISTINCT l.readerid) AS borrowers, COUNT(l.id) AS loans
                FROM {" . self::T . "member} m
           LEFT JOIN {" . self::T . "loan} l ON l.readerid = m.readerid AND l.yearid = m.yearid
+                    AND " . bank::reading('l.libraryid') . "
               WHERE m.yearid = :yearid
            GROUP BY COALESCE(m.stage, '')
            ORDER BY COALESCE(m.stage, '')",
@@ -182,7 +184,7 @@ final class memoir {
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} r ON r.id = i.recordid
-              WHERE r.entityid = :entityid AND l.yearid = :yearid
+              WHERE r.entityid = :entityid AND l.yearid = :yearid AND " . bank::reading('l.libraryid') . "
            GROUP BY r.id, r.title
            ORDER BY COUNT(1) DESC, r.title",
             ['entityid' => $entityid, 'yearid' => $year->id],
@@ -207,7 +209,7 @@ final class memoir {
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
                JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
-              WHERE l.yearid = :yearid AND a.entityid = :entityid",
+              WHERE l.yearid = :yearid AND a.entityid = :entityid AND " . bank::reading('l.libraryid'),
             ['yearid' => $year->id, 'entityid' => $library->entityid]
         );
         $counted = [];

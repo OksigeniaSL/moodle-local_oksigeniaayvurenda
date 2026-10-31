@@ -2851,3 +2851,63 @@ html[data-bs-theme="dark"] .ayv .ayv-memoir { --bar: var(--accent); }
     .ayv .ayv-memoir-top { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     .ayv .ayv-memoir-groups { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+/* A textbook bank by classes: a card for each class; in one, a card for each pupil with what they hold and what they
+   still need, to hand out in September and collect in June, class by class. */
+.ayv .ayv-roll-classes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: .75rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+.ayv .ayv-roll-class {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    height: 100%;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: 0 1px 0 var(--line);
+}
+.ayv .ayv-roll-class:hover { box-shadow: 0 0 0 2px var(--accent); }
+.ayv .ayv-roll-class:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-roll-class-name { font-family: var(--title); font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-roll-class-line { font-size: .95rem; }
+.ayv .ayv-roll-waiting,
+.ayv .ayv-roll-gone { color: var(--late); font-weight: 700; }
+.ayv .ayv-roll-empty { margin: 1rem 0; }
+.ayv .ayv-roll-backline { margin: 0 0 .25rem; }
+.ayv .ayv-roll-head { display: flex; gap: 1rem; align-items: center; justify-content: space-between; }
+.ayv .ayv-roll-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0 1rem; }
+.ayv .ayv-roll-pupils {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: .75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.ayv .ayv-roll-pupil { padding: 1rem 1.1rem; border-radius: var(--radius); background: var(--surface); break-inside: avoid; }
+.ayv .ayv-roll-name { margin: 0; font-weight: 700; }
+.ayv .ayv-roll-card { margin-left: .35rem; font-weight: 400; font-size: .9rem; white-space: nowrap; }
+.ayv .ayv-roll-gone,
+.ayv .ayv-roll-complete { margin: .25rem 0 0; font-size: .95rem; }
+.ayv .ayv-roll-complete { color: var(--accent); font-weight: 700; }
+.ayv .ayv-roll-label { margin: .6rem 0 .3rem; font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.ayv .ayv-roll-books { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-roll-book { padding: .2rem .6rem; border-radius: 8px; background: var(--notice-bg); font-size: .9rem; }
+.ayv .ayv-roll-book-missing { background: none; box-shadow: inset 0 0 0 1.5px var(--late); }
+.ayv .ayv-roll-code { font-size: .8rem; font-variant-numeric: tabular-nums; }
+@media print {
+    .ayv .ayv-roll-print,
+    .ayv .ayv-roll-filters,
+    .ayv .ayv-roll-backline { display: none; }
+    .ayv .ayv-roll-pupils { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ayv .ayv-roll-pupil { box-shadow: inset 0 0 0 1px var(--line); }
+    .ayv .ayv-roll-pupil,
+    .ayv .ayv-roll-book { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

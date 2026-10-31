@@ -174,19 +174,21 @@ final class challenges {
         $params += ['start' => $start, 'end' => $end];
         if ($kind === 'everyone') {
             return (int) $DB->count_records_sql("SELECT COUNT(DISTINCT l.readerid) FROM {" . self::T . "loan} l
-                WHERE l.readerid $in AND l.timeloaned >= :start AND l.timeloaned < :end", $params);
+                WHERE l.readerid $in AND l.timeloaned >= :start AND l.timeloaned < :end
+                  AND " . bank::reading('l.libraryid'), $params);
         }
         if ($kind === 'notes') {
             return (int) $DB->count_records_sql("SELECT COUNT(1) FROM {" . self::T . "loan} l
                 WHERE l.readerid $in AND l.timereturned >= :start AND l.timereturned < :end
-                  AND l.returnnote IS NOT NULL AND l.returnnote <> ''", $params);
+                  AND l.returnnote IS NOT NULL AND l.returnnote <> '' AND " . bank::reading('l.libraryid'), $params);
         }
         $codes = $DB->get_fieldset_sql("SELECT DISTINCT a.code
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
                JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
-              WHERE l.readerid $in AND l.timeloaned >= :start AND l.timeloaned < :end", $params);
+              WHERE l.readerid $in AND l.timeloaned >= :start AND l.timeloaned < :end
+                AND " . bank::reading('l.libraryid'), $params);
         $tops = [];
         foreach ($codes as $code) {
             if (preg_match('/^\s*(\d)/', (string) $code, $m)) {

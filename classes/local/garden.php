@@ -160,7 +160,7 @@ final class garden {
                       WHERE ra.recordid = i.recordid) AS class
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
-              WHERE l.readerid = :readerid",
+              WHERE l.readerid = :readerid AND " . bank::reading('l.libraryid'),
             ['readerid' => $reader->id]
         );
         $won = [];
@@ -191,9 +191,13 @@ final class garden {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $loans = self::loans((int) $reader->id, (int) $year->id);
         $params = ['readerid' => $reader->id, 'yearid' => $year->id];
-        $last = max((int) $DB->get_field_sql('SELECT MAX(timeloaned) FROM {' . self::T . 'loan}
-            WHERE readerid = :readerid AND yearid = :yearid', $params), (int) $DB->get_field_sql('SELECT MAX(timereturned)
-            FROM {' . self::T . 'loan} WHERE readerid = :readerid AND yearid = :yearid', $params));
+        $reading = ' AND ' . bank::reading('libraryid');
+        $last = max(
+            (int) $DB->get_field_sql('SELECT MAX(timeloaned) FROM {' . self::T . 'loan}
+                WHERE readerid = :readerid AND yearid = :yearid' . $reading, $params),
+            (int) $DB->get_field_sql('SELECT MAX(timereturned) FROM {' . self::T . 'loan}
+                WHERE readerid = :readerid AND yearid = :yearid' . $reading, $params)
+        );
         $tz = \core_date::get_server_timezone_object();
         $day = fn(int $time) => (new \DateTimeImmutable('@' . $time))->setTimezone($tz)->setTime(0, 0);
         $back = $str('cardnovisit');
@@ -288,7 +292,7 @@ final class garden {
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} r ON r.id = i.recordid
-              WHERE l.readerid = :readerid AND l.yearid = :yearid
+              WHERE l.readerid = :readerid AND l.yearid = :yearid AND " . bank::reading('l.libraryid') . "
            ORDER BY l.timeloaned, l.id",
             ['readerid' => $readerid, 'yearid' => $yearid]
         );
