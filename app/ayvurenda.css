@@ -2500,6 +2500,9 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-visit-bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: space-between; margin: 0 0 .75rem; }
 .ayv .ayv-visit-title { margin: 0; font: 600 1.7rem/1.2 var(--title); }
 .ayv .ayv-visit-sound[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+/* How loud, beside it: one for the whole device. */
+.ayv .ayv-visit-volume { display: inline-flex; align-items: center; min-height: 44px; }
+.ayv .ayv-visit-volume input { width: 7.5rem; accent-color: var(--accent); }
 /* On or off at a glance: filled with the speaker's waves, or only its outline with the speaker crossed out. */
 .ayv .ayv-visit-sound-on,
 .ayv .ayv-visit-sound-off { display: inline-flex; }

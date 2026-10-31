@@ -1734,6 +1734,7 @@ $string['visitpulsequiet'] = 'Los libros te esperan';
 $string['visitsound'] = 'Sonido';
 $string['visitstacks'] = 'La estantería de {$a}';
 $string['visitvoices'] = 'Ayvu rande, las voces de la biblioteca';
+$string['visitvolume'] = 'Volumen';
 $string['voiceagain'] = 'Volver a grabar';
 $string['voiceapprove'] = 'Aprobarla';
 $string['voiceapproved'] = 'Aprobada';

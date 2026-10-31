@@ -243,6 +243,13 @@
                 return;
             }
             var audio = new Audio(urls[i]);
+            // The device's own volume, as the visit and its games set it (low until someone sets it).
+            try {
+                var level = parseFloat(window.localStorage.getItem('ayv-volume'));
+                audio.volume = isNaN(level) ? 0.25 : Math.max(0, Math.min(1, level));
+            } catch (e) {
+                audio.volume = 0.25;
+            }
             listening = {button: button, audio: audio};
             button.setAttribute('aria-pressed', 'true');
             audio.addEventListener('ended', function() {

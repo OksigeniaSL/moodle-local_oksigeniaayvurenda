@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.79.1 (2026-10-31)
+
+- A volume control beside «Sound» in the visit, one for the whole device, kept for every room and game and for
+  «Listen»: it starts at a quarter, since twenty devices may sound at once in a class and a loud voice frightens the
+  little ones. Turning the sound on no longer jumps to full volume.
+
 ## 0.79.0 (2026-10-31)
 
 - The skin of a centre's library, first part: each centre chooses in its settings whether its library is a school's

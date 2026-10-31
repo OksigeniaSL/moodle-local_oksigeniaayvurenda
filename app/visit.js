@@ -294,9 +294,11 @@
     // The sound is off until one turns it on; a reader of the flower hears it unless they turned it off.
     var chosen = store('localStorage', 'ayv-visit-sound');
     var on = chosen === 'on' || (chosen !== 'off' && visit.getAttribute('data-young') === '1');
-    // In a class, twenty devices may sound at once: a sound nobody chose starts at a quarter, and whoever turns it on
-    // hears it whole.
-    var level = chosen === 'on' ? 1 : 0.25;
+    // How loud, one setting for the whole device, set once (on a class's board, say): low to start with, since twenty
+    // devices may sound at once and a voice that comes out loud frightens the little ones.
+    var level = parseFloat(store('localStorage', 'ayv-volume'));
+    level = isNaN(level) ? 0.25 : Math.max(0, Math.min(1, level));
+    var volume = visit.querySelector('.ayv-visit-volume');
     var play = function() {
         if (!ambience) {
             ambience = new window.Audio(visit.getAttribute('data-sound'));
@@ -317,12 +319,6 @@
                 return;
             }
             on = !on;
-            if (on) {
-                level = 1;
-                if (ambience) {
-                    ambience.volume = level;
-                }
-            }
             store('localStorage', 'ayv-visit-sound', on ? 'on' : 'off');
             soundbutton.setAttribute('aria-pressed', on ? 'true' : 'false');
             if (on) {
@@ -333,6 +329,20 @@
                 ambience.pause();
             }
         });
+        if (volume) {
+            volume.hidden = false;
+            volume.querySelector('input').value = Math.round(level * 100);
+            volume.querySelector('input').addEventListener('input', function(event) {
+                level = Math.max(0, Math.min(1, event.target.value / 100));
+                store('localStorage', 'ayv-volume', String(level));
+                if (ambience) {
+                    ambience.volume = level;
+                }
+                if (voice) {
+                    voice.volume = level;
+                }
+            });
+        }
         if (on) {
             // A browser may wait for a first touch before it lets a page sound.
             play().catch(function() {

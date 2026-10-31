@@ -35,7 +35,7 @@
     * sort - the hall's game, or nothing: heading, name, intro, figure, puppet, cheer, cheerpuppet, books (id, title,
       photo, colour, corner, cornerlabel, topic, lines, count, labelsr, url, first), doors (code, label, colour, art),
       againurl, messages, voices; hasplaces
-    * visitplaces, visitsound, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
+    * visitplaces, visitsound, visitvolume, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
     Example context (json):
     {
         "name": "vestibulo", "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "depth": 0.35,
@@ -85,7 +85,7 @@
         },
         "hasplaces": true, "huntplay": "Busca el libro escondido", "huntshelf": "La estantería",
         "huntrecord": "Ver su ficha", "huntagain": "Otro libro", "huntlens": "Pasa por los lomos y aquí verás su tejuelo",
-        "visitplaces": "Lo que hay aquí", "visitsound": "Sonido", "visitpanleft": "Mirar a la izquierda",
+        "visitplaces": "Lo que hay aquí", "visitsound": "Sonido", "visitvolume": "Volumen", "visitpanleft": "Mirar a la izquierda",
         "visitpanright": "Mirar a la derecha", "visitclose": "Cerrar", "searchlabel": "Buscar en el catálogo",
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
     }
@@ -97,6 +97,7 @@
         <button type="button" class="ayv-button ayv-button-quiet ayv-visit-sound" aria-pressed="false" hidden>
             <span class="ayv-visit-sound-on">{{> local_oksigeniaayvurenda/icon_volume}}</span><span class="ayv-visit-sound-off">{{> local_oksigeniaayvurenda/icon_volume_off}}</span> {{visitsound}}
         </button>
+        <label class="ayv-visit-volume" hidden><span class="ayv-sr">{{visitvolume}}</span><input type="range" min="0" max="100" step="5" value="25"></label>
         {{/sound}}
     </div>
     <div class="ayv-visit-frame" hidden>

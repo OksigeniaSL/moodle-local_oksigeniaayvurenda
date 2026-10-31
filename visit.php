@@ -52,7 +52,7 @@ if (!$data) {
     shell::missing($str('visitnone'), $library);
 }
 foreach (
-    ['visitplaces', 'visitsound', 'visitpanleft', 'visitpanright', 'visitclose', 'searchlabel', 'searchplaceholder',
+    ['visitplaces', 'visitsound', 'visitvolume', 'visitpanleft', 'visitpanright', 'visitclose', 'searchlabel', 'searchplaceholder',
         'searchbutton', 'huntplay', 'huntshelf', 'huntrecord', 'huntagain', 'huntlens', 'sortplay', 'sortwhich', 'sortdone',
         'sortdonehint', 'sortagain'] as $key
 ) {
