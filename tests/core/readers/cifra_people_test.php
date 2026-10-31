@@ -46,4 +46,30 @@ final class cifra_people_test extends \basic_testcase {
         // Before the day they left, they were still there.
         $this->assertCount(5, cifra_people::readers($people, strtotime('2026-09-01 12:00:00 UTC'))['readers']);
     }
+
+    /**
+     * The families come from each student's record: the same mother of two brothers is one adult with both, a relative
+     * without an id is known by their email, the legal guardian says so, and a student who left brings nobody.
+     */
+    public function test_families(): void {
+        $now = strtotime('2026-10-31 12:00:00 UTC');
+        $mother = ['parentesco' => 'Madre', 'tutor' => 'Sí', 'usuario' => ['id' => 900, 'nombre' => 'Marta',
+            'apellidos' => 'Arenas Faro', 'email' => 'Marta@Example.invalid', 'telefono_movil' => '600 000 001']];
+        $records = [
+            ['id' => 10, 'familiares' => [$mother]],
+            ['id' => 11, 'familiares' => [$mother, ['parentesco' => 'Abuelo', 'tutor' => 'No',
+                'usuario' => ['nombre' => 'Ramón', 'apellido1' => 'Faro', 'apellido2' => 'Lago',
+                    'email' => 'ramon@example.invalid']]]],
+            ['id' => 12, 'fecha_baja' => '2026-06-30', 'familiares' => [['parentesco' => 'Padre', 'tutor' => true,
+                'usuario' => ['id' => 901, 'nombre' => 'Gael']]]],
+            ['id' => 13, 'familiares' => [['parentesco' => 'Tía', 'usuario' => ['nombre' => 'Sin forma de reconocerla']]]],
+        ];
+        $families = cifra_people::families($records, $now);
+        $this->assertSame(['cifra:900', 'cifra:mail:ramon@example.invalid'], array_column($families, 'key'));
+        $this->assertSame(['key' => 'cifra:900', 'firstname' => 'Marta', 'lastname' => 'Arenas Faro',
+            'email' => 'marta@example.invalid', 'phone' => '600000001', 'relation' => 'Madre', 'guardian' => true,
+            'children' => ['cifra:10', 'cifra:11']], $families[0]);
+        $this->assertSame(['Faro Lago', false, ['cifra:11']], [$families[1]['lastname'], $families[1]['guardian'],
+            $families[1]['children']]);
+    }
 }

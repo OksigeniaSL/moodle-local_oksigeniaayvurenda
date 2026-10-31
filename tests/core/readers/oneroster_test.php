@@ -88,4 +88,29 @@ final class oneroster_test extends \basic_testcase {
         $this->expectException(\InvalidArgumentException::class);
         oneroster::readers(['classes.csv' => "sourcedId\n"], '', false, time());
     }
+
+    /**
+     * The families of an export, from agentSourcedIds read both ways: a guardian who names their child, and a student
+     * who names their parent; the mobile first; someone disabled or of another school brings nobody.
+     */
+    public function test_families(): void {
+        $now = strtotime('2026-10-31 12:00:00 UTC');
+        $found = oneroster::families($this->files(), 'sch1', $now);
+        $this->assertSame([['key' => 'oneroster:p1', 'firstname' => 'Bruno', 'lastname' => 'Montes',
+            'relation' => 'guardian', 'children' => ['oneroster:u1']]], $found);
+        $users = "sourcedId,status,dateLastModified,enabledUser,orgSourcedIds,role,username,userIds,givenName,familyName," .
+            "middleName,identifier,email,sms,phone,agentSourcedIds,grades,password\n" .
+            "s1,active,,true,sch1,student,iker,,Iker,Brisa,,5001,,,,m1,04,\n" .
+            "s2,active,,true,sch1,student,noa,,Noa,Brisa,,5002,,,,,02,\n" .
+            "s3,active,,false,sch1,student,ona,,Ona,Brisa,,5003,,,,m1,01,\n" .
+            "m1,active,,true,sch1,parent,lucia,,Lucía,Brisa,,,lucia@example.invalid,+34600000002,910000000,s2,,\n" .
+            "x1,active,,true,sch2,student,teo,,Teo,Lago,,5004,,,,m2,04,\n" .
+            "m2,active,,true,sch2,parent,eva,,Eva,Lago,,,,,,,,\n";
+        $families = oneroster::families(['users.csv' => $users], 'sch1', $now);
+        $this->assertCount(1, $families);
+        $this->assertSame(['oneroster:s1', 'oneroster:s2'], $families[0]['children']);
+        $this->assertSame(['+34600000002', 'parent'], [$families[0]['phone'], $families[0]['relation']]);
+        $everyone = oneroster::families(['users.csv' => $users], '', $now);
+        $this->assertSame(['oneroster:m1', 'oneroster:m2'], array_column($everyone, 'key'));
+    }
 }

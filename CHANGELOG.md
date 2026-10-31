@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.85.0 (2026-10-31)
+
+- The roster readers say who is family of whom, for the common family record (`local_oksigeniafamily`), which carries a
+  copy of them made by hq's kit: from OneRoster, each parent, guardian or relative with their children (the
+  `agentSourcedIds` of users.csv, read both ways); from Cifra, the relatives of each student's record, each adult once
+  with their kinship, whether they are a legal guardian and their mobile first. Plain PHP with their tests; the library
+  does not use them yet.
+
 ## 0.84.2 (2026-10-31)
 
 - The textbook bank's sets say what has to be replaced of each title (copies broken or being mended, and lost), and

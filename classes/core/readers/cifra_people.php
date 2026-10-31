@@ -68,4 +68,61 @@ final class cifra_people {
         }
         return ['readers' => $readers, 'gone' => $gone];
     }
+
+    /**
+     * The families of the students, from the record of each one (Cifra gives `familiares` only there, not in the list):
+     * each adult once, with the students they are family of, their kinship and whether they are a legal guardian. An
+     * adult is known by their id in Cifra (the same as a person's, por verificar), or else by their email or mobile, so
+     * the same parent of two brothers is one. Students who left bring no family.
+     *
+     * @param array[] $records The records of the students, as Cifra gives them.
+     * @param int $now
+     * @return array[] key, firstname, lastname, email, phone (the mobile first), relation (as Cifra says it), guardian
+     *     and children (their keys); keys as cifra:<id>.
+     */
+    public static function families(array $records, int $now): array {
+        $adults = [];
+        foreach ($records as $record) {
+            $id = (string) ($record['id'] ?? '');
+            $left = (string) ($record['fecha_baja'] ?? '');
+            if ($id === '' || ($left !== '' && strtotime($left) !== false && strtotime($left) <= $now)) {
+                continue;
+            }
+            foreach ((array) ($record['familiares'] ?? []) as $relative) {
+                $person = (array) ($relative['usuario'] ?? $relative);
+                $email = mb_strtolower(trim((string) ($person['email'] ?? '')), 'UTF-8');
+                $phone = preg_replace(
+                    '/[^\d+]/',
+                    '',
+                    (string) (($person['telefono_movil'] ?? '') ?: ($person['telefono_fijo'] ?? ''))
+                );
+                $own = (string) ($person['id'] ?? '');
+                $key = $own !== '' ? 'cifra:' . $own
+                    : ($email !== '' ? 'cifra:mail:' . $email : ($phone !== '' ? 'cifra:tel:' . $phone : ''));
+                if ($key === '') {
+                    continue;
+                }
+                $guardian = ($relative['tutor'] ?? null) === true || in_array(
+                    mb_strtolower(trim((string) ($relative['tutor'] ?? '')), 'UTF-8'),
+                    ['1', 'true', 'si', 'sí', 's', 'yes'],
+                    true
+                );
+                $adults[$key] = $adults[$key] ?? array_filter([
+                    'key' => $key,
+                    'firstname' => trim((string) ($person['nombre'] ?? '')),
+                    'lastname' => trim((string) ($person['apellidos']
+                        ?? (($person['apellido1'] ?? '') . ' ' . ($person['apellido2'] ?? '')))),
+                    'email' => $email,
+                    'phone' => $phone,
+                    'relation' => trim((string) ($relative['parentesco'] ?? '')),
+                ], fn($v) => $v !== '') + ['guardian' => false, 'children' => []];
+                $adults[$key]['guardian'] = $adults[$key]['guardian'] || $guardian;
+                $adults[$key]['children'][] = 'cifra:' . $id;
+            }
+        }
+        foreach ($adults as $key => $adult) {
+            $adults[$key]['children'] = array_values(array_unique($adult['children']));
+        }
+        return array_values($adults);
+    }
 }

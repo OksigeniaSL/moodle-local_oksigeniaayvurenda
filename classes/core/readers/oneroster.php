@@ -63,22 +63,8 @@ final class oneroster {
                 $schools[$row['sourcedId']] = trim($row['name'] ?? '') ?: $row['sourcedId'];
             }
         }
-        // What each user is, and where: roles.csv (1.2) or the columns of users.csv (1.1).
         $users = self::by_id(self::table($files['users.csv']));
-        $roles = [];
-        foreach (self::table($files['roles.csv'] ?? '') as $row) {
-            if (self::alive($row, $now) && ($row['userSourcedId'] ?? '') !== '') {
-                $roles[$row['userSourcedId']][] = ['role' => $row['role'] ?? '', 'org' => $row['orgSourcedId'] ?? '',
-                    'primary' => ($row['roleType'] ?? '') === 'primary'];
-            }
-        }
-        foreach ($users as $id => $user) {
-            if (!isset($roles[$id]) && ($user['role'] ?? '') !== '') {
-                foreach (array_filter(array_map('trim', explode(',', $user['orgSourcedIds'] ?? ''))) ?: [''] as $org) {
-                    $roles[$id][] = ['role' => $user['role'], 'org' => $org, 'primary' => true];
-                }
-            }
-        }
+        $roles = self::roles($files, $users, $now);
         // The classes, and who is in each.
         $classes = self::by_id(self::table($files['classes.csv'] ?? ''));
         $homerooms = [];
@@ -137,6 +123,98 @@ final class oneroster {
         }
         return ['readers' => $readers, 'gone' => $gone, 'tutors' => $tutors, 'schools' => $schools,
             'mode' => $manifest['file.users'] ?? 'bulk', 'version' => $manifest['oneroster.version'] ?? ''];
+    }
+
+    /**
+     * The families of an export: each parent, guardian or relative with the students they are family of, from the
+     * links of users.csv (agentSourcedIds) read both ways, the student's and the adult's. Only students of the school
+     * given, and only who is enabled and not to be deleted.
+     *
+     * @param array $files File name (users.csv…) => its text.
+     * @param string $school The sourcedId of the school to take, or empty for every one.
+     * @param int $now
+     * @return array[] key, firstname, lastname, email, phone (the mobile first), relation (parent, guardian or relative)
+     *     and children (their keys); keys as oneroster:<sourcedId>.
+     * @throws \InvalidArgumentException When users.csv is not there.
+     */
+    public static function families(array $files, string $school, int $now): array {
+        if (!isset($files['users.csv'])) {
+            throw new \InvalidArgumentException('users.csv');
+        }
+        $users = self::by_id(self::table($files['users.csv']));
+        $roles = self::roles($files, $users, $now);
+        $alive = fn(string $id) => isset($users[$id]) && ($users[$id]['status'] ?? '') !== 'tobedeleted'
+            && strtolower($users[$id]['enabledUser'] ?? 'true') !== 'false';
+        $is = function (string $id, array $kinds) use ($roles, $users, $school): ?string {
+            foreach ($roles[$id] ?? [] as $role) {
+                $here = $school === '' || $role['org'] === $school || $role['org'] === ''
+                    || ($users[$id]['primaryOrgSourcedId'] ?? '') === $school;
+                if ($here && in_array($role['role'], $kinds, true)) {
+                    return $role['role'];
+                }
+            }
+            return null;
+        };
+        $agents = fn(string $id) => array_values(array_filter(array_map(
+            'trim',
+            explode(',', $users[$id]['agentSourcedIds'] ?? '')
+        )));
+        $links = [];
+        foreach (array_keys($users) as $id) {
+            $id = (string) $id;
+            foreach ($agents($id) as $other) {
+                // Either way round: a student names their family, or an adult names their children.
+                if ($is($id, ['student']) && $is($other, ['parent', 'guardian', 'relative'])) {
+                    $links[$other][$id] = true;
+                } else if ($is($other, ['student']) && $is($id, ['parent', 'guardian', 'relative'])) {
+                    $links[$id][$other] = true;
+                }
+            }
+        }
+        $adults = [];
+        foreach ($links as $adult => $children) {
+            $children = array_values(array_filter(array_keys($children), fn($c) => $alive((string) $c)));
+            if (!$alive((string) $adult) || !$children) {
+                continue;
+            }
+            $user = $users[$adult];
+            $adults[] = array_filter([
+                'key' => 'oneroster:' . $adult,
+                'firstname' => trim(($user['preferredGivenName'] ?? '') ?: ($user['givenName'] ?? '')),
+                'lastname' => trim(($user['preferredFamilyName'] ?? '') ?: ($user['familyName'] ?? '')),
+                'email' => trim($user['email'] ?? ''),
+                'phone' => trim(($user['sms'] ?? '') ?: ($user['phone'] ?? '')),
+                'relation' => (string) $is((string) $adult, ['parent', 'guardian', 'relative']),
+                'children' => array_map(fn($c) => 'oneroster:' . $c, $children),
+            ], fn($v) => $v !== '' && $v !== []);
+        }
+        return $adults;
+    }
+
+    /**
+     * What each user is, and where: roles.csv (1.2) or the columns of users.csv (1.1).
+     *
+     * @param array $files
+     * @param array $users By sourcedId.
+     * @param int $now
+     * @return array<string, array[]> By user: role, org, primary.
+     */
+    private static function roles(array $files, array $users, int $now): array {
+        $roles = [];
+        foreach (self::table($files['roles.csv'] ?? '') as $row) {
+            if (self::alive($row, $now) && ($row['userSourcedId'] ?? '') !== '') {
+                $roles[$row['userSourcedId']][] = ['role' => $row['role'] ?? '', 'org' => $row['orgSourcedId'] ?? '',
+                    'primary' => ($row['roleType'] ?? '') === 'primary'];
+            }
+        }
+        foreach ($users as $id => $user) {
+            if (!isset($roles[$id]) && ($user['role'] ?? '') !== '') {
+                foreach (array_filter(array_map('trim', explode(',', $user['orgSourcedIds'] ?? ''))) ?: [''] as $org) {
+                    $roles[$id][] = ['role' => $user['role'], 'org' => $org, 'primary' => true];
+                }
+            }
+        }
+        return $roles;
     }
 
     /**
