@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.103.0 (2026-10-31)
+
+- The card's drawing by Gaudí, in cut paper, when the art package brings it (`pix/carne/flor/` and `pix/carne/cielo/`,
+  from the art package 0.1.28): the base of the stage (seed, sprout, bud, flower; new, crescent, half and full moon)
+  and each mark of the four paths in its box, lit up to its level and waiting beyond, as `carne.json` lays them out.
+  Up to 140 px the sky takes the marks drawn thicker; the sober sky leaves out the waiting ones. On the card, the home,
+  the reader's record and the class garden; without the package, the drawn SVG of before.
+- A hint softens its words by their colour, not by opacity, so a «Listen» button inside it keeps its contrast.
+
 ## 0.102.0 (2026-10-31)
 
 The herald at work, as she was designed: she tells what happens.

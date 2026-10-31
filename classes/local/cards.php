@@ -104,7 +104,8 @@ final class cards {
      * @return string SVG.
      */
     public static function flower_svg(int $stage, array $levels, string $label, int $size): string {
-        return self::drawing('flor/' . flower::STAGES[$stage] . '.svg', $levels, $label, $size, $size);
+        return self::layered('flor', $stage, $levels, $label, $size)
+            ?? self::drawing('flor/' . flower::STAGES[$stage] . '.svg', $levels, $label, $size, $size);
     }
 
     /** @var string[] The drawings of the sky, by stage: the moon as it grows. */
@@ -122,7 +123,67 @@ final class cards {
      * @return string
      */
     public static function sky_svg(int $stage, array $levels, string $label, int $size, bool $sober): string {
-        return self::drawing('cielo/' . self::SKY[$stage] . '.svg', $levels, $label, $size, $size, $sober);
+        return self::layered('cielo', $stage, $levels, $label, $size, $sober)
+            ?? self::drawing('cielo/' . self::SKY[$stage] . '.svg', $levels, $label, $size, $size, $sober);
+    }
+
+    /** @var int Up to this size, the sky takes the marks drawn thicker (pix/carne/cielo/pequeno/). */
+    private const SMALL = 140;
+
+    /**
+     * Gaudí's drawing of the card, when the art package brings it: the base of the stage and, on it, each mark in its
+     * box, lit up to the level of its path and waiting beyond (the sober sky leaves out the waiting ones). Its layers
+     * and boxes come from the package's carne.json.
+     *
+     * @param string $kind flor or cielo.
+     * @param int $stage 0 to 3.
+     * @param array $levels Path => level, 0 to 3.
+     * @param string $label What it says to a screen reader.
+     * @param int $size Pixels, at most (it shrinks with its box).
+     * @param bool $sober
+     * @return string|null HTML; null without the art package's drawing.
+     */
+    private static function layered(
+        string $kind,
+        int $stage,
+        array $levels,
+        string $label,
+        int $size,
+        bool $sober = false
+    ): ?string {
+        $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+        $json = $dir ? $dir . '/pix/carne/' . $kind . '/carne.json' : '';
+        $layout = $json !== '' && is_readable($json) ? json_decode((string) file_get_contents($json), true) : null;
+        $base = null;
+        foreach ((array) ($layout['stages'] ?? []) as $one) {
+            if ((int) ($one['stage'] ?? -1) === $stage) {
+                $base = screens::art('carne/' . $kind . '/' . pathinfo((string) $one['file'], PATHINFO_FILENAME));
+            }
+        }
+        if (!$base) {
+            return null;
+        }
+        $small = $kind === 'cielo' && $size <= self::SMALL ? 'pequeno/' : '';
+        $html = '<span class="ayv-layered ayv-layered-' . $kind . '" role="img" aria-label="' . s($label) . '" style="width: '
+            . $size . 'px"><img class="ayv-layered-base" src="' . s($base) . '" alt="" width="' . $size . '" height="' . $size
+            . '">';
+        foreach ((array) ($layout['order'] ?? []) as $path) {
+            $level = max(0, min(3, (int) ($levels[$path] ?? 0)));
+            foreach ((array) ($layout['paths'][$path]['marks'] ?? []) as $mark) {
+                $lit = (int) ($mark['n'] ?? 9) <= $level;
+                if (!$lit && $sober) {
+                    continue;
+                }
+                $file = pathinfo((string) ($lit ? $mark['lit'] : $mark['waiting']), PATHINFO_FILENAME);
+                $url = screens::art('carne/' . $kind . '/' . $small . $file) ?? screens::art('carne/' . $kind . '/' . $file);
+                [$left, $top, $width] = array_map('floatval', array_slice((array) ($mark['pct'] ?? []), 0, 3) + [0, 0, 0]);
+                if ($url && $width > 0) {
+                    $html .= '<img class="ayv-layered-mark' . ($lit ? '' : ' ayv-layered-waiting') . '" src="' . s($url)
+                        . '" alt="" style="left: ' . $left . '%; top: ' . $top . '%; width: ' . $width . '%">';
+                }
+            }
+        }
+        return $html . '</span>';
     }
 
     /**

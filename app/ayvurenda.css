@@ -850,7 +850,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-states-label { font-size: .9rem; font-weight: 700; margin-right: .25rem; }
 
-.ayv .ayv-field-hint { font-size: .85rem; opacity: .8; }
+/* Softer by its colour, not by opacity, so that a button inside (Listen) keeps its contrast. */
+.ayv .ayv-field-hint { font-size: .85rem; color: color-mix(in srgb, currentColor 80%, transparent); }
 
 .ayv .ayv-notice-error { border-left-color: var(--coral); background: var(--no-bg); }
 
@@ -3359,3 +3360,12 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-desk-herald { transition: none; transform: none; }
 }
+
+/* Gaudí's drawing of the card, in layers: the base of the stage, and each mark in its box on top. */
+.ayv .ayv-layered { position: relative; display: block; max-width: 100%; aspect-ratio: 1 / 1; }
+.ayv .ayv-layered img { position: absolute; display: block; }
+.ayv .ayv-layered .ayv-layered-base { inset: 0; width: 100%; height: 100%; }
+.ayv .ayv-layered .ayv-layered-mark { height: auto; }
+.ayv .ayv-card-flower .ayv-layered { width: 100% !important; }
+.ayv .ayv-profile-drawing .ayv-layered { width: 7.5rem !important; }
+.ayv .ayv-garden li > .ayv-layered { padding: 8px; border-radius: 50%; background: var(--ayv-plate); box-sizing: content-box; }
