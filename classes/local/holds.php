@@ -376,14 +376,16 @@ final class holds {
             'library' => format_string($library->name),
             'until' => userdate((int) $hold->timeexpires, get_string('strftimedateshort', 'langconfig')),
         ];
-        $body = get_string('holdreadybody', 'local_oksigeniaayvurenda', $a) . "\n\n" .
+        // In the tone of the centre's skin.
+        $words = fn(string $key) => skins::words((int) $library->entityid, $key);
+        $body = get_string($words('holdreadybody'), 'local_oksigeniaayvurenda', $a) . "\n\n" .
             characters::say((int) $library->entityid, 'herald', 'heraldsign')['text'];
         $url = (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $hold->recordid]))
             ->out(false);
         return notices::send(
             'holdready',
             $user,
-            get_string('holdreadysubject', 'local_oksigeniaayvurenda', $a),
+            get_string($words('holdreadysubject'), 'local_oksigeniaayvurenda', $a),
             $body,
             $url,
             $a->title

@@ -84,4 +84,20 @@ final class skins_test extends \advanced_testcase {
         libraries::update_entity($entityid, ['skin' => 'secondary', 'play' => ['games']]);
         $this->assertSame(skins::PLAY['secondary'], skins::play($entityid));
     }
+
+    /**
+     * What is said to a reader comes in the tone of the centre's skin; where a skin has no words of its own, the
+     * school's.
+     */
+    public function test_words(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $this->assertSame('noticereaderbody', skins::words($entityid, 'noticereaderbody'));
+        libraries::update_entity($entityid, ['skin' => 'university']);
+        $this->assertSame('noticereaderbodyuniversity', skins::words($entityid, 'noticereaderbody'));
+        $this->assertSame('holdreadysubjectuniversity', skins::words($entityid, 'holdreadysubject'));
+        $this->assertSame('noticetutorbody', skins::words($entityid, 'noticetutorbody'));
+    }
 }

@@ -129,6 +129,20 @@ final class skins {
     }
 
     /**
+     * The words of a centre's skin for something said to a reader: the same thing, in its tone (a school's greets and
+     * speaks warmly; a university's gives the facts). A skin without its own words says the school's.
+     *
+     * @param int $entityid
+     * @param string $key The school's string.
+     * @return string The string to use.
+     */
+    public static function words(int $entityid, string $key): string {
+        $skin = self::of($entityid);
+        return $skin !== self::SKINS[0] && get_string_manager()->string_exists($key . $skin, 'local_oksigeniaayvurenda')
+            ? $key . $skin : $key;
+    }
+
+    /**
      * Forgets the skin kept for this request, after it changes.
      *
      * @param int $entityid

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.84.1 (2026-10-31)
+
+- What the library tells a reader comes in the tone of the centre's skin (`skins::words()`): a school's greets and
+  speaks warmly, a secondary school's says it plainly and offers a renewal, a university's gives the facts (title and
+  date). For now the overdue notice and the held book ready; a skin without its own words says the school's.
+
 ## 0.84.0 (2026-10-31)
 
 - What is on at each centre (in its settings): the visit, its games, the characters standing whole, their voices in the

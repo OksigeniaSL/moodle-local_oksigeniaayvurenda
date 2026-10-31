@@ -86,19 +86,21 @@ final class notices {
             if (!$user || $user->deleted || $user->suspended) {
                 continue;
             }
+            // In the tone of the centre's skin.
+            $words = fn(string $key) => skins::words((int) $list[0]->entityid, $key);
             $lines = [];
             foreach ($list as $loan) {
-                $lines[] = get_string('noticereaderline', 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
+                $lines[] = get_string($words('noticereaderline'), 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
                     'due' => userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'))]);
             }
             $a = (object) ['name' => $user->firstname, 'library' => format_string($list[0]->library),
                 'books' => implode("\n", $lines)];
             $subject = get_string(
-                count($list) === 1 ? 'noticereadersubject' : 'noticereadersubjectmany',
+                $words(count($list) === 1 ? 'noticereadersubject' : 'noticereadersubjectmany'),
                 'local_oksigeniaayvurenda',
                 $a
             );
-            $body = get_string('noticereaderbody', 'local_oksigeniaayvurenda', $a);
+            $body = get_string($words('noticereaderbody'), 'local_oksigeniaayvurenda', $a);
             $herald = characters::of((int) $list[0]->entityid)['herald'];
             if ($herald['enabled'] && $herald['signs']) {
                 $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
