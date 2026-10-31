@@ -43,7 +43,10 @@ $PAGE->set_context(context_system::instance());
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$desk = new desk($library, (int) $USER->id, null, $own);
+// A scan kept while the network was down comes later with the moment it was made, so the dates are those of that moment
+// (from the last three days, never later than now).
+$at = optional_param('at', 0, PARAM_INT);
+$desk = new desk($library, (int) $USER->id, $at && $at <= time() && $at > time() - 3 * DAYSECS ? $at : null, $own);
 switch ($action) {
     case 'scan':
         $answer = $desk->scan(

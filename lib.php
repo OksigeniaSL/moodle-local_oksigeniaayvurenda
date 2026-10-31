@@ -146,3 +146,14 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         $options
     );
 }
+
+/**
+ * The look of the library a user reads at, for Oksigenia Aty to dress the app with where many libraries share one
+ * site: the name of their centre, its colour, its picture and its line. Null for whoever is not a reader.
+ *
+ * @param int $userid
+ * @return array|null name, library, colour (#rrggbb), logo (address or null), tagline, url.
+ */
+function local_oksigeniaayvurenda_oksigeniaaty_user_brand(int $userid): ?array {
+    return \local_oksigeniaayvurenda\local\brand::of_user($userid);
+}

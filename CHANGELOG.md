@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.88.0 (2026-10-31)
+
+- The desk without a network: if it goes down, the desk goes on; each scan is kept in that browser, in order and with
+  its moment, a band says how many wait, and they go through by themselves as soon as the network is back (or when the
+  page opens again), each answered as it would have been then, with the dates of that moment.
+- For Oksigenia Aty, the app of the libraries of a shared site: `local_oksigeniaayvurenda_oksigeniaaty_user_brand()`
+  gives the look of a reader's library (their centre, the colour, picture and line of its main library); nothing for
+  whoever is not a reader or reads at a centre open only to its staff.
+- Not only for schools: «Academic year» instead of «School year», and the readme and the help's instructions say it
+  is the library for schools, secondary schools, universities, academies and public or private libraries.
+
 ## 0.87.1 (2026-10-31)
 
 - A class's page, compact (Enrique: «ocupa mucho espacio y tiene mucho sitio en blanco»): the challenge of the term,

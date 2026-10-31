@@ -54,7 +54,8 @@ $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $strings = [];
 foreach (
-    ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'profileview', 'noteloved', 'noteunfinished',
+    ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'profileview', 'deskoffline', 'deskofflineone',
+        'deskofflinemany', 'deskbackonline', 'noteloved', 'noteunfinished',
         'notemore',
         'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint',
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',

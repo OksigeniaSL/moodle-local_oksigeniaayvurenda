@@ -3065,3 +3065,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 @media (max-width: 36rem) {
     .ayv .ayv-classbar { grid-template-columns: minmax(0, 1fr); }
 }
+/* The desk without a network: a band that says how many scans wait, and their lines. */
+.ayv .ayv-desk-offline { margin: .6rem 0 0; padding: .55rem .9rem; border-radius: 12px; background: var(--sun); color: #1e2b2a; font-weight: 700; }
+.ayv .ayv-line-offline { border-left: 4px solid var(--sun); }
+.ayv .ayv-line-online { border-left: 4px solid var(--green2); }

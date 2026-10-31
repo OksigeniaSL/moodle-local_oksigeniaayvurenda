@@ -390,20 +390,120 @@
         line(answer, code);
     };
 
+    // Without a network the desk goes on: each scan is kept in this browser, in order and with its moment, and passed
+    // to the server as soon as the network is back; what it answers then is shown as if it had just happened.
+    var pendingkey = 'ayv-desk-pending-' + config.library;
+    var pending = [];
+    try {
+        pending = JSON.parse(window.localStorage.getItem(pendingkey) || '[]') || [];
+    } catch (e) {
+        pending = [];
+    }
+    var offline = false;
+    var replaying = false;
+    var bar = el('p', 'ayv-desk-offline');
+    bar.setAttribute('role', 'status');
+    bar.hidden = true;
+    form.parentNode.insertBefore(bar, form.nextSibling);
+    var keepPending = function() {
+        try {
+            window.localStorage.setItem(pendingkey, JSON.stringify(pending));
+        } catch (e) {
+            // Without storage they are kept while the page is open.
+        }
+        bar.hidden = !pending.length;
+        bar.textContent = pending.length === 1 ? str.deskofflineone : (str.deskofflinemany || '').replace('{$a}', pending.length);
+    };
+    var lostNetwork = function(error) {
+        return !navigator.onLine || error instanceof TypeError || error instanceof SyntaxError;
+    };
+    var keep = function(job) {
+        pending.push({code: job.code, force: job.force, readerid: readerid, at: job.at || Math.floor(Date.now() / 1000)});
+        keepPending();
+        tone('look');
+        line({kind: 'offline', sound: 'look', message: str.deskoffline}, job.code);
+    };
+    var replay = function() {
+        if (replaying || !pending.length) {
+            return;
+        }
+        replaying = true;
+        var reader = pending[0].readerid || 0;
+        var passed = 0;
+        var step = function() {
+            if (!pending.length) {
+                offline = false;
+                replaying = false;
+                keepPending();
+                line({kind: 'online', sound: 'ok', message: (str.deskbackonline || '').replace('{$a}', passed)}, '');
+                return null;
+            }
+            var job = pending[0];
+            return post({action: 'scan', code: job.code, readerid: reader, force: job.force ? 1 : 0, at: job.at})
+                .then(function(answer) {
+                    pending.shift();
+                    passed++;
+                    keepPending();
+                    if (answer.reader) {
+                        reader = answer.reader.id;
+                    }
+                    add(answer, job.code);
+                    return step();
+                })
+                .catch(function(error) {
+                    replaying = false;
+                    if (!lostNetwork(error)) {
+                        // The server answered with an error: that scan is dropped and shown; the rest go on.
+                        pending.shift();
+                        keepPending();
+                        line({kind: 'stop', sound: 'no', message: str.deskerror}, job.code);
+                        replaying = true;
+                        return step();
+                    }
+                    return null;
+                });
+        };
+        step();
+    };
+    window.addEventListener('online', replay);
+    setInterval(function() {
+        if (pending.length && !busy) {
+            replay();
+        }
+    }, 15000);
+    keepPending();
+    // Scans kept from before (the page was closed without a network): they go first.
+    if (pending.length) {
+        replay();
+    }
+
     var next = function() {
         if (busy || !queue.length) {
             return;
         }
         busy = true;
         var job = queue.shift();
+        // While scans wait for the network, new ones wait behind them, in order.
+        if (offline || pending.length) {
+            keep(job);
+            busy = false;
+            next();
+            return;
+        }
         post({action: 'scan', code: job.code, readerid: readerid, force: job.force ? 1 : 0})
             .then(function(answer) {
                 add(answer, job.code);
                 return answer;
             })
-            .catch(function() {
+            .catch(function(error) {
+                if (lostNetwork(error)) {
+                    offline = true;
+                    keep(job);
+                    return null;
+                }
                 tone('no');
                 line({kind: 'stop', sound: 'no', message: str.deskerror}, job.code);
+                return null;
             })
             .then(function() {
                 busy = false;

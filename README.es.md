@@ -1,12 +1,12 @@
-# Biblioteca escolar para Moodle (Oksigenia Ayvurenda)
+# Biblioteca para Moodle (Oksigenia Ayvurenda)
 
 [![Licencia: GPLv3](https://img.shields.io/badge/licencia-GPLv3+-blue.svg)](LICENSE)
 ![Moodle](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-orange)
 ![Estado](https://img.shields.io/badge/estado-prealfa-red)
 [![Patrocinio](https://img.shields.io/badge/patrocinio-Oksigenia-00d4ff)](https://oksigenia.com/en/open-source#sponsor)
 
-**Ayvurenda** es una biblioteca escolar para Moodle™ que llevan los bibliotecarios del centro y cuyos lectores son
-los usuarios del sitio.
+**Ayvurenda** es una biblioteca para Moodle™, para colegios, institutos, universidades, academias y bibliotecas públicas
+o privadas, que llevan sus bibliotecarios y cuyos lectores son los usuarios del sitio.
 
 Desarrollado por [Oksigenia](https://oksigenia.com).
 

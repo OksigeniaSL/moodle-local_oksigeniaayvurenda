@@ -33,6 +33,7 @@ final class howto {
         'lend' => ['desk.php', 'desk', 'desk'],
         'giveback' => ['desk.php', 'desk', 'desk'],
         'renew' => ['desk.php', 'desk', ''],
+        'offline' => ['desk.php', 'desk', ''],
         'room' => ['desk.php', 'desk', ''],
         'add' => ['add.php', 'catalogue', 'add'],
         'free' => ['free.php', 'catalogue', 'free'],
