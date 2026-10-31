@@ -124,5 +124,56 @@ final class freeworks_test extends \advanced_testcase {
         $this->assertSame('https://es.wikisource.org/wiki/Platero_y_yo', $link->url);
         $this->assertSame('cc-by-sa', $link->licence);
         $this->assertSame($recordid, freeworks::bring_wikisource($library, 'Platero y yo', 'es', ['students'], 2));
+        $this->assertSame(1, $DB->count_records('local_oksigeniaayvurenda_digital', ['recordid' => $recordid]));
+    }
+
+    /**
+     * A work of Wikisource comes with its EPUB, to read it in the library; one that came as a link when the export did
+     * not answer gets its EPUB when brought again, in the link's place.
+     */
+    public function test_bring_wikisource_epub(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $fixtures = __DIR__ . '/../fixtures/';
+        $zip = make_request_directory() . '/obra.epub';
+        $archive = new \ZipArchive();
+        $archive->open($zip, \ZipArchive::CREATE);
+        $archive->addFromString('mimetype', 'application/epub+zip');
+        $archive->close();
+        $exported = false;
+        $asked = [];
+        lookup::$fetcher = function (string $url) use ($fixtures, $zip, &$exported, &$asked) {
+            $asked[] = $url;
+            if (str_contains($url, 'ws-export.wmcloud.org')) {
+                return $exported ? file_get_contents($zip) : null;
+            }
+            if (str_contains($url, 'wikisource.org/w/api.php')) {
+                return file_get_contents($fixtures . 'wikisource-roots.json');
+            }
+            if (str_contains($url, 'ids=Q131318')) {
+                return file_get_contents($fixtures . 'wikisource-authors.json');
+            }
+            return file_get_contents($fixtures . 'wikisource-works.json');
+        };
+        $recordid = freeworks::bring_wikisource($library, 'Platero y yo', 'es', ['students'], 2);
+        $this->assertContains('https://ws-export.wmcloud.org/?format=epub-3&lang=es&page=Platero_y_yo', $asked);
+        $this->assertSame(['link'], array_values($DB->get_fieldset_select(
+            'local_oksigeniaayvurenda_digital',
+            'kind',
+            'recordid = ?',
+            [$recordid]
+        )));
+        $exported = true;
+        $this->assertSame($recordid, freeworks::bring_wikisource($library, 'Platero y yo', 'es', ['students'], 2));
+        $items = array_values($DB->get_records('local_oksigeniaayvurenda_digital', ['recordid' => $recordid]));
+        $this->assertCount(1, $items);
+        $this->assertSame(['file', 'epub', 'cc-by-sa'], [$items[0]->kind, $items[0]->format, $items[0]->licence]);
+        $this->assertNotNull(digital::file($items[0]));
+        // Once it has its EPUB, it is not asked for again.
+        $asked = [];
+        freeworks::bring_wikisource($library, 'Platero y yo', 'es', ['students'], 2);
+        $this->assertEmpty(array_filter($asked, fn($url) => str_contains($url, 'ws-export')));
     }
 }

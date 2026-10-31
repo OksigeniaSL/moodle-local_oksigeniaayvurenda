@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.74.0 (2026-10-31)
+
+- Works of Wikisource come with their EPUB, from Wikisource's own export, and are read in the library like those of
+  Project Gutenberg; when the export does not answer, the link to read them there, and brought again later, the EPUB
+  takes the link's place.
+- In the visit, a sound nobody chose (a reader of the flower hears it from the start) begins at a quarter of its
+  volume, voices and touches too: twenty devices in a class sound at once. Turned on by hand, it is heard whole.
+
 ## 0.73.5 (2026-10-31)
 
 - The addresses of the art package carry its version: a new one is seen as soon as it is installed, even behind a cache

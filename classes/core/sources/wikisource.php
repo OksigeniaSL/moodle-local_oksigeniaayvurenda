@@ -54,6 +54,19 @@ final class wikisource {
     }
 
     /**
+     * Where Wikisource's own export gives a work as an EPUB, with its chapters and a page of credits.
+     *
+     * @param string $lang
+     * @param string $title The work's page.
+     * @return string
+     */
+    public static function epub_url(string $lang, string $title): string {
+        $lang = in_array($lang, self::LANGS, true) ? $lang : 'mul';
+        return 'https://ws-export.wmcloud.org/?format=epub-3&lang=' . $lang . '&page=' .
+            rawurlencode(str_replace(' ', '_', trim($title)));
+    }
+
+    /**
      * The language of a Wikisource as the catalogue writes it.
      *
      * @param string $lang

@@ -144,7 +144,8 @@ final class freeworks {
     }
 
     /**
-     * Brings a work of Wikisource: its record, and a link to read it there, for whom the library says.
+     * Brings a work of Wikisource: its record, and its EPUB to read it here, for whom the library says. When its export
+     * does not answer, a link to read it there; brought again later, the EPUB takes the link's place.
      *
      * @param \stdClass $library
      * @param string $title
@@ -158,18 +159,43 @@ final class freeworks {
         if (!$work) {
             throw new \moodle_exception('freeworksnoanswerws', 'local_oksigeniaayvurenda');
         }
+        global $DB;
         $recordid = self::wikisource_brought((int) $library->entityid, $work['url']);
-        if ($recordid) {
+        if (!$recordid) {
+            $recordid = cataloguer::create_record((int) $library->entityid, [
+                'record' => ['doctype' => 'electronic', 'title' => $work['title'], 'lang' => wikisource::lang3($lang),
+                    'notes' => 'Wikisource'],
+                'authorities' => ['author' => $work['authors']],
+                'extra' => ['wikisource' => $work['url'], 'wikisourceid' => sha1($work['url'])],
+            ], time());
+        }
+        $items = $DB->get_records(self::T . 'digital', ['recordid' => $recordid]);
+        if (array_filter($items, fn($item) => $item->kind === 'file')) {
             return $recordid;
         }
-        $recordid = cataloguer::create_record((int) $library->entityid, [
-            'record' => ['doctype' => 'electronic', 'title' => $work['title'], 'lang' => wikisource::lang3($lang),
-                'notes' => 'Wikisource'],
-            'authorities' => ['author' => $work['authors']],
-            'extra' => ['wikisource' => $work['url'], 'wikisourceid' => sha1($work['url'])],
-        ], time());
-        digital::add_link($library, $recordid, $work['url'], ['title' => '', 'licence' => 'cc-by-sa',
-            'audience' => $audience, 'download' => 0], $userid);
+        // A long work takes Wikisource a while to put together.
+        \core_php_time_limit::raise(180);
+        $epub = lookup::fetch(wikisource::epub_url($lang, $title), 120);
+        if ($epub !== null && str_starts_with($epub, 'PK')) {
+            $path = make_request_directory() . '/obra.epub';
+            file_put_contents($path, $epub);
+            digital::add_file(
+                $library,
+                $recordid,
+                $path,
+                'wikisource-' . substr(sha1($work['url']), 0, 12) . '.epub',
+                ['title' => '', 'licence' => 'cc-by-sa', 'audience' => $audience, 'download' => 1],
+                $userid
+            );
+            foreach ($items as $item) {
+                if ($item->kind === 'link' && $item->url === $work['url']) {
+                    digital::delete((int) $item->id, $library);
+                }
+            }
+        } else if (!$items) {
+            digital::add_link($library, $recordid, $work['url'], ['title' => '', 'licence' => 'cc-by-sa',
+                'audience' => $audience, 'download' => 0], $userid);
+        }
         return $recordid;
     }
 

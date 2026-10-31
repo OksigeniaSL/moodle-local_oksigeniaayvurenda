@@ -157,9 +157,10 @@ final class lookup {
      * Fetches an address from the server.
      *
      * @param string $url
+     * @param int $timeout Seconds to wait for the whole answer (an export put together on the way takes longer).
      * @return string|null The body, or null when it did not answer well.
      */
-    public static function fetch(string $url): ?string {
+    public static function fetch(string $url, int $timeout = 12): ?string {
         global $CFG;
         if (self::$fetcher) {
             $body = (self::$fetcher)($url);
@@ -172,7 +173,7 @@ final class lookup {
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
         $curl->setopt([
-            'CURLOPT_TIMEOUT' => 12,
+            'CURLOPT_TIMEOUT' => $timeout,
             'CURLOPT_CONNECTTIMEOUT' => 5,
             // Open Library asks to be told who asks, with a way to write back.
             'CURLOPT_USERAGENT' => 'Oksigenia Ayvurenda/' . get_config('local_oksigeniaayvurenda', 'release') .

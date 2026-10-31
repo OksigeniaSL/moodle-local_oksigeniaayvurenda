@@ -34,7 +34,7 @@
     var voice = null;
     var duck = function(down) {
         if (ambience) {
-            ambience.volume = down ? 0.3 : 1;
+            ambience.volume = (down ? 0.3 : 1) * level;
         }
     };
     window.AYVVisit = {
@@ -46,6 +46,7 @@
                 voice.pause();
             }
             voice = new window.Audio(url);
+            voice.volume = level;
             duck(true);
             voice.addEventListener('ended', function() {
                 duck(false);
@@ -64,7 +65,7 @@
                 var osc = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime + note[1];
                 osc.frequency.value = note[0];
                 gain.gain.setValueAtTime(0.0001, at);
-                gain.gain.exponentialRampToValueAtTime(0.12, at + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.12 * level, at + 0.02);
                 gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.35);
                 osc.connect(gain);
                 gain.connect(audio.destination);
@@ -257,7 +258,7 @@
             return;
         }
         touch = touch || new window.Audio(visit.getAttribute('data-touch'));
-        touch.volume = 0.5;
+        touch.volume = 0.5 * level;
         touch.currentTime = 0;
         touch.play().catch(function() {
             // Silence, then.
@@ -293,11 +294,14 @@
     // The sound is off until one turns it on; a reader of the flower hears it unless they turned it off.
     var chosen = store('localStorage', 'ayv-visit-sound');
     var on = chosen === 'on' || (chosen !== 'off' && visit.getAttribute('data-young') === '1');
+    // In a class, twenty devices may sound at once: a sound nobody chose starts at a quarter, and whoever turns it on
+    // hears it whole.
+    var level = chosen === 'on' ? 1 : 0.25;
     var play = function() {
         if (!ambience) {
             ambience = new window.Audio(visit.getAttribute('data-sound'));
             ambience.loop = true;
-            ambience.volume = 1;
+            ambience.volume = level;
         }
         return ambience.play();
     };
@@ -313,6 +317,12 @@
                 return;
             }
             on = !on;
+            if (on) {
+                level = 1;
+                if (ambience) {
+                    ambience.volume = level;
+                }
+            }
             store('localStorage', 'ayv-visit-sound', on ? 'on' : 'off');
             soundbutton.setAttribute('aria-pressed', on ? 'true' : 'false');
             if (on) {
@@ -384,7 +394,7 @@
         room.classList.add('ayv-visit-leaving');
         if (on && visit.getAttribute('data-door') && window.Audio) {
             var door = new window.Audio(visit.getAttribute('data-door'));
-            door.volume = 0.6;
+            door.volume = 0.6 * level;
             door.play().catch(function() {
                 // Without the door's sound, through it all the same.
             });
