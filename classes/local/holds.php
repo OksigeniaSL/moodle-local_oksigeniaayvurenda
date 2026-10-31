@@ -368,6 +368,9 @@ final class holds {
             return false;
         }
         $library = $DB->get_record(self::T . 'library', ['id' => $hold->libraryid], '*', MUST_EXIST);
+        if (access::closed((int) $library->entityid)) {
+            return false;
+        }
         $a = (object) [
             'title' => (string) $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]),
             'library' => format_string($library->name),

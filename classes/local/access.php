@@ -80,6 +80,10 @@ final class access {
         if (!$view) {
             return has_capability($capability, self::context($entityid), $userid);
         }
+        // A centre open only to its staff for now: its readers do not even see the way in.
+        if (self::closed($entityid) && !self::is_staff($entityid, $userid)) {
+            return false;
+        }
         if (self::is_reader($entityid, $userid)) {
             return true;
         }
@@ -138,6 +142,62 @@ final class access {
         }
         sort($ids);
         return $ids;
+    }
+
+    /**
+     * Whether a centre is open only to its staff for now, while it gets ready: its readers see no way in and get no
+     * notices, and its public door is shut. Only whoever sets the plans opens it, where its staff do not see it.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function closed(int $entityid): bool {
+        global $DB;
+        if (!$entityid) {
+            return false;
+        }
+        $cache = \cache::make('local_oksigeniaayvurenda', 'access');
+        $closed = $cache->get('closed_' . $entityid);
+        if ($closed === false) {
+            $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+            $closed = empty($settings['closed']) ? 0 : 1;
+            $cache->set('closed_' . $entityid, $closed);
+        }
+        return (bool) $closed;
+    }
+
+    /**
+     * Opens a centre to its readers, or keeps it for its staff only (the caller checks the site's capability).
+     *
+     * @param int $entityid
+     * @param bool $closed
+     */
+    public static function set_closed(int $entityid, bool $closed): void {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $settings['closed'] = $closed;
+        $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        \cache::make('local_oksigeniaayvurenda', 'access')->delete('closed_' . $entityid);
+    }
+
+    /**
+     * Whether someone is staff of a centre: lends, catalogues or runs it.
+     *
+     * @param int $entityid
+     * @param int $userid
+     * @return bool
+     */
+    public static function is_staff(int $entityid, int $userid): bool {
+        if (!$userid) {
+            return false;
+        }
+        $context = self::context($entityid);
+        foreach (self::STAFF as $staff) {
+            if (has_capability('local/oksigeniaayvurenda:' . $staff, $context, $userid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

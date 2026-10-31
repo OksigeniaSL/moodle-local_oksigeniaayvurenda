@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.75.0 (2026-10-31)
+
+- A centre can be open only to its staff while it gets ready: its readers see no way in (pages, the block, the app)
+  and hear «The library opens soon», get no notices, and its public door stays shut; its staff work as before. Only
+  whoever sets the plans opens it, beside the plan in the centre's settings, where the staff do not see it.
+
 ## 0.74.1 (2026-10-31)
 
 - Bringing a free work, and searching for one, shows that it is working: the button turns with «Bringing it into the

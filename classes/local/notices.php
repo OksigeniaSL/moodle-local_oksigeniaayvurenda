@@ -78,6 +78,10 @@ final class notices {
         }
         $sent = 0;
         foreach ($byreader as $list) {
+            // A centre open only to its staff tells its readers nothing yet.
+            if (access::closed((int) $list[0]->entityid)) {
+                continue;
+            }
             $user = \core_user::get_user($list[0]->userid);
             if (!$user || $user->deleted || $user->suspended) {
                 continue;
@@ -127,6 +131,9 @@ final class notices {
         );
         $sent = 0;
         foreach ($tutors as $tutor) {
+            if (access::closed((int) $tutor->entityid)) {
+                continue;
+            }
             $late = $DB->get_records_sql(
                 "SELECT l.id, l.timedue, l.readerid, r.firstname, r.lastname, r.userid, b.name AS library
                    FROM {" . self::T . "loan} l

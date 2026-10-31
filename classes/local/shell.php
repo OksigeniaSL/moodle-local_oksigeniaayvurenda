@@ -42,6 +42,18 @@ final class shell {
             return;
         }
         self::login_first();
+        // A library getting ready: whoever is not its staff hears only that it opens soon.
+        if ($library && $capability === 'local/oksigeniaayvurenda:view' && access::closed((int) $library->entityid)) {
+            http_response_code(403);
+            self::refuse_page(
+                get_string('closedsoon', 'local_oksigeniaayvurenda'),
+                get_string('closedsoonhint', 'local_oksigeniaayvurenda'),
+                null,
+                '',
+                '',
+                [(new \moodle_url('/my/'))->out(false), get_string('myhome')]
+            );
+        }
         $name = get_string(str_replace('local/', '', $capability), 'local_oksigeniaayvurenda');
         // A library of a centre that is not theirs is not even named.
         $theirs = $library && access::can('local/oksigeniaayvurenda:view', $library) ? $library : null;
@@ -79,25 +91,28 @@ final class shell {
      * @param \stdClass|null $library
      * @param string $figure Gaudí's drawing of the memory in a pose, or ''.
      * @param string $puppet Its puppet for that pose (JSON), or ''.
+     * @param array|null $back Another way back than the library's home: its address and its words.
      */
     private static function refuse_page(
         string $title,
         string $why,
         ?\stdClass $library,
         string $figure = '',
-        string $puppet = ''
+        string $puppet = '',
+        ?array $back = null
     ): void {
         global $PAGE;
         // It can come before the page set its own context: every page of the library is on the site's.
         $PAGE->set_context(\context_system::instance());
-        $home = (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
+        $home = $back[0] ??
+            (new \moodle_url('/local/oksigeniaayvurenda/index.php', $library ? ['library' => $library->slug] : []))->out(false);
         self::output(
             $title,
             ($figure !== '' ? '<div class="ayv-posed"><span class="ayv-figure"><img class="ayv-posed-figure" src="' . s($figure) .
             '" alt="" width="512" height="512"' . ($puppet !== '' ? ' data-puppet="' . s($puppet) . '"' : '') .
             '></span><div>' : '') .
             '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
-            s($home) . '">' . s(get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>' .
+            s($home) . '">' . s($back[1] ?? get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>' .
             ($figure !== '' ? '</div></div>' : ''),
             $library,
             '',

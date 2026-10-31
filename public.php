@@ -95,7 +95,8 @@ $shared = [
     'action' => $here(),
     'manage' => $manage,
     'sesskey' => sesskey(),
-    'open' => $settings['open'],
+    // The staff's own choice, kept for when the centre opens.
+    'open' => window::settings($library, true)['open'],
     'voices' => $settings['voices'],
     'index' => $settings['index'],
     'catalogue' => $catalogue,

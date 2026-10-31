@@ -28,7 +28,7 @@
             "cardlooks": [{"stage": "Primaria", "options": [{"value": "", "label": "Automático (la flor)", "selected": true}]}],
             "challengestages": [{"stage": "Primaria", "on": true}],
             "plansummary": "Plan Gratis: 812 de 1.000 ejemplares · 140 de 150 lectores",
-            "planform": {"plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
+            "planform": {"readersopen": true, "plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
                 "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
             "staffpart": {"staffparthint": "Da el rol de bibliotecario en la categoría del centro.", "staffentity": 1,
                 "staffassign": "#"},
@@ -161,6 +161,8 @@
             <fieldset class="ayv-fieldset"><legend>{{librariesplan}}</legend>
                 <p class="ayv-field-hint">{{librariesplanhint}}</p>
                 <input type="hidden" name="planform" value="1">
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="readersopen" value="1" {{#readersopen}}checked{{/readersopen}}> {{librariesreadersopen}}</label>
+                <p class="ayv-field-hint">{{librariesreadersopenhint}}</p>
                 <label class="ayv-field">{{planname}} <input type="text" name="planname" value="{{plannamenow}}" maxlength="60"></label>
                 <label class="ayv-field">{{plancopies}} <span class="ayv-field-hint">{{planlimithint}}</span> <input type="number" name="plancopies" value="{{plancopiesnow}}" min="0" step="1" class="ayv-plan-limit"></label>
                 <label class="ayv-field">{{planreaders}} <span class="ayv-field-hint">{{planlimithint}}</span> <input type="number" name="planreaders" value="{{planreadersnow}}" min="0" step="1" class="ayv-plan-limit"></label>

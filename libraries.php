@@ -91,6 +91,7 @@ if (data_submitted() && confirm_sesskey()) {
                 $plan[$feature] = optional_param('plan' . $feature, 0, PARAM_BOOL);
             }
             plans::save(required_param('entity', PARAM_INT), $plan);
+            access::set_closed(required_param('entity', PARAM_INT), !optional_param('readersopen', 0, PARAM_BOOL));
         }
         $notice = $str('librariessaved');
     } else if ($do === 'category') {
@@ -245,7 +246,8 @@ foreach (libraries::all() as $one) {
         })() : null,
         'planform' => $setsplans ? (function () use ($entity, $str) {
             $plan = plans::of((int) $entity->id);
-            return ['plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
+            return ['readersopen' => !access::closed((int) $entity->id),
+                'plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
                 'planfeatures' => array_map(fn($f) => ['feature' => $f, 'featurelabel' => $str('plan' . $f),
                     'featureon' => $plan[$f]], plans::FEATURES)];
         })() : null,
@@ -272,7 +274,8 @@ foreach (
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
         'librarieschallengeshint', 'librariesreviewsign', 'librariesplan', 'librariesplanhint', 'planname', 'plancopies',
-        'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate'] as $key
+        'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',
+        'librariesreadersopen', 'librariesreadersopenhint'] as $key
 ) {
     $data[$key] = $str($key);
 }

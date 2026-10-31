@@ -44,12 +44,19 @@ final class window {
      * The window's settings: open or not, the centre's words, whether voices show, whether search engines may list it,
      * and whether anyone may see the catalogue and the shelves (what there is and whether it is free; never who has it).
      *
+     * While the centre is open only to its staff, the window is shut whatever the staff chose; the staff's form shows
+     * their own choice, kept for when it opens.
+     *
      * @param \stdClass $library
+     * @param bool $own The staff's own choice of open, not what is seen now.
      * @return array open, text, voices, index, catalogue.
      */
-    public static function settings(\stdClass $library): array {
+    public static function settings(\stdClass $library, bool $own = false): array {
         $settings = json_decode((string) ($library->settings ?? ''), true) ?: [];
         $window = (array) ($settings['window'] ?? []);
+        if (!$own && !empty($library->entityid) && access::closed((int) $library->entityid)) {
+            $window['open'] = false;
+        }
         return [
             'open' => (bool) ($window['open'] ?? false),
             'text' => (string) ($window['text'] ?? ''),
@@ -169,10 +176,11 @@ final class window {
      */
     public static function shows(\stdClass $item): bool {
         global $DB;
-        if (!digital::visible($item, self::ANYONE)) {
+        if (!digital::visible($item, self::ANYONE) || access::closed((int) $item->entityid)) {
             return false;
         }
-        foreach ($DB->get_records(self::T . 'library', ['entityid' => $item->entityid], 'id', 'id, settings') as $library) {
+        $libraries = $DB->get_records(self::T . 'library', ['entityid' => $item->entityid], 'id', 'id, entityid, settings');
+        foreach ($libraries as $library) {
             $settings = self::settings($library);
             if ($settings['open'] && ($item->kind !== 'voice' || $settings['voices'])) {
                 return true;

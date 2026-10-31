@@ -183,4 +183,40 @@ final class notices_test extends \advanced_testcase {
         $this->assertSame($now + 8 * DAYSECS, (int) $list[0]->get_timecreated());
         $this->assertCount(1, copies::list((int) $other->entityid));
     }
+
+    /**
+     * A centre open only to its staff while it gets ready: its readers see no way in, not even in the block's summary,
+     * hear nothing, and its public door is shut; its librarian works as before. Opened, its readers are told.
+     */
+    public function test_closed_to_readers(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, , $now, $readers] = $this->library();
+        $entityid = (int) $library->entityid;
+        $ana = (int) $readers['ana']->userid;
+        $staff = $this->getDataGenerator()->create_user();
+        role_assign(roles::ensure_librarian(), $staff->id, access::context($entityid)->id);
+        $DB->set_field('local_oksigeniaayvurenda_library', 'settings', json_encode(['window' => ['open' => true,
+            'catalogue' => true]]), ['id' => $library->id]);
+        $library = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $library->id]);
+        $this->assertTrue(access::can('local/oksigeniaayvurenda:view', $library, $ana));
+        $this->assertNotEmpty(mine::summary($ana, $now));
+        access::set_closed($entityid, true);
+        $this->assertTrue(access::closed($entityid));
+        $this->assertFalse(access::can('local/oksigeniaayvurenda:view', $library, $ana));
+        $this->assertTrue(access::can('local/oksigeniaayvurenda:view', $library, (int) $staff->id));
+        $this->assertTrue(access::can('local/oksigeniaayvurenda:desk', $library, (int) $staff->id));
+        $this->assertSame([], mine::summary($ana, $now));
+        $this->assertNull(window::open($library->slug));
+        $this->assertFalse(window::catalogue_open($library));
+        $sink = $this->redirectMessages();
+        $this->assertSame(['readers' => 0, 'tutors' => 0], notices::run($now));
+        $this->assertCount(0, $sink->get_messages());
+        access::set_closed($entityid, false);
+        $this->assertTrue(access::can('local/oksigeniaayvurenda:view', $library, $ana));
+        $this->assertNotNull(window::open($library->slug));
+        $this->assertSame(['readers' => 1, 'tutors' => 1], notices::run($now));
+        $sink->close();
+    }
 }

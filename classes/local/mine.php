@@ -48,6 +48,9 @@ final class mine {
             return $out;
         }
         foreach ($DB->get_records(self::T . 'reader', ['userid' => $userid, 'status' => 'active'], 'id') as $reader) {
+            if (access::closed((int) $reader->entityid) && !access::is_staff((int) $reader->entityid, $userid)) {
+                continue;
+            }
             $library = $DB->get_record(
                 self::T . 'library',
                 ['entityid' => $reader->entityid, 'parentid' => null],
