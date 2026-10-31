@@ -33,4 +33,12 @@ $functions = [
         'loginrequired' => true,
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
+    'local_oksigeniaayvurenda_renew_loan' => [
+        'classname' => \local_oksigeniaayvurenda\external\renew_loan::class,
+        'description' => 'A reader gives one of their loans more time, where the library lets them.',
+        'type' => 'write',
+        'ajax' => true,
+        'loginrequired' => true,
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
 ];

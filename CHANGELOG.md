@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.92.0 (2026-10-31)
+
+- Readers renew their own loans online, where the library lets them: a new switch next to reserving online, for the
+  same stages, off by default. «Renew» on each loan in the app (the new web service `local_oksigeniaayvurenda_renew_loan`,
+  which says why when it cannot) and in the dashboard block from its 0.1.3 (`renew.php`). The same rules as at the desk:
+  as many times as the loan rules say, not while another reader waits for the book (unless the library says it may),
+  and never in a textbook bank.
+
 ## 0.91.0 (2026-10-31)
 
 - The way into the app, from a reader's record: where Oksigenia Aty is installed, «Send them the app» e-mails the

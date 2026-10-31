@@ -33,9 +33,15 @@ final class hold_rules_test extends \basic_testcase {
     public function test_settings_and_online(): void {
         $this->assertSame(hold_rules::DEFAULTS, hold_rules::settings([]));
         $this->assertSame(
-            ['online' => true, 'stages' => ['Primaria'], 'days' => 30, 'max' => 1, 'renew' => false],
+            ['online' => true, 'stages' => ['Primaria'], 'days' => 30, 'max' => 1, 'renew' => false, 'renewonline' => false],
             hold_rules::settings(['online' => 1, 'stages' => ['Primaria', ' '], 'days' => 90, 'max' => 0])
         );
+        // Renewing online has its own switch and the same stages; reserving online need not be on.
+        $renew = hold_rules::settings(['renewonline' => true, 'stages' => ['Primaria']]);
+        $this->assertFalse(hold_rules::online($renew, 'student', 'Primaria'));
+        $this->assertTrue(hold_rules::renew_online($renew, 'student', 'Primaria'));
+        $this->assertFalse(hold_rules::renew_online($renew, 'student', 'Infantil'));
+        $this->assertFalse(hold_rules::renew_online(hold_rules::settings(['online' => true]), 'teacher', null));
         $off = hold_rules::settings([]);
         $this->assertFalse(hold_rules::online($off, 'student', 'Primaria'));
         $all = hold_rules::settings(['online' => true]);

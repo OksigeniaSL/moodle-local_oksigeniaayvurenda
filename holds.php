@@ -52,6 +52,7 @@ if ($manage && data_submitted() && confirm_sesskey()) {
         'days' => optional_param('days', 5, PARAM_INT),
         'max' => optional_param('max', 3, PARAM_INT),
         'renew' => optional_param('renew', 0, PARAM_BOOL),
+        'renewonline' => optional_param('renewonline', 0, PARAM_BOOL),
     ]);
     $notice = $str('holdssaved');
 }
@@ -85,6 +86,7 @@ $data = [
     'manage' => $manage,
     'online' => $settings['online'],
     'renew' => $settings['renew'],
+    'renewonline' => $settings['renewonline'],
     'days' => $settings['days'],
     'max' => $settings['max'],
     'stages' => array_map(fn($s) => ['name' => $s, 'chosen' => isset($chosen[$s])], holds::stages($entityid, $now)),
@@ -92,7 +94,7 @@ $data = [
 $data['hasstages'] = (bool) $data['stages'];
 foreach (
     ['holdssettings', 'holdssettingsintro', 'holdsonline', 'holdsstages', 'holdsnostages', 'holdsdays', 'holdsmax',
-        'holdsrenew', 'holdssave'] as $key
+        'holdsrenew', 'holdsrenewonline', 'holdssave'] as $key
 ) {
     $data[$key] = $str($key);
 }

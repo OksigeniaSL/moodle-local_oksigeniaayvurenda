@@ -74,9 +74,14 @@ final class mine {
                ORDER BY l.timedue, l.id",
                 ['readerid' => $reader->id]
             );
+            $renews = [];
             foreach ($rows as $row) {
                 $where = $DB->get_record(self::T . 'library', ['id' => $row->libraryid]) ?: $library;
+                // Whether they may give it more time themselves, as the library says (once per library).
+                $renews[$where->id] = $renews[$where->id] ?? holds::renew_online($where, (int) $reader->id, $now);
                 $loans[] = [
+                    'loanid' => (int) $row->id,
+                    'canrenew' => $renews[$where->id],
                     'title' => $row->title,
                     'url' => $url('record.php', $where, ['id' => $row->recordid]),
                     'due' => userdate((int) $row->timedue, get_string('strftimedateshort', 'langconfig')),

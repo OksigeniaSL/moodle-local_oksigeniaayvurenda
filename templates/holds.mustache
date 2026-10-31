@@ -22,7 +22,7 @@
     * heading, intro, notice - texts
     * ready, waiting - reservations: id, title, url, name, group, barcode, when, aheadlabel
     * action, self, sesskey, library - the forms
-    * manage, online, renew, days, max, stages, hasstages - the settings, for managers
+    * manage, online, renewonline, renew, days, max, stages, hasstages - the settings, for managers
 
     Example context (json):
     {
@@ -34,11 +34,11 @@
         "waitingheading": "En cola", "nowaiting": "Nadie espera.",
         "waiting": [],
         "cancel": "Anular",
-        "manage": true, "online": true, "renew": false, "days": 5, "max": 3,
+        "manage": true, "online": true, "renewonline": false, "renew": false, "days": 5, "max": 3,
         "hasstages": true, "stages": [{"name": "Primaria", "chosen": true}],
         "holdssettings": "Cómo se reserva", "holdssettingsintro": "En el mostrador, siempre.",
         "holdsonline": "En línea", "holdsstages": "Etapas", "holdsnostages": "Sin etapas",
-        "holdsdays": "Días", "holdsmax": "A la vez", "holdsrenew": "Ampliar con cola", "holdssave": "Guardar"
+        "holdsdays": "Días", "holdsmax": "A la vez", "holdsrenew": "Ampliar con cola", "holdsrenewonline": "Ampliar en línea", "holdssave": "Guardar"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -86,6 +86,7 @@
     <h2 class="ayv-section-title">{{holdssettings}}</h2>
     <p>{{holdssettingsintro}}</p>
     <label class="ayv-field ayv-field-check"><input type="checkbox" name="online" value="1" {{#online}}checked{{/online}}> {{holdsonline}}</label>
+    <label class="ayv-field ayv-field-check"><input type="checkbox" name="renewonline" value="1" {{#renewonline}}checked{{/renewonline}}> {{holdsrenewonline}}</label>
     <fieldset class="ayv-fieldset">
         <legend>{{holdsstages}}</legend>
         {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}> {{name}}</label>{{/stages}}

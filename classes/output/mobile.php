@@ -81,6 +81,8 @@ class mobile {
             'golibrary' => $str('mobilegolibrary'),
             'gospring' => $str('mobilegospring'),
             'searchheading' => $str('mobilesearch'),
+            'renew' => $str('mobilerenew'),
+            'renewed' => $str('mobilerenewed'),
             'searchplaceholder' => $str('searchplaceholder'),
             'searchbutton' => $str('searchbutton'),
         ];

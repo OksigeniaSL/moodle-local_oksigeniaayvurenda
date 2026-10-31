@@ -106,6 +106,25 @@ final class holds {
     }
 
     /**
+     * Whether a reader may renew their own loans online in this library (never in a textbook bank).
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param int $now
+     * @return bool
+     */
+    public static function renew_online(\stdClass $library, int $readerid, int $now): bool {
+        global $DB;
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'status' => 'active']);
+        if (!$reader || $library->kind === bank::KIND) {
+            return false;
+        }
+        $year = years::around((int) $library->entityid, $now);
+        $stage = $DB->get_field(self::T . 'member', 'stage', ['readerid' => $readerid, 'yearid' => $year->id], IGNORE_MULTIPLE);
+        return hold_rules::renew_online(self::settings((int) $library->entityid), $reader->readertype, $stage ?: null);
+    }
+
+    /**
      * The open reservation of a reader for a book in a library, if any.
      *
      * @param int $libraryid

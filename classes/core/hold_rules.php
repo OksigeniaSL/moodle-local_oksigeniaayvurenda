@@ -32,13 +32,14 @@ namespace local_oksigeniaayvurenda\core;
  */
 final class hold_rules {
     /** @var array The settings when a library has none. */
-    public const DEFAULTS = ['online' => false, 'stages' => [], 'days' => 5, 'max' => 3, 'renew' => false];
+    public const DEFAULTS = ['online' => false, 'stages' => [], 'days' => 5, 'max' => 3, 'renew' => false,
+        'renewonline' => false];
 
     /**
      * The settings, with the defaults where something is missing.
      *
      * @param array $settings
-     * @return array online, stages, days, max, renew.
+     * @return array online, stages, days, max, renew, renewonline.
      */
     public static function settings(array $settings): array {
         $settings += self::DEFAULTS;
@@ -48,7 +49,20 @@ final class hold_rules {
             'days' => max(1, min(30, (int) $settings['days'])),
             'max' => max(1, min(20, (int) $settings['max'])),
             'renew' => !empty($settings['renew']),
+            'renewonline' => !empty($settings['renewonline']),
         ];
+    }
+
+    /**
+     * Whether a reader may renew their own loans online: its own switch, and the same stages as reserving online.
+     *
+     * @param array $settings As settings() gives them.
+     * @param string $readertype
+     * @param string|null $stage The reader's stage this year.
+     * @return bool
+     */
+    public static function renew_online(array $settings, string $readertype, ?string $stage): bool {
+        return !empty($settings['renewonline']) && self::online(['online' => true] + $settings, $readertype, $stage);
     }
 
     /**
