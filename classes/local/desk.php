@@ -253,6 +253,9 @@ final class desk {
         if (holds::blocks_renewal($item)) {
             return $this->answer('stop', 'no', 'desknorenewheld', $this->title($item), ['readerid' => (int) $reader->id]);
         }
+        if (reserves::active((int) $item->id, $this->now)) {
+            return $this->answer('stop', 'no', 'desknorenewreserve', $this->title($item), ['readerid' => (int) $reader->id]);
+        }
         $previous = (int) $loan->timedue;
         if ($loan->timereturned !== null) {
             // Renewing right after the copy came back: it goes out again with the same loan.
@@ -278,7 +281,10 @@ final class desk {
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid], '*', MUST_EXIST);
         $rule = $this->rule($reader->readertype, $item->itemtype);
-        if (!loan_rules::can_renew($rule, (int) $loan->renewals) || holds::blocks_renewal($item)) {
+        if (
+            !loan_rules::can_renew($rule, (int) $loan->renewals) || holds::blocks_renewal($item)
+            || reserves::active((int) $item->id, $this->now)
+        ) {
             return null;
         }
         return loan_rules::renewed_due((int) $loan->timedue, $this->now, $rule, $this->tz);
@@ -435,9 +441,11 @@ final class desk {
             ['readerid' => $readerid, 'yearid' => $year->id],
             IGNORE_MULTIPLE
         );
-        // From a textbook bank, until the school year ends.
+        // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today).
+        $reserve = reserves::active((int) $item->id, $this->now);
         $due = bank::is($this->library) ? (int) $year->timeend - 1
-            : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz);
+            : ($reserve ? loan_rules::due($this->now, (int) $reserve->days, $this->tz, (int) $reserve->days > 0)
+            : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz));
         $transaction = $DB->start_delegated_transaction();
         $loanid = $DB->insert_record(self::T . 'loan', [
             'libraryid' => $this->library->id,
@@ -457,7 +465,10 @@ final class desk {
         $material = $this->material($item, (int) $loanid, 'out');
         $transaction->allow_commit();
         $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
-        $message = $fulfilled ? 'desklentheld' : 'desklent';
+        $message = $fulfilled ? 'desklentheld' : ($reserve ? 'desklentreserve' : 'desklent');
+        if ($reserve) {
+            $a->course = format_string((string) $DB->get_field('course', 'shortname', ['id' => $reserve->courseid]));
+        }
         return $this->answer('lent', 'ok', $message, $a, ['loanid' => (int) $loanid, 'readerid' => $readerid,
             'reader' => $this->reader_panel($readerid), 'material' => $material]);
     }

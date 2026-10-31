@@ -339,5 +339,13 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103122, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026103129) {
+        // Copies on reserve for a course.
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_reserve')) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_reserve');
+        }
+        upgrade_plugin_savepoint(true, 2026103129, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

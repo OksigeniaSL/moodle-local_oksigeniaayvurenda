@@ -24,7 +24,7 @@
     Context variables required for this template:
     * heading, intro, notice, canedit, action, courseid, sesskey, hasbooks, empty, query, topic, searched, hasfound
     * topics - topic, hastopic, books (id, title, authors, url, hascover, coverurl, colour, statelabel, stateclass,
-      location, required, note, digital, topic, first, last)
+      location, required, reserve, note, digital, topic, first, last)
     * found - recordid, title, authors
     * topiclist - value
     * readingsadd, readingsfind, readingsfindbutton, readingstopic, readingstopichint, readingsrequired,
@@ -39,7 +39,7 @@
         "topics": [{"topic": "Tema 1", "hastopic": true, "books": [{"id": 1, "title": "El faro dormido",
             "authors": "Ana Ruiz", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg",
             "colour": 2, "statelabel": "Libre", "stateclass": "free", "location": "Estantería", "required": true,
-            "note": "Para la semana 3", "digital": false, "topic": "Tema 1", "first": true, "last": true} ]} ],
+            "note": "Para la semana 3", "reserve": "En reserva: un día", "digital": false, "topic": "Tema 1", "first": true, "last": true} ]} ],
         "readingsadd": "Añadir un libro", "readingsfind": "Título, autor o ISBN", "readingsfindbutton": "Buscar",
         "readingstopic": "Tema", "readingstopichint": "Opcional", "readingsrequired": "Obligatoria",
         "readingsrecommended": "Recomendada", "readingsnote": "Una palabra", "readingssave": "Guardar",
@@ -60,7 +60,7 @@
         <li class="ayv-reading">
             <a class="ayv-reading-cover ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" href="{{url}}" tabindex="-1" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</a>
             <div class="ayv-reading-text">
-                <p class="ayv-reading-tags">{{#required}}<span class="ayv-reading-required">{{readingsrequired}}</span>{{/required}}{{^required}}<span class="ayv-reading-optional">{{readingsrecommended}}</span>{{/required}}</p>
+                <p class="ayv-reading-tags">{{#required}}<span class="ayv-reading-required">{{readingsrequired}}</span>{{/required}}{{^required}}<span class="ayv-reading-optional">{{readingsrecommended}}</span>{{/required}}{{#reserve}} <span class="ayv-reading-reserve">{{reserve}}</span>{{/reserve}}</p>
                 <a class="ayv-reading-title" href="{{url}}">{{title}}</a>
                 {{#authors}}<span class="ayv-reading-authors">{{authors}}</span>{{/authors}}
                 {{#note}}<p class="ayv-reading-note">{{note}}</p>{{/note}}

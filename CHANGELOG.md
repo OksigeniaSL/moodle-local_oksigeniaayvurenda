@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.93.0 (2026-10-31)
+
+- Course reserves: from «What the courses ask», the library puts copies of a required reading on reserve for one of
+  its courses, as many as it chooses (free ones first), lent only in the room (back the same day) or for one to seven
+  days, until a date; then each copy goes back to its own rules. The desk lends them so, says it is the course's
+  reserve, and does not renew them (neither does the reader online). The course's readings say «On reserve». A course
+  deleted takes its reserves with it. Also in «How do I…?».
+
 ## 0.92.2 (2026-10-31)
 
 - After Aty's second test on a phone: a book the reader has out says so on its page («You have it, until…», with

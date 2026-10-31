@@ -3145,6 +3145,21 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-demand-courses { grid-column: 1; font-size: .92rem; }
 .ayv .ayv-demand-facts { grid-column: 1; font-size: .92rem; }
 .ayv .ayv-demand-ratio { grid-column: 2; grid-row: 1 / span 3; align-self: center; font-weight: 700; color: var(--late); }
+.ayv .ayv-demand-reserved,
+.ayv .ayv-demand-put { grid-column: 1 / -1; margin: .35rem 0 0; font-size: .92rem; }
+.ayv .ayv-demand-reserved { display: flex; flex-wrap: wrap; gap: .4rem .75rem; align-items: center; font-weight: 700; color: var(--accent); }
+.ayv .ayv-demand-put summary { cursor: pointer; color: var(--accent); }
+.ayv .ayv-demand-form { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: flex-end; margin: .6rem 0 0; }
+.ayv .ayv-demand-form .ayv-field { flex-direction: column; align-items: stretch; gap: .2rem; }
+.ayv .ayv-reading-reserve {
+    display: inline-block;
+    padding: .05rem .55rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    background: var(--notice-bg);
+    color: var(--accent);
+}
 @media (max-width: 30rem) {
     .ayv .ayv-demand-row { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-demand-ratio { grid-column: 1; grid-row: auto; }

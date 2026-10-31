@@ -277,6 +277,7 @@ final class readings {
      */
     public static function course_deleted(\core\event\course_deleted $event): void {
         global $DB;
+        $DB->delete_records(self::T . 'reserve', ['courseid' => $event->objectid]);
         $list = self::of_course((int) $event->objectid);
         if ($list) {
             $DB->delete_records(self::T . 'readingitem', ['listid' => $list->id]);

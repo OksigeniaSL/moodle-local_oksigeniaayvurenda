@@ -21,19 +21,29 @@
     library's copies and who waits for it; the most students per copy first.
 
     Context variables required for this template:
-    * heading, intro, hastitles, none
-    * titles - title, url, courses, facts, ratio, short
+    * heading, intro, hastitles, none, notice, action, sesskey, reserveuntil, reservedays (value, label, selected)
+    * sreserveput, sreservecourse, sreservecopies, sreservehow, sreserveuntillabel, sreservego, sreserveend
+    * titles - recordid, title, url, courses, facts, ratio, short, hascopies, reservecopies, reservemax,
+      reservecourses (id, name), reserved (courseid, text)
 
     Example context (json):
     {
         "heading": "Lo que piden los cursos", "intro": "Para saber qué comprar.", "hastitles": true, "none": "",
+        "notice": "", "action": "#", "sesskey": "x", "reserveuntil": "2027-06-30",
+        "reservedays": [{"value": 0, "label": "En sala", "selected": false}, {"value": 1, "label": "Un día", "selected": true}],
+        "sreserveput": "Poner en reserva", "sreservecourse": "Para", "sreservecopies": "Ejemplares",
+        "sreservehow": "Préstamo", "sreserveuntillabel": "Hasta", "sreservego": "Poner en reserva", "sreserveend": "Quitar",
         "titles": [{"title": "El faro dormido", "url": "#", "courses": "En: Lengua 2.º", "facts": "38 alumnos · 2 ejemplares",
-            "ratio": "1 ejemplar por cada 19 alumnos", "short": true}]
+            "ratio": "1 ejemplar por cada 19 alumnos", "short": true,
+            "recordid": 4, "hascopies": true, "reservecopies": 2, "reservemax": 2,
+            "reservecourses": [{"id": 3, "name": "Lengua 2.º"}],
+            "reserved": [{"courseid": 3, "text": "En reserva para Lengua 2.º: 2 ejemplares, un día, hasta el 20 dic"}]}]
     }
 }}
 <section class="ayv-readings">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-readings-intro">{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{^hastitles}}<p class="ayv-empty">{{none}}</p>{{/hastitles}}
 <ul class="ayv-demand">
     {{#titles}}
@@ -42,6 +52,26 @@
         <span class="ayv-demand-courses">{{courses}}</span>
         <span class="ayv-demand-facts">{{facts}}</span>
         {{#ratio}}<span class="ayv-demand-ratio">{{ratio}}</span>{{/ratio}}
+        {{#reserved}}
+        <form class="ayv-demand-reserved" method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="unreserve">
+            <input type="hidden" name="record" value="{{recordid}}"><input type="hidden" name="forcourse" value="{{courseid}}">
+            <span>{{text}}</span> <button type="submit" class="ayv-chip">{{sreserveend}}</button>
+        </form>
+        {{/reserved}}
+        {{#hascopies}}
+        <details class="ayv-demand-put">
+            <summary>{{sreserveput}}</summary>
+            <form method="post" action="{{action}}" class="ayv-demand-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="record" value="{{recordid}}">
+                <label class="ayv-field">{{sreservecourse}} <select name="forcourse">{{#reservecourses}}<option value="{{id}}">{{name}}</option>{{/reservecourses}}</select></label>
+                <label class="ayv-field">{{sreservecopies}} <input type="number" name="copies" value="{{reservecopies}}" min="1" max="{{reservemax}}"></label>
+                <label class="ayv-field">{{sreservehow}} <select name="days">{{#reservedays}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/reservedays}}</select></label>
+                <label class="ayv-field">{{sreserveuntillabel}} <input type="date" name="until" value="{{reserveuntil}}"></label>
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{sreservego}}</button></p>
+            </form>
+        </details>
+        {{/hascopies}}
     </li>
     {{/titles}}
 </ul>

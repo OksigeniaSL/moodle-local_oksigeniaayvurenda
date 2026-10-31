@@ -25,6 +25,7 @@
 
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\readings;
+use local_oksigeniaayvurenda\local\reserves;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -40,14 +41,55 @@ if (!$courseid) {
     shell::require('local/oksigeniaayvurenda:desk', $library);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $ref]));
+    $now = time();
+    $notice = '';
+    if (data_submitted() && confirm_sesskey()) {
+        // Copies on reserve for a course, or off it.
+        $recordid = required_param('record', PARAM_INT);
+        // Not «course»: that is the course's own side of this page.
+        $courseid = required_param('forcourse', PARAM_INT);
+        if (optional_param('do', '', PARAM_ALPHA) === 'unreserve') {
+            reserves::end($library, $recordid, $courseid);
+            $notice = $str('reserveended');
+        } else {
+            $until = (string) optional_param('until', '', PARAM_TEXT);
+            $tz = core_date::get_server_timezone_object();
+            $end = DateTimeImmutable::createFromFormat('!Y-m-d', $until, $tz);
+            $put = $end ? reserves::put(
+                $library,
+                $recordid,
+                $courseid,
+                optional_param('copies', 1, PARAM_INT),
+                optional_param('days', 0, PARAM_INT),
+                $end->setTime(23, 59, 59)->getTimestamp(),
+                $now
+            ) : 0;
+            $notice = $put ? $str($put === 1 ? 'reserveputone' : 'reserveput', $put) : $str('reservenone');
+        }
+    }
     $names = [];
     $count = fn(int $n, string $one, string $many) => $n === 1 ? $str($one) : $str($many, $n);
     $titles = [];
+    $onreserve = reserves::of_library($library, $now);
+    $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now)->timeend - 1;
     foreach (readings::demand($library) as $row) {
         foreach ($row['courses'] as $id) {
             $names[$id] = $names[$id] ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $id]));
         }
+        $reserved = [];
+        foreach ($onreserve[$row['recordid']] ?? [] as $courseid => $r) {
+            $reserved[] = ['courseid' => $courseid, 'text' => $str('reserveline', (object) ['course' => $names[$courseid]
+                ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $courseid])),
+                'copies' => $count($r['copies'], 'readingscopiesone', 'readingscopies'), 'how' => reserves::words($r['days']),
+                'until' => userdate($r['timeend'], get_string('strftimedateshort', 'langconfig'))])];
+        }
         $titles[] = [
+            'recordid' => $row['recordid'],
+            'reserved' => $reserved,
+            'reservecourses' => array_map(fn($id) => ['id' => $id, 'name' => $names[$id]], $row['courses']),
+            'reservecopies' => max(1, min(2, $row['copies'])),
+            'reservemax' => max(1, $row['copies']),
+            'hascopies' => $row['copies'] > 0,
             'title' => $row['title'],
             'url' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
                 'id' => $row['recordid']]))->out(false),
@@ -63,7 +105,18 @@ if (!$courseid) {
         ];
     }
     $data = ['heading' => $str('readingsdemandheading', format_string($library->name)), 'intro' => $str('readingsdemandintro'),
-        'titles' => $titles, 'hastitles' => (bool) $titles, 'none' => $str('readingsdemandnone')];
+        'titles' => $titles, 'hastitles' => (bool) $titles, 'none' => $str('readingsdemandnone'), 'notice' => $notice,
+        'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'reserveuntil' => date('Y-m-d', $yearend),
+        'reservedays' => array_map(
+            fn($d) => ['value' => $d, 'label' => reserves::words($d), 'selected' => $d === 1],
+            reserves::DAYS
+        )];
+    foreach (
+        ['reserveput', 'reservecourse', 'reservecopies', 'reservehow', 'reserveuntillabel',
+        'reservego', 'reserveend'] as $key
+    ) {
+        $data['s' . $key] = $str($key === 'reserveput' ? 'reserveaction' : $key);
+    }
     shell::output(
         $data['heading'],
         $OUTPUT->render_from_template('local_oksigeniaayvurenda/readings_demand', $data),
@@ -111,6 +164,7 @@ if ($canedit && data_submitted() && confirm_sesskey()) {
     }
 }
 $items = $list ? readings::items($list, $library) : [];
+$onreserve = reserves::of_library($library, time(), (int) $course->id);
 // By topic, in the order the teacher put them; what has no topic goes first.
 $topics = ['' => ['topic' => '', 'hastopic' => false, 'books' => []]];
 foreach ($items as $item) {
@@ -131,6 +185,10 @@ foreach ($items as $item) {
         'stateclass' => $card['stateclass'],
         'location' => $card['location'] ?? '',
         'required' => $item['required'],
+        'reserve' => isset($onreserve[$item['recordid']]) ? $str(
+            'reservebadge',
+            reserves::words(reset($onreserve[$item['recordid']])['days'])
+        ) : '',
         'note' => $item['note'],
         'digital' => $item['digital'],
         'topic' => $item['topic'],
