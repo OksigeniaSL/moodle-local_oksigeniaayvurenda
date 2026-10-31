@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.95.0 (2026-10-31)
+
+- A course's readings, for a reference manager: «Download the list» in RIS (Zotero, Mendeley, EndNote) or BibTeX
+  (LaTeX, JabRef), in their order, each with where it is on the shelf and, as its note, its topic, whether it is
+  required and the teacher's word. Checked with the parsers those tools use (18,097 entries read without an error).
+- A BibTeX writer in the core (`core\export\bibtex`), with LaTeX characters escaped and keys from the author, year and
+  title.
+
 ## 0.94.1 (2026-10-31)
 
 - The digital forms of a record, redesigned (Enrique: «La ficha puede estar técnicamente bien montada, pero el diseño es

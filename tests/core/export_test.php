@@ -16,6 +16,7 @@
 
 namespace local_oksigeniaayvurenda\core;
 
+use local_oksigeniaayvurenda\core\export\bibtex;
 use local_oksigeniaayvurenda\core\export\dublincore;
 use local_oksigeniaayvurenda\core\export\ris;
 
@@ -27,9 +28,11 @@ use local_oksigeniaayvurenda\core\export\ris;
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_oksigeniaayvurenda\core\export\ris
+ * @covers     \local_oksigeniaayvurenda\core\export\bibtex
  * @covers     \local_oksigeniaayvurenda\core\export\dublincore
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(ris::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(bibtex::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(dublincore::class)]
 final class export_test extends \basic_testcase {
     /** @var array A made-up book. */
@@ -68,5 +71,23 @@ final class export_test extends \basic_testcase {
         $this->assertSame(['urn:isbn:9788490000014'], $value('//dc:identifier'));
         $this->assertSame(['Text'], $value('//dc:type'));
         $this->assertSame(['Un faro que duerme.'], $value('//dc:description'));
+    }
+
+    /**
+     * BibTeX: the entry with its authors joined by «and», LaTeX characters escaped, its shelf and note, and a key
+     * from the author, year and title.
+     */
+    public function test_bibtex(): void {
+        $entry = bibtex::entry(
+            ['doctype' => 'book', 'title' => 'El faro dormido', 'pubyear' => '2019'],
+            ['author' => ['Ruiz Gómez, Ana', 'Pérez, Luis'], 'subject' => ['Mar & costa']],
+            'N RUI far',
+            'Obligatoria'
+        );
+        $this->assertStringStartsWith('@book{ruizgomez2019faro,', $entry);
+        $this->assertStringContainsString('author = {Ruiz Gómez, Ana and Pérez, Luis}', $entry);
+        $this->assertStringContainsString('keywords = {Mar \\& costa}', $entry);
+        $this->assertStringContainsString('note = {Signatura: N RUI far. Obligatoria}', $entry);
+        $this->assertSame('', bibtex::entry(['doctype' => 'material', 'title' => 'Tableta'], []));
     }
 }

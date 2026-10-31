@@ -89,6 +89,11 @@ final class readings_test extends \advanced_testcase {
         readings::remove($list, $items[0]['id']);
         readings::remove($list, $last);
         $this->assertSame([(int) $one->recordid], array_column(readings::items($list, $library), 'recordid'));
+        // For a reference manager: RIS with the topic and «required» as its note, and BibTeX.
+        $ris = readings::export($list, $library, 'ris');
+        $this->assertStringContainsString('TY  - BOOK', $ris);
+        $this->assertStringContainsString('N1  - ' . get_string('readingstopic', 'local_oksigeniaayvurenda') . ': Tema 1', $ris);
+        $this->assertStringContainsString('@book{', readings::export($list, $library, 'bibtex'));
         delete_course($course, false);
         $this->assertFalse($DB->record_exists('local_oksigeniaayvurenda_readinglist', ['id' => $list->id]));
         $this->assertFalse($DB->record_exists('local_oksigeniaayvurenda_readingitem', ['listid' => $list->id]));

@@ -41,9 +41,10 @@ final class ris {
      *     summary).
      * @param array $authorities Kind => labels, in order (author, publisher, subject, collection).
      * @param string $callnumber Where it is on the shelf, if it is in one library.
+     * @param string $note A note of whoever made the list (its topic, whether it is required).
      * @return string
      */
-    public static function entry(array $record, array $authorities, string $callnumber = ''): string {
+    public static function entry(array $record, array $authorities, string $callnumber = '', string $note = ''): string {
         $type = self::TYPES[(string) ($record['doctype'] ?? 'book')] ?? null;
         $title = trim((string) ($record['title'] ?? ''));
         if ($type === null || $title === '') {
@@ -64,6 +65,7 @@ final class ris {
         }
         $lines[] = ['AB', trim(strip_tags((string) ($record['summary'] ?? '')))];
         $lines[] = ['CN', $callnumber];
+        $lines[] = ['N1', $note];
         $text = '';
         foreach ($lines as [$tag, $value]) {
             $value = trim(preg_replace('/\s+/u', ' ', $value));

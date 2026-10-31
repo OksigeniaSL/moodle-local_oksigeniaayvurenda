@@ -232,6 +232,84 @@ final class readings {
     }
 
     /**
+     * A course's readings for a reference manager, in their order: RIS (Zotero, Mendeley, EndNote) or BibTeX, each
+     * with where it is on the shelf and, as its note, its topic, whether it is required and the teacher's word.
+     *
+     * @param \stdClass $list
+     * @param \stdClass $library
+     * @param string $format ris or bibtex.
+     * @return string
+     */
+    public static function export(\stdClass $list, \stdClass $library, string $format): string {
+        global $DB;
+        $items = array_values($DB->get_records(self::T . 'readingitem', ['listid' => $list->id], 'sortorder, id'));
+        if (!$items) {
+            return '';
+        }
+        $ids = array_map(fn($i) => (int) $i->recordid, $items);
+        [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+        $records = $DB->get_records_select(self::T . 'record', "id $in", $params);
+        $by = [];
+        foreach (
+            $DB->get_records_sql(
+                "SELECT ra.id, ra.recordid, a.kind, a.label
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                  WHERE ra.recordid $in
+               ORDER BY ra.sortorder, ra.id",
+                $params
+            ) as $row
+        ) {
+            $by[$row->recordid][$row->kind][] = $row->label;
+        }
+        $shelf = [];
+        foreach (
+            $DB->get_records_select(self::T . 'item', "recordid $in AND libraryid = :libraryid", $params +
+                ['libraryid' => $library->id], 'id', 'id, recordid, callnumber1, callnumber2, callnumber3') as $copy
+        ) {
+            $shelf[$copy->recordid] = $shelf[$copy->recordid] ?? trim(implode(' ', array_filter([$copy->callnumber1,
+                $copy->callnumber2, $copy->callnumber3])));
+        }
+        $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+        $out = '';
+        $keys = [];
+        foreach ($items as $item) {
+            $record = $records[$item->recordid] ?? null;
+            if (!$record) {
+                continue;
+            }
+            $note = implode('. ', array_filter([
+                $item->topic ? $str('readingstopic') . ': ' . $item->topic : '',
+                $str($item->required ? 'readingsrequired' : 'readingsrecommended'),
+                (string) $item->note,
+            ]));
+            if ($format === 'bibtex') {
+                $key = \local_oksigeniaayvurenda\core\export\bibtex::key(
+                    ($by[$item->recordid]['author'] ?? [''])[0],
+                    (string) $record->pubyear,
+                    (string) $record->title
+                );
+                $keys[$key] = ($keys[$key] ?? 0) + 1;
+                $out .= \local_oksigeniaayvurenda\core\export\bibtex::entry(
+                    (array) $record,
+                    $by[$item->recordid] ?? [],
+                    $shelf[$item->recordid] ?? '',
+                    $note,
+                    $keys[$key] > 1 ? $key . chr(96 + $keys[$key]) : $key
+                ) . "\n";
+            } else {
+                $out .= \local_oksigeniaayvurenda\core\export\ris::entry(
+                    (array) $record,
+                    $by[$item->recordid] ?? [],
+                    $shelf[$item->recordid] ?? '',
+                    $note
+                );
+            }
+        }
+        return $out;
+    }
+
+    /**
      * What the courses ask of a library: each title some course requires, with the courses, their students, the
      * library's copies and the readers waiting for it; the most students per copy first.
      *

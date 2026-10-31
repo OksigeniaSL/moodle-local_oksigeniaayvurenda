@@ -3074,6 +3074,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 /* The readings of a course: by topic, each book with its cover, required or recommended, the teacher's word and whether
    it is free and where; for the library, what the courses ask of it, the shortest first. */
 .ayv .ayv-readings-intro { margin: .25rem 0 1rem; }
+.ayv .ayv-readings-export { display: flex; flex-wrap: wrap; gap: .4rem .6rem; align-items: center; margin: -.25rem 0 1.25rem; font-size: .92rem; }
 .ayv .ayv-readings-topic { margin: 0 0 1.5rem; }
 .ayv .ayv-readings-heading { margin: 0 0 .6rem; font-family: var(--title); font-size: 1.3rem; color: var(--accent); }
 .ayv .ayv-readings-books {

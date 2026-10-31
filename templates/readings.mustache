@@ -22,7 +22,8 @@
     its topic, its word, its place and taking it off.
 
     Context variables required for this template:
-    * heading, intro, notice, canedit, action, courseid, sesskey, hasbooks, empty, query, topic, searched, hasfound
+    * heading, intro, notice, canedit, action, courseid, risurl, biburl, readingsexport, readingsexportris,
+      readingsexportbib, sesskey, hasbooks, empty, query, topic, searched, hasfound
     * topics - topic, hastopic, books (id, title, authors, url, hascover, coverurl, colour, statelabel, stateclass,
       location, required, reserve, note, digital, topic, first, last)
     * found - recordid, title, authors
@@ -34,7 +35,8 @@
     Example context (json):
     {
         "heading": "Lecturas de Lengua 2.º", "intro": "Los libros de este curso.", "notice": "", "canedit": true,
-        "action": "#", "courseid": 2, "sesskey": "x", "hasbooks": true, "empty": "", "query": "", "topic": "", "searched": false,
+        "action": "#", "courseid": 2, "risurl": "#", "biburl": "#", "readingsexport": "Descargar la lista:",
+        "readingsexportris": "RIS (Zotero, Mendeley, EndNote)", "readingsexportbib": "BibTeX", "sesskey": "x", "hasbooks": true, "empty": "", "query": "", "topic": "", "searched": false,
         "hasfound": false, "found": [], "topiclist": [{"value": "Tema 1"}],
         "topics": [{"topic": "Tema 1", "hastopic": true, "books": [{"id": 1, "title": "El faro dormido",
             "authors": "Ana Ruiz", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg",
@@ -50,6 +52,7 @@
 <section class="ayv-readings">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-readings-intro">{{intro}}</p>
+{{#hasbooks}}<p class="ayv-readings-export"><span>{{readingsexport}}</span> <a class="ayv-chip" href="{{risurl}}">{{readingsexportris}}</a> <a class="ayv-chip" href="{{biburl}}">{{readingsexportbib}}</a></p>{{/hasbooks}}
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{^hasbooks}}<p class="ayv-empty">{{empty}}</p>{{/hasbooks}}
 {{#topics}}
