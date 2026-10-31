@@ -51,6 +51,7 @@ final class howto {
         'stocktake' => ['stocktake.php', 'catalogue', ''],
         'weed' => ['weed.php', 'catalogue', ''],
         'lots' => ['lots.php', 'desk', ''],
+        'bank' => ['libraries.php', 'manage', ''],
         'import' => ['import.php', 'manage', ''],
         'year' => ['year.php', 'manage', ''],
         'tutors' => ['tutors.php', 'manage', ''],

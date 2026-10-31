@@ -35,7 +35,7 @@ final class libraries {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] The kinds of library. */
-    public const KINDS = ['central', 'classroom', 'department', 'faculty'];
+    public const KINDS = ['central', 'classroom', 'department', 'faculty', 'bank'];
 
     /** @var string[] How a catalogue classifies. */
     public const CLASSIFICATIONS = ['udc', 'dewey', 'other'];

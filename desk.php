@@ -52,6 +52,7 @@ foreach (
     ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'noteloved', 'noteunfinished', 'notemore',
         'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint',
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
+        'deskbankset', 'deskbankmissing', 'deskbankdone', 'deskbankcontract',
         'desklendheld', 'deskroom'] as $key
 ) {
     $strings[$key] = $str($key);
@@ -142,6 +143,9 @@ shell::output($str('desktitle'), $main, $library, '', [
     ], access::can('local/oksigeniaayvurenda:catalogue', $library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
             'label' => $str('addnav')],
+    ] : [], access::can('local/oksigeniaayvurenda:catalogue', $library) && \local_oksigeniaayvurenda\local\bank::is($library) ? [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/bank.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('banknav')],
     ] : [], access::can('local/oksigeniaayvurenda:manage', $library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false), 'label' => $str('librariesnav')],
     ] : [])),

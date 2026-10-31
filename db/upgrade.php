@@ -319,5 +319,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103104, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026103109) {
+        // The sets of a textbook bank and their titles.
+        foreach (['local_oksigeniaayvurenda_bankset', 'local_oksigeniaayvurenda_banktitle'] as $table) {
+            if (!$dbman->table_exists($table)) {
+                $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', $table);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026103109, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

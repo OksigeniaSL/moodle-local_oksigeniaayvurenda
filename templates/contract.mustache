@@ -1,0 +1,54 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/contract
+
+    The contract of the textbooks lent to a pupil, for the family to sign: one sheet to print.
+
+    Context variables required for this template:
+    * centre, library, title, who, terms, date, hascopies
+    * copies - title, barcode, condition, date
+    * contracttitlecol, contractcodecol, contractstatecol, contractdatecol, contractnone, contractfamily, contractcentre,
+      contractprint
+
+    Example context (json):
+    {
+        "centre": "Colegio de ejemplo", "library": "Banco de libros", "title": "Préstamo de libros de texto",
+        "who": "Ana Inventada, de 1.º ESO A, para el curso 2026-2027.", "terms": "Se devuelven al acabar el curso.",
+        "date": "31 de octubre de 2026", "hascopies": true,
+        "copies": [{"title": "Matemáticas 1", "barcode": "500001K", "condition": "Bien", "date": "15/9/26"}],
+        "contracttitlecol": "Libro", "contractcodecol": "Código", "contractstatecol": "Estado al darlo",
+        "contractdatecol": "Fecha", "contractnone": "No tiene libros del banco.", "contractfamily": "Firma de la familia",
+        "contractcentre": "Firma y sello del centro", "contractprint": "Imprimir"
+    }
+}}
+<section class="ayv-contract">
+    <p class="ayv-contract-centre">{{centre}} · {{library}}</p>
+    <h1 class="ayv-results-title">{{title}}</h1>
+    <p>{{who}}</p>
+    {{#hascopies}}
+    <table class="ayv-contract-table">
+        <thead><tr><th scope="col">{{contracttitlecol}}</th><th scope="col">{{contractcodecol}}</th><th scope="col">{{contractstatecol}}</th><th scope="col">{{contractdatecol}}</th></tr></thead>
+        <tbody>{{#copies}}<tr><td>{{title}}</td><td>{{barcode}}</td><td>{{condition}}</td><td>{{date}}</td></tr>{{/copies}}</tbody>
+    </table>
+    {{/hascopies}}
+    {{^hascopies}}<p class="ayv-empty">{{contractnone}}</p>{{/hascopies}}
+    <p>{{terms}}</p>
+    <p>{{date}}</p>
+    <div class="ayv-contract-signs"><p>{{contractfamily}}</p><p>{{contractcentre}}</p></div>
+    <p class="ayv-print-head"><button type="button" class="ayv-button" onclick="window.print()">{{contractprint}}</button></p>
+</section>

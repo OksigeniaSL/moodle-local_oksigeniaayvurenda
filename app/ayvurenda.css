@@ -2649,3 +2649,21 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
     .ayv .ayv-hunt-no-door { animation: none; }
     .ayv .ayv-sort-door { transition: none; }
 }
+
+/* The contract of a textbook bank: one sheet to sign. */
+.ayv .ayv-contract { display: block; padding: 15mm; border-radius: var(--radius); background: var(--surface); }
+@media print {
+    .ayv .ayv-contract { padding: 15mm; border-radius: 0; box-shadow: none; color: #1e2b2a; }
+}
+.ayv .ayv-contract-centre { margin: 0 0 .5rem; color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-contract-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-variant-numeric: tabular-nums; }
+.ayv .ayv-contract-table th,
+.ayv .ayv-contract-table td { padding: .45rem .5rem; border-bottom: 1px solid var(--line); text-align: left; }
+.ayv .ayv-contract-signs { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.5rem; }
+.ayv .ayv-contract-signs p { min-height: 5rem; padding-top: .5rem; border-top: 1px solid var(--ink); }
+/* A set of the bank: the titles that are short, marked. */
+.ayv .ayv-bankset { margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--surface); }
+.ayv .ayv-bank-short .ayv-holds-when { color: var(--late); font-weight: 700; }
+.ayv .ayv-bank-edit summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
+.ayv .ayv-reader-bank { margin: .5rem 0 1rem; }
+.ayv .ayv-reader-bank-missing { color: var(--late); font-weight: 700; }

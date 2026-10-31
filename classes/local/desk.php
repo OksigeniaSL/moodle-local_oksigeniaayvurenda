@@ -224,7 +224,14 @@ final class desk {
         }
         // Whoever keeps one library only sees what waits for the reader there.
         $holds = $this->own ? [] : holds::of_reader($readerid, $this->now);
-        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => $holds];
+        // At a textbook bank, the set of their grade: what is still to give, and the contract for the family.
+        $set = bank::is($this->library) ? bank::of_reader($this->library, $readerid, $this->now) : null;
+        if ($set) {
+            $set['contract'] = (new \moodle_url('/local/oksigeniaayvurenda/contract.php', ['library' => $this->library->slug,
+                'reader' => $readerid]))->out(false);
+            $set['pending'] = array_values(array_column(array_filter($set['titles'], fn($t) => !$t['out']), 'title'));
+        }
+        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => $holds, 'bank' => $set];
     }
 
     /**
@@ -409,7 +416,9 @@ final class desk {
             ['readerid' => $readerid, 'yearid' => $year->id],
             IGNORE_MULTIPLE
         );
-        $due = loan_rules::due($this->now, (int) $rule['loandays'], $this->tz);
+        // From a textbook bank, until the school year ends.
+        $due = bank::is($this->library) ? (int) $year->timeend - 1
+            : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz);
         $transaction = $DB->start_delegated_transaction();
         $loanid = $DB->insert_record(self::T . 'loan', [
             'libraryid' => $this->library->id,
@@ -498,6 +507,12 @@ final class desk {
      */
     private function rule(string $readertype, string $itemtype): ?array {
         global $DB;
+        // A textbook bank lends a whole set, until the year ends, unless it has its own rules.
+        if (bank::is($this->library) && !$DB->record_exists(self::T . 'rule', ['libraryid' => $this->library->id])) {
+            // Lent (any days, the year's end sets the date), with no limit of copies and no renewal.
+            return ['readertype' => '*', 'itemtype' => '*', 'loandays' => 365, 'maxloans' => 0, 'renewals' => 0,
+                'renewdays' => 0];
+        }
         $library = $this->library;
         while ($library) {
             $rules = $DB->get_records(self::T . 'rule', ['libraryid' => $library->id]);
@@ -630,7 +645,8 @@ final class desk {
      */
     private function material(\stdClass $item, int $loanid, string $when): ?array {
         global $DB;
-        if ($DB->get_field(self::T . 'record', 'doctype', ['id' => $item->recordid]) !== 'device') {
+        // The state goes with material, and with every textbook of a bank.
+        if (!bank::is($this->library) && $DB->get_field(self::T . 'record', 'doctype', ['id' => $item->recordid]) !== 'device') {
             return null;
         }
         $current = in_array($item->itemcondition, self::CONDITIONS, true) ? $item->itemcondition : 'good';

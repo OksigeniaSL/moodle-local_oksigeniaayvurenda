@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.80.0 (2026-10-31)
+
+- The textbook bank, first part: a library of the kind «Textbook bank», with its sets (`bank.php`, from its desk): each
+  set is a grade's titles for the groups it serves. At the bank's desk, the pupil's panel says their set and what is
+  still to give; each copy goes until the school year ends, with no limit of copies, and its state is noted when it
+  goes and when it comes back. The family's contract, one page to print (`contract.php`), lists each copy with its
+  code and state. Each set says, per title, the copies lent, free and short for the pupils of its groups.
+
 ## 0.79.1 (2026-10-31)
 
 - A volume control beside «Sound» in the visit, one for the whole device, kept for every room and game and for

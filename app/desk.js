@@ -145,6 +145,19 @@
         if (reader.latecount > 0) {
             panel.appendChild(el('p', 'ayv-reader-late', str.desklate));
         }
+        // At a textbook bank: the set of their grade, what is still to give, and the contract for the family.
+        if (reader.bank) {
+            var set = el('div', 'ayv-reader-bank');
+            set.appendChild(el('p', 'ayv-reader-has', str.deskbankset.replace('{$a}', reader.bank.set)));
+            set.appendChild(el('p', reader.bank.missing ? 'ayv-reader-bank-missing' : 'ayv-reader-bank-done',
+                reader.bank.missing ? str.deskbankmissing.replace('{$a}', reader.bank.pending.join(', ')) : str.deskbankdone));
+            var contract = el('a', 'ayv-button ayv-button-quiet', str.deskbankcontract);
+            contract.href = reader.bank.contract;
+            contract.target = '_blank';
+            contract.rel = 'noopener';
+            set.appendChild(contract);
+            panel.appendChild(set);
+        }
         // What they reserved: first what is set aside for them, to hand it over now.
         if (reader.holds && reader.holds.length) {
             panel.appendChild(el('p', 'ayv-reader-has', str.deskholds));
