@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.77.0 (2026-10-31)
+
+- A centre can give its own character whole, in a zip on «Characters»: its portrait, its five poses and its puppet
+  (`retrato`, `saluda`, `senala`, `celebra`, `lee`, `piensa`, and `marioneta.webp` with its `.atlas.json`, `.rig.json`
+  and `.anim.json`). It then stands in its own poses and moves as its own puppet in the visit and on every screen;
+  taken away, Ayvurenda's comes back. Only those names are read, each picture checked and each file of data parsed.
+
 ## 0.76.0 (2026-10-31)
 
 - Each library can have its own keepers: the centre's staff choose them among its readers with an account

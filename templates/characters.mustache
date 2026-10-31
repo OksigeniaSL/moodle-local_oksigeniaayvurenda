@@ -59,6 +59,9 @@
             <label class="ayv-field ayv-field-wide">{{characterportrait}} <span class="ayv-field-hint">{{characterportraithint}}</span>
                 <input type="file" name="{{role}}portrait" accept="image/png,image/jpeg,image/webp,image/gif"></label>
             {{#own}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}noportrait" value="1"> {{characternoportrait}}</label>{{/own}}
+            <label class="ayv-field ayv-field-wide">{{characterpack}} <span class="ayv-field-hint">{{characterpackhint}}</span>
+                <input type="file" name="{{role}}pack" accept=".zip,application/zip"></label>
+            {{#own}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}nopack" value="1"> {{characternopack}}</label>{{/own}}
             <p class="ayv-character-preview">{{characterpreview}}</p>
             {{#preview}}{{> local_oksigeniaayvurenda/bubble}}{{/preview}}
         </section>

@@ -66,6 +66,34 @@ final class images {
     }
 
     /**
+     * Keeps the data of a puppet (its atlas, rig or gestures), if it is JSON.
+     *
+     * @param string $area portrait.
+     * @param int $itemid The entity of the characters.
+     * @param string $name Its name, without the ending (herald-marioneta.atlas).
+     * @param string $path Where the file is now.
+     * @return bool Whether it was JSON and was kept.
+     */
+    public static function store_json(string $area, int $itemid, string $name, string $path): bool {
+        if (!is_readable($path) || filesize($path) > self::MAX || filesize($path) === 0) {
+            return false;
+        }
+        if (!is_array(json_decode((string) file_get_contents($path), true))) {
+            return false;
+        }
+        self::remove($area, $itemid, $name);
+        get_file_storage()->create_file_from_pathname([
+            'contextid' => \context_system::instance()->id,
+            'component' => 'local_oksigeniaayvurenda',
+            'filearea' => $area,
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => $name . '.json',
+        ], $path);
+        return true;
+    }
+
+    /**
      * Keeps the picture a form sent, if it sent one.
      *
      * @param string $field The form's field.

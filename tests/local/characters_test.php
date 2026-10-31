@@ -178,4 +178,43 @@ final class characters_test extends \advanced_testcase {
             $this->assertStringContainsString('memoria-cielo-senala', characters::figure('memory', 'senala', 'cielo'));
         }
     }
+
+    /**
+     * A centre gives its own character whole, in a zip: it then stands in its own poses and moves as its own puppet;
+     * taken away, Ayvurenda's comes back. What is not a piece with its name is not read.
+     */
+    public function test_own_pack(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $dir = make_request_directory();
+        $picture = $dir . '/p.png';
+        $image = imagecreatetruecolor(8, 8);
+        imagepng($image, $picture);
+        $zip = new \ZipArchive();
+        $zip->open($dir . '/rosita.zip', \ZipArchive::CREATE);
+        foreach (['retrato', 'saluda', 'senala', 'celebra', 'lee', 'piensa', 'marioneta'] as $piece) {
+            $zip->addFile($picture, 'rosita/' . $piece . '.png');
+        }
+        foreach (['atlas', 'rig', 'anim'] as $part) {
+            $zip->addFromString('rosita/marioneta.' . $part . '.json', '{"made": "up"}');
+        }
+        $zip->addFromString('rosita/../../config.php', '<?php');
+        $zip->addFromString('rosita/marioneta.rig.json.bak', 'no');
+        $zip->close();
+        $this->assertSame(10, characters::store_pack($entityid, 'herald', $dir . '/rosita.zip'));
+        $this->assertNull(characters::store_pack($entityid, 'herald', $picture));
+        $this->assertTrue(characters::of($entityid)['herald']['own']);
+        $said = characters::say($entityid, 'herald', 'heraldnew', [], 'saluda');
+        $this->assertStringContainsString('/herald-saluda.png', $said['figure']);
+        $puppet = json_decode($said['puppet'], true);
+        $this->assertSame('arrive', $puppet['gesture']);
+        $this->assertStringContainsString('/herald-marioneta.atlas.json', $puppet['atlas']);
+        $this->assertStringContainsString('/herald.png', characters::of($entityid)['herald']['portrait']);
+        characters::remove_pack($entityid, 'herald');
+        $this->assertFalse(characters::of($entityid)['herald']['own']);
+        $said = characters::say($entityid, 'herald', 'heraldnew', [], 'saluda');
+        $this->assertSame(characters::figure('herald', 'saluda'), $said['figure']);
+    }
 }

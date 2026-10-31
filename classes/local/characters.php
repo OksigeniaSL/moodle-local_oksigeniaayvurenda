@@ -34,6 +34,12 @@ final class characters {
     /** @var string[] The two trades. */
     public const ROLES = ['memory', 'herald'];
 
+    /** @var string[] How a character stands, drawn whole. */
+    public const POSES = ['saluda', 'senala', 'celebra', 'lee', 'piensa'];
+
+    /** @var string[] What a puppet is made of besides its picture. */
+    private const PUPPET = ['atlas', 'rig', 'anim'];
+
     /**
      * The characters of an entity, as it set them or as they come.
      *
@@ -61,10 +67,10 @@ final class characters {
                 'sex' => $sex,
                 // Gaudí's portrait, when the art package is there: one of the other sex if it has it, else the same
                 // grandmother and hummingbird as their drawings whole.
-                'portrait' => images::url('portrait', $entityid, $role)
+                'portrait' => images::url('portrait', $entityid, $role) ?? self::own_figure($entityid, $role, 'saluda')
                     ?? ($sex === ($role === 'herald' ? 'm' : 'f') ? null : screens::art($drawn . '-' . $sex))
                     ?? screens::art($drawn),
-                'own' => images::url('portrait', $entityid, $role) !== null,
+                'own' => images::url('portrait', $entityid, $role) !== null || self::own_figure($entityid, $role, 'saluda'),
                 'signs' => $role === 'herald' && !empty($mine['signs']),
                 // Until the puppets come, the initial of the name, not a makeshift drawing.
                 'initial' => \core_text::strtoupper(\core_text::substr($name !== '' ? $name
@@ -165,10 +171,105 @@ final class characters {
         if (in_array(null, $parts, true)) {
             return '';
         }
+        return (string) json_encode($parts + ['gesture' => self::gesture($role, $pose)]);
+    }
+
+    /**
+     * Takes a character of the centre's own, whole, from a zip: its portrait (retrato), its five poses (saluda, senala,
+     * celebra, lee, piensa) and its puppet (marioneta.webp with marioneta.atlas.json, .rig.json and .anim.json), as
+     * Gaudí's kit gives them. Only those names are read, each picture checked and each file of data parsed.
+     *
+     * @param int $entityid
+     * @param string $role
+     * @param string $path The zip.
+     * @return int|null How many pieces it kept; null if it is not a zip.
+     */
+    public static function store_pack(int $entityid, string $role, string $path): ?int {
+        $zip = new \ZipArchive();
+        if (!in_array($role, self::ROLES, true) || $zip->open($path) !== true) {
+            return null;
+        }
+        $dir = make_request_directory();
+        $kept = 0;
+        for ($i = 0; $i < min($zip->numFiles, 200); $i++) {
+            $stat = $zip->statIndex($i);
+            $base = \core_text::strtolower(basename((string) ($stat['name'] ?? '')));
+            $pattern = '/^(?:(retrato|' . implode('|', self::POSES) . '|marioneta)\.(?:webp|png|jpe?g)|marioneta\.(' .
+                implode('|', self::PUPPET) . ')\.json)$/';
+            if (!preg_match($pattern, $base, $m) || ($stat['size'] ?? 0) > images::MAX) {
+                continue;
+            }
+            $tmp = $dir . '/' . $i;
+            file_put_contents($tmp, (string) $zip->getFromIndex($i));
+            if (!empty($m[2])) {
+                $kept += images::store_json('portrait', $entityid, $role . '-marioneta.' . $m[2], $tmp) ? 1 : 0;
+            } else {
+                $kept += images::store('portrait', $entityid, $m[1] === 'retrato' ? $role : $role . '-' . $m[1], $tmp) ? 1 : 0;
+            }
+        }
+        $zip->close();
+        return $kept;
+    }
+
+    /**
+     * Takes away a character of the centre's own, whole: back to Ayvurenda's.
+     *
+     * @param int $entityid
+     * @param string $role
+     */
+    public static function remove_pack(int $entityid, string $role): void {
+        images::remove('portrait', $entityid, $role);
+        foreach (array_merge(self::POSES, ['marioneta']) as $piece) {
+            images::remove('portrait', $entityid, $role . '-' . $piece);
+        }
+        foreach (self::PUPPET as $part) {
+            images::remove('portrait', $entityid, $role . '-marioneta.' . $part);
+        }
+    }
+
+    /**
+     * A pose of the centre's own character, if it gave one.
+     *
+     * @param int $entityid
+     * @param string $role
+     * @param string $pose
+     * @return string|null
+     */
+    public static function own_figure(int $entityid, string $role, string $pose): ?string {
+        return in_array($pose, self::POSES, true) ? images::url('portrait', $entityid, $role . '-' . $pose) : null;
+    }
+
+    /**
+     * The puppet of the centre's own character doing the gesture of a pose ('' without a whole one).
+     *
+     * @param int $entityid
+     * @param string $role
+     * @param string $pose
+     * @return string JSON: image, atlas, rig, anim and gesture.
+     */
+    public static function own_puppet(int $entityid, string $role, string $pose): string {
+        $parts = ['image' => images::url('portrait', $entityid, $role . '-marioneta')];
+        foreach (self::PUPPET as $part) {
+            $parts[$part] = images::url('portrait', $entityid, $role . '-marioneta.' . $part);
+        }
+        if (in_array(null, $parts, true)) {
+            return '';
+        }
+        return (string) json_encode($parts + ['gesture' => self::gesture($role, $pose)]);
+    }
+
+    /**
+     * The gesture of a puppet for a pose.
+     *
+     * @param string $role
+     * @param string $pose
+     * @return string
+     */
+    private static function gesture(string $role, string $pose): string {
         $gestures = $role === 'herald'
             ? ['saluda' => 'arrive', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'idle']
             : ['saluda' => 'greet', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'think'];
-        return (string) json_encode($parts + ['gesture' => $gestures[$pose] ?? 'idle']);
+        return $gestures[$pose] ?? 'idle';
     }
 
     /**
@@ -188,7 +289,12 @@ final class characters {
             return null;
         }
         $sm = get_string_manager();
-        $step = $pose !== '' && empty($character['own']) ? self::step($entityid) : '';
+        $own = !empty($character['own']);
+        $step = $pose !== '' && !$own ? self::step($entityid) : '';
+        // A character of the centre's own stands as it drew it, when it drew it whole; else, only its portrait.
+        $figure = $pose === '' ? null : ($own ? self::own_figure($entityid, $role, $pose) : self::figure($role, $pose, $step));
+        $puppet = $pose === '' || !$figure ? '' : ($own ? self::own_puppet($entityid, $role, $pose)
+            : self::puppet($role, $pose, $step));
         $gendered = $key . $character['sex'];
         $key = $sm->string_exists($gendered, 'local_oksigeniaayvurenda') ? $gendered : $key;
         return [
@@ -196,8 +302,8 @@ final class characters {
             'text' => get_string($key, 'local_oksigeniaayvurenda', (object) ($a + ['name' => $character['name']])),
             'initial' => $character['initial'],
             'portrait' => $character['portrait'],
-            'figure' => $pose !== '' && empty($character['own']) ? self::figure($role, $pose, $step) : null,
-            'puppet' => $pose !== '' && empty($character['own']) ? self::puppet($role, $pose, $step) : '',
+            'figure' => $figure,
+            'puppet' => $puppet,
             'role' => $role,
             // Its voice, for a young reader, is added by the screen that knows the reader.
             'listen' => null,

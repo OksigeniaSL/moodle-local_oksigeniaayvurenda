@@ -63,6 +63,16 @@ if (data_submitted() && confirm_sesskey()) {
         if (\local_oksigeniaayvurenda\local\images::store_upload($role . 'portrait', 'portrait', $entityid, $role) === false) {
             $notice = $str('librarieslookbadimage');
         }
+        // The character whole, in a zip: its portrait, its poses and its puppet; or back to Ayvurenda's.
+        if (optional_param($role . 'nopack', 0, PARAM_BOOL)) {
+            characters::remove_pack($entityid, $role);
+        }
+        $upload = $_FILES[$role . 'pack'] ?? null;
+        if ($upload && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            $kept = $upload['error'] === UPLOAD_ERR_OK && is_uploaded_file($upload['tmp_name'])
+                ? characters::store_pack($entityid, $role, $upload['tmp_name']) : null;
+            $notice = $kept ? $str('characterpackkept', $kept) : $str('characterpackbad');
+        }
     }
 }
 $samples = ['memory' => ['memorynothing', ['query' => $str('charactersamplequery')]], 'herald' => ['heraldnew', []]];
@@ -95,7 +105,8 @@ $data = [
 ];
 foreach (
     ['characterenabled', 'charactername', 'charactersex', 'charactersexf', 'charactersexm', 'charactersigns',
-        'characterpreview', 'sourcessave', 'characterportrait', 'characterportraithint', 'characternoportrait'] as $key
+        'characterpreview', 'sourcessave', 'characterportrait', 'characterportraithint', 'characternoportrait',
+        'characterpack', 'characterpackhint', 'characternopack'] as $key
 ) {
     $data[$key] = $str($key);
 }
