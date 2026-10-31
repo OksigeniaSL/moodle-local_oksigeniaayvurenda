@@ -2912,3 +2912,9 @@ html[data-bs-theme="dark"] .ayv .ayv-memoir { --bar: var(--accent); }
     .ayv .ayv-roll-pupil,
     .ayv .ayv-roll-book { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+/* Just for the reader, on their card: their goal for the year (a bar of one hue) and the library's news. */
+.ayv .ayv-mine { --bar: var(--green2); margin-top: 1.5rem; }
+html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
+.ayv .ayv-mine form { margin: 0 0 1rem; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--surface); }
+.ayv .ayv-mine-number { width: 6rem; }
+.ayv .ayv-mine-progress { margin: .5rem 0 .4rem; font-weight: 700; }

@@ -72,8 +72,9 @@ final class cifra_people {
     /**
      * The families of the students, from the record of each one (Cifra gives `familiares` only there, not in the list):
      * each adult once, with the students they are family of, their kinship and whether they are a legal guardian. An
-     * adult is known by their id in Cifra (the same as a person's, por verificar), or else by their email or mobile, so
-     * the same parent of two brothers is one. Students who left bring no family.
+     * adult is known by their id in Cifra, which every user has, the same as a person's (Enrique, 31 October 2026); a
+     * relative without one, by their email or mobile. So the same parent of two brothers is one. Students who left
+     * bring no family.
      *
      * @param array[] $records The records of the students, as Cifra gives them.
      * @param int $now

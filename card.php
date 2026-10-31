@@ -28,6 +28,8 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\cards;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\garden;
+use local_oksigeniaayvurenda\local\goals;
+use local_oksigeniaayvurenda\local\newsletter;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -47,9 +49,18 @@ if ($library) {
 }
 // The reader's own choice of how the card looks (not with the flower, which the centre decides).
 $pref = 'local_oksigeniaayvurenda_cardlook';
+$saved = '';
 if (data_submitted() && confirm_sesskey()) {
-    $chosen = optional_param('look', '', PARAM_ALPHA);
-    set_user_preference($pref, in_array($chosen, card_look::OWN, true) ? $chosen : null);
+    $do = optional_param('do', 'look', PARAM_ALPHA);
+    if ($do === 'newbooks') {
+        newsletter::subscribe((int) $USER->id, optional_param('newbooks', 0, PARAM_BOOL));
+    } else if ($do === 'goal') {
+        goals::set((int) $USER->id, required_param('year', PARAM_INT), optional_param('goal', 0, PARAM_INT));
+    } else {
+        $chosen = optional_param('look', '', PARAM_ALPHA);
+        set_user_preference($pref, in_array($chosen, card_look::OWN, true) ? $chosen : null);
+    }
+    $saved = get_string('cardsaved', 'local_oksigeniaayvurenda');
 }
 $own = get_user_preferences($pref, null);
 // The library staff may see any reader's card, in any look, as the reader would see it.
@@ -144,6 +155,17 @@ foreach ($readers as $reader) {
     // From twelve on, and for adults, each reader chooses: the sky, the classic look, or none.
     $choices = $look === 'flower' || $previewid ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
         'checked' => $o === ($sky ? 'sky' : $look)], card_look::OWN);
+    // From twelve on, and for adults: their own goal for the year, which only they see, and the library's news.
+    $mine = false;
+    if ($look !== 'flower' && !$previewid) {
+        $goal = goals::of((int) $USER->id, (int) $album['year']->id);
+        $done = goals::done((int) $reader->id, (int) $album['year']->id);
+        $mine = ['yearid' => (int) $album['year']->id, 'goal' => $goal ?: '', 'hasgoal' => $goal > 0,
+            'goalwidth' => $goal ? (int) round(min($done, $goal) * 100 / $goal) : 0,
+            'goaltext' => $goal ? $str($done >= $goal ? 'goalmet' : 'goalprogress', (object) ['done' => $done, 'goal' => $goal])
+                : '',
+            'newbookson' => newsletter::subscribed((int) $USER->id)];
+    }
     $cardsdata[] = $card + [
         'herald' => $herald,
         'paths' => $paths,
@@ -166,6 +188,7 @@ foreach ($readers as $reader) {
         'pastheading' => $str($sky ? 'cardpastsky' : 'cardpast'),
         'choices' => $choices,
         'haschoices' => (bool) $choices,
+        'mine' => $mine,
         'sky' => $sky,
         'books' => $album['books'],
         'hasbooks' => (bool) $album['books'],
@@ -219,6 +242,13 @@ $data = [
     'nobooks' => $str('cardnobooks'),
     'pastheading' => $str('cardpast'),
     'showcode' => $str('cardshowcode'),
+    'saved' => $saved,
+    'mineheading' => $str('mineheading'),
+    'goallabel' => $str('goallabel'),
+    'goalhint' => $str('goalhint'),
+    'newbookslabel' => $str('newbookslabel'),
+    'newbookshint' => $str('newbookshint'),
+    'minesave' => $str('cardlooksave'),
 ];
 // The staff find here the guided help of the card (not inside the help itself).
 $nav = $isdesk && !optional_param('help', 0, PARAM_BOOL) ? [['url' => (new moodle_url(

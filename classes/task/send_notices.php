@@ -25,8 +25,8 @@
 namespace local_oksigeniaayvurenda\task;
 
 /**
- * Every morning: readers with a book late hear about it (on the first day, then once a week), and tutors get, once a
- * week, who in their group has books late.
+ * Every morning: readers with a book late hear about it (on the first day, then once a week), tutors get, once a
+ * week, who in their group has books late, and whoever signed up gets the library's news, once a week at most.
  */
 class send_notices extends \core\task\scheduled_task {
     /**
@@ -52,5 +52,7 @@ class send_notices extends \core\task\scheduled_task {
         mtrace('Ayvurenda: voices of reviews past the days the centre keeps voices: ' . $reviewvoices);
         $staff = \local_oksigeniaayvurenda\local\staffnotices::run();
         mtrace('Ayvurenda: what waits for the staff: ' . json_encode($staff));
+        $news = \local_oksigeniaayvurenda\local\newsletter::run();
+        mtrace('Ayvurenda: the library\'s news to whoever signed up: ' . json_encode($news));
     }
 }

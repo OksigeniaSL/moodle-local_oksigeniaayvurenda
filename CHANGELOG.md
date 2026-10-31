@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.86.0 (2026-10-31)
+
+- «Just for you» on the card of every reader past the flower (from twelve, and adults), in any skin, as the skins'
+  sheet asks for a university:
+  - their own goal for the school year, how many books they mean to read, with its progress: only they see it, and it
+    counts the books taken home that year (not the textbooks);
+  - the library's news, if they sign up: once a week at most, a Moodle message with what came into the library since
+    the last one, only when something did, in the tone of the centre's skin and opening the library's home. Nobody gets
+    it without asking, and nothing goes while the centre is open only to its staff.
+- In Cifra every user has their own id: a relative is known by it (the reader's comment says so).
+
 ## 0.85.0 (2026-10-31)
 
 - The roster readers say who is family of whom, for the common family record (`local_oksigeniafamily`), which carries a

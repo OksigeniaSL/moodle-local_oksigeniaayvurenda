@@ -53,6 +53,13 @@ $messageproviders = [
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To a reader who signed up for it on their card: what came into the library, once a week at most.
+    'newbooks' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To a tutor: who in the group has books to bring back, without their titles.
     'overduetutor' => [
         'defaults' => [

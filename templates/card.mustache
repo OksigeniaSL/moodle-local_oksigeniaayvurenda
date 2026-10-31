@@ -32,7 +32,7 @@
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Casi flor", "yearname": "2026-2027",
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "detail": "Última visita: el martes"}],
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
-                   "sky": false, "haschoices": false, "choices": [],
+                   "sky": false, "haschoices": false, "choices": [], "mine": false,
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": [],
                    "hasclassgarden": false, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
                    "hascromos": true, "cromosheading": "Tus cromos", "cromoscount": "1 de 2",
@@ -50,6 +50,7 @@
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
+{{#saved}}<p class="ayv-notice" role="status">{{saved}}</p>{{/saved}}
 {{#preview}}<div class="ayv-notice"><p>{{note}}</p>
     <p class="ayv-subjects">{{label}} {{#looks}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}" {{#current}}aria-current="true"{{/current}}>{{label}}</a> {{/looks}}</p></div>{{/preview}}
 {{^hascards}}<p class="ayv-empty">{{none}}</p>
@@ -125,5 +126,25 @@
         <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{looksave}}</button></p>
     </form>
     {{/haschoices}}
+    {{#mine}}
+    <div class="ayv-mine">
+        <h2 class="ayv-section-title">{{mineheading}}</h2>
+        <form method="post" action="{{action}}" class="ayv-mine-goal">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="goal">
+            <input type="hidden" name="year" value="{{yearid}}">
+            <label class="ayv-field">{{goallabel}} <input type="number" name="goal" min="0" max="365" step="1" value="{{goal}}" class="ayv-mine-number"></label>
+            {{#hasgoal}}<p class="ayv-mine-progress">{{goaltext}}</p>
+            <span class="ayv-memoir-meter ayv-memoir-meter-big" aria-hidden="true"><span style="width: {{goalwidth}}%"></span></span>{{/hasgoal}}
+            <p class="ayv-field-hint">{{goalhint}}</p>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{minesave}}</button></p>
+        </form>
+        <form method="post" action="{{action}}" class="ayv-mine-news">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="newbooks">
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="newbooks" value="1" {{#newbookson}}checked{{/newbookson}}> {{newbookslabel}}</label>
+            <p class="ayv-field-hint">{{newbookshint}}</p>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{minesave}}</button></p>
+        </form>
+    </div>
+    {{/mine}}
 </section>
 {{/cards}}

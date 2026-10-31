@@ -180,11 +180,14 @@ class provider implements
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
         $collection->add_user_preference('local_oksigeniaayvurenda_cardlook', 'privacy:metadata:preference:cardlook');
         $collection->add_user_preference('local_oksigeniaayvurenda_stafftold', 'privacy:metadata:preference:stafftold');
+        $collection->add_user_preference('local_oksigeniaayvurenda_newbooks', 'privacy:metadata:preference:newbooks');
+        $collection->add_user_preference('local_oksigeniaayvurenda_newbookslast', 'privacy:metadata:preference:newbookslast');
+        $collection->add_user_preference('local_oksigeniaayvurenda_goal', 'privacy:metadata:preference:goal');
         return $collection;
     }
 
     /**
-     * Exports how the user chose to see their card.
+     * Exports how the user chose to see their card, whether they get the library's news, and their reading goals.
      *
      * @param int $userid
      */
@@ -206,6 +209,17 @@ class provider implements
                 transform::datetime((int) $told),
                 get_string('privacy:metadata:preference:stafftold', 'local_oksigeniaayvurenda')
             );
+        }
+        foreach (['newbooks' => 'newbooks', 'newbookslast' => 'newbookslast', 'goal' => 'goal'] as $name => $key) {
+            $value = get_user_preferences('local_oksigeniaayvurenda_' . $name, null, $userid);
+            if ($value !== null) {
+                writer::export_user_preference(
+                    'local_oksigeniaayvurenda',
+                    'local_oksigeniaayvurenda_' . $name,
+                    $name === 'newbookslast' ? transform::datetime((int) $value) : $value,
+                    get_string('privacy:metadata:preference:' . $key, 'local_oksigeniaayvurenda')
+                );
+            }
         }
     }
 
