@@ -208,6 +208,42 @@
             sheet.showModal();
         });
     });
+    // A sheet that has something to say once, as the page opens (a key just made, a link just made).
+    document.querySelectorAll('dialog.ayv-modal[data-ayv-show]').forEach(function(sheet) {
+        if (sheet.showModal) {
+            sheet.showModal();
+        }
+    });
+    // «Copy»: the text of a field to the clipboard, and the button says so for a moment.
+    document.querySelectorAll('[data-ayv-copy]').forEach(function(button) {
+        var field = document.getElementById(button.getAttribute('data-ayv-copy'));
+        if (!field) {
+            return;
+        }
+        var label = button.textContent;
+        button.addEventListener('click', function() {
+            var done = function() {
+                button.textContent = button.getAttribute('data-done') || label;
+                window.setTimeout(function() {
+                    button.textContent = label;
+                }, 2000);
+            };
+            var text = field.value !== undefined ? field.value : field.textContent;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(function() {
+                    field.select();
+                });
+            } else {
+                field.select();
+                try {
+                    document.execCommand('copy');
+                    done();
+                } catch (e) {
+                    // The text stays selected, to copy by hand.
+                }
+            }
+        });
+    });
     document.querySelectorAll('dialog.ayv-modal').forEach(function(sheet) {
         sheet.addEventListener('click', function(event) {
             var box = sheet.getBoundingClientRect();

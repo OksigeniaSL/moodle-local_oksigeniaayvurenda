@@ -182,6 +182,11 @@ class provider implements
         ], 'privacy:metadata:relay');
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
+        $collection->add_external_location_link(
+            'offsite',
+            ['copy' => 'privacy:metadata:offsite:copy'],
+            'privacy:metadata:offsite'
+        );
         $collection->add_user_preference('local_oksigeniaayvurenda_cardlook', 'privacy:metadata:preference:cardlook');
         $collection->add_user_preference('local_oksigeniaayvurenda_stafftold', 'privacy:metadata:preference:stafftold');
         $collection->add_user_preference('local_oksigeniaayvurenda_newbooks', 'privacy:metadata:preference:newbooks');

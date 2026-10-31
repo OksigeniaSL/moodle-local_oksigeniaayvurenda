@@ -22,6 +22,9 @@
     * heading, intro, notice, empty, download - texts
     * files - list of url, label and size
     * make - action, sesskey and label to make one now, for those who may
+    * offsite - for whoever manages the centre: action, sesskey, state (tone, text), haskey, keyline, recipient, secret,
+      secretfile, places (id, label, url, user), hasplaces, canadd, keepline, keepdaily, keepweekly, keepmonthly,
+      haspull, pullurl, scripts (id, label, hint, code), hasscripts
 
     Example context (json):
     {
@@ -32,17 +35,129 @@
         "files": [{"url": "#", "label": "25 de octubre de 2026, 02:47", "size": "1.2 MB"}],
         "empty": "",
         "download": "Descargar",
-        "make": {"action": "#", "sesskey": "abc", "label": "Hacer una copia ahora"}
+        "make": {"action": "#", "sesskey": "abc", "label": "Hacer una copia ahora"},
+        "offsite": {"action": "#", "sesskey": "abc", "state": {"tone": "ok", "text": "Última: hoy, en 1 sitio."},
+            "haskey": true, "keyline": "Llave del centro desde el 31 de octubre", "recipient": "age1abc", "secret": "",
+            "secretfile": "", "places": [{"id": "a1", "label": "nube.ejemplo.org", "url": "https://nube.ejemplo.org/dav/",
+            "user": "biblioteca"}], "hasplaces": true, "canadd": true, "keepline": "7 días, 4 semanas y 12 meses",
+            "keepdaily": 7, "keepweekly": 4, "keepmonthly": 12, "haspull": false, "pullurl": "", "scripts": [],
+            "hasscripts": false}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#offsite}}
+<section class="ayv-off" aria-labelledby="ayv-off-title">
+    <h2 id="ayv-off-title" class="ayv-section-title">{{#str}}offsiteheading, local_oksigeniaayvurenda{{/str}}</h2>
+    <p>{{#str}}offsiteintro, local_oksigeniaayvurenda{{/str}}</p>
+    <p class="ayv-off-state ayv-off-state-{{state.tone}}" role="status">{{state.text}}</p>
+    <ul class="ayv-dig-grid">
+        <li class="ayv-dig-card">
+            <h3 class="ayv-dig-title">{{#str}}offsitekeyheading, local_oksigeniaayvurenda{{/str}}</h3>
+            <p>{{keyline}}</p>
+            <p class="ayv-field-hint">{{#str}}offsitekeyhint, local_oksigeniaayvurenda{{/str}}</p>
+            <p class="ayv-dig-actions"><button type="button" class="ayv-button{{#haskey}} ayv-button-quiet{{/haskey}}" data-ayv-open="ayv-off-newkey">{{#haskey}}{{#str}}offsitenewkey, local_oksigeniaayvurenda{{/str}}{{/haskey}}{{^haskey}}{{#str}}offsitemakekey, local_oksigeniaayvurenda{{/str}}{{/haskey}}</button>
+                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-off-usekey">{{#str}}offsiteusekey, local_oksigeniaayvurenda{{/str}}</button></p>
+        </li>
+        <li class="ayv-dig-card">
+            <h3 class="ayv-dig-title">{{#str}}offsiteplacesheading, local_oksigeniaayvurenda{{/str}}</h3>
+            {{#hasplaces}}<ul class="ayv-off-places">{{#places}}
+                <li><span class="ayv-off-place"><b>{{label}}</b> <span>{{user}}</span></span>
+                    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="place" value="{{id}}">
+                        <button type="submit" class="ayv-line-button" name="do" value="testplace">{{#str}}offsitetest, local_oksigeniaayvurenda{{/str}}</button>
+                        <button type="submit" class="ayv-line-button ayv-line-quiet" name="do" value="removeplace">{{#str}}offsiteremove, local_oksigeniaayvurenda{{/str}}</button></form></li>
+            {{/places}}</ul>{{/hasplaces}}
+            {{^hasplaces}}<p>{{#str}}offsitenoplaces, local_oksigeniaayvurenda{{/str}}</p>{{/hasplaces}}
+            <p class="ayv-field-hint">{{#str}}offsitekeeps, local_oksigeniaayvurenda, {{keepline}}{{/str}}</p>
+            <p class="ayv-dig-actions">{{#canadd}}<button type="button" class="ayv-button{{#hasplaces}} ayv-button-quiet{{/hasplaces}}" data-ayv-open="ayv-off-addplace">{{#str}}offsiteaddplace, local_oksigeniaayvurenda{{/str}}</button>{{/canadd}}
+                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-off-keep">{{#str}}offsitekeepchange, local_oksigeniaayvurenda{{/str}}</button></p>
+        </li>
+        <li class="ayv-dig-card">
+            <h3 class="ayv-dig-title">{{#str}}offsitepullheading, local_oksigeniaayvurenda{{/str}}</h3>
+            <p>{{#haspull}}{{#str}}offsitepullon, local_oksigeniaayvurenda{{/str}}{{/haspull}}{{^haspull}}{{#str}}offsitepulloff, local_oksigeniaayvurenda{{/str}}{{/haspull}}</p>
+            <p class="ayv-field-hint">{{#str}}offsitepullhint, local_oksigeniaayvurenda{{/str}}</p>
+            <form method="post" action="{{action}}" class="ayv-dig-actions"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <button type="submit" class="ayv-button{{#haspull}} ayv-button-quiet{{/haspull}}" name="do" value="newpull">{{#haspull}}{{#str}}offsitepullnew, local_oksigeniaayvurenda{{/str}}{{/haspull}}{{^haspull}}{{#str}}offsitepullmake, local_oksigeniaayvurenda{{/str}}{{/haspull}}</button>
+                {{#haspull}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="stoppull">{{#str}}offsitepullstop, local_oksigeniaayvurenda{{/str}}</button>{{/haspull}}</form>
+        </li>
+    </ul>
+    <details class="ayv-off-open">
+        <summary>{{#str}}offsiteopenheading, local_oksigeniaayvurenda{{/str}}</summary>
+        <p>{{#str}}offsiteopenintro, local_oksigeniaayvurenda{{/str}}</p>
+        <pre class="ayv-off-code">age -d -i llave-ayvurenda.txt -o copia.zip ayvurenda-…zip.age</pre>
+    </details>
+
+    <dialog class="ayv-modal" id="ayv-off-newkey" aria-labelledby="ayv-off-newkey-title">
+        <div class="ayv-modal-head"><h3 id="ayv-off-newkey-title" class="ayv-section-title">{{#haskey}}{{#str}}offsitenewkey, local_oksigeniaayvurenda{{/str}}{{/haskey}}{{^haskey}}{{#str}}offsitemakekey, local_oksigeniaayvurenda{{/str}}{{/haskey}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{#str}}offsiteclose, local_oksigeniaayvurenda{{/str}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p>{{#str}}offsitenewkeyintro, local_oksigeniaayvurenda{{/str}}</p>
+        {{#haskey}}<p class="ayv-field-hint">{{#str}}offsitenewkeyold, local_oksigeniaayvurenda{{/str}}</p>{{/haskey}}
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="newkey">{{#str}}offsitemakekeynow, local_oksigeniaayvurenda{{/str}}</button></p></form>
+    </dialog>
+    <dialog class="ayv-modal" id="ayv-off-usekey" aria-labelledby="ayv-off-usekey-title">
+        <div class="ayv-modal-head"><h3 id="ayv-off-usekey-title" class="ayv-section-title">{{#str}}offsiteusekey, local_oksigeniaayvurenda{{/str}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{#str}}offsiteclose, local_oksigeniaayvurenda{{/str}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <label class="ayv-field ayv-dig-field">{{#str}}offsiterecipient, local_oksigeniaayvurenda{{/str}} <input type="text" name="recipient" value="{{recipient}}" placeholder="age1…" spellcheck="false" autocomplete="off"></label>
+            <p class="ayv-field-hint">{{#str}}offsiterecipienthint, local_oksigeniaayvurenda{{/str}}</p>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="usekey">{{#str}}offsitesave, local_oksigeniaayvurenda{{/str}}</button></p></form>
+    </dialog>
+    <dialog class="ayv-modal" id="ayv-off-addplace" aria-labelledby="ayv-off-addplace-title">
+        <div class="ayv-modal-head"><h3 id="ayv-off-addplace-title" class="ayv-section-title">{{#str}}offsiteaddplace, local_oksigeniaayvurenda{{/str}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{#str}}offsiteclose, local_oksigeniaayvurenda{{/str}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{action}}" data-busy="{{#str}}offsitetrying, local_oksigeniaayvurenda{{/str}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <label class="ayv-field ayv-dig-field">{{#str}}offsiteurl, local_oksigeniaayvurenda{{/str}} <input type="url" name="url" required placeholder="https://nube.ejemplo.org/remote.php/dav/files/biblioteca/Copias/" spellcheck="false"></label>
+            <p class="ayv-field-hint">{{#str}}offsiteurlhint, local_oksigeniaayvurenda{{/str}}</p>
+            <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{#str}}offsiteuser, local_oksigeniaayvurenda{{/str}} <input type="text" name="user" autocomplete="off" spellcheck="false"></label>
+                <label class="ayv-field ayv-dig-field">{{#str}}offsitepassword, local_oksigeniaayvurenda{{/str}} <input type="password" name="password" autocomplete="new-password"></label></div>
+            <p class="ayv-field-hint">{{#str}}offsitepasswordhint, local_oksigeniaayvurenda{{/str}}</p>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="addplace">{{#str}}offsiteaddtry, local_oksigeniaayvurenda{{/str}}</button></p></form>
+    </dialog>
+    <dialog class="ayv-modal" id="ayv-off-keep" aria-labelledby="ayv-off-keep-title">
+        <div class="ayv-modal-head"><h3 id="ayv-off-keep-title" class="ayv-section-title">{{#str}}offsitekeepchange, local_oksigeniaayvurenda{{/str}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{#str}}offsiteclose, local_oksigeniaayvurenda{{/str}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <div class="ayv-off-keepset">
+                <label class="ayv-field ayv-dig-field">{{#str}}offsitekeepdaily, local_oksigeniaayvurenda{{/str}} <input type="number" name="daily" min="1" max="60" value="{{keepdaily}}"></label>
+                <label class="ayv-field ayv-dig-field">{{#str}}offsitekeepweekly, local_oksigeniaayvurenda{{/str}} <input type="number" name="weekly" min="0" max="52" value="{{keepweekly}}"></label>
+                <label class="ayv-field ayv-dig-field">{{#str}}offsitekeepmonthly, local_oksigeniaayvurenda{{/str}} <input type="number" name="monthly" min="0" max="60" value="{{keepmonthly}}"></label></div>
+            <p class="ayv-field-hint">{{#str}}offsitekeephint, local_oksigeniaayvurenda{{/str}}</p>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="keep">{{#str}}offsitesave, local_oksigeniaayvurenda{{/str}}</button></p></form>
+    </dialog>
+    {{#secret}}
+    <dialog class="ayv-modal" id="ayv-off-secret" data-ayv-show aria-labelledby="ayv-off-secret-title">
+        <div class="ayv-modal-head"><h3 id="ayv-off-secret-title" class="ayv-section-title">{{#str}}offsitesecretheading, local_oksigeniaayvurenda{{/str}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{#str}}offsiteclose, local_oksigeniaayvurenda{{/str}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p>{{#str}}offsitesecretintro, local_oksigeniaayvurenda{{/str}}</p>
+        <label class="ayv-field ayv-dig-field">{{#str}}offsitesecretlabel, local_oksigeniaayvurenda{{/str}} <textarea id="ayv-off-secret-key" readonly rows="2" spellcheck="false">{{secret}}</textarea></label>
+        <p class="ayv-dig-sheet-actions"><a class="ayv-button" href="{{secretfile}}" download="llave-ayvurenda.txt">{{#str}}offsitesecretdownload, local_oksigeniaayvurenda{{/str}}</a>
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-copy="ayv-off-secret-key" data-done="{{#str}}offsitecopied, local_oksigeniaayvurenda{{/str}}">{{#str}}offsitecopy, local_oksigeniaayvurenda{{/str}}</button></p>
+    </dialog>
+    {{/secret}}
+    {{#hasscripts}}
+    <dialog class="ayv-modal" id="ayv-off-pull" data-ayv-show aria-labelledby="ayv-off-pull-title">
+        <div class="ayv-modal-head"><h3 id="ayv-off-pull-title" class="ayv-section-title">{{#str}}offsitepullheading, local_oksigeniaayvurenda{{/str}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{#str}}offsiteclose, local_oksigeniaayvurenda{{/str}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p>{{#str}}offsitepullintro, local_oksigeniaayvurenda{{/str}}</p>
+        <label class="ayv-field ayv-dig-field">{{#str}}offsitepulladdress, local_oksigeniaayvurenda{{/str}} <input id="ayv-off-pull-url" type="text" readonly value="{{pullurl}}" spellcheck="false"></label>
+        {{#scripts}}
+        <h4 class="ayv-modal-part">{{label}}</h4>
+        <p class="ayv-field-hint">{{hint}}</p>
+        <textarea class="ayv-off-code" id="{{id}}" readonly rows="4" spellcheck="false" aria-label="{{label}}">{{code}}</textarea>
+        <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-copy="{{id}}" data-done="{{#str}}offsitecopied, local_oksigeniaayvurenda{{/str}}">{{#str}}offsitecopy, local_oksigeniaayvurenda{{/str}}</button></p>
+        {{/scripts}}
+    </dialog>
+    {{/hasscripts}}
+</section>
+{{/offsite}}
+<h2 class="ayv-section-title ayv-off-listtitle">{{#str}}copieslistheading, local_oksigeniaayvurenda{{/str}}</h2>
 {{#hasfiles}}
 <ul class="ayv-people">
 {{#files}}
     <li class="ayv-person"><span class="ayv-person-name">{{label}}</span> <span>{{size}}</span>
-        <a class="ayv-button" href="{{url}}">{{download}}</a></li>
+        <a class="ayv-button ayv-button-quiet" href="{{url}}">{{download}}</a></li>
 {{/files}}
 </ul>
 {{/hasfiles}}

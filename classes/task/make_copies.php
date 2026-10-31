@@ -51,6 +51,12 @@ class make_copies extends \core\task\scheduled_task {
             $file = \local_oksigeniaayvurenda\local\copies::make((int) $entityid);
             mtrace('Ayvurenda: copy of entity ' . $entityid . ': ' . $file->get_filename() . ' (' .
                 $file->get_filesize() . ' bytes)');
+            // And out of the server, encrypted, where the centre chose.
+            $out = \local_oksigeniaayvurenda\local\offsite::send((int) $entityid, $file);
+            if ($out['sent'] || $out['failed']) {
+                mtrace('Ayvurenda: sent to ' . $out['sent'] . ' places' . ($out['failed'] ? ', failed: ' .
+                    implode(', ', $out['failed']) : ''));
+            }
         }
     }
 }

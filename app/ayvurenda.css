@@ -3322,3 +3322,23 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv.ayv-has-howto .ayv-main { padding-bottom: 6rem; }
 .ayv .ayv-subnav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: 0 0 1rem; font-size: .92rem; }
 .ayv .ayv-subnav-link { font-weight: 700; color: var(--accent); }
+
+/* Copies out of the server. */
+.ayv .ayv-off { margin: 1.5rem 0 2.5rem; }
+.ayv .ayv-off-listtitle { margin-top: 2rem; }
+.ayv .ayv-off-state { display: inline-block; margin: 0 0 1rem; padding: .45rem .8rem; border-radius: var(--radius); font-weight: 600; }
+.ayv .ayv-off-state-ok { background: color-mix(in srgb, var(--green2) 16%, transparent); color: var(--ink); }
+.ayv .ayv-off-state-wait,
+.ayv .ayv-off-state-off { background: var(--notice-bg); color: var(--ink); }
+.ayv .ayv-off-state-bad { background: color-mix(in srgb, var(--coral) 22%, transparent); color: var(--ink); }
+.ayv .ayv-off-places { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; }
+.ayv .ayv-off-places li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; }
+.ayv .ayv-off-places form { display: flex; gap: .3rem; }
+.ayv .ayv-off-place { display: grid; min-width: 0; }
+.ayv .ayv-off-place b { overflow-wrap: anywhere; }
+.ayv .ayv-off-place span { font-size: .88rem; }
+.ayv .ayv-off-open { margin-top: 1.25rem; }
+.ayv .ayv-off-open summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.ayv .ayv-off-code { display: block; width: 100%; box-sizing: border-box; padding: .6rem .75rem; border-radius: var(--radius); background: var(--paper2); color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid var(--line); }
+.ayv .ayv-off-keepset { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.ayv #ayv-off-secret-key { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }

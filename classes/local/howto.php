@@ -53,6 +53,7 @@ final class howto {
         'memoir' => ['memoir.php', 'desk', ''],
         'readings' => ['readings.php', 'desk', ''],
         'copies' => ['copies.php', 'desk', ''],
+        'offsite' => ['copies.php', 'manage', ''],
         'stocktake' => ['stocktake.php', 'catalogue', ''],
         'weed' => ['weed.php', 'catalogue', ''],
         'lots' => ['lots.php', 'desk', ''],

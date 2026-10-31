@@ -25,6 +25,7 @@
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\copies;
+use local_oksigeniaayvurenda\local\offsite;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -41,10 +42,58 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$entityid = (int) $library->entityid;
+$manage = has_capability('local/oksigeniaayvurenda:manage', $context);
 $notice = '';
-if (data_submitted() && confirm_sesskey() && has_capability('local/oksigeniaayvurenda:manage', $context)) {
-    copies::make((int) $library->entityid);
-    $notice = $str('copymade');
+// Shown once, on the page that made them: the secret key and the address of the library's computer.
+$secret = '';
+$pullurl = '';
+if (data_submitted() && confirm_sesskey() && $manage) {
+    $do = optional_param('do', 'make', PARAM_ALPHA);
+    if ($do === 'make') {
+        $file = copies::make($entityid);
+        $out = offsite::send($entityid, $file);
+        $notice = $str('copymade') . ($out['sent'] ? ' ' . $str(
+            $out['sent'] === 1 ? 'offsitesentnowone' : 'offsitesentnow',
+            $out['sent']
+        ) : '')
+            . ($out['failed'] ? ' ' . $str('offsitefailednow', implode(', ', $out['failed'])) : '');
+    } else if ($do === 'newkey') {
+        $secret = offsite::new_key($entityid);
+        $notice = $str('offsitekeymade');
+    } else if ($do === 'usekey') {
+        $notice = $str(offsite::use_key($entityid, optional_param('recipient', '', PARAM_RAW_TRIMMED)) ? 'offsitekeyused'
+            : 'offsitekeybad');
+    } else if ($do === 'addplace') {
+        $id = offsite::add_webdav(
+            $entityid,
+            optional_param('url', '', PARAM_RAW_TRIMMED),
+            optional_param('user', '', PARAM_RAW_TRIMMED),
+            optional_param('password', '', PARAM_RAW)
+        );
+        $error = $id === null ? $str('offsiteplacebad') : offsite::test($entityid, $id);
+        $notice = $error === null ? $str('offsiteplaceadded') : ($id === null ? $error : $str('offsiteplacefails', $error));
+    } else if ($do === 'testplace') {
+        $error = offsite::test($entityid, optional_param('place', '', PARAM_ALPHANUM));
+        $notice = $error === null ? $str('offsiteplaceworks') : $str('offsiteplacefails', $error);
+    } else if ($do === 'removeplace') {
+        offsite::remove($entityid, optional_param('place', '', PARAM_ALPHANUM));
+        $notice = $str('offsiteplaceremoved');
+    } else if ($do === 'keep') {
+        offsite::set_keep(
+            $entityid,
+            optional_param('daily', 7, PARAM_INT),
+            optional_param('weekly', 4, PARAM_INT),
+            optional_param('monthly', 12, PARAM_INT)
+        );
+        $notice = $str('offsitekeepsaved');
+    } else if ($do === 'newpull') {
+        $pullurl = offsite::new_pull($entityid);
+        $notice = $str('offsitepullmade');
+    } else if ($do === 'stoppull') {
+        offsite::stop_pull($entityid);
+        $notice = $str('offsitepullstopped');
+    }
 }
 $files = [];
 foreach (copies::list((int) $library->entityid) as $file) {
@@ -70,9 +119,82 @@ $data = [
     'hasfiles' => (bool) $files,
     'empty' => $str('copiesempty'),
     'download' => $str('copydownload'),
-    'make' => has_capability('local/oksigeniaayvurenda:manage', $context) ? ['action' => $PAGE->url->out(false),
-        'sesskey' => sesskey(), 'label' => $str('copymake')] : null,
+    'make' => $manage ? ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('copymake')] : null,
+    'offsite' => $manage ? copies_offsite($entityid, $secret, $pullurl, $str) : null,
 ];
+
+/**
+ * What the page says of the copies out of the server, for whoever manages the centre.
+ *
+ * @param int $entityid
+ * @param string $secret A secret key just made, to show once.
+ * @param string $pullurl A link just made, to show once.
+ * @param callable $str
+ * @return array
+ */
+function copies_offsite(int $entityid, string $secret, string $pullurl, callable $str): array {
+    global $PAGE;
+    $settings = offsite::settings($entityid);
+    $day = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
+    $last = $settings['last'];
+    if ($settings['recipient'] === '' || !$settings['places']) {
+        $state = ['tone' => 'off', 'text' => $str($settings['recipient'] === '' ? 'offsitestatenokey' : 'offsitestatenoplace')];
+    } else if (!$last) {
+        $state = ['tone' => 'wait', 'text' => $str('offsitestatewait')];
+    } else if (!empty($last['failed'])) {
+        $state = ['tone' => 'bad', 'text' => $str('offsitestatefailed', (object) ['when' => userdate(
+            $last['time'],
+            get_string('strftimedatetime', 'langconfig')
+        ), 'places' => implode(', ', $last['failed'])])];
+    } else {
+        $state = ['tone' => 'ok', 'text' => $str(
+            $last['sent'] === 1 ? 'offsitestateokone' : 'offsitestateok',
+            (object) ['when' => userdate($last['time'], get_string('strftimedatetime', 'langconfig')), 'count' => $last['sent']]
+        )];
+    }
+    $keep = $settings['keep'];
+    $scripts = [];
+    if ($pullurl !== '') {
+        $folder = 'Copias-Ayvurenda';
+        $scripts = [
+            ['id' => 'ayv-pull-linux', 'label' => $str('offsitescriptlinux'), 'hint' => $str('offsitescriptlinuxhint'),
+                'code' => 'mkdir -p "$HOME/' . $folder . '" && curl -fsS -o "$HOME/' . $folder . '/ayvurenda-$(date +%F).zip.age" "'
+                . $pullurl . '" && ls -1t "$HOME/' . $folder . '"/*.zip.age | tail -n +31 | xargs -r rm --'],
+            ['id' => 'ayv-pull-windows', 'label' => $str('offsitescriptwindows'), 'hint' => $str('offsitescriptwindowshint'),
+                'code' => '$d = "$env:USERPROFILE\\' . $folder . '"; New-Item -ItemType Directory -Force $d | Out-Null; '
+                . 'Invoke-WebRequest -UseBasicParsing -Uri "' . $pullurl . '" -OutFile '
+                . '"$d\ayvurenda-$(Get-Date -Format yyyy-MM-dd).zip.age"; '
+                . 'Get-ChildItem $d -Filter *.zip.age | Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 | '
+                . 'Remove-Item'],
+        ];
+    }
+    return [
+        'action' => $PAGE->url->out(false),
+        'sesskey' => sesskey(),
+        'state' => $state,
+        'haskey' => $settings['recipient'] !== '',
+        'keyline' => $settings['recipient'] !== '' ? $str('offsitekeysince', $day($settings['keyed'])) : $str('offsitenokey'),
+        'recipient' => $settings['recipient'],
+        'secret' => $secret,
+        'secretfile' => $secret !== '' ? 'data:text/plain;charset=utf-8;base64,'
+            . base64_encode("# " . $str('offsitesecretfilehead')
+            . "\n" . $secret . "\n") : '',
+        'places' => array_map(
+            fn($p) => ['id' => $p['id'], 'label' => $p['label'], 'url' => $p['url'], 'user' => $p['user']],
+            $settings['places']
+        ),
+        'hasplaces' => (bool) $settings['places'],
+        'canadd' => count($settings['places']) < offsite::PLACES,
+        'keepline' => $str('offsitekeepline', (object) $keep),
+        'keepdaily' => $keep['daily'],
+        'keepweekly' => $keep['weekly'],
+        'keepmonthly' => $keep['monthly'],
+        'haspull' => $settings['pull'],
+        'pullurl' => $pullurl,
+        'scripts' => $scripts,
+        'hasscripts' => (bool) $scripts,
+    ];
+}
 $deskurl = (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);
 shell::output(
     $data['heading'],

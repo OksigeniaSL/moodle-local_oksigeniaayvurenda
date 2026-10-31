@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.100.0 (2026-10-31)
+
+- Copies out of the server, in «Copies», for whoever manages the centre: each night's copy, encrypted with the centre's
+  public key in the open format of age (X25519 and ChaCha20-Poly1305; checked against the age program both ways), goes
+  to the centre's WebDAV folders (Nextcloud, ownCloud, a NAS…), tried as they are added; each keeps the copies of the
+  last days, one a week and one a month, as the centre chooses. The library's own computer can fetch the newest copy
+  with a link of its own (`pull.php`), with lines ready for Linux, macOS and Windows. The server keeps only the public
+  key: the secret one is shown once (or the centre brings its own). Two nights that fail, and whoever manages the
+  centre gets a notice. «How do I…?» explains it.
+- The page of copies: shorter, the state out of the server first, quiet buttons.
+
 ## 0.99.0 (2026-10-31)
 
 The rest of the review of the whole project:
