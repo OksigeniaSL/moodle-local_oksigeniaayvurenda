@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.82.0 (2026-10-31)
+
+- The visit by skin: each scene of the art package says its skin (`"skin"`; the school's without it), and a centre
+  visits only the scenes of its own, starting in its skin's hall (`vestibulo`, `instituto` or `universidad`); without
+  it, there is no visit. Shelves without a corner lead to the whole shelves, and in a skin without rooms each corner of
+  the board goes to its shelf.
+
 ## 0.81.0 (2026-10-31)
 
 - The year's report (`memoir.php`, from «Reports»): for the centre's reading plan, the year's figures beside the year

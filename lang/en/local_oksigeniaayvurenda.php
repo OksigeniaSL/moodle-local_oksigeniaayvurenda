@@ -1812,6 +1812,7 @@ $string['visitpulse'] = 'Today in the library';
 $string['visitpulsequiet'] = 'The books are waiting for you';
 $string['visitsound'] = 'Sound';
 $string['visitstacks'] = 'The shelves of {$a}';
+$string['visitstacksall'] = 'The shelves';
 $string['visitvoices'] = 'Ayvu rande, the voices of the library';
 $string['visitvolume'] = 'Volume';
 $string['voiceagain'] = 'Record again';

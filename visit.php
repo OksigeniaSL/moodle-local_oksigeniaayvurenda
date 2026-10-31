@@ -31,8 +31,10 @@ use local_oksigeniaayvurenda\local\window;
 require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
-$room = optional_param('room', visit::HALL, PARAM_ALPHANUMEXT);
+$room = optional_param('room', '', PARAM_ALPHANUMEXT);
 $library = catalogue::library($ref);
+// Without a room, the hall of the centre's skin.
+$room = $room !== '' || !$library ? $room : visit::hall((int) $library->entityid);
 // Whoever is not of the library visits it only where its window shows the catalogue, as with the shelves.
 $public = $library && window::catalogue_open($library)
     && (!isloggedin() || isguestuser() || !access::can('local/oksigeniaayvurenda:view', $library));
@@ -47,7 +49,9 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 if (!$library) {
     shell::missing($str('visitnone'));
 }
-$data = visit::page($library, $room, $public, null, max(0, optional_param($room === visit::HALL ? 'sort' : 'hunt', 0, PARAM_INT)));
+// A turn of the game of the hall (placing the new books) or of a room (the hidden book).
+$turn = max(0, optional_param($room === visit::hall((int) $library->entityid) ? 'sort' : 'hunt', 0, PARAM_INT));
+$data = visit::page($library, $room, $public, null, $turn);
 if (!$data) {
     shell::missing($str('visitnone'), $library);
 }

@@ -319,4 +319,47 @@ final class visit_test extends \advanced_testcase {
         $this->assertNotNull(visit::card($library, true, $art));
         $this->assertNull(visit::card($library, false, ['dir' => make_request_directory(), 'url' => '']));
     }
+
+    /**
+     * A centre of another skin visits its own hall: a university's starts in its reading room, whose shelves without a
+     * corner lead to the whole shelves and whose board of corners leads each corner to its shelf; the school's hall and
+     * rooms are not its visit; without its hall, there is no visit.
+     */
+    public function test_skin_halls(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $art = $this->art();
+        $box = fn($x, $y) => [[$x, $y], [$x + 200, $y], [$x + 200, $y + 400], [$x, $y + 400]];
+        foreach (['universidad-fondo', 'universidad-fondo-noche'] as $file) {
+            file_put_contents($art['dir'] . '/pix/visita/' . $file . '.webp', 'made-up');
+        }
+        file_put_contents($art['dir'] . '/pix/visita/universidad.json', json_encode([
+            'skin' => 'university',
+            'layers' => [['name' => 'fondo', 'depth' => 0]],
+            'zones' => [
+                ['kind' => 'stacks', 'shape' => $box(100, 100)],
+                ['kind' => 'directory', 'quad' => [[300, 260], [700, 300], [700, 820], [300, 860]], 'rows' => 9],
+                ['kind' => 'exit', 'shape' => $box(1800, 400)],
+            ],
+        ]));
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $this->assertSame('vestibulo', visit::hall($entityid));
+        $this->assertNull(visit::page($library, 'universidad', false, $art));
+        libraries::update_entity($entityid, ['skin' => 'university']);
+        $this->assertSame('universidad', visit::hall($entityid));
+        $this->assertTrue(visit::available($art, $entityid));
+        $this->assertStringEndsWith('universidad-fondo-noche.webp', visit::card($library, false, $art)['night']);
+        $this->assertNull(visit::page($library, 'vestibulo', false, $art));
+        $this->assertNull(visit::page($library, 'literatura', false, $art));
+        $page = visit::page($library, 'universidad', false, $art);
+        $shelves = array_values(array_filter($page['zones'], fn($z) => $z['kind'] === 'stacks'))[0];
+        $this->assertStringEndsWith('stacks.php?library=' . $library->slug, $shelves['url']);
+        $this->assertSame(get_string('visitstacksall', 'local_oksigeniaayvurenda'), $shelves['label']);
+        libraries::update_entity($entityid, ['skin' => 'secondary']);
+        $this->assertFalse(visit::available($art, $entityid));
+        $this->assertNull(visit::card($library, false, $art));
+    }
 }
