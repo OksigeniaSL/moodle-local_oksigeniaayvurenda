@@ -106,4 +106,19 @@ final class home_test extends \advanced_testcase {
         $this->assertNull(screens::spoken('nobody/es/nothing'));
         $this->assertNull(screens::listen(['nobody/{lang}/nothing', 'none/{lang}/at-all']));
     }
+
+    /**
+     * The art package's addresses carry its version, so that a new one is fetched at once past a cache on the way.
+     */
+    public function test_art_version(): void {
+        $this->resetAfterTest();
+        set_config('version', 2026102616, 'local_oksigeniaayvurendaarte');
+        $this->assertSame('?v=2026102616', screens::artversion());
+        $drawn = screens::art('memoria');
+        if ($drawn !== null) {
+            $this->assertStringEndsWith('/pix/memoria.webp?v=2026102616', $drawn);
+        }
+        unset_config('version', 'local_oksigeniaayvurendaarte');
+        $this->assertSame('', screens::artversion());
+    }
 }

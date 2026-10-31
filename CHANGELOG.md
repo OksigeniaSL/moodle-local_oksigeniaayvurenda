@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.73.5 (2026-10-31)
+
+- The addresses of the art package carry its version: a new one is seen as soon as it is installed, even behind a cache
+  that keeps files for hours.
+- «Sound» in the visit shows whether it is on: the speaker with its waves, or crossed out.
+- The way back to Moodle in the header keeps its colour under the pointer, a little darker, instead of turning pale
+  under its white words.
+
 ## 0.73.4 (2026-10-27)
 
 - A herald of the other sex keeps Gaudí's hummingbird on the home and the card when the art package has no portrait

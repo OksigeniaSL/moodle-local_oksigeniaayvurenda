@@ -94,8 +94,8 @@
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}
-        <button type="button" class="ayv-button ayv-visit-sound" aria-pressed="false" hidden>
-            {{> local_oksigeniaayvurenda/icon_volume}} {{visitsound}}
+        <button type="button" class="ayv-button ayv-button-quiet ayv-visit-sound" aria-pressed="false" hidden>
+            <span class="ayv-visit-sound-on">{{> local_oksigeniaayvurenda/icon_volume}}</span><span class="ayv-visit-sound-off">{{> local_oksigeniaayvurenda/icon_volume_off}}</span> {{visitsound}}
         </button>
         {{/sound}}
     </div>

@@ -473,7 +473,18 @@ final class screens {
         ) {
             return null;
         }
-        return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.' . $type))->out(false);
+        return (new \moodle_url('/local/oksigeniaayvurendaarte/pix/' . $name . '.' . $type))->out(false) . self::artversion();
+    }
+
+    /**
+     * What the addresses of the art package carry so that a new version of it is fetched at once: a cache on the way
+     * (a proxy in front of the site) may keep a file for hours under the same address.
+     *
+     * @return string Like ?v=2026102616; empty without the package.
+     */
+    public static function artversion(): string {
+        $version = (int) get_config('local_oksigeniaayvurendaarte', 'version');
+        return $version ? '?v=' . $version : '';
     }
 
     /**
@@ -652,7 +663,7 @@ final class screens {
         if (!$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+)*$#', $path) || !is_readable($dir . '/voz/' . $path . '.mp3')) {
             return null;
         }
-        return (new \moodle_url('/local/oksigeniaayvurendaarte/voz/' . $path . '.mp3'))->out(false);
+        return (new \moodle_url('/local/oksigeniaayvurendaarte/voz/' . $path . '.mp3'))->out(false) . self::artversion();
     }
 
     /**

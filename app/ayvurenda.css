@@ -1518,7 +1518,10 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
     text-decoration: none;
     box-shadow: 0 6px 14px -8px rgba(15, 58, 51, .6);
 }
-.ayv .ayv-nav-exit:hover { filter: brightness(1.08); }
+/* Its own colour on hover too, darker: the staff's pills (ayvurenda-d.css) turn pale under the pointer, and its white
+   words would go with them. */
+.ayv .ayv-nav.ayv-nav-exit:hover,
+.ayv .ayv-nav.ayv-nav-exit:focus-visible { background: var(--accent); filter: brightness(.88); }
 .ayv .ayv-navs { align-items: center; }
 /* The catalogue, first and with its book: where everyone goes back most. */
 .ayv .ayv-nav-home { gap: .4rem; padding: 0 .9rem; border-radius: 999px; box-shadow: inset 0 0 0 2px var(--accent); }
@@ -2472,6 +2475,11 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-visit-bar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: space-between; margin: 0 0 .75rem; }
 .ayv .ayv-visit-title { margin: 0; font: 600 1.7rem/1.2 var(--title); }
 .ayv .ayv-visit-sound[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+/* On or off at a glance: filled with the speaker's waves, or only its outline with the speaker crossed out. */
+.ayv .ayv-visit-sound-on,
+.ayv .ayv-visit-sound-off { display: inline-flex; }
+.ayv .ayv-visit-sound[aria-pressed="true"] .ayv-visit-sound-off,
+.ayv .ayv-visit-sound[aria-pressed="false"] .ayv-visit-sound-on { display: none; }
 .ayv .ayv-visit-frame { position: relative; border-radius: 18px; overflow: hidden; background: var(--paper2); box-shadow: 0 14px 34px -18px rgba(15, 58, 51, .55); }
 .ayv .ayv-visit-view { position: relative; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
 .ayv .ayv-visit-view::-webkit-scrollbar { display: none; }

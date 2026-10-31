@@ -56,14 +56,16 @@ final class visit {
      * Where the art package is, or another place for the tests.
      *
      * @param array|null $art dir and url.
-     * @return array|null dir and url; null without the art package.
+     * @return array|null dir, url and v (what each address carries after it, screens::artversion()); null without the
+     *     art package.
      */
     private static function art(?array $art): ?array {
         if ($art) {
-            return $art;
+            return $art + ['v' => ''];
         }
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
-        return $dir ? ['dir' => $dir, 'url' => (new \moodle_url('/local/oksigeniaayvurendaarte'))->out(false)] : null;
+        return $dir ? ['dir' => $dir, 'url' => (new \moodle_url('/local/oksigeniaayvurendaarte'))->out(false),
+            'v' => screens::artversion()] : null;
     }
 
     /**
@@ -121,9 +123,9 @@ final class visit {
                 continue;
             }
             $night = is_readable($dir . $name . '-' . $layername . '-noche.webp');
+            $at = $art['url'] . '/pix/visita/' . $name . '-' . $layername;
             $layers[] = ['name' => $layername, 'depth' => max(0.0, min(1.0, (float) ($layer['depth'] ?? 0))),
-                'day' => $art['url'] . '/pix/visita/' . $name . '-' . $layername . '.webp',
-                'night' => $art['url'] . '/pix/visita/' . $name . '-' . $layername . ($night ? '-noche' : '') . '.webp'];
+                'day' => $at . '.webp' . $art['v'], 'night' => $at . ($night ? '-noche' : '') . '.webp' . $art['v']];
         }
         if (!$layers) {
             return null;
@@ -193,9 +195,11 @@ final class visit {
             'focus' => max(0.0, min((float) self::SIZE[0], $focus)),
             'corner' => preg_match('/^\d$/', (string) ($json['corner'] ?? '')) ? (string) $json['corner'] : ($corner ?: $thing),
             'sound' => is_readable($art['dir'] . '/sonido/visita/' . $name . '.mp3')
-                ? $art['url'] . '/sonido/visita/' . $name . '.mp3' : '',
-            'door' => is_readable($art['dir'] . '/sonido/visita/puerta.mp3') ? $art['url'] . '/sonido/visita/puerta.mp3' : '',
-            'touch' => is_readable($art['dir'] . '/sonido/visita/toque.mp3') ? $art['url'] . '/sonido/visita/toque.mp3' : ''];
+                ? $art['url'] . '/sonido/visita/' . $name . '.mp3' . $art['v'] : '',
+            'door' => is_readable($art['dir'] . '/sonido/visita/puerta.mp3')
+                ? $art['url'] . '/sonido/visita/puerta.mp3' . $art['v'] : '',
+            'touch' => is_readable($art['dir'] . '/sonido/visita/toque.mp3')
+                ? $art['url'] . '/sonido/visita/toque.mp3' . $art['v'] : ''];
     }
 
     /**

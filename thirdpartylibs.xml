@@ -217,6 +217,18 @@
         </copyrights>
     </library>
     <library>
+        <location>templates/icon_volume_off.mustache</location>
+        <name>Lucide icon «volume-x»</name>
+        <description>The «volume-x» icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
         <location>app/isla3d.js</location>
         <name>three.js</name>
         <description>The 3D library of the class island, bundled with its code (app/isla3d/src) for Chrome 93. License text in app/isla3d/LICENSE-three.txt.</description>
