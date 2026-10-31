@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.82.1 (2026-10-31)
+
+- The year's report, redone to be read and not only filed: the share of the year's readers who came as one big figure
+  with its bar, the other figures as tiles with how they moved since the year before, stages as bars, groups as small
+  cards, the covers of what went out most in their order, the corners as ranked bars with their pictures, and icons for
+  what the readers did and the textbook bank; in light and dark, and on four A4 pages when printed. Who came counts only
+  the readers of the year's groups (the staff borrow too).
+
 ## 0.82.0 (2026-10-31)
 
 - The visit by skin: each scene of the art package says its skin (`"skin"`; the school's without it), and a centre

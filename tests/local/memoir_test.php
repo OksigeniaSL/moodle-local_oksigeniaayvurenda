@@ -56,12 +56,12 @@ final class memoir_test extends \advanced_testcase {
                 'yearid' => $when->id, 'groupname' => '3º A', 'timeloaned' => (int) $when->timestart + DAYSECS]);
         }
         $report = memoir::of($library, $year);
-        $this->assertSame([2, 1, 2], [$report['figures']['loans'], $report['figures']['borrowers'],
-            $report['figures']['readers']]);
+        $this->assertSame([2, 1, 1, 2], [$report['figures']['loans'], $report['figures']['borrowers'],
+            $report['figures']['came'], $report['figures']['readers']]);
         $this->assertSame([1, 1], [$report['before']['loans'], $report['before']['borrowers']]);
         $this->assertSame($last->name, $report['before']['name']);
         $this->assertSame([['stage' => 'Primaria', 'readers' => 2, 'borrowers' => 1, 'loans' => 2]], $report['stages']);
-        $this->assertSame([['title' => 'El faro dormido', 'loans' => 2]], $report['top']);
+        $this->assertSame([['id' => (int) $book->id, 'title' => 'El faro dormido', 'loans' => 2]], $report['top']);
         $this->assertNull($report['bank']);
         memoir::save_notes($entityid, (int) $year->id, ' Un club de lectura. ', 'Más horas.');
         $this->assertSame(['done' => 'Un club de lectura.', 'next' => 'Más horas.'], memoir::of($library, $year)['notes']);

@@ -23,7 +23,9 @@
  */
 
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\covers;
 use local_oksigeniaayvurenda\local\memoir;
+use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\years;
 
@@ -49,14 +51,52 @@ if (data_submitted() && confirm_sesskey()) {
 }
 $report = memoir::of($library, $year);
 $num = fn(int $n) => number_format($n, 0, '', get_string('thousandssep', 'langconfig'));
-$share = fn(int $part, int $whole) => $whole ? round($part * 100 / $whole) . ' %' : '—';
+$pct = fn(int $part, int $whole) => $whole ? (int) round(min($part, $whole) * 100 / $whole) : 0;
 $figures = $report['figures'];
 $before = $report['before'];
-$rows = [];
-foreach (['loans', 'borrowers', 'room', 'acquired', 'withdrawn', 'holdings'] as $key) {
-    $rows[] = ['label' => $str('memoir' . $key), 'now' => $num($figures[$key]),
-        'before' => $before ? $num($before[$key]) : '—'];
+// Each figure big, and how it moved since the year before (an arrow, never a colour: more is not always better).
+$delta = function (string $key) use ($figures, $before, $str) {
+    if (!$before || !$before[$key]) {
+        return false;
+    }
+    $change = (int) round(($figures[$key] - $before[$key]) * 100 / $before[$key]);
+    $a = (object) ['change' => abs($change), 'year' => $before['name']];
+    return ['text' => $str($change === 0 ? 'memoirsame' : ($change > 0 ? 'memoirup' : 'memoirdown'), $a),
+        'up' => $change > 0, 'down' => $change < 0];
+};
+$tiles = [];
+foreach (['loans', 'room', 'acquired', 'withdrawn', 'holdings'] as $key) {
+    $tiles[] = ['value' => $num($figures[$key]), 'label' => $str('memoir' . $key), 'delta' => $delta($key)];
 }
+$loans = fn(int $n) => $n === 1 ? $str('memoirloanone') : $str('memoirloansof', $num($n));
+// Of each stage or group, the part of its readers who came; and its loans.
+$bars = fn(array $rows, string $name, string $whole) => array_map(fn($r) => [
+    'label' => $r[$name],
+    'width' => $pct($r['borrowers'], $r[$whole]),
+    'value' => $str('memoircameof', (object) ['came' => $num($r['borrowers']), 'of' => $num($r[$whole])]),
+    'loans' => $loans($r['loans']),
+], $rows);
+// The corners, against the one most books went out from.
+$most = max(array_merge([1], array_column($report['corners'], 'loans')));
+$corners = [];
+foreach ($report['corners'] as $corner) {
+    $art = screens::art('rincon-' . preg_replace('/[^a-z0-9]/', '', core_text::strtolower($corner['code'])));
+    $corners[] = ['label' => $corner['corner'], 'width' => (int) round($corner['loans'] * 100 / $most),
+        'value' => $num($corner['loans']), 'hasart' => (bool) $art, 'arturl' => $art ?: ''];
+}
+// What went out most, with its cover, or one of the house's colours with its title.
+$covers = covers::urls(array_column($report['top'], 'id'));
+$top = array_map(fn($t) => ['label' => $t['title'], 'value' => $loans($t['loans']), 'hascover' => isset($covers[$t['id']]),
+    'coverurl' => $covers[$t['id']] ?? '', 'colour' => $t['id'] % 6], $report['top']);
+$life = $report['life'];
+$icon = fn(string $which) => [$which => true] + array_fill_keys(['sprout', 'reviews', 'voices', 'books', 'pupils'], false);
+$came = $figures['readers'] ? [
+    'value' => $pct($figures['came'], $figures['readers']) . ' %',
+    'width' => $pct($figures['came'], $figures['readers']),
+    'label' => $str('memoircame', (object) ['came' => $num($figures['came']), 'of' => $num($figures['readers'])]),
+    'delta' => $before && $before['readers'] ? ['text' => $str('memoircamebefore', (object) [
+        'share' => $pct($before['came'], $before['readers']), 'year' => $before['name']]), 'up' => false, 'down' => false] : false,
+] : false;
 $data = [
     'heading' => $str('memoirheading', $year->name),
     'centre' => format_string($DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $entityid])),
@@ -64,28 +104,33 @@ $data = [
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'yearname' => $year->name,
-    'beforename' => $before['name'] ?? '—',
-    'came' => $str('memoircame', (object) ['came' => $num($figures['borrowers']), 'of' => $num($figures['readers']),
-        'share' => $share($figures['borrowers'], $figures['readers'])]),
-    'figures' => $rows,
-    'stages' => array_map(fn($s) => $s + ['sharecame' => $share($s['borrowers'], $s['readers'])], $report['stages']),
+    'came' => $came,
+    'tiles' => $tiles,
+    'stages' => $bars($report['stages'], 'stage', 'readers'),
     'hasstages' => (bool) $report['stages'],
-    'groups' => array_map(fn($g) => $g + ['sharecame' => $share($g['borrowers'], $g['members'])], $report['groups']),
+    'barsnote' => $str('memoirbarsnote'),
+    'groups' => $bars($report['groups'], 'group', 'members'),
     'hasgroups' => (bool) $report['groups'],
-    'top' => $report['top'],
-    'hastop' => (bool) $report['top'],
-    'corners' => $report['corners'],
-    'hascorners' => (bool) $report['corners'],
-    'life' => $str('memoirlife', (object) $report['life']),
-    'bank' => $report['bank'] ? $str('memoirbank', (object) $report['bank']) : '',
+    'top' => $top,
+    'hastop' => (bool) $top,
+    'corners' => $corners,
+    'hascorners' => (bool) $corners,
+    'life' => [
+        ['value' => $num($life['challenges']), 'label' => $str('memoirchallenges')] + $icon('sprout'),
+        ['value' => $num($life['reviews']), 'label' => $str('memoirreviews')] + $icon('reviews'),
+        ['value' => $num($life['voices']), 'label' => $str('memoirvoices')] + $icon('voices'),
+    ],
+    'bank' => $report['bank'] ? [
+        ['value' => $num($report['bank']['loans']), 'label' => $str('memoirbankloans')] + $icon('books'),
+        ['value' => $num($report['bank']['pupils']), 'label' => $str('memoirbankpupils')] + $icon('pupils'),
+    ] : [],
+    'hasbank' => (bool) $report['bank'],
     'done' => $report['notes']['done'],
     'next' => $report['notes']['next'],
 ];
 foreach (
-    ['memoirfigures', 'memoirthisyear', 'memoirstages', 'memoirstage', 'memoirgroups', 'memoirgroup', 'memoirreaders',
-        'memoircamecol', 'memoirloans', 'memoirtop', 'memoircorners', 'memoircorner', 'memoirlifeheading', 'memoirbankheading',
-        'memoirdone', 'memoirnext', 'memoirsave', 'memoirprint', 'memoiranon', 'memoirtitle'] as $key
+    ['memoirfigures', 'memoirstages', 'memoirgroups', 'memoirtop', 'memoircorners', 'memoirlifeheading',
+        'memoirbankheading', 'memoirdone', 'memoirnext', 'memoirsave', 'memoirprint', 'memoiranon'] as $key
 ) {
     $data[$key] = $str($key);
 }

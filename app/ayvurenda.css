@@ -2667,14 +2667,187 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 .ayv .ayv-bank-edit summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
 .ayv .ayv-reader-bank { margin: .5rem 0 1rem; }
 .ayv .ayv-reader-bank-missing { color: var(--late); font-weight: 700; }
-/* The year's report: on screen, the team writes in the form; on paper, their words as text. */
-.ayv .ayv-memoir { padding: 1.25rem 1.5rem; border-radius: var(--radius); background: var(--surface); }
-.ayv .ayv-memoir .ayv-contract-table th[scope="row"] { font-weight: 400; }
+/* The year's report: big figures, thin bars of one hue and the covers of what went out most; on screen, the team
+   writes in the form; on paper, their words as text. */
+.ayv .ayv-memoir {
+    --bar: var(--green2);
+    --soft: color-mix(in srgb, var(--ink) 72%, var(--surface));
+    padding: 1.5rem 2rem 2rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+html[data-bs-theme="dark"] .ayv .ayv-memoir { --bar: var(--accent); }
+.ayv .ayv-memoir-head { display: flex; gap: 1rem; align-items: flex-start; justify-content: space-between; }
+.ayv .ayv-memoir-centre { margin: 0; color: var(--soft); font-size: .95rem; }
+.ayv .ayv-memoir-title { margin: .15rem 0 .5rem; font-family: var(--title); font-size: 2rem; line-height: 1.2; }
+.ayv .ayv-memoir-intro { margin: 0; color: var(--soft); }
+.ayv .ayv-memoir-printbutton { flex: none; }
+.ayv .ayv-memoir-heading {
+    display: block;
+    margin: 2.25rem 0 .9rem;
+    font-family: var(--title);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+.ayv .ayv-memoir-note { margin: -.5rem 0 .75rem; color: var(--soft); font-size: .95rem; }
+.ayv .ayv-memoir-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .5rem 1.75rem;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--paper);
+}
+.ayv .ayv-memoir-hero-value { margin: 0; font-size: 3.5rem; font-weight: 700; line-height: 1; }
+.ayv .ayv-memoir-hero-label { margin: 0 0 .6rem; font-size: 1.1rem; }
+.ayv .ayv-memoir-delta { display: block; margin: .4rem 0 0; color: var(--soft); font-size: .9rem; }
+.ayv .ayv-memoir-meter {
+    display: block;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bar) 18%, var(--surface));
+    overflow: hidden;
+}
+.ayv .ayv-memoir-meter > span { display: block; height: 100%; border-radius: 999px; background: var(--bar); }
+.ayv .ayv-memoir-meter-big { height: 12px; }
+.ayv .ayv-memoir-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: .75rem;
+    margin: .75rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+.ayv .ayv-memoir-tile { display: flex; flex-direction: column; padding: 1rem 1.1rem; border-radius: 12px; background: var(--paper); }
+.ayv .ayv-memoir-tile-value { font-size: 2rem; font-weight: 700; line-height: 1.15; }
+.ayv .ayv-memoir-tile-label { margin-top: .2rem; }
+.ayv .ayv-memoir-tile-icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: .5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--notice-bg);
+    color: var(--accent);
+}
+.ayv .ayv-memoir-tile-icon .ayv-icon { width: 22px; height: 22px; }
+.ayv .ayv-memoir-bars { margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-memoir-bars > li {
+    display: grid;
+    grid-template-columns: minmax(7rem, 11rem) minmax(5rem, 1fr) auto 7.5rem;
+    gap: .25rem 1rem;
+    align-items: center;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--line);
+    break-inside: avoid;
+}
+.ayv .ayv-memoir-bar-label { display: flex; gap: .6rem; align-items: center; overflow-wrap: anywhere; }
+.ayv .ayv-memoir-bar-value { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.ayv .ayv-memoir-bar-loans { color: var(--soft); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.ayv .ayv-memoir-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: .75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.ayv .ayv-memoir-group {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .4rem .6rem;
+    align-items: baseline;
+    padding: .8rem .9rem;
+    border-radius: 12px;
+    background: var(--paper);
+    break-inside: avoid;
+}
+.ayv .ayv-memoir-group-name { grid-column: 1 / -1; grid-row: 1; font-weight: 700; overflow-wrap: break-word; }
+.ayv .ayv-memoir-group .ayv-memoir-meter { grid-column: 1 / -1; grid-row: 2; }
+.ayv .ayv-memoir-group-share { grid-row: 3; font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+.ayv .ayv-memoir-group-detail { grid-row: 3; color: var(--soft); font-size: .875rem; line-height: 1.3; }
+.ayv .ayv-memoir-group-detail > span { display: block; }
+.ayv .ayv-memoir-ranked > li { grid-template-columns: minmax(8rem, 15rem) minmax(5rem, 1fr) 4rem; }
+.ayv .ayv-memoir-meter-ranked { height: 14px; border-radius: 0; background: none; }
+.ayv .ayv-memoir-meter-ranked > span { min-width: 2px; border-radius: 0 4px 4px 0; }
+.ayv .ayv-memoir-corner-art { width: 2.25rem; height: 2.25rem; flex: none; border-radius: 8px; object-fit: cover; }
+.ayv .ayv-memoir-top {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 1.25rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: memoirtop;
+}
+@media (min-width: 48rem) {
+    .ayv .ayv-memoir-top { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.5rem 1.25rem; }
+}
+.ayv .ayv-memoir-top > li { position: relative; display: flex; flex-direction: column; gap: .3rem; counter-increment: memoirtop; }
+.ayv .ayv-memoir-top > li::before {
+    content: counter(memoirtop);
+    position: absolute;
+    z-index: 1;
+    top: -.5rem;
+    left: -.5rem;
+    display: flex;
+    width: 1.9rem;
+    height: 1.9rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sun);
+    color: #1e2b2a;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px var(--surface);
+}
+.ayv .ayv-memoir-top .ayv-cover { width: 100%; }
+.ayv .ayv-memoir-top .ayv-cover-title { font-size: .9rem; }
+.ayv .ayv-memoir-top-title { margin-top: .35rem; font-weight: 700; font-size: .95rem; line-height: 1.3; overflow-wrap: anywhere; }
+.ayv .ayv-memoir-top-count { color: var(--soft); font-size: .9rem; }
 .ayv .ayv-memoir-words { display: none; }
 .ayv .ayv-memoir-print { white-space: pre-line; }
+.ayv .ayv-memoir-form { margin-top: 1rem; }
+.ayv .ayv-memoir-field { display: block; }
+.ayv .ayv-memoir-field textarea {
+    display: block;
+    width: 100%;
+    min-height: 8rem;
+    padding: .75rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    resize: vertical;
+}
+.ayv .ayv-memoir-field textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 40rem) {
+    .ayv .ayv-memoir { padding: 1.25rem 1rem 1.5rem; }
+    .ayv .ayv-memoir-head { flex-direction: column; }
+    .ayv .ayv-memoir-title { font-size: 1.6rem; }
+    .ayv .ayv-memoir-hero { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-memoir-hero-value { font-size: 3rem; }
+    .ayv .ayv-memoir-bars > li,
+    .ayv .ayv-memoir-ranked > li { grid-template-columns: minmax(0, 1fr) auto; }
+    .ayv .ayv-memoir-bars .ayv-memoir-meter { grid-column: 1 / -1; grid-row: 2; }
+    .ayv .ayv-memoir-bar-loans { grid-column: 1 / -1; text-align: left; }
+}
 @media print {
-    .ayv .ayv-memoir { padding: 12mm; border-radius: 0; }
+    .ayv .ayv-memoir { padding: 0; border-radius: 0; }
+    .ayv .ayv-memoir,
+    .ayv .ayv-memoir * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .ayv .ayv-memoir-printbutton,
     .ayv .ayv-memoir-form { display: none; }
     .ayv .ayv-memoir-words { display: block; }
-    .ayv .ayv-memoir .ayv-contract-table { break-inside: avoid; }
+    .ayv .ayv-memoir-heading { break-after: avoid; }
+    .ayv .ayv-memoir-hero,
+    .ayv .ayv-memoir-tiles,
+    .ayv .ayv-memoir-top { break-inside: avoid; }
+    .ayv .ayv-memoir-top { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .ayv .ayv-memoir-groups { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

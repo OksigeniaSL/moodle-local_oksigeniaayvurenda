@@ -104,16 +104,25 @@ final class memoir {
      *
      * @param int $entityid
      * @param \stdClass $year
-     * @return array loans, borrowers, readers, room, acquired, withdrawn, holdings.
+     * @return array loans, borrowers, came (of the readers of the year), readers, room, acquired, withdrawn, holdings.
      */
     private static function figures(int $entityid, \stdClass $year): array {
         global $DB;
         $summary = year_change::summary($year);
         $range = ['entityid' => $entityid, 'a' => $year->timestart, 'b' => $year->timeend];
         $libraries = "SELECT id FROM {" . self::T . "library} WHERE entityid = :entityid";
+        // Of the readers of the year (its groups), those who came: the staff borrow too, and are not of a group.
+        $came = (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT l.readerid)
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "member} m ON m.readerid = l.readerid AND m.yearid = l.yearid
+              WHERE l.yearid = :yearid",
+            ['yearid' => $year->id]
+        );
         return [
             'loans' => $summary['loans'],
             'borrowers' => $summary['borrowers'],
+            'came' => $came,
             'readers' => $summary['members'],
             'room' => $DB->count_records_select(
                 self::T . 'roomread',
@@ -164,7 +173,7 @@ final class memoir {
      *
      * @param int $entityid
      * @param \stdClass $year
-     * @return array[] title, loans.
+     * @return array[] id, title, loans.
      */
     private static function top(int $entityid, \stdClass $year): array {
         global $DB;
@@ -180,7 +189,7 @@ final class memoir {
             0,
             10
         );
-        return array_values(array_map(fn($r) => ['title' => $r->title, 'loans' => (int) $r->loans], $rows));
+        return array_values(array_map(fn($r) => ['id' => (int) $r->id, 'title' => $r->title, 'loans' => (int) $r->loans], $rows));
     }
 
     /**
@@ -188,7 +197,7 @@ final class memoir {
      *
      * @param \stdClass $library
      * @param \stdClass $year
-     * @return array[] corner, loans.
+     * @return array[] code, corner, loans.
      */
     private static function corners(\stdClass $library, \stdClass $year): array {
         global $DB;
@@ -215,7 +224,7 @@ final class memoir {
         arsort($counted);
         $out = [];
         foreach ($counted as $code => $loans) {
-            $out[] = ['corner' => $labels[(string) $code] ?? (string) $code, 'loans' => $loans];
+            $out[] = ['code' => (string) $code, 'corner' => $labels[(string) $code] ?? (string) $code, 'loans' => $loans];
         }
         return $out;
     }
