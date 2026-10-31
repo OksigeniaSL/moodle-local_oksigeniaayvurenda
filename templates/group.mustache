@@ -37,31 +37,36 @@
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 {{#challenge}}
-<section class="ayv-section ayv-book">
-    {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-    {{#offstage}}<p class="ayv-field-hint">{{offstage}}</p>{{/offstage}}
-    {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
-    {{^locked}}<form method="post" action="{{action}}">
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<section class="ayv-classbar">
+    <div class="ayv-classbar-box ayv-classbar-now">
+        {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
+        {{#offstage}}<p class="ayv-field-hint">{{offstage}}</p>{{/offstage}}
+    </div>
+    {{^locked}}<form class="ayv-classbar-box ayv-classbar-choose" method="post" action="{{action}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <fieldset class="ayv-fieldset"><legend>{{choose}}</legend>
-            <p class="ayv-field-hint">{{choosehint}}</p>
-            {{#kinds}}<label class="ayv-field ayv-field-check"><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/kinds}}
+        <fieldset>
+            <legend class="ayv-classbar-label">{{choose}}</legend>
+            <div class="ayv-segmented">{{#kinds}}<label><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}} onchange="this.form.requestSubmit ? this.form.requestSubmit() : this.form.submit()"><span>{{label}}</span></label>{{/kinds}}</div>
         </fieldset>
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></p>
+        <p class="ayv-classbar-hint">{{choosehint}}</p>
+        <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></noscript>
     </form>{{/locked}}
-    <h2 class="ayv-section-title">{{gardenheading}}</h2>
-    {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}
-    {{^hasgarden}}<p class="ayv-empty">{{gardenempty}}</p>{{/hasgarden}}
+    <div class="ayv-classbar-box ayv-classbar-garden">
+        <p class="ayv-classbar-label">{{gardenheading}}</p>
+        {{#hasgarden}}<ul class="ayv-classbar-plants">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}
+        {{^hasgarden}}<p class="ayv-classbar-hint">{{gardenempty}}</p>{{/hasgarden}}
+    </div>
 </section>
 {{/challenge}}
 {{#hasreaders}}
-<ul class="ayv-people">
+<ul class="ayv-people ayv-people-grid">
 {{#readers}}
     <li class="ayv-person">
         <span class="ayv-person-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>
-        <a class="ayv-person-name" href="{{url}}">{{name}}</a>
-        <span class="ayv-person-card"><span class="ayv-sr">{{cardlabel}}: </span>{{cardcode}}</span>
-        <span class="ayv-person-loans" title="{{loanslabel}}">{{loans}}</span>
+        <span class="ayv-person-text"><a class="ayv-person-name" href="{{url}}">{{name}}</a>
+        <span class="ayv-person-card"><span class="ayv-sr">{{cardlabel}}: </span>{{cardcode}}</span></span>
+        {{#loans}}<span class="ayv-person-loans" title="{{loanslabel}}">{{loans}}</span>{{/loans}}
     </li>
 {{/readers}}
 </ul>

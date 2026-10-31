@@ -3037,3 +3037,31 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-person-name { color: var(--ink); text-decoration: none; }
 .ayv .ayv-person-name:hover { color: var(--accent); text-decoration: underline; }
 .ayv .ayv-person { align-items: center; }
+/* A class, compact: the challenge of the term, choosing it and the class's garden side by side; the readers as small
+   cards in a grid. */
+.ayv .ayv-classbar { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr) minmax(0, .9fr); gap: .75rem; margin-bottom: 1.25rem; }
+.ayv .ayv-classbar-box { padding: 1rem 1.15rem; border-radius: var(--radius); background: var(--surface); min-width: 0; }
+.ayv .ayv-classbar-box fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.ayv .ayv-classbar-label { margin: 0 0 .55rem; padding: 0; font-family: var(--title); font-weight: 600; font-size: 1.02rem; }
+.ayv .ayv-classbar-hint { margin: .55rem 0 0; font-size: .86rem; color: color-mix(in srgb, var(--ink) 72%, var(--surface)); }
+.ayv .ayv-classbar-now .ayv-challenge { display: grid; gap: .35rem; }
+.ayv .ayv-classbar-plants { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-classbar-plants li { padding: .2rem .65rem; border-radius: 999px; background: var(--notice-bg); font-size: .86rem; }
+.ayv .ayv-segmented { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ayv .ayv-segmented label { position: relative; cursor: pointer; }
+.ayv .ayv-segmented input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.ayv .ayv-segmented span { display: inline-flex; align-items: center; min-height: 38px; padding: .3rem .9rem; border-radius: 999px; background: var(--paper2); color: var(--accent); font-weight: 700; font-size: .92rem; }
+.ayv .ayv-segmented input:checked + span { background: var(--green); color: #fbf6ec; }
+.ayv .ayv-segmented input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-people-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr)); gap: .5rem; }
+.ayv .ayv-people-grid .ayv-person { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .2rem .7rem; padding: .55rem .75rem; }
+.ayv .ayv-person-text { display: grid; min-width: 0; }
+.ayv .ayv-people-grid .ayv-person-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ayv .ayv-people-grid .ayv-person-card { font-size: .82rem; }
+@media (max-width: 60rem) {
+    .ayv .ayv-classbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .ayv .ayv-classbar-choose { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 36rem) {
+    .ayv .ayv-classbar { grid-template-columns: minmax(0, 1fr); }
+}

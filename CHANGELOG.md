@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.87.1 (2026-10-31)
+
+- A class's page, compact (Enrique: «ocupa mucho espacio y tiene mucho sitio en blanco»): the challenge of the term,
+  choosing it (as buttons in a row that save when pressed) and the class's garden side by side in one band; the
+  readers as small cards in a grid, each with their face, name and card, and the count of books only when they have
+  some.
+
 ## 0.87.0 (2026-10-31)
 
 - A reader's record for the library staff (`reader.php`): their photo, from their Moodle account (or their initial),
