@@ -106,6 +106,20 @@ $data['beside'] = $beside && count($beside['spines']) > 1 ? [
     'bird' => screens::art('estanteria/mainumby', 'svg'),
     'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
 ] : null;
+// What else its readers took, said by the memory (only when enough of them did, so that no one is singled out).
+$also = \local_oksigeniaayvurenda\local\memory::also($library, $id);
+$said = count($also) >= 2 ? \local_oksigeniaayvurenda\local\characters::say(
+    (int) $library->entityid,
+    'memory',
+    'memoryalso',
+    [],
+    'senala'
+) : null;
+$data['memoryalso'] = $said ? [
+    'heading' => get_string('memoryalsoheading', 'local_oksigeniaayvurenda'),
+    'said' => $said,
+    'cards' => array_values(screens::cards(catalogue::cards_of($also, $library), $library)),
+] : null;
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
     'scripts' => array_merge(!empty($data['reviews']['write']) ? ['draw', 'speak'] : [], $data['beside'] ? ['stacks'] : []),
 ]);

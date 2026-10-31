@@ -51,6 +51,10 @@ if ($query === '' && $corner === '') {
     redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]));
 }
 $data = screens::results($library, $query, $corner, $page, $onlyfree, $subject);
+// The memory remembers what a reader looked for (words typed, three letters at least).
+if ($page === 0 && core_text::strlen($query) >= 3 && !$subject) {
+    \local_oksigeniaayvurenda\local\memory::searched($library, $query);
+}
 $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/results', $data);
 if ($fragment) {
     @header('Content-Type: text/html; charset=utf-8');

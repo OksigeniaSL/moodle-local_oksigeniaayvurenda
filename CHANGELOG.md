@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.101.0 (2026-10-31)
+
+The memory at work (`classes/local/memory.php`), as she was designed: she has read everything and remembers everything.
+
+- On the home, to each reader, one thing a day: the book they left half read (still free on its shelf), one like a book
+  they loved or wanted more of (by its author, else its topic, else its corner), what they were looking for last time
+  (for a month, if they took nothing since), or one more of the corner they read most. With the book's cover and a way
+  to it, in the tone of the centre's skin.
+- On a record, «Also taken»: what else its readers took, said by the memory, only when at least three readers took
+  the book and each one by two of them, so that nobody is singled out. Never the textbooks of a bank.
+- The last search is kept as a preference of the person (declared in privacy, exported and deleted with them).
+
 ## 0.100.0 (2026-10-31)
 
 - Copies out of the server, in «Copies», for whoever manages the centre: each night's copy, encrypted with the centre's

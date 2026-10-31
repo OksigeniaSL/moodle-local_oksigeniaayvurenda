@@ -3342,3 +3342,10 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-off-code { display: block; width: 100%; box-sizing: border-box; padding: .6rem .75rem; border-radius: var(--radius); background: var(--paper2); color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid var(--line); }
 .ayv .ayv-off-keepset { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
 .ayv #ayv-off-secret-key { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+
+/* The memory remembers, on the home: the whole row, her words with the book and its button beside them. */
+.ayv .ayv-duo .ayv-duo-memory { grid-column: 1 / -1; }
+.ayv .ayv-duo-memory-go { display: flex; flex: 0 0 auto; align-items: center; gap: .9rem; margin: 0; }
+.ayv .ayv-duo-memory-go .ayv-button { white-space: nowrap; }
+.ayv .ayv-duo-memory-cover { width: 3.5rem; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }
+.ayv .ayv-also .ayv-bubble { margin-bottom: .75rem; }

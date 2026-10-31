@@ -192,6 +192,7 @@ class provider implements
         $collection->add_user_preference('local_oksigeniaayvurenda_newbooks', 'privacy:metadata:preference:newbooks');
         $collection->add_user_preference('local_oksigeniaayvurenda_newbookslast', 'privacy:metadata:preference:newbookslast');
         $collection->add_user_preference('local_oksigeniaayvurenda_goal', 'privacy:metadata:preference:goal');
+        $collection->add_user_preference('local_oksigeniaayvurenda_lastsearch', 'privacy:metadata:preference:lastsearch');
         return $collection;
     }
 
@@ -219,7 +220,8 @@ class provider implements
                 get_string('privacy:metadata:preference:stafftold', 'local_oksigeniaayvurenda')
             );
         }
-        foreach (['newbooks' => 'newbooks', 'newbookslast' => 'newbookslast', 'goal' => 'goal'] as $name => $key) {
+        $names = ['newbooks' => 'newbooks', 'newbookslast' => 'newbookslast', 'goal' => 'goal', 'lastsearch' => 'lastsearch'];
+        foreach ($names as $name => $key) {
             $value = get_user_preferences('local_oksigeniaayvurenda_' . $name, null, $userid);
             if ($value !== null) {
                 writer::export_user_preference(
@@ -643,7 +645,7 @@ class provider implements
         $DB->set_field(self::T . 'wish', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'readinglist', 'createdby', null, ['createdby' => $userid]);
         // Their choices in the library go too, also when they keep their account.
-        foreach (['cardlook', 'stafftold', 'newbooks', 'newbookslast', 'goal'] as $name) {
+        foreach (['cardlook', 'stafftold', 'newbooks', 'newbookslast', 'goal', 'lastsearch'] as $name) {
             unset_user_preference('local_oksigeniaayvurenda_' . $name, $userid);
         }
     }

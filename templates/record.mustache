@@ -213,6 +213,13 @@
             <p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{walkurl}}">{{> local_oksigeniaayvurenda/icon_shelf}} {{walk}}</a></p>
         </section>
         {{/beside}}
+        {{#memoryalso}}
+        <section class="ayv-section ayv-shelf-section ayv-also" aria-labelledby="ayv-also-title">
+            <h2 id="ayv-also-title" class="ayv-section-title">{{heading}}</h2>
+            {{#said}}{{> local_oksigeniaayvurenda/bubble}}{{/said}}
+            <div class="ayv-wood">{{> local_oksigeniaayvurenda/cards}}{{> local_oksigeniaayvurenda/shelf_arrows}}</div>
+        </section>
+        {{/memoryalso}}
         {{#back}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/back}}
     </div>
 </article>

@@ -741,6 +741,7 @@ final class screens {
             'heraldsex' => 'm',
             'listenquestion' => null,
             'wishherald' => null,
+            'remembers' => null,
         ];
         if (!$reader) {
             return $hero;
@@ -782,6 +783,17 @@ final class screens {
             $hero['you'] = ['title' => self::str('homeclassic'), 'text' => self::str('homeclassictext'), 'drawing' => ''];
         }
         $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard'), 'listen' => null];
+        // What the memory has to tell this reader today: a book, or what they were looking for.
+        $remembers = memory::remembers($library, $reader);
+        if ($remembers) {
+            $book = $remembers['recordid'];
+            $hero['remembers'] = $remembers['say'] + [
+                'url' => $book ? self::url('record.php', $library, ['id' => $book])
+                    : self::url('search.php', $library, ['q' => $remembers['query']]),
+                'label' => self::str($book ? 'memorygo' : 'memorysearchagain'),
+                'cover' => $book ? covers::url($book) : null,
+            ];
+        }
         if ($member && (string) $member->groupname !== '') {
             $challenge = challenges::of((int) $library->entityid, (string) $member->groupname);
             $hero['challenge'] = $challenge ? challenges::view($challenge, (int) $library->entityid) : null;

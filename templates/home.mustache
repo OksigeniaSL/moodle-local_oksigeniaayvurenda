@@ -82,6 +82,8 @@
         <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span>{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</span>
         <a class="ayv-button" href="{{url}}">{{label}}</a></div>{{/hero.you}}
     {{#hero.wishherald}}<div class="ayv-duo-card">{{> local_oksigeniaayvurenda/bubble}}</div>{{/hero.wishherald}}
+    {{#hero.remembers}}<div class="ayv-duo-card ayv-duo-memory">{{> local_oksigeniaayvurenda/bubble}}
+        <p class="ayv-duo-memory-go">{{#cover}}<img class="ayv-duo-memory-cover" src="{{cover}}" alt="" loading="lazy">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p></div>{{/hero.remembers}}
     {{#hero.challenge}}<div class="ayv-duo-card ayv-challenge-card">{{> local_oksigeniaayvurenda/challenge}}</div>{{/hero.challenge}}
 </div>
 <p class="ayv-staff ayv-staff-row">
