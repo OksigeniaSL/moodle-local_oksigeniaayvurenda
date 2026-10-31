@@ -187,6 +187,9 @@ foreach (libraries::all() as $one) {
             'group' => implode(', ', $lgroups),
             'hasgroups' => (bool) $groups || (bool) $lgroups,
             'canremove' => (int) $library->copies === 0,
+            // Who keeps this library only, at its desk.
+            'keepernames' => implode(', ', array_column(\local_oksigeniaayvurenda\local\keepers::of((int) $library->id), 'name')),
+            'keepersurl' => (new moodle_url('/local/oksigeniaayvurenda/keepers.php', ['library' => $library->slug]))->out(false),
             'look' => (function () use ($library) {
                 $look = libraries::look($library);
                 $scenes = [];
@@ -275,7 +278,8 @@ foreach (
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
         'librarieschallengeshint', 'librariesreviewsign', 'librariesplan', 'librariesplanhint', 'planname', 'plancopies',
         'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',
-        'librariesreadersopen', 'librariesreadersopenhint'] as $key
+        'librariesreadersopen', 'librariesreadersopenhint', 'librarieskeptby', 'librarieskeepers', 'librarieskeepershint',
+        'librarieskeepersgo'] as $key
 ) {
     $data[$key] = $str($key);
 }

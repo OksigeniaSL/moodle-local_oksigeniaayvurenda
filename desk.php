@@ -33,14 +33,18 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
-shell::require('local/oksigeniaayvurenda:desk', $library);
+// Whoever keeps only this library works at its desk too, for this library alone.
+$own = access::keeps($library);
+if (!$own) {
+    shell::require('local/oksigeniaayvurenda:desk', $library);
+}
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $ref]));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$today = (new desk($library, (int) $USER->id))->today();
+$today = (new desk($library, (int) $USER->id, null, $own))->today();
 $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $library->entityid]), true);
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $strings = [];
@@ -53,8 +57,8 @@ foreach (
     $strings[$key] = $str($key);
 }
 // What waits for the staff besides the desk: reviews to read and books the classes asked for.
-$today['reviews'] = \local_oksigeniaayvurenda\local\reviews::waiting((int) $library->entityid);
-$today['wishes'] = \local_oksigeniaayvurenda\local\wishes::waiting((int) $library->entityid);
+$today['reviews'] = $own ? 0 : \local_oksigeniaayvurenda\local\reviews::waiting((int) $library->entityid);
+$today['wishes'] = $own ? 0 : \local_oksigeniaayvurenda\local\wishes::waiting((int) $library->entityid);
 $cards = '';
 foreach (
     ['today' => 'todaytoday', 'held' => 'todayheld', 'late' => 'todaylate', 'out' => 'todayout', 'reviews' => 'todayreviews',
@@ -63,7 +67,7 @@ foreach (
     if ($today[$key] > 0) {
         $inner = '<span class="ayv-today-number">' . $today[$key] . '</span><span class="ayv-today-label">' .
             s($str($label)) . '</span>';
-        if ($key === 'today') {
+        if ($key === 'today' || $own) {
             $cards .= '<li class="ayv-today-card ayv-today-' . $key . '">' . $inner . '</li>';
         } else {
             $page = ['held' => 'holds.php', 'reviews' => 'reviews.php', 'wishes' => 'wishes.php'][$key] ?? null;
@@ -94,6 +98,10 @@ if (!$help && access::can('local/oksigeniaayvurenda:manage', $library)) {
 $tools = shell::readers_tools($library);
 if ($help) {
     $tools['html'] = '';
+} else if ($own) {
+    // The camera, yes; the phone as a reader is for the centre's staff.
+    $tools['html'] = '<div class="ayv-tools"><button type="button" class="ayv-toggle" id="ayv-camera-open" hidden>' .
+        s($str('camerabutton')) . '</button></div>';
 }
 $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <h1 id="ayv-desk-title" class="ayv-sr">' . s($str('desktitle')) . '</h1>
@@ -111,7 +119,12 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,
     'scripts' => ['camera', 'desk'],
-    'nav' => $help ? [] : array_merge([
+    'nav' => $help ? [] : ($own ? [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('deskcatalogue')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
+            ->out(false), 'label' => $str('helpnav')],
+    ] : array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false),
             'label' => $str('readers')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
@@ -131,7 +144,7 @@ shell::output($str('desktitle'), $main, $library, '', [
             'label' => $str('addnav')],
     ] : [], access::can('local/oksigeniaayvurenda:manage', $library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false), 'label' => $str('librariesnav')],
-    ] : []),
+    ] : [])),
     'config' => [
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/desk_ajax.php'))->out(false),
         'sesskey' => sesskey(),

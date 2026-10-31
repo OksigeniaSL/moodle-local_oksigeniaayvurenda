@@ -246,6 +246,15 @@ final class shell {
         if ($library && access::can('local/oksigeniaayvurenda:desk', $library)) {
             $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($library->slug),
                 'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
+        } else if ($library) {
+            // Whoever keeps a library of this centre goes to its desk from anywhere in it.
+            foreach (keepers::libraries((int) ($USER->id ?? 0)) as $kept) {
+                if ((int) $kept->entityid === (int) $library->entityid) {
+                    $links[] = ['url' => $base . 'desk.php?library=' . rawurlencode($kept->slug),
+                        'label' => get_string('desktitle', 'local_oksigeniaayvurenda')];
+                    break;
+                }
+            }
         }
         $nav = $catalogue;
         foreach ($links as $link) {

@@ -91,6 +91,12 @@ class provider implements
             'groupname' => 'privacy:metadata:tutor:groupname',
             'timenotified' => 'privacy:metadata:tutor:timenotified',
         ], 'privacy:metadata:tutor');
+        $collection->add_database_table(self::T . 'keeper', [
+            'libraryid' => 'privacy:metadata:keeper:libraryid',
+            'userid' => 'privacy:metadata:keeper:userid',
+            'staffid' => 'privacy:metadata:keeper:staffid',
+            'timecreated' => 'privacy:metadata:keeper:timecreated',
+        ], 'privacy:metadata:keeper');
         $collection->add_database_table(self::T . 'hold', [
             'readerid' => 'privacy:metadata:hold:readerid',
             'recordid' => 'privacy:metadata:hold:recordid',
@@ -234,6 +240,8 @@ class provider implements
             []
         );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
+        $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'keeper}', []);
+        $userlist->add_from_sql('staffid', 'SELECT staffid FROM {' . self::T . 'keeper} WHERE staffid IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'relay}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'hold} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql(
@@ -447,6 +455,23 @@ class provider implements
                 ], $tutored))]
             );
         }
+        $kept = $DB->get_records_sql(
+            'SELECT k.id, b.name, k.timecreated
+               FROM {' . self::T . 'keeper} k
+               JOIN {' . self::T . 'library} b ON b.id = k.libraryid
+              WHERE k.userid = :userid
+           ORDER BY b.name',
+            ['userid' => $userid]
+        );
+        if ($kept) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:keeper', 'local_oksigeniaayvurenda')]),
+                (object) ['libraries' => array_values(array_map(fn($k) => [
+                    'library' => $k->name,
+                    'since' => transform::datetime($k->timecreated),
+                ], $kept))]
+            );
+        }
     }
 
     /**
@@ -465,6 +490,7 @@ class provider implements
         $DB->set_field_select(self::T . 'loan', 'staffid', null, 'staffid IS NOT NULL');
         $DB->set_field_select(self::T . 'loan', 'returnstaffid', null, 'returnstaffid IS NOT NULL');
         $DB->delete_records(self::T . 'tutor');
+        $DB->delete_records(self::T . 'keeper');
         $DB->delete_records(self::T . 'relay');
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'stocktake', 'createdby', null, 'createdby IS NOT NULL');
@@ -558,6 +584,8 @@ class provider implements
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
         $DB->delete_records(self::T . 'tutor', ['userid' => $userid]);
+        $DB->delete_records(self::T . 'keeper', ['userid' => $userid]);
+        $DB->set_field(self::T . 'keeper', 'staffid', null, ['staffid' => $userid]);
         $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
         $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
@@ -590,6 +618,9 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'tutor', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'keeper', ['userid' => $userid])) {
             return true;
         }
         if ($DB->record_exists(self::T . 'relay', ['userid' => $userid])) {

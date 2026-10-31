@@ -317,7 +317,7 @@ final class libraries {
                 $DB->delete_records_select(self::T . $child, "$field $in", $params);
             }
         }
-        foreach (['rule', 'hold', 'stocktake', 'withdrawal'] as $table) {
+        foreach (['rule', 'hold', 'stocktake', 'withdrawal', 'keeper'] as $table) {
             $DB->delete_records(self::T . $table, ['libraryid' => $libraryid]);
         }
         $DB->delete_records(self::T . 'library', ['id' => $libraryid]);

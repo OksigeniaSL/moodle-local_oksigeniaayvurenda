@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.76.0 (2026-10-31)
+
+- Each library can have its own keepers: the centre's staff choose them among its readers with an account
+  (`keepers.php`, from the library's card) — the teachers of a department, the class teacher, a pupil librarian. A keeper
+  works at that library's desk only: its own books, and in a classroom library only the readers of its groups; never
+  the other libraries' loans, the copies, the boxes, the catalogue nor the settings. «Desk» shows in the header for
+  them, and the library's card says who keeps it. The privacy provider exports and deletes it.
+
 ## 0.75.0 (2026-10-31)
 
 - A centre can be open only to its staff while it gets ready: its readers see no way in (pages, the block, the app)

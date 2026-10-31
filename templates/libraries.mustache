@@ -40,7 +40,7 @@
                 "colour": 2, "hascardimage": false, "featured": true, "count": "600", "countword": "ejemplares",
                 "hasgroupchips": true, "groupchips": [{"chip": "4º B"}],
                 "kinds": [{"value": "central", "label": "Central", "selected": true}], "parents": [], "groups": [], "hasgroups": false,
-                "canremove": false}]}],
+                "canremove": false, "keepernames": "Ana Ruiz", "keepersurl": "#"}]}],
         "librariesfirst": "Tu centro", "librariesfirsthint": "Para empezar", "librariesentityname": "Nombre del centro",
         "librarieslibraryname": "Nombre de la biblioteca", "librariesyearstart": "Empieza el curso",
         "librariesyearstarthint": "MM-DD", "librariesclassification": "Clasificación", "librariescontrolletter": "Letra de control",
@@ -81,6 +81,7 @@
                 <p class="ayv-libcard-kind">{{kindlabel}} <span class="ayv-libcard-address">{{address}}</span></p>
                 {{#hasgroupchips}}<ul class="ayv-libcard-groups">{{#groupchips}}<li>{{chip}}</li>{{/groupchips}}</ul>{{/hasgroupchips}}
                 <p class="ayv-libcard-count"><strong>{{count}}</strong> {{countword}}</p>
+                {{#keepernames}}<p class="ayv-libcard-keepers">{{librarieskeptby}} {{keepernames}}</p>{{/keepernames}}
             </div>
             <div class="ayv-libcard-actions">
                 <a class="ayv-button" href="{{url}}">{{librariesenter}}</a>
@@ -99,6 +100,9 @@
                     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="library">{{librariessave}}</button>
                     {{#canremove}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{librariesremove}}</button>{{/canremove}}</p>
                 </form>
+                <h4 class="ayv-modal-part">{{librarieskeepers}}</h4>
+                <p class="ayv-field-hint">{{librarieskeepershint}}</p>
+                <p><a class="ayv-button ayv-button-quiet" href="{{keepersurl}}">{{librarieskeepersgo}}</a></p>
                 {{#look}}
                 <form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-library-look">
                     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{id}}">

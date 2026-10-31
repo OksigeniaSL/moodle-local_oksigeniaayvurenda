@@ -201,6 +201,21 @@ final class access {
     }
 
     /**
+     * Whether someone works at a library's desk only as its keeper (keepers::is), not as staff of its centre: the desk
+     * then serves that library alone.
+     *
+     * @param \stdClass|null $library
+     * @param int|null $userid
+     * @return bool
+     */
+    public static function keeps(?\stdClass $library, ?int $userid = null): bool {
+        global $USER;
+        $userid = $userid ?? (int) ($USER->id ?? 0);
+        return $library && !self::can('local/oksigeniaayvurenda:desk', $library, $userid)
+            && keepers::is((int) $library->id, $userid);
+    }
+
+    /**
      * Whether a user is an active reader of a centre.
      *
      * @param int $entityid

@@ -1,0 +1,79 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/keepers
+
+    Who keeps a library: whoever keeps it now, each with its button to take it away, and the search among the centre's
+    readers with an account, each with its button to give it.
+
+    Context variables required for this template:
+    * heading, intro, notice, action, slug, sesskey, groupsnote, query, nothing, none
+    * keepers - userid, name; haskeepers
+    * found - userid, name, typelabel; hasfound
+    * keepersnow, keeperssearch, keeperssearchbutton, keepersadd, keepersremove
+
+    Example context (json):
+    {
+        "heading": "Quién lleva Aula de 3º B", "intro": "Quien la lleva presta y devuelve sus libros en su mostrador.",
+        "notice": "", "action": "#", "slug": "aula-3b", "sesskey": "x", "groupsnote": "Solo a los lectores de 3º B.", "query": "ana",
+        "nothing": "", "none": "Todavía no la lleva nadie.",
+        "keepers": [{"userid": 3, "name": "Irene Tutora"}], "haskeepers": true,
+        "found": [{"userid": 4, "name": "Ana Inventada", "typelabel": "alumno"}], "hasfound": true,
+        "keepersnow": "La llevan", "keeperssearch": "Nombre", "keeperssearchbutton": "Buscar",
+        "keepersadd": "Que la lleve", "keepersremove": "Quitar"
+    }
+}}
+<section class="ayv-keepers">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#groupsnote}}<p class="ayv-field-hint">{{groupsnote}}</p>{{/groupsnote}}
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<h2 class="ayv-section-title">{{keepersnow}}</h2>
+{{#haskeepers}}
+<ul class="ayv-holds">
+{{#keepers}}
+    <li class="ayv-holds-row">
+        <span class="ayv-holds-title">{{name}}</span>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="user" value="{{userid}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remove">{{keepersremove}}</button>
+        </form>
+    </li>
+{{/keepers}}
+</ul>
+{{/haskeepers}}
+{{^haskeepers}}<p>{{none}}</p>{{/haskeepers}}
+<form class="ayv-window-search" role="search" method="get" action="{{action}}">
+    <input type="hidden" name="library" value="{{slug}}">
+    <label class="ayv-field ayv-field-wide">{{keeperssearch}} <input type="search" name="q" value="{{query}}" maxlength="100" spellcheck="false"></label>
+    <button type="submit" class="ayv-button">{{keeperssearchbutton}}</button>
+</form>
+{{#nothing}}<p class="ayv-notice" role="status">{{nothing}}</p>{{/nothing}}
+{{#hasfound}}
+<ul class="ayv-holds">
+{{#found}}
+    <li class="ayv-holds-row">
+        <span class="ayv-holds-title">{{name}}{{#typelabel}} <span class="ayv-field-hint">· {{typelabel}}</span>{{/typelabel}}</span>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="user" value="{{userid}}">
+            <button type="submit" class="ayv-button" name="do" value="add">{{keepersadd}}</button>
+        </form>
+    </li>
+{{/found}}
+</ul>
+{{/hasfound}}
+</section>

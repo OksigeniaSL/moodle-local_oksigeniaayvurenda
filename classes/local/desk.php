@@ -52,6 +52,9 @@ final class desk {
     /** @var int Who is at the desk. */
     private int $staffid;
 
+    /** @var bool Whoever is at it keeps this library only: its own books and, in a classroom, the readers of its groups. */
+    private bool $own;
+
     /** @var int */
     private int $now;
 
@@ -64,10 +67,12 @@ final class desk {
      * @param \stdClass $library
      * @param int $staffid
      * @param int|null $now
+     * @param bool $own Whoever is at it keeps only this library (keepers::is), not the centre's.
      */
-    public function __construct(\stdClass $library, int $staffid, ?int $now = null) {
+    public function __construct(\stdClass $library, int $staffid, ?int $now = null, bool $own = false) {
         $this->library = $library;
         $this->staffid = $staffid;
+        $this->own = $own;
         $this->now = $now ?? time();
         $this->tz = \core_date::get_server_timezone_object();
     }
@@ -88,6 +93,9 @@ final class desk {
         }
         $item = $DB->get_record_select(self::T . 'item', 'entityid = :entityid AND ' .
             $DB->sql_equal('barcode', ':code', false), ['entityid' => $this->library->entityid, 'code' => $code]);
+        if ($item && $this->own && (int) $item->libraryid !== (int) $this->library->id) {
+            return $this->answer('unknown', 'no', 'deskotherlibrary', $this->title($item));
+        }
         if ($item) {
             $open = $DB->get_record_select(
                 self::T . 'loan',
@@ -117,6 +125,9 @@ final class desk {
             $DB->sql_equal('cardcode', ':code', false) . " AND status <> 'deleted'",
             ['entityid' => $this->library->entityid, 'code' => $code]
         );
+        if ($reader && !$this->allowed((int) $reader->id)) {
+            return $this->answer('unknown', 'no', 'deskotherreader');
+        }
         if ($reader) {
             return $this->answer('reader', 'ok', null, null, ['reader' => $this->reader_panel((int) $reader->id)]);
         }
@@ -165,6 +176,9 @@ final class desk {
         );
         $found = [];
         foreach (array_keys($rows) as $id) {
+            if (!$this->allowed((int) $id)) {
+                continue;
+            }
             $reader = $this->reader((int) $id);
             $found[] = ['id' => (int) $id, 'name' => $reader['name'], 'group' => $reader['group']];
         }
@@ -179,6 +193,9 @@ final class desk {
      */
     public function reader_panel(int $readerid): array {
         global $DB;
+        if (!$this->allowed($readerid)) {
+            throw new \moodle_exception('deskotherreader', 'local_oksigeniaayvurenda');
+        }
         $reader = $this->reader($readerid);
         $loans = [];
         $late = 0;
@@ -187,9 +204,9 @@ final class desk {
                FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'item} i ON i.id = l.itemid
                JOIN {' . self::T . 'record} r ON r.id = i.recordid
-              WHERE l.readerid = :readerid AND l.timereturned IS NULL
+              WHERE l.readerid = :readerid AND l.timereturned IS NULL' . ($this->own ? ' AND l.libraryid = :libraryid' : '') . '
            ORDER BY l.timedue, l.id',
-            ['readerid' => $readerid]
+            ['readerid' => $readerid, 'libraryid' => $this->library->id]
         );
         foreach ($rows as $row) {
             $days = loan_rules::days_late((int) $row->timedue, $this->now, $this->tz);
@@ -205,7 +222,9 @@ final class desk {
                 ) : '',
             ];
         }
-        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => holds::of_reader($readerid, $this->now)];
+        // Whoever keeps one library only sees what waits for the reader there.
+        $holds = $this->own ? [] : holds::of_reader($readerid, $this->now);
+        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => $holds];
     }
 
     /**
@@ -348,6 +367,9 @@ final class desk {
     private function lend(\stdClass $item, int $readerid, bool $force): array {
         global $DB;
         $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $this->library->entityid], '*', MUST_EXIST);
+        if (!$this->allowed($readerid)) {
+            return $this->answer('unknown', 'no', 'deskotherreader');
+        }
         $rule = $this->rule($reader->readertype, $item->itemtype);
         $open = $DB->get_records_sql(
             'SELECT l.id, l.timedue, i.itemtype
@@ -544,9 +566,37 @@ final class desk {
             'SELECT l.*
                FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'library} b ON b.id = l.libraryid
-              WHERE l.id = :id AND b.entityid = :entityid',
-            ['id' => $loanid, 'entityid' => $this->library->entityid],
+              WHERE l.id = :id AND b.entityid = :entityid' . ($this->own ? ' AND l.libraryid = :libraryid' : ''),
+            ['id' => $loanid, 'entityid' => $this->library->entityid, 'libraryid' => $this->library->id],
             MUST_EXIST
+        );
+    }
+
+    /**
+     * Whether a reader may be served here: at any desk of the centre, anyone; by whoever keeps a classroom library, only
+     * the readers of its groups this year.
+     *
+     * @param int $readerid
+     * @return bool
+     */
+    private function allowed(int $readerid): bool {
+        global $DB;
+        if (!$this->own) {
+            return true;
+        }
+        $settings = json_decode((string) ($this->library->settings ?? ''), true) ?: [];
+        $groups = array_values(array_filter((array) ($settings['groups'] ?? []), 'is_string'));
+        if (!$groups) {
+            return true;
+        }
+        [$in, $params] = $DB->get_in_or_equal($groups, SQL_PARAMS_NAMED);
+        return $DB->record_exists_sql(
+            "SELECT 1
+               FROM {" . self::T . "member} m
+               JOIN {" . self::T . "year} y ON y.id = m.yearid
+              WHERE m.readerid = :readerid AND y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b
+                    AND m.groupname $in",
+            ['readerid' => $readerid, 'entityid' => $this->library->entityid, 'a' => $this->now, 'b' => $this->now] + $params
         );
     }
 

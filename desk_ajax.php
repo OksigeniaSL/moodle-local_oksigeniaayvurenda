@@ -35,12 +35,15 @@ $action = required_param('action', PARAM_ALPHA);
 require_login(null, false);
 require_sesskey();
 $library = catalogue::library($ref);
-access::require('local/oksigeniaayvurenda:desk', $library);
+$own = access::keeps($library);
+if (!$own) {
+    access::require('local/oksigeniaayvurenda:desk', $library);
+}
 $PAGE->set_context(context_system::instance());
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$desk = new desk($library, (int) $USER->id);
+$desk = new desk($library, (int) $USER->id, null, $own);
 switch ($action) {
     case 'scan':
         $answer = $desk->scan(
