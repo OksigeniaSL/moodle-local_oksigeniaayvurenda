@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.94.1 (2026-10-31)
+
+- The digital forms of a record, redesigned (Enrique: «La ficha puede estar técnicamente bien montada, pero el diseño es
+  lo que siempre hay que mejorar»): the book on top with its cover; each form a card with its format, licence, who it
+  is for (or the course it is only for, and until when) and «Open» and «Change»; adding one, a card that opens its
+  sheet; changing or removing one, in its sheet; who it is for and the stages, as the house's pill buttons; the date in
+  one row.
+
 ## 0.94.0 (2026-10-31)
 
 - Course fragments: a digital form of a book (a scanned chapter, some pages, a link) can be given only to the students

@@ -112,7 +112,11 @@ $items = [];
 foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => null]) as $item) {
     $chosenstages = json_decode((string) $item->stages, true) ?: [];
     $only = \local_oksigeniaayvurenda\local\fragments::of_item((int) $item->id);
+    $audiencelabels = array_map(fn($a) => $str('audience' . $a), digital::audience($item));
     $items[] = [
+        'formatkey' => (string) $item->format,
+        // Only for a course: its line says who; the audience above does not count.
+        'audiencechips' => $only ? [] : array_values($audiencelabels),
         'courses' => $courselist($only ? (int) $only->courseid : 0),
         'pages' => $only ? (string) $only->pages : '',
         'until' => date('Y-m-d', $only ? (int) $only->timeend : $yearend),
@@ -132,8 +136,15 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
         'download' => (bool) $item->download,
     ];
 }
+$covers = \local_oksigeniaayvurenda\local\covers::urls([$recordid]);
 $data = [
-    'heading' => $str('digitaltitle', $found['record']->title),
+    'heading' => $found['record']->title,
+    'eyebrow' => $str('digitaleyebrow'),
+    'authors' => $found['card']['authors'] ?? '',
+    'hascover' => isset($covers[$recordid]),
+    'coverurl' => $covers[$recordid] ?? '',
+    'colour' => (int) ($found['card']['colour'] ?? 0),
+    'close' => $str('librariesclose'),
     'intro' => $str('digitalintro'),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
@@ -153,8 +164,8 @@ $data = [
 foreach (
     ['digitaladd', 'digitalfile', 'digitalurl', 'digitalurlhint', 'digitaltitlefield', 'digitallicence',
         'digitallicencehint', 'digitalaudience', 'digitalstages', 'digitaldownload', 'digitalsave', 'digitaldelete',
-        'digitalread', 'digitalnone', 'backtorecord', 'fragmentcourse', 'fragmentnone', 'fragmentpages',
-        'fragmentpageshint', 'fragmentuntil', 'fragmenthint'] as $key
+        'digitalread', 'digitalnone', 'backtorecord', 'digitalchange', 'digitaladdhint', 'fragmentcourse', 'fragmentnone',
+        'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint'] as $key
 ) {
     $data[$key] = $str($key);
 }

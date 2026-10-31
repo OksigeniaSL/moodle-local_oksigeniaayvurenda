@@ -13,79 +13,120 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/digital
 
-    The digital forms of a record: those there are, with their licence and audience, and adding one.
+    The digital forms of a record, as cards: each with its format, licence, who it is for and, when it is only for a
+    course, which and until when; opening it, and changing or removing it in a sheet. Adding one is a card that opens
+    its sheet: a file or a link, its title, its licence, who it is for and, if the book is in some course's readings,
+    only for one of them.
+
+    Context variables required for this template:
+    * heading, eyebrow, authors, hascover, coverurl, colour, intro, notice, action, sesskey, hasitems, recordurl, close
+    * items - id, title, rawtitle, format, formatkey, licencelabel, audiencechips, onlyline, readurl, licences,
+      audiences, stages, download, courses, pages, until
+    * licences, audiences, stages, hasstages, hascourses, courses, until
+    * digitaladd, digitaladdhint, digitalfile, digitalurl, digitalurlhint, digitaltitlefield, digitallicence,
+      digitallicencehint, digitalaudience, digitalstages, digitaldownload, digitalsave, digitaldelete, digitalread,
+      digitalchange, digitalnone, fragmentcourse, fragmentnone, fragmentpages, fragmentpageshint, fragmentuntil,
+      fragmenthint
 
     Example context (json):
     {
-        "heading": "En digital: El faro dormido", "intro": "Lo decide la licencia.", "notice": "", "action": "#",
-        "sesskey": "abc", "hasitems": true, "hasstages": true, "recordurl": "#", "hascourses": true, "until": "2027-06-30",
-        "courses": [{"id": 3, "name": "Lengua 2.º", "selected": false}],
-        "fragmentcourse": "Solo para los alumnos de un curso", "fragmentnone": "Ninguno", "fragmentpages": "Qué parte",
-        "fragmentpageshint": "pp. 12-34", "fragmentuntil": "Hasta", "fragmenthint": "Lo abren solo sus matriculados.",
-        "items": [{"id": 1, "title": "EPUB", "rawtitle": "", "format": "EPUB", "licencelabel": "Dominio público", "readurl": "#",
-            "licences": [{"value": "pd", "label": "Dominio público", "selected": true}],
+        "heading": "La ladrona del faro", "eyebrow": "En digital", "authors": "Ana Ruiz", "hascover": false, "coverurl": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "colour": 2,
+        "intro": "Manda su licencia.", "notice": "", "action": "#", "sesskey": "abc", "hasitems": true,
+        "recordurl": "#", "close": "Cerrar", "hasstages": true, "hascourses": true, "until": "2027-06-30",
+        "items": [{"id": 1, "title": "Capítulo 3", "rawtitle": "Capítulo 3", "format": "PDF", "formatkey": "pdf",
+            "licencelabel": "Con derechos de otros", "audiencechips": ["Alumnos"], "onlyline": "Solo para Lengua 2.º, hasta el 30 jun",
+            "readurl": "#", "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
             "audiences": [{"value": "students", "label": "Alumnos", "checked": true}],
-            "stages": [{"value": "Primaria", "checked": false}], "download": true,
-            "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "Capítulo 3", "until": "2027-06-30",
-            "onlyline": "Solo para Lengua 2.º, hasta el 30 jun"}],
+            "stages": [{"value": "Primaria", "checked": false}], "download": false,
+            "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "pp. 45-60", "until": "2027-06-30"}],
         "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
         "audiences": [{"value": "staff", "label": "Personal", "checked": true}],
         "stages": [{"value": "Primaria", "checked": false}],
-        "digitaladd": "Añadir", "digitalfile": "Fichero", "digitalurl": "O un enlace", "digitalurlhint": "dónde está",
+        "courses": [{"id": 3, "name": "Lengua 2.º", "selected": false}],
+        "digitaladd": "Añadir una forma digital", "digitaladdhint": "EPUB, PDF, audio, vídeo o un enlace",
+        "digitalfile": "Un fichero", "digitalurl": "O un enlace", "digitalurlhint": "a donde está",
         "digitaltitlefield": "Título", "digitallicence": "Licencia", "digitallicencehint": "La licencia manda",
         "digitalaudience": "Para quién", "digitalstages": "Solo estas etapas", "digitaldownload": "Se puede descargar",
-        "digitalsave": "Guardar", "digitaldelete": "Quitarlo", "digitalread": "Abrirlo", "digitalnone": "Nada todavía",
-        "backtorecord": "Volver a la ficha"
+        "digitalsave": "Guardar", "digitaldelete": "Quitarlo", "digitalread": "Abrirlo", "digitalchange": "Cambiar",
+        "digitalnone": "Nada todavía", "fragmentcourse": "Solo para los alumnos de un curso", "fragmentnone": "No",
+        "fragmentpages": "Qué parte", "fragmentpageshint": "pp. 45-60", "fragmentuntil": "Hasta", "fragmenthint": "Solo sus matriculados."
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
+<header class="ayv-dig-head">
+    <span class="ayv-dig-cover ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="">{{/hascover}}</span>
+    <div class="ayv-dig-who">
+        <p class="ayv-dig-eyebrow">{{eyebrow}}</p>
+        <h1 class="ayv-results-title">{{heading}}</h1>
+        {{#authors}}<p class="ayv-dig-authors">{{authors}}</p>{{/authors}}
+        <p class="ayv-dig-intro">{{intro}}</p>
+    </div>
+</header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{^hasitems}}<p class="ayv-empty">{{digitalnone}}</p>{{/hasitems}}
-{{#items}}
-<form method="post" action="{{action}}" class="ayv-book">
-    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
-    <h2 class="ayv-section-title">{{title}} <span class="ayv-field-hint">{{format}} · {{licencelabel}}</span></h2>
-    {{#onlyline}}<p class="ayv-digital-only">{{onlyline}}</p>{{/onlyline}}
-    <p><a href="{{readurl}}">{{digitalread}}</a></p>
-    <label class="ayv-field">{{digitaltitlefield}} <input type="text" name="title" value="{{rawtitle}}" maxlength="255"></label>
-    <label class="ayv-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
-    <fieldset class="ayv-fieldset"><legend>{{digitalaudience}}</legend><div class="ayv-choices">
-        {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/audiences}}</div></fieldset>
-    {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{digitalstages}}</legend><div class="ayv-choices">
-        {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{value}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
-    <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
-    {{#hascourses}}
-    <fieldset class="ayv-fieldset"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
-        <label class="ayv-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}</select></label>
-        <label class="ayv-field">{{fragmentpages}} <input type="text" name="pages" value="{{pages}}" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
-        <label class="ayv-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></fieldset>
-    {{/hascourses}}
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{digitalsave}}</button>
-        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{digitaldelete}}</button></p>
-</form>
-{{/items}}
-<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <h2 class="ayv-section-title">{{digitaladd}}</h2>
-    <label class="ayv-field">{{digitalfile}} <input type="file" name="file" accept=".epub,.pdf,.mp3,.m4a,.m4b,.ogg,.oga,.opus,.wav,.flac,.aac,.mp4,.webm,.ogv,.mov"></label>
-    <label class="ayv-field ayv-field-wide">{{digitalurl}} <span class="ayv-field-hint">{{digitalurlhint}}</span> <input type="text" name="url" inputmode="url" spellcheck="false"></label>
-    <label class="ayv-field">{{digitaltitlefield}} <input type="text" name="title" maxlength="255"></label>
-    <label class="ayv-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
-    <p class="ayv-field-hint">{{digitallicencehint}}</p>
-    <fieldset class="ayv-fieldset"><legend>{{digitalaudience}}</legend><div class="ayv-choices">
-        {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/audiences}}</div></fieldset>
-    {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{digitalstages}}</legend><div class="ayv-choices">
-        {{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{value}}"> {{value}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
-    <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
-    {{#hascourses}}
-    <fieldset class="ayv-fieldset"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
-        <label class="ayv-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}">{{name}}</option>{{/courses}}</select></label>
-        <label class="ayv-field">{{fragmentpages}} <input type="text" name="pages" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
-        <label class="ayv-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></fieldset>
-    {{/hascourses}}
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="add">{{digitaladd}}</button></p>
-</form>
+<ul class="ayv-dig-grid">
+    <li><button type="button" class="ayv-dig-new" data-ayv-open="ayv-dig-add">
+        <span class="ayv-dig-plus" aria-hidden="true">{{> local_oksigeniaayvurenda/icon_plus}}</span>
+        <strong>{{digitaladd}}</strong><span>{{digitaladdhint}}</span></button></li>
+    {{#items}}
+    <li class="ayv-dig-card">
+        <span class="ayv-dig-format ayv-dig-format-{{formatkey}}">{{format}}</span>
+        <h2 class="ayv-dig-title">{{title}}</h2>
+        <p class="ayv-dig-licence">{{licencelabel}}</p>
+        <ul class="ayv-dig-chips">{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}</ul>
+        {{#onlyline}}<p class="ayv-dig-only">{{onlyline}}{{#pages}} · {{pages}}{{/pages}}</p>{{/onlyline}}
+        <p class="ayv-dig-actions"><a class="ayv-button" href="{{readurl}}">{{digitalread}}</a>
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-dig-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{digitalchange}}</button></p>
+        <dialog class="ayv-modal ayv-dig-sheet" id="ayv-dig-{{id}}" aria-labelledby="ayv-dig-{{id}}-title">
+            <div class="ayv-modal-head"><h3 id="ayv-dig-{{id}}-title" class="ayv-section-title">{{title}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <form method="post" action="{{action}}" class="ayv-dig-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
+                <label class="ayv-field ayv-dig-field">{{digitaltitlefield}} <input type="text" name="title" value="{{rawtitle}}" maxlength="255"></label>
+                <label class="ayv-field ayv-dig-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
+                <fieldset class="ayv-dig-set"><legend>{{digitalaudience}}</legend><div class="ayv-segmented">
+                    {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
+                {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
+                    {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
+                {{#hascourses}}
+                <fieldset class="ayv-dig-set ayv-dig-course"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
+                    <label class="ayv-field ayv-dig-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}</select></label>
+                    <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{fragmentpages}} <input type="text" name="pages" value="{{pages}}" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
+                    <label class="ayv-field ayv-dig-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></div></fieldset>
+                {{/hascourses}}
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="save">{{digitalsave}}</button>
+                    <button type="submit" class="ayv-button ayv-button-danger" name="do" value="delete">{{digitaldelete}}</button></p>
+            </form>
+        </dialog>
+    </li>
+    {{/items}}
+</ul>
+<dialog class="ayv-modal ayv-dig-sheet" id="ayv-dig-add" aria-labelledby="ayv-dig-add-title">
+    <div class="ayv-modal-head"><h3 id="ayv-dig-add-title" class="ayv-section-title">{{digitaladd}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-dig-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <div class="ayv-dig-what">
+            <label class="ayv-field ayv-dig-field">{{digitalfile}} <input type="file" name="file" accept=".epub,.pdf,.mp3,.m4a,.m4b,.ogg,.oga,.opus,.wav,.flac,.aac,.mp4,.webm,.ogv,.mov"></label>
+            <label class="ayv-field ayv-dig-field">{{digitalurl}} <span class="ayv-field-hint">{{digitalurlhint}}</span> <input type="text" name="url" inputmode="url" spellcheck="false"></label>
+        </div>
+        <label class="ayv-field ayv-dig-field">{{digitaltitlefield}} <input type="text" name="title" maxlength="255"></label>
+        <label class="ayv-field ayv-dig-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
+        <p class="ayv-field-hint">{{digitallicencehint}}</p>
+        <fieldset class="ayv-dig-set"><legend>{{digitalaudience}}</legend><div class="ayv-segmented">
+            {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
+        {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
+            {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}"><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
+        {{#hascourses}}
+        <fieldset class="ayv-dig-set ayv-dig-course"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
+            <label class="ayv-field ayv-dig-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}">{{name}}</option>{{/courses}}</select></label>
+            <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{fragmentpages}} <input type="text" name="pages" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
+            <label class="ayv-field ayv-dig-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></div></fieldset>
+        {{/hascourses}}
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="add">{{digitaladd}}</button></p>
+    </form>
+</dialog>

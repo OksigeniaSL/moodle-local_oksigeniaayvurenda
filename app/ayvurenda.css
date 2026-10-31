@@ -3166,3 +3166,100 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
     .ayv .ayv-demand-row { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-demand-ratio { grid-column: 1; grid-row: auto; }
 }
+/* The digital forms of a record: the book on top, then cards (one to add, one per form), and each one changed in its
+   sheet. */
+.ayv .ayv-dig-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.25rem; align-items: center; margin: 0 0 1.25rem; }
+.ayv .ayv-dig-cover { width: 5.5rem; padding: 0; }
+.ayv .ayv-dig-who .ayv-results-title { margin: 0; }
+.ayv .ayv-dig-eyebrow { margin: 0 0 .2rem; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.ayv .ayv-dig-authors { margin: .15rem 0 .5rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-dig-intro { margin: 0; }
+.ayv .ayv-dig-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: .9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.ayv .ayv-dig-new {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: .35rem;
+    width: 100%;
+    height: 100%;
+    min-height: 12rem;
+    padding: 1.25rem;
+    border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+}
+.ayv .ayv-dig-new:hover { background: var(--notice-bg); }
+.ayv .ayv-dig-new:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-dig-new strong { font-family: var(--title); font-size: 1.15rem; }
+.ayv .ayv-dig-new span:last-child { font-size: .92rem; color: var(--ink); }
+.ayv .ayv-dig-plus {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fbf6ec;
+}
+.ayv .ayv-dig-card {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    padding: 1.1rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line);
+}
+.ayv .ayv-dig-format {
+    align-self: flex-start;
+    padding: .2rem .7rem;
+    border-radius: 8px;
+    background: var(--green);
+    color: #fbf6ec;
+    font-weight: 700;
+    font-size: .82rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+.ayv .ayv-dig-format-pdf { background: #a3321e; }
+.ayv .ayv-dig-format-audio { background: #3f6e8c; }
+.ayv .ayv-dig-format-video { background: #5b4b8a; }
+.ayv .ayv-dig-format-link { background: #4f5b57; }
+.ayv .ayv-dig-title { margin: 0; font-family: var(--title); font-size: 1.2rem; }
+.ayv .ayv-dig-licence { margin: 0; font-size: .92rem; }
+.ayv .ayv-dig-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-dig-chips li { padding: .1rem .6rem; border-radius: 999px; background: var(--notice-bg); color: var(--accent); font-size: .85rem; font-weight: 700; }
+.ayv .ayv-dig-only { margin: 0; padding: .45rem .7rem; border-radius: 10px; background: color-mix(in srgb, var(--late) 12%, transparent); color: var(--late); font-weight: 700; font-size: .9rem; }
+.ayv .ayv-dig-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: auto 0 0; padding-top: .35rem; }
+.ayv .ayv-dig-form { display: grid; gap: 1rem; }
+.ayv .ayv-dig-field { flex-direction: column; align-items: stretch; gap: .3rem; }
+.ayv .ayv-dig-field input,
+.ayv .ayv-dig-field select { width: 100%; }
+.ayv .ayv-dig-set { margin: 0; padding: 0; border: 0; min-width: 0; }
+.ayv .ayv-dig-set legend { margin: 0 0 .45rem; padding: 0; font-weight: 700; }
+.ayv .ayv-dig-course { padding: 1rem; border-radius: 14px; background: var(--paper); }
+.ayv .ayv-dig-course > legend { float: left; width: 100%; }
+.ayv .ayv-dig-course > legend + * { clear: both; }
+.ayv .ayv-dig-field .ayv-date { display: grid; grid-template-columns: 6rem minmax(0, 1fr) 7.5rem; width: 100%; }
+.ayv .ayv-dig-field .ayv-date select { width: 100%; }
+.ayv .ayv-dig-course .ayv-field-hint { margin: 0 0 .6rem; }
+.ayv .ayv-dig-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; margin-top: .6rem; }
+.ayv .ayv-dig-what { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .75rem; padding: 1rem; border-radius: 14px; background: var(--paper); }
+.ayv .ayv-dig-sheet-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem; margin: .25rem 0 0; }
+.ayv .ayv-button-danger { background: transparent; color: var(--danger); border-color: currentColor; }
+@media (max-width: 36rem) {
+    .ayv .ayv-dig-what { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-dig-head { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-dig-cover { display: none; }
+}
