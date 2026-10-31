@@ -37,6 +37,9 @@ $library = catalogue::library($ref);
 shell::require('local/oksigeniaayvurenda:desk', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/memoir.php', ['library' => $ref]));
+if (!$library) {
+    shell::missing(get_string('librarynotfound', 'local_oksigeniaayvurenda'));
+}
 
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $entityid = (int) $library->entityid;

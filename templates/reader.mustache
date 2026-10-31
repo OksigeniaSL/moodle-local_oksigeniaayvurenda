@@ -26,7 +26,7 @@
     * holds - title, state; hasholds
     * readheading, read (title, url, hascover, coverurl, colour, when, note), hasread, readmore
     * past - year, loans; haspast
-    * notes, notice, action, sesskey, deskurl, cardurl, appheading
+    * notes, staffonly, notice, action, sesskey, deskurl, cardurl, appheading
     * app - false, or can, button and hint: the way into the app, by e-mail
     * profiledesk, profilecard, profilenow, profilenothing, profileholds, profilenoread, profilepastheading,
       profilenotes, profilenoteshint, profilesave, profilegone, profilecode
@@ -42,7 +42,7 @@
         "read": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
             "when": "14 de octubre", "note": "Le encantó"}], "hasread": true, "readmore": "",
         "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
-        "notes": "", "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "appheading": "La app",
+        "notes": "", "staffonly": true, "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "appheading": "La app",
         "app": {"can": true, "button": "Mandarle la app", "hint": "Le llega un correo con un enlace."},
         "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
         "profilenothing": "Nada prestado.", "profileholds": "Reservas", "profilenoread": "Nada este curso todavía.",
@@ -100,6 +100,7 @@
             <ul class="ayv-profile-holds">{{#holds}}<li><b>{{title}}</b> <span>{{state}}</span></li>{{/holds}}</ul>
         </section>
         {{/hasholds}}
+        {{#staffonly}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profilenotes}}</h2>
             <form method="post" action="{{action}}">
@@ -110,6 +111,7 @@
                 <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
             </form>
         </section>
+        {{/staffonly}}
         {{#app}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{appheading}}</h2>

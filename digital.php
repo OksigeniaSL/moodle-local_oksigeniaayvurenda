@@ -72,7 +72,12 @@ if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     if ($do === 'add') {
         $url = trim(optional_param('url', '', PARAM_URL));
-        if (!empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
+        if (
+            !empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])
+            && !digital::acceptable($_FILES['file']['tmp_name'], (string) $_FILES['file']['name'])
+        ) {
+            $notice = $str('digitalwrongtype');
+        } else if (!empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
             $fragment(digital::add_file(
                 $library,
                 $recordid,

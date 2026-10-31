@@ -56,7 +56,9 @@ final class cifra {
     }
 
     /**
-     * Saves the settings; a key or secret left empty keeps the one there was.
+     * Saves the settings; a key or secret left empty keeps the one there was, unless the address or the way of
+     * connecting changed: then they are forgotten (else whoever may change the settings could send the centre's key to
+     * a server of theirs).
      *
      * @param int $entityid
      * @param array $settings enabled, url, mode, example, key, clientid, secret.
@@ -64,10 +66,17 @@ final class cifra {
     public static function save(int $entityid, array $settings): void {
         global $DB;
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $before = $entity['cifra'] ?? [];
+        $url = rtrim(trim((string) ($settings['url'] ?? '')), '/');
+        $mode = ($settings['mode'] ?? 'key') === 'oauth' ? 'oauth' : 'key';
+        if ($before && (($before['url'] ?? '') !== $url || ($before['mode'] ?? 'key') !== $mode)) {
+            unset_config('cifrakey' . $entityid, 'local_oksigeniaayvurenda');
+            unset_config('cifrasecret' . $entityid, 'local_oksigeniaayvurenda');
+        }
         $entity['cifra'] = [
             'enabled' => !empty($settings['enabled']),
-            'url' => rtrim(trim((string) ($settings['url'] ?? '')), '/'),
-            'mode' => ($settings['mode'] ?? 'key') === 'oauth' ? 'oauth' : 'key',
+            'url' => $url,
+            'mode' => $mode,
             'example' => !empty($settings['example']),
             'clientid' => trim((string) ($settings['clientid'] ?? '')),
             'brought' => $entity['cifra']['brought'] ?? null,
@@ -231,9 +240,14 @@ final class cifra {
             return $answer;
         }
         require_once($CFG->libdir . '/filelib.php');
-        // On a site shared by several centres nobody reaches the site's own network: the administrator lets the bridge's
-        // address through in Moodle's HTTP security settings instead.
-        $curl = new \curl(['ignoresecurity' => $internal && !get_config('local_oksigeniaayvurenda', 'entitycategories')]);
+        // Moodle's HTTP security stands, except for a host of the site's own network that its administrator allowed in
+        // the plugin's settings (a bridge inside the server): nobody else can point the connector inside.
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $allowed = array_filter(array_map('trim', explode(',', strtolower((string) get_config(
+            'local_oksigeniaayvurenda',
+            'internalhosts'
+        )))));
+        $curl = new \curl(['ignoresecurity' => $internal && $host !== '' && in_array($host, $allowed, true)]);
         $curl->setHeader($headers);
         $curl->setopt(['CURLOPT_TIMEOUT' => 60, 'CURLOPT_CONNECTTIMEOUT' => 10]);
         $answer = $method === 'POST' ? $curl->post($url, $body) : $curl->get($url);

@@ -93,7 +93,7 @@ class mobile {
         return [
             'templates' => [['id' => 'main', 'html' => $OUTPUT->render_from_template(
                 'local_oksigeniaayvurenda/mobile_library',
-                $data
+                self::inert($data)
             )]],
             'javascript' => '',
             'otherdata' => $otherdata,
@@ -134,7 +134,7 @@ class mobile {
         return [
             'templates' => [['id' => 'main', 'html' => $OUTPUT->render_from_template(
                 'local_oksigeniaayvurenda/mobile_search',
-                $data
+                self::inert($data)
             )]],
             'javascript' => '',
             'otherdata' => ['q' => $query],
@@ -202,7 +202,7 @@ class mobile {
         return [
             'templates' => [['id' => 'main', 'html' => $OUTPUT->render_from_template(
                 'local_oksigeniaayvurenda/mobile_record',
-                $data
+                self::inert($data)
             )]],
             'javascript' => '',
             // Whether the reader is being asked if they let go of the book (a question in the page, not a dialog).
@@ -229,6 +229,21 @@ class mobile {
             return '';
         }
         return 'data:image/jpeg;base64,' . base64_encode($file->get_content());
+    }
+
+    /**
+     * The page's data with no braces in its texts. The app compiles these templates as Angular ones, and Mustache does
+     * not escape braces: a title brought from Open Library, Wikisource or an imported catalogue with «{{ … }}» in it
+     * would run in the app with the reader's session. Each brace becomes its full-width look-alike, which reads the same.
+     *
+     * @param mixed $data
+     * @return mixed
+     */
+    private static function inert($data) {
+        if (is_array($data)) {
+            return array_map([self::class, 'inert'], $data);
+        }
+        return is_string($data) && !str_starts_with($data, 'data:') ? strtr($data, ['{' => '｛', '}' => '｝']) : $data;
     }
 
     /**

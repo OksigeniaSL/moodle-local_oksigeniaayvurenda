@@ -36,6 +36,9 @@ $library = catalogue::library($ref);
 shell::require('local/oksigeniaayvurenda:catalogue', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/posters.php', ['library' => $ref]));
+if (!$library) {
+    shell::missing(get_string('librarynotfound', 'local_oksigeniaayvurenda'));
+}
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 
 // The places of the room; a library that has none is laid out by its corners.

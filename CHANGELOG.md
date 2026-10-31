@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.97.0 (2026-10-31)
+
+Fixes from a review of the whole project:
+
+- The digital collection takes only what is read or played (EPUB, PDF, audio, video), never a page: a file whose
+  content is markup or a script is refused, and anything that is not a work that reads or plays, and any HTML, SVG or
+  XML file the plugin serves, always goes as a download. The catalogue capability now says it carries a risk of XSS.
+- The app's screens: braces in a title, author or shelf mark become their full-width look-alikes, so the app (which
+  compiles these templates) can never run what a catalogue brought.
+- Cifra's connector forgets its key or secret when its address or way of connecting changes, and reaches a host of
+  the server's own network only if the site's administrator allowed it (new setting «Internal hosts for the
+  connectors»); Moodle's HTTP security stands for everything else.
+- Linking a reader with an account that already had one brings everything along (holds, reviews, voices, where it
+  came from), as joining repeated readers does: no reservation is left pointing at a reader that is gone.
+- A library cannot hang from one of its own, and the desk never loops looking for loan rules.
+- Whoever only keeps a library sees, on a reader's record, what that library lends them: not their history elsewhere
+  nor the staff's notes, and they write nothing there.
+- Deleting a reader's data also forgets their name in their family's voice invitations.
+- Smaller: cancelling someone else's reservation shows a page of the library instead of an error; the memoir and the
+  posters say when a library does not exist; «Cancel» in LTI.
+
 ## 0.96.0 (2026-10-31)
 
 - The same header on every page (`classes/local/menu.php`), after a design review of every screen: for the staff,

@@ -71,10 +71,9 @@ final class matching {
             foreach ($DB->get_records(self::T . 'member', ['readerid' => $other->id]) as $member) {
                 $DB->delete_records(self::T . 'member', ['readerid' => $keep->id, 'yearid' => $member->yearid]);
             }
-            $DB->set_field(self::T . 'member', 'readerid', $keep->id, ['readerid' => $other->id]);
-            $DB->set_field(self::T . 'loan', 'readerid', $keep->id, ['readerid' => $other->id]);
-            $DB->delete_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $other->id]);
-            $DB->delete_records(self::T . 'reader', ['id' => $other->id]);
+            // Then everything of the account's reader comes along (loans, holds, reviews, voices, where it came from), as
+            // when two repeated readers are put together: nothing is left pointing at a reader that is gone.
+            twins::join($entityid, (int) $keep->id, (int) $other->id);
             $type = $other->readertype;
         }
         // The account gives the name from now on: the library does not keep a copy.

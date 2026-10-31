@@ -46,6 +46,7 @@ $capabilities = [
     ],
     // Catalogue: add and change records and copies, import.
     'local/oksigeniaayvurenda:catalogue' => [
+        'riskbitmask' => RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSECAT,
         'archetypes' => [

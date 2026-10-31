@@ -54,7 +54,10 @@ if (!(new desk($library, (int) $USER->id, $now, $own))->allowed($id)) {
 }
 $notice = '';
 $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id, 'entityid' => $library->entityid]);
-if (data_submitted() && confirm_sesskey()) {
+// Whoever only keeps this library sees what it lends them: not their history elsewhere, nor the staff's notes, and
+// writes nothing here.
+$limited = $own && !access::can('local/oksigeniaayvurenda:desk', $library);
+if (!$limited && data_submitted() && confirm_sesskey()) {
     if (optional_param('do', '', PARAM_ALPHA) === 'app' && $reader) {
         // The way into the app, by e-mail.
         $notice = $str(applink::send($reader));
@@ -64,10 +67,17 @@ if (data_submitted() && confirm_sesskey()) {
         $notice = $str('profilenotessaved');
     }
 }
-$app = $reader ? applink::state($reader) : 'none';
+$app = $reader && !$limited ? applink::state($reader) : 'none';
 $record = profile::of($library, $id, $now);
 if (!$record) {
     shell::missing($str('readernothere'), $library);
+}
+if ($limited) {
+    $record['loans'] = array_values(array_filter($record['loans'], fn($l) => $l['libraryid'] === (int) $library->id));
+    $record['holds'] = [];
+    $record['read'] = ['books' => [], 'total' => 0];
+    $record['past'] = [];
+    $record['notes'] = '';
 }
 $link = fn(string $script, array $params = []) => (new moodle_url(
     '/local/oksigeniaayvurenda/' . $script,
@@ -137,6 +147,7 @@ $data = [
         : $str('profilepast', $p['loans'])], $record['past']),
     'haspast' => (bool) $record['past'],
     'notes' => $record['notes'],
+    'staffonly' => !$limited,
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),

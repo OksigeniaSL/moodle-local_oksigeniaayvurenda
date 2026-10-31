@@ -66,6 +66,8 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
             $item->licence,
             (bool) $item->download
         );
+        // Shown in the page only what is read or played; anything else (older files, whatever got in) is downloaded.
+        $inline = in_array($item->format, ['epub', 'pdf', 'audio', 'video'], true);
     } else if ($filearea === 'copies') {
         // The daily copies of a centre (the item is the centre): for its staff.
         require_login(null, false);
@@ -137,6 +139,15 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
     $file = get_file_storage()->get_file($context->id, 'local_oksigeniaayvurenda', $filearea, $itemid, $filepath, $filename);
     if (!$file || $file->is_directory()) {
         return false;
+    }
+    // Never markup in the site's origin: a digital item that is not a work that reads or plays, and any HTML, SVG or
+    // XML that got in, always as a download.
+    $mime = (string) $file->get_mimetype();
+    if (
+        ($filearea === 'digital' && empty($inline)) || str_contains($mime, 'html') || str_contains($mime, 'xml')
+        || str_contains($mime, 'svg') || str_starts_with($mime, 'text/')
+    ) {
+        $forcedownload = true;
     }
     send_stored_file(
         $file,

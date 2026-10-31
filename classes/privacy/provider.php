@@ -588,6 +588,9 @@ class provider implements
             ]);
             $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $reader->id]);
             $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $reader->id]);
+            // The invitations to their family carried their name («Family of …»): the name and the link to them go.
+            $DB->set_field(self::T . 'voiceinvite', 'name', null, ['readerid' => $reader->id]);
+            $DB->set_field(self::T . 'voiceinvite', 'readerid', null, ['readerid' => $reader->id]);
             // The key their origin knew them by (a file number, an email, a name) goes too.
             $DB->delete_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $reader->id]);
             $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $reader->id]);

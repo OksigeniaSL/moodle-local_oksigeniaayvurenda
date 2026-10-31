@@ -76,7 +76,7 @@ if ($action === 'ask') {
     $hold = $DB->get_record('local_oksigeniaayvurenda_hold', ['id' => required_param('hold', PARAM_INT),
         'libraryid' => $library->id], '*', MUST_EXIST);
     if (!$isdesk && (!$mine || (int) $hold->readerid !== (int) $mine->id)) {
-        throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+        shell::refuse(get_string('holdnotyours', 'local_oksigeniaayvurenda'), $library);
     }
     holds::cancel((int) $hold->id, $now);
     $recordid = (int) $hold->recordid;

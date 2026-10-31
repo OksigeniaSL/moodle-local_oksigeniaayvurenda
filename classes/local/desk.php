@@ -544,7 +544,10 @@ final class desk {
                 'renewdays' => 0];
         }
         $library = $this->library;
-        while ($library) {
+        $seen = [];
+        // Up the libraries it hangs from, each once (a loop in the data cannot hang the desk).
+        while ($library && !isset($seen[$library->id])) {
+            $seen[$library->id] = true;
             $rules = $DB->get_records(self::T . 'rule', ['libraryid' => $library->id]);
             if ($rules) {
                 return loan_rules::pick(array_map(fn($r) => (array) $r, $rules), $readertype, $itemtype);

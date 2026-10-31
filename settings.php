@@ -38,6 +38,15 @@ if ($hassiteconfig) {
             PARAM_URL,
             50
         ));
+        // Hosts of the site's own network a connector may reach (a bridge inside the server); none by default.
+        $settings->add(new admin_setting_configtext(
+            'local_oksigeniaayvurenda/internalhosts',
+            $str('internalhosts'),
+            $str('internalhosts_desc'),
+            '',
+            PARAM_TEXT,
+            50
+        ));
         // The class island in 3D, in «My class»: on unless the site's computers cannot carry it.
         $settings->add(new admin_setting_configcheckbox(
             'local_oksigeniaayvurenda/island3d',

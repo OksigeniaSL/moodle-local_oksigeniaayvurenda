@@ -169,7 +169,7 @@ final class profile {
     private static function loans(\stdClass $library, int $readerid, int $now): array {
         global $DB;
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, i.recordid, r.title, b.name AS library
+            "SELECT l.id, l.timedue, l.libraryid, i.recordid, r.title, b.name AS library
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} r ON r.id = i.recordid
@@ -179,7 +179,7 @@ final class profile {
             ['readerid' => $readerid, 'entityid' => $library->entityid]
         );
         return array_values(array_map(fn($r) => ['recordid' => (int) $r->recordid, 'title' => $r->title,
-            'library' => format_string($r->library), 'due' => (int) $r->timedue,
+            'libraryid' => (int) $r->libraryid, 'library' => format_string($r->library), 'due' => (int) $r->timedue,
             'late' => max(0, (int) floor(($now - (int) $r->timedue) / DAYSECS))], $rows));
     }
 

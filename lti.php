@@ -132,7 +132,7 @@ $data = [
     'moodlehint' => $str('ltimoodlehint'),
     'savelabel' => $str('ltisave'),
     'cancelurl' => $editing ? $PAGE->url->out(false) : '',
-    'cancellabel' => $str('cancel', 'moodle'),
+    'cancellabel' => get_string('cancel'),
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
 ];

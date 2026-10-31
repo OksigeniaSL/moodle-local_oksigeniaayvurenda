@@ -95,11 +95,39 @@ final class digital {
         ?int $now = null
     ): int {
         $filename = clean_filename($filename) ?: 'file';
+        // Only what is read or played (EPUB, PDF, audio, video), by its name and by what it really is: a page (HTML,
+        // SVG, XML…) opened in the site would run there with the session of whoever opens it.
+        if (!self::acceptable($path, $filename)) {
+            throw new \moodle_exception('digitalwrongtype', 'local_oksigeniaayvurenda');
+        }
         $id = self::insert($library, $recordid, 'file', digital_rules::format($filename), null, $data, $userid, $now);
         get_file_storage()->create_file_from_pathname(['contextid' => \context_system::instance()->id,
             'component' => 'local_oksigeniaayvurenda', 'filearea' => self::AREA, 'itemid' => $id, 'filepath' => '/',
             'filename' => $filename], $path);
         return $id;
+    }
+
+    /**
+     * Whether a file may go in the digital collection: an EPUB, a PDF, an audio or a video, by its name and its content.
+     *
+     * @param string $path Where the file is now.
+     * @param string $filename Its name.
+     * @return bool
+     */
+    public static function acceptable(string $path, string $filename): bool {
+        $format = digital_rules::format($filename);
+        if ($format === 'other' || !is_readable($path)) {
+            return false;
+        }
+        // Its name decides the type it is served with (one that reads or plays); its content, never markup or a script,
+        // in case a browser looked inside.
+        $mime = strtolower((string) (new \finfo(FILEINFO_MIME_TYPE))->file($path));
+        foreach (['html', 'xml', 'svg', 'javascript', 'ecmascript'] as $markup) {
+            if (str_contains($mime, $markup)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

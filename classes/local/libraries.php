@@ -163,7 +163,7 @@ final class libraries {
         $parentid = (int) ($data['parentid'] ?? $library->parentid);
         if (
             $parentid === (int) $library->id || ($parentid && !$DB->record_exists(self::T . 'library', ['id' => $parentid,
-                'entityid' => $library->entityid]))
+                'entityid' => $library->entityid])) || ($parentid && self::descends($parentid, (int) $library->id))
         ) {
             $parentid = 0;
         }
@@ -247,6 +247,27 @@ final class libraries {
                 }
             }
         }
+    }
+
+    /**
+     * Whether a library hangs, however far down, from another: going up from it, the other comes.
+     *
+     * @param int $libraryid
+     * @param int $ancestorid
+     * @return bool
+     */
+    public static function descends(int $libraryid, int $ancestorid): bool {
+        global $DB;
+        $seen = [];
+        $id = $libraryid;
+        while ($id && !isset($seen[$id])) {
+            if ($id === $ancestorid) {
+                return true;
+            }
+            $seen[$id] = true;
+            $id = (int) $DB->get_field(self::T . 'library', 'parentid', ['id' => $id]);
+        }
+        return false;
     }
 
     /**
