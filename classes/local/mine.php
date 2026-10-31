@@ -74,17 +74,17 @@ final class mine {
                ORDER BY l.timedue, l.id",
                 ['readerid' => $reader->id]
             );
-            $renews = [];
             foreach ($rows as $row) {
                 $where = $DB->get_record(self::T . 'library', ['id' => $row->libraryid]) ?: $library;
-                // Whether they may give it more time themselves, as the library says (once per library).
-                $renews[$where->id] = $renews[$where->id] ?? holds::renew_online($where, (int) $reader->id, $now);
+                // Whether they may give it more time themselves now, and until when.
+                $until = renewals::until($where, (int) $reader->id, (int) $row->id, $userid, $now);
                 $loans[] = [
                     'loanid' => (int) $row->id,
                     'recordid' => (int) $row->recordid,
                     // Not «slug»: inside the list, Mustache would find the library's first.
                     'where' => (string) $where->slug,
-                    'canrenew' => $renews[$where->id],
+                    'canrenew' => $until !== null,
+                    'renewuntil' => $until ? userdate($until, get_string('strftimedateshort', 'langconfig')) : '',
                     'title' => $row->title,
                     'url' => $url('record.php', $where, ['id' => $row->recordid]),
                     'due' => userdate((int) $row->timedue, get_string('strftimedateshort', 'langconfig')),

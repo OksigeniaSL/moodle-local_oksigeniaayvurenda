@@ -34,6 +34,24 @@ final class renewals {
     private const T = 'local_oksigeniaayvurenda_';
 
     /**
+     * Whether the account's reader may give one of their loans more time now, by themselves, and until when.
+     *
+     * @param \stdClass $library The library of the loan.
+     * @param int $readerid
+     * @param int $loanid
+     * @param int $userid
+     * @param int|null $now
+     * @return int|null The new date, or null when they may not (the library does not let them, or no renewal is left).
+     */
+    public static function until(\stdClass $library, int $readerid, int $loanid, int $userid, ?int $now = null): ?int {
+        $now = $now ?? time();
+        if (!holds::renew_online($library, $readerid, $now)) {
+            return null;
+        }
+        return (new desk($library, $userid, $now))->renewable($loanid);
+    }
+
+    /**
      * Renews a loan of the account's reader.
      *
      * @param int $loanid

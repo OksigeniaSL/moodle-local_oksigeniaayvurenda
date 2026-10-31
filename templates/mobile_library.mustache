@@ -26,7 +26,7 @@
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar", "renew": "Ampliar",
         "renewed": "Ampliado.",
         "libraries": [{"name": "Biblioteca", "slug": "demo-1", "qkey": "q0", "cardcode": "10000H", "home": "https://example.org/b", "spring": "https://example.org/a",
-            "hasloans": true, "loans": [{"loanid": 7, "canrenew": true, "where": "demo-1", "recordid": 3, "title": "El faro dormido", "url": "https://example.org/r", "when": "hasta el 3 nov",
+            "hasloans": true, "loans": [{"loanid": 7, "canrenew": true, "renewtoast": "Ampliado hasta el 15 dic.", "where": "demo-1", "recordid": 3, "title": "El faro dormido", "url": "https://example.org/r", "when": "hasta el 3 nov",
                 "late": false}],
             "hasholds": false, "holds": [], "barcodeimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
             "qrimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw="}]
@@ -44,7 +44,7 @@
         <ion-item-divider><ion-label>{{loansheading}}</ion-label></ion-item-divider>
         {{^hasloans}}<ion-item><ion-label class="ion-text-wrap">{{none}}</ion-label></ion-item>{{/hasloans}}
         {{#loans}}<ion-item button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }"{{#canrenew}} lines="none"{{/canrenew}}><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p{{#late}} class="text-danger"{{/late}}>{{when}}</p></ion-label></ion-item>
-        {{#canrenew}}<ion-item><ion-button slot="end" size="small" fill="outline" core-site-plugins-call-ws name="local_oksigeniaayvurenda_renew_loan" [params]="{loan: {{loanid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{renewed}}" refreshOnSuccess="true">{{renew}}</ion-button></ion-item>{{/canrenew}}{{/loans}}
+        {{#canrenew}}<ion-item><ion-button slot="end" size="small" fill="outline" core-site-plugins-call-ws name="local_oksigeniaayvurenda_renew_loan" [params]="{loan: {{loanid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{renewtoast}}" refreshOnSuccess="true">{{renew}}</ion-button></ion-item>{{/canrenew}}{{/loans}}
         {{#hasholds}}
         <ion-item-divider><ion-label>{{holdsheading}}</ion-label></ion-item-divider>
         {{#holds}}<ion-item button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{slug}}', id: {{recordid}} }"><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p>{{when}}</p></ion-label></ion-item>{{/holds}}

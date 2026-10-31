@@ -27,7 +27,8 @@
         "free": false, "hascopies": true, "copiesheading": "Ejemplares",
         "copies": [{"state": "Prestado", "location": "Estantería juvenil", "callnumber": "N RUI fa"}],
         "mine": "", "ahead": "", "holdid": 0, "holdcancelask": "¿Anular el aviso?", "holdcancelled": "Anulado.",
-        "holdcancelmine": "Ya no lo quiero", "canask": true, "holdask": "Avísame cuando vuelva", "holdaskhint": "Te avisamos.",
+        "holdcancelmine": "Ya no lo quiero", "holdkeepwaiting": "Seguir esperando", "holdletgo": "Dejarlo",
+        "loanid": 0, "canrenew": false, "renew": "Ampliar", "renewtoast": "", "canask": true, "holdask": "Avísame cuando vuelva", "holdaskhint": "Te avisamos.",
         "holdadded": "Hecho.", "url": "https://example.org/r", "openweb": "Abrir en la biblioteca"
     }
 }}
@@ -39,7 +40,15 @@
     <ion-item lines="none"><ion-label class="ion-text-wrap"><h2>{{title}}</h2>{{#subtitle}}<p>{{subtitle}}</p>{{/subtitle}}{{#authors}}<p>{{authors}}</p>{{/authors}}</ion-label></ion-item>
     <ion-item><ion-label class="ion-text-wrap"><p>{{#free}}<strong>{{/free}}{{statelabel}}{{#free}}</strong>{{/free}}</p></ion-label></ion-item>
     {{#mine}}<ion-item><ion-label class="ion-text-wrap"><p><strong>{{mine}}</strong></p>{{#ahead}}<p>{{ahead}}</p>{{/ahead}}</ion-label></ion-item>
-    {{#holdid}}<ion-button expand="block" fill="outline" class="ion-margin" core-site-plugins-call-ws name="local_oksigeniaayvurenda_cancel_hold" [params]="{hold: {{holdid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" confirmMessage="{{holdcancelask}}" successMessage="{{holdcancelled}}" refreshOnSuccess="true">{{holdcancelmine}}</ion-button>{{/holdid}}{{/mine}}
+    {{#canrenew}}<ion-button expand="block" class="ion-margin" core-site-plugins-call-ws name="local_oksigeniaayvurenda_renew_loan" [params]="{loan: {{loanid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{renewtoast}}" refreshOnSuccess="true">{{renew}}</ion-button>{{/canrenew}}
+    {{#holdid}}
+    <ion-button expand="block" fill="outline" class="ion-margin" *ngIf="!CONTENT_OTHERDATA.letgo" (click)="CONTENT_OTHERDATA.letgo = 1">{{holdcancelmine}}</ion-button>
+    <ion-item lines="none" *ngIf="CONTENT_OTHERDATA.letgo"><ion-label class="ion-text-wrap"><p>{{holdcancelask}}</p></ion-label></ion-item>
+    <ion-grid *ngIf="CONTENT_OTHERDATA.letgo"><ion-row>
+        <ion-col><ion-button expand="block" fill="outline" (click)="CONTENT_OTHERDATA.letgo = 0">{{holdkeepwaiting}}</ion-button></ion-col>
+        <ion-col><ion-button expand="block" core-site-plugins-call-ws name="local_oksigeniaayvurenda_cancel_hold" [params]="{hold: {{holdid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{holdcancelled}}" refreshOnSuccess="true">{{holdletgo}}</ion-button></ion-col>
+    </ion-row></ion-grid>
+    {{/holdid}}{{/mine}}
     {{#canask}}
     <ion-item lines="none"><ion-label class="ion-text-wrap"><p>{{holdaskhint}}</p></ion-label></ion-item>
     <ion-button expand="block" class="ion-margin" core-site-plugins-call-ws name="local_oksigeniaayvurenda_ask_hold" [params]="{library: '{{library}}', record: {{recordid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{holdadded}}" refreshOnSuccess="true">{{holdask}}</ion-button>

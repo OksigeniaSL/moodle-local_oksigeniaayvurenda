@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\core\barcode\code39;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\mine;
+use local_oksigeniaayvurenda\local\renewals;
 use local_oksigeniaayvurenda\local\screens;
 
 /**
@@ -55,10 +56,13 @@ class mobile {
             $libraries[] = [
                 'hasloans' => (bool) $library['loans'],
                 'hasholds' => (bool) $library['holds'],
-                'loans' => array_map(fn($loan) => $loan + ['when' => $str(
-                    $loan['late'] ? 'mobilelate' : 'mobiledue',
-                    $loan['due']
-                )], $library['loans']),
+                'loans' => array_map(
+                    fn($loan) => $loan + ['when' => $str(
+                        $loan['late'] ? 'mobilelate' : 'mobiledue',
+                        $loan['due']
+                    ), 'renewtoast' => $loan['renewuntil'] !== '' ? $str('mobilerenewedto', $loan['renewuntil']) : ''],
+                    $library['loans']
+                ),
                 'holds' => array_map(fn($hold) => $hold + ['when' => $hold['ready'] ? $str('mobileready', $hold['until'])
                     : $str('mobilewaiting')], $library['holds']),
                 // Not «barcode» nor «qr»: other templates use those names for drawings, not addresses.
@@ -145,7 +149,7 @@ class mobile {
      * @return array
      */
     public static function mobile_record_view(array $args): array {
-        global $OUTPUT;
+        global $DB, $OUTPUT, $USER;
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $library = self::library($args);
         $found = $library ? catalogue::record((int) ($args['id'] ?? 0), $library) : null;
@@ -153,6 +157,13 @@ class mobile {
         if ($found) {
             $card = screens::cards([$found['card']], $library)[0];
             $box = screens::hold($found, $library) ?? [];
+            // Their own loan of it: more time, if they may still have it.
+            $until = null;
+            if (!empty($box['loanid'])) {
+                $loan = $DB->get_record('local_oksigeniaayvurenda_loan', ['id' => $box['loanid']]);
+                $where = $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $loan->libraryid]);
+                $until = renewals::until($where, (int) $loan->readerid, (int) $loan->id, (int) $USER->id);
+            }
             $copies = array_values(array_filter($found['copies'], fn($c) => $c['here']));
             $data += [
                 'library' => $library->slug,
@@ -169,11 +180,18 @@ class mobile {
                 'copiesheading' => $str('copies'),
                 'mine' => $box['mine'] ?? '',
                 'holdid' => (int) ($box['holdid'] ?? 0),
+                'holdkeepwaiting' => $str('holdkeepwaiting'),
+                'holdletgo' => $str('holdletgo'),
                 'holdcancelask' => $str('holdcancelask'),
                 'holdcancelled' => $str('holdcancelled'),
                 'holdcancelmine' => $str('holdcancelmine'),
                 'ahead' => $box['ahead'] ?? '',
                 'canask' => !empty($box['canask']),
+                'loanid' => (int) ($box['loanid'] ?? 0),
+                'canrenew' => $until !== null,
+                'renew' => $str('mobilerenew'),
+                'renewtoast' => $until
+                    ? $str('mobilerenewedto', userdate($until, get_string('strftimedateshort', 'langconfig'))) : '',
                 'holdask' => $str('holdask'),
                 'holdaskhint' => $str('holdaskhint'),
                 'holdadded' => $str('holdadded'),
@@ -187,7 +205,8 @@ class mobile {
                 $data
             )]],
             'javascript' => '',
-            'otherdata' => '',
+            // Whether the reader is being asked if they let go of the book (a question in the page, not a dialog).
+            'otherdata' => ['letgo' => 0],
         ];
     }
 

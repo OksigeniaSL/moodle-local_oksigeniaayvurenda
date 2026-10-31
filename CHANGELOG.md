@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.92.2 (2026-10-31)
+
+- After Aty's second test on a phone: a book the reader has out says so on its page («You have it, until…», with
+  «Renew»), instead of offering to ask for it; «Renew» shows only while a renewal is left (and no one waits for the
+  book), and says the new date when it goes through, in the app and in the dashboard block; letting go of a
+  reservation asks in the page with «Keep waiting» and «Let it go», not «Cancel» and «OK».
+
 ## 0.92.1 (2026-10-31)
 
 - In the app (tried by Aty on a phone): the search field is outlined and as tall as its button, so it shows in dark

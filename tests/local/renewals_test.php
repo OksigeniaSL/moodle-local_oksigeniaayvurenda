@@ -65,9 +65,17 @@ final class renewals_test extends \advanced_testcase {
             'readerid' => $other->id, 'status' => 'waiting', 'timecreated' => $now, 'timemodified' => $now]);
         $this->assertFalse(renewals::mine((int) $loan->id, (int) $ana->id)['ok']);
         $DB->delete_records('local_oksigeniaayvurenda_hold', ['id' => $hold]);
+        // The book's page in the app: she has it, until when, and more time; not a button to ask for it.
+        $this->setUser($ana);
+        $page = \local_oksigeniaayvurenda\output\mobile::mobile_record_view(['library' => $library->slug,
+            'id' => $item->recordid])['templates'][0]['html'];
+        $this->assertStringContainsString('local_oksigeniaayvurenda_renew_loan', $page);
+        $this->assertStringNotContainsString('local_oksigeniaayvurenda_ask_hold', $page);
         $renewed = renewals::mine((int) $loan->id, (int) $ana->id);
         $this->assertTrue($renewed['ok']);
         $this->assertGreaterThan($now + DAYSECS, $renewed['due']);
+        // No renewal left: no button.
+        $this->assertFalse(mine::summary((int) $ana->id)[0]['loans'][0]['canrenew']);
         // Once, as the rules say; the app's service says why not.
         $this->setUser($ana);
         try {

@@ -267,6 +267,24 @@ final class desk {
     }
 
     /**
+     * Whether a loan out can be given more time now, as renew() would see it, and until when.
+     *
+     * @param int $loanid
+     * @return int|null The new date it would be due, or null if it cannot.
+     */
+    public function renewable(int $loanid): ?int {
+        global $DB;
+        $loan = $this->loan($loanid);
+        $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid], '*', MUST_EXIST);
+        $rule = $this->rule($reader->readertype, $item->itemtype);
+        if (!loan_rules::can_renew($rule, (int) $loan->renewals) || holds::blocks_renewal($item)) {
+            return null;
+        }
+        return loan_rules::renewed_due((int) $loan->timedue, $this->now, $rule, $this->tz);
+    }
+
+    /**
      * Notes what the reader said of the book on returning it.
      *
      * @param int $loanid

@@ -337,7 +337,20 @@ final class screens {
             'id',
             IGNORE_MULTIPLE
         ) : null;
-        if ($reader) {
+        // A book they have out themselves: until when, and nothing to ask for.
+        $loan = $reader ? $DB->get_record_sql(
+            "SELECT l.id, l.timedue
+               FROM {local_oksigeniaayvurenda_loan} l
+               JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+              WHERE i.recordid = :recordid AND l.readerid = :readerid AND l.timereturned IS NULL",
+            ['recordid' => $recordid, 'readerid' => $reader->id],
+            IGNORE_MULTIPLE
+        ) : null;
+        if ($loan) {
+            $short = get_string('strftimedateshort', 'langconfig');
+            $box['mine'] = self::str('holdyouhaveit', userdate((int) $loan->timedue, $short));
+            $box['loanid'] = (int) $loan->id;
+        } else if ($reader) {
             $mine = holds::open((int) $library->id, $recordid, (int) $reader->id);
             if ($mine) {
                 $box['holdid'] = (int) $mine->id;
