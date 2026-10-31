@@ -174,6 +174,8 @@ final class holds_test extends \advanced_testcase {
         $messages = $sink->get_messages();
         $this->assertCount(1, $messages);
         $this->assertSame('holdready', $messages[0]->eventtype);
+        // The message opens the book's page, in Moodle and in its app.
+        $this->assertStringContainsString('/local/oksigeniaayvurenda/record.php?library=', $messages[0]->contexturl);
         $this->assertEquals($w->user->id, $messages[0]->useridto);
         $this->assertNotEmpty($DB->get_field(self::T . 'hold', 'timenotified', ['id' => $hold->id]));
     }

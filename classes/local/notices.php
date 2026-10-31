@@ -61,7 +61,7 @@ final class notices {
         $tz = \core_date::get_server_timezone_object();
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $loans = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.entityid, rec.title
+            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
@@ -103,7 +103,9 @@ final class notices {
             if ($herald['enabled'] && $herald['signs']) {
                 $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
             }
-            if (self::send('overdue', $user, $subject, $body)) {
+            // The library of the oldest one, where the reader sees what they have.
+            $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
+            if (self::send('overdue', $user, $subject, $body, $url, format_string($list[0]->library))) {
                 $sent++;
             }
             [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
@@ -135,7 +137,7 @@ final class notices {
                 continue;
             }
             $late = $DB->get_records_sql(
-                "SELECT l.id, l.timedue, l.readerid, r.firstname, r.lastname, r.userid, b.name AS library
+                "SELECT l.id, l.timedue, l.readerid, r.firstname, r.lastname, r.userid, b.name AS library, b.slug
                    FROM {" . self::T . "loan} l
                    JOIN {" . self::T . "reader} r ON r.id = l.readerid
                    JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid AND m.groupname = :groupname
@@ -174,7 +176,10 @@ final class notices {
                     'overduetutor',
                     $user,
                     get_string('noticetutorsubject', 'local_oksigeniaayvurenda', $a),
-                    get_string('noticetutorbody', 'local_oksigeniaayvurenda', $a)
+                    get_string('noticetutorbody', 'local_oksigeniaayvurenda', $a),
+                    (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => reset($late)->slug,
+                        'group' => $tutor->groupname]))->out(false),
+                    $tutor->groupname
                 )
             ) {
                 $sent++;
@@ -207,9 +212,18 @@ final class notices {
      * @param \stdClass $user
      * @param string $subject
      * @param string $body Plain text.
+     * @param string $url The exact page the message is about, which Moodle and its app open from it.
+     * @param string $urlname What that page is.
      * @return bool
      */
-    public static function send(string $provider, \stdClass $user, string $subject, string $body): bool {
+    public static function send(
+        string $provider,
+        \stdClass $user,
+        string $subject,
+        string $body,
+        string $url = '',
+        string $urlname = ''
+    ): bool {
         $message = new \core\message\message();
         $message->component = 'local_oksigeniaayvurenda';
         $message->name = $provider;
@@ -221,6 +235,10 @@ final class notices {
         $message->fullmessagehtml = nl2br(s($body));
         $message->smallmessage = $subject;
         $message->notification = 1;
+        if ($url !== '') {
+            $message->contexturl = $url;
+            $message->contexturlname = $urlname;
+        }
         return (bool) message_send($message);
     }
 }

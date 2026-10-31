@@ -79,7 +79,7 @@ final class visit {
      * @return bool
      */
     public static function available(?array $art = null, int $entityid = 0): bool {
-        return self::scene(self::hall($entityid), $art) !== null;
+        return skins::on($entityid, 'visit') && self::scene(self::hall($entityid), $art) !== null;
     }
 
     /**
@@ -102,7 +102,7 @@ final class visit {
      * @return array|null url, label, hint, day, night, position.
      */
     public static function card(\stdClass $library, bool $public, ?array $art = null): ?array {
-        $hall = self::scene(self::hall((int) $library->entityid), $art);
+        $hall = skins::on((int) $library->entityid, 'visit') ? self::scene(self::hall((int) $library->entityid), $art) : null;
         if (!$hall || ($public && !window::catalogue_open($library))) {
             return null;
         }
@@ -231,8 +231,9 @@ final class visit {
      */
     public static function page(\stdClass $library, string $name, bool $public, ?array $art = null, int $turn = 0): ?array {
         $scene = self::scene($name, $art);
-        // Only the scenes of the centre's skin are its visit.
-        if (!$scene || $scene['skin'] !== skins::of((int) $library->entityid)) {
+        // Only the scenes of the centre's skin are its visit, when the centre has it on.
+        $entityid = (int) $library->entityid;
+        if (!$scene || $scene['skin'] !== skins::of($entityid) || !skins::on($entityid, 'visit')) {
             return null;
         }
         $hallname = self::hall((int) $library->entityid);
@@ -325,9 +326,10 @@ final class visit {
                 'enters' => str_contains($link, '/visit.php')];
         }
         // In a room of a corner, the memory hides a book of it; in the hall, the herald brings the new books.
-        $hunt = $scene['corner'] !== '' && isset($corners[$scene['corner']])
+        $games = skins::on($entityid, 'games');
+        $hunt = $games && $scene['corner'] !== '' && isset($corners[$scene['corner']])
             ? self::hunt($library, $scene['corner'], $public, $turn, $url, $name) : null;
-        $sort = $name === $hallname ? self::sort($library, $public, $turn, $url, $art) : null;
+        $sort = $games && $name === $hallname ? self::sort($library, $public, $turn, $url, $art) : null;
         $depth = 0.0;
         $back = $scene['layers'];
         $front = [];
@@ -358,8 +360,8 @@ final class visit {
             ),
             'hunt' => $hunt,
             'sort' => $sort,
-            // A reader of the flower hears the visit unless they turned the sound off.
-            'young' => self::young($library, $public),
+            // A reader of the flower hears the visit unless they turned the sound off, where the centre has it so.
+            'young' => skins::on($entityid, 'sound') && self::young($library, $public),
             'hasplaces' => $zones || $hunt || $sort,
             'focus' => $scene['focus'],
             'sound' => $scene['sound'],
@@ -693,8 +695,8 @@ final class visit {
      * @return string JSON: what the script calls each one => its address, for those that have one.
      */
     private static function voices(\stdClass $library, string $role, array $keys): string {
-        // At a university or academy the characters have no voice of their own.
-        if (!skins::lively((int) $library->entityid)) {
+        // The characters speak in the games where the centre has their voices on (not at a university, of its own).
+        if (!skins::on((int) $library->entityid, 'voices')) {
             return '{}';
         }
         $who = $role === 'memory' ? 'memoria'

@@ -89,9 +89,11 @@ final class notices_test extends \advanced_testcase {
         $this->assertStringContainsString('El faro dormido', $byname['overdue']->fullmessage);
         $this->assertStringContainsString('La nube de tinta', $byname['overdue']->fullmessage);
         $this->assertStringNotContainsString('A tiempo', $byname['overdue']->fullmessage);
+        $this->assertStringContainsString('/local/oksigeniaayvurenda/index.php?library=', $byname['overdue']->contexturl);
         $tutormessage = $byname['overduetutor'];
         $this->assertEquals($tutor->id, $tutormessage->useridto);
         $this->assertStringContainsString('Noa Sin Cuenta', $tutormessage->fullmessage);
+        $this->assertStringContainsString('/local/oksigeniaayvurenda/class.php?library=', $tutormessage->contexturl);
         $this->assertStringContainsString('Ana Inventada', $tutormessage->fullmessage);
         $this->assertStringNotContainsString('faro', $tutormessage->fullmessage);
         $this->assertStringNotContainsString('Mapas', $tutormessage->fullmessage);

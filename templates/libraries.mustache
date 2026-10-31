@@ -27,6 +27,7 @@
             "hasgroups": true, "groups": [{"value": "4º B", "label": "4º B", "selected": false}],
             "cardlooks": [{"stage": "Primaria", "options": [{"value": "", "label": "Automático (la flor)", "selected": true}]}],
             "challengestages": [{"stage": "Primaria", "on": true}],
+            "play": [{"what": "visit", "label": "La biblioteca que se visita", "on": true}],
             "plansummary": "Plan Gratis: 812 de 1.000 ejemplares · 140 de 150 lectores",
             "planform": {"readersopen": true, "plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
                 "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
@@ -55,6 +56,7 @@
         "librariesdata": "Nombre, tipo y grupos", "librariescentre": "Centro",
         "librarieschallenges": "Retos de la clase", "librarieschallengeshint": "Las etapas que juegan",
         "librariesreviewsign": "Cómo se firman las reseñas", "librariesplan": "Plan",
+        "librariesplay": "Lo que se enciende", "librariesplayhint": "De serie, lo de su piel.",
         "librariesplanhint": "Solo lo ven y lo cambian quienes administran el sitio.", "planname": "Nombre del plan",
         "plancopies": "Ejemplares", "planreaders": "Lectores", "planlimithint": "Con 0, sin tope",
         "librariesstaff": "Personal del centro", "librariesstaffassign": "Dar roles en el centro",
@@ -158,6 +160,11 @@
                     <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
             </fieldset>
             <label class="ayv-field">{{librariesskin}} <span class="ayv-field-hint">{{librariesskinhint}}</span> <select name="skin">{{#skins}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/skins}}</select></label>
+            <fieldset class="ayv-fieldset"><legend>{{librariesplay}}</legend>
+                <p class="ayv-field-hint">{{librariesplayhint}}</p>
+                <input type="hidden" name="playform" value="1">
+                <div class="ayv-choices">{{#play}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="play[]" value="{{what}}" {{#on}}checked{{/on}}> {{label}}</label>{{/play}}</div>
+            </fieldset>
             <label class="ayv-field">{{librariesreviewsign}} <select name="reviewsign">{{#reviewsigns}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/reviewsigns}}</select></label>
             <fieldset class="ayv-fieldset"><legend>{{librarieschallenges}}</legend>
                 <p class="ayv-field-hint">{{librarieschallengeshint}}</p>

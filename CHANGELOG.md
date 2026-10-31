@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.84.0 (2026-10-31)
+
+- What is on at each centre (in its settings): the visit, its games, the characters standing whole, their voices in the
+  games and the visit's sound on for the readers of the flower, each as its skin brings it (all at a school; no voices
+  nor sound at first at a secondary school; and neither figures at a university), and the centre changes any. Only what
+  differs from the skin is kept, so choosing another skin brings its own back.
+- Every notice of the library carries the link to its exact page, which Moodle and its app open from it: an overdue book,
+  the reader's library; to a tutor, their class; a held book ready, its page; a voice received, the book's page; and to
+  the staff, the desk.
+
 ## 0.83.0 (2026-10-31)
 
 - The textbook bank by class (`roll.php`, «By class» from the bank's desk and its sets): a card for each class with its

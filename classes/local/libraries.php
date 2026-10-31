@@ -405,8 +405,18 @@ final class libraries {
         if (isset($data['reviewsign'])) {
             $settings['reviewsign'] = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : 'name';
         }
+        $before = $settings['skin'] ?? skins::SKINS[0];
         if (isset($data['skin'])) {
             $settings['skin'] = in_array($data['skin'], skins::SKINS, true) ? $data['skin'] : skins::SKINS[0];
+        }
+        // What is on: only what differs from the skin is kept; a new skin starts with its own.
+        if (($settings['skin'] ?? skins::SKINS[0]) !== $before) {
+            unset($settings['play']);
+        } else if (isset($data['play'])) {
+            $settings['play'] = skins::changes($settings['skin'] ?? skins::SKINS[0], (array) $data['play']);
+            if (!$settings['play']) {
+                unset($settings['play']);
+            }
         }
         // The stages that play no class challenge; all play when none is listed.
         if (array_key_exists('challengesoff', $data)) {

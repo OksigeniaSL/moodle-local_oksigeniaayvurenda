@@ -378,7 +378,16 @@ final class holds {
         ];
         $body = get_string('holdreadybody', 'local_oksigeniaayvurenda', $a) . "\n\n" .
             characters::say((int) $library->entityid, 'herald', 'heraldsign')['text'];
-        return notices::send('holdready', $user, get_string('holdreadysubject', 'local_oksigeniaayvurenda', $a), $body);
+        $url = (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $hold->recordid]))
+            ->out(false);
+        return notices::send(
+            'holdready',
+            $user,
+            get_string('holdreadysubject', 'local_oksigeniaayvurenda', $a),
+            $body,
+            $url,
+            $a->title
+        );
     }
 
     /**

@@ -154,11 +154,16 @@ final class voices {
             return false;
         }
         $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
+        // The book's page, in a library of its centre.
+        $slug = (string) $DB->get_field_select(self::T . 'library', 'slug', 'entityid = ?', [$item->entityid], IGNORE_MULTIPLE);
         return notices::send(
             'voicereceived',
             $user,
             get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title),
-            get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)])
+            get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)]),
+            $slug !== '' ? (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $slug, 'id' => $item->recordid]))
+                ->out(false) : '',
+            $title
         );
     }
 

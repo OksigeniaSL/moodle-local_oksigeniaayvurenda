@@ -55,4 +55,33 @@ final class skins_test extends \advanced_testcase {
             'saluda'
         )['figure']);
     }
+
+    /**
+     * What is on comes from the skin, and the centre changes it: only what differs is kept, and a new skin brings its
+     * own back. With the visit off there is no way in; with the figures on, a university's characters stand whole.
+     */
+    public function test_play(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $this->assertSame(skins::PLAY['school'], skins::play($entityid));
+        libraries::update_entity($entityid, ['skin' => 'university']);
+        $this->assertSame(
+            ['visit' => true, 'games' => true, 'figures' => false, 'voices' => false, 'sound' => false],
+            skins::play($entityid)
+        );
+        $this->assertSame(['figures' => true], skins::changes('university', ['visit', 'games', 'figures']));
+        libraries::update_entity($entityid, ['skin' => 'university', 'play' => ['games', 'figures']]);
+        $this->assertSame(
+            ['visit' => false, 'figures' => true],
+            array_diff_assoc(skins::play($entityid), skins::PLAY['university'])
+        );
+        $this->assertTrue(skins::lively($entityid));
+        $this->assertFalse(visit::available(null, $entityid));
+        $this->assertNull(visit::card($library, false));
+        // Another skin starts with what it brings.
+        libraries::update_entity($entityid, ['skin' => 'secondary', 'play' => ['games']]);
+        $this->assertSame(skins::PLAY['secondary'], skins::play($entityid));
+    }
 }

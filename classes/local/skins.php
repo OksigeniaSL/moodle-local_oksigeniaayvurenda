@@ -37,6 +37,16 @@ final class skins {
     public const SKINS = ['school', 'secondary', 'university'];
 
     /**
+     * @var array What is on at each skin until the centre changes it: the visit, its games, the characters standing whole
+     * with their gestures, their voices in the games, and the visit's sound on when the young readers come in.
+     */
+    public const PLAY = [
+        'school' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => true, 'sound' => true],
+        'secondary' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => false, 'sound' => false],
+        'university' => ['visit' => true, 'games' => true, 'figures' => false, 'voices' => false, 'sound' => false],
+    ];
+
+    /**
      * The skin of a centre.
      *
      * @param int $entityid
@@ -65,7 +75,57 @@ final class skins {
      * @return bool
      */
     public static function lively(int $entityid): bool {
-        return self::of($entityid) !== 'university';
+        return self::on($entityid, 'figures');
+    }
+
+    /**
+     * What is on at a centre: its skin's, with what the centre changed.
+     *
+     * @param int $entityid
+     * @return bool[] By PLAY's keys.
+     */
+    public static function play(int $entityid): array {
+        global $DB;
+        $play = self::PLAY[self::of($entityid)];
+        if (!$entityid) {
+            return $play;
+        }
+        $cache = \cache::make('local_oksigeniaayvurenda', 'access');
+        $changed = $cache->get('play_' . $entityid);
+        if ($changed === false) {
+            $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+            $changed = array_map('boolval', array_intersect_key((array) ($settings['play'] ?? []), $play));
+            $cache->set('play_' . $entityid, $changed);
+        }
+        return $changed + $play;
+    }
+
+    /**
+     * Whether one thing is on at a centre.
+     *
+     * @param int $entityid
+     * @param string $what A key of PLAY.
+     * @return bool
+     */
+    public static function on(int $entityid, string $what): bool {
+        return !empty(self::play($entityid)[$what]);
+    }
+
+    /**
+     * What a centre changed from its skin, to keep: only what differs, so a new skin brings its own.
+     *
+     * @param string $skin
+     * @param string[] $on The keys left on.
+     * @return bool[]
+     */
+    public static function changes(string $skin, array $on): array {
+        $changed = [];
+        foreach (self::PLAY[$skin] ?? self::PLAY[self::SKINS[0]] as $what => $default) {
+            if (in_array($what, $on, true) !== $default) {
+                $changed[$what] = !$default;
+            }
+        }
+        return $changed;
     }
 
     /**
@@ -74,6 +134,6 @@ final class skins {
      * @param int $entityid
      */
     public static function forget(int $entityid): void {
-        \cache::make('local_oksigeniaayvurenda', 'access')->delete('skin_' . $entityid);
+        \cache::make('local_oksigeniaayvurenda', 'access')->delete_many(['skin_' . $entityid, 'play_' . $entityid]);
     }
 }

@@ -78,6 +78,8 @@ if (data_submitted() && confirm_sesskey()) {
             ) ?: [],
             'reviewsign' => optional_param('reviewsign', 'name', PARAM_ALPHA),
             'skin' => optional_param('skin', 'school', PARAM_ALPHA),
+            // What is on, only with the form that lists it.
+            'play' => optional_param('playform', 0, PARAM_BOOL) ? optional_param_array('play', [], PARAM_ALPHA) : null,
             // The stages listed on the form whose box is left empty play no class challenge.
             'challengesoff' => array_values(array_diff(
                 optional_param_array('challengestage', [], PARAM_TEXT),
@@ -238,6 +240,11 @@ foreach (libraries::all() as $one) {
             'selected' => $s === \local_oksigeniaayvurenda\local\skins::of((int) $entity->id)],
             \local_oksigeniaayvurenda\local\skins::SKINS
         ),
+        'play' => array_map(
+            fn($what, $on) => ['what' => $what, 'label' => $str('play' . $what), 'on' => $on],
+            array_keys(\local_oksigeniaayvurenda\local\skins::play((int) $entity->id)),
+            \local_oksigeniaayvurenda\local\skins::play((int) $entity->id)
+        ),
         'reviewsigns' => array_map(fn($s) => ['value' => $s, 'label' => $str('reviewsign' . $s),
             'selected' => $s === ($settings['reviewsign'] ?? 'name')], \local_oksigeniaayvurenda\local\reviews::SIGNS),
         'challengestages' => array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
@@ -282,7 +289,8 @@ foreach (
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
-        'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplan',
+        'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplay',
+        'librariesplayhint', 'librariesplan',
         'librariesplanhint', 'planname', 'plancopies',
         'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',
         'librariesreadersopen', 'librariesreadersopenhint', 'librarieskeptby', 'librarieskeepers', 'librarieskeepershint',

@@ -53,6 +53,7 @@ final class staffnotices_test extends \advanced_testcase {
         $messages = $sink->get_messages();
         $this->assertCount(1, $messages);
         $this->assertEquals($librarian->id, $messages[0]->useridto);
+        $this->assertStringContainsString('/local/oksigeniaayvurenda/desk.php?library=', $messages[0]->contexturl);
         $this->assertStringContainsString(get_string('stafftodoreviewsone', 'local_oksigeniaayvurenda'), $messages[0]->subject);
         $this->assertSame(0, staffnotices::run($now + HOURSECS)['sent']);
 

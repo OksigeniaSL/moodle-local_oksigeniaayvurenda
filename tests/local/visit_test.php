@@ -358,6 +358,12 @@ final class visit_test extends \advanced_testcase {
         $shelves = array_values(array_filter($page['zones'], fn($z) => $z['kind'] === 'stacks'))[0];
         $this->assertStringEndsWith('stacks.php?library=' . $library->slug, $shelves['url']);
         $this->assertSame(get_string('visitstacksall', 'local_oksigeniaayvurenda'), $shelves['label']);
+        // A centre that turns its visit off has none, though the art paints it.
+        libraries::update_entity($entityid, ['skin' => 'university', 'play' => ['games']]);
+        $this->assertNull(visit::page($library, 'universidad', false, $art));
+        $this->assertNull(visit::card($library, false, $art));
+        libraries::update_entity($entityid, ['skin' => 'university', 'play' => ['visit', 'games']]);
+        $this->assertNotNull(visit::page($library, 'universidad', false, $art));
         libraries::update_entity($entityid, ['skin' => 'secondary']);
         $this->assertFalse(visit::available($art, $entityid));
         $this->assertNull(visit::card($library, false, $art));

@@ -91,7 +91,8 @@ final class staffnotices {
                     continue;
                 }
                 [$subject, $body] = self::words($entity, $library, $reviews, $wishes);
-                if (notices::send('stafftodo', $user, $subject, $body)) {
+                $url = (new \moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);
+                if (notices::send('stafftodo', $user, $subject, $body, $url, get_string('desktitle', 'local_oksigeniaayvurenda'))) {
                     set_user_preference(self::PREFERENCE, $now, (int) $userid);
                     $stats['sent']++;
                 }
