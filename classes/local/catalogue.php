@@ -101,7 +101,8 @@ final class catalogue {
      * @param bool $onlyfree Only records with a copy free in this library.
      * @param string $corner Only records in this corner (a top class), if given.
      * @param int $subject Only records about this topic (an authority), if given.
-     * @return array total, cards, suggestions, facets (corners and subjects of all the results).
+     * @return array total, reachable (how many can be paged), cards, suggestions, facets (corners and subjects of all the
+     *     results).
      */
     public static function search(
         \stdClass $library,
@@ -114,7 +115,8 @@ final class catalogue {
         global $DB;
         $words = text::words($query);
         if (!$words) {
-            return ['total' => 0, 'cards' => [], 'suggestions' => [], 'facets' => ['corners' => [], 'subjects' => []]];
+            return ['total' => 0, 'reachable' => 0, 'cards' => [], 'suggestions' => [],
+                'facets' => ['corners' => [], 'subjects' => []]];
         }
         $conditions = [];
         $params = ['entityid' => $library->entityid];
@@ -146,15 +148,28 @@ final class catalogue {
             $conditions[] = 'r.id IN (SELECT sra.recordid FROM {' . self::T . 'recauth} sra WHERE sra.authorityid = :fsubject)';
             $params['fsubject'] = $subject;
         }
+        $normalquery = implode(' ', $words);
+        $where = 'r.entityid = :entityid AND ' . implode(' AND ', $conditions);
+        $count = $DB->count_records_sql('SELECT COUNT(1) FROM {' . self::T . 'record} r WHERE ' . $where, $params);
+        $order = '';
+        if ($count > self::CANDIDATES) {
+            // More than are scored: those whose title starts with what was typed (with or without its article) come into
+            // the candidates first; the search text begins with the title.
+            $cases = [];
+            foreach (['', 'el ', 'la ', 'los ', 'las ', 'un ', 'una ', 'the ', 'a ', 'an '] as $i => $article) {
+                $cases[] = 'WHEN ' . $DB->sql_like('r.searchtext', ':lead' . $i) . ' THEN 0';
+                $params['lead' . $i] = $article . $DB->sql_like_escape($normalquery) . '%';
+            }
+            $order = ' ORDER BY CASE ' . implode(' ', $cases) . ' ELSE 1 END, r.id';
+        }
         $records = $DB->get_records_sql(
             'SELECT r.id, r.title, r.subtitle
                FROM {' . self::T . 'record} r
-              WHERE r.entityid = :entityid AND ' . implode(' AND ', $conditions),
+              WHERE ' . $where . $order,
             $params,
             0,
             self::CANDIDATES
         );
-        $normalquery = implode(' ', $words);
         $scored = [];
         foreach ($records as $record) {
             $title = ' ' . text::normalise($record->title . ' ' . $record->subtitle) . ' ';
@@ -178,9 +193,11 @@ final class catalogue {
         }
         usort($scored, fn($a, $b) => [$b[0], $a[1]] <=> [$a[0], $b[1]]);
         $total = count($scored);
+        // Only the candidates are paged (reachable); how many there are in all is the count.
+        $all = max($total, $count);
         $slice = array_column(array_slice($scored, $page * self::PERPAGE, self::PERPAGE), 2);
         $suggestions = $total === 0 ? (new suggester(self::vocabulary((int) $library->entityid)))->suggest($query) : [];
-        return ['total' => $total, 'cards' => self::cards($slice, $library), 'suggestions' => $suggestions,
+        return ['total' => $all, 'reachable' => $total, 'cards' => self::cards($slice, $library), 'suggestions' => $suggestions,
             'facets' => self::facets(array_map(fn($row) => (int) $row[2]->id, $scored))];
     }
 

@@ -179,7 +179,7 @@ if ($catalogue && $query !== '') {
         'cards' => $public($found['cards']),
         'hascards' => (bool) $found['cards'],
         'empty' => $str('windownothingcatalogue'),
-        'nexturl' => $found['total'] > ($page + 1) * catalogue::PERPAGE ? $here(['q' => $query, 'page' => $page + 1]) : '',
+        'nexturl' => $found['reachable'] > ($page + 1) * catalogue::PERPAGE ? $here(['q' => $query, 'page' => $page + 1]) : '',
         'prevurl' => $page > 0 ? $here(['q' => $query, 'page' => $page - 1]) : '',
     ];
 } else if ($catalogue) {

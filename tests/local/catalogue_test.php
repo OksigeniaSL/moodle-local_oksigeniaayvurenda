@@ -71,6 +71,28 @@ final class catalogue_test extends \advanced_testcase {
     }
 
     /**
+     * With more matches than are scored, the title that starts with what was typed is never left out.
+     */
+    public function test_search_keeps_the_best_of_many(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $now = time();
+        $many = (new \ReflectionClassConstant(catalogue::class, 'CANDIDATES'))->getValue() + 50;
+        $rows = [];
+        for ($i = 0; $i < $many; $i++) {
+            $rows[] = ['entityid' => $library->entityid, 'doctype' => 'book', 'title' => 'Cuaderno de agua ' . $i,
+                'searchtext' => 'cuaderno de agua ' . $i, 'timecreated' => $now, 'timemodified' => $now];
+        }
+        $DB->insert_records('local_oksigeniaayvurenda_record', $rows);
+        $gen->create_record(['entityid' => $library->entityid, 'title' => 'El agua clara', 'searchtext' => 'el agua clara']);
+        $found = catalogue::search($library, 'agua');
+        $this->assertSame($many + 1, $found['total']);
+        $this->assertSame('El agua clara', $found['cards'][0]['title']);
+    }
+
+    /**
      * Every word has to be there, as the start of a word, without accents; the title counts most.
      */
     public function test_search(): void {

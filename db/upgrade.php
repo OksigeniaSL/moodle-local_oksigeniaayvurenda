@@ -355,5 +355,27 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103131, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026103136) {
+        // Since 0.97.0 a connector reaches the server's own network only at the hosts the administrator allows. Where a
+        // centre's bridge already worked that way (a site that is not shared), its host is allowed, so nothing stops.
+        if (!get_config('local_oksigeniaayvurenda', 'entitycategories')) {
+            $hosts = array_filter(array_map('trim', explode(',', strtolower((string) get_config(
+                'local_oksigeniaayvurenda',
+                'internalhosts'
+            )))));
+            foreach ($DB->get_records('local_oksigeniaayvurenda_entity', null, 'id', 'id, settings') as $entity) {
+                $cifra = (json_decode((string) $entity->settings, true) ?: [])['cifra'] ?? [];
+                $host = strtolower((string) parse_url((string) ($cifra['url'] ?? ''), PHP_URL_HOST));
+                if ($host !== '' && ($cifra['mode'] ?? 'key') === 'key' && !in_array($host, $hosts, true)) {
+                    $hosts[] = $host;
+                }
+            }
+            if ($hosts) {
+                set_config('internalhosts', implode(', ', $hosts), 'local_oksigeniaayvurenda');
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026103136, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

@@ -144,7 +144,7 @@ if ($format === 'csv') {
     fwrite($out, "\xEF\xBB\xBF");
     fputcsv($out, $columns, ',', '"', '\\');
     foreach ($rows as $row) {
-        fputcsv($out, $row['csv'], ',', '"', '\\');
+        fputcsv($out, \local_oksigeniaayvurenda\core\spreadsheet::row($row['csv']), ',', '"', '\\');
     }
     fclose($out);
     die();

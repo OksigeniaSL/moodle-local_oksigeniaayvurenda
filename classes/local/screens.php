@@ -166,7 +166,7 @@ final class screens {
         foreach ($found['suggestions'] as $suggestion) {
             $suggestions[] = ['text' => $suggestion, 'url' => self::url('search.php', $library, ['q' => $suggestion])];
         }
-        $more = ($page + 1) * catalogue::PERPAGE < $found['total'];
+        $more = ($page + 1) * catalogue::PERPAGE < $found['reachable'];
         return [
             'heading' => $heading,
             'cards' => self::cards($found['cards'], $library),

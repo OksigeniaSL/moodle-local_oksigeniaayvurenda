@@ -54,4 +54,21 @@ final class upgrade_test extends \advanced_testcase {
         $this->assertTrue($dbman->field_exists('local_oksigeniaayvurenda_loan', 'conditionin'));
         $this->assertTrue($DB->record_exists('role', ['shortname' => 'ayvurendalibrarian']));
     }
+
+    /**
+     * A centre whose bridge was on the server's own network keeps reaching it after the 0.97.0.
+     */
+    public function test_bridge_stays_allowed(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        require_once($CFG->libdir . '/upgradelib.php');
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $entity = $gen->create_entity();
+        $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode(['cifra' => ['enabled' => true,
+            'url' => 'http://Puente-Interno:8080', 'mode' => 'key']]), ['id' => $entity->id]);
+        set_config('version', 2026103135, 'local_oksigeniaayvurenda');
+        $this->assertTrue(xmldb_local_oksigeniaayvurenda_upgrade(2026103135));
+        $this->assertSame('puente-interno', get_config('local_oksigeniaayvurenda', 'internalhosts'));
+    }
 }

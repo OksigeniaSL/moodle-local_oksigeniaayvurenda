@@ -117,7 +117,8 @@ if (optional_param('download', '', PARAM_ALPHA) === 'missing') {
     $csv->set_filename(clean_filename($stocktake->name));
     $csv->add_data([$str('stocktakecoltitle'), $str('callnumber'), $str('stocktakecolcode'), $str('stocktakecolwhere')]);
     foreach (stocktake::results($stocktake)['missing'] as $copy) {
-        $csv->add_data([$copy['title'], $copy['callnumber'], $copy['barcode'], $copy['where']]);
+        $csv->add_data(\local_oksigeniaayvurenda\core\spreadsheet::row([$copy['title'], $copy['callnumber'], $copy['barcode'],
+            $copy['where']]));
     }
     $csv->download_file();
     exit;

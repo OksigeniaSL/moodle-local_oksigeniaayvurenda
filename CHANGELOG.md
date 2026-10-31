@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.98.0 (2026-10-31)
+
+- `\local_oksigeniaayvurenda\api::new_books($since, $limit, $entityid)`: the books that have just come to the
+  libraries, newest first, for other plugins of the site (the screens of a centre, a block) without reading the
+  library's tables. Each with its title, subtitle, authors, its cover as a stored file (or the colours of its drawn
+  cover), when it came, its library and the address of its record. Never a bank of textbooks, the practice library, a
+  withdrawn or lost copy, a device or a centre still closed to its readers.
+- Upgrading keeps a centre's bridge reachable: the host its connector already used on the server's own network goes
+  into «Internal hosts for the connectors» (since 0.97.0, the only hosts there a connector may reach).
+- The search, with more matches than it scores (2,000), takes first those whose title starts with what was typed, so
+  the best is never left out; it counts all of them, and pages only what it scored.
+- The lists opened in a spreadsheet (reports, the missing of a stocktake, the record of course fragments) never carry
+  a formula: a cell that begins with «=», «+», «-» or «@» gets an apostrophe in front.
+- Deleting a person's data in the library also takes away their choices there (look of the card, new books, goal).
+
 ## 0.97.0 (2026-10-31)
 
 Fixes from a review of the whole project:

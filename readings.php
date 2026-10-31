@@ -51,7 +51,7 @@ if (!$courseid) {
         fputcsv($out, array_map(fn($k) => $str('fragmentcsv' . $k), ['title', 'isbn', 'pages', 'course', 'students', 'from',
             'until', 'opened']), ',', '"', '');
         foreach (\local_oksigeniaayvurenda\local\fragments::log($library) as $row) {
-            fputcsv($out, array_values($row), ',', '"', '');
+            fputcsv($out, \local_oksigeniaayvurenda\core\spreadsheet::row($row), ',', '"', '');
         }
         fclose($out);
         exit;

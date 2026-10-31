@@ -637,6 +637,10 @@ class provider implements
         $DB->set_field(self::T . 'roomread', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'wish', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'readinglist', 'createdby', null, ['createdby' => $userid]);
+        // Their choices in the library go too, also when they keep their account.
+        foreach (['cardlook', 'stafftold', 'newbooks', 'newbookslast', 'goal'] as $name) {
+            unset_user_preference('local_oksigeniaayvurenda_' . $name, $userid);
+        }
     }
 
     /**
