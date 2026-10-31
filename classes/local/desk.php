@@ -542,6 +542,8 @@ final class desk {
         if ($readerid) {
             $extra['reader'] = $this->reader_panel($readerid);
         }
+        // The herald, in a corner, a word as each book comes home: never in the way, and never at a sober centre.
+        $extra['herald'] = $this->herald_word($hold ? 'deskheraldheld' : 'deskheraldback' . (1 + ((int) $loan->id % 4)));
         if ($hold) {
             // Set it aside: the other sound, and who it is for.
             $a->for = $this->who((int) $hold->readerid);
@@ -582,7 +584,7 @@ final class desk {
             if ($rules) {
                 return loan_rules::pick(array_map(fn($r) => (array) $r, $rules), $readertype, $itemtype);
             }
-            $library = $library->parentid ? $DB->get_record(self::T . 'library', ['id' => $library->parentid]) : null;
+            $library = !empty($library->parentid) ? $DB->get_record(self::T . 'library', ['id' => $library->parentid]) : null;
         }
         return self::DEFAULT_RULE;
     }
@@ -759,6 +761,22 @@ final class desk {
         global $DB;
         $DB->delete_records(self::T . 'roomread', ['id' => $roomid, 'libraryid' => $this->library->id]);
         return $this->answer('undone', 'ok', 'deskroomundone');
+    }
+
+    /**
+     * What the herald says in the desk's corner, if she is on and the centre's skin is lively.
+     *
+     * @param string $key
+     * @return array|null name, text, initial, portrait.
+     */
+    private function herald_word(string $key): ?array {
+        $entityid = (int) $this->library->entityid;
+        if (bank::is($this->library) || !skins::lively($entityid)) {
+            return null;
+        }
+        $said = characters::say($entityid, 'herald', $key);
+        return $said ? ['name' => $said['name'], 'text' => $said['text'], 'initial' => $said['initial'],
+            'portrait' => $said['portrait']] : null;
     }
 
     /**

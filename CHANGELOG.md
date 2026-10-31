@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.102.0 (2026-10-31)
+
+The herald at work, as she was designed: she tells what happens.
+
+- On the home, the book of the week: the one most readers took from the library in the last seven days, from two
+  readers on (a count, never who), with its cover.
+- At the desk, a word of hers in a corner as each book comes home («Home again!», «Someone was waiting for this
+  one!»): it never waits for anything, goes by itself in four seconds and is not read aloud twice. Not in a textbook
+  bank, nor at a university or academy, where the characters are a portrait and a signature.
+- The reminder of a late book to a young reader (the card with the flower) comes in her words, by their name: the
+  books miss their shelf.
+
 ## 0.101.0 (2026-10-31)
 
 The memory at work (`classes/local/memory.php`), as she was designed: she has read everything and remembers everything.

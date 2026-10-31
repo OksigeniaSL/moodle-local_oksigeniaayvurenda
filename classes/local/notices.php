@@ -102,7 +102,14 @@ final class notices {
             );
             $body = get_string($words('noticereaderbody'), 'local_oksigeniaayvurenda', $a);
             $herald = characters::of((int) $list[0]->entityid)['herald'];
-            if ($herald['enabled'] && $herald['signs']) {
+            // To a young reader (the card with the flower), the herald tells it her way: the book misses its shelf.
+            $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
+            $young = $herald['enabled'] && $reader && cards::look_of($reader, $now) === 'flower'
+                ? characters::say((int) $list[0]->entityid, 'herald', 'heraldoverdue', ['reader' => $user->firstname,
+                    'books' => $a->books, 'library' => $a->library]) : null;
+            if ($young) {
+                $body = $young['text'];
+            } else if ($herald['enabled'] && $herald['signs']) {
                 $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
             }
             // The library of the oldest one, where the reader sees what they have.

@@ -388,6 +388,40 @@
             showReader(answer.reader);
         }
         line(answer, code);
+        if (answer.herald) {
+            heraldSays(answer.herald);
+        }
+    };
+
+    // The herald, in a corner, a word as a book comes home: it never waits for anything and goes by itself.
+    var heraldBox = null;
+    var heraldTimer = null;
+    var heraldSays = function(said) {
+        if (!heraldBox) {
+            heraldBox = el('div', 'ayv-desk-herald');
+            heraldBox.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(heraldBox);
+        }
+        heraldBox.textContent = '';
+        var face = el('span', 'ayv-desk-herald-face');
+        if (said.portrait) {
+            var img = document.createElement('img');
+            img.src = said.portrait;
+            img.alt = '';
+            face.appendChild(img);
+        } else {
+            face.textContent = said.initial || '';
+        }
+        heraldBox.appendChild(face);
+        heraldBox.appendChild(el('span', 'ayv-desk-herald-text', said.text));
+        heraldBox.classList.remove('ayv-desk-herald-on');
+        // Read the layout so that the class put back starts the appearance again.
+        heraldBox.getBoundingClientRect();
+        heraldBox.classList.add('ayv-desk-herald-on');
+        window.clearTimeout(heraldTimer);
+        heraldTimer = window.setTimeout(function() {
+            heraldBox.classList.remove('ayv-desk-herald-on');
+        }, 4000);
     };
 
     // Without a network the desk goes on: each scan is kept in this browser, in order and with its moment, and passed

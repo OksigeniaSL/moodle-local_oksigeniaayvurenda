@@ -3349,3 +3349,13 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-duo-memory-go .ayv-button { white-space: nowrap; }
 .ayv .ayv-duo-memory-cover { width: 3.5rem; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, .18); }
 .ayv .ayv-also .ayv-bubble { margin-bottom: .75rem; }
+
+/* The herald's word at the desk, in a corner: it comes, says it and goes; never over anything for long. */
+.ayv .ayv-desk-herald { position: fixed; left: 1rem; bottom: 1rem; z-index: 40; display: flex; align-items: center; gap: .6rem; max-width: min(22rem, calc(100vw - 2rem)); padding: .5rem .9rem .5rem .5rem; border-radius: 999px; background: var(--surface); color: var(--ink); box-shadow: 0 10px 28px -14px rgba(15, 58, 51, .55); opacity: 0; transform: translateY(.75rem); pointer-events: none; transition: opacity .25s ease, transform .25s ease; }
+.ayv .ayv-desk-herald-on { opacity: 1; transform: none; }
+.ayv .ayv-desk-herald-face { display: grid; place-items: center; flex: 0 0 auto; width: 2.4rem; height: 2.4rem; overflow: hidden; border-radius: 50%; background: var(--notice-bg); color: var(--accent); font-weight: 700; }
+.ayv .ayv-desk-herald-face img { width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-desk-herald-text { font-size: .95rem; }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-desk-herald { transition: none; transform: none; }
+}

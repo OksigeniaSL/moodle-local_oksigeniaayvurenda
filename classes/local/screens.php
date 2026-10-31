@@ -113,6 +113,7 @@ final class screens {
             'cards' => $recent,
             'hasrecent' => (bool) $recent,
             'herald' => $recent ? self::herald_new($library, $hero) : null,
+            'weekbook' => self::week_book($library),
             'empty' => !$corners && !$recent ? self::str('emptycatalogue') : '',
         ];
     }
@@ -843,6 +844,42 @@ final class screens {
             $said['listen'] = self::listen(['herald-' . $hero['heraldsex'] . '/{lang}/heraldnew']);
         }
         return $said;
+    }
+
+    /**
+     * The book of the week, told by the herald: the one most readers took from this library in the last seven days,
+     * when two or more did (a count, never who).
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return array|null What the herald says, with the book's url, cover and label.
+     */
+    public static function week_book(\stdClass $library, ?int $now = null): ?array {
+        global $DB;
+        if (bank::is($library)) {
+            return null;
+        }
+        $rows = $DB->get_records_sql(
+            "SELECT i.recordid, COUNT(DISTINCT l.readerid) AS readers
+               FROM {local_oksigeniaayvurenda_loan} l
+               JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+              WHERE l.libraryid = :libraryid AND l.timeloaned >= :since
+           GROUP BY i.recordid
+             HAVING COUNT(DISTINCT l.readerid) >= 2
+           ORDER BY COUNT(DISTINCT l.readerid) DESC, i.recordid",
+            ['libraryid' => $library->id, 'since' => ($now ?? time()) - WEEKSECS],
+            0,
+            1
+        );
+        $row = $rows ? reset($rows) : null;
+        if (!$row) {
+            return null;
+        }
+        $title = (string) $DB->get_field('local_oksigeniaayvurenda_record', 'title', ['id' => $row->recordid]);
+        $said = characters::say((int) $library->entityid, 'herald', 'heraldweek', ['title' => $title,
+            'count' => (int) $row->readers], 'celebra');
+        return $said ? $said + ['url' => self::url('record.php', $library, ['id' => $row->recordid]),
+            'cover' => covers::url((int) $row->recordid), 'label' => self::str('memorygo')] : null;
     }
 
     /**
