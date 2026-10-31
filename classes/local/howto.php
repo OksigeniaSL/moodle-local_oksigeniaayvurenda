@@ -47,6 +47,7 @@ final class howto {
         'stacks' => ['stacks.php', 'view', 'stacks'],
         'posters' => ['posters.php', 'catalogue', ''],
         'reports' => ['reports.php', 'desk', 'reports'],
+        'memoir' => ['memoir.php', 'desk', ''],
         'copies' => ['copies.php', 'desk', ''],
         'stocktake' => ['stocktake.php', 'catalogue', ''],
         'weed' => ['weed.php', 'catalogue', ''],

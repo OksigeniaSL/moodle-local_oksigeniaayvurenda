@@ -686,7 +686,7 @@ final class catalogue {
      * @param string $code
      * @return string|null
      */
-    private static function top_class(string $code): ?string {
+    public static function top_class(string $code): ?string {
         return preg_match('/^\s*(\d)/', $code, $matches) ? $matches[1] : null;
     }
 

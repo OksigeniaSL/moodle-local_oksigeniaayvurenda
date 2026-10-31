@@ -2667,3 +2667,14 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 .ayv .ayv-bank-edit summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
 .ayv .ayv-reader-bank { margin: .5rem 0 1rem; }
 .ayv .ayv-reader-bank-missing { color: var(--late); font-weight: 700; }
+/* The year's report: on screen, the team writes in the form; on paper, their words as text. */
+.ayv .ayv-memoir { padding: 1.25rem 1.5rem; border-radius: var(--radius); background: var(--surface); }
+.ayv .ayv-memoir .ayv-contract-table th[scope="row"] { font-weight: 400; }
+.ayv .ayv-memoir-words { display: none; }
+.ayv .ayv-memoir-print { white-space: pre-line; }
+@media print {
+    .ayv .ayv-memoir { padding: 12mm; border-radius: 0; }
+    .ayv .ayv-memoir-form { display: none; }
+    .ayv .ayv-memoir-words { display: block; }
+    .ayv .ayv-memoir .ayv-contract-table { break-inside: avoid; }
+}

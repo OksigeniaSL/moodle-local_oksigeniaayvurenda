@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.81.0 (2026-10-31)
+
+- The year's report (`memoir.php`, from «Reports»): for the centre's reading plan, the year's figures beside the year
+  before (loans, readers who came of those of the year, read in the room, copies come, weeded and held), by stage and
+  by group, what went out most and from which corners, the class challenges, reviews and voices of the year, and the
+  textbook bank; with the team's words of what was done and what comes next, kept for the year, and ready to print.
+  Always added up and without names.
+
 ## 0.80.0 (2026-10-31)
 
 - The textbook bank, first part: a library of the kind «Textbook bank», with its sets (`bank.php`, from its desk): each

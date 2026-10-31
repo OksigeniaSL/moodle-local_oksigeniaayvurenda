@@ -1,0 +1,109 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/memoir
+
+    The library's report of a school year: its figures beside the year before, by stage and by group, what went out
+    most and from which corners, what the readers did, the textbook bank, and the team's words; to print.
+
+    Context variables required for this template:
+    * heading, centre, intro, notice, action, sesskey, yearname, beforename, came, life, bank, done, next
+    * figures - label, now, before
+    * stages - stage, readers, borrowers, loans, sharecame; hasstages
+    * groups - group, members, borrowers, loans, sharecame; hasgroups
+    * top - title, loans; hastop
+    * corners - corner, loans; hascorners
+    * memoirfigures, memoirthisyear, memoirstages, memoirstage, memoirgroups, memoirgroup, memoirreaders, memoircamecol,
+      memoirloans, memoirtop, memoircorners, memoircorner, memoirlifeheading, memoirbankheading, memoirdone, memoirnext,
+      memoirsave, memoirprint, memoiranon, memoirtitle
+
+    Example context (json):
+    {
+        "heading": "La biblioteca en el curso 2026-2027", "centre": "Colegio de ejemplo", "intro": "Para la memoria.",
+        "notice": "", "action": "#", "sesskey": "x", "yearname": "2026-2027", "beforename": "2025-2026",
+        "came": "312 de 450 lectores han venido (69 %).", "life": "3 retos · 12 reseñas · 2 voces", "bank": "",
+        "done": "", "next": "",
+        "figures": [{"label": "Préstamos", "now": "2.140", "before": "1.980"}],
+        "stages": [{"stage": "Primaria", "readers": 200, "borrowers": 150, "loans": 900, "sharecame": "75 %"}],
+        "hasstages": true,
+        "groups": [{"group": "3º A", "members": 25, "borrowers": 20, "loans": 130, "sharecame": "80 %"}],
+        "hasgroups": true, "top": [{"title": "El faro dormido", "loans": 14}], "hastop": true,
+        "corners": [{"corner": "Literatura", "loans": 800}], "hascorners": true,
+        "memoirfigures": "En cifras", "memoirthisyear": "Este curso", "memoirstages": "Por etapas", "memoirstage": "Etapa",
+        "memoirgroups": "Por grupos", "memoirgroup": "Grupo", "memoirreaders": "Lectores", "memoircamecol": "Han venido",
+        "memoirloans": "Préstamos", "memoirtop": "Lo más prestado", "memoircorners": "Por rincones",
+        "memoircorner": "Rincón", "memoirlifeheading": "La biblioteca viva", "memoirbankheading": "Banco de libros",
+        "memoirdone": "Lo que hicimos", "memoirnext": "Lo que haremos", "memoirsave": "Guardar", "memoirprint": "Imprimir",
+        "memoiranon": "Todo sumado y sin nombres.", "memoirtitle": "Título"
+    }
+}}
+<section class="ayv-memoir">
+<p class="ayv-contract-centre">{{centre}}</p>
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}} {{memoiranon}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<h2 class="ayv-section-title">{{memoirfigures}}</h2>
+<p>{{came}}</p>
+<table class="ayv-contract-table">
+    <thead><tr><th scope="col"><span class="ayv-sr">{{memoirfigures}}</span></th><th scope="col">{{yearname}}</th><th scope="col">{{beforename}}</th></tr></thead>
+    <tbody>{{#figures}}<tr><th scope="row">{{label}}</th><td>{{now}}</td><td>{{before}}</td></tr>{{/figures}}</tbody>
+</table>
+{{#hasstages}}
+<h2 class="ayv-section-title">{{memoirstages}}</h2>
+<table class="ayv-contract-table">
+    <thead><tr><th scope="col">{{memoirstage}}</th><th scope="col">{{memoirreaders}}</th><th scope="col">{{memoircamecol}}</th><th scope="col">{{memoirloans}}</th></tr></thead>
+    <tbody>{{#stages}}<tr><th scope="row">{{stage}}</th><td>{{readers}}</td><td>{{borrowers}} ({{sharecame}})</td><td>{{loans}}</td></tr>{{/stages}}</tbody>
+</table>
+{{/hasstages}}
+{{#hasgroups}}
+<h2 class="ayv-section-title">{{memoirgroups}}</h2>
+<table class="ayv-contract-table">
+    <thead><tr><th scope="col">{{memoirgroup}}</th><th scope="col">{{memoirreaders}}</th><th scope="col">{{memoircamecol}}</th><th scope="col">{{memoirloans}}</th></tr></thead>
+    <tbody>{{#groups}}<tr><th scope="row">{{group}}</th><td>{{members}}</td><td>{{borrowers}} ({{sharecame}})</td><td>{{loans}}</td></tr>{{/groups}}</tbody>
+</table>
+{{/hasgroups}}
+{{#hastop}}
+<h2 class="ayv-section-title">{{memoirtop}}</h2>
+<table class="ayv-contract-table">
+    <thead><tr><th scope="col">{{memoirtitle}}</th><th scope="col">{{memoirloans}}</th></tr></thead>
+    <tbody>{{#top}}<tr><th scope="row">{{title}}</th><td>{{loans}}</td></tr>{{/top}}</tbody>
+</table>
+{{/hastop}}
+{{#hascorners}}
+<h2 class="ayv-section-title">{{memoircorners}}</h2>
+<table class="ayv-contract-table">
+    <thead><tr><th scope="col">{{memoircorner}}</th><th scope="col">{{memoirloans}}</th></tr></thead>
+    <tbody>{{#corners}}<tr><th scope="row">{{corner}}</th><td>{{loans}}</td></tr>{{/corners}}</tbody>
+</table>
+{{/hascorners}}
+<h2 class="ayv-section-title">{{memoirlifeheading}}</h2>
+<p>{{life}}</p>
+{{#bank}}<h2 class="ayv-section-title">{{memoirbankheading}}</h2><p>{{bank}}</p>{{/bank}}
+<div class="ayv-memoir-words">
+    <h2 class="ayv-section-title">{{memoirdone}}</h2>
+    <p class="ayv-memoir-print">{{done}}</p>
+    <h2 class="ayv-section-title">{{memoirnext}}</h2>
+    <p class="ayv-memoir-print">{{next}}</p>
+</div>
+<form class="ayv-book ayv-memoir-form" method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <label class="ayv-field ayv-field-wide">{{memoirdone}} <textarea name="done" rows="5" maxlength="5000">{{done}}</textarea></label>
+    <label class="ayv-field ayv-field-wide">{{memoirnext}} <textarea name="next" rows="5" maxlength="5000">{{next}}</textarea></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{memoirsave}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" onclick="window.print()">{{memoirprint}}</button></p>
+</form>
+</section>

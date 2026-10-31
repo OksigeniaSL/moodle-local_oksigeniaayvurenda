@@ -181,6 +181,8 @@ shell::output(
     $library,
     '',
     ['search' => false, 'nav' => [['url' => $deskurl, 'label' => $str('desktitle')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/memoir.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('memoirnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'reports']))
             ->out(false), 'label' => $str('helpnav')]]]
 );
