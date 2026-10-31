@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.93.1 (2026-10-31)
+
+- The course memoir: «Save» and «Print» no longer sit against the box of text above them.
+
 ## 0.93.0 (2026-10-31)
 
 - Course reserves: from «What the courses ask», the library puts copies of a required reading on reserve for one of

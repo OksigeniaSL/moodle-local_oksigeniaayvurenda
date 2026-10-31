@@ -2813,8 +2813,9 @@ html[data-bs-theme="dark"] .ayv .ayv-memoir { --bar: var(--accent); }
 .ayv .ayv-memoir-top-count { color: var(--soft); font-size: .9rem; }
 .ayv .ayv-memoir-words { display: none; }
 .ayv .ayv-memoir-print { white-space: pre-line; }
-.ayv .ayv-memoir-form { margin-top: 1rem; }
+.ayv .ayv-memoir-form { display: grid; gap: 1.25rem; margin-top: 1rem; }
 .ayv .ayv-memoir-field { display: block; }
+.ayv .ayv-memoir-form .ayv-book-actions { margin-top: .25rem; }
 .ayv .ayv-memoir-field textarea {
     display: block;
     width: 100%;
