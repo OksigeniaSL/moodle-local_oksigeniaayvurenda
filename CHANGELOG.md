@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.92.1 (2026-10-31)
+
+- In the app (tried by Aty on a phone): the search field is outlined and as tall as its button, so it shows in dark
+  too; a book asked for can be let go from its page («I do not want it any more», with a question first; the new web
+  service `local_oksigeniaayvurenda_cancel_hold`); and the books out and asked for open their page inside the app.
+
 ## 0.92.0 (2026-10-31)
 
 - Readers renew their own loans online, where the library lets them: a new switch next to reserving online, for the

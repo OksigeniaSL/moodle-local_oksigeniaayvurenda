@@ -33,6 +33,14 @@ $functions = [
         'loginrequired' => true,
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
+    'local_oksigeniaayvurenda_cancel_hold' => [
+        'classname' => \local_oksigeniaayvurenda\external\cancel_hold::class,
+        'description' => 'A reader lets go of a book they asked for.',
+        'type' => 'write',
+        'ajax' => true,
+        'loginrequired' => true,
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
     'local_oksigeniaayvurenda_renew_loan' => [
         'classname' => \local_oksigeniaayvurenda\external\renew_loan::class,
         'description' => 'A reader gives one of their loans more time, where the library lets them.',

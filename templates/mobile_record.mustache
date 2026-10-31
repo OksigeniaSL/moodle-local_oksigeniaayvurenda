@@ -26,7 +26,8 @@
         "subtitle": "", "authors": "Ana Ruiz", "cover": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "statelabel": "Prestado",
         "free": false, "hascopies": true, "copiesheading": "Ejemplares",
         "copies": [{"state": "Prestado", "location": "Estantería juvenil", "callnumber": "N RUI fa"}],
-        "mine": "", "ahead": "", "canask": true, "holdask": "Avísame cuando vuelva", "holdaskhint": "Te avisamos.",
+        "mine": "", "ahead": "", "holdid": 0, "holdcancelask": "¿Anular el aviso?", "holdcancelled": "Anulado.",
+        "holdcancelmine": "Ya no lo quiero", "canask": true, "holdask": "Avísame cuando vuelva", "holdaskhint": "Te avisamos.",
         "holdadded": "Hecho.", "url": "https://example.org/r", "openweb": "Abrir en la biblioteca"
     }
 }}
@@ -37,7 +38,8 @@
     {{#cover}}<ion-item lines="none"><img src="{{cover}}" alt="" style="display: block; width: 128px; margin: 12px auto; border-radius: 6px;"></ion-item>{{/cover}}
     <ion-item lines="none"><ion-label class="ion-text-wrap"><h2>{{title}}</h2>{{#subtitle}}<p>{{subtitle}}</p>{{/subtitle}}{{#authors}}<p>{{authors}}</p>{{/authors}}</ion-label></ion-item>
     <ion-item><ion-label class="ion-text-wrap"><p>{{#free}}<strong>{{/free}}{{statelabel}}{{#free}}</strong>{{/free}}</p></ion-label></ion-item>
-    {{#mine}}<ion-item><ion-label class="ion-text-wrap"><p><strong>{{mine}}</strong></p>{{#ahead}}<p>{{ahead}}</p>{{/ahead}}</ion-label></ion-item>{{/mine}}
+    {{#mine}}<ion-item><ion-label class="ion-text-wrap"><p><strong>{{mine}}</strong></p>{{#ahead}}<p>{{ahead}}</p>{{/ahead}}</ion-label></ion-item>
+    {{#holdid}}<ion-button expand="block" fill="outline" class="ion-margin" core-site-plugins-call-ws name="local_oksigeniaayvurenda_cancel_hold" [params]="{hold: {{holdid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" confirmMessage="{{holdcancelask}}" successMessage="{{holdcancelled}}" refreshOnSuccess="true">{{holdcancelmine}}</ion-button>{{/holdid}}{{/mine}}
     {{#canask}}
     <ion-item lines="none"><ion-label class="ion-text-wrap"><p>{{holdaskhint}}</p></ion-label></ion-item>
     <ion-button expand="block" class="ion-margin" core-site-plugins-call-ws name="local_oksigeniaayvurenda_ask_hold" [params]="{library: '{{library}}', record: {{recordid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{holdadded}}" refreshOnSuccess="true">{{holdask}}</ion-button>

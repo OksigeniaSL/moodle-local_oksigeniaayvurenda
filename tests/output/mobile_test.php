@@ -91,6 +91,19 @@ final class mobile_test extends \advanced_testcase {
         $this->assertSame(get_string('holdhas', 'local_oksigeniaayvurenda'), $answer['message']);
         $html = mobile::mobile_record_view(['library' => $library->slug, 'id' => $record->id])['templates'][0]['html'];
         $this->assertStringContainsString(get_string('holdminewaiting', 'local_oksigeniaayvurenda'), $html);
+        // Let go of it from the app: the page asks for it again.
+        $this->assertStringContainsString('local_oksigeniaayvurenda_cancel_hold', $html);
+        global $DB;
+        $holdid = (int) $DB->get_field('local_oksigeniaayvurenda_hold', 'id', ['recordid' => $record->id, 'status' => 'waiting']);
+        $this->assertTrue(\local_oksigeniaayvurenda\external\cancel_hold::execute($holdid)['ok']);
+        $html = mobile::mobile_record_view(['library' => $library->slug, 'id' => $record->id])['templates'][0]['html'];
+        $this->assertStringContainsString('local_oksigeniaayvurenda_ask_hold', $html);
+        try {
+            \local_oksigeniaayvurenda\external\cancel_hold::execute($holdid);
+            $this->fail('A reservation was cancelled twice');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('holdnotyours', $e->errorcode);
+        }
         // Someone who may not see the library is told they are no reader.
         $this->setUser($this->getDataGenerator()->create_user());
         $html = mobile::mobile_record_view(['library' => 'no-such-library', 'id' => $record->id])['templates'][0]['html'];

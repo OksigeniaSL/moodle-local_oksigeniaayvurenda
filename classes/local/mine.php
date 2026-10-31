@@ -81,6 +81,9 @@ final class mine {
                 $renews[$where->id] = $renews[$where->id] ?? holds::renew_online($where, (int) $reader->id, $now);
                 $loans[] = [
                     'loanid' => (int) $row->id,
+                    'recordid' => (int) $row->recordid,
+                    // Not «slug»: inside the list, Mustache would find the library's first.
+                    'where' => (string) $where->slug,
                     'canrenew' => $renews[$where->id],
                     'title' => $row->title,
                     'url' => $url('record.php', $where, ['id' => $row->recordid]),
