@@ -46,7 +46,7 @@ final class visit {
 
     /** @var string[] The hall of each skin of a centre: the visit starts there. */
     public const HALLS = ['school' => 'vestibulo', 'secondary' => 'instituto', 'university' => 'universidad',
-        'public' => 'publica'];
+        'public' => 'publica', 'company' => 'empresa', 'mobile' => 'bibliobus'];
 
     /** @var string[] What a place of a scene may be. */
     private const KINDS = ['room', 'corner', 'directory', 'new', 'pulse', 'voices', 'stacks', 'exit'];
@@ -84,8 +84,8 @@ final class visit {
     }
 
     /**
-     * The hall of a centre's visit, by its skin: without the hall of its skin, there is no visit (a public library
-     * starts in the school's until the art brings its own).
+     * The hall of a centre's visit, by its skin: without the hall of its skin, there is no visit, unless the skin borrows
+     * another's until the art brings its own (`skins::SCENES`).
      *
      * @param int $entityid
      * @param array|null $art The art package, if already found.
@@ -93,12 +93,12 @@ final class visit {
      */
     public static function hall(int $entityid, ?array $art = null): string {
         $skin = skins::of($entityid);
-        $hall = self::HALLS[$skin] ?? self::HALL;
-        // A public library has a children's room: until the art brings its own hall, the visit starts in the school's.
-        if ($skin === 'public' && self::scene($hall, $art) === null) {
-            return self::HALL;
+        foreach (skins::scenes($skin) as $from) {
+            if (self::scene(self::HALLS[$from] ?? self::HALL, $art) !== null) {
+                return self::HALLS[$from] ?? self::HALL;
+            }
         }
-        return $hall;
+        return self::HALLS[$skin] ?? self::HALL;
     }
 
     /**

@@ -102,6 +102,34 @@ final class skins_test extends \advanced_testcase {
     }
 
     /**
+     * Each skin has what it needs: what is on, its name, its hall. A company is plain, with a university's words and its
+     * hall until it has its own; a mobile library speaks and visits like a public one; neither has classes.
+     */
+    public function test_company_and_mobile(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        foreach (skins::SKINS as $skin) {
+            $this->assertArrayHasKey($skin, skins::PLAY);
+            $this->assertArrayHasKey($skin, visit::HALLS);
+            $this->assertTrue(get_string_manager()->string_exists('skin' . $skin, 'local_oksigeniaayvurenda'), $skin);
+        }
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $this->assertFalse(skins::no_classes($entityid));
+        libraries::update_entity($entityid, ['skin' => 'company']);
+        $this->assertTrue(skins::no_classes($entityid));
+        $this->assertFalse(skins::lively($entityid));
+        $this->assertFalse(skins::on($entityid, 'games'));
+        $this->assertSame('noticereaderbodyuniversity', skins::words($entityid, 'noticereaderbody'));
+        $this->assertSame(['company', 'university'], skins::scenes('company'));
+        libraries::update_entity($entityid, ['skin' => 'mobile']);
+        $this->assertTrue(skins::no_classes($entityid));
+        $this->assertTrue(skins::lively($entityid));
+        $this->assertSame('noticereaderbodysecondary', skins::words($entityid, 'noticereaderbody'));
+        $this->assertSame(['mobile', 'public', 'school'], skins::scenes('mobile'));
+    }
+
+    /**
      * A public library: readers of every age, with the characters standing whole and no voices nor sound of its own;
      * it speaks in a secondary school's words where it has none, and visits the school's rooms as its children's room.
      */

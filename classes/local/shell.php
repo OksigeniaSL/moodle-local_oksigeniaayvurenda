@@ -299,6 +299,8 @@ final class shell {
         $howto = self::howto_box($library, $base);
         // The skin of the library's centre: what changes in the look hangs from its class.
         $skin = skins::of($library ? (int) $library->entityid : 0);
+        // With the system's font there is no font to fetch.
+        $sober = in_array($skin, ['university', 'company'], true);
         echo '<!DOCTYPE html>
 <html lang="' . s($lang) . '"' . self::colour_mode() . '>
 <head>
@@ -313,7 +315,7 @@ final class shell {
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="' . $app . 'emblema-pequeno.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="' . $app . 'apple-touch-icon.png">
-' . ($skin === 'university' ? '' : '<link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2"
+' . ($sober ? '' : '<link rel="preload" href="' . $app . 'fonts/andika-400.woff2" as="font" type="font/woff2"
     crossorigin>') . '
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">

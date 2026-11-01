@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.112.0 (2026-11-01)
+
+- Two more skins. «Company», for a company's library or documentation centre: adult readers, plain, the system's font, a
+  portrait and a signature, no games by default, each reader told about their own books, and the words of a university.
+  «Mobile library», for a bookmobile or any library that travels: readers of every age, no classes, like a public library,
+  whose hall and rooms it visits until the art brings its own. The public library's skin now says «or foundation».
+
 ## 0.111.0 (2026-11-01)
 
 - The reader's card alone in the app, to show at the desk (`mobile_card_view`): their name, the library, the QR and the

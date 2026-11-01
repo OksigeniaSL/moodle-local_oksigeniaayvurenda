@@ -15,7 +15,8 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The skin of a centre's library: a school, a secondary school, or a university or academy.
+ * The skin of a centre's library: a school, a secondary school, a university or academy, a public library or a
+ * foundation's, a company's, or a library that travels.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -34,7 +35,7 @@ final class skins {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] The skins, the school's first: it is the one a centre has until it chooses. */
-    public const SKINS = ['school', 'secondary', 'university', 'public'];
+    public const SKINS = ['school', 'secondary', 'university', 'public', 'company', 'mobile'];
 
     /**
      * @var array What is on at each skin until the centre changes it: the visit, its games, the characters standing whole
@@ -46,10 +47,24 @@ final class skins {
         'university' => ['visit' => true, 'games' => true, 'figures' => false, 'voices' => false, 'sound' => false],
         // A public library (a town's, a foundation's, an association's): readers of every age, a children's room.
         'public' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => false, 'sound' => false],
+        // A company's library or documentation centre: adults only, plain, with no play until the centre wants it.
+        'company' => ['visit' => true, 'games' => false, 'figures' => false, 'voices' => false, 'sound' => false],
+        // A library that travels (a bookmobile): readers of every age at each stop.
+        'mobile' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => false, 'sound' => false],
     ];
 
-    /** @var array The skins whose scenes a skin also visits: a public library has the school's as its children's room. */
-    public const SCENES = ['public' => ['public', 'school']];
+    /**
+     * @var array The skins whose scenes a skin also visits, its own first: a public library has the school's as its
+     * children's room; a company, the university's hall until the art brings its own; a bookmobile, a public library's.
+     */
+    public const SCENES = ['public' => ['public', 'school'], 'company' => ['company', 'university'],
+        'mobile' => ['mobile', 'public', 'school']];
+
+    /** @var array Whose words a skin speaks with, where it has none of its own: warm for every age, or plain for adults. */
+    public const TONES = ['public' => ['public', 'secondary'], 'company' => ['university'], 'mobile' => ['public', 'secondary']];
+
+    /** @var string[] The skins with no classes nor tutors: each reader is told about their own books. */
+    public const NO_CLASSES = ['university', 'public', 'company', 'mobile'];
 
     /**
      * The skin of a centre.
@@ -143,13 +158,22 @@ final class skins {
      */
     public static function words(int $entityid, string $key): string {
         $skin = self::of($entityid);
-        // A public library speaks to every age: its own words, or else a secondary school's, warm but not childish.
-        foreach ($skin === 'public' ? ['public', 'secondary'] : [$skin] as $tone) {
+        foreach (self::TONES[$skin] ?? [$skin] as $tone) {
             if ($tone !== self::SKINS[0] && get_string_manager()->string_exists($key . $tone, 'local_oksigeniaayvurenda')) {
                 return $key . $tone;
             }
         }
         return $key;
+    }
+
+    /**
+     * Whether a centre has no classes nor tutors, so each reader is told about their own books.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function no_classes(int $entityid): bool {
+        return in_array(self::of($entityid), self::NO_CLASSES, true);
     }
 
     /**

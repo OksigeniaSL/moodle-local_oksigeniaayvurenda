@@ -407,6 +407,13 @@ final class visit_test extends \advanced_testcase {
         // Its door to the school's room of literature leads there (the room is the children's room's).
         $door = array_values(array_filter($page['zones'], fn($z) => $z['kind'] === 'room'))[0];
         $this->assertStringContainsString('room=literatura', $door['url']);
+        // A bookmobile borrows the public library's hall until it has its own.
+        libraries::update_entity($entityid, ['skin' => 'mobile']);
+        $this->assertSame('publica', visit::hall($entityid, $art));
+        $this->assertNotNull(visit::page($library, 'publica', false, $art));
+        // A company has no hall to borrow here: no university's in this art, so there is no visit.
+        libraries::update_entity($entityid, ['skin' => 'company']);
+        $this->assertFalse(visit::available($art, $entityid));
         // A school does not visit the public library's hall.
         libraries::update_entity($entityid, ['skin' => 'school']);
         $this->assertNull(visit::page($library, 'publica', false, $art));
