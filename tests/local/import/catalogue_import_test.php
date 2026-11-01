@@ -60,7 +60,7 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame('Narrativa', $DB->get_field(self::T . 'authority', 'label', ['id' => $koha->locationid]));
 
         $again = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
-        $this->assertSame(['records' => 0, 'found' => 2, 'items' => 1, 'kept' => 2, 'newcodes' => 1], $again);
+        $this->assertSame(['records' => 0, 'found' => 2, 'items' => 0, 'kept' => 3, 'newcodes' => 0], $again);
     }
 
     /**
@@ -80,6 +80,15 @@ final class catalogue_import_test extends \advanced_testcase {
         $stats = (new catalogue_import($library, 'csv'))->run($records);
         $this->assertSame(1, $stats['records']);
         $this->assertSame(2, $stats['items']);
+        // Another pass repeats nothing, though these copies have no code; one more copy in the file is one more.
+        $again = (new catalogue_import($library, 'csv'))->run($records);
+        $this->assertSame(['records' => 0, 'found' => 1, 'items' => 0, 'kept' => 2, 'newcodes' => 0], $again);
+        file_put_contents($dir . '/libros.csv', "Título;Autor;Ejemplares\nCuentos a oscuras;Olmo Ríos, Bruno;3\n");
+        $more = (new catalogue_import($library, 'csv'))->run(files::csv_records(
+            $dir . '/libros.csv',
+            \local_oksigeniaayvurenda\core\import\catalogue_csv::guess($csv['columns'])
+        ));
+        $this->assertSame([1, 2], [$more['items'], $more['kept']]);
         $this->assertSame('Cuentos a oscuras', $DB->get_field(self::T . 'record', 'title', ['entityid' => $library->entityid]));
     }
 }

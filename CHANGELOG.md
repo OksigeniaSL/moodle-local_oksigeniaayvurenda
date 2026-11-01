@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.112.1 (2026-11-01)
+
+- Importing again repeats nothing, also for copies with no code: those the record already has count for them, and one
+  more in the file is one more. Until now each pass added them again.
+- The import screen and its help begin with any program; Abies Web comes last.
+
 ## 0.112.0 (2026-11-01)
 
 - Two more skins. «Company», for a company's library or documentation centre: adult readers, plain, the system's font, a

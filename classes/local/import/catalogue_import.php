@@ -97,6 +97,14 @@ final class catalogue_import {
             $description = $record['description'];
             $isbn = (string) ($description['record']['isbn'] ?? '');
             $recordid = ($key !== '' ? ($this->sources[$key] ?? 0) : 0) ?: ($isbn !== '' ? ($this->isbns[$isbn] ?? 0) : 0);
+            // Copies with no code cannot be recognised by it: when this file's record came before, those it has count for them.
+            $room = 0;
+            if ($recordid && $key !== '' && isset($this->sources[$key])) {
+                $room = $DB->count_records(self::T . 'item', ['recordid' => $recordid, 'libraryid' => $this->library->id]);
+                foreach ($record['items'] ?? [] as $item) {
+                    $room -= isset($this->codes[strtoupper(trim((string) ($item['barcode'] ?? '')))]) ? 1 : 0;
+                }
+            }
             if ($recordid) {
                 $this->stats['found']++;
             } else {
@@ -116,6 +124,11 @@ final class catalogue_import {
                 $this->sources[$key] = $recordid;
             }
             foreach ($record['items'] ?? [] as $item) {
+                if (trim((string) ($item['barcode'] ?? '')) === '' && $room > 0) {
+                    $room--;
+                    $this->stats['kept']++;
+                    continue;
+                }
                 $this->item($recordid, $item, $letter, $now);
             }
             if (++$batch % 500 === 0) {
