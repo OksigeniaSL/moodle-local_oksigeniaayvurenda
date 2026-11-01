@@ -51,19 +51,28 @@ core_php_time_limit::raise(300);
 $notice = '';
 $error = '';
 if (data_submitted() && confirm_sesskey()) {
-    cifra::save($entityid, [
-        'enabled' => optional_param('enabled', 0, PARAM_BOOL),
-        'url' => optional_param('url', '', PARAM_URL),
-        'mode' => optional_param('mode', 'key', PARAM_ALPHA),
-        'example' => optional_param('example', 0, PARAM_BOOL),
-        'key' => optional_param('key', '', PARAM_RAW_TRIMMED),
-        'clientid' => optional_param('clientid', '', PARAM_RAW_TRIMMED),
-        'secret' => optional_param('secret', '', PARAM_RAW_TRIMMED),
-    ]);
-    $notice = $str('sourcessaved');
     $action = optional_param('do', '', PARAM_ALPHA);
+    $settings = cifra::settings($entityid);
+    if ($action === 'night') {
+        // Only that: the connection stays as it is.
+        cifra::save($entityid, ['enabled' => optional_param('enabled', 0, PARAM_BOOL), 'url' => $settings['url'],
+            'mode' => $settings['mode'], 'example' => $settings['example'], 'key' => '', 'clientid' => $settings['clientid'],
+            'secret' => '']);
+        $notice = $str('sourcessaved');
+    } else if ($action === 'save' || $action === 'connect') {
+        cifra::save($entityid, [
+            'enabled' => $settings['enabled'],
+            'url' => optional_param('url', '', PARAM_URL),
+            'mode' => optional_param('mode', 'key', PARAM_ALPHA),
+            'example' => optional_param('example', 0, PARAM_BOOL),
+            'key' => optional_param('key', '', PARAM_RAW_TRIMMED),
+            'clientid' => optional_param('clientid', '', PARAM_RAW_TRIMMED),
+            'secret' => optional_param('secret', '', PARAM_RAW_TRIMMED),
+        ]);
+        $notice = $str('sourcessaved');
+    }
     try {
-        if ($action === 'test') {
+        if ($action === 'test' || $action === 'connect') {
             $found = cifra_people::readers(cifra::people($entityid), time());
             $groups = array_count_values(array_filter(array_map(fn($r) => $r['group'] ?? '', $found['readers'])));
             ksort($groups, SORT_NATURAL);
@@ -78,13 +87,24 @@ if (data_submitted() && confirm_sesskey()) {
     }
 }
 $settings = cifra::settings($entityid);
+$connected = $settings['url'] !== '' && ($settings['haskey'] || $settings['hassecret']);
+$from = \local_oksigeniaayvurenda\local\readers::from_sources($entityid);
+$brought = $from['cifra'] ?? 0;
 $data = $settings + [
     'heading' => $str('cifratitle'),
     'intro' => $str('cifraintro'),
+    'how' => $str('cifrahowintro'),
     'notice' => $notice,
     'error' => $error,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
+    'connected' => $connected,
+    'state' => $str($connected ? 'cifrastateon' : 'cifrastateoff'),
+    'stateline' => !$connected ? $str('cifrastateoffhint') : ($brought
+        ? $str('cifrastatereaders', \local_oksigeniaayvurenda\local\screens::number($brought)) : $str('cifrastatenone')),
+    'nightline' => $str($settings['enabled'] ? 'cifranighton' : 'cifranightoff'),
+    'nightvalue' => $settings['enabled'] ? 0 : 1,
+    'nightgo' => $str($settings['enabled'] ? 'cifranightstop' : 'cifranightstart'),
     'modekey' => $settings['mode'] === 'key',
     'modeoauth' => $settings['mode'] === 'oauth',
     'keyhint' => $settings['haskey'] ? $str('cifrakeptkey') : '',
@@ -98,8 +118,9 @@ if ($unpaired) {
         'url' => (new moodle_url('/local/oksigeniaayvurenda/pair.php', ['library' => $library->slug]))->out(false)];
 }
 foreach (
-    ['cifraenabled', 'cifraurl', 'cifraurlhint', 'cifrahow', 'ciframodekey', 'ciframodeoauth', 'cifrakey', 'cifraclientid',
-        'cifrasecret', 'cifraexample', 'cifratest', 'cifrasync', 'sourcessave'] as $key
+    ['cifrachange', 'cifraconnect', 'cifrasavetest', 'cifraurl', 'cifraurlhint', 'cifrahow', 'ciframodekey', 'ciframodeoauth',
+        'cifrakey', 'cifraclientid', 'cifrasecret', 'cifraexample', 'cifratest', 'cifrasync', 'sourcessave',
+        'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -109,5 +130,5 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/connector', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $url('readers.php'), 'label' => $str('readers')]]]
+    ['search' => false, 'nav' => [['url' => $url('sources.php'), 'label' => $str('readerssources')]]]
 );

@@ -127,10 +127,13 @@ final class mine {
     public static function home_cards(int $userid, ?int $now = null): array {
         $now = $now ?? time();
         $summary = self::summary($userid, $now);
-        if (!$summary) {
-            return [];
-        }
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        if (!$summary) {
+            // Staff without a reader's card have nothing of theirs to list, and the library is still theirs to open.
+            return access::can('local/oksigeniaayvurenda:desk', 0, $userid) ? [['tile' => ['label' => $str('mobilelibrary'),
+                'icon' => 'fas-book-open-reader', 'method' => 'mobile_library_view',
+                'pagetitle' => $str('mobilelibrary')]]] : [];
+        }
         $items = [];
         foreach ($summary as $library) {
             foreach ($library['loans'] as $loan) {

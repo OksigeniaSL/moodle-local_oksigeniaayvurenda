@@ -1,74 +1,80 @@
 {{!
-    This file is part of Moodle - https://moodle.org/
-
-    Moodle is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Moodle is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-{{!
     @template local_oksigeniaayvurenda/readers
 
-    The groups of this school year, for the staff.
-
-    Context variables required for this template:
-    * heading - title of the screen
-    * groups - list of name, stage, countlabel and url
-    * nogroup - url and label of readers without a group
-    * manage - url and label to choose where readers come from, for those who may
-    * match - url and label to match readers without an account, when there are
-    * list - url and label to load readers from a list, for those who may
-    * tutors - url and label to choose the tutor of each group, for those who may
-    * rules - url and label of the loan rules, for those who may
-    * characters - url and label of the two characters, for those who may
-    * year - url and label of the school year, for those who may
+    The readers of a library: who there is, by stage and group, how to find one, and what asks for attention.
 
     Example context (json):
     {
-        "heading": "Lectores",
-        "hasgroups": true,
-        "groups": [{"name": "3º Primaria A", "stage": "Primaria", "countlabel": "24 lectores", "url": "#"}],
-        "nogroup": {"url": "#", "label": "Sin grupo"},
-        "empty": "",
-        "manage": {"url": "#", "label": "De dónde salen los lectores"},
-        "match": {"url": "#", "label": "Casar lectores sin cuenta (12)"},
-        "list": {"url": "#", "label": "Desde una lista"},
-        "tutors": {"url": "#", "label": "Tutores"},
-        "rules": {"url": "#", "label": "Normas"},
-        "characters": {"url": "#", "label": "Personajes"},
-        "year": {"url": "#", "label": "Curso escolar"}
+        "heading": "Lectores", "summary": "24 lectores · 1 grupo", "hasreadersatall": true, "action": "#", "library": "demo-1",
+        "query": "", "findlabel": "Busca a un lector", "findhint": "Nombre o carné", "findgo": "Buscar", "cardlabel": "Carné", "loanslabel": "Préstamos",
+        "bring": {"url": "#", "label": "Traer lectores"},
+        "match": {"url": "#", "go": "Revisarlos", "line": "12 lectores sin cuenta en este sitio.", "hint": "Con cuenta ven su carné."},
+        "stages": [{"name": "Primaria", "named": true, "groups": [{"name": "3º A", "url": "#", "count": "24", "countlabel": "24 lectores"}]}],
+        "found": null, "people": null, "pager": null, "said": null,
+        "tools": [{"url": "#", "label": "Tutores"}]
     }
 }}
-<div class="ayv-results-head">
-    <h1 class="ayv-results-title">{{heading}}</h1>
-    {{#manage}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/manage}}
-    {{#list}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/list}}
-    {{#oneroster}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/oneroster}}
-    {{#twins}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/twins}}
-    {{#tutors}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/tutors}}
-    {{#rules}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/rules}}
-    {{#characters}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/characters}}
-    {{#year}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/year}}
-</div>
-{{#hasgroups}}
-<ul class="ayv-corners">
-{{#groups}}
-    <li><a class="ayv-corner ayv-cover-5" href="{{url}}">
-        <span class="ayv-corner-label">{{name}}</span>
-        <span class="ayv-corner-count">{{stage}} · {{countlabel}}</span>
-    </a></li>
-{{/groups}}
+<header class="ayv-readers-top">
+    <div class="ayv-readers-head">
+        <h1 class="ayv-results-title">{{heading}}</h1>
+        <p class="ayv-readers-sum">{{summary}}</p>
+    </div>
+    {{#bring}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/bring}}
+</header>
+{{#match}}
+<p class="ayv-readers-band"><span class="ayv-readers-bandtext"><b>{{line}}</b> {{hint}}</span>
+    <a class="ayv-button ayv-button-quiet" href="{{url}}">{{go}}</a></p>
+{{/match}}
+{{#hasreadersatall}}
+<form class="ayv-readers-find" role="search" method="get" action="{{action}}">
+    <input type="hidden" name="library" value="{{library}}">
+    <label for="ayv-readers-q" class="ayv-sr">{{findlabel}}</label>
+    <input id="ayv-readers-q" type="search" name="q" value="{{query}}" placeholder="{{findhint}}" maxlength="100" autocomplete="off">
+    <button type="submit" class="ayv-button ayv-button-quiet">{{findgo}}</button>
+</form>
+{{/hasreadersatall}}
+{{#said}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/said}}
+{{#found}}
+<section class="ayv-readers-found">
+    <div class="ayv-readers-foundhead"><h2 class="ayv-section-title">{{heading}}</h2> <a href="{{clear}}">{{clearlabel}}</a></div>
+    {{#none}}<p class="ayv-empty">{{none}}</p>{{/none}}
+    <ul class="ayv-people ayv-people-grid">
+    {{#people}}
+        <li class="ayv-person">
+            <span class="ayv-person-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>
+            <span class="ayv-person-text"><a class="ayv-person-name" href="{{url}}">{{name}}</a>
+            <span class="ayv-person-card">{{group}}</span></span>
+        </li>
+    {{/people}}
+    </ul>
+</section>
+{{/found}}
+{{^found}}
+{{#stages}}
+<section class="ayv-readers-stage">
+    {{#named}}<h2 class="ayv-section-title">{{name}}</h2>{{/named}}
+    <ul class="ayv-readers-groups">
+    {{#groups}}
+        <li><a class="ayv-readers-group" href="{{url}}"><span class="ayv-readers-groupname">{{name}}</span>
+            <span class="ayv-readers-groupcount"><span aria-hidden="true">{{count}}</span><span class="ayv-sr">{{countlabel}}</span></span></a></li>
+    {{/groups}}
+    </ul>
+</section>
+{{/stages}}
+{{#people.0}}
+<ul class="ayv-people ayv-people-grid">
+{{#people}}
+    <li class="ayv-person">
+        <span class="ayv-person-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>
+        <span class="ayv-person-text"><a class="ayv-person-name" href="{{url}}">{{name}}</a>
+        <span class="ayv-person-card"><span class="ayv-sr">{{cardlabel}}: </span>{{cardcode}}</span></span>
+        {{#loans}}<span class="ayv-person-loans" title="{{loanslabel}}">{{loans}}</span>{{/loans}}
+    </li>
+{{/people}}
 </ul>
-{{/hasgroups}}
-{{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
-<p class="ayv-more">
-    {{#nogroup}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/nogroup}}
-    {{#match}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/match}}
-</p>
+{{/people.0}}
+{{#pager}}{{> local_oksigeniaayvurenda/readers_pager}}{{/pager}}
+{{/found}}
+{{#tools.0}}
+<p class="ayv-readers-tools">{{#tools}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a> {{/tools}}</p>
+{{/tools.0}}

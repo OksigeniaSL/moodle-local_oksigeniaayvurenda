@@ -38,20 +38,29 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:manage', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readerslist.php', ['library' => $ref]));
+$keep = optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [];
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readerslist.php', ['library' => $ref] + $keep));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
+$entityid = (int) $library->entityid;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$number = fn(int $n) => \local_oksigeniaayvurenda\local\screens::number($n);
+$page = fn(string $file) => (new moodle_url('/local/oksigeniaayvurenda/' . $file, ['library' => $library->slug]))->out(false);
 $text = '';
-$notice = '';
 $error = '';
 $step = 'paste';
+$done = null;
+$filename = '';
+$list = ['columns' => [], 'rows' => []];
+$map = [];
 if (data_submitted() && confirm_sesskey()) {
     $text = optional_param('csv', '', PARAM_RAW);
+    $filename = optional_param('filename', '', PARAM_FILE);
     if (!empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
         $text = (string) file_get_contents($_FILES['file']['tmp_name'], false, null, 0, 5 * 1024 * 1024);
+        $filename = clean_filename((string) ($_FILES['file']['name'] ?? ''));
     }
     $list = csv_list::read($text);
     $map = csv_list::guess($list['columns']);
@@ -62,26 +71,42 @@ if (data_submitted() && confirm_sesskey()) {
     if (optional_param('load', 0, PARAM_BOOL)) {
         $type = optional_param('type', 'student', PARAM_ALPHA);
         try {
-            $stats = plans::within((int) $library->entityid, fn() => csvlist::load(
-                (int) $library->entityid,
+            $done = plans::within($entityid, fn() => csvlist::load(
+                $entityid,
                 csv_list::readers($list['rows'], $map),
                 $type,
                 null,
                 'csv',
                 false
             ));
-            $notice = $str('readerslistloaded', (object) $stats);
             $text = '';
         } catch (plan_full $e) {
             $error = $e->getMessage();
         }
     } else if ($list['columns']) {
         $step = 'check';
+    } else {
+        $error = $str('readerslistnothing');
     }
 }
-$data = ['heading' => $str('readerslisttitle'), 'intro' => $str('readerslistintro'), 'notice' => $notice, 'error' => $error,
-    'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'paste' => $step === 'paste', 'check' => null];
+$data = ['heading' => $str('readerslisttitle'), 'intro' => $str('readerslistintro'), 'error' => $error,
+    'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'paste' => $step === 'paste' && !$done, 'check' => null,
+    'done' => null, 'plansummary' => plans::summary($entityid), 'said' => null];
+if ($done) {
+    $figure = fn(int $count, string $key) => $count ? ['count' => $number($count), 'label' => $str($key)] : null;
+    $data['done'] = [
+        'figures' => array_values(array_filter([
+            $figure((int) $done['created'], 'readerslistfigcreated'),
+            $figure((int) $done['updated'], 'readerslistfigupdated'),
+            $figure((int) $done['linked'], 'readerslistfiglinked'),
+        ])),
+        'urlreaders' => $page('readers.php'),
+        'urldesk' => $page('desk.php'),
+    ];
+    $data['said'] = \local_oksigeniaayvurenda\local\characters::say($entityid, 'memory', 'readerslistmemory', [], 'celebra');
+}
 if ($step === 'check') {
+    $readers = csv_list::readers($list['rows'], $map);
     $columns = [];
     foreach ($list['columns'] as $index => $heading) {
         $options = [['value' => '', 'label' => $str('readerslistignore'), 'selected' => !isset($map[$index])]];
@@ -89,30 +114,65 @@ if ($step === 'check') {
             $options[] = ['value' => $field, 'label' => $str('readerslistfield' . $field),
                 'selected' => ($map[$index] ?? '') === $field];
         }
-        $columns[] = ['index' => $index, 'heading' => $heading, 'options' => $options];
+        $sample = '';
+        foreach (array_slice($list['rows'], 0, 25) as $row) {
+            if (trim((string) ($row[$index] ?? '')) !== '') {
+                $sample = trim((string) $row[$index]);
+                break;
+            }
+        }
+        $columns[] = ['index' => $index, 'heading' => $heading, 'options' => $options, 'sample' => $sample,
+            'isknown' => isset($map[$index])];
     }
-    $preview = array_map(
-        fn($row) => ['cells' => array_map(fn($c) => ['value' => $c], $row)],
-        array_slice($list['rows'], 0, 5)
-    );
-    $types = array_map(
-        fn($t) => ['value' => $t, 'label' => $str('readertype' . $t), 'selected' => $t === 'student'],
-        ['student', 'teacher', 'staff', 'family']
-    );
-    $data['check'] = ['columns' => $columns, 'preview' => $preview, 'types' => $types, 'csv' => $text,
-        'count' => $str('readerslistcount', count(csv_list::readers($list['rows'], $map)))];
+    $groups = array_unique(array_filter(array_column($readers, 'group')));
+    $emails = count(array_filter(array_column($readers, 'email')));
+    $people = array_map(function ($reader) {
+        $name = trim(($reader['firstname'] ?? '') . ' ' . ($reader['lastname'] ?? ''));
+        return ['name' => $name, 'group' => (string) ($reader['group'] ?? ''),
+            'initial' => \local_oksigeniaayvurenda\local\profile::initial($name)];
+    }, array_slice($readers, 0, 6));
+    $more = count($readers) - count($people);
+    $data['check'] = [
+        'csv' => $text,
+        'filename' => $filename,
+        'kind' => $str('importkindcsv'),
+        'figures' => array_values(array_filter([
+            ['count' => $number(count($readers)), 'label' => $str('readerslistfigreaders')],
+            $groups ? ['count' => $number(count($groups)), 'label' => $str('readerslistfiggroups')] : null,
+            $emails ? ['count' => $number($emails), 'label' => $str('readerslistfigemail')] : null,
+        ])),
+        'people' => $people,
+        'more' => $more > 0 ? $str('readerslistmore', $number($more)) : '',
+        'columns' => $columns,
+        'allknown' => count($map) === count($columns),
+        'line' => count($map) === count($columns) ? $str('importcolumnsall', count($columns))
+            : $str('importcolumnssome', (object) ['known' => count($map), 'all' => count($columns)]),
+        'cannot' => $readers ? '' : $str('readerslistnoname'),
+        'noname' => !$readers,
+        'gowords' => $str('readerslistload', $number(count($readers))),
+        'types' => array_map(
+            fn($t) => ['value' => $t, 'label' => $str('readertype' . $t), 'selected' => $t === 'student'],
+            ['student', 'teacher', 'staff', 'family']
+        ),
+    ];
 }
 foreach (
-    ['readerslistpaste', 'readerslistfile', 'readerslistnext', 'readerslistcolumns', 'readerslisttype',
-        'readerslistload', 'readerslistpreview'] as $key
+    ['readerslistdrop', 'readerslistformats', 'readerslistpastetoggle', 'readerslistpastego', 'readerslistsample',
+        'readerslistsamplehint', 'readerslistcolumns', 'readerslisttype', 'readerslistchecktitle', 'readerslistchecklead',
+        'readerslistpeople', 'readerslistsafe', 'readerslistdonetitle', 'readerslistgoreaders', 'readerslistgoreadershint',
+        'importdropor', 'importnextheading', 'importnextdesk', 'importnextdeskhint', 'importcolumnsreview',
+        'importcolumnsintro', 'importcolumnsapply', 'importcolumnssaysnothing', 'importcancel', 'importreading',
+        'importbusy', 'importbusyhint', 'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }
-$readersurl = (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false);
+$data['urlself'] = $PAGE->url->out(false);
 shell::output(
     $data['heading'],
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/readerslist', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $readersurl, 'label' => $str('readers')]]]
+    ['search' => false, 'nav' => $keep ? [] : [['url' => $page('sources.php'), 'label' => $str('readerssources')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'readerslist']))
+            ->out(false), 'label' => $str('helpnav')]]]
 );

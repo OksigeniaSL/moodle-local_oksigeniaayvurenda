@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.115.0 (2026-11-01)
+
+- The readers, as one route. «Readers» says how many there are, finds one by name or card, and shows the groups by stage,
+  with what needs a look at the top; a library without classes lists its readers a page at a time.
+- «Where the readers come from» is a set of cards, one for each place (a list, OneRoster, Moodle cohorts and courses, a
+  learning platform, a management program, Abies Web), each saying whether it is in use. Cohorts and courses are chosen in
+  their own sheets, where one row is one line.
+- A list and a OneRoster zip are dropped like a catalogue, and show what they bring before anyone arrives: figures, the first
+  people and the columns they were taken for. The connector shows its state first; the connection goes in a sheet, and «every
+  night» is a choice of its own.
+- Guided helps for the readers and for loading a list. On the app's home, staff without a reader's card get their way in too.
+
 ## 0.114.0 (2026-11-01)
 
 - Guided helps for the screens already remade: importing a catalogue, weeding, loan rules, late books, holds and voices, in

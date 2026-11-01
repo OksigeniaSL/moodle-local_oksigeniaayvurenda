@@ -1,80 +1,67 @@
 {{!
-    This file is part of Moodle - https://moodle.org/
-
-    Moodle is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Moodle is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-{{!
     @template local_oksigeniaayvurenda/connector
 
-    The centre's management program as the source of readers.
-
-    Context variables required for this template:
-    * heading, intro, notice, error - texts
-    * action, sesskey - the form
-    * enabled, url, modekey, modeoauth, example, clientid, keyhint, secrethint - the settings
-    * the words of the fields and buttons
+    The connector of a management program: its state and what to do with it first; the connection, in a sheet.
 
     Example context (json):
     {
-        "heading": "El programa de gestión",
-        "intro": "Los lectores, desde Cifra.",
-        "notice": "",
-        "error": "",
-        "action": "#",
-        "sesskey": "abc",
-        "enabled": false,
-        "url": "https://cifra-puente.invalid",
-        "modekey": true,
-        "modeoauth": false,
-        "example": false,
-        "clientid": "",
-        "keyhint": "guardada; escríbela solo para cambiarla",
-        "secrethint": "",
-        "cifraenabled": "Traer los lectores de Cifra cada noche", "cifraurl": "Dirección", "cifraurlhint": "La del puente o la de Cifra", "cifrahow": "Cómo se conecta",
-        "ciframodekey": "Con la llave del puente", "ciframodeoauth": "Directamente con Cifra", "cifrakey": "Llave",
-        "cifraclientid": "Identificador", "cifrasecret": "Secreto", "cifraexample": "Usar los datos de ejemplo del puente",
-        "cifratest": "Probar la conexión", "cifrasync": "Traer los lectores ahora", "sourcessave": "Guardar",
-        "pair": {"hint": "Hay 2138 lectores sin casar.", "label": "Casarlos", "url": "https://example.org/p"}
+        "heading": "Lectores desde Cifra", "intro": "Solo lee.", "how": "Con un puente o directamente.", "notice": "", "error": "", "action": "#", "sesskey": "abc",
+        "connected": true, "state": "Conectado", "stateline": "312 lectores vienen de aquí.", "enabled": true,
+        "nightline": "Cada noche se ponen al día.", "nightvalue": 0, "nightgo": "Dejar de traerlos",
+        "url": "https://cifra-puente.invalid", "modekey": true, "modeoauth": false, "example": false, "clientid": "",
+        "keyhint": "guardada", "secrethint": "", "pair": {"hint": "Hay 2 sin casar.", "label": "Casarlos", "url": "#"},
+        "cifrachange": "Cambiar la conexión", "cifraconnect": "Conectar", "cifrasavetest": "Guardar y probar", "cifraurl": "Dirección",
+        "cifraurlhint": "La del puente", "cifrahow": "Cómo se conecta", "ciframodekey": "Con la llave", "ciframodeoauth": "Directamente",
+        "cifrakey": "Llave", "cifraclientid": "Identificador", "cifrasecret": "Secreto", "cifraexample": "Datos de ejemplo",
+        "cifratest": "Probar", "cifrasync": "Traer ahora", "sourcessave": "Guardar", "offsiteclose": "Cerrar"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
-<form method="post" action="{{action}}" class="ayv-book" autocomplete="off">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <label class="ayv-field ayv-field-check"><input type="checkbox" name="enabled" value="1" {{#enabled}}checked{{/enabled}}> {{cifraenabled}}</label>
-    <label class="ayv-field ayv-field-wide">{{cifraurl}} <span class="ayv-field-hint">{{cifraurlhint}}</span>
-        <input type="text" name="url" value="{{url}}" inputmode="url" spellcheck="false"></label>
-    <fieldset class="ayv-fieldset">
-        <legend>{{cifrahow}}</legend>
-        <label class="ayv-field ayv-field-check"><input type="radio" name="mode" value="key" {{#modekey}}checked{{/modekey}}> {{ciframodekey}}</label>
-        <label class="ayv-field ayv-field-check"><input type="radio" name="mode" value="oauth" {{#modeoauth}}checked{{/modeoauth}}> {{ciframodeoauth}}</label>
-    </fieldset>
-    <div class="ayv-connect ayv-connect-key">
-        <label class="ayv-field ayv-field-wide">{{cifrakey}} {{#keyhint}}<span class="ayv-field-hint">{{keyhint}}</span>{{/keyhint}}
-            <input type="password" name="key" autocomplete="new-password"></label>
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="example" value="1" {{#example}}checked{{/example}}> {{cifraexample}}</label>
-    </div>
-    <div class="ayv-connect ayv-connect-oauth">
-        <label class="ayv-field ayv-field-wide">{{cifraclientid}} <input type="text" name="clientid" value="{{clientid}}" spellcheck="false"></label>
-        <label class="ayv-field ayv-field-wide">{{cifrasecret}} {{#secrethint}}<span class="ayv-field-hint">{{secrethint}}</span>{{/secrethint}}
-            <input type="password" name="secret" autocomplete="new-password"></label>
-    </div>
-    {{#pair}}<p class="ayv-notice">{{hint}} <a href="{{url}}">{{label}}</a></p>{{/pair}}
-    <p class="ayv-book-actions">
-        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="test">{{cifratest}}</button>
+<section class="ayv-settingcard ayv-conn-state{{#connected}} ayv-conn-on{{/connected}}">
+    <h2 class="ayv-section-title"><span class="ayv-imp-tick{{^connected}} ayv-imp-tick-warn{{/connected}}" aria-hidden="true">{{#connected}}{{> local_oksigeniaayvurenda/icon_check}}{{/connected}}{{^connected}}{{> local_oksigeniaayvurenda/icon_circle_alert}}{{/connected}}</span> {{state}}</h2>
+    <p>{{stateline}}</p>
+    {{#connected}}
+    <form method="post" action="{{action}}" class="ayv-conn-actions" data-busy="{{cifrasync}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
         <button type="submit" class="ayv-button" name="do" value="sync">{{cifrasync}}</button>
-        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="save">{{sourcessave}}</button>
-    </p>
-</form>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="test">{{cifratest}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-conn-sheet">{{cifrachange}}</button>
+    </form>
+    <form method="post" action="{{action}}" class="ayv-conn-night">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="enabled" value="{{nightvalue}}">
+        <span>{{nightline}}</span> <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="night">{{nightgo}}</button>
+    </form>
+    {{/connected}}
+    {{^connected}}<p><button type="button" class="ayv-button" data-ayv-open="ayv-conn-sheet">{{cifraconnect}}</button></p>{{/connected}}
+    {{#pair}}<p class="ayv-notice">{{hint}} <a href="{{url}}">{{label}}</a></p>{{/pair}}
+</section>
+<dialog class="ayv-modal" id="ayv-conn-sheet" aria-labelledby="ayv-conn-sheet-title">
+    <div class="ayv-modal-head"><h2 id="ayv-conn-sheet-title" class="ayv-section-title">{{cifrachange}}</h2>
+        <button type="button" class="ayv-modal-close" aria-label="{{offsiteclose}}" data-ayv-close>{{> local_oksigeniaayvurenda/icon_x}}</button></div>
+    <p class="ayv-field-hint">{{how}}</p>
+    <form method="post" action="{{action}}" autocomplete="off">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <label class="ayv-field ayv-dig-field">{{cifraurl}} <span class="ayv-field-hint">{{cifraurlhint}}</span>
+            <input type="text" name="url" value="{{url}}" inputmode="url" spellcheck="false"></label>
+        <fieldset class="ayv-dig-set">
+            <legend>{{cifrahow}}</legend>
+            <label class="ayv-field ayv-field-check"><input type="radio" name="mode" value="key" {{#modekey}}checked{{/modekey}}> {{ciframodekey}}</label>
+            <label class="ayv-field ayv-field-check"><input type="radio" name="mode" value="oauth" {{#modeoauth}}checked{{/modeoauth}}> {{ciframodeoauth}}</label>
+        </fieldset>
+        <div class="ayv-connect ayv-connect-key">
+            <label class="ayv-field ayv-dig-field">{{cifrakey}} {{#keyhint}}<span class="ayv-field-hint">{{keyhint}}</span>{{/keyhint}}
+                <input type="password" name="key" autocomplete="new-password"></label>
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="example" value="1" {{#example}}checked{{/example}}> {{cifraexample}}</label>
+        </div>
+        <div class="ayv-connect ayv-connect-oauth">
+            <label class="ayv-field ayv-dig-field">{{cifraclientid}} <input type="text" name="clientid" value="{{clientid}}" spellcheck="false"></label>
+            <label class="ayv-field ayv-dig-field">{{cifrasecret}} {{#secrethint}}<span class="ayv-field-hint">{{secrethint}}</span>{{/secrethint}}
+                <input type="password" name="secret" autocomplete="new-password"></label>
+        </div>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="connect">{{cifrasavetest}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="save">{{sourcessave}}</button></p>
+    </form>
+</dialog>

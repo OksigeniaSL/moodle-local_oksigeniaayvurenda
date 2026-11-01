@@ -1,0 +1,9 @@
+{{!
+    @template local_oksigeniaayvurenda/readers_pager
+
+    From which reader to which, with the way to the pages around.
+
+    Example context (json):
+    {"prev": "#", "next": "#", "line": "Del 61 al 120 de 900", "prevlabel": "Anteriores", "nextlabel": "Siguientes"}
+}}
+<p class="ayv-weed-pages">{{#prev}}<a class="ayv-button ayv-button-quiet" href="{{prev}}">{{prevlabel}}</a>{{/prev}} <span>{{line}}</span> {{#next}}<a class="ayv-button ayv-button-quiet" href="{{next}}">{{nextlabel}}</a>{{/next}}</p>

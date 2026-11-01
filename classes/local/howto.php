@@ -39,7 +39,7 @@ final class howto {
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
         'cards' => ['readers.php', 'desk', 'card'],
-        'readers' => ['readers.php', 'desk', ''],
+        'readers' => ['readers.php', 'desk', 'readers'],
         'profile' => ['readers.php', 'desk', ''],
         'applink' => ['readers.php', 'desk', ''],
         'late' => ['late.php', 'desk', 'late'],
@@ -88,6 +88,8 @@ final class howto {
         'late' => ['capability' => 'desk', 'page' => 'late.php', 'steps' => 6],
         'holds' => ['capability' => 'desk', 'page' => 'holds.php', 'steps' => 5],
         'voices' => ['capability' => 'desk', 'page' => 'voices.php', 'steps' => 8],
+        'readers' => ['capability' => 'manage', 'page' => 'readers.php', 'steps' => 6],
+        'readerslist' => ['capability' => 'manage', 'page' => 'readerslist.php', 'steps' => 6],
     ];
 
     /** @var string[] Words that say nothing about the task. */

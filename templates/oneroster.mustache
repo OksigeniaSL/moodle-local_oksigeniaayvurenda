@@ -1,62 +1,75 @@
 {{!
-    This file is part of Moodle - https://moodle.org/
-
-    Moodle is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Moodle is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-{{!
     @template local_oksigeniaayvurenda/oneroster
 
-    Readers from a OneRoster export: upload the zip, see what it brings, load it.
-
-    Context variables required for this template:
-    * heading, intro, notice, error, plansummary - texts
-    * action, sesskey - the forms
-    * upload - whether it is the first step
-    * check - mode, counts, schoolchoice (options: value, label; null with one school), hasfamilies
+    Readers from a OneRoster zip: dropped, seen in figures, and only then brought.
 
     Example context (json):
     {
-        "heading": "Lectores desde OneRoster", "intro": "El zip que exporta el programa de gestión.", "notice": "",
-        "error": "", "plansummary": "", "action": "#", "sesskey": "abc", "upload": false,
-        "check": {"mode": "Exportación completa", "counts": "Alumnos: 120 · Profesores: 12", "hasfamilies": true,
-            "schoolchoice": {"options": [{"value": "", "label": "Todos"}, {"value": "s1", "label": "Colegio Alfa"}]}
-        },
-        "onerosterfile": "El zip", "onerosternext": "Ver lo que trae", "onerostercheck": "Lo que trae",
-        "onerosterschool": "Centro", "onerosterfamilies": "También las familias", "onerosterload": "Cargarlos",
-        "onerostercancel": "Otro fichero"
+        "heading": "Lectores desde OneRoster", "intro": "El zip de tu programa.", "error": "", "plansummary": "", "action": "#", "sesskey": "abc",
+        "urlself": "#", "upload": false, "done": null, "said": null,
+        "check": {"mode": "Exportación completa", "figures": [{"count": "120", "label": "alumnos"}], "hasfamilies": true,
+            "familiesline": "También las 40 familias", "schoolchoice": {"options": [{"value": "", "label": "Todos"}, {"value": "s1", "label": "Colegio Alfa"}]} },
+        "onerosterdrop": "Suelta aquí el zip", "onerosterformats": "Un .zip", "onerosterchecktitle": "Esto es lo que trae",
+        "onerosterschool": "Centro", "onerosterload": "Dar de alta", "importcancel": "Dejarlo", "importdropor": "o búscalo",
+        "importreading": "Leyendo…", "importbusy": "Dando de alta…", "importbusyhint": "Tarda un poco.", "readerslistdonetitle": "Ya están",
+        "importnextheading": "Y ahora", "readerslistgoreaders": "Míralos", "readerslistgoreadershint": "Por grupos.",
+        "importnextdesk": "Mostrador", "importnextdeskhint": "Presta."
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
-{{#plansummary}}<p class="ayv-field-hint">{{plansummary}}</p>{{/plansummary}}
-{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<div class="ayv-imp">
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#upload}}
-<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
+<header class="ayv-imp-top">
+    <h1 class="ayv-imp-title">{{heading}}</h1>
+    <p class="ayv-imp-lead">{{intro}}</p>
+</header>
+<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-imp-upload" data-busy="{{importreading}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="upload">
-    <label class="ayv-field">{{onerosterfile}} <input type="file" name="file" accept=".zip,application/zip" required></label>
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{onerosternext}}</button></p>
+    <label class="ayv-imp-drop" data-ayv-drop>
+        <span class="ayv-imp-droptitle">{{onerosterdrop}}</span>
+        <span class="ayv-imp-dropor">{{importdropor}}</span>
+        <input type="file" name="file" accept=".zip,application/zip" required>
+        <span class="ayv-imp-dropformats">{{onerosterformats}}</span>
+    </label>
 </form>
+{{#plansummary}}<p class="ayv-field-hint ayv-imp-plan">{{plansummary}}</p>{{/plansummary}}
 {{/upload}}
 {{#check}}
-<form method="post" action="{{action}}" class="ayv-book">
+<form method="post" action="{{action}}" class="ayv-imp-review" data-busy="{{importbusy}}" data-busyhint="{{importbusyhint}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="load">
-    <h2 class="ayv-section-title">{{onerostercheck}}</h2>
-    <p>{{counts}}</p>
-    <p class="ayv-field-hint">{{mode}}</p>
-    {{#schoolchoice}}<label class="ayv-field">{{onerosterschool}} <select name="school">{{#options}}<option value="{{value}}">{{label}}</option>{{/options}}</select></label>{{/schoolchoice}}
-    {{#hasfamilies}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="families" value="1"> {{onerosterfamilies}}</label>{{/hasfamilies}}
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{onerosterload}}</button>
-        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="cancel">{{onerostercancel}}</button></p>
+    <header class="ayv-imp-head">
+        <div class="ayv-imp-headtext">
+            <h1 class="ayv-imp-title">{{onerosterchecktitle}}</h1>
+            <p class="ayv-imp-lead">{{mode}}</p>
+        </div>
+        <ul class="ayv-imp-figures">
+            {{#figures}}<li><span class="ayv-imp-num">{{count}}</span> <span class="ayv-imp-figlabel">{{label}}</span></li>{{/figures}}
+        </ul>
+    </header>
+    {{#schoolchoice}}<label class="ayv-field ayv-readers-school">{{onerosterschool}} <select name="school">{{#options}}<option value="{{value}}">{{label}}</option>{{/options}}</select></label>{{/schoolchoice}}
+    {{#hasfamilies}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="families" value="1"> {{familiesline}}</label>{{/hasfamilies}}
+    <div class="ayv-imp-go">
+        <button type="submit" class="ayv-button ayv-imp-gobutton">{{onerosterload}}</button>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="cancel" data-nobusy>{{importcancel}}</button>
+    </div>
 </form>
 {{/check}}
+{{#done}}
+<section class="ayv-imp-done">
+    <header class="ayv-imp-head">
+        <div class="ayv-imp-headtext">
+            <h1 class="ayv-imp-title">{{readerslistdonetitle}}</h1>
+            {{#said}}{{> local_oksigeniaayvurenda/bubble}}{{/said}}
+        </div>
+        <ul class="ayv-imp-figures">
+            {{#figures}}<li><span class="ayv-imp-num">{{count}}</span> <span class="ayv-imp-figlabel">{{label}}</span></li>{{/figures}}
+        </ul>
+    </header>
+    <h2 class="ayv-section-title">{{importnextheading}}</h2>
+    <ul class="ayv-imp-next">
+        <li><a href="{{urlreaders}}">{{> local_oksigeniaayvurenda/icon_users}}<b>{{readerslistgoreaders}}</b><span>{{readerslistgoreadershint}}</span></a></li>
+        <li><a href="{{urldesk}}">{{> local_oksigeniaayvurenda/icon_scan_line}}<b>{{importnextdesk}}</b><span>{{importnextdeskhint}}</span></a></li>
+    </ul>
+</section>
+{{/done}}
+</div>

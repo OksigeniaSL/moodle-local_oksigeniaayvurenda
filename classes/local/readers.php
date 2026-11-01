@@ -56,11 +56,97 @@ final class readers {
         );
         $groups = [];
         foreach ($rows as $row) {
-            $groups[] = ['name' => $row->groupname, 'stage' => (string) $row->stage, 'count' => (int) $row->readers];
+            if ((string) $row->groupname !== '') {
+                $groups[] = ['name' => $row->groupname, 'stage' => (string) $row->stage, 'count' => (int) $row->readers];
+            }
         }
         // As a school lists them: by stage, year and letter.
         usort($groups, fn($a, $b) => group_order::compare((string) $a['name'], (string) $b['name'], $a['stage'], $b['stage']));
         return $groups;
+    }
+
+    /**
+     * The active readers of a library's centre.
+     *
+     * @param \stdClass $library
+     * @return int
+     */
+    public static function total(\stdClass $library): int {
+        global $DB;
+        return $DB->count_records(self::T . 'reader', ['entityid' => $library->entityid, 'status' => 'active']);
+    }
+
+    /**
+     * How many readers each place brought: by what the import keeps of each one, and by where its group came from
+     * this year. Connected places bring the same reader in both; the larger figure is the true one.
+     *
+     * @param int $entityid
+     * @param int|null $now
+     * @return int[] Place (csv, oneroster, cifra, abies, lti, cohort…) => readers.
+     */
+    public static function from_sources(int $entityid, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        $kept = $DB->get_records_sql_menu(
+            "SELECT system, COUNT(1)
+               FROM {" . self::T . "source}
+              WHERE entityid = :entityid AND tablename = 'reader'
+           GROUP BY system",
+            ['entityid' => $entityid]
+        );
+        $members = $DB->get_records_sql_menu(
+            "SELECT m.source, COUNT(DISTINCT m.readerid)
+               FROM {" . self::T . "member} m
+               JOIN {" . self::T . "year} y ON y.id = m.yearid
+              WHERE y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b AND m.source IS NOT NULL
+           GROUP BY m.source",
+            ['entityid' => $entityid, 'a' => $now, 'b' => $now]
+        );
+        $from = [];
+        foreach ([$kept, $members] as $counts) {
+            foreach ($counts as $place => $count) {
+                $from[$place] = max($from[$place] ?? 0, (int) $count);
+            }
+        }
+        return $from;
+    }
+
+    /**
+     * What selects the readers of a group this school year, or those without one ('' as group).
+     *
+     * @param \stdClass $library
+     * @param string $group
+     * @param int $now
+     * @return array The condition and its parameters.
+     */
+    private static function in_group_where(\stdClass $library, string $group, int $now): array {
+        $params = ['entityid' => $library->entityid, 'a' => $now, 'b' => $now];
+        $member = "SELECT m.readerid
+                     FROM {" . self::T . "member} m
+                     JOIN {" . self::T . "year} y ON y.id = m.yearid
+                    WHERE y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b";
+        if ($group === '') {
+            return ["r.id NOT IN ($member AND m.groupname IS NOT NULL AND m.groupname <> '')", $params];
+        }
+        $params['groupname'] = $group;
+        return ["r.id IN ($member AND m.groupname = :groupname)", $params];
+    }
+
+    /**
+     * How many readers a group has this school year, or how many have none ('' as group).
+     *
+     * @param \stdClass $library
+     * @param string $group
+     * @param int|null $now
+     * @return int
+     */
+    public static function in_group_count(\stdClass $library, string $group, ?int $now = null): int {
+        global $DB;
+        [$where, $params] = self::in_group_where($library, $group, $now ?? time());
+        return (int) $DB->count_records_sql(
+            "SELECT COUNT(1) FROM {" . self::T . "reader} r WHERE r.entityid = :entityid2 AND r.status = 'active' AND $where",
+            $params + ['entityid2' => $library->entityid]
+        );
     }
 
     /**
@@ -69,30 +155,25 @@ final class readers {
      * @param \stdClass $library
      * @param string $group
      * @param int|null $now
+     * @param int $limit How many, for a library without classes that may have thousands; 0 for all.
+     * @param int $from From which.
      * @return array[] id, name, photo, initial, url (their record), cardcode, type and loans out.
      */
-    public static function in_group(\stdClass $library, string $group, ?int $now = null): array {
+    public static function in_group(\stdClass $library, string $group, ?int $now = null, int $limit = 0, int $from = 0): array {
         global $DB;
         $now = $now ?? time();
-        $params = ['entityid' => $library->entityid, 'a' => $now, 'b' => $now];
-        $member = "SELECT m.readerid
-                     FROM {" . self::T . "member} m
-                     JOIN {" . self::T . "year} y ON y.id = m.yearid
-                    WHERE y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b";
-        if ($group === '') {
-            $where = "r.id NOT IN ($member)";
-        } else {
-            $where = "r.id IN ($member AND m.groupname = :groupname)";
-            $params['groupname'] = $group;
-        }
+        [$where, $params] = self::in_group_where($library, $group, $now);
         $rows = $DB->get_records_sql(
             "SELECT r.id, r.cardcode, r.readertype, r.firstname, r.lastname, r.userid,
                     u.firstname AS ufirstname, u.lastname AS ulastname,
                     (SELECT COUNT(1) FROM {" . self::T . "loan} l WHERE l.readerid = r.id AND l.timereturned IS NULL) AS loans
                FROM {" . self::T . "reader} r
           LEFT JOIN {user} u ON u.id = r.userid
-              WHERE r.entityid = :entityid2 AND r.status = 'active' AND $where",
-            $params + ['entityid2' => $library->entityid]
+              WHERE r.entityid = :entityid2 AND r.status = 'active' AND $where
+           ORDER BY COALESCE(u.lastname, r.lastname), COALESCE(u.firstname, r.firstname), r.id",
+            $params + ['entityid2' => $library->entityid],
+            $from,
+            $limit
         );
         $readers = [];
         // Their photos, from their accounts, where the centre shows them.

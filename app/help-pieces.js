@@ -218,6 +218,60 @@ window.AYVHelpPieces = {
             });
         });
     },
+    // The readers: the figures, finding one, the stages, and the way to where they come from.
+    readers: function(h) {
+        'use strict';
+        return h.point('.ayv-readers-sum').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.type('#ayv-readers-q', 'Ana');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-readers-stage');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.go('.ayv-readers-top .ayv-button');
+        }).then(function() {
+            return h.point('.ayv-src-cards');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    // A list: an example handed over, the figures and people it brings, the columns, and registering them.
+    readerslist: function(h) {
+        'use strict';
+        return h.point('.ayv-imp-drop').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.drop('.ayv-imp-drop input[type="file"]', h.codes.listname, h.codes.list);
+        }).then(function() {
+            return h.point('.ayv-imp-figures');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-people-grid');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return Promise.all([h.say(3), h.tap('.ayv-imp-columnshead button').then(function() {
+                return h.point('.ayv-imp-map');
+            })]);
+        }).then(function() {
+            return h.tap('#ayv-imp-map [data-ayv-close]');
+        }).then(function() {
+            return h.you(4, '.ayv-imp-gobutton');
+        }).then(function() {
+            return h.point('.ayv-imp-done .ayv-imp-figures');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
     // The shelves: spines as tall as the books, the label at their foot, the gap of a book that is out, the lectern.
     stacks: function(h) {
         'use strict';

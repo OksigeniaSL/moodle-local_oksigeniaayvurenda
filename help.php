@@ -115,6 +115,8 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'sheet' => str_replace('|', "\n", $str('practicesheet')) . "\n",
             'sheetname' => $str('practicesheetname'),
             'weedreason' => $str('practiceweedreason'),
+            'list' => str_replace('|', "\n", $str('practicelist')) . "\n",
+            'listname' => $str('practicelistname'),
         ],
     ],
 ]);

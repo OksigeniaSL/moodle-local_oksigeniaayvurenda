@@ -52,7 +52,7 @@ $pending = $SESSION->ayvurendaoneroster ?? null;
 if ($pending && (!is_file($pending['path']) || $pending['library'] !== $library->slug)) {
     $pending = null;
 }
-$notice = '';
+$done = null;
 $error = '';
 if (data_submitted() && confirm_sesskey()) {
     $step = optional_param('step', '', PARAM_ALPHA);
@@ -69,8 +69,7 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param('families', 0, PARAM_BOOL),
                 time()
             );
-            $stats = plans::within($entityid, fn() => oneroster::load($entityid, $found, null, false));
-            $notice = $str('onerosterloaded', (object) $stats);
+            $done = plans::within($entityid, fn() => oneroster::load($entityid, $found, null, false));
             @unlink($pending['path']);
             $pending = null;
         } else if ($step === 'cancel' && $pending) {
@@ -88,9 +87,25 @@ if (data_submitted() && confirm_sesskey()) {
     }
     $SESSION->ayvurendaoneroster = $pending;
 }
-$data = ['heading' => $str('onerostertitle'), 'intro' => $str('onerosterintro'), 'notice' => $notice, 'error' => $error,
-    'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'upload' => !$pending, 'check' => null,
-    'plansummary' => plans::summary($entityid)];
+$number = fn(int $n) => \local_oksigeniaayvurenda\local\screens::number($n);
+$figure = fn(int $count, string $key) => $count ? ['count' => $number($count), 'label' => $str($key)] : null;
+$page = fn(string $file) => (new moodle_url('/local/oksigeniaayvurenda/' . $file, ['library' => $library->slug]))->out(false);
+$data = ['heading' => $str('onerostertitle'), 'intro' => $str('onerosterintro'), 'error' => $error,
+    'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'upload' => !$pending && !$done, 'check' => null,
+    'done' => null, 'said' => null, 'plansummary' => plans::summary($entityid), 'urlself' => $PAGE->url->out(false)];
+if ($done) {
+    $data['done'] = [
+        'figures' => array_values(array_filter([
+            $figure((int) $done['created'], 'readerslistfigcreated'),
+            $figure((int) $done['updated'], 'readerslistfigupdated'),
+            $figure((int) $done['left'], 'onerosterfigleft'),
+            $figure((int) $done['tutors'], 'onerosterfigtutors'),
+        ])),
+        'urlreaders' => $page('readers.php'),
+        'urldesk' => $page('desk.php'),
+    ];
+    $data['said'] = \local_oksigeniaayvurenda\local\characters::say($entityid, 'memory', 'readerslistmemory', [], 'celebra');
+}
 if ($pending) {
     $files = oneroster::files($pending['path']);
     $found = roster::readers($files, '', true, time());
@@ -102,24 +117,30 @@ if ($pending) {
     }
     $data['check'] = [
         'mode' => $str($found['mode'] === 'delta' ? 'onerostermodedelta' : 'onerostermodebulk'),
-        'counts' => $str('onerostercounts', (object) ['students' => $kinds['student'] ?? 0, 'teachers' => $kinds['teacher'] ?? 0,
-            'staff' => $kinds['staff'] ?? 0, 'families' => $kinds['family'] ?? 0, 'groups' => count($groups),
-            'tutors' => count(array_intersect_key($found['tutors'], array_flip($groups)))]),
+        'figures' => array_values(array_filter([
+            $figure($kinds['student'] ?? 0, 'onerosterfigstudents'),
+            $figure($kinds['teacher'] ?? 0, 'onerosterfigteachers'),
+            $figure($kinds['staff'] ?? 0, 'onerosterfigstaff'),
+            $figure(count($groups), 'readerslistfiggroups'),
+            $figure(count(array_intersect_key($found['tutors'], array_flip($groups))), 'onerosterfigtutors'),
+        ])),
         'schoolchoice' => count($schools) > 2 ? ['options' => $schools] : null,
         'hasfamilies' => !empty($kinds['family']),
+        'familiesline' => empty($kinds['family']) ? '' : ($kinds['family'] === 1 ? $str('onerosterfamiliesone')
+            : $str('onerosterfamilies', $number($kinds['family']))),
     ];
 }
 foreach (
-    ['onerosterfile', 'onerosternext', 'onerostercheck', 'onerosterschool', 'onerosterfamilies', 'onerosterload',
-        'onerostercancel'] as $key
+    ['onerosterdrop', 'onerosterformats', 'onerosterchecktitle', 'onerosterschool', 'onerosterload', 'importcancel',
+        'importdropor', 'importreading', 'importbusy', 'importbusyhint', 'readerslistdonetitle', 'importnextheading',
+        'readerslistgoreaders', 'readerslistgoreadershint', 'importnextdesk', 'importnextdeskhint'] as $key
 ) {
     $data[$key] = $str($key);
 }
-$readersurl = (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false);
 shell::output(
     $data['heading'],
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/oneroster', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $readersurl, 'label' => $str('readers')]]]
+    ['search' => false, 'nav' => [['url' => $page('sources.php'), 'label' => $str('readerssources')]]]
 );

@@ -122,4 +122,17 @@ final class mine_test extends \advanced_testcase {
         }
         $this->assertCount(5, mine::home_cards((int) $ana->id, $now)[0]['items']);
     }
+
+    /**
+     * Whoever works at a desk without a reader's card still has the library on the app's home; anyone else, nothing.
+     */
+    public function test_home_for_staff_without_a_card(): void {
+        $this->resetAfterTest();
+        $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $cards = mine::home_cards((int) get_admin()->id);
+        $this->assertCount(1, $cards);
+        $this->assertSame('mobile_library_view', $cards[0]['tile']['method']);
+        $this->assertArrayNotHasKey('items', $cards[0]);
+        $this->assertSame([], mine::home_cards((int) $this->getDataGenerator()->create_user()->id));
+    }
 }

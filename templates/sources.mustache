@@ -1,97 +1,89 @@
 {{!
-    This file is part of Moodle - https://moodle.org/
-
-    Moodle is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Moodle is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-{{!
     @template local_oksigeniaayvurenda/sources
 
-    Which cohorts of the site bring readers, of what kind and stage.
-
-    Context variables required for this template:
-    * heading, intro, notice - texts
-    * action, sesskey - the form
-    * cohorts - list of id, name, memberslabel, chosen, types, stage and group
-    * labels - words of the form
+    Where the readers come from: each place with its state, and the sheets of those chosen here.
 
     Example context (json):
     {
-        "heading": "De dónde salen los lectores",
-        "intro": "Marca las cohortes cuyos miembros son lectores.",
-        "notice": "",
-        "action": "#",
-        "sesskey": "abc",
-        "hascohorts": true,
-        "cohorts": [{"id": 1, "name": "3º Primaria A", "memberslabel": "24 miembros", "chosen": true, "stage": "Primaria",
-                     "group": true, "types": [{"value": "student", "label": "Alumnos", "selected": true}]}],
-        "nocohorts": "",
-        "cohortsheading": "Cohortes",
-        "coursesheading": "Cursos de Moodle",
-        "outsideheading": "Desde fuera de Moodle",
-        "outsideintro": "Lectores que no están en cohortes ni en cursos.",
-        "outside": [{"url": "#", "label": "Cifra Educación", "hint": "Cada noche"}],
-        "coursesintro": "Si las clases están en cursos con grupos.",
-        "courses": [{"id": 2, "name": "Lengua 3º", "groupslabel": "2 grupos", "chosen": false, "stage": "Primaria", "group": true}],
-        "labels": {"chosen": "Son lectores", "type": "Tipo", "stage": "Etapa", "group": "Su nombre es el grupo",
-                   "save": "Guardar", "syncnow": "Guardar y traer los lectores ahora"}
+        "heading": "De dónde vienen los lectores", "intro": "Puedes usar varias.", "notice": "", "action": "#", "sesskey": "abc",
+        "cards": [{"title": "Una lista", "hint": "Una hoja de cálculo.", "go": "Cargar una lista", "state": "Sin usar", "inuse": false,
+            "url": "#", "islist": true},
+            {"title": "Cohortes de Moodle", "hint": "Cada noche.", "go": "Elegir", "state": "2 cohortes", "inuse": true,
+            "sheet": "ayv-src-cohorts", "iscohorts": true}],
+        "cohorts": [{"id": 1, "name": "3º A", "memberslabel": "24 miembros", "chosen": true, "stage": "Primaria", "group": true,
+            "types": [{"value": "student", "label": "Alumnos", "selected": true}]}],
+        "courses": [{"id": 2, "name": "Lengua", "groupslabel": "2 grupos", "chosen": false, "stage": "", "group": true}],
+        "cohortsheading": "Cohortes de Moodle", "cohortsintro": "Marca las que son lectores.", "coursesheading": "Cursos de Moodle",
+        "coursesintro": "Los alumnos de cada curso marcado.", "nocohorts": "No hay", "nocourses": "No hay", "offsiteclose": "Cerrar",
+        "labels": {"type": "Tipo", "stage": "Etapa", "group": "Su nombre es el grupo", "save": "Guardar", "syncnow": "Guardar y traerlos"}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{#hascohorts}}
-<form class="ayv-form" method="post" action="{{action}}">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <h2 class="ayv-section-title">{{cohortsheading}}</h2>
-    {{^cohorts}}<p class="ayv-empty">{{nocohorts}}</p>{{/cohorts}}
-    <ul class="ayv-sources">
-    {{#cohorts}}
-        <li class="ayv-source">
-            <label class="ayv-source-name"><input type="checkbox" name="chosen[{{id}}]" value="1" {{#chosen}}checked{{/chosen}}>
-                {{name}} <span class="ayv-source-count">{{memberslabel}}</span></label>
-            <label class="ayv-field">{{labels.type}}
-                <select name="type[{{id}}]">{{#types}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/types}}</select>
-            </label>
-            <label class="ayv-field">{{labels.stage}} <input type="text" name="stage[{{id}}]" value="{{stage}}" maxlength="100"></label>
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="group[{{id}}]" value="1" {{#group}}checked{{/group}}>
-                {{labels.group}}</label>
-        </li>
-    {{/cohorts}}
-    </ul>
-    <h2 class="ayv-section-title">{{coursesheading}}</h2>
-    <p>{{coursesintro}}</p>
-    <ul class="ayv-sources">
-    {{#courses}}
-        <li class="ayv-source">
-            <label class="ayv-source-name"><input type="checkbox" name="course[{{id}}]" value="1" {{#chosen}}checked{{/chosen}}>
-                {{name}} <span class="ayv-source-count">{{groupslabel}}</span></label>
-            <label class="ayv-field">{{labels.stage}} <input type="text" name="coursestage[{{id}}]" value="{{stage}}" maxlength="100"></label>
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="coursegroup[{{id}}]" value="1" {{#group}}checked{{/group}}>
-                {{labels.group}}</label>
-        </li>
-    {{/courses}}
-    </ul>
-    <p class="ayv-more">
-        <button type="submit" class="ayv-button" name="syncnow" value="1">{{labels.syncnow}}</button>
-        <button type="submit" class="ayv-button ayv-button-quiet">{{labels.save}}</button>
-    </p>
-</form>
-{{/hascohorts}}
-<h2 class="ayv-section-title">{{outsideheading}}</h2>
-<p>{{outsideintro}}</p>
-<ul class="ayv-sources">
-{{#outside}}
-    <li class="ayv-source"><a class="ayv-source-name" href="{{url}}">{{label}}</a> <span class="ayv-source-count">{{hint}}</span></li>
-{{/outside}}
+<ul class="ayv-src-cards">
+{{#cards}}
+    <li class="ayv-src-card{{#inuse}} ayv-src-card-on{{/inuse}}">
+        <span class="ayv-src-icon" aria-hidden="true">{{#islist}}{{> local_oksigeniaayvurenda/icon_sheet}}{{/islist}}{{#isoneroster}}{{> local_oksigeniaayvurenda/icon_file_archive}}{{/isoneroster}}{{#iscohorts}}{{> local_oksigeniaayvurenda/icon_users}}{{/iscohorts}}{{#iscourses}}{{> local_oksigeniaayvurenda/icon_graduation_cap}}{{/iscourses}}{{#islti}}{{> local_oksigeniaayvurenda/icon_plug}}{{/islti}}{{#iscifra}}{{> local_oksigeniaayvurenda/icon_refresh}}{{/iscifra}}{{#isabies}}{{> local_oksigeniaayvurenda/icon_database}}{{/isabies}}</span>
+        <h2 class="ayv-src-title">{{title}}</h2>
+        <p class="ayv-src-hint">{{hint}}</p>
+        <p class="ayv-src-foot"><span class="ayv-src-state">{{state}}</span>
+            {{#url}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{go}}</a>{{/url}}
+            {{#sheet}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="{{sheet}}">{{go}}</button>{{/sheet}}</p>
+    </li>
+{{/cards}}
 </ul>
-
+<dialog class="ayv-modal ayv-src-sheet" id="ayv-src-cohorts" aria-labelledby="ayv-src-cohorts-title">
+    <div class="ayv-modal-head"><h2 id="ayv-src-cohorts-title" class="ayv-section-title">{{cohortsheading}}</h2>
+        <button type="button" class="ayv-modal-close" aria-label="{{offsiteclose}}" data-ayv-close>{{> local_oksigeniaayvurenda/icon_x}}</button></div>
+    <p class="ayv-field-hint">{{cohortsintro}}</p>
+    {{^cohorts}}<p class="ayv-empty">{{nocohorts}}</p>{{/cohorts}}
+    {{#cohorts.0}}
+    <form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="cohorts">
+        <div class="ayv-src-rows">
+            <p class="ayv-src-headrow" aria-hidden="true"><span></span><span>{{labels.type}}</span><span>{{labels.stage}}</span><span>{{labels.group}}</span></p>
+            {{#cohorts}}
+            <div class="ayv-src-row">
+                <label class="ayv-src-name"><input type="checkbox" name="chosen[{{id}}]" value="1" {{#chosen}}checked{{/chosen}}>
+                    <span>{{name}} <span class="ayv-src-count">{{memberslabel}}</span></span></label>
+                <label class="ayv-field ayv-src-cell"><span class="ayv-src-celllabel">{{labels.type}}</span>
+                    <select name="type[{{id}}]">{{#types}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/types}}</select></label>
+                <label class="ayv-field ayv-src-cell"><span class="ayv-src-celllabel">{{labels.stage}}</span>
+                    <input type="text" name="stage[{{id}}]" value="{{stage}}" maxlength="100"></label>
+                <label class="ayv-field ayv-field-check ayv-src-cell"><input type="checkbox" name="group[{{id}}]" value="1" {{#group}}checked{{/group}}>
+                    <span class="ayv-src-celllabel">{{labels.group}}</span></label>
+            </div>
+            {{/cohorts}}
+        </div>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="syncnow" value="1">{{labels.syncnow}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet">{{labels.save}}</button></p>
+    </form>
+    {{/cohorts.0}}
+</dialog>
+<dialog class="ayv-modal ayv-src-sheet" id="ayv-src-courses" aria-labelledby="ayv-src-courses-title">
+    <div class="ayv-modal-head"><h2 id="ayv-src-courses-title" class="ayv-section-title">{{coursesheading}}</h2>
+        <button type="button" class="ayv-modal-close" aria-label="{{offsiteclose}}" data-ayv-close>{{> local_oksigeniaayvurenda/icon_x}}</button></div>
+    <p class="ayv-field-hint">{{coursesintro}}</p>
+    {{^courses}}<p class="ayv-empty">{{nocourses}}</p>{{/courses}}
+    {{#courses.0}}
+    <form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="courses">
+        <div class="ayv-src-rows ayv-src-rows-courses">
+            <p class="ayv-src-headrow" aria-hidden="true"><span></span><span>{{labels.stage}}</span><span>{{labels.group}}</span></p>
+            {{#courses}}
+            <div class="ayv-src-row">
+                <label class="ayv-src-name"><input type="checkbox" name="course[{{id}}]" value="1" {{#chosen}}checked{{/chosen}}>
+                    <span>{{name}} <span class="ayv-src-count">{{groupslabel}}</span></span></label>
+                <label class="ayv-field ayv-src-cell"><span class="ayv-src-celllabel">{{labels.stage}}</span>
+                    <input type="text" name="coursestage[{{id}}]" value="{{stage}}" maxlength="100"></label>
+                <label class="ayv-field ayv-field-check ayv-src-cell"><input type="checkbox" name="coursegroup[{{id}}]" value="1" {{#group}}checked{{/group}}>
+                    <span class="ayv-src-celllabel">{{labels.group}}</span></label>
+            </div>
+            {{/courses}}
+        </div>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="syncnow" value="1">{{labels.syncnow}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet">{{labels.save}}</button></p>
+    </form>
+    {{/courses.0}}
+</dialog>
