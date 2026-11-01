@@ -395,5 +395,18 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103137, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110116) {
+        // What a reader waits for rings on their phone too. Moodle does not change the defaults of a message that exists.
+        foreach (['overdue', 'holdready', 'newbooks', 'overduetutor'] as $name) {
+            $key = 'message_provider_local_oksigeniaayvurenda_' . $name . '_enabled';
+            $outputs = array_filter(explode(',', (string) get_config('message', $key)));
+            if (!in_array('airnotifier', $outputs, true)) {
+                $outputs[] = 'airnotifier';
+                set_config($key, implode(',', $outputs), 'message');
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110116, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

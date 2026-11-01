@@ -30,6 +30,7 @@ $messageproviders = [
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
     // To a reader: the book they were waiting for is set aside for them.
@@ -37,6 +38,7 @@ $messageproviders = [
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
     // To whoever recorded a voice: it was received, with the link that deletes it without asking anyone.
@@ -58,6 +60,7 @@ $messageproviders = [
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
     // To whoever manages a centre: its copy could not be sent out of the server two nights running.
@@ -73,6 +76,7 @@ $messageproviders = [
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
 ];

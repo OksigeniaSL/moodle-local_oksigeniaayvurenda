@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.117.1 (2026-11-01)
+
+- What a reader waits for reaches their phone: late books, a book set aside, the new books, and to a tutor their group's late
+  books also go through the mobile app's notifications, in the official app and in Aty.
+
 ## 0.117.0 (2026-11-01)
 
 - Any old MARC file reads right. MARC-8 and ISO 5426, with their accents before the letter, and Windows-1252, told from how the
