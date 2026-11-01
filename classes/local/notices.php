@@ -82,45 +82,86 @@ final class notices {
             if (access::closed((int) $list[0]->entityid)) {
                 continue;
             }
-            $user = \core_user::get_user($list[0]->userid);
-            if (!$user || $user->deleted || $user->suspended) {
-                continue;
-            }
-            // In the tone of the centre's skin.
-            $words = fn(string $key) => skins::words((int) $list[0]->entityid, $key);
-            $lines = [];
-            foreach ($list as $loan) {
-                $lines[] = get_string($words('noticereaderline'), 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
-                    'due' => userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'))]);
-            }
-            $a = (object) ['name' => $user->firstname, 'library' => format_string($list[0]->library, true, ['escape' => false]),
-                'books' => implode("\n", $lines)];
-            $subject = get_string(
-                $words(count($list) === 1 ? 'noticereadersubject' : 'noticereadersubjectmany'),
-                'local_oksigeniaayvurenda',
-                $a
-            );
-            $body = get_string($words('noticereaderbody'), 'local_oksigeniaayvurenda', $a);
-            $herald = characters::of((int) $list[0]->entityid)['herald'];
-            // To a young reader (the card with the flower), the herald tells it her way: the book misses its shelf.
-            $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
-            $young = $herald['enabled'] && $reader && cards::look_of($reader, $now) === 'flower'
-                ? characters::say((int) $list[0]->entityid, 'herald', 'heraldoverdue', ['reader' => $user->firstname,
-                    'books' => $a->books, 'library' => $a->library]) : null;
-            if ($young) {
-                $body = $young['text'];
-            } else if ($herald['enabled'] && $herald['signs']) {
-                $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
-            }
-            // The library of the oldest one, where the reader sees what they have.
-            $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
-            if (self::send('overdue', $user, $subject, $body, $url, format_string($list[0]->library, true, ['escape' => false]))) {
-                $sent++;
-            }
-            [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
-            $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
+            $sent += self::tell_reader($list, $now) ? 1 : 0;
         }
         return $sent;
+    }
+
+    /**
+     * Reminds a reader now of all their late books, as the nightly notice does (the staff's «Tell …» on late books).
+     *
+     * @param int $readerid
+     * @param int $now
+     * @return bool Whether a message went (a reader without an account, or with nothing late, gets none).
+     */
+    public static function remind(int $readerid, int $now): bool {
+        global $DB;
+        $tz = \core_date::get_server_timezone_object();
+        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
+        $list = array_values($DB->get_records_sql(
+            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "reader} r ON r.id = l.readerid
+               JOIN {" . self::T . "library} b ON b.id = l.libraryid
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} rec ON rec.id = i.recordid
+              WHERE l.timereturned IS NULL AND l.timedue < :today AND r.userid IS NOT NULL AND r.status = 'active'
+                    AND l.readerid = :readerid
+           ORDER BY l.timedue",
+            ['today' => $today, 'readerid' => $readerid]
+        ));
+        return $list && !access::closed((int) $list[0]->entityid) && self::tell_reader($list, $now);
+    }
+
+    /**
+     * One message to a reader with their late books, in the tone of the centre's skin (by the herald, to the young).
+     *
+     * @param \stdClass[] $list The reader's late loans, the oldest first.
+     * @param int $now
+     * @return bool Whether it went.
+     */
+    private static function tell_reader(array $list, int $now): bool {
+        global $DB;
+        $user = \core_user::get_user($list[0]->userid);
+        if (!$user || $user->deleted || $user->suspended) {
+            return false;
+        }
+        // In the tone of the centre's skin.
+        $words = fn(string $key) => skins::words((int) $list[0]->entityid, $key);
+        $lines = [];
+        foreach ($list as $loan) {
+            $lines[] = get_string($words('noticereaderline'), 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
+                'due' => userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'))]);
+        }
+        $a = (object) ['name' => $user->firstname, 'library' => format_string($list[0]->library, true, ['escape' => false]),
+            'books' => implode("\n", $lines)];
+        $subject = get_string(
+            $words(count($list) === 1 ? 'noticereadersubject' : 'noticereadersubjectmany'),
+            'local_oksigeniaayvurenda',
+            $a
+        );
+        $body = get_string($words('noticereaderbody'), 'local_oksigeniaayvurenda', $a);
+        $herald = characters::of((int) $list[0]->entityid)['herald'];
+        // To a young reader (the card with the flower), the herald tells it her way: the book misses its shelf.
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
+        $young = $herald['enabled'] && $reader && cards::look_of($reader, $now) === 'flower'
+            ? characters::say((int) $list[0]->entityid, 'herald', 'heraldoverdue', ['reader' => $user->firstname,
+                'books' => $a->books, 'library' => $a->library]) : null;
+        if ($young) {
+            $body = $young['text'];
+        } else if ($herald['enabled'] && $herald['signs']) {
+            $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
+        }
+        // The library of the oldest one, where the reader sees what they have.
+        $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
+        $told = self::send('overdue', $user, $subject, $body, $url, format_string(
+            $list[0]->library,
+            true,
+            ['escape' => false]
+        ));
+        [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
+        $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
+        return $told;
     }
 
     /**

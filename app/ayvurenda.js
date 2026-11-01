@@ -220,6 +220,7 @@
     // Lists to mark (weeding): how many are marked, said where it is asked for; the action waits for one at least, and
     // «mark those of this page» marks only what the page shows.
     document.querySelectorAll('form[data-ayv-marks]').forEach(function(form) {
+        form.classList.add('ayv-marks-live');
         var boxes = form.querySelectorAll('input[data-ayv-mark]');
         var all = form.querySelector('input[data-ayv-markall]');
         var count = function() {

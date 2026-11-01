@@ -46,74 +46,116 @@ $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/late
     + $params))->out(false);
 $now = time();
 $notice = '';
-// Tell a group's tutor now, without waiting for the week's notice.
-if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'tell') {
-    $year = \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now);
-    $groupname = optional_param('group', '', PARAM_TEXT);
-    $told = 0;
-    foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id, 'groupname' => $groupname]) as $tutor) {
-        $tutor->entityid = (int) $library->entityid;
-        $told += \local_oksigeniaayvurenda\local\notices::tell_tutor($tutor, $now) ? 1 : 0;
+$year = \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now);
+// At a university or academy the readers are adults: each one is told, not a tutor, and there are no classes.
+$adults = \local_oksigeniaayvurenda\local\skins::of((int) $library->entityid) === 'university';
+if (data_submitted() && confirm_sesskey()) {
+    $do = optional_param('do', '', PARAM_ALPHA);
+    if ($do === 'tell') {
+        // Tell a group's tutor now, without waiting for the week's notice.
+        $groupname = optional_param('group', '', PARAM_TEXT);
+        $told = [];
+        foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id, 'groupname' => $groupname]) as $tutor) {
+            $tutor->entityid = (int) $library->entityid;
+            $user = core_user::get_user((int) $tutor->userid);
+            if ($user && \local_oksigeniaayvurenda\local\notices::tell_tutor($tutor, $now)) {
+                $told[] = fullname($user);
+            }
+        }
+        $notice = $told ? $str('latetutortoldname', (object) ['names' => implode(' · ', $told), 'group' => $groupname])
+            : $str('latenotutor', $groupname);
+    } else if ($do === 'remind') {
+        // Remind a reader now.
+        $notice = $str(\local_oksigeniaayvurenda\local\notices::remind(required_param('reader', PARAM_INT), $now)
+            ? 'latereadertold' : 'latereadernoaccount');
     }
-    $notice = $str($told ? 'latetutortold' : 'latenotutor', $groupname);
 }
 $groups = late::by_group($library, !$all, $now);
 // The spans of lateness, as cards that filter: more than 30 days, 15 to 30, under 15.
 $span = optional_param('span', '', PARAM_ALPHA);
 $spanof = fn(int $days) => $days > 30 ? 'old' : ($days >= 15 ? 'mid' : 'new');
+// Red past 30 days, orange from 15: what is close to it shows too.
+$toneof = fn(int $days) => $days > 30 ? 'late' : ($days >= 15 ? 'near' : ($days > 0 ? 'soon' : 'ok'));
 $counts = ['old' => 0, 'mid' => 0, 'new' => 0];
+$lines = [];
 foreach ($groups as $group) {
     foreach ($group['lines'] as $line) {
         if ($line['days'] > 0) {
             $counts[$spanof($line['days'])]++;
         }
+        $lines[] = $line + ['group' => $group['group']];
     }
 }
 $only = optional_param('group', '', PARAM_TEXT);
-$covers = \local_oksigeniaayvurenda\local\covers::urls(array_merge(...array_map(
-    fn($g) => array_column($g['lines'], 'recordid'),
-    $groups ?: [['lines' => []]]
-)));
+$covers = \local_oksigeniaayvurenda\local\covers::urls(array_column($lines, 'recordid'));
+$readerurl = fn(int $id) => (new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug, 'id' => $id]))
+    ->out(false);
+// The tutors of each group this year, by their names: the button says whom it tells.
+$tutornames = [];
+foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id]) as $tutor) {
+    $user = core_user::get_user((int) $tutor->userid);
+    if ($user && !$user->deleted) {
+        $tutornames[(string) $tutor->groupname][] = fullname($user);
+    }
+}
+// The boxes of the page: a group each (a reader each, with adults), the most late first, and in each the most late
+// first; also when a span filters.
+$boxes = [];
+foreach ($lines as $line) {
+    if (!$all && $span !== '' && isset($counts[$span]) && $spanof($line['days']) !== $span) {
+        continue;
+    }
+    $key = $adults ? 'r' . $line['readerid'] : 'g' . $line['group'];
+    if ($only !== '' && ($adults || $line['group'] !== $only)) {
+        continue;
+    }
+    $boxes[$key]['group'] = $line['group'];
+    $boxes[$key]['readerid'] = $line['readerid'];
+    $boxes[$key]['name'] = $line['name'];
+    $boxes[$key]['readers'][$line['readerid']] = true;
+    $boxes[$key]['oldest'] = max($boxes[$key]['oldest'] ?? 0, $line['days']);
+    $boxes[$key]['lines'][] = $line + [
+        'url' => $readerurl($line['readerid']),
+        'cover' => $covers[$line['recordid']] ?? null,
+        'colour' => $line['recordid'] % 6,
+        'when' => $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
+            : $str('lateuntil', $line['due']),
+        'tone' => $toneof($line['days']),
+    ];
+}
+uasort($boxes, fn($a, $b) => [$b['oldest'], $a['group'], $a['name']] <=> [$a['oldest'], $b['group'], $b['name']]);
 $shown = [];
-foreach ($groups as $group) {
-    if ($only !== '' && $group['group'] !== $only) {
-        continue;
+foreach ($boxes as $box) {
+    usort($box['lines'], fn($a, $b) => [$b['days'], $a['name']] <=> [$a['days'], $b['name']]);
+    $readers = count($box['readers']);
+    $books = count($box['lines']);
+    if ($adults) {
+        $heading = $box['name'];
+        $summary = $box['oldest'] > 0 ? $str($books === 1 ? 'latereaderone' : 'latereader', (object) ['books' => $books,
+            'days' => $box['oldest']]) : $str($books === 1 ? 'latebooksone' : 'latebooks', $books);
+    } else {
+        $heading = $box['group'] !== '' ? $box['group'] : $str('readersnogroup');
+        $summary = $box['oldest'] > 0
+            ? $str($readers === 1 ? 'lategroupone' : 'lategroup', (object) ['readers' => $readers, 'days' => $box['oldest']])
+            : $str($readers === 1 ? 'lategroupcountone' : 'lategroupcount', $readers);
     }
-    $lines = [];
-    $readers = [];
-    $oldest = 0;
-    foreach ($group['lines'] as $line) {
-        if (!$all && $span !== '' && isset($counts[$span]) && $spanof($line['days']) !== $span) {
-            continue;
-        }
-        $readers[$line['readerid']] = true;
-        $oldest = max($oldest, $line['days']);
-        $lines[] = $line + [
-            'url' => (new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug,
-                'id' => $line['readerid']]))->out(false),
-            'cover' => $covers[$line['recordid']] ?? null,
-            'colour' => $line['recordid'] % 6,
-            'when' => $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
-                : $str('lateuntil', $line['due']),
-            // Red only past two weeks: what is just late stays calm.
-            'tone' => $line['days'] > 14 ? 'late' : ($line['days'] > 0 ? 'soon' : 'ok'),
-        ];
-    }
-    if (!$lines) {
-        continue;
-    }
-    $name = $group['group'] !== '' ? $group['group'] : $str('readersnogroup');
+    $tutors = $tutornames[$box['group']] ?? [];
     $shown[] = [
-        'heading' => $name,
-        'group' => $group['group'],
-        'summary' => $oldest > 0
-            ? $str(count($readers) === 1 ? 'lategroupone' : 'lategroup', (object) ['readers' => count($readers), 'days' => $oldest])
-            : $str(count($readers) === 1 ? 'lategroupcountone' : 'lategroupcount', count($readers)),
-        'lines' => $lines,
-        'urgent' => $oldest > 30,
+        'heading' => $heading,
+        'group' => $box['group'],
+        'summary' => $summary,
+        'tone' => $toneof($box['oldest']),
+        'lines' => $box['lines'],
         'open' => $only !== '',
-        'tellable' => !$all && $group['group'] !== '',
-        'printurl' => $url(['group' => $group['group'], 'all' => (int) $all]),
+        // To whom it goes, by name: the group's tutors; at a university, the reader.
+        'tell' => !$all && !$adults && $box['group'] !== '' && $tutors
+            ? $str('latetellname', implode(' · ', $tutors)) : '',
+        'settutor' => !$all && !$adults && $box['group'] !== '' && !$tutors
+            ? (new moodle_url('/local/oksigeniaayvurenda/tutors.php', ['library' => $library->slug]))->out(false) : '',
+        'remind' => !$all && $adults && $box['oldest'] > 0 ? $str('latetellname', $box['name']) : '',
+        'readerid' => $box['readerid'],
+        'readerurl' => $adults ? $readerurl($box['readerid']) : '',
+        'printurl' => $adults ? '' : $url(['group' => $box['group'], 'all' => (int) $all]),
     ];
 }
 $data = [
@@ -135,7 +177,7 @@ $data = [
     'action' => $url(['all' => (int) $all]),
     'sesskey' => sesskey(),
 ];
-foreach (['latetell', 'lateprint', 'lateallgroups', 'printnow'] as $key) {
+foreach (['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord'] as $key) {
     $data[$key] = $str($key);
 }
 $deskurl = (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);

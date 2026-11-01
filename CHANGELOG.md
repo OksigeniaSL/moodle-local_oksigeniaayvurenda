@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.107.0 (2026-11-01)
+
+From Enrique's look at the redone screens:
+
+- «How do I…?» sits at the end of each page, on the right of the content, instead of floating over cards and buttons.
+- Weeding: the bar of the marked ones shows only once something is marked, fixed at the bottom and centred; without
+  scripts it stays at the end of the list.
+- Late books: the groups (and the books in each) go from the most late to the least, also when a span filters; red past
+  30 days and orange from 15, in the spans, the groups and each book; the button says whom it tells («Tell Elena Duna
+  Montes»), and a group without a tutor offers to set one. At a university or academy the readers are adults: each one
+  with their books and «Tell …» to them (`notices::remind()`, the same message as the night's), no classes, no tutors.
+
 ## 0.106.0 (2026-11-01)
 
 - Reservations and voices redone from the design reviews (the same problem: the settings took the page): first what
