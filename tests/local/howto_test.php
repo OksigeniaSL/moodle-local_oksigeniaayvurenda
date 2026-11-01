@@ -55,4 +55,33 @@ final class howto_test extends \advanced_testcase {
         $keys = array_column(howto::find('', $library, (int) $teacher->id), 'key');
         $this->assertSame(['myclass', 'stacks'], $keys);
     }
+
+    /**
+     * Each guided help has its script and its words, step by step, in both languages; each task's help exists.
+     */
+    public function test_each_help_is_whole(): void {
+        global $CFG;
+        $manager = get_string_manager();
+        $script = file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/help-pieces.js');
+        foreach (howto::PIECES as $piece => $help) {
+            $this->assertStringContainsString("\n    {$piece}: function(h)", $script, $piece);
+            $this->assertFileExists($CFG->dirroot . '/local/oksigeniaayvurenda/' . $help['page']);
+            $keys = ['helptitle' . $piece, 'helpintro' . $piece, 'helpdone' . $piece, 'helpback' . $piece];
+            for ($step = 1; $step <= $help['steps']; $step++) {
+                $keys[] = sprintf('help%s%02d', $piece, $step);
+            }
+            foreach ($keys as $key) {
+                foreach (['en', 'es'] as $lang) {
+                    $this->assertNotSame('', trim($manager->get_string($key, 'local_oksigeniaayvurenda', null, $lang)), $key);
+                }
+            }
+            $next = sprintf('help%s%02d', $piece, $help['steps'] + 1);
+            $this->assertFalse($manager->string_exists($next, 'local_oksigeniaayvurenda'), $next);
+        }
+        foreach (howto::TASKS as [, , $piece]) {
+            if ($piece !== '') {
+                $this->assertArrayHasKey($piece, howto::PIECES);
+            }
+        }
+    }
 }

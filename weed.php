@@ -37,14 +37,15 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:catalogue', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $ref]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $ref] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
-$url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $library->slug] + $params))
-    ->out(false);
+$url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $library->slug] + $params
+    + (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])))->out(false);
 $now = time();
 $date = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
 
@@ -92,7 +93,8 @@ if ($recordid) {
         $OUTPUT->render_from_template('local_oksigeniaayvurenda/weedrecord', $data),
         $library,
         '',
-        ['search' => false, 'nav' => [['url' => $url(), 'label' => $str('weedtitle')]]]
+        ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => $url(),
+            'label' => $str('weedtitle')]]]
     );
     exit;
 }
@@ -208,10 +210,12 @@ foreach (
 }
 shell::output($str('weedtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/weed', $data), $library, '', [
     'search' => false,
-    'nav' => [
+    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/stocktake.php', ['library' => $library->slug]))->out(false),
             'label' => $str('stocktakenav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
             'label' => $str('addnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'weed']))
+            ->out(false), 'label' => $str('helpnav')],
     ],
 ]);

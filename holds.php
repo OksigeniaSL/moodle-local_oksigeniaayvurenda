@@ -35,7 +35,8 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:desk', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/holds.php', ['library' => $ref]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/holds.php', ['library' => $ref] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -124,6 +125,10 @@ foreach (
 $url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($str('holdstitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/holds', $data), $library, '', [
     'search' => false,
-    'nav' => [['url' => $url('desk.php'), 'label' => $str('desktitle')], ['url' => $url('index.php'),
-        'label' => $str('deskcatalogue')]],
+    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [
+        ['url' => $url('desk.php'), 'label' => $str('desktitle')],
+        ['url' => $url('index.php'), 'label' => $str('deskcatalogue')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'holds']))
+            ->out(false), 'label' => $str('helpnav')],
+    ],
 ]);

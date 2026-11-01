@@ -36,14 +36,15 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:desk', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $ref, 'all' => (int) $all]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $ref, 'all' => (int) $all] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug]
-    + $params))->out(false);
+    + $params + (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])))->out(false);
 $now = time();
 $notice = '';
 $year = \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now);
@@ -186,5 +187,9 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/late', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $deskurl, 'label' => $str('desktitle')]]]
+    ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [
+        ['url' => $deskurl, 'label' => $str('desktitle')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'late']))
+            ->out(false), 'label' => $str('helpnav')],
+    ]]
 );

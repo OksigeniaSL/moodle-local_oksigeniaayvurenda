@@ -38,7 +38,8 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:view', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/voices.php', ['library' => $ref]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/voices.php', ['library' => $ref] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -172,5 +173,8 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/voices', $data),
     $library,
     '',
-    ['search' => false]
+    ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'voices']))
+            ->out(false), 'label' => $str('helpnav')],
+    ]]
 );

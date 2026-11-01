@@ -34,17 +34,7 @@ $piece = optional_param('piece', 'desk', PARAM_ALPHA);
 $auto = optional_param('auto', 0, PARAM_BOOL);
 require_login(null, false);
 $context = context_system::instance();
-$pieces = ['desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 10],
-    'add' => ['capability' => 'catalogue', 'page' => 'add.php', 'steps' => 6],
-    'card' => ['capability' => 'desk', 'page' => 'card.php', 'steps' => 7],
-    'labels' => ['capability' => 'catalogue', 'page' => 'labels.php', 'steps' => 6],
-    'reports' => ['capability' => 'desk', 'page' => 'reports.php', 'steps' => 5],
-    'reviews' => ['capability' => 'desk', 'page' => 'reviews.php', 'steps' => 6],
-    'wishes' => ['capability' => 'desk', 'page' => 'wishes.php', 'steps' => 4],
-    'myclass' => ['capability' => 'view', 'page' => 'class.php', 'steps' => 7],
-    'stacks' => ['capability' => 'view', 'page' => 'stacks.php', 'steps' => 7],
-    'free' => ['capability' => 'catalogue', 'page' => 'free.php', 'steps' => 5],
-    'keepers' => ['capability' => 'manage', 'page' => 'keepers.php', 'steps' => 4]];
+$pieces = \local_oksigeniaayvurenda\local\howto::PIECES;
 if (!isset($pieces[$piece])) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
@@ -56,6 +46,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' =
 
 // The practice library, as new: the help always finds the same readers and books.
 $practice = practice::reset();
+practice::prepare($practice, $piece, (int) $USER->id);
 $library = $theirs ?? $practice;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $steps = [];
@@ -121,6 +112,9 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'isbn1' => practice::ISBNS[0][0],
             'isbn2' => practice::ISBNS[1][0],
             'wish' => $str('practicewishmine'),
+            'sheet' => str_replace('|', "\n", $str('practicesheet')) . "\n",
+            'sheetname' => $str('practicesheetname'),
+            'weedreason' => $str('practiceweedreason'),
         ],
     ],
 ]);

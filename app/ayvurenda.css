@@ -3435,7 +3435,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-rule-numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem .75rem; }
 .ayv .ayv-rule-remove { color: #a3321e; }
 .ayv .ayv-rule-form .ayv-field-check { margin: .6rem 0; }
-.ayv .ayv-rule-numbers { align-items: start; margin: .5rem 0; }
+.ayv .ayv-rule-numbers { align-items: start; gap: .75rem 1.5rem; margin: .5rem 0; }
 
 /* Late books: spans that filter, groups folded, the red only past two weeks. */
 .ayv .ayv-late-spans .ayv-late-span-old .ayv-weed-count { color: #a3321e; }
@@ -3604,3 +3604,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
     .ayv .ayv-imp-next a { transition: none; }
     .ayv .ayv-imp-next a:hover { transform: none; }
 }
+
+/* A tick with a long sentence: the sentence wraps beside the tick, never under it. */
+.ayv .ayv-field-check { flex-wrap: nowrap; align-items: flex-start; }
+.ayv .ayv-field-check input[type="checkbox"] { flex: none; margin-top: .25em; }

@@ -57,6 +57,12 @@ final class practice {
         [100004, 'Atlas de los mares', 'Lago Montes, Teo', '91', null],
     ];
 
+    /** @var array[] More books, only for the help of weeding: barcode number, title, author, class. */
+    private const SHELVED = [
+        [100005, 'Cartas del viento', 'Cardo Olmo, Eva', 'N'],
+        [100006, 'El reloj de sal', 'Brisa Galán, Hugo', 'N'],
+    ];
+
     /** @var array[] The made-up catalogue the adding screen asks in practice: ISBN, title, author, publisher, year. */
     public const ISBNS = [
         ['9798999999993', 'El jardín de las palabras', 'Duna Faro, Lía', 'Editorial Brújula', '2025'],
@@ -155,14 +161,15 @@ final class practice {
                 'groupname' => $group, 'stage' => 'Primaria', 'source' => 'practice', 'timecreated' => $now]);
         }
         foreach (self::BOOKS as [$number, $title, $author, $class, $lent]) {
-            $recordid = $DB->insert_record(self::T . 'record', ['entityid' => $entityid, 'doctype' => 'book',
-                'title' => $title, 'searchtext' => text::normalise($title . ' ' . $author), 'timecreated' => $now,
-                'timemodified' => $now]);
-            $itemid = $DB->insert_record(self::T . 'item', ['entityid' => $entityid, 'libraryid' => $libraryid,
-                'recordid' => $recordid, 'barcode' => control_letter::append((string) $number), 'itemtype' => 'normal',
-                'callnumber1' => $class, 'callnumber2' => callnumber::author($author),
-                'callnumber3' => callnumber::title($title), 'status' => $lent ? 'onloan' : 'available', 'timecreated' => $now,
-                'timemodified' => $now]);
+            $itemid = self::book(
+                (object) ['id' => $libraryid, 'entityid' => $entityid],
+                $number,
+                $title,
+                $author,
+                $class,
+                (bool) $lent,
+                $now
+            );
             if ($lent) {
                 [$reader, $daysago] = $lent;
                 $loaned = $now - $daysago * DAYSECS;
@@ -198,6 +205,112 @@ final class practice {
         }
         $transaction->allow_commit();
         return $DB->get_record(self::T . 'library', ['id' => $libraryid], '*', MUST_EXIST);
+    }
+
+    /**
+     * What a guided help needs and the library as new does not have.
+     *
+     * @param \stdClass $library The practice library.
+     * @param string $piece
+     * @param int $userid Who is watching: the tutor in the help of the late books, whom the button names.
+     */
+    public static function prepare(\stdClass $library, string $piece, int $userid): void {
+        global $DB;
+        $now = time();
+        $code = fn(int $number) => control_letter::append((string) $number);
+        $items = [];
+        foreach ($DB->get_records(self::T . 'item', ['libraryid' => $library->id]) as $item) {
+            $items[$item->barcode] = $item;
+        }
+        $readers = $DB->get_records_menu(self::T . 'reader', ['entityid' => $library->entityid], '', 'cardcode, id');
+        $year = years::around((int) $library->entityid, $now);
+        if ($piece === 'weed') {
+            // One lost, one worn, and some that nobody has taken for years, on a shelf with a name.
+            $place = $DB->insert_record(self::T . 'authority', ['entityid' => $library->entityid, 'kind' => 'location',
+                'label' => get_string('practiceshelf', 'local_oksigeniaayvurenda'), 'timecreated' => $now, 'timemodified' => $now]);
+            $DB->set_field(self::T . 'item', 'locationid', $place, ['libraryid' => $library->id]);
+            $DB->set_field(self::T . 'item', 'status', 'lost', ['id' => $items[$code(self::BOOKS[4][0])]->id]);
+            $DB->set_field(self::T . 'item', 'itemcondition', 'worn', ['id' => $items[$code(self::BOOKS[0][0])]->id]);
+            $old = $now - 8 * 365 * DAYSECS;
+            $DB->set_field(self::T . 'item', 'timeacquired', $old, ['id' => $items[$code(self::BOOKS[1][0])]->id]);
+            foreach (self::SHELVED as [$number, $title, $author, $class]) {
+                $itemid = self::book($library, $number, $title, $author, $class, false, $now);
+                $DB->update_record(self::T . 'item', (object) ['id' => $itemid, 'locationid' => $place,
+                    'timeacquired' => $now - 9 * 365 * DAYSECS]);
+            }
+        } else if ($piece === 'late') {
+            // More than a month, more than a fortnight and (as new) under one, in two groups; 3º A has its tutor.
+            $late = [[self::BOOKS[0][0], self::READERS[0], 54], [self::BOOKS[1][0], self::READERS[1], 32]];
+            foreach ($late as [$number, $who, $ago]) {
+                $DB->set_field(self::T . 'item', 'status', 'onloan', ['id' => $items[$code($number)]->id]);
+                $loaned = $now - $ago * DAYSECS;
+                $DB->insert_record(self::T . 'loan', ['libraryid' => $library->id, 'itemid' => $items[$code($number)]->id,
+                    'readerid' => $readers[$code($who[0])], 'yearid' => $year->id, 'groupname' => $who[3], 'timeloaned' => $loaned,
+                    'timedue' => $loaned + 14 * DAYSECS, 'renewals' => 0, 'timecreated' => $loaned, 'timemodified' => $loaned]);
+            }
+            $DB->insert_record(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => self::READERS[0][3], 'userid' => $userid,
+                'timecreated' => $now, 'timemodified' => $now]);
+        } else if ($piece === 'holds') {
+            // One set aside for Ana, and two waiting for the book Noa has.
+            $faro = $items[$code(self::BOOKS[0][0])];
+            $DB->set_field(self::T . 'item', 'status', 'held', ['id' => $faro->id]);
+            $DB->insert_record(self::T . 'hold', ['libraryid' => $library->id, 'recordid' => $faro->recordid,
+                'readerid' => $readers[$code(self::READERS[0][0])], 'itemid' => $faro->id, 'status' => 'ready',
+                'timecreated' => $now - 2 * DAYSECS, 'timeready' => $now - DAYSECS, 'timeexpires' => $now + 4 * DAYSECS,
+                'timemodified' => $now - DAYSECS]);
+            $lent = $items[$code(self::BOOKS[3][0])];
+            foreach ([[self::READERS[1][0], 3], [self::READERS[0][0], 1]] as [$who, $ago]) {
+                $DB->insert_record(self::T . 'hold', ['libraryid' => $library->id, 'recordid' => $lent->recordid,
+                    'readerid' => $readers[$code($who)], 'status' => 'waiting', 'timecreated' => $now - $ago * DAYSECS,
+                    'timemodified' => $now - $ago * DAYSECS]);
+            }
+        } else if ($piece === 'voices') {
+            // A voice waiting: Ana's, with no permission of her family yet. It sounds if the art brings a clip to borrow.
+            $itemid = $DB->insert_record(self::T . 'digital', ['entityid' => $library->entityid,
+                'recordid' => $items[$code(self::BOOKS[0][0])]->recordid, 'kind' => 'voice', 'format' => 'audio',
+                'title' => get_string('practicevoicetitle', 'local_oksigeniaayvurenda'), 'licence' => 'rights', 'audience' => '',
+                'download' => 0, 'status' => 'pending', 'readerid' => $readers[$code(self::READERS[0][0])],
+                'signature' => self::READERS[0][1], 'createdby' => $userid, 'timecreated' => $now, 'timemodified' => $now]);
+            $art = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
+            $clip = $art ? $art . '/voz/desk/' . substr(current_language(), 0, 2) . '/01.mp3' : '';
+            if ($clip !== '' && is_readable($clip)) {
+                get_file_storage()->create_file_from_pathname(['contextid' => \context_system::instance()->id,
+                    'component' => 'local_oksigeniaayvurenda', 'filearea' => digital::AREA, 'itemid' => $itemid,
+                    'filepath' => '/', 'filename' => 'practica.mp3'], $clip);
+            }
+        }
+    }
+
+    /**
+     * One more book on the shelf.
+     *
+     * @param \stdClass $library
+     * @param int $number Its barcode, without the letter.
+     * @param string $title
+     * @param string $author
+     * @param string $class
+     * @param bool $lent
+     * @param int $now
+     * @return int The copy.
+     */
+    private static function book(
+        \stdClass $library,
+        int $number,
+        string $title,
+        string $author,
+        string $class,
+        bool $lent,
+        int $now
+    ): int {
+        global $DB;
+        $recordid = $DB->insert_record(self::T . 'record', ['entityid' => $library->entityid, 'doctype' => 'book',
+            'title' => $title, 'searchtext' => text::normalise($title . ' ' . $author), 'timecreated' => $now,
+            'timemodified' => $now]);
+        return $DB->insert_record(self::T . 'item', ['entityid' => $library->entityid, 'libraryid' => $library->id,
+            'recordid' => $recordid, 'barcode' => control_letter::append((string) $number), 'itemtype' => 'normal',
+            'callnumber1' => $class, 'callnumber2' => callnumber::author($author),
+            'callnumber3' => callnumber::title($title), 'status' => $lent ? 'onloan' : 'available', 'timecreated' => $now,
+            'timemodified' => $now]);
     }
 
     /**
@@ -249,10 +362,22 @@ final class practice {
         }
         $DB->delete_records(self::T . 'review', ['entityid' => $entityid]);
         $DB->delete_records(self::T . 'wish', ['entityid' => $entityid]);
+        // The voice of its help, what an import left behind and the tutor of its help.
+        foreach ($DB->get_fieldset_select(self::T . 'digital', 'id', 'entityid = ?', [$entityid]) as $digitalid) {
+            get_file_storage()->delete_area_files(
+                \context_system::instance()->id,
+                'local_oksigeniaayvurenda',
+                digital::AREA,
+                (int) $digitalid
+            );
+        }
+        $DB->delete_records(self::T . 'digital', ['entityid' => $entityid]);
+        $DB->delete_records(self::T . 'source', ['entityid' => $entityid]);
         $years = $DB->get_fieldset_select(self::T . 'year', 'id', 'entityid = ?', [$entityid]);
         if ($years) {
             [$in, $params] = $DB->get_in_or_equal($years);
             $DB->delete_records_select(self::T . 'challenge', 'yearid ' . $in, $params);
+            $DB->delete_records_select(self::T . 'tutor', 'yearid ' . $in, $params);
         }
         foreach (['item', 'record', 'reader', 'authority', 'year', 'library'] as $table) {
             $DB->delete_records(self::T . $table, ['entityid' => $entityid]);

@@ -16,6 +16,10 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\control_letter;
+use local_oksigeniaayvurenda\core\import\catalogue_csv;
+use local_oksigeniaayvurenda\local\import\preview;
+
 /**
  * Tests for the practice library of the guided help.
  *
@@ -108,5 +112,68 @@ final class practice_test extends \advanced_testcase {
             'timereturned' => null]));
         $desk->room_undo($read['roomid']);
         $this->assertSame(0, reports::year($library, $year)['room']);
+    }
+
+    /**
+     * Each help finds what it shows, and making the library again takes it all away.
+     */
+    public function test_what_each_help_needs(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $t = 'local_oksigeniaayvurenda_';
+        $admin = (int) get_admin()->id;
+
+        $library = practice::reset();
+        practice::prepare($library, 'weed', $admin);
+        $found = weeding::candidates($library, ['unused' => 5, 'before' => 0, 'worn' => 1, 'lost' => 1, 'place' => 0], null, 0);
+        $why = array_count_values(array_column($found['rows'], 'why'));
+        $this->assertSame(1, $why['lost']);
+        $this->assertSame(1, $why['worn']);
+        $this->assertSame(3, $why['unused']);
+
+        $library = practice::reset();
+        $this->assertSame(5, $DB->count_records($t . 'item', ['libraryid' => $library->id]));
+        practice::prepare($library, 'late', $admin);
+        $this->assertSame(4, $DB->count_records($t . 'loan', ['libraryid' => $library->id]));
+        $this->assertSame(3, $DB->count_records_select($t . 'loan', 'libraryid = ? AND timedue < ?', [$library->id, time()]));
+        $this->assertSame(1, $DB->count_records($t . 'tutor', ['userid' => $admin, 'groupname' => '3º A']));
+
+        $library = practice::reset();
+        $this->assertSame(0, $DB->count_records($t . 'tutor', ['userid' => $admin]));
+        practice::prepare($library, 'holds', $admin);
+        $lists = holds::lists($library, time());
+        $this->assertCount(1, $lists['ready']);
+        $this->assertCount(2, $lists['waiting']);
+
+        $library = practice::reset();
+        $this->assertSame(0, $DB->count_records($t . 'hold', ['libraryid' => $library->id]));
+        practice::prepare($library, 'voices', $admin);
+        $this->assertCount(1, voices::pending($library, $admin));
+
+        $library = practice::reset();
+        $this->assertSame(0, $DB->count_records($t . 'digital', ['entityid' => $library->entityid]));
+    }
+
+    /**
+     * The example file of the help of importing: its columns are recognised but one, in both languages, and every
+     * code passes its letter.
+     */
+    public function test_the_example_file(): void {
+        $manager = get_string_manager();
+        foreach (['en', 'es'] as $lang) {
+            $lines = explode('|', $manager->get_string('practicesheet', 'local_oksigeniaayvurenda', null, $lang));
+            $rows = array_map(fn($line) => explode(';', $line), $lines);
+            $columns = array_shift($rows);
+            $map = catalogue_csv::guess($columns);
+            $this->assertCount(count($columns) - 1, $map, $lang);
+            $look = preview::of(catalogue_csv::records($rows, $map));
+            $this->assertSame(8, $look['records'], $lang);
+            $this->assertSame(8, $look['items'], $lang);
+            $this->assertSame(0, $look['nocode'], $lang);
+            foreach ($rows as $row) {
+                $this->assertTrue(control_letter::is_valid($row[6]), $row[6]);
+            }
+        }
     }
 }

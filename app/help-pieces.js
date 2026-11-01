@@ -21,6 +21,203 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 window.AYVHelpPieces = {
+    // Importing: what it takes, an example file handed over, what it would bring before anything enters, what follows.
+    import: function(h) {
+        'use strict';
+        return h.point('.ayv-imp-drop').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.drop('.ayv-imp-drop input[type="file"]', h.codes.sheetname, h.codes.sheet);
+        }).then(function() {
+            return h.point('.ayv-imp-figures');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('.ayv-imp-shelf');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point('.ayv-imp-chips');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return Promise.all([h.say(5), h.tap('.ayv-imp-columnshead button').then(function() {
+                return h.point('.ayv-imp-map');
+            })]);
+        }).then(function() {
+            return h.tap('#ayv-imp-map [data-ayv-close]');
+        }).then(function() {
+            return h.you(6, '.ayv-imp-gobutton');
+        }).then(function() {
+            return h.point('.ayv-imp-done .ayv-imp-figures');
+        }).then(function() {
+            return h.say(7);
+        }).then(function() {
+            return h.point('.ayv-imp-next');
+        }).then(function() {
+            return h.say(8);
+        });
+    },
+    // Weeding: the reasons, one list, refining, marking one, its record to sign.
+    weed: function(h) {
+        'use strict';
+        return h.point('.ayv-weed-reasons').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.go('.ayv-weed-reason-unused');
+        }).then(function() {
+            return h.point('.ayv-weed-row');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return Promise.all([h.say(3), h.tap('[data-ayv-open="ayv-weed-refine"]').then(function() {
+                return h.point('#ayv-weed-refine form[method="get"]');
+            })]);
+        }).then(function() {
+            return h.tap('#ayv-weed-refine .ayv-modal-close');
+        }).then(function() {
+            return h.you(4, '.ayv-weed-item');
+        }).then(function() {
+            return h.point('.ayv-weed-bar');
+        }).then(function() {
+            return h.say(5);
+        }).then(function() {
+            return Promise.all([h.say(6), h.tap('[data-ayv-needs-mark]').then(function() {
+                return h.type('#ayv-weed-go input[name="reason"]', h.codes.weedreason);
+            })]);
+        }).then(function() {
+            return h.go('#ayv-weed-go button[type="submit"]');
+        }).then(function() {
+            return h.point('.ayv-weedtable');
+        }).then(function() {
+            return h.say(7);
+        });
+    },
+    // The loan rules: one read as a sentence, changing it, and a new one for an exception.
+    rules: function(h) {
+        'use strict';
+        return h.point('.ayv-rule').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return Promise.all([h.say(1), h.tap('.ayv-rule-actions button').then(function() {
+                return h.point('dialog[open] .ayv-rule-numbers');
+            })]);
+        }).then(function() {
+            return h.tap('dialog[open] .ayv-modal-close');
+        }).then(function() {
+            return Promise.all([h.say(2), h.tap('[data-ayv-open="ayv-rule-new"]').then(function() {
+                return h.choose('#ayv-rule-new select[name="readertype"]', 'teacher');
+            }).then(function() {
+                return h.type('#ayv-rule-new input[name="loandays"]', '30');
+            }).then(function() {
+                return h.type('#ayv-rule-new input[name="maxloans"]', '5');
+            })]);
+        }).then(function() {
+            return h.you(3, '#ayv-rule-new button[value="save"]');
+        }).then(function() {
+            return h.point('.ayv-rule:nth-child(2)');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    // The late books: the spans, a box, who has what, and the two things to do with it.
+    late: function(h) {
+        'use strict';
+        return h.point('.ayv-late-spans').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-late-group summary');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.tap('.ayv-late-group summary');
+        }).then(function() {
+            return h.point('.ayv-late-row');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('.ayv-late-who');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point('.ayv-late-actions');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    // The holds: what is set aside, who waits, and how a library chooses to take them.
+    holds: function(h) {
+        'use strict';
+        var waiting = '.ayv-holdcard:not(.ayv-holdcard-ready)';
+        return h.point('.ayv-holdcard-ready').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point(waiting);
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point(waiting + ' button');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            if (!h.has('[data-ayv-open="ayv-holds-sheet"]')) {
+                return null;
+            }
+            return Promise.all([h.say(4), h.tap('[data-ayv-open="ayv-holds-sheet"]').then(function() {
+                return h.point('#ayv-holds-sheet form[method="post"]');
+            })]).then(function() {
+                return h.tap('#ayv-holds-sheet .ayv-modal-close');
+            });
+        });
+    },
+    // The voices waiting: listening, the family's permission, the licence, who else hears it, the signature.
+    voices: function(h) {
+        'use strict';
+        return h.point('.ayv-book').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-book audio');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-book form.ayv-book-actions');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('.ayv-book select[name="licence"]');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point('.ayv-book form:not(.ayv-book-actions) > .ayv-field-hint');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.point('.ayv-book input[name="signature"]');
+        }).then(function() {
+            return h.say(5);
+        }).then(function() {
+            return h.point('.ayv-book button[value="approve"]');
+        }).then(function() {
+            return h.say(6);
+        }).then(function() {
+            if (!h.has('.ayv-settingcard')) {
+                return null;
+            }
+            return h.point('.ayv-settingcard').then(function() {
+                return h.say(7);
+            });
+        });
+    },
     // The shelves: spines as tall as the books, the label at their foot, the gap of a book that is out, the lectern.
     stacks: function(h) {
         'use strict';

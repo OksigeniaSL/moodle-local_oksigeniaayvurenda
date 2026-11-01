@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.114.0 (2026-11-01)
+
+- Guided helps for the screens already remade: importing a catalogue, weeding, loan rules, late books, holds and voices, in
+  English and Spanish. Each plays over the real screen in the practice library, with made-up data: importing takes in an
+  example file of eight books and goes through to the end, weeding makes its record, a new rule is saved. Nobody is told
+  anything and the library's own data is not touched. Each screen offers its help, and «How do I…?» leads to it too.
+- The practice library sets out what each help needs only for that help, and takes it all away when it is made again:
+  also the voices, tutors and import traces it had been leaving behind.
+- A tick with a long sentence keeps the sentence beside it, instead of the tick alone on the line above.
+
 ## 0.113.0 (2026-11-01)
 
 - The import screen, remade. A file is seen as the books it brings: the first six stand on their shelf, each with its

@@ -214,6 +214,27 @@
                 });
             });
         },
+        // Hands a file to a file field, as if it were dropped there: its form goes on to the next page by itself.
+        drop: function(selector, name, text) {
+            return wait(selector).then(function(input) {
+                var win = frame.contentWindow;
+                var transfer = new win.DataTransfer();
+                transfer.items.add(new win.File([text], name, {type: 'text/csv'}));
+                var loaded = new Promise(function(resolve) {
+                    frame.addEventListener('load', resolve, {once: true});
+                });
+                input.files = transfer.files;
+                input.dispatchEvent(new win.Event('change', {bubbles: true}));
+                return loaded;
+            }).then(function() {
+                pointer.classList.remove('ayv-help-pointer-on');
+                return sleep(400);
+            });
+        },
+        // Whether something is on the screen: what only some people see.
+        has: function(selector) {
+            return !!find(selector);
+        },
         // «Now you»: a ring round the button, and nothing moves until it is tapped.
         you: function(index, selector) {
             caption.textContent = config.now + ' ' + (config.steps[index] || '');

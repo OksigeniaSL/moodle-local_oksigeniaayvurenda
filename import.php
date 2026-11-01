@@ -45,7 +45,8 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:manage', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $ref]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $ref] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -212,8 +213,10 @@ foreach (
 }
 shell::output($data['heading'], $OUTPUT->render_from_template('local_oksigeniaayvurenda/import', $data), $library, '', [
     'search' => false,
-    'nav' => [
+    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [
         ['url' => $url('index.php'), 'label' => $str('deskcatalogue')],
         ['url' => $url('add.php'), 'label' => $str('addnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'import']))
+            ->out(false), 'label' => $str('helpnav')],
     ],
 ]);
