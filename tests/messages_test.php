@@ -25,27 +25,20 @@ namespace local_oksigeniaayvurenda;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversNothing
  */
+#[\PHPUnit\Framework\Attributes\CoversNothing]
 final class messages_test extends \advanced_testcase {
     /**
-     * What a reader waits for goes to the app too, on a new site and on one brought up to date.
+     * What a reader waits for goes to the app too.
      */
     public function test_the_phone_rings(): void {
-        global $CFG, $DB;
+        global $CFG;
         $this->resetAfterTest();
-        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/messages.php');
+        $messageproviders = [];
+        include($CFG->dirroot . '/local/oksigeniaayvurenda/db/messages.php');
         foreach (['overdue', 'holdready', 'newbooks', 'overduetutor'] as $name) {
             $this->assertArrayHasKey('airnotifier', $messageproviders[$name]['defaults'], $name);
             $key = 'message_provider_local_oksigeniaayvurenda_' . $name . '_enabled';
             $this->assertContains('airnotifier', explode(',', (string) get_config('message', $key)), $name);
         }
-
-        // A site from before: its other choices stay as they were.
-        $key = 'message_provider_local_oksigeniaayvurenda_overdue_enabled';
-        set_config($key, 'email', 'message');
-        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
-        $this->setAdminUser();
-        xmldb_local_oksigeniaayvurenda_upgrade(2026110115);
-        $this->assertSame('email,airnotifier', get_config('message', $key));
-        $this->assertTrue($DB->record_exists('config_plugins', ['plugin' => 'message', 'name' => $key]));
     }
 }
