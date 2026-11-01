@@ -191,6 +191,21 @@ final class mail_test extends \advanced_testcase {
     }
 
     /**
+     * A mobile library speaks with its own words where it has them, and with those of a public library where it does not.
+     */
+    public function test_a_mobile_library_has_its_words(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        libraries::update_entity($entityid, ['skin' => 'mobile']);
+        skins::forget($entityid);
+        $this->assertSame('visitpulsemobile', skins::words($entityid, 'visitpulse'));
+        $this->assertSame('holdreadyheadingsecondary', skins::words($entityid, 'holdreadyheading'));
+    }
+
+    /**
      * The name of a library has its own article, or none («Biblioteca de Riosalto», «La Casa del Libro»): in Spanish, no
      * sentence puts a preposition right before it.
      */

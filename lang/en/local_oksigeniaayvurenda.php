@@ -2641,6 +2641,7 @@ $string['visitpanleft'] = 'Look to the left';
 $string['visitpanright'] = 'Look to the right';
 $string['visitplaces'] = 'What is here';
 $string['visitpulse'] = 'Today in the library';
+$string['visitpulsemobile'] = 'Today in the square';
 $string['visitpulsequiet'] = 'The books are waiting for you';
 $string['visitsound'] = 'Sound';
 $string['visitstacks'] = 'The shelves of {$a}';

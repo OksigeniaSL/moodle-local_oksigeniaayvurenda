@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.120.2 (2026-11-01)
+
+- The mobile library has its own hall, a bookmobile in a square, with its board saying «Today in the square», and its picture on the
+  notices by e-mail.
+
 ## 0.120.1 (2026-11-01)
 
 - The button of a notice by e-mail opens the book or the library in Aty for whoever has it on their phone, instead of leaving them in

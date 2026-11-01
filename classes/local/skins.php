@@ -61,7 +61,11 @@ final class skins {
         'mobile' => ['mobile', 'public', 'school']];
 
     /** @var array Whose words a skin speaks with, where it has none of its own: warm for every age, or plain for adults. */
-    public const TONES = ['public' => ['public', 'secondary'], 'company' => ['university'], 'mobile' => ['public', 'secondary']];
+    public const TONES = [
+        'public' => ['public', 'secondary'],
+        'company' => ['university'],
+        'mobile' => ['mobile', 'public', 'secondary'],
+    ];
 
     /** @var string[] The skins with no classes nor tutors: each reader is told about their own books. */
     public const NO_CLASSES = ['university', 'public', 'company', 'mobile'];

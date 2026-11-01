@@ -2641,6 +2641,7 @@ $string['visitpanleft'] = 'Mirar a la izquierda';
 $string['visitpanright'] = 'Mirar a la derecha';
 $string['visitplaces'] = 'Lo que hay aquí';
 $string['visitpulse'] = 'Hoy en la biblioteca';
+$string['visitpulsemobile'] = 'Hoy en la plaza';
 $string['visitpulsequiet'] = 'Los libros te esperan';
 $string['visitsound'] = 'Sonido';
 $string['visitstacks'] = 'La estantería de {$a}';

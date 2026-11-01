@@ -488,7 +488,8 @@ final class visit {
             $lines[] = ['text' => $str('visitpulsequiet')];
         }
         return ['directory' => false, 'pulse' => true, 'book' => false, 'width' => round($w), 'height' => round($h),
-            'transform' => homography::css($w, $h, $zone['quad']), 'heading' => $str('visitpulse'), 'lines' => $lines,
+            'transform' => homography::css($w, $h, $zone['quad']),
+            'heading' => $str(skins::words((int) $library->entityid, 'visitpulse')), 'lines' => $lines,
             'ink' => self::ink($zone),
             'fontsize' => round(min($h * .1, $w / 13), 1)];
     }
