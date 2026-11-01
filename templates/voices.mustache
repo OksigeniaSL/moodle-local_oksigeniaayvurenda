@@ -41,7 +41,7 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{^haspending}}<p class="ayv-empty">{{voicesnone}}</p>{{/haspending}}
+{{^haspending}}{{#quiet}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/quiet}}{{^quiet}}<p class="ayv-empty">{{voicesnone}}</p>{{/quiet}}{{/haspending}}
 {{#pending}}
 <section class="ayv-book">
     <h2 class="ayv-section-title">{{book}}{{#title}} · {{title}}{{/title}}</h2>
@@ -67,14 +67,22 @@
 </section>
 {{/pending}}
 {{#manage}}
-<form method="post" action="{{action}}" class="ayv-book">
+<section class="ayv-settingcard" aria-labelledby="ayv-voices-settings">
+    <h2 id="ayv-voices-settings" class="ayv-section-title">{{voicessettings}}</h2>
+    <p>{{summary}}</p>
+    <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-voices-sheet">{{holdschange}}</button></p>
+</section>
+<dialog class="ayv-modal" id="ayv-voices-sheet" aria-labelledby="ayv-voices-sheet-title">
+    <div class="ayv-modal-head"><h3 id="ayv-voices-sheet-title" class="ayv-section-title">{{voicessettings}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+<form method="post" action="{{action}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <h2 class="ayv-section-title">{{voicessettings}}</h2>
-    <label class="ayv-field ayv-field-wide">{{voiceskeepdays}} <select name="keepdays">{{#keeps}}<option value="{{days}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/keeps}}</select></label>
-    <fieldset class="ayv-fieldset"><legend>{{voicesfamilyoptions}}</legend><div class="ayv-choices">
-        {{#familyoptions}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="familyoptions[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/familyoptions}}</div></fieldset>
-    <label class="ayv-field ayv-field-wide">{{voicestext}} <span class="ayv-field-hint">{{voicestexthint}}</span>
+    <label class="ayv-field ayv-dig-field">{{voiceskeepdays}} <select name="keepdays">{{#keeps}}<option value="{{days}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/keeps}}</select></label>
+    <fieldset class="ayv-dig-set"><legend>{{voicesfamilyoptions}}</legend><div class="ayv-segmented">
+        {{#familyoptions}}<label><input type="checkbox" name="familyoptions[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/familyoptions}}</div></fieldset>
+    <label class="ayv-field ayv-dig-field">{{voicestext}} <span class="ayv-field-hint">{{voicestexthint}}</span>
         <textarea name="voicetext" rows="4">{{voicetext}}</textarea></label>
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="settings">{{voicessave}}</button></p>
+    <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="settings">{{voicessave}}</button></p>
 </form>
+</dialog>
 {{/manage}}

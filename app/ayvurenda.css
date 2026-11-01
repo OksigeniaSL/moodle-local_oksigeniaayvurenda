@@ -3442,3 +3442,14 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 @media print {
     .ayv .ayv-late-actions, .ayv .ayv-print-head { display: none; }
 }
+
+/* Reservations: what waits first, as cards; the settings in one line and a sheet. */
+.ayv .ayv-holdcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: .7rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
+.ayv .ayv-holdcard { display: flex; align-items: center; gap: .8rem; padding: .7rem .9rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-holdcard-ready { box-shadow: inset 4px 0 0 var(--sun), 0 1px 0 var(--line); }
+.ayv .ayv-holdcard-words { display: grid; flex: 1 1 auto; min-width: 0; gap: .1rem; }
+.ayv .ayv-holdcard-title { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
+.ayv .ayv-holdcard form { margin: 0; flex: 0 0 auto; }
+.ayv .ayv-holds-quiet { margin: 0 0 1.5rem; }
+.ayv .ayv-settingcard { margin: 1.5rem 0 0; padding: 1rem 1.2rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-settingcard .ayv-section-title { margin-top: 0; }

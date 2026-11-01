@@ -48,7 +48,8 @@ $notice = optional_param('notice', '', PARAM_ALPHA) === 'holdcancelled' ? $str('
 if ($manage && data_submitted() && confirm_sesskey()) {
     holds::save_settings($entityid, [
         'online' => optional_param('online', 0, PARAM_BOOL),
-        'stages' => optional_param_array('stages', [], PARAM_TEXT),
+        // With all the stages marked, no stage is chosen: every one.
+        'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
         'days' => optional_param('days', 5, PARAM_INT),
         'max' => optional_param('max', 3, PARAM_INT),
         'renew' => optional_param('renew', 0, PARAM_BOOL),
@@ -59,18 +60,36 @@ if ($manage && data_submitted() && confirm_sesskey()) {
 $lists = holds::lists($library, $now);
 $record = fn(int $id) => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $id]))
     ->out(false);
-$rows = function (array $list, string $when) use ($str, $record) {
+$covers = \local_oksigeniaayvurenda\local\covers::urls(array_merge(
+    array_column($lists['ready'], 'recordid'),
+    array_column($lists['waiting'], 'recordid')
+));
+$rows = function (array $list, string $when) use ($str, $record, $covers) {
     return array_map(fn($h) => $h + [
         'url' => $record($h['recordid']),
+        'cover' => $covers[$h['recordid']] ?? null,
+        'colour' => $h['recordid'] % 6,
         'when' => $when === 'until' ? $str('holdsuntil', $h['until']) : $str('holdssince', $h['since']),
         'aheadlabel' => $when === 'since' && $h['ahead'] ? $str('holdsahead', $h['ahead']) : '',
     ], $list);
 };
 $settings = holds::settings($entityid);
 $chosen = array_flip($settings['stages']);
+$yes = fn(bool $on) => $str($on ? 'holdson' : 'holdsoff');
+// The settings read in one line, changed in a sheet.
+$summary = $str($settings['online'] ? 'holdssummary' : 'holdssummaryoff', (object) [
+    'online' => $yes((bool) $settings['online']),
+    'stages' => $settings['stages'] ? implode(', ', $settings['stages']) : \core_text::strtolower($str('holdsallstages')),
+    'days' => (int) $settings['days'],
+    'max' => (int) $settings['max'],
+    'renewonline' => $yes((bool) $settings['renewonline']),
+]);
+// Nothing waiting: the herald says so, if she is on.
+$herald = !$lists['ready'] && !$lists['waiting']
+    ? \local_oksigeniaayvurenda\local\characters::say($entityid, 'herald', 'holdsquiet', [], 'lee') : null;
 $data = [
     'heading' => $str('holdstitle'),
-    'intro' => $str('holdsintro'),
+    'intro' => $str('holdsintroshort'),
     'notice' => $notice,
     'action' => (new moodle_url('/local/oksigeniaayvurenda/hold.php'))->out(false),
     'self' => $PAGE->url->out(false),
@@ -84,6 +103,10 @@ $data = [
     'nowaiting' => $str('holdsnowaiting'),
     'cancel' => $str('holdcancel'),
     'manage' => $manage,
+    'summary' => $summary,
+    'herald' => $herald,
+    'quiet' => !$lists['ready'] && !$lists['waiting'],
+    'allstages' => !$settings['stages'],
     'online' => $settings['online'],
     'renew' => $settings['renew'],
     'renewonline' => $settings['renewonline'],
@@ -94,7 +117,7 @@ $data = [
 $data['hasstages'] = (bool) $data['stages'];
 foreach (
     ['holdssettings', 'holdssettingsintro', 'holdsonline', 'holdsstages', 'holdsnostages', 'holdsdays', 'holdsmax',
-        'holdsrenew', 'holdsrenewonline', 'holdssave'] as $key
+        'holdsrenew', 'holdsrenewonline', 'holdssave', 'holdschange', 'holdsallstages', 'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }

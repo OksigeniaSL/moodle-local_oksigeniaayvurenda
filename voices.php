@@ -142,11 +142,28 @@ $data = [
     'voicetext' => (string) ($settings['voicetext'] ?? ''),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
 ];
+// Nothing to listen to: the memory says so. The settings, read in one line and changed in a sheet.
+$data['quiet'] = !$pending ? \local_oksigeniaayvurenda\local\characters::say(
+    (int) $library->entityid,
+    'memory',
+    'voicesquiet',
+    [],
+    'lee'
+) : null;
+$keepdays = voices::keepdays((int) $library->entityid);
+$chosenoptions = array_filter($data['familyoptions'], fn($o) => $o['checked']);
+$data['summary'] = $str('voicessummary', (object) [
+    'keep' => $keepdays === 0 ? $str('voiceskeepforever') : (in_array($keepdays, [365, 730, 1095, 1825], true)
+        ? \core_text::strtolower($str('voiceskeep' . $keepdays)) : $str('voiceskeepdaysn', $keepdays)),
+    'options' => $chosenoptions ? implode(', ', array_map(fn($o) => $str('voicefamilyshort' . $o['value']), $chosenoptions))
+        : $str('voicesnooptions'),
+    'text' => $str(trim($data['voicetext']) !== '' ? 'holdson' : 'holdsoff'),
+]);
 foreach (
     ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voiceaudience',
         'voicepermissiongive', 'voicepermissiontake', 'voicepermissionhas', 'voicepermissionnot', 'voicessettings',
         'voiceskeepdays', 'voicestext', 'voicestexthint', 'voicessave', 'voiceinfo', 'voicesignaturereview',
-        'voicesignaturereviewhint', 'voicesfamilyoptions'] as $key
+        'voicesignaturereviewhint', 'voicesfamilyoptions', 'holdschange', 'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }

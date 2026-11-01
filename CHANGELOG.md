@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.106.0 (2026-11-01)
+
+- Reservations and voices redone from the design reviews (the same problem: the settings took the page): first what
+  waits, as cards with the cover, the reader and the date (a copy set aside marked on its edge); when nothing waits, the
+  herald (reservations) or the memory (voices) says so; the settings read in one line («Online reservations: no · a book
+  set aside is kept 5 days · 3 at a time per reader…») and changed in a sheet, the stages as chips with «All the
+  stages» explicit, and «teaching days» instead of «school days».
+
 ## 0.105.0 (2026-11-01)
 
 - Late books redone from the design reviews: tabs «Late | Lent» instead of a chip; three cards by span (more than 30
