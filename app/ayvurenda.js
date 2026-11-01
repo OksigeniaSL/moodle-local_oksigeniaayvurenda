@@ -101,6 +101,31 @@
             show();
         });
     }
+    // A zone to drop a file on: the file field covers all of it, so the browser takes the drop by itself; choosing a
+    // file is already the next step, and its button only shows that it is at work.
+    document.querySelectorAll('[data-ayv-drop]').forEach(function(zone) {
+        var input = zone.querySelector('input[type="file"]');
+        var form = zone.closest('form');
+        if (!input || !form) {
+            return;
+        }
+        form.classList.add('ayv-imp-auto');
+        ['dragenter', 'dragover'].forEach(function(name) {
+            zone.addEventListener(name, function() {
+                zone.classList.add('ayv-imp-over');
+            });
+        });
+        ['dragleave', 'drop'].forEach(function(name) {
+            zone.addEventListener(name, function() {
+                zone.classList.remove('ayv-imp-over');
+            });
+        });
+        input.addEventListener('change', function() {
+            if (input.files && input.files.length && form.requestSubmit) {
+                form.requestSubmit();
+            }
+        });
+    });
     // Dates as three dropdowns (day, month by its name, year) in the library's language: the browser's date field writes
     // the date its own way (mm/dd/yyyy in an English browser). The field stays, hidden, and carries the value.
     var dateParts = function(lang) {
@@ -375,8 +400,8 @@
     // A form that takes a while (a work brought from far away, a search in another catalogue) shows that it is working:
     // its button waits with the words of what it does, turning, and a line under it says how long it may take. Sent once;
     // back to it from the next page, it is as it was.
-    var busy = function(form, on) {
-        var button = form.querySelector('button[type="submit"], button:not([type])');
+    var busy = function(form, on, pressed) {
+        var button = pressed || form.querySelector('button[type="submit"], button:not([type])');
         var said = form.querySelector('.ayv-busy-said');
         form.setAttribute('aria-busy', on ? 'true' : 'false');
         if (button) {
@@ -403,8 +428,9 @@
                 event.preventDefault();
                 return;
             }
-            if (!event.defaultPrevented) {
-                busy(form, true);
+            // Leaving a form that imports, or looking at it again, is not what takes a while.
+            if (!event.defaultPrevented && !(event.submitter && event.submitter.hasAttribute('data-nobusy'))) {
+                busy(form, true, event.submitter);
             }
         });
     });

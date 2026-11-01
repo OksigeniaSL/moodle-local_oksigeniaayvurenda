@@ -3469,3 +3469,138 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-holds-quiet { margin: 0 0 1.5rem; }
 .ayv .ayv-settingcard { margin: 1.5rem 0 0; padding: 1rem 1.2rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
 .ayv .ayv-settingcard .ayv-section-title { margin-top: 0; }
+
+/* Importing a catalogue: a file seen as the books it brings, standing on their shelf. */
+.ayv .ayv-imp-top { margin: .5rem 0 1.5rem; }
+.ayv .ayv-imp-title { margin: 0; font-family: var(--title); font-weight: 600; font-size: clamp(1.75rem, 3.2vw, 2.5rem); line-height: 1.12; }
+.ayv .ayv-imp-lead { margin: .45rem 0 0; font-size: 1.05rem; }
+.ayv .ayv-imp-plan { margin-top: .75rem; }
+
+.ayv .ayv-imp-drop {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: .55rem;
+    padding: clamp(2rem, 6vw, 3.5rem) 1.25rem;
+    border: 2px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 22px;
+    background: var(--surface);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+.ayv .ayv-imp-drop:hover,
+.ayv .ayv-imp-drop.ayv-imp-over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+/* Three drawn books, ready to come in; they open when a file is over them. */
+.ayv .ayv-imp-fan { display: flex; justify-content: center; margin-bottom: .5rem; }
+.ayv .ayv-imp-fan .ayv-cover { width: 3.6rem; padding: 0; box-sizing: border-box; transition: transform .2s ease; }
+.ayv .ayv-imp-fan .ayv-cover:nth-child(1) { transform: translate(.7rem, .35rem) rotate(-11deg); }
+.ayv .ayv-imp-fan .ayv-cover:nth-child(2) { z-index: 1; }
+.ayv .ayv-imp-fan .ayv-cover:nth-child(3) { transform: translate(-.7rem, .35rem) rotate(11deg); }
+.ayv .ayv-imp-drop:hover .ayv-imp-fan .ayv-cover:nth-child(1),
+.ayv .ayv-imp-over .ayv-imp-fan .ayv-cover:nth-child(1) { transform: translate(.1rem, .35rem) rotate(-15deg); }
+.ayv .ayv-imp-drop:hover .ayv-imp-fan .ayv-cover:nth-child(2),
+.ayv .ayv-imp-over .ayv-imp-fan .ayv-cover:nth-child(2) { transform: translateY(-.35rem); }
+.ayv .ayv-imp-drop:hover .ayv-imp-fan .ayv-cover:nth-child(3),
+.ayv .ayv-imp-over .ayv-imp-fan .ayv-cover:nth-child(3) { transform: translate(-.1rem, .35rem) rotate(15deg); }
+.ayv .ayv-imp-droptitle { font-family: var(--title); font-weight: 600; font-size: clamp(1.25rem, 2.4vw, 1.6rem); line-height: 1.2; }
+.ayv .ayv-imp-dropor { font-size: .95rem; }
+.ayv .ayv-imp-dropformats { font-size: .9rem; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+.ayv .ayv-imp-drop .ayv-file { position: static; }
+.ayv .ayv-imp-drop .ayv-file-name { display: none; }
+.ayv .ayv-imp-send { margin: 1rem 0 0; text-align: center; }
+.ayv .ayv-imp-auto .ayv-imp-send { display: none; }
+.ayv .ayv-imp-auto[aria-busy="true"] .ayv-imp-send { display: block; }
+.ayv .ayv-imp-sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr)); gap: .8rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-imp-sources li { display: grid; align-content: start; gap: .3rem; padding: 1rem 1.15rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); line-height: 1.4; }
+.ayv .ayv-imp-sources b { font-family: var(--title); font-weight: 600; font-size: 1.05rem; }
+.ayv .ayv-imp-sourcego { display: inline-flex; align-items: center; gap: .15rem; margin-top: .25rem; font-weight: 700; }
+
+.ayv .ayv-imp-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.25rem 2.5rem; margin: .5rem 0 1.75rem; }
+.ayv .ayv-imp-headtext { flex: 1 1 20rem; min-width: 0; }
+.ayv .ayv-imp-file { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem; margin: 0 0 .5rem; font-size: .95rem; }
+.ayv .ayv-imp-filename { font-weight: 700; color: var(--accent); overflow-wrap: anywhere; }
+.ayv .ayv-imp-kind { padding: .05rem .6rem; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, transparent); font-size: .85rem; }
+.ayv .ayv-imp-figures { display: flex; flex-wrap: wrap; gap: .75rem 0; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-imp-figures li { display: grid; align-content: start; gap: .3rem; padding: 0 1.35rem; border-left: 1px solid var(--line); line-height: 1.2; }
+.ayv .ayv-imp-figures li:first-child { padding-left: 0; border-left: 0; }
+.ayv .ayv-imp-figures li:last-child { padding-right: 0; }
+.ayv .ayv-imp-num { font-family: var(--title); font-weight: 600; font-size: clamp(2.1rem, 4.2vw, 3.1rem); line-height: 1; color: var(--accent); }
+.ayv .ayv-imp-figlabel { font-size: .92rem; }
+
+.ayv .ayv-imp-stackhead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .2rem 1rem; margin-bottom: .75rem; }
+.ayv .ayv-imp-stackhead .ayv-section-title { margin: 0; }
+.ayv .ayv-imp-shelf { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); row-gap: 1.5rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-imp-book { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 12px auto; align-content: start; min-width: 0; padding: 0 .75rem; }
+.ayv .ayv-imp-book::after { content: ""; grid-row: 2; margin: 0 -.75rem; background: linear-gradient(var(--ayv-wood), var(--ayv-wood2)); box-shadow: 0 7px 10px -6px rgba(15, 30, 27, .4); }
+/* Books are not all of one height: they stand side by side, each its own. */
+.ayv .ayv-imp-stand { display: flex; align-items: flex-end; grid-row: 1; width: 100%; max-width: 12rem; aspect-ratio: 2 / 3; }
+.ayv .ayv-imp-stand .ayv-cover { width: 100%; height: var(--ayv-stand, 100%); aspect-ratio: auto; box-sizing: border-box; }
+.ayv .ayv-imp-book:nth-child(6n+2) { --ayv-stand: 91%; }
+.ayv .ayv-imp-book:nth-child(6n+3) { --ayv-stand: 97%; }
+.ayv .ayv-imp-book:nth-child(6n+4) { --ayv-stand: 88%; }
+.ayv .ayv-imp-book:nth-child(6n+6) { --ayv-stand: 94%; }
+.ayv .ayv-imp-stand .ayv-cover-title { -webkit-line-clamp: 4; }
+/* The label a library sticks on the spine, on the drawn cover. */
+.ayv .ayv-imp-label { position: absolute; left: .7rem; bottom: .7rem; z-index: 1; display: grid; justify-items: center; min-width: 2.6rem; padding: .22rem .4rem; border-radius: 2px; background: #fbf8f0; color: #1e2b2a; font-size: .68rem; font-weight: 700; line-height: 1.2; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+.ayv .ayv-imp-bookinfo { grid-row: 3; display: grid; align-content: start; gap: .12rem; padding-top: .7rem; min-width: 0; line-height: 1.3; }
+.ayv .ayv-imp-booktitle { font-family: var(--title); font-weight: 600; font-size: 1rem; overflow-wrap: anywhere; }
+.ayv .ayv-imp-bookby,
+.ayv .ayv-imp-bookplace,
+.ayv .ayv-imp-bookcopies { font-size: .88rem; color: color-mix(in srgb, var(--ink) 75%, transparent); overflow-wrap: anywhere; }
+.ayv .ayv-imp-more { margin: 0; font-weight: 700; color: var(--accent); }
+
+.ayv .ayv-imp-panel { margin: 1.75rem 0 0; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-imp-options .ayv-field-hint { margin-bottom: 0; }
+.ayv .ayv-imp-columnshead { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem .8rem; }
+.ayv .ayv-imp-columnsline { flex: 1 1 14rem; margin: 0; font-weight: 700; }
+.ayv .ayv-imp-tick { display: grid; place-items: center; flex: none; width: 2rem; height: 2rem; border-radius: 50%; background: var(--green); color: #fbf6ec; }
+.ayv .ayv-imp-tick-warn { background: var(--sun); color: #1e2b2a; }
+.ayv .ayv-imp-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .8rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-imp-chip { padding: .15rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--accent) 11%, transparent); font-size: .88rem; line-height: 1.5; }
+.ayv .ayv-imp-chip-off { background: transparent; box-shadow: inset 0 0 0 1px var(--line); text-decoration: line-through; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+.ayv .ayv-imp-chipto { font-weight: 700; }
+
+.ayv .ayv-imp-map { display: grid; margin: 0 0 1.25rem; padding: 0; list-style: none; }
+.ayv .ayv-imp-mapline { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: .1rem 1rem; padding: .6rem 0; border-top: 1px solid var(--line); }
+.ayv .ayv-imp-mapname { grid-column: 1; font-weight: 700; overflow-wrap: anywhere; }
+.ayv .ayv-imp-mapsample { grid-column: 1; font-size: .88rem; color: color-mix(in srgb, var(--ink) 75%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ayv .ayv-imp-mapfield { display: block; grid-column: 2; grid-row: 1 / span 2; min-width: 0; margin: 0; }
+.ayv .ayv-imp-mapfield select { display: block; width: 100%; }
+
+.ayv .ayv-imp-go { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin: 1.5rem 0 0; }
+.ayv .ayv-imp-gobutton { padding-inline: 1.75rem; font-size: 1.05rem; }
+.ayv .ayv-imp-safe { flex: 1 1 15rem; margin: 0; font-size: .95rem; text-align: right; }
+
+.ayv .ayv-imp-done .ayv-bubble { margin: .75rem 0 0; }
+.ayv .ayv-imp-done .ayv-section-title { margin-top: 1.75rem; }
+.ayv .ayv-imp-next { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr)); gap: .8rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-imp-next a { display: grid; align-content: start; gap: .3rem; height: 100%; box-sizing: border-box; padding: 1.1rem 1.2rem; border-radius: var(--radius); background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: 0 1px 0 var(--line); border: 2px solid transparent; line-height: 1.4; transition: border-color .15s ease, transform .15s ease; }
+.ayv .ayv-imp-next a:hover { border-color: var(--accent); transform: translateY(-2px); }
+.ayv .ayv-imp-next .ayv-icon { width: 24px; height: 24px; color: var(--accent); }
+.ayv .ayv-imp-next b { font-family: var(--title); font-weight: 600; font-size: 1.1rem; }
+.ayv .ayv-imp-another { margin: 1.25rem 0 0; }
+
+@media (max-width: 560px) {
+    .ayv .ayv-imp-shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .ayv .ayv-imp-book { padding: 0 .4rem; }
+    .ayv .ayv-imp-book::after { margin: 0 -.4rem; }
+    .ayv .ayv-imp-stand .ayv-cover { padding: .5rem .45rem; }
+    .ayv .ayv-imp-stand .ayv-cover-title { font-size: .74rem; -webkit-line-clamp: 3; }
+    .ayv .ayv-imp-label { left: .4rem; bottom: .4rem; min-width: 2rem; padding: .12rem .25rem; font-size: .54rem; }
+    .ayv .ayv-imp-booktitle { font-size: .85rem; }
+    .ayv .ayv-imp-bookby,
+    .ayv .ayv-imp-bookplace,
+    .ayv .ayv-imp-bookcopies { font-size: .78rem; }
+    .ayv .ayv-imp-figures { gap: .75rem 1.5rem; }
+    .ayv .ayv-imp-figures li { padding: 0; border-left: 0; }
+    .ayv .ayv-imp-safe { flex-basis: 100%; text-align: left; }
+    .ayv .ayv-imp-gobutton { flex: 1 1 100%; }
+    .ayv .ayv-imp-mapline { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-imp-mapfield { grid-column: 1; grid-row: auto; margin-top: .3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-imp-fan .ayv-cover { transition: none; }
+    .ayv .ayv-imp-next a { transition: none; }
+    .ayv .ayv-imp-next a:hover { transform: none; }
+}

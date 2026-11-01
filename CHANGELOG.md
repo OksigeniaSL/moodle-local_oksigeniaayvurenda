@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.113.0 (2026-11-01)
+
+- The import screen, remade. A file is seen as the books it brings: the first six stand on their shelf, each with its
+  drawn cover, its spine label, its author and its place, beside the figures of the whole file (records, copies, places,
+  copies without a code). It is the same for MARC, a spreadsheet or Abies Web.
+- A spreadsheet's columns are recognised and folded away: one line says so, and a window lets you correct them with what
+  each one says, and then the shelf is drawn again with the new columns. Without a column for the title nothing can be
+  imported, and the window opens by itself.
+- A file is dropped on a zone or chosen, and that is already the next step. The button says what it will do («Import
+  1,284 records»), and the page warns before importing if the file may not fit the plan.
+- After importing, what entered in figures, Memoria's words (a portrait and a signature at a university) and what comes
+  next: the catalogue, the labels, the readers and the desk.
+
 ## 0.112.1 (2026-11-01)
 
 - Importing again repeats nothing, also for copies with no code: those the record already has count for them, and one

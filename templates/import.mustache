@@ -16,72 +16,185 @@
 {{!
     @template local_oksigeniaayvurenda/import
 
-    Importing a catalogue: bring the file, see what it brings, import it.
+    Importing a catalogue: bring the file, see the books it brings on their shelf, import them, and what comes next.
 
     Context variables required for this template:
-    * heading, intro, notice, error, file, plansummary - texts
+    * heading, intro, error, plansummary - texts
     * action, sesskey - the forms
-    * upload - whether to ask for a file
-    * abies (summary), marc (summary), csv (summary, columns, preview) - what the file brings
-    * the words of the fields and buttons
+    * upload - whether to ask for a file, with the ways of having one
+    * review (file, kind, figures, books, more, abies, csv, cannot, tight, gowords, safe) - what the file brings
+    * done (figures, again, newcodes, said) - what entered
+    * the words of the fields and buttons, and the addresses of what comes next
 
     Example context (json):
     {
-        "heading": "Importar un catálogo",
-        "intro": "De Abies, de otro programa en MARC o de una hoja de cálculo.",
-        "plansummary": "Plan Gratis: 812 de 1.000 ejemplares",
-        "notice": "",
-        "error": "",
-        "file": "",
-        "action": "#",
-        "sesskey": "abc",
-        "upload": true,
-        "abies": null,
-        "marc": null,
-        "csv": null,
-        "importfile": "El fichero", "importnext": "Ver qué trae", "importgo": "Importar", "importcancel": "Dejarlo",
-        "importnotes": "Con las notas de los ejemplares", "importreaders": "Con los lectores y sus préstamos",
-        "importreadershint": "Llegan sin cuenta.", "readerslistcolumns": "Qué es cada columna",
-        "readerslistpreview": "Las primeras filas"
+        "heading": "Importar un catálogo", "intro": "Nada cambia hasta que digas «Importar».",
+        "plansummary": "Plan Gratis: 812 de 1.000 ejemplares", "error": "", "action": "#", "sesskey": "abc",
+        "upload": false, "done": null,
+        "review": {
+            "file": "catalogo.csv", "kind": "Hoja de cálculo",
+            "figures": [{"count": "6", "label": "fichas"}, {"count": "6", "label": "ejemplares"}],
+            "books": [{"title": "El faro dormido", "authors": "Roma Quintana", "colour": 1, "haslines": true,
+                "lines": [{"line": "821"}, {"line": "RAM"}, {"line": "fa"}], "callnumber": "821 RAM fa",
+                "place": "Sala general", "hascopies": false, "copieslabel": ""}],
+            "more": "y 3 más", "abies": false, "cannot": "", "tight": "", "gowords": "Importar 6 fichas", "safe": "No se duplica.",
+            "csv": {"line": "Las 2 columnas, reconocidas.", "allknown": true, "notitle": false,
+                "columns": [{"index": 0, "heading": "Título", "sample": "El faro dormido", "isknown": true, "becomes": "",
+                    "options": [{"value": "title", "label": "Título", "selected": true}]},
+                    {"index": 1, "heading": "Sala", "sample": "Sala general", "isknown": true, "becomes": "Ubicación",
+                    "options": [{"value": "location", "label": "Ubicación", "selected": true}]}]}
+        },
+        "importdrop": "Suelta aquí el fichero", "importdropor": "o", "importformats": "MARC21, CSV", "importnext": "Ver qué trae",
+        "importreading": "Leyendo el fichero…", "importsources": "Cómo tenerlo",
+        "importfromprogram": "Un programa", "importfromprogramhint": "Busca «exportar».", "importfromsheet": "Una hoja",
+        "importfromsheethint": "Guárdala como CSV.", "importfromabies": "Abies Web", "importfromabieshint": "El zip.",
+        "importfromnone": "Sin nada", "importfromnonehint": "Por su ISBN.", "importfromnonego": "Altas por ISBN", "urladd": "#",
+        "importreviewtitle": "Esto es lo que entrará", "importshelfheading": "Así quedarán", "importcolumnsreview": "Revisar",
+        "readerslistcolumns": "Qué es cada columna", "importcolumnsintro": "Cada columna, con lo que dice.",
+        "importcolumnsapply": "Ver cómo queda", "importcolumnssaysnothing": "Vacía", "importcancel": "Dejarlo",
+        "importbusy": "Importando…", "importbusyhint": "Tarda un poco.", "importuploadintro": "Sube el fichero y míralo.",
+        "importnotes": "Con las notas", "importreaders": "Con los lectores", "importreadershint": "Llegan sin cuenta.",
+        "importdonetitle": "Ya está", "importnextheading": "Y ahora", "importnextcatalogue": "El catálogo",
+        "importnextcataloguehint": "Míralo.", "importnextlabels": "Etiquetas", "importnextlabelshint": "Imprímelas.",
+        "importnextreaders": "Lectores", "importnextreadershint": "Tráelos.", "importnextdesk": "Mostrador",
+        "importnextdeskhint": "Presta.", "importanother": "Importar otro fichero", "urlcatalogue": "#", "urllabels": "#",
+        "urlreaders": "#", "urldesk": "#", "urlself": "#", "offsiteclose": "Cerrar"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
-{{#plansummary}}<p class="ayv-field-hint">{{plansummary}}</p>{{/plansummary}}
-{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<div class="ayv-imp">
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#upload}}
-<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-book">
+<header class="ayv-imp-top">
+    <h1 class="ayv-imp-title">{{heading}}</h1>
+    <p class="ayv-imp-lead">{{importuploadintro}}</p>
+</header>
+<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-imp-upload" data-busy="{{importreading}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="upload">
-    <label class="ayv-field">{{importfile}} <input type="file" name="file" required accept=".zip,.xml,.mrc,.marc,.iso,.csv,.txt"></label>
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{importnext}}</button></p>
+    <label class="ayv-imp-drop" data-ayv-drop>
+        <span class="ayv-imp-fan" aria-hidden="true"><span class="ayv-cover ayv-cover-1"></span><span class="ayv-cover ayv-cover-0"></span><span class="ayv-cover ayv-cover-2"></span></span>
+        <span class="ayv-imp-droptitle">{{importdrop}}</span>
+        <span class="ayv-imp-dropor">{{importdropor}}</span>
+        <input type="file" name="file" required accept=".zip,.xml,.mrc,.marc,.iso,.csv,.txt">
+        <span class="ayv-imp-dropformats">{{importformats}}</span>
+    </label>
+    <p class="ayv-imp-send"><button type="submit" class="ayv-button">{{importnext}}</button></p>
 </form>
+{{#plansummary}}<p class="ayv-field-hint ayv-imp-plan">{{plansummary}}</p>{{/plansummary}}
+<h2 class="ayv-section-title">{{importsources}}</h2>
+<ul class="ayv-imp-sources">
+    <li><b>{{importfromprogram}}</b><span>{{importfromprogramhint}}</span></li>
+    <li><b>{{importfromsheet}}</b><span>{{importfromsheethint}}</span></li>
+    <li><b>{{importfromnone}}</b><span>{{importfromnonehint}}</span>
+        <a class="ayv-imp-sourcego" href="{{urladd}}">{{importfromnonego}} {{> local_oksigeniaayvurenda/icon_next}}</a></li>
+    <li><b>{{importfromabies}}</b><span>{{importfromabieshint}}</span></li>
+</ul>
 {{/upload}}
-{{^upload}}
-<form method="post" action="{{action}}" class="ayv-book">
+{{#review}}
+<form method="post" action="{{action}}" class="ayv-imp-review" data-busy="{{importbusy}}" data-busyhint="{{importbusyhint}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="import">
-    <p class="ayv-book-title">{{file}}</p>
+    <header class="ayv-imp-head">
+        <div class="ayv-imp-headtext">
+            <p class="ayv-imp-file"><span class="ayv-imp-filename">{{file}}</span> <span class="ayv-imp-kind">{{kind}}</span></p>
+            <h1 class="ayv-imp-title">{{importreviewtitle}}</h1>
+            <p class="ayv-imp-lead">{{intro}}</p>
+        </div>
+        <ul class="ayv-imp-figures">
+            {{#figures}}<li><span class="ayv-imp-num">{{count}}</span> <span class="ayv-imp-figlabel">{{label}}</span></li>{{/figures}}
+        </ul>
+    </header>
+    {{#cannot}}<p class="ayv-notice ayv-notice-error" role="alert">{{cannot}}</p>{{/cannot}}
+    {{#books.0}}
+    <section class="ayv-imp-stack" aria-labelledby="ayv-imp-shelf">
+        <div class="ayv-imp-stackhead">
+            <h2 class="ayv-section-title" id="ayv-imp-shelf">{{importshelfheading}}</h2>
+            {{#more}}<p class="ayv-imp-more">{{more}}</p>{{/more}}
+        </div>
+        <ul class="ayv-imp-shelf">
+            {{#books}}
+            <li class="ayv-imp-book">
+                <span class="ayv-imp-stand" aria-hidden="true">
+                    <span class="ayv-cover ayv-cover-{{colour}}">
+                        <span class="ayv-cover-title">{{title}}</span>
+                        {{#haslines}}<span class="ayv-imp-label">{{#lines}}<span>{{line}}</span>{{/lines}}</span>{{/haslines}}
+                    </span>
+                </span>
+                <span class="ayv-imp-bookinfo">
+                    <span class="ayv-imp-booktitle">{{title}}</span>
+                    {{#authors}}<span class="ayv-imp-bookby">{{authors}}</span>{{/authors}}
+                    {{#haslines}}<span class="ayv-sr">{{callnumber}}</span>{{/haslines}}
+                    {{#place}}<span class="ayv-imp-bookplace">{{place}}</span>{{/place}}
+                    {{#hascopies}}<span class="ayv-imp-bookcopies">{{copieslabel}}</span>{{/hascopies}}
+                </span>
+            </li>
+            {{/books}}
+        </ul>
+    </section>
+    {{/books.0}}
     {{#abies}}
-    <p>{{summary}}</p>
-    <label class="ayv-field ayv-field-check"><input type="checkbox" name="notes" value="1" checked> {{importnotes}}</label>
-    <label class="ayv-field ayv-field-check"><input type="checkbox" name="readers" value="1"> {{importreaders}}</label>
-    <p class="ayv-field-hint">{{importreadershint}}</p>
-    {{/abies}}
-    {{#marc}}<p>{{summary}}</p>{{/marc}}
-    {{#csv}}
-    <p>{{summary}}</p>
-    <h2 class="ayv-section-title">{{readerslistcolumns}}</h2>
-    <div class="ayv-book-copy">
-    {{#columns}}
-        <label class="ayv-field">{{heading}} <select name="column[{{index}}]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>
-    {{/columns}}
+    <div class="ayv-imp-panel ayv-imp-options">
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="notes" value="1" checked> {{importnotes}}</label>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="readers" value="1"> {{importreaders}}</label>
+        <p class="ayv-field-hint">{{importreadershint}}</p>
     </div>
-    <h2 class="ayv-section-title">{{readerslistpreview}}</h2>
-    <ul class="ayv-people">{{#preview}}<li class="ayv-person">{{#cells}}<span>{{value}}</span>{{/cells}}</li>{{/preview}}</ul>
+    {{/abies}}
+    {{#csv}}
+    <div class="ayv-imp-panel ayv-imp-columns">
+        <div class="ayv-imp-columnshead">
+            <span class="ayv-imp-tick{{^allknown}} ayv-imp-tick-warn{{/allknown}}" aria-hidden="true">{{#allknown}}{{> local_oksigeniaayvurenda/icon_check}}{{/allknown}}{{^allknown}}{{> local_oksigeniaayvurenda/icon_circle_alert}}{{/allknown}}</span>
+            <p class="ayv-imp-columnsline">{{line}}</p>
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-imp-map">{{importcolumnsreview}}</button>
+        </div>
+        <ul class="ayv-imp-chips">
+            {{#columns}}<li class="ayv-imp-chip{{^isknown}} ayv-imp-chip-off{{/isknown}}">{{heading}}{{#becomes}} <span class="ayv-imp-chipto">→ {{becomes}}</span>{{/becomes}}</li>{{/columns}}
+        </ul>
+    </div>
+    <dialog class="ayv-modal" id="ayv-imp-map" aria-labelledby="ayv-imp-maptitle"{{#notitle}} data-ayv-show{{/notitle}}>
+        <div class="ayv-modal-head">
+            <h2 class="ayv-section-title" id="ayv-imp-maptitle">{{readerslistcolumns}}</h2>
+            <button type="button" class="ayv-modal-close" data-ayv-close aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button>
+        </div>
+        <p>{{importcolumnsintro}}</p>
+        <ul class="ayv-imp-map">
+            {{#columns}}
+            <li class="ayv-imp-mapline">
+                <label class="ayv-imp-mapname" for="ayv-imp-col-{{index}}">{{heading}}</label>
+                <span class="ayv-imp-mapsample">{{sample}}{{^sample}}{{importcolumnssaysnothing}}{{/sample}}</span>
+                <span class="ayv-field ayv-imp-mapfield"><select id="ayv-imp-col-{{index}}" name="column[{{index}}]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></span>
+            </li>
+            {{/columns}}
+        </ul>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="step" value="remap" data-nobusy>{{importcolumnsapply}}</button></p>
+    </dialog>
     {{/csv}}
-    <p class="ayv-book-actions">
-        <button type="submit" class="ayv-button">{{importgo}}</button>
-        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="cancel">{{importcancel}}</button>
-    </p>
+    {{#tight}}<p class="ayv-notice" role="status">{{tight}}</p>{{/tight}}
+    <div class="ayv-imp-go">
+        {{^cannot}}<button type="submit" class="ayv-button ayv-imp-gobutton">{{gowords}}</button>{{/cannot}}
+        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="cancel" data-nobusy>{{importcancel}}</button>
+        {{^cannot}}<p class="ayv-imp-safe">{{safe}}</p>{{/cannot}}
+    </div>
 </form>
-{{/upload}}
+{{/review}}
+{{#done}}
+<section class="ayv-imp-done">
+    <header class="ayv-imp-head">
+        <div class="ayv-imp-headtext">
+            <h1 class="ayv-imp-title">{{importdonetitle}}</h1>
+            {{#said}}{{> local_oksigeniaayvurenda/bubble}}{{/said}}
+        </div>
+        <ul class="ayv-imp-figures">
+            {{#figures}}<li><span class="ayv-imp-num">{{count}}</span> <span class="ayv-imp-figlabel">{{label}}</span></li>{{/figures}}
+        </ul>
+    </header>
+    {{#again}}<p class="ayv-imp-lead">{{again}}</p>{{/again}}
+    {{#newcodes}}<p class="ayv-imp-lead">{{newcodes}}</p>{{/newcodes}}
+    <h2 class="ayv-section-title">{{importnextheading}}</h2>
+    <ul class="ayv-imp-next">
+        <li><a href="{{urlcatalogue}}">{{> local_oksigeniaayvurenda/icon_book}}<b>{{importnextcatalogue}}</b><span>{{importnextcataloguehint}}</span></a></li>
+        <li><a href="{{urllabels}}">{{> local_oksigeniaayvurenda/icon_tag}}<b>{{importnextlabels}}</b><span>{{importnextlabelshint}}</span></a></li>
+        <li><a href="{{urlreaders}}">{{> local_oksigeniaayvurenda/icon_users}}<b>{{importnextreaders}}</b><span>{{importnextreadershint}}</span></a></li>
+        <li><a href="{{urldesk}}">{{> local_oksigeniaayvurenda/icon_scan_line}}<b>{{importnextdesk}}</b><span>{{importnextdeskhint}}</span></a></li>
+    </ul>
+    <p class="ayv-imp-another"><a href="{{urlself}}">{{importanother}}</a></p>
+</section>
+{{/done}}
+</div>

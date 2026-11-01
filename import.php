@@ -27,11 +27,14 @@ use local_oksigeniaayvurenda\core\abies\survey;
 use local_oksigeniaayvurenda\core\import\catalogue_csv;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\characters;
 use local_oksigeniaayvurenda\local\import\abies_import;
 use local_oksigeniaayvurenda\local\import\catalogue_import;
 use local_oksigeniaayvurenda\local\import\files;
+use local_oksigeniaayvurenda\local\import\preview;
 use local_oksigeniaayvurenda\local\plan_full;
 use local_oksigeniaayvurenda\local\plans;
+use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -54,9 +57,15 @@ $pending = $SESSION->ayvurendaimport ?? null;
 if ($pending && (!is_file($pending['path']) || $pending['library'] !== $library->slug)) {
     $pending = null;
 }
+$entityid = (int) $library->entityid;
+$url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
+// A count with the word that goes with it, one or many.
+$figure = fn(int $count, string $key) => ['count' => screens::number($count), 'label' => $str($key . ($count === 1 ? 'one' : ''))];
 $data = ['heading' => $str('importtitle'), 'intro' => $str('importintro'), 'action' => $PAGE->url->out(false),
-    'sesskey' => sesskey(), 'notice' => '', 'error' => '', 'upload' => true, 'abies' => null, 'marc' => null, 'csv' => null,
-    'plansummary' => plans::summary((int) $library->entityid)];
+    'sesskey' => sesskey(), 'error' => '', 'upload' => true, 'review' => null, 'done' => null,
+    'plansummary' => plans::summary($entityid), 'urladd' => $url('add.php'), 'urlcatalogue' => $url('index.php'),
+    'urllabels' => $url('labels.php'), 'urlreaders' => $url('readers.php'), 'urldesk' => $url('desk.php'),
+    'urlself' => $PAGE->url->out(false)];
 if (data_submitted() && confirm_sesskey()) {
     $step = optional_param('step', '', PARAM_ALPHA);
     if ($step === 'upload' && !empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
@@ -73,6 +82,13 @@ if (data_submitted() && confirm_sesskey()) {
                 'library' => $library->slug];
         }
         $SESSION->ayvurendaimport = $pending;
+    } else if ($step === 'remap' && $pending) {
+        // The columns as they were chosen, to see the books again with them.
+        $pending['map'] = array_filter(
+            optional_param_array('column', [], PARAM_ALPHANUMEXT),
+            fn($f) => in_array($f, catalogue_csv::FIELDS, true)
+        );
+        $SESSION->ayvurendaimport = $pending;
     } else if ($step === 'import' && $pending) {
         try {
             if ($pending['kind'] === 'abies') {
@@ -82,14 +98,15 @@ if (data_submitted() && confirm_sesskey()) {
                     optional_param('notes', 0, PARAM_BOOL),
                     optional_param('readers', 0, PARAM_BOOL)
                 );
-                $stats = plans::within((int) $library->entityid, fn() => $importer->run(new export_reader($xml)));
-                $data['notice'] = $str('importdoneabies', (object) [
-                    'records' => $stats['record']['created'] ?? 0,
-                    'items' => $stats['item']['created'] ?? 0,
-                    'readers' => $stats['reader']['created'] ?? 0,
-                    'loans' => $stats['loan']['created'] ?? 0,
-                ]);
-                catalogue::purge((int) $library->entityid);
+                $stats = plans::within($entityid, fn() => $importer->run(new export_reader($xml)));
+                $figures = [$figure($stats['record']['created'] ?? 0, 'importnewrecords'),
+                    $figure($stats['item']['created'] ?? 0, 'importnewitems')];
+                if (optional_param('readers', 0, PARAM_BOOL)) {
+                    $figures[] = $figure($stats['reader']['created'] ?? 0, 'importfigreaders');
+                    $figures[] = $figure($stats['loan']['created'] ?? 0, 'importfigloans');
+                }
+                $data['done'] = ['figures' => $figures, 'again' => $str('importabiesagain'), 'newcodes' => ''];
+                catalogue::purge($entityid);
             } else {
                 $map = array_filter(
                     optional_param_array('column', [], PARAM_ALPHANUMEXT),
@@ -98,9 +115,16 @@ if (data_submitted() && confirm_sesskey()) {
                 $records = $pending['kind'] === 'csv' ? files::csv_records($pending['path'], $map)
                     : files::marc($pending['path'], $pending['kind']);
                 $importer = new catalogue_import($library, $pending['kind'] === 'csv' ? 'csv' : 'marc');
-                $stats = plans::within((int) $library->entityid, fn() => $importer->run($records));
-                $data['notice'] = $str('importdone', (object) $stats);
+                $stats = plans::within($entityid, fn() => $importer->run($records));
+                $data['done'] = [
+                    'figures' => [$figure($stats['records'], 'importnewrecords'), $figure($stats['items'], 'importnewitems')],
+                    'again' => $stats['found'] || $stats['kept'] ? $str('importagain', (object) ['records' => $stats['found'],
+                        'items' => $stats['kept']]) : '',
+                    'newcodes' => $stats['newcodes'] ? $str('importnewcodes', $stats['newcodes']) : '',
+                ];
             }
+            $data['done']['said'] = characters::say($entityid, 'memory', 'importmemory', [], 'celebra');
+            $data['upload'] = false;
         } catch (plan_full $e) {
             $data['error'] = $e->getMessage();
         } catch (Throwable $e) {
@@ -116,55 +140,76 @@ if (data_submitted() && confirm_sesskey()) {
     }
 }
 if ($pending) {
-    $data['upload'] = false;
-    $data['file'] = $pending['name'];
     try {
+        $review = ['file' => $pending['name'], 'abies' => false, 'csv' => null, 'cannot' => '', 'tight' => ''];
         if ($pending['kind'] === 'abies') {
-            $report = survey::run(new export_reader(files::abies_xml($pending['path'])));
-            $data['abies'] = ['summary' => $str('importabiessummary', (object) ['records' => array_sum($report['records']),
-                'items' => $report['items'], 'readers' => $report['readers'], 'loans' => $report['loans']])];
-        } else if ($pending['kind'] === 'csv') {
-            $csv = files::csv($pending['path']);
-            $map = catalogue_csv::guess($csv['columns']);
-            $columns = [];
-            foreach ($csv['columns'] as $index => $heading) {
-                $options = [['value' => '', 'label' => $str('readerslistignore'), 'selected' => !isset($map[$index])]];
-                foreach (catalogue_csv::FIELDS as $field) {
-                    $options[] = ['value' => $field, 'label' => $str('importfield' . $field),
-                        'selected' => ($map[$index] ?? '') === $field];
-                }
-                $columns[] = ['index' => $index, 'heading' => $heading, 'options' => $options];
-            }
-            $records = catalogue_csv::records($csv['rows'], $map);
-            $data['csv'] = ['columns' => $columns, 'summary' => $str('importcsvsummary', (object) ['records' => count($records),
-                'items' => array_sum(array_map(fn($r) => count($r['items']), $records))]),
-                'preview' => array_map(
-                    fn($row) => ['cells' => array_map(fn($c) => ['value' => $c], $row)],
-                    array_slice($csv['rows'], 0, 5)
-                )];
+            $export = new export_reader(files::abies_xml($pending['path']));
+            $report = survey::run($export);
+            $look = ['records' => array_sum($report['records']), 'items' => $report['items'],
+                'books' => preview::abies_books($export)];
+            $review['kind'] = $str('importkindabies');
+            $review['abies'] = true;
+            $review['figures'] = [$figure($look['records'], 'importfigrecords'), $figure($look['items'], 'importfigitems'),
+                $figure($report['readers'], 'importfigreaders'), $figure($report['loans'], 'importfigloans')];
         } else {
-            $count = 0;
-            $items = 0;
-            foreach (files::marc($pending['path'], $pending['kind']) as $record) {
-                $count++;
-                $items += count($record['items']);
+            if ($pending['kind'] === 'csv') {
+                $csv = files::csv($pending['path']);
+                $map = $pending['map'] ?? catalogue_csv::guess($csv['columns']);
+                $columns = preview::columns($csv, $map);
+                $look = preview::of(catalogue_csv::records($csv['rows'], $map));
+                $review['kind'] = $str('importkindcsv');
+                $review['csv'] = ['columns' => $columns['columns'], 'allknown' => $columns['hastitle']
+                    && $columns['known'] === $columns['all'], 'notitle' => !$columns['hastitle'], 'line' => !$columns['hastitle']
+                    ? $str('importcolumnsnotitle') : ($columns['known'] === $columns['all']
+                    ? $str('importcolumnsall', screens::number($columns['all']))
+                    : $str('importcolumnssome', (object) ['known' => $columns['known'], 'all' => $columns['all']]))];
+                $review['cannot'] = $columns['hastitle'] ? '' : $str('importnotitle');
+            } else {
+                $look = preview::of(files::marc($pending['path'], $pending['kind']));
+                $review['kind'] = $str('importkindmarc');
             }
-            $data['marc'] = ['summary' => $str('importmarcsummary', (object) ['records' => $count, 'items' => $items])];
+            $review['figures'] = [$figure($look['records'], 'importfigrecords'), $figure($look['items'], 'importfigitems')];
+            if ($look['places']) {
+                $review['figures'][] = $figure($look['places'], 'importfigplaces');
+            }
+            if ($look['nocode']) {
+                $review['figures'][] = $figure($look['nocode'], 'importfignocode');
+            }
         }
+        if (!$look['records'] && !$review['cannot']) {
+            $review['cannot'] = $str('importempty');
+        }
+        $review['books'] = array_map(fn($book) => $book + ['hascopies' => $book['copies'] > 1,
+            'copieslabel' => $book['copies'] > 1 ? $str('importbookcopies', $book['copies']) : ''], $look['books']);
+        $review['more'] = $look['records'] > count($look['books'])
+            ? $str('importshelfmore', screens::number($look['records'] - count($look['books']))) : '';
+        $review['safe'] = $str('importsafe') . (empty($look['nocode']) ? '' : ' ' . $str('importnocodehint'));
+        $review['gowords'] = $look['records'] === 1 ? $str('importgoone') : $str('importgomany', screens::number($look['records']));
+        $left = plans::left($entityid, 'copies');
+        if ($left !== null && $look['items'] > $left) {
+            $review['tight'] = $str('importtight', (object) ['left' => screens::number($left),
+                'items' => screens::number($look['items'])]);
+        }
+        $data['review'] = $review;
+        $data['upload'] = false;
     } catch (Throwable $e) {
         $data['error'] = $str('importfailed', $e->getMessage());
-        $data['upload'] = true;
         @unlink($pending['path']);
         unset($SESSION->ayvurendaimport);
     }
 }
 foreach (
-    ['importfile', 'importnext', 'importgo', 'importcancel', 'importnotes', 'importreaders', 'importreadershint',
-        'readerslistcolumns', 'readerslistpreview'] as $key
+    ['importdrop', 'importdropor', 'importformats', 'importnext', 'importreading', 'importsources', 'importfromprogram',
+        'importfromprogramhint', 'importfromsheet', 'importfromsheethint', 'importfromabies', 'importfromabieshint',
+        'importfromnone', 'importfromnonehint', 'importfromnonego', 'importreviewtitle', 'importshelfheading',
+        'importcolumnsreview', 'readerslistcolumns', 'importcolumnsintro', 'importcolumnsapply', 'importcolumnssaysnothing',
+        'importcancel', 'importbusy', 'importbusyhint', 'importuploadintro', 'importnotes', 'importreaders', 'importreadershint',
+        'importdonetitle', 'importnextheading', 'importnextcatalogue', 'importnextcataloguehint', 'importnextlabels',
+        'importnextlabelshint', 'importnextreaders', 'importnextreadershint', 'importnextdesk', 'importnextdeskhint',
+        'importanother', 'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }
-$url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($data['heading'], $OUTPUT->render_from_template('local_oksigeniaayvurenda/import', $data), $library, '', [
     'search' => false,
     'nav' => [

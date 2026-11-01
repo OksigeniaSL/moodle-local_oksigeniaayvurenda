@@ -63,6 +63,23 @@ final class catalogue_csv {
     ];
 
     /**
+     * Whether a heading is one of the usual words for a field: then the column's name already says what it is.
+     *
+     * @param string $heading
+     * @param string $field
+     * @return bool
+     */
+    public static function named(string $heading, string $field): bool {
+        $key = text::normalise($heading);
+        foreach (self::WORDS[$field] ?? [] as $word) {
+            if (text::normalise($word) === $key) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * What each column is, guessed from its heading.
      *
      * @param string[] $columns
