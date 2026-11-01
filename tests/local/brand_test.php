@@ -28,8 +28,8 @@ namespace local_oksigeniaayvurenda\local;
 #[\PHPUnit\Framework\Attributes\CoversClass(brand::class)]
 final class brand_test extends \advanced_testcase {
     /**
-     * A reader gets the look of their centre's main library (the one marked as the main seat); whoever is not a reader,
-     * or reads at a centre open only to its staff, gets none.
+     * On a shared site, a reader gets the look of their centre's main library (the one marked as the main seat); whoever
+     * is not a reader, or reads at a centre open only to its staff, gets none. On a school's own site, nobody does.
      */
     public function test_brand(): void {
         global $CFG;
@@ -43,6 +43,8 @@ final class brand_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->assertNull(local_oksigeniaayvurenda_oksigeniaaty_user_brand((int) $user->id));
         $gen->create_reader(['entityid' => $entityid, 'userid' => $user->id]);
+        $this->assertNull(local_oksigeniaayvurenda_oksigeniaaty_user_brand((int) $user->id));
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
         $brand = local_oksigeniaayvurenda_oksigeniaaty_user_brand((int) $user->id);
         $this->assertSame(['Aula de 3.º', '#e2654c', 'Aquí se lee'], [$brand['library'], $brand['colour'], $brand['tagline']]);
         $this->assertStringContainsString('index.php?library=', $brand['url']);

@@ -38,14 +38,18 @@ final class brand {
 
     /**
      * The look of the library a user reads at: their centre's main library (the one marked as the site's main seat,
-     * else its central one, else its first). Null for whoever is not an active reader, or reads at a centre still open
-     * only to its staff.
+     * else its central one, else its first). Only where the site is shared and keeps its centres apart: on a school's own
+     * site the app is the school's, not its library's. Null there too for whoever is not an active reader, or reads at a
+     * centre still open only to its staff.
      *
      * @param int $userid
      * @return array|null name (the centre), library, colour (#rrggbb), logo (address, or null), tagline, url (its home).
      */
     public static function of_user(int $userid): ?array {
         global $DB;
+        if (!access::apart()) {
+            return null;
+        }
         $readers = $DB->get_records(self::T . 'reader', ['userid' => $userid, 'status' => 'active'], 'id', 'id, entityid');
         foreach ($readers as $reader) {
             $entityid = (int) $reader->entityid;

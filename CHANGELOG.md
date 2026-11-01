@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.110.1 (2026-11-01)
+
+From Aty's test on a phone:
+
+- The look of a reader's library in Aty only where the site is shared and keeps its centres apart: on a school's own
+  site, a student with a card saw the app with the library's name and colour instead of the school's.
+- A late book on Aty's home says so in words, not only by its colour.
+- The library's icon in the app is `fas-book-open-reader`: Aty's «My courses» has `fas-book-open`, right beside it.
+
 ## 0.110.0 (2026-11-01)
 
 - The home of Oksigenia Aty shows the library: a reader's books out and what is set aside for them, the late ones first,

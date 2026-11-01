@@ -135,8 +135,10 @@ final class mine {
         foreach ($summary as $library) {
             foreach ($library['loans'] as $loan) {
                 if (!$loan['textbook']) {
-                    $items[] = ['title' => $loan['title'], 'detail' => $library['name'], 'date' => $loan['timedue'],
-                        'urgent' => $loan['late'], 'method' => 'mobile_record_view',
+                    // Late says so in words: a colour alone does not reach everyone, and a library's own may be close to it.
+                    $items[] = ['title' => $loan['title'], 'detail' => $loan['late'] ? $str('mobilelate', $loan['due'])
+                        : $library['name'], 'date' => $loan['timedue'], 'urgent' => $loan['late'],
+                        'method' => 'mobile_record_view',
                         'args' => ['library' => $loan['where'], 'id' => $loan['recordid']]];
                 }
             }
@@ -149,7 +151,7 @@ final class mine {
             }
         }
         usort($items, fn($a, $b) => [$b['urgent'], $a['date']] <=> [$a['urgent'], $b['date']]);
-        $card = ['tile' => ['label' => $str('mobilelibrary'), 'icon' => 'fas-book-open', 'method' => 'mobile_library_view',
+        $card = ['tile' => ['label' => $str('mobilelibrary'), 'icon' => 'fas-book-open-reader', 'method' => 'mobile_library_view',
             'pagetitle' => $str('mobilelibrary')]];
         if ($items) {
             $card += ['heading' => $str('mobileloans'), 'items' => array_slice($items, 0, self::HOME_ROWS)];

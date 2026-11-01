@@ -76,6 +76,7 @@ final class mine_test extends \advanced_testcase {
         $cards = mine::home_cards((int) $ana->id, $now);
         $this->assertCount(1, $cards);
         $this->assertSame('mobile_library_view', $cards[0]['tile']['method']);
+        $this->assertSame('fas-book-open-reader', $cards[0]['tile']['icon']);
         $this->assertArrayNotHasKey('items', $cards[0]);
 
         $lend = function (string $title, int $due, ?\stdClass $where = null) use ($gen, $library, $reader, $now): int {
@@ -93,6 +94,12 @@ final class mine_test extends \advanced_testcase {
         $cards = mine::home_cards((int) $ana->id, $now);
         $this->assertSame(['La sal', 'El faro'], array_column($cards[0]['items'], 'title'));
         $this->assertSame([true, false], array_column($cards[0]['items'], 'urgent'));
+        // Late says so in words too, not only by its colour.
+        $this->assertSame(get_string('mobilelate', 'local_oksigeniaayvurenda', userdate(
+            $now - DAYSECS,
+            get_string('strftimedateshort', 'langconfig')
+        )), $cards[0]['items'][0]['detail']);
+        $this->assertSame(format_string($library->name), $cards[0]['items'][1]['detail']);
         $this->assertSame($now + 5 * DAYSECS, $cards[0]['items'][1]['date']);
         $this->assertSame(['library' => $library->slug, 'id' => $faro], $cards[0]['items'][1]['args']);
         $this->assertSame('mobile_record_view', $cards[0]['items'][1]['method']);
