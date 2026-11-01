@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/rules_form
+
+    The sheet of one loan rule: who, what, lent or not, how many, how long, how many times more.
+
+    Example context (json):
+    {
+        "index": "new", "action": "#", "sesskey": "abc",
+        "readertypes": [{"value": "*", "label": "Cualquier lector", "selected": true}],
+        "itemtypes": [{"value": "*", "label": "Cualquier ejemplar", "selected": true}], "roomonly": false, "loandays": 14,
+        "nolimit": false, "maxloans": 1, "renewals": 1, "renewdays": 7, "removable": false, "rulesnew": "Nueva norma",
+        "rulesreader": "Lectores", "rulesitem": "Ejemplares", "rulesdaysplain": "Días", "rulesmaxplain": "A la vez",
+        "rulesrenewals": "Ampliaciones", "rulesrenewdays": "Días de cada ampliación", "rulesremoveone": "Quitar esta norma",
+        "sourcessave": "Guardar", "rulesroomonlyfield": "No se presta", "rulesnolimit": "Sin límite", "offsiteclose": "Cerrar"
+    }
+}}
+<dialog class="ayv-modal" id="ayv-rule-{{index}}" aria-labelledby="ayv-rule-{{index}}-title">
+    <div class="ayv-modal-head"><h3 id="ayv-rule-{{index}}-title" class="ayv-section-title">{{#removable}}{{rulesreader}} · {{rulesitem}}{{/removable}}{{^removable}}{{rulesnew}}{{/removable}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <form method="post" action="{{action}}" class="ayv-rule-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="rule" value="{{index}}">
+        <div class="ayv-dig-pair">
+            <label class="ayv-field ayv-dig-field">{{rulesreader}} <select name="readertype">{{#readertypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/readertypes}}</select></label>
+            <label class="ayv-field ayv-dig-field">{{rulesitem}} <select name="itemtype">{{#itemtypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/itemtypes}}</select></label>
+        </div>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="roomonly" value="1" {{#roomonly}}checked{{/roomonly}}> {{rulesroomonlyfield}}</label>
+        <div class="ayv-rule-numbers">
+            <label class="ayv-field ayv-dig-field">{{rulesdaysplain}} <input type="number" name="loandays" min="1" max="365" value="{{loandays}}"></label>
+            <div><label class="ayv-field ayv-dig-field">{{rulesmaxplain}} <input type="number" name="maxloans" min="1" max="99" value="{{maxloans}}"></label>
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="nolimit" value="1" {{#nolimit}}checked{{/nolimit}}> {{rulesnolimit}}</label></div>
+            <label class="ayv-field ayv-dig-field">{{rulesrenewals}} <input type="number" name="renewals" min="0" max="20" value="{{renewals}}"></label>
+            <label class="ayv-field ayv-dig-field">{{rulesrenewdays}} <input type="number" name="renewdays" min="1" max="365" value="{{renewdays}}"></label>
+        </div>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="save">{{sourcessave}}</button>
+            {{#removable}}<button type="submit" class="ayv-button ayv-button-quiet ayv-rule-remove" name="do" value="remove">{{rulesremoveone}}</button>{{/removable}}</p>
+    </form>
+</dialog>

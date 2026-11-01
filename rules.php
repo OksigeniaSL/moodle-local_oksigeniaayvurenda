@@ -44,26 +44,47 @@ if (!$library) {
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $sm = get_string_manager();
 $notice = '';
+// One rule at a time: changed, added or taken away; the others stay as they were.
 if (data_submitted() && confirm_sesskey()) {
-    $rows = [];
-    foreach (optional_param_array('readertype', [], PARAM_ALPHANUMEXT) as $index => $readertype) {
-        if (optional_param('remove' . $index, 0, PARAM_BOOL)) {
-            continue;
+    $all = rules::of((int) $library->id);
+    $index = optional_param('rule', 'new', PARAM_ALPHANUM);
+    if (optional_param('do', '', PARAM_ALPHA) === 'remove') {
+        unset($all[(int) $index]);
+    } else {
+        $lent = !optional_param('roomonly', 0, PARAM_BOOL);
+        $rule = [
+            // Any reader or copy is a star, which the parameter cleaning takes away: back to a star.
+            'readertype' => optional_param('readertype', '', PARAM_ALPHANUMEXT) ?: '*',
+            'itemtype' => optional_param('itemtype', '', PARAM_ALPHANUMEXT) ?: '*',
+            'loandays' => $lent ? max(1, optional_param('loandays', 14, PARAM_INT)) : 0,
+            'maxloans' => optional_param('nolimit', 0, PARAM_BOOL) ? 0 : max(1, optional_param('maxloans', 1, PARAM_INT)),
+            'renewals' => $lent ? max(0, optional_param('renewals', 0, PARAM_INT)) : 0,
+            'renewdays' => $lent ? max(1, optional_param('renewdays', 7, PARAM_INT)) : 7,
+        ];
+        // Two rules for the same readers and copies cannot be: a new one that repeats another says so, and changes nothing.
+        $twin = null;
+        foreach ($all as $at => $other) {
+            $same = $other['readertype'] === $rule['readertype'] && $other['itemtype'] === $rule['itemtype'];
+            if ((string) $at !== $index && $same) {
+                $twin = $other;
+            }
         }
-        $row = ['readertype' => $readertype];
-        foreach (
-            ['itemtype' => PARAM_ALPHANUMEXT, 'loandays' => PARAM_INT, 'maxloans' => PARAM_INT,
-                'renewals' => PARAM_INT, 'renewdays' => PARAM_INT] as $field => $type
-        ) {
-            $row[$field] = optional_param_array($field, [], $type)[$index] ?? null;
+        if ($twin) {
+            $notice = $str('rulestwin', (object) ['who' => $rule['readertype'] === '*' ? $str('rulesanyreader')
+                : ($sm->string_exists('readertype' . $rule['readertype'], 'local_oksigeniaayvurenda')
+                ? $str('readertype' . $rule['readertype']) : $rule['readertype']),
+                'what' => $rule['itemtype'] === '*' ? $str('rulesanyitem')
+                : ($sm->string_exists('itemtype' . $rule['itemtype'], 'local_oksigeniaayvurenda')
+                ? $str('itemtype' . $rule['itemtype']) : $rule['itemtype'])]);
+        } else if ($index === 'new') {
+            $all[] = $rule;
+        } else {
+            $all[(int) $index] = $rule;
         }
-        // The empty row only counts when it was filled in.
-        if ($index === 'new' && empty($row['loandays']) && $readertype === '') {
-            continue;
-        }
-        $rows[] = $row;
     }
-    $notice = $str('rulessaved', rules::save((int) $library->id, $rows));
+    if ($notice === '') {
+        $notice = $str('rulessaved', rules::save((int) $library->id, array_values($all)));
+    }
 }
 $readertypes = $DB->get_fieldset_sql(
     'SELECT DISTINCT readertype FROM {local_oksigeniaayvurenda_reader} WHERE entityid = ?',
@@ -73,36 +94,62 @@ $readertypes = array_values(array_unique(array_merge(['*', 'student', 'teacher',
 $itemtypes = array_merge(['*'], cataloguer::itemtypes((int) $library->entityid));
 $label = function (string $kind, string $value) use ($str, $sm): string {
     if ($value === '*') {
-        return $str('rulesany');
+        return $str($kind === 'readertype' ? 'rulesanyreader' : 'rulesanyitem');
     }
     return $sm->string_exists($kind . $value, 'local_oksigeniaayvurenda') ? $str($kind . $value) : $value;
 };
 $options = fn(array $values, string $kind, string $chosen) => array_map(fn($v) => ['value' => $v,
     'label' => $label($kind, $v), 'selected' => $v === $chosen], $values);
-$rows = [];
+// Each rule read as a sentence: who, what, how many, how long, how many times more.
+$sentence = function (array $rule) use ($str): string {
+    $days = fn(int $n) => $str($n === 1 ? 'rulesdayone' : 'rulesdaysn', $n);
+    if ((int) $rule['loandays'] === 0) {
+        return $str('rulesroomonly');
+    }
+    $max = (int) $rule['maxloans'] === 0 ? $str('rulesanynumber') : $str('rulesupto', (int) $rule['maxloans']);
+    $renew = (int) $rule['renewals'] === 0 ? $str('rulesnorenew')
+        : $str((int) $rule['renewals'] === 1 ? 'rulesrenewonce' : 'rulesrenewtimes', (object) ['times' => (int) $rule['renewals'],
+            'days' => $days((int) $rule['renewdays'])]);
+    return $str('rulessentence', (object) ['max' => $max, 'days' => $days((int) $rule['loandays']), 'renew' => $renew]);
+};
+$form = fn(string $index, array $rule) => [
+    'index' => $index,
+    'readertypes' => $options($readertypes, 'readertype', (string) $rule['readertype']),
+    'itemtypes' => $options($itemtypes, 'itemtype', (string) $rule['itemtype']),
+    'roomonly' => (int) $rule['loandays'] === 0 && $index !== 'new',
+    'loandays' => (int) $rule['loandays'] ?: 14,
+    'nolimit' => (int) $rule['maxloans'] === 0 && $index !== 'new',
+    'maxloans' => (int) $rule['maxloans'] ?: 1,
+    'renewals' => (int) $rule['renewals'],
+    'renewdays' => (int) $rule['renewdays'] ?: 7,
+    'removable' => $index !== 'new',
+];
+$cards = [];
 foreach (rules::of((int) $library->id) as $index => $rule) {
-    $rows[] = ['index' => $index, 'readertypes' => $options($readertypes, 'readertype', $rule['readertype']),
-        'itemtypes' => $options($itemtypes, 'itemtype', $rule['itemtype']), 'loandays' => $rule['loandays'],
-        'maxloans' => $rule['maxloans'], 'renewals' => $rule['renewals'], 'renewdays' => $rule['renewdays'],
-        'removable' => true];
+    $cards[] = [
+        'who' => $label('readertype', (string) $rule['readertype']),
+        'what' => $label('itemtype', (string) $rule['itemtype']),
+        'sentence' => $sentence($rule),
+        'form' => $form((string) $index, $rule),
+    ];
 }
-$rows[] = ['index' => 'new', 'readertypes' => $options($readertypes, 'readertype', '*'),
-    'itemtypes' => $options($itemtypes, 'itemtype', '*'), 'loandays' => '', 'maxloans' => '', 'renewals' => '',
-    'renewdays' => '', 'removable' => false, 'isnew' => true];
-$parent = $library->parentid ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $library->parentid]) : null;
+$parent = !empty($library->parentid) ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $library->parentid]) : null;
 $data = [
     'heading' => $str('rulestitle'),
-    'intro' => $str('rulesintro'),
-    'inherited' => count($rows) > 1 ? '' : ($parent ? $str('rulesparent', format_string($parent->name, true, ['escape' => false]))
+    'intro' => $str('rulesintroshort'),
+    'inherited' => $cards ? '' : ($parent ? $str('rulesparent', format_string($parent->name, true, ['escape' => false]))
         : $str('rulesdefault')),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'rows' => $rows,
+    'cards' => $cards,
+    'hascards' => (bool) $cards,
+    'newform' => $form('new', ['readertype' => '*', 'itemtype' => '*', 'loandays' => 14, 'maxloans' => 1, 'renewals' => 1,
+        'renewdays' => 7]),
 ];
 foreach (
-    ['rulesreader', 'rulesitem', 'rulesdays', 'rulesmax', 'rulesrenewals', 'rulesrenewdays', 'rulesremove',
-        'rulesnew', 'sourcessave'] as $key
+    ['rulesreader', 'rulesitem', 'rulesdaysplain', 'rulesmaxplain', 'rulesrenewals', 'rulesrenewdays', 'rulesremoveone',
+        'rulesnew', 'sourcessave', 'rulesroomonlyfield', 'rulesnolimit', 'ruleschange', 'rulesprecedence', 'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }

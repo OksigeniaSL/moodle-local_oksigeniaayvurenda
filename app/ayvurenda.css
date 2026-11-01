@@ -3373,3 +3373,53 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 /* The sky's medallion on the card: a thin ring of paper and a soft shadow, so that it reads as a piece apart from the
    card's green, as the flower does on its cream plate (Gaudí, 31 October 2026). */
 .ayv .ayv-card-face .ayv-card-flower.ayv-card-sky { box-shadow: 0 0 0 3px #efe3c4, 0 12px 24px -12px rgba(0, 0, 0, .55); }
+
+/* Tabs of a page (weeding: candidates and records). */
+.ayv .ayv-tab { display: inline-flex; align-items: center; min-height: 2.5rem; padding: .35rem 1rem; border-radius: 999px; color: var(--accent); font-weight: 700; text-decoration: none; background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-tab[aria-current="page"] { background: var(--green); color: #fbf6ec; }
+
+/* Weeding: a card for each reason, the copies by place, a bar for the marked ones. */
+.ayv .ayv-weed-reasons { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); gap: .8rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+.ayv .ayv-weed-reason { display: grid; gap: .15rem; height: 100%; box-sizing: border-box; padding: 1rem 1.1rem; border-radius: var(--radius); background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: 0 1px 0 var(--line); border: 2px solid transparent; }
+.ayv .ayv-weed-reason[aria-current="true"] { border-color: var(--accent); }
+.ayv .ayv-weed-reason-empty .ayv-weed-count { color: color-mix(in srgb, var(--ink) 70%, transparent); }
+.ayv .ayv-weed-count { font-family: var(--title); font-size: 2rem; line-height: 1.1; color: var(--accent); }
+.ayv .ayv-weed-reason-lost .ayv-weed-count,
+.ayv .ayv-weed-reason-worn .ayv-weed-count { color: var(--coral-ink, #a3321e); }
+.ayv .ayv-weed-label { font-weight: 700; }
+.ayv .ayv-weed-hint { font-size: .85rem; color: color-mix(in srgb, currentColor 80%, transparent); }
+.ayv .ayv-weed-tools { margin: 0 0 1rem; }
+.ayv .ayv-weed-all { margin: 0 0 .75rem; }
+.ayv .ayv-weed-group { margin: 0 0 1.25rem; }
+.ayv .ayv-weed-place { margin: 0 0 .5rem; font-family: var(--title); font-size: 1.1rem; }
+.ayv .ayv-weed-list { display: grid; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-weed-row { display: flex; align-items: center; gap: .75rem; padding: .5rem .75rem; border-radius: 12px; background: var(--surface); box-shadow: 0 1px 0 var(--line); cursor: pointer; }
+.ayv .ayv-weed-row input { flex: 0 0 auto; width: 1.2rem; height: 1.2rem; }
+.ayv .ayv-weed-cover { display: grid; place-items: center; flex: 0 0 auto; width: 2.2rem; height: 3.2rem; overflow: hidden; padding: 0; border-radius: 4px; font-weight: 700; font-size: .9rem; }
+.ayv .ayv-weed-cover img { width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-weed-words { display: grid; min-width: 0; }
+.ayv .ayv-weed-title { font-weight: 700; overflow-wrap: anywhere; }
+.ayv .ayv-weed-detail { font-size: .85rem; color: color-mix(in srgb, currentColor 80%, transparent); overflow-wrap: anywhere; }
+.ayv .ayv-weed-pages { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.ayv .ayv-weed-bar { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin: 1rem 0 0; padding: .75rem 1rem; border-radius: var(--radius) var(--radius) 0 0; background: var(--surface); box-shadow: 0 -10px 24px -18px rgba(15, 58, 51, .5); }
+.ayv .ayv-weed-marked { font-weight: 700; }
+.ayv .ayv-weed-records { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-weed-record { display: flex; flex-wrap: wrap; gap: .25rem .9rem; align-items: baseline; padding: .8rem 1rem; border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-weed-record-when { font-weight: 700; color: var(--accent); }
+@media (max-width: 480px) {
+    .ayv .ayv-weed-reason { padding: .75rem .8rem; }
+    .ayv .ayv-weed-count { font-size: 1.6rem; }
+}
+
+/* Loan rules: each rule a card read as a sentence. */
+.ayv .ayv-rules-top { margin: 0 0 1rem; }
+.ayv .ayv-rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: .9rem; margin: 0 0 1rem; padding: 0; list-style: none; }
+.ayv .ayv-rule { display: flex; flex-direction: column; gap: .4rem; padding: 1.1rem 1.2rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-rule-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0; }
+.ayv .ayv-rule-who { font-family: var(--title); font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-rule-sentence { margin: 0; flex: 1 1 auto; }
+.ayv .ayv-rule-actions { margin: .25rem 0 0; }
+.ayv .ayv-rule-numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem .75rem; }
+.ayv .ayv-rule-remove { color: #a3321e; }
+.ayv .ayv-rule-form .ayv-field-check { margin: .6rem 0; }
+.ayv .ayv-rule-numbers { align-items: start; margin: .5rem 0; }

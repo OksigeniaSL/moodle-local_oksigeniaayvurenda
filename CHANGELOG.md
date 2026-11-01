@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.104.0 (2026-11-01)
+
+The first screens redone from the design reviews of 31 October:
+
+- Weeding: a card for each reason with its count (lost, torn or worn, by age, not lent for years), starting with the
+  small ones; the copies of the chosen reason by place, with their cover, fifty to a page; «Mark those of this page»
+  says so; a bar that stays at the bottom counts the marked ones and opens a sheet with the reason for the record; the
+  records in their own tab; the filters in a «Refine» sheet. The page was 28,875 px long.
+- Loan rules: each rule a card read as a sentence («They take up to 1 at a time, for 7 days, and can renew 6 times, 7
+  days more each time»), «Not lent: read in the library» and «No limit» instead of zeros, changed in its own sheet, one
+  at a time; a new rule from the top; a new one that repeats another says so instead of replacing it.
+- Numbers with the thousands separator of the page's language (`screens::number()`), starting with weeding.
+
 ## 0.103.1 (2026-10-31)
 
 - The sky's medallion on the card wears a thin ring of cream paper and a soft shadow, so that it stands apart from the

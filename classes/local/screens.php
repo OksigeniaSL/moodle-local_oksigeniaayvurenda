@@ -495,6 +495,23 @@ final class screens {
     }
 
     /**
+     * A whole number as the page's language writes it, with its thousands separator (17.378 in Spanish, 17,378 in
+     * English); plain digits without the intl extension.
+     *
+     * @param int $number
+     * @return string
+     */
+    public static function number(int $number): string {
+        static $formatters = [];
+        $lang = current_language();
+        if (!class_exists('NumberFormatter')) {
+            return (string) $number;
+        }
+        $formatters[$lang] ??= new \NumberFormatter(str_replace('_', '-', $lang), \NumberFormatter::DECIMAL);
+        return (string) ($formatters[$lang]->format($number) ?: $number);
+    }
+
+    /**
      * What the addresses of the art package carry so that a new version of it is fetched at once: a cache on the way
      * (a proxy in front of the site) may keep a file for hours under the same address.
      *

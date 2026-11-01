@@ -208,6 +208,53 @@
             sheet.showModal();
         });
     });
+    // A button that closes its sheet, where the sheet sits inside a form and cannot have a form of its own.
+    document.querySelectorAll('[data-ayv-close]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var sheet = button.closest('dialog');
+            if (sheet) {
+                sheet.close();
+            }
+        });
+    });
+    // Lists to mark (weeding): how many are marked, said where it is asked for; the action waits for one at least, and
+    // «mark those of this page» marks only what the page shows.
+    document.querySelectorAll('form[data-ayv-marks]').forEach(function(form) {
+        var boxes = form.querySelectorAll('input[data-ayv-mark]');
+        var all = form.querySelector('input[data-ayv-markall]');
+        var count = function() {
+            var n = 0;
+            boxes.forEach(function(box) {
+                n += box.checked ? 1 : 0;
+            });
+            form.querySelectorAll('[data-ayv-marked]').forEach(function(say) {
+                say.textContent = n === 0 ? say.getAttribute('data-none') : (n === 1 ? say.getAttribute('data-one')
+                    : say.getAttribute('data-many').replace('{n}', function() {
+                        return String(n);
+                    }));
+            });
+            form.querySelectorAll('[data-ayv-needs-mark]').forEach(function(button) {
+                button.disabled = n === 0;
+            });
+            form.classList.toggle('ayv-has-marks', n > 0);
+            if (all) {
+                all.checked = n > 0 && n === boxes.length;
+                all.indeterminate = n > 0 && n < boxes.length;
+            }
+        };
+        boxes.forEach(function(box) {
+            box.addEventListener('change', count);
+        });
+        if (all) {
+            all.addEventListener('change', function() {
+                boxes.forEach(function(box) {
+                    box.checked = all.checked;
+                });
+                count();
+            });
+        }
+        count();
+    });
     // A sheet that has something to say once, as the page opens (a key just made, a link just made).
     document.querySelectorAll('dialog.ayv-modal[data-ayv-show]').forEach(function(sheet) {
         if (sheet.showModal) {

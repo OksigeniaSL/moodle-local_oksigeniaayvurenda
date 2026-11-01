@@ -42,7 +42,7 @@ final class weeding {
      * @param array $filters unused (years), before (year), worn, lost, place (location id).
      * @param int|null $now
      * @param int $limit
-     * @return array total and rows (id, title, barcode, callnumber, year, lastloan, why).
+     * @return array total and rows (id, recordid, locationid, title, barcode, callnumber, year, lastloan, why).
      */
     public static function candidates(\stdClass $library, array $filters, ?int $now = null, int $limit = 500): array {
         global $DB;
@@ -57,8 +57,8 @@ final class weeding {
         $lastloans = $DB->get_records_sql_menu('SELECT itemid, MAX(timeloaned) FROM {' . self::T . 'loan}
             WHERE libraryid = :libraryid GROUP BY itemid', ['libraryid' => $library->id]);
         $rows = $DB->get_recordset_sql(
-            'SELECT i.id, i.barcode, i.status, i.itemcondition, i.timeacquired, i.callnumber1, i.callnumber2, i.callnumber3,
-                    r.title, r.pubyear
+            'SELECT i.id, i.recordid, i.locationid, i.barcode, i.status, i.itemcondition, i.timeacquired, i.callnumber1,
+                    i.callnumber2, i.callnumber3, r.title, r.pubyear
                FROM {' . self::T . 'item} i
                JOIN {' . self::T . 'record} r ON r.id = i.recordid
               WHERE ' . $where,
@@ -76,7 +76,8 @@ final class weeding {
                 continue;
             }
             $callnumber = trim(implode(' ', array_filter([$row->callnumber1, $row->callnumber2, $row->callnumber3])));
-            $found[] = ['id' => (int) $row->id, 'title' => (string) $row->title, 'barcode' => (string) $row->barcode,
+            $found[] = ['id' => (int) $row->id, 'recordid' => (int) $row->recordid, 'locationid' => (int) $row->locationid,
+                'title' => (string) $row->title, 'barcode' => (string) $row->barcode,
                 'callnumber' => $callnumber, 'year' => $year, 'lastloan' => $row->lastloan ? (int) $row->lastloan : null,
                 'why' => $why, 'order' => [$order[$why], $callnumber, (string) $row->title]];
         }

@@ -16,50 +16,42 @@
 {{!
     @template local_oksigeniaayvurenda/rules
 
-    The loan rules of a library: one card for each kind of reader and kind of copy.
-
-    Context variables required for this template:
-    * heading, intro, inherited, notice - texts
-    * action, sesskey - the form
-    * rows - index, readertypes and itemtypes (value, label, selected), loandays, maxloans, renewals, renewdays,
-      removable, isnew
-    * the words of the fields
+    The loan rules of a library: each one a card read as a sentence, changed in its own sheet; a new one from the top.
 
     Example context (json):
     {
-        "heading": "Normas de préstamo",
-        "intro": "Para cada tipo de lector y de ejemplar.",
-        "inherited": "",
-        "notice": "",
-        "action": "#",
-        "sesskey": "abc",
-        "rows": [{"index": 0, "readertypes": [{"value": "student", "label": "Alumnos", "selected": true}],
-                  "itemtypes": [{"value": "normal", "label": "Se presta", "selected": true}],
-                  "loandays": 14, "maxloans": 2, "renewals": 1, "renewdays": 7, "removable": true}],
-        "rulesreader": "Lectores", "rulesitem": "Ejemplares", "rulesdays": "Días", "rulesmax": "A la vez",
-        "rulesrenewals": "Ampliaciones", "rulesrenewdays": "Días de cada ampliación", "rulesremove": "Quitar",
-        "rulesnew": "Norma nueva", "sourcessave": "Guardar"
+        "heading": "Normas de préstamo", "intro": "Manda la más precisa.", "inherited": "", "notice": "",
+        "action": "#", "sesskey": "abc", "hascards": true,
+        "cards": [{"who": "Alumnos", "what": "Cualquier ejemplar", "sentence": "Se llevan hasta 1, durante 7 días.",
+            "form": {"index": "0", "readertypes": [{"value": "student", "label": "Alumnos", "selected": true}],
+                "itemtypes": [{"value": "*", "label": "Cualquier ejemplar", "selected": true}], "roomonly": false,
+                "loandays": 7, "nolimit": false, "maxloans": 1, "renewals": 1, "renewdays": 7, "removable": true} }],
+        "newform": {"index": "new", "readertypes": [{"value": "*", "label": "Cualquier lector", "selected": true}],
+            "itemtypes": [{"value": "*", "label": "Cualquier ejemplar", "selected": true}], "roomonly": false,
+            "loandays": 14, "nolimit": false, "maxloans": 1, "renewals": 1, "renewdays": 7, "removable": false},
+        "rulesreader": "Lectores", "rulesitem": "Ejemplares", "rulesdaysplain": "Días", "rulesmaxplain": "A la vez",
+        "rulesrenewals": "Ampliaciones", "rulesrenewdays": "Días de cada ampliación", "rulesremoveone": "Quitar esta norma",
+        "rulesnew": "Nueva norma", "sourcessave": "Guardar", "rulesroomonlyfield": "No se presta: se lee aquí",
+        "rulesnolimit": "Sin límite", "ruleschange": "Cambiar", "rulesprecedence": "Manda la más precisa.",
+        "offsiteclose": "Cerrar"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
-{{#inherited}}<p class="ayv-notice">{{inherited}}</p>{{/inherited}}
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<form method="post" action="{{action}}">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <ul class="ayv-sources">
-    {{#rows}}
-        <li class="ayv-source ayv-rule{{#isnew}} ayv-rule-new{{/isnew}}">
-            {{#isnew}}<span class="ayv-source-name">{{rulesnew}}</span>{{/isnew}}
-            <label class="ayv-field">{{rulesreader}} <select name="readertype[{{index}}]">{{#readertypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/readertypes}}</select></label>
-            <label class="ayv-field">{{rulesitem}} <select name="itemtype[{{index}}]">{{#itemtypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/itemtypes}}</select></label>
-            <label class="ayv-field">{{rulesdays}} <input type="number" min="0" max="9999" name="loandays[{{index}}]" value="{{loandays}}"></label>
-            <label class="ayv-field">{{rulesmax}} <input type="number" min="0" max="9999" name="maxloans[{{index}}]" value="{{maxloans}}"></label>
-            <label class="ayv-field">{{rulesrenewals}} <input type="number" min="0" max="99" name="renewals[{{index}}]" value="{{renewals}}"></label>
-            <label class="ayv-field">{{rulesrenewdays}} <input type="number" min="0" max="9999" name="renewdays[{{index}}]" value="{{renewdays}}"></label>
-            {{#removable}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="remove{{index}}" value="1"> {{rulesremove}}</label>{{/removable}}
-        </li>
-    {{/rows}}
-    </ul>
-    <p class="ayv-more"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
-</form>
+<p class="ayv-rules-top"><button type="button" class="ayv-button" data-ayv-open="ayv-rule-new">{{rulesnew}}</button></p>
+{{#inherited}}<p class="ayv-empty">{{inherited}}</p>{{/inherited}}
+{{#hascards}}
+<ul class="ayv-rules">
+{{#cards}}
+    <li class="ayv-rule">
+        <p class="ayv-rule-head"><span class="ayv-rule-who">{{who}}</span> <span class="ayv-chip">{{what}}</span></p>
+        <p class="ayv-rule-sentence">{{sentence}}</p>
+        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-rule-{{form.index}}">{{ruleschange}}</button></p>
+        {{#form}}{{> local_oksigeniaayvurenda/rules_form}}{{/form}}
+    </li>
+{{/cards}}
+</ul>
+{{/hascards}}
+<p class="ayv-field-hint">{{rulesprecedence}}</p>
+{{#newform}}{{> local_oksigeniaayvurenda/rules_form}}{{/newform}}
