@@ -24,6 +24,7 @@
 
 namespace local_oksigeniaayvurenda\local\sources;
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\core\readers\card_codes;
 use local_oksigeniaayvurenda\core\text;
 use local_oksigeniaayvurenda\local\plans;
@@ -94,7 +95,7 @@ final class csvlist {
             if (($emails[\core_text::strtolower($person['email'] ?? '')] ?? 0) > 1) {
                 unset($lookup['email']);
             }
-            $userid = self::account($lookup);
+            $userid = self::account($lookup, $entityid);
             if (!$readerid && $userid) {
                 $readerid = (int) $DB->get_field(self::T . 'reader', 'id', ['entityid' => $entityid, 'userid' => $userid]);
             }
@@ -175,12 +176,14 @@ final class csvlist {
     }
 
     /**
-     * The account of the site with the same file number, user or email; none if it is not one only.
+     * The account of the site with the same file number, user or email; none if it is not one only. With centres apart, only
+     * one that is already of this centre: a list must not be a way of asking who has an account in another, or of taking it.
      *
      * @param array $person
+     * @param int $entityid
      * @return int
      */
-    private static function account(array $person): int {
+    private static function account(array $person, int $entityid): int {
         global $DB;
         foreach (['idnumber', 'username', 'email'] as $field) {
             $value = trim($person[$field] ?? '');
@@ -194,10 +197,32 @@ final class csvlist {
                 ['value' => $value]
             );
             if (count($ids) === 1) {
-                return (int) $ids[0];
+                return !access::apart() || self::of_the_centre((int) $ids[0], $entityid) ? (int) $ids[0] : 0;
             }
         }
         return 0;
+    }
+
+    /**
+     * Whether an account is already of a centre: one of its readers, or with a role inside its category.
+     *
+     * @param int $userid
+     * @param int $entityid
+     * @return bool
+     */
+    private static function of_the_centre(int $userid, int $entityid): bool {
+        global $DB;
+        if ($DB->record_exists(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid])) {
+            return true;
+        }
+        $own = access::context($entityid);
+        return $DB->record_exists_sql(
+            "SELECT 1
+               FROM {role_assignments} ra
+               JOIN {context} ctx ON ctx.id = ra.contextid
+              WHERE ra.userid = :userid AND (ctx.id = :contextid OR " . $DB->sql_like('ctx.path', ':path') . ')',
+            ['userid' => $userid, 'contextid' => $own->id, 'path' => $own->path . '/%']
+        );
     }
 
     /**

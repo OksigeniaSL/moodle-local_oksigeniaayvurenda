@@ -60,7 +60,9 @@ $settings = $library ? window::settings($library) : null;
 if (!$library || (!$settings['open'] && !$manage)) {
     http_response_code(404);
     shell::output($str('windowclosed'), '<h1 class="ayv-results-title">' . s($str('windowclosed')) . '</h1><p>' .
-        s($str('windowclosedhint')) . '</p>', null, '', ['search' => false]);
+        s($str('windowclosedhint')) . '</p>' . ($library && \local_oksigeniaayvurenda\local\onlylibrary::on()
+            ? '<p><a class="ayv-button" href="' . \local_oksigeniaayvurenda\local\onlylibrary::entry()->out() . '">'
+            . s($str('entrargo')) . '</a></p>' : ''), null, '', ['search' => false]);
     die;
 }
 // The catalogue and the shelves, for anyone when the centre shows them; whoever manages it sees how they will look.

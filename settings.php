@@ -64,6 +64,20 @@ if ($hassiteconfig) {
             $str('island3d_desc'),
             1
         ));
+        // A site that is only a library: its entry and its home are the library's.
+        $settings->add(new admin_setting_configcheckbox(
+            'local_oksigeniaayvurenda/libraryonly',
+            $str('libraryonly'),
+            $str('libraryonly_desc'),
+            0
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_oksigeniaayvurenda/libraryonlylegal',
+            $str('libraryonlylegal'),
+            $str('libraryonlylegal_desc'),
+            '',
+            PARAM_URL
+        ));
         // Several centres on one site: each with its own category, where the roles of its staff are given.
         $settings->add(new admin_setting_heading(
             'local_oksigeniaayvurenda/centresheading',

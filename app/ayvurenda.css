@@ -3666,3 +3666,36 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 /* A long sheet keeps its buttons in sight. */
 .ayv .ayv-src-sheet .ayv-dig-sheet-actions { position: sticky; bottom: -1px; margin-bottom: 0; padding: .75rem 0 .25rem; background: var(--surface); }
 
+/* The front door of a site that is only a library: a place to see, and the way in. */
+.ayv-entry-page { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); }
+.ayv .ayv-entry { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); min-height: 100vh; }
+.ayv .ayv-entry-picture { position: relative; overflow: hidden; background: var(--green); }
+.ayv .ayv-entry-picture picture, .ayv .ayv-entry-picture img { display: block; width: 100%; height: 100%; }
+.ayv .ayv-entry-picture img { position: absolute; inset: 0; object-fit: cover; object-position: 60% 60%; }
+.ayv .ayv-entry-side { display: flex; flex-direction: column; gap: 1.5rem; padding: clamp(1.25rem, 3vw, 3rem) clamp(1.25rem, 5vw, 5rem); }
+.ayv .ayv-entry-brand { display: flex; align-items: center; gap: .75rem; margin: 0; font-family: var(--title); font-size: 1.25rem; }
+.ayv .ayv-entry-tagline { display: block; font-family: var(--text); font-size: .85rem; color: color-mix(in srgb, currentColor 80%, transparent); }
+.ayv .ayv-entry-in { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; width: 100%; }
+.ayv .ayv-entry-title { margin: 0 0 .35rem; font-family: var(--title); font-size: clamp(1.9rem, 3vw, 2.75rem); line-height: 1.1; }
+.ayv .ayv-entry-lead { margin: 0 0 1.25rem; font-size: 1.05rem; }
+.ayv .ayv-entry-form { display: grid; gap: .35rem; }
+.ayv .ayv-entry-label { margin-top: .6rem; font-weight: 700; }
+.ayv .ayv-entry-input { width: 100%; min-height: 48px; padding: .5rem .95rem; font: inherit; color: var(--ink); border: 2px solid var(--line); border-radius: 12px; background: var(--surface); }
+.ayv .ayv-entry-input:focus { outline: 3px solid var(--sun); outline-offset: 1px; border-color: var(--accent); }
+.ayv .ayv-entry-go { justify-self: stretch; justify-content: center; min-height: 48px; margin-top: 1rem; font-size: 1.05rem; }
+.ayv .ayv-entry-more { margin: .85rem 0 .25rem; }
+.ayv .ayv-entry-hint { display: block; margin: 0; font-size: .92rem; color: color-mix(in srgb, currentColor 80%, transparent); font-weight: 400; }
+.ayv .ayv-entry-open { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.ayv .ayv-entry-libraries { display: grid; gap: .5rem; margin: .75rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-entry-libraries a { display: flex; align-items: center; gap: .75rem; padding: .55rem .75rem; border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.ayv .ayv-entry-swatch { flex: none; width: 32px; height: 32px; border-radius: 8px; }
+.ayv .ayv-entry-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1.5rem; font-size: .92rem; }
+.ayv .ayv-entry-languages { display: flex; gap: .85rem; }
+.ayv .ayv-entry-languages a[aria-current] { font-weight: 700; text-decoration: none; }
+@media (max-width: 52rem) {
+    .ayv .ayv-entry { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+    .ayv .ayv-entry-picture { height: 34vh; min-height: 11rem; }
+    .ayv .ayv-entry-picture img { object-position: 60% 62%; }
+    .ayv .ayv-entry-in { justify-content: flex-start; }
+}
+

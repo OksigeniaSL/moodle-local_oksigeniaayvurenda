@@ -1,0 +1,53 @@
+{{!
+    @template local_oksigeniaayvurenda/entrar
+
+    The front door of a site that is only a library: a place to see, and the way in.
+
+    Example context (json):
+    {
+        "site": "Ayvurenda", "emblem": "emblema.svg", "tagline": "Gestión de bibliotecas en línea", "heading": "Entra en tu biblioteca",
+        "lead": "Con tu usuario y tu contraseña.", "error": "", "action": "#", "logintoken": "abc", "username": "", "userlabel": "Usuario",
+        "passwordlabel": "Contraseña", "go": "Entrar", "forgot": "#", "forgotlabel": "¿Has olvidado la contraseña?",
+        "noaccount": "Si no tienes acceso, te lo da tu biblioteca.", "day": "dia.webp", "night": "noche.webp",
+        "open": [{"name": "Biblioteca Riosalto", "motto": "Abierta", "colour": 1, "url": "#"}], "openheading": "Abiertas a todos",
+        "openhint": "Sin entrar.", "languages": [{"code": "es", "name": "Español", "current": true, "url": "#"}],
+        "languagelabel": "Idioma", "legal": "#", "legallabel": "Aviso legal y privacidad"
+    }
+}}
+<div class="ayv-entry">
+    <div class="ayv-entry-picture" aria-hidden="true">
+        {{#day}}<picture>{{#night}}<source media="(prefers-color-scheme: dark)" srcset="{{night}}">{{/night}}<img src="{{day}}" alt=""></picture>{{/day}}
+    </div>
+    <main class="ayv-entry-side">
+        <p class="ayv-entry-brand"><img src="{{emblem}}" alt="" width="44" height="44"> <span><b>{{site}}</b> <span class="ayv-entry-tagline">{{tagline}}</span></span></p>
+        <div class="ayv-entry-in">
+            <h1 class="ayv-entry-title">{{heading}}</h1>
+            <p class="ayv-entry-lead">{{lead}}</p>
+            {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+            <form class="ayv-entry-form" method="post" action="{{action}}">
+                <input type="hidden" name="logintoken" value="{{logintoken}}">
+                <input type="hidden" name="anchor" value="">
+                <label class="ayv-entry-label" for="ayv-entry-user">{{userlabel}}</label>
+                <input class="ayv-entry-input" id="ayv-entry-user" type="text" name="username" value="{{username}}" autocomplete="username" autocapitalize="none" spellcheck="false" required {{^username}}autofocus{{/username}}>
+                <label class="ayv-entry-label" for="ayv-entry-pass">{{passwordlabel}}</label>
+                <input class="ayv-entry-input" id="ayv-entry-pass" type="password" name="password" autocomplete="current-password" required {{#username}}autofocus{{/username}}>
+                <button type="submit" class="ayv-button ayv-entry-go">{{go}}</button>
+            </form>
+            <p class="ayv-entry-more"><a href="{{forgot}}">{{forgotlabel}}</a></p>
+            <p class="ayv-entry-hint">{{noaccount}}</p>
+            {{#open.0}}
+            <section class="ayv-entry-open" aria-labelledby="ayv-entry-open">
+                <h2 class="ayv-section-title" id="ayv-entry-open">{{openheading}}</h2>
+                <p class="ayv-entry-hint">{{openhint}}</p>
+                <ul class="ayv-entry-libraries">
+                    {{#open}}<li><a href="{{url}}"><span class="ayv-entry-swatch ayv-cover-{{colour}}" aria-hidden="true"></span><span><b>{{name}}</b>{{#motto}}<span class="ayv-entry-hint">{{motto}}</span>{{/motto}}</span></a></li>{{/open}}
+                </ul>
+            </section>
+            {{/open.0}}
+        </div>
+        <footer class="ayv-entry-foot">
+            {{#languages.0}}<nav aria-label="{{languagelabel}}" class="ayv-entry-languages">{{#languages}}<a href="{{url}}" lang="{{code}}"{{#current}} aria-current="true"{{/current}}>{{name}}</a> {{/languages}}</nav>{{/languages.0}}
+            {{#legal}}<a href="{{legal}}">{{legallabel}}</a>{{/legal}}
+        </footer>
+    </main>
+</div>

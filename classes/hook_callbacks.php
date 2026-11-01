@@ -24,7 +24,11 @@
 
 namespace local_oksigeniaayvurenda;
 
+use core\hook\after_config;
 use core\hook\navigation\primary_extend;
+use core\hook\output\before_http_headers;
+use core\hook\output\before_standard_head_html_generation;
+use local_oksigeniaayvurenda\local\onlylibrary;
 
 /**
  * What the library adds to the pages of Moodle.
@@ -37,6 +41,15 @@ final class hook_callbacks {
      */
     public static function primary_extend(primary_extend $hook): void {
         global $DB;
+        // A site that is only a library has no home, dashboard or courses to go to, except for whoever runs it.
+        if (onlylibrary::on() && !onlylibrary::runs_the_site()) {
+            foreach (['home', 'myhome', 'mycourses'] as $key) {
+                $node = $hook->get_primaryview()->get($key);
+                if ($node) {
+                    $node->remove();
+                }
+            }
+        }
         // The cheap question first: a site without libraries asks nothing more.
         if (!isloggedin() || isguestuser() || !$DB->record_exists('local_oksigeniaayvurenda_library', [])) {
             return;
@@ -51,5 +64,56 @@ final class hook_callbacks {
             null,
             'local_oksigeniaayvurenda_library'
         );
+    }
+
+    /**
+     * In a site that is only a library, the way in is the library's own. The platform's stays at login/index.php?loginredirect=0.
+     *
+     * @param after_config $hook
+     */
+    public static function after_config(after_config $hook): void {
+        global $CFG;
+        if (during_initial_install() || (defined('CLI_SCRIPT') && CLI_SCRIPT) || !onlylibrary::on()) {
+            return;
+        }
+        $CFG->alternateloginurl = onlylibrary::entry()->out(false);
+    }
+
+    /**
+     * In a site that is only a library, the pages of the platform lead to the library.
+     *
+     * @param before_http_headers $hook
+     */
+    public static function before_http_headers(before_http_headers $hook): void {
+        global $PAGE;
+        if (during_initial_install() || (defined('AJAX_SCRIPT') && AJAX_SCRIPT)) {
+            return;
+        }
+        $instead = onlylibrary::instead_of((string) $PAGE->pagetype);
+        if ($instead) {
+            redirect($instead);
+        }
+    }
+
+    /**
+     * In a site that is only a library, the pages left of the platform wear its colours.
+     *
+     * @param before_standard_head_html_generation $hook
+     */
+    public static function before_standard_head_html_generation(before_standard_head_html_generation $hook): void {
+        global $CFG;
+        if (during_initial_install() || !onlylibrary::on()) {
+            return;
+        }
+        $version = (int) get_config('local_oksigeniaayvurenda', 'version');
+        $app = $CFG->wwwroot . '/local/oksigeniaayvurenda/app/';
+        // The picture of the entry, also in the panel of the platform's own pages to get in (a forgotten password).
+        $day = \local_oksigeniaayvurenda\local\screens::art('entrada/dia');
+        $night = \local_oksigeniaayvurenda\local\screens::art('entrada/noche') ?? $day;
+        $vars = '--ayv-emblem:url("' . s($app) . 'emblema.svg");' . ($day
+            ? '--ayv-picture-day:url("' . s($day) . '");--ayv-picture-night:url("' . s($night) . '");' : '');
+        $hook->add_html('<style>:root{' . $vars . '}</style><link rel="stylesheet" href="' . s($app) . 'sitio.css?v='
+            . $version . '">' . (onlylibrary::runs_the_site() ? ''
+            : '<style>.btn-footer-popover,#page-footer,.footer-popover{display:none!important}</style>'));
     }
 }

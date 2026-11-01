@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.116.0 (2026-11-01)
+
+- A site that is only a library («This site is only a library», off by default): its own entry instead of the site's, with a
+  picture of a library, sign-in and the libraries open to everyone; the front page, dashboard and course list lead to the
+  library; the pages left of the platform wear its colours, and the library's header ends in signing out. Whoever runs the
+  site still reaches everything.
+- On a site with centres apart, a list no longer takes the account of someone of another centre, nor says whether there is
+  one; and the staff of a centre can send a reader the app, making their account from the e-mail the library has.
+- A window that is closed offers the way in, on such a site.
+
 ## 0.115.0 (2026-11-01)
 
 - The readers, as one route. «Readers» says how many there are, finds one by name or card, and shows the groups by stage,

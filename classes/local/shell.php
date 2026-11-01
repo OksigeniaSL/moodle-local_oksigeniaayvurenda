@@ -51,7 +51,8 @@ final class shell {
                 null,
                 '',
                 '',
-                [(new \moodle_url('/my/'))->out(false), get_string('myhome')]
+                onlylibrary::way_out() ? [onlylibrary::way_out()['url'], onlylibrary::way_out()['label']]
+                    : [(new \moodle_url('/my/'))->out(false), get_string('myhome')]
             );
         }
         $name = get_string(str_replace('local/', '', $capability), 'local_oksigeniaayvurenda');
@@ -259,8 +260,10 @@ final class shell {
         }
         // The way back to Moodle, always at the end and in sight, but quiet.
         $mine = isloggedin() && !isguestuser();
-        $nav .= '<a class="ayv-nav-out" href="' . s($CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
-            . ($mine ? s(get_string('myhome')) : $str('backto', format_string($SITE->shortname, true, ['escape' => false])))
+        $out = onlylibrary::way_out();
+        $nav .= '<a class="ayv-nav-out" href="' . s($out ? $out['url'] : $CFG->wwwroot . ($mine ? '/my/' : '/')) . '">'
+            . ($out ? s($out['label']) : ($mine ? s(get_string('myhome'))
+                : $str('backto', format_string($SITE->shortname, true, ['escape' => false]))))
             . ' <span aria-hidden="true">→</span></a>';
         $nav = '<nav class="ayv-navs" aria-label="' . $str('menulabel') . '">' . $nav . '</nav>';
         // An administrator who logged in as someone else sees it on every page, as in the rest of Moodle.
@@ -290,10 +293,9 @@ final class shell {
         // The sheet of «More» goes in the page, not in the header (a dialog inside the header is not centred).
         $main = $sheet . ($row !== '' ? '<nav class="ayv-subnav" aria-label="' . $str('menuthispage') . '">' . $row . '</nav>' : '')
             . $main;
-        $name = $library ? format_string($library->name, true, ['escape' => false]) : get_string(
-            'pluginname',
-            'local_oksigeniaayvurenda'
-        );
+        $name = $library ? format_string($library->name, true, ['escape' => false]) : (onlylibrary::on()
+            ? format_string($GLOBALS['SITE']->fullname, true, ['escape' => false])
+            : get_string('pluginname', 'local_oksigeniaayvurenda'));
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
         $howto = self::howto_box($library, $base);
@@ -345,8 +347,8 @@ final class shell {
 ' . $howto . '
 <footer class="ayv-foot"><button type="button" class="ayv-foot-credits" data-ayv-credits aria-haspopup="dialog">
 Oksigenia Ayvurenda</button>
-' . self::made_with($library) . '<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' .
-        $str('backto', format_string($SITE->shortname, true, ['escape' => false])) . '</a></footer>
+' . self::made_with($library) . (onlylibrary::way_out() ? '' : '<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' .
+        $str('backto', format_string($SITE->shortname, true, ['escape' => false])) . '</a>') . '</footer>
 ' . self::credits() . '
 <script>window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
@@ -414,6 +416,37 @@ Oksigenia Ayvurenda</button>
 <body class="ayv ayv-embed">
 ' . $html . '
 <script src="' . $app . 'stacks.js?v=' . $version . '"></script>
+</body>
+</html>';
+    }
+
+    /**
+     * A page on its own, without the library's header: the entry of the site.
+     *
+     * @param string $title
+     * @param string $html
+     */
+    public static function standalone(string $title, string $html): void {
+        global $CFG;
+        $version = (int) get_config('local_oksigeniaayvurenda', 'version');
+        $app = $CFG->wwwroot . '/local/oksigeniaayvurenda/app/';
+        @header('Content-Type: text/html; charset=utf-8');
+        @header('X-Frame-Options: DENY');
+        echo '<!DOCTYPE html>
+<html lang="' . s(str_replace('_', '-', current_language())) . '">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>' . s($title) . '</title>
+<link rel="icon" href="' . $app . 'emblema.svg" type="image/svg+xml">
+<link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
+<script>if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
+    document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');
+}</script>
+</head>
+<body class="ayv ayv-entry-page">
+' . $html . '
 </body>
 </html>';
     }

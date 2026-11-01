@@ -17,6 +17,8 @@
 namespace local_oksigeniaayvurenda\local\sources;
 
 use local_oksigeniaayvurenda\core\control_letter;
+use local_oksigeniaayvurenda\local\access;
+use local_oksigeniaayvurenda\local\libraries;
 
 /**
  * Tests for readers from a list.
@@ -76,5 +78,37 @@ final class csvlist_test extends \advanced_testcase {
             ['readerid' => $readers[1]->id]
         ));
         $this->assertSame(3, $DB->count_records('local_oksigeniaayvurenda_reader', ['entityid' => $entityid]));
+    }
+
+    /**
+     * With centres apart, a list does not take the account of someone of another centre, and does not say whether there is one.
+     */
+    public function test_an_account_of_another_centre(): void {
+        global $DB;
+        $this->resetAfterTest();
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
+        $generator = $this->getDataGenerator();
+        $plugin = $generator->get_plugin_generator('local_oksigeniaayvurenda');
+        $mine = libraries::create_entity(['name' => 'Centro uno', 'library' => 'Uno']);
+        $other = libraries::create_entity(['name' => 'Centro dos', 'library' => 'Dos']);
+        $theirs = $generator->create_user(['username' => 'deotrocentro', 'email' => 'deotro@example.org']);
+        $plugin->create_reader(['entityid' => $other->entityid, 'userid' => $theirs->id]);
+        $staff = $generator->create_user(['username' => 'delcentro']);
+        $role = create_role('Inside', 'ayvinside', 'Made up for the test');
+        role_assign($role, $staff->id, access::context((int) $mine->entityid)->id);
+
+        $list = [['firstname' => 'Eva', 'lastname' => 'Uno', 'username' => 'deotrocentro'],
+            ['firstname' => 'Hugo', 'lastname' => 'Dos', 'email' => 'deotro@example.org'],
+            ['firstname' => 'Teo', 'lastname' => 'Tres', 'username' => 'delcentro']];
+        $stats = csvlist::load((int) $mine->entityid, $list);
+        $this->assertSame(3, $stats['created']);
+        $this->assertSame(1, $stats['linked']);
+        $linked = $DB->get_fieldset_select(
+            'local_oksigeniaayvurenda_reader',
+            'userid',
+            'entityid = ? AND userid IS NOT NULL',
+            [$mine->entityid]
+        );
+        $this->assertSame([(int) $staff->id], array_map('intval', $linked));
     }
 }

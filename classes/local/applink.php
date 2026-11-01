@@ -47,7 +47,9 @@ final class applink {
 
     /**
      * What can be done for a reader: send (they have an account), create (no account, an e-mail, and whoever asks may
-     * create accounts), noemail (no account and no e-mail) or none (the app is not there, or they are not active).
+     * create accounts, or works at the desk of a centre on a shared site, where nobody of a centre can have that permission
+     * and the account gets nothing but being this reader), noemail (no account and no e-mail) or none (the app is not there,
+     * or they are not active).
      *
      * @param \stdClass $reader
      * @return string
@@ -62,7 +64,9 @@ final class applink {
         if (self::email($reader) === '') {
             return 'noemail';
         }
-        return has_capability('moodle/user:create', \context_system::instance()) ? 'create' : 'none';
+        $may = has_capability('moodle/user:create', \context_system::instance())
+            || (access::apart() && access::can('local/oksigeniaayvurenda:desk', (int) $reader->entityid));
+        return $may ? 'create' : 'none';
     }
 
     /**

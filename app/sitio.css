@@ -1,0 +1,80 @@
+/* A site that is only a library: the pages left of the platform (forgotten password, the person's own account) in its colours. */
+html:root,
+html[data-bs-theme="light"] {
+    --bs-primary: #17574c;
+    --bs-primary-rgb: 23, 87, 76;
+    --bs-link-color: #17574c;
+    --bs-link-color-rgb: 23, 87, 76;
+    --bs-link-hover-color: #0f3a33;
+    --bs-body-bg: #fbf6ec;
+    --bs-body-bg-rgb: 251, 246, 236;
+    --bs-body-color: #1e2b2a;
+}
+html[data-bs-theme="dark"] {
+    --bs-primary: #8fd3c1;
+    --bs-primary-rgb: 143, 211, 193;
+    --bs-link-color: #8fd3c1;
+    --bs-link-color-rgb: 143, 211, 193;
+    --bs-body-bg: #0e1c1a;
+    --bs-body-bg-rgb: 14, 28, 26;
+    --bs-body-color: #ece4d4;
+}
+body,
+#page,
+#page.drawers {
+    background-color: var(--bs-body-bg);
+}
+.btn.btn-primary {
+    color: #fff !important;
+    background-color: #17574c !important;
+    border-color: #17574c !important;
+    border-radius: 999px;
+}
+.btn.btn-primary:hover,
+.btn.btn-primary:focus {
+    background-color: #0f3a33 !important;
+    border-color: #0f3a33 !important;
+}
+/* What says which platform this is, or leads to its documentation. */
+.helplink,
+.footer-section .tool_usertours-resettourcontainer,
+.logininfo .moodlelogo,
+#page-footer .purgecaches,
+.footer-content-popover .footer-section:has(a[href*="moodle.org"]),
+.footer-content-popover a[href*="moodle.com"],
+.footer-content-popover a[href*="moodle.org"],
+a[href*="docs.moodle.org"] {
+    display: none !important;
+}
+/* The platform's own pages to get in: the library's picture in their panel, and none of its publicity. */
+.login-layout-left {
+    background-color: #17574c !important;
+    background-image: var(--ayv-picture-day, none) !important;
+    background-size: cover !important;
+    background-position: 60% 60% !important;
+}
+.login-layout-left > *,
+.login-layout-left::before,
+.login-layout-left::after {
+    display: none !important;
+}
+@media (prefers-color-scheme: dark) {
+    .login-layout-left {
+        background-image: var(--ayv-picture-night, none) !important;
+    }
+}
+[data-bs-theme="dark"] .login-layout-left {
+    background-image: var(--ayv-picture-night, none) !important;
+}
+.login-layout-right {
+    background-color: var(--bs-body-bg) !important;
+}
+.login-container::before {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    background: var(--ayv-emblem) center / contain no-repeat;
+}
+

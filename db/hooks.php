@@ -29,4 +29,16 @@ $callbacks = [
         'hook' => \core\hook\navigation\primary_extend::class,
         'callback' => '\local_oksigeniaayvurenda\hook_callbacks::primary_extend',
     ],
+    [
+        'hook' => \core\hook\after_config::class,
+        'callback' => '\local_oksigeniaayvurenda\hook_callbacks::after_config',
+    ],
+    [
+        'hook' => \core\hook\output\before_http_headers::class,
+        'callback' => '\local_oksigeniaayvurenda\hook_callbacks::before_http_headers',
+    ],
+    [
+        'hook' => \core\hook\output\before_standard_head_html_generation::class,
+        'callback' => '\local_oksigeniaayvurenda\hook_callbacks::before_standard_head_html_generation',
+    ],
 ];

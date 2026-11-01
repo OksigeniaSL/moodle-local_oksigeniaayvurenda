@@ -79,4 +79,36 @@ final class applink_test extends \advanced_testcase {
         $this->assertSame(0, applink::account($sibling));
         $this->assertNull($DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $sibling->id]));
     }
+
+    /**
+     * On a shared site the staff of a centre, who can never have the site's permission to make accounts, can send the app;
+     * elsewhere, and in another centre, they cannot.
+     */
+    public function test_the_staff_of_a_centre_apart(): void {
+        $this->resetAfterTest();
+        if (!applink::available()) {
+            $this->markTestSkipped('The plugin of the app is not here.');
+        }
+        $generator = $this->getDataGenerator();
+        $plugin = $generator->get_plugin_generator('local_oksigeniaayvurenda');
+        $plain = $plugin->create_library();
+        $reader = $plugin->create_reader(['entityid' => $plain->entityid, 'firstname' => 'Eva', 'email' => 'eva@example.com']);
+        $staff = $generator->create_user();
+        $this->setUser($staff);
+        $this->assertSame('none', applink::state($reader));
+
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
+        $mine = libraries::create_entity(['name' => 'Centro uno', 'library' => 'Uno']);
+        $other = libraries::create_entity(['name' => 'Centro dos', 'library' => 'Dos']);
+        $reader = $plugin->create_reader(['entityid' => $mine->entityid, 'firstname' => 'Nico', 'email' => 'nico@example.com']);
+        $theirs = $plugin->create_reader(['entityid' => $other->entityid, 'firstname' => 'Iris', 'email' => 'iris@example.com']);
+        $role = create_role('Desk', 'ayvdesk', 'Made up for the test');
+        set_role_contextlevels($role, [CONTEXT_COURSECAT]);
+        assign_capability('local/oksigeniaayvurenda:desk', CAP_ALLOW, $role, \context_system::instance()->id);
+        role_assign($role, $staff->id, access::context((int) $mine->entityid)->id);
+        accesslib_clear_all_caches_for_unit_testing();
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
+        $this->assertSame('create', applink::state($reader));
+        $this->assertSame('none', applink::state($theirs));
+    }
 }
