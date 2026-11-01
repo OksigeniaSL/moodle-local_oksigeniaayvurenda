@@ -1,0 +1,4 @@
+# The access key of the test vector AWS publishes in its documentation of Signature Version 4: not a real key.
+844d3451002b66df2b7f0f3f2efe6b38e0b74625:tests/core/s3_test.php:aws-access-token:38
+844d3451002b66df2b7f0f3f2efe6b38e0b74625:tests/core/s3_test.php:aws-access-token:44
+844d3451002b66df2b7f0f3f2efe6b38e0b74625:tests/core/s3_test.php:aws-access-token:57

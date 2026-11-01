@@ -314,8 +314,8 @@ final class notices {
      * @param string $body Plain text.
      * @param string $url The exact page the message is about, which Moodle and its app open from it.
      * @param string $urlname What that page is.
-     * @param array|null $design What the e-mail shows, for mail::html(); without it, the words as they are.
      * @param string $from The library that speaks: in a site that is only a library, it signs the message.
+     * @param array|null $design What the e-mail shows, for mail::html(); without it, the words as they are.
      * @return bool
      */
     public static function send(
