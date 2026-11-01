@@ -156,6 +156,52 @@ final class mobile_test extends \advanced_testcase {
     }
 
     /**
+     * A book's page says how it stands for this reader: set aside until a date, out with them until a date or late, or free with
+     * where it is; and says each thing once.
+     */
+    public function test_a_book_as_it_stands(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $user = $this->getDataGenerator()->create_user();
+        $reader = $gen->create_reader(['entityid' => $library->entityid, 'userid' => $user->id]);
+        $this->setUser($user);
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $page = fn($record) => mobile::mobile_record_view(
+            ['library' => $library->slug, 'id' => $record->id]
+        )['templates'][0]['html'];
+        $now = time();
+        // Free: where it is, and its call number named.
+        $free = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Libre']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $free->id, 'callnumber1' => 'N', 'callnumber2' => 'R3']);
+        $this->assertStringContainsString($str('mobilecallnumber', 'N R3'), $page($free));
+        // Set aside: the date on its own, and no call number that says nothing to them.
+        $held = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Apartado']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $held->id, 'callnumber1' => 'N', 'callnumber2' => 'R3']);
+        $DB->insert_record('local_oksigeniaayvurenda_hold', ['libraryid' => $library->id, 'recordid' => $held->id,
+            'readerid' => $reader->id, 'status' => 'ready', 'timecreated' => $now, 'timeready' => $now,
+            'timeexpires' => $now + 5 * DAYSECS, 'timemodified' => $now]);
+        $html = $page($held);
+        $this->assertStringContainsString($str('holdreadyuntil'), $html);
+        $this->assertStringContainsString(userdate($now + 5 * DAYSECS, get_string('strftimedateshort', 'langconfig')), $html);
+        $this->assertStringNotContainsString($str('mobilecallnumber', 'N R3'), $html);
+        $this->assertStringNotContainsString($str('copies'), $html);
+        // With them: until when, or since when it is late.
+        foreach ([[$now + 9 * DAYSECS, 'mobileloanuntil'], [$now - 9 * DAYSECS, 'mobileloanlate']] as [$due, $label]) {
+            $book = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Prestado']);
+            $item = $gen->create_item(['libraryid' => $library->id, 'recordid' => $book->id, 'status' => 'onloan']);
+            $DB->insert_record('local_oksigeniaayvurenda_loan', ['libraryid' => $library->id, 'itemid' => $item->id,
+                'readerid' => $reader->id, 'timeloaned' => $now - DAYSECS, 'timedue' => $due, 'renewals' => 0,
+                'timecreated' => $now, 'timemodified' => $now]);
+            $html = $page($book);
+            $this->assertStringContainsString($str('mobilestateloan'), $html);
+            $this->assertStringContainsString($str($label), $html);
+        }
+    }
+
+    /**
      * What the app runs at the start opens the links of the notices inside it, and the plugin tells the app to run it.
      */
     public function test_init(): void {

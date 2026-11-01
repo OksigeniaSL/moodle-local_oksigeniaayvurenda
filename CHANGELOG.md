@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.120.0 (2026-11-01)
+
+- A book's page in the app, redone like the notice by e-mail: its cover or a drawn one, the library's name, how it stands at a glance,
+  the date large, and the place and call number only when they are of use. In the official app and in Aty, in light and in dark.
+
 ## 0.119.2 (2026-11-01)
 
 - In the app, a page of a library where the person has no card says so, instead of saying they read at no library on the site.

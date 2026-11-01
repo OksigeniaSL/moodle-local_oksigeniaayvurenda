@@ -37,6 +37,12 @@ $addons = [
                     'icon' => 'fas-book-open-reader',
                 ],
                 'priority' => 500,
+                // The official app does not apply the site's mobile CSS, but it does load a handler's sheet.
+                'styles' => [
+                    'url' => $CFG->wwwroot . '/local/oksigeniaayvurenda/mobilecss.php?v=' .
+                        crc32((string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/mobile.css')),
+                    'version' => crc32((string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/mobile.css')),
+                ],
             ],
         ],
         'lang' => [

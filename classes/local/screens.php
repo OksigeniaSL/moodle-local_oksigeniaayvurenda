@@ -351,10 +351,14 @@ final class screens {
             $short = get_string('strftimedateshort', 'langconfig');
             $box['mine'] = self::str('holdyouhaveit', userdate((int) $loan->timedue, $short));
             $box['loanid'] = (int) $loan->id;
+            $box['minekind'] = 'loan';
+            $box['mineuntil'] = (int) $loan->timedue;
         } else if ($reader) {
             $mine = holds::open((int) $library->id, $recordid, (int) $reader->id);
             if ($mine) {
                 $box['holdid'] = (int) $mine->id;
+                $box['minekind'] = $mine->status === 'ready' ? 'ready' : 'waiting';
+                $box['mineuntil'] = (int) $mine->timeexpires;
                 if ($mine->status === 'ready') {
                     $box['mine'] = self::str('holdmineready', userdate(
                         (int) $mine->timeexpires,

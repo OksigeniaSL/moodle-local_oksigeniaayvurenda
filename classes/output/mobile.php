@@ -27,9 +27,11 @@ namespace local_oksigeniaayvurenda\output;
 use local_oksigeniaayvurenda\core\barcode\code39;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\mail;
 use local_oksigeniaayvurenda\local\mine;
 use local_oksigeniaayvurenda\local\renewals;
 use local_oksigeniaayvurenda\local\screens;
+use local_oksigeniaayvurenda\local\skins;
 
 /**
  * The «Library» of the app's menu: for each centre where someone is a reader, their books out and until when, what is
@@ -232,20 +234,43 @@ class mobile {
                 $until = renewals::until($where, (int) $loan->readerid, (int) $loan->id, (int) $USER->id);
             }
             $copies = array_values(array_filter($found['copies'], fn($c) => $c['here']));
+            $mineis = (string) ($box['minekind'] ?? '');
+            $words = fn(string $key) => get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda');
+            $date = !empty($box['mineuntil'])
+                ? userdate((int) $box['mineuntil'], get_string('strftimedateshort', 'langconfig')) : '';
+            $late = $mineis === 'loan' && (int) $box['mineuntil'] < time();
+            // One copy goes in the slip; of several, the list says where each one is.
+            $one = !$mineis && count($copies) === 1 && $card['state'] !== 'out' ? $copies[0] : null;
+            $drawn = mail::book((int) $found['record']->id, $card['title']);
             $data += [
+                'libraryname' => format_string($library->name, true, ['escape' => false]),
                 'library' => $library->slug,
                 'recordid' => (int) $found['record']->id,
                 'title' => $card['title'],
                 'subtitle' => (string) ($card['subtitle'] ?? ''),
                 'authors' => $card['authors'],
                 'cover' => self::cover((int) $found['record']->id),
-                'statelabel' => $card['statelabel'],
-                'free' => $card['state'] === 'free',
+                'coverbg' => $drawn['coverbg'],
+                'coverink' => $drawn['coverink'],
+                'statelabel' => [
+                    'ready' => $words('holdreadyheading'),
+                    'loan' => $str('mobilestateloan'),
+                    'waiting' => $str('mobilestatewaiting'),
+                ][$mineis] ?? $card['statelabel'],
+                'stateclass' => $mineis ? 'mine' : ($card['state'] === 'free' ? 'free' : 'out'),
+                'stamplabel' => $mineis === 'ready' ? $words('holdreadyuntil')
+                    : ($late ? $str('mobileloanlate') : $str('mobileloanuntil')),
+                'stampvalue' => in_array($mineis, ['ready', 'loan'], true) ? $date : '',
+                'stamplate' => $late,
+                'sliptext' => $mineis === 'ready' ? $words('holdreadylead')
+                    : ($mineis === 'waiting' ? $str('holdminewaiting') : ''),
+                'where' => $one ? (string) $one['location'] : '',
+                'tejuelo' => $one && $one['callnumber'] ? $str('mobilecallnumber', $one['callnumber']) : '',
                 'copies' => array_map(fn($c) => ['state' => $str('state' . $c['state']), 'location' => (string) $c['location'],
-                    'callnumber' => $c['callnumber']], $copies),
-                'hascopies' => (bool) $copies,
+                    'tejuelo' => $c['callnumber'] ? $str('mobilecallnumber', $c['callnumber']) : ''], $copies),
+                'hascopies' => !$mineis && count($copies) > 1,
                 'copiesheading' => $str('copies'),
-                'mine' => $box['mine'] ?? '',
+                'mine' => $mineis !== '',
                 'holdid' => (int) ($box['holdid'] ?? 0),
                 'holdkeepwaiting' => $str('holdkeepwaiting'),
                 'holdletgo' => $str('holdletgo'),
