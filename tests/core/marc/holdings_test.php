@@ -36,13 +36,64 @@ final class holdings_test extends \basic_testcase {
         $items = holdings::items($records[0]);
         $this->assertCount(2, $items);
         $this->assertSame(['barcode' => 'K1001', 'callnumber' => ['N', 'DUN', 'jar'], 'location' => 'Narrativa',
-            'itemtype' => 'BK', 'acquired' => '2024-03-01', 'notes' => ''], $items[0]);
+            'itemtype' => 'BK', 'acquired' => '2024-03-01', 'notes' => '', 'regnumber' => ''], $items[0]);
         $this->assertSame('', $items[1]['barcode']);
         $this->assertSame([['barcode' => 'K1002', 'callnumber' => ['91', 'LAG', 'atl'], 'location' => 'Consulta',
-            'itemtype' => '', 'acquired' => '', 'notes' => '']], holdings::items($records[1]));
+            'itemtype' => '', 'acquired' => '', 'notes' => '', 'regnumber' => '']], holdings::items($records[1]));
         $none = new record();
         $none->data('035', ' ', ' ', [['a', '(OCoLC)123']]);
         $this->assertSame('(OCoLC)123', holdings::id($none));
         $this->assertSame('', holdings::id(new record()));
+    }
+
+    /**
+     * The copies of other programs: 949, 999 and 995, only when 852 and 952 bring none.
+     */
+    public function test_other_programs(): void {
+        $sierra = new record();
+        $sierra->data('949', ' ', '1', [['a', '813 ROM fa'], ['i', '31000000123'], ['l', 'Adultos'], ['t', 'BOOK']]);
+        $copy = holdings::items($sierra)[0];
+        $this->assertSame('31000000123', $copy['barcode']);
+        $this->assertSame(['813', 'ROM', 'fa'], $copy['callnumber']);
+        $this->assertSame('Adultos', $copy['location']);
+        $this->assertSame('BOOK', $copy['itemtype']);
+
+        $symphony = new record();
+        $symphony->data('999', ' ', ' ', [['a', '823 DUN'], ['i', '777'], ['l', 'STACKS'], ['t', 'BOOK']]);
+        $this->assertSame('777', holdings::items($symphony)[0]['barcode']);
+
+        $unimarc = new record();
+        $unimarc->data('995', ' ', ' ', [['f', 'F100'], ['k', '843 LAU'], ['e', 'Salle'], ['r', 'LIVRE'], ['j', '42']]);
+        $copy = holdings::items($unimarc)[0];
+        $this->assertSame('F100', $copy['barcode']);
+        $this->assertSame('Salle', $copy['location']);
+        $this->assertSame('42', $copy['regnumber']);
+
+        // An empty local field is no copy, and when 952 says, the others say nothing.
+        $both = new record();
+        $both->data('952', ' ', ' ', [['p', 'K1'], ['i', '9']]);
+        $both->data('999', ' ', ' ', [['a', 'Local data']]);
+        $this->assertCount(1, holdings::items($both));
+        $this->assertSame('9', holdings::items($both)[0]['regnumber']);
+        $empty = new record();
+        $empty->data('949', ' ', ' ', [['c', '1']]);
+        $this->assertSame([], holdings::items($empty));
+    }
+
+    /**
+     * What goes to Koha comes back the same: the copies in 952, with the codes Koha asks for.
+     */
+    public function test_to_koha_and_back(): void {
+        $marc = encoder::encode(['title' => 'El faro dormido', 'doctype' => 'book'], [], [['barcode' => 'A1', 'regnumber' => '77',
+            'library' => 'Biblioteca Peña', 'location' => 'Sala', 'callnumber' => ['821', 'ROM', 'fa'], 'acquired' => '2024-05-02',
+            'itemtype' => 'normal']], '', true);
+        $this->assertSame([], $marc->data_fields('852'));
+        $this->assertSame('BK', $marc->first(['942'], 'c'));
+        $this->assertSame('BIBLIOTECA', $marc->first(['952'], 'a'));
+        $item = holdings::items($marc)[0];
+        $this->assertSame('A1', $item['barcode']);
+        $this->assertSame(['821', 'ROM', 'fa'], $item['callnumber']);
+        $this->assertSame('77', $item['regnumber']);
+        $this->assertSame('2024-05-02', $item['acquired']);
     }
 }

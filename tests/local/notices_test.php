@@ -221,4 +221,19 @@ final class notices_test extends \advanced_testcase {
         $this->assertSame(['readers' => 1, 'tutors' => 1], notices::run($now));
         $sink->close();
     }
+
+    /**
+     * In a site that is only a library, its name signs the message; and whoever writes next is not signed with it.
+     */
+    public function test_the_library_signs(): void {
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        set_config('libraryonly', 1, 'local_oksigeniaayvurenda');
+        $before = \core_user::get_noreply_user()->firstname;
+        $user = $this->getDataGenerator()->create_user();
+        $sink = $this->redirectEmails();
+        $this->assertTrue(notices::send('overdue', $user, 'Asunto', 'Cuerpo', '', '', 'Biblioteca de Riosalto'));
+        $this->assertSame($before, \core_user::get_noreply_user()->firstname);
+        $sink->close();
+    }
 }

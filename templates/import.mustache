@@ -166,6 +166,13 @@
         <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="step" value="remap" data-nobusy>{{importcolumnsapply}}</button></p>
     </dialog>
     {{/csv}}
+    {{#letters}}
+    <div class="ayv-imp-panel ayv-imp-letters">
+        <label class="ayv-field">{{importletters}} <select name="charset">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="remap" data-nobusy>{{importcolumnsapply}}</button>
+        <p class="ayv-field-hint">{{importlettershint}}</p>
+    </div>
+    {{/letters}}
     {{#tight}}<p class="ayv-notice" role="status">{{tight}}</p>{{/tight}}
     <div class="ayv-imp-go">
         {{^cannot}}<button type="submit" class="ayv-button ayv-imp-gobutton">{{gowords}}</button>{{/cannot}}

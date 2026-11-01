@@ -41,7 +41,8 @@ final class csvlist {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var array<string, string> Words of the kind of reader, without accents or case. */
-    private const TYPES = ['alumno' => 'student', 'alumna' => 'student', 'student' => 'student', 'estudiante' => 'student',
+    private const TYPES = ['st' => 'student', 't' => 'teacher', 's' => 'staff',
+        'alumno' => 'student', 'alumna' => 'student', 'student' => 'student', 'estudiante' => 'student',
         'profesor' => 'teacher', 'profesora' => 'teacher', 'docente' => 'teacher', 'teacher' => 'teacher',
         'personal' => 'staff', 'pas' => 'staff', 'staff' => 'staff', 'familia' => 'family', 'family' => 'family'];
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.117.0 (2026-11-01)
+
+- Any old MARC file reads right. MARC-8 and ISO 5426, with their accents before the letter, and Windows-1252, told from how the
+  file writes its accents, whatever its leader says; when a file is not in Unicode, the import screen lets you read it another way
+  and see the books change.
+- The copies of other programs: fields 949 (Sierra, OCLC, suppliers), 999 (Symphony) and 995 (UNIMARC, Koha, PMB), and the accession
+  number of 952 and 995.
+- Readers from Koha's list of patrons are recognised.
+- To go to Koha: the daily copy has a koha folder, with the catalogue with its copies in 952, the readers in its list of patrons
+  and the books out in a file of its offline circulation, and a note of how to load them.
+
 ## 0.116.0 (2026-11-01)
 
 - A site that is only a library («This site is only a library», off by default): its own entry instead of the site's, with a

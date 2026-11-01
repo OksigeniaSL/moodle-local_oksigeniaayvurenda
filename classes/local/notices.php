@@ -154,11 +154,8 @@ final class notices {
         }
         // The library of the oldest one, where the reader sees what they have.
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
-        $told = self::send('overdue', $user, $subject, $body, $url, format_string(
-            $list[0]->library,
-            true,
-            ['escape' => false]
-        ));
+        $library = format_string($list[0]->library, true, ['escape' => false]);
+        $told = self::send('overdue', $user, $subject, $body, $url, $library, $library);
         [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
         $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
         return $told;
@@ -242,7 +239,8 @@ final class notices {
             get_string('noticetutorbody', 'local_oksigeniaayvurenda', $a),
             (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => reset($late)->slug,
                     'group' => $tutor->groupname]))->out(false),
-            $tutor->groupname
+            $tutor->groupname,
+            $a->library
         );
         $DB->set_field(self::T . 'tutor', 'timenotified', $now, ['id' => $tutor->id]);
         return $told;
@@ -273,6 +271,7 @@ final class notices {
      * @param string $body Plain text.
      * @param string $url The exact page the message is about, which Moodle and its app open from it.
      * @param string $urlname What that page is.
+     * @param string $from The library that speaks: in a site that is only a library, it signs the message.
      * @return bool
      */
     public static function send(
@@ -281,12 +280,18 @@ final class notices {
         string $subject,
         string $body,
         string $url = '',
-        string $urlname = ''
+        string $urlname = '',
+        string $from = ''
     ): bool {
         $message = new \core\message\message();
         $message->component = 'local_oksigeniaayvurenda';
         $message->name = $provider;
-        $message->userfrom = \core_user::get_noreply_user();
+        // A copy: the one Moodle hands out is the same for the whole request, and the next message is someone else's.
+        $message->userfrom = clone \core_user::get_noreply_user();
+        if ($from !== '' && onlylibrary::on()) {
+            $message->userfrom->firstname = $from;
+            $message->userfrom->lastname = '';
+        }
         $message->userto = $user;
         $message->subject = $subject;
         $message->fullmessage = $body;

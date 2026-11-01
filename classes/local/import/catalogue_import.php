@@ -176,7 +176,8 @@ final class catalogue_import {
             'libraryid' => $this->library->id,
             'recordid' => $recordid,
             'barcode' => \core_text::substr($code, 0, 64),
-            'regnumber' => (string) ++$this->regnumber,
+            'regnumber' => trim((string) ($item['regnumber'] ?? '')) !== ''
+                ? \core_text::substr(trim((string) $item['regnumber']), 0, 64) : (string) ++$this->regnumber,
             'callnumber1' => $lines[0],
             'callnumber2' => $lines[1],
             'callnumber3' => $lines[2],

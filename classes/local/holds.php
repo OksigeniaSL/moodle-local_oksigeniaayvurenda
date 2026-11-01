@@ -407,7 +407,8 @@ final class holds {
             get_string($words('holdreadysubject'), 'local_oksigeniaayvurenda', $a),
             $body,
             $url,
-            $a->title
+            $a->title,
+            format_string($library->name, true, ['escape' => false])
         );
     }
 

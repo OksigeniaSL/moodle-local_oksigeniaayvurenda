@@ -26,16 +26,26 @@ namespace local_oksigeniaayvurenda\core\marc;
 
 /**
  * Library programs export each copy inside its record: the standard field 852 (Ayvurenda's own copies, and many
- * others) or Koha's 952. This reads either into the copies of the catalogue: code, spine, place, kind, date acquired
- * and notes; and the record's own identifier, to find it again when the file is loaded once more. Plain PHP, without
- * Moodle.
+ * others), Koha's 952, the 949 of Sierra, OCLC and book suppliers, Symphony's 999, or the 995 of UNIMARC (Koha, PMB). This
+ * reads any of them into the copies of the catalogue: code, spine, place, kind, date acquired, notes and accession number;
+ * and the record's own identifier, to find it again when the file is loaded once more. Plain PHP, without Moodle.
  */
 final class holdings {
+    /**
+     * @var array[] Fields used only when 852 and 952 bring nothing, as they may mean something else in a local catalogue:
+     * for each one, the subfields of the code, the spine, the place, the kind, the notes and the accession number.
+     */
+    private const OTHERS = [
+        '949' => ['ib', 'a', 'l', 't', 'z', ''],
+        '999' => ['i', 'a', 'l', 't', '', ''],
+        '995' => ['f', 'k', 'eh', 'r', 'u', 'j'],
+    ];
+
     /**
      * The copies of a record.
      *
      * @param record $record
-     * @return array[] barcode, callnumber (up to three lines), location, itemtype, acquired (Y-m-d), notes.
+     * @return array[] barcode, callnumber (up to three lines), location, itemtype, acquired (Y-m-d), notes, regnumber.
      */
     public static function items(record $record): array {
         $items = [];
@@ -51,10 +61,48 @@ final class holdings {
                 $sub['c'] ?? '',
                 $sub['y'] ?? '',
                 $sub['d'] ?? '',
-                $sub['z'] ?? ($sub['x'] ?? '')
+                $sub['z'] ?? ($sub['x'] ?? ''),
+                $sub['i'] ?? ''
             );
         }
+        foreach (self::OTHERS as $tag => [$code, $spine, $place, $kind, $notes, $accession]) {
+            if ($items) {
+                break;
+            }
+            foreach ($record->data_fields((string) $tag) as $field) {
+                $sub = self::subfields($field);
+                $barcode = self::first($sub, $code);
+                $call = self::first($sub, $spine);
+                if ($barcode !== '' || $call !== '') {
+                    $items[] = self::item(
+                        $barcode,
+                        $call,
+                        self::first($sub, $place),
+                        self::first($sub, $kind),
+                        '',
+                        self::first($sub, $notes),
+                        self::first($sub, $accession)
+                    );
+                }
+            }
+        }
         return $items;
+    }
+
+    /**
+     * The first of some subfields that has something.
+     *
+     * @param array $subfields
+     * @param string $codes One letter for each, in order.
+     * @return string
+     */
+    private static function first(array $subfields, string $codes): string {
+        foreach (str_split($codes) as $code) {
+            if (($subfields[$code] ?? '') !== '') {
+                return $subfields[$code];
+            }
+        }
+        return '';
     }
 
     /**
@@ -98,6 +146,7 @@ final class holdings {
      * @param string $itemtype
      * @param string $acquired
      * @param string $notes
+     * @param string $regnumber
      * @return array
      */
     private static function item(
@@ -106,7 +155,8 @@ final class holdings {
         string $location,
         string $itemtype,
         string $acquired,
-        string $notes
+        string $notes,
+        string $regnumber = ''
     ): array {
         $lines = preg_split('/\s+/', trim($callnumber), 3, PREG_SPLIT_NO_EMPTY);
         return [
@@ -116,6 +166,7 @@ final class holdings {
             'itemtype' => $itemtype,
             'acquired' => preg_match('/^\d{4}-\d{2}-\d{2}/', $acquired) ? substr($acquired, 0, 10) : '',
             'notes' => $notes,
+            'regnumber' => $regnumber,
         ];
     }
 }

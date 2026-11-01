@@ -105,11 +105,12 @@ final class files {
      *
      * @param string $path
      * @param string $kind marc or marcxml.
+     * @param string $set How the letters of a marc file are written, one of charset::SETS.
      * @return \Generator Key, description and items of each record.
      */
-    public static function marc(string $path, string $kind): \Generator {
+    public static function marc(string $path, string $kind, string $set = 'auto'): \Generator {
         $data = (string) file_get_contents($path);
-        $records = $kind === 'marcxml' ? marcxml::read($data) : iso2709::read($data);
+        $records = $kind === 'marcxml' ? marcxml::read($data) : iso2709::read($data, $set);
         unset($data);
         foreach ($records as $record) {
             yield ['key' => holdings::id($record), 'description' => describer::describe($record),

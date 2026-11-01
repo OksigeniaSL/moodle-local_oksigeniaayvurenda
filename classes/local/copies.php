@@ -29,6 +29,7 @@ use local_oksigeniaayvurenda\core\export\ris;
 use local_oksigeniaayvurenda\core\marc\encoder;
 use local_oksigeniaayvurenda\core\marc\iso2709;
 use local_oksigeniaayvurenda\core\marc\marcxml;
+use local_oksigeniaayvurenda\core\spreadsheet;
 
 /**
  * Every day, everything an entity's libraries hold, in open formats (CSV in a zip, with a note of what each file is,
@@ -112,6 +113,12 @@ final class copies {
         $zip->addFile($dir . '/catalogo.xml', 'catalogo.xml');
         $zip->addFile($dir . '/catalogo-dc.xml', 'catalogo-dc.xml');
         $zip->addFile($dir . '/catalogo.ris', 'catalogo.ris');
+        // To go to Koha, the free program: it only makes copies from its 952, and has its own lists of people and loans.
+        $counts += self::koha($entityid, $dir);
+        $zip->addFile($dir . '/koha-catalogo.mrc', 'koha/catalogo.mrc');
+        $zip->addFile($dir . '/koha-lectores.csv', 'koha/lectores.csv');
+        $zip->addFile($dir . '/koha-prestamos.koc', 'koha/prestamos.koc');
+        $zip->addFromString('koha/LEEME.txt', get_string('copykoha', 'local_oksigeniaayvurenda'));
         $zip->addFromString('LEEME.txt', get_string('copyreadme', 'local_oksigeniaayvurenda', (object) [
             'entity' => format_string($entity->name, true, ['escape' => false]),
             'date' => userdate($now, get_string('strftimedatetime', 'langconfig')),
@@ -161,6 +168,7 @@ final class copies {
         $dc = fopen($dir . '/catalogo-dc.xml', 'w');
         fwrite($dc, '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<collection>' . "\n");
         $ris = fopen($dir . '/catalogo.ris', 'w');
+        $koha = fopen($dir . '/koha-catalogo.mrc', 'w');
         $count = 0;
         $last = 0;
         do {
@@ -192,8 +200,8 @@ final class copies {
             $rows->close();
             $items = [];
             $rows = $DB->get_recordset_sql(
-                'SELECT i.id, i.recordid, i.barcode, i.serial, i.callnumber1, i.callnumber2, i.callnumber3,
-                        b.name AS library, l.label AS location
+                'SELECT i.id, i.recordid, i.barcode, i.serial, i.callnumber1, i.callnumber2, i.callnumber3, i.regnumber,
+                        i.itemtype, i.timeacquired, b.name AS library, l.label AS location
                    FROM {' . self::T . 'item} i
                    JOIN {' . self::T . 'library} b ON b.id = i.libraryid
               LEFT JOIN {' . self::T . 'authority} l ON l.id = i.locationid
@@ -204,13 +212,22 @@ final class copies {
             foreach ($rows as $row) {
                 $items[$row->recordid][] = ['barcode' => $row->barcode, 'serial' => $row->serial,
                     'library' => format_string($row->library, true, ['escape' => false]), 'location' => $row->location,
-                    'callnumber' => [$row->callnumber1, $row->callnumber2, $row->callnumber3]];
+                    'callnumber' => [$row->callnumber1, $row->callnumber2, $row->callnumber3],
+                    'regnumber' => $row->regnumber, 'itemtype' => $row->itemtype,
+                    'acquired' => $row->timeacquired ? date('Y-m-d', (int) $row->timeacquired) : ''];
             }
             $rows->close();
             foreach ($records as $record) {
                 $marc = encoder::encode((array) $record, $authorities[$record->id] ?? [], $items[$record->id] ?? [], $entityname);
                 fwrite($mrc, iso2709::write($marc));
                 fwrite($xml, marcxml::element($marc) . "\n");
+                fwrite($koha, iso2709::write(encoder::encode(
+                    (array) $record,
+                    $authorities[$record->id] ?? [],
+                    $items[$record->id] ?? [],
+                    format_string($entityname, true, ['escape' => false]),
+                    true
+                )));
                 fwrite($dc, dublincore::element((array) $record, $authorities[$record->id] ?? []) . "\n");
                 $first = ($items[$record->id] ?? [])[0]['callnumber'] ?? [];
                 fwrite($ris, ris::entry((array) $record, $authorities[$record->id] ?? [], implode(' ', array_filter($first))));
@@ -221,10 +238,85 @@ final class copies {
         fwrite($xml, '</collection>' . "\n");
         fwrite($dc, '</collection>' . "\n");
         fclose($mrc);
+        fclose($koha);
         fclose($xml);
         fclose($dc);
         fclose($ris);
         return $count;
+    }
+
+    /**
+     * The readers in Koha's list of patrons, and the books out in a file of its offline circulation.
+     *
+     * @param int $entityid
+     * @param string $dir Where to write them.
+     * @return array Rows written: kohareaders, kohaloans.
+     */
+    private static function koha(int $entityid, string $dir): array {
+        global $DB;
+        $branch = encoder::koha_code((string) $DB->get_field_sql(
+            'SELECT name FROM {' . self::T . 'library} WHERE entityid = :entityid ORDER BY id',
+            ['entityid' => $entityid],
+            IGNORE_MULTIPLE
+        ));
+        $now = time();
+        $groups = $DB->get_records_sql_menu(
+            'SELECT m.readerid, MAX(m.groupname)
+               FROM {' . self::T . 'member} m
+               JOIN {' . self::T . 'year} y ON y.id = m.yearid
+              WHERE y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b
+           GROUP BY m.readerid',
+            ['entityid' => $entityid, 'a' => $now, 'b' => $now]
+        );
+        $kinds = ['student' => 'ST', 'teacher' => 'T', 'staff' => 'S', 'family' => 'PT'];
+        $people = fopen($dir . '/koha-lectores.csv', 'w');
+        fwrite($people, "\xEF\xBB\xBF");
+        fputcsv($people, ['cardnumber', 'surname', 'firstname', 'categorycode', 'branchcode', 'email', 'sort1'], ',', '"', '\\');
+        $readers = 0;
+        $rows = $DB->get_recordset_sql(
+            'SELECT r.id, r.cardcode, r.readertype, r.firstname, r.lastname, r.email,
+                    u.firstname AS ufirstname, u.lastname AS ulastname, u.email AS uemail
+               FROM {' . self::T . "reader} r
+          LEFT JOIN {user} u ON u.id = r.userid
+              WHERE r.entityid = :entityid AND r.status = 'active'
+           ORDER BY r.id",
+            ['entityid' => $entityid]
+        );
+        foreach ($rows as $row) {
+            // What a spreadsheet would run as a formula goes as plain text, as in the other lists.
+            fputcsv($people, spreadsheet::row([
+                $row->cardcode,
+                $row->ulastname ?? $row->lastname,
+                $row->ufirstname ?? $row->firstname,
+                $kinds[$row->readertype] ?? 'PT',
+                $branch,
+                $row->uemail ?? $row->email,
+                $groups[$row->id] ?? '',
+            ]), ',', '"', '\\');
+            $readers++;
+        }
+        $rows->close();
+        fclose($people);
+        $loans = fopen($dir . '/koha-prestamos.koc', 'w');
+        fwrite($loans, "Version=1.0\tGenerator=Ayvurenda\tGeneratorVersion=" . get_config('local_oksigeniaayvurenda', 'release')
+            . "\n");
+        $out = 0;
+        $rows = $DB->get_recordset_sql(
+            'SELECT l.id, l.timeloaned, r.cardcode, i.barcode
+               FROM {' . self::T . 'loan} l
+               JOIN {' . self::T . 'reader} r ON r.id = l.readerid
+               JOIN {' . self::T . 'item} i ON i.id = l.itemid
+              WHERE r.entityid = :entityid AND l.timereturned IS NULL
+           ORDER BY l.timeloaned, l.id',
+            ['entityid' => $entityid]
+        );
+        foreach ($rows as $row) {
+            fwrite($loans, date('Y-m-d H:i:s', (int) $row->timeloaned) . " 000\tissue\t{$row->cardcode}\t{$row->barcode}\n");
+            $out++;
+        }
+        $rows->close();
+        fclose($loans);
+        return ['kohareaders' => $readers, 'kohaloans' => $out];
     }
 
     /**

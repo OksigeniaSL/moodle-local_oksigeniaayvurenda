@@ -25,6 +25,7 @@
 use local_oksigeniaayvurenda\core\abies\export_reader;
 use local_oksigeniaayvurenda\core\abies\survey;
 use local_oksigeniaayvurenda\core\import\catalogue_csv;
+use local_oksigeniaayvurenda\core\marc\charset;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\characters;
@@ -89,6 +90,8 @@ if (data_submitted() && confirm_sesskey()) {
             optional_param_array('column', [], PARAM_ALPHANUMEXT),
             fn($f) => in_array($f, catalogue_csv::FIELDS, true)
         );
+        $set = optional_param('charset', 'auto', PARAM_ALPHANUM);
+        $pending['charset'] = in_array($set, charset::SETS, true) ? $set : charset::AUTO;
         $SESSION->ayvurendaimport = $pending;
     } else if ($step === 'import' && $pending) {
         try {
@@ -114,7 +117,7 @@ if (data_submitted() && confirm_sesskey()) {
                     fn($f) => in_array($f, catalogue_csv::FIELDS, true)
                 );
                 $records = $pending['kind'] === 'csv' ? files::csv_records($pending['path'], $map)
-                    : files::marc($pending['path'], $pending['kind']);
+                    : files::marc($pending['path'], $pending['kind'], $pending['charset'] ?? charset::AUTO);
                 $importer = new catalogue_import($library, $pending['kind'] === 'csv' ? 'csv' : 'marc');
                 $stats = plans::within($entityid, fn() => $importer->run($records));
                 $data['done'] = [
@@ -166,8 +169,19 @@ if ($pending) {
                     : $str('importcolumnssome', (object) ['known' => $columns['known'], 'all' => $columns['all']]))];
                 $review['cannot'] = $columns['hastitle'] ? '' : $str('importnotitle');
             } else {
-                $look = preview::of(files::marc($pending['path'], $pending['kind']));
+                $set = $pending['charset'] ?? charset::AUTO;
+                $look = preview::of(files::marc($pending['path'], $pending['kind'], $set));
                 $review['kind'] = $str('importkindmarc');
+                // Not in Unicode: the letters are guessed, and they can be read another way, seeing the books change.
+                $seen = $pending['kind'] === 'marc' ? charset::guess((string) file_get_contents($pending['path'])) : 'utf8';
+                if ($seen !== 'utf8' || $set !== charset::AUTO) {
+                    $review['letters'] = ['options' => array_map(fn($code) => [
+                        'value' => $code,
+                        'selected' => $code === $set,
+                        'label' => $code === charset::AUTO ? $str('importletterauto', $str('importletter' . $seen))
+                            : $str('importletter' . $code),
+                    ], charset::SETS)];
+                }
             }
             $review['figures'] = [$figure($look['records'], 'importfigrecords'), $figure($look['items'], 'importfigitems')];
             if ($look['places']) {
@@ -203,6 +217,7 @@ foreach (
     ['importdrop', 'importdropor', 'importformats', 'importnext', 'importreading', 'importsources', 'importfromprogram',
         'importfromprogramhint', 'importfromsheet', 'importfromsheethint', 'importfromabies', 'importfromabieshint',
         'importfromnone', 'importfromnonehint', 'importfromnonego', 'importreviewtitle', 'importshelfheading',
+        'importletters', 'importlettershint',
         'importcolumnsreview', 'readerslistcolumns', 'importcolumnsintro', 'importcolumnsapply', 'importcolumnssaysnothing',
         'importcancel', 'importbusy', 'importbusyhint', 'importuploadintro', 'importnotes', 'importreaders', 'importreadershint',
         'importdonetitle', 'importnextheading', 'importnextcatalogue', 'importnextcataloguehint', 'importnextlabels',

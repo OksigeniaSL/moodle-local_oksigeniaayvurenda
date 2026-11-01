@@ -73,9 +73,11 @@ final class iso2709 {
      * The records of a file.
      *
      * @param string $data
+     * @param string $set How its letters are written: one of charset::SETS.
      * @return record[]
      */
-    public static function read(string $data): array {
+    public static function read(string $data, string $set = charset::AUTO): array {
+        $set = $set === charset::AUTO ? charset::guess($data) : $set;
         $records = [];
         foreach (explode(self::END, $data) as $raw) {
             $raw = ltrim($raw, "\r\n");
@@ -84,16 +86,13 @@ final class iso2709 {
             }
             $leader = substr($raw, 0, 24);
             $base = (int) substr($leader, 12, 5);
-            $utf8 = $leader[9] === 'a';
             $record = new record($leader);
             $directory = substr($raw, 24, max(0, $base - 25));
             for ($i = 0; $i + 12 <= strlen($directory); $i += 12) {
                 $tag = substr($directory, $i, 3);
                 $body = substr($raw, $base + (int) substr($directory, $i + 7, 5), (int) substr($directory, $i + 3, 4));
                 $body = rtrim($body, self::FIELD);
-                if (!$utf8) {
-                    $body = mb_convert_encoding($body, 'UTF-8', 'ISO-8859-1');
-                }
+                $body = charset::to_utf8($body, $set);
                 if ($tag < '010') {
                     $record->control($tag, $body);
                     continue;

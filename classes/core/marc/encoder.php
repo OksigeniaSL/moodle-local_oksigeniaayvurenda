@@ -42,9 +42,16 @@ final class encoder {
      * @param array $authorities Kind => labels, in order (author, publisher, class, subject, collection, audience).
      * @param array $items Copies: barcode, library, location, callnumber (the three lines), serial.
      * @param string $entity The entity's name, for 852.
+     * @param bool $koha With the copies as Koha makes them (952 and 942), instead of the standard 852.
      * @return record
      */
-    public static function encode(array $record, array $authorities, array $items = [], string $entity = ''): record {
+    public static function encode(
+        array $record,
+        array $authorities,
+        array $items = [],
+        string $entity = '',
+        bool $koha = false
+    ): record {
         $doctype = (string) ($record['doctype'] ?? 'book');
         $level = $doctype === 'periodical' ? 's' : 'm';
         $marc = new record('00000n' . (self::TYPES[$doctype] ?? 'a') . $level . ' a2200000 i 4500');
@@ -137,6 +144,10 @@ final class encoder {
                 $marc->data('950', ' ', ' ', [[$code, (string) $extra[$key]]]);
             }
         }
+        if ($koha) {
+            self::koha_items($marc, $items);
+            return $marc;
+        }
         foreach ($items as $item) {
             $copy = array_filter([
                 ['a', $entity],
@@ -149,6 +160,52 @@ final class encoder {
             $marc->data('852', ' ', ' ', array_values($copy));
         }
         return $marc;
+    }
+
+    /**
+     * The copies as Koha makes them: only from its field 952, and its default kind of item in 942.
+     *
+     * @param record $marc
+     * @param array[] $items library, location, callnumber, barcode, regnumber, acquired (Y-m-d) and itemtype.
+     */
+    private static function koha_items(record $marc, array $items): void {
+        $marc->data('942', ' ', ' ', [['c', self::koha_type((string) ($items[0]['itemtype'] ?? 'normal'))]]);
+        foreach ($items as $item) {
+            $branch = self::koha_code((string) ($item['library'] ?? ''));
+            $copy = array_filter([
+                ['a', $branch],
+                ['b', $branch],
+                ['c', (string) ($item['location'] ?? '')],
+                ['d', (string) ($item['acquired'] ?? '')],
+                ['i', (string) ($item['regnumber'] ?? '')],
+                ['o', trim(implode(' ', array_filter((array) ($item['callnumber'] ?? []), fn($l) => (string) $l !== '')))],
+                ['p', (string) ($item['barcode'] ?? '')],
+                ['y', self::koha_type((string) ($item['itemtype'] ?? 'normal'))],
+            ], fn($s) => $s[1] !== '');
+            $marc->data('952', ' ', ' ', array_values($copy));
+        }
+    }
+
+    /**
+     * A code as Koha wants them: capitals and digits, ten at most.
+     *
+     * @param string $name
+     * @return string
+     */
+    public static function koha_code(string $name): string {
+        $ascii = (string) preg_replace('/[^A-Z0-9]/', '', strtoupper(strtr($name, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o',
+            'ú' => 'u', 'ü' => 'u', 'ñ' => 'n', 'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ñ' => 'N'])));
+        return substr($ascii, 0, 10) ?: 'LIB';
+    }
+
+    /**
+     * The kind of item in Koha's usual codes.
+     *
+     * @param string $type
+     * @return string
+     */
+    private static function koha_type(string $type): string {
+        return ['normal' => 'BK', 'reference' => 'REF'][$type] ?? self::koha_code($type);
     }
 
     /**

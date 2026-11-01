@@ -42,13 +42,14 @@ final class csv_list {
         'firstname' => ['nombre', 'name', 'first name', 'firstname', 'given name', 'nom'],
         'lastname' => ['apellidos', 'apellido', 'surname', 'last name', 'lastname', 'family name', 'cognoms', 'primer apellido'],
         'fullname' => ['nombre completo', 'alumno', 'alumna', 'lector', 'full name', 'nombre y apellidos', 'apellidos y nombre'],
-        'group' => ['grupo', 'group', 'clase', 'class', 'unidad', 'aula', 'curso y grupo', 'grup'],
+        'group' => ['sort1', 'grupo', 'group', 'clase', 'class', 'unidad', 'aula', 'curso y grupo', 'grup'],
         'stage' => ['etapa', 'stage', 'nivel', 'level', 'ensenanza', 'enseñanza', 'estudios'],
-        'cardcode' => ['carne', 'carnet', 'codigo', 'card', 'card code', 'barcode', 'codigo de lector', 'numero de lector'],
+        'cardcode' => ['cardnumber', 'carne', 'carnet', 'codigo', 'card', 'card code', 'barcode', 'codigo de lector',
+            'numero de lector'],
         'email' => ['correo', 'email', 'e-mail', 'correo electronico', 'mail'],
         'username' => ['usuario', 'username', 'user', 'login', 'nombre de usuario'],
         'idnumber' => ['expediente', 'nia', 'id', 'idnumber', 'numero de expediente', 'matricula', 'student id'],
-        'type' => ['tipo', 'type', 'perfil', 'role', 'rol'],
+        'type' => ['categorycode', 'tipo', 'type', 'perfil', 'role', 'rol'],
     ];
 
     /**

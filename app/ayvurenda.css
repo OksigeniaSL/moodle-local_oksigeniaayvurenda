@@ -3699,3 +3699,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
     .ayv .ayv-entry-in { justify-content: flex-start; }
 }
 
+
+/* How the letters of an old file are read: its choice and its button in one line. */
+.ayv .ayv-imp-letters { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+.ayv .ayv-imp-letters .ayv-field-hint { flex: 1 1 100%; margin: 0; }
