@@ -368,4 +368,47 @@ final class visit_test extends \advanced_testcase {
         $this->assertFalse(visit::available($art, $entityid));
         $this->assertNull(visit::card($library, false, $art));
     }
+
+    /**
+     * A public library visits the school's hall and rooms as its children's room until the art brings its own hall;
+     * then it starts there, and the school's rooms are still its.
+     */
+    public function test_public_hall(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $art = $this->art();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        // A book of literature, so the library has the corner of the school's room.
+        $now = time();
+        $class = (int) $DB->insert_record('local_oksigeniaayvurenda_authority', ['entityid' => $entityid, 'kind' => 'class',
+            'code' => '8', 'label' => 'Literatura', 'timecreated' => $now, 'timemodified' => $now]);
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'Cuento uno']);
+        $DB->insert_record('local_oksigeniaayvurenda_recauth', ['recordid' => $record->id, 'authorityid' => $class,
+            'sortorder' => 0]);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'callnumber1' => '8',
+            'callnumber2' => 'AUT', 'callnumber3' => 'cue']);
+        libraries::update_entity($entityid, ['skin' => 'public']);
+        $this->assertSame('vestibulo', visit::hall($entityid, $art));
+        $this->assertTrue(visit::available($art, $entityid));
+        $this->assertNotNull(visit::page($library, 'vestibulo', false, $art));
+        file_put_contents($art['dir'] . '/pix/visita/publica-fondo.webp', 'made-up');
+        file_put_contents($art['dir'] . '/pix/visita/publica.json', json_encode([
+            'skin' => 'public',
+            'layers' => [['name' => 'fondo', 'depth' => 0]],
+            'zones' => [['kind' => 'room', 'to' => 'literatura', 'shape' => [[0, 0], [100, 0], [100, 100], [0, 100]]]],
+        ]));
+        $this->assertSame('publica', visit::hall($entityid, $art));
+        $page = visit::page($library, 'publica', false, $art);
+        $this->assertNotNull($page);
+        // Its door to the school's room of literature leads there (the room is the children's room's).
+        $door = array_values(array_filter($page['zones'], fn($z) => $z['kind'] === 'room'))[0];
+        $this->assertStringContainsString('room=literatura', $door['url']);
+        // A school does not visit the public library's hall.
+        libraries::update_entity($entityid, ['skin' => 'school']);
+        $this->assertNull(visit::page($library, 'publica', false, $art));
+    }
 }

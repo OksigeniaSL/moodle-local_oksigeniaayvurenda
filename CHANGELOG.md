@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.109.0 (2026-11-01)
+
+- A fourth skin, «Public library», for a town's, a foundation's or an association's library: readers of every age,
+  no classes nor tutors (late books are told to each reader, as at a university), the characters standing whole for
+  the children, no voices nor sound until the centre turns them on, and the words of a secondary school where it has
+  none of its own. Its visit starts in its own hall (`publica`) when the art package brings one, and until then in the
+  school's, whose rooms are its children's room.
+
 ## 0.108.0 (2026-11-01)
 
 - A notice for every page of the library, set by whoever runs the site («Notice in the library», `sitenotice`): one

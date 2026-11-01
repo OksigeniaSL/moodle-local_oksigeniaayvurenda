@@ -34,7 +34,7 @@ final class skins {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] The skins, the school's first: it is the one a centre has until it chooses. */
-    public const SKINS = ['school', 'secondary', 'university'];
+    public const SKINS = ['school', 'secondary', 'university', 'public'];
 
     /**
      * @var array What is on at each skin until the centre changes it: the visit, its games, the characters standing whole
@@ -44,7 +44,12 @@ final class skins {
         'school' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => true, 'sound' => true],
         'secondary' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => false, 'sound' => false],
         'university' => ['visit' => true, 'games' => true, 'figures' => false, 'voices' => false, 'sound' => false],
+        // A public library (a town's, a foundation's, an association's): readers of every age, a children's room.
+        'public' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => false, 'sound' => false],
     ];
+
+    /** @var array The skins whose scenes a skin also visits: a public library has the school's as its children's room. */
+    public const SCENES = ['public' => ['public', 'school']];
 
     /**
      * The skin of a centre.
@@ -138,8 +143,23 @@ final class skins {
      */
     public static function words(int $entityid, string $key): string {
         $skin = self::of($entityid);
-        return $skin !== self::SKINS[0] && get_string_manager()->string_exists($key . $skin, 'local_oksigeniaayvurenda')
-            ? $key . $skin : $key;
+        // A public library speaks to every age: its own words, or else a secondary school's, warm but not childish.
+        foreach ($skin === 'public' ? ['public', 'secondary'] : [$skin] as $tone) {
+            if ($tone !== self::SKINS[0] && get_string_manager()->string_exists($key . $tone, 'local_oksigeniaayvurenda')) {
+                return $key . $tone;
+            }
+        }
+        return $key;
+    }
+
+    /**
+     * Whose scenes a centre of this skin visits: its own, and a public library also the school's (its children's room).
+     *
+     * @param string $skin
+     * @return string[]
+     */
+    public static function scenes(string $skin): array {
+        return self::SCENES[$skin] ?? [$skin];
     }
 
     /**

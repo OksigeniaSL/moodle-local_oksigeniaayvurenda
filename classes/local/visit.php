@@ -45,7 +45,8 @@ final class visit {
     public const HALL = 'vestibulo';
 
     /** @var string[] The hall of each skin of a centre: the visit starts there. */
-    public const HALLS = ['school' => 'vestibulo', 'secondary' => 'instituto', 'university' => 'universidad'];
+    public const HALLS = ['school' => 'vestibulo', 'secondary' => 'instituto', 'university' => 'universidad',
+        'public' => 'publica'];
 
     /** @var string[] What a place of a scene may be. */
     private const KINDS = ['room', 'corner', 'directory', 'new', 'pulse', 'voices', 'stacks', 'exit'];
@@ -79,17 +80,25 @@ final class visit {
      * @return bool
      */
     public static function available(?array $art = null, int $entityid = 0): bool {
-        return skins::on($entityid, 'visit') && self::scene(self::hall($entityid), $art) !== null;
+        return skins::on($entityid, 'visit') && self::scene(self::hall($entityid, $art), $art) !== null;
     }
 
     /**
-     * The hall of a centre's visit, by its skin: without the hall of its skin, there is no visit.
+     * The hall of a centre's visit, by its skin: without the hall of its skin, there is no visit (a public library
+     * starts in the school's until the art brings its own).
      *
      * @param int $entityid
+     * @param array|null $art The art package, if already found.
      * @return string
      */
-    public static function hall(int $entityid): string {
-        return self::HALLS[skins::of($entityid)] ?? self::HALL;
+    public static function hall(int $entityid, ?array $art = null): string {
+        $skin = skins::of($entityid);
+        $hall = self::HALLS[$skin] ?? self::HALL;
+        // A public library has a children's room: until the art brings its own hall, the visit starts in the school's.
+        if ($skin === 'public' && self::scene($hall, $art) === null) {
+            return self::HALL;
+        }
+        return $hall;
     }
 
     /**
@@ -102,7 +111,7 @@ final class visit {
      * @return array|null url, label, hint, day, night, position.
      */
     public static function card(\stdClass $library, bool $public, ?array $art = null): ?array {
-        $hall = skins::on((int) $library->entityid, 'visit') ? self::scene(self::hall((int) $library->entityid), $art) : null;
+        $hall = skins::on((int) $library->entityid, 'visit') ? self::scene(self::hall((int) $library->entityid, $art), $art) : null;
         if (!$hall || ($public && !window::catalogue_open($library))) {
             return null;
         }
@@ -233,10 +242,10 @@ final class visit {
         $scene = self::scene($name, $art);
         // Only the scenes of the centre's skin are its visit, when the centre has it on.
         $entityid = (int) $library->entityid;
-        if (!$scene || $scene['skin'] !== skins::of($entityid) || !skins::on($entityid, 'visit')) {
+        if (!$scene || !in_array($scene['skin'], skins::scenes(skins::of($entityid)), true) || !skins::on($entityid, 'visit')) {
             return null;
         }
-        $hallname = self::hall((int) $library->entityid);
+        $hallname = self::hall((int) $library->entityid, $art);
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $url = fn(string $script, array $params = []) => (new \moodle_url(
             '/local/oksigeniaayvurenda/' . $script,
@@ -252,7 +261,7 @@ final class visit {
         }
         // A room exists when the art package paints it, behind a door of this scene or not; a corner without its room
         // leads to its shelves.
-        $rooms = self::rooms($art, $scene['skin']);
+        $rooms = self::rooms($art, skins::of($entityid));
         foreach ($scene['zones'] as $zone) {
             $room = $zone['kind'] === 'room' && $zone['to'] !== '' ? self::scene($zone['to'], $art) : null;
             if ($room && ($zone['corner'] ?: $room['corner']) !== '') {
@@ -385,7 +394,10 @@ final class visit {
         foreach ($art ? (glob($art['dir'] . '/pix/visita/*.json') ?: []) : [] as $file) {
             $name = basename($file, '.json');
             $room = !in_array($name, self::HALLS, true) ? self::scene($name, $art) : null;
-            if ($room && $room['skin'] === $skin && $room['corner'] !== '' && !isset($rooms[$room['corner']])) {
+            if (
+                $room && in_array($room['skin'], skins::scenes($skin), true) && $room['corner'] !== ''
+                && !isset($rooms[$room['corner']])
+            ) {
                 $rooms[$room['corner']] = $name;
             }
         }

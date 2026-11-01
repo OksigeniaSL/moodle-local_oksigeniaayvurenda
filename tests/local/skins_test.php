@@ -102,6 +102,26 @@ final class skins_test extends \advanced_testcase {
     }
 
     /**
+     * A public library: readers of every age, with the characters standing whole and no voices nor sound of its own;
+     * it speaks in a secondary school's words where it has none, and visits the school's rooms as its children's room.
+     */
+    public function test_public(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        libraries::update_entity($entityid, ['skin' => 'public']);
+        $this->assertSame('public', skins::of($entityid));
+        $this->assertTrue(skins::lively($entityid));
+        $this->assertFalse(skins::on($entityid, 'voices'));
+        $this->assertSame('noticereaderbodysecondary', skins::words($entityid, 'noticereaderbody'));
+        $this->assertSame('noticetutorbody', skins::words($entityid, 'noticetutorbody'));
+        $this->assertSame(['public', 'school'], skins::scenes('public'));
+        $this->assertSame(['university'], skins::scenes('university'));
+        $this->assertTrue(get_string_manager()->string_exists('skinpublic', 'local_oksigeniaayvurenda'));
+    }
+
+    /**
      * The reader's card speaks in the tone of the skin: a secondary school's and a university's say the same in their
      * own words.
      */

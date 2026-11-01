@@ -47,8 +47,8 @@ $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/late
 $now = time();
 $notice = '';
 $year = \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now);
-// At a university or academy the readers are adults: each one is told, not a tutor, and there are no classes.
-$adults = \local_oksigeniaayvurenda\local\skins::of((int) $library->entityid) === 'university';
+// At a university or academy, and at a public library, there are no classes nor tutors: each reader is told.
+$adults = in_array(\local_oksigeniaayvurenda\local\skins::of((int) $library->entityid), ['university', 'public'], true);
 if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', '', PARAM_ALPHA);
     if ($do === 'tell') {
