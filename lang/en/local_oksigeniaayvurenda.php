@@ -1632,6 +1632,7 @@ $string['mobilenothing'] = 'Nothing in the catalogue with «{$a}».';
 $string['mobilenotreader'] = 'You are not a reader of any library of this site yet.';
 $string['mobileopenweb'] = 'Open in the library';
 $string['mobileready'] = 'waiting for you until {$a}';
+$string['mobilenotyours'] = 'This page belongs to a library where you have no card.';
 $string['mobilerenew'] = 'Renew';
 $string['mobilerenewed'] = 'Renewed.';
 $string['mobilerenewedto'] = 'Renewed until {$a}.';

@@ -51,6 +51,8 @@ final class mail_test extends \advanced_testcase {
         $this->assertStringContainsString('El faro &amp; la mar', $html);
         $this->assertStringContainsString('https://example.com/?a=1&amp;b=2', $html);
         $this->assertStringContainsString('6 de noviembre', $html);
+        // In the elements' own styles the paper is near white: a program that darkens by itself turns anything warmer mustard.
+        $this->assertSame(0, preg_match('/style="[^"]*background-color:#(efe6d3|f7efdc)/', $html));
         $this->assertStringContainsString('notificationpreferences.php', $html);
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringNotContainsString('<b>te espera', $html);
@@ -106,6 +108,8 @@ final class mail_test extends \advanced_testcase {
         $this->assertStringContainsString('Biblioteca de Riosalto', $message->fullmessagehtml);
         $this->assertStringContainsString('Hugo', $message->fullmessagehtml);
         $this->assertStringContainsString('/local/oksigeniaayvurenda/record.php?library=central', $message->fullmessagehtml);
+        $this->assertStringContainsString('lang=' . current_language(), $message->fullmessagehtml);
+        $this->assertStringNotContainsString('lang=', (string) $message->contexturl);
         $this->assertStringNotContainsString('<', $message->fullmessage);
         $this->assertStringContainsString('El faro dormido', $message->fullmessage);
         $this->assertStringContainsString('Biblioteca de Riosalto', $message->fullmessage);

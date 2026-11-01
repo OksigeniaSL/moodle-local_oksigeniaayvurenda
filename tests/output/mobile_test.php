@@ -136,6 +136,26 @@ final class mobile_test extends \advanced_testcase {
     }
 
     /**
+     * A page that does not open says the truth: to someone who reads at another library, that this one is not theirs; to someone
+     * who reads nowhere, that they do not.
+     */
+    public function test_a_page_of_another_library(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $ana = $this->getDataGenerator()->create_user();
+        $gen->create_reader(['entityid' => $library->entityid, 'userid' => $ana->id]);
+        $args = ['library' => $library->slug, 'id' => 999999];
+        $this->setUser($ana);
+        $html = mobile::mobile_record_view($args)['templates'][0]['html'];
+        $this->assertStringContainsString(get_string('mobilenotyours', 'local_oksigeniaayvurenda'), $html);
+        $this->setUser($this->getDataGenerator()->create_user());
+        $html = mobile::mobile_record_view($args)['templates'][0]['html'];
+        $this->assertStringContainsString(get_string('mobilenotreader', 'local_oksigeniaayvurenda'), $html);
+    }
+
+    /**
      * What the app runs at the start opens the links of the notices inside it, and the plugin tells the app to run it.
      */
     public function test_init(): void {

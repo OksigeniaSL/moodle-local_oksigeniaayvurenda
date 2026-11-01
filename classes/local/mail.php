@@ -116,7 +116,8 @@ final class mail {
             'people' => $people,
             'hastasks' => (bool) $tasks,
             'tasks' => $tasks,
-            'button' => $content['button'] ?? null,
+            'button' => !empty($content['button']) ? ['url' => self::in_language($content['button']['url'])] + $content['button']
+                : null,
             'after' => array_values((array) ($content['after'] ?? [])),
             'quiet' => $content['quiet'] ?? null,
             'sign' => $sign ? true : false,
@@ -365,10 +366,23 @@ final class mail {
     private static function link(array $content, ?\stdClass $library): string {
         global $CFG;
         if (!empty($content['button']['url'])) {
-            return (string) $content['button']['url'];
+            return self::in_language((string) $content['button']['url']);
         }
         return !empty($library->slug)
             ? (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false) : $CFG->wwwroot;
+    }
+
+    /**
+     * An address of the site in the language of the notice: whoever is not signed in lands on an entry that speaks like the
+     * e-mail, not like their browser.
+     *
+     * @param string $url
+     * @return string
+     */
+    private static function in_language(string $url): string {
+        global $CFG;
+        return str_starts_with($url, $CFG->wwwroot . '/')
+            ? (new \moodle_url($url, ['lang' => current_language()]))->out(false) : $url;
     }
 
     /**

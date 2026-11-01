@@ -38,6 +38,17 @@ use local_oksigeniaayvurenda\local\screens;
  */
 class mobile {
     /**
+     * Why a page of a library does not open: the person reads at another one here, or at none. No names: on a shared site, that
+     * other library says nothing of this one.
+     *
+     * @return string
+     */
+    private static function not_here(): string {
+        global $USER;
+        return get_string(mine::summary((int) $USER->id) ? 'mobilenotyours' : 'mobilenotreader', 'local_oksigeniaayvurenda');
+    }
+
+    /**
      * What the app runs when it starts: the links of the notices open inside it.
      *
      * @param array $args What the app sends.
@@ -182,7 +193,7 @@ class mobile {
             'hascards' => (bool) $cards,
             'searched' => $query !== '',
             'cannot' => !$library,
-            'notreader' => $str('mobilenotreader'),
+            'notreader' => $library ? '' : self::not_here(),
             'nothing' => $str('mobilenothing', s($query)),
             'searchplaceholder' => $str('searchplaceholder'),
             'searchbutton' => $str('searchbutton'),
@@ -209,7 +220,7 @@ class mobile {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $library = self::library($args);
         $found = $library ? catalogue::record((int) ($args['id'] ?? 0), $library) : null;
-        $data = ['cannot' => !$found, 'notreader' => $str('mobilenotreader')];
+        $data = ['cannot' => !$found, 'notreader' => $found ? '' : self::not_here()];
         if ($found) {
             $card = screens::cards([$found['card']], $library)[0];
             $box = screens::hold($found, $library) ?? [];

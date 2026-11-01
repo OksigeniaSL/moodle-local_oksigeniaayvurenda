@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.119.2 (2026-11-01)
+
+- In the app, a page of a library where the person has no card says so, instead of saying they read at no library on the site.
+- Notices by e-mail hold up in the programs that darken a mail by themselves (the paper turned mustard in Proton on Android), and
+  their button lands on an entry in the language of the notice.
+
 ## 0.119.1 (2026-11-01)
 
 - Bringing in a catalogue is no longer news: the weekly message counts what an import brings only if it says it was acquired that
