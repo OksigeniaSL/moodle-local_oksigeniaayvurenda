@@ -336,7 +336,7 @@ final class notices {
         $message->subject = $subject;
         $message->fullmessage = $body;
         $message->fullmessageformat = FORMAT_PLAIN;
-        $message->fullmessagehtml = mail::html($design ?? mail::plain($subject, $body));
+        $message->fullmessagehtml = mail::html(($design ?? mail::plain($subject, $body)) + ['userid' => (int) $user->id]);
         $message->smallmessage = $subject;
         $message->notification = 1;
         if ($url !== '') {

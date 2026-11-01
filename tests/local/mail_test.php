@@ -116,6 +116,46 @@ final class mail_test extends \advanced_testcase {
     }
 
     /**
+     * The button stays on the page for whoever has no app; with Aty on their phone it goes by way of the app, and only for a page
+     * the app knows how to open.
+     */
+    public function test_the_button_and_the_app(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library(['slug' => 'central']);
+        $user = $this->getDataGenerator()->create_user();
+        $make = fn(string $page) => mail::html([
+            'library' => $library,
+            'heading' => 'Aviso',
+            'userid' => $user->id,
+            'button' => [
+                'url' => (new \moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => 'central']))->out(false),
+                'text' => 'Ver',
+            ],
+        ]);
+        $this->assertStringContainsString('/local/oksigeniaayvurenda/record.php?library=central', $make('record.php'));
+        if (!method_exists('\\local_oksigeniaaty\\api', 'app_link')) {
+            return;
+        }
+        $DB->insert_record('user_devices', [
+            'userid' => $user->id,
+            'appid' => get_config('tool_mobile', 'androidappid') ?: 'com.moodle.moodlemobile',
+            'name' => 'x',
+            'model' => 'x',
+            'platform' => 'Android',
+            'version' => '14',
+            'pushid' => 'x',
+            'uuid' => 'x',
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+        $this->assertStringContainsString('/local/oksigeniaaty/go.php', $make('record.php'));
+        $this->assertStringNotContainsString('/local/oksigeniaaty/go.php', $make('desk.php'));
+    }
+
+    /**
      * A notice without its design still comes in the same clothes, paragraph by paragraph.
      */
     public function test_plain(): void {

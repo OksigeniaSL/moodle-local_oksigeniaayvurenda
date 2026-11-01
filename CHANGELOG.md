@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.120.1 (2026-11-01)
+
+- The button of a notice by e-mail opens the book or the library in Aty for whoever has it on their phone, instead of leaving them in
+  the browser, asked to sign in. Without Aty, the same page as before.
+
 ## 0.120.0 (2026-11-01)
 
 - A book's page in the app, redone like the notice by e-mail: its cover or a drawn one, the library's name, how it stands at a glance,

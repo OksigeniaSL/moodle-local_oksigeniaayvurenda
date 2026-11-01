@@ -71,7 +71,7 @@ final class mail {
      *     stamp and place (label, value), books (rows from book() with line, urgent), shelf (from book()), more, people (name,
      *     line), tasks (text, url), button (url, text), after (paragraphs), quiet (hint, url, text), sign (from sign()), why,
      *     prefs,
-     *     young (for a reader with the flower).
+     *     young (for a reader with the flower), userid (who it is for, so its button can open their app).
      * @return string The whole page.
      */
     public static function html(array $content): string {
@@ -116,8 +116,8 @@ final class mail {
             'people' => $people,
             'hastasks' => (bool) $tasks,
             'tasks' => $tasks,
-            'button' => !empty($content['button']) ? ['url' => self::in_language($content['button']['url'])] + $content['button']
-                : null,
+            'button' => !empty($content['button']) ? ['url' => self::leading((string) $content['button']['url'], $content)]
+                + $content['button'] : null,
             'after' => array_values((array) ($content['after'] ?? [])),
             'quiet' => $content['quiet'] ?? null,
             'sign' => $sign ? true : false,
@@ -366,10 +366,30 @@ final class mail {
     private static function link(array $content, ?\stdClass $library): string {
         global $CFG;
         if (!empty($content['button']['url'])) {
-            return self::in_language((string) $content['button']['url']);
+            return self::leading((string) $content['button']['url'], $content);
         }
         return !empty($library->slug)
             ? (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false) : $CFG->wwwroot;
+    }
+
+    /**
+     * Where the button of a notice leads: the page in the language of the notice and, for whoever has Aty on their phone and a
+     * page the app knows how to open, by way of the app. Aty is optional, and may be an older one.
+     *
+     * @param string $url
+     * @param array $content
+     * @return string
+     */
+    private static function leading(string $url, array $content): string {
+        $url = self::in_language($url);
+        $api = '\\local_oksigeniaaty\\api';
+        if (
+            empty($content['userid']) || !preg_match('#/local/oksigeniaayvurenda/(record|index)\.php#', $url)
+                || !class_exists($api) || !method_exists($api, 'app_link')
+        ) {
+            return $url;
+        }
+        return $api::app_link((int) $content['userid'], $url);
     }
 
     /**
