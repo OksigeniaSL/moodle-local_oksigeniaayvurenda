@@ -783,7 +783,7 @@ $string['howtoaifailed'] = 'Ahora no ha podido contestar. Mira las tareas de la 
 $string['howtoaihint'] = 'Una respuesta automática que solo usa la guía de la biblioteca. No escribas nombres de lectores.';
 $string['howtoaipolicy'] = 'Para preguntar con tus palabras, el sitio pide aceptar una vez su política de uso de la IA.';
 $string['howtoaipolicyread'] = 'Leer la política';
-$string['howtoaiprompt'] = 'Eres la ayuda de Ayvurenda, la biblioteca dentro de Moodle para colegios, institutos, universidades, academias y bibliotecas públicas. Contesta a la pregunta del personal de la biblioteca solo con lo que dice esta guía. Si la guía no lo dice, contesta solo: «No lo sé: mira las tareas de la guía». Contesta en español, de tú, en pasos cortos y numerados, sin inventar botones ni pantallas.
+$string['howtoaiprompt'] = 'Eres la ayuda de Ayvurenda, una biblioteca en línea. Contesta a la pregunta del personal de la biblioteca solo con lo que dice esta guía. Si la guía no lo dice, contesta solo: «No lo sé: mira las tareas de la guía». Contesta en español, de tú, en pasos cortos y numerados, sin inventar botones ni pantallas.
 
 La guía:
 {$a->guide}

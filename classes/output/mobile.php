@@ -65,13 +65,8 @@ class mobile {
                 ),
                 'holds' => array_map(fn($hold) => $hold + ['when' => $hold['ready'] ? $str('mobileready', $hold['until'])
                     : $str('mobilewaiting')], $library['holds']),
-                // Not «barcode» nor «qr»: other templates use those names for drawings, not addresses.
-                'barcodeimg' => $code !== '' && code39::can($code)
-                    ? 'data:image/svg+xml;base64,' . base64_encode(code39::svg($code, 60, false)) : '',
-                'qrimg' => $code !== ''
-                    ? 'data:image/png;base64,' . base64_encode((new \core_qrcode($code))->getBarcodePngData(4, 4)) : '',
                 'qkey' => 'q' . $index,
-            ] + $library;
+            ] + self::codes($code) + $library;
         }
         $data = [
             'libraries' => $libraries,
@@ -97,6 +92,52 @@ class mobile {
             )]],
             'javascript' => '',
             'otherdata' => $otherdata,
+        ];
+    }
+
+    /**
+     * The reader's card alone, to show at the desk: their name, the library, the QR and the barcode, big.
+     *
+     * @param array $args What the app sends.
+     * @return array
+     */
+    public static function mobile_card_view(array $args): array {
+        global $OUTPUT, $USER;
+        $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+        $cards = [];
+        foreach (mine::summary((int) $USER->id) as $library) {
+            if ($library['cardcode'] !== '') {
+                // Not «library» nor «name»: the page's own would stand in for what is missing in a list.
+                $cards[] = ['where' => $library['name'], 'cardcode' => $library['cardcode'], 'fullname' => fullname($USER)]
+                    + self::codes($library['cardcode'], 8);
+            }
+        }
+        $data = ['cards' => $cards, 'hascards' => (bool) $cards, 'notreader' => $str('mobilenotreader'),
+            'hint' => $str('mobilecardhint')];
+        return [
+            'templates' => [['id' => 'main', 'html' => $OUTPUT->render_from_template(
+                'local_oksigeniaayvurenda/mobile_card',
+                self::inert($data)
+            )]],
+            'javascript' => '',
+            'otherdata' => [],
+        ];
+    }
+
+    /**
+     * A card's code as pictures embedded in the page. Not «barcode» nor «qr»: other templates use those names for drawings,
+     * not addresses.
+     *
+     * @param string $code
+     * @param int $qrscale The size of each square of the QR.
+     * @return array barcodeimg and qrimg, empty when they cannot be drawn.
+     */
+    private static function codes(string $code, int $qrscale = 4): array {
+        return [
+            'barcodeimg' => $code !== '' && code39::can($code)
+                ? 'data:image/svg+xml;base64,' . base64_encode(code39::svg($code, 60, false)) : '',
+            'qrimg' => $code !== ''
+                ? 'data:image/png;base64,' . base64_encode((new \core_qrcode($code))->getBarcodePngData($qrscale, $qrscale)) : '',
         ];
     }
 

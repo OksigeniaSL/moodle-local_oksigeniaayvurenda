@@ -156,6 +156,9 @@ final class mine {
         if ($items) {
             $card += ['heading' => $str('mobileloans'), 'items' => array_slice($items, 0, self::HOME_ROWS)];
         }
-        return [$card];
+        // The reader's card, a tap away, to show at the desk.
+        $card2 = ['tile' => ['label' => $str('mobilecard'), 'icon' => 'fas-id-card', 'method' => 'mobile_card_view',
+            'pagetitle' => $str('mobilecard')]];
+        return array_filter(array_column($summary, 'cardcode'), fn($code) => $code !== '') ? [$card, $card2] : [$card];
     }
 }

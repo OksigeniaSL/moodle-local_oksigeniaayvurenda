@@ -28,6 +28,31 @@ namespace local_oksigeniaayvurenda\output;
 #[\PHPUnit\Framework\Attributes\CoversClass(mobile::class)]
 final class mobile_test extends \advanced_testcase {
     /**
+     * The card's page: the reader's name and code, with their pictures, and nothing a template could run; for anyone
+     * else, that they are not a reader.
+     */
+    public function test_card_view(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Ana', 'lastname' => 'Duna {{ 7 }} @if']);
+        $reader = $gen->create_reader(['entityid' => $library->entityid, 'userid' => $user->id]);
+        $this->setUser($user);
+        $html = mobile::mobile_card_view([])['templates'][0]['html'];
+        $this->assertStringContainsString((string) $reader->cardcode, $html);
+        $this->assertStringContainsString('data:image/png;base64', $html);
+        $this->assertStringContainsString('background: #fff', $html);
+        $this->assertStringContainsString('Ana Duna', $html);
+        $this->assertStringNotContainsString('{{ 7', $html);
+        $this->assertDoesNotMatchRegularExpression('/@[a-z]/i', $html);
+        // Whoever is not a reader is told so.
+        $this->setUser($this->getDataGenerator()->create_user());
+        $html = mobile::mobile_card_view([])['templates'][0]['html'];
+        $this->assertStringContainsString(get_string('mobilenotreader', 'local_oksigeniaayvurenda'), $html);
+        $this->assertStringNotContainsString('data:image', $html);
+    }
+
+    /**
      * A reader gets their books, their card's code as letters, barcode and QR, and the ways in that leave the app;
      * someone who is no reader is told so.
      */

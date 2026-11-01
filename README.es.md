@@ -1,12 +1,12 @@
-# Biblioteca para Moodle (Oksigenia Ayvurenda)
+# Oksigenia Ayvurenda: gestión de bibliotecas en línea
 
 [![Licencia: GPLv3](https://img.shields.io/badge/licencia-GPLv3+-blue.svg)](LICENSE)
 ![Moodle](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-orange)
 ![Estado](https://img.shields.io/badge/estado-prealfa-red)
 [![Patrocinio](https://img.shields.io/badge/patrocinio-Oksigenia-00d4ff)](https://oksigenia.com/en/open-source#sponsor)
 
-**Ayvurenda** es una biblioteca para Moodle™, para colegios, institutos, universidades, academias y bibliotecas públicas
-o privadas, que llevan sus bibliotecarios y cuyos lectores son los usuarios del sitio.
+**Ayvurenda** es la gestión de bibliotecas en línea, para cualquier biblioteca: el mostrador, el catálogo, el carné de cada
+lector y una biblioteca que se visita. Este es su plugin para Moodle™, donde los lectores son los usuarios del sitio.
 
 Desarrollado por [Oksigenia](https://oksigenia.com).
 

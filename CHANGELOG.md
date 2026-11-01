@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.111.0 (2026-11-01)
+
+- The reader's card alone in the app, to show at the desk (`mobile_card_view`): their name, the library, the QR and the
+  barcode, big and on white in light and in dark; on Aty's home, a tile («Your card») beside the library's.
+- The look of a reader's library gives Aty its picture as `picture`, not as `logo`: it is a photo or a drawing, and it
+  fills the top of the header.
+- The library's menu entry no longer asks to be a tab: Aty cannot open a plugin's page from one.
+
 ## 0.110.1 (2026-11-01)
 
 From Aty's test on a phone:

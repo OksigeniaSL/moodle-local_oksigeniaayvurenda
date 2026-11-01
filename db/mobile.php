@@ -34,8 +34,6 @@ $addons = [
                     'title' => 'mobilelibrary',
                     // Not «fas-book-open»: Aty's «My courses» has it, right beside this one.
                     'icon' => 'fas-book-open-reader',
-                    // A tab of its own in Aty when it fits by priority; the official app ignores it.
-                    'tab' => true,
                 ],
                 'priority' => 500,
             ],

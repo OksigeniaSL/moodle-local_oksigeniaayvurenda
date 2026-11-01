@@ -43,7 +43,8 @@ final class brand {
      * centre still open only to its staff.
      *
      * @param int $userid
-     * @return array|null name (the centre), library, colour (#rrggbb), logo (address, or null), tagline, url (its home).
+     * @return array|null name (the centre), library, colour (#rrggbb), picture (a photo or a drawing: address, or null),
+     *     tagline, url (its home).
      */
     public static function of_user(int $userid): ?array {
         global $DB;
@@ -81,7 +82,8 @@ final class brand {
                 ),
                 'library' => format_string($main->name, true, ['escape' => false]),
                 'colour' => self::COLOURS[$look['colour']] ?? self::COLOURS[0],
-                'logo' => $look['image'],
+                // A picture of the library, not a logo: Aty fills the top of its header with it.
+                'picture' => $look['image'],
                 'tagline' => $look['motto'],
                 'url' => (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $main->slug]))->out(false),
             ];

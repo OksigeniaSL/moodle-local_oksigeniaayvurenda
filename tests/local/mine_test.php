@@ -74,7 +74,9 @@ final class mine_test extends \advanced_testcase {
         $ana = $this->getDataGenerator()->create_user();
         $reader = $gen->create_reader(['entityid' => $library->entityid, 'userid' => $ana->id, 'readertype' => 'student']);
         $cards = mine::home_cards((int) $ana->id, $now);
-        $this->assertCount(1, $cards);
+        $this->assertCount(2, $cards);
+        $this->assertSame('mobile_card_view', $cards[1]['tile']['method']);
+        $this->assertSame('fas-id-card', $cards[1]['tile']['icon']);
         $this->assertSame('mobile_library_view', $cards[0]['tile']['method']);
         $this->assertSame('fas-book-open-reader', $cards[0]['tile']['icon']);
         $this->assertArrayNotHasKey('items', $cards[0]);
