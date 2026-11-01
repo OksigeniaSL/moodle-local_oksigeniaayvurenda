@@ -33,6 +33,8 @@ $addons = [
                 'displaydata' => [
                     'title' => 'mobilelibrary',
                     'icon' => 'fas-book-open',
+                    // A tab of its own in Aty when it fits by priority; the official app ignores it.
+                    'tab' => true,
                 ],
                 'priority' => 500,
             ],

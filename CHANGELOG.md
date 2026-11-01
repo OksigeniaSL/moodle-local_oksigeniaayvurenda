@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.110.0 (2026-11-01)
+
+- The home of Oksigenia Aty shows the library: a reader's books out and what is set aside for them, the late ones first,
+  and the way in (`local_oksigeniaayvurenda_oksigeniaaty_home_cards()`); in Aty, the library is a tab where it fits.
+  Textbooks lent for the year stay out.
+- In the app's pages, an at sign in a text is as harmless as a brace: Angular also reads «@let» and «@if» there.
+- A book's record opens at the top, with its title: the short shelf «Beside it on the shelf» took the page to the end and
+  took the focus with it.
+- In English, a book that can be borrowed is «available», not «free», which read like a price.
+
 ## 0.109.0 (2026-11-01)
 
 - A fourth skin, «Public library», for a town's, a foundation's or an association's library: readers of every age,

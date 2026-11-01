@@ -232,9 +232,10 @@ class mobile {
     }
 
     /**
-     * The page's data with no braces in its texts. The app compiles these templates as Angular ones, and Mustache does
-     * not escape braces: a title brought from Open Library, Wikisource or an imported catalogue with «{{ … }}» in it
-     * would run in the app with the reader's session. Each brace becomes its full-width look-alike, which reads the same.
+     * The page's data with no braces nor at signs in its texts. The app compiles these templates as Angular ones, and
+     * Mustache escapes neither: a title brought from Open Library, Wikisource or an imported catalogue with «{{ … }}» or
+     * «@let» in it would run in the app with the reader's session, and an «@if» would not let the page compile. Each one
+     * becomes its full-width look-alike, which reads the same; in an address, an at sign means nothing and stays.
      *
      * @param mixed $data
      * @return mixed
@@ -243,7 +244,11 @@ class mobile {
         if (is_array($data)) {
             return array_map([self::class, 'inert'], $data);
         }
-        return is_string($data) && !str_starts_with($data, 'data:') ? strtr($data, ['{' => '｛', '}' => '｝']) : $data;
+        if (!is_string($data) || str_starts_with($data, 'data:')) {
+            return $data;
+        }
+        $map = ['{' => '｛', '}' => '｝'];
+        return strtr($data, preg_match('#^https?://#i', $data) ? $map : $map + ['@' => '＠']);
     }
 
     /**

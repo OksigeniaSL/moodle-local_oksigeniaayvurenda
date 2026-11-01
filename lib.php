@@ -170,6 +170,17 @@ function local_oksigeniaayvurenda_oksigeniaaty_user_brand(int $userid): ?array {
 }
 
 /**
+ * What a reader's home shows of the library in Oksigenia Aty: their books out and what is set aside for them, and the way
+ * into the library. Nothing for whoever is not a reader.
+ *
+ * @param int $userid
+ * @return array A list of cards, as Aty's homecards class describes them.
+ */
+function local_oksigeniaayvurenda_oksigeniaaty_home_cards(int $userid): array {
+    return \local_oksigeniaayvurenda\local\mine::home_cards($userid);
+}
+
+/**
  * «Readings» in a course's menu: for whoever can change the course, always (to make its list); for the rest, when the
  * course has some.
  *

@@ -439,6 +439,7 @@ final class holds {
                     (int) $row->timeexpires,
                     get_string('strftimedateshort', 'langconfig')
                 ) : '',
+                'expires' => (int) $row->timeexpires,
                 'ahead' => $row->status === 'waiting' ? self::ahead($row) : 0,
             ];
         }

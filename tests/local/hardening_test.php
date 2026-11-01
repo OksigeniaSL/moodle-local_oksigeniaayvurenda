@@ -128,5 +128,12 @@ final class hardening_test extends \advanced_testcase {
             'id' => $record->id])['templates'][0]['html'];
         $this->assertStringNotContainsString('{{ 7', $html);
         $this->assertStringContainsString('｛｛ 7 * 7 ｝｝', $html);
+        // Nor an at sign: Angular reads «@let» and «@if» in a text without any brace.
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => '@let x = 7; @if (x']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id]);
+        $html = \local_oksigeniaayvurenda\output\mobile::mobile_record_view(['library' => $library->slug,
+            'id' => $record->id])['templates'][0]['html'];
+        $this->assertDoesNotMatchRegularExpression('/@[a-z]/i', $html);
+        $this->assertStringContainsString('＠let x = 7; ＠if (x', $html);
     }
 }

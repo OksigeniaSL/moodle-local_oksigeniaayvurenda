@@ -190,12 +190,14 @@
         var here = shelf.querySelector('.ayv-spine-here a.ayv-spine');
         roving(shelf, here || list[0]);
         markRows(shelf);
-        if (here) {
+        // Without a lectern (the short shelf of a record), a spine is just its link.
+        var lectern = !!document.getElementById('ayv-lectern');
+        // On the shelves the page goes to the book asked for, with the focus. On a record the shelf is a detail near the
+        // end: the page stays at the top with the book's title, the focus stays where it was.
+        if (here && lectern) {
             here.scrollIntoView({block: 'center'});
             here.focus({preventScroll: true});
         }
-        // Without a lectern (the short shelf of a record), a spine is just its link.
-        var lectern = !!document.getElementById('ayv-lectern');
         shelf.addEventListener('click', function (event) {
             var spine = event.target.closest('a.ayv-spine');
             if (!lectern || !spine || event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) {

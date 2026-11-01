@@ -29,6 +29,9 @@ namespace local_oksigeniaayvurenda\local;
  * them or that they wait for, and the ways in (the library, the card, Ayvu rande). Nothing of anyone else.
  */
 final class mine {
+    /** @var int The most rows a reader's home in the app shows. */
+    private const HOME_ROWS = 5;
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -89,6 +92,9 @@ final class mine {
                     'url' => $url('record.php', $where, ['id' => $row->recordid]),
                     'due' => userdate((int) $row->timedue, get_string('strftimedateshort', 'langconfig')),
                     'late' => (int) $row->timedue < $now,
+                    'timedue' => (int) $row->timedue,
+                    // A textbook lent for the year is not something to remember on a phone's home.
+                    'textbook' => bank::is($where),
                 ];
             }
             $holds = array_map(
@@ -107,5 +113,47 @@ final class mine {
             ];
         }
         return $out;
+    }
+
+    /**
+     * What a reader's home in Oksigenia Aty shows of the library: their books out and what is set aside for them, the
+     * most pressing first, and the way into the library. Nothing for whoever is not a reader.
+     *
+     * @param int $userid
+     * @param int|null $now
+     * @return array A list with one card: tile and, when there is something to show, heading and items. The fields, in
+     *     Aty's homecards class.
+     */
+    public static function home_cards(int $userid, ?int $now = null): array {
+        $now = $now ?? time();
+        $summary = self::summary($userid, $now);
+        if (!$summary) {
+            return [];
+        }
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $items = [];
+        foreach ($summary as $library) {
+            foreach ($library['loans'] as $loan) {
+                if (!$loan['textbook']) {
+                    $items[] = ['title' => $loan['title'], 'detail' => $library['name'], 'date' => $loan['timedue'],
+                        'urgent' => $loan['late'], 'method' => 'mobile_record_view',
+                        'args' => ['library' => $loan['where'], 'id' => $loan['recordid']]];
+                }
+            }
+            foreach ($library['holds'] as $hold) {
+                if ($hold['ready']) {
+                    $items[] = ['title' => $hold['title'], 'detail' => $str('mobileready', $hold['until']),
+                        'date' => $hold['expires'], 'urgent' => false, 'method' => 'mobile_record_view',
+                        'args' => ['library' => $library['slug'], 'id' => $hold['recordid']]];
+                }
+            }
+        }
+        usort($items, fn($a, $b) => [$b['urgent'], $a['date']] <=> [$a['urgent'], $b['date']]);
+        $card = ['tile' => ['label' => $str('mobilelibrary'), 'icon' => 'fas-book-open', 'method' => 'mobile_library_view',
+            'pagetitle' => $str('mobilelibrary')]];
+        if ($items) {
+            $card += ['heading' => $str('mobileloans'), 'items' => array_slice($items, 0, self::HOME_ROWS)];
+        }
+        return [$card];
     }
 }
