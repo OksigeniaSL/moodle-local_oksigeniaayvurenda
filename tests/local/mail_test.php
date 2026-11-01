@@ -122,6 +122,31 @@ final class mail_test extends \advanced_testcase {
     }
 
     /**
+     * The herald signs in a school; in the other skins, the library does, by its name and without a picture, unless the centre
+     * asks the herald to; and nobody signs what does not have to be signed.
+     */
+    public function test_sign(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library(['name' => 'Biblioteca de Riosalto']);
+        $entityid = (int) $library->entityid;
+        $this->assertNull(mail::sign($entityid, null, false, $library));
+        $this->assertStringContainsString('Mainumby', mail::sign($entityid, null, true, $library)['text']);
+        foreach (['public', 'university', 'company', 'mobile'] as $skin) {
+            libraries::update_entity($entityid, ['skin' => $skin]);
+            skins::forget($entityid);
+            $signed = mail::sign($entityid, null, true, $library);
+            $this->assertSame('— Biblioteca de Riosalto', $signed['text'], $skin);
+            $this->assertSame('', $signed['portrait'], $skin);
+            $this->assertSame('', $signed['initial'], $skin);
+            $this->assertNull(mail::sign($entityid, null, true), $skin);
+        }
+        characters::save($entityid, ['herald' => ['enabled' => true, 'name' => 'Rosa', 'sex' => 'f', 'signs' => true]]);
+        $this->assertStringContainsString('Rosa', mail::sign($entityid, null, false, $library)['text']);
+    }
+
+    /**
      * The name of a library has its own article, or none («Biblioteca de Riosalto», «La Casa del Libro»): in Spanish, no
      * sentence puts a preposition right before it.
      */

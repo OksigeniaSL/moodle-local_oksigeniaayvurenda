@@ -402,7 +402,7 @@ final class holds {
             ),
         ];
         $str = fn(string $key) => get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda', $a);
-        $sign = mail::sign((int) $library->entityid, $reader, skins::lively((int) $library->entityid));
+        $sign = mail::sign((int) $library->entityid, $reader, true, $library);
         $url = (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $hold->recordid]))
             ->out(false);
         $sent = notices::send(

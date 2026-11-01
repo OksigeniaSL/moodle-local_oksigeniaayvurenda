@@ -53,7 +53,10 @@ final class mail {
         'public' => 'publica', 'company' => 'empresa', 'mobile' => 'publica'];
 
     /** @var string The picture at the top for a young reader of a school. */
-    private const PICTURE_YOUNG = 'cabecera-1';
+    private const PICTURE_YOUNG = 'cabecera-5';
+
+    /** @var string[] The skins where the herald signs for anyone; in the rest, for a young reader or if the centre asks. */
+    private const HERALD_SIGNS = ['school', 'secondary'];
 
     /** @var string[] Where a picture of a centre may be. */
     public const AREAS = ['cover', 'libraryimage', 'portrait'];
@@ -117,6 +120,7 @@ final class mail {
             'after' => array_values((array) ($content['after'] ?? [])),
             'quiet' => $content['quiet'] ?? null,
             'sign' => $sign ? true : false,
+            'signpicture' => !empty($sign['portrait']) || !empty($sign['initial']),
             'signportrait' => $sign['portrait'] ?? '',
             'signinitial' => $sign['initial'] ?? '',
             'signtext' => $sign['text'] ?? '',
@@ -163,17 +167,33 @@ final class mail {
     }
 
     /**
-     * Who signs a notice: the herald, with their portrait of the centre or the art package's. Null if the centre has it off.
+     * Who signs a notice: the herald, with their portrait of the centre or the art package's; where the herald does not speak to
+     * this reader, the library, by its name and without a picture.
      *
      * @param int $entityid
      * @param \stdClass|null $reader Who it is for: a young reader sees the flower's herald, and the rest the sky's.
      * @param bool $always Whether to sign even if the centre does not ask the herald to sign what it sends.
+     * @param \stdClass|null $library The library that signs when the herald does not.
      * @return array|null portrait, initial, text.
      */
-    public static function sign(int $entityid, ?\stdClass $reader = null, bool $always = false): ?array {
+    public static function sign(
+        int $entityid,
+        ?\stdClass $reader = null,
+        bool $always = false,
+        ?\stdClass $library = null
+    ): ?array {
         $herald = characters::of($entityid)['herald'];
-        if (!$herald['enabled'] || (!$always && !$herald['signs'])) {
+        if (!$always && !$herald['signs']) {
             return null;
+        }
+        $speaks = $herald['enabled']
+            && ($herald['signs'] || self::young($reader) || in_array(skins::of($entityid), self::HERALD_SIGNS, true));
+        if (!$speaks) {
+            return !$library ? null : ['portrait' => '', 'initial' => '', 'text' => get_string(
+                'mailsignlibrary',
+                self::COMPONENT,
+                format_string($library->name, true, ['escape' => false])
+            )];
         }
         $young = $reader ? self::young($reader) : skins::lively($entityid);
         $own = self::file_of('portrait', $entityid, 'herald');

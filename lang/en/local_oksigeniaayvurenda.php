@@ -1476,6 +1476,7 @@ $string['ltiurllaunch'] = 'Tool URL, redirection URI and content selection URL';
 $string['ltiurllogin'] = 'Initiate login URL';
 $string['mailhello'] = 'Hello, {$a}:';
 $string['mailprefs'] = 'Choose which notices I get';
+$string['mailsignlibrary'] = '— {$a}';
 $string['mailwhere'] = 'Where';
 $string['mailwhyreader'] = 'You get this because you have a card at this library.';
 $string['mailwhystaff'] = 'You get this because you run this library.';

@@ -30,6 +30,37 @@ namespace local_oksigeniaayvurenda\local;
 #[\PHPUnit\Framework\Attributes\CoversClass(goals::class)]
 final class newsletter_test extends \advanced_testcase {
     /**
+     * A catalogue brought in from another program is not news, unless what it brings says it was acquired that week; and a copy
+     * of an old record that comes in by hand is.
+     */
+    public function test_an_import_is_not_news(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $since = $now - WEEKSECS;
+        $source = fn($record, $when) => $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $entityid,
+            'system' => 'marc', 'tablename' => 'record', 'externalid' => 'x' . $record->id, 'localid' => $record->id,
+            'timecreated' => $when]);
+        $whole = $gen->create_record(['entityid' => $entityid, 'title' => 'Traído con el catálogo']);
+        $source($whole, $now);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $whole->id, 'timeacquired' => $now - 900 * DAYSECS]);
+        $this->assertSame(0, newsletter::news($entityid, $since)['total']);
+        $bought = $gen->create_record(['entityid' => $entityid, 'title' => 'Comprado esta semana']);
+        $source($bought, $now);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $bought->id, 'timeacquired' => $now]);
+        $old = $gen->create_record(['entityid' => $entityid, 'title' => 'Otro ejemplar de uno viejo']);
+        $source($old, $now - 400 * DAYSECS);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $old->id]);
+        $this->assertEqualsCanonicalizing(
+            ['Comprado esta semana', 'Otro ejemplar de uno viejo'],
+            array_values(newsletter::news($entityid, $since)['titles'])
+        );
+    }
+
+    /**
      * Only who signed up gets the news, once a week at most and only when something came, from the libraries and not
      * from a textbook bank; and nothing while the centre is open only to its staff.
      */

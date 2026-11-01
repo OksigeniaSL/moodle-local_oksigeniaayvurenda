@@ -32,7 +32,7 @@
     * hasshelf, shelfrows - rows of cells: isbook, title, cover, coverbg, coverink; more - how many more
     * haspeople, people - rows: name, line; hastasks, tasks - rows: text, url
     * button - url, text; after - smaller paragraphs; quiet - hint, url, text
-    * sign, signportrait, signinitial, signtext - who signs
+    * sign, signpicture, signportrait, signinitial, signtext - who signs
     * why, prefsurl, prefstext, madewith - the foot; linkurl - where the pictures lead
 
     Example context (json):
@@ -55,7 +55,7 @@
         "hastasks": true, "tasks": [{"text": "Una reseña por revisar", "url": "https://example.com/r"}],
         "button": {"url": "https://example.com", "text": "Ver el libro"}, "after": ["Gracias."],
         "quiet": {"hint": "Si quieres borrarla:", "url": "https://example.com/b", "text": "Borrar mi voz"},
-        "sign": true, "signportrait": "https://example.com/s.png", "signinitial": "M",
+        "sign": true, "signpicture": true, "signportrait": "https://example.com/s.png", "signinitial": "M",
         "signtext": "— Mainumby, el pregonero de la biblioteca", "why": "Te llega porque tienes carné en esta biblioteca.",
         "linkurl": "https://example.com/l", "prefsurl": "https://example.com/n", "prefstext": "Elegir qué avisos recibo", "madewith": "Hecho con Ayvurenda"
     }
@@ -78,7 +78,9 @@ body > p a { color: inherit; }
     .ayvm-card { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; }
     .ayvm-title { font-size: 26px !important; }
     .ayvm-round { border-radius: 0 !important; }
-    .ayvm-drawn { height: 104px !important; }
+    .ayvm-book { display: inline-block !important; width: 50% !important; box-sizing: border-box; vertical-align: top; }
+    .ayvm-nobook { display: none !important; }
+    .ayvm-drawn { height: 235px !important; }
 }
 @media (prefers-color-scheme: dark) {
     .ayvm-page { background-color: #0b1f1b !important; }
@@ -163,7 +165,7 @@ body > p a { color: inherit; }
 {{#shelfrows}}
 <tr>
     {{#cells}}
-    <td style="border:0;width:25%;padding:6px 6px 12px;vertical-align:top;">
+    <td class="{{#isbook}}ayvm-book{{/isbook}}{{^isbook}}ayvm-nobook{{/isbook}}" style="border:0;width:25%;padding:6px 6px 12px;vertical-align:top;">
         {{#isbook}}
         {{#cover}}<a href="{{linkurl}}" style="display:block;"><img src="{{cover}}" width="120" alt="" style="display:block;width:100%;height:auto;border:1px solid #e4d8bf;border-radius:2px 5px 5px 2px;"></a>{{/cover}}
         {{^cover}}<table role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;"><tr><td class="ayvm-drawn" style="border:0;height:170px;padding:6px;text-align:center;vertical-align:middle;background-color:{{coverbg}};border-radius:2px 5px 5px 2px;font-family:Literata,Georgia,serif;font-size:12px;line-height:1.2;font-weight:600;color:{{coverink}};">{{title}}</td></tr></table>{{/cover}}
@@ -214,10 +216,12 @@ body > p a { color: inherit; }
 {{#sign}}
 <tr><td class="ayvm-pad" style="border:0;padding:18px 32px 4px;">
 <table role="presentation" style="border-collapse:collapse;"><tr>
+    {{#signpicture}}
     <td style="border:0;width:56px;padding:0 12px 0 0;vertical-align:middle;">
         {{#signportrait}}<img src="{{signportrait}}" width="56" height="56" alt="" style="display:block;width:56px;height:56px;border:0;border-radius:50%;">{{/signportrait}}
         {{^signportrait}}<table role="presentation" style="width:56px;border-collapse:separate;border-spacing:0;"><tr><td style="border:0;height:56px;text-align:center;vertical-align:middle;background-color:{{accentbg}};border-radius:50%;font-family:Literata,Georgia,serif;font-size:24px;font-weight:600;color:{{accentink}};">{{signinitial}}</td></tr></table>{{/signportrait}}
     </td>
+    {{/signpicture}}
     <td style="border:0;vertical-align:middle;"><p class="ayvm-soft" style="margin:0;font-size:14px;line-height:1.4;font-style:italic;color:#5f6b67;">{{signtext}}</p></td>
 </tr></table>
 </td></tr>

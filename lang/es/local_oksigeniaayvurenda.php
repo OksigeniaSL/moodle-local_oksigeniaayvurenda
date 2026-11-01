@@ -1476,6 +1476,7 @@ $string['ltiurllaunch'] = 'Dirección de la herramienta, de redirección y de se
 $string['ltiurllogin'] = 'Dirección para iniciar la sesión («Initiate login URL»)';
 $string['mailhello'] = 'Hola, {$a}:';
 $string['mailprefs'] = 'Elegir qué avisos recibo';
+$string['mailsignlibrary'] = '— {$a}';
 $string['mailwhere'] = 'Dónde';
 $string['mailwhyreader'] = 'Te llega porque tienes carné en esta biblioteca.';
 $string['mailwhystaff'] = 'Te llega porque llevas esta biblioteca.';

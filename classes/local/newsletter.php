@@ -112,7 +112,8 @@ final class newsletter {
     }
 
     /**
-     * What came into a centre's libraries (not its textbook banks) since a moment, the newest first.
+     * What came into a centre's libraries (not its textbook banks) since a moment, the newest first. A catalogue brought in whole
+     * from another program did not just come: what an import brings counts only if it says it was acquired in that time.
      *
      * @param int $entityid
      * @param int $since
@@ -120,11 +121,13 @@ final class newsletter {
      */
     public static function news(int $entityid, int $since): array {
         global $DB;
-        $params = ['entityid' => $entityid, 'since' => $since, 'kind' => bank::KIND];
+        $params = ['entityid' => $entityid, 'since' => $since, 'kind' => bank::KIND, 'imported' => $since, 'acquired' => $since];
         $from = "FROM {" . self::T . "item} i
                  JOIN {" . self::T . "library} b ON b.id = i.libraryid
                  JOIN {" . self::T . "record} r ON r.id = i.recordid
-                WHERE b.entityid = :entityid AND b.kind <> :kind AND i.timecreated >= :since AND i.status <> 'withdrawn'";
+            LEFT JOIN {" . self::T . "source} s ON s.tablename = 'record' AND s.localid = r.id AND s.timecreated >= :imported
+                WHERE b.entityid = :entityid AND b.kind <> :kind AND i.timecreated >= :since AND i.status <> 'withdrawn'
+                      AND (s.id IS NULL OR i.timeacquired >= :acquired)";
         $total = (int) $DB->count_records_sql("SELECT COUNT(DISTINCT r.id) $from", $params);
         $titles = $total ? array_map(fn($r) => $r->title, $DB->get_records_sql(
             "SELECT r.id, r.title, MAX(i.timecreated) AS came $from GROUP BY r.id, r.title ORDER BY MAX(i.timecreated) DESC, r.id",

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.119.1 (2026-11-01)
+
+- Bringing in a catalogue is no longer news: the weekly message counts what an import brings only if it says it was acquired that
+  week.
+- By e-mail: the pictures cut closer to what they show; the adults of a public library, a university or a company read the library's
+  signature, without a character, unless the centre asks the herald to sign; and on a phone the new books go two by two.
+
 ## 0.119.0 (2026-11-01)
 
 - Notices by e-mail have a design: the library's picture and colour, what it is about, the book as a slip with its date, one large
