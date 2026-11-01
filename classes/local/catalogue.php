@@ -677,6 +677,25 @@ final class catalogue {
     }
 
     /**
+     * The first authors of a record, as a card shows them.
+     *
+     * @param int $recordid
+     * @return string
+     */
+    public static function authors_of(int $recordid): string {
+        global $DB;
+        $labels = $DB->get_fieldset_sql(
+            "SELECT a.label
+               FROM {" . self::T . "recauth} ra
+               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+              WHERE ra.recordid = :recordid AND a.kind = 'author'
+           ORDER BY ra.sortorder, ra.id",
+            ['recordid' => $recordid]
+        );
+        return implode(' · ', array_map(fn($label) => self::display_name($label), array_slice($labels, 0, 2)));
+    }
+
+    /**
      * SQL that keeps records with a copy free to take home from a library (parameter freelibrary).
      *
      * @return string

@@ -486,7 +486,7 @@ final class screens {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
         if (
             !$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+(\.[a-z]+)?)*$#', $name)
-                || !in_array($type, ['webp', 'svg', 'glb', 'json'], true)
+                || !in_array($type, ['webp', 'svg', 'glb', 'json', 'jpg', 'png'], true)
                 || !is_readable($dir . '/pix/' . $name . '.' . $type)
         ) {
             return null;

@@ -116,7 +116,7 @@ final class newsletter {
      *
      * @param int $entityid
      * @param int $since
-     * @return array total, titles (up to LISTED), library (the centre's main one: slug and name), or no library.
+     * @return array total, titles (record => title, up to LISTED), library (the centre's main one: slug and name), or no library.
      */
     public static function news(int $entityid, int $since): array {
         global $DB;
@@ -126,12 +126,12 @@ final class newsletter {
                  JOIN {" . self::T . "record} r ON r.id = i.recordid
                 WHERE b.entityid = :entityid AND b.kind <> :kind AND i.timecreated >= :since AND i.status <> 'withdrawn'";
         $total = (int) $DB->count_records_sql("SELECT COUNT(DISTINCT r.id) $from", $params);
-        $titles = $total ? array_values(array_map(fn($r) => $r->title, $DB->get_records_sql(
+        $titles = $total ? array_map(fn($r) => $r->title, $DB->get_records_sql(
             "SELECT r.id, r.title, MAX(i.timecreated) AS came $from GROUP BY r.id, r.title ORDER BY MAX(i.timecreated) DESC, r.id",
             $params,
             0,
             self::LISTED
-        ))) : [];
+        )) : [];
         $library = $DB->get_records_select(
             self::T . 'library',
             'entityid = :entityid AND kind <> :kind',
@@ -156,11 +156,17 @@ final class newsletter {
         if (!$news['library']) {
             return false;
         }
+        global $DB;
+        // In their language, wherever the task runs; in the tone of the centre's skin.
+        $language = force_current_language((string) $user->lang);
         $words = fn(string $key) => skins::words($entityid, $key);
         $str = fn(string $key, $a = null) => get_string($words($key), 'local_oksigeniaayvurenda', $a);
         $lines = array_map(fn($t) => get_string('newbooksline', 'local_oksigeniaayvurenda', $t), $news['titles']);
+        $more = '';
         if ($news['total'] > count($news['titles'])) {
-            $lines[] = get_string('newbooksmore', 'local_oksigeniaayvurenda', $news['total'] - count($news['titles']));
+            $left = $news['total'] - count($news['titles']);
+            $more = get_string('newbooksmore', 'local_oksigeniaayvurenda', screens::number($left));
+            $lines[] = $more;
         }
         $a = (object) ['name' => $user->firstname, 'library' => format_string($news['library']->name, true, ['escape' => false]),
             'books' => implode("\n", $lines)];
@@ -170,13 +176,34 @@ final class newsletter {
             $body .= "\n\n" . characters::say($entityid, 'herald', 'heraldsign')['text'];
         }
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $news['library']->slug]))->out(false);
-        return notices::send(
+        $subject = $news['total'] === 1 ? $str('newbookssubjectone') : $str('newbookssubject', screens::number($news['total']));
+        $shelf = [];
+        foreach ($news['titles'] as $recordid => $title) {
+            $shelf[] = mail::book((int) $recordid, $title);
+        }
+        $sent = notices::send(
             'newbooks',
             $user,
-            $news['total'] === 1 ? $str('newbookssubjectone') : $str('newbookssubject', $news['total']),
+            $subject,
             $body,
             $url,
-            format_string($news['library']->name, true, ['escape' => false])
+            format_string($news['library']->name, true, ['escape' => false]),
+            '',
+            [
+                'library' => $DB->get_record(self::T . 'library', ['id' => $news['library']->id]),
+                'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),
+                'heading' => $subject,
+                'lead' => [$str('newbookslead')],
+                'shelf' => $shelf,
+                'more' => $more,
+                'button' => ['url' => $url, 'text' => get_string('newbooksbutton', 'local_oksigeniaayvurenda')],
+                'after' => [$str('newbooksafter')],
+                'sign' => mail::sign($entityid),
+                'why' => get_string('mailwhyreader', 'local_oksigeniaayvurenda'),
+                'prefs' => true,
+            ]
         );
+        force_current_language($language);
+        return $sent;
     }
 }

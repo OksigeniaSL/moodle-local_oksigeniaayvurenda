@@ -1,0 +1,233 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/email_notice
+
+    A notice by e-mail: the library's picture and name, what it is about, the book as a slip with its date, one large button and
+    who signs. Inline styles and tables, the only thing every mail program respects, without any image needed to read it; 600
+    pixels at most; the style block only adds the phone and the dark mode of the programs that read it.
+
+    Context variables required for this template:
+    * lang, preheader - the language; the line mail programs show before opening it
+    * artpicture, ownpicture - the picture at the top: cut to fit, or of any shape, or empty
+    * libraryname, motto - who sends it
+    * accentbg, accentink, accenttext, buttonbg, buttonink, bandcorners - the colours of the library
+    * hello, heading, lead - what it is about
+    * book - title, authors, cover (address, or empty), coverbg, coverink; stamp, place - label and value, on the slip
+    * hasbooks, books - rows: title, cover, coverbg, coverink, line, urgent
+    * hasshelf, shelfrows - rows of cells: isbook, title, cover, coverbg, coverink; more - how many more
+    * haspeople, people - rows: name, line; hastasks, tasks - rows: text, url
+    * button - url, text; after - smaller paragraphs; quiet - hint, url, text
+    * sign, signportrait, signinitial, signtext - who signs
+    * why, prefsurl, prefstext, madewith - the foot; linkurl - where the pictures lead
+
+    Example context (json):
+    {
+        "lang": "es", "preheader": "Te lo guardamos hasta el 6 de noviembre", "artpicture": "https://example.com/p.jpg",
+        "ownpicture": "", "libraryname": "Biblioteca de Monte Claro", "motto": "Pasa y lee", "accentbg": "#17574c",
+        "accentink": "#ffffff", "accenttext": "#17574c", "buttonbg": "#17574c", "buttonink": "#ffffff", "bandcorners": "0",
+        "hello": "Hola, Hugo:", "heading": "Tu libro te espera", "lead": ["El libro que reservaste ha vuelto."],
+        "book": {"title": "Canciones de Monte Claro", "authors": "Ana Montes", "cover": "https://example.com/c.jpg",
+            "coverbg": "#17574c", "coverink": "#ffffff"},
+        "stamp": {"label": "Te lo guardamos hasta", "value": "6 de noviembre"},
+        "place": {"label": "Dónde", "value": "Biblioteca de Monte Claro"},
+        "hasbooks": true,
+        "books": [{"title": "El faro", "cover": "https://example.com/f.jpg", "coverbg": "#17574c", "coverink": "#ffffff", "line": "Tocaba el 2 de octubre",
+            "urgent": true}],
+        "hasshelf": true,
+        "shelfrows": [{"cells": [{"isbook": true, "title": "El faro", "cover": "https://example.com/f.jpg", "coverbg": "#17574c", "coverink": "#ffffff"},
+            {"isbook": false}, {"isbook": false}, {"isbook": false}]}],
+        "more": "Y 3 más.", "haspeople": true, "people": [{"name": "Leo Montes", "line": "1 libro, 3 días de retraso"}],
+        "hastasks": true, "tasks": [{"text": "Una reseña por revisar", "url": "https://example.com/r"}],
+        "button": {"url": "https://example.com", "text": "Ver el libro"}, "after": ["Gracias."],
+        "quiet": {"hint": "Si quieres borrarla:", "url": "https://example.com/b", "text": "Borrar mi voz"},
+        "sign": true, "signportrait": "https://example.com/s.png", "signinitial": "M",
+        "signtext": "— Mainumby, el pregonero de la biblioteca", "why": "Te llega porque tienes carné en esta biblioteca.",
+        "linkurl": "https://example.com/l", "prefsurl": "https://example.com/n", "prefstext": "Elegir qué avisos recibo", "madewith": "Hecho con Ayvurenda"
+    }
+}}
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>{{heading}}</title>
+<style>
+:root { color-scheme: light dark; }
+body > p { margin: 0; padding: 0 16px 16px; }
+body > p a { color: inherit; }
+@media (max-width: 480px) {
+    .ayvm-pad { padding-left: 20px !important; padding-right: 20px !important; }
+    .ayvm-outer { padding: 0 !important; }
+    .ayvm-card { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; }
+    .ayvm-title { font-size: 26px !important; }
+    .ayvm-round { border-radius: 0 !important; }
+    .ayvm-drawn { height: 104px !important; }
+}
+@media (prefers-color-scheme: dark) {
+    .ayvm-page { background-color: #0b1f1b !important; }
+    .ayvm-card { background-color: #13302a !important; border-color: #24463f !important; }
+    .ayvm-slip { background-color: #1b3d36 !important; }
+    .ayvm-ink { color: #f5efe2 !important; }
+    .ayvm-soft { color: #b9c7c1 !important; }
+    .ayvm-rule { border-color: #2c4f47 !important; }
+    .ayvm-tone { color: #f0b43c !important; }
+    .ayvm-late { color: #f5a08e !important; }
+    .ayvm-link { color: #f0b43c !important; }
+}
+</style>
+</head>
+<body class="ayvm-page ayvm-soft" style="margin:0;padding:0;background-color:#efe6d3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;text-align:center;color:#5f6b67;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#efe6d3;font-size:1px;line-height:1px;">{{preheader}}</div>
+<table role="presentation" class="ayvm-page" style="width:100%;border-collapse:collapse;background-color:#efe6d3;">
+<tr><td class="ayvm-outer" style="border:0;padding:24px 12px;">
+<!--[if mso]><table role="presentation" style="width:600px;margin:0 auto;"><tr><td><![endif]-->
+<table role="presentation" class="ayvm-card" style="width:100%;max-width:600px;margin:0 auto;text-align:left;border-collapse:separate;border-spacing:0;background-color:#fffdf7;border:1px solid #e4d8bf;border-radius:22px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1e2b2a;">
+{{#artpicture}}
+<tr><td class="ayvm-round" style="border:0;padding:0;font-size:0;line-height:0;background-color:{{accentbg}};border-radius:21px 21px 0 0;"><a href="{{linkurl}}" style="display:block;"><img src="{{artpicture}}" width="600" height="175" alt="" class="ayvm-round" style="display:block;width:100%;height:auto;border:0;border-radius:21px 21px 0 0;"></a></td></tr>
+{{/artpicture}}
+{{#ownpicture}}
+<tr><td class="ayvm-round" style="border:0;height:175px;padding:0;background-color:{{accentbg}};background-image:url('{{ownpicture}}');background-size:cover;background-position:center;border-radius:21px 21px 0 0;">&nbsp;</td></tr>
+{{/ownpicture}}
+<tr><td class="ayvm-pad ayvm-round" style="border:0;padding:12px 32px;background-color:{{accentbg}};border-radius:{{bandcorners}};">
+    <p style="margin:0;font-size:15px;line-height:1.35;font-weight:700;color:{{accentink}};">{{libraryname}}</p>
+    {{#motto}}<p style="margin:2px 0 0;font-size:13px;line-height:1.35;font-style:italic;color:{{accentink}};">{{motto}}</p>{{/motto}}
+</td></tr>
+<tr><td class="ayvm-pad" style="border:0;padding:28px 32px 8px;">
+    {{#hello}}<p class="ayvm-soft" style="margin:0 0 6px;font-size:16px;line-height:1.4;color:#5f6b67;">{{hello}}</p>{{/hello}}
+    <h1 class="ayvm-ink ayvm-title" style="margin:0 0 12px;font-family:Literata,Georgia,'Times New Roman',serif;font-size:30px;line-height:1.2;font-weight:600;color:#1e2b2a;">{{heading}}</h1>
+    {{#lead}}<p class="ayvm-ink" style="margin:0 0 12px;font-size:16px;line-height:1.55;color:#1e2b2a;">{{.}}</p>{{/lead}}
+</td></tr>
+{{#book}}
+<tr><td class="ayvm-pad" style="border:0;padding:6px 32px 10px;">
+<table role="presentation" class="ayvm-slip" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#f7efdc;border-radius:16px;">
+<tr>
+    <td style="border:0;width:104px;padding:18px 0 18px 18px;vertical-align:top;">
+        {{#cover}}<a href="{{linkurl}}" style="display:block;"><img src="{{cover}}" width="104" alt="" style="display:block;width:104px;height:auto;border:1px solid #e4d8bf;border-radius:3px 7px 7px 3px;"></a>{{/cover}}
+        {{^cover}}<table role="presentation" style="width:104px;border-collapse:separate;border-spacing:0;"><tr><td style="border:0;height:150px;padding:10px;text-align:center;vertical-align:middle;background-color:{{coverbg}};border-radius:3px 7px 7px 3px;font-family:Literata,Georgia,serif;font-size:14px;line-height:1.25;font-weight:600;color:{{coverink}};">{{title}}</td></tr></table>{{/cover}}
+    </td>
+    <td style="border:0;padding:18px;vertical-align:top;">
+        <p class="ayvm-ink" style="margin:0;font-family:Literata,Georgia,'Times New Roman',serif;font-size:20px;line-height:1.25;font-weight:600;color:#1e2b2a;">{{title}}</p>
+        {{#authors}}<p class="ayvm-soft" style="margin:6px 0 0;font-size:14px;line-height:1.4;color:#5f6b67;">{{authors}}</p>{{/authors}}
+        {{#place}}<p class="ayvm-soft" style="margin:12px 0 0;font-size:14px;line-height:1.4;color:#5f6b67;">{{label}}: <span class="ayvm-ink" style="color:#1e2b2a;">{{value}}</span></p>{{/place}}
+    </td>
+</tr>
+{{#stamp}}
+<tr><td colspan="2" style="border:0;padding:0 18px 16px;">
+    <table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td class="ayvm-rule" style="border:0;padding:14px 0 0;border-top:2px dashed #d8c7a2;">
+        <p class="ayvm-soft" style="margin:0;font-size:12px;line-height:1.3;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5f6b67;">{{label}}</p>
+        <p class="ayvm-tone" style="margin:2px 0 0;font-family:Literata,Georgia,'Times New Roman',serif;font-size:26px;line-height:1.2;font-weight:600;color:{{accenttext}};">{{value}}</p>
+    </td></tr></table>
+</td></tr>
+{{/stamp}}
+</table>
+</td></tr>
+{{/book}}
+{{#hasbooks}}
+<tr><td class="ayvm-pad" style="border:0;padding:6px 32px 10px;">
+<table role="presentation" class="ayvm-slip" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#f7efdc;border-radius:16px;">
+{{#books}}
+<tr>
+    <td style="border:0;width:52px;padding:12px 0 12px 16px;vertical-align:top;">
+        {{#cover}}<a href="{{linkurl}}" style="display:block;"><img src="{{cover}}" width="52" alt="" style="display:block;width:52px;height:auto;border:1px solid #e4d8bf;border-radius:2px 4px 4px 2px;"></a>{{/cover}}
+        {{^cover}}<table role="presentation" style="width:52px;border-collapse:separate;border-spacing:0;"><tr><td style="border:0;height:74px;background-color:{{coverbg}};border-radius:2px 4px 4px 2px;">&nbsp;</td></tr></table>{{/cover}}
+    </td>
+    <td style="border:0;padding:12px 16px;vertical-align:middle;">
+        <p class="ayvm-ink" style="margin:0;font-family:Literata,Georgia,'Times New Roman',serif;font-size:17px;line-height:1.25;font-weight:600;color:#1e2b2a;">{{title}}</p>
+        {{#line}}<p class="ayvm-late" style="margin:4px 0 0;font-size:14px;line-height:1.35;font-weight:700;color:#a8402a;">{{line}}</p>{{/line}}
+    </td>
+</tr>
+{{/books}}
+</table>
+</td></tr>
+{{/hasbooks}}
+{{#hasshelf}}
+<tr><td class="ayvm-pad" style="border:0;padding:6px 26px 4px;">
+<table role="presentation" style="width:100%;table-layout:fixed;border-collapse:collapse;">
+{{#shelfrows}}
+<tr>
+    {{#cells}}
+    <td style="border:0;width:25%;padding:6px 6px 12px;vertical-align:top;">
+        {{#isbook}}
+        {{#cover}}<a href="{{linkurl}}" style="display:block;"><img src="{{cover}}" width="120" alt="" style="display:block;width:100%;height:auto;border:1px solid #e4d8bf;border-radius:2px 5px 5px 2px;"></a>{{/cover}}
+        {{^cover}}<table role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;"><tr><td class="ayvm-drawn" style="border:0;height:170px;padding:6px;text-align:center;vertical-align:middle;background-color:{{coverbg}};border-radius:2px 5px 5px 2px;font-family:Literata,Georgia,serif;font-size:12px;line-height:1.2;font-weight:600;color:{{coverink}};">{{title}}</td></tr></table>{{/cover}}
+        <p class="ayvm-ink" style="margin:6px 0 0;font-size:13px;line-height:1.3;color:#1e2b2a;">{{title}}</p>
+        {{/isbook}}
+    </td>
+    {{/cells}}
+</tr>
+{{/shelfrows}}
+</table>
+</td></tr>
+{{/hasshelf}}
+{{#more}}<tr><td class="ayvm-pad" style="border:0;padding:0 32px 8px;"><p class="ayvm-soft" style="margin:0;font-size:14px;line-height:1.4;color:#5f6b67;">{{more}}</p></td></tr>{{/more}}
+{{#haspeople}}
+<tr><td class="ayvm-pad" style="border:0;padding:6px 32px 10px;">
+<table role="presentation" class="ayvm-slip" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#f7efdc;border-radius:16px;">
+{{#people}}
+<tr><td style="border:0;padding:11px 18px;">
+    <p class="ayvm-ink" style="margin:0;font-size:16px;line-height:1.3;font-weight:700;color:#1e2b2a;">{{name}}</p>
+    <p class="ayvm-soft" style="margin:2px 0 0;font-size:14px;line-height:1.35;color:#5f6b67;">{{line}}</p>
+</td></tr>
+{{/people}}
+</table>
+</td></tr>
+{{/haspeople}}
+{{#hastasks}}
+<tr><td class="ayvm-pad" style="border:0;padding:6px 32px 10px;">
+<table role="presentation" class="ayvm-slip" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#f7efdc;border-radius:16px;">
+{{#tasks}}
+<tr><td style="border:0;padding:13px 18px;"><a class="ayvm-link" href="{{url}}" style="font-size:16px;line-height:1.3;font-weight:700;color:{{accenttext}};">{{text}}</a></td></tr>
+{{/tasks}}
+</table>
+</td></tr>
+{{/hastasks}}
+{{#button}}
+<tr><td class="ayvm-pad" style="border:0;padding:14px 32px 8px;">
+<table role="presentation" style="width:100%;border-collapse:separate;border-spacing:0;"><tr><td style="border:0;text-align:center;background-color:{{buttonbg}};border-radius:14px;">
+    <a href="{{url}}" style="display:block;padding:16px 24px;font-size:17px;line-height:1.25;font-weight:700;color:{{buttonink}};text-decoration:none;border-radius:14px;">{{text}}</a>
+</td></tr></table>
+</td></tr>
+{{/button}}
+{{#after}}
+<tr><td class="ayvm-pad" style="border:0;padding:8px 32px 0;"><p class="ayvm-soft" style="margin:0;font-size:14px;line-height:1.5;color:#5f6b67;">{{.}}</p></td></tr>
+{{/after}}
+{{#quiet}}
+<tr><td class="ayvm-pad" style="border:0;padding:10px 32px 0;"><p class="ayvm-soft" style="margin:0;font-size:14px;line-height:1.5;color:#5f6b67;">{{hint}} <a class="ayvm-link" href="{{url}}" style="color:{{accenttext}};">{{text}}</a></p></td></tr>
+{{/quiet}}
+{{#sign}}
+<tr><td class="ayvm-pad" style="border:0;padding:18px 32px 4px;">
+<table role="presentation" style="border-collapse:collapse;"><tr>
+    <td style="border:0;width:56px;padding:0 12px 0 0;vertical-align:middle;">
+        {{#signportrait}}<img src="{{signportrait}}" width="56" height="56" alt="" style="display:block;width:56px;height:56px;border:0;border-radius:50%;">{{/signportrait}}
+        {{^signportrait}}<table role="presentation" style="width:56px;border-collapse:separate;border-spacing:0;"><tr><td style="border:0;height:56px;text-align:center;vertical-align:middle;background-color:{{accentbg}};border-radius:50%;font-family:Literata,Georgia,serif;font-size:24px;font-weight:600;color:{{accentink}};">{{signinitial}}</td></tr></table>{{/signportrait}}
+    </td>
+    <td style="border:0;vertical-align:middle;"><p class="ayvm-soft" style="margin:0;font-size:14px;line-height:1.4;font-style:italic;color:#5f6b67;">{{signtext}}</p></td>
+</tr></table>
+</td></tr>
+{{/sign}}
+<tr><td class="ayvm-pad" style="border:0;padding:20px 32px 22px;">
+    <p class="ayvm-soft ayvm-rule" style="margin:0;padding:14px 0 0;border-top:1px solid #e4d8bf;font-size:12px;line-height:1.6;color:#5f6b67;">{{why}}{{#prefsurl}} <a class="ayvm-link" href="{{prefsurl}}" style="color:{{accenttext}};">{{prefstext}}</a>{{/prefsurl}}{{#madewith}} · <a class="ayvm-link" href="https://ayvurenda.com/" style="color:{{accenttext}};">{{madewith}}</a>{{/madewith}}</p>
+</td></tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td></tr>
+</table>
+</body>
+</html>

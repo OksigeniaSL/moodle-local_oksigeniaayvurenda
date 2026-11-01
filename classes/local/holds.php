@@ -390,26 +390,47 @@ final class holds {
         if (access::closed((int) $library->entityid)) {
             return false;
         }
+        // In their language and at their hour, wherever the task runs; in the tone of the centre's skin.
+        $language = force_current_language((string) $user->lang);
         $a = (object) [
             'title' => (string) $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]),
             'library' => format_string($library->name, true, ['escape' => false]),
-            'until' => userdate((int) $hold->timeexpires, get_string('strftimedateshort', 'langconfig')),
+            'until' => userdate(
+                (int) $hold->timeexpires,
+                get_string('strftimedateshort', 'langconfig'),
+                \core_date::get_user_timezone($user)
+            ),
         ];
-        // In the tone of the centre's skin.
-        $words = fn(string $key) => skins::words((int) $library->entityid, $key);
-        $body = get_string($words('holdreadybody'), 'local_oksigeniaayvurenda', $a) . "\n\n" .
-            characters::say((int) $library->entityid, 'herald', 'heraldsign')['text'];
+        $str = fn(string $key) => get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda', $a);
+        $sign = mail::sign((int) $library->entityid, $reader, skins::lively((int) $library->entityid));
         $url = (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $hold->recordid]))
             ->out(false);
-        return notices::send(
+        $sent = notices::send(
             'holdready',
             $user,
-            get_string($words('holdreadysubject'), 'local_oksigeniaayvurenda', $a),
-            $body,
+            $str('holdreadysubject'),
+            $str('holdreadybody') . ($sign ? "\n\n" . $sign['text'] : ''),
             $url,
             $a->title,
-            format_string($library->name, true, ['escape' => false])
+            $a->library,
+            [
+                'library' => $library,
+                'young' => mail::young($reader),
+                'preheader' => $str('holdreadypreheader'),
+                'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),
+                'heading' => $str('holdreadyheading'),
+                'lead' => [$str('holdreadylead')],
+                'book' => mail::book((int) $hold->recordid, $a->title, catalogue::authors_of((int) $hold->recordid)),
+                'stamp' => ['label' => $str('holdreadyuntil'), 'value' => $a->until],
+                'place' => ['label' => get_string('mailwhere', 'local_oksigeniaayvurenda'), 'value' => $a->library],
+                'button' => ['url' => $url, 'text' => get_string('holdreadybutton', 'local_oksigeniaayvurenda')],
+                'sign' => $sign,
+                'why' => get_string('mailwhyreader', 'local_oksigeniaayvurenda'),
+                'prefs' => true,
+            ]
         );
+        force_current_language($language);
+        return $sent;
     }
 
     /**

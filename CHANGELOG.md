@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.119.0 (2026-11-01)
+
+- Notices by e-mail have a design: the library's picture and colour, what it is about, the book as a slip with its date, one large
+  button and who signs, in the tone of each skin, on a phone and in dark mode; readable with images off. All of them: a book set
+  aside, late books, new books, the tutor's summary, what awaits the staff, a copy that failed, a voice received and the app link.
+- A library's sentences no longer need an article before its name: «Where: Monte Claro Library».
+- A notice reaches each person in their own language and at their own hour, wherever the task runs.
+- In the app, a notice opens the book or the library inside it, in the official app and in Aty.
+
 ## 0.118.0 (2026-11-01)
 
 - Recover a copy. Whoever runs the site opens an encrypted copy with its key, sees what it holds and brings it back as a new

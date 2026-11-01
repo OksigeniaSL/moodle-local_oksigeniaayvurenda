@@ -30,6 +30,7 @@ $addons = [
             'library' => [
                 'delegate' => 'CoreMainMenuDelegate',
                 'method' => 'mobile_library_view',
+                'init' => 'mobile_init',
                 'displaydata' => [
                     'title' => 'mobilelibrary',
                     // Not «fas-book-open»: Aty's «My courses» has it, right beside this one.

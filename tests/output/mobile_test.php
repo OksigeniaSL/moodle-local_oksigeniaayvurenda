@@ -134,4 +134,17 @@ final class mobile_test extends \advanced_testcase {
         $html = mobile::mobile_record_view(['library' => 'no-such-library', 'id' => $record->id])['templates'][0]['html'];
         $this->assertStringContainsString(get_string('mobilenotreader', 'local_oksigeniaayvurenda'), $html);
     }
+
+    /**
+     * What the app runs at the start opens the links of the notices inside it, and the plugin tells the app to run it.
+     */
+    public function test_init(): void {
+        global $CFG;
+        $javascript = mobile::mobile_init([])['javascript'];
+        $this->assertStringContainsString('CoreContentLinksDelegate.registerHandler', $javascript);
+        $this->assertStringContainsString('mobile_record_view', $javascript);
+        $addons = [];
+        include($CFG->dirroot . '/local/oksigeniaayvurenda/db/mobile.php');
+        $this->assertSame('mobile_init', $addons['local_oksigeniaayvurenda']['handlers']['library']['init']);
+    }
 }

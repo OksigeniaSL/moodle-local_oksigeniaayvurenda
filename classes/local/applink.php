@@ -90,11 +90,42 @@ final class applink {
             return 'appnone';
         }
         try {
-            $sent = \local_oksigeniaaty\api::send_link((int) $reader->userid, self::DAYS);
+            $sent = self::mail_link($reader);
         } catch (\moodle_exception $e) {
             return 'appnotallowed';
         }
         return !$sent ? 'appnomail' : ($created ? 'appcreated' : 'appsent');
+    }
+
+    /**
+     * Sends a reader the link that opens the app, with the look of their library.
+     *
+     * @param \stdClass $reader
+     * @return bool
+     */
+    private static function mail_link(\stdClass $reader): bool {
+        $user = \core_user::get_user((int) $reader->userid, '*', MUST_EXIST);
+        $link = \local_oksigeniaaty\api::issue_link((int) $user->id, self::DAYS);
+        $language = force_current_language((string) $user->lang);
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $until = userdate((int) $link['expires'], get_string('strftimedate', 'langconfig'), \core_date::get_user_timezone($user));
+        $subject = $str('applinkmailsubject');
+        $hello = $str('mailhello', $user->firstname);
+        $library = mail::main_library((int) $reader->entityid);
+        $text = $hello . "\n\n" . $str('applinkmaillead') . "\n\n" . $link['url'] . "\n\n" . $str('applinkmailuntil', $until) . ' '
+            . $str('applinkmailhint');
+        $html = mail::html([
+            'library' => $library,
+            'entityid' => (int) $reader->entityid,
+            'hello' => $hello,
+            'heading' => $str('applinkmailheading'),
+            'lead' => [$str('applinkmaillead')],
+            'button' => ['url' => $link['url'], 'text' => $str('applinkmailbutton')],
+            'after' => [$str('applinkmailuntil', $until), $str('applinkmailhint')],
+            'why' => $str('mailwhyreader'),
+        ]);
+        force_current_language($language);
+        return (bool) email_to_user($user, mail::from($library ? (string) $library->name : ''), $subject, $text, $html);
     }
 
     /**

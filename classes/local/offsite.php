@@ -502,7 +502,17 @@ final class offsite {
                 $str('offsitefailedsubject'),
                 $str('offsitefailedbody', implode(', ', $failed)),
                 $url,
-                $str('copiesheading')
+                $str('copiesheading'),
+                '',
+                [
+                    'library' => mail::main_library($entityid),
+                    'entityid' => $entityid,
+                    'heading' => $str('offsitefailedsubject'),
+                    'lead' => [$str('offsitefailedbody', implode(', ', $failed))],
+                    'button' => $url !== '' ? ['url' => $url, 'text' => $str('offsitefailedbutton')] : null,
+                    'why' => $str('mailwhystaff'),
+                    'prefs' => true,
+                ]
             );
         }
     }

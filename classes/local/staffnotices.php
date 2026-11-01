@@ -90,9 +90,34 @@ final class staffnotices {
                 if (!$user || $user->deleted || $user->suspended) {
                     continue;
                 }
-                [$subject, $body] = self::words($entity, $library, $reviews, $wishes);
+                $language = force_current_language((string) $user->lang);
+                [$subject, $body, $tasks] = self::words($entity, $library, $reviews, $wishes);
                 $url = (new \moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);
-                if (notices::send('stafftodo', $user, $subject, $body, $url, get_string('desktitle', 'local_oksigeniaayvurenda'))) {
+                $sent = notices::send(
+                    'stafftodo',
+                    $user,
+                    $subject,
+                    $body,
+                    $url,
+                    get_string('desktitle', 'local_oksigeniaayvurenda'),
+                    '',
+                    [
+                        'library' => $DB->get_record(self::T . 'library', ['id' => $library->id]) ?: null,
+                        'entityid' => (int) $entity->id,
+                        'heading' => get_string('stafftodoheading', 'local_oksigeniaayvurenda'),
+                        'lead' => [get_string(
+                            'stafftodobody',
+                            'local_oksigeniaayvurenda',
+                            format_string($entity->name, true, ['escape' => false])
+                        )],
+                        'tasks' => $tasks,
+                        'button' => ['url' => $url, 'text' => get_string('stafftodobutton', 'local_oksigeniaayvurenda')],
+                        'why' => get_string('mailwhystaff', 'local_oksigeniaayvurenda'),
+                        'prefs' => true,
+                    ]
+                );
+                force_current_language($language);
+                if ($sent) {
                     set_user_preference(self::PREFERENCE, $now, (int) $userid);
                     $stats['sent']++;
                 }
@@ -132,19 +157,33 @@ final class staffnotices {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $parts = [];
         $lines = [];
+        $tasks = [];
         $url = fn(string $page) => $library ? (new \moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))
             ->out(false) : '';
         if ($reviews) {
             $parts[] = $reviews === 1 ? $str('stafftodoreviewsone') : $str('stafftodoreviewsmany', $reviews);
             $lines[] = end($parts) . ': ' . $url('reviews.php');
+            $tasks[] = ['text' => self::capital(end($parts)), 'url' => $url('reviews.php')];
         }
         if ($wishes) {
             $parts[] = $wishes === 1 ? $str('stafftodowishesone') : $str('stafftodowishesmany', $wishes);
             $lines[] = end($parts) . ': ' . $url('wishes.php');
+            $tasks[] = ['text' => self::capital(end($parts)), 'url' => $url('wishes.php')];
         }
         $what = implode($str('stafftodoand'), $parts);
         return [$str('stafftodosubject', (object) ['centre' => format_string($entity->name, true, ['escape' => false]),
             'what' => $what]),
-            $str('stafftodobody', format_string($entity->name, true, ['escape' => false])) . "\n\n" . implode("\n", $lines)];
+            $str('stafftodobody', format_string($entity->name, true, ['escape' => false])) . "\n\n" . implode("\n", $lines),
+            $tasks];
+    }
+
+    /**
+     * A task as a line of its own, with its capital letter.
+     *
+     * @param string $text
+     * @return string
+     */
+    private static function capital(string $text): string {
+        return \core_text::strtoupper(\core_text::substr($text, 0, 1)) . \core_text::substr($text, 1);
     }
 }

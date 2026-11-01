@@ -61,7 +61,7 @@ final class notices {
         $tz = \core_date::get_server_timezone_object();
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $loans = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title
+            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title, rec.id AS recordid
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
@@ -99,7 +99,7 @@ final class notices {
         $tz = \core_date::get_server_timezone_object();
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $list = array_values($DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title
+            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title, rec.id AS recordid
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
@@ -126,12 +126,18 @@ final class notices {
         if (!$user || $user->deleted || $user->suspended) {
             return false;
         }
-        // In the tone of the centre's skin.
-        $words = fn(string $key) => skins::words((int) $list[0]->entityid, $key);
+        // In their language and at their hour, wherever the task runs; in the tone of the centre's skin.
+        $language = force_current_language((string) $user->lang);
+        $entityid = (int) $list[0]->entityid;
+        $words = fn(string $key) => skins::words($entityid, $key);
+        $str = fn(string $key, $a = null) => get_string($words($key), 'local_oksigeniaayvurenda', $a);
+        $timezone = \core_date::get_user_timezone($user);
         $lines = [];
+        $rows = [];
         foreach ($list as $loan) {
-            $lines[] = get_string($words('noticereaderline'), 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
-                'due' => userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'))]);
+            $due = userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'), $timezone);
+            $lines[] = $str('noticereaderline', (object) ['title' => $loan->title, 'due' => $due]);
+            $rows[] = ['line' => $str('noticereaderdue', $due), 'urgent' => true] + mail::book((int) $loan->recordid, $loan->title);
         }
         $a = (object) ['name' => $user->firstname, 'library' => format_string($list[0]->library, true, ['escape' => false]),
             'books' => implode("\n", $lines)];
@@ -141,21 +147,39 @@ final class notices {
             $a
         );
         $body = get_string($words('noticereaderbody'), 'local_oksigeniaayvurenda', $a);
-        $herald = characters::of((int) $list[0]->entityid)['herald'];
+        $herald = characters::of($entityid)['herald'];
+        $one = count($list) === 1;
         // To a young reader (the card with the flower), the herald tells it her way: the book misses its shelf.
         $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
         $young = $herald['enabled'] && $reader && cards::look_of($reader, $now) === 'flower'
-            ? characters::say((int) $list[0]->entityid, 'herald', 'heraldoverdue', ['reader' => $user->firstname,
-                'books' => $a->books, 'library' => $a->library]) : null;
+            ? characters::say($entityid, 'herald', $one ? 'heraldoverdueone' : 'heraldoverdue', ['reader' => $user->firstname,
+                'books' => $a->books]) : null;
+        $heading = $subject;
+        $after = $str('noticereaderafter');
         if ($young) {
             $body = $young['text'];
+            $heading = $str($one ? 'heraldoverdueheading' : 'heraldoverdueheadingmany');
+            $after = '';
         } else if ($herald['enabled'] && $herald['signs']) {
-            $body .= "\n\n" . characters::say((int) $list[0]->entityid, 'herald', 'heraldsign')['text'];
+            $body .= "\n\n" . characters::say($entityid, 'herald', 'heraldsign')['text'];
         }
         // The library of the oldest one, where the reader sees what they have.
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
         $library = format_string($list[0]->library, true, ['escape' => false]);
-        $told = self::send('overdue', $user, $subject, $body, $url, $library, $library);
+        $told = self::send('overdue', $user, $subject, $body, $url, $library, $library, [
+            'library' => $DB->get_record(self::T . 'library', ['slug' => $list[0]->slug]),
+            'young' => mail::young($reader ?: null),
+            'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),
+            'heading' => $heading,
+            'lead' => $young ? [$str($one ? 'heraldoverduelead' : 'heraldoverdueleadmany')] : [],
+            'books' => $rows,
+            'button' => ['url' => $url, 'text' => get_string('noticereaderbutton', 'local_oksigeniaayvurenda')],
+            'after' => $after !== '' ? [$after] : [],
+            'sign' => mail::sign($entityid, $reader ?: null, (bool) $young),
+            'why' => get_string('mailwhyreader', 'local_oksigeniaayvurenda'),
+            'prefs' => true,
+        ]);
+        force_current_language($language);
         [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
         $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
         return $told;
@@ -214,6 +238,7 @@ final class notices {
         if (!$user || $user->deleted || $user->suspended) {
             return false;
         }
+        $language = force_current_language((string) $user->lang);
         $readers = [];
         foreach ($late as $loan) {
             $days = loan_rules::days_late((int) $loan->timedue, $now, $tz);
@@ -223,25 +248,43 @@ final class notices {
             $readers[$loan->readerid] = $entry;
         }
         $lines = [];
+        $people = [];
         foreach ($readers as $entry) {
-            $lines[] = get_string(
-                $entry['books'] === 1 ? 'noticetutorlineone' : 'noticetutorline',
+            $row = get_string(
+                'noticetutorrow' . ($entry['books'] === 1 ? 'one' : '') . ($entry['days'] === 1 ? 'day' : ''),
                 'local_oksigeniaayvurenda',
                 (object) $entry
             );
+            $line = (object) ['name' => $entry['name'], 'row' => $row];
+            $lines[] = get_string('noticetutorline', 'local_oksigeniaayvurenda', $line);
+            $people[] = ['name' => $entry['name'], 'line' => $row];
         }
         $a = (object) ['name' => $user->firstname, 'group' => $tutor->groupname,
             'library' => format_string(reset($late)->library, true, ['escape' => false]), 'readers' => implode("\n", $lines)];
+        $url = (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => reset($late)->slug,
+            'group' => $tutor->groupname]))->out(false);
+        $subject = get_string('noticetutorsubject', 'local_oksigeniaayvurenda', $a);
         $told = self::send(
             'overduetutor',
             $user,
-            get_string('noticetutorsubject', 'local_oksigeniaayvurenda', $a),
+            $subject,
             get_string('noticetutorbody', 'local_oksigeniaayvurenda', $a),
-            (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => reset($late)->slug,
-                    'group' => $tutor->groupname]))->out(false),
+            $url,
             $tutor->groupname,
-            $a->library
+            $a->library,
+            [
+                'library' => $DB->get_record(self::T . 'library', ['slug' => reset($late)->slug]),
+                'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),
+                'heading' => $subject,
+                'lead' => [get_string('noticetutorlead', 'local_oksigeniaayvurenda')],
+                'people' => $people,
+                'button' => ['url' => $url, 'text' => get_string('noticetutorbutton', 'local_oksigeniaayvurenda')],
+                'after' => [get_string('noticetutorafter', 'local_oksigeniaayvurenda')],
+                'why' => get_string('mailwhytutor', 'local_oksigeniaayvurenda'),
+                'prefs' => true,
+            ]
         );
+        force_current_language($language);
         $DB->set_field(self::T . 'tutor', 'timenotified', $now, ['id' => $tutor->id]);
         return $told;
     }
@@ -271,6 +314,7 @@ final class notices {
      * @param string $body Plain text.
      * @param string $url The exact page the message is about, which Moodle and its app open from it.
      * @param string $urlname What that page is.
+     * @param array|null $design What the e-mail shows, for mail::html(); without it, the words as they are.
      * @param string $from The library that speaks: in a site that is only a library, it signs the message.
      * @return bool
      */
@@ -281,22 +325,18 @@ final class notices {
         string $body,
         string $url = '',
         string $urlname = '',
-        string $from = ''
+        string $from = '',
+        ?array $design = null
     ): bool {
         $message = new \core\message\message();
         $message->component = 'local_oksigeniaayvurenda';
         $message->name = $provider;
-        // A copy: the one Moodle hands out is the same for the whole request, and the next message is someone else's.
-        $message->userfrom = clone \core_user::get_noreply_user();
-        if ($from !== '' && onlylibrary::on()) {
-            $message->userfrom->firstname = $from;
-            $message->userfrom->lastname = '';
-        }
+        $message->userfrom = mail::from($from);
         $message->userto = $user;
         $message->subject = $subject;
         $message->fullmessage = $body;
         $message->fullmessageformat = FORMAT_PLAIN;
-        $message->fullmessagehtml = nl2br(s($body));
+        $message->fullmessagehtml = mail::html($design ?? mail::plain($subject, $body));
         $message->smallmessage = $subject;
         $message->notification = 1;
         if ($url !== '') {

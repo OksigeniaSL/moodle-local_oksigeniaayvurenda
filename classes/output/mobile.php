@@ -38,6 +38,21 @@ use local_oksigeniaayvurenda\local\screens;
  */
 class mobile {
     /**
+     * What the app runs when it starts: the links of the notices open inside it.
+     *
+     * @param array $args What the app sends.
+     * @return array
+     */
+    public static function mobile_init(array $args): array {
+        global $CFG;
+        return [
+            'templates' => [],
+            'javascript' => (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/mobile-links.js'),
+            'otherdata' => '',
+        ];
+    }
+
+    /**
      * The page of the menu entry.
      *
      * @param array $args What the app sends: userid among others.

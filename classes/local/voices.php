@@ -153,18 +153,24 @@ final class voices {
         if (!$user || $user->deleted) {
             return false;
         }
+        $language = force_current_language((string) $user->lang);
         $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
         // The book's page, in a library of its centre.
         $slug = (string) $DB->get_field_select(self::T . 'library', 'slug', 'entityid = ?', [$item->entityid], IGNORE_MULTIPLE);
-        return notices::send(
+        $subject = get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title);
+        $sent = notices::send(
             'voicereceived',
             $user,
-            get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title),
+            $subject,
             get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)]),
             $slug !== '' ? (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $slug, 'id' => $item->recordid]))
                 ->out(false) : '',
-            $title
+            $title,
+            '',
+            self::received_mail($item, $title, $subject) + ['prefs' => true]
         );
+        force_current_language($language);
+        return $sent;
     }
 
     /**
@@ -180,17 +186,41 @@ final class voices {
             return false;
         }
         $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
-        $to = \core_user::get_noreply_user();
+        $to = clone \core_user::get_noreply_user();
         $to->email = $email;
         $to->firstname = '';
         $to->lastname = '';
-        $to->mailformat = 0;
+        $to->mailformat = 1;
+        $subject = get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title);
         return (bool) email_to_user(
             $to,
-            \core_user::get_noreply_user(),
-            get_string('voicereceivedsubject', 'local_oksigeniaayvurenda', $title),
-            get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)])
+            mail::from((string) (mail::main_library((int) $item->entityid)->name ?? '')),
+            $subject,
+            get_string('voicereceivedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => self::forget_url($item)]),
+            mail::html(self::received_mail($item, $title, $subject))
         );
+    }
+
+    /**
+     * What the e-mail about a voice just received says.
+     *
+     * @param \stdClass $item
+     * @param string $title
+     * @param string $subject
+     * @return array For mail::html().
+     */
+    private static function received_mail(\stdClass $item, string $title, string $subject): array {
+        $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+        return [
+            'library' => mail::main_library((int) $item->entityid),
+            'entityid' => (int) $item->entityid,
+            'heading' => $subject,
+            'lead' => [$str('voicereceivedlead')],
+            'book' => mail::book((int) $item->recordid, $title),
+            'quiet' => ['hint' => $str('voicereceivedforgethint'), 'url' => self::forget_url($item),
+                'text' => $str('voicereceivedforget')],
+            'why' => $str('mailwhyvoice'),
+        ];
     }
 
     /**
