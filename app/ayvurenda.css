@@ -3423,3 +3423,22 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-rule-remove { color: #a3321e; }
 .ayv .ayv-rule-form .ayv-field-check { margin: .6rem 0; }
 .ayv .ayv-rule-numbers { align-items: start; margin: .5rem 0; }
+
+/* Late books: spans that filter, groups folded, the red only past two weeks. */
+.ayv .ayv-late-spans .ayv-late-span-old .ayv-weed-count { color: #a3321e; }
+.ayv .ayv-late-group { margin: 0 0 .75rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-late-group summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .9rem; padding: .9rem 1.1rem; cursor: pointer; }
+.ayv .ayv-late-name { font-family: var(--title); font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+.ayv .ayv-late-summary { font-size: .92rem; }
+.ayv .ayv-late-urgent { color: #8a2a17; font-weight: 700; }
+.ayv .ayv-late-group .ayv-weed-list { padding: 0 .9rem .25rem; }
+.ayv .ayv-late-row { display: flex; align-items: center; gap: .75rem; padding: .45rem .5rem; border-top: 1px solid var(--line); }
+.ayv .ayv-late-row .ayv-weed-words { flex: 1 1 auto; }
+.ayv .ayv-late-who { font-weight: 700; color: var(--ink); }
+.ayv .ayv-late-when { flex: 0 0 auto; padding: .2rem .6rem; border-radius: 999px; font-size: .88rem; font-weight: 700; background: var(--notice-bg); color: var(--ink); }
+.ayv .ayv-late-late { background: #f6d9d2; color: #8a2a17; }
+.ayv .ayv-late-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: .5rem 1.1rem 1rem; }
+.ayv .ayv-late-actions form { margin: 0; }
+@media print {
+    .ayv .ayv-late-actions, .ayv .ayv-print-head { display: none; }
+}

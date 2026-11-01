@@ -50,7 +50,7 @@ final class late {
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $year = years::around((int) $library->entityid, $now);
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, r.firstname, r.lastname, r.userid, r.cardcode, rec.title, m.groupname,
+            "SELECT l.id, l.timedue, l.readerid, i.recordid, r.firstname, r.lastname, r.userid, r.cardcode, rec.title, m.groupname,
                     u.firstname AS ufirstname, u.lastname AS ulastname
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
@@ -69,6 +69,8 @@ final class late {
             $group = (string) $row->groupname;
             $groups[$group][] = [
                 'name' => $name !== '' ? $name : $row->cardcode,
+                'readerid' => (int) $row->readerid,
+                'recordid' => (int) $row->recordid,
                 'title' => $row->title,
                 'due' => userdate((int) $row->timedue, get_string('strftimedateshort', 'langconfig')),
                 'days' => $days,

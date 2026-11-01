@@ -42,24 +42,102 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
-$groups = late::by_group($library, !$all);
-foreach ($groups as &$group) {
-    $group['heading'] = $group['group'] !== '' ? $group['group'] : $str('readersnogroup');
-    foreach ($group['lines'] as &$line) {
-        $line['when'] = $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
-            : $str('lateuntil', $line['due']);
-        $line['islate'] = $line['days'] > 0;
+$url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug]
+    + $params))->out(false);
+$now = time();
+$notice = '';
+// Tell a group's tutor now, without waiting for the week's notice.
+if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'tell') {
+    $year = \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, $now);
+    $groupname = optional_param('group', '', PARAM_TEXT);
+    $told = 0;
+    foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id, 'groupname' => $groupname]) as $tutor) {
+        $tutor->entityid = (int) $library->entityid;
+        $told += \local_oksigeniaayvurenda\local\notices::tell_tutor($tutor, $now) ? 1 : 0;
+    }
+    $notice = $str($told ? 'latetutortold' : 'latenotutor', $groupname);
+}
+$groups = late::by_group($library, !$all, $now);
+// The spans of lateness, as cards that filter: more than 30 days, 15 to 30, under 15.
+$span = optional_param('span', '', PARAM_ALPHA);
+$spanof = fn(int $days) => $days > 30 ? 'old' : ($days >= 15 ? 'mid' : 'new');
+$counts = ['old' => 0, 'mid' => 0, 'new' => 0];
+foreach ($groups as $group) {
+    foreach ($group['lines'] as $line) {
+        if ($line['days'] > 0) {
+            $counts[$spanof($line['days'])]++;
+        }
     }
 }
-unset($group, $line);
+$only = optional_param('group', '', PARAM_TEXT);
+$covers = \local_oksigeniaayvurenda\local\covers::urls(array_merge(...array_map(
+    fn($g) => array_column($g['lines'], 'recordid'),
+    $groups ?: [['lines' => []]]
+)));
+$shown = [];
+foreach ($groups as $group) {
+    if ($only !== '' && $group['group'] !== $only) {
+        continue;
+    }
+    $lines = [];
+    $readers = [];
+    $oldest = 0;
+    foreach ($group['lines'] as $line) {
+        if (!$all && $span !== '' && isset($counts[$span]) && $spanof($line['days']) !== $span) {
+            continue;
+        }
+        $readers[$line['readerid']] = true;
+        $oldest = max($oldest, $line['days']);
+        $lines[] = $line + [
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug,
+                'id' => $line['readerid']]))->out(false),
+            'cover' => $covers[$line['recordid']] ?? null,
+            'colour' => $line['recordid'] % 6,
+            'when' => $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
+                : $str('lateuntil', $line['due']),
+            // Red only past two weeks: what is just late stays calm.
+            'tone' => $line['days'] > 14 ? 'late' : ($line['days'] > 0 ? 'soon' : 'ok'),
+        ];
+    }
+    if (!$lines) {
+        continue;
+    }
+    $name = $group['group'] !== '' ? $group['group'] : $str('readersnogroup');
+    $shown[] = [
+        'heading' => $name,
+        'group' => $group['group'],
+        'summary' => $oldest > 0
+            ? $str(count($readers) === 1 ? 'lategroupone' : 'lategroup', (object) ['readers' => count($readers), 'days' => $oldest])
+            : $str(count($readers) === 1 ? 'lategroupcountone' : 'lategroupcount', count($readers)),
+        'lines' => $lines,
+        'urgent' => $oldest > 30,
+        'open' => $only !== '',
+        'tellable' => !$all && $group['group'] !== '',
+        'printurl' => $url(['group' => $group['group'], 'all' => (int) $all]),
+    ];
+}
 $data = [
     'heading' => $str($all ? 'lateallheading' : 'lateheading'),
-    'groups' => $groups,
-    'hasgroups' => (bool) $groups,
+    'notice' => $notice,
+    'tabs' => [
+        ['label' => $str('latetablate'), 'url' => $url(), 'current' => !$all],
+        ['label' => $str('latetaball'), 'url' => $url(['all' => 1]), 'current' => $all],
+    ],
+    'spans' => $all ? [] : array_map(fn($key) => ['key' => $key, 'count' => \local_oksigeniaayvurenda\local\screens::number(
+        $counts[$key]
+    ), 'label' => $str('latespan' . $key), 'url' => $url($span === $key ? [] : ['span' => $key]),
+        'current' => $span === $key], ['old', 'mid', 'new']),
+    'groups' => $shown,
+    'hasgroups' => (bool) $shown,
+    'only' => $only !== '',
+    'allurl' => $url(['all' => (int) $all]),
     'empty' => $str($all ? 'lateallempty' : 'lateempty'),
-    'switch' => ['url' => (new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug,
-        'all' => (int) !$all]))->out(false), 'label' => $str($all ? 'lateonly' : 'lateall')],
+    'action' => $url(['all' => (int) $all]),
+    'sesskey' => sesskey(),
 ];
+foreach (['latetell', 'lateprint', 'lateallgroups', 'printnow'] as $key) {
+    $data[$key] = $str($key);
+}
 $deskurl = (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);
 shell::output(
     $data['heading'],

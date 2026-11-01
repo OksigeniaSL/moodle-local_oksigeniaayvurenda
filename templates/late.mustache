@@ -16,39 +16,47 @@
 {{!
     @template local_oksigeniaayvurenda/late
 
-    Books out of the library by group: the late ones, or all of them.
-
-    Context variables required for this template:
-    * heading, empty - texts
-    * groups - list of heading and lines (name, title, when, islate)
-    * switch - url and label to see the others
+    Books out of the library: the late ones by span and by group (folded, in the order of the stages), or all of them;
+    each reader to their record; for each group, its list to print and its tutor told now.
 
     Example context (json):
     {
-        "heading": "Libros con retraso",
+        "heading": "Libros con retraso", "notice": "", "action": "#", "sesskey": "abc", "only": false, "allurl": "#",
+        "tabs": [{"label": "Con retraso", "url": "#", "current": true}, {"label": "Prestados", "url": "#", "current": false}],
+        "spans": [{"key": "old", "count": "4", "label": "Más de 30 días", "url": "#", "current": false}],
         "hasgroups": true,
-        "groups": [{"heading": "3º Primaria A", "lines": [{"name": "Ana Montes", "title": "El faro dormido",
-                    "when": "5 días de retraso", "islate": true}]}],
-        "empty": "No hay libros con retraso.",
-        "switch": {"url": "#", "label": "Ver todos los prestados"}
+        "groups": [{"heading": "3º Primaria A", "group": "3º Primaria A", "summary": "2 lectores · el más antiguo, 31 días",
+            "open": false, "tellable": true, "printurl": "#",
+            "lines": [{"name": "Ana Montes", "url": "#", "title": "El faro dormido", "when": "31 días de retraso",
+                "tone": "late", "cover": null, "colour": 2}]}],
+        "empty": "No hay libros con retraso.", "latetell": "Avisar al tutor ahora", "lateprint": "La lista de la clase",
+        "lateallgroups": "Todos los grupos", "printnow": "Imprimir"
     }
 }}
-<div class="ayv-results-head">
-    <h1 class="ayv-results-title">{{heading}}</h1>
-    {{#switch}}<a class="ayv-toggle" href="{{url}}">{{label}}</a>{{/switch}}
-</div>
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{^only}}<nav class="ayv-tabs" aria-label="{{heading}}">{{#tabs}}<a class="ayv-tab" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}</nav>
+<ul class="ayv-weed-reasons ayv-late-spans">
+    {{#spans}}<li><a class="ayv-weed-reason ayv-late-span-{{key}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}><span class="ayv-weed-count">{{count}}</span> <span class="ayv-weed-label">{{label}}</span></a></li>{{/spans}}
+</ul>{{/only}}
+{{#only}}<p class="ayv-print-head"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{lateallgroups}}</a> <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/only}}
 {{#hasgroups}}
 {{#groups}}
-<section class="ayv-section">
-    <h2 class="ayv-section-title">{{heading}}</h2>
-    <ul class="ayv-people">
+<details class="ayv-late-group"{{#open}} open{{/open}}>
+    <summary><span class="ayv-late-name">{{heading}}</span> <span class="ayv-late-summary{{#urgent}} ayv-late-urgent{{/urgent}}">{{summary}}</span></summary>
+    <ul class="ayv-weed-list">
     {{#lines}}
-        <li class="ayv-person"><span class="ayv-person-name">{{name}}</span>
-            <span>«{{title}}»</span>
-            <span class="ayv-person-card {{#islate}}ayv-is-late{{/islate}}">{{when}}</span></li>
+        <li class="ayv-late-row">
+            <span class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}</span>
+            <span class="ayv-weed-words"><a class="ayv-late-who" href="{{url}}">{{name}}</a> <span class="ayv-weed-detail">«{{title}}»</span></span>
+            <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span>
+        </li>
     {{/lines}}
     </ul>
-</section>
+    <div class="ayv-late-actions">{{^open}}<a class="ayv-button ayv-button-quiet" href="{{printurl}}">{{lateprint}}</a>{{/open}}
+        {{#tellable}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="tell">{{latetell}}</button></form>{{/tellable}}</div>
+</details>
 {{/groups}}
 {{/hasgroups}}
 {{^hasgroups}}<p class="ayv-empty">{{empty}}</p>{{/hasgroups}}

@@ -131,8 +131,6 @@ final class notices {
      */
     private static function tutors(int $now): int {
         global $DB;
-        $tz = \core_date::get_server_timezone_object();
-        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $tutors = $DB->get_records_sql(
             "SELECT t.id, t.yearid, t.groupname, t.userid, y.entityid
                FROM {" . self::T . "tutor} t
@@ -145,57 +143,68 @@ final class notices {
             if (access::closed((int) $tutor->entityid)) {
                 continue;
             }
-            $late = $DB->get_records_sql(
-                "SELECT l.id, l.timedue, l.readerid, r.firstname, r.lastname, r.userid, b.name AS library, b.slug
-                   FROM {" . self::T . "loan} l
-                   JOIN {" . self::T . "reader} r ON r.id = l.readerid
-                   JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid AND m.groupname = :groupname
-                   JOIN {" . self::T . "library} b ON b.id = l.libraryid
-                  WHERE l.timereturned IS NULL AND l.timedue < :today AND r.status = 'active'
-               ORDER BY r.lastname, r.firstname, l.timedue",
-                ['yearid' => $tutor->yearid, 'groupname' => $tutor->groupname, 'today' => $today]
-            );
-            if (!$late) {
-                continue;
-            }
-            $user = \core_user::get_user($tutor->userid);
-            if (!$user || $user->deleted || $user->suspended) {
-                continue;
-            }
-            $readers = [];
-            foreach ($late as $loan) {
-                $days = loan_rules::days_late((int) $loan->timedue, $now, $tz);
-                $entry = $readers[$loan->readerid] ?? ['name' => self::name($loan), 'books' => 0, 'days' => 0];
-                $entry['books']++;
-                $entry['days'] = max($entry['days'], $days);
-                $readers[$loan->readerid] = $entry;
-            }
-            $lines = [];
-            foreach ($readers as $entry) {
-                $lines[] = get_string(
-                    $entry['books'] === 1 ? 'noticetutorlineone' : 'noticetutorline',
-                    'local_oksigeniaayvurenda',
-                    (object) $entry
-                );
-            }
-            $a = (object) ['name' => $user->firstname, 'group' => $tutor->groupname,
-                'library' => format_string(reset($late)->library, true, ['escape' => false]), 'readers' => implode("\n", $lines)];
-            if (
-                self::send(
-                    'overduetutor',
-                    $user,
-                    get_string('noticetutorsubject', 'local_oksigeniaayvurenda', $a),
-                    get_string('noticetutorbody', 'local_oksigeniaayvurenda', $a),
-                    (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => reset($late)->slug,
-                        'group' => $tutor->groupname]))->out(false),
-                    $tutor->groupname
-                )
-            ) {
-                $sent++;
-            }
-            $DB->set_field(self::T . 'tutor', 'timenotified', $now, ['id' => $tutor->id]);
+            $sent += self::tell_tutor($tutor, $now) ? 1 : 0;
         }
         return $sent;
+    }
+
+    /**
+     * Tells a tutor now who in the group has books to bring back, without their titles.
+     *
+     * @param \stdClass $tutor With id, yearid, groupname, userid and entityid.
+     * @param int $now
+     * @return bool Whether a message went.
+     */
+    public static function tell_tutor(\stdClass $tutor, int $now): bool {
+        global $DB;
+        $tz = \core_date::get_server_timezone_object();
+        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
+        $late = $DB->get_records_sql(
+            "SELECT l.id, l.timedue, l.readerid, r.firstname, r.lastname, r.userid, b.name AS library, b.slug
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "reader} r ON r.id = l.readerid
+               JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid AND m.groupname = :groupname
+               JOIN {" . self::T . "library} b ON b.id = l.libraryid
+              WHERE l.timereturned IS NULL AND l.timedue < :today AND r.status = 'active'
+           ORDER BY r.lastname, r.firstname, l.timedue",
+            ['yearid' => $tutor->yearid, 'groupname' => $tutor->groupname, 'today' => $today]
+        );
+        if (!$late) {
+            return false;
+        }
+        $user = \core_user::get_user($tutor->userid);
+        if (!$user || $user->deleted || $user->suspended) {
+            return false;
+        }
+        $readers = [];
+        foreach ($late as $loan) {
+            $days = loan_rules::days_late((int) $loan->timedue, $now, $tz);
+            $entry = $readers[$loan->readerid] ?? ['name' => self::name($loan), 'books' => 0, 'days' => 0];
+            $entry['books']++;
+            $entry['days'] = max($entry['days'], $days);
+            $readers[$loan->readerid] = $entry;
+        }
+        $lines = [];
+        foreach ($readers as $entry) {
+            $lines[] = get_string(
+                $entry['books'] === 1 ? 'noticetutorlineone' : 'noticetutorline',
+                'local_oksigeniaayvurenda',
+                (object) $entry
+            );
+        }
+        $a = (object) ['name' => $user->firstname, 'group' => $tutor->groupname,
+            'library' => format_string(reset($late)->library, true, ['escape' => false]), 'readers' => implode("\n", $lines)];
+        $told = self::send(
+            'overduetutor',
+            $user,
+            get_string('noticetutorsubject', 'local_oksigeniaayvurenda', $a),
+            get_string('noticetutorbody', 'local_oksigeniaayvurenda', $a),
+            (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => reset($late)->slug,
+                    'group' => $tutor->groupname]))->out(false),
+            $tutor->groupname
+        );
+        $DB->set_field(self::T . 'tutor', 'timenotified', $now, ['id' => $tutor->id]);
+        return $told;
     }
 
     /**

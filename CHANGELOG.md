@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.105.0 (2026-11-01)
+
+- Late books redone from the design reviews: tabs «Late | Lent» instead of a chip; three cards by span (more than 30
+  days, 15 to 30, under 15) that filter; the groups folded, in the order of the stages, each saying how many readers
+  and the oldest delay (in red past 30 days); each name leads to the reader's record, with the cover beside the title,
+  and the red only past two weeks; for each group, its list alone to print, and «Tell the tutor now»
+  (`notices::tell_tutor()`, the same message as the week's). The page was 8,929 px long.
+
 ## 0.104.0 (2026-11-01)
 
 The first screens redone from the design reviews of 31 October:
