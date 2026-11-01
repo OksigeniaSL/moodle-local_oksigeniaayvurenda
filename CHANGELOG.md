@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.108.0 (2026-11-01)
+
+- A notice for every page of the library, set by whoever runs the site («Notice in the library», `sitenotice`): one
+  line at the top, for everyone, for an open demo that starts again each night or a stop for maintenance.
+
 ## 0.107.0 (2026-11-01)
 
 From Enrique's look at the redone screens:

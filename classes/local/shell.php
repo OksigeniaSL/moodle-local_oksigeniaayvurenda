@@ -144,6 +144,19 @@ final class shell {
     }
 
     /**
+     * The site's line for every page of the library, if whoever runs the site wrote one (setting «sitenotice»).
+     *
+     * @return string HTML, or nothing.
+     */
+    public static function site_notice(): string {
+        $notice = trim((string) get_config('local_oksigeniaayvurenda', 'sitenotice'));
+        if ($notice === '') {
+            return '';
+        }
+        return '<p class="ayv-sitenotice" role="note">' . s($notice) . '</p>';
+    }
+
+    /**
      * Sends a whole page.
      *
      * @param string $title
@@ -258,6 +271,7 @@ final class shell {
                 . s((new \moodle_url('/login/logout.php', ['sesskey' => sesskey()]))->out(false)) . '">'
                 . s(get_string('logout')) . '</a></p>';
         }
+        $as .= self::site_notice();
         // What only this page needs (back to a course, its guided help), in a small row, without what the header has.
         $links = $options['nav'] ?? [];
         if (isset($links['url'])) {

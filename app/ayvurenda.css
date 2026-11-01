@@ -100,6 +100,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-loggedinas { margin: 0; padding: .5rem 1rem; background: var(--sun); color: #1e2b2a; text-align: center; font-weight: 600; }
 
 .ayv .ayv-loggedinas a { color: #1e2b2a; text-decoration: underline; }
+/* The site's line (an open demo, a stop for maintenance): the same in light and dark. */
+.ayv .ayv-sitenotice { margin: 0; padding: .55rem 1rem; background: #0f3a33; color: #fbf6ec; text-align: center; font-weight: 600; }
 
 /* The header: emblem and name, the search, the way back. */
 .ayv .ayv-top {

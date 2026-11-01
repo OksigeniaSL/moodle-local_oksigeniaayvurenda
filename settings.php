@@ -47,6 +47,16 @@ if ($hassiteconfig) {
             PARAM_TEXT,
             50
         ));
+        // A line on every page of the library, for whoever runs the site (an open demo that starts again each night).
+        $settings->add(new admin_setting_configtextarea(
+            'local_oksigeniaayvurenda/sitenotice',
+            $str('sitenotice'),
+            $str('sitenotice_desc'),
+            '',
+            PARAM_TEXT,
+            60,
+            3
+        ));
         // The class island in 3D, in «My class»: on unless the site's computers cannot carry it.
         $settings->add(new admin_setting_configcheckbox(
             'local_oksigeniaayvurenda/island3d',
