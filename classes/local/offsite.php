@@ -18,6 +18,7 @@ namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\age;
 use local_oksigeniaayvurenda\core\retention;
+use local_oksigeniaayvurenda\core\s3;
 
 /**
  * The copies of a centre out of the server: each night's copy, encrypted with the centre's public key (in the open
@@ -134,6 +135,48 @@ final class offsite {
         $places[] = ['id' => $id, 'kind' => 'webdav', 'url' => rtrim($url, '/') . '/', 'user' => trim($user),
             'label' => $host];
         set_config('offsite' . $entityid . '_' . $id, $password, 'local_oksigeniaayvurenda');
+        self::change($entityid, ['places' => $places]);
+        return $id;
+    }
+
+    /**
+     * Adds an S3-compatible store (AWS, Backblaze, Wasabi, MinIO…) as a place for the copies.
+     *
+     * @param int $entityid
+     * @param string $endpoint Where it answers, with https (or http, on a host of the server's network the site allows).
+     * @param string $bucket
+     * @param string $region
+     * @param string $accesskey
+     * @param string $secret Kept in the plugin's settings, never shown again.
+     * @return string|null The id of the place; null if something is not one.
+     */
+    public static function add_s3(
+        int $entityid,
+        string $endpoint,
+        string $bucket,
+        string $region,
+        string $accesskey,
+        string $secret
+    ): ?string {
+        $endpoint = rtrim(trim($endpoint), '/');
+        $bucket = trim($bucket, " /");
+        $scheme = strtolower((string) parse_url($endpoint, PHP_URL_SCHEME));
+        $host = strtolower((string) parse_url($endpoint, PHP_URL_HOST));
+        if (
+            $host === '' || clean_param($endpoint, PARAM_URL) !== $endpoint
+            || !preg_match('/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/', $bucket)
+            || !($scheme === 'https' || ($scheme === 'http' && self::internal($host)))
+        ) {
+            return null;
+        }
+        $places = self::settings($entityid)['places'];
+        if (count($places) >= self::PLACES) {
+            return null;
+        }
+        $id = substr(bin2hex(random_bytes(6)), 0, 10);
+        $places[] = ['id' => $id, 'kind' => 's3', 'url' => $endpoint . '/' . $bucket . '/', 'user' => trim($accesskey),
+            'region' => trim($region) !== '' ? trim($region) : 'us-east-1', 'label' => $host . ' · ' . $bucket];
+        set_config('offsite' . $entityid . '_' . $id, $secret, 'local_oksigeniaayvurenda');
         self::change($entityid, ['places' => $places]);
         return $id;
     }
@@ -299,7 +342,7 @@ final class offsite {
      */
     private static function put(int $entityid, array $place, string $path, string $name): ?string {
         [$code] = self::call($entityid, $place, 'PUT', $name, $path);
-        if ($code === 404 || $code === 409) {
+        if (($code === 404 || $code === 409) && ($place['kind'] ?? 'webdav') === 'webdav') {
             self::call($entityid, $place, 'MKCOL', '');
             [$code] = self::call($entityid, $place, 'PUT', $name, $path);
         }
@@ -318,13 +361,23 @@ final class offsite {
      * @param array $keep daily, weekly, monthly.
      */
     private static function prune(int $entityid, array $place, array $keep): void {
-        [$code, $body] = self::call($entityid, $place, 'PROPFIND', '', '<?xml version="1.0" encoding="utf-8"?>'
-            . '<d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>');
-        if ($code !== 207) {
+        $s3 = ($place['kind'] ?? 'webdav') === 's3';
+        [$code, $body] = $s3 ? self::call($entityid, $place, 'LIST', '') : self::call(
+            $entityid,
+            $place,
+            'PROPFIND',
+            '',
+            '<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>'
+        );
+        if ($code !== ($s3 ? 200 : 207)) {
             return;
         }
         $days = [];
-        preg_match_all('#<(?:[a-z0-9]+:)?href>([^<]+)</(?:[a-z0-9]+:)?href>#i', (string) $body, $matches);
+        preg_match_all(
+            $s3 ? '#<Key>([^<]+)</Key>#' : '#<(?:[a-z0-9]+:)?href>([^<]+)</(?:[a-z0-9]+:)?href>#i',
+            (string) $body,
+            $matches
+        );
         foreach ($matches[1] as $href) {
             $file = rawurldecode(basename(html_entity_decode($href)));
             if (preg_match('/^ayvurenda-' . $entityid . '-(\d{8})\.zip\.age$/', $file, $m)) {
@@ -356,6 +409,9 @@ final class offsite {
             return (self::$network)($method, $url, $payload);
         }
         require_once($CFG->libdir . '/filelib.php');
+        if (($place['kind'] ?? 'webdav') === 's3') {
+            return self::call_s3($entityid, $place, $method, $name, $payload);
+        }
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
         // Moodle's HTTP security stands, except for a host of the server's network the administrator allowed.
         $curl = new \curl(['ignoresecurity' => self::internal($host)]);
@@ -370,6 +426,43 @@ final class offsite {
         } else {
             $curl->setHeader(['Depth: 1', 'Content-Type: application/xml; charset=utf-8']);
             $body = $curl->post($url, $payload, $auth + ['CURLOPT_CUSTOMREQUEST' => $method]);
+        }
+        return [(int) ($curl->get_info()['http_code'] ?? 0), (string) $body];
+    }
+
+    /**
+     * One question to an S3-compatible place, signed.
+     *
+     * @param int $entityid
+     * @param array $place
+     * @param string $method PUT, LIST or DELETE.
+     * @param string $name A file in the bucket.
+     * @param string $path A file's path (PUT).
+     * @return array The answer's code and body.
+     */
+    private static function call_s3(int $entityid, array $place, string $method, string $name, string $path): array {
+        $url = $place['url'] . ($name === '' ? '' : rawurlencode($name)) . ($method === 'LIST' ? '?list-type=2' : '');
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $curl = new \curl(['ignoresecurity' => self::internal($host)]);
+        $secret = (string) get_config('local_oksigeniaayvurenda', 'offsite' . $entityid . '_' . $place['id']);
+        $hash = $method === 'PUT' ? hash_file('sha256', $path) : hash('sha256', '');
+        $signed = s3::headers(
+            $method === 'LIST' ? 'GET' : $method,
+            $url,
+            (string) $place['region'],
+            (string) $place['user'],
+            $secret,
+            $hash,
+            time()
+        );
+        $curl->setHeader(array_map(fn($header, $value) => $header . ': ' . $value, array_keys($signed), $signed));
+        $options = ['CURLOPT_TIMEOUT' => 600, 'CURLOPT_CONNECTTIMEOUT' => 15];
+        if ($method === 'PUT') {
+            $body = $curl->put($url, ['file' => $path], $options);
+        } else if ($method === 'DELETE') {
+            $body = $curl->delete($url, [], $options);
+        } else {
+            $body = $curl->get($url, [], $options);
         }
         return [(int) ($curl->get_info()['http_code'] ?? 0), (string) $body];
     }

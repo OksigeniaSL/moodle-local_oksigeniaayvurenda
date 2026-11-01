@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.118.0 (2026-11-01)
+
+- Recover a copy. Whoever runs the site opens an encrypted copy with its key, sees what it holds and brings it back as a new
+  centre, with its copies, readers, loans and voices, without touching anything already on the site.
+- The copies off the server also go to any store that speaks S3 (AWS, Backblaze, Wasabi, MinIO), tested when added and with the
+  same days, weeks and months to keep.
+- Remove a centre entirely, by command line (`cli/remove_entity.php --entity=ID`, which first says what it would remove).
+- The printed card, as drawn by the art direction: ten cards on an A4 sheet, with the reader's drawing, the code in both QR and
+  Code 39, cutting guides, and a ruler to check the printer did not resize it.
+
 ## 0.117.1 (2026-11-01)
 
 - What a reader waits for reaches their phone: late books, a book set aside, the new books, and to a tutor their group's late

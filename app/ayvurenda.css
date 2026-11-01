@@ -946,32 +946,173 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-garden li { display: grid; justify-items: center; gap: .25rem; font-weight: 700; }
 
-/* Cards to print: ten to an A4 sheet, 85.6 × 54 mm each. */
-.ayv .ayv-sheet { display: grid; grid-template-columns: repeat(2, 85.6mm); grid-auto-rows: 54mm; gap: 4mm 8mm;
-    justify-content: center; align-content: start; width: 210mm; min-height: 297mm; padding: 14mm 0; margin: 0 auto 1rem;
-    background: #fff; color: #1e2b2a; box-shadow: 0 1px 6px rgba(0, 0, 0, .15); }
+/* Reader cards to print. A proposal for app/ayvurenda.css, in place of the .ayv-sheet and .ayv-printcard rules: made by
+   agents/arte/kit/marca-ayvurenda/carne-impreso.py, change it there.
 
-.ayv .ayv-printcard { display: grid; grid-template-rows: auto 1fr; padding: 3mm 4mm; border: .3mm dashed #b9b2a3;
-    border-radius: 3mm; overflow: hidden; }
+   What holds it up:
+   - Nothing depends on a CSS background: browsers leave those out unless told otherwise. Lines and art are SVG and <img>.
+   - Everything to be read is pure black, one toner: a dark green turns into dots on a black-and-white printer.
+   - The cards touch: one cut per line, three along and six across. Nothing comes closer than 4.5 mm to a cut.
+   - Sizes in millimetres, for the page and for the codes. The bars never stretch: their narrow bar is set per card. */
+.ayv .ayv-sheet {
+    --ayv-print-ink: #000;
+    --ayv-print-accent: #17574c;
+    --ayv-print-x0: 19.4mm;
+    --ayv-print-y0: 13.5mm;
+    --ayv-print-rows: 5;
+    --ayv-print-w: 210mm;
+    --ayv-print-h: 297mm;
+    position: relative;
+    width: var(--ayv-print-w);
+    height: var(--ayv-print-h);
+    margin: 0 auto 1rem;
+    overflow: hidden;
+    background: #fff;
+    color: var(--ayv-print-ink);
+    color-scheme: light;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .15);
+    break-inside: avoid;
+}
 
-.ayv .ayv-printcard-top { display: flex; gap: 3mm; align-items: center; }
+.ayv .ayv-sheet-letter {
+    --ayv-print-x0: 22.35mm;
+    --ayv-print-y0: 31.7mm;
+    --ayv-print-rows: 4;
+    --ayv-print-w: 215.9mm;
+    --ayv-print-h: 279.4mm;
+    page: ayv-letter;
+}
 
-.ayv .ayv-printcard-top p { margin: 0; font-size: 9pt; line-height: 1.2; }
+.ayv .ayv-sheet-guides { position: absolute; top: 0; left: 0; width: var(--ayv-print-w); height: var(--ayv-print-h); }
 
-.ayv .ayv-printcard-name { font-family: var(--title); font-weight: 600; font-size: 11pt !important; }
+.ayv .ayv-sheet-note { position: absolute; width: 81.6mm; margin: 0; font-size: 7pt; line-height: 1.16; color: var(--ayv-print-ink); }
 
-.ayv .ayv-printcard-qr { width: 18mm; height: 18mm; margin-left: auto; image-rendering: pixelated; }
+.ayv .ayv-sheet-note-a, .ayv .ayv-sheet-note-c { left: calc(var(--ayv-print-x0) + 2mm); }
 
-.ayv .ayv-printcard-barcode { align-self: end; height: 17mm; }
+.ayv .ayv-sheet-note-b, .ayv .ayv-sheet-note-d { left: calc(var(--ayv-print-x0) + 87.6mm); }
 
-.ayv .ayv-printcard-barcode svg { width: 100%; height: 100%; }
+.ayv .ayv-sheet-note-a, .ayv .ayv-sheet-note-b { top: calc(var(--ayv-print-y0) - 6.6mm); }
+
+.ayv .ayv-sheet-note-c, .ayv .ayv-sheet-note-d { top: calc(var(--ayv-print-y0) + var(--ayv-print-rows) * 54mm + 1.3mm); }
+
+.ayv .ayv-sheet-note-c { left: calc(var(--ayv-print-x0) + 54mm); width: 30mm; }
+
+.ayv .ayv-sheet-cards {
+    position: absolute;
+    top: var(--ayv-print-y0);
+    left: var(--ayv-print-x0);
+    display: grid;
+    grid-template-columns: repeat(2, 85.6mm);
+    grid-auto-rows: 54mm;
+}
+
+/* One card: drawing, who, QR; and under them, the bars and the code. */
+.ayv .ayv-printcard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 19.2mm;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "who qr" "bars bars";
+    width: 85.6mm;
+    height: 54mm;
+    padding: 4.5mm;
+    overflow: hidden;
+    color: var(--ayv-print-ink);
+    break-inside: avoid;
+}
+
+.ayv .ayv-printcard-art-flower, .ayv .ayv-printcard-art-sky {
+    grid-template-columns: 23mm minmax(0, 1fr) 19.2mm;
+    grid-template-areas: "art who qr" "bars bars bars";
+}
+
+.ayv .ayv-printcard-picture { grid-area: art; display: block; width: 23mm; height: 23mm; }
+
+/* The name, the group and the centre. */
+.ayv .ayv-printcard-who { grid-area: who; display: flex; flex-direction: column; min-width: 0; padding-left: 2.5mm; overflow: hidden; }
+
+.ayv .ayv-printcard-plain .ayv-printcard-who { padding-left: 0; }
+
+.ayv .ayv-printcard-who p { margin: 0; overflow-wrap: anywhere; font-size: 8pt; line-height: 1.16; color: var(--ayv-print-ink); }
+
+.ayv .ayv-printcard-who .ayv-printcard-label {
+    padding-bottom: .9mm;
+    margin-bottom: 1.1mm;
+    border-bottom: .3mm solid var(--ayv-print-accent);
+    font-size: 6.6pt;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.ayv .ayv-printcard-who .ayv-printcard-name {
+    margin-bottom: .8mm;
+    font-family: var(--title);
+    font-weight: 600;
+    font-size: 12.5pt;
+    line-height: 1.08;
+}
+
+.ayv .ayv-printcard-who .ayv-printcard-long { font-size: 10.5pt; }
+
+.ayv .ayv-printcard-who .ayv-printcard-verylong { font-size: 9pt; }
+
+/* Without a drawing there is room: larger, and the centre first, as the one that gives the card. */
+.ayv .ayv-printcard-plain .ayv-printcard-name { font-size: 15pt; }
+
+.ayv .ayv-printcard-plain .ayv-printcard-long { font-size: 12.5pt; }
+
+.ayv .ayv-printcard-plain .ayv-printcard-verylong { font-size: 10.5pt; }
+
+.ayv .ayv-printcard-plain .ayv-printcard-library { order: -2; margin-bottom: .5mm; font-size: 8.5pt; font-weight: 700; }
+
+.ayv .ayv-printcard-plain .ayv-printcard-label { order: -1; }
+
+.ayv .ayv-printcard-plain .ayv-printcard-group { font-size: 8.5pt; }
+
+/* University or academy: as a catalogue card, a book's letter for the centre and a double rule. */
+.ayv .ayv-printcard-skin-university .ayv-printcard-library { font-family: var(--title); font-weight: 600; font-size: 9.5pt; }
+
+.ayv .ayv-printcard-skin-university .ayv-printcard-label { border-bottom: 1mm double var(--ayv-print-accent); }
+
+/* A company: its own letter, what its people use every day, in black alone. */
+.ayv .ayv-printcard-skin-company { --ayv-print-accent: #000; font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+
+.ayv .ayv-printcard-skin-company .ayv-printcard-name { font-family: inherit; font-weight: 700; }
+
+.ayv .ayv-printcard-skin-company .ayv-printcard-label { font-weight: 600; }
+
+/* The QR keeps its four modules of silence: at 16 mm the smallest code has modules of 0.76 mm, so 3.1 mm; the column
+   leaves 3.2 mm before it, the card's padding 4.5 mm around it, and the bars are well below. */
+.ayv .ayv-printcard-qr { grid-area: qr; justify-self: end; width: 16mm; height: 16mm; }
+
+.ayv .ayv-printcard-qr svg { display: block; width: 100%; height: 100%; }
+
+.ayv .ayv-printcard-bars { grid-area: bars; display: grid; justify-items: center; padding-top: 1mm; }
+
+.ayv .ayv-printcard-bars svg { display: block; width: var(--ayv-print-bars); height: 10mm; }
+
+.ayv .ayv-printcard-bars p {
+    margin: .7mm 0 0;
+    font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+    font-weight: 700;
+    font-size: 9pt;
+    line-height: 1;
+    letter-spacing: .08em;
+    overflow-wrap: anywhere;
+    text-align: center;
+    color: var(--ayv-print-ink);
+}
+
+@page ayv-letter { size: letter; margin: 0; }
 
 @media print {
     @page { size: A4; margin: 0; }
     .ayv { background: #fff; }
     .ayv .ayv-top, .ayv .ayv-foot, .ayv .ayv-print-head, .ayv .ayv-skip { display: none !important; }
     .ayv .ayv-main { padding: 0; }
-    .ayv .ayv-sheet { margin: 0; box-shadow: none; break-after: page; }
+    /* A hair under the page, or the browser sees it does not fit and leaves a blank page before it. */
+    .ayv .ayv-sheet { height: calc(var(--ayv-print-h) - .5mm); margin: 0; box-shadow: none; break-after: page; }
+    .ayv .ayv-sheet:last-of-type { break-after: auto; }
 }
 
 /* Labels and spine labels on A4 sheets: the measures come from the sheet chosen. */

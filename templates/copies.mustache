@@ -114,6 +114,19 @@
                 <label class="ayv-field ayv-dig-field">{{#str}}offsitepassword, local_oksigeniaayvurenda{{/str}} <input type="password" name="password" autocomplete="new-password"></label></div>
             <p class="ayv-field-hint">{{#str}}offsitepasswordhint, local_oksigeniaayvurenda{{/str}}</p>
             <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="addplace">{{#str}}offsiteaddtry, local_oksigeniaayvurenda{{/str}}</button></p></form>
+        <details class="ayv-off-s3">
+            <summary>{{#str}}offsites3, local_oksigeniaayvurenda{{/str}}</summary>
+            <form method="post" action="{{action}}" data-busy="{{#str}}offsitetrying, local_oksigeniaayvurenda{{/str}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <p class="ayv-field-hint">{{#str}}offsites3hint, local_oksigeniaayvurenda{{/str}}</p>
+                <label class="ayv-field ayv-dig-field">{{#str}}offsites3endpoint, local_oksigeniaayvurenda{{/str}} <input type="url" name="endpoint" required placeholder="https://s3.eu-central-003.backblazeb2.com" spellcheck="false"></label>
+                <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{#str}}offsites3bucket, local_oksigeniaayvurenda{{/str}} <input type="text" name="bucket" required autocomplete="off" spellcheck="false"></label>
+                    <label class="ayv-field ayv-dig-field">{{#str}}offsites3region, local_oksigeniaayvurenda{{/str}} <input type="text" name="region" placeholder="us-east-1" autocomplete="off" spellcheck="false"></label></div>
+                <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{#str}}offsites3access, local_oksigeniaayvurenda{{/str}} <input type="text" name="accesskey" required autocomplete="off" spellcheck="false"></label>
+                    <label class="ayv-field ayv-dig-field">{{#str}}offsites3secret, local_oksigeniaayvurenda{{/str}} <input type="password" name="secret" required autocomplete="new-password"></label></div>
+                <p class="ayv-field-hint">{{#str}}offsitepasswordhint, local_oksigeniaayvurenda{{/str}}</p>
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="adds3">{{#str}}offsiteaddtry, local_oksigeniaayvurenda{{/str}}</button></p>
+            </form>
+        </details>
     </dialog>
     <dialog class="ayv-modal" id="ayv-off-keep" aria-labelledby="ayv-off-keep-title">
         <div class="ayv-modal-head"><h3 id="ayv-off-keep-title" class="ayv-section-title">{{#str}}offsitekeepchange, local_oksigeniaayvurenda{{/str}}</h3>

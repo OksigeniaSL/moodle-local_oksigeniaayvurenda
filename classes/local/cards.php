@@ -94,6 +94,66 @@ final class cards {
     }
 
     /**
+     * A card on paper. Paper does not grow: everyone's shows the first day, the seed or the new moon, so that a class's
+     * cards on a table are not a ranking, and nothing goes out of date; what grows stays on the screen.
+     *
+     * @param \stdClass $reader With id, entityid, userid, readertype and cardcode.
+     * @param string $name
+     * @param string $group
+     * @param string $library
+     * @param string $skin The centre's.
+     * @return array name, group, library, code, skin, look, art, label, namesize, qr, barcode, barwidth.
+     */
+    public static function printed(\stdClass $reader, string $name, string $group, string $library, string $skin): array {
+        global $CFG;
+        $code = (string) $reader->cardcode;
+        // Only the school and the secondary school draw; each reader's look says what.
+        $look = in_array($skin, ['school', 'secondary'], true) ? self::look_of($reader) : 'none';
+        $art = match ($look) {
+            'flower' => screens::art('carne/impreso/semilla') ?? self::flower_url(null),
+            'sky' => screens::art('carne/impreso/luna-nueva'),
+            default => null,
+        };
+        // The QR: core_qrcode forces the lowest correction, and this needs no GD.
+        require_once($CFG->libdir . '/tcpdf/tcpdf_barcodes_2d.php');
+        $matrix = (new \TCPDF2DBarcode($code, 'QRCODE,Q'))->getBarcodeArray();
+        $path = '';
+        foreach ($matrix['bcode'] as $row => $cells) {
+            foreach ($cells as $col => $on) {
+                $path .= $on ? 'M' . $col . ' ' . $row . 'h1v1h-1z' : '';
+            }
+        }
+        $n = (int) $matrix['num_cols'];
+        $qr = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $n . ' ' . $n . '" shape-rendering="crispEdges" '
+            . 'aria-hidden="true"><path fill="#000" d="' . $path . '"/></svg>';
+        // The bars: a narrow bar of 0.45 mm, or what fits in 76.6 mm; under 0.25 mm, none.
+        $barcode = '';
+        $barwidth = '';
+        if (code39::can($code)) {
+            $modules = array_sum(code39::widths($code)) + 20;
+            $x = min(.45, 76.6 / $modules);
+            if ($x >= .25) {
+                $barcode = code39::svg($code, 40, false);
+                $barwidth = (string) round($modules * $x, 2);
+            }
+        }
+        return [
+            'name' => $name,
+            'group' => $group,
+            'library' => $library,
+            'code' => strtoupper($code),
+            'skin' => $skin,
+            'look' => $art ? ($look === 'flower' ? 'art-flower' : 'art-sky') : 'plain',
+            'art' => $art ?? '',
+            'label' => get_string('printcardlabel', 'local_oksigeniaayvurenda'),
+            'namesize' => \core_text::strlen($name) > 34 ? 'verylong' : (\core_text::strlen($name) > 18 ? 'long' : ''),
+            'qr' => $qr,
+            'barcode' => $barcode,
+            'barwidth' => $barwidth,
+        ];
+    }
+
+    /**
      * The flower drawn in the page, with the marks of each path lit up to its level (Gaudí's drawing: drops for back,
      * sparkles for explore, speech bubbles for tell, roots for stay; what is missing shows dotted, nothing withers).
      *

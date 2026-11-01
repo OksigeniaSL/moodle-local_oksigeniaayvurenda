@@ -280,6 +280,8 @@ $data = [
     'entities' => $entities,
     'none' => !$entities,
     'sitewide' => $sitewide,
+    'recoverurl' => (new moodle_url('/local/oksigeniaayvurenda/recover.php'))->out(false),
+    'recoverlabel' => $str('recovernav'),
     'newclassifications' => $classifications('udc'),
 ];
 foreach (

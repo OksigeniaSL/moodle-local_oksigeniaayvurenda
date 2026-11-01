@@ -48,15 +48,27 @@ $entity = format_string(
     true,
     ['escape' => false]
 );
+$skin = \local_oksigeniaayvurenda\local\skins::of((int) $library->entityid);
 $printed = [];
+$long = false;
 foreach (readers::in_group($library, $group) as $reader) {
-    $printed[] = cards::card((object) ['id' => $reader['id'], 'entityid' => $library->entityid,
-        'cardcode' => $reader['cardcode']], $reader['name'], $group, $entity);
+    $printed[] = cards::printed((object) ['id' => $reader['id'], 'entityid' => $library->entityid, 'userid' => $reader['userid'],
+        'readertype' => $reader['type'], 'cardcode' => $reader['cardcode']], $reader['name'], $group, $entity, $skin);
+    $long = $long || core_text::strlen((string) $reader['cardcode']) > 10;
 }
-$sheets = array_map(fn($chunk) => ['cards' => $chunk], array_chunk($printed, 10));
+$heading = $str('printcardsheading', $group !== '' ? $group : $str('readersnogroup'));
+$guides = (string) file_get_contents(__DIR__ . '/app/printguides-a4.svg');
+$chunks = array_chunk($printed, 10);
+$sheets = [];
+foreach ($chunks as $index => $chunk) {
+    $sheets[] = ['paper' => 'a4', 'guides' => $guides, 'how' => $str('printcardshow'), 'ruler' => $str('printcardsruler'),
+        'sample' => '',
+        'title' => $str('printcardssheet', (object) ['heading' => $heading, 'n' => $index + 1, 'of' => count($chunks)]),
+        'cards' => $chunk];
+}
 $data = [
-    'heading' => $str('printcardsheading', $group !== '' ? $group : $str('readersnogroup')),
-    'intro' => $str('printcardsintro', count($printed)),
+    'heading' => $heading,
+    'intro' => $str('printcardsintro', count($printed)) . ($long ? ' ' . $str('printcardslongcodes') : ''),
     'print' => $str('printnow'),
     'sheets' => $sheets,
     'hassheets' => (bool) $sheets,

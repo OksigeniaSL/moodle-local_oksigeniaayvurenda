@@ -1,0 +1,64 @@
+{{!
+    @template local_oksigeniaayvurenda/recover
+
+    A centre back from its copy: the file dropped, what it holds seen, and only then brought back as a new centre.
+
+    Example context (json):
+    {
+        "heading": "Recuperar una copia", "intro": "Entra como un centro nuevo.", "error": "", "action": "#", "sesskey": "abc", "upload": false,
+        "check": {"file": "copia.zip", "title": "Colegio Monte Claro", "figures": [{"count": "8", "label": "fichas"}]},
+        "done": null, "recoverdrop": "Suelta aquí la copia", "recoverformats": "El zip o el .age", "recoverkey": "Llave", "recoverkeyhint": "Para el .age",
+        "recovergo": "Recuperarla", "recoversafe": "No toca nada.", "recovernot": "No vienen las cuentas.", "recovergoin": "Entrar",
+        "recovergolibraries": "Bibliotecas", "importcancel": "Dejarlo", "importdropor": "o búscalo", "importreading": "Leyendo…",
+        "recoverbusy": "Recuperando…", "importbusyhint": "Tarda."
+    }
+}}
+<div class="ayv-imp">
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+{{#upload}}
+<header class="ayv-imp-top">
+    <h1 class="ayv-imp-title">{{heading}}</h1>
+    <p class="ayv-imp-lead">{{intro}}</p>
+</header>
+<form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-imp-upload" data-busy="{{importreading}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="upload">
+    <label class="ayv-field ayv-dig-field">{{recoverkey}} <span class="ayv-field-hint">{{recoverkeyhint}}</span>
+        <input type="password" name="identity" autocomplete="off" spellcheck="false"></label>
+    <label class="ayv-imp-drop" data-ayv-drop>
+        <span class="ayv-imp-droptitle">{{recoverdrop}}</span>
+        <span class="ayv-imp-dropor">{{importdropor}}</span>
+        <input type="file" name="file" accept=".zip,.age" required>
+        <span class="ayv-imp-dropformats">{{recoverformats}}</span>
+    </label>
+</form>
+<p class="ayv-field-hint ayv-imp-plan">{{recovernot}}</p>
+{{/upload}}
+{{#check}}
+<form method="post" action="{{action}}" class="ayv-imp-review" data-busy="{{recoverbusy}}" data-busyhint="{{importbusyhint}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="step" value="restore">
+    <header class="ayv-imp-head">
+        <div class="ayv-imp-headtext">
+            <p class="ayv-imp-file"><span class="ayv-imp-filename">{{file}}</span></p>
+            <h1 class="ayv-imp-title">{{title}}</h1>
+            <p class="ayv-imp-lead">{{recoversafe}}</p>
+        </div>
+        <ul class="ayv-imp-figures">
+            {{#figures}}<li><span class="ayv-imp-num">{{count}}</span> <span class="ayv-imp-figlabel">{{label}}</span></li>{{/figures}}
+        </ul>
+    </header>
+    <p class="ayv-field-hint">{{recovernot}}</p>
+    <div class="ayv-imp-go">
+        <button type="submit" class="ayv-button ayv-imp-gobutton">{{recovergo}}</button>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="step" value="cancel" data-nobusy>{{importcancel}}</button>
+    </div>
+</form>
+{{/check}}
+{{#done}}
+<section class="ayv-imp-done">
+    <h1 class="ayv-imp-title">{{title}}</h1>
+    <p class="ayv-field-hint">{{recovernot}}</p>
+    <p class="ayv-book-actions"><a class="ayv-button" href="{{url}}">{{recovergoin}}</a>
+        <a class="ayv-button ayv-button-quiet" href="{{urllibraries}}">{{recovergolibraries}}</a></p>
+</section>
+{{/done}}
+</div>

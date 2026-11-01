@@ -13,23 +13,28 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/printcards
 
-    Reader cards to print: sheets of ten, each card 85.6 × 54 mm.
+    Reader cards to print, on one side: ten to an A4 sheet, each card 85.6 x 54 mm, touching, so each line is cut once.
 
     Context variables required for this template:
     * heading, intro, print, empty - texts
-    * sheets - list of cards (name, group, library, code, barcode as SVG, qr image address, flower)
+    * sheets - list of sheets: paper (a4 or letter), guides (the cut lines, SVG), title, how, ruler, sample and cards
+    * cards - look (art-flower, art-sky or plain), skin, art (address, or empty), label, name, namesize (long, verylong
+      or empty), group, library, qr (SVG), barcode (SVG, or empty when it does not fit), barwidth (its width in mm, or empty), code
 
     Example context (json):
     {
-        "heading": "Carnés de 3º A",
+        "heading": "Carnés de 3.º A",
         "intro": "25 carnés.",
         "print": "Imprimir",
         "hassheets": true,
-        "sheets": [{"cards": [{"name": "Ana Montes", "group": "3º A", "library": "Biblioteca", "code": "10000H",
-                               "barcode": "", "qr": "app/emblema.svg", "flower": "emblema.svg"}]}],
+        "sheets": [{"paper": "a4", "guides": "", "title": "Carnés de 3.º A · 1/3", "how": "", "ruler": "", "sample": "",
+                    "cards": [{"look": "art-flower", "skin": "school", "art": "semilla.webp", "label": "Carné de biblioteca",
+                               "name": "Ana Montes", "namesize": "", "group": "3.º A", "library": "Biblioteca",
+                               "qr": "<svg></svg>", "barcode": "", "barwidth": "", "code": "10000H"}]}],
         "empty": ""
     }
 }}
@@ -40,16 +45,29 @@
 </div>
 {{^hassheets}}<p class="ayv-empty">{{empty}}</p>{{/hassheets}}
 {{#sheets}}
-<div class="ayv-sheet">
-{{#cards}}
-    <div class="ayv-printcard">
-        <div class="ayv-printcard-top">
-            <img src="{{flower}}" alt="" width="40" height="40">
-            <div><p class="ayv-printcard-name">{{name}}</p><p>{{group}}{{#group}} · {{/group}}{{library}}</p></div>
-            {{#qr}}<img class="ayv-printcard-qr" src="{{qr}}" alt="">{{/qr}}
+<div class="ayv-sheet ayv-sheet-{{paper}}">
+    {{{guides}}}
+    <p class="ayv-sheet-note ayv-sheet-note-a">{{title}}</p>
+    <p class="ayv-sheet-note ayv-sheet-note-b">{{how}}</p>
+    <p class="ayv-sheet-note ayv-sheet-note-c">{{ruler}}</p>
+    {{#sample}}<p class="ayv-sheet-note ayv-sheet-note-d">{{sample}}</p>{{/sample}}
+    <div class="ayv-sheet-cards">
+    {{#cards}}
+        <div class="ayv-printcard ayv-printcard-{{look}} ayv-printcard-skin-{{skin}}">
+            {{#art}}<img class="ayv-printcard-picture" src="{{art}}" alt="">{{/art}}
+            <div class="ayv-printcard-who">
+                <p class="ayv-printcard-label">{{label}}</p>
+                <p class="ayv-printcard-name ayv-printcard-{{namesize}}">{{name}}</p>
+                {{#group}}<p class="ayv-printcard-group">{{group}}</p>{{/group}}
+                <p class="ayv-printcard-library">{{library}}</p>
+            </div>
+            <div class="ayv-printcard-qr">{{{qr}}}</div>
+            <div class="ayv-printcard-bars"{{#barwidth}} style="--ayv-print-bars: {{barwidth}}mm"{{/barwidth}}>
+                {{{barcode}}}
+                <p>{{code}}</p>
+            </div>
         </div>
-        {{#barcode}}<div class="ayv-printcard-barcode">{{{barcode}}}</div>{{/barcode}}
+    {{/cards}}
     </div>
-{{/cards}}
 </div>
 {{/sheets}}

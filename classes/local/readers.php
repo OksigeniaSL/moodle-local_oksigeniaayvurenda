@@ -186,6 +186,7 @@ final class readers {
             $name = trim($first . ' ' . $last) ?: $row->cardcode;
             $readers[] = [
                 'id' => (int) $row->id,
+                'userid' => $row->userid ? (int) $row->userid : null,
                 'name' => $name,
                 'photo' => isset($users[$row->userid]) ? profile::photo((object) ['userid' => $row->userid,
                     'entityid' => $library->entityid], $users[$row->userid]) : '',

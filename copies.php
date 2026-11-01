@@ -64,6 +64,17 @@ if (data_submitted() && confirm_sesskey() && $manage) {
     } else if ($do === 'usekey') {
         $notice = $str(offsite::use_key($entityid, optional_param('recipient', '', PARAM_RAW_TRIMMED)) ? 'offsitekeyused'
             : 'offsitekeybad');
+    } else if ($do === 'adds3') {
+        $id = offsite::add_s3(
+            $entityid,
+            optional_param('endpoint', '', PARAM_RAW_TRIMMED),
+            optional_param('bucket', '', PARAM_RAW_TRIMMED),
+            optional_param('region', '', PARAM_RAW_TRIMMED),
+            optional_param('accesskey', '', PARAM_RAW_TRIMMED),
+            optional_param('secret', '', PARAM_RAW)
+        );
+        $error = $id === null ? $str('offsiteplacebad') : offsite::test($entityid, $id);
+        $notice = $error === null ? $str('offsiteplaceadded') : ($id === null ? $error : $str('offsiteplacefails', $error));
     } else if ($do === 'addplace') {
         $id = offsite::add_webdav(
             $entityid,
