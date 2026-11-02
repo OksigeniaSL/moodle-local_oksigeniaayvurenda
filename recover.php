@@ -57,8 +57,28 @@ $forget = function () use (&$pending) {
 };
 $error = '';
 $done = null;
+$filesfor = optional_param('entity', 0, PARAM_INT);
+$brought = '';
 if (data_submitted() && confirm_sesskey()) {
     $step = optional_param('step', '', PARAM_ALPHA);
+    if ($step === 'files' && !empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
+        $path = make_request_directory() . '/ficheros.zip';
+        try {
+            if (str_ends_with(strtolower(clean_filename((string) $_FILES['file']['name'])), '.age')) {
+                age::decrypt($_FILES['file']['tmp_name'], $path, trim(optional_param('identity', '', PARAM_RAW_TRIMMED)));
+            } else {
+                move_uploaded_file($_FILES['file']['tmp_name'], $path);
+            }
+            $back = recover::bring_files($filesfor, $path, (int) $USER->id);
+            if ($back === null) {
+                $error = $str('recoverfilesnot');
+            } else {
+                $brought = $str('recoverfilesdone', (object) $back);
+            }
+        } catch (\Throwable $e) {
+            $error = $str('recoverbadkey');
+        }
+    }
     if ($step === 'upload' && !empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
         $forget();
         $dir = make_temp_directory('local_oksigeniaayvurenda');
@@ -86,11 +106,17 @@ if (data_submitted() && confirm_sesskey()) {
     } else if ($step === 'restore' && $pending) {
         $done = recover::restore($pending['path'], (int) $USER->id);
         $forget();
+        $filesfor = (int) $done->entityid;
     } else if ($step === 'cancel') {
         $forget();
     }
     $SESSION->ayvurendarecover = $pending;
 }
+$firstslug = $filesfor ? (string) $DB->get_field_sql(
+    'SELECT slug FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entity ORDER BY id',
+    ['entity' => $filesfor],
+    IGNORE_MULTIPLE
+) : '';
 $figure = fn(int $count, string $key) => ['count' => screens::number($count), 'label' => $str($key)];
 $look = $pending ? recover::look($pending['path']) : null;
 $data = [
@@ -99,21 +125,26 @@ $data = [
     'error' => $error,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'upload' => !$pending && !$done,
+    'upload' => !$pending && !$filesfor,
     'check' => $look ? [
         'file' => $pending['name'],
         'title' => $str('recoverchecktitle', $look['name']),
         'figures' => [$figure($look['records'], 'importfigrecords'), $figure($look['items'], 'importfigitems'),
             $figure($look['readers'], 'readerslistfigreaders'), $figure($look['loans'], 'recoverfigloans')],
     ] : null,
-    'done' => $done ? [
-        'title' => $str('recoverdonetitle', format_string($done->name, true, ['escape' => false])),
-        'url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $done->slug]))->out(false),
+    'files' => $filesfor && recover::recovered($filesfor) ? [
+        'title' => $done ? $str('recoverdonetitle', format_string($done->name, true, ['escape' => false]))
+            : $str('recoverfilestitle'),
+        'brought' => $brought,
+        'entity' => $filesfor,
+        'limit' => $str('recoverfileslimit', display_size(get_max_upload_file_size())),
+        'url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $firstslug]))->out(false),
         'urllibraries' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
     ] : null,
 ];
 foreach (
-    ['recoverdrop', 'recoverformats', 'recoverkey', 'recoverkeyhint', 'recovergo', 'recoversafe', 'recovernot', 'recovergoin',
+    ['recoverfilesintro', 'recoverfilesdrop', 'recoverdrop', 'recoverformats', 'recoverkey', 'recoverkeyhint', 'recovergo',
+        'recoversafe', 'recovernot', 'recovergoin',
         'recovergolibraries', 'importcancel', 'importdropor', 'importreading', 'recoverbusy', 'importbusyhint'] as $key
 ) {
     $data[$key] = $str($key);

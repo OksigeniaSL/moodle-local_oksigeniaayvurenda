@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.124.0 (2026-11-02)
+
+- The copy of a centre's files, apart from the daily one: covers, the digital collection, the drawings of the reviews, the pictures of
+  the libraries and its own characters, in folders anyone can open. Made on request; every week if the copies leave the server.
+  Recorded voices never leave the server.
+- A centre comes back whole: after its daily copy, its files (`recover.php`, or `cli/recover_files.php` if too big to upload).
+- The daily copy also has the reviews, the challenges, what the classes asked for, what was read in the room and the sets of the
+  textbook bank. The list of readers for Koha without a byte-order mark.
+- Her thinking pose moves the herald too.
+
 ## 0.123.0 (2026-11-02)
 
 - Who did what: each delicate action (joining readers, taking a copy, changing a rule, publishing a voice, a plan, a skin…) tells

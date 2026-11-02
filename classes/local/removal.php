@@ -29,7 +29,8 @@ final class removal {
 
     /** @var string[] The areas of files, each with the table its item id belongs to. */
     private const FILES = ['digital' => 'digital', 'cover' => 'record', 'reviewdrawing' => 'review', 'reviewvoice' => 'review',
-        'libraryimage' => 'library', 'portrait' => 'entity', 'copies' => 'entity'];
+        'libraryimage' => 'library', 'portrait' => 'entity', 'copies' => 'entity', 'filecopies' => 'entity',
+        'recovermap' => 'entity'];
 
     /**
      * How much hangs from a centre, table by table.

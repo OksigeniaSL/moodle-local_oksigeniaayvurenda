@@ -475,6 +475,8 @@ final class events_test extends \advanced_testcase {
      * Who keeps a centre reads what was done in it, and not what was done in another; opening records goes apart.
      */
     public function test_the_page_reads_the_log_of_its_centre(): void {
+        // The log waits for the transaction a test runs in.
+        $this->preventResetByRollback();
         set_config('enabled_stores', 'logstore_standard', 'tool_log');
         set_config('buffersize', 0, 'logstore_standard');
         get_log_manager(true);

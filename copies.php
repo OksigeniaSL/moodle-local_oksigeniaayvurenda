@@ -52,7 +52,7 @@ $pullurl = '';
 if (data_submitted() && confirm_sesskey() && $manage) {
     $do = optional_param('do', 'make', PARAM_ALPHA);
     // The copy off the server goes with the plan; the daily copy, always.
-    if ($do !== 'make' && !plans::allows((int) $library->entityid, 'offsite')) {
+    if (!in_array($do, ['make', 'makefiles'], true) && !plans::allows((int) $library->entityid, 'offsite')) {
         $do = '';
     }
     if ($do === 'make') {
@@ -63,6 +63,9 @@ if (data_submitted() && confirm_sesskey() && $manage) {
             $out['sent']
         ) : '')
             . ($out['failed'] ? ' ' . $str('offsitefailednow', implode(', ', $out['failed'])) : '');
+    } else if ($do === 'makefiles') {
+        \local_oksigeniaayvurenda\local\filecopy::queue($entityid);
+        $notice = $str('filecopyqueued');
     } else if ($do === 'newkey') {
         $secret = offsite::new_key($entityid);
         $notice = $str('offsitekeymade');
@@ -136,9 +139,41 @@ $data = [
     'empty' => $str('copiesempty'),
     'download' => $str('copydownload'),
     'make' => $manage ? ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('copymake')] : null,
+    'filecopy' => $manage ? copies_files($entityid, $context, $str) : null,
     'offsite' => $manage && plans::allows($entityid, 'offsite') ? copies_offsite($entityid, $secret, $pullurl, $str) : null,
     'offsitenote' => $manage && !plans::allows($entityid, 'offsite') ? $str('offsitenotinplan') : '',
 ];
+
+/**
+ * What the page says of the copy of the files, for whoever manages the centre.
+ *
+ * @param int $entityid
+ * @param context $context
+ * @param callable $str
+ * @return array
+ */
+function copies_files(int $entityid, context $context, callable $str): array {
+    global $PAGE;
+    $latest = \local_oksigeniaayvurenda\local\filecopy::latest($entityid);
+    $last = offsite::settings($entityid)['lastfiles'];
+    return [
+        'action' => $PAGE->url->out(false),
+        'sesskey' => sesskey(),
+        'waiting' => \local_oksigeniaayvurenda\local\filecopy::waiting($entityid),
+        'url' => $latest ? moodle_url::make_pluginfile_url(
+            $context->id,
+            'local_oksigeniaayvurenda',
+            \local_oksigeniaayvurenda\local\filecopy::AREA,
+            $entityid,
+            '/',
+            $latest->get_filename(),
+            true
+        )->out(false) : '',
+        'label' => $latest ? userdate($latest->get_timecreated(), get_string('strftimedatetime', 'langconfig')) : '',
+        'size' => $latest ? display_size($latest->get_filesize()) : '',
+        'failed' => !empty($last['failed']) ? $str('filecopyfailed', implode(', ', $last['failed'])) : '',
+    ];
+}
 
 /**
  * What the page says of the copies out of the server, for whoever manages the centre.

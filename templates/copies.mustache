@@ -22,6 +22,7 @@
     * heading, intro, notice, empty, download - texts
     * files - list of url, label and size
     * make - action, sesskey and label to make one now, for those who may
+    * filecopy - for whoever manages the centre: action, sesskey, waiting, url, label, size, failed
     * offsite - for whoever manages the centre: action, sesskey, state (tone, text), haskey, keyline, recipient, secret,
       secretfile, places (id, label, url, user), hasplaces, canadd, keepline, keepdaily, keepweekly, keepmonthly,
       haspull, pullurl, scripts (id, label, hint, code), hasscripts
@@ -29,6 +30,8 @@
     Example context (json):
     {
         "offsitenote": "",
+        "filecopy": {"action": "#", "sesskey": "abc", "waiting": false, "url": "#", "label": "25 de octubre de 2026, 02:47",
+            "size": "312 MB", "failed": ""},
         "heading": "Copias de la biblioteca",
         "intro": "Cada noche, una copia completa.",
         "notice": "",
@@ -49,6 +52,18 @@
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#offsitenote}}<p class="ayv-empty">{{offsitenote}}</p>{{/offsitenote}}
+{{#filecopy}}
+<section class="ayv-off" aria-labelledby="ayv-files-title">
+    <h2 id="ayv-files-title" class="ayv-section-title">{{#str}}filecopyheading, local_oksigeniaayvurenda{{/str}}</h2>
+    <p>{{#str}}filecopyintro, local_oksigeniaayvurenda{{/str}}</p>
+    {{#failed}}<p class="ayv-off-state ayv-off-state-bad" role="status">{{failed}}</p>{{/failed}}
+    {{#waiting}}<p class="ayv-off-state ayv-off-state-wait" role="status">{{#str}}filecopywaiting, local_oksigeniaayvurenda{{/str}}</p>{{/waiting}}
+    <form method="post" action="{{action}}" class="ayv-dig-actions"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        {{#url}}<a class="ayv-button" href="{{url}}">{{#str}}filecopydownload, local_oksigeniaayvurenda, {{label}}{{/str}} ({{size}})</a>{{/url}}
+        {{^waiting}}<button type="submit" class="ayv-button{{#url}} ayv-button-quiet{{/url}}" name="do" value="makefiles">{{#str}}filecopymake, local_oksigeniaayvurenda{{/str}}</button>{{/waiting}}
+    </form>
+</section>
+{{/filecopy}}
 {{#offsite}}
 <section class="ayv-off" aria-labelledby="ayv-off-title">
     <h2 id="ayv-off-title" class="ayv-section-title">{{#str}}offsiteheading, local_oksigeniaayvurenda{{/str}}</h2>

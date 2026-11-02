@@ -62,6 +62,7 @@ final class offsite {
             'pull' => (string) ($mine['pull'] ?? '') !== '',
             'last' => (array) ($mine['last'] ?? []),
             'failures' => (int) ($mine['failures'] ?? 0),
+            'lastfiles' => (array) ($mine['lastfiles'] ?? []),
         ];
     }
 
@@ -323,6 +324,49 @@ final class offsite {
     }
 
     /**
+     * Sends the copy of the files to every place, and keeps there only the last two.
+     *
+     * @param int $entityid
+     * @param \stored_file $copy
+     * @param int|null $now
+     * @return array sent (places that have it), failed (labels of those that did not).
+     */
+    public static function send_files(int $entityid, \stored_file $copy, ?int $now = null): array {
+        $now = $now ?? time();
+        $settings = self::settings($entityid);
+        if ($settings['recipient'] === '' || !$settings['places'] || !plans::allows($entityid, 'offsite')) {
+            return ['sent' => 0, 'failed' => []];
+        }
+        $path = self::encrypted($entityid, $copy);
+        $name = filecopy::name($entityid, $now) . '.age';
+        $sent = 0;
+        $failed = [];
+        foreach ($settings['places'] as $place) {
+            $error = self::put($entityid, $place, $path, $name);
+            if ($error === null) {
+                $sent++;
+                $days = [];
+                foreach (self::names($entityid, $place) as $file) {
+                    if (preg_match('/^ayvurenda-' . $entityid . '-ficheros-(\d{8})\.zip\.age$/', $file, $m)) {
+                        $days[$m[1]] = $file;
+                    }
+                }
+                krsort($days);
+                foreach (array_slice($days, 2) as $file) {
+                    self::call($entityid, $place, 'DELETE', $file);
+                }
+            } else {
+                $failed[] = $place['label'];
+            }
+        }
+        self::change($entityid, ['lastfiles' => ['time' => $now, 'sent' => $sent, 'failed' => $failed]]);
+        if ($failed) {
+            self::tell($entityid, $failed);
+        }
+        return ['sent' => $sent, 'failed' => $failed];
+    }
+
+    /**
      * Tries a place: a small file goes and is taken away.
      *
      * @param int $entityid
@@ -367,13 +411,13 @@ final class offsite {
     }
 
     /**
-     * Leaves in a place only the copies of the centre the centre keeps.
+     * The names of the files a place has.
      *
      * @param int $entityid
      * @param array $place
-     * @param array $keep daily, weekly, monthly.
+     * @return string[]
      */
-    private static function prune(int $entityid, array $place, array $keep): void {
+    private static function names(int $entityid, array $place): array {
         $s3 = ($place['kind'] ?? 'webdav') === 's3';
         [$code, $body] = $s3 ? self::call($entityid, $place, 'LIST', '') : self::call(
             $entityid,
@@ -383,16 +427,26 @@ final class offsite {
             '<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:resourcetype/></d:prop></d:propfind>'
         );
         if ($code !== ($s3 ? 200 : 207)) {
-            return;
+            return [];
         }
-        $days = [];
         preg_match_all(
             $s3 ? '#<Key>([^<]+)</Key>#' : '#<(?:[a-z0-9]+:)?href>([^<]+)</(?:[a-z0-9]+:)?href>#i',
             (string) $body,
             $matches
         );
-        foreach ($matches[1] as $href) {
-            $file = rawurldecode(basename(html_entity_decode($href)));
+        return array_map(fn($href) => rawurldecode(basename(html_entity_decode($href))), $matches[1]);
+    }
+
+    /**
+     * Leaves in a place only the copies of the centre the centre keeps.
+     *
+     * @param int $entityid
+     * @param array $place
+     * @param array $keep daily, weekly, monthly.
+     */
+    private static function prune(int $entityid, array $place, array $keep): void {
+        $days = [];
+        foreach (self::names($entityid, $place) as $file) {
             if (preg_match('/^ayvurenda-' . $entityid . '-(\d{8})\.zip\.age$/', $file, $m)) {
                 $days[$m[1]] = $file;
             }
@@ -431,7 +485,7 @@ final class offsite {
         $password = (string) get_config('local_oksigeniaayvurenda', 'offsite' . $entityid . '_' . $place['id']);
         // The credentials go with each request: Moodle's delete() and put() put an anonymous user otherwise.
         $auth = ['CURLOPT_USERPWD' => $place['user'] . ':' . $password, 'CURLOPT_HTTPAUTH' => CURLAUTH_BASIC,
-            'CURLOPT_TIMEOUT' => 600, 'CURLOPT_CONNECTTIMEOUT' => 15];
+            'CURLOPT_TIMEOUT' => self::timeout($method, $payload), 'CURLOPT_CONNECTTIMEOUT' => 15];
         if ($method === 'PUT') {
             $body = $curl->put($url, ['file' => $payload], $auth);
         } else if ($method === 'DELETE') {
@@ -469,7 +523,7 @@ final class offsite {
             time()
         );
         $curl->setHeader(array_map(fn($header, $value) => $header . ': ' . $value, array_keys($signed), $signed));
-        $options = ['CURLOPT_TIMEOUT' => 600, 'CURLOPT_CONNECTTIMEOUT' => 15];
+        $options = ['CURLOPT_TIMEOUT' => self::timeout($method, $path), 'CURLOPT_CONNECTTIMEOUT' => 15];
         if ($method === 'PUT') {
             $body = $curl->put($url, ['file' => $path], $options);
         } else if ($method === 'DELETE') {
@@ -492,6 +546,17 @@ final class offsite {
             'internalhosts'
         )))));
         return $host !== '' && in_array($host, $allowed, true);
+    }
+
+    /**
+     * How long a request may take: a copy of files can take a good while to go.
+     *
+     * @param string $method
+     * @param string $path What a PUT sends.
+     * @return int Seconds.
+     */
+    private static function timeout(string $method, string $path): int {
+        return $method === 'PUT' && is_file($path) ? max(600, (int) (filesize($path) / 262144)) : 600;
     }
 
     /**

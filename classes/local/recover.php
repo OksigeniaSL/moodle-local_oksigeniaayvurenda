@@ -19,7 +19,8 @@ namespace local_oksigeniaayvurenda\local;
 /**
  * A centre back from its daily copy, on this site or any other with Ayvurenda: always as a new centre, so nothing there is
  * touched. What the copy has comes back with its ids made new and everything that pointed at them pointing at the new ones.
- * What it does not have stays out: the accounts of the site, the covers, the files of the digital collection and the voices.
+ * What it does not have stays out: the accounts of the site and the voices. The covers and the other files have their own copy,
+ * which comes back after it (bring_files).
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -31,7 +32,15 @@ final class recover {
 
     /** @var string[] What comes back, parents first; a tutor is an account, and a digital file is not in the copy. */
     private const TABLES = ['library', 'year', 'authority', 'record', 'recauth', 'item', 'reader', 'member', 'loan', 'hold',
-        'stocktake', 'lot', 'lotitem', 'withdrawal', 'withdrawn', 'stockread', 'rule', 'source'];
+        'stocktake', 'lot', 'lotitem', 'withdrawal', 'withdrawn', 'stockread', 'rule', 'challenge', 'review', 'wish', 'roomread',
+        'bankset', 'banktitle', 'digital', 'source'];
+
+    /** @var string Where a recovered centre keeps which of its ids were which, for its files to come after. */
+    private const MAPAREA = 'recovermap';
+
+    /** @var string[] What each area of files may hold; a copy is a file someone brings, and nothing else gets served. */
+    private const KINDS = ['cover' => '/\.(jpe?g|png|webp)$/i', 'reviewdrawing' => '/\.png$/i',
+        'libraryimage' => '/\.(jpe?g|png|webp)$/i', 'portrait' => '/\.(jpe?g|png|webp|json)$/i'];
 
     /** @var string[] Fields that point at their own table, set in a second pass. */
     private const SELF = ['library' => 'parentid', 'authority' => 'parentid'];
@@ -103,6 +112,10 @@ final class recover {
             $later = [];
             foreach (self::rows($zip, $table) as $row) {
                 $old = (int) ($row['id'] ?? 0);
+                // A file of the digital collection comes with its file, after; a link needs nothing else.
+                if ($table === 'digital' && ($row['kind'] ?? '') !== 'link') {
+                    continue;
+                }
                 $new = self::row($table, $row, $columns, $keys[$table] ?? [], $map, $userid);
                 if ($new === null) {
                     continue;
@@ -136,9 +149,130 @@ final class recover {
         if (get_config('local_oksigeniaayvurenda', 'entitycategories')) {
             access::category($entityid);
         }
+        self::keep_map($entityid, $map);
         \local_oksigeniaayvurenda\event\copy_recovered::fire($entityid);
         $first = $DB->get_records(self::T . 'library', ['entityid' => $entityid], 'id', '*', 0, 1);
         return reset($first);
+    }
+
+    /**
+     * Keeps which of a recovered centre's ids were which, for its files to come after.
+     *
+     * @param int $entityid
+     * @param array $map
+     */
+    private static function keep_map(int $entityid, array $map): void {
+        $fs = get_file_storage();
+        $context = \context_system::instance();
+        $fs->delete_area_files($context->id, 'local_oksigeniaayvurenda', self::MAPAREA, $entityid);
+        $fs->create_file_from_string(['contextid' => $context->id, 'component' => 'local_oksigeniaayvurenda',
+            'filearea' => self::MAPAREA, 'itemid' => $entityid, 'filepath' => '/', 'filename' => 'map.json'], (string) json_encode(
+                array_intersect_key($map, array_flip(['entity', 'record', 'review', 'library', 'year', 'reader', 'digital']))
+            ));
+    }
+
+    /**
+     * Which of a recovered centre's ids were which.
+     *
+     * @param int $entityid
+     * @return array|null Null if it is not a recovered centre.
+     */
+    private static function map_of(int $entityid): ?array {
+        $file = get_file_storage()->get_file(
+            \context_system::instance()->id,
+            'local_oksigeniaayvurenda',
+            self::MAPAREA,
+            $entityid,
+            '/',
+            'map.json'
+        );
+        return $file ? json_decode($file->get_content(), true) : null;
+    }
+
+    /**
+     * Whether a centre was recovered, and so can take its files.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function recovered(int $entityid): bool {
+        return self::map_of($entityid) !== null;
+    }
+
+    /**
+     * Brings a centre's files back from their copy. It can be done again: what is there already stays.
+     *
+     * @param int $entityid The recovered centre.
+     * @param string $path The zip.
+     * @param int $userid Who does it.
+     * @return array|null files, digital; null if it is not the copy of the files of this centre.
+     */
+    public static function bring_files(int $entityid, string $path, int $userid): ?array {
+        global $DB;
+        $map = self::map_of($entityid);
+        $zip = new \ZipArchive();
+        if ($map === null || $zip->open($path, \ZipArchive::RDONLY) !== true) {
+            return null;
+        }
+        $origin = json_decode((string) $zip->getFromName('origen.json'), true);
+        if ((int) ($map['entity'][(int) ($origin['entity'] ?? 0)] ?? 0) !== $entityid) {
+            $zip->close();
+            return null;
+        }
+        $columns = $DB->get_columns(self::T . 'digital');
+        $keys = self::foreign_keys()['digital'] ?? [];
+        $digital = 0;
+        foreach (self::csv($zip, 'digital.csv') as $row) {
+            $old = (int) ($row['id'] ?? 0);
+            if (isset($map['digital'][$old]) || ($row['kind'] ?? '') !== 'file') {
+                continue;
+            }
+            $new = self::row('digital', $row, $columns, $keys, $map, $userid);
+            if ($new !== null) {
+                $map['digital'][$old] = (int) $DB->insert_record(self::T . 'digital', $new);
+                $digital++;
+            }
+        }
+        self::keep_map($entityid, $map);
+        $fs = get_file_storage();
+        $context = \context_system::instance();
+        $dir = make_request_directory();
+        $files = 0;
+        // By batches: file by file, a database writes each one to disk, and fifteen thousand covers take minutes.
+        $transaction = $DB->start_delegated_transaction();
+        foreach (self::csv($zip, 'ficheros.csv') as $row) {
+            $area = (string) ($row['area'] ?? '');
+            $name = clean_filename((string) ($row['file'] ?? ''));
+            $table = filecopy::AREAS[$area] ?? '';
+            $item = (int) ($map[$table][(int) ($row['item'] ?? 0)] ?? 0);
+            $inzip = (string) ($row['path'] ?? '');
+            $allowed = $name !== '' && (!isset(self::KINDS[$area]) || preg_match(self::KINDS[$area], $name));
+            $there = $item && $fs->file_exists($context->id, 'local_oksigeniaayvurenda', $area, $item, '/', $name);
+            if (!$table || !$item || !$allowed || $there) {
+                continue;
+            }
+            $stream = $zip->getStream($inzip);
+            if (!$stream) {
+                continue;
+            }
+            $temp = $dir . '/' . $files . '.tmp';
+            file_put_contents($temp, $stream);
+            fclose($stream);
+            // The same door as a file uploaded by hand.
+            if ($area !== 'digital' || digital::acceptable($temp, $name)) {
+                $fs->create_file_from_pathname(['contextid' => $context->id, 'component' => 'local_oksigeniaayvurenda',
+                    'filearea' => $area, 'itemid' => $item, 'filepath' => '/', 'filename' => $name], $temp);
+                $files++;
+                if ($files % 500 === 0) {
+                    $transaction->allow_commit();
+                    $transaction = $DB->start_delegated_transaction();
+                }
+            }
+            @unlink($temp);
+        }
+        $transaction->allow_commit();
+        $zip->close();
+        return ['files' => $files, 'digital' => $digital];
     }
 
     /**

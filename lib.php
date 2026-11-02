@@ -37,7 +37,7 @@
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER;
-    $areas = ['copies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'reviewdrawing', 'reviewvoice'];
+    $areas = ['copies', 'filecopies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'reviewdrawing', 'reviewvoice'];
     if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, $areas, true)) {
         return false;
     }
@@ -73,6 +73,11 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         require_login(null, false);
         \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:desk', $itemid);
         \local_oksigeniaayvurenda\event\copy_downloaded::fire($itemid, null, ['how' => 'page']);
+    } else if ($filearea === 'filecopies') {
+        // The copy of a centre's files: for whoever manages it.
+        require_login(null, false);
+        \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:manage', $itemid);
+        \local_oksigeniaayvurenda\event\copy_downloaded::fire($itemid, null, ['how' => 'files']);
     } else if ($filearea === 'libraryimage' || $filearea === 'portrait') {
         // A library's own picture, or its characters' portraits (the item is the centre): for whoever sees the library,
         // and for anyone where its public window is open.

@@ -53,6 +53,7 @@ class make_copies extends \core\task\scheduled_task {
                 $file->get_filesize() . ' bytes)');
             // And out of the server, encrypted, where the centre chose.
             $out = \local_oksigeniaayvurenda\local\offsite::send((int) $entityid, $file);
+            \local_oksigeniaayvurenda\local\filecopy::night((int) $entityid);
             if ($out['sent'] || $out['failed']) {
                 mtrace('Ayvurenda: sent to ' . $out['sent'] . ' places' . ($out['failed'] ? ', failed: ' .
                     implode(', ', $out['failed']) : ''));

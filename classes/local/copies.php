@@ -70,6 +70,13 @@ final class copies {
         'stockread' => 'stocktakeid IN (SELECT s.id FROM {local_oksigeniaayvurenda_stocktake} s
             JOIN {local_oksigeniaayvurenda_library} l ON l.id = s.libraryid WHERE l.entityid = :entityid)',
         'rule' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'challenge' => 'yearid IN (SELECT id FROM {local_oksigeniaayvurenda_year} WHERE entityid = :entityid)',
+        'review' => 'entityid = :entityid',
+        'wish' => 'entityid = :entityid',
+        'roomread' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'bankset' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'banktitle' => 'setid IN (SELECT s.id FROM {local_oksigeniaayvurenda_bankset} s
+            JOIN {local_oksigeniaayvurenda_library} l ON l.id = s.libraryid WHERE l.entityid = :entityid)',
         'tutor' => 'yearid IN (SELECT id FROM {local_oksigeniaayvurenda_year} WHERE entityid = :entityid)',
         'source' => 'entityid = :entityid',
     ];
@@ -123,7 +130,7 @@ final class copies {
             'entity' => format_string($entity->name, true, ['escape' => false]),
             'date' => userdate($now, get_string('strftimedatetime', 'langconfig')),
             'counts' => json_encode($counts, JSON_PRETTY_PRINT),
-            'release' => get_config('local_oksigeniaayvurenda', 'release'),
+            'release' => \core_plugin_manager::instance()->get_plugin_info('local_oksigeniaayvurenda')->release,
         ]));
         $zip->close();
 
@@ -270,7 +277,6 @@ final class copies {
         );
         $kinds = ['student' => 'ST', 'teacher' => 'T', 'staff' => 'S', 'family' => 'PT'];
         $people = fopen($dir . '/koha-lectores.csv', 'w');
-        fwrite($people, "\xEF\xBB\xBF");
         fputcsv($people, ['cardnumber', 'surname', 'firstname', 'categorycode', 'branchcode', 'email', 'sort1'], ',', '"', '\\');
         $readers = 0;
         $rows = $DB->get_recordset_sql(

@@ -267,7 +267,7 @@ final class characters {
      */
     private static function gesture(string $role, string $pose): string {
         $gestures = $role === 'herald'
-            ? ['saluda' => 'arrive', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'idle']
+            ? ['saluda' => 'arrive', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'think']
             : ['saluda' => 'greet', 'senala' => 'point', 'celebra' => 'celebrate', 'lee' => 'read', 'piensa' => 'think'];
         return $gestures[$pose] ?? 'idle';
     }

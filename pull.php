@@ -28,11 +28,13 @@ define('NO_MOODLE_COOKIES', true);
 require(__DIR__ . '/../../config.php');
 
 use local_oksigeniaayvurenda\local\copies;
+use local_oksigeniaayvurenda\local\filecopy;
 use local_oksigeniaayvurenda\local\offsite;
 
 $centre = required_param('centre', PARAM_INT);
 $key = required_param('key', PARAM_ALPHANUM);
-$copy = offsite::pull_allowed($centre, $key) ? (copies::list($centre)[0] ?? null) : null;
+$files = optional_param('what', '', PARAM_ALPHA) === 'files';
+$copy = !offsite::pull_allowed($centre, $key) ? null : ($files ? filecopy::latest($centre) : (copies::list($centre)[0] ?? null));
 if (!$copy) {
     // The same answer for a wrong key and for a centre that is not there.
     http_response_code(404);
@@ -40,4 +42,6 @@ if (!$copy) {
 }
 $path = offsite::encrypted($centre, $copy);
 \local_oksigeniaayvurenda\event\copy_downloaded::fire($centre, null, ['how' => 'pull']);
-send_file($path, offsite::name($centre, (int) $copy->get_timecreated()), 0, 0, false, true, 'application/octet-stream');
+$name = $files ? filecopy::name($centre, (int) $copy->get_timecreated()) . '.age'
+    : offsite::name($centre, (int) $copy->get_timecreated());
+send_file($path, $name, 0, 0, false, true, 'application/octet-stream');
