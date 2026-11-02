@@ -29,5 +29,5 @@
 <div class="ayv-mat-grid">
     <label class="ayv-field ayv-dig-field">{{purchasefieldcopies}} <input type="number" name="copies" min="1" max="500" value="{{copies}}"></label>
     <label class="ayv-field ayv-dig-field">{{purchasefieldprice}} <span class="ayv-field-hint">{{purchasefieldpricehint}}</span> <input type="text" name="price" inputmode="decimal" maxlength="12" value="{{pricevalue}}"></label>
-    <label class="ayv-field ayv-dig-field ayv-mat-name">{{purchasefieldvendor}} <input type="text" name="vendor" maxlength="100" value="{{vendor}}" list="ayv-purchase-vendors"></label>
+    <label class="ayv-field ayv-dig-field ayv-mat-name">{{purchasefieldvendor}} <input type="text" name="vendor" maxlength="100" value="{{vendor}}"{{#vendorlist}} list="{{vendorlist}}"{{/vendorlist}}></label>
 </div>

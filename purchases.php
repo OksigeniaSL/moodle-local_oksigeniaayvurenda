@@ -139,6 +139,7 @@ $vendors = $DB->get_fieldset_sql(
     [$library->id]
 );
 $data['vendors'] = array_map(fn($v) => ['name' => $v], $vendors);
+$data['vendorlist'] = 'ayv-purchase-vendors';
 if ($tab === 'asked') {
     $data['cards'] = array_map($card, purchases::list($library, 'asked'));
     $data['hascards'] = (bool) $data['cards'];
