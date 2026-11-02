@@ -115,7 +115,9 @@
 
     var counts = function(c) {
         if (progress && c) {
-            progress.textContent = fill(str.stocktakeprogress, c);
+            var lang = document.documentElement.lang || undefined;
+            progress.textContent = fill(str.stocktakeprogress, {seen: Number(c.seen).toLocaleString(lang),
+                expected: Number(c.expected).toLocaleString(lang)});
         }
     };
 

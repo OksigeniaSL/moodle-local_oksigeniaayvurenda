@@ -80,7 +80,7 @@
     <p class="ayv-lab-count"><span>{{count}}</span>{{#haspages}} <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button>{{/haspages}}</p>
 </div>
 {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
-{{^haspages}}<p class="ayv-empty">{{empty}}</p>{{/haspages}}
+{{^haspages}}<div class="ayv-nothing"><p>{{empty}}</p></div>{{/haspages}}
 {{#pages}}
 <div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}" style="{{style}}">
 {{#labels}}

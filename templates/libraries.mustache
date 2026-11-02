@@ -83,13 +83,13 @@
             <div class="ayv-libcard-body">
                 {{#featured}}<span class="ayv-libcard-seat">{{librariesseat}}</span>{{/featured}}
                 <h3 class="ayv-libcard-name"><a href="{{url}}">{{name}}</a></h3>
-                <p class="ayv-libcard-kind">{{kindlabel}} <span class="ayv-libcard-address">{{address}}</span></p>
+                <p class="ayv-libcard-kind">{{kindlabel}}</p>
                 {{#hasgroupchips}}<ul class="ayv-libcard-groups">{{#groupchips}}<li>{{chip}}</li>{{/groupchips}}</ul>{{/hasgroupchips}}
                 <p class="ayv-libcard-count"><strong>{{count}}</strong> {{countword}}</p>
                 {{#keepernames}}<p class="ayv-libcard-keepers">{{librarieskeptby}} {{keepernames}}</p>{{/keepernames}}
             </div>
             <div class="ayv-libcard-actions">
-                <a class="ayv-button" href="{{url}}">{{librariesenter}}</a>
+                <a class="ayv-button ayv-button-quiet" href="{{url}}">{{librariesenter}}</a>
                 <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-library-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{librariesedit}}</button>
             </div>
             <dialog class="ayv-modal ayv-entity-edit" id="ayv-library-{{id}}" aria-labelledby="ayv-library-{{id}}-title">

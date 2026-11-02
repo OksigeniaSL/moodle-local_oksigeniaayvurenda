@@ -26,7 +26,8 @@
                   "counts": "12 libros", "other": "Aula de 4º B"}],
         "lotssent": "Enviados", "lotsreceived": "Recibidos", "lotsnew": "Preparar un lote", "lotname": "Nombre",
         "lotnamehint": "un tema o una lectura", "lotto": "Para", "lotdue": "Hasta", "lotcreate": "Empezar a llenarlo",
-        "lotsnoothers": "Hace falta otra biblioteca", "lotlate": "con retraso"
+        "lotsnoothers": "Hace falta otra biblioteca", "lotlate": "con retraso",
+        "librariesurl": "#", "librariesgo": "Bibliotecas"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -49,7 +50,7 @@
 <form method="post" action="{{action}}" class="ayv-book">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
     <h2 class="ayv-section-title">{{lotsnew}}</h2>
-    {{^hasothers}}<p class="ayv-empty">{{lotsnoothers}}</p>{{/hasothers}}
+    {{^hasothers}}<div class="ayv-nothing"><p>{{lotsnoothers}}</p>{{#librariesurl}}<a class="ayv-button ayv-button-quiet" href="{{librariesurl}}">{{librariesgo}}</a>{{/librariesurl}}</div>{{/hasothers}}
     {{#hasothers}}
     <label class="ayv-field">{{lotname}} <span class="ayv-field-hint">{{lotnamehint}}</span> <input type="text" name="name" maxlength="100" required></label>
     <label class="ayv-field">{{lotto}} <select name="to">{{#others}}<option value="{{id}}">{{name}}</option>{{/others}}</select></label>

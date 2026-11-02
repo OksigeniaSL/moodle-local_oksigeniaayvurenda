@@ -173,6 +173,10 @@ $data = [
 ];
 $data['hassent'] = (bool) $data['sent'];
 $data['hasreceived'] = (bool) $data['received'];
+if (!$others && access::can('local/oksigeniaayvurenda:manage', $library)) {
+    $data['librariesurl'] = (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false);
+    $data['librariesgo'] = $str('librariesnav');
+}
 foreach (
     ['lotssent', 'lotsreceived', 'lotsnew', 'lotname', 'lotnamehint', 'lotto', 'lotdue', 'lotcreate', 'lotsnoothers',
         'lotlate'] as $key

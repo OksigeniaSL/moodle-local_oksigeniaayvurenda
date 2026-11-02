@@ -1172,7 +1172,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-tabs .ayv-toggle[aria-current="page"] { background: var(--green2); color: #fff; }
 
-.ayv .ayv-tabs .ayv-toggle[aria-current="page"]::before { background: #fff; box-shadow: none; }
+/* A tab is no option to tick: no ring. */
+.ayv .ayv-tabs .ayv-toggle::before { content: none; }
 
 .ayv .ayv-report .ayv-person { flex-wrap: wrap; }
 
@@ -3984,3 +3985,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
     .ayv .ayv-twins-top input[type="search"] { width: 100%; flex: 1 1 100%; }
     .ayv .ayv-lti-url { flex-wrap: wrap; }
 }
+
+/* What a list says with nothing in it, and the next step when there is one. */
+.ayv .ayv-nothing { display: flex; flex-direction: column; align-items: center; gap: .9rem; margin: 1.25rem 0; padding: 2rem 1.5rem; border: 1px dashed var(--line); border-radius: 16px; text-align: center; }
+.ayv .ayv-nothing p { margin: 0; font-size: 1.0625rem; }

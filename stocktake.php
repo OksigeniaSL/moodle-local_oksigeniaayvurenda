@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\stocktake;
 
@@ -58,6 +59,10 @@ if (!$id && data_submitted() && confirm_sesskey()) {
     redirect($url(['id' => $newid]));
 }
 
+$progress = fn($counts) => $str('stocktakeprogress', (object) [
+    'seen' => screens::number((int) ((array) $counts)['seen']),
+    'expected' => screens::number((int) ((array) $counts)['expected']),
+]);
 if (!$id) {
     $list = [];
     foreach (stocktake::all($library) as $one) {
@@ -67,7 +72,7 @@ if (!$id) {
             'url' => $url(['id' => $one->id] + ($one->status === 'open' ? [] : ['view' => 'results'])),
             'state' => $str($one->status === 'open' ? 'stocktakeopen' : 'stocktakeclosedon', userdate((int) ($one->timeclosed ?:
                 $one->timecreated), get_string('strftimedateshort', 'langconfig'))),
-            'progress' => $str('stocktakeprogress', (object) $counts),
+            'progress' => $progress($counts),
         ];
     }
     $data = [
@@ -139,7 +144,7 @@ if ($view === 'results' || $stocktake->status !== 'open') {
         'heading' => $stocktake->name,
         'scope' => $scope,
         'notice' => $notice,
-        'progress' => $str('stocktakeprogress', (object) $counts),
+        'progress' => $progress($counts),
         'open' => $stocktake->status === 'open',
         'readurl' => $url(['id' => $id]),
         'action' => $url(['id' => $id]),
@@ -198,7 +203,7 @@ $data = [
     'nowhere' => $str('stocktakenowhere'),
     'places' => $stocktake->locationid ? [] : stocktake::places($library),
     'tools' => $tools['html'],
-    'progress' => $str('stocktakeprogress', (object) $counts),
+    'progress' => $progress($counts),
     'resultsurl' => $url(['id' => $id, 'view' => 'results']),
     'results' => $str('stocktakeresults'),
     'hint' => $str('stocktakehint'),

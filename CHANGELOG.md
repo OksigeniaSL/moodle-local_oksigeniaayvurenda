@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.129.0 (2026-11-02)
+
+- What repeated across the staff's screens: an intro of a line or two, what they do and not how the system works; one main button (How do I…?, libraries, matching); a list with nothing in it says so in its place, with the next step where there is one; the tabs of the reports look like tabs. In Spanish, «enlazar» instead of «casar». The groups of the site are called that, with «cohorts» in brackets where it matters.
+
 ## 0.128.0 (2026-11-02)
 
 - Guided helps for adding material, repeated readers and tutors, with their voices (art 0.1.38). «How do I…?» also answers about material, repeated readers and other platforms.
