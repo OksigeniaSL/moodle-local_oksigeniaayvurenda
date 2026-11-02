@@ -60,6 +60,7 @@ final class howto {
         'weed' => ['weed.php', 'catalogue', 'weed'],
         'lots' => ['lots.php', 'desk', ''],
         'selfloan' => ['selfloan.php', 'desk', 'selfloan'],
+        'purchases' => ['purchases.php', 'catalogue', 'purchases'],
         'bank' => ['libraries.php', 'manage', ''],
         'activity' => ['activity.php', 'manage', ''],
         'bankround' => ['libraries.php', 'desk', ''],
@@ -105,6 +106,7 @@ final class howto {
         'twins' => ['capability' => 'manage', 'page' => 'twins.php', 'steps' => 6],
         'tutors' => ['capability' => 'manage', 'page' => 'tutors.php', 'steps' => 5],
         'selfloan' => ['capability' => 'manage', 'page' => 'selfloan.php', 'steps' => 6],
+        'purchases' => ['capability' => 'catalogue', 'page' => 'purchases.php', 'steps' => 8],
     ];
 
     /** @var string[] Words that say nothing about the task. */

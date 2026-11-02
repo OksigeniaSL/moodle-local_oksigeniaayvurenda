@@ -1,0 +1,200 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/purchases
+
+    What a library buys: what is asked for, what to order, what is on its way and what has arrived.
+
+    Example context (json):
+    {
+        "heading": "Compras", "intro": "De lo que se pide a lo que llega.", "notice": "", "error": "", "action": "#", "sesskey": "x",
+        "tabs": [{"url": "#", "label": "Por decidir", "current": true}], "manage": true,
+        "isasked": true, "isapproved": false, "isordered": false, "isdone": false,
+        "vendors": [{"name": "Librería Sur"}],
+        "hascards": true, "cards": [{"id": 1, "title": "El faro", "author": "Laurel", "isbn": "978", "note": "", "asked": "Lo pide Ana",
+            "copies": 1, "pricevalue": "", "pricetext": "", "vendor": "", "copiestext": "1 ejemplar"}],
+        "hasideas": true, "ideas": [{"recordid": 1, "title": "Atlas", "isbn": "", "source": "queue", "why": "4 esperan y hay 1"}],
+        "budgetline": "420 € de 1.200 €", "hasbudget": true, "budgetshare": 35, "over": false, "amountvalue": "1200.00",
+        "currencies": [{"code": "EUR", "name": "Euro (EUR)", "selected": true}],
+        "suggestline": "Los lectores no piden libros aquí.", "suggeston": false, "allstages": true, "hasstages": true,
+        "stages": [{"name": "Primaria", "chosen": false}],
+        "purchaseadd": "Añadir un libro", "purchaseaddintro": "Lo que quieres comprar.", "purchasefieldtitle": "Título",
+        "purchasefieldauthor": "Autor", "purchasefieldisbn": "ISBN", "purchasefieldnote": "Nota", "purchasefieldcopies": "Ejemplares",
+        "purchasefieldprice": "Precio", "purchasefieldpricehint": "Si lo sabes", "purchasefieldvendor": "A quién", "purchasesave": "Guardar",
+        "purchaseclose": "Cerrar", "purchaseyes": "Comprarlo", "purchaseno": "Esta vez no", "purchaseideas": "Lo que se queda corto",
+        "purchaseideasintro": "Según las lecturas y las colas.", "purchaseideaadd": "A la lista", "purchasenothingasked": "Nada.",
+        "purchasenothingapproved": "Nada.", "purchasenothingordered": "Nada.", "purchasenothingdone": "Nada.", "purchasechange": "Cambiar",
+        "purchasearrived": "Ha llegado", "purchasearrivedintro": "Si ya está en el catálogo, su código.", "purchasefieldcode": "Código",
+        "purchasesheet": "Ver la hoja", "purchasedoneheading": "Han llegado", "purchasedeclinedheading": "Esta vez no",
+        "purchasebudgetheading": "Presupuesto", "purchasebudgetintro": "Sin él, se lleva la cuenta.", "purchasefieldamount": "Cantidad",
+        "purchasefieldcurrency": "Moneda", "purchasesuggestheading": "Lo que piden los lectores", "purchasesuggestlabel": "Pueden pedir",
+        "purchasestages": "Etapas", "purchaseallstages": "Todas"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+<section class="ayv-settingcard ayv-pur-budget">
+    <p class="ayv-pur-budgetline{{#over}} ayv-pur-over{{/over}}">{{budgetline}}</p>
+    {{#hasbudget}}<span class="ayv-share ayv-pur-share" aria-hidden="true"><span style="width: {{budgetshare}}%"></span></span>{{/hasbudget}}
+    <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-budget">{{purchasechange}}</button>
+</section>
+<nav class="ayv-tabs" aria-label="{{heading}}">
+{{#tabs}}<a class="ayv-toggle" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
+</nav>
+<datalist id="ayv-purchase-vendors">{{#vendors}}<option value="{{name}}"></option>{{/vendors}}</datalist>
+{{#isasked}}
+<p class="ayv-more ayv-pur-add"><button type="button" class="ayv-button" data-ayv-open="ayv-pur-new">{{purchaseadd}}</button></p>
+{{^hascards}}<div class="ayv-nothing"><p>{{purchasenothingasked}}</p></div>{{/hascards}}
+{{#hascards}}
+<ul class="ayv-dig-grid ayv-pur-cards">
+{{#cards}}
+    <li class="ayv-dig-card"><h2 class="ayv-dig-title">{{title}}</h2>
+        <p class="ayv-field-hint">{{#author}}{{author}}{{/author}}{{#isbn}}{{#author}} · {{/author}}{{isbn}}{{/isbn}}</p>
+        {{#asked}}<p class="ayv-pur-who">{{asked}}</p>{{/asked}}
+        {{#note}}<p class="ayv-field-hint">{{note}}</p>{{/note}}
+        <div class="ayv-dig-actions">
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-yes-{{id}}">{{purchaseyes}}</button>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="decline"><input type="hidden" name="id" value="{{id}}">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{purchaseno}}</button></form>
+        </div>
+        <dialog class="ayv-modal" id="ayv-pur-yes-{{id}}" aria-labelledby="ayv-pur-yes-title-{{id}}">
+            <div class="ayv-modal-head"><h3 id="ayv-pur-yes-title-{{id}}" class="ayv-section-title">{{title}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="approve"><input type="hidden" name="id" value="{{id}}">
+                {{> local_oksigeniaayvurenda/purchase_fields}}
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchaseyes}}</button></p></form>
+        </dialog></li>
+{{/cards}}
+</ul>
+{{/hascards}}
+{{#hasideas}}
+<section class="ayv-section ayv-pur-ideas">
+    <h2 class="ayv-section-title">{{purchaseideas}}</h2>
+    <p>{{purchaseideasintro}}</p>
+    <ul class="ayv-self-rows">
+    {{#ideas}}
+        <li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong> · {{why}}</span>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
+                <input type="hidden" name="title" value="{{title}}"><input type="hidden" name="isbn" value="{{isbn}}"><input type="hidden" name="recordid" value="{{recordid}}"><input type="hidden" name="source" value="{{source}}">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{purchaseideaadd}}</button></form></li>
+    {{/ideas}}
+    </ul>
+</section>
+{{/hasideas}}
+<dialog class="ayv-modal" id="ayv-pur-new" aria-labelledby="ayv-pur-new-title">
+    <div class="ayv-modal-head"><h3 id="ayv-pur-new-title" class="ayv-section-title">{{purchaseadd}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <p class="ayv-field-hint">{{purchaseaddintro}}</p>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
+        <label class="ayv-field ayv-dig-field">{{purchasefieldtitle}} <input type="text" name="title" maxlength="255" required></label>
+        <div class="ayv-mat-grid">
+            <label class="ayv-field ayv-dig-field ayv-mat-name">{{purchasefieldauthor}} <input type="text" name="author" maxlength="255"></label>
+            <label class="ayv-field ayv-dig-field">{{purchasefieldisbn}} <input type="text" name="isbn" maxlength="20" inputmode="numeric"></label>
+        </div>
+        {{> local_oksigeniaayvurenda/purchase_fields}}
+        <label class="ayv-field ayv-dig-field">{{purchasefieldnote}} <input type="text" name="note" maxlength="255"></label>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchasesave}}</button></p></form>
+</dialog>
+{{/isasked}}
+{{#isapproved}}
+{{^hasgroups}}<div class="ayv-nothing"><p>{{purchasenothingapproved}}</p></div>{{/hasgroups}}
+{{#groups}}
+<section class="ayv-section ayv-pur-group">
+    <div class="ayv-pur-grouphead"><h2 class="ayv-section-title">{{vendorname}}</h2>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="order"><input type="hidden" name="vendor" value="{{vendor}}">
+            <button type="submit" class="ayv-button">{{orderlabel}}</button></form></div>
+    <ul class="ayv-self-rows">
+    {{#rows}}
+        <li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong> · {{copiestext}}{{#pricetext}} · {{pricetext}}{{/pricetext}}</span>
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-yes-{{id}}">{{purchasechange}}</button>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="decline"><input type="hidden" name="id" value="{{id}}">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{purchaseno}}</button></form>
+            <dialog class="ayv-modal" id="ayv-pur-yes-{{id}}" aria-labelledby="ayv-pur-yes-title-{{id}}">
+                <div class="ayv-modal-head"><h3 id="ayv-pur-yes-title-{{id}}" class="ayv-section-title">{{title}}</h3>
+                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="approve"><input type="hidden" name="id" value="{{id}}">
+                    {{> local_oksigeniaayvurenda/purchase_fields}}
+                    <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchasesave}}</button></p></form>
+            </dialog></li>
+    {{/rows}}
+    </ul>
+</section>
+{{/groups}}
+{{/isapproved}}
+{{#isordered}}
+{{^hasorders}}<div class="ayv-nothing"><p>{{purchasenothingordered}}</p></div>{{/hasorders}}
+{{#orders}}
+<section class="ayv-section ayv-pur-order">
+    <div class="ayv-pur-grouphead"><h2 class="ayv-section-title">{{heading}}</h2><a class="ayv-button ayv-button-quiet" href="{{sheet}}">{{purchasesheet}}</a></div>
+    <ul class="ayv-self-rows">
+    {{#rows}}
+        <li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong> · {{copiestext}}{{#pricetext}} · {{pricetext}}{{/pricetext}}</span>
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-got-{{id}}">{{purchasearrived}}</button>
+            <dialog class="ayv-modal" id="ayv-pur-got-{{id}}" aria-labelledby="ayv-pur-got-title-{{id}}">
+                <div class="ayv-modal-head"><h3 id="ayv-pur-got-title-{{id}}" class="ayv-section-title">{{title}}</h3>
+                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                <p class="ayv-field-hint">{{purchasearrivedintro}}</p>
+                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="received"><input type="hidden" name="id" value="{{id}}">
+                    <label class="ayv-field ayv-dig-field">{{purchasefieldcode}} <input type="text" name="code" maxlength="40" autocomplete="off"></label>
+                    <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchasearrived}}</button></p></form>
+            </dialog></li>
+    {{/rows}}
+    </ul>
+</section>
+{{/orders}}
+{{/isordered}}
+{{#isdone}}
+{{^hasreceived}}{{^hasdeclined}}<div class="ayv-nothing"><p>{{purchasenothingdone}}</p></div>{{/hasdeclined}}{{/hasreceived}}
+{{#hasreceived}}<section class="ayv-section"><h2 class="ayv-section-title">{{purchasedoneheading}}</h2>
+    <ul class="ayv-self-rows">{{#received}}<li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong> · {{copiestext}}{{#pricetext}} · {{pricetext}}{{/pricetext}}{{#vendor}} · {{vendor}}{{/vendor}}</span></li>{{/received}}</ul></section>{{/hasreceived}}
+{{#hasdeclined}}<section class="ayv-section"><h2 class="ayv-section-title">{{purchasedeclinedheading}}</h2>
+    <ul class="ayv-self-rows">{{#declined}}<li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong>{{#asked}} · {{asked}}{{/asked}}</span></li>{{/declined}}</ul></section>{{/hasdeclined}}
+{{/isdone}}
+{{#manage}}
+<section class="ayv-settingcard ayv-pur-settings">
+    <h2 class="ayv-section-title">{{purchasesuggestheading}}</h2>
+    <p>{{suggestline}}</p>
+    <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-settings">{{purchasechange}}</button></p>
+</section>
+<dialog class="ayv-modal" id="ayv-pur-settings" aria-labelledby="ayv-pur-settings-title">
+    <div class="ayv-modal-head"><h3 id="ayv-pur-settings-title" class="ayv-section-title">{{purchasesuggestheading}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="settings">
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="suggest" value="1" {{#suggeston}}checked{{/suggeston}}> {{purchasesuggestlabel}}</label>
+        {{#hasstages}}
+        <fieldset class="ayv-dig-set"><legend>{{purchasestages}}</legend>
+            <div class="ayv-segmented"><label><input type="checkbox" name="allstages" value="1" {{#allstages}}checked{{/allstages}}><span>{{purchaseallstages}}</span></label>
+            {{#stages}}<label><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}><span>{{name}}</span></label>{{/stages}}</div>
+        </fieldset>
+        {{/hasstages}}
+        {{^hasstages}}<input type="hidden" name="allstages" value="1">{{/hasstages}}
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchasesave}}</button></p></form>
+</dialog>
+{{/manage}}
+<dialog class="ayv-modal" id="ayv-pur-budget" aria-labelledby="ayv-pur-budget-title">
+    <div class="ayv-modal-head"><h3 id="ayv-pur-budget-title" class="ayv-section-title">{{purchasebudgetheading}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <p class="ayv-field-hint">{{purchasebudgetintro}}</p>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="budget">
+        <div class="ayv-mat-grid">
+            <label class="ayv-field ayv-dig-field">{{purchasefieldamount}} <input type="text" name="amount" inputmode="decimal" maxlength="14" value="{{amountvalue}}"></label>
+            <label class="ayv-field ayv-dig-field ayv-mat-name">{{purchasefieldcurrency}} <select name="currency">{{#currencies}}<option value="{{code}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/currencies}}</select></label>
+        </div>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchasesave}}</button></p></form>
+</dialog>

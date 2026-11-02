@@ -55,6 +55,7 @@
     </div>
     {{/facets}}
     {{#memory}}{{> local_oksigeniaayvurenda/bubble}}{{/memory}}
+    {{#askforit}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/askforit}}
     {{#hassuggestions}}
     <p class="ayv-suggest">{{didyoumean}}
         {{#suggestions}}<a class="ayv-chip" href="{{url}}">{{text}}</a> {{/suggestions}}

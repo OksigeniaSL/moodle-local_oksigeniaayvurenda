@@ -634,6 +634,41 @@ window.AYVHelpPieces = {
             return h.you(4, '.ayv-tut-save .ayv-button');
         });
     },
+    // Buying: what readers ask for, the budget, saying yes, the list by vendor, the order and what happens when it comes.
+    purchases: function(h) {
+        'use strict';
+        return h.point('.ayv-pur-cards .ayv-dig-card').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-pur-budget');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.tap('.ayv-pur-cards [data-ayv-open]');
+        }).then(function() {
+            return h.type('dialog[open] input[name="price"]', '12,50');
+        }).then(function() {
+            return h.type('dialog[open] input[name="vendor"]', h.codes.vendor);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.you(3, 'dialog[open] button[type="submit"]:not(.ayv-modal-close)');
+        }).then(function() {
+            return h.go('.ayv-tabs a:nth-child(2)');
+        }).then(function() {
+            return h.point('.ayv-pur-group');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.you(5, '.ayv-pur-grouphead button[type="submit"]');
+        }).then(function() {
+            return h.point('.ayv-order-table');
+        }).then(function() {
+            return h.say(6);
+        }).then(function() {
+            return h.say(7);
+        });
+    },
     // A post: what it is, making one, its address, who may use it, and going over what was done at it.
     selfloan: function(h) {
         'use strict';

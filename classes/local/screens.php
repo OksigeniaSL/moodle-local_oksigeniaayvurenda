@@ -178,6 +178,7 @@ final class screens {
             // The memory speaks when it found nothing; otherwise it keeps quiet.
             'memory' => $corner === '' && $found['total'] === 0 && $query !== ''
                 ? characters::say((int) $library->entityid, 'memory', 'memorynothing', ['query' => $query], 'piensa') : null,
+            'askforit' => self::ask_for_it($library, $query, (int) $found['total']),
             'tryother' => $found['total'] === 0 && !$suggestions && ($corner !== '' || $query === '' ||
                 !characters::of((int) $library->entityid)['memory']['enabled']) ? self::str('tryother') : '',
             'more' => $more ? ['url' => self::url('search.php', $library, $next), 'label' => self::str('more')] : null,
@@ -188,6 +189,25 @@ final class screens {
                 'pressed' => $onlyfree ? 'true' : 'false',
             ] : null,
         ];
+    }
+
+    /**
+     * Where a reader asks the library for a book it does not have, after a search that found nothing, if they may.
+     *
+     * @param \stdClass $library
+     * @param string $query
+     * @param int $total
+     * @return array|null url and label.
+     */
+    private static function ask_for_it(\stdClass $library, string $query, int $total): ?array {
+        global $DB, $USER;
+        if ($total > 0 || $query === '' || !isloggedin() || isguestuser()) {
+            return null;
+        }
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+            'status' => 'active'], '*', IGNORE_MULTIPLE) ?: null;
+        return purchases::may_ask($library, $reader, time()) ? ['url' => self::url('suggest.php', $library, ['q' => $query]),
+            'label' => self::str('suggestask')] : null;
     }
 
     /**

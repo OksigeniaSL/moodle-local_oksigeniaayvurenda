@@ -463,5 +463,18 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110211, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110212) {
+        // What a library buys: all from the plugin's own description, which says the same as these tables.
+        $xml = new xmldb_file(__DIR__ . '/install.xml');
+        $xml->loadXMLStructure();
+        foreach (['purchaseorder', 'purchase', 'purchasewho', 'budget'] as $name) {
+            $table = $xml->getStructure()->getTable('local_oksigeniaayvurenda_' . $name);
+            if (!$dbman->table_exists($table)) {
+                $dbman->create_table($table);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110212, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

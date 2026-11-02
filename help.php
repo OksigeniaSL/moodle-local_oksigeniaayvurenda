@@ -119,6 +119,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'wish' => $str('practicewishmine'),
             'me' => (string) $USER->id,
             'post' => $str('practicepost'),
+            'vendor' => $str('practicevendor'),
             'material' => $str('practicematerial'),
             'sheet' => str_replace('|', "\n", $str('practicesheet')) . "\n",
             'sheetname' => $str('practicesheetname'),

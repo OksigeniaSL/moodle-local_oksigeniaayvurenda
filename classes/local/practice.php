@@ -409,6 +409,14 @@ final class practice {
                     'readerid' => $readers[$code($who)], 'status' => 'waiting', 'timecreated' => $now - $ago * DAYSECS,
                     'timemodified' => $now - $ago * DAYSECS]);
             }
+        } else if ($piece === 'purchases') {
+            // Two readers ask for a book, one of them for the same; and there is a budget.
+            purchases::save_settings($library, ['suggest' => true, 'stages' => []]);
+            purchases::save_budget($library, '600', 'EUR', $now);
+            $asker = $DB->get_records(self::T . 'reader', ['entityid' => $library->entityid], 'id', '*', 0, 2);
+            foreach ($asker as $one) {
+                purchases::ask($library, $one, ['title' => get_string('practicebuy', 'local_oksigeniaayvurenda')], $now);
+            }
         } else if ($piece === 'selfloan') {
             // A post that already lent a book, so there is something to go over.
             $post = $DB->insert_record(self::T . 'selfpost', ['libraryid' => $library->id,

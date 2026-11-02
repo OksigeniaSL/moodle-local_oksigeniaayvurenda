@@ -93,6 +93,19 @@ class provider implements
             'groupname' => 'privacy:metadata:tutor:groupname',
             'timenotified' => 'privacy:metadata:tutor:timenotified',
         ], 'privacy:metadata:tutor');
+        $collection->add_database_table(self::T . 'purchasewho', [
+            'purchaseid' => 'privacy:metadata:purchasewho:purchaseid',
+            'readerid' => 'privacy:metadata:purchasewho:readerid',
+            'timetold' => 'privacy:metadata:purchasewho:timetold',
+            'timecreated' => 'privacy:metadata:purchasewho:timecreated',
+        ], 'privacy:metadata:purchasewho');
+        $collection->add_database_table(self::T . 'purchase', [
+            'decidedby' => 'privacy:metadata:purchase:decidedby',
+            'note' => 'privacy:metadata:purchase:note',
+        ], 'privacy:metadata:purchase');
+        $collection->add_database_table(self::T . 'purchaseorder', [
+            'createdby' => 'privacy:metadata:purchaseorder:createdby',
+        ], 'privacy:metadata:purchaseorder');
         $collection->add_database_table(self::T . 'selfpost', [
             'libraryid' => 'privacy:metadata:selfpost:libraryid',
             'name' => 'privacy:metadata:selfpost:name',
@@ -275,6 +288,12 @@ class provider implements
         );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'selfpost} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'purchase} WHERE decidedby IS NOT NULL', []);
+        $userlist->add_from_sql(
+            'createdby',
+            'SELECT createdby FROM {' . self::T . 'purchaseorder} WHERE createdby IS NOT NULL',
+            []
+        );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'keeper}', []);
         $userlist->add_from_sql('staffid', 'SELECT staffid FROM {' . self::T . 'keeper} WHERE staffid IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'relay}', []);
@@ -324,6 +343,13 @@ class provider implements
             $loans = [];
             foreach ($DB->get_records(self::T . 'loan', ['readerid' => $reader->id], 'timeloaned') as $loan) {
                 $loans[] = self::loan_export($loan);
+            }
+            $asked = \local_oksigeniaayvurenda\local\purchases::of_reader((int) $reader->id, 1000);
+            if ($asked) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:purchases', 'local_oksigeniaayvurenda')]),
+                    (object) ['books' => $asked]
+                );
             }
             $holds = [];
             foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id], 'timecreated') as $hold) {
@@ -549,6 +575,10 @@ class provider implements
         $DB->delete_records(self::T . 'keeper');
         $DB->delete_records(self::T . 'relay');
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
+        $DB->delete_records(self::T . 'purchasewho');
+        $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader'");
+        $DB->set_field_select(self::T . 'purchase', 'decidedby', null, 'decidedby IS NOT NULL');
+        $DB->set_field_select(self::T . 'purchaseorder', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'stocktake', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'stockread', 'userid', null, 'userid IS NOT NULL');
         $DB->set_field_select(self::T . 'withdrawal', 'createdby', null, 'createdby IS NOT NULL');
@@ -640,6 +670,13 @@ class provider implements
                 }
             }
             $DB->delete_records(self::T . 'hold', ['readerid' => $reader->id]);
+            // What they asked the library to buy stays as a book on a list, without them or what they wrote.
+            $asked = $DB->get_fieldset_select(self::T . 'purchasewho', 'purchaseid', 'readerid = ?', [$reader->id]);
+            if ($asked) {
+                [$in, $params] = $DB->get_in_or_equal($asked);
+                $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader' AND id $in", $params);
+            }
+            $DB->delete_records(self::T . 'purchasewho', ['readerid' => $reader->id]);
         }
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
@@ -649,6 +686,8 @@ class provider implements
         $DB->set_field(self::T . 'keeper', 'staffid', null, ['staffid' => $userid]);
         $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
         $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'purchase', 'decidedby', null, ['decidedby' => $userid]);
+        $DB->set_field(self::T . 'purchaseorder', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'withdrawal', 'createdby', null, ['createdby' => $userid]);
@@ -693,6 +732,12 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'relay', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'purchase', ['decidedby' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'purchaseorder', ['createdby' => $userid])) {
             return true;
         }
         if ($DB->record_exists(self::T . 'hold', ['createdby' => $userid])) {

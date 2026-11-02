@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/suggest
+
+    A reader asks the library for a book, and sees what they asked for.
+
+    Example context (json):
+    {
+        "heading": "Pide un libro", "intro": "Si no lo tenemos, dinos cuál.", "notice": "", "error": "", "action": "#", "sesskey": "x",
+        "title": "", "hasmine": true, "mine": [{"title": "El faro", "state": "Lo están mirando"}],
+        "purchasefieldtitle": "Título", "purchasefieldauthor": "Autor", "purchasefieldisbn": "ISBN",
+        "suggestnotelabel": "Por qué", "suggestsend": "Pedirlo", "suggestmine": "Lo que has pedido"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+<form method="post" action="{{action}}" class="ayv-book" autocomplete="off">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <label class="ayv-field ayv-dig-field">{{purchasefieldtitle}} <input type="text" name="title" maxlength="255" value="{{title}}" required></label>
+    <label class="ayv-field ayv-dig-field">{{purchasefieldauthor}} <input type="text" name="author" maxlength="255"></label>
+    <label class="ayv-field ayv-dig-field">{{purchasefieldisbn}} <input type="text" name="isbn" maxlength="20" inputmode="numeric"></label>
+    <label class="ayv-field ayv-dig-field">{{suggestnotelabel}} <input type="text" name="note" maxlength="255"></label>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{suggestsend}}</button></p>
+</form>
+{{#hasmine}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{suggestmine}}</h2>
+    <ul class="ayv-self-rows">{{#mine}}<li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong></span><span class="ayv-self-row-when">{{state}}</span></li>{{/mine}}</ul>
+</section>
+{{/hasmine}}

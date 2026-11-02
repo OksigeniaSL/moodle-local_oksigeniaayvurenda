@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.131.0 (2026-11-02)
+
+- Purchases: what readers ask for and what the staff see missing (required readings with too few copies, books with a queue), what is decided, the order for each vendor as a sheet to send or print, what arrives, and what it costs against the year's budget. When a book enters the catalogue, whoever asked for it is told.
+
 ## 0.130.0 (2026-11-02)
 
 - Self-loan: a tablet or computer in the library where readers lend to themselves with their card and give books back, opened by its own address, with no account left open on it. It only says the person's first name and what they have just taken. Whoever runs the library chooses who may use it and goes over what was done, undoing what is wrong. If its address gets out, it holds back what no queue would do and stops until someone looks, and everything it did in the last 24 hours can be undone at once.

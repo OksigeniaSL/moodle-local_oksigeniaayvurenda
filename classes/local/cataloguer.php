@@ -183,6 +183,7 @@ final class cataloguer {
         // Material in a library whose rules do not cover it would never be lent.
         $ruled = $device && rules::cover((int) $library->id, ($copy['itemtype'] ?? '') !== '' ? $copy['itemtype'] : 'normal');
         $transaction->allow_commit();
+        purchases::catalogued($library, $recordid, $now);
         return ['recordid' => $recordid, 'newrecord' => $newrecord, 'itemids' => $itemids,
             'barcodes' => array_slice($barcodes, 0, $count), 'ruled' => $ruled];
     }

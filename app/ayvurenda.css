@@ -4021,3 +4021,16 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
     .ayv .ayv-self-stage { flex-direction: column; align-items: flex-start; }
     .ayv .ayv-self-figure { width: 120px; }
 }
+
+/* What a library buys. */
+.ayv .ayv-pur-budget { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; margin: 1rem 0; }
+.ayv .ayv-pur-budgetline { flex: 1 1 18rem; margin: 0; font-weight: 700; }
+.ayv .ayv-pur-over { color: var(--late); }
+.ayv .ayv-pur-share { flex: 1 1 10rem; width: auto; height: .6rem; }
+.ayv .ayv-pur-share span { display: block; height: 100%; background: var(--accent); }
+.ayv .ayv-pur-add { margin: 0 0 1rem; }
+.ayv .ayv-pur-who { margin: 0; }
+.ayv .ayv-pur-grouphead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; }
+.ayv .ayv-order-table { width: 100%; border-collapse: collapse; margin-top: .75rem; }
+.ayv .ayv-order-table th, .ayv .ayv-order-table td { padding: .55rem .6rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.ayv .ayv-order-table .ayv-order-n { text-align: right; white-space: nowrap; }

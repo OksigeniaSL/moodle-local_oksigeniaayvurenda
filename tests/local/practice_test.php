@@ -153,6 +153,11 @@ final class practice_test extends \advanced_testcase {
 
         $library = practice::reset();
         $this->assertSame(0, $DB->count_records($t . 'digital', ['entityid' => $library->entityid]));
+        practice::prepare($library, 'purchases', $admin);
+        $this->assertCount(1, purchases::list($library, 'asked'));
+        $this->assertSame(60000, purchases::budget($library)['amount']);
+        $library = practice::reset();
+        $this->assertSame([], purchases::list($library, 'asked'));
         practice::prepare($library, 'twins', $admin);
         $sets = twins::likely((int) $library->entityid);
         $this->assertCount(1, $sets);

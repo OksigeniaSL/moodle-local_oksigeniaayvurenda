@@ -256,6 +256,14 @@ $nav = $flower && $isdesk && !optional_param('help', 0, PARAM_BOOL) ? [['url' =>
     '/local/oksigeniaayvurenda/help.php',
     ['library' => $library->slug, 'piece' => 'card']
 ))->out(false), 'label' => $str('helpnav')]] : [];
+// Whoever may ask the library for a book finds the way from their card too.
+$asker = $library ? ($DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+    'status' => 'active'], '*', IGNORE_MULTIPLE) ?: null) : null;
+$canask = $library && \local_oksigeniaayvurenda\local\purchases::may_ask($library, $asker, time());
+if ($canask && !optional_param('help', 0, PARAM_BOOL)) {
+    $nav[] = ['url' => (new moodle_url('/local/oksigeniaayvurenda/suggest.php', ['library' => $library->slug]))->out(false),
+        'label' => $str('suggesttitle')];
+}
 shell::output(
     $str('cardtitle'),
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/card', $data),
