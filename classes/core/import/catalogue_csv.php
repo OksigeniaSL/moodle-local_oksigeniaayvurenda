@@ -29,38 +29,47 @@ use local_oksigeniaayvurenda\core\text;
 
 /**
  * A catalogue from a spreadsheet saved as CSV, one row for each copy (or for each title, with how many copies): the
- * usual headings in Spanish and English are understood, and a column can be chosen by hand. Rows of the same title,
- * author and ISBN are one record with several copies. Plain PHP, without Moodle.
+ * usual headings in Spanish and English are understood, and those of the exports of LibraryThing, Goodreads, Calibre and
+ * Libib (their exact headings, por verificar for LibraryThing and Libib), and a column can be chosen by hand. Rows of
+ * the same title, author and ISBN are one record with several copies. Plain PHP, without Moodle.
  */
 final class catalogue_csv {
     /** @var string[] What a column can be. */
     public const FIELDS = ['title', 'subtitle', 'author', 'publisher', 'year', 'isbn', 'place', 'extent', 'language',
         'class', 'subject', 'collection', 'audience', 'summary', 'notes', 'barcode', 'callnumber', 'location', 'itemtype',
-        'copies'];
+        'copies', 'moreauthors', 'shelf'];
 
     /** @var array<string, string[]> Words of a heading for each field, without accents or case. */
     private const WORDS = [
         'title' => ['titulo', 'title', 'titol'],
         'subtitle' => ['subtitulo', 'subtitle', 'resto del titulo'],
-        'author' => ['autor', 'author', 'autores', 'authors', 'autora', 'creator'],
+        'author' => ['autor', 'author', 'autores', 'authors', 'autora', 'creator', 'creators', 'primary author'],
+        'moreauthors' => ['additional authors', 'secondary author', 'otros autores', 'mas autores'],
         'publisher' => ['editorial', 'publisher', 'editor', 'edita'],
-        'year' => ['ano', 'year', 'fecha', 'date', 'ano de publicacion', 'fecha de publicacion', 'any'],
-        'isbn' => ['isbn', 'isbn13', 'isbn 13', 'ean'],
+        'year' => ['ano', 'year', 'fecha', 'date', 'ano de publicacion', 'fecha de publicacion', 'any', 'year published',
+            'pubdate', 'publish date', 'publication year'],
+        'isbn' => ['isbn', 'isbn13', 'isbn 13', 'ean', 'isbns', 'ean isbn13', 'upc isbn10'],
         'place' => ['lugar', 'place', 'lugar de publicacion', 'ciudad'],
-        'extent' => ['paginas', 'pages', 'extension', 'pags'],
-        'language' => ['idioma', 'language', 'lengua', 'llengua'],
-        'class' => ['cdu', 'clasificacion', 'dewey', 'class', 'classification', 'materia cdu'],
-        'subject' => ['materia', 'materias', 'subject', 'subjects', 'tema', 'temas', 'descriptor', 'descriptores'],
+        'extent' => ['paginas', 'pages', 'extension', 'pags', 'number of pages', 'page count', 'num pages'],
+        'language' => ['idioma', 'language', 'lengua', 'llengua', 'languages', 'idiomas'],
+        'class' => ['cdu', 'clasificacion', 'dewey', 'class', 'classification', 'materia cdu', 'dewey decimal'],
+        'subject' => ['materia', 'materias', 'subject', 'subjects', 'tema', 'temas', 'descriptor', 'descriptores', 'tags',
+            'etiquetas'],
         'collection' => ['coleccion', 'collection', 'serie', 'series'],
         'audience' => ['edad', 'age', 'nivel lector', 'publico', 'audience', 'aplicacion pedagogica'],
-        'summary' => ['resumen', 'sinopsis', 'summary', 'abstract'],
-        'notes' => ['notas', 'notes', 'observaciones', 'nota'],
+        'summary' => ['resumen', 'sinopsis', 'summary', 'abstract', 'description', 'descripcion', 'comments'],
+        'notes' => ['notas', 'notes', 'observaciones', 'nota', 'private notes', 'private comment'],
         'barcode' => ['codigo', 'codigo de barras', 'barcode', 'ejemplar', 'n ejemplar', 'numero de ejemplar', 'registro'],
-        'callnumber' => ['signatura', 'tejuelo', 'call number', 'callnumber', 'shelfmark'],
+        'callnumber' => ['signatura', 'tejuelo', 'call number', 'callnumber', 'shelfmark', 'other call number'],
         'location' => ['ubicacion', 'location', 'estanteria', 'seccion', 'sala'],
         'itemtype' => ['tipo', 'type', 'tipo de ejemplar', 'item type'],
-        'copies' => ['ejemplares', 'copies', 'cantidad', 'unidades', 'n de ejemplares'],
+        'copies' => ['ejemplares', 'copies', 'cantidad', 'unidades', 'n de ejemplares', 'owned copies'],
+        // Goodreads: a book on the «to-read» shelf is not in the library yet.
+        'shelf' => ['exclusive shelf'],
     ];
+
+    /** @var string[] Headings of a column with the ISBN-13, preferred to one with the ISBN-10 or both. */
+    private const THIRTEEN = ['isbn13', 'isbn 13', 'ean isbn13'];
 
     /**
      * Whether a heading is one of the usual words for a field: then the column's name already says what it is.
@@ -109,7 +118,36 @@ final class catalogue_csv {
                 }
             }
         }
+        // Goodreads and Libib give the ISBN-10 and the ISBN-13 apart: the ISBN-13, which every book has.
+        foreach ($columns as $index => $heading) {
+            if (in_array(text::normalise($heading), self::THIRTEEN, true)) {
+                $map = array_filter($map, fn($field) => $field !== 'isbn');
+                $map[$index] = 'isbn';
+                break;
+            }
+        }
         return $map;
+    }
+
+    /**
+     * The people of a cell: several separated by «;», «|» or « & » (Calibre), or by commas when each one is a name in
+     * its natural order («Mary GrandPré, Jim Kay», Goodreads and Libib); «Rowling, J. K.» is one name.
+     *
+     * @param string $value
+     * @return string[]
+     */
+    public static function people(string $value): array {
+        $names = [];
+        foreach (preg_split('/\s*(?:;|\||\s&\s)\s*/u', trim($value)) ?: [] as $part) {
+            $commas = array_values(array_filter(array_map('trim', explode(',', $part)), 'strlen'));
+            $natural = count($commas) > 1 && !array_filter($commas, fn($c) => !str_contains($c, ' '));
+            foreach ($natural ? $commas : [trim($part)] as $name) {
+                if ($name !== '' && !in_array($name, $names, true)) {
+                    $names[] = $name;
+                }
+            }
+        }
+        return $names;
     }
 
     /**
@@ -129,10 +167,17 @@ final class catalogue_csv {
                     $values[$field] = $value;
                 }
             }
-            if (($values['title'] ?? '') === '') {
+            if (($values['title'] ?? '') === '' || text::normalise($values['shelf'] ?? '') === 'to read') {
                 continue;
             }
-            $isbn = isset($values['isbn']) ? isbn::normalise($values['isbn']) : null;
+            // An ISBN as «="9780439023481"» (Goodreads), «[0439023483]» (LibraryThing) or several in one cell: the first.
+            $isbn = null;
+            foreach (preg_split('/[\s,;]+/', $values['isbn'] ?? '') ?: [] as $candidate) {
+                $isbn = isbn::normalise($candidate);
+                if ($isbn !== null) {
+                    break;
+                }
+            }
             $key = $isbn ?? text::normalise($values['title'] . ' / ' . ($values['author'] ?? ''));
             if (!isset($records[$key])) {
                 $year = isset($values['year']) && preg_match('/\d{4}/', $values['year'], $m) ? $m[0] : null;
@@ -151,11 +196,19 @@ final class catalogue_csv {
                         'lang' => self::language($values['language'] ?? ''),
                         'extent' => isset($values['extent']) && ctype_digit($values['extent']) ? $values['extent'] . ' p.'
                             : ($values['extent'] ?? null),
-                        'summary' => $values['summary'] ?? null,
+                        // Calibre keeps its description in HTML.
+                        'summary' => isset($values['summary']) ? trim(preg_replace('/\s+/u', ' ', html_entity_decode(
+                            strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], ' ', $values['summary'])),
+                            ENT_QUOTES | ENT_HTML5,
+                            'UTF-8'
+                        ))) : null,
                         'notes' => null,
                     ],
                     'authorities' => [
-                        'author' => $list('author'),
+                        'author' => array_values(array_unique(array_merge(
+                            self::people($values['author'] ?? ''),
+                            self::people($values['moreauthors'] ?? '')
+                        ))),
                         'publisher' => $list('publisher'),
                         'class' => $list('class'),
                         'subject' => $list('subject'),

@@ -58,4 +58,63 @@ final class catalogue_csv_test extends \basic_testcase {
         $this->assertSame('cat', $records[1]['description']['record']['lang']);
         $this->assertSame('', $records[1]['items'][0]['barcode']);
     }
+
+    /**
+     * The exports of other programs: Goodreads (its ISBN-13 first, «="…"», the «to-read» shelf left out), Calibre (« & »,
+     * its description in HTML), Libib (authors by commas) and LibraryThing («[…]», several ISBNs in a cell).
+     */
+    public function test_other_programs(): void {
+        // Goodreads.
+        $columns = ['Book Id', 'Title', 'Author', 'Author l-f', 'Additional Authors', 'ISBN', 'ISBN13', 'Publisher',
+            'Number of Pages', 'Year Published', 'Original Publication Year', 'Exclusive Shelf', 'Owned Copies'];
+        $map = catalogue_csv::guess($columns);
+        $this->assertSame('isbn', $map[6]);
+        $this->assertArrayNotHasKey(5, $map);
+        ksort($map);
+        $this->assertSame(
+            ['title', 'author', 'moreauthors', 'isbn', 'publisher', 'extent', 'year', 'shelf', 'copies'],
+            array_values(array_intersect_key($map, array_flip([1, 2, 4, 6, 7, 8, 9, 11, 12])))
+        );
+        $records = catalogue_csv::records([
+            ['1', 'El faro dormido', 'Irene Laurel', 'Laurel, Irene', 'Bruno Olmo, Marta Ríos', '="8490000018"',
+                '="9788490000014"', 'Brújula', '96', '2024', '2020', 'read', '2'],
+            ['2', 'La nube de tinta', 'Marco Quintana', 'Quintana, Marco', '', '=""', '=""', 'Brújula', '80', '2023', '',
+                'to-read', '0'],
+        ], $map);
+        $this->assertCount(1, $records);
+        $this->assertSame('9788490000014', $records[0]['description']['record']['isbn']);
+        $this->assertSame(['Irene Laurel', 'Bruno Olmo', 'Marta Ríos'], $records[0]['description']['authorities']['author']);
+        $this->assertSame('96 p.', $records[0]['description']['record']['extent']);
+        $this->assertSame('2024', $records[0]['description']['record']['pubyear']);
+        $this->assertCount(2, $records[0]['items']);
+
+        // Calibre.
+        $map = catalogue_csv::guess(['title', 'authors', 'author_sort', 'publisher', 'pubdate', 'isbn', 'tags', 'series',
+            'languages', 'comments']);
+        $records = catalogue_csv::records([['Mapas del sur', 'Olivia Estrada & Bruno Olmo', 'Estrada, Olivia', 'Brújula',
+            '2022-05-01T00:00:00+00:00', '9788490000021', 'Viajes, Mapas', 'Linterna', 'spa',
+            '<div><p>Un libro de <b>mapas</b>.</p><p>Para viajar.</p></div>']], $map);
+        $d = $records[0]['description'];
+        $this->assertSame(['Olivia Estrada', 'Bruno Olmo'], $d['authorities']['author']);
+        $this->assertSame('2022', $d['record']['pubyear']);
+        $this->assertSame('Un libro de mapas. Para viajar.', $d['record']['summary']);
+        $this->assertSame(['Linterna'], $d['authorities']['collection']);
+
+        // Libib and LibraryThing.
+        $map = catalogue_csv::guess(['item_type', 'title', 'creators', 'ean_isbn13', 'upc_isbn10', 'description', 'copies']);
+        $this->assertSame('isbn', $map[3]);
+        $records = catalogue_csv::records([['book', 'El faro dormido', 'Irene Laurel, Bruno Olmo', '9788490000014', '',
+            'Un faro.', '1']], $map);
+        $this->assertSame(['Irene Laurel', 'Bruno Olmo'], $records[0]['description']['authorities']['author']);
+        $map = catalogue_csv::guess(['Book Id', 'Title', 'Primary Author', 'Secondary Author', 'Date', 'Page Count',
+            'Barcode', 'Tags', 'ISBN', 'ISBNs', 'Dewey Decimal', 'Other Call Number', 'Copies']);
+        $records = catalogue_csv::records([['7', 'El faro dormido', 'Laurel, Irene', 'Olmo, Bruno', '2024', '96', 'LT1',
+            'faros', '[8490000018]', '8490000018, 9788490000014', '863', 'N LAU', '1']], $map);
+        $d = $records[0]['description'];
+        $this->assertSame('9788490000014', $d['record']['isbn']);
+        $this->assertSame(['Laurel, Irene', 'Olmo, Bruno'], $d['authorities']['author']);
+        $this->assertSame(['863'], $d['authorities']['class']);
+        $this->assertSame('LT1', $records[0]['items'][0]['barcode']);
+        $this->assertSame(['N', 'LAU', ''], $records[0]['items'][0]['callnumber']);
+    }
 }

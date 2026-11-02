@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.144.0
+
+- A catalogue from the exports of LibraryThing, Goodreads, Calibre and Libib: their columns are understood (the ISBN-13
+  before the ISBN-10, the pages, the year, the tags, Calibre's description in HTML), their ISBNs come clean («="…"», «[…]»,
+  several in a cell), their authors are split as each writes them («Mary GrandPré, Jim Kay», «A & B»), more authors go
+  with the rest, and what Goodreads keeps on the «to-read» shelf does not come in.
+
 ## 0.143.0
 
 - UNIMARC, the format of France, Portugal, Italy and much of Europe: its records are read as well as MARC 21's, in an
