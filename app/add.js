@@ -174,6 +174,8 @@
         $('ayv-book-by').textContent = (answer.authors || []).join(' · ');
         $('ayv-book-facts').textContent = [answer.publisher, answer.year, answer.extent, answer.isbn]
             .filter(Boolean).join(' · ');
+        $('ayv-book-memory').textContent = answer.remark || '';
+        $('ayv-book-memory').hidden = !answer.remark;
         $('ayv-book-source').textContent = answer.found ? fill(str.addfound, answer.source) : fill(str.addnotfound, answer.tried);
         var manual = $('ayv-book-manual');
         manual.hidden = answer.found || answer.existing.length > 0;

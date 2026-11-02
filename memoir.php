@@ -108,6 +108,7 @@ $data = [
         ['escape' => false]
     ),
     'intro' => $str('memoirintro'),
+    'story' => \local_oksigeniaayvurenda\local\memoir::story($entityid, $report),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),

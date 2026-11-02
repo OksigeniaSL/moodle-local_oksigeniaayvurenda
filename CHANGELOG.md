@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.122.0 (2026-11-02)
+
+- The memory works with the staff too: when cataloguing a book, she says if a class asked for it or what else there is by its author;
+  and the year's report opens with the year as she tells it.
+- What she has to tell a reader today, also in the block and in the app.
+
 ## 0.121.1 (2026-11-02)
 
 - The plans of the hosted service with one choice in a centre's settings: Free, Small and Medium, each with its limits and what it

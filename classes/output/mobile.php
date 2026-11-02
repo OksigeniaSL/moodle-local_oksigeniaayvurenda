@@ -82,6 +82,11 @@ class mobile {
             $otherdata['q' . $index] = '';
             // What is worked out here replaces what the summary gave (its lists of loans and holds), so it goes first.
             $libraries[] = [
+                'memoryline' => $library['remembers']['text'] ?? '',
+                'memoryportrait' => $library['remembers']['portrait'] ?? '',
+                'memoryrecord' => $library['remembers']['recordid'] ?? 0,
+                'memoryquery' => $library['remembers']['query'] ?? '',
+                'memorybook' => !empty($library['remembers']['recordid']),
                 'hasloans' => (bool) $library['loans'],
                 'hasholds' => (bool) $library['holds'],
                 'loans' => array_map(

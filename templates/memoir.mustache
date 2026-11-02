@@ -23,6 +23,7 @@
 
     Context variables required for this template:
     * heading, centre, intro, memoiranon, notice, action, sesskey, done, next
+    * story - lines, portrait, sign: the year as the memory tells it, or false
     * came - value, width, label, delta (false or text, up, down); false without readers
     * tiles - value, label, delta (false or text, up, down)
     * stages, groups - label, width, value, loans; hasstages, hasgroups, barsnote
@@ -34,7 +35,7 @@
 
     Example context (json):
     {
-        "heading": "La biblioteca en el curso 2026-2027", "centre": "Colegio de ejemplo", "intro": "Para la memoria.",
+        "heading": "La biblioteca en el curso 2026-2027", "centre": "Colegio de ejemplo", "intro": "Para la memoria.", "story": {"lines": ["Este curso se llevaron 120 libros."], "portrait": "https://example.com/m.webp", "sign": "— Memoria"},
         "memoiranon": "Todo sumado y sin nombres.", "notice": "", "action": "#", "sesskey": "x", "done": "", "next": "",
         "came": {"value": "69 %", "width": 69, "label": "312 de 450 lectores vinieron a llevarse algo",
             "delta": {"text": "El curso 2025-2026: 61 %", "up": false, "down": false} },
@@ -67,6 +68,15 @@
     <button type="button" class="ayv-button ayv-button-quiet ayv-memoir-printbutton" onclick="window.print()">{{memoirprint}}</button>
 </header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#story}}
+<section class="ayv-memoir-story">
+    {{#portrait}}<img class="ayv-memoir-storyface" src="{{portrait}}" alt="" width="72" height="72">{{/portrait}}
+    <div>
+        <p>{{#lines}}{{.}} {{/lines}}</p>
+        <p class="ayv-memoir-storysign">{{sign}}</p>
+    </div>
+</section>
+{{/story}}
 
 <h2 class="ayv-memoir-heading">{{memoirfigures}}</h2>
 {{#came}}

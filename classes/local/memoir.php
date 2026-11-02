@@ -72,6 +72,42 @@ final class memoir {
     }
 
     /**
+     * The year as the memory tells it, in a few sentences, from the same figures.
+     *
+     * @param int $entityid
+     * @param array $report From of().
+     * @return array|null lines, portrait, sign; null with no loans, or with the memory off.
+     */
+    public static function story(int $entityid, array $report): ?array {
+        $figures = $report['figures'];
+        $sign = characters::say($entityid, 'memory', 'memoirstorysign');
+        if (!$figures['loans'] || !$sign) {
+            return null;
+        }
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $number = fn(int $n) => screens::number($n);
+        $lines = [$str('memoirstoryloans', (object) ['came' => $number((int) $figures['came']),
+            'readers' => $number((int) $figures['readers']), 'loans' => $number((int) $figures['loans'])])];
+        if ($report['before'] && (int) $report['before']['loans'] !== (int) $figures['loans']) {
+            $change = (int) $figures['loans'] - (int) $report['before']['loans'];
+            $lines[] = $str($change > 0 ? 'memoirstoryup' : 'memoirstorydown', (object) ['change' => $number(abs($change)),
+                'year' => $report['before']['name']]);
+        }
+        if (!empty($report['corners'][0]['corner'])) {
+            $lines[] = $str('memoirstorycorner', $report['corners'][0]['corner']);
+        }
+        if (!empty($report['top'][0]['title'])) {
+            $lines[] = $str('memoirstorytop', $report['top'][0]['title']);
+        }
+        foreach (['challenges', 'reviews', 'voices'] as $what) {
+            if ((int) ($report['life'][$what] ?? 0) > 1) {
+                $lines[] = $str('memoirstory' . $what, $number((int) $report['life'][$what]));
+            }
+        }
+        return ['lines' => $lines, 'portrait' => (string) ($sign['portrait'] ?? ''), 'sign' => $sign['text']];
+    }
+
+    /**
      * The team's words of a year: what was done and what comes next.
      *
      * @param int $entityid

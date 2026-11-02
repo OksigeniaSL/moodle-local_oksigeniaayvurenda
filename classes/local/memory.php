@@ -212,6 +212,65 @@ final class memory {
     }
 
     /**
+     * What the memory tells whoever is cataloguing a book: that a class asked for it, or what else there is by its author.
+     *
+     * @param int $entityid
+     * @param string $title
+     * @param string[] $authors As the catalogue keeps them.
+     * @return string What she says, or nothing.
+     */
+    public static function cataloguing(int $entityid, string $title, array $authors): string {
+        global $DB;
+        $wanted = \core_text::strtolower(trim($title));
+        if ($wanted !== '') {
+            $wishes = $DB->get_records_sql(
+                "SELECT w.id, w.title, c.groupname
+                   FROM {" . self::T . "wish} w
+                   JOIN {" . self::T . "challenge} c ON c.id = w.challengeid
+                  WHERE w.entityid = :entityid AND w.status = :status",
+                ['entityid' => $entityid, 'status' => 'asked']
+            );
+            foreach ($wishes as $wish) {
+                if (\core_text::strtolower(trim((string) $wish->title)) === $wanted) {
+                    $said = characters::say($entityid, 'memory', 'memorycatalogwish', ['group' => (string) $wish->groupname]);
+                    return $said ? $said['text'] : '';
+                }
+            }
+        }
+        foreach ($authors as $author) {
+            $count = (int) $DB->count_records_sql(
+                "SELECT COUNT(DISTINCT ra.recordid)
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                  WHERE a.entityid = :entityid AND a.kind = 'author' AND a.label = :label",
+                ['entityid' => $entityid, 'label' => (string) $author]
+            );
+            if (!$count) {
+                continue;
+            }
+            $top = $DB->get_records_sql(
+                "SELECT r.id, r.title, COUNT(l.id) AS taken
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                   JOIN {" . self::T . "record} r ON r.id = ra.recordid
+                   JOIN {" . self::T . "item} i ON i.recordid = r.id
+                   JOIN {" . self::T . "loan} l ON l.itemid = i.id
+                  WHERE a.entityid = :entityid AND a.kind = 'author' AND a.label = :label
+               GROUP BY r.id, r.title
+               ORDER BY COUNT(l.id) DESC",
+                ['entityid' => $entityid, 'label' => (string) $author],
+                0,
+                1
+            );
+            $top = reset($top);
+            $a = ['author' => catalogue::display_name((string) $author), 'count' => $count, 'title' => $top ? $top->title : ''];
+            $said = characters::say($entityid, 'memory', $top ? 'memorycatalogauthortop' : 'memorycatalogauthor', $a);
+            return $said ? $said['text'] : '';
+        }
+        return '';
+    }
+
+    /**
      * When a reader last took each book they took.
      *
      * @param int $readerid

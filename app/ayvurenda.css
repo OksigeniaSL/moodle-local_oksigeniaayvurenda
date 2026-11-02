@@ -3884,3 +3884,10 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
     .ayv .ayv-roll-lost { display: none; }
     .ayv .ayv-contract + .ayv-contract { break-before: page; }
 }
+
+/* What the memory says to whoever works: at the altas and in the year's report. */
+.ayv .ayv-book-memory { margin: .5rem 0 0; padding: .35rem 0 .35rem .75rem; border-left: 3px solid var(--sun); font-style: italic; }
+.ayv .ayv-memoir-story { display: flex; align-items: flex-start; gap: 1rem; margin: 0 0 1.5rem; padding: 1.1rem 1.25rem; border-radius: var(--radius); background: var(--surface); }
+.ayv .ayv-memoir-story p { margin: 0; }
+.ayv .ayv-memoir-storyface { flex: none; width: 72px; height: 72px; border-radius: 50%; background: #f3e6cc; object-fit: cover; object-position: top; }
+.ayv .ayv-memoir-storysign { margin-top: .4rem !important; font-style: italic; font-size: .92rem; color: var(--ayv-muted, var(--muted)); }

@@ -40,7 +40,8 @@ final class mine {
      *
      * @param int $userid
      * @param int|null $now
-     * @return array[] One per centre: name, cardcode, home, card, spring, loans (title, url, due, late) and holds
+     * @return array[] One per centre: name, cardcode, home, card, spring, remembers (what the memory has to say today: text,
+     *     portrait, url, label, recordid, query; or null), loans (title, url, due, late) and holds
      *     (title, url, ready, until, ahead).
      */
     public static function summary(int $userid, ?int $now = null): array {
@@ -101,7 +102,18 @@ final class mine {
                 fn($hold) => $hold + ['url' => $url('record.php', $library, ['id' => $hold['recordid']])],
                 holds::of_reader((int) $reader->id, $now)
             );
+            $remembers = memory::remembers($library, $reader, $now);
+            $book = $remembers ? (int) $remembers['recordid'] : 0;
             $out[] = [
+                'remembers' => $remembers ? [
+                    'text' => $remembers['say']['text'],
+                    'portrait' => (string) ($remembers['say']['portrait'] ?? ''),
+                    'url' => $book ? $url('record.php', $library, ['id' => $book])
+                        : $url('search.php', $library, ['q' => $remembers['query']]),
+                    'label' => get_string($book ? 'memorygo' : 'memorysearchagain', 'local_oksigeniaayvurenda'),
+                    'recordid' => $book,
+                    'query' => (string) $remembers['query'],
+                ] : null,
                 'name' => format_string($library->name, true, ['escape' => false]),
                 'slug' => (string) $library->slug,
                 'cardcode' => (string) $reader->cardcode,

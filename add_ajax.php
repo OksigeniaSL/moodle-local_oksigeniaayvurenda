@@ -78,6 +78,11 @@ switch ($action) {
                 'year' => $record['pubyear'] ?? '',
                 'extent' => $record['extent'] ?? '',
                 'existing' => $existing,
+                'remark' => \local_oksigeniaayvurenda\local\memory::cataloguing(
+                    $entityid,
+                    (string) ($existing ? $existing[0]['title'] : ($record['title'] ?? '')),
+                    (array) ($description['authorities']['author'] ?? [])
+                ),
                 'spine' => cataloguer::spine($library, $description, $existing[0]['id'] ?? 0),
                 'spinebefore' => (bool) $existing,
                 'cover' => $existing ? covers::url($existing[0]['id']) : covers::draft(
