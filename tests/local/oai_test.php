@@ -70,6 +70,19 @@ final class oai_test extends \advanced_testcase {
         $this->assertSame('badArgument', $error(['verb' => 'ListRecords']));
         $this->assertSame('badArgument', $error(['verb' => 'ListRecords', 'metadataPrefix' => 'oai_dc', 'from' => 'yesterday']));
         $this->assertSame('cannotDisseminateFormat', $error(['verb' => 'ListRecords', 'metadataPrefix' => 'marc']));
+        // MARC 21 for library systems: the record as the copy writes it, with where it is read.
+        $formats = $ask(['verb' => 'ListMetadataFormats']);
+        $this->assertSame(['oai_dc', 'marc21'], array_map(
+            fn($n) => $n->textContent,
+            iterator_to_array($formats->query('//o:metadataPrefix'))
+        ));
+        $marc = $ask(['verb' => 'GetRecord', 'identifier' => $id, 'metadataPrefix' => 'marc21']);
+        $marc->registerNamespace('m', 'http://www.loc.gov/MARC21/slim');
+        $title = '//m:datafield[@tag="245"]/m:subfield[@code="a"]';
+        // With the punctuation that MARC 21 closes a title with.
+        $this->assertSame('Revista del centro, número 1.', $marc->evaluate('string(' . $title . ')'));
+        $this->assertStringContainsString('/read.php', $marc->evaluate('string(//m:datafield[@tag="856"]/m:subfield[@code="u"])'));
+        $this->assertSame(1, $ask(['verb' => 'ListRecords', 'metadataPrefix' => 'marc21'])->query('//o:record')->length);
         $this->assertSame('noRecordsMatch', $error(['verb' => 'ListRecords', 'metadataPrefix' => 'oai_dc',
             'from' => gmdate('Y-m-d', time() + 10 * DAYSECS)]));
         $this->assertSame('idDoesNotExist', $error(['verb' => 'GetRecord', 'identifier' => 'oai:nowhere:1',

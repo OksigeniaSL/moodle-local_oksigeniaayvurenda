@@ -39,6 +39,13 @@ final class oai {
     /** @var string[] Licences of what the centre publishes. */
     public const OWN = ['own', 'cc-by', 'cc-by-sa', 'cc-by-nc', 'cc-by-nc-sa', 'cc-by-nd', 'cc-by-nc-nd'];
 
+    /** @var array<string, string[]> What a record can be given in: its schema and its namespace. Dublin Core for anyone; MARC
+     * 21 (MARCXML) for library systems that harvest it. */
+    public const FORMATS = [
+        'oai_dc' => ['http://www.openarchives.org/OAI/2.0/oai_dc.xsd', 'http://www.openarchives.org/OAI/2.0/oai_dc/'],
+        'marc21' => ['http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd', 'http://www.loc.gov/MARC21/slim'],
+    ];
+
     /** @var string[] Where each licence is described. */
     private const LICENCES = ['cc-by' => 'https://creativecommons.org/licenses/by/4.0/',
         'cc-by-sa' => 'https://creativecommons.org/licenses/by-sa/4.0/',
@@ -167,19 +174,22 @@ final class oai {
         if ($verb === 'ListSets') {
             return ['noSetHierarchy', 'This repository has no sets'];
         }
-        if (isset($args['metadataPrefix']) && $args['metadataPrefix'] !== 'oai_dc') {
-            return ['cannotDisseminateFormat', 'Only oai_dc'];
+        if (isset($args['metadataPrefix']) && !isset(self::FORMATS[$args['metadataPrefix']])) {
+            return ['cannotDisseminateFormat', 'Only ' . implode(' and ', array_keys(self::FORMATS))];
         }
+        $prefix = $args['metadataPrefix'] ?? 'oai_dc';
         if ($verb === 'ListMetadataFormats') {
             if (isset($args['identifier']) && !self::find($library, $args['identifier'])) {
                 return ['idDoesNotExist', 'No such item'];
             }
             $xml->startElement('ListMetadataFormats');
-            $xml->startElement('metadataFormat');
-            $xml->writeElement('metadataPrefix', 'oai_dc');
-            $xml->writeElement('schema', 'http://www.openarchives.org/OAI/2.0/oai_dc.xsd');
-            $xml->writeElement('metadataNamespace', 'http://www.openarchives.org/OAI/2.0/oai_dc/');
-            $xml->endElement();
+            foreach (self::FORMATS as $name => [$schema, $namespace]) {
+                $xml->startElement('metadataFormat');
+                $xml->writeElement('metadataPrefix', $name);
+                $xml->writeElement('schema', $schema);
+                $xml->writeElement('metadataNamespace', $namespace);
+                $xml->endElement();
+            }
             $xml->endElement();
             return null;
         }
@@ -189,7 +199,7 @@ final class oai {
                 return ['idDoesNotExist', 'No such item'];
             }
             $xml->startElement('GetRecord');
-            self::record($xml, $library, $record, true);
+            self::record($xml, $library, $record, true, $prefix);
             $xml->endElement();
             return null;
         }
@@ -203,7 +213,7 @@ final class oai {
             if (!$token) {
                 return ['badResumptionToken', 'Bad or expired token'];
             }
-            [$offset, $from, $until] = $token;
+            [$offset, $from, $until, $prefix] = $token;
         } else {
             $from = isset($args['from']) ? self::time($args['from'], false) : null;
             $until = isset($args['until']) ? self::time($args['until'], true) : null;
@@ -215,14 +225,14 @@ final class oai {
         }
         $xml->startElement($verb);
         foreach (array_slice($records, $offset, self::PAGE) as $record) {
-            self::record($xml, $library, $record, $verb === 'ListRecords');
+            self::record($xml, $library, $record, $verb === 'ListRecords', $prefix);
         }
         if ($offset || count($records) > self::PAGE) {
             $xml->startElement('resumptionToken');
             $xml->writeAttribute('completeListSize', (string) count($records));
             $xml->writeAttribute('cursor', (string) $offset);
             if ($offset + self::PAGE < count($records)) {
-                $xml->text(self::token($offset + self::PAGE, $from, $until));
+                $xml->text(self::token($offset + self::PAGE, $from, $until, $prefix));
             }
             $xml->endElement();
         }
@@ -298,8 +308,15 @@ final class oai {
      * @param \stdClass $library
      * @param array $record
      * @param bool $metadata
+     * @param string $prefix oai_dc or marc21.
      */
-    private static function record(\XMLWriter $xml, \stdClass $library, array $record, bool $metadata): void {
+    private static function record(
+        \XMLWriter $xml,
+        \stdClass $library,
+        array $record,
+        bool $metadata,
+        string $prefix = 'oai_dc'
+    ): void {
         global $DB;
         if ($metadata) {
             $xml->startElement('record');
@@ -312,6 +329,12 @@ final class oai {
             return;
         }
         $xml->startElement('metadata');
+        if ($prefix === 'marc21') {
+            $xml->writeRaw(self::marc($library, $record));
+            $xml->endElement();
+            $xml->endElement();
+            return;
+        }
         $xml->startElementNs('oai_dc', 'dc', 'http://www.openarchives.org/OAI/2.0/oai_dc/');
         $xml->writeAttributeNs('xmlns', 'dc', null, 'http://purl.org/dc/elements/1.1/');
         $xml->writeAttributeNs('xmlns', 'xsi', null, 'http://www.w3.org/2001/XMLSchema-instance');
@@ -358,6 +381,44 @@ final class oai {
     }
 
     /**
+     * A record in MARCXML, as the daily copy writes it, with where each of its digital forms is read (856).
+     *
+     * @param \stdClass $library
+     * @param array $record
+     * @return string
+     */
+    private static function marc(\stdClass $library, array $record): string {
+        global $DB;
+        $row = (array) $DB->get_record(self::T . 'record', ['id' => $record['id']], '*', MUST_EXIST);
+        $authorities = [];
+        foreach (
+            $DB->get_records_sql(
+                "SELECT ra.id, a.kind, a.label FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+                  WHERE ra.recordid = ? ORDER BY ra.sortorder, ra.id",
+                [$record['id']]
+            ) as $one
+        ) {
+            $authorities[$one->kind][] = $one->label;
+        }
+        $entity = (string) $DB->get_field(self::T . 'entity', 'name', ['id' => $library->entityid]);
+        $marc = \local_oksigeniaayvurenda\core\marc\encoder::encode($row, $authorities, [], format_string(
+            $entity,
+            true,
+            ['escape' => false]
+        ));
+        foreach ($record['items'] as $item) {
+            $marc->data('856', '4', '0', [['u', (new \moodle_url(
+                '/local/oksigeniaayvurenda/read.php',
+                ['library' => $library->slug, 'id' => $item->id]
+            ))->out(false)], ['y', $item->title !== '' && $item->title !== null ? $item->title : (string) $record['title']]]);
+        }
+        $element = \local_oksigeniaayvurenda\core\marc\marcxml::element($marc);
+        return str_contains(substr($element, 0, 80), 'xmlns') ? $element
+            : preg_replace('/^<record/', '<record xmlns="' . self::FORMATS['marc21'][1] . '"', $element);
+    }
+
+    /**
      * A date of a request as a time, or null if it is not one; «until» a day means the end of that day.
      *
      * @param string $value
@@ -382,22 +443,23 @@ final class oai {
      * @param int $offset
      * @param int|null $from
      * @param int|null $until
+     * @param string $prefix The format asked for: a token goes on in it.
      * @return string
      */
-    private static function token(int $offset, ?int $from, ?int $until): string {
-        return $offset . '-' . ($from ?? '') . '-' . ($until ?? '');
+    private static function token(int $offset, ?int $from, ?int $until, string $prefix = 'oai_dc'): string {
+        return $offset . '-' . ($from ?? '') . '-' . ($until ?? '') . '-' . $prefix;
     }
 
     /**
      * Reads a resumption token.
      *
      * @param string $token
-     * @return array|null offset, from, until.
+     * @return array|null offset, from, until, prefix.
      */
     private static function untoken(string $token): ?array {
-        if (!preg_match('/^(\d+)-(\d*)-(\d*)$/', $token, $m)) {
+        if (!preg_match('/^(\d+)-(\d*)-(\d*)(?:-(\w+))?$/', $token, $m) || !isset(self::FORMATS[$m[4] ?? 'oai_dc'])) {
             return null;
         }
-        return [(int) $m[1], $m[2] === '' ? null : (int) $m[2], $m[3] === '' ? null : (int) $m[3]];
+        return [(int) $m[1], $m[2] === '' ? null : (int) $m[2], $m[3] === '' ? null : (int) $m[3], $m[4] ?? 'oai_dc'];
     }
 }

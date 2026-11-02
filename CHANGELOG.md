@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.145.0
+
+- The OAI-PMH repository also gives its records in MARC 21 (MARCXML, prefix «marc21»), as the daily copy writes them, with
+  where each digital form is read (856); valid against MARC21slim.xsd. A resumption token goes on in the format asked.
+
 ## 0.144.0
 
 - A catalogue from the exports of LibraryThing, Goodreads, Calibre and Libib: their columns are understood (the ISBN-13
