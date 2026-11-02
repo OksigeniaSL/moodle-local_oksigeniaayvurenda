@@ -1,0 +1,94 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/sanctions
+
+    What late books have left at a centre.
+
+    Example context (json):
+    {
+        "heading": "Sanciones y multas", "intro": "Lo que han dejado los libros devueltos tarde.", "notice": "",
+        "off": "", "rulesurl": "#", "sanctionsoffgo": "Ir a las normas", "hastiles": true,
+        "tiles": [{"value": "12,40 €", "label": "Pendiente"}],
+        "tabs": [{"url": "#", "label": "Ahora", "current": true}, {"url": "#", "label": "Cerrado", "current": false}],
+        "isnow": true, "action": "#", "sesskey": "x", "csv": "#", "sanctionscsv": "Descargar la lista (CSV)",
+        "hassuspended": true, "sanctionssuspended": "Sin préstamos ahora", "sanctionlift": "Levantar",
+        "suspended": [{"id": 1, "name": "Hugo Lago", "group": "5.º A", "url": "#", "line": "Hasta el 14 de noviembre"}],
+        "hasowing": true, "sanctionsowing": "Deben", "sanctionpay": "Cobrar", "sanctionwaive": "Perdonar",
+        "owing": [{"id": 2, "name": "Ana Paz", "group": "", "url": "#", "line": "2,40 € · 3 apuntes"}],
+        "nothing": false, "sanctionsnothing": "Nadie espera ni debe nada.", "hasclosed": false,
+        "sanctionsnothingclosed": "Todavía no se ha cerrado nada.", "closed": [], "sanctionreopen": "Deshacer"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#off}}<div class="ayv-nothing"><p>{{off}}</p><p><a class="ayv-button ayv-button-quiet" href="{{rulesurl}}">{{sanctionsoffgo}}</a></p></div>{{/off}}
+{{#hastiles}}
+<ul class="ayv-sanction-tiles">
+    {{#tiles}}<li class="ayv-sanction-tile"><b>{{value}}</b><span>{{label}}</span></li>{{/tiles}}
+</ul>
+{{/hastiles}}
+<nav class="ayv-tabs" aria-label="{{heading}}">
+{{#tabs}}<a class="ayv-toggle" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
+</nav>
+{{#isnow}}
+{{#nothing}}<div class="ayv-nothing"><p>{{sanctionsnothing}}</p></div>{{/nothing}}
+{{#hassuspended}}
+<section class="ayv-section"><h2 class="ayv-section-title">{{sanctionssuspended}}</h2>
+<ul class="ayv-self-rows">
+{{#suspended}}
+    <li class="ayv-self-row">
+        <span class="ayv-self-row-what"><a href="{{url}}"><strong>{{name}}</strong></a>{{#group}} · {{group}}{{/group}}<br>{{line}}</span>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="reader" value="{{id}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="lift">{{sanctionlift}}</button></form>
+    </li>
+{{/suspended}}
+</ul>
+</section>
+{{/hassuspended}}
+{{#hasowing}}
+<section class="ayv-section"><h2 class="ayv-section-title">{{sanctionsowing}}</h2>
+<ul class="ayv-self-rows">
+{{#owing}}
+    <li class="ayv-self-row">
+        <span class="ayv-self-row-what"><a href="{{url}}"><strong>{{name}}</strong></a>{{#group}} · {{group}}{{/group}}<br>{{line}}</span>
+        <form method="post" action="{{action}}" class="ayv-sanction-acts"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="reader" value="{{id}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="pay">{{sanctionpay}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="waive">{{sanctionwaive}}</button></form>
+    </li>
+{{/owing}}
+</ul>
+</section>
+{{/hasowing}}
+{{/isnow}}
+{{^isnow}}
+{{^hasclosed}}<div class="ayv-nothing"><p>{{sanctionsnothingclosed}}</p></div>{{/hasclosed}}
+{{#hasclosed}}
+<ul class="ayv-self-rows">
+{{#closed}}
+    <li class="ayv-self-row">
+        <span class="ayv-self-row-when">{{when}}</span>
+        <span class="ayv-self-row-what"><a href="{{url}}"><strong>{{name}}</strong></a>{{#group}} · {{group}}{{/group}}<br>{{what}}{{#state}} · {{state}}{{/state}}{{#why}}<br>{{why}}{{/why}}</span>
+        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="row" value="{{id}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reopen">{{sanctionreopen}}</button></form>
+    </li>
+{{/closed}}
+</ul>
+{{/hasclosed}}
+{{/isnow}}
+<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{csv}}">{{sanctionscsv}}</a></p>

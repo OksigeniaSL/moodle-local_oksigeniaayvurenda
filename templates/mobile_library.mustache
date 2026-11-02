@@ -41,6 +41,7 @@
             <ion-input fill="outline" mode="md" style="flex: 1 1 auto; min-height: 48px;" [(ngModel)]="CONTENT_OTHERDATA.{{qkey}}" placeholder="{{searchplaceholder}}" aria-label="{{searchheading}}"></ion-input>
             <ion-button class="ion-no-margin" style="height: 48px;" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{qkey}} }">{{searchbutton}}</ion-button>
         </div>
+        {{#notice}}<ion-item lines="none"><ion-label class="ion-text-wrap" color="danger">{{notice}}</ion-label></ion-item>{{/notice}}
         {{#memoryline}}<ion-item lines="none" button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" {{#memorybook}}method="mobile_record_view" title="{{name}}" [args]="{library: '{{slug}}', id: {{memoryrecord}} }"{{/memorybook}}{{^memorybook}}method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{memorykey}} }"{{/memorybook}}>{{#memoryportrait}}<img slot="start" src="{{memoryportrait}}" alt="" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top;">{{/memoryportrait}}<ion-label class="ion-text-wrap"><p>{{memoryline}}</p></ion-label></ion-item>{{/memoryline}}
         <ion-item-divider><ion-label>{{loansheading}}</ion-label></ion-item-divider>
         {{^hasloans}}<ion-item><ion-label class="ion-text-wrap">{{none}}</ion-label></ion-item>{{/hasloans}}

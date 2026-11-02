@@ -25,7 +25,10 @@
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\cataloguer;
+use local_oksigeniaayvurenda\core\desk\sanction_rules;
+use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\rules;
+use local_oksigeniaayvurenda\local\sanctions;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -45,8 +48,25 @@ if (!$library) {
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $sm = get_string_manager();
 $notice = '';
-// One rule at a time: changed, added or taken away; the others stay as they were.
-if (data_submitted() && confirm_sesskey()) {
+$entityid = (int) $library->entityid;
+if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'sanctions') {
+    // What a late book leaves, for the whole centre: its readers are the same in all its libraries.
+    sanctions::save_settings($entityid, [
+        'mode' => optional_param('mode', sanction_rules::NONE, PARAM_ALPHA),
+        'grace' => optional_param('grace', 0, PARAM_INT),
+        'perday' => optional_param('perday', 1, PARAM_INT),
+        'maxdays' => optional_param('maxdays', 30, PARAM_INT),
+        'cents' => sanction_rules::to_cents(optional_param('amount', '', PARAM_RAW_TRIMMED)),
+        'maxcents' => sanction_rules::to_cents(optional_param('maxamount', '', PARAM_RAW_TRIMMED)),
+        'block' => sanction_rules::to_cents(optional_param('block', '', PARAM_RAW_TRIMMED)),
+        'currency' => optional_param('currency', '', PARAM_ALPHA),
+        // With all the stages marked, no stage is chosen: every one.
+        'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
+        'adults' => optional_param('adults', 0, PARAM_BOOL),
+    ]);
+    $notice = $str('sanctionssaved');
+} else if (data_submitted() && confirm_sesskey()) {
+    // One rule at a time: changed, added or taken away; the others stay as they were.
     $all = rules::of((int) $library->id);
     $index = optional_param('rule', 'new', PARAM_ALPHANUM);
     if (optional_param('do', '', PARAM_ALPHA) === 'remove') {
@@ -140,6 +160,27 @@ foreach (rules::of((int) $library->id) as $index => $rule) {
     ];
 }
 $parent = !empty($library->parentid) ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $library->parentid]) : null;
+// What a late book leaves: read as a sentence, changed in a sheet.
+$late = sanctions::settings($entityid);
+$money = fn(int $cents) => sanctions::money($cents, $late['currency']);
+$plain = fn(int $cents) => number_format($cents / 100, 2, '.', '');
+$counted = fn(int $n) => $str($n === 1 ? 'rulesdayone' : 'rulesdaysn', $n);
+$latesentence = $late['mode'] === sanction_rules::DAYS
+    ? $str('sanctionssentencedays', (object) ['days' => $counted($late['perday']), 'max' => $counted($late['maxdays'])])
+    : ($late['mode'] === sanction_rules::FINE ? $str('sanctionssentencefine', (object) ['amount' => $money($late['cents']),
+    'max' => $money($late['maxcents']), 'block' => $money($late['block'])]) : $str('sanctionssentencenone'));
+$latefacts = [];
+if ($late['mode'] !== sanction_rules::NONE) {
+    if ($late['grace']) {
+        $latefacts[] = $late['grace'] === 1 ? $str('sanctionsgraceone') : $str('sanctionsgrace', $late['grace']);
+    }
+    $stagenames = implode(', ', $late['stages']);
+    $latefacts[] = $late['stages'] ? $str($late['adults'] ? 'sanctionswhostages' : 'sanctionswhostagesonly', $stagenames)
+        : $str($late['adults'] ? 'sanctionswhoall' : 'sanctionswhostudents');
+}
+$latestate = sanctions::now($entityid, time());
+$stages = holds::stages($entityid, time());
+$currencies = get_string_manager()->get_list_of_currencies();
 $data = [
     'heading' => $str('rulestitle'),
     'intro' => $str('rulesintroshort'),
@@ -152,10 +193,38 @@ $data = [
     'hascards' => (bool) $cards,
     'newform' => $form('new', ['readertype' => '*', 'itemtype' => '*', 'loandays' => 14, 'maxloans' => 1, 'renewals' => 1,
         'renewdays' => 7]),
+    'latesentence' => $latesentence,
+    'latefacts' => array_map(fn($fact) => ['fact' => $fact], $latefacts),
+    'latereport' => $late['mode'] !== sanction_rules::NONE || $latestate['pending']
+        ? (new moodle_url('/local/oksigeniaayvurenda/sanctions.php', ['library' => $library->slug]))->out(false) : '',
+    'lateleft' => $late['mode'] === sanction_rules::NONE && $latestate['pending'] ? $str('sanctionsopenleft') : '',
+    'modes' => array_map(
+        fn($mode) => ['value' => $mode, 'label' => $str('sanctionsmode' . $mode),
+        'hint' => $str('sanctionsmodehint' . $mode), 'checked' => $late['mode'] === $mode],
+        [sanction_rules::NONE, sanction_rules::DAYS, sanction_rules::FINE]
+    ),
+    'grace' => $late['grace'],
+    'perday' => $late['perday'],
+    'maxdays' => $late['maxdays'],
+    'amount' => $plain($late['cents']),
+    'maxamount' => $plain($late['maxcents']),
+    'block' => $plain($late['block']),
+    'currencies' => array_map(
+        fn($code, $name) => ['code' => $code, 'name' => $name, 'chosen' => $code === $late['currency']],
+        array_keys($currencies),
+        array_values($currencies)
+    ),
+    'hasstages' => (bool) $stages,
+    'allstages' => !$late['stages'],
+    'stages' => array_map(fn($name) => ['name' => $name, 'chosen' => in_array($name, $late['stages'], true)], $stages),
+    'adults' => $late['adults'],
 ];
 foreach (
     ['rulesreader', 'rulesitem', 'rulesdaysplain', 'rulesmaxplain', 'rulesrenewals', 'rulesrenewdays', 'rulesremoveone',
-        'rulesnew', 'sourcessave', 'rulesroomonlyfield', 'rulesnolimit', 'ruleschange', 'rulesprecedence', 'offsiteclose'] as $key
+        'rulesnew', 'sourcessave', 'rulesroomonlyfield', 'rulesnolimit', 'ruleschange', 'rulesprecedence', 'offsiteclose',
+        'sanctionsheading', 'menusanctions', 'sanctionsmodelegend', 'sanctionsfieldperday', 'sanctionsfieldmaxdays',
+        'sanctionsdayshint', 'sanctionsfieldcents', 'sanctionsfieldmaxcents', 'sanctionsfieldblock', 'sanctionsfieldcurrency',
+        'sanctionsfinehint', 'sanctionsfieldgrace', 'holdsstages', 'holdsallstages', 'sanctionsadults', 'sanctionscentre'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -53,8 +53,14 @@ final class policy {
     /** @var string The copy is set aside for another reader who reserved it. The librarian may go ahead. */
     public const HELD = 'held';
 
+    /** @var string The reader is in days without lending, for a book that came back late. The librarian may go ahead. */
+    public const SUSPENDED = 'suspended';
+
+    /** @var string The reader owes as much as the centre lets them. The librarian may go ahead. */
+    public const OWES = 'owes';
+
     /** @var string[] Reasons the librarian may override. */
-    public const FORCEABLE = [self::LIMIT, self::LATE, self::HELD];
+    public const FORCEABLE = [self::LIMIT, self::LATE, self::HELD, self::SUSPENDED, self::OWES];
 
     /**
      * Whether a copy can be lent to a reader now.
@@ -65,6 +71,7 @@ final class policy {
      * @param int $lateloans Loans the reader has out past their due date.
      * @param bool $force The librarian said to go ahead.
      * @param bool $heldforother The copy is set aside for someone else.
+     * @param string|null $sanction SUSPENDED or OWES, where the centre stops such a reader.
      * @return string One of the constants.
      */
     public static function lend(
@@ -73,7 +80,8 @@ final class policy {
         int $openloans,
         int $lateloans,
         bool $force = false,
-        bool $heldforother = false
+        bool $heldforother = false,
+        ?string $sanction = null
     ): string {
         if ($status !== 'available' && $status !== 'onloan' && $status !== 'held') {
             return self::UNAVAILABLE;
@@ -86,6 +94,9 @@ final class policy {
         }
         if (!$force && !loan_rules::can_lend($rule, $openloans)) {
             return self::LIMIT;
+        }
+        if (!$force && $sanction !== null) {
+            return $sanction;
         }
         if (!$force && $lateloans > 0) {
             return self::LATE;

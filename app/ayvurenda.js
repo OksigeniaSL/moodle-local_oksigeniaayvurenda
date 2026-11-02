@@ -222,6 +222,18 @@
             box.appendChild(input);
         });
     }
+    // What only matters with one answer of a form: «mode=days,fine» shows while the radio «mode» says one of those.
+    document.querySelectorAll('[data-ayv-whens]').forEach(function(form) {
+        var refresh = function() {
+            form.querySelectorAll('[data-ayv-when]').forEach(function(box) {
+                var parts = box.getAttribute('data-ayv-when').split('=');
+                var chosen = form.querySelector('input[name="' + parts[0] + '"]:checked');
+                box.hidden = !chosen || parts[1].split(',').indexOf(chosen.value) < 0;
+            });
+        };
+        form.addEventListener('change', refresh);
+        refresh();
+    });
     // Sheets: a form over the page, opened by its button. They close with their cross, Escape or a click outside the
     // sheet (not in its margin, which is still the dialog: what was typed is not lost by a near miss).
     document.querySelectorAll('[data-ayv-open]').forEach(function(button) {

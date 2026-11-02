@@ -23,12 +23,14 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\core\desk\sanction_rules;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\applink;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\covers;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\profile;
+use local_oksigeniaayvurenda\local\sanctions;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -67,6 +69,31 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
     } else if (optional_param('do', '', PARAM_ALPHA) === 'newcard') {
         $notice = $str('profilenewcarddone', profile::new_card($library, $id));
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'lift') {
+        sanctions::lift($library, $id, (int) $USER->id, $now);
+        $notice = $str('sanctionrowlifted');
+    } else if (in_array(optional_param('do', '', PARAM_ALPHA), ['pay', 'waive'], true)) {
+        $paid = optional_param('do', '', PARAM_ALPHA) === 'pay';
+        sanctions::settle(
+            $library,
+            $id,
+            $paid ? sanctions::PAID : sanctions::WAIVED,
+            (int) $USER->id,
+            $now,
+            optional_param('row', 0, PARAM_INT)
+        );
+        $notice = $str($paid ? 'sanctionrowpaid' : 'sanctionrowwaived');
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'reopen') {
+        sanctions::reopen($library, optional_param('row', 0, PARAM_INT), $now);
+        $notice = $str('sanctionreopened');
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'charge') {
+        $cents = sanction_rules::to_cents(optional_param('amount', '', PARAM_RAW_TRIMMED));
+        $note = trim(optional_param('note', '', PARAM_TEXT));
+        if ($cents > 0 && $note !== '') {
+            sanctions::charge($library, $id, $cents, $note, (int) $USER->id, $now);
+            $currency = sanctions::settings((int) $library->entityid)['currency'];
+            $notice = $str('sanctionchargedone', sanctions::money($cents, $currency));
+        }
     } else {
         profile::save_notes($library, $id, optional_param('notes', '', PARAM_TEXT));
         $notice = $str('profilenotessaved');
@@ -119,6 +146,9 @@ if (isset($looks[$record['look']])) {
         : $str('stagesky' . $stage);
 }
 $notes = ['loved' => $str('noteloved'), 'unfinished' => $str('noteunfinished'), 'more' => $str('notemore')];
+// What late books left: only for the staff of the centre, and only where it means anything.
+$lateon = sanctions::settings((int) $library->entityid);
+$laterows = $limited ? [] : sanctions::of_reader((int) $library->entityid, $id, $now);
 $data = [
     'name' => $record['name'],
     'photo' => $record['photo'],
@@ -153,6 +183,13 @@ $data = [
     'haspast' => (bool) $record['past'],
     'notes' => $record['notes'],
     'staffonly' => !$limited,
+    // What is open goes first, for the staff to see; what is closed or empty, after what they have now.
+    'lateopen' => !$limited && array_filter(array_column($laterows, 'open')),
+    'latequiet' => !$limited && !array_filter(array_column($laterows, 'open'))
+        && ($laterows || $lateon['mode'] === sanction_rules::FINE),
+    'laterows' => $laterows,
+    'hasnolaterows' => !$laterows,
+    'cancharge' => !$limited && $lateon['mode'] === sanction_rules::FINE,
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
@@ -169,7 +206,9 @@ $data = [
 foreach (
     ['profiledesk', 'profilecard', 'profilenow', 'profilenothing', 'profileholds', 'profilenoread', 'profilepastheading',
         'profilenotes', 'profilenoteshint', 'profilesave', 'profilegone', 'profilecode', 'appheading',
-        'profilenewcard', 'profilenewcardgo', 'selfclose'] as $key
+        'profilenewcard', 'profilenewcardgo', 'selfclose', 'sanctionstitle', 'sanctionsboxnone', 'sanctionlift',
+        'sanctionpay', 'sanctionwaive', 'sanctionreopen', 'sanctionchargeadd', 'sanctionchargeintro', 'sanctionchargeamount',
+        'sanctionchargenote', 'sanctionchargego'] as $key
 ) {
     $data[$key] = $str($key);
 }

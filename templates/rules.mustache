@@ -33,7 +33,17 @@
         "rulesrenewals": "Ampliaciones", "rulesrenewdays": "Días de cada ampliación", "rulesremoveone": "Quitar esta norma",
         "rulesnew": "Nueva norma", "sourcessave": "Guardar", "rulesroomonlyfield": "No se presta: se lee aquí",
         "rulesnolimit": "Sin límite", "ruleschange": "Cambiar", "rulesprecedence": "Manda la más precisa.",
-        "offsiteclose": "Cerrar"
+        "offsiteclose": "Cerrar", "sanctionsheading": "Si un libro vuelve tarde", "latesentence": "Se avisa y nada más.",
+        "latefacts": [], "lateleft": "", "latereport": "", "menusanctions": "Sanciones y multas",
+        "sanctionscentre": "Vale para todas las bibliotecas de este centro.", "sanctionsmodelegend": "Qué deja",
+        "modes": [{"value": "none", "label": "Solo el aviso", "hint": "Nada más.", "checked": true}],
+        "sanctionsfieldperday": "Días por cada día", "perday": 1, "sanctionsfieldmaxdays": "Como mucho", "maxdays": 30,
+        "sanctionsdayshint": "No se suman.", "sanctionsfieldcents": "Por cada día", "amount": "0.10",
+        "sanctionsfieldmaxcents": "Como mucho", "maxamount": "5.00", "sanctionsfieldblock": "Avisa si debe", "block": "5.00",
+        "sanctionsfieldcurrency": "Moneda", "currencies": [{"code": "EUR", "name": "Euro", "chosen": true}],
+        "sanctionsfinehint": "Solo se apunta.", "sanctionsfieldgrace": "Días que no cuentan", "grace": 0, "hasstages": true,
+        "holdsstages": "Etapas", "holdsallstages": "Todas", "allstages": true, "stages": [{"name": "Primaria", "chosen": false}],
+        "adults": true, "sanctionsadults": "También el personal"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -55,3 +65,53 @@
 {{/hascards}}
 <p class="ayv-field-hint">{{rulesprecedence}}</p>
 {{#newform}}{{> local_oksigeniaayvurenda/rules_form}}{{/newform}}
+<section class="ayv-section ayv-sanction-rule">
+    <h2 class="ayv-section-title">{{sanctionsheading}}</h2>
+    <div class="ayv-sanction-card">
+        <p class="ayv-rule-sentence">{{latesentence}}</p>
+        {{#latefacts}}<p class="ayv-field-hint">{{fact}}</p>{{/latefacts}}
+        {{#lateleft}}<p class="ayv-field-hint">{{lateleft}}</p>{{/lateleft}}
+        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-sanctions">{{ruleschange}}</button>
+            {{#latereport}}<a class="ayv-button ayv-button-quiet" href="{{latereport}}">{{menusanctions}}</a>{{/latereport}}</p>
+    </div>
+    <dialog class="ayv-modal" id="ayv-sanctions" aria-labelledby="ayv-sanctions-title">
+        <div class="ayv-modal-head"><h3 id="ayv-sanctions-title" class="ayv-section-title">{{sanctionsheading}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p class="ayv-field-hint">{{sanctionscentre}}</p>
+        <form method="post" action="{{action}}" class="ayv-rule-form" data-ayv-whens>
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sanctions">
+            <fieldset class="ayv-dig-set"><legend>{{sanctionsmodelegend}}</legend>
+                <div class="ayv-sanction-modes">
+                    {{#modes}}<label class="ayv-sanction-mode"><input type="radio" name="mode" value="{{value}}" {{#checked}}checked{{/checked}}><span><b>{{label}}</b>{{hint}}</span></label>{{/modes}}
+                </div>
+            </fieldset>
+            <div data-ayv-when="mode=days">
+                <div class="ayv-rule-numbers">
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldperday}} <input type="number" name="perday" min="1" max="30" value="{{perday}}"></label>
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldmaxdays}} <input type="number" name="maxdays" min="1" max="365" value="{{maxdays}}"></label>
+                </div>
+                <p class="ayv-field-hint">{{sanctionsdayshint}}</p>
+            </div>
+            <div data-ayv-when="mode=fine">
+                <div class="ayv-rule-numbers">
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldcents}} <input type="number" name="amount" min="0.01" step="0.01" value="{{amount}}"></label>
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldmaxcents}} <input type="number" name="maxamount" min="0.01" step="0.01" value="{{maxamount}}"></label>
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldblock}} <input type="number" name="block" min="0.01" step="0.01" value="{{block}}"></label>
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldcurrency}} <select name="currency">{{#currencies}}<option value="{{code}}"{{#chosen}} selected{{/chosen}}>{{name}}</option>{{/currencies}}</select></label>
+                </div>
+                <p class="ayv-field-hint">{{sanctionsfinehint}}</p>
+            </div>
+            <div data-ayv-when="mode=days,fine">
+                <div class="ayv-rule-numbers">
+                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldgrace}} <input type="number" name="grace" min="0" max="30" value="{{grace}}"></label>
+                </div>
+                {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{holdsstages}}</legend>
+                    <div class="ayv-segmented"><label><input type="checkbox" name="allstages" value="1" {{#allstages}}checked{{/allstages}}><span>{{holdsallstages}}</span></label>
+                    {{#stages}}<label><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}><span>{{name}}</span></label>{{/stages}}</div>
+                </fieldset>{{/hasstages}}
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="adults" value="1" {{#adults}}checked{{/adults}}> {{sanctionsadults}}</label>
+            </div>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+        </form>
+    </dialog>
+</section>

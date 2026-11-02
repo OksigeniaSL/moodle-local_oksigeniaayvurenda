@@ -487,5 +487,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110215, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110217) {
+        // What a late book leaves, for a centre that wants it to leave something.
+        $xml = new xmldb_file(__DIR__ . '/install.xml');
+        $xml->loadXMLStructure();
+        $table = $xml->getStructure()->getTable('local_oksigeniaayvurenda_sanction');
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026110217, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

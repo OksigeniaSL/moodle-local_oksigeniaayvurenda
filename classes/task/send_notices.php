@@ -52,6 +52,8 @@ class send_notices extends \core\task\scheduled_task {
         mtrace('Ayvurenda: voices of reviews past the days the centre keeps voices: ' . $reviewvoices);
         $staff = \local_oksigeniaayvurenda\local\staffnotices::run();
         mtrace('Ayvurenda: what waits for the staff: ' . json_encode($staff));
+        $sanctions = \local_oksigeniaayvurenda\local\sanctions::notify();
+        mtrace('Ayvurenda: readers told what a late book left: ' . $sanctions);
         $news = \local_oksigeniaayvurenda\local\newsletter::run();
         mtrace('Ayvurenda: the library\'s news to whoever signed up: ' . json_encode($news));
     }

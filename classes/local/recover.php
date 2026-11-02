@@ -33,7 +33,7 @@ final class recover {
     /** @var string[] What comes back, parents first; a tutor is an account, and a digital file is not in the copy. */
     private const TABLES = ['library', 'year', 'authority', 'record', 'recauth', 'item', 'reader', 'member', 'loan', 'hold',
         'stocktake', 'lot', 'lotitem', 'withdrawal', 'withdrawn', 'stockread', 'rule', 'challenge', 'review', 'wish', 'roomread',
-        'bankset', 'banktitle', 'digital', 'source', 'purchaseorder', 'purchase', 'purchasewho', 'budget', 'ill'];
+        'bankset', 'banktitle', 'digital', 'source', 'purchaseorder', 'purchase', 'purchasewho', 'budget', 'ill', 'sanction'];
 
     /** @var string Where a recovered centre keeps which of its ids were which, for its files to come after. */
     private const MAPAREA = 'recovermap';

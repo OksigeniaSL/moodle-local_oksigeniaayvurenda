@@ -258,7 +258,31 @@ final class desk {
                 'reader' => $readerid]))->out(false);
             $set['pending'] = array_values(array_column(array_filter($set['titles'], fn($t) => !$t['out']), 'title'));
         }
-        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => $holds, 'bank' => $set];
+        return $reader + ['loans' => $loans, 'latecount' => $late, 'holds' => $holds, 'bank' => $set,
+            'sanction' => sanctions::panel($this->library, $readerid, $this->now, $this->staffid)];
+    }
+
+    /**
+     * Lifts the days without lending of a reader, or closes what they owe.
+     *
+     * @param int $readerid
+     * @param string $what lift, pay or waive.
+     * @return array
+     */
+    public function sanction(int $readerid, string $what): array {
+        if (!$this->allowed($readerid)) {
+            return $this->answer('unknown', 'no', 'deskotherreader');
+        }
+        if ($what === 'lift') {
+            sanctions::lift($this->library, $readerid, $this->staffid, $this->now);
+            $message = 'sanctionlifted';
+        } else {
+            $paid = $what === 'pay';
+            sanctions::settle($this->library, $readerid, $paid ? sanctions::PAID : sanctions::WAIVED, $this->staffid, $this->now);
+            $message = $paid ? 'sanctionpaid' : 'sanctionwaived';
+        }
+        return $this->answer('sanction', 'ok', $message, $this->who($readerid), ['readerid' => $readerid,
+            'reader' => $this->reader_panel($readerid)]);
     }
 
     /**
@@ -375,6 +399,7 @@ final class desk {
             $DB->delete_records(self::T . 'loan', ['id' => $loan->id]);
         } else if ($what === 'returned' && $loan->timereturned !== null) {
             holds::undo_return((int) $item->id, $this->now);
+            sanctions::undo_return((int) $loan->id);
             $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => null, 'returnstaffid' => null,
                 'returnnote' => null, 'timemodified' => $this->now]);
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
@@ -447,9 +472,21 @@ final class desk {
             }
         }
         $set = $item->status === 'held' ? holds::ready_for((int) $item->id) : null;
-        $decision = policy::lend($rule, $item->status, $samerule, $late, $force, $set && (int) $set->readerid !== $readerid);
+        // A textbook bank lends what a student needs for class, whatever they owe the library.
+        $sanction = $force || bank::is($this->library) ? null
+            : sanctions::stop((int) $this->library->entityid, $readerid, $this->now);
+        $decision = policy::lend(
+            $rule,
+            $item->status,
+            $samerule,
+            $late,
+            $force,
+            $set && (int) $set->readerid !== $readerid,
+            $sanction['reason'] ?? null
+        );
         if ($decision !== policy::OK) {
-            $a = (object) ['title' => $this->title($item), 'max' => $rule['maxloans'] ?? 0];
+            $a = (object) ['title' => $this->title($item), 'max' => $rule['maxloans'] ?? 0,
+                'until' => $sanction['until'] ?? '', 'owes' => $sanction['owes'] ?? ''];
             if ($decision === policy::HELD) {
                 $a->who = $this->who((int) $set->readerid);
             }
@@ -526,10 +563,11 @@ final class desk {
         // A copy of a box that already went back goes home now.
         lots::come_home($item, $this->now);
         $hold = holds::place($item, $this->now);
-        $transaction->allow_commit();
-        $owner = $this->reader((int) $loan->readerid);
         $days = loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz);
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
+        $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
+        $transaction->allow_commit();
+        $owner = $this->reader((int) $loan->readerid);
         $rule = $reader ? $this->rule($reader->readertype, $item->itemtype) : null;
         $a = (object) ['title' => $this->title($item), 'name' => $owner['name'], 'days' => $days];
         $extra = [
@@ -538,12 +576,15 @@ final class desk {
             'canrenew' => !$hold && loan_rules::can_renew($rule, (int) $loan->renewals) && !holds::blocks_renewal($item),
             'late' => $days,
             'readerid' => (int) $loan->readerid,
+            'sanction' => $sanction,
         ];
         if ($readerid) {
             $extra['reader'] = $this->reader_panel($readerid);
         }
         // The herald, in a corner, a word as each book comes home: never in the way, and never at a sober centre.
-        $extra['herald'] = $this->herald_word($hold ? 'deskheraldheld' : 'deskheraldback' . (1 + ((int) $loan->id % 4)));
+        // Nor when the book has just cost the reader something.
+        $extra['herald'] = $sanction ? null
+            : $this->herald_word($hold ? 'deskheraldheld' : 'deskheraldback' . (1 + ((int) $loan->id % 4)));
         if ($hold) {
             // Set it aside: the other sound, and who it is for.
             $a->for = $this->who((int) $hold->readerid);

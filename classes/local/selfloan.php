@@ -55,7 +55,7 @@ final class selfloan {
     public const DAYS = 7;
 
     /** @var string[] Why a book may not go out, as the desk's policy says it. */
-    private const STOPS = ['held', 'late', 'limit', 'notlendable', 'unavailable'];
+    private const STOPS = ['held', 'late', 'limit', 'notlendable', 'unavailable', 'suspended', 'owes'];
 
     /**
      * Whether a library can have posts: a textbook bank hands out whole sets, at its desk.

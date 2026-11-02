@@ -56,6 +56,7 @@
 {{^hascards}}<p class="ayv-empty">{{none}}</p>
 {{#practice}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/practice}}{{/hascards}}
 {{#cards}}
+{{#sanctionline}}<p class="ayv-notice ayv-sanction-line">{{sanctionline}}</p>{{/sanctionline}}
 <section class="ayv-mycard">
     <div class="ayv-card-face">
         {{#flowersvg}}<span class="ayv-card-flower{{#sky}} ayv-card-sky{{/sky}}">{{{flowersvg}}}</span>{{/flowersvg}}

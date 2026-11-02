@@ -167,6 +167,7 @@ foreach ($readers as $reader) {
             'newbookson' => newsletter::subscribed((int) $USER->id)];
     }
     $cardsdata[] = $card + [
+        'sanctionline' => \local_oksigeniaayvurenda\local\sanctions::for_reader((int) $reader->entityid, (int) $reader->id, time()),
         'herald' => $herald,
         'paths' => $paths,
         'haspaths' => (bool) $paths,

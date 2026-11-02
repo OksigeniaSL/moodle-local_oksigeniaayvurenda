@@ -1,0 +1,60 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/reader_sanctions
+
+    What late books left a reader, on their record for the staff.
+
+    Example context (json):
+    {
+        "sanctionstitle": "Sanciones y multas", "sanctionsboxnone": "Nada pendiente.", "hasnolaterows": false,
+        "action": "#", "sesskey": "x", "sanctionpay": "Cobrar", "sanctionwaive": "Perdonar", "sanctionlift": "Levantar",
+        "sanctionreopen": "Deshacer",
+        "laterows": [{"id": 1, "what": "0,30 €", "state": "", "why": "«El faro», 3 días de retraso", "when": "2 de noviembre",
+            "open": true, "money": true, "closedrow": false}],
+        "cancharge": true, "sanctionchargeadd": "Apuntar una cantidad", "selfclose": "Cerrar",
+        "sanctionchargeintro": "Aquí solo se apunta.", "sanctionchargeamount": "Cantidad", "sanctionchargenote": "Por qué",
+        "sanctionchargego": "Apuntar"
+    }
+}}
+<section class="ayv-profile-box ayv-sanction-box">
+    <h2 class="ayv-profile-heading">{{sanctionstitle}}</h2>
+    {{#hasnolaterows}}<p class="ayv-profile-empty">{{sanctionsboxnone}}</p>{{/hasnolaterows}}
+    <ul class="ayv-sanction-rows">
+        {{#laterows}}
+        <li class="ayv-sanction-row{{#open}} ayv-sanction-open{{/open}}">
+            <span class="ayv-sanction-what"><b>{{what}}</b>{{#state}} · {{state}}{{/state}}<br>{{why}} · {{when}}</span>
+            <form method="post" action="{{action}}" class="ayv-sanction-acts"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="row" value="{{id}}">
+                {{#open}}{{#money}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="pay">{{sanctionpay}}</button>
+                <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="waive">{{sanctionwaive}}</button>{{/money}}
+                {{^money}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="lift">{{sanctionlift}}</button>{{/money}}{{/open}}
+                {{#closedrow}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reopen">{{sanctionreopen}}</button>{{/closedrow}}
+            </form>
+        </li>
+        {{/laterows}}
+    </ul>
+    {{#cancharge}}<p class="ayv-more"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-sanction-charge">{{sanctionchargeadd}}</button></p>
+    <dialog class="ayv-modal" id="ayv-sanction-charge" aria-labelledby="ayv-sanction-charge-title">
+        <div class="ayv-modal-head"><h3 id="ayv-sanction-charge-title" class="ayv-section-title">{{sanctionchargeadd}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p class="ayv-field-hint">{{sanctionchargeintro}}</p>
+        <form method="post" action="{{action}}" autocomplete="off"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="charge">
+            <label class="ayv-field ayv-dig-field">{{sanctionchargeamount}} <input type="number" name="amount" min="0.01" step="0.01" required></label>
+            <label class="ayv-field ayv-dig-field">{{sanctionchargenote}} <input type="text" name="note" maxlength="255" required></label>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sanctionchargego}}</button></p></form>
+    </dialog>{{/cancharge}}
+</section>

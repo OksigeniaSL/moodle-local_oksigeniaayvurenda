@@ -91,6 +91,7 @@
 
 <div class="ayv-profile-grid">
     <div class="ayv-profile-col">
+        {{#lateopen}}{{> local_oksigeniaayvurenda/reader_sanctions}}{{/lateopen}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profilenow}}</h2>
             {{^hasloans}}<p class="ayv-profile-empty">{{profilenothing}}</p>{{/hasloans}}
@@ -105,6 +106,7 @@
                 {{/loans}}
             </ul>
         </section>
+        {{#latequiet}}{{> local_oksigeniaayvurenda/reader_sanctions}}{{/latequiet}}
         {{#hasholds}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profileholds}}</h2>

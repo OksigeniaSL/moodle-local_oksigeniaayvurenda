@@ -74,6 +74,9 @@ final class renewals {
             return ['ok' => false, 'message' => $str('renewnotyours'), 'due' => 0];
         }
         $library = $DB->get_record(self::T . 'library', ['id' => $loan->libraryid], '*', MUST_EXIST);
+        if (sanctions::stop((int) $library->entityid, (int) $loan->readerid, $now)) {
+            return ['ok' => false, 'message' => $str('renewsanction'), 'due' => 0];
+        }
         if (!holds::renew_online($library, (int) $loan->readerid, $now)) {
             return ['ok' => false, 'message' => $str('renewnotallowed'), 'due' => 0];
         }

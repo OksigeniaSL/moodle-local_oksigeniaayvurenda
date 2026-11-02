@@ -634,6 +634,29 @@ window.AYVHelpPieces = {
             return h.you(4, '.ayv-tut-save .ayv-button');
         });
     },
+    // What a late book leaves: off of itself; days, a fine, how to save it, how it reads, and who has the last word.
+    sanctions: function(h) {
+        'use strict';
+        return h.point('.ayv-sanction-card').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.tap('[data-ayv-open="ayv-sanctions"]');
+        }).then(function() {
+            return Promise.all([h.say(1), h.tap('#ayv-sanctions input[name="mode"][value="days"]')]);
+        }).then(function() {
+            return Promise.all([h.say(2), h.tap('#ayv-sanctions input[name="mode"][value="fine"]')]);
+        }).then(function() {
+            return h.tap('#ayv-sanctions input[name="mode"][value="days"]');
+        }).then(function() {
+            return h.you(3, '#ayv-sanctions button[type="submit"]:not(.ayv-modal-close)');
+        }).then(function() {
+            return h.point('.ayv-sanction-card');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.say(5);
+        });
+    },
     // Lending between libraries: what it is, asking for a book, what happens when it comes, and lending one out.
     ill: function(h) {
         'use strict';

@@ -71,6 +71,7 @@ final class howto {
         'twins' => ['twins.php', 'manage', 'twins'],
         'platforms' => ['lti.php', 'manage', ''],
         'rules' => ['rules.php', 'manage', 'rules'],
+        'sanctions' => ['rules.php', 'manage', 'sanctions'],
         'libraries' => ['libraries.php', 'manage', ''],
         'keepers' => ['keepers.php', 'manage', 'keepers'],
         'characters' => ['characters.php', 'manage', ''],
@@ -109,6 +110,7 @@ final class howto {
         'selfloan' => ['capability' => 'manage', 'page' => 'selfloan.php', 'steps' => 6],
         'purchases' => ['capability' => 'catalogue', 'page' => 'purchases.php', 'steps' => 8],
         'ill' => ['capability' => 'desk', 'page' => 'ill.php', 'steps' => 5],
+        'sanctions' => ['capability' => 'manage', 'page' => 'rules.php', 'steps' => 6],
     ];
 
     /** @var string[] Words that say nothing about the task. */

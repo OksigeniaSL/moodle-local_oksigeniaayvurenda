@@ -79,6 +79,11 @@ switch ($action) {
             optional_param('previousdue', 0, PARAM_INT)
         );
         break;
+    case 'sanction':
+        // What a reader owes or the days they wait are for the staff of the centre, not for whoever only keeps this library.
+        access::require('local/oksigeniaayvurenda:desk', $library);
+        $answer = $desk->sanction(required_param('readerid', PARAM_INT), required_param('what', PARAM_ALPHA));
+        break;
     case 'room':
         $answer = $desk->room(required_param('itemid', PARAM_INT));
         break;

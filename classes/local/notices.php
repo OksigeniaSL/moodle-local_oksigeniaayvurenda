@@ -157,6 +157,9 @@ final class notices {
                 'books' => $a->books]) : null;
         $heading = $subject;
         $after = $str('noticereaderafter');
+        // Where a late book costs something, it is said before it does.
+        $warning = $reader ? sanctions::warning($entityid, $reader, $now) : '';
+        $body .= $warning !== '' ? ' ' . $warning : '';
         if ($young) {
             $body = $young['text'];
             $heading = $str($one ? 'heraldoverdueheading' : 'heraldoverdueheadingmany');
@@ -175,7 +178,7 @@ final class notices {
             'lead' => $young ? [$str($one ? 'heraldoverduelead' : 'heraldoverdueleadmany')] : [],
             'books' => $rows,
             'button' => ['url' => $url, 'text' => get_string('noticereaderbutton', 'local_oksigeniaayvurenda')],
-            'after' => $after !== '' ? [$after] : [],
+            'after' => array_values(array_filter([$warning, $after], fn($line) => $line !== '')),
             'sign' => mail::sign($entityid, $reader ?: null, (bool) $young),
             'why' => get_string('mailwhyreader', 'local_oksigeniaayvurenda'),
             'prefs' => true,

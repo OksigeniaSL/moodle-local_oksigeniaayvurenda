@@ -122,6 +122,7 @@ final class mine {
                 'spring' => $url('ayvurande.php', $library),
                 'loans' => $loans,
                 'holds' => $holds,
+                'notice' => sanctions::for_reader((int) $reader->entityid, (int) $reader->id, $now),
             ];
         }
         return $out;
@@ -148,6 +149,11 @@ final class mine {
         }
         $items = [];
         foreach ($summary as $library) {
+            // What keeps them from borrowing goes before the books: it is why the desk will stop them.
+            if ($library['notice'] !== '') {
+                $items[] = ['title' => $library['notice'], 'detail' => $library['name'], 'date' => 0, 'urgent' => true,
+                    'method' => 'mobile_card_view', 'args' => []];
+            }
             foreach ($library['loans'] as $loan) {
                 if (!$loan['textbook']) {
                     // Late says so in words: a colour alone does not reach everyone, and a library's own may be close to it.

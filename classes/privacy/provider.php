@@ -99,6 +99,18 @@ class provider implements
             'note' => 'privacy:metadata:ill:note',
             'createdby' => 'privacy:metadata:ill:createdby',
         ], 'privacy:metadata:ill');
+        $collection->add_database_table(self::T . 'sanction', [
+            'readerid' => 'privacy:metadata:sanction:readerid',
+            'kind' => 'privacy:metadata:sanction:kind',
+            'dayslate' => 'privacy:metadata:sanction:dayslate',
+            'timeuntil' => 'privacy:metadata:sanction:timeuntil',
+            'cents' => 'privacy:metadata:sanction:cents',
+            'note' => 'privacy:metadata:sanction:note',
+            'status' => 'privacy:metadata:sanction:status',
+            'createdby' => 'privacy:metadata:sanction:createdby',
+            'closedby' => 'privacy:metadata:sanction:closedby',
+            'timecreated' => 'privacy:metadata:sanction:timecreated',
+        ], 'privacy:metadata:sanction');
         $collection->add_database_table(self::T . 'purchasewho', [
             'purchaseid' => 'privacy:metadata:purchasewho:purchaseid',
             'readerid' => 'privacy:metadata:purchasewho:readerid',
@@ -294,6 +306,8 @@ class provider implements
         );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'selfpost} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'sanction} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql('closedby', 'SELECT closedby FROM {' . self::T . 'sanction} WHERE closedby IS NOT NULL', []);
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'purchase} WHERE decidedby IS NOT NULL', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'ill} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql(
@@ -362,6 +376,14 @@ class provider implements
                     array_merge($base, [get_string('privacy:path:ill', 'local_oksigeniaayvurenda')]),
                     (object) ['books' => array_values(array_map(fn($b) => ['title' => $b->title, 'from' => $b->partner,
                         'status' => $b->status], $borrowed))]
+                );
+            }
+            $late = \local_oksigeniaayvurenda\local\sanctions::of_reader((int) $reader->entityid, (int) $reader->id, time());
+            if ($late) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:sanctions', 'local_oksigeniaayvurenda')]),
+                    (object) ['entries' => array_map(fn($row) => ['what' => $row['what'], 'why' => $row['why'],
+                        'state' => $row['state'], 'when' => $row['when']], $late)]
                 );
             }
             $asked = \local_oksigeniaayvurenda\local\purchases::of_reader((int) $reader->id, 1000);
@@ -596,6 +618,7 @@ class provider implements
         $DB->delete_records(self::T . 'relay');
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'purchasewho');
+        $DB->delete_records(self::T . 'sanction');
         $DB->execute('UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE direction = 'in'");
         $DB->set_field_select(self::T . 'ill', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader'");
@@ -699,6 +722,7 @@ class provider implements
                 $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader' AND id $in", $params);
             }
             $DB->delete_records(self::T . 'purchasewho', ['readerid' => $reader->id]);
+            $DB->delete_records(self::T . 'sanction', ['readerid' => $reader->id]);
             $DB->execute(
                 'UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE readerid = ? AND direction = 'in'",
                 [$reader->id]
@@ -713,6 +737,8 @@ class provider implements
         $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
         $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'purchase', 'decidedby', null, ['decidedby' => $userid]);
+        $DB->set_field(self::T . 'sanction', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'sanction', 'closedby', null, ['closedby' => $userid]);
         $DB->set_field(self::T . 'purchaseorder', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'ill', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
@@ -762,6 +788,12 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'ill', ['createdby' => $userid])) {
+            return true;
+        }
+        if (
+            $DB->record_exists(self::T . 'sanction', ['createdby' => $userid]) ||
+            $DB->record_exists(self::T . 'sanction', ['closedby' => $userid])
+        ) {
             return true;
         }
         if ($DB->record_exists(self::T . 'purchase', ['decidedby' => $userid])) {

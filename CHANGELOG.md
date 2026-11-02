@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.133.0
+
+- If a book comes back late, a centre can now choose what it leaves, in the lending rules: only the warning (still the
+  default), days without lending, or a fine, with days of grace, a ceiling, its currency, and which stages and adults it
+  applies to. It is worked out as the book comes back.
+- The desk says what the book left, stops before lending to whoever is waiting or owes (the librarian can always lend
+  anyway), and lifts the days, takes the payment or forgives it from there. Payment is only written down: nothing is
+  charged online.
+- The reader's record lists it all and writes down other amounts, such as for a lost book. «Fines and suspensions», a new
+  report, shows who waits and who owes, the sums of the year, what was closed (which can be undone) and a CSV.
+- The reader is told by message, sees it on their card, in the app and in the block, and cannot reserve or renew from
+  home meanwhile; the notice of a late book warns first. A self-loan post sends them to the desk.
+- Never at a textbook bank, nor for a library that borrows. Goes in the daily copy, recovery and merging of readers, and
+  the privacy provider exports and deletes it.
+- A guided help with its voices; the desk's own help no longer promises there are no fines.
+- A copy that failed, what waits for the staff and a voice received also reach the staff's phones.
+
 ## 0.132.1 (2026-11-02)
 
 - On a child's page in Aty, the row of a book of an older child opens nothing: the page would be the adult's library, not the child's.

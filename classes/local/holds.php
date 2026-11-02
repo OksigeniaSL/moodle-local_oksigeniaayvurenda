@@ -101,6 +101,10 @@ final class holds {
         if (!$reader) {
             return false;
         }
+        // Whoever may not borrow now, may not line up from home either: the desk is where that gets talked over.
+        if (sanctions::stop((int) $library->entityid, $readerid, $now)) {
+            return false;
+        }
         $year = years::around((int) $library->entityid, $now);
         $stage = $DB->get_field(self::T . 'member', 'stage', ['readerid' => $readerid, 'yearid' => $year->id], IGNORE_MULTIPLE);
         return hold_rules::online(self::settings((int) $library->entityid), $reader->readertype, $stage ?: null);
@@ -117,7 +121,7 @@ final class holds {
     public static function renew_online(\stdClass $library, int $readerid, int $now): bool {
         global $DB;
         $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'status' => 'active']);
-        if (!$reader || $library->kind === bank::KIND) {
+        if (!$reader || $library->kind === bank::KIND || sanctions::stop((int) $library->entityid, $readerid, $now)) {
             return false;
         }
         $year = years::around((int) $library->entityid, $now);

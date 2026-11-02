@@ -168,6 +168,13 @@
         if (reader.latecount > 0) {
             panel.appendChild(el('p', 'ayv-reader-late', str.desklate));
         }
+        // What a late book left: what the desk stops for, and what the librarian can lift or close from here.
+        if (reader.sanction) {
+            var owed = el('div', 'ayv-sanction-band');
+            owed.appendChild(el('p', 'ayv-sanction-text', reader.sanction.text));
+            owed.appendChild(settle(reader.sanction.actions, reader.id));
+            panel.appendChild(owed);
+        }
         // At a textbook bank: the set of their grade, what is still to give, and the contract for the family.
         if (reader.bank) {
             var set = el('div', 'ayv-reader-bank');
@@ -238,9 +245,42 @@
         return box;
     };
 
+    // Lift the days or close what is owed, from the panel or from the line of the book that just came back.
+    var settle = function(choices, who, done) {
+        var box = el('div', 'ayv-line-actions');
+        (choices || []).forEach(function(choice) {
+            box.appendChild(button(choice.label, 'ayv-line-quiet', function(b) {
+                b.disabled = true;
+                post({action: 'sanction', readerid: who, what: choice.do}).then(function(answer) {
+                    tone('ok');
+                    if (done) {
+                        done(answer);
+                    }
+                    if (answer.reader && readerid === who) {
+                        showReader(answer.reader);
+                    }
+                    return answer;
+                }).catch(function() {
+                    tone('no');
+                    b.disabled = false;
+                });
+            }));
+        });
+        return box;
+    };
+
     var line = function(answer, code) {
         var li = el('li', 'ayv-line ayv-line-' + answer.kind + ' ayv-sound-' + (answer.sound || 'ok'));
         li.appendChild(el('p', 'ayv-line-text', answer.message));
+        if (answer.sanction) {
+            var left = el('p', 'ayv-line-note ayv-sanction-left', answer.sanction.text);
+            li.appendChild(left);
+            var settling = settle(answer.sanction.actions, answer.readerid, function(done) {
+                left.textContent = done.message;
+                settling.remove();
+            });
+            li.appendChild(settling);
+        }
         var actions = el('div', 'ayv-line-actions');
         var undo = function(what, extra) {
             actions.appendChild(button(str.deskundo, 'ayv-line-quiet', function(b) {

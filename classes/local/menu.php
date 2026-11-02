@@ -41,11 +41,12 @@ final class menu {
         'class' => ['class.php'],
         'readers' => ['readers.php', 'reader.php', 'readerslist.php', 'oneroster.php', 'pair.php', 'match.php',
             'twins.php', 'tutors.php', 'sources.php', 'connector.php'],
-        'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php', 'activity.php'],
+        'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php', 'activity.php', 'sanctions.php'],
     ];
 
     /** @var string[] The pages that need classes, or courses, to mean anything. */
-    private const ONLY_WITH = ['tutors.php' => 'classes', 'wishes.php' => 'classes', 'readings.php' => 'courses'];
+    private const ONLY_WITH = ['tutors.php' => 'classes', 'wishes.php' => 'classes', 'readings.php' => 'courses',
+        'sanctions.php' => 'sanctions'];
 
     /**
      * The groups of «More», with what each person may open.
@@ -57,7 +58,8 @@ final class menu {
         $c = 'local/oksigeniaayvurenda:catalogue';
         $m = 'local/oksigeniaayvurenda:manage';
         return [
-            'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d], ['lots.php', 'menulots', $d],
+            'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d],
+                ['sanctions.php', 'menusanctions', $d], ['lots.php', 'menulots', $d],
                 ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d],
                 ['copies.php', 'menucopies', $m]],
             'menucataloguing' => [['add.php', 'menuadd', $c], ['purchases.php', 'menupurchases', $c],
@@ -133,7 +135,8 @@ final class menu {
                 $entityid = (int) $library->entityid;
                 if (
                     ($needs === 'classes' && skins::no_classes($entityid)) ||
-                    ($needs === 'courses' && skins::no_courses($entityid))
+                    ($needs === 'courses' && skins::no_courses($entityid)) ||
+                    ($needs === 'sanctions' && !sanctions::on($entityid))
                 ) {
                     continue;
                 }
