@@ -42,7 +42,7 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $entityid = (int) $library->entityid;
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $manage = has_capability('local/oksigeniaayvurenda:manage', $context);
 $now = time();
 $notice = optional_param('notice', '', PARAM_ALPHA) === 'holdcancelled' ? $str('holdcancelled') : '';

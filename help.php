@@ -45,24 +45,27 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $ref, 'piece' => $piece]));
 
 // The practice library, as new: the help always finds the same readers and books.
-$practice = practice::reset();
+$practice = practice::reset($theirs ? \local_oksigeniaayvurenda\local\skins::of((int) $theirs->entityid) : 'school');
 practice::prepare($practice, $piece, (int) $USER->id);
 $library = $theirs ?? $practice;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $steps = [];
 for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
-    $steps[] = $str(sprintf('help%s%02d', $piece, $i));
+    $steps[] = \local_oksigeniaayvurenda\local\skins::say((int) $practice->entityid, sprintf('help%s%02d', $piece, $i));
 }
 $code = fn(int $number) => control_letter::append((string) $number);
 // The voice of each step, from the art package (voz/<piece>/<language>/<nn>.mp3); a step without it is only read.
 $art = core_component::get_component_directory('local_oksigeniaayvurendaarte');
 $voices = [];
 for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
-    $file = sprintf('/voz/%s/%s/%02d.mp3', $piece, substr(current_language(), 0, 2), $i);
+    // A step said in the words of a skin has its own voice, or none: the other one would say something else.
+    $key = sprintf('help%s%02d', $piece, $i);
+    $tone = substr(\local_oksigeniaayvurenda\local\skins::words((int) $practice->entityid, $key), strlen($key));
+    $file = sprintf('/voz/%s/%s/%02d%s.mp3', $piece, substr(current_language(), 0, 2), $i, $tone !== '' ? '-' . $tone : '');
     $voices[] = $art && is_readable($art . $file) ? (new moodle_url('/local/oksigeniaayvurendaarte' . $file))->out(false) : null;
 }
 $back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' =>
-    $piece === 'bankround' && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::BANKSLUG : $library->slug]);
+    $piece === 'bankround' && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::bank_slug() : $library->slug]);
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <h1 id="ayv-help-title" class="ayv-results-title">' . s($str('helptitle' . $piece)) . '</h1>
 <div class="ayv-help-stage" id="ayv-help-stage">
@@ -96,7 +99,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
         'auto' => $auto,
         'frame' => (new moodle_url(
             '/local/oksigeniaayvurenda/' . $pieces[$piece]['page'],
-            ['library' => $piece === 'bankround' ? practice::BANKSLUG : practice::SLUG, 'help' => 1]
+            ['library' => $piece === 'bankround' ? practice::bank_slug() : $practice->slug, 'help' => 1]
                 + ($piece === 'bankround' ? ['mode' => 'collect'] : []) + ($piece === 'card' ? ['reader' => $DB->get_field(
                     'local_oksigeniaayvurenda_reader',
                     'id',
@@ -119,6 +122,8 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'weedreason' => $str('practiceweedreason'),
             'list' => str_replace('|', "\n", $str('practicelist')) . "\n",
             'listname' => $str('practicelistname'),
+            'ruletype' => \local_oksigeniaayvurenda\local\skins::no_courses((int) $practice->entityid) ? 'staff' : 'teacher',
+            'adults' => \local_oksigeniaayvurenda\local\skins::no_classes((int) $practice->entityid),
         ],
     ],
 ]);

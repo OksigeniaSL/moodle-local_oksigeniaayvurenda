@@ -41,7 +41,7 @@ if (!$library) {
     shell::missing(get_string('librarynotfound', 'local_oksigeniaayvurenda'));
 }
 
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $entityid = (int) $library->entityid;
 // The year asked for, of this centre; else the one going on.
 $yearid = optional_param('year', 0, PARAM_INT);
@@ -124,7 +124,9 @@ $data = [
     'corners' => $corners,
     'hascorners' => (bool) $corners,
     'life' => [
-        ['value' => $num($life['challenges']), 'label' => $str('memoirchallenges')] + $icon('sprout'),
+        ...(\local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid) ? [] : [
+            ['value' => $num($life['challenges']), 'label' => $str('memoirchallenges')] + $icon('sprout'),
+        ]),
         ['value' => $num($life['reviews']), 'label' => $str('memoirreviews')] + $icon('reviews'),
         ['value' => $num($life['voices']), 'label' => $str('memoirvoices')] + $icon('voices'),
     ],

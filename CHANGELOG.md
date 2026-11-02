@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.125.0 (2026-11-02)
+
+- What a library reads, in the words of its kind: without classes, no challenges, no tutors, no «My class», no class wishes; without
+  courses, no reading lists, no school programs among the sources, and «year» instead of «academic year». Readers, not students.
+- Each person has their own practice library, in their language and with the skin of the library they work in: in a shared site, two
+  people at a time no longer change it under each other. The guides change their words where a skin needs it, with their own voices.
+- A big library, measured with 110,000 copies and 10,000 readers: the nightly sync asks once instead of once per reader, a page of
+  labels stops at 2,000 and printed cards go 200 at a time.
+
 ## 0.124.0 (2026-11-02)
 
 - The copy of a centre's files, apart from the daily one: covers, the digital collection, the drawings of the reviews, the pictures of

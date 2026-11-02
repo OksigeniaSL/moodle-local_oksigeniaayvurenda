@@ -46,7 +46,10 @@ $settings = json_decode(
 $data = [
     'heading' => $str('voiceinfo'),
     'points' => array_map(
-        fn($k) => ['text' => $str($k, voices::keepdays((int) $library->entityid))],
+        fn($k) => ['text' => $str(
+            \local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, $k),
+            voices::keepdays((int) $library->entityid)
+        )],
         ['voiceinfo1', 'voiceinfo2', 'voiceinfo3', 'voiceinfo4', 'voiceinfo5',
             voices::keepdays((int) $library->entityid) ? 'voiceinfo6' : 'voiceinfo6forever', 'voiceinfo7']
     ),

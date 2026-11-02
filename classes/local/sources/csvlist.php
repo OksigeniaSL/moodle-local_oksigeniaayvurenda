@@ -73,7 +73,32 @@ final class csvlist {
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $year = years::around($entityid, $now);
         $transaction = $DB->start_delegated_transaction();
-        $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
+        // What is there, all at once: a question per reader, every night, adds up.
+        $known = $DB->get_records(
+            self::T . 'reader',
+            ['entityid' => $entityid],
+            '',
+            'id, cardcode, userid, status, readertype, firstname, lastname, email'
+        );
+        $codes = array_column($known, 'cardcode');
+        $bycard = [];
+        $byuser = [];
+        foreach ($known as $one) {
+            $bycard[\core_text::strtolower((string) $one->cardcode)] = (int) $one->id;
+            if ($one->userid) {
+                $byuser[(int) $one->userid] = (int) $one->id;
+            }
+        }
+        $sources = $DB->get_records_menu(
+            self::T . 'source',
+            ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader'],
+            '',
+            'externalid, localid'
+        );
+        $members = [];
+        foreach ($DB->get_records_select(self::T . 'member', 'yearid = :yearid', ['yearid' => $year->id]) as $row) {
+            $members[(int) $row->readerid] = $row;
+        }
         // Names that come twice in the list are told apart by their group.
         $names = array_count_values(array_map(fn($p) => self::key($p), $readers));
         // An email that comes twice, a family's, does not say whose account it is.
@@ -85,12 +110,10 @@ final class csvlist {
             }
             $readerid = 0;
             if (($person['cardcode'] ?? '') !== '') {
-                $readerid = (int) $DB->get_field_select(self::T . 'reader', 'id', 'entityid = :entityid AND ' .
-                    $DB->sql_equal('cardcode', ':code', false), ['entityid' => $entityid, 'code' => $person['cardcode']]);
+                $readerid = $bycard[\core_text::strtolower($person['cardcode'])] ?? 0;
             }
             if (!$readerid) {
-                $readerid = (int) $DB->get_field(self::T . 'source', 'localid', ['entityid' => $entityid,
-                    'system' => $system, 'tablename' => 'reader', 'externalid' => $key]);
+                $readerid = (int) ($sources[$key] ?? 0);
             }
             $lookup = $person;
             if (($emails[\core_text::strtolower($person['email'] ?? '')] ?? 0) > 1) {
@@ -98,20 +121,14 @@ final class csvlist {
             }
             $userid = self::account($lookup, $entityid);
             if (!$readerid && $userid) {
-                $readerid = (int) $DB->get_field(self::T . 'reader', 'id', ['entityid' => $entityid, 'userid' => $userid]);
+                $readerid = $byuser[$userid] ?? 0;
             }
             // An account that another reader already has is not taken from it.
-            if (
-                $userid && $DB->record_exists_select(
-                    self::T . 'reader',
-                    'entityid = :entityid AND userid = :userid AND id <> :id',
-                    ['entityid' => $entityid, 'userid' => $userid, 'id' => $readerid]
-                )
-            ) {
+            if ($userid && ($byuser[$userid] ?? $readerid) !== $readerid) {
                 $userid = 0;
             }
             // A new reader, or one who had left, takes a place in the plan.
-            if ($room !== null && (!$readerid || $DB->get_field(self::T . 'reader', 'status', ['id' => $readerid]) !== 'active')) {
+            if ($room !== null && (!$readerid || ($known[$readerid]->status ?? '') !== 'active')) {
                 if ($room < 1) {
                     $stats['overlimit']++;
                     continue;
@@ -126,29 +143,46 @@ final class csvlist {
                 'lastname' => $userid ? null : \core_text::substr($person['lastname'] ?? '', 0, 100),
                 'email' => $userid ? null : (($person['email'] ?? '') !== '' ? $person['email'] : null)];
             if ($readerid) {
-                $DB->update_record(self::T . 'reader', (object) (['id' => $readerid] + $data));
+                // Only if something changed: most nights, nothing has.
+                $was = $known[$readerid] ?? null;
+                $changed = !$was;
+                foreach (['readertype', 'status', 'userid', 'firstname', 'lastname', 'email'] as $field) {
+                    $changed = $changed || (string) ($was->$field ?? '') !== (string) ($data[$field] ?? '');
+                }
+                if ($changed) {
+                    $DB->update_record(self::T . 'reader', (object) (['id' => $readerid] + $data));
+                }
                 $stats['updated']++;
             } else {
                 $code = ($person['cardcode'] ?? '') !== '' ? strtoupper($person['cardcode'])
                     : card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
                 $codes[] = $code;
-                $readerid = $DB->insert_record(self::T . 'reader', $data + ['entityid' => $entityid, 'cardcode' => $code,
+                $readerid = (int) $DB->insert_record(self::T . 'reader', $data + ['entityid' => $entityid, 'cardcode' => $code,
                     'timecreated' => $now]);
+                $bycard[\core_text::strtolower($code)] = $readerid;
                 $stats['created']++;
             }
+            $known[$readerid] = (object) (['id' => $readerid] + $data);
             if ($userid) {
+                $byuser[$userid] = $readerid;
                 $stats['linked']++;
             }
-            if (
-                !$DB->record_exists(self::T . 'source', ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader',
-                    'externalid' => $key])
-            ) {
+            if (!isset($sources[$key])) {
                 $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader',
                     'externalid' => $key, 'localid' => $readerid, 'timecreated' => $now]);
+                $sources[$key] = $readerid;
             }
             $stats['ids'][] = (int) $readerid;
             if (($person['group'] ?? '') !== '') {
-                self::member($readerid, (int) $year->id, $person['group'], $person['stage'] ?? '', $now, $system);
+                $members[$readerid] = self::member(
+                    $readerid,
+                    (int) $year->id,
+                    $person['group'],
+                    $person['stage'] ?? '',
+                    $now,
+                    $system,
+                    $members[$readerid] ?? null
+                );
             }
             $stats['total']++;
         }
@@ -235,6 +269,8 @@ final class csvlist {
      * @param string $stage
      * @param int $now
      * @param string $source Where the group comes from.
+     * @param \stdClass|null $existing What the reader has this year, if anything.
+     * @return \stdClass What the reader has now.
      */
     private static function member(
         int $readerid,
@@ -242,16 +278,20 @@ final class csvlist {
         string $group,
         string $stage,
         int $now,
-        string $source = 'csv'
-    ): void {
+        string $source,
+        ?\stdClass $existing
+    ): \stdClass {
         global $DB;
-        $existing = $DB->get_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid], '*', IGNORE_MULTIPLE);
+        $row = (object) ['groupname' => $group, 'stage' => $stage !== '' ? $stage : null, 'source' => $source];
         if (!$existing) {
-            $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid, 'groupname' => $group,
-                'stage' => $stage !== '' ? $stage : null, 'source' => $source, 'timecreated' => $now]);
-        } else if ($existing->groupname !== $group || (string) $existing->stage !== $stage) {
-            $DB->update_record(self::T . 'member', (object) ['id' => $existing->id, 'groupname' => $group,
-                'stage' => $stage !== '' ? $stage : null, 'source' => $source]);
+            $row->id = $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid, 'groupname' => $group,
+                'stage' => $row->stage, 'source' => $source, 'timecreated' => $now]);
+            return $row;
         }
+        $row->id = $existing->id;
+        if ($existing->groupname !== $group || (string) $existing->stage !== $stage) {
+            $DB->update_record(self::T . 'member', $row);
+        }
+        return $row;
     }
 }

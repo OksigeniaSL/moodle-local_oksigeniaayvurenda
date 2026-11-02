@@ -802,7 +802,8 @@ final class screens {
             $hero['you'] = ['title' => self::str('homesky', $name), 'text' => self::str('homeskytext'),
                 'drawing' => cards::sky_svg($stage, $levels, $name, 72, $look === 'skysober')];
         } else {
-            $hero['you'] = ['title' => self::str('homeclassic'), 'text' => self::str('homeclassictext'), 'drawing' => ''];
+            $hero['you'] = ['title' => self::str('homeclassic'),
+                'text' => skins::say((int) $library->entityid, 'homeclassictext'), 'drawing' => ''];
         }
         $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard'), 'listen' => null];
         // What the memory has to tell this reader today: a book, or what they were looking for.

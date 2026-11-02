@@ -44,7 +44,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/voices.php', ['library'
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $manage = has_capability('local/oksigeniaayvurenda:manage', $context);
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
@@ -139,7 +139,8 @@ $data = [
     'familyoptions' => array_map(
         fn($a) => ['value' => $a, 'label' => $str('voicefamilyoption' . $a),
         'checked' => in_array($a, (array) ($settings['voicefamilyoptions'] ?? voices::FAMILYAUDIENCES), true)],
-        voices::FAMILYAUDIENCES
+        \local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid)
+            ? array_diff(voices::FAMILYAUDIENCES, ['class']) : voices::FAMILYAUDIENCES
     ),
     'voicetext' => (string) ($settings['voicetext'] ?? ''),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),

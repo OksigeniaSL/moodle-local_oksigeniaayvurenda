@@ -110,7 +110,7 @@ window.AYVHelpPieces = {
             return h.tap('dialog[open] .ayv-modal-close');
         }).then(function() {
             return Promise.all([h.say(2), h.tap('[data-ayv-open="ayv-rule-new"]').then(function() {
-                return h.choose('#ayv-rule-new select[name="readertype"]', 'teacher');
+                return h.choose('#ayv-rule-new select[name="readertype"]', h.codes.ruletype);
             }).then(function() {
                 return h.type('#ayv-rule-new input[name="loandays"]', '30');
             }).then(function() {
@@ -228,7 +228,7 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.point('.ayv-readers-stage');
+            return h.point(h.codes.adults ? '.ayv-person' : '.ayv-readers-stage');
         }).then(function() {
             return h.say(2);
         }).then(function() {

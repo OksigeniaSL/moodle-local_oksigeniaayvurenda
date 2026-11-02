@@ -86,7 +86,7 @@ final class memoir {
         }
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $number = fn(int $n) => screens::number($n);
-        $lines = [$str('memoirstoryloans', (object) ['came' => $number((int) $figures['came']),
+        $lines = [skins::say($entityid, 'memoirstoryloans', (object) ['came' => $number((int) $figures['came']),
             'readers' => $number((int) $figures['readers']), 'loans' => $number((int) $figures['loans'])])];
         if ($report['before'] && (int) $report['before']['loans'] !== (int) $figures['loans']) {
             $change = (int) $figures['loans'] - (int) $report['before']['loans'];
@@ -283,7 +283,7 @@ final class memoir {
         global $DB;
         $range = ['entityid' => $entityid, 'a' => $year->timestart, 'b' => $year->timeend];
         return [
-            'challenges' => $DB->count_records_select(
+            'challenges' => skins::no_classes($entityid) ? 0 : $DB->count_records_select(
                 self::T . 'challenge',
                 'yearid = :yearid AND timecompleted IS NOT NULL',
                 ['yearid' => $year->id]

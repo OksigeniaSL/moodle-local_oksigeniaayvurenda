@@ -67,7 +67,7 @@ if (data_submitted() && confirm_sesskey()) {
     }
 }
 $typelabel = fn(string $type) => get_string_manager()->string_exists('readerkind' . $type, 'local_oksigeniaayvurenda')
-    ? $str('readerkind' . $type) : $type;
+    ? $str(\local_oksigeniaayvurenda\local\skins::words($entityid, 'readerkind' . $type)) : $type;
 $card = function (array $reader, bool $first) use ($str, $typelabel) {
     return $reader + [
         'typelabel' => $typelabel($reader['type']),

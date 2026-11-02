@@ -104,7 +104,7 @@ $mine = array_map(fn($v) => [
 ], voices::mine($recordid, $library, (int) $USER->id));
 $data = [
     'heading' => $str('voicetitle', $found['record']->title),
-    'how' => $str('voicehow'),
+    'how' => $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'voicehow')),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),

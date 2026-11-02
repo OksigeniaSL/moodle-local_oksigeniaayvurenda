@@ -62,7 +62,7 @@ final class libraries {
             );
             $entities[] = ['entity' => $entity, 'libraries' => array_values(array_filter(
                 $libraries,
-                fn($l) => $l->slug !== practice::SLUG
+                fn($l) => !practice::is((int) $l->entityid)
             ))];
         }
         return $entities;

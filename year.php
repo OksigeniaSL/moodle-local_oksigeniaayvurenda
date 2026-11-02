@@ -43,7 +43,7 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $entityid = (int) $library->entityid;
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $action = optional_param('do', '', PARAM_ALPHA);
@@ -69,6 +69,9 @@ $cards = [
         'late' => $status['notutor'] > 0],
     ['number' => $status['out'], 'label' => $str('yearout'), 'url' => $url('late.php', ['all' => 1])],
 ];
+if (\local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid)) {
+    $cards = array_slice($cards, 2);
+}
 if ($status['left']) {
     $cards[] = ['number' => count($status['left']), 'label' => $str('yearleft'), 'url' => '#ayv-left', 'late' => true];
 }

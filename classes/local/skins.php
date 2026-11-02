@@ -62,13 +62,16 @@ final class skins {
 
     /** @var array Whose words a skin speaks with, where it has none of its own: warm for every age, or plain for adults. */
     public const TONES = [
-        'public' => ['public', 'secondary'],
-        'company' => ['university'],
-        'mobile' => ['mobile', 'public', 'secondary'],
+        'public' => ['public', 'lay', 'secondary'],
+        'company' => ['company', 'lay', 'university'],
+        'mobile' => ['mobile', 'public', 'lay', 'secondary'],
     ];
 
     /** @var string[] The skins with no classes nor tutors: each reader is told about their own books. */
     public const NO_CLASSES = ['university', 'public', 'company', 'mobile'];
+
+    /** @var string[] The skins with no courses either: no reading lists, no programs of a school, no lessons on a platform. */
+    public const NO_COURSES = ['public', 'company', 'mobile'];
 
     /**
      * The skin of a centre.
@@ -168,6 +171,39 @@ final class skins {
             }
         }
         return $key;
+    }
+
+    /**
+     * A string, in the words of a centre's skin.
+     *
+     * @param int $entityid
+     * @param string $key
+     * @param mixed $a
+     * @return string
+     */
+    public static function say(int $entityid, string $key, $a = null): string {
+        return get_string(self::words($entityid, $key), 'local_oksigeniaayvurenda', $a);
+    }
+
+    /**
+     * What a page asks its strings with, in the words of its library's skin.
+     *
+     * @param \stdClass|null $library
+     * @return \Closure Of the key and its parameter.
+     */
+    public static function speaker(?\stdClass $library): \Closure {
+        return fn(string $key, $a = null) => $library ? self::say((int) $library->entityid, $key, $a)
+            : get_string($key, 'local_oksigeniaayvurenda', $a);
+    }
+
+    /**
+     * Whether a centre has no courses: its people are readers, not students of anything.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function no_courses(int $entityid): bool {
+        return in_array(self::of($entityid), self::NO_COURSES, true);
     }
 
     /**

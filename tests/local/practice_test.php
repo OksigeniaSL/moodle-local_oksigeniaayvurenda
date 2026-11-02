@@ -40,7 +40,7 @@ final class practice_test extends \advanced_testcase {
         $this->resetAfterTest();
         $mine = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $library = practice::library();
-        $this->assertSame(practice::SLUG, $library->slug);
+        $this->assertSame(practice::slug(), $library->slug);
         $this->assertTrue(practice::is((int) $library->entityid));
         $this->assertFalse(practice::is((int) $mine->entityid));
         $this->assertSame([(int) $mine->id], array_map(fn($l) => (int) $l->id, catalogue::libraries()));
@@ -57,11 +57,11 @@ final class practice_test extends \advanced_testcase {
         $this->assertNotEquals($library->entityid, $again->entityid);
         $this->assertFalse($DB->record_exists('local_oksigeniaayvurenda_entity', ['id' => $library->entityid]));
         $this->assertSame(2, $DB->count_records('local_oksigeniaayvurenda_loan', ['libraryid' => $again->id]));
-        $this->assertSame(1, $DB->count_records('local_oksigeniaayvurenda_library', ['slug' => practice::SLUG]));
+        $this->assertSame(1, $DB->count_records('local_oksigeniaayvurenda_library', ['slug' => practice::slug()]));
 
         $found = lookup::isbn((int) $again->entityid, practice::ISBNS[0][0]);
         $this->assertTrue($found['found']);
-        $this->assertSame('El jardín de las palabras', $found['description']['record']['title']);
+        $this->assertSame('The Garden of Words', $found['description']['record']['title']);
         $this->assertFalse(lookup::isbn((int) $again->entityid, '9780743273565')['found']);
     }
 
@@ -82,7 +82,7 @@ final class practice_test extends \advanced_testcase {
         $back = $desk->scan('100003E');
         $desk->note($back['loanid'], 'loved');
         $album = garden::album($noa);
-        $this->assertSame(['La ladrona de la tormenta'], array_column($album['books'], 'title'));
+        $this->assertSame(['The Storm Thief'], array_column($album['books'], 'title'));
         $this->assertSame('loved', $album['books'][0]['note']);
         $this->assertSame(['back' => 1, 'explore' => 0, 'tell' => 1, 'stay' => 0], $album['flower']['levels']);
         $this->assertSame(0, $album['flower']['stage']);

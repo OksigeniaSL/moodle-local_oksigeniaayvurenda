@@ -98,7 +98,7 @@ final class onlylibrary {
         if ($slug === '' && preg_match('/[?&]library=([a-z0-9-]+)/', $wantsurl, $found)) {
             $slug = $found[1];
         }
-        if ($slug === '' || $slug === practice::SLUG) {
+        if ($slug === '' || str_starts_with($slug, practice::SLUG)) {
             return null;
         }
         $library = catalogue::library($slug);

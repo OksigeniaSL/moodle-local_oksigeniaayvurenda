@@ -42,7 +42,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/rules.php', ['library' 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $sm = get_string_manager();
 $notice = '';
 // One rule at a time: changed, added or taken away; the others stay as they were.
@@ -73,7 +73,8 @@ if (data_submitted() && confirm_sesskey()) {
         if ($twin) {
             $notice = $str('rulestwin', (object) ['who' => $rule['readertype'] === '*' ? $str('rulesanyreader')
                 : ($sm->string_exists('readertype' . $rule['readertype'], 'local_oksigeniaayvurenda')
-                ? $str('readertype' . $rule['readertype']) : $rule['readertype']),
+                ? $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'readertype' . $rule['readertype']))
+                : $rule['readertype']),
                 'what' => $rule['itemtype'] === '*' ? $str('rulesanyitem')
                 : ($sm->string_exists('itemtype' . $rule['itemtype'], 'local_oksigeniaayvurenda')
                 ? $str('itemtype' . $rule['itemtype']) : $rule['itemtype'])]);
@@ -91,7 +92,11 @@ $readertypes = $DB->get_fieldset_sql(
     'SELECT DISTINCT readertype FROM {local_oksigeniaayvurenda_reader} WHERE entityid = ?',
     [$library->entityid]
 );
-$readertypes = array_values(array_unique(array_merge(['*', 'student', 'teacher', 'staff'], $readertypes)));
+$nocourses = \local_oksigeniaayvurenda\local\skins::no_courses((int) $library->entityid);
+$readertypes = array_values(array_unique(array_merge(
+    $nocourses ? ['*', 'student', 'staff'] : ['*', 'student', 'teacher', 'staff'],
+    $readertypes
+)));
 $itemtypes = array_merge(['*'], cataloguer::itemtypes((int) $library->entityid));
 $label = function (string $kind, string $value) use ($str, $sm): string {
     if ($value === '*') {

@@ -32,6 +32,7 @@ require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $group = optional_param('group', '', PARAM_TEXT);
+$from = max(0, optional_param('from', 0, PARAM_INT));
 require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
@@ -51,7 +52,11 @@ $entity = format_string(
 $skin = \local_oksigeniaayvurenda\local\skins::of((int) $library->entityid);
 $printed = [];
 $long = false;
-foreach (readers::in_group($library, $group) as $reader) {
+// A town's library has no groups: its whole list, a good batch at a time.
+$batch = 200;
+$list = readers::in_group($library, $group, null, $batch + 1, $from);
+$more = count($list) > $batch;
+foreach (array_slice($list, 0, $batch) as $reader) {
     $printed[] = cards::printed((object) ['id' => $reader['id'], 'entityid' => $library->entityid, 'userid' => $reader['userid'],
         'readertype' => $reader['type'], 'cardcode' => $reader['cardcode']], $reader['name'], $group, $entity, $skin);
     $long = $long || core_text::strlen((string) $reader['cardcode']) > 10;
@@ -73,6 +78,8 @@ $data = [
     'sheets' => $sheets,
     'hassheets' => (bool) $sheets,
     'empty' => $str('readersnone'),
+    'next' => $more ? (new moodle_url($PAGE->url, ['from' => $from + $batch]))->out(false) : '',
+    'nextlabel' => $str('printcardsnext', $batch),
 ];
 $back = new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug, 'group' => $group]);
 shell::output(

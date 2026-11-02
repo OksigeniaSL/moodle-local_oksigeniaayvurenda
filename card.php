@@ -42,7 +42,7 @@ shell::require('local/oksigeniaayvurenda:view', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/card.php', ['library' => $ref]));
 
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $conditions = ['userid' => $USER->id, 'status' => 'active'];
 if ($library) {
     $conditions['entityid'] = $library->entityid;
@@ -251,7 +251,8 @@ $data = [
     'minesave' => $str('cardlooksave'),
 ];
 // The staff find here the guided help of the card (not inside the help itself).
-$nav = $isdesk && !optional_param('help', 0, PARAM_BOOL) ? [['url' => (new moodle_url(
+$flower = in_array(\local_oksigeniaayvurenda\local\skins::of((int) $library->entityid), ['school', 'secondary'], true);
+$nav = $flower && $isdesk && !optional_param('help', 0, PARAM_BOOL) ? [['url' => (new moodle_url(
     '/local/oksigeniaayvurenda/help.php',
     ['library' => $library->slug, 'piece' => 'card']
 ))->out(false), 'label' => $str('helpnav')]] : [];

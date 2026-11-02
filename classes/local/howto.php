@@ -70,6 +70,10 @@ final class howto {
         'window' => ['public.php', 'manage', ''],
     ];
 
+    /** @var string[] The tasks that need classes, or courses, to mean anything. */
+    private const ONLY_WITH = ['myclass' => 'classes', 'wishes' => 'classes', 'tutors' => 'classes', 'bank' => 'classes',
+        'bankround' => 'classes', 'readings' => 'courses'];
+
     /** @var array[] Each guided help: the permission it needs, the screen it plays on and how many steps it says. */
     public const PIECES = [
         'desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 10],
@@ -112,8 +116,14 @@ final class howto {
             fn($w) => \core_text::strlen($w) >= 3 && !in_array($w, self::QUIET, true)
         ));
         $found = [];
+        $noclasses = skins::no_classes((int) $library->entityid);
+        $nocourses = skins::no_courses((int) $library->entityid);
         foreach (self::TASKS as $key => [$page, $capability, $piece]) {
             if (!access::can('local/oksigeniaayvurenda:' . $capability, $library, $userid)) {
+                continue;
+            }
+            $needs = self::ONLY_WITH[$key] ?? '';
+            if (($needs === 'classes' && $noclasses) || ($needs === 'courses' && $nocourses)) {
                 continue;
             }
             $task = self::task($key, $library);
@@ -204,14 +214,17 @@ final class howto {
      */
     public static function task(string $key, \stdClass $library): array {
         [$page, , $piece] = self::TASKS[$key];
+        $skin = skins::of((int) $library->entityid);
         $str = fn(string $k) => get_string($k, 'local_oksigeniaayvurenda');
         return [
             'key' => $key,
             'title' => $str('howto' . $key),
-            'steps' => array_map('trim', explode('|', $str('howto' . $key . 'steps'))),
+            'steps' => array_map('trim', explode('|', skins::say((int) $library->entityid, 'howto' . $key . 'steps'))),
             'words' => $str('howto' . $key . 'words'),
             'url' => (new \moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false),
-            'help' => $piece !== '' ? (new \moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug,
+            // The help of the card is about its flower and its sky, which not every skin has.
+            'help' => $piece !== '' && ($piece !== 'card' || in_array($skin, ['school', 'secondary'], true))
+                ? (new \moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug,
                 'piece' => $piece]))->out(false) : null,
         ];
     }

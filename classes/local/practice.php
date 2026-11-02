@@ -38,11 +38,18 @@ final class practice {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
-    /** @var string The address of the practice library. */
+    /** @var string How the address of a practice library starts: each person has their own. */
     public const SLUG = 'ayv-practica';
 
-    /** @var string The address of its textbook bank, which the help of the bank's round makes. */
+    /** @var string How the address of its textbook bank starts, which the help of the bank's round makes. */
     public const BANKSLUG = 'ayv-practica-banco';
+
+    /** @var string[] Its made-up books, in English. */
+    private const ENGLISH = ['El faro dormido' => 'The Sleeping Lighthouse', 'La nube de tinta' => 'The Ink Cloud',
+        'Mapas del sur' => 'Maps of the South', 'La ladrona de la tormenta' => 'The Storm Thief',
+        'Atlas de los mares' => 'Atlas of the Seas', 'Cartas del viento' => 'Letters from the Wind',
+        'El reloj de sal' => 'The Salt Clock', 'El jardín de las palabras' => 'The Garden of Words',
+        'Cuentos para leer a oscuras' => 'Stories to Read in the Dark', 'Editorial Brújula' => 'Compass Books'];
 
     /** @var array[] Its readers: card number (without the letter), first name, surnames, group. */
     public const READERS = [
@@ -73,28 +80,78 @@ final class practice {
     ];
 
     /**
-     * The practice library, made if it is not there.
+     * The address of someone's practice library.
+     *
+     * @return string
+     */
+    public static function slug(): string {
+        global $USER;
+        return self::SLUG . '-' . (int) ($USER->id ?? 0);
+    }
+
+    /**
+     * The address of the textbook bank of someone's practice library.
+     *
+     * @return string
+     */
+    public static function bank_slug(): string {
+        global $USER;
+        return self::BANKSLUG . '-' . (int) ($USER->id ?? 0);
+    }
+
+    /**
+     * Someone's practice library, made if it is not there.
      *
      * @return \stdClass
      */
     public static function library(): \stdClass {
         global $DB;
-        $library = $DB->get_record(self::T . 'library', ['slug' => self::SLUG]);
-        return $library ?: self::make();
+        $library = $DB->get_record(self::T . 'library', ['slug' => self::slug()]);
+        return $library ?: self::make(skins::SKINS[0]);
     }
 
     /**
-     * Makes the practice library again, as new.
+     * Makes someone's practice library again, as new, with the skin of the library they work in and in their language.
      *
+     * @param string $skin
      * @return \stdClass
      */
-    public static function reset(): \stdClass {
+    public static function reset(string $skin = skins::SKINS[0]): \stdClass {
         global $DB;
-        $library = $DB->get_record(self::T . 'library', ['slug' => self::SLUG]);
+        $library = $DB->get_record(self::T . 'library', ['slug' => self::slug()]);
         if ($library) {
             self::forget((int) $library->entityid);
         }
-        return self::make();
+        return self::make($skin);
+    }
+
+    /**
+     * Takes away the practice libraries of the days before: nobody is watching those.
+     *
+     * @param int|null $now
+     * @return int How many.
+     */
+    public static function sweep(?int $now = null): int {
+        global $DB;
+        $old = ($now ?? time()) - DAYSECS;
+        $gone = 0;
+        foreach ($DB->get_records_select(self::T . 'entity', 'timecreated < ?', [$old], '', 'id, settings') as $entity) {
+            if (!empty(json_decode((string) $entity->settings, true)['practice'])) {
+                self::forget((int) $entity->id);
+                $gone++;
+            }
+        }
+        return $gone;
+    }
+
+    /**
+     * A made-up title, in the language of whoever is watching.
+     *
+     * @param string $text
+     * @return string
+     */
+    private static function say(string $text): string {
+        return substr(current_language(), 0, 2) === 'en' ? (self::ENGLISH[$text] ?? $text) : $text;
     }
 
     /**
@@ -125,9 +182,11 @@ final class practice {
     public static function lookup(string $isbn): ?array {
         foreach (self::ISBNS as [$code, $title, $author, $publisher, $year]) {
             if ($code === $isbn) {
-                return ['record' => ['doctype' => 'book', 'title' => $title, 'isbn' => $isbn, 'pubyear' => $year,
-                    'extent' => '96 p.', 'lang' => 'spa'], 'authorities' => ['author' => [$author],
-                    'publisher' => [$publisher], 'class' => ['N'], 'subject' => [], 'collection' => [], 'audience' => []],
+                return ['record' => ['doctype' => 'book', 'title' => self::say($title), 'isbn' => $isbn, 'pubyear' => $year,
+                    'extent' => '96 p.', 'lang' => substr(current_language(), 0, 2) === 'en' ? 'eng' : 'spa'],
+                    'authorities' => ['author' => [$author],
+                    'publisher' => [self::say($publisher)], 'class' => ['N'], 'subject' => [], 'collection' => [],
+                    'audience' => []],
                     'extra' => []];
             }
         }
@@ -146,7 +205,7 @@ final class practice {
         global $DB;
         $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
         $bank = libraries::create_library((int) $library->entityid, ['name' => $str('practicebankname'), 'kind' => bank::KIND,
-            'slug' => self::BANKSLUG]);
+            'slug' => self::bank_slug()]);
         $group = self::READERS[0][3];
         $set = bank::save_set($bank, $group, [$group]);
         $number = 90000;
@@ -173,16 +232,18 @@ final class practice {
     /**
      * Makes the entity, its library, rules, readers and books, with two of them lent.
      *
+     * @param string $skin
      * @return \stdClass
      */
-    private static function make(): \stdClass {
+    private static function make(string $skin): \stdClass {
         global $DB;
         $now = time();
+        $classes = !in_array($skin, skins::NO_CLASSES, true);
         $transaction = $DB->start_delegated_transaction();
         $entityid = $DB->insert_record(self::T . 'entity', ['name' => get_string('practicename', 'local_oksigeniaayvurenda'),
-            'yearstart' => '09-01', 'settings' => json_encode(['practice' => true, 'controlletter' => true]),
+            'yearstart' => '09-01', 'settings' => json_encode(['practice' => true, 'controlletter' => true, 'skin' => $skin]),
             'timecreated' => $now, 'timemodified' => $now]);
-        $libraryid = $DB->insert_record(self::T . 'library', ['entityid' => $entityid, 'slug' => self::SLUG,
+        $libraryid = $DB->insert_record(self::T . 'library', ['entityid' => $entityid, 'slug' => self::slug(),
             'name' => get_string('practicename', 'local_oksigeniaayvurenda'), 'kind' => 'central',
             'timecreated' => $now, 'timemodified' => $now]);
         $DB->insert_record(self::T . 'rule', ['libraryid' => $libraryid, 'readertype' => '*', 'itemtype' => '*',
@@ -192,18 +253,21 @@ final class practice {
         $readers = [];
         $groups = [];
         foreach (self::READERS as [$number, $first, $last, $group]) {
-            $groups[$number] = $group;
+            $groups[$number] = $classes ? $group : null;
             $readers[$number] = $DB->insert_record(self::T . 'reader', ['entityid' => $entityid,
                 'cardcode' => control_letter::append((string) $number), 'readertype' => 'student', 'firstname' => $first,
                 'lastname' => $last, 'status' => 'active', 'timecreated' => $now, 'timemodified' => $now]);
-            $DB->insert_record(self::T . 'member', ['readerid' => $readers[$number], 'yearid' => $year->id,
-                'groupname' => $group, 'stage' => 'Primaria', 'source' => 'practice', 'timecreated' => $now]);
+            if ($classes) {
+                $DB->insert_record(self::T . 'member', ['readerid' => $readers[$number], 'yearid' => $year->id,
+                    'groupname' => $group, 'stage' => get_string('practicestage', 'local_oksigeniaayvurenda'),
+                    'source' => 'practice', 'timecreated' => $now]);
+            }
         }
         foreach (self::BOOKS as [$number, $title, $author, $class, $lent]) {
             $itemid = self::book(
                 (object) ['id' => $libraryid, 'entityid' => $entityid],
                 $number,
-                $title,
+                self::say($title),
                 $author,
                 $class,
                 (bool) $lent,
@@ -223,15 +287,16 @@ final class practice {
         // are there as sent; no loan is added, so the reports keep their numbers); 3º A met this term's challenge and
         // has not chosen its book; 4º C met it and asked for one.
         $records = $DB->get_records_menu(self::T . 'record', ['entityid' => $entityid], '', 'title, id');
-        $cloud = (int) $records[self::BOOKS[1][1]];
-        $told = [[10001, $cloud, 'practicereviewleo', 3], [10002, (int) $records[self::BOOKS[3][1]], 'practicereviewnoa', 1]];
+        $cloud = (int) $records[self::say(self::BOOKS[1][1])];
+        $thief = (int) $records[self::say(self::BOOKS[3][1])];
+        $told = [[10001, $cloud, 'practicereviewleo', 3], [10002, $thief, 'practicereviewnoa', 1]];
         foreach ($told as [$reader, $recordid, $key, $hoursago]) {
             $DB->insert_record(self::T . 'review', ['entityid' => $entityid, 'recordid' => $recordid,
                 'readerid' => $readers[$reader], 'text' => get_string($key, 'local_oksigeniaayvurenda'), 'status' => 'pending',
                 'forlittle' => 0, 'timecreated' => $now - $hoursago * HOURSECS, 'timemodified' => $now - $hoursago * HOURSECS]);
         }
         $term = challenges::term($year, $now);
-        foreach (['3º A' => 'corners', '4º C' => 'everyone'] as $group => $kind) {
+        foreach ($classes ? ['3º A' => 'corners', '4º C' => 'everyone'] : [] as $group => $kind) {
             $challengeid = $DB->insert_record(self::T . 'challenge', ['yearid' => $year->id, 'groupname' => $group,
                 'term' => $term, 'kind' => $kind, 'timecompleted' => $now - DAYSECS, 'timecreated' => $now - 30 * DAYSECS,
                 'timemodified' => $now - DAYSECS]);
@@ -276,7 +341,7 @@ final class practice {
             $old = $now - 8 * 365 * DAYSECS;
             $DB->set_field(self::T . 'item', 'timeacquired', $old, ['id' => $items[$code(self::BOOKS[1][0])]->id]);
             foreach (self::SHELVED as [$number, $title, $author, $class]) {
-                $itemid = self::book($library, $number, $title, $author, $class, false, $now);
+                $itemid = self::book($library, $number, self::say($title), $author, $class, false, $now);
                 $DB->update_record(self::T . 'item', (object) ['id' => $itemid, 'locationid' => $place,
                     'timeacquired' => $now - 9 * 365 * DAYSECS]);
             }
@@ -287,7 +352,8 @@ final class practice {
                 $DB->set_field(self::T . 'item', 'status', 'onloan', ['id' => $items[$code($number)]->id]);
                 $loaned = $now - $ago * DAYSECS;
                 $DB->insert_record(self::T . 'loan', ['libraryid' => $library->id, 'itemid' => $items[$code($number)]->id,
-                    'readerid' => $readers[$code($who[0])], 'yearid' => $year->id, 'groupname' => $who[3], 'timeloaned' => $loaned,
+                    'readerid' => $readers[$code($who[0])], 'yearid' => $year->id,
+                    'groupname' => skins::no_classes((int) $library->entityid) ? null : $who[3], 'timeloaned' => $loaned,
                     'timedue' => $loaned + 14 * DAYSECS, 'renewals' => 0, 'timecreated' => $loaned, 'timemodified' => $loaned]);
             }
             $DB->insert_record(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => self::READERS[0][3], 'userid' => $userid,

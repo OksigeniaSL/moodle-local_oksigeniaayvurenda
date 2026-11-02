@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\plan_full;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\skins;
 use local_oksigeniaayvurenda\local\sources\csvlist;
 
 require(__DIR__ . '/../../config.php');
@@ -152,8 +153,8 @@ if ($step === 'check') {
         'noname' => !$readers,
         'gowords' => $str('readerslistload', $number(count($readers))),
         'types' => array_map(
-            fn($t) => ['value' => $t, 'label' => $str('readertype' . $t), 'selected' => $t === 'student'],
-            ['student', 'teacher', 'staff', 'family']
+            fn($t) => ['value' => $t, 'label' => $str(skins::words($entityid, 'readertype' . $t)), 'selected' => $t === 'student'],
+            skins::no_courses($entityid) ? ['student', 'staff'] : ['student', 'teacher', 'staff', 'family']
         ),
     ];
 }

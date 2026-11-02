@@ -47,7 +47,7 @@ if ($report === 'late') {
     redirect(new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug]));
 }
 $report = in_array($report, reports::ALL, true) ? $report : 'loans';
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $date = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
 $day = function (string $text, int $default): int {
     return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $text, $p) ? (int) make_timestamp((int) $p[1], (int) $p[2], (int) $p[3])

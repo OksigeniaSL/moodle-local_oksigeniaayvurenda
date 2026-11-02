@@ -44,6 +44,7 @@ class make_copies extends \core\task\scheduled_task {
         global $DB;
         \local_oksigeniaayvurenda\local\covers::forget_drafts();
         \local_oksigeniaayvurenda\local\relay::forget();
+        \local_oksigeniaayvurenda\local\practice::sweep();
         foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
             if (\local_oksigeniaayvurenda\local\practice::is((int) $entityid)) {
                 continue;

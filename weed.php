@@ -43,7 +43,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' =
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $library->slug] + $params
     + (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])))->out(false);
 $now = time();

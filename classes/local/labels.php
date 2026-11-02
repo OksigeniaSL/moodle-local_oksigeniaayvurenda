@@ -31,6 +31,9 @@ use local_oksigeniaayvurenda\core\barcode\code39;
  * labels sold everywhere, so a half-used sheet can be used up starting at any label.
  */
 final class labels {
+    /** @var int Labels in one page: more would not be a page, the day a whole catalogue is imported. */
+    public const LIMIT = 2000;
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -77,7 +80,9 @@ final class labels {
                 ->setTimezone(\core_date::get_server_timezone_object())->setTime(0, 0)->getTimestamp();
             $rows = array_values($DB->get_records_sql(
                 "SELECT $fields FROM $from WHERE i.libraryid = :libraryid AND i.timecreated >= :start ORDER BY i.id",
-                ['libraryid' => $library->id, 'start' => $start]
+                ['libraryid' => $library->id, 'start' => $start],
+                0,
+                self::LIMIT + 1
             ));
         }
         $name = format_string($library->name, true, ['escape' => false]);

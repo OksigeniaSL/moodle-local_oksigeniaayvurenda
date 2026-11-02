@@ -119,6 +119,11 @@ $cards = [
         'state' => $cifraon ? $str($cifra['enabled'] ? 'sourcestatenight' : 'sourcestatelinked') : ''],
     ['key' => 'abies', 'state' => $brought('abies'), 'url' => $page('import.php'), 'sheet' => ''],
 ];
+if (\local_oksigeniaayvurenda\local\skins::no_courses($entityid)) {
+    // What a school's programs and platforms bring: not for a town's library.
+    $school = ['oneroster', 'courses', 'lti', 'cifra'];
+    $cards = array_values(array_filter($cards, fn($card) => !in_array($card['key'], $school, true)));
+}
 $data = [
     'heading' => $str('readerssources'),
     'intro' => $str('sourcesintroshort'),

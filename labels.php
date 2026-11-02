@@ -59,6 +59,9 @@ $items = labels::items(
     $since,
     preg_split('/[\s,;]+/', $codestext) ?: []
 );
+// One more than fit says there are more.
+$toomany = count($items) > labels::LIMIT;
+$items = array_slice($items, 0, labels::LIMIT);
 $format = labels::SHEETS[$sheet];
 $data = [
     'heading' => $str($kind === 'spines' ? 'spinestitle' : 'labelstitle'),
@@ -79,6 +82,7 @@ $data = [
         'selected' => $s === $sheet], array_keys(labels::SHEETS)),
     'start' => $start,
     'count' => $str('labelscount', count($items)),
+    'toomany' => $toomany ? $str('labelstoomany', labels::LIMIT) : '',
     'pages' => labels::sheets($items, $sheet, $start),
     'haspages' => (bool) $items,
     'empty' => $str('labelsempty'),

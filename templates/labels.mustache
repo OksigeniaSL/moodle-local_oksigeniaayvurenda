@@ -60,6 +60,7 @@
     <p>{{count}}</p>
     {{#haspages}}<p><button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/haspages}}
 </div>
+{{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
 {{^haspages}}<p class="ayv-empty">{{empty}}</p>{{/haspages}}
 {{#pages}}
 <div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}" style="{{style}}">

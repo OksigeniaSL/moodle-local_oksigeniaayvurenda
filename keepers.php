@@ -67,7 +67,7 @@ $data = [
     'found' => array_map(fn($c) => $c + ['typelabel' => get_string_manager()->string_exists(
         'keepertype' . $c['type'],
         'local_oksigeniaayvurenda'
-    ) ? $str('keepertype' . $c['type']) : ''], $found),
+    ) ? $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'keepertype' . $c['type'])) : ''], $found),
     'hasfound' => (bool) $found,
     'nothing' => $query !== '' && !$found ? $str('keepersnothing') : '',
 ];

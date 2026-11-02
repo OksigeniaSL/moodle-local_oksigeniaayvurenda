@@ -106,7 +106,9 @@ if (data_submitted() && confirm_sesskey()) {
 $stages = holds::stages((int) $library->entityid, time());
 $licences = fn(string $chosen) => array_map(fn($l) => ['value' => $l, 'label' => $str('licence' . str_replace('-', '', $l)),
     'selected' => $l === $chosen], digital_rules::LICENCES);
-$audiences = fn(array $chosen) => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a),
+$audiences = fn(array $chosen) => array_map(fn($a) => ['value' => $a, 'label' => $str(
+    \local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'audience' . $a)
+),
     'checked' => in_array($a, $chosen, true)], digital_rules::AUDIENCES);
 $stagelist = fn(array $chosen) => array_map(fn($s) => ['value' => $s, 'checked' => in_array($s, $chosen, true)], $stages);
 $courses = \local_oksigeniaayvurenda\local\fragments::courses($library, $recordid);
@@ -117,7 +119,10 @@ $items = [];
 foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => null]) as $item) {
     $chosenstages = json_decode((string) $item->stages, true) ?: [];
     $only = \local_oksigeniaayvurenda\local\fragments::of_item((int) $item->id);
-    $audiencelabels = array_map(fn($a) => $str('audience' . $a), digital::audience($item));
+    $audiencelabels = array_map(
+        fn($a) => $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'audience' . $a)),
+        digital::audience($item)
+    );
     $items[] = [
         'formatkey' => (string) $item->format,
         // Only for a course: its line says who; the audience above does not count.

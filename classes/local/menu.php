@@ -44,6 +44,9 @@ final class menu {
         'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php', 'activity.php'],
     ];
 
+    /** @var string[] The pages that need classes, or courses, to mean anything. */
+    private const ONLY_WITH = ['tutors.php' => 'classes', 'wishes.php' => 'classes', 'readings.php' => 'courses'];
+
     /**
      * The groups of «More», with what each person may open.
      *
@@ -124,8 +127,16 @@ final class menu {
         foreach (self::groups() as $title => $links) {
             $shown = [];
             foreach ($links as [$page, $label, $capability]) {
+                $needs = self::ONLY_WITH[$page] ?? '';
+                $entityid = (int) $library->entityid;
+                if (
+                    ($needs === 'classes' && skins::no_classes($entityid)) ||
+                    ($needs === 'courses' && skins::no_courses($entityid))
+                ) {
+                    continue;
+                }
                 if (access::can($capability, $library, $userid)) {
-                    $shown[] = ['url' => $url($page), 'label' => $str($label), 'current' => $here === $page];
+                    $shown[] = ['url' => $url($page), 'label' => skins::say($entityid, $label), 'current' => $here === $page];
                     $inmore = $inmore || ($here === $page && !self::in_doors($here));
                 }
             }

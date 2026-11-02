@@ -51,7 +51,7 @@ $preload = optional_param('reader', 0, PARAM_INT);
 $preload = $preload && $DB->record_exists('local_oksigeniaayvurenda_reader', ['id' => $preload, 'entityid' => $library->entityid])
     && $desk->allowed($preload) ? $desk->reader_panel($preload) : null;
 $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $library->entityid]), true);
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $strings = [];
 foreach (
     ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'profileview', 'deskoffline', 'deskofflineone',

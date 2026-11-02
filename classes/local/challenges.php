@@ -71,6 +71,9 @@ final class challenges {
      */
     public static function of(int $entityid, string $group, ?int $now = null): ?\stdClass {
         global $DB;
+        if (skins::no_classes($entityid)) {
+            return null;
+        }
         $now = $now ?? time();
         $year = years::around($entityid, $now);
         if (self::stage_off($entityid, (int) $year->id, $group) !== null) {
@@ -147,7 +150,7 @@ final class challenges {
      */
     public static function tutored(int $entityid, int $userid, ?int $now = null): array {
         global $DB;
-        if (!$userid) {
+        if (!$userid || skins::no_classes($entityid)) {
             return [];
         }
         $now = $now ?? time();
@@ -291,6 +294,9 @@ final class challenges {
      */
     public static function garden(int $entityid, string $group, ?int $now = null): array {
         global $DB;
+        if (skins::no_classes($entityid)) {
+            return [];
+        }
         $year = years::around($entityid, $now ?? time());
         $rows = $DB->get_records_select(self::T . 'challenge', 'yearid = :yearid AND groupname = :groupname
             AND timecompleted IS NOT NULL', ['yearid' => $year->id, 'groupname' => $group], 'term');

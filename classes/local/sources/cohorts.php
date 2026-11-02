@@ -168,6 +168,8 @@ final class cohorts {
         );
         // Past the centre's plan, who does not fit is left out until there is room.
         $room = plans::left($entityid, 'readers');
+        // All at once: a question per reader, every night, adds up.
+        $members = self::members($entityid, (int) $year->id);
         foreach ($people as $userid => $person) {
             $reader = $byuser[$userid] ?? null;
             if ($room !== null && ($reader === null || $reader->status !== 'active')) {
@@ -201,7 +203,7 @@ final class cohorts {
                 }
             }
             if ($person['group'] !== '') {
-                self::member($readerid, (int) $year->id, $person['group'], $person['stage'], $now);
+                self::member($readerid, (int) $year->id, $person['group'], $person['stage'], $now, $members[$readerid] ?? null);
             }
             $stats['total']++;
         }
@@ -224,6 +226,30 @@ final class cohorts {
     }
 
     /**
+     * The groups of a centre's readers this school year.
+     *
+     * @param int $entityid
+     * @param int $yearid
+     * @return array Reader => their row.
+     */
+    private static function members(int $entityid, int $yearid): array {
+        global $DB;
+        $members = [];
+        $rows = $DB->get_recordset_sql(
+            'SELECT m.id, m.readerid, m.groupname, m.stage
+               FROM {' . self::T . 'member} m
+               JOIN {' . self::T . 'reader} r ON r.id = m.readerid
+              WHERE m.yearid = :yearid AND r.entityid = :entityid',
+            ['yearid' => $yearid, 'entityid' => $entityid]
+        );
+        foreach ($rows as $row) {
+            $members[(int) $row->readerid] = $row;
+        }
+        $rows->close();
+        return $members;
+    }
+
+    /**
      * The reader's group this school year: one row per year, changed if the reader moved group within it.
      *
      * @param int $readerid
@@ -231,10 +257,10 @@ final class cohorts {
      * @param string $group
      * @param string $stage
      * @param int $now
+     * @param \stdClass|null $existing What the reader has this year, if anything.
      */
-    private static function member(int $readerid, int $yearid, string $group, string $stage, int $now): void {
+    private static function member(int $readerid, int $yearid, string $group, string $stage, int $now, ?\stdClass $existing): void {
         global $DB;
-        $existing = $DB->get_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid], '*', IGNORE_MULTIPLE);
         if (!$existing) {
             $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid, 'groupname' => $group,
                 'stage' => $stage !== '' ? $stage : null, 'source' => 'cohort', 'timecreated' => $now]);

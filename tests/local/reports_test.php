@@ -53,7 +53,7 @@ final class reports_test extends \advanced_testcase {
 
         $never = reports::never($library, 0, time() + DAYSECS);
         $this->assertSame(1, $never['total']);
-        $this->assertSame('Atlas de los mares', $never['rows'][0]['label']);
+        $this->assertSame('Atlas of the Seas', $never['rows'][0]['label']);
         $this->assertNull($never['rows'][0]['lastloan']);
         // Not lent since yesterday: also the two lent days ago; a copy with no date of acquisition counts as old.
         $this->assertSame(3, reports::never($library, time() - DAYSECS, time() + DAYSECS)['total']);

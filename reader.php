@@ -44,7 +44,7 @@ if (!$own) {
 }
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $ref, 'id' => $id]));
-$str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 if (!$library) {
     shell::missing($str('readernothere'));
 }
