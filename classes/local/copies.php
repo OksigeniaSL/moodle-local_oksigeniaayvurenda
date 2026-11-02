@@ -45,6 +45,12 @@ final class copies {
     /** @var int Copies kept for each entity. */
     public const KEEP = 7;
 
+    /** @var int How many copies made by hand are kept, apart: they never push out the nightly ones. */
+    public const KEEPHAND = 2;
+
+    /** @var string The end of the name of a copy made by hand. */
+    private const HAND = '-a-mano';
+
     /** @var string[] Tables of an entity, and how to find its rows. */
     private const TABLES = [
         'entity' => 'id = :entityid',
@@ -90,13 +96,15 @@ final class copies {
     ];
 
     /**
-     * Makes today's copy of an entity and forgets the old ones beyond the last seven.
+     * Makes a copy of an entity: the night's, of which the last seven are kept, or one by hand, of which the last two are
+     * kept apart, so that a few clicks in a day do not push the nightly ones out.
      *
      * @param int $entityid
      * @param int|null $now
+     * @param bool $byhand
      * @return \stored_file
      */
-    public static function make(int $entityid, ?int $now = null): \stored_file {
+    public static function make(int $entityid, ?int $now = null, bool $byhand = false): \stored_file {
         global $DB, $CFG;
         $now = $now ?? time();
         $dir = make_request_directory();
@@ -147,7 +155,7 @@ final class copies {
 
         $fs = get_file_storage();
         $context = \context_system::instance();
-        $filename = 'ayvurenda-' . $entityid . '-' . date('Ymd-His', $now) . '.zip';
+        $filename = 'ayvurenda-' . $entityid . '-' . date('Ymd-His', $now) . ($byhand ? self::HAND : '') . '.zip';
         // Two copies in the same second (the task and the button at once): the newer one takes the name.
         $same = $fs->get_file($context->id, 'local_oksigeniaayvurenda', 'copies', $entityid, '/', $filename);
         if ($same) {
@@ -163,10 +171,21 @@ final class copies {
             'timecreated' => $now,
             'timemodified' => $now,
         ], $zippath);
-        foreach (array_slice(self::list($entityid), self::KEEP) as $old) {
+        $kind = array_values(array_filter(self::list($entityid), fn($f) => self::by_hand($f) === $byhand));
+        foreach (array_slice($kind, $byhand ? self::KEEPHAND : self::KEEP) as $old) {
             $old->delete();
         }
         return $file;
+    }
+
+    /**
+     * Whether a copy was made by hand.
+     *
+     * @param \stored_file $file
+     * @return bool
+     */
+    public static function by_hand(\stored_file $file): bool {
+        return str_ends_with($file->get_filename(), self::HAND . '.zip');
     }
 
     /**

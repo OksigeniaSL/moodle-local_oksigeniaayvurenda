@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.142.1
+
+- The copies made by hand are kept apart (the last two) and never push out the last seven nightly ones; the list says
+  which are made by hand.
+- The lines for the library's computer fetch both copies already, the day's and the week's of the files, and the Linux
+  one is ready to paste into «crontab -e»; the card says why the copy is encrypted, with nothing technical to type.
+- «Copias» stops offering «Connect Google Drive» once Drive is one of its places (seen in the real test in dev, where a
+  copy reached Drive and opened with the centre's key).
+
 ## 0.142.0
 
 - Erasing a reader at their request, for whoever manages the centre, from the reader's record: everything that says who

@@ -71,7 +71,7 @@ if (data_submitted() && confirm_sesskey() && $manage) {
         $do = '';
     }
     if ($do === 'make') {
-        $file = copies::make($entityid);
+        $file = copies::make($entityid, null, true);
         $out = offsite::send($entityid, $file);
         $notice = $str('copymade') . ($out['sent'] ? ' ' . $str(
             $out['sent'] === 1 ? 'offsitesentnowone' : 'offsitesentnow',
@@ -148,13 +148,14 @@ foreach (copies::list((int) $library->entityid) as $file) {
             $file->get_filename(),
             true
         )->out(false),
-        'label' => userdate($file->get_timecreated(), get_string('strftimedatetime', 'langconfig')),
+        'label' => userdate($file->get_timecreated(), get_string('strftimedatetime', 'langconfig'))
+            . (copies::by_hand($file) ? ' · ' . $str('copiesbyhand') : ''),
         'size' => display_size($file->get_filesize()),
     ];
 }
 $data = [
     'heading' => $str('copiesheading'),
-    'intro' => $str('copiesintro', copies::KEEP),
+    'intro' => $str('copiesintro', (object) ['night' => copies::KEEP, 'hand' => copies::KEEPHAND]),
     'notice' => $notice,
     'files' => $files,
     'hasfiles' => (bool) $files,
@@ -231,16 +232,26 @@ function copies_offsite(int $entityid, string $secret, string $pullurl, callable
     $scripts = [];
     if ($pullurl !== '') {
         $folder = 'Copias-Ayvurenda';
+        $files = $pullurl . '&what=files';
+        // Ready to paste: the copy of each day, and the one of the files of each week (one name a week, so fetching it
+        // every day keeps one); the last thirty and the last eight. In cron, «%» is written «\%».
+        $linux = 'mkdir -p "$HOME/' . $folder . '" && curl -fsS -o "$HOME/' . $folder . '/ayvurenda-$(date +%F).zip.age" "'
+            . $pullurl . '"; curl -fsS -o "$HOME/' . $folder . '/ayvurenda-ficheros-$(date +%G-W%V).zip.age" "' . $files
+            . '"; ls -1t "$HOME/' . $folder . '"/ayvurenda-2*.zip.age | tail -n +31 | xargs -r rm --; ls -1t "$HOME/' . $folder
+            . '"/ayvurenda-ficheros-*.zip.age | tail -n +9 | xargs -r rm --';
         $scripts = [
             ['id' => 'ayv-pull-linux', 'label' => $str('offsitescriptlinux'), 'hint' => $str('offsitescriptlinuxhint'),
-                'code' => 'mkdir -p "$HOME/' . $folder . '" && curl -fsS -o "$HOME/' . $folder . '/ayvurenda-$(date +%F).zip.age" "'
-                . $pullurl . '" && ls -1t "$HOME/' . $folder . '"/*.zip.age | tail -n +31 | xargs -r rm --'],
+                'code' => '30 8 * * * ' . str_replace('%', '\%', $linux)],
             ['id' => 'ayv-pull-windows', 'label' => $str('offsitescriptwindows'), 'hint' => $str('offsitescriptwindowshint'),
                 'code' => '$d = "$env:USERPROFILE\\' . $folder . '"; New-Item -ItemType Directory -Force $d | Out-Null; '
                 . 'Invoke-WebRequest -UseBasicParsing -Uri "' . $pullurl . '" -OutFile '
                 . '"$d\ayvurenda-$(Get-Date -Format yyyy-MM-dd).zip.age"; '
-                . 'Get-ChildItem $d -Filter *.zip.age | Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 | '
-                . 'Remove-Item'],
+                . 'try { Invoke-WebRequest -UseBasicParsing -Uri "' . $files . '" -OutFile '
+                . '"$d\ayvurenda-ficheros-$(Get-Date -UFormat %Y-W%V).zip.age" } catch {}; '
+                . 'Get-ChildItem $d -Filter "ayvurenda-2*.zip.age" | Sort-Object LastWriteTime -Descending | '
+                . 'Select-Object -Skip 30 | Remove-Item; '
+                . 'Get-ChildItem $d -Filter "ayvurenda-ficheros-*.zip.age" | Sort-Object LastWriteTime -Descending | '
+                . 'Select-Object -Skip 8 | Remove-Item'],
         ];
     }
     return [
@@ -260,7 +271,9 @@ function copies_offsite(int $entityid, string $secret, string $pullurl, callable
         ),
         'hasplaces' => (bool) $settings['places'],
         'canadd' => count($settings['places']) < offsite::PLACES,
-        'candrive' => gdrive::configured() && count($settings['places']) < offsite::PLACES,
+        // Once connected, Drive is one of its places: not offered again.
+        'candrive' => gdrive::configured() && count($settings['places']) < offsite::PLACES
+            && !in_array('gdrive', array_column($settings['places'], 'kind'), true),
         'keepline' => $str('offsitekeepline', (object) $keep),
         'keepdaily' => $keep['daily'],
         'keepweekly' => $keep['weekly'],

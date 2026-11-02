@@ -184,6 +184,14 @@ final class notices_test extends \advanced_testcase {
         $this->assertCount(copies::KEEP, $list);
         $this->assertSame($now + 8 * DAYSECS, (int) $list[0]->get_timecreated());
         $this->assertCount(1, copies::list((int) $other->entityid));
+        // Copies by hand are kept apart: three of them leave the seven nightly ones, and only the last two of their own.
+        for ($i = 1; $i <= 3; $i++) {
+            copies::make((int) $library->entityid, $now + 9 * DAYSECS + $i, true);
+        }
+        $list = copies::list((int) $library->entityid);
+        $this->assertCount(copies::KEEP + copies::KEEPHAND, $list);
+        $this->assertCount(copies::KEEPHAND, array_filter($list, fn($f) => copies::by_hand($f)));
+        $this->assertTrue(copies::by_hand($list[0]));
     }
 
     /**
