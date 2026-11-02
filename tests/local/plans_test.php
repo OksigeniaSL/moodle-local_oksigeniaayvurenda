@@ -57,7 +57,7 @@ final class plans_test extends \advanced_testcase {
         $this->resetAfterTest();
         $old = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $this->assertSame(['name' => '', 'copies' => 0, 'readers' => 0, 'lti' => true, 'connectors' => true,
-            'voices' => true, 'offsite' => true, 'app' => true, 'madewith' => false], plans::defaults());
+            'voices' => true, 'offsite' => true, 'app' => false, 'madewith' => false], plans::defaults());
         $this->assertNull(plans::summary((int) $old->entityid));
         $this->assertNull(plans::left((int) $old->entityid, 'copies'));
 
@@ -65,7 +65,7 @@ final class plans_test extends \advanced_testcase {
         $library = libraries::create_entity(['name' => 'Invented school']);
         $entityid = (int) $library->entityid;
         $this->assertSame(['name' => 'Free', 'copies' => 3, 'readers' => 2, 'lti' => false, 'connectors' => true,
-            'voices' => true, 'offsite' => true, 'app' => true, 'madewith' => true], plans::of($entityid));
+            'voices' => true, 'offsite' => true, 'app' => false, 'madewith' => true], plans::of($entityid));
         $this->assertFalse(plans::allows($entityid, 'lti'));
         $this->assertSame('Plan Free: 0 of 3 copies · 0 of 2 readers', plans::summary($entityid));
 
@@ -74,7 +74,7 @@ final class plans_test extends \advanced_testcase {
         $this->assertSame('Annual', plans::of((int) $old->entityid)['name']);
         plans::save($entityid, ['name' => 'Annual', 'copies' => -5]);
         $this->assertSame(['name' => 'Annual', 'copies' => 0, 'readers' => 0, 'lti' => true, 'connectors' => true,
-            'voices' => true, 'offsite' => true, 'app' => true, 'madewith' => false], plans::of($entityid));
+            'voices' => true, 'offsite' => true, 'app' => false, 'madewith' => false], plans::of($entityid));
         $this->assertSame('Plan Annual: 0 copies · 0 readers', plans::summary($entityid));
     }
 

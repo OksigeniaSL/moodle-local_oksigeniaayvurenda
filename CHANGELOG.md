@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.134.2
+
+- A new centre on a shared site starts without the app, as the free plan does; a plan saved before this has none either.
+
 ## 0.134.1
 
 - The app of the hosted service (Oksigenia Aty) as a feature of a plan: in the paid ones, not in the free one. A plugin in

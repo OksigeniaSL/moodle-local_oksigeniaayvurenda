@@ -58,7 +58,7 @@ final class plans {
             'connectors' => (bool) ($config->planconnectors ?? true),
             'voices' => (bool) ($config->planvoices ?? true),
             'offsite' => (bool) ($config->planoffsite ?? true),
-            'app' => (bool) ($config->planapp ?? true),
+            'app' => (bool) ($config->planapp ?? false),
             'madewith' => (bool) ($config->planmadewith ?? false),
         ];
     }
@@ -333,7 +333,7 @@ final class plans {
         $clean = ['name' => \core_text::substr(trim((string) ($plan['name'] ?? '')), 0, 60),
             'copies' => max(0, (int) ($plan['copies'] ?? 0)), 'readers' => max(0, (int) ($plan['readers'] ?? 0))];
         foreach (self::FEATURES as $feature) {
-            $clean[$feature] = (bool) ($plan[$feature] ?? $feature !== 'madewith');
+            $clean[$feature] = (bool) ($plan[$feature] ?? !in_array($feature, ['madewith', 'app'], true));
         }
         return $clean;
     }

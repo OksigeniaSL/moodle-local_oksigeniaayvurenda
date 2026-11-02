@@ -122,7 +122,7 @@ if ($hassiteconfig) {
                 8
             ));
         }
-        $features = ['planlti' => 1, 'planconnectors' => 1, 'planvoices' => 1, 'planoffsite' => 1, 'planapp' => 1,
+        $features = ['planlti' => 1, 'planconnectors' => 1, 'planvoices' => 1, 'planoffsite' => 1, 'planapp' => 0,
             'planmadewith' => 0];
         foreach ($features as $feature => $default) {
             $settings->add(new admin_setting_configcheckbox(
