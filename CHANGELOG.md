@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.140.0
+
+- A centre signed up from the command line, for the hosted service: `cli/add_entity.php` creates the centre, its first
+  library and its category, sets its plan, gives whoever runs it an account and the role «Library manager» in that
+  category, mails them how to get in, and notes when the centre accepted the terms and the privacy policy. Run again,
+  it changes nothing that is already there.
+- The role «Library manager» (`ayvurendamanager`): the librarian's permissions and the centre's settings, only in the
+  category of a centre.
+
 ## 0.139.0
 
 - A book with no ISBN, by its words: type its title or its author in «Add books» and what other catalogues have comes up,

@@ -33,6 +33,9 @@ final class roles {
     /** @var string Short name of the role. */
     public const LIBRARIAN = 'ayvurendalibrarian';
 
+    /** @var string Short name of the role of whoever runs the library of a centre: the librarian's, and its settings. */
+    public const MANAGER = 'ayvurendamanager';
+
     /**
      * Creates the librarian role if the site does not have it, and gives it its capabilities.
      *
@@ -57,6 +60,32 @@ final class roles {
         )));
         $system = \context_system::instance();
         foreach (['view', 'desk', 'catalogue'] as $capability) {
+            assign_capability('local/oksigeniaayvurenda:' . $capability, CAP_ALLOW, $roleid, $system->id, true);
+        }
+        $system->mark_dirty();
+        return $roleid;
+    }
+
+    /**
+     * Creates the role of whoever runs the library of a centre, if the site does not have it: given in the category of
+     * that centre, never on the site (there it would be every centre's).
+     *
+     * @return int The role id.
+     */
+    public static function ensure_manager(): int {
+        global $DB;
+        update_capabilities('local_oksigeniaayvurenda');
+        $roleid = (int) $DB->get_field('role', 'id', ['shortname' => self::MANAGER]);
+        if (!$roleid) {
+            $roleid = create_role(
+                get_string('rolemanager', 'local_oksigeniaayvurenda'),
+                self::MANAGER,
+                get_string('rolemanager_desc', 'local_oksigeniaayvurenda')
+            );
+        }
+        set_role_contextlevels($roleid, [CONTEXT_COURSECAT]);
+        $system = \context_system::instance();
+        foreach (['view', 'desk', 'catalogue', 'manage'] as $capability) {
             assign_capability('local/oksigeniaayvurenda:' . $capability, CAP_ALLOW, $roleid, $system->id, true);
         }
         $system->mark_dirty();

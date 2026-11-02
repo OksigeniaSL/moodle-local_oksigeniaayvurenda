@@ -270,7 +270,13 @@ foreach (libraries::all() as $one) {
         })() : null,
         'planform' => $setsplans ? (function () use ($entity, $str) {
             $plan = plans::of((int) $entity->id);
+            $terms = \local_oksigeniaayvurenda\local\signup::terms((int) $entity->id);
             return ['readersopen' => !access::closed((int) $entity->id),
+                'termsline' => $terms ? $str('librariesterms', \local_oksigeniaayvurenda\local\zones::date(
+                    (int) $terms['time'],
+                    'strftimedate',
+                    (int) $entity->id
+                )) : '',
                 'plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
                 'planpresets' => array_map(
                     fn($key) => ['value' => $key, 'label' => $str('planpreset' . $key)],

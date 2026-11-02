@@ -538,5 +538,11 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110302, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110304) {
+        // Whoever runs the library of a centre has a role of the plugin's, given in the centre's category.
+        \local_oksigeniaayvurenda\local\roles::ensure_manager();
+        upgrade_plugin_savepoint(true, 2026110304, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

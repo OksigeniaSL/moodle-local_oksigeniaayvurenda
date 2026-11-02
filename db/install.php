@@ -29,5 +29,6 @@
  */
 function xmldb_local_oksigeniaayvurenda_install() {
     \local_oksigeniaayvurenda\local\roles::ensure_librarian();
+    \local_oksigeniaayvurenda\local\roles::ensure_manager();
     return true;
 }
