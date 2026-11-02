@@ -6,6 +6,9 @@
   with client credentials, or the OAuth 1.0a signature of 1.1; it is tried first without changing anything, the centre
   chooses its school and whether the families come, and after the first time by hand the night keeps them up to date,
   with the tutor of each homeroom. They are the same readers as the OneRoster zip brings.
+- On Moodle 4.5, the request of a token to Cifra Educación joined its fields with «&amp;» and the program read it wrong;
+  now with «&».
+- Late books say «1 día» («1 day»), not «1 días».
 
 ## 0.147.0
 

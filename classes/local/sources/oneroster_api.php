@@ -242,7 +242,7 @@ final class oneroster_api {
             'Content-Type: application/x-www-form-urlencoded',
             'Authorization: Basic ' . $basic,
         ], http_build_query(['grant_type' => 'client_credentials',
-            'scope' => ($all['scope'] ?? '') !== '' ? $all['scope'] : rest::scope($version)]));
+            'scope' => ($all['scope'] ?? '') !== '' ? $all['scope'] : rest::scope($version)], '', '&'));
         $token = json_decode($answer, true)['access_token'] ?? '';
         if (!is_string($token) || $token === '') {
             throw new \moodle_exception('onerosternotoken', 'local_oksigeniaayvurenda');

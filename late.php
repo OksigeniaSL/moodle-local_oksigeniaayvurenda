@@ -130,6 +130,8 @@ foreach ($lines as $line) {
 }
 uasort($boxes, fn($a, $b) => [$b['oldest'], $a['group'], $a['name']] <=> [$a['oldest'], $b['group'], $b['name']]);
 $shown = [];
+// One day is «1 día», never «1 días».
+$days = fn(int $n) => $str($n === 1 ? 'latedayone' : 'latedaysof', \local_oksigeniaayvurenda\local\screens::number($n));
 foreach ($boxes as $box) {
     usort($box['lines'], fn($a, $b) => [$b['days'], $a['name']] <=> [$a['days'], $b['name']]);
     $readers = count($box['readers']);
@@ -137,11 +139,11 @@ foreach ($boxes as $box) {
     if ($adults) {
         $heading = $box['name'];
         $summary = $box['oldest'] > 0 ? $str($books === 1 ? 'latereaderone' : 'latereader', (object) ['books' => $books,
-            'days' => $box['oldest']]) : $str($books === 1 ? 'latebooksone' : 'latebooks', $books);
+            'days' => $days($box['oldest'])]) : $str($books === 1 ? 'latebooksone' : 'latebooks', $books);
     } else {
         $heading = $box['group'] !== '' ? $box['group'] : $str('readersnogroup');
         $summary = $box['oldest'] > 0
-            ? $str($readers === 1 ? 'lategroupone' : 'lategroup', (object) ['readers' => $readers, 'days' => $box['oldest']])
+            ? $str($readers === 1 ? 'lategroupone' : 'lategroup', (object) ['readers' => $readers, 'days' => $days($box['oldest'])])
             : $str($readers === 1 ? 'lategroupcountone' : 'lategroupcount', $readers);
     }
     $tutors = $tutornames[$box['group']] ?? [];

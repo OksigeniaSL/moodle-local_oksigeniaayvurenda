@@ -112,7 +112,7 @@ final class cifra {
                 false,
                 http_build_query(['grant_type' => 'client_credentials', 'client_id' => $all['clientid'] ?? '',
                 'client_secret' => $all['secret'] ?? '',
-                'scope' => 'alumnos:read'])
+                'scope' => 'alumnos:read'], '', '&')
             );
             $token = json_decode((string) $token, true)['access_token'] ?? '';
             if ($token === '') {
