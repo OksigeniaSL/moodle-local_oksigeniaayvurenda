@@ -370,6 +370,40 @@ final class visit_test extends \advanced_testcase {
     }
 
     /**
+     * A centre's own character stands on the floor where the scene says, in the pose it says; the art's stays where it is.
+     */
+    public function test_own_character_stands(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $art = $this->art();
+        $file = $art['dir'] . '/pix/visita/vestibulo.json';
+        $scene = json_decode(file_get_contents($file), true);
+        $scene['characters'] = ['herald' => ['feet' => [600, 500], 'height' => 150, 'pose' => 'idle',
+            'standing' => ['feet' => [1700, 1200], 'height' => 400, 'pose' => 'greet']]];
+        file_put_contents($file, json_encode($scene));
+        $this->assertSame('saluda', visit::scene('vestibulo', $art)['characters']['herald']['standing']['pose']);
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        if (screens::art('personajes/mainumby-piensa')) {
+            $bird = visit::page($library, 'vestibulo', false, $art)['characters'][0];
+            $this->assertEquals([525, 350], [$bird['left'], $bird['top']], 'the art\'s hummingbird stays on its perch');
+        }
+        $png = make_request_directory() . '/a.png';
+        imagepng(imagecreatetruecolor(8, 8), $png);
+        $this->assertTrue(images::store('portrait', (int) $library->entityid, 'herald-saluda', $png));
+        $own = visit::page($library, 'vestibulo', false, $art)['characters'][0];
+        $this->assertEquals([1500, 800, 400], [$own['left'], $own['top'], $own['size']]);
+        $this->assertStringContainsString('/portrait/' . $library->entityid . '/herald-saluda', $own['figure']);
+        // A scene that does not say where leaves it where the art's goes.
+        unset($scene['characters']['herald']['standing']);
+        $scene['characters']['herald']['pose'] = 'greet';
+        file_put_contents($file, json_encode($scene));
+        $own = visit::page($library, 'vestibulo', false, $art)['characters'][0];
+        $this->assertEquals([525, 350, 150], [$own['left'], $own['top'], $own['size']]);
+    }
+
+    /**
      * A public library visits the school's hall and rooms as its children's room until the art brings its own hall;
      * then it starts there, and the school's rooms are still its.
      */

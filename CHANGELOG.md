@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.127.2 (2026-11-02)
+
+- A centre's own character stands on the floor of the visit, at the size of a person, instead of perching where the hummingbird perches (`standing` in each scene; art 0.1.37).
+- A twice-written entity keeps its characters in the app's templates.
+
 ## 0.127.1 (2026-11-02)
 
 - What looks like an entity and is none no longer stops a page of the app from compiling.

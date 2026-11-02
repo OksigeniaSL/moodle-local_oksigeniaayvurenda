@@ -161,6 +161,12 @@ final class visit {
             if ($feet && $height >= 40 && $height <= self::SIZE[1]) {
                 $characters[$role] = ['feet' => $feet, 'height' => $height,
                     'pose' => self::POSES[(string) ($one['pose'] ?? '')] ?? 'saluda'];
+                $stands = self::point($one['standing']['feet'] ?? null);
+                $tall = (int) ($one['standing']['height'] ?? 0);
+                if ($stands && $tall >= 40 && $tall <= self::SIZE[1]) {
+                    $characters[$role]['standing'] = ['feet' => $stands, 'height' => $tall,
+                        'pose' => self::POSES[(string) ($one['standing']['pose'] ?? '')] ?? $characters[$role]['pose']];
+                }
             }
         }
         $zones = [];
@@ -545,6 +551,11 @@ final class visit {
     ): array {
         $out = [];
         foreach ($scene['characters'] as $role => $one) {
+            // The art's hummingbird perches on the furniture; a centre's own character stands on the floor, like a person.
+            $standing = $one['standing'] ?? null;
+            if ($standing && characters::own_figure((int) $library->entityid, $role, $standing['pose'])) {
+                $one = $standing;
+            }
             $news = '';
             if ($role === 'herald') {
                 $pulse = window::pulse($library);
