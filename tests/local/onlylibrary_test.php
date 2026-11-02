@@ -49,6 +49,20 @@ final class onlylibrary_test extends \advanced_testcase {
     }
 
     /**
+     * The entrance names the app only once the site's setup link is Oksigenia Aty's in Google Play.
+     */
+    public function test_the_app_on_the_entrance(): void {
+        $this->resetAfterTest();
+        $play = 'https://play.google.com/store/apps/details?id=com.oksigenia.aty';
+        foreach (['', 'https://download.moodle.org/mobile', 'https://example.org/?id=com.oksigenia.aty', $play . 'x'] as $other) {
+            set_config('setuplink', $other, 'tool_mobile');
+            $this->assertSame('', onlylibrary::app_link(), $other);
+        }
+        set_config('setuplink', $play, 'tool_mobile');
+        $this->assertSame($play, onlylibrary::app_link());
+    }
+
+    /**
      * A library is named at the entry only if its window is open, and listed only if it also asks to be found.
      */
     public function test_what_the_entry_says(): void {

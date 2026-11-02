@@ -8,7 +8,8 @@
         "site": "Ayvurenda", "emblem": "emblema.svg", "tagline": "Gestión de bibliotecas en línea", "heading": "Entra en tu biblioteca",
         "lead": "Con tu usuario y tu contraseña.", "error": "", "action": "#", "logintoken": "abc", "username": "", "userlabel": "Usuario",
         "passwordlabel": "Contraseña", "go": "Entrar", "forgot": "#", "forgotlabel": "¿Has olvidado la contraseña?",
-        "noaccount": "Si no tienes acceso, te lo da tu biblioteca.", "day": "dia.webp", "night": "noche.webp",
+        "noaccount": "Si no tienes acceso, te lo da tu biblioteca.",
+        "applink": "https://play.google.com/store/apps/details?id=com.oksigenia.aty", "apphint": "También en el móvil.", "applabel": "Descargar", "appnew": "(pestaña nueva)", "day": "dia.webp", "night": "noche.webp",
         "open": [{"name": "Biblioteca Riosalto", "motto": "Abierta", "colour": 1, "url": "#"}], "openheading": "Abiertas a todos",
         "openhint": "Sin entrar.", "languages": [{"code": "es", "name": "Español", "current": true, "url": "#"}],
         "languagelabel": "Idioma", "legal": "#", "legallabel": "Aviso legal y privacidad"
@@ -35,6 +36,7 @@
             </form>
             <p class="ayv-entry-more"><a href="{{forgot}}">{{forgotlabel}}</a></p>
             <p class="ayv-entry-hint">{{noaccount}}</p>
+            {{#applink}}<p class="ayv-entry-app">{{apphint}} <a href="{{applink}}" target="_blank" rel="noopener">{{applabel}}<span class="ayv-sr"> {{appnew}}</span></a></p>{{/applink}}
             {{#open.0}}
             <section class="ayv-entry-open" aria-labelledby="ayv-entry-open">
                 <h2 class="ayv-section-title" id="ayv-entry-open">{{openheading}}</h2>

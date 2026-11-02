@@ -106,6 +106,17 @@ final class onlylibrary {
     }
 
     /**
+     * Where to get this site's own app, if the site says it is Oksigenia Aty (Moodle's «setup link» points to it): nothing
+     * until whoever runs the site puts it there, and nothing at a site with Moodle's own app or none.
+     *
+     * @return string
+     */
+    public static function app_link(): string {
+        $link = (string) get_config('tool_mobile', 'setuplink');
+        return preg_match('~^https://play\.google\.com/store/apps/details\?id=com\.oksigenia\.aty(&|$)~', $link) ? $link : '';
+    }
+
+    /**
      * The libraries that ask to be found: their window open and their «let search engines find it» on.
      *
      * @return array[] name, motto, colour, url.

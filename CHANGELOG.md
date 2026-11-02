@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.131.2 (2026-11-02)
+
+- The entrance of a site that is only a library says where to get Oksigenia Aty, once the site's setup link points to it in Google Play.
+
 ## 0.131.1 (2026-11-02)
 
 - In Oksigenia Aty, a family sees a child's library on the child's page: what they have out, what is set aside, and until when. To see, not to act. From the age the sky replaces the flower, there is a book and its date, not which one.
