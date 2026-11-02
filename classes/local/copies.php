@@ -106,6 +106,9 @@ final class copies {
             $rows = $DB->get_recordset_select(self::T . $table, $where, ['entityid' => $entityid], 'id');
             $count = 0;
             foreach ($rows as $row) {
+                if ($table === 'entity') {
+                    $row->settings = self::shareable((string) $row->settings);
+                }
                 fputcsv($handle, array_map(fn($c) => $row->$c, $columns), ',', '"', '\\');
                 $count++;
             }
@@ -156,6 +159,20 @@ final class copies {
             $old->delete();
         }
         return $file;
+    }
+
+    /**
+     * A centre's settings without where its copies go or how its connectors enter: a copy does not need them to come back.
+     *
+     * @param string $settings
+     * @return string
+     */
+    private static function shareable(string $settings): string {
+        $all = json_decode($settings, true) ?: [];
+        foreach (['offsite', 'cifra', 'ltiregister'] as $name) {
+            unset($all[$name]);
+        }
+        return (string) json_encode($all);
     }
 
     /**

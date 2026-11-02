@@ -68,8 +68,14 @@ final class age {
      */
     public static function is_recipient(string $recipient): bool {
         try {
-            return strlen(self::unbech32('age', $recipient)) === 32;
-        } catch (\InvalidArgumentException $e) {
+            $key = self::unbech32('age', $recipient);
+            if (strlen($key) !== 32) {
+                return false;
+            }
+            // A key of low order makes the sodium library refuse to encrypt, every night: it is no key.
+            sodium_crypto_scalarmult(random_bytes(32), $key);
+            return true;
+        } catch (\InvalidArgumentException | \SodiumException $e) {
             return false;
         }
     }

@@ -73,11 +73,22 @@ final class shell {
     }
 
     /**
-     * A page of the library that says why someone may not go on, with the way back, and ends there.
+     * Refuses a page that has no business in a practice library.
+     *
+     * @param \stdClass|null $library
+     */
+    public static function no_practice(?\stdClass $library): void {
+        if ($library && practice::is((int) $library->entityid)) {
+            self::refuse(get_string('practicenothere', 'local_oksigeniaayvurenda'), $library);
+        }
+    }
+
+    /**
+     * A page that says no, with why.
      *
      * @param string $why
      * @param \stdClass|null $library
-     * @param string|null $title What the page says first; that it is only for the staff when not given.
+     * @param string|null $title
      */
     public static function refuse(string $why, ?\stdClass $library = null, ?string $title = null): void {
         http_response_code(403);

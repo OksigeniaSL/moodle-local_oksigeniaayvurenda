@@ -30,6 +30,7 @@
     Example context (json):
     {
         "offsitenote": "",
+        "offsiteclear": null,
         "filecopy": {"action": "#", "sesskey": "abc", "waiting": false, "url": "#", "label": "25 de octubre de 2026, 02:47",
             "size": "312 MB", "failed": ""},
         "heading": "Copias de la biblioteca",
@@ -52,6 +53,7 @@
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#offsitenote}}<p class="ayv-empty">{{offsitenote}}</p>{{/offsitenote}}
+{{#offsiteclear}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="clearoffsite">{{label}}</button></form>{{/offsiteclear}}
 {{#filecopy}}
 <section class="ayv-off" aria-labelledby="ayv-files-title">
     <h2 id="ayv-files-title" class="ayv-section-title">{{#str}}filecopyheading, local_oksigeniaayvurenda{{/str}}</h2>

@@ -69,9 +69,9 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         // Shown in the page only what is read or played; anything else (older files, whatever got in) is downloaded.
         $inline = in_array($item->format, ['epub', 'pdf', 'audio', 'video'], true);
     } else if ($filearea === 'copies') {
-        // The daily copies of a centre (the item is the centre): for its staff.
+        // The daily copies of a centre (the item is the centre), with everyone's addresses: for whoever manages it.
         require_login(null, false);
-        \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:desk', $itemid);
+        \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:manage', $itemid);
         \local_oksigeniaayvurenda\event\copy_downloaded::fire($itemid, null, ['how' => 'page']);
     } else if ($filearea === 'filecopies') {
         // The copy of a centre's files: for whoever manages it.

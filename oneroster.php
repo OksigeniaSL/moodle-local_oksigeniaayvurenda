@@ -37,6 +37,7 @@ require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:manage', $library);
+shell::no_practice($library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/oneroster.php', ['library' => $ref]));
 

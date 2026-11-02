@@ -52,7 +52,7 @@ final class howto {
         'reports' => ['reports.php', 'desk', 'reports'],
         'memoir' => ['memoir.php', 'desk', ''],
         'readings' => ['readings.php', 'desk', ''],
-        'copies' => ['copies.php', 'desk', ''],
+        'copies' => ['copies.php', 'manage', ''],
         'offsite' => ['copies.php', 'manage', ''],
         'stocktake' => ['stocktake.php', 'catalogue', ''],
         'weed' => ['weed.php', 'catalogue', 'weed'],

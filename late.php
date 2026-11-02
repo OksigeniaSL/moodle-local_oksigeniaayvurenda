@@ -67,7 +67,11 @@ if (data_submitted() && confirm_sesskey()) {
             : $str('latenotutor', $groupname);
     } else if ($do === 'remind') {
         // Remind a reader now.
-        $notice = $str(\local_oksigeniaayvurenda\local\notices::remind(required_param('reader', PARAM_INT), $now)
+        $notice = $str(\local_oksigeniaayvurenda\local\notices::remind(
+            required_param('reader', PARAM_INT),
+            $now,
+            (int) $library->entityid
+        )
             ? 'latereadertold' : 'latereadernoaccount');
     }
 }

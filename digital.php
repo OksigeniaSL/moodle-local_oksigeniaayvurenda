@@ -54,15 +54,18 @@ $fields = fn() => [
     'download' => optional_param('download', 0, PARAM_BOOL),
 ];
 // Only for the students of a course, until a date, with the part of the work it is.
-$fragment = function (int $id) use ($str) {
+$fragment = function (int $id) use ($str, $library, $recordid) {
+    // Only a course that already has the book in its readings.
+    $coursesasking = \local_oksigeniaayvurenda\local\fragments::courses($library, $recordid);
     $until = DateTimeImmutable::createFromFormat(
         '!Y-m-d',
         (string) optional_param('until', '', PARAM_TEXT),
         core_date::get_server_timezone_object()
     );
+    $course = optional_param('forcourse', 0, PARAM_INT);
     \local_oksigeniaayvurenda\local\fragments::set(
         $id,
-        $until ? optional_param('forcourse', 0, PARAM_INT) : 0,
+        $until && isset($coursesasking[$course]) ? $course : 0,
         optional_param('pages', '', PARAM_TEXT),
         $until ? $until->setTime(23, 59, 59)->getTimestamp() : 0,
         time()

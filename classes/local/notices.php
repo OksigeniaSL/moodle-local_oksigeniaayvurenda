@@ -92,9 +92,10 @@ final class notices {
      *
      * @param int $readerid
      * @param int $now
+     * @param int $entityid The centre of whoever asks: nobody else's readers.
      * @return bool Whether a message went (a reader without an account, or with nothing late, gets none).
      */
-    public static function remind(int $readerid, int $now): bool {
+    public static function remind(int $readerid, int $now, int $entityid): bool {
         global $DB;
         $tz = \core_date::get_server_timezone_object();
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
@@ -106,9 +107,9 @@ final class notices {
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
               WHERE l.timereturned IS NULL AND l.timedue < :today AND r.userid IS NOT NULL AND r.status = 'active'
-                    AND l.readerid = :readerid
+                    AND l.readerid = :readerid AND r.entityid = :entityid
            ORDER BY l.timedue",
-            ['today' => $today, 'readerid' => $readerid]
+            ['today' => $today, 'readerid' => $readerid, 'entityid' => $entityid]
         ));
         return $list && !access::closed((int) $list[0]->entityid) && self::tell_reader($list, $now);
     }

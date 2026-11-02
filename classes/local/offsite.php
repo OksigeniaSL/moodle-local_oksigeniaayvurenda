@@ -140,7 +140,7 @@ final class offsite {
         $id = substr(bin2hex(random_bytes(6)), 0, 10);
         $places[] = ['id' => $id, 'kind' => 'webdav', 'url' => rtrim($url, '/') . '/', 'user' => trim($user),
             'label' => $host];
-        set_config('offsite' . $entityid . '_' . $id, $password, 'local_oksigeniaayvurenda');
+        secrets::put('offsite' . $entityid . '_' . $id, $password);
         self::change($entityid, ['places' => $places]);
         \local_oksigeniaayvurenda\event\offsite_place_added::fire($entityid, null, ['kind' => 'webdav']);
         return $id;
@@ -186,7 +186,7 @@ final class offsite {
         $id = substr(bin2hex(random_bytes(6)), 0, 10);
         $places[] = ['id' => $id, 'kind' => 's3', 'url' => $endpoint . '/' . $bucket . '/', 'user' => trim($accesskey),
             'region' => trim($region) !== '' ? trim($region) : 'us-east-1', 'label' => $host . ' · ' . $bucket];
-        set_config('offsite' . $entityid . '_' . $id, $secret, 'local_oksigeniaayvurenda');
+        secrets::put('offsite' . $entityid . '_' . $id, $secret);
         self::change($entityid, ['places' => $places]);
         \local_oksigeniaayvurenda\event\offsite_place_added::fire($entityid, null, ['kind' => 's3']);
         return $id;
@@ -249,6 +249,9 @@ final class offsite {
      * @return bool
      */
     public static function pull_allowed(int $entityid, string $token): bool {
+        if (!plans::allows($entityid, 'offsite')) {
+            return false;
+        }
         global $DB;
         $all = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $hash = (string) ($all['offsite']['pull'] ?? '');
@@ -282,9 +285,35 @@ final class offsite {
         $dir = make_request_directory();
         $plain = $copy->copy_content_to_temp();
         $out = $dir . '/copy.zip.age';
-        age::encrypt($plain, $out, $recipient);
-        @unlink($plain);
+        try {
+            age::encrypt($plain, $out, $recipient);
+        } finally {
+            @unlink($plain);
+        }
         return $out;
+    }
+
+    /**
+     * Whether a centre has anything out there.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function has_any(int $entityid): bool {
+        $settings = self::settings($entityid);
+        return $settings['pull'] || (bool) $settings['places'];
+    }
+
+    /**
+     * Takes away all the places and the link of a centre.
+     *
+     * @param int $entityid
+     */
+    public static function clear(int $entityid): void {
+        foreach (self::settings($entityid)['places'] as $place) {
+            self::remove($entityid, $place['id']);
+        }
+        self::stop_pull($entityid);
     }
 
     /**
@@ -482,10 +511,10 @@ final class offsite {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
         // Moodle's HTTP security stands, except for a host of the server's network the administrator allowed.
         $curl = new \curl(['ignoresecurity' => self::internal($host)]);
-        $password = (string) get_config('local_oksigeniaayvurenda', 'offsite' . $entityid . '_' . $place['id']);
+        $password = secrets::get('offsite' . $entityid . '_' . $place['id']);
         // The credentials go with each request: Moodle's delete() and put() put an anonymous user otherwise.
-        $auth = ['CURLOPT_USERPWD' => $place['user'] . ':' . $password, 'CURLOPT_HTTPAUTH' => CURLAUTH_BASIC,
-            'CURLOPT_TIMEOUT' => self::timeout($method, $payload), 'CURLOPT_CONNECTTIMEOUT' => 15];
+        $auth = ['CURLOPT_USERPWD' => $place['user'] . ':' . $password, 'CURLOPT_HTTPAUTH' => CURLAUTH_BASIC]
+            + self::limits($method, $payload);
         if ($method === 'PUT') {
             $body = $curl->put($url, ['file' => $payload], $auth);
         } else if ($method === 'DELETE') {
@@ -511,7 +540,7 @@ final class offsite {
         $url = $place['url'] . ($name === '' ? '' : rawurlencode($name)) . ($method === 'LIST' ? '?list-type=2' : '');
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
         $curl = new \curl(['ignoresecurity' => self::internal($host)]);
-        $secret = (string) get_config('local_oksigeniaayvurenda', 'offsite' . $entityid . '_' . $place['id']);
+        $secret = secrets::get('offsite' . $entityid . '_' . $place['id']);
         $hash = $method === 'PUT' ? hash_file('sha256', $path) : hash('sha256', '');
         $signed = s3::headers(
             $method === 'LIST' ? 'GET' : $method,
@@ -523,7 +552,7 @@ final class offsite {
             time()
         );
         $curl->setHeader(array_map(fn($header, $value) => $header . ': ' . $value, array_keys($signed), $signed));
-        $options = ['CURLOPT_TIMEOUT' => self::timeout($method, $path), 'CURLOPT_CONNECTTIMEOUT' => 15];
+        $options = self::limits($method, $path);
         if ($method === 'PUT') {
             $body = $curl->put($url, ['file' => $path], $options);
         } else if ($method === 'DELETE') {
@@ -543,20 +572,25 @@ final class offsite {
     private static function internal(string $host): bool {
         $allowed = array_filter(array_map('trim', explode(',', strtolower((string) get_config(
             'local_oksigeniaayvurenda',
-            'internalhosts'
+            'offsitehosts'
         )))));
         return $host !== '' && in_array($host, $allowed, true);
     }
 
     /**
-     * How long a request may take: a copy of files can take a good while to go.
+     * How long a request may take: a copy of files can take a good while to go, but a server that takes it and stops
+     * answering does not hold the night.
      *
      * @param string $method
      * @param string $path What a PUT sends.
-     * @return int Seconds.
+     * @return array cURL's options.
      */
-    private static function timeout(string $method, string $path): int {
-        return $method === 'PUT' && is_file($path) ? max(600, (int) (filesize($path) / 262144)) : 600;
+    private static function limits(string $method, string $path): array {
+        if ($method !== 'PUT') {
+            return ['CURLOPT_TIMEOUT' => 30, 'CURLOPT_CONNECTTIMEOUT' => 15];
+        }
+        return ['CURLOPT_TIMEOUT' => max(600, (int) (filesize($path) / 262144)), 'CURLOPT_CONNECTTIMEOUT' => 15,
+            'CURLOPT_LOW_SPEED_LIMIT' => 1024, 'CURLOPT_LOW_SPEED_TIME' => 120];
     }
 
     /**

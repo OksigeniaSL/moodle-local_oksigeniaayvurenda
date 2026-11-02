@@ -43,6 +43,31 @@ final class removal {
     }
 
     /**
+     * The accounts that have nothing on the site but being readers of a centre: when the centre goes, nobody needs them.
+     *
+     * @param int $entityid
+     * @return int[]
+     */
+    public static function lonely_accounts(int $entityid): array {
+        global $DB, $CFG;
+        $keep = array_merge(array_map('intval', explode(',', (string) $CFG->siteadmins)), [(int) $CFG->siteguest]);
+        $lonely = [];
+        $readers = $DB->get_fieldset_select(self::T . 'reader', 'userid', 'entityid = ? AND userid IS NOT NULL', [$entityid]);
+        foreach ($readers as $userid) {
+            $userid = (int) $userid;
+            if (
+                !in_array($userid, $keep, true)
+                && !$DB->record_exists_select(self::T . 'reader', 'userid = ? AND entityid <> ?', [$userid, $entityid])
+                && !$DB->record_exists('role_assignments', ['userid' => $userid])
+                && !$DB->record_exists('user_enrolments', ['userid' => $userid])
+            ) {
+                $lonely[] = $userid;
+            }
+        }
+        return $lonely;
+    }
+
+    /**
      * Takes a centre away. There is no way back but its copy.
      *
      * @param int $entityid
@@ -52,8 +77,10 @@ final class removal {
         global $DB;
         $rows = self::rows($entityid);
         $counts = array_map('count', $rows);
-        \local_oksigeniaayvurenda\event\centre_removed::fire($entityid, null, ['readers' => $counts['reader'] ?? 0,
-            'items' => $counts['item'] ?? 0]);
+        if (!practice::is($entityid)) {
+            \local_oksigeniaayvurenda\event\centre_removed::fire($entityid, null, ['readers' => $counts['reader'] ?? 0,
+                'items' => $counts['item'] ?? 0]);
+        }
         $categoryid = (int) $DB->get_field(self::T . 'entity', 'categoryid', ['id' => $entityid]);
         $context = \context_system::instance();
         $storage = get_file_storage();

@@ -47,7 +47,14 @@ final class keepers {
         $cache = \cache::make('local_oksigeniaayvurenda', 'access');
         $kept = $cache->get('keeper_' . $libraryid . '_' . $userid);
         if ($kept === false) {
-            $kept = $DB->record_exists(self::T . 'keeper', ['libraryid' => $libraryid, 'userid' => $userid]) ? 1 : 0;
+            $kept = $DB->record_exists_sql(
+                'SELECT 1
+                   FROM {' . self::T . 'keeper} k
+                   JOIN {' . self::T . 'library} l ON l.id = k.libraryid
+                   JOIN {' . self::T . "reader} r ON r.entityid = l.entityid AND r.userid = k.userid AND r.status = 'active'
+                  WHERE k.libraryid = :libraryid AND k.userid = :userid",
+                ['libraryid' => $libraryid, 'userid' => $userid]
+            ) ? 1 : 0;
             $cache->set('keeper_' . $libraryid . '_' . $userid, $kept);
         }
         return (bool) $kept;

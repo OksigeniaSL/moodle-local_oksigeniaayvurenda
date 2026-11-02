@@ -46,7 +46,7 @@ final class recover {
     private const SELF = ['library' => 'parentid', 'authority' => 'parentid'];
 
     /** @var string[] What a centre's settings keep of the place they came from: none of it holds here. */
-    private const LEFT_BEHIND = ['cohorts', 'courses', 'cifra', 'offsite', 'plan', 'closed', 'demo', 'ltiregister'];
+    private const LEFT_BEHIND = ['cohorts', 'courses', 'cifra', 'offsite', 'plan', 'closed', 'demo', 'ltiregister', 'practice'];
 
     /** @var int The largest piece of a copy that is read, a guard against a file that is not one. */
     private const LIMIT = 1024 * 1048576;
@@ -122,6 +122,9 @@ final class recover {
                 }
                 if ($table === 'library') {
                     $new->slug = libraries::slug((string) $row['slug']);
+                }
+                if ($table === 'digital') {
+                    $new->url = clean_param((string) ($new->url ?? ''), PARAM_URL);
                 }
                 if ($table === 'reader' && !empty($row['userid']) && isset($names[(string) $row['cardcode']])) {
                     // An account does not cross over; its name and address, which the copy has apart, do.
@@ -249,6 +252,11 @@ final class recover {
             $allowed = $name !== '' && (!isset(self::KINDS[$area]) || preg_match(self::KINDS[$area], $name));
             $there = $item && $fs->file_exists($context->id, 'local_oksigeniaayvurenda', $area, $item, '/', $name);
             if (!$table || !$item || !$allowed || $there) {
+                continue;
+            }
+            $stat = $zip->statName($inzip);
+            // A file that says it holds more than the disk has is not going to fit.
+            if (!$stat || $stat['size'] > disk_free_space($dir)) {
                 continue;
             }
             $stream = $zip->getStream($inzip);

@@ -29,11 +29,11 @@ require_once($CFG->libdir . '/clilib.php');
 
 use local_oksigeniaayvurenda\local\removal;
 
-[$options] = cli_get_params(['entity' => 0, 'yes' => false, 'help' => false], ['h' => 'help']);
+[$options] = cli_get_params(['entity' => 0, 'yes' => false, 'accounts' => false, 'help' => false], ['h' => 'help']);
 $entity = $DB->get_record('local_oksigeniaayvurenda_entity', ['id' => (int) $options['entity']]);
 if ($options['help'] || !$entity) {
     cli_writeln("Takes a centre away whole. Without --yes, it only says what would go.\n\n"
-        . "--entity=ID  The centre.\n--yes        Do it.");
+        . "--entity=ID  The centre.\n--yes        Do it.\n--accounts   Also the accounts that have nothing else on this site.");
     foreach ($DB->get_records('local_oksigeniaayvurenda_entity', null, 'id', 'id, name') as $row) {
         cli_writeln($row->id . ': ' . $row->name);
     }
@@ -43,10 +43,20 @@ cli_writeln($entity->name);
 foreach (removal::count((int) $entity->id) as $table => $rows) {
     cli_writeln(sprintf('  %-16s %d', $table, $rows));
 }
+$lonely = removal::lonely_accounts((int) $entity->id);
+$stays = $options['accounts'] ? '' : ' (they stay without --accounts)';
+cli_writeln(sprintf('  %-16s %d', 'lonely accounts', count($lonely)) . $stays);
 if (!$options['yes']) {
     cli_writeln('Nothing done: add --yes.');
     exit(0);
 }
 \core\session\manager::set_user(get_admin());
 removal::remove((int) $entity->id);
+if ($options['accounts']) {
+    require_once($CFG->dirroot . '/user/lib.php');
+    foreach ($lonely as $userid) {
+        delete_user($DB->get_record('user', ['id' => $userid], '*', MUST_EXIST));
+    }
+    cli_writeln(count($lonely) . ' accounts deleted.');
+}
 cli_writeln('Gone.');

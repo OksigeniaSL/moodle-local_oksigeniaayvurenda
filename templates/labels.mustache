@@ -21,6 +21,7 @@
     Context variables required for this template:
     * heading, count, empty - texts
     * action, library - the form; kinds, whiches, sheets (value, label, selected); since, codes, start
+    * cols, cells - the map of the sheet (n, used, first, label); istoday, issince, iscodes; toomany
     * pages - sheets of labels (blank, barcode, title, callnumber lines, library, svg)
     * spines - whether they are spine labels; style - the measures of the sheet
 
@@ -29,7 +30,9 @@
         "heading": "Etiquetas",
         "action": "#",
         "library": "central",
-        "kinds": [{"value": "labels", "label": "Etiquetas", "selected": true}],
+        "kinds": [{"value": "labels", "label": "Etiquetas", "selected": true, "isspine": false}],
+        "cols": 3, "cells": [{"n": 1, "used": false, "first": true, "label": "Empezar en la etiqueta 1"}],
+        "istoday": true, "issince": false, "iscodes": false, "toomany": "", "labelsmaphint": "Toca la primera libre.",
         "whiches": [{"value": "today", "label": "Lo dado de alta hoy", "selected": true}],
         "since": "",
         "codes": "",

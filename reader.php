@@ -96,8 +96,8 @@ $book = fn(array $b) => ['title' => $b['title'], 'url' => $link('record.php', ['
     'colour' => $b['recordid'] % 6];
 $facts = array_values(array_filter([
     $record['group'] !== '' ? $record['group'] . ($record['stage'] !== '' ? ' · ' . $record['stage'] : '') : '',
-    $record['tutor'] !== '' ? $str('profiletutor', $record['tutor']) : '',
-    $record['email'],
+    !$limited && $record['tutor'] !== '' ? $str('profiletutor', $record['tutor']) : '',
+    $limited ? '' : $record['email'],
 ]));
 $looks = ['flower' => 'flower', 'sky' => 'sky', 'skysober' => 'sky'];
 $drawing = '';

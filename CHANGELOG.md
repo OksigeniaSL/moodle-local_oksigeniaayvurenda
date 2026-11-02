@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.127.0 (2026-11-02)
+
+The findings of an independent security review (`docs/contrastes/2026-11-02-seguridad.md`, in the project's notes):
+
+- A practice library belongs to one person and nothing of the site comes through it: no accounts, cohorts or courses of other centres.
+- Nothing from a catalogue can run in the app: numeric entities no longer get past the guard, and the last search is data, not part
+  of an expression.
+- One centre cannot leave the others without their nightly copy, nor hold the night with a server that does not answer.
+- A reminder, a course fragment or a course reserve only reaches one's own centre.
+- The daily copy, for whoever manages the centre (it holds everyone's addresses), and without where the copies go. It can be
+  downloaded from a shared site again.
+- The passwords and keys of the centres, encrypted in the settings. Copies have their own list of internal hosts (`offsitehosts`).
+- Who keeps a library stops doing so when they stop being a reader. Removing a centre can take its lonely accounts with it.
+
 ## 0.126.0 (2026-11-02)
 
 - The screens that were still forms, redone: labels (what, of which, and the first free one tapped on a map of the sheet), material (the

@@ -47,6 +47,7 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 $number = fn(int $n) => \local_oksigeniaayvurenda\local\screens::number($n);
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
+    shell::no_practice($library);
     // Each sheet saves its own.
     $do = optional_param('do', '', PARAM_ALPHA);
     if ($do === 'cohorts') {

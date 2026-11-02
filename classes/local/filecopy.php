@@ -16,6 +16,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\spreadsheet;
+
 /**
  * The copy of a centre's files: covers, the digital collection, the drawings of its reviews, the pictures of its libraries and
  * its own characters. Apart from the daily copy, because it can weigh a hundred times more. Voices never leave the site.
@@ -96,7 +98,7 @@ final class filecopy {
                 $file = $fs->get_file_instance($row);
                 $inzip = $area . '/' . $row->itemid . '/' . $row->filename;
                 $file->archive_file($zip, $inzip);
-                $what = $area === 'cover' ? (string) ($titles[$row->itemid] ?? '') : '';
+                $what = $area === 'cover' ? spreadsheet::cell((string) ($titles[$row->itemid] ?? '')) : '';
                 fputcsv($list, [$area, $row->itemid, $inzip, $row->filename, $what, $row->filesize], ',', '"', '\\');
                 $total++;
             }
@@ -135,6 +137,24 @@ final class filecopy {
             'timecreated' => $now,
             'timemodified' => $now,
         ], $path);
+    }
+
+    /**
+     * Takes away what an import or a recovery left waiting in the temporary folder, with its readers in clear, if nobody came back.
+     *
+     * @param int|null $now
+     * @return int How many.
+     */
+    public static function sweep_temp(?int $now = null): int {
+        global $CFG;
+        $old = ($now ?? time()) - DAYSECS;
+        $gone = 0;
+        foreach (glob($CFG->tempdir . '/local_oksigeniaayvurenda/*') ?: [] as $path) {
+            if (is_file($path) && filemtime($path) < $old && @unlink($path)) {
+                $gone++;
+            }
+        }
+        return $gone;
     }
 
     /**

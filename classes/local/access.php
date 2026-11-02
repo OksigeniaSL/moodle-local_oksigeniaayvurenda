@@ -75,6 +75,9 @@ final class access {
         $entityid = self::entity_of($where);
         // The practice library of the guided help, invented and the same for everyone: for whoever may do it anywhere.
         if ($entityid && practice::is($entityid)) {
+            if (!practice::mine($entityid, $userid)) {
+                return false;
+            }
             $entityid = 0;
         }
         $view = $capability === 'local/oksigeniaayvurenda:view';
@@ -316,7 +319,8 @@ final class access {
     public static function categories(int $entityid): ?array {
         $context = self::context($entityid);
         if ($context->contextlevel !== CONTEXT_COURSECAT) {
-            return null;
+            // Nothing of the site for a practice library, nor for a centre without its category where centres are apart.
+            return practice::is($entityid) || self::apart() ? [] : null;
         }
         $category = \core_course_category::get((int) $context->instanceid, IGNORE_MISSING, true);
         return $category ? array_merge([(int) $category->id], array_map('intval', $category->get_all_children_ids())) : [];

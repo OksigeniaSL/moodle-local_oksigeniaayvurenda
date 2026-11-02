@@ -35,7 +35,8 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
-shell::require('local/oksigeniaayvurenda:desk', $library);
+shell::require('local/oksigeniaayvurenda:manage', $library);
+shell::no_practice($library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $ref]));
 
@@ -52,7 +53,7 @@ $pullurl = '';
 if (data_submitted() && confirm_sesskey() && $manage) {
     $do = optional_param('do', 'make', PARAM_ALPHA);
     // The copy off the server goes with the plan; the daily copy, always.
-    if (!in_array($do, ['make', 'makefiles'], true) && !plans::allows((int) $library->entityid, 'offsite')) {
+    if (!in_array($do, ['make', 'makefiles', 'clearoffsite'], true) && !plans::allows((int) $library->entityid, 'offsite')) {
         $do = '';
     }
     if ($do === 'make') {
@@ -63,6 +64,9 @@ if (data_submitted() && confirm_sesskey() && $manage) {
             $out['sent']
         ) : '')
             . ($out['failed'] ? ' ' . $str('offsitefailednow', implode(', ', $out['failed'])) : '');
+    } else if ($do === 'clearoffsite') {
+        offsite::clear($entityid);
+        $notice = $str('offsiteplaceremoved');
     } else if ($do === 'makefiles') {
         \local_oksigeniaayvurenda\local\filecopy::queue($entityid);
         $notice = $str('filecopyqueued');
@@ -118,7 +122,7 @@ $files = [];
 foreach (copies::list((int) $library->entityid) as $file) {
     $files[] = [
         'url' => moodle_url::make_pluginfile_url(
-            $context->id,
+            context_system::instance()->id,
             'local_oksigeniaayvurenda',
             'copies',
             $file->get_itemid(),
@@ -139,20 +143,21 @@ $data = [
     'empty' => $str('copiesempty'),
     'download' => $str('copydownload'),
     'make' => $manage ? ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('copymake')] : null,
-    'filecopy' => $manage ? copies_files($entityid, $context, $str) : null,
+    'filecopy' => $manage ? copies_files($entityid, $str) : null,
     'offsite' => $manage && plans::allows($entityid, 'offsite') ? copies_offsite($entityid, $secret, $pullurl, $str) : null,
     'offsitenote' => $manage && !plans::allows($entityid, 'offsite') ? $str('offsitenotinplan') : '',
+    'offsiteclear' => $manage && !plans::allows($entityid, 'offsite') && offsite::has_any($entityid) ? [
+        'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('offsiteclearall')] : null,
 ];
 
 /**
  * What the page says of the copy of the files, for whoever manages the centre.
  *
  * @param int $entityid
- * @param context $context
  * @param callable $str
  * @return array
  */
-function copies_files(int $entityid, context $context, callable $str): array {
+function copies_files(int $entityid, callable $str): array {
     global $PAGE;
     $latest = \local_oksigeniaayvurenda\local\filecopy::latest($entityid);
     $last = offsite::settings($entityid)['lastfiles'];
@@ -161,7 +166,7 @@ function copies_files(int $entityid, context $context, callable $str): array {
         'sesskey' => sesskey(),
         'waiting' => \local_oksigeniaayvurenda\local\filecopy::waiting($entityid),
         'url' => $latest ? moodle_url::make_pluginfile_url(
-            $context->id,
+            context_system::instance()->id,
             'local_oksigeniaayvurenda',
             \local_oksigeniaayvurenda\local\filecopy::AREA,
             $entityid,

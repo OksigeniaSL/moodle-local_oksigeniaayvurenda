@@ -49,16 +49,22 @@ class make_copies extends \core\task\scheduled_task {
             if (\local_oksigeniaayvurenda\local\practice::is((int) $entityid)) {
                 continue;
             }
-            $file = \local_oksigeniaayvurenda\local\copies::make((int) $entityid);
-            mtrace('Ayvurenda: copy of entity ' . $entityid . ': ' . $file->get_filename() . ' (' .
-                $file->get_filesize() . ' bytes)');
-            // And out of the server, encrypted, where the centre chose.
-            $out = \local_oksigeniaayvurenda\local\offsite::send((int) $entityid, $file);
-            \local_oksigeniaayvurenda\local\filecopy::night((int) $entityid);
-            if ($out['sent'] || $out['failed']) {
-                mtrace('Ayvurenda: sent to ' . $out['sent'] . ' places' . ($out['failed'] ? ', failed: ' .
-                    implode(', ', $out['failed']) : ''));
+            // What goes wrong with one centre does not leave the others without their copy.
+            try {
+                $file = \local_oksigeniaayvurenda\local\copies::make((int) $entityid);
+                mtrace('Ayvurenda: copy of entity ' . $entityid . ': ' . $file->get_filename() . ' (' .
+                    $file->get_filesize() . ' bytes)');
+                // And out of the server, encrypted, where the centre chose.
+                $out = \local_oksigeniaayvurenda\local\offsite::send((int) $entityid, $file);
+                \local_oksigeniaayvurenda\local\filecopy::night((int) $entityid);
+                if ($out['sent'] || $out['failed']) {
+                    mtrace('Ayvurenda: sent to ' . $out['sent'] . ' places' . ($out['failed'] ? ', failed: ' .
+                        implode(', ', $out['failed']) : ''));
+                }
+            } catch (\Throwable $e) {
+                mtrace('Ayvurenda: entity ' . $entityid . ': ' . get_class($e));
             }
         }
+        \local_oksigeniaayvurenda\local\filecopy::sweep_temp();
     }
 }

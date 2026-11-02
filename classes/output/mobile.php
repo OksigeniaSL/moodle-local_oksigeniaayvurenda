@@ -80,12 +80,13 @@ class mobile {
             $code = $library['cardcode'];
             // Each library's search box keeps its words in the page's data, under its own name.
             $otherdata['q' . $index] = '';
+            $otherdata['m' . $index] = (string) ($library['remembers']['query'] ?? '');
             // What is worked out here replaces what the summary gave (its lists of loans and holds), so it goes first.
             $libraries[] = [
                 'memoryline' => $library['remembers']['text'] ?? '',
                 'memoryportrait' => $library['remembers']['portrait'] ?? '',
                 'memoryrecord' => $library['remembers']['recordid'] ?? 0,
-                'memoryquery' => $library['remembers']['query'] ?? '',
+                'memorykey' => 'm' . $index,
                 'memorybook' => !empty($library['remembers']['recordid']),
                 'hasloans' => (bool) $library['loans'],
                 'hasholds' => (bool) $library['holds'],
@@ -335,17 +336,31 @@ class mobile {
      * becomes its full-width look-alike, which reads the same; in an address, an at sign means nothing and stays.
      *
      * @param mixed $data
+     * @param string $key The name it goes by: an address only counts as one where one is expected, not because of how it starts.
      * @return mixed
      */
-    private static function inert($data) {
+    private static function inert($data, string $key = '') {
         if (is_array($data)) {
-            return array_map([self::class, 'inert'], $data);
+            $inert = [];
+            foreach ($data as $name => $value) {
+                $inert[$name] = self::inert($value, is_string($name) ? $name : $key);
+            }
+            return $inert;
         }
-        if (!is_string($data) || str_starts_with($data, 'data:')) {
+        if (!is_string($data)) {
             return $data;
         }
+        $address = preg_match('/(url|img|cover|portrait|picture)$/i', $key);
+        if ($address && str_starts_with($data, 'data:')) {
+            return $data;
+        }
+        // Entities first: the app reads them before it looks for expressions, and Mustache leaves the numeric ones as they are.
+        do {
+            $before = $data;
+            $data = html_entity_decode($data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        } while ($data !== $before);
         $map = ['{' => '｛', '}' => '｝'];
-        return strtr($data, preg_match('#^https?://#i', $data) ? $map : $map + ['@' => '＠']);
+        return strtr($data, $address && preg_match('#^https?://#i', $data) ? $map : $map + ['@' => '＠']);
     }
 
     /**

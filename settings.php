@@ -47,6 +47,15 @@ if ($hassiteconfig) {
             PARAM_TEXT,
             50
         ));
+        // Hosts of the site's own network that copies may go to (a NAS); none by default, and none on a shared site.
+        $settings->add(new admin_setting_configtext(
+            'local_oksigeniaayvurenda/offsitehosts',
+            $str('offsitehosts'),
+            $str('offsitehosts_desc'),
+            '',
+            PARAM_TEXT,
+            50
+        ));
         // A line on every page of the library, for whoever runs the site (an open demo that starts again each night).
         $settings->add(new admin_setting_configtextarea(
             'local_oksigeniaayvurenda/sitenotice',

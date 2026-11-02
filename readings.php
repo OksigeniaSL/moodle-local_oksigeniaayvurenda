@@ -69,7 +69,8 @@ if (!$courseid) {
             $until = (string) optional_param('until', '', PARAM_TEXT);
             $tz = core_date::get_server_timezone_object();
             $end = DateTimeImmutable::createFromFormat('!Y-m-d', $until, $tz);
-            $put = $end ? reserves::put(
+            $asked = \local_oksigeniaayvurenda\local\readings::asks($library, $recordid, $courseid);
+            $put = $end && $asked ? reserves::put(
                 $library,
                 $recordid,
                 $courseid,

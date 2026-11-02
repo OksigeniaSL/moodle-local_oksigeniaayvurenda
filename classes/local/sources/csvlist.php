@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\core\readers\card_codes;
 use local_oksigeniaayvurenda\core\text;
 use local_oksigeniaayvurenda\local\plans;
+use local_oksigeniaayvurenda\local\practice;
 use local_oksigeniaayvurenda\local\years;
 
 /**
@@ -220,6 +221,9 @@ final class csvlist {
      */
     private static function account(array $person, int $entityid): int {
         global $DB;
+        if (practice::is($entityid)) {
+            return 0;
+        }
         foreach (['idnumber', 'username', 'email'] as $field) {
             $value = trim($person[$field] ?? '');
             if ($value === '') {

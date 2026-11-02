@@ -409,6 +409,10 @@ final class libraries {
         $base = \core_text::strtolower(\core_text::specialtoascii(trim($text)));
         $base = trim(preg_replace('/[^a-z0-9]+/', '-', $base), '-');
         $base = substr($base !== '' ? $base : 'biblioteca', 0, 56);
+        // Those are the practice libraries' own.
+        if (str_starts_with($base, practice::SLUG)) {
+            $base = 'biblioteca-' . substr($base, 0, 44);
+        }
         $slug = $base;
         for ($n = 2; $DB->record_exists(self::T . 'library', ['slug' => $slug]) || ctype_digit($slug); $n++) {
             $slug = $base . '-' . $n;

@@ -35,6 +35,7 @@ $from = max(0, optional_param('from', 0, PARAM_INT));
 require_login(null, false);
 $library = catalogue::library($ref);
 shell::require('local/oksigeniaayvurenda:manage', $library);
+shell::no_practice($library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/activity.php', ['library' => $ref]));
 

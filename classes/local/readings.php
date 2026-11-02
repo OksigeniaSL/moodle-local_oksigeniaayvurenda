@@ -310,6 +310,25 @@ final class readings {
     }
 
     /**
+     * Whether a course has a book among its required readings in a library.
+     *
+     * @param \stdClass $library
+     * @param int $recordid
+     * @param int $courseid
+     * @return bool
+     */
+    public static function asks(\stdClass $library, int $recordid, int $courseid): bool {
+        global $DB;
+        return $DB->record_exists_sql(
+            "SELECT 1
+               FROM {" . self::T . "readingitem} i
+               JOIN {" . self::T . "readinglist} l ON l.id = i.listid
+              WHERE l.libraryid = :libraryid AND l.courseid = :courseid AND i.recordid = :recordid AND i.required = 1",
+            ['libraryid' => $library->id, 'courseid' => $courseid, 'recordid' => $recordid]
+        );
+    }
+
+    /**
      * What the courses ask of a library: each title some course requires, with the courses, their students, the
      * library's copies and the readers waiting for it; the most students per copy first.
      *

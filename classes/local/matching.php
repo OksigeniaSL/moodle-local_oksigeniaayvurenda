@@ -150,6 +150,10 @@ final class matching {
      */
     private static function accounts(int $entityid): array {
         global $DB, $CFG;
+        // Nobody's accounts for a practice library, nor the whole site's for a centre among others.
+        if (practice::is($entityid) || (access::apart() && access::context($entityid)->contextlevel !== CONTEXT_COURSECAT)) {
+            return [];
+        }
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $cohorts = array_keys($settings['cohorts'] ?? []);
         // A centre with its own category: its chosen cohorts that are there, or whoever has a role inside it.

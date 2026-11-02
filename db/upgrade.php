@@ -408,5 +408,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110116, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110204) {
+        // The passwords and keys of the centres, encrypted from now on.
+        foreach (get_config('local_oksigeniaayvurenda') as $name => $value) {
+            $secret = preg_match('/^(offsite\d+_|cifrakey\d|cifrasecret\d)/', $name);
+            if ($secret && !preg_match('/^(sodium|openssl):/', (string) $value)) {
+                \local_oksigeniaayvurenda\local\secrets::put($name, (string) $value);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110204, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

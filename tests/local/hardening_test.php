@@ -105,11 +105,11 @@ final class hardening_test extends \advanced_testcase {
         $entityid = (int) $gen->create_entity()->id;
         sources\cifra::save($entityid, ['enabled' => 1, 'url' => 'https://puente.example.org', 'mode' => 'key',
             'key' => 'llave-de-prueba']);
-        $this->assertSame('llave-de-prueba', get_config('local_oksigeniaayvurenda', 'cifrakey' . $entityid));
+        $this->assertSame('llave-de-prueba', secrets::get('cifrakey' . $entityid));
         sources\cifra::save($entityid, ['enabled' => 1, 'url' => 'https://puente.example.org', 'mode' => 'key', 'key' => '']);
-        $this->assertSame('llave-de-prueba', get_config('local_oksigeniaayvurenda', 'cifrakey' . $entityid));
+        $this->assertSame('llave-de-prueba', secrets::get('cifrakey' . $entityid));
         sources\cifra::save($entityid, ['enabled' => 1, 'url' => 'https://otro.example.net', 'mode' => 'key', 'key' => '']);
-        $this->assertFalse(get_config('local_oksigeniaayvurenda', 'cifrakey' . $entityid));
+        $this->assertSame('', secrets::get('cifrakey' . $entityid));
     }
 
     /**

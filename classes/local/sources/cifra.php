@@ -84,7 +84,7 @@ final class cifra {
         $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
         foreach (['key', 'secret'] as $name) {
             if (trim((string) ($settings[$name] ?? '')) !== '') {
-                set_config('cifra' . $name . $entityid, trim($settings[$name]), 'local_oksigeniaayvurenda');
+                \local_oksigeniaayvurenda\local\secrets::put('cifra' . $name . $entityid, trim($settings[$name]));
             }
         }
         \local_oksigeniaayvurenda\event\connector_changed::fire($entityid, null, ['kind' => 'cifra']);
@@ -211,8 +211,8 @@ final class cifra {
         global $DB;
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         return ($entity['cifra'] ?? []) + [
-            'key' => (string) get_config('local_oksigeniaayvurenda', 'cifrakey' . $entityid),
-            'secret' => (string) get_config('local_oksigeniaayvurenda', 'cifrasecret' . $entityid),
+            'key' => \local_oksigeniaayvurenda\local\secrets::get('cifrakey' . $entityid),
+            'secret' => \local_oksigeniaayvurenda\local\secrets::get('cifrasecret' . $entityid),
         ];
     }
 

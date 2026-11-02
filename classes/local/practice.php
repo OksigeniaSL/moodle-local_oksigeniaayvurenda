@@ -105,9 +105,7 @@ final class practice {
      * @return \stdClass
      */
     public static function library(): \stdClass {
-        global $DB;
-        $library = $DB->get_record(self::T . 'library', ['slug' => self::slug()]);
-        return $library ?: self::make(skins::SKINS[0]);
+        return self::own() ?: self::make(skins::SKINS[0]);
     }
 
     /**
@@ -117,12 +115,22 @@ final class practice {
      * @return \stdClass
      */
     public static function reset(string $skin = skins::SKINS[0]): \stdClass {
-        global $DB;
-        $library = $DB->get_record(self::T . 'library', ['slug' => self::slug()]);
+        $library = self::own();
         if ($library) {
             self::forget((int) $library->entityid);
         }
         return self::make($skin);
+    }
+
+    /**
+     * Someone's practice library, if there is one.
+     *
+     * @return \stdClass|null
+     */
+    private static function own(): ?\stdClass {
+        global $DB;
+        $library = $DB->get_record(self::T . 'library', ['slug' => self::slug()]);
+        return $library && self::is((int) $library->entityid) ? $library : null;
     }
 
     /**
@@ -161,16 +169,39 @@ final class practice {
      * @return bool
      */
     public static function is(int $entityid): bool {
+        return self::owner($entityid) !== 0;
+    }
+
+    /**
+     * Whether a practice library is someone's own.
+     *
+     * @param int $entityid
+     * @param int $userid
+     * @return bool
+     */
+    public static function mine(int $entityid, int $userid): bool {
+        $owner = self::owner($entityid);
+        return $owner === $userid || $owner === -1;
+    }
+
+    /**
+     * Whose a practice library is.
+     *
+     * @param int $entityid
+     * @return int Its owner; -1 if nobody's; 0 if it is not one.
+     */
+    private static function owner(int $entityid): int {
         global $DB;
         // For one request: a static one would outlive the tests, whose ids come again.
         $cache = \cache::make('local_oksigeniaayvurenda', 'access');
-        $practice = $cache->get('practice_' . $entityid);
-        if ($practice === false) {
+        $owner = $cache->get('practice_' . $entityid);
+        if ($owner === false) {
             $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-            $practice = empty($settings['practice']) ? 0 : 1;
-            $cache->set('practice_' . $entityid, $practice);
+            $mark = $settings['practice'] ?? 0;
+            $owner = !$mark ? 0 : (is_int($mark) ? $mark : -1);
+            $cache->set('practice_' . $entityid, $owner);
         }
-        return (bool) $practice;
+        return (int) $owner;
     }
 
     /**
@@ -204,8 +235,10 @@ final class practice {
     private static function bank(\stdClass $library, array $readers, \stdClass $year, int $now): void {
         global $DB;
         $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
-        $bank = libraries::create_library((int) $library->entityid, ['name' => $str('practicebankname'), 'kind' => bank::KIND,
-            'slug' => self::bank_slug()]);
+        $bank = libraries::create_library((int) $library->entityid, ['name' => $str('practicebankname'), 'kind' => bank::KIND]);
+        // An address nobody else can take.
+        $bank->slug = self::bank_slug();
+        $DB->set_field(self::T . 'library', 'slug', $bank->slug, ['id' => $bank->id]);
         $group = self::READERS[0][3];
         $set = bank::save_set($bank, $group, [$group]);
         $number = 90000;
@@ -236,12 +269,13 @@ final class practice {
      * @return \stdClass
      */
     private static function make(string $skin): \stdClass {
-        global $DB;
+        global $DB, $USER;
         $now = time();
         $classes = !in_array($skin, skins::NO_CLASSES, true);
         $transaction = $DB->start_delegated_transaction();
         $entityid = $DB->insert_record(self::T . 'entity', ['name' => get_string('practicename', 'local_oksigeniaayvurenda'),
-            'yearstart' => '09-01', 'settings' => json_encode(['practice' => true, 'controlletter' => true, 'skin' => $skin]),
+            'yearstart' => '09-01',
+            'settings' => json_encode(['practice' => (int) ($USER->id ?? 0) ?: true, 'controlletter' => true, 'skin' => $skin]),
             'timecreated' => $now, 'timemodified' => $now]);
         $libraryid = $DB->insert_record(self::T . 'library', ['entityid' => $entityid, 'slug' => self::slug(),
             'name' => get_string('practicename', 'local_oksigeniaayvurenda'), 'kind' => 'central',
@@ -436,64 +470,6 @@ final class practice {
      * @param int $entityid
      */
     private static function forget(int $entityid): void {
-        global $DB;
-        $libraries = $DB->get_fieldset_select(self::T . 'library', 'id', 'entityid = ?', [$entityid]);
-        $records = $DB->get_fieldset_select(self::T . 'record', 'id', 'entityid = ?', [$entityid]);
-        $readers = $DB->get_fieldset_select(self::T . 'reader', 'id', 'entityid = ?', [$entityid]);
-        $stocktakes = $libraries ? $DB->get_fieldset_select(self::T . 'stocktake', 'id', 'libraryid IN (' .
-            implode(',', array_map('intval', $libraries)) . ')') : [];
-        $withdrawals = $libraries ? $DB->get_fieldset_select(self::T . 'withdrawal', 'id', 'libraryid IN (' .
-            implode(',', array_map('intval', $libraries)) . ')') : [];
-        $lots = $libraries ? $DB->get_fieldset_select(self::T . 'lot', 'id', 'libraryid IN (' .
-            implode(',', array_map('intval', $libraries)) . ')') : [];
-        $sets = $libraries ? $DB->get_fieldset_select(self::T . 'bankset', 'id', 'libraryid IN (' .
-            implode(',', array_map('intval', $libraries)) . ')') : [];
-        $transaction = $DB->start_delegated_transaction();
-        foreach (
-            [['banktitle', 'setid', $sets], ['bankset', 'libraryid', $libraries],
-                ['stockread', 'stocktakeid', $stocktakes], ['stocktake', 'libraryid', $libraries],
-                ['withdrawn', 'withdrawalid', $withdrawals], ['withdrawal', 'libraryid', $libraries],
-                ['lotitem', 'lotid', $lots], ['lot', 'libraryid', $libraries],
-                ['hold', 'libraryid', $libraries], ['loan', 'libraryid', $libraries], ['rule', 'libraryid', $libraries],
-                ['roomread', 'libraryid', $libraries],
-                ['recauth', 'recordid', $records],
-                ['member', 'readerid', $readers]] as [$table, $field, $ids]
-        ) {
-            if ($ids) {
-                [$in, $params] = $DB->get_in_or_equal($ids);
-                $DB->delete_records_select(self::T . $table, $field . ' ' . $in, $params);
-            }
-        }
-        foreach ($records as $recordid) {
-            covers::remove((int) $recordid);
-        }
-        // The reviews (with their drawings), the class books and the challenges of its years.
-        foreach ($DB->get_fieldset_select(self::T . 'review', 'id', 'entityid = ?', [$entityid]) as $reviewid) {
-            images::remove(reviews::AREA, (int) $reviewid, 'drawing');
-        }
-        $DB->delete_records(self::T . 'review', ['entityid' => $entityid]);
-        $DB->delete_records(self::T . 'wish', ['entityid' => $entityid]);
-        // The voice of its help, what an import left behind and the tutor of its help.
-        foreach ($DB->get_fieldset_select(self::T . 'digital', 'id', 'entityid = ?', [$entityid]) as $digitalid) {
-            get_file_storage()->delete_area_files(
-                \context_system::instance()->id,
-                'local_oksigeniaayvurenda',
-                digital::AREA,
-                (int) $digitalid
-            );
-        }
-        $DB->delete_records(self::T . 'digital', ['entityid' => $entityid]);
-        $DB->delete_records(self::T . 'source', ['entityid' => $entityid]);
-        $years = $DB->get_fieldset_select(self::T . 'year', 'id', 'entityid = ?', [$entityid]);
-        if ($years) {
-            [$in, $params] = $DB->get_in_or_equal($years);
-            $DB->delete_records_select(self::T . 'challenge', 'yearid ' . $in, $params);
-            $DB->delete_records_select(self::T . 'tutor', 'yearid ' . $in, $params);
-        }
-        foreach (['item', 'record', 'reader', 'authority', 'year', 'library'] as $table) {
-            $DB->delete_records(self::T . $table, ['entityid' => $entityid]);
-        }
-        $DB->delete_records(self::T . 'entity', ['id' => $entityid]);
-        $transaction->allow_commit();
+        removal::remove($entityid);
     }
 }
