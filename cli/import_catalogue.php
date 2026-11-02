@@ -67,7 +67,7 @@ if (!$library) {
     cli_error('There is no library ' . $options['library']);
 }
 $kind = files::kind($path, basename($path));
-if (!in_array($kind, ['marc', 'marcxml', 'csv'], true)) {
+if (!in_array($kind, ['marc', 'marcxml', 'onix', 'csv'], true)) {
     cli_error($kind === 'abies' ? 'This is an Abies Web export: use import_abies.php.' : 'This is neither MARC nor CSV.');
 }
 raise_memory_limit(MEMORY_HUGE);

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A made-up ONIX 3.0 message with reference names, as a publisher sends it. -->
+<ONIXMessage release="3.0" xmlns="http://ns.editeur.org/onix/3.0/reference">
+  <Header><Sender><SenderName>Editorial Brújula</SenderName></Sender><SentDateTime>20261102</SentDateTime></Header>
+  <Product>
+    <RecordReference>brujula-0001</RecordReference>
+    <NotificationType>03</NotificationType>
+    <ProductIdentifier><ProductIDType>15</ProductIDType><IDValue>9788490000014</IDValue></ProductIdentifier>
+    <DescriptiveDetail>
+      <ProductComposition>00</ProductComposition><ProductForm>BC</ProductForm>
+      <Collection><CollectionType>10</CollectionType><TitleDetail><TitleType>01</TitleType><TitleElement><TitleElementLevel>02</TitleElementLevel><TitleText>Colección Linterna</TitleText></TitleElement></TitleDetail></Collection>
+      <TitleDetail><TitleType>01</TitleType><TitleElement><TitleElementLevel>01</TitleElementLevel><TitlePrefix>El</TitlePrefix><TitleWithoutPrefix>faro dormido</TitleWithoutPrefix><Subtitle>una historia de mar</Subtitle></TitleElement></TitleDetail>
+      <Contributor><SequenceNumber>1</SequenceNumber><ContributorRole>A01</ContributorRole><NamesBeforeKey>Irene</NamesBeforeKey><KeyNames>Laurel Prado</KeyNames></Contributor>
+      <Contributor><SequenceNumber>2</SequenceNumber><ContributorRole>A12</ContributorRole><PersonNameInverted>Olmo, Bruno</PersonNameInverted></Contributor>
+      <Contributor><SequenceNumber>3</SequenceNumber><ContributorRole>B11</ContributorRole><PersonName>Nadie Revisa</PersonName></Contributor>
+      <EditionNumber>2</EditionNumber>
+      <Language><LanguageRole>01</LanguageRole><LanguageCode>spa</LanguageCode></Language>
+      <Extent><ExtentType>00</ExtentType><ExtentValue>96</ExtentValue><ExtentUnit>03</ExtentUnit></Extent>
+      <Subject><SubjectSchemeIdentifier>93</SubjectSchemeIdentifier><SubjectCode>YFC</SubjectCode><SubjectHeadingText>Aventuras</SubjectHeadingText></Subject>
+    </DescriptiveDetail>
+    <CollateralDetail><TextContent><TextType>03</TextType><ContentAudience>00</ContentAudience><Text textformat="05">&lt;p&gt;Un faro que &lt;b&gt;duerme&lt;/b&gt;.&lt;/p&gt;</Text></TextContent></CollateralDetail>
+    <PublishingDetail>
+      <Publisher><PublishingRole>01</PublishingRole><PublisherName>Editorial Brújula</PublisherName></Publisher>
+      <CityOfPublication>Villanube</CityOfPublication>
+      <PublishingDate><PublishingDateRole>01</PublishingDateRole><Date>20240315</Date></PublishingDate>
+    </PublishingDetail>
+  </Product>
+  <Product>
+    <RecordReference>brujula-0002</RecordReference>
+    <ProductIdentifier><ProductIDType>01</ProductIDType><IDValue>interno-2</IDValue></ProductIdentifier>
+    <DescriptiveDetail><TitleDetail><TitleType>01</TitleType><TitleElement><TitleElementLevel>01</TitleElementLevel><TitleText>La nube de tinta</TitleText></TitleElement></TitleDetail></DescriptiveDetail>
+  </Product>
+</ONIXMessage>

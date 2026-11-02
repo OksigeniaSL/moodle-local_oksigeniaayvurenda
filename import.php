@@ -171,7 +171,7 @@ if ($pending) {
             } else {
                 $set = $pending['charset'] ?? charset::AUTO;
                 $look = preview::of(files::marc($pending['path'], $pending['kind'], $set));
-                $review['kind'] = $str('importkindmarc');
+                $review['kind'] = $str($pending['kind'] === 'onix' ? 'importkindonix' : 'importkindmarc');
                 // Not in Unicode: the letters are guessed, and they can be read another way, seeing the books change.
                 $seen = $pending['kind'] === 'marc' ? charset::guess((string) file_get_contents($pending['path'])) : 'utf8';
                 if ($seen !== 'utf8' || $set !== charset::AUTO) {

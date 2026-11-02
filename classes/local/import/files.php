@@ -41,13 +41,16 @@ final class files {
      *
      * @param string $path
      * @param string $name The name it was brought with.
-     * @return string abies, marc, marcxml, csv or '' when it is none of them.
+     * @return string abies, marc, marcxml, onix, csv or '' when it is none of them.
      */
     public static function kind(string $path, string $name): string {
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
         $head = (string) file_get_contents($path, false, null, 0, 4096);
         if ($extension === 'zip') {
             return 'abies';
+        }
+        if (\local_oksigeniaayvurenda\core\onix::is($head)) {
+            return 'onix';
         }
         if (str_contains($head, 'MARC21/slim') || preg_match('/<(\w+:)?collection\b/', $head)) {
             return 'marcxml';
@@ -110,6 +113,11 @@ final class files {
      */
     public static function marc(string $path, string $kind, string $set = 'auto'): \Generator {
         $data = (string) file_get_contents($path);
+        // ONIX: a publisher's products, already as records.
+        if ($kind === 'onix') {
+            yield from \local_oksigeniaayvurenda\core\onix::records($data);
+            return;
+        }
         $records = $kind === 'marcxml' ? marcxml::read($data) : iso2709::read($data, $set);
         unset($data);
         foreach ($records as $record) {

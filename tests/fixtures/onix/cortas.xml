@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A made-up ONIX 3.0 message with short tags. -->
+<ONIXmessage release="3.0" xmlns="http://ns.editeur.org/onix/3.0/short">
+  <product>
+    <a001>brujula-0003</a001>
+    <productidentifier><b221>15</b221><b244>9788490000021</b244></productidentifier>
+    <descriptivedetail>
+      <titledetail><b202>01</b202><titleelement><x409>01</x409><b203>Mapas del sur</b203></titleelement></titledetail>
+      <contributor><b034>1</b034><b035>A01</b035><b037>Estrada Brisa, Olivia</b037></contributor>
+      <language><b253>01</b253><b252>spa</b252></language>
+    </descriptivedetail>
+    <publishingdetail><publisher><b291>01</b291><b081>Editorial Brújula</b081></publisher><publishingdate><x448>01</x448><b306>2022</b306></publishingdate></publishingdetail>
+  </product>
+</ONIXmessage>

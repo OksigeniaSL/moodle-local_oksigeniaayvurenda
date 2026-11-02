@@ -88,6 +88,24 @@ final class catalogue_import_test extends \advanced_testcase {
     }
 
     /**
+     * A publisher's ONIX: the records, without copies (they are added at the desk); loading it again repeats nothing.
+     */
+    public function test_onix(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $path = __DIR__ . '/../../fixtures/onix/referencia.xml';
+        $this->assertSame('onix', files::kind($path, 'catalogo.xml'));
+        $stats = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'onix'));
+        $this->assertSame(2, $stats['records']);
+        $this->assertSame(0, $stats['items']);
+        $this->assertSame('El faro dormido', $DB->get_field(self::T . 'record', 'title', ['entityid' => $library->entityid,
+            'isbn' => '9788490000014']));
+        $again = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'onix'));
+        $this->assertSame(0, $again['records']);
+    }
+
+    /**
      * A spreadsheet: the records and copies of the rows.
      */
     public function test_csv(): void {

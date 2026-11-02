@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.147.0
+
+- ONIX for Books, the format of publishers and distributors (and of services such as DILVE): a message in 3.0 or 2.1,
+  with reference names or the short tags of 3.0, comes in as records without copies, which are added at the desk; loading
+  it again repeats nothing. The import screen says it.
+
 ## 0.146.0
 
 - COinS on each book's page: Zotero, Mendeley and the other reference managers take the book with one click from the
