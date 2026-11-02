@@ -267,7 +267,7 @@ final class bank {
      * @param \stdClass $library
      * @param string $group
      * @param int $now
-     * @return array[] readerid, name, card, member, held (title, barcode, condition, due), missing (titles).
+     * @return array[] readerid, name, card, member, held (loanid, title, barcode, condition, due), missing (titles).
      */
     public static function roll(\stdClass $library, string $group, int $now): array {
         global $DB;
@@ -322,7 +322,7 @@ final class bank {
                 trim($who->lastname . ' ' . $who->firstname) ?: $name
             ), 'card' => (string) $reader->cardcode,
                 'member' => $member,
-                'held' => array_map(fn($l) => ['title' => $l->title, 'barcode' => $l->barcode,
+                'held' => array_map(fn($l) => ['loanid' => (int) $l->id, 'title' => $l->title, 'barcode' => $l->barcode,
                     'condition' => (string) ($l->conditionout ?: 'good'), 'due' => (int) $l->timedue], $held),
                 // Only a pupil of the class this year waits for its set.
                 'missing' => $member ? array_values(array_map(

@@ -61,7 +61,8 @@ for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
     $file = sprintf('/voz/%s/%s/%02d.mp3', $piece, substr(current_language(), 0, 2), $i);
     $voices[] = $art && is_readable($art . $file) ? (new moodle_url('/local/oksigeniaayvurendaarte' . $file))->out(false) : null;
 }
-$back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' => $library->slug]);
+$back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' =>
+    $piece === 'bankround' && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::BANKSLUG : $library->slug]);
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <h1 id="ayv-help-title" class="ayv-results-title">' . s($str('helptitle' . $piece)) . '</h1>
 <div class="ayv-help-stage" id="ayv-help-stage">
@@ -95,11 +96,12 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
         'auto' => $auto,
         'frame' => (new moodle_url(
             '/local/oksigeniaayvurenda/' . $pieces[$piece]['page'],
-            ['library' => practice::SLUG, 'help' => 1] + ($piece === 'card' ? ['reader' => $DB->get_field(
-                'local_oksigeniaayvurenda_reader',
-                'id',
-                ['entityid' => $practice->entityid, 'cardcode' => $code(practice::READERS[0][0])]
-            )] : []) + ($piece === 'stacks' ? ['all' => 1] : [])
+            ['library' => $piece === 'bankround' ? practice::BANKSLUG : practice::SLUG, 'help' => 1]
+                + ($piece === 'bankround' ? ['mode' => 'collect'] : []) + ($piece === 'card' ? ['reader' => $DB->get_field(
+                    'local_oksigeniaayvurenda_reader',
+                    'id',
+                    ['entityid' => $practice->entityid, 'cardcode' => $code(practice::READERS[0][0])]
+                )] : []) + ($piece === 'stacks' ? ['all' => 1] : [])
         ))->out(false),
         'steps' => $steps,
         'voices' => $voices,

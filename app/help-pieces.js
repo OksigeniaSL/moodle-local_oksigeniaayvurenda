@@ -516,6 +516,59 @@ window.AYVHelpPieces = {
         });
     },
     // Who keeps a library: what it is for, a name looked for, and how it is given and taken away.
+    bankround: function(h) {
+        'use strict';
+        return h.point('.ayv-camp-number').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.tap('[data-ayv-open="ayv-camp-sheet"]');
+        }).then(function() {
+            return h.point('#ayv-camp-sheet .ayv-date');
+        }).then(function(box) {
+            // Day, month and year, whatever their order in this language: the day has 31 options, the month 12 and the year 13.
+            var when = new Date(Date.now() + 20 * 86400000);
+            box.querySelectorAll('select').forEach(function(list) {
+                var size = list.options.length;
+                list.value = String(size > 31 ? when.getDate() : (size === 13 ? when.getMonth() + 1 : when.getFullYear()));
+                list.dispatchEvent(new Event('change', {bubbles: true}));
+            });
+            return h.say(1);
+        }).then(function() {
+            return h.go('#ayv-camp-sheet button[type="submit"]');
+        }).then(function() {
+            return h.point('.ayv-camp-cards');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('.ayv-camp-class');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.go('.ayv-camp-class');
+        }).then(function() {
+            return h.point('.ayv-roll-lost button');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.go('.ayv-roll-lost button');
+        }).then(function() {
+            return h.go('a[href*="bankround.php"]');
+        }).then(function() {
+            return h.point('.ayv-camp-lostrow button');
+        }).then(function() {
+            return h.say(5);
+        }).then(function() {
+            return h.go('.ayv-tabs .ayv-tab:nth-child(2)');
+        }).then(function() {
+            return h.point('.ayv-camp-hero');
+        }).then(function() {
+            return h.say(6);
+        }).then(function() {
+            return h.point('.ayv-camp-links a:last-child');
+        }).then(function() {
+            return h.say(7);
+        });
+    },
     keepers: function(h) {
         'use strict';
         return h.point('.ayv-keepers h2').then(function() {

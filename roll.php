@@ -46,7 +46,14 @@ if (!$library || !bank::is($library)) {
 $url = fn(array $params) => (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug] + $params))
     ->out(false);
 $now = time();
-$data = ['heading' => $str('bankrollheading', format_string($library->name, true, ['escape' => false])),
+$notice = '';
+if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'lost') {
+    if (\local_oksigeniaayvurenda\local\bankround::lost($library, required_param('loan', PARAM_INT), (int) $USER->id, $now)) {
+        $notice = $str('bankrolllostnow');
+    }
+}
+$data = ['notice' => $notice, 'sesskey' => sesskey(),
+    'heading' => $str('bankrollheading', format_string($library->name, true, ['escape' => false])),
     'intro' => $str('bankrollintro'),
     'isclass' => $group !== ''];
 if ($group === '') {
@@ -64,6 +71,7 @@ if ($group === '') {
     $data += [
         'group' => $group,
         'back' => $url([]),
+        'action' => $url(['group' => $group, 'show' => $show]),
         'filters' => array_map(
             fn($f) => ['url' => $url(['group' => $group, 'show' => $f]),
             'label' => $str('bankrollshow' . $f), 'current' => $f === $show,
@@ -74,7 +82,7 @@ if ($group === '') {
             'name' => $p['name'],
             'card' => $p['card'] !== '' ? $str('bankrollcard', $p['card']) : '',
             'gone' => !$p['member'],
-            'held' => array_map(fn($h) => ['title' => $h['title'], 'barcode' => $h['barcode'],
+            'held' => array_map(fn($h) => ['loanid' => $h['loanid'], 'title' => $h['title'], 'barcode' => $h['barcode'],
                 'condition' => $h['condition'] !== 'good' ? $str('condition' . $h['condition']) : ''], $p['held']),
             'hasheld' => (bool) $p['held'],
             'missing' => array_map(fn($t) => ['title' => $t], $p['missing']),
@@ -86,7 +94,7 @@ if ($group === '') {
 }
 foreach (
     ['bankrollnone', 'bankrollhas', 'bankrollmissing', 'bankrollgone', 'bankrollcomplete', 'bankrollempty', 'bankrollback',
-        'bankrollprint'] as $key
+        'bankrollprint', 'bankrolllost'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -96,5 +104,7 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/roll', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $desk, 'label' => $str('desktitle')]]]
+    ['search' => false, 'nav' => [['url' => $desk, 'label' => $str('desktitle')], ['url' =>
+        (new moodle_url('/local/oksigeniaayvurenda/bankround.php', ['library' => $library->slug]))->out(false),
+        'label' => $str('bankroundnav')]]]
 );

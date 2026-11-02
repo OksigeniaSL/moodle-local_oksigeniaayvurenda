@@ -3844,3 +3844,43 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 /* How the letters of an old file are read: its choice and its button in one line. */
 .ayv .ayv-imp-letters { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
 .ayv .ayv-imp-letters .ayv-field-hint { flex: 1 1 100%; margin: 0; }
+
+/* The collecting and the handing out of a textbook bank. */
+.ayv .ayv-camp-nosets { margin: 0 0 1rem; font-size: .95rem; }
+.ayv .ayv-camp-nosets summary { cursor: pointer; }
+.ayv .ayv-camp-hero { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0 0 1.5rem; }
+.ayv .ayv-camp-big,
+.ayv .ayv-camp-date { flex: 1 1 18rem; padding: 1.25rem 1.5rem; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.ayv .ayv-camp-date { flex: 0 1 18rem; }
+.ayv .ayv-camp-number { margin: 0; font-family: var(--title); font-size: 3.4rem; font-weight: 600; line-height: 1; }
+.ayv .ayv-camp-label { margin: .25rem 0 0; font-size: 1.05rem; }
+.ayv .ayv-camp-when { margin: .1rem 0 .75rem; font-family: var(--title); font-size: 1.7rem; font-weight: 600; line-height: 1.2; }
+.ayv .ayv-camp-small { margin: 0; font-size: .92rem; color: var(--ayv-muted, var(--muted)); }
+.ayv .ayv-camp-bar { height: .7rem; margin: .9rem 0 .4rem; border-radius: 999px; background: var(--paper2); overflow: hidden; }
+.ayv .ayv-camp-fill { display: block; height: 100%; border-radius: 999px; background: var(--green2); }
+.ayv .ayv-camp-progress { margin: .2rem 0 0; font-size: .95rem; }
+.ayv .ayv-camp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); gap: 1rem; margin: 0 0 1.5rem; }
+.ayv .ayv-camp-card { display: flex; flex-direction: column; gap: .4rem; padding: 1.1rem 1.25rem; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.ayv .ayv-camp-card p { margin: 0; }
+.ayv .ayv-camp-card .ayv-button { margin-top: .4rem; }
+.ayv .ayv-camp-card-title { margin: 0; font-family: var(--title); font-size: 1.1rem; font-weight: 600; }
+.ayv .ayv-camp-classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); gap: .75rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
+.ayv .ayv-camp-class { display: flex; flex-direction: column; gap: .2rem; height: 100%; padding: .85rem 1rem; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); color: inherit; text-decoration: none; }
+.ayv .ayv-camp-links { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .35rem; font-size: .92rem; }
+.ayv .ayv-camp-done { opacity: .72; }
+.ayv .ayv-camp-lost { margin: .5rem 0 1.5rem; padding: 0; list-style: none; }
+.ayv .ayv-camp-lostrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.ayv .ayv-camp-lostrow form { margin: 0; }
+.ayv .ayv-camp-lostwhat { min-width: 0; }
+.ayv .ayv-camp-sets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr)); gap: 1rem; }
+.ayv .ayv-camp-set { padding: 1.1rem 1.25rem; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.ayv .ayv-camp-titles { margin: .5rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-camp-titlerow { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .75rem; padding: .45rem 0; border-top: 1px solid var(--line); }
+.ayv .ayv-camp-titlerow > span:first-child { flex: 1 1 10rem; min-width: 0; }
+.ayv .ayv-camp-short { padding: .1rem .55rem; border-radius: 999px; background: var(--coral); color: #141c1b; font-size: .85rem; font-weight: 700; }
+.ayv .ayv-roll-lost { margin: 0; display: inline; }
+.ayv .ayv-roll-lost button { padding: 0; border: 0; background: none; color: var(--link); font-size: .88rem; text-decoration: underline; cursor: pointer; }
+@media print {
+    .ayv .ayv-roll-lost { display: none; }
+    .ayv .ayv-contract + .ayv-contract { break-before: page; }
+}

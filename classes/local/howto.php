@@ -82,6 +82,7 @@ final class howto {
         'stacks' => ['capability' => 'view', 'page' => 'stacks.php', 'steps' => 7],
         'free' => ['capability' => 'catalogue', 'page' => 'free.php', 'steps' => 5],
         'keepers' => ['capability' => 'manage', 'page' => 'keepers.php', 'steps' => 4],
+        'bankround' => ['capability' => 'desk', 'page' => 'bankround.php', 'steps' => 8],
         'import' => ['capability' => 'manage', 'page' => 'import.php', 'steps' => 9],
         'weed' => ['capability' => 'catalogue', 'page' => 'weed.php', 'steps' => 8],
         'rules' => ['capability' => 'manage', 'page' => 'rules.php', 'steps' => 6],

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.121.0 (2026-11-02)
+
+- A textbook bank's handing out and collecting («Handing out and collecting», from its desk and its sets). Collecting: how many books
+  are still out, by class; a deadline; reminders to whoever has books, with their list, and to the tutors, with who has them; and
+  what is lost, without charging anything, which can turn up again. Handing out: who is waiting, what each set is short of, the groups
+  that do not match this year's, and each class with its list and its contracts, all of a class at once.
+- Its guided help, on a practice bank.
+
 ## 0.120.2 (2026-11-01)
 
 - The mobile library has its own hall, a bookmobile in a square, with its board saying «Today in the square», and its picture on the

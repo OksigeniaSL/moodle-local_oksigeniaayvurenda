@@ -41,6 +41,9 @@ final class practice {
     /** @var string The address of the practice library. */
     public const SLUG = 'ayv-practica';
 
+    /** @var string The address of its textbook bank, which the help of the bank's round makes. */
+    public const BANKSLUG = 'ayv-practica-banco';
+
     /** @var array[] Its readers: card number (without the letter), first name, surnames, group. */
     public const READERS = [
         [10000, 'Ana', 'Montes Prado', '3º A'],
@@ -129,6 +132,42 @@ final class practice {
             }
         }
         return null;
+    }
+
+    /**
+     * A textbook bank for the help of its round: a set for 3º A, Ana with both its titles and Leo with one.
+     *
+     * @param \stdClass $library
+     * @param array $readers Card => reader.
+     * @param \stdClass $year
+     * @param int $now
+     */
+    private static function bank(\stdClass $library, array $readers, \stdClass $year, int $now): void {
+        global $DB;
+        $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+        $bank = libraries::create_library((int) $library->entityid, ['name' => $str('practicebankname'), 'kind' => bank::KIND,
+            'slug' => self::BANKSLUG]);
+        $group = self::READERS[0][3];
+        $set = bank::save_set($bank, $group, [$group]);
+        $number = 90000;
+        foreach (['practicebanktitle1', 'practicebanktitle2'] as $index => $key) {
+            $record = $DB->insert_record(self::T . 'record', ['entityid' => $library->entityid, 'doctype' => 'book',
+                'title' => $str($key), 'searchtext' => \core_text::strtolower($str($key)), 'timecreated' => $now,
+                'timemodified' => $now]);
+            bank::add_title($bank, $set, (int) $record);
+            foreach ([0, 1] as $who) {
+                $lent = $who === 0 || $index === 1;
+                $item = $DB->insert_record(self::T . 'item', ['entityid' => $library->entityid, 'libraryid' => $bank->id,
+                    'recordid' => $record, 'barcode' => control_letter::append((string) ++$number), 'itemtype' => 'normal',
+                    'status' => $lent ? 'onloan' : 'available', 'timecreated' => $now, 'timemodified' => $now]);
+                if ($lent) {
+                    $DB->insert_record(self::T . 'loan', ['libraryid' => $bank->id, 'itemid' => $item,
+                        'readerid' => $readers[control_letter::append((string) self::READERS[$who][0])], 'yearid' => $year->id,
+                        'groupname' => $group, 'timeloaned' => $now - 60 * DAYSECS, 'timedue' => (int) $year->timeend,
+                        'renewals' => 0, 'timecreated' => $now, 'timemodified' => $now]);
+                }
+            }
+        }
     }
 
     /**
@@ -224,6 +263,9 @@ final class practice {
         }
         $readers = $DB->get_records_menu(self::T . 'reader', ['entityid' => $library->entityid], '', 'cardcode, id');
         $year = years::around((int) $library->entityid, $now);
+        if ($piece === 'bankround') {
+            self::bank($library, $readers, $year, $now);
+        }
         if ($piece === 'weed') {
             // One lost, one worn, and some that nobody has taken for years, on a shelf with a name.
             $place = $DB->insert_record(self::T . 'authority', ['entityid' => $library->entityid, 'kind' => 'location',
@@ -338,9 +380,12 @@ final class practice {
             implode(',', array_map('intval', $libraries)) . ')') : [];
         $lots = $libraries ? $DB->get_fieldset_select(self::T . 'lot', 'id', 'libraryid IN (' .
             implode(',', array_map('intval', $libraries)) . ')') : [];
+        $sets = $libraries ? $DB->get_fieldset_select(self::T . 'bankset', 'id', 'libraryid IN (' .
+            implode(',', array_map('intval', $libraries)) . ')') : [];
         $transaction = $DB->start_delegated_transaction();
         foreach (
-            [['stockread', 'stocktakeid', $stocktakes], ['stocktake', 'libraryid', $libraries],
+            [['banktitle', 'setid', $sets], ['bankset', 'libraryid', $libraries],
+                ['stockread', 'stocktakeid', $stocktakes], ['stocktake', 'libraryid', $libraries],
                 ['withdrawn', 'withdrawalid', $withdrawals], ['withdrawal', 'libraryid', $libraries],
                 ['lotitem', 'lotid', $lots], ['lot', 'libraryid', $libraries],
                 ['hold', 'libraryid', $libraries], ['loan', 'libraryid', $libraries], ['rule', 'libraryid', $libraries],

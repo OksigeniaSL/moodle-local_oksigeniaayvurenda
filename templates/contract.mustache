@@ -33,7 +33,7 @@
         "copies": [{"title": "Matemáticas 1", "barcode": "500001K", "condition": "Bien", "date": "15/9/26"}],
         "contracttitlecol": "Libro", "contractcodecol": "Código", "contractstatecol": "Estado al darlo",
         "contractdatecol": "Fecha", "contractnone": "No tiene libros del banco.", "contractfamily": "Firma de la familia",
-        "contractcentre": "Firma y sello del centro", "contractprint": "Imprimir"
+        "contractcentre": "Firma y sello del centro", "contractprint": "Imprimir", "canprint": true
     }
 }}
 <section class="ayv-contract">
@@ -50,5 +50,5 @@
     <p>{{terms}}</p>
     <p>{{date}}</p>
     <div class="ayv-contract-signs"><p>{{contractfamily}}</p><p>{{contractcentre}}</p></div>
-    <p class="ayv-print-head"><button type="button" class="ayv-button" onclick="window.print()">{{contractprint}}</button></p>
+    {{#canprint}}<p class="ayv-print-head"><button type="button" class="ayv-button" onclick="window.print()">{{contractprint}}</button></p>{{/canprint}}
 </section>

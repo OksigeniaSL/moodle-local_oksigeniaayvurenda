@@ -30,7 +30,8 @@ use local_oksigeniaayvurenda\local\shell;
 require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
-$readerid = required_param('reader', PARAM_INT);
+$readerid = optional_param('reader', 0, PARAM_INT);
+$group = trim(optional_param('group', '', PARAM_TEXT));
 require_login(null, false);
 $library = catalogue::library($ref);
 // Whoever works at the bank's desk: its staff, or whoever keeps it.
@@ -38,44 +39,64 @@ if (!access::keeps($library)) {
     shell::require('local/oksigeniaayvurenda:desk', $library);
 }
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/contract.php', ['library' => $ref, 'reader' => $readerid]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/contract.php', ['library' => $ref] +
+    ($group !== '' ? ['group' => $group] : ['reader' => $readerid])));
 
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 if (!$library || !bank::is($library)) {
     shell::missing($str('banknotbank'), $library);
 }
-if (!$DB->record_exists('local_oksigeniaayvurenda_reader', ['id' => $readerid, 'entityid' => $library->entityid])) {
-    shell::missing($str('readernotfound'), $library);
+$now = time();
+// One pupil's, or those of a whole class that has books, each on its page.
+if ($group !== '') {
+    $readers = array_column(
+        array_filter(\local_oksigeniaayvurenda\local\bank::roll($library, $group, $now), fn($p) => $p['held']),
+        'readerid'
+    );
+} else {
+    if (!$DB->record_exists('local_oksigeniaayvurenda_reader', ['id' => $readerid, 'entityid' => $library->entityid])) {
+        shell::missing($str('readernotfound'), $library);
+    }
+    $readers = [$readerid];
 }
-$contract = bank::contract($library, $readerid, time());
-$data = [
-    'centre' => format_string(
-        $DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $library->entityid]),
-        true,
-        ['escape' => false]
-    ),
-    'library' => format_string($library->name, true, ['escape' => false]),
-    'title' => $str('contracttitle'),
-    'who' => $str('contractwho', (object) ['name' => $contract['name'], 'group' => $contract['group'],
-        'year' => $contract['year']]),
-    'copies' => array_map(fn($c) => ['title' => $c['title'], 'barcode' => $c['barcode'],
-        'condition' => $str('condition' . $c['condition']), 'date' => userdate(
-            $c['date'],
-            get_string('strftimedateshort', 'langconfig')
-        )], $contract['copies']),
-    'hascopies' => (bool) $contract['copies'],
-    'terms' => $str('contractterms', $contract['year']),
-    'date' => userdate(time(), get_string('strftimedate', 'langconfig')),
-];
-foreach (
-    ['contracttitlecol', 'contractcodecol', 'contractstatecol', 'contractdatecol', 'contractnone', 'contractfamily',
-        'contractcentre', 'contractprint'] as $key
-) {
-    $data[$key] = $str($key);
+$centre = format_string(
+    $DB->get_field('local_oksigeniaayvurenda_entity', 'name', ['id' => $library->entityid]),
+    true,
+    ['escape' => false]
+);
+$html = '';
+foreach ($readers as $index => $oneid) {
+    $contract = bank::contract($library, (int) $oneid, $now);
+    $data = [
+        'centre' => $centre,
+        'library' => format_string($library->name, true, ['escape' => false]),
+        'title' => $str('contracttitle'),
+        'who' => $str('contractwho', (object) ['name' => $contract['name'], 'group' => $contract['group'],
+            'year' => $contract['year']]),
+        'copies' => array_map(fn($c) => ['title' => $c['title'], 'barcode' => $c['barcode'],
+            'condition' => $str('condition' . $c['condition']), 'date' => userdate(
+                $c['date'],
+                get_string('strftimedateshort', 'langconfig')
+            )], $contract['copies']),
+        'hascopies' => (bool) $contract['copies'],
+        'terms' => $str('contractterms', $contract['year']),
+        'date' => userdate($now, get_string('strftimedate', 'langconfig')),
+        'canprint' => $index === 0,
+    ];
+    foreach (
+        ['contracttitlecol', 'contractcodecol', 'contractstatecol', 'contractdatecol', 'contractnone', 'contractfamily',
+            'contractcentre', 'contractprint'] as $key
+    ) {
+        $data[$key] = $str($key);
+    }
+    $html .= $OUTPUT->render_from_template('local_oksigeniaayvurenda/contract', $data);
+}
+if (!$readers) {
+    $html = html_writer::tag('p', s($str('contractnoneclass')), ['class' => 'ayv-empty']);
 }
 shell::output(
-    $data['title'],
-    $OUTPUT->render_from_template('local_oksigeniaayvurenda/contract', $data),
+    $group !== '' ? $group : $str('contracttitle'),
+    $html,
     $library,
     '',
     ['search' => false]

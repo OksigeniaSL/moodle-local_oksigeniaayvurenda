@@ -123,5 +123,7 @@ shell::output(
     '',
     ['search' => false, 'nav' => [['url' => $desk, 'label' => $str('desktitle')], ['url' =>
         (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug]))->out(false),
-        'label' => $str('bankrollnav')]]]
+        'label' => $str('bankrollnav')], ['url' =>
+        (new moodle_url('/local/oksigeniaayvurenda/bankround.php', ['library' => $library->slug]))->out(false),
+        'label' => $str('bankroundnav')]]]
 );

@@ -153,6 +153,8 @@ shell::output($str('desktitle'), $main, $library, '', [
     ] : [], \local_oksigeniaayvurenda\local\bank::is($library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug]))->out(false),
             'label' => $str('bankrollnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/bankround.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('bankroundnav')],
     ] : [], access::can('local/oksigeniaayvurenda:catalogue', $library) && \local_oksigeniaayvurenda\local\bank::is($library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/bank.php', ['library' => $library->slug]))->out(false),
             'label' => $str('banknav')],

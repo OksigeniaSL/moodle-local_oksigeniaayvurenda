@@ -1,0 +1,160 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/bankround
+
+    The collecting and the handing out of a textbook bank, as two tabs. Collecting: how many books are still out, the date, the
+    reminders, each class and what was lost. Handing out: who waits, what each set is short of, each class with its list and contracts.
+
+    Example context (json):
+    {
+        "heading": "Reparto y recogida", "notice": "", "action": "#", "sesskey": "x",
+        "tabs": [{"label": "Recogida", "url": "#", "current": true}, {"label": "Reparto", "url": "#", "current": false}],
+        "iscollect": true, "outnumber": "42", "outlabel": "libros por volver", "hasprogress": true, "progress": "268 de 310",
+        "percent": 86, "allback": false, "allbacktext": "", "notyet": false, "notyettext": "", "old": "", "deadlinelabel": "Fecha",
+        "deadlinetext": "20 de junio", "deadlinevalue": "2027-06-20", "deadlinechange": "Cambiar", "deadlinehint": "La dicen los avisos.",
+        "save": "Guardar", "close": "Cerrar", "hasout": true, "remindheading": "Avisar", "remindreaders": "A quien tiene libros",
+        "remindreadershint": "120 con cuenta", "remindreaderslast": "", "remindtutors": "A los tutores", "remindtutorshint": "Su clase",
+        "remindtutorslast": "", "canreaders": true, "cantutors": true, "classesheading": "Por clases",
+        "classes": [{"group": "1º A", "url": "#", "line": "12 libros de 5 alumnos"}], "hasclasses": true, "lostheading": "Perdidos",
+        "losthint": "Sin cobrar.", "haslosses": true, "foundlabel": "Ha aparecido",
+        "losses": [{"loanid": 1, "title": "Matemáticas 1", "barcode": "500001K", "name": "Ana Inventada", "group": "1º A", "date": "2 de junio"}]
+    }
+}}
+<section class="ayv-camp">
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<nav class="ayv-tabs" aria-label="{{heading}}">{{#tabs}}<a class="ayv-tab" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}</nav>
+{{#iscollect}}
+<div class="ayv-camp-hero">
+    <div class="ayv-camp-big">
+        <p class="ayv-camp-number">{{outnumber}}</p>
+        <p class="ayv-camp-label">{{outlabel}}</p>
+        {{#hasprogress}}
+        <div class="ayv-camp-bar" role="img" aria-label="{{progress}}"><span class="ayv-camp-fill" style="width: {{percent}}%"></span></div>
+        <p class="ayv-camp-progress">{{progress}}</p>
+        {{/hasprogress}}
+        {{#allback}}<p class="ayv-camp-progress">{{allbacktext}}</p>{{/allback}}
+        {{#notyet}}<p class="ayv-camp-progress">{{notyettext}}</p>{{/notyet}}
+        {{#old}}<p class="ayv-camp-progress">{{old}}</p>{{/old}}
+    </div>
+    <div class="ayv-camp-date">
+        <p class="ayv-camp-small">{{deadlinelabel}}</p>
+        <p class="ayv-camp-when">{{deadlinetext}}</p>
+        <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-camp-sheet">{{deadlinechange}}</button>
+    </div>
+</div>
+<dialog class="ayv-modal" id="ayv-camp-sheet">
+    <div class="ayv-modal-head"><h2 class="ayv-section-title">{{deadlinelabel}}</h2><button type="button" class="ayv-modal-close" data-ayv-close aria-label="{{close}}">×</button></div>
+    <form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="deadline">
+        <label class="ayv-field">{{deadlinelabel}} <input type="date" name="deadline" value="{{deadlinevalue}}"></label>
+        <p class="ayv-camp-small">{{deadlinehint}}</p>
+        <p><button type="submit" class="ayv-button">{{save}}</button></p>
+    </form>
+</dialog>
+{{#hasout}}
+<h2 class="ayv-section-title">{{remindheading}}</h2>
+<div class="ayv-camp-cards">
+    <form class="ayv-camp-card" method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="remind">
+        <input type="hidden" name="who" value="readers">
+        <p class="ayv-camp-card-title">{{remindreaders}}</p>
+        <p class="ayv-camp-small">{{remindreadershint}}</p>
+        {{#remindreaderslast}}<p class="ayv-camp-small">{{remindreaderslast}}</p>{{/remindreaderslast}}
+        {{#canreaders}}<p><button type="submit" class="ayv-button">{{remindreaders}}</button></p>{{/canreaders}}
+    </form>
+    <form class="ayv-camp-card" method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="remind">
+        <input type="hidden" name="who" value="tutors">
+        <p class="ayv-camp-card-title">{{remindtutors}}</p>
+        <p class="ayv-camp-small">{{remindtutorshint}}</p>
+        {{#remindtutorslast}}<p class="ayv-camp-small">{{remindtutorslast}}</p>{{/remindtutorslast}}
+        {{#cantutors}}<p><button type="submit" class="ayv-button ayv-button-quiet">{{remindtutors}}</button></p>{{/cantutors}}
+    </form>
+</div>
+{{/hasout}}
+{{#hasclasses}}
+<h2 class="ayv-section-title">{{classesheading}}</h2>
+<ul class="ayv-camp-classes">
+    {{#classes}}<li><a class="ayv-camp-class" href="{{url}}"><span class="ayv-camp-card-title">{{group}}</span><span class="ayv-camp-small">{{line}}</span></a></li>{{/classes}}
+</ul>
+{{/hasclasses}}
+{{#haslosses}}
+<h2 class="ayv-section-title">{{lostheading}}</h2>
+<p class="ayv-camp-small">{{losthint}}</p>
+<ul class="ayv-camp-lost">
+    {{#losses}}
+    <li class="ayv-camp-lostrow">
+        <span class="ayv-camp-lostwhat"><b>{{title}}</b> <span class="ayv-camp-small">{{barcode}} · {{name}} · {{group}} · {{date}}</span></span>
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="do" value="found">
+            <input type="hidden" name="loan" value="{{loanid}}">
+            <button type="submit" class="ayv-button ayv-button-quiet">{{foundlabel}}</button>
+        </form>
+    </li>
+    {{/losses}}
+</ul>
+{{/haslosses}}
+{{/iscollect}}
+{{^iscollect}}
+<div class="ayv-camp-hero">
+    <div class="ayv-camp-big">
+        <p class="ayv-camp-number">{{waitingnumber}}</p>
+        <p class="ayv-camp-label">{{waitinglabel}}</p>
+    </div>
+    <div class="ayv-camp-big">
+        <p class="ayv-camp-number">{{shortnumber}}</p>
+        <p class="ayv-camp-label">{{shortlabel}}</p>
+    </div>
+</div>
+{{#nosets}}<details class="ayv-camp-nosets"><summary>{{nosetslabel}}</summary><p>{{nosets}}</p></details>{{/nosets}}
+{{#emptygroups}}<p class="ayv-notice">{{emptygroups}}</p>{{/emptygroups}}
+{{^hassets}}<p class="ayv-empty">{{nosetstext}} <a href="{{setsurl}}">{{setslink}}</a></p>{{/hassets}}
+{{#hashandclasses}}
+<h2 class="ayv-section-title">{{handclassesheading}}</h2>
+<ul class="ayv-camp-classes">
+    {{#handclasses}}
+    <li class="ayv-camp-class{{#done}} ayv-camp-done{{/done}}">
+        <span class="ayv-camp-card-title">{{group}}</span>
+        <span class="ayv-camp-small">{{line}}</span>
+        <span class="ayv-camp-links"><a href="{{url}}">{{listlabel}}</a> <a href="{{contracts}}">{{contractslabel}}</a></span>
+    </li>
+    {{/handclasses}}
+</ul>
+{{/hashandclasses}}
+{{#hassets}}
+<h2 class="ayv-section-title">{{setsheading}}</h2>
+<div class="ayv-camp-sets">
+    {{#sets}}
+    <div class="ayv-camp-set">
+        <p class="ayv-camp-card-title">{{name}} <span class="ayv-camp-small">{{pupils}}</span></p>
+        <ul class="ayv-camp-titles">
+            {{#titles}}
+            <li class="ayv-camp-titlerow"><span>{{title}}</span><span class="ayv-camp-small">{{free}}{{#mend}} · {{mend}}{{/mend}}</span>{{#short}}<span class="ayv-camp-short">{{short}}</span>{{/short}}</li>
+            {{/titles}}
+        </ul>
+    </div>
+    {{/sets}}
+</div>
+{{/hassets}}
+{{/iscollect}}
+</section>
