@@ -128,6 +128,10 @@ if ($group === null) {
         $data['people'] = readers::in_group($library, '', null, $pagesize, $from);
         $data['pager'] = $pager($total, []);
     }
+    if ($total && !$groups && $query === '') {
+        // Without classes there is no group to print the cards of: those of everyone, from here.
+        $data['tools'][] = ['url' => $page('print.php'), 'label' => $str('printcards')];
+    }
     if ($manage) {
         $unlinked = $DB->count_records_select(
             'local_oksigeniaayvurenda_reader',

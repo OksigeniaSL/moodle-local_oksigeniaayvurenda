@@ -80,6 +80,13 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
         ['library' => $library->slug, 'q' => $t['title']]
     ))->out(false)], $all),
     'hasall' => (bool) $all,
+    // The printed guides live on Ayvurenda's website, in the language of whoever reads them (Spanish, or else English).
+    'guidesheading' => $str('howtoguides'),
+    'guidesintro' => $str('howtoguidesintro'),
+    'guides' => array_map(fn($g) => ['title' => $str('howtoguide' . $g), 'what' => $str('howtoguide' . $g . 'what'),
+        'isstart' => $g === 'empezar', 'isdesk' => $g === 'mostrador', 'isreaders' => $g === 'lectores',
+        'url' => 'https://ayvurenda.com/guias/guia-' . $g . '-' . (str_starts_with(current_language(), 'es') ? 'es' : 'en')
+            . '.pdf'], ['empezar', 'mostrador', 'lectores']),
     'go' => $str('howtogo'),
     'helplabel' => $str('howtohelp'),
     'ai' => $ai ? [

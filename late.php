@@ -126,6 +126,11 @@ foreach ($lines as $line) {
         'when' => $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
             : $str('lateuntil', $line['due']),
         'tone' => $toneof($line['days']),
+        // In a box of one reader, the row is the book: its name is already the box's.
+        'bybook' => $adults,
+        'bookurl' => $adults ? (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
+            'id' => $line['recordid']]))->out(false) : '',
+        'wasdue' => $adults ? $str('latewasdue', $line['due']) : '',
     ];
 }
 uasort($boxes, fn($a, $b) => [$b['oldest'], $a['group'], $a['name']] <=> [$a['oldest'], $b['group'], $b['name']]);

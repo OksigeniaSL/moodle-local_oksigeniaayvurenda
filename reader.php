@@ -180,7 +180,7 @@ $data = [
     'hasphoto' => $record['photo'] !== '',
     'initial' => $record['initial'],
     'type' => get_string_manager()->string_exists('profiletype' . $record['type'], 'local_oksigeniaayvurenda')
-        ? $str('profiletype' . $record['type']) : '',
+        ? \local_oksigeniaayvurenda\local\skins::say((int) $library->entityid, 'profiletype' . $record['type']) : '',
     'facts' => array_map(fn($f) => ['fact' => $f], $facts),
     'cardcode' => $record['cardcode'],
     'barcode' => $record['barcode'],

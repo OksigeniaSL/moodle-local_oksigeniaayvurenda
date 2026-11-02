@@ -28,7 +28,7 @@
         "groups": [{"heading": "3º Primaria A", "group": "3º Primaria A", "summary": "2 lectores · el más antiguo, 31 días",
             "tone": "late", "open": false, "tell": "Avisar a Irene López", "remind": "", "settutor": "", "readerid": 0,
             "readerurl": "", "printurl": "#",
-            "lines": [{"name": "Ana Montes", "url": "#", "title": "El faro dormido", "when": "31 días de retraso",
+            "lines": [{"bybook": false, "bookurl": "", "wasdue": "", "name": "Ana Montes", "url": "#", "title": "El faro dormido", "when": "31 días de retraso",
                 "tone": "late", "cover": null, "colour": 2}]}],
         "empty": "No hay libros con retraso.", "latesettutor": "Poner tutor", "lateseerecord": "Su ficha", "lateprint": "La lista de la clase",
         "lateallgroups": "Todos los grupos", "printnow": "Imprimir"
@@ -49,7 +49,8 @@
     {{#lines}}
         <li class="ayv-late-row">
             <span class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}</span>
-            <span class="ayv-weed-words"><a class="ayv-late-who" href="{{url}}">{{name}}</a> <span class="ayv-weed-detail">«{{title}}»</span></span>
+            {{#bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{bookurl}}">{{title}}</a> <span class="ayv-weed-detail">{{wasdue}}</span></span>{{/bybook}}
+            {{^bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{url}}">{{name}}</a> <span class="ayv-weed-detail">«{{title}}»</span></span>{{/bybook}}
             <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span>
         </li>
     {{/lines}}

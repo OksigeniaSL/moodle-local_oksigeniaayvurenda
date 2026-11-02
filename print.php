@@ -61,7 +61,9 @@ foreach (array_slice($list, 0, $batch) as $reader) {
         'readertype' => $reader['type'], 'cardcode' => $reader['cardcode']], $reader['name'], $group, $entity, $skin);
     $long = $long || core_text::strlen((string) $reader['cardcode']) > 10;
 }
-$heading = $str('printcardsheading', $group !== '' ? $group : $str('readersnogroup'));
+// Without groups (a town's library, or readers in none), the cards of its readers, not those of «No group».
+$heading = $group !== '' ? $str('printcardsheading', $group)
+    : $str(\local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid) ? 'printcardsall' : 'printcardsnogroup');
 $guides = (string) file_get_contents(__DIR__ . '/app/printguides-a4.svg');
 $chunks = array_chunk($printed, 10);
 $sheets = [];

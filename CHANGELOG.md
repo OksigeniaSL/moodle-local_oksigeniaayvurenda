@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.149.0
+
+- «How do I…?» links the printed guides on Ayvurenda's website (starting the library, the desk and the readers), in the
+  reader's language.
+- What making the guides showed, in a library without classes: late books are listed by reader, and each row now says
+  the book and when it was due (it said the reader's name again); the readers' page offers «Print cards» for everyone; the
+  sheet of cards is «Readers' cards», not «Cards of No group»; a reader's profile says «Reader», not «Student».
+
 ## 0.148.0
 
 - Readers from the OneRoster REST API of a management program (1.1 or 1.2), from «Where the readers come from»: OAuth 2
