@@ -64,6 +64,7 @@ final class howto {
         'homelinks' => ['libraries.php', 'manage', ''],
         'shareclass' => ['search.php', 'desk', ''],
         'formats' => ['formats.php', 'desk', 'formats'],
+        'erase' => ['readers.php', 'manage', ''],
         'purchases' => ['purchases.php', 'catalogue', 'purchases'],
         'ill' => ['ill.php', 'desk', 'ill'],
         'bank' => ['libraries.php', 'manage', ''],

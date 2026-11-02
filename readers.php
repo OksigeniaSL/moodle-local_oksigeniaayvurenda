@@ -79,8 +79,10 @@ if ($group === null) {
     }
     $howgroups = count($groups) === 1 ? $str('readersgroupsone') : $str('readersgroupsmany', $number(count($groups)));
     $nogroup = readers::in_group_count($library, '');
+    $erased = optional_param('erased', 0, PARAM_INT);
     $data = [
         'heading' => $str('readers'),
+        'notice' => $erased ? $str($erased === 2 ? 'readererasedaccount' : 'readererased') : '',
         'summary' => $howmany($total) . ($groups ? ' · ' . $howgroups : ''),
         'bring' => $manage ? ['url' => (new moodle_url(
             '/local/oksigeniaayvurenda/sources.php',

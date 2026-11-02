@@ -702,56 +702,8 @@ class provider implements
         global $DB;
         $now = time();
         foreach ($DB->get_records(self::T . 'reader', ['userid' => $userid], 'id', 'id') as $reader) {
-            $DB->update_record(self::T . 'reader', (object) [
-                'id' => $reader->id,
-                'userid' => null,
-                'cardcode' => 'deleted-' . $reader->id,
-                'firstname' => null,
-                'lastname' => null,
-                'email' => null,
-                'notes' => null,
-                'status' => 'deleted',
-                'timemodified' => $now,
-            ]);
-            $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $reader->id]);
-            $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $reader->id]);
-            // The invitations to their family carried their name («Family of …»): the name and the link to them go.
-            $DB->set_field(self::T . 'voiceinvite', 'name', null, ['readerid' => $reader->id]);
-            $DB->set_field(self::T . 'voiceinvite', 'readerid', null, ['readerid' => $reader->id]);
-            // The key their origin knew them by (a file number, an email, a name) goes too.
-            $DB->delete_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $reader->id]);
-            $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $reader->id]);
-            foreach ($drawn as $id) {
-                foreach (['reviewdrawing', 'reviewvoice'] as $area) {
-                    get_file_storage()->delete_area_files(
-                        \context_system::instance()->id,
-                        'local_oksigeniaayvurenda',
-                        $area,
-                        (int) $id
-                    );
-                }
-            }
-            $DB->delete_records(self::T . 'review', ['readerid' => $reader->id]);
-            // Their reservations go; a copy set aside for them goes back to the shelf or to the next.
-            foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id]) as $hold) {
-                if ($hold->status === 'ready' || $hold->status === 'waiting') {
-                    \local_oksigeniaayvurenda\local\holds::cancel((int) $hold->id, $now);
-                }
-            }
-            $DB->delete_records(self::T . 'hold', ['readerid' => $reader->id]);
-            // What they asked the library to buy stays as a book on a list, without them or what they wrote.
-            $asked = $DB->get_fieldset_select(self::T . 'purchasewho', 'purchaseid', 'readerid = ?', [$reader->id]);
-            if ($asked) {
-                [$in, $params] = $DB->get_in_or_equal($asked);
-                $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader' AND id $in", $params);
-            }
-            $DB->delete_records(self::T . 'purchasewho', ['readerid' => $reader->id]);
-            $DB->delete_records(self::T . 'sanction', ['readerid' => $reader->id]);
-            $DB->delete_records(self::T . 'formatask', ['readerid' => $reader->id]);
-            $DB->execute(
-                'UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE readerid = ? AND direction = 'in'",
-                [$reader->id]
-            );
+            // The same as when their library erases them.
+            \local_oksigeniaayvurenda\local\erasure::reader((int) $reader->id, $now);
         }
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);

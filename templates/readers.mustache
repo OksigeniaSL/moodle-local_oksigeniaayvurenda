@@ -17,6 +17,7 @@
 <header class="ayv-readers-top">
     <div class="ayv-readers-head">
         <h1 class="ayv-results-title">{{heading}}</h1>
+        {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
         <p class="ayv-readers-sum">{{summary}}</p>
     </div>
     {{#bring}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/bring}}

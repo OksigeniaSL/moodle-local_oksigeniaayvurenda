@@ -167,6 +167,26 @@
             <ul class="ayv-profile-past">{{#past}}<li><span>{{year}}</span><b>{{loans}}</b></li>{{/past}}</ul>
         </section>
         {{/haspast}}
+        {{#canerase}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{readererase}}</h2>
+            <p class="ayv-field-hint">{{readererasehint}}</p>
+            <p class="ayv-book-actions"><button type="button" class="ayv-button ayv-button-danger" data-ayv-open="ayv-reader-erase">{{readererasego}}</button></p>
+            <dialog class="ayv-modal" id="ayv-reader-erase" aria-labelledby="ayv-reader-erase-title">
+                <div class="ayv-modal-head"><h3 id="ayv-reader-erase-title" class="ayv-section-title">{{erasetitle}}</h3>
+                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                <p>{{readererasegoes}}</p>
+                <p class="ayv-field-hint">{{readererasestays}}</p>
+                <form method="post" action="{{action}}" class="ayv-dig-form">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="erase">
+                    {{#eraselost}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="lost" value="1" required> {{eraselost}}</label>{{/eraselost}}
+                    <label class="ayv-field ayv-field-check"><input type="checkbox" name="sure" value="1" required> {{readererasecheck}}</label>
+                    <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button ayv-button-danger">{{erasedo}}</button>
+                        <button type="submit" formmethod="dialog" formnovalidate class="ayv-button ayv-button-quiet">{{readererasekeep}}</button></p>
+                </form>
+            </dialog>
+        </section>
+        {{/canerase}}
     </div>
 </div>
 </section>

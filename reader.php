@@ -70,6 +70,24 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
         // The way into the app, by e-mail.
         $notice = $str(applink::send($reader));
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'erase' && access::can('local/oksigeniaayvurenda:manage', $library)) {
+        // At the reader's request: everything that says who they are goes, and their account if it has nothing else here.
+        if (optional_param('sure', 0, PARAM_BOOL)) {
+            $erased = \local_oksigeniaayvurenda\local\erasure::erase(
+                $library,
+                $id,
+                optional_param('lost', 0, PARAM_BOOL),
+                (int) $USER->id,
+                $now
+            );
+            if ($erased['done']) {
+                redirect(new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug,
+                    'erased' => $erased['account'] ? 2 : 1]));
+            }
+            $notice = $erased['open'] === 1 ? $str('readereraseoneout') : $str('readererasebooksout', $erased['open']);
+        } else {
+            $notice = $str('readererasesure');
+        }
     } else if (optional_param('do', '', PARAM_ALPHA) === 'needs') {
         \local_oksigeniaayvurenda\local\formats::mark($library, $id, optional_param('needs', 0, PARAM_BOOL));
         $notice = $str('profileneedssaved');
@@ -191,6 +209,13 @@ $data = [
     'notes' => $record['notes'],
     'staffonly' => !$limited,
     'needs' => !empty($reader->accessneeds),
+    'canerase' => !$limited && access::can('local/oksigeniaayvurenda:manage', $library) && $reader->status !== 'deleted',
+    'erasetitle' => $str('readererasetitle', $record['name']),
+    'erasedo' => $str('readererasedo', $record['name']),
+    'eraselost' => (function () use ($id, $str) {
+        $open = \local_oksigeniaayvurenda\local\erasure::open_loans($id);
+        return $open ? ($open === 1 ? $str('readereraselostone') : $str('readereraselost', $open)) : '';
+    })(),
     'asks' => $limited ? [] : array_map(
         fn($a) => ['title' => format_string($a['title'], true, ['escape' => false]),
         'format' => $str('format' . $a['format'] . 'label'), 'state' => $str('formatsstate' . $a['status'])],
@@ -222,7 +247,8 @@ foreach (
         'profilenewcard', 'profilenewcardgo', 'selfclose', 'sanctionstitle', 'sanctionsboxnone', 'sanctionlift',
         'sanctionpay', 'sanctionwaive', 'sanctionreopen', 'sanctionchargeadd', 'sanctionchargeintro', 'sanctionchargeamount',
         'sanctionchargenote', 'sanctionchargego', 'profileneeds', 'profileneedslabel', 'profileneedshint',
-        'profileneedsasks'] as $key
+        'profileneedsasks', 'readererase', 'readererasehint', 'readererasego', 'readererasetitle', 'readererasegoes',
+        'readererasestays', 'readererasecheck', 'readererasekeep'] as $key
 ) {
     $data[$key] = $str($key);
 }

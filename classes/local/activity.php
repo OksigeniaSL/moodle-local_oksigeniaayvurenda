@@ -33,7 +33,7 @@ final class activity {
             'reader_merged', 'reader_paired', 'reader_matched', 'readers_synced', 'connector_changed', 'connector_tried',
             'tutor_changed', 'keeper_added', 'keeper_removed', 'applink_sent', 'voice_published', 'voice_removed',
             'voice_consent_changed', 'sanction_settings_changed', 'sanction_lifted', 'fine_paid', 'fine_waived', 'charge_added',
-            'sanction_reopened', 'reader_needs_changed'],
+            'sanction_reopened', 'reader_needs_changed', 'reader_erased'],
         'copies' => ['offsite_key_created', 'offsite_place_added', 'offsite_place_removed', 'offsite_pull_created',
             'offsite_pull_stopped', 'copy_downloaded', 'copy_recovered', 'report_exported'],
         'books' => ['copies_withdrawn', 'copy_restored', 'stocktake_applied', 'catalogue_imported', 'addition_undone',

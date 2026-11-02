@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.142.0
+
+- Erasing a reader at their request, for whoever manages the centre, from the reader's record: everything that says who
+  they are goes (name, card, e-mail, notes, reviews with their drawings and voices, their voices, reservations, fines,
+  asks, the invitations to their family and the key their origin knew them by); the loans stay as anonymous numbers. On a
+  site shared by centres their account goes too, when it has nothing else there. Not while they have books out. Moodle's
+  privacy requests do the same with each reader of an account.
+
 ## 0.141.0
 
 - The world's libraries for adding books: besides the Library of Congress, Open Library and Spain's, the national
