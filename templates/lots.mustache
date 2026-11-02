@@ -52,9 +52,9 @@
     <h2 class="ayv-section-title">{{lotsnew}}</h2>
     {{^hasothers}}<div class="ayv-nothing"><p>{{lotsnoothers}}</p>{{#librariesurl}}<a class="ayv-button ayv-button-quiet" href="{{librariesurl}}">{{librariesgo}}</a>{{/librariesurl}}</div>{{/hasothers}}
     {{#hasothers}}
-    <label class="ayv-field">{{lotname}} <span class="ayv-field-hint">{{lotnamehint}}</span> <input type="text" name="name" maxlength="100" required></label>
-    <label class="ayv-field">{{lotto}} <select name="to">{{#others}}<option value="{{id}}">{{name}}</option>{{/others}}</select></label>
-    <label class="ayv-field">{{lotdue}} <input type="date" name="due"></label>
+    <label class="ayv-field ayv-dig-field">{{lotname}} <span class="ayv-field-hint">{{lotnamehint}}</span> <input type="text" name="name" maxlength="100" required></label>
+    <label class="ayv-field ayv-dig-field">{{lotto}} <select name="to">{{#others}}<option value="{{id}}">{{name}}</option>{{/others}}</select></label>
+    <label class="ayv-field ayv-dig-field">{{lotdue}} <input type="date" name="due"></label>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="create">{{lotcreate}}</button></p>
     {{/hasothers}}
 </form>

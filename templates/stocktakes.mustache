@@ -42,8 +42,8 @@
 <form method="post" action="{{action}}" class="ayv-book">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
     <h2 class="ayv-section-title">{{stocktakenew}}</h2>
-    <label class="ayv-field ayv-field-wide">{{stocktakename}} <input type="text" name="name" value="{{defaultname}}" maxlength="100"></label>
-    <label class="ayv-field">{{stocktakewhere}}
+    <label class="ayv-field ayv-dig-field">{{stocktakename}} <input type="text" name="name" value="{{defaultname}}" maxlength="100"></label>
+    <label class="ayv-field ayv-dig-field">{{stocktakewhere}}
         <select name="location"><option value="0">{{stocktakeall}}</option>{{#places}}<option value="{{id}}">{{label}}</option>{{/places}}</select>
     </label>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{stocktakestart}}</button></p>
