@@ -116,6 +116,8 @@ final class security_test extends \advanced_testcase {
             $running = '/[{}@]|&#\d+;|&#x[0-9a-f]+;|&lbrace|&rbrace|&commat/i';
             $this->assertDoesNotMatchRegularExpression($running, $out, $title);
         }
+        // Twice written, it still reads as it should.
+        $this->assertSame('｛｛9*9｝｝', $inert->invoke(null, ['title' => '&#38;#123;&#38;#123;9*9&#38;#125;&#38;#125;'])['title']);
         // An address stays one where one is expected.
         $this->assertSame('data:image/png;base64,AA', $inert->invoke(null, ['cover' => 'data:image/png;base64,AA'])['cover']);
         $this->assertSame('https://a@b.org/c', $inert->invoke(null, ['url' => 'https://a@b.org/c'])['url']);
