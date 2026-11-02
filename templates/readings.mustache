@@ -35,7 +35,7 @@
     Example context (json):
     {
         "heading": "Lecturas de Lengua 2.º", "intro": "Los libros de este curso.", "notice": "", "canedit": true,
-        "action": "#", "courseid": 2, "risurl": "#", "biburl": "#", "readingsexport": "Descargar la lista:",
+        "action": "#", "courseid": 2, "risurl": "#", "biburl": "#", "cslurl": "#", "readingsexportcsl": "CSL-JSON", "readingsexport": "Descargar la lista:",
         "readingsexportris": "RIS (Zotero, Mendeley, EndNote)", "readingsexportbib": "BibTeX", "sesskey": "x", "hasbooks": true, "empty": "", "query": "", "topic": "", "searched": false,
         "hasfound": false, "found": [], "topiclist": [{"value": "Tema 1"}],
         "topics": [{"topic": "Tema 1", "hastopic": true, "books": [{"id": 1, "title": "El faro dormido",
@@ -52,7 +52,7 @@
 <section class="ayv-readings">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p class="ayv-readings-intro">{{intro}}</p>
-{{#hasbooks}}<p class="ayv-readings-export"><span>{{readingsexport}}</span> <a class="ayv-chip" href="{{risurl}}">{{readingsexportris}}</a> <a class="ayv-chip" href="{{biburl}}">{{readingsexportbib}}</a></p>{{/hasbooks}}
+{{#hasbooks}}<p class="ayv-readings-export"><span>{{readingsexport}}</span> <a class="ayv-chip" href="{{risurl}}">{{readingsexportris}}</a> <a class="ayv-chip" href="{{biburl}}">{{readingsexportbib}}</a> <a class="ayv-chip" href="{{cslurl}}">{{readingsexportcsl}}</a></p>{{/hasbooks}}
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{^hasbooks}}<p class="ayv-empty">{{empty}}</p>{{/hasbooks}}
 {{#topics}}

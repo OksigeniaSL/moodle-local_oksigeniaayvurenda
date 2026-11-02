@@ -17,6 +17,7 @@
 namespace local_oksigeniaayvurenda\core;
 
 use local_oksigeniaayvurenda\core\export\bibtex;
+use local_oksigeniaayvurenda\core\export\csljson;
 use local_oksigeniaayvurenda\core\export\dublincore;
 use local_oksigeniaayvurenda\core\export\ris;
 
@@ -34,6 +35,7 @@ use local_oksigeniaayvurenda\core\export\ris;
 #[\PHPUnit\Framework\Attributes\CoversClass(ris::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(bibtex::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(dublincore::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(csljson::class)]
 final class export_test extends \basic_testcase {
     /** @var array A made-up book. */
     private const RECORD = ['doctype' => 'book', 'title' => 'El faro dormido', 'subtitle' => 'una historia del sur',
@@ -89,5 +91,36 @@ final class export_test extends \basic_testcase {
         $this->assertStringContainsString('keywords = {Mar \\& costa}', $entry);
         $this->assertStringContainsString('note = {Signatura: N RUI far. Obligatoria}', $entry);
         $this->assertSame('', bibtex::entry(['doctype' => 'material', 'title' => 'Tableta'], []));
+    }
+
+    /**
+     * A book in CSL-JSON: names as their parts, the year as a date, the pages as a number; a body as it is; material not.
+     */
+    public function test_csljson(): void {
+        $item = csljson::item(
+            ['id' => 7] + self::RECORD,
+            ['author' => ['Lago Brisa, Hugo', 'Unesco']] + self::AUTHORITIES,
+            'N LAG far',
+            'Obligatoria'
+        );
+        $this->assertSame('ayv-7', $item['id']);
+        $this->assertSame('book', $item['type']);
+        $this->assertSame('El faro dormido: una historia del sur', $item['title']);
+        $this->assertSame([['family' => 'Lago Brisa', 'given' => 'Hugo'], ['literal' => 'Unesco']], $item['author']);
+        $this->assertSame(['date-parts' => [[2007]]], $item['issued']);
+        $this->assertSame('120', $item['number-of-pages']);
+        $this->assertSame('9788490000014', $item['ISBN']);
+        $this->assertSame('Los misterios del faro', $item['collection-title']);
+        $this->assertSame('N LAG far', $item['call-number']);
+        $this->assertNull(csljson::item(['doctype' => 'device', 'title' => 'Tableta'], []));
+        $document = json_decode(csljson::document([$item]), true);
+        $this->assertSame('Editorial Inventada', $document[0]['publisher']);
+        // The same book described for OpenURL, as a page carries it in COinS.
+        $kev = links::kev('9788490000014', 'El faro dormido', 'Lago Brisa, Hugo', '2007');
+        parse_str($kev, $fields);
+        $this->assertSame('Z39.88-2004', $fields['ctx_ver']);
+        $this->assertSame('El faro dormido', $fields['rft_btitle']);
+        $this->assertSame('2007', $fields['rft_date']);
+        $this->assertSame('book', $fields['rft_genre']);
     }
 }

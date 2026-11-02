@@ -273,6 +273,7 @@ final class readings {
         $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
         $out = '';
         $keys = [];
+        $csl = [];
         foreach ($items as $item) {
             $record = $records[$item->recordid] ?? null;
             if (!$record) {
@@ -283,7 +284,14 @@ final class readings {
                 $str($item->required ? 'readingsrequired' : 'readingsrecommended'),
                 (string) $item->note,
             ]));
-            if ($format === 'bibtex') {
+            if ($format === 'csl') {
+                $csl[] = \local_oksigeniaayvurenda\core\export\csljson::item(
+                    (array) $record,
+                    $by[$item->recordid] ?? [],
+                    $shelf[$item->recordid] ?? '',
+                    $note
+                );
+            } else if ($format === 'bibtex') {
                 $key = \local_oksigeniaayvurenda\core\export\bibtex::key(
                     ($by[$item->recordid]['author'] ?? [''])[0],
                     (string) $record->pubyear,
@@ -306,7 +314,7 @@ final class readings {
                 );
             }
         }
-        return $out;
+        return $format === 'csl' ? \local_oksigeniaayvurenda\core\export\csljson::document(array_filter($csl)) : $out;
     }
 
     /**

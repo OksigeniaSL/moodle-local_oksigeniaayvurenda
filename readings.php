@@ -170,17 +170,18 @@ if (!$library) {
 shell::require('local/oksigeniaayvurenda:view', $library);
 // The list for a reference manager.
 $export = optional_param('export', '', PARAM_ALPHA);
-if (in_array($export, ['ris', 'bibtex'], true) && ($list = readings::of_course((int) $course->id))) {
+if (in_array($export, ['ris', 'bibtex', 'csl'], true) && ($list = readings::of_course((int) $course->id))) {
     require_once($CFG->libdir . '/filelib.php');
+    $kinds = ['ris' => ['.ris', 'application/x-research-info-systems'], 'bibtex' => ['.bib', 'application/x-bibtex'],
+        'csl' => ['.json', 'application/vnd.citationstyles.csl+json']];
     send_file(
         readings::export($list, $library, $export),
-        clean_filename(core_text::substr($course->shortname, 0, 40)) .
-        ($export === 'ris' ? '.ris' : '.bib'),
+        clean_filename(core_text::substr($course->shortname, 0, 40)) . $kinds[$export][0],
         0,
         0,
         true,
         true,
-        $export === 'ris' ? 'application/x-research-info-systems' : 'application/x-bibtex'
+        $kinds[$export][1]
     );
 }
 $notice = '';
@@ -250,6 +251,8 @@ $data = [
         'export' => 'ris']))->out(false),
     'biburl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['course' => $course->id,
         'export' => 'bibtex']))->out(false),
+    'cslurl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['course' => $course->id,
+        'export' => 'csl']))->out(false),
     'intro' => $str('readingsintro', format_string($library->name, true, ['escape' => false])),
     'notice' => $notice,
     'canedit' => $canedit,
@@ -270,6 +273,7 @@ foreach (
     ['readingsadd', 'readingsfind', 'readingsfindbutton', 'readingstopic', 'readingstopichint', 'readingsrequired',
         'readingsrecommended', 'readingsnote', 'readingssave', 'readingsremove', 'readingsup', 'readingsdown',
         'readingschange', 'readingsaddthis', 'readingsnothing', 'readingsread', 'readingsexport', 'readingsexportris',
+        'readingsexportcsl',
         'readingsexportbib'] as $key
 ) {
     $data[$key] = $str($key);

@@ -81,9 +81,23 @@ final class links {
         if ($resolver === '' || ($isbn === '' && $title === '')) {
             return null;
         }
+        return $resolver . (strpos($resolver, '?') === false ? '?' : '&') . self::kev($isbn, $title, $author);
+    }
+
+    /**
+     * A book described for OpenURL (KEV): what a resolver is asked, and what a page carries as COinS for Zotero and
+     * Mendeley to find.
+     *
+     * @param string $isbn
+     * @param string $title
+     * @param string $author
+     * @param string $year
+     * @return string
+     */
+    public static function kev(string $isbn, string $title, string $author = '', string $year = ''): string {
         $query = array_filter(['ctx_ver' => 'Z39.88-2004', 'rft_val_fmt' => 'info:ofi/fmt:kev:mtx:book', 'rft.isbn' => $isbn,
-            'rft.btitle' => $title, 'rft.au' => $author], fn($value) => $value !== '');
-        return $resolver . (strpos($resolver, '?') === false ? '?' : '&') . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+            'rft.btitle' => $title, 'rft.au' => $author, 'rft.date' => $year, 'rft.genre' => 'book'], fn($value) => $value !== '');
+        return http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 
     /**

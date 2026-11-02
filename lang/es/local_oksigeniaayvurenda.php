@@ -2893,6 +2893,7 @@ $string['readingsempty'] = 'Todavía no hay lecturas en este curso.';
 $string['readingsemptyteacher'] = 'Todavía no hay lecturas. Busca un libro de la biblioteca y añádelo.';
 $string['readingsexport'] = 'Descargar la lista:';
 $string['readingsexportbib'] = 'BibTeX (LaTeX, JabRef)';
+$string['readingsexportcsl'] = 'CSL-JSON (para estilos de cita)';
 $string['readingsexportris'] = 'RIS (Zotero, Mendeley, EndNote)';
 $string['readingsfind'] = 'Título, autor o ISBN';
 $string['readingsfindbutton'] = 'Buscar';

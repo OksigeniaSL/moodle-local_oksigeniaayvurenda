@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.146.0
+
+- COinS on each book's page: Zotero, Mendeley and the other reference managers take the book with one click from the
+  browser.
+- A course's reading list also in CSL-JSON, the format of the Citation Style Language that the citation styles read.
+
 ## 0.145.0
 
 - The OAI-PMH repository also gives its records in MARC 21 (MARCXML, prefix «marc21»), as the daily copy writes them, with

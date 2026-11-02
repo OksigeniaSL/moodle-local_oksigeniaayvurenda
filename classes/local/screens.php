@@ -324,6 +324,13 @@ final class screens {
             'card' => $card,
             'cite' => $cite,
             'fulltext' => $fulltext ? ['url' => $fulltext, 'label' => self::str('recordfulltext')] : null,
+            // COinS: what Zotero and Mendeley find on the page to take the book with a click.
+            'coins' => $young || $record->doctype === 'device' ? '' : \local_oksigeniaayvurenda\core\links::kev(
+                (string) $record->isbn,
+                (string) $record->title,
+                $firstauthor,
+                (string) $record->pubyear
+            ),
             'passon' => $teaches ? ['heading' => self::str('recordshare'),
                 'classroom' => \local_oksigeniaayvurenda\core\links::classroom($address),
                 'classroomlabel' => self::str('recordshareclassroom'),
