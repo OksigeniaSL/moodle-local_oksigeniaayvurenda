@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\lots;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -45,7 +46,7 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/lots.php', ['library' => $library->slug] + $params))
     ->out(false);
 $now = time();
-$date = fn(?int $time) => $time ? userdate($time, get_string('strftimedateshort', 'langconfig')) : '';
+$date = fn(?int $time) => $time ? zones::date($time, 'strftimedateshort', $library) : '';
 $others = $DB->get_records_select_menu(
     'local_oksigeniaayvurenda_library',
     'entityid = :entityid AND id <> :id',

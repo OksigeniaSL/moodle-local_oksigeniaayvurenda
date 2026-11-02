@@ -275,11 +275,7 @@ final class bankround {
                ORDER BY rec.title",
                 ['libraryid' => $library->id, 'readerid' => $reader->id]
             );
-            $when = $deadline ? userdate(
-                $deadline,
-                get_string('strftimedateshort', 'langconfig'),
-                \core_date::get_user_timezone($user)
-            ) : '';
+            $when = $deadline ? zones::date($deadline, 'strftimedateshort', $library) : '';
             $lead = $when ? $str('bankreturnlead', $when) : $str('bankreturnleadnodate');
             $rows = [];
             $lines = [];
@@ -349,11 +345,7 @@ final class bankround {
                     count($p['held']) === 1 ? 'bankreturnrowone' : 'bankreturnrow',
                     count($p['held'])
                 )], $held);
-                $when = $deadline ? userdate(
-                    $deadline,
-                    get_string('strftimedateshort', 'langconfig'),
-                    \core_date::get_user_timezone($user)
-                ) : '';
+                $when = $deadline ? zones::date($deadline, 'strftimedateshort', $library) : '';
                 $lead = $when ? $str('bankreturntutorlead', $when) : $str('bankreturntutorleadnodate');
                 $subject = $str('bankreturntutorsubject', $class['group']);
                 $url = (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => $main->slug,

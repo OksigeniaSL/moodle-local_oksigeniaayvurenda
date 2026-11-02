@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -142,7 +143,7 @@ if ($caninvite) {
             : ($open ? 'voiceinviteopen' : 'voiceinviteexpired');
         $data['invites'][] = [
             'name' => (string) $invite->name,
-            'state' => $str($state, userdate($invite->timeexpires, get_string('strftimedate', 'langconfig'))),
+            'state' => $str($state, zones::date($invite->timeexpires, 'strftimedate', $library)),
             'link' => $open ? (new moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $invite->token]))->out(false) : '',
             'linklabel' => $str('voiceinvitelinkfor', (string) $invite->name),
             'copylabel' => $str('voiceinvitecopy'),

@@ -32,6 +32,7 @@ use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\profile;
 use local_oksigeniaayvurenda\local\sanctions;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -117,7 +118,7 @@ $link = fn(string $script, array $params = []) => (new moodle_url(
     '/local/oksigeniaayvurenda/' . $script,
     ['library' => $library->slug] + $params
 ))->out(false);
-$day = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
+$day = fn(int $time) => zones::date($time, 'strftimedate', $library);
 $covers = covers::urls(array_merge(array_column($record['loans'], 'recordid'), array_column(
     $record['read']['books'],
     'recordid'

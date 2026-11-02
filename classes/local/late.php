@@ -46,7 +46,7 @@ final class late {
     public static function by_group(\stdClass $library, bool $onlylate = true, ?int $now = null): array {
         global $DB;
         $now = $now ?? time();
-        $tz = \core_date::get_server_timezone_object();
+        $tz = zones::of($library);
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $year = years::around((int) $library->entityid, $now);
         $rows = $DB->get_records_sql(
@@ -72,7 +72,7 @@ final class late {
                 'readerid' => (int) $row->readerid,
                 'recordid' => (int) $row->recordid,
                 'title' => $row->title,
-                'due' => userdate((int) $row->timedue, get_string('strftimedateshort', 'langconfig')),
+                'due' => zones::date((int) $row->timedue, 'strftimedateshort', $library),
                 'days' => $days,
             ];
         }

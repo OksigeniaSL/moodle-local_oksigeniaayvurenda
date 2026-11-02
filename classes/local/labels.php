@@ -76,8 +76,7 @@ final class labels {
             }
             $rows = array_values(array_filter(array_map(fn($c) => $bycode[$c] ?? null, $codes)));
         } else {
-            $start = $which === 'since' ? $since : (new \DateTimeImmutable('@' . $now))
-                ->setTimezone(\core_date::get_server_timezone_object())->setTime(0, 0)->getTimestamp();
+            $start = $which === 'since' ? $since : zones::today($library, $now);
             $rows = array_values($DB->get_records_sql(
                 "SELECT $fields FROM $from WHERE i.libraryid = :libraryid AND i.timecreated >= :start ORDER BY i.id",
                 ['libraryid' => $library->id, 'start' => $start],

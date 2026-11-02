@@ -137,7 +137,7 @@ final class garden {
                 'name' => $name,
                 'art' => $art,
                 'won' => isset($won[$code]),
-                'when' => isset($won[$code]) ? userdate($won[$code], get_string('strftimedateshort', 'langconfig')) : '',
+                'when' => isset($won[$code]) ? zones::date($won[$code], 'strftimedateshort', $library) : '',
             ];
         }
         return $cromos ?: null;
@@ -203,13 +203,13 @@ final class garden {
             (int) $DB->get_field_sql('SELECT MAX(timereturned) FROM {' . self::T . 'loan}
                 WHERE readerid = :readerid AND yearid = :yearid' . $reading, $params)
         );
-        $tz = \core_date::get_server_timezone_object();
+        $tz = zones::of($reader);
         $day = fn(int $time) => (new \DateTimeImmutable('@' . $time))->setTimezone($tz)->setTime(0, 0);
         $back = $str('cardnovisit');
         if ($last) {
             $ago = (int) $day($last)->diff($day($now))->days;
             $when = $ago === 0 ? $str('cardvisittoday') : ($ago === 1 ? $str('cardvisityesterday')
-                : $str('cardvisiton', userdate($last, $ago < 7 ? '%A' : get_string('strftimedateshort', 'langconfig'))));
+                : $str('cardvisiton', zones::date($last, $ago < 7 ? '%A' : 'strftimedateshort', $reader)));
             $back = $str('cardlastvisit', $when);
         }
         // Corners by the first sign of the class, named as the catalogue names them.
@@ -293,7 +293,7 @@ final class garden {
      */
     private static function loans(int $readerid, int $yearid): array {
         global $DB;
-        $tz = \core_date::get_server_timezone_object();
+        $tz = zones::of((int) $DB->get_field(self::T . 'year', 'entityid', ['id' => $yearid]));
         $rows = $DB->get_records_sql(
             "SELECT l.id, l.timeloaned, l.timereturned, l.returnnote, i.recordid, r.title,
                     (SELECT MIN(a.code)

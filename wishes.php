@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\wishes;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -55,7 +56,7 @@ $items = array_map(fn($w) => [
     'title' => format_string($w->title, true, ['escape' => false]),
     'note' => (string) $w->note,
     'from' => $str('wishesfrom', (object) ['group' => $w->groupname,
-        'when' => userdate((int) $w->timemodified, get_string('strftimedateshort', 'langconfig'))]),
+        'when' => zones::date((int) $w->timemodified, 'strftimedateshort', $library)]),
     'search' => (new moodle_url('/local/oksigeniaayvurenda/search.php', ['library' => $library->slug, 'q' => $w->title]))
         ->out(false),
 ], wishes::asked((int) $library->entityid));

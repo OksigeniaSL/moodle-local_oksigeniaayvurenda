@@ -251,7 +251,7 @@ final class holds {
         $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $item->libraryid]);
         $days = self::settings($entityid)['days'];
         $DB->update_record(self::T . 'hold', (object) ['id' => $first->id, 'status' => 'ready', 'itemid' => $item->id,
-            'timeready' => $now, 'timeexpires' => loan_rules::due($now, $days, \core_date::get_server_timezone_object()),
+            'timeready' => $now, 'timeexpires' => loan_rules::due($now, $days, zones::of($entityid)),
             'timenotified' => null, 'timemodified' => $now]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'held', 'timemodified' => $now]);
         // The message waits a little: an «Undo» at the desk right after takes it back before it goes.
@@ -400,11 +400,7 @@ final class holds {
         $a = (object) [
             'title' => (string) $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]),
             'library' => format_string($library->name, true, ['escape' => false]),
-            'until' => userdate(
-                (int) $hold->timeexpires,
-                get_string('strftimedateshort', 'langconfig'),
-                \core_date::get_user_timezone($user)
-            ),
+            'until' => zones::date((int) $hold->timeexpires, 'strftimedateshort', $library),
         ];
         $str = fn(string $key) => get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda', $a);
         $sign = mail::sign((int) $library->entityid, $reader, true, $library);
@@ -447,6 +443,7 @@ final class holds {
      */
     public static function of_reader(int $readerid, int $now): array {
         global $DB;
+        $entityid = (int) $DB->get_field(self::T . 'reader', 'entityid', ['id' => $readerid]);
         $rows = $DB->get_records_sql(
             "SELECT h.*, r.title
                FROM {" . self::T . "hold} h
@@ -462,10 +459,7 @@ final class holds {
                 'recordid' => (int) $row->recordid,
                 'title' => $row->title,
                 'ready' => $row->status === 'ready',
-                'until' => $row->status === 'ready' ? userdate(
-                    (int) $row->timeexpires,
-                    get_string('strftimedateshort', 'langconfig')
-                ) : '',
+                'until' => $row->status === 'ready' ? zones::date((int) $row->timeexpires, 'strftimedateshort', $entityid) : '',
                 'expires' => (int) $row->timeexpires,
                 'ahead' => $row->status === 'waiting' ? self::ahead($row) : 0,
             ];
@@ -504,8 +498,8 @@ final class holds {
                 'name' => $who['name'],
                 'group' => $who['group'],
                 'barcode' => (string) $row->barcode,
-                'until' => $row->timeexpires ? userdate((int) $row->timeexpires, $format) : '',
-                'since' => userdate((int) $row->timecreated, $format),
+                'until' => $row->timeexpires ? zones::date((int) $row->timeexpires, $format, $library) : '',
+                'since' => zones::date((int) $row->timecreated, $format, $library),
                 'ahead' => $row->status === 'waiting' ? self::ahead($row) : 0,
             ];
         }

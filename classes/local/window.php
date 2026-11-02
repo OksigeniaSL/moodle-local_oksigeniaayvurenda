@@ -92,8 +92,7 @@ final class window {
     public static function pulse(\stdClass $library, ?int $now = null): array {
         global $DB;
         $now = $now ?? time();
-        $tz = \core_date::get_server_timezone_object();
-        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
+        $today = zones::today($library, $now);
         $out = $DB->count_records_select(
             self::T . 'loan',
             'libraryid = :libraryid AND timeloaned >= :today',

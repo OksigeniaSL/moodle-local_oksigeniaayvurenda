@@ -54,7 +54,7 @@ final class years {
         }
         $start = (string) $DB->get_field(self::T . 'entity', 'yearstart', ['id' => $entityid]);
         $year = (object) (['entityid' => $entityid] +
-            school_year::around($time, $start ?: '09-01', \core_date::get_server_timezone_object()));
+            school_year::around($time, $start ?: '09-01', zones::of($entityid)));
         $existing = $DB->get_record(self::T . 'year', ['entityid' => $entityid, 'name' => $year->name]);
         if ($existing) {
             return $existing;

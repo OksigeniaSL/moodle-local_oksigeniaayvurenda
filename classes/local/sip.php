@@ -147,13 +147,14 @@ final class sip {
     }
 
     /**
-     * A moment as the protocol writes it, at the site's hour: the bridge may well run in another zone.
+     * A moment as the protocol writes it, at the hour of the centre: the bridge may well run in another zone.
      *
      * @param int $time
+     * @param \stdClass $library
      * @return string
      */
-    private static function stamp(int $time): string {
-        return (new \DateTimeImmutable('@' . $time))->setTimezone(\core_date::get_server_timezone_object())->format('Ymd    His');
+    private static function stamp(int $time, \stdClass $library): string {
+        return (new \DateTimeImmutable('@' . $time))->setTimezone(zones::of($library))->format('Ymd    His');
     }
 
     /**
@@ -228,7 +229,7 @@ final class sip {
             IGNORE_MULTIPLE
         );
         return ['circulation' => self::CIRCULATION[$item->status] ?? '01', 'title' => $title,
-            'due' => $due ? self::stamp((int) $due) : ''];
+            'due' => $due ? self::stamp((int) $due, $library) : ''];
     }
 
     /**
@@ -258,7 +259,7 @@ final class sip {
         }
         $open = $DB->get_record_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$item->id], '*', IGNORE_MULTIPLE);
         if ($open && (int) $open->readerid === (int) $reader->id) {
-            return ['ok' => true, 'title' => $title, 'due' => self::stamp((int) $open->timedue)];
+            return ['ok' => true, 'title' => $title, 'due' => self::stamp((int) $open->timedue, $library)];
         }
         // A copy on reserve for a course may be for the room only: that is for someone to say.
         if ($open || $item->status === 'onloan' || reserves::active((int) $item->id, $now)) {
@@ -268,7 +269,7 @@ final class sip {
         if ($answer['kind'] === 'lent') {
             $DB->set_field(self::T . 'loan', 'postid', $post->id, ['id' => $answer['loanid']]);
             $due = (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $answer['loanid']]);
-            return ['ok' => true, 'title' => $title, 'due' => self::stamp($due)];
+            return ['ok' => true, 'title' => $title, 'due' => self::stamp($due, $library)];
         }
         $reason = $answer['kind'] === 'stop' ? (string) ($answer['reason'] ?? '') : '';
         return ['ok' => false, 'title' => $title,
@@ -367,6 +368,6 @@ final class sip {
             self::T . 'loan',
             'timedue',
             ['id' => $loan->id]
-        ))];
+        ), $library)];
     }
 }

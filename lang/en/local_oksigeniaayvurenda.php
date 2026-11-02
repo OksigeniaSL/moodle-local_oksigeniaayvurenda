@@ -1713,6 +1713,8 @@ $string['librariestitle'] = 'The libraries';
 $string['librariesyearstart'] = 'The academic year starts on';
 $string['librariesyearstarthint'] = 'month-day, such as 09-01';
 $string['librariesyearstartlay'] = 'The year starts on';
+$string['librarieszone'] = 'Time zone';
+$string['librarieszonehint'] = 'When the day ends at this library: due dates, what is late and reservations go by it.';
 $string['librarykindbank'] = 'Textbook bank';
 $string['librarykindcentral'] = 'Central';
 $string['librarykindclassroom'] = 'Classroom';
@@ -3751,3 +3753,5 @@ $string['yearsynced'] = 'Groups brought: {$a->created} new readers, {$a->updated
 $string['yeartutors'] = 'groups with a tutor';
 $string['z3950bridge'] = 'Z39.50 bridge';
 $string['z3950bridge_desc'] = 'Address of the service that asks, as SRU, the catalogues that only speak Z39.50, such as REBECA (Spain\'s public libraries, with their CDU). With it, a site in Spanish asks REBECA first when adding books by ISBN. Empty, those catalogues are not asked.';
+
+$string['zonesite'] = 'The site\'s ({$a})';

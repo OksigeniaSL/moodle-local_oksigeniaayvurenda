@@ -156,7 +156,8 @@ final class sanctions {
                 return null;
             }
             // Today does not count: from tomorrow, so many days, ending at the end of the last one.
-            $until = self::today($now)->modify('+' . ($days + 1) . ' days')->getTimestamp();
+            $until = (new \DateTimeImmutable('@' . $now))->setTimezone(zones::of($library))->setTime(0, 0)
+                ->modify('+' . ($days + 1) . ' days')->getTimestamp();
             $row += ['kind' => self::KIND_DAYS, 'timeuntil' => $until];
         } else {
             $cents = sanction_rules::cents($settings, $dayslate);
@@ -179,7 +180,7 @@ final class sanctions {
     private static function answer(\stdClass $row, array $settings): array {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         if ($row->kind === self::KIND_DAYS) {
-            $text = $str('sanctionleftdays', self::day((int) $row->timeuntil));
+            $text = $str('sanctionleftdays', self::day((int) $row->timeuntil, (int) $row->entityid));
             $actions = [['do' => 'lift', 'label' => $str('sanctionlift')]];
         } else {
             $text = $str('sanctionleftfine', self::money((int) $row->cents, $settings['currency']));
@@ -250,7 +251,7 @@ final class sanctions {
         }
         $state = self::state($entityid, $readerid, $now);
         if ($state['until'] > $now) {
-            return ['reason' => policy::SUSPENDED, 'until' => self::day($state['until'])];
+            return ['reason' => policy::SUSPENDED, 'until' => self::day($state['until'], $entityid)];
         }
         if ($settings['mode'] === sanction_rules::FINE && $state['owes'] >= $settings['block']) {
             return ['reason' => policy::OWES, 'owes' => self::money($state['owes'], $settings['currency'])];
@@ -280,7 +281,7 @@ final class sanctions {
         $lines = [];
         $actions = [];
         if ($state['until']) {
-            $lines[] = $str('sanctionpanelday', self::day($state['until']));
+            $lines[] = $str('sanctionpanelday', self::day($state['until'], $entityid));
             $actions[] = ['do' => 'lift', 'label' => $str('sanctionlift')];
         }
         if ($state['owes']) {
@@ -304,7 +305,7 @@ final class sanctions {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $lines = [];
         if ($state['until']) {
-            $lines[] = $str('sanctionreaderdays', self::day($state['until']));
+            $lines[] = $str('sanctionreaderdays', self::day($state['until'], $entityid));
         }
         if ($state['owes']) {
             $lines[] = $str('sanctionreaderowes', self::money($state['owes'], self::settings($entityid)['currency']));
@@ -490,7 +491,7 @@ final class sanctions {
         $counting = $row->kind === self::KIND_DAYS && $row->status === self::OPEN && (int) $row->timeuntil > $now;
         $open = $row->kind === self::KIND_DAYS ? $counting : $row->status === self::OPEN;
         if ($row->kind === self::KIND_DAYS) {
-            $what = $str('sanctionrowdays', self::day((int) $row->timeuntil));
+            $what = $str('sanctionrowdays', self::day((int) $row->timeuntil, (int) $row->entityid));
             $state = $row->status === self::LIFTED ? $str('sanctionstatelifted') : ($counting ? '' : $str('sanctionstateover'));
         } else {
             $what = self::money((int) $row->cents, $currency);
@@ -498,7 +499,7 @@ final class sanctions {
         }
         return ['id' => (int) $row->id, 'kind' => $row->kind, 'what' => $what, 'why' => $why, 'state' => $state, 'open' => $open,
             'money' => $row->kind !== self::KIND_DAYS, 'closedrow' => $row->status !== self::OPEN,
-            'when' => userdate((int) $row->timecreated, get_string('strftimedate', 'langconfig'))];
+            'when' => zones::date((int) $row->timecreated, 'strftimedate', (int) $row->entityid)];
     }
 
     /**
@@ -523,7 +524,7 @@ final class sanctions {
                 self::LISTED
             );
             foreach ($rows as $row) {
-                $suspended[] = ['id' => (int) $row->readerid, 'until' => self::day((int) $row->until)];
+                $suspended[] = ['id' => (int) $row->readerid, 'until' => self::day((int) $row->until, $entityid)];
             }
         }
         $rows = $DB->get_records_sql(
@@ -592,7 +593,7 @@ final class sanctions {
             $desk = new desk($library, 0, $now);
         }
         $currency = self::settings($entityid)['currency'];
-        $zone = \core_date::get_server_timezone();
+        $zone = zones::name($entityid);
         $out = [];
         $rows = $DB->get_recordset_sql(
             self::SELECT . ' WHERE s.entityid = :entityid ORDER BY s.timecreated, s.id',
@@ -679,11 +680,7 @@ final class sanctions {
         $title = $record ? (string) $record->title : (string) ($row->note ?? '');
         $name = format_string($library->name, true, ['escape' => false]);
         if ($row->kind === self::KIND_DAYS) {
-            $value = userdate(
-                (int) $row->timeuntil - 1,
-                get_string('strftimedateshort', 'langconfig'),
-                \core_date::get_server_timezone()
-            );
+            $value = zones::date((int) $row->timeuntil - 1, 'strftimedateshort', $entityid);
             $key = 'sanctionnoticedays';
             $label = $str('sanctionnoticeuntil');
         } else {
@@ -737,22 +734,13 @@ final class sanctions {
     }
 
     /**
-     * The start of a day, at the site's hour.
-     *
-     * @param int $now
-     * @return \DateTimeImmutable
-     */
-    private static function today(int $now): \DateTimeImmutable {
-        return (new \DateTimeImmutable('@' . $now))->setTimezone(\core_date::get_server_timezone_object())->setTime(0, 0);
-    }
-
-    /**
      * The last day of a stretch that ends at a moment, in words.
      *
      * @param int $until
+     * @param int $entityid
      * @return string
      */
-    private static function day(int $until): string {
-        return userdate($until - 1, get_string('strftimedate', 'langconfig'), \core_date::get_server_timezone());
+    private static function day(int $until, int $entityid): string {
+        return zones::date($until - 1, 'strftimedate', $entityid);
     }
 }

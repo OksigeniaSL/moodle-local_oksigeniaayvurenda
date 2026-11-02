@@ -135,8 +135,8 @@ final class fragments {
                     ['escape' => false]
                 ),
                 'students' => $context ? count_enrolled_users($context, 'moodle/course:isincompletionreports') : 0,
-                'from' => userdate((int) $row->timecreated, '%Y-%m-%d'),
-                'until' => userdate((int) $row->timeend, '%Y-%m-%d'),
+                'from' => zones::date((int) $row->timecreated, '%Y-%m-%d', $library),
+                'until' => zones::date((int) $row->timeend, '%Y-%m-%d', $library),
                 'opened' => $DB->count_records_select(self::T . 'digitalread', 'digitalid = ?', [$row->digitalid]),
             ];
         }

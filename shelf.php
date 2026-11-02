@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\shelf;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -125,7 +126,7 @@ if (in_array($done, ['lent', 'back'], true)) {
 } else if ($done === 'notlent') {
     $notice = $str('shelfnotlent');
 }
-$date = fn(?int $time) => $time ? userdate($time, get_string('strftimedateshort', 'langconfig')) : '—';
+$date = fn(?int $time) => $time ? zones::date($time, 'strftimedateshort', $library) : '—';
 $boxes = [];
 foreach (\local_oksigeniaayvurenda\local\lots::of_library($library)['received'] as $box) {
     if ($box['lot']->status === 'out') {

@@ -58,8 +58,6 @@ final class notices {
      */
     private static function readers(int $now): int {
         global $DB;
-        $tz = \core_date::get_server_timezone_object();
-        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $loans = $DB->get_records_sql(
             "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title, rec.id AS recordid
                FROM {" . self::T . "loan} l
@@ -67,14 +65,17 @@ final class notices {
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
-              WHERE l.timereturned IS NULL AND l.timedue < :today AND r.userid IS NOT NULL AND r.status = 'active'
+              WHERE l.timereturned IS NULL AND l.timedue < :now AND r.userid IS NOT NULL AND r.status = 'active'
                     AND (l.timenotified IS NULL OR l.timenotified <= :since)
            ORDER BY l.readerid, l.timedue",
-            ['today' => $today, 'since' => $now - self::EVERY + HOURSECS]
+            ['now' => $now, 'since' => $now - self::EVERY + HOURSECS]
         );
         $byreader = [];
         foreach ($loans as $loan) {
-            $byreader[$loan->readerid][] = $loan;
+            // Late once the last day is over where its centre is, which the query cannot say.
+            if ((int) $loan->timedue < zones::today((int) $loan->entityid, $now)) {
+                $byreader[$loan->readerid][] = $loan;
+            }
         }
         $sent = 0;
         foreach ($byreader as $list) {
@@ -97,8 +98,7 @@ final class notices {
      */
     public static function remind(int $readerid, int $now, int $entityid): bool {
         global $DB;
-        $tz = \core_date::get_server_timezone_object();
-        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
+        $today = zones::today($entityid, $now);
         $list = array_values($DB->get_records_sql(
             "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title, rec.id AS recordid
                FROM {" . self::T . "loan} l
@@ -132,11 +132,10 @@ final class notices {
         $entityid = (int) $list[0]->entityid;
         $words = fn(string $key) => skins::words($entityid, $key);
         $str = fn(string $key, $a = null) => get_string($words($key), 'local_oksigeniaayvurenda', $a);
-        $timezone = \core_date::get_user_timezone($user);
         $lines = [];
         $rows = [];
         foreach ($list as $loan) {
-            $due = userdate((int) $loan->timedue, get_string('strftimedateshort', 'langconfig'), $timezone);
+            $due = zones::date((int) $loan->timedue, 'strftimedateshort', $entityid);
             $lines[] = $str('noticereaderline', (object) ['title' => $loan->title, 'due' => $due]);
             $rows[] = ['line' => $str('noticereaderdue', $due), 'urgent' => true] + mail::book((int) $loan->recordid, $loan->title);
         }
@@ -223,8 +222,9 @@ final class notices {
      */
     public static function tell_tutor(\stdClass $tutor, int $now): bool {
         global $DB;
-        $tz = \core_date::get_server_timezone_object();
-        $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
+        $entityid = (int) $DB->get_field(self::T . 'year', 'entityid', ['id' => $tutor->yearid]);
+        $tz = zones::of($entityid);
+        $today = zones::today($entityid, $now);
         $late = $DB->get_records_sql(
             "SELECT l.id, l.timedue, l.readerid, r.firstname, r.lastname, r.userid, b.name AS library, b.slug
                FROM {" . self::T . "loan} l

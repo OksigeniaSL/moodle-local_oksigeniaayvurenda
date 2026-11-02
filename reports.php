@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\reports;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\years;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -48,10 +49,10 @@ if ($report === 'late') {
 }
 $report = in_array($report, reports::ALL, true) ? $report : 'loans';
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
-$date = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
-$day = function (string $text, int $default): int {
-    return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $text, $p) ? (int) make_timestamp((int) $p[1], (int) $p[2], (int) $p[3])
-        : $default;
+$date = fn(int $time) => zones::date($time, 'strftimedate', $library);
+$day = function (string $text, int $default) use ($library): int {
+    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $text)
+        ? (new DateTimeImmutable($text . ' 00:00:00', zones::of($library)))->getTimestamp() : $default;
 };
 $year = years::around((int) $library->entityid, time());
 $from = $day(optional_param('from', '', PARAM_TEXT), (int) $year->timestart);
@@ -99,8 +100,8 @@ switch ($report) {
                 'note' => trim($row['callnumber'] . ' · ' . ($row['lastloan'] ? $str('reportlastloanon', $date($row['lastloan']))
                     : $str('reportneverlent')), ' ·'),
                 'csv' => [$row['label'], $row['barcode'], $row['callnumber'],
-                    $row['acquired'] ? date('Y-m-d', $row['acquired']) : '',
-                    $row['lastloan'] ? date('Y-m-d', $row['lastloan']) : '']];
+                    $row['acquired'] ? zones::date((int) $row['acquired'], '%Y-%m-%d', $library) : '',
+                    $row['lastloan'] ? zones::date((int) $row['lastloan'], '%Y-%m-%d', $library) : '']];
         }
         $summary = $str('reportnevertotal', $found['total']);
         break;
@@ -151,7 +152,8 @@ if ($format === 'csv') {
     die();
 }
 $params = ['library' => $library->slug, 'report' => $report];
-$extra = $period ? ['from' => date('Y-m-d', $from), 'to' => date('Y-m-d', $to - 1)] : ($report === 'never'
+$shown = fn(int $time) => zones::date($time, '%Y-%m-%d', $library);
+$extra = $period ? ['from' => $shown($from), 'to' => $shown($to - 1)] : ($report === 'never'
     ? ['unlent' => $unlent, 'older' => $older] : []);
 $data = [
     'heading' => $str('report' . $report . 'title'),
@@ -164,7 +166,7 @@ $data = [
     'action' => (new moodle_url('/local/oksigeniaayvurenda/reports.php'))->out(false),
     'library' => $library->slug,
     'report' => $report,
-    'period' => $period ? ['from' => date('Y-m-d', $from), 'to' => date('Y-m-d', $to - 1)] : null,
+    'period' => $period ? ['from' => $shown($from), 'to' => $shown($to - 1)] : null,
     'never' => $report === 'never' ? ['unlent' => $unlent, 'older' => $older] : null,
     'summary' => $summary,
     'rows' => $rows,

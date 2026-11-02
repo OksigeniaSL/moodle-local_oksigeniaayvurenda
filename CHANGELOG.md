@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.135.0
+
+- Each centre has its own time zone, in its settings; none chosen, the site's. Its day ends at its own midnight: due dates,
+  what is late, days without lending, reservations, notices, the school year, reports and the dates shown for them all go
+  by it, for whoever looks. A book back at 18:30 on its last day in Bogotá is not late because it is tomorrow in Madrid.
+  Moments, such as when a copy was made or who did what, stay in the zone of whoever reads them.
+
 ## 0.134.2
 
 - A new centre on a shared site starts without the app, as the free plan does; a plan saved before this has none either.

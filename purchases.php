@@ -29,6 +29,7 @@ use local_oksigeniaayvurenda\local\purchases;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\skins;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -177,7 +178,7 @@ if ($tab === 'asked') {
                 'heading' => $str(
                     $order && $order->vendor ? 'purchaseorderheading' : 'purchaseorderheadingplain',
                     (object) ['vendor' => (string) ($order->vendor ?? ''),
-                        'date' => userdate((int) ($order->timecreated ?? $now), get_string('strftimedateshort', 'langconfig'))]
+                        'date' => zones::date((int) ($order->timecreated ?? $now), 'strftimedateshort', $library)]
                 ),
                 'sheet' => (new moodle_url('/local/oksigeniaayvurenda/purchaseorder.php', ['library' => $ref,
                     'id' => $id]))->out(false),

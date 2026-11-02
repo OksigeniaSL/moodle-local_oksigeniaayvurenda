@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\stocktake;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -52,9 +53,10 @@ $notice = '';
 // Starting one.
 if (!$id && data_submitted() && confirm_sesskey()) {
     $name = trim(optional_param('name', '', PARAM_TEXT));
-    $newid = stocktake::start($library, $name !== '' ? $name : $str('stocktakedefault', userdate(
+    $newid = stocktake::start($library, $name !== '' ? $name : $str('stocktakedefault', zones::date(
         $now,
-        get_string('strftimedate', 'langconfig')
+        'strftimedate',
+        $library
     )), optional_param('location', 0, PARAM_INT) ?: null, (int) $USER->id, $now);
     redirect($url(['id' => $newid]));
 }
@@ -70,8 +72,8 @@ if (!$id) {
         $list[] = [
             'name' => $one->name,
             'url' => $url(['id' => $one->id] + ($one->status === 'open' ? [] : ['view' => 'results'])),
-            'state' => $str($one->status === 'open' ? 'stocktakeopen' : 'stocktakeclosedon', userdate((int) ($one->timeclosed ?:
-                $one->timecreated), get_string('strftimedateshort', 'langconfig'))),
+            'state' => $str($one->status === 'open' ? 'stocktakeopen' : 'stocktakeclosedon', zones::date((int) ($one->timeclosed ?:
+                $one->timecreated), 'strftimedateshort', $library)),
             'progress' => $progress($counts),
         ];
     }
@@ -83,7 +85,7 @@ if (!$id) {
         'action' => $url(),
         'sesskey' => sesskey(),
         'places' => array_map(fn($p) => $p + ['label' => $p['label'] . ' (' . $p['count'] . ')'], stocktake::places($library)),
-        'defaultname' => $str('stocktakedefault', userdate($now, get_string('strftimedate', 'langconfig'))),
+        'defaultname' => $str('stocktakedefault', zones::date($now, 'strftimedate', $library)),
     ];
     foreach (['stocktakenew', 'stocktakename', 'stocktakewhere', 'stocktakeall', 'stocktakestart', 'stocktakelist'] as $key) {
         $data[$key] = $str($key);

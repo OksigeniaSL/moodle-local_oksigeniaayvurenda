@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\stocktake;
 use local_oksigeniaayvurenda\local\weeding;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -47,7 +48,7 @@ $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/weed.php', ['library' => $library->slug] + $params
     + (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])))->out(false);
 $now = time();
-$date = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
+$date = fn(int $time) => zones::date($time, 'strftimedate', $library);
 
 if (data_submitted() && confirm_sesskey()) {
     $restore = optional_param('restore', 0, PARAM_INT);

@@ -148,10 +148,10 @@ final class ill_test extends \advanced_testcase {
     public function test_dates_and_going(): void {
         global $DB;
         $w = $this->world();
-        $this->assertNull(ill::date(''));
-        $this->assertNull(ill::date('nothing'));
+        $this->assertNull(ill::date('', $w->library));
+        $this->assertNull(ill::date('nothing', $w->library));
         $date = new \DateTime('2030-03-04 23:59:59', \core_date::get_server_timezone_object());
-        $this->assertSame($date->getTimestamp(), ill::date('2030-03-04'));
+        $this->assertSame($date->getTimestamp(), ill::date('2030-03-04', $w->library));
         $other = $w->gen->create_library(['entityid' => $w->library->entityid]);
         ill::ask($other, ['title' => 'Atlas', 'partner' => 'Central'], $w->staff);
         $this->assertTrue(libraries::delete_library((int) $other->id));

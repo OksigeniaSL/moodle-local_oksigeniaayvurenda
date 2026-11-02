@@ -41,10 +41,11 @@ final class ill {
      * A date as a form gives it, at the end of that day; null if it is none.
      *
      * @param string $text
+     * @param \stdClass $library
      * @return int|null
      */
-    public static function date(string $text): ?int {
-        $date = \DateTime::createFromFormat('!Y-m-d', trim($text), \core_date::get_server_timezone_object());
+    public static function date(string $text, \stdClass $library): ?int {
+        $date = \DateTime::createFromFormat('!Y-m-d', trim($text), zones::of($library));
         return $date ? $date->getTimestamp() + DAYSECS - 1 : null;
     }
 

@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\readings;
 use local_oksigeniaayvurenda\local\reserves;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -67,7 +68,7 @@ if (!$courseid) {
             $notice = $str('reserveended');
         } else {
             $until = (string) optional_param('until', '', PARAM_TEXT);
-            $tz = core_date::get_server_timezone_object();
+            $tz = zones::of($library);
             $end = DateTimeImmutable::createFromFormat('!Y-m-d', $until, $tz);
             $asked = \local_oksigeniaayvurenda\local\readings::asks($library, $recordid, $courseid);
             $put = $end && $asked ? reserves::put(
@@ -100,7 +101,7 @@ if (!$courseid) {
             $reserved[] = ['courseid' => $courseid, 'text' => $str('reserveline', (object) ['course' => $names[$courseid]
                 ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $courseid]), true, ['escape' => false]),
                 'copies' => $count($r['copies'], 'readingscopiesone', 'readingscopies'), 'how' => reserves::words($r['days']),
-                'until' => userdate($r['timeend'], get_string('strftimedateshort', 'langconfig'))])];
+                'until' => zones::date($r['timeend'], 'strftimedateshort', $library)])];
         }
         $titles[] = [
             'recordid' => $row['recordid'],
@@ -126,7 +127,7 @@ if (!$courseid) {
     $data = ['heading' => $str('readingsdemandheading', format_string($library->name, true, ['escape' => false])),
         'intro' => $str('readingsdemandintro'),
         'titles' => $titles, 'hastitles' => (bool) $titles, 'none' => $str('readingsdemandnone'), 'notice' => $notice,
-        'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'reserveuntil' => date('Y-m-d', $yearend),
+        'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'reserveuntil' => zones::date($yearend, '%Y-%m-%d', $library),
         'fragmentsurl' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $library->slug,
             'fragments' => 1]))->out(false), 'fragmentslabel' => $str('fragmentslog'),
         'reservedays' => array_map(

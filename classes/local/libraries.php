@@ -116,6 +116,7 @@ final class libraries {
             'timemodified' => $now ?? time(),
         ]);
         skins::forget($entityid);
+        zones::forget($entityid);
         $from = $settings['skin'] ?? skins::SKINS[0];
         $to = $after['skin'] ?? skins::SKINS[0];
         if ($from !== $to) {
@@ -448,6 +449,9 @@ final class libraries {
         }
         if (array_key_exists('photos', $data)) {
             $settings['photos'] = !empty($data['photos']);
+        }
+        if (array_key_exists('timezone', $data)) {
+            $settings['timezone'] = zones::known((string) $data['timezone']) ? (string) $data['timezone'] : '';
         }
         $before = $settings['skin'] ?? skins::SKINS[0];
         if (isset($data['skin'])) {

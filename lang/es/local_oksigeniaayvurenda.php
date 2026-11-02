@@ -1713,6 +1713,8 @@ $string['librariestitle'] = 'Las bibliotecas';
 $string['librariesyearstart'] = 'El curso empieza el';
 $string['librariesyearstarthint'] = 'mes-día, como 09-01';
 $string['librariesyearstartlay'] = 'El año empieza el';
+$string['librarieszone'] = 'Zona horaria';
+$string['librarieszonehint'] = 'Cuándo acaba el día en esta biblioteca: las fechas de devolución, los retrasos y las reservas van por ella.';
 $string['librarykindbank'] = 'Banco de libros';
 $string['librarykindcentral'] = 'Central';
 $string['librarykindclassroom'] = 'De aula';
@@ -3751,3 +3753,5 @@ $string['yearsynced'] = 'Grupos traídos: {$a->created} lectores nuevos, {$a->up
 $string['yeartutors'] = 'grupos con tutor';
 $string['z3950bridge'] = 'Puente Z39.50';
 $string['z3950bridge_desc'] = 'Dirección del servicio que pregunta, como SRU, a los catálogos que solo hablan Z39.50, como REBECA (las bibliotecas públicas de España, con su CDU). Con él, un sitio en español pregunta primero a REBECA al dar de alta por ISBN. Vacío, a esos catálogos no se les pregunta.';
+
+$string['zonesite'] = 'La del sitio ({$a})';

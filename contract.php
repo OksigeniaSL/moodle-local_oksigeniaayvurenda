@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\bank;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -74,13 +75,14 @@ foreach ($readers as $index => $oneid) {
         'who' => $str('contractwho', (object) ['name' => $contract['name'], 'group' => $contract['group'],
             'year' => $contract['year']]),
         'copies' => array_map(fn($c) => ['title' => $c['title'], 'barcode' => $c['barcode'],
-            'condition' => $str('condition' . $c['condition']), 'date' => userdate(
+            'condition' => $str('condition' . $c['condition']), 'date' => zones::date(
                 $c['date'],
-                get_string('strftimedateshort', 'langconfig')
+                'strftimedateshort',
+                $library
             )], $contract['copies']),
         'hascopies' => (bool) $contract['copies'],
         'terms' => $str('contractterms', $contract['year']),
-        'date' => userdate($now, get_string('strftimedate', 'langconfig')),
+        'date' => zones::date($now, 'strftimedate', $library),
         'canprint' => $index === 0,
     ];
     foreach (

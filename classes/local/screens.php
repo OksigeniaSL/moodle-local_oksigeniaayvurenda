@@ -369,7 +369,7 @@ final class screens {
         ) : null;
         if ($loan) {
             $short = get_string('strftimedateshort', 'langconfig');
-            $box['mine'] = self::str('holdyouhaveit', userdate((int) $loan->timedue, $short));
+            $box['mine'] = self::str('holdyouhaveit', zones::date((int) $loan->timedue, $short, $library));
             $box['loanid'] = (int) $loan->id;
             $box['minekind'] = 'loan';
             $box['mineuntil'] = (int) $loan->timedue;
@@ -380,10 +380,7 @@ final class screens {
                 $box['minekind'] = $mine->status === 'ready' ? 'ready' : 'waiting';
                 $box['mineuntil'] = (int) $mine->timeexpires;
                 if ($mine->status === 'ready') {
-                    $box['mine'] = self::str('holdmineready', userdate(
-                        (int) $mine->timeexpires,
-                        get_string('strftimedateshort', 'langconfig')
-                    ));
+                    $box['mine'] = self::str('holdmineready', zones::date((int) $mine->timeexpires, 'strftimedateshort', $library));
                 } else {
                     $box['mine'] = self::str('holdminewaiting');
                     $ahead = holds::ahead($mine);

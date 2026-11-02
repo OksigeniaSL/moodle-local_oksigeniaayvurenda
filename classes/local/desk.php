@@ -74,7 +74,7 @@ final class desk {
         $this->staffid = $staffid;
         $this->own = $own;
         $this->now = $now ?? time();
-        $this->tz = \core_date::get_server_timezone_object();
+        $this->tz = zones::of($library);
     }
 
     /**

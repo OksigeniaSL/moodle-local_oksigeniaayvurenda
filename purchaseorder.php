@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\purchases;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\skins;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -60,7 +61,7 @@ $data = [
     'heading' => $str(
         $found['order']->vendor ? 'purchaseorderheading' : 'purchaseorderheadingplain',
         (object) ['vendor' => (string) $found['order']->vendor,
-            'date' => userdate((int) $found['order']->timecreated, get_string('strftimedate', 'langconfig'))]
+            'date' => zones::date((int) $found['order']->timecreated, 'strftimedate', $library)]
     ),
     'from' => format_string($library->name, true, ['escape' => false]),
     'rows' => $rows,

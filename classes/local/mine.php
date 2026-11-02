@@ -88,10 +88,10 @@ final class mine {
                     // Not «slug»: inside the list, Mustache would find the library's first.
                     'where' => (string) $where->slug,
                     'canrenew' => $until !== null,
-                    'renewuntil' => $until ? userdate($until, get_string('strftimedateshort', 'langconfig')) : '',
+                    'renewuntil' => $until ? zones::date($until, 'strftimedateshort', $where) : '',
                     'title' => $row->title,
                     'url' => $url('record.php', $where, ['id' => $row->recordid]),
-                    'due' => userdate((int) $row->timedue, get_string('strftimedateshort', 'langconfig')),
+                    'due' => zones::date((int) $row->timedue, 'strftimedateshort', $where),
                     'late' => (int) $row->timedue < $now,
                     'timedue' => (int) $row->timedue,
                     // A textbook lent for the year is not something to remember on a phone's home.

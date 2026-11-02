@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -60,7 +61,7 @@ $fragment = function (int $id) use ($str, $library, $recordid) {
     $until = DateTimeImmutable::createFromFormat(
         '!Y-m-d',
         (string) optional_param('until', '', PARAM_TEXT),
-        core_date::get_server_timezone_object()
+        zones::of($library)
     );
     $course = optional_param('forcourse', 0, PARAM_INT);
     \local_oksigeniaayvurenda\local\fragments::set(
@@ -132,10 +133,10 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
         'audiencechips' => $only ? [] : array_values($audiencelabels),
         'courses' => $courselist($only ? (int) $only->courseid : 0),
         'pages' => $only ? (string) $only->pages : '',
-        'until' => date('Y-m-d', $only ? (int) $only->timeend : $yearend),
+        'until' => zones::date($only ? (int) $only->timeend : $yearend, '%Y-%m-%d', $library),
         'onlyline' => $only ? $str('fragmentline', (object) ['course' => $courses[$only->courseid]
             ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $only->courseid]), true, ['escape' => false]),
-            'until' => userdate((int) $only->timeend, get_string('strftimedateshort', 'langconfig'))]) : '',
+            'until' => zones::date((int) $only->timeend, 'strftimedateshort', $library)]) : '',
         'id' => (int) $item->id,
         'title' => $item->title !== '' && $item->title !== null ? $item->title : $str('format' . $item->format),
         'rawtitle' => (string) $item->title,
@@ -170,7 +171,7 @@ $data = [
     'hasstages' => (bool) $stages,
     'hascourses' => (bool) $courses,
     'courses' => $courselist(0),
-    'until' => date('Y-m-d', $yearend),
+    'until' => zones::date($yearend, '%Y-%m-%d', $library),
     'recordurl' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $recordid]))
         ->out(false),
 ];

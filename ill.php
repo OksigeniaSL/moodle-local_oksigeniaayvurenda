@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\ill;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\skins;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -68,7 +69,7 @@ if (data_submitted() && confirm_sesskey()) {
             $library,
             optional_param('code', '', PARAM_TEXT),
             optional_param('partner', '', PARAM_TEXT),
-            ill::date(optional_param('due', '', PARAM_TEXT)),
+            ill::date(optional_param('due', '', PARAM_TEXT), $library),
             (int) $USER->id,
             $now
         );
@@ -79,14 +80,14 @@ if (data_submitted() && confirm_sesskey()) {
         }
     } else if ($do === 'move') {
         $state = required_param('state', PARAM_ALPHA);
-        $due = ill::date(optional_param('due', '', PARAM_TEXT));
+        $due = ill::date(optional_param('due', '', PARAM_TEXT), $library);
         $done = ill::move($library, required_param('id', PARAM_INT), $state, $due, $now);
         if ($done) {
             $notice = $str('illmoved' . $state);
         }
     }
 }
-$date = fn(?int $time) => $time ? userdate($time, get_string('strftimedateshort', 'langconfig')) : '';
+$date = fn(?int $time) => $time ? zones::date($time, 'strftimedateshort', $library) : '';
 $next = ['asked' => 'arrived', 'arrived' => 'lent', 'lent' => 'back', 'back' => 'done'];
 $lists = ill::rows($library, $tab, $now);
 $card = function (array $row) use ($str, $date, $next) {

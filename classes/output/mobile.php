@@ -32,6 +32,7 @@ use local_oksigeniaayvurenda\local\mine;
 use local_oksigeniaayvurenda\local\renewals;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\skins;
+use local_oksigeniaayvurenda\local\zones;
 
 /**
  * The «Library» of the app's menu: for each centre where someone is a reader, their books out and until when, what is
@@ -243,7 +244,7 @@ class mobile {
             $mineis = (string) ($box['minekind'] ?? '');
             $words = fn(string $key) => get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda');
             $date = !empty($box['mineuntil'])
-                ? userdate((int) $box['mineuntil'], get_string('strftimedateshort', 'langconfig')) : '';
+                ? zones::date((int) $box['mineuntil'], 'strftimedateshort', $library) : '';
             $late = $mineis === 'loan' && (int) $box['mineuntil'] < time();
             // One copy goes in the slip; of several, the list says where each one is.
             $one = !$mineis && count($copies) === 1 && $card['state'] !== 'out' ? $copies[0] : null;
@@ -289,7 +290,7 @@ class mobile {
                 'canrenew' => $until !== null,
                 'renew' => $str('mobilerenew'),
                 'renewtoast' => $until
-                    ? $str('mobilerenewedto', userdate($until, get_string('strftimedateshort', 'langconfig'))) : '',
+                    ? $str('mobilerenewedto', zones::date($until, 'strftimedateshort', $library)) : '',
                 'holdask' => $str('holdask'),
                 'holdaskhint' => $str('holdaskhint'),
                 'holdadded' => $str('holdadded'),

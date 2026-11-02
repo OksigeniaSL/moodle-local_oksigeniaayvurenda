@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\sources\cohorts;
 use local_oksigeniaayvurenda\local\year_change;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -61,7 +62,7 @@ $url = fn(string $page, array $params = []) => (new moodle_url(
     '/local/oksigeniaayvurenda/' . $page,
     ['library' => $library->slug] + $params
 ))->out(false);
-$date = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));
+$date = fn(int $time) => zones::date($time, 'strftimedate', $library);
 
 $cards = [
     ['number' => $status['groups'], 'label' => $str('yeargroups', $status['members']), 'url' => $url('readers.php')],

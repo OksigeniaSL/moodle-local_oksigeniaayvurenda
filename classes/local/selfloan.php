@@ -283,7 +283,7 @@ final class selfloan {
         if ($open || $item->status === 'onloan') {
             // Read twice in a row, a book just taken must not go back by itself.
             if ($open && $holder && (int) $open->readerid === $holder && $now - (int) $open->timeloaned < self::DOUBLE) {
-                $due = self::date((int) $open->timedue);
+                $due = self::date((int) $open->timedue, $library);
                 return self::say('look', 'selfalready', (object) ['title' => $title, 'due' => $due]);
             }
             if (!self::settings($library)['returns']) {
@@ -314,7 +314,7 @@ final class selfloan {
         $answer = $desk->scan($item->barcode, $holder);
         if ($answer['kind'] === 'lent') {
             $DB->set_field(self::T . 'loan', 'postid', $post->id, ['id' => $answer['loanid']]);
-            $due = self::date((int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $answer['loanid']]));
+            $due = self::date((int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $answer['loanid']]), $library);
             return self::say('ok', 'selflent', (object) ['title' => $title, 'due' => $due], ['title' => $title, 'due' => $due]);
         }
         if ($answer['kind'] === 'stop' && in_array($answer['reason'] ?? '', self::STOPS, true)) {
@@ -617,10 +617,11 @@ final class selfloan {
      * A date as a post says it.
      *
      * @param int $time
+     * @param \stdClass $library
      * @return string
      */
-    private static function date(int $time): string {
-        return userdate($time, get_string('strftimedateshort', 'langconfig'), \core_date::get_server_timezone());
+    private static function date(int $time, \stdClass $library): string {
+        return zones::date($time, 'strftimedateshort', $library);
     }
 
     /**

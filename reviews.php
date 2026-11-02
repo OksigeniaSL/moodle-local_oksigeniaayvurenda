@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\reviews;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -62,7 +63,7 @@ $items = array_map(fn($r) => [
     'voice' => $r->voice,
     'voicelabel' => $str('reviewvoiceof', $r->who),
     'drawingalt' => $str('reviewdrawingof', $r->who),
-    'when' => userdate((int) $r->timemodified, get_string('strftimedateshort', 'langconfig')),
+    'when' => zones::date((int) $r->timemodified, 'strftimedateshort', $library),
 ], reviews::pending((int) $library->entityid));
 
 shell::output($str('reviewstitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/reviews', [

@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\bankround;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -56,7 +57,8 @@ if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', '', PARAM_ALPHA);
     if ($do === 'deadline') {
         $date = optional_param('deadline', '', PARAM_TEXT);
-        $when = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? (int) strtotime($date . ' 23:59:59') : 0;
+        $when = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
+            ? (new DateTimeImmutable($date . ' 23:59:59', zones::of($library)))->getTimestamp() : 0;
         bankround::save_state($library, ['deadline' => $when]);
         $notice = $str($when ? 'bankrounddeadlinesaved' : 'bankrounddeadlinegone');
     } else if ($do === 'remind') {
@@ -98,8 +100,9 @@ if ($mode === 'collect') {
         'notyettext' => $str('bankroundnotyet'),
         'old' => $c['old'] ? $str('bankroundold', $number($c['old'])) : '',
         'deadlinelabel' => $str('bankrounddeadline'),
-        'deadlinetext' => $state['deadline'] ? userdate((int) $state['deadline'], $short) : $str('bankrounddeadlinenone'),
-        'deadlinevalue' => $state['deadline'] ? date('Y-m-d', (int) $state['deadline']) : '',
+        'deadlinetext' => $state['deadline'] ? zones::date((int) $state['deadline'], $short, $library)
+            : $str('bankrounddeadlinenone'),
+        'deadlinevalue' => $state['deadline'] ? zones::date((int) $state['deadline'], '%Y-%m-%d', $library) : '',
         'deadlinechange' => $str($state['deadline'] ? 'bankrounddeadlinechange' : 'bankrounddeadlineset'),
         'deadlinehint' => $str('bankrounddeadlinehint'),
         'save' => $str('bankroundsave'),
@@ -110,13 +113,13 @@ if ($mode === 'collect') {
         'remindreadershint' => $str('bankroundremindreadershint', (object) ['with' => $number($c['holders'] - $c['noaccount']),
             'without' => $number($c['noaccount'])]),
         'remindreaderslast' => $state['readers'] ? $str('bankroundremindlast', (object) [
-            'when' => userdate((int) $state['readers'], $short),
+            'when' => zones::date((int) $state['readers'], $short, $library),
             'sent' => $number((int) $state['readerssent']),
         ]) : '',
         'remindtutors' => $str('bankroundremindtutors'),
         'remindtutorshint' => $str('bankroundremindtutorshint'),
         'remindtutorslast' => $state['tutors'] ? $str('bankroundremindlast', (object) [
-            'when' => userdate((int) $state['tutors'], $short),
+            'when' => zones::date((int) $state['tutors'], $short, $library),
             'sent' => $number((int) $state['tutorssent']),
         ]) : '',
         'canreaders' => (int) $state['readers'] <= $now - DAYSECS,
@@ -131,7 +134,11 @@ if ($mode === 'collect') {
         'hasclasses' => (bool) $c['classes'],
         'lostheading' => $str('bankroundlost'),
         'losthint' => $str('bankroundlosthint'),
-        'losses' => array_map(fn($l) => $l + ['date' => userdate($l['when'], $short)], $losses),
+        'losses' => array_map(fn($l) => $l + ['date' => zones::date(
+            $l['when'],
+            $short,
+            $library
+        )], $losses),
         'haslosses' => (bool) $losses,
         'foundlabel' => $str('bankroundfound'),
     ];

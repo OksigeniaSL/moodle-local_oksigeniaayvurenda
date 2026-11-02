@@ -292,7 +292,7 @@ final class abies_import {
         global $DB;
         $types = $export->item_types();
         $barcodes = $DB->get_records_menu(self::T . 'item', ['entityid' => $this->entityid], '', 'barcode, id');
-        $tz = \core_date::get_server_timezone_object();
+        $tz = \local_oksigeniaayvurenda\local\zones::of($this->entityid);
         $seen = [];
         foreach ($export->items() as $item) {
             $abiesid = $item['Id'] ?? '';
@@ -452,7 +452,7 @@ final class abies_import {
      */
     private function loans(export_reader $export): void {
         global $DB;
-        $tz = \core_date::get_server_timezone_object();
+        $tz = \local_oksigeniaayvurenda\local\zones::of($this->entityid);
         $date = function (?string $value, bool $endofday = false) use ($tz): ?int {
             if ($value === null || !preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
                 return null;
@@ -510,7 +510,8 @@ final class abies_import {
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $latest)) {
             return $this->now;
         }
-        return (new \DateTimeImmutable($latest, \core_date::get_server_timezone_object()))->setTime(12, 0)->getTimestamp();
+        return (new \DateTimeImmutable($latest, \local_oksigeniaayvurenda\local\zones::of($this->entityid)))
+            ->setTime(12, 0)->getTimestamp();
     }
 
     /**
