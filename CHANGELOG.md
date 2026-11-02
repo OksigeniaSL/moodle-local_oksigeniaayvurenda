@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.128.0 (2026-11-02)
+
+- Guided helps for adding material, repeated readers and tutors, with their voices (art 0.1.38). «How do I…?» also answers about material, repeated readers and other platforms.
+
 ## 0.127.2 (2026-11-02)
 
 - A centre's own character stands on the floor of the visit, at the size of a person, instead of perching where the hummingbird perches (`standing` in each scene; art 0.1.37).

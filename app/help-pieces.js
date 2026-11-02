@@ -452,7 +452,7 @@ window.AYVHelpPieces = {
         return h.point('.ayv-tabs').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('label:has(input[name="from"])');
+            return h.point('.ayv-inline-form');
         }).then(function() {
             return h.say(1);
         }).then(function() {
@@ -567,6 +567,71 @@ window.AYVHelpPieces = {
             return h.point('.ayv-camp-links a:last-child');
         }).then(function() {
             return h.say(7);
+        });
+    },
+    // What is lent and is no book: its name, how many, the rest folded, and «now you»: add them.
+    material: function(h) {
+        'use strict';
+        return h.type('input[name="name"]', h.codes.material).then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.choose('input[name="count"]', '3');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.tap('.ayv-mat-more summary');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.you(3, '.ayv-book-actions .ayv-button');
+        }).then(function() {
+            return h.point('.ayv-notice');
+        }).then(function() {
+            return h.say(4);
+        });
+    },
+    // The same person twice: what each record says, which stays, «now you»: join them, and by hand.
+    twins: function(h) {
+        'use strict';
+        return h.point('#ayv-twins-likely .ayv-twinset').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-twinset-person:last-child .ayv-field-hint');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-twinset-person');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.you(3, '#ayv-twins-likely .ayv-twinset button[type="submit"]');
+        }).then(function() {
+            return h.point('.ayv-notice');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.point('[data-ayv-open="ayv-twins-bycode"]');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    // Who looks after each group: how many have one, what they get, choosing one, last year's, and «now you»: save.
+    tutors: function(h) {
+        'use strict';
+        return h.point('.ayv-tut-sum').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-tut-stage');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.choose('select[name="tutor[0]"]', h.codes.me);
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.you(4, '.ayv-tut-save .ayv-button');
         });
     },
     keepers: function(h) {

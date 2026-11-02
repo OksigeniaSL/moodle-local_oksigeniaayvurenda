@@ -36,6 +36,7 @@ final class howto {
         'offline' => ['desk.php', 'desk', ''],
         'room' => ['desk.php', 'desk', ''],
         'add' => ['add.php', 'catalogue', 'add'],
+        'material' => ['material.php', 'catalogue', 'material'],
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
         'cards' => ['readers.php', 'desk', 'card'],
@@ -62,7 +63,9 @@ final class howto {
         'bankround' => ['libraries.php', 'desk', ''],
         'import' => ['import.php', 'manage', 'import'],
         'year' => ['year.php', 'manage', ''],
-        'tutors' => ['tutors.php', 'manage', ''],
+        'tutors' => ['tutors.php', 'manage', 'tutors'],
+        'twins' => ['twins.php', 'manage', 'twins'],
+        'platforms' => ['lti.php', 'manage', ''],
         'rules' => ['rules.php', 'manage', 'rules'],
         'libraries' => ['libraries.php', 'manage', ''],
         'keepers' => ['keepers.php', 'manage', 'keepers'],
@@ -96,6 +99,9 @@ final class howto {
         'voices' => ['capability' => 'desk', 'page' => 'voices.php', 'steps' => 8],
         'readers' => ['capability' => 'manage', 'page' => 'readers.php', 'steps' => 6],
         'readerslist' => ['capability' => 'manage', 'page' => 'readerslist.php', 'steps' => 6],
+        'material' => ['capability' => 'catalogue', 'page' => 'material.php', 'steps' => 5],
+        'twins' => ['capability' => 'manage', 'page' => 'twins.php', 'steps' => 6],
+        'tutors' => ['capability' => 'manage', 'page' => 'tutors.php', 'steps' => 5],
     ];
 
     /** @var string[] Words that say nothing about the task. */

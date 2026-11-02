@@ -153,6 +153,20 @@ final class practice_test extends \advanced_testcase {
 
         $library = practice::reset();
         $this->assertSame(0, $DB->count_records($t . 'digital', ['entityid' => $library->entityid]));
+        practice::prepare($library, 'twins', $admin);
+        $sets = twins::likely((int) $library->entityid);
+        $this->assertCount(1, $sets);
+        $this->assertCount(2, $sets[0]);
+        $loans = array_column(twins::describe((int) $library->entityid, $sets[0]), 'loans');
+        rsort($loans);
+        $this->assertGreaterThan(0, (int) $loans[0], 'one of the two has something to lose');
+        $this->assertSame(0, (int) $loans[1]);
+
+        $library = practice::reset();
+        $this->assertSame([], twins::likely((int) $library->entityid));
+        $this->assertSame([], tutors::candidates((int) $library->entityid));
+        practice::prepare($library, 'tutors', $admin);
+        $this->assertSame([$admin], array_keys(tutors::candidates((int) $library->entityid)), 'only who is practising');
     }
 
     /**

@@ -41,6 +41,9 @@ final class howto_test extends \advanced_testcase {
         $this->assertSame('labels', $first('print stickers for the spines', $admin));
         $this->assertSame('reviews', $first('approve the reviews', $admin));
         $this->assertSame('room', $first('books read at the tables', $admin));
+        $this->assertSame('material', $first('tablets and calculators', $admin));
+        $this->assertSame('twins', $first('merge duplicates', $admin));
+        $this->assertSame('platforms', $first('open it from canvas', $admin));
         $this->assertSame([], howto::find('xyzzy', $library, $admin));
         $this->assertCount(count(howto::TASKS), howto::find('', $library, $admin));
         $this->assertNotNull(howto::find('labels', $library, $admin)[0]['help']);

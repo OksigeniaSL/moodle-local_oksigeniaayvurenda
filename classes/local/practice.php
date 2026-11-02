@@ -58,6 +58,9 @@ final class practice {
         [10002, 'Noa', 'Ríos Lago', '5º B'],
     ];
 
+    /** @var int The number of the card of one more reader, for the helps that need one. */
+    private const TWIN = 10003;
+
     /** @var array[] Its books: barcode number, title, author, class, how many days ago it was lent to whom (or null). */
     public const BOOKS = [
         [100000, 'El faro dormido', 'Laurel Prado, Irene', 'N', null],
@@ -406,6 +409,17 @@ final class practice {
                     'readerid' => $readers[$code($who)], 'status' => 'waiting', 'timecreated' => $now - $ago * DAYSECS,
                     'timemodified' => $now - $ago * DAYSECS]);
             }
+        } else if ($piece === 'twins') {
+            // Leo twice, as a list from another program leaves him: this one has no loans, so the first is offered to stay.
+            $DB->insert_record(self::T . 'reader', ['entityid' => $library->entityid,
+                'cardcode' => control_letter::append((string) self::TWIN), 'readertype' => 'student',
+                'firstname' => self::READERS[1][1], 'lastname' => self::READERS[1][2], 'status' => 'active',
+                'timecreated' => $now, 'timemodified' => $now]);
+        } else if ($piece === 'tutors') {
+            // Whoever is practising, the only one the list can offer: nobody else of the site comes in here.
+            $DB->insert_record(self::T . 'reader', ['entityid' => $library->entityid, 'userid' => $userid,
+                'cardcode' => control_letter::append((string) self::TWIN), 'readertype' => 'teacher',
+                'firstname' => '', 'lastname' => '', 'status' => 'active', 'timecreated' => $now, 'timemodified' => $now]);
         } else if ($piece === 'voices') {
             // A voice waiting: Ana's, with no permission of her family yet. It sounds if the art brings a clip to borrow.
             $itemid = $DB->insert_record(self::T . 'digital', ['entityid' => $library->entityid,

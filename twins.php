@@ -38,7 +38,8 @@ $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:manage', $library);
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/twins.php', ['library' => $ref]));
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/twins.php', ['library' => $ref] +
+    (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -146,5 +147,7 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/twins', $data),
     $library,
     '',
-    ['search' => false, 'nav' => [['url' => $readersurl, 'label' => $str('readers')]]]
+    ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => $readersurl, 'label' => $str('readers')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'twins']))
+            ->out(false), 'label' => $str('helpnav')]]]
 );
