@@ -181,7 +181,8 @@ final class mine {
      * What a family sees of a child's library in Oksigenia Aty: what the child has out and what is set aside for them, and
      * until when, so that it gets back. See, not act: they do not renew or reserve for the child. What a child reads is theirs:
      * from the age the sky replaces the flower, the family sees that there is a book and its date, not which one, as a
-     * tutor does. A textbook lent for the year is left out, as on the child's own home.
+     * tutor does, and its row opens nothing, since any page would be the adult's library and not the child's. A textbook
+     * lent for the year is left out, as on the child's own home.
      *
      * @param int $childuserid
      * @param int|null $now
@@ -203,7 +204,7 @@ final class mine {
             $row = function (array $book, string $detail, int $date, bool $late, string $where) use ($young, $str) {
                 return ['title' => $young ? $book['title'] : $str('mobilechildbook'), 'detail' => $detail, 'date' => $date,
                     'urgent' => $late] + ($young ? ['method' => 'mobile_record_view',
-                    'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['method' => 'mobile_library_view']);
+                    'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['plain' => true]);
             };
             foreach ($library['loans'] as $loan) {
                 if (!$loan['textbook']) {

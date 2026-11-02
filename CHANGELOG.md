@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.132.1 (2026-11-02)
+
+- On a child's page in Aty, the row of a book of an older child opens nothing: the page would be the adult's library, not the child's.
+
 ## 0.132.0 (2026-11-02)
 
 - Lending between libraries of different centres, whatever program the other one uses: what is asked of another library for a reader here, from the asking to going home, with a notice when it arrives; and copies lent to another library, which go out and come back at the desk. What a reader asks to buy can be asked of another library instead.

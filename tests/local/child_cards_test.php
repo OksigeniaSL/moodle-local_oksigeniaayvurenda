@@ -87,7 +87,8 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertStringNotContainsString('faro', $text);
         $this->assertStringNotContainsString((string) $w->record->id . ',', json_encode($cards[0]['items'][0]['args'] ?? []));
         $this->assertSame(get_string('mobilechildbook', 'local_oksigeniaayvurenda'), $cards[0]['items'][0]['title']);
-        $this->assertSame('mobile_library_view', $cards[0]['items'][0]['method']);
+        $this->assertTrue($cards[0]['items'][0]['plain']);
+        $this->assertArrayNotHasKey('method', $cards[0]['items'][0]);
         $this->assertGreaterThan(0, $cards[0]['items'][0]['date']);
     }
 
@@ -117,9 +118,6 @@ final class child_cards_test extends \advanced_testcase {
         $page = \local_oksigeniaayvurenda\output\mobile::mobile_record_view($args);
         $html = json_encode($page, JSON_UNESCAPED_UNICODE);
         $this->assertStringNotContainsString('renew_loan', $html);
-        // Where the row of an older child leads: nothing of the child in it.
-        $library = json_encode(\local_oksigeniaayvurenda\output\mobile::mobile_library_view([]));
-        $this->assertStringNotContainsString('El faro secreto', $library);
         $this->assertStringNotContainsString(get_string('mobilestateloan', 'local_oksigeniaayvurenda'), $html);
         $this->assertFalse($DB->record_exists(self::T . 'reader', ['userid' => $w->adult->id]), 'opening it makes nobody a reader');
     }
