@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.137.1
+
+- Copies in Google Drive with no client of the library's own: a Moodle that already has Google's OAuth 2 service uses it.
+  When that project has the Drive API off, «Copias» says so.
+
 ## 0.137.0
 
 - Links that open from home: in a centre's settings, the prefix of its proxy and its link resolver. A link marked as

@@ -37,17 +37,41 @@ final class gdrive {
     /** @var string The type of a folder, for Drive. */
     private const FOLDER = 'application/vnd.google-apps.folder';
 
+    /** @var string Why the last connection failed: '' or 'api', when the Drive API is off in the client's project. */
+    public static $why = '';
+
     /** @var callable|null For the tests: answers in place of the network (method, url, headers, body) → [code, body, headers]. */
     public static $network = null;
 
     /**
-     * Whether the site has its client, from Google's console.
+     * Whether the site has a client of Google's to use.
      *
      * @return bool
      */
     public static function configured(): bool {
-        return trim((string) get_config('local_oksigeniaayvurenda', 'driveclientid')) !== ''
-            && trim((string) get_config('local_oksigeniaayvurenda', 'driveclientsecret')) !== '';
+        return self::client() !== null;
+    }
+
+    /**
+     * The client: the one in the plugin's settings or, without it, the Google service of the site's own Moodle (OAuth 2
+     * services), which asks for the same permission and comes back through the same page.
+     *
+     * @return array|null Its id and its secret.
+     */
+    private static function client(): ?array {
+        $id = trim((string) get_config('local_oksigeniaayvurenda', 'driveclientid'));
+        $secret = trim((string) get_config('local_oksigeniaayvurenda', 'driveclientsecret'));
+        if ($id !== '' && $secret !== '') {
+            return [$id, $secret];
+        }
+        foreach (\core\oauth2\api::get_all_issuers(true) as $issuer) {
+            $google = $issuer->get('servicetype') === 'google'
+                || strpos((string) $issuer->get('baseurl'), 'accounts.google.com') !== false;
+            if ($google && $issuer->get('enabled') && $issuer->is_configured()) {
+                return [trim((string) $issuer->get('clientid')), trim((string) $issuer->get('clientsecret'))];
+            }
+        }
+        return null;
     }
 
     /**
@@ -82,7 +106,7 @@ final class gdrive {
      */
     public static function auth_url(\moodle_url $back): string {
         return self::address('auth') . '?' . http_build_query([
-            'client_id' => trim((string) get_config('local_oksigeniaayvurenda', 'driveclientid')),
+            'client_id' => (self::client() ?? [''])[0],
             'redirect_uri' => self::callback(),
             'response_type' => 'code',
             'scope' => self::SCOPE,
@@ -135,9 +159,9 @@ final class gdrive {
      * @return array The answer's code, body and headers.
      */
     private static function token_request(array $fields): array {
+        [$id, $secret] = self::client() ?? ['', ''];
         return self::http('POST', self::address('token'), ['Content-Type: application/x-www-form-urlencoded'], http_build_query(
-            $fields + ['client_id' => trim((string) get_config('local_oksigeniaayvurenda', 'driveclientid')),
-                'client_secret' => trim((string) get_config('local_oksigeniaayvurenda', 'driveclientsecret'))],
+            $fields + ['client_id' => $id, 'client_secret' => $secret],
             '',
             '&'
         ));
@@ -162,6 +186,8 @@ final class gdrive {
             json_encode(['name' => $name, 'mimeType' => self::FOLDER])
         );
         $id = $status === 200 ? (string) (json_decode($body, true)['id'] ?? '') : '';
+        // A client made for signing in may come from a project where nobody turned the Drive API on.
+        self::$why = $status === 403 && preg_match('/accessNotConfigured|SERVICE_DISABLED/', $body) ? 'api' : '';
         return $id !== '' ? $id : null;
     }
 

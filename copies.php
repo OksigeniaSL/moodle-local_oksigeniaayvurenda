@@ -57,11 +57,12 @@ if ($code !== '' && $manage && confirm_sesskey() && optional_param('drivefor', 0
     $id = offsite::add_drive($entityid, $code);
     $good = $id !== null && offsite::test($entityid, $id) === null;
     // Back to a clean address: the code does not stay in the bar or in the history.
-    redirect(new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $ref, 'drive' => $good ? 'ok' : 'no']));
+    $answer = $good ? 'ok' : (gdrive::$why === 'api' ? 'api' : 'no');
+    redirect(new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $ref, 'drive' => $answer]));
 }
 $drive = optional_param('drive', '', PARAM_ALPHA);
 if ($drive !== '') {
-    $notice = $str($drive === 'ok' ? 'offsitedriveadded' : 'offsitedrivefailed');
+    $notice = $str(['ok' => 'offsitedriveadded', 'api' => 'offsitedriveapi'][$drive] ?? 'offsitedrivefailed');
 }
 if (data_submitted() && confirm_sesskey() && $manage) {
     $do = optional_param('do', 'make', PARAM_ALPHA);

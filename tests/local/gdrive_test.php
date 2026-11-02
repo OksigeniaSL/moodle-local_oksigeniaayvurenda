@@ -143,6 +143,57 @@ final class gdrive_test extends \advanced_testcase {
     }
 
     /**
+     * A Moodle with its own Google service needs no client of its own; the plugin's, when there is one, comes first.
+     */
+    public function test_moodle_service(): void {
+        $this->centre();
+        unset_config('driveclientid', 'local_oksigeniaayvurenda');
+        unset_config('driveclientsecret', 'local_oksigeniaayvurenda');
+        $issuer = \core\oauth2\api::init_standard_issuer('google');
+        $issuer->set('clientid', 'moodle-id');
+        $issuer->set('clientsecret', 'moodle-secret');
+        $issuer->set('enabled', 0);
+        $issuer->create();
+        $this->assertFalse(gdrive::configured(), 'a service that is off is not used');
+        $issuer->set('enabled', 1);
+        $issuer->update();
+        $this->assertTrue(gdrive::configured());
+        $client = function () {
+            parse_str((string) parse_url(gdrive::auth_url(new \moodle_url('/x.php')), PHP_URL_QUERY), $query);
+            return $query['client_id'];
+        };
+        $this->assertSame('moodle-id', $client());
+        $asked = [];
+        gdrive::$network = function ($method, $url, $headers, $body) use (&$asked) {
+            $asked[] = is_string($body) ? $body : '';
+            return [200, json_encode(['refresh_token' => 'r'])];
+        };
+        gdrive::exchange('c');
+        $this->assertStringContainsString('client_secret=moodle-secret', $asked[0]);
+        set_config('driveclientid', 'id-1', 'local_oksigeniaayvurenda');
+        set_config('driveclientsecret', 'sec-1', 'local_oksigeniaayvurenda');
+        $this->assertSame('id-1', $client());
+    }
+
+    /**
+     * When the client's project has the Drive API off, it says so instead of a plain failure.
+     */
+    public function test_api_off(): void {
+        $entityid = $this->centre();
+        gdrive::$network = function ($method, $url) {
+            if (strpos($url, '/token') !== false) {
+                return [200, json_encode(['refresh_token' => 'r', 'access_token' => 'a'])];
+            }
+            if (strpos($url, '/revoke') !== false) {
+                return [200, ''];
+            }
+            return [403, json_encode(['error' => ['errors' => [['reason' => 'accessNotConfigured']]]])];
+        };
+        $this->assertNull(offsite::add_drive($entityid, 'c'));
+        $this->assertSame('api', gdrive::$why);
+    }
+
+    /**
      * Connected: a folder of its own, the token kept in the secrets and not in the settings; each night's copy goes there,
      * old ones go away, and only its own are looked at.
      */
