@@ -187,6 +187,17 @@ function local_oksigeniaayvurenda_oksigeniaaty_home_cards(int $userid): array {
 }
 
 /**
+ * What a family sees in Oksigenia Aty of a child's library. Aty has checked that this adult is of this child's family.
+ *
+ * @param int $adultuserid
+ * @param int $childuserid
+ * @return array A list of cards, as Aty's homecards class describes them.
+ */
+function local_oksigeniaayvurenda_oksigeniaaty_child_cards(int $adultuserid, int $childuserid): array {
+    return \local_oksigeniaayvurenda\local\mine::child_cards($childuserid);
+}
+
+/**
  * «Readings» in a course's menu: for whoever can change the course, always (to make its list); for the rest, when the
  * course has some.
  *

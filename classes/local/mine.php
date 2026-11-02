@@ -176,4 +176,62 @@ final class mine {
             'pagetitle' => $str('mobilecard')]];
         return array_filter(array_column($summary, 'cardcode'), fn($code) => $code !== '') ? [$card, $card2] : [$card];
     }
+
+    /**
+     * What a family sees of a child's library in Oksigenia Aty: what the child has out and what is set aside for them, and
+     * until when, so that it gets back. See, not act: they do not renew or reserve for the child. What a child reads is theirs:
+     * from the age the sky replaces the flower, the family sees that there is a book and its date, not which one, as a
+     * tutor does. A textbook lent for the year is left out, as on the child's own home.
+     *
+     * @param int $childuserid
+     * @param int|null $now
+     * @return array A list of cards, as Aty's homecards class describes them.
+     */
+    public static function child_cards(int $childuserid, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $items = [];
+        foreach (self::summary($childuserid, $now) as $library) {
+            $reader = $DB->get_record(
+                self::T . 'reader',
+                ['userid' => $childuserid, 'cardcode' => $library['cardcode'], 'status' => 'active'],
+                '*',
+                IGNORE_MULTIPLE
+            );
+            $young = $reader && cards::look_of($reader, $now) === 'flower';
+            $row = function (array $book, string $detail, int $date, bool $late, string $where) use ($young, $str) {
+                return ['title' => $young ? $book['title'] : $str('mobilechildbook'), 'detail' => $detail, 'date' => $date,
+                    'urgent' => $late] + ($young ? ['method' => 'mobile_record_view',
+                    'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['method' => 'mobile_library_view']);
+            };
+            foreach ($library['loans'] as $loan) {
+                if (!$loan['textbook']) {
+                    $items[] = $row(
+                        $loan,
+                        $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $loan['due']),
+                        (int) $loan['timedue'],
+                        (bool) $loan['late'],
+                        (string) $loan['where']
+                    );
+                }
+            }
+            foreach ($library['holds'] as $hold) {
+                if ($hold['ready']) {
+                    $items[] = $row(
+                        $hold,
+                        $str('mobilechildready', $hold['until']),
+                        (int) $hold['expires'],
+                        false,
+                        (string) $library['slug']
+                    );
+                }
+            }
+        }
+        if (!$items) {
+            return [];
+        }
+        usort($items, fn($a, $b) => [$b['urgent'], $a['date']] <=> [$a['urgent'], $b['date']]);
+        return [['heading' => $str('mobilechildheading'), 'items' => array_slice($items, 0, self::HOME_ROWS)]];
+    }
 }

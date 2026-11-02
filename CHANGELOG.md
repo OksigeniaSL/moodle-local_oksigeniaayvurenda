@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.131.1 (2026-11-02)
+
+- In Oksigenia Aty, a family sees a child's library on the child's page: what they have out, what is set aside, and until when. To see, not to act. From the age the sky replaces the flower, there is a book and its date, not which one.
+
 ## 0.131.0 (2026-11-02)
 
 - Purchases: what readers ask for and what the staff see missing (required readings with too few copies, books with a queue), what is decided, the order for each vendor as a sheet to send or print, what arrives, and what it costs against the year's budget. When a book enters the catalogue, whoever asked for it is told.
