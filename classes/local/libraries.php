@@ -107,6 +107,10 @@ final class libraries {
         global $DB;
         $entity = $DB->get_record(self::T . 'entity', ['id' => $entityid], '*', MUST_EXIST);
         $settings = json_decode((string) $entity->settings, true) ?: [];
+        // The catalogues, in the order of the region and only when they are not its own order.
+        if (isset($data['sources'])) {
+            $data['sources'] = lookup::chosen($entityid, (array) $data['sources']);
+        }
         $after = self::entity_settings($settings, $data);
         $DB->update_record(self::T . 'entity', (object) [
             'id' => $entityid,
@@ -449,6 +453,14 @@ final class libraries {
         }
         if (array_key_exists('photos', $data)) {
             $settings['photos'] = !empty($data['photos']);
+        }
+        if (isset($data['sources'])) {
+            $list = array_values(array_filter((array) $data['sources'], fn($s) => isset(lookup::PRESETS[$s])));
+            if ($list) {
+                $settings['sources'] = $list;
+            } else {
+                unset($settings['sources']);
+            }
         }
         foreach (['linkproxy', 'linkresolver'] as $name) {
             if (array_key_exists($name, $data)) {

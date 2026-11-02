@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.141.0
+
+- The world's libraries for adding books: besides the Library of Congress, Open Library and Spain's, the national
+  libraries and shared catalogues of Germany, Switzerland, Austria, Sweden, Finland, Norway, Denmark, Italy, Quebec,
+  Wales, Victoria (Australia), Brazil, Colombia, Peru and Catalonia, each asked in its own way and tried with real
+  questions. Those that only speak Z39.50 go through the bridge, which gets a route for catalogues that send UTF-8
+  without saying so.
+- Each centre chooses them in «Centre settings»; without a choice, the ones of its time zone go first (a centre in Berlin
+  asks the German ones), or of the language of the site.
+- A search by words stops asking after 20 seconds: a catalogue that does not answer must not hold the desk.
+
 ## 0.140.0
 
 - A centre signed up from the command line, for the hosted service: `cli/add_entity.php` creates the centre, its first

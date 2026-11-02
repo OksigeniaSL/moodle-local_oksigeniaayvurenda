@@ -51,6 +51,9 @@ final class isbn_test extends \basic_testcase {
      * Every way of writing an ISBN with hyphens holds the one it is kept as; a 979 has no ISBN-10.
      */
     public function test_hyphenations(): void {
+        $this->assertSame('8532511015', isbn::ten('9788532511010'));
+        $this->assertSame('080442957X', isbn::ten('9780804429573'));
+        $this->assertNull(isbn::ten('9791040000075'));
         $ways = isbn::hyphenations('9788478884452');
         $this->assertCount(25, $ways['13']);
         $this->assertCount(25, $ways['10']);

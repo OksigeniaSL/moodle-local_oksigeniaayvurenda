@@ -82,6 +82,9 @@ if (data_submitted() && confirm_sesskey()) {
             'timezone' => optional_param('timezone', '', PARAM_TIMEZONE),
             'linkproxy' => optional_param('linkproxy', '', PARAM_RAW_TRIMMED),
             'linkresolver' => optional_param('linkresolver', '', PARAM_RAW_TRIMMED),
+            // The catalogues for adding books, only with the form that lists them.
+            'sources' => optional_param('sourcesform', 0, PARAM_BOOL) ? optional_param_array('sources', [], PARAM_ALPHANUMEXT)
+                : null,
             // What is on, only with the form that lists it.
             'play' => optional_param('playform', 0, PARAM_BOOL) ? optional_param_array('play', [], PARAM_ALPHA) : null,
             // The stages listed on the form whose box is left empty play no class challenge.
@@ -246,6 +249,8 @@ foreach (libraries::all() as $one) {
         ),
         'photos' => \local_oksigeniaayvurenda\local\profile::photos_on((int) $entity->id),
         'zones' => \local_oksigeniaayvurenda\local\zones::choices((int) $entity->id),
+        'catalogues' => array_map(fn($group) => ['label' => $str('sourceregion' . $group['region']),
+            'sources' => $group['sources']], \local_oksigeniaayvurenda\local\lookup::choices((int) $entity->id)),
         'linkproxy' => \local_oksigeniaayvurenda\local\links::settings((int) $entity->id)['proxy'],
         'linkresolver' => \local_oksigeniaayvurenda\local\links::settings((int) $entity->id)['resolver'],
         'play' => array_map(
@@ -311,7 +316,7 @@ foreach (
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
         'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplay',
         'librariesplayhint', 'librariesphotos', 'librariesphotoshint', 'librarieszone', 'librarieszonehint',
-        'librarieslinks', 'librarieslinkshint',
+        'librarieslinks', 'librarieslinkshint', 'librariescatalogues', 'librariescatalogueshint',
         'librariesproxy', 'librariesproxyhint', 'librariesresolver', 'librariesresolverhint', 'librariesplan',
         'librariesplanhint', 'planpreset', 'planpresetcustom', 'planname', 'plancopies',
         'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',

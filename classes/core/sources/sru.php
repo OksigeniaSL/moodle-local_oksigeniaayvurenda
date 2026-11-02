@@ -40,6 +40,7 @@ final class sru {
      * @param string $base Address of the service, up to the question mark.
      * @param string $index CQL index of the ISBN.
      * @param string $version SRU version.
+     * @param string $schema The name it gives to MARCXML («MARC21-xml» at the Deutsche Nationalbibliothek).
      */
     public function __construct(
         /** @var string Address of the service. */
@@ -47,7 +48,9 @@ final class sru {
         /** @var string CQL index of the ISBN. */
         private string $index = 'bath.isbn',
         /** @var string SRU version. */
-        private string $version = '1.1'
+        private string $version = '1.1',
+        /** @var string The name it gives to MARCXML. */
+        private string $schema = 'marcxml'
     ) {
     }
 
@@ -63,7 +66,7 @@ final class sru {
             'operation' => 'searchRetrieve',
             'query' => $this->index . '=' . preg_replace('/[^0-9X]/', '', strtoupper($isbn)),
             'maximumRecords' => 5,
-            'recordSchema' => 'marcxml',
+            'recordSchema' => $this->schema,
         ], '', '&', PHP_QUERY_RFC3986);
         return rtrim($this->base, '?&') . (str_contains($this->base, '?') ? '&' : '?') . $query;
     }
@@ -80,7 +83,7 @@ final class sru {
             'operation' => 'searchRetrieve',
             'query' => implode(' or ', array_map(fn($t) => $this->index . '="' . preg_replace('/[^0-9X-]/', '', $t) . '"', $terms)),
             'maximumRecords' => 5,
-            'recordSchema' => 'marcxml',
+            'recordSchema' => $this->schema,
         ], '', '&', PHP_QUERY_RFC3986);
         return rtrim($this->base, '?&') . (str_contains($this->base, '?') ? '&' : '?') . $query;
     }
@@ -88,7 +91,7 @@ final class sru {
     /**
      * The address that asks for books by the words of their title or their authors, wherever they are.
      *
-     * @param string $index The CQL index that looks everywhere.
+     * @param string $index The CQL index that looks everywhere; empty for the catalogue's own (the words alone, quoted).
      * @param string $relation «all» where the catalogue takes it; «=» where it reads all the words that way.
      * @param string $words
      * @param int $max
@@ -100,9 +103,9 @@ final class sru {
         $query = http_build_query([
             'version' => $this->version,
             'operation' => 'searchRetrieve',
-            'query' => $index . ' ' . $relation . ' "' . $clean . '"',
+            'query' => ($index === '' ? '' : $index . ' ' . $relation . ' ') . '"' . $clean . '"',
             'maximumRecords' => $max,
-            'recordSchema' => 'marcxml',
+            'recordSchema' => $this->schema,
         ], '', '&', PHP_QUERY_RFC3986);
         return rtrim($this->base, '?&') . (str_contains($this->base, '?') ? '&' : '?') . $query;
     }
@@ -122,7 +125,8 @@ final class sru {
     }
 
     /**
-     * A description with its accents as one character each: a catalogue in MARC-8 sends «o» and its accent apart.
+     * A description with its accents as one character each (a catalogue in MARC-8 sends «o» and its accent apart), and
+     * without the marks around a leading article.
      *
      * @param array $description
      * @return array
@@ -132,6 +136,10 @@ final class sru {
             array_walk_recursive($description, function (&$value) {
                 if (is_string($value) && !\Normalizer::isNormalized($value)) {
                     $value = \Normalizer::normalize($value, \Normalizer::FORM_C) ?: $value;
+                }
+                // The marks around a leading article that sorting skips («\u{98}Die\u{9C} Verwandlung») are not text.
+                if (is_string($value)) {
+                    $value = preg_replace('/[\x{0098}\x{009C}]/u', '', $value);
                 }
             });
         }

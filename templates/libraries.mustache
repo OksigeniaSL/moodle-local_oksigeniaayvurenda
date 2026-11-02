@@ -162,6 +162,13 @@
                     <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
             </fieldset>
             <label class="ayv-field">{{librarieszone}} <span class="ayv-field-hint">{{librarieszonehint}}</span> <select name="timezone">{{#zones}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/zones}}</select></label>
+            <details class="ayv-fieldset"><summary>{{librariescatalogues}}</summary>
+                <p class="ayv-field-hint">{{librariescatalogueshint}}</p>
+                <input type="hidden" name="sourcesform" value="1">
+                {{#catalogues}}<fieldset class="ayv-dig-set"><legend>{{label}}</legend><div class="ayv-segmented">
+                    {{#sources}}<label><input type="checkbox" name="sources[]" value="{{key}}" {{#on}}checked{{/on}}><span>{{name}}</span></label>{{/sources}}
+                </div></fieldset>{{/catalogues}}
+            </details>
             <details class="ayv-fieldset"><summary>{{librarieslinks}}</summary>
                 <p class="ayv-field-hint">{{librarieslinkshint}}</p>
                 <label class="ayv-field">{{librariesproxy}} <span class="ayv-field-hint">{{librariesproxyhint}}</span> <input type="text" inputmode="url" name="linkproxy" value="{{linkproxy}}" placeholder="https://login.proxy.example.org/login?url=" spellcheck="false"></label>

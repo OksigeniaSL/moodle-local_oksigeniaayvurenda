@@ -149,6 +149,7 @@ final class cataloguer_test extends \advanced_testcase {
     public function test_lookup(): void {
         $this->resetAfterTest();
         $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        libraries::update_entity((int) $library->entityid, ['sources' => ['loc', 'openlibrary']]);
         $asked = [];
         lookup::$fetcher = function (string $url) use (&$asked) {
             $asked[] = $url;
@@ -230,10 +231,17 @@ final class cataloguer_test extends \advanced_testcase {
      * book once, and each kept to be chosen; too few letters ask nobody, and neither does the practice library.
      */
     public function test_words(): void {
-        global $CFG;
+        global $CFG, $DB;
         $this->resetAfterTest();
         $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $CFG->lang = 'en';
+        // In this order (the settings screen would keep the order of its list).
+        $DB->set_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            json_encode(['sources' => ['loc', 'openlibrary', 'bne']]),
+            ['id' => $library->entityid]
+        );
         $asked = [];
         lookup::$fetcher = function (string $url) use (&$asked) {
             $asked[] = urldecode($url);
@@ -284,9 +292,38 @@ final class cataloguer_test extends \advanced_testcase {
         $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $entityid = (int) $library->entityid;
         $CFG->lang = 'en';
-        $this->assertSame(['loc', 'openlibrary', 'bne'], lookup::sources($entityid));
+        $this->assertSame(lookup::REGIONS['en'], lookup::sources($entityid));
         $CFG->lang = 'es';
-        $this->assertSame(['rebeca', 'bne', 'rebiun', 'csic', 'loc', 'openlibrary'], lookup::sources($entityid));
+        $this->assertSame(['rebeca', 'bne', 'rebiun', 'csic', 'ccuc', 'loc', 'openlibrary'], lookup::sources($entityid));
+        $CFG->lang = 'pt_br';
+        $this->assertSame('pt', lookup::region($entityid));
+        // A centre's own time zone wins over the language of the site.
+        $zones = ['Europe/Berlin' => 'de', 'America/Santiago' => 'la', 'America/Sao_Paulo' => 'pt', 'Europe/Oslo' => 'nordic',
+            'Australia/Melbourne' => 'en', 'America/Toronto' => 'en', 'Atlantic/Canary' => 'es', 'Europe/Rome' => 'it'];
+        foreach ($zones as $zone => $region) {
+            libraries::update_entity($entityid, ['timezone' => $zone]);
+            $this->assertSame($region, lookup::region($entityid), $zone);
+        }
+        libraries::update_entity($entityid, ['timezone' => 'Europe/Berlin']);
+        $this->assertSame(['dnb', 'k10plus', 'swisscovery', 'obv', 'loc', 'openlibrary'], lookup::sources($entityid));
+        $groups = lookup::choices($entityid);
+        $this->assertSame('de', $groups[0]['region']);
+        $this->assertSame('world', end($groups)['region']);
+        foreach (lookup::PRESETS as $key => $preset) {
+            $this->assertNotEmpty($preset['region'], $key);
+            $this->assertTrue($preset['type'] === 'openlibrary' || isset($preset['words']), $key);
+        }
+        // Chosen: kept in the order of the list; the region's own order is not kept, it follows the zone.
+        libraries::update_entity($entityid, ['sources' => ['openlibrary', 'dnb', 'nowhere']]);
+        $this->assertSame(['dnb', 'openlibrary'], lookup::sources($entityid));
+        libraries::update_entity($entityid, ['sources' => lookup::REGIONS['de']]);
+        $this->assertSame(lookup::REGIONS['de'], lookup::sources($entityid));
+        $this->assertArrayNotHasKey('sources', json_decode($DB->get_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            ['id' => $entityid]
+        ), true));
+        libraries::update_entity($entityid, ['timezone' => '']);
         $DB->set_field(
             'local_oksigeniaayvurenda_entity',
             'settings',

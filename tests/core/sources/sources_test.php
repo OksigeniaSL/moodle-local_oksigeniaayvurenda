@@ -44,8 +44,16 @@ final class sources_test extends \basic_testcase {
                 . '&maximumRecords=8&recordSchema=marcxml',
             (new sru('https://example.org/sru', 'alma.isbn', '1.2'))->url_words('alma.all_for_ui', 'all', ' el "faro"  dormido*\\')
         );
-        // A catalogue in MARC-8 sends each accent apart from its letter: it comes back as one character.
+        // A catalogue's own index: the words alone; its own name for MARCXML.
+        $this->assertStringContainsString(
+            '&query=%22r%C3%B6da%20rummet%22&maximumRecords=8&recordSchema=MARC21-xml',
+            (new sru('https://example.org/sru', 'isbn', '1.1', 'MARC21-xml'))->url_words('', '', 'röda rummet')
+        );
+        // A catalogue in MARC-8 sends each accent apart from its letter: it comes back as one character; the marks
+        // around a leading article go.
         $xml = file_get_contents(__DIR__ . '/../../fixtures/marc/sru.xml');
+        $marked = str_replace('El faro dormido', "\u{0098}El\u{009C} faro", $xml);
+        $this->assertSame('El faro', sru::descriptions($marked)[1]['record']['title']);
         $apart = str_replace('El faro dormido', 'El faro de Miro' . "\u{0301}", $xml);
         $this->assertSame('El faro de Miró', sru::descriptions($apart)[1]['record']['title']);
         $descriptions = sru::descriptions(file_get_contents(__DIR__ . '/../../fixtures/marc/sru.xml'));

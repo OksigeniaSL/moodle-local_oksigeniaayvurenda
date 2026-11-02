@@ -35,34 +35,94 @@ use local_oksigeniaayvurenda\core\text;
  * only talks to the site.
  */
 final class lookup {
-    /** @var array<string, array> The catalogues that can be asked without anything else. */
+    /** @var array<string, array> The catalogues that can be asked without anything else: long-standing national libraries
+     * and shared catalogues, each with its region, tried by real questions on 2 November 2026. Alma speaks SRU with
+     * «alma.isbn» and «alma.all_for_ui»; one that only speaks Z39.50 goes through the bridge the site sets. */
     public const PRESETS = [
-        'loc' => ['type' => 'sru', 'name' => 'Library of Congress', 'url' => 'https://lx2.loc.gov/sru/lcdb',
+        'loc' => ['type' => 'sru', 'name' => 'Library of Congress', 'region' => 'en', 'url' => 'https://lx2.loc.gov/sru/lcdb',
             'index' => 'bath.isbn', 'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => '='],
-        'openlibrary' => ['type' => 'openlibrary', 'name' => 'Open Library'],
+        'openlibrary' => ['type' => 'openlibrary', 'name' => 'Open Library', 'region' => 'world'],
         // Spain's National Library: its Alma catalogue by SRU, without a key, with most books in Spanish.
-        'bne' => ['type' => 'sru', 'name' => 'Biblioteca Nacional de España',
+        'bne' => ['type' => 'sru', 'name' => 'Biblioteca Nacional de España', 'region' => 'es',
             'url' => 'https://catalogo.bne.es/view/sru/34BNE_INST', 'index' => 'alma.isbn', 'version' => '1.2',
             'words' => 'alma.all_for_ui', 'relation' => 'all'],
-        // The libraries of Spain's research council (CSIC): their Alma catalogue by SRU, without a key.
-        'csic' => ['type' => 'sru', 'name' => 'Bibliotecas del CSIC',
+        // The libraries of Spain's research council (CSIC).
+        'csic' => ['type' => 'sru', 'name' => 'Bibliotecas del CSIC', 'region' => 'es',
             'url' => 'https://eu00.alma.exlibrisgroup.com/view/sru/34CSIC_INST', 'index' => 'alma.isbn', 'version' => '1.2',
             'words' => 'alma.all_for_ui', 'relation' => 'all'],
-        // REBECA, the shared catalogue of Spain's public libraries, with their CDU: it only speaks Z39.50, so it is asked
-        // through the Z39.50 bridge the site sets, and it only finds an ISBN written with its hyphens.
-        'rebeca' => ['type' => 'sru', 'name' => 'REBECA', 'bridge' => 'rebeca', 'index' => 'bath.isbn', 'version' => '1.1',
-            'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
-        // REBIUN, the shared catalogue of Spain's university libraries, with their CDU: Z39.50 only, through the bridge,
-        // and its ISBN with hyphens too.
-        'rebiun' => ['type' => 'sru', 'name' => 'REBIUN', 'bridge' => 'rebiun', 'index' => 'bath.isbn', 'version' => '1.1',
-            'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // Catalonia's shared catalogue of university and research libraries (CSUC).
+        'ccuc' => ['type' => 'sru', 'name' => 'CCUC (Catalunya)', 'region' => 'es',
+            'url' => 'https://csuc-bc.alma.exlibrisgroup.com/view/sru/34CSUC_NETWORK', 'index' => 'alma.isbn',
+            'version' => '1.2', 'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        // REBECA, the shared catalogue of Spain's public libraries, with their CDU: it only finds an ISBN with its hyphens.
+        'rebeca' => ['type' => 'sru', 'name' => 'REBECA', 'region' => 'es', 'bridge' => 'rebeca', 'index' => 'bath.isbn',
+            'version' => '1.1', 'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // REBIUN, the shared catalogue of Spain's university libraries, with their CDU and the ISBN with hyphens too.
+        'rebiun' => ['type' => 'sru', 'name' => 'REBIUN', 'region' => 'es', 'bridge' => 'rebiun', 'index' => 'bath.isbn',
+            'version' => '1.1', 'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // Colombia's National University (SINAB) and Peru's National Library, through the bridge.
+        'unal' => ['type' => 'sru', 'name' => 'Universidad Nacional de Colombia', 'region' => 'la', 'bridge' => 'unal',
+            'index' => 'bath.isbn', 'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        'bnp' => ['type' => 'sru', 'name' => 'Biblioteca Nacional del Perú', 'region' => 'la', 'bridge' => 'bnp',
+            'index' => 'bath.isbn', 'version' => '1.1', 'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // Brazil: São Paulo State University (UNESP) by SRU, and the University of São Paulo (DEDALUS) through the bridge.
+        'unesp' => ['type' => 'sru', 'name' => 'UNESP', 'region' => 'pt',
+            'url' => 'https://unesp.alma.exlibrisgroup.com/view/sru/55UNESP_INST', 'index' => 'alma.isbn', 'version' => '1.2',
+            'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        'usp' => ['type' => 'sru', 'name' => 'USP Dedalus', 'region' => 'pt', 'bridge' => 'usp', 'index' => 'bath.isbn',
+            'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // German: the National Library, the K10plus shared catalogue, and the Swiss and Austrian networks.
+        'dnb' => ['type' => 'sru', 'name' => 'Deutsche Nationalbibliothek', 'region' => 'de',
+            'url' => 'https://services.dnb.de/sru/dnb', 'index' => 'isbn', 'version' => '1.1', 'schema' => 'MARC21-xml',
+            'words' => 'woe', 'relation' => 'all'],
+        'k10plus' => ['type' => 'sru', 'name' => 'K10plus', 'region' => 'de', 'url' => 'https://sru.k10plus.de/opac-de-627',
+            'index' => 'pica.isb', 'version' => '1.1', 'words' => 'pica.all', 'relation' => '='],
+        'swisscovery' => ['type' => 'sru', 'name' => 'swisscovery', 'region' => 'de',
+            'url' => 'https://swisscovery.slsp.ch/view/sru/41SLSP_NETWORK', 'index' => 'alma.isbn', 'version' => '1.2',
+            'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        'obv' => ['type' => 'sru', 'name' => 'Österreichischer Bibliothekenverbund', 'region' => 'de',
+            'url' => 'https://obv-at-obvsg.alma.exlibrisgroup.com/view/sru/43ACC_NETWORK', 'index' => 'alma.isbn',
+            'version' => '1.2', 'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        // Nordic: Sweden's LIBRIS, Finland's Melinda, Norway's shared catalogue and Denmark's Royal Library.
+        'libris' => ['type' => 'sru', 'name' => 'LIBRIS', 'region' => 'nordic', 'url' => 'https://api.libris.kb.se/sru/libris',
+            'index' => 'bath.isbn', 'version' => '1.1', 'words' => '', 'relation' => ''],
+        'melinda' => ['type' => 'sru', 'name' => 'Melinda', 'region' => 'nordic',
+            'url' => 'https://sru.api.melinda.kansalliskirjasto.fi/bib', 'index' => 'bath.isbn', 'version' => '1.1',
+            'words' => '', 'relation' => ''],
+        'bibsys' => ['type' => 'sru', 'name' => 'Bibsys (Norge)', 'region' => 'nordic',
+            'url' => 'https://bibsys-k.alma.exlibrisgroup.com/view/sru/47BIBSYS_NETWORK', 'index' => 'alma.isbn',
+            'version' => '1.2', 'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        'kbdk' => ['type' => 'sru', 'name' => 'Det Kgl. Bibliotek', 'region' => 'nordic',
+            'url' => 'https://kbdk-kgl.alma.exlibrisgroup.com/view/sru/45KBDK_KGL', 'index' => 'alma.isbn', 'version' => '1.2',
+            'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        // Italy's national shared catalogue (SBN), in MARC 21 when asked for it, through the bridge.
+        'sbn' => ['type' => 'sru', 'name' => 'SBN (Italia)', 'region' => 'it', 'bridge' => 'sbn', 'index' => 'bath.isbn',
+            'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // In French with MARC 21: Quebec's national library, through the bridge.
+        'banq' => ['type' => 'sru', 'name' => 'BAnQ (Québec)', 'region' => 'fr', 'bridge' => 'banq', 'index' => 'bath.isbn',
+            'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // In English, besides the Library of Congress: the National Library of Wales and the State Library Victoria.
+        'nlw' => ['type' => 'sru', 'name' => 'National Library of Wales', 'region' => 'en', 'bridge' => 'nlw',
+            'index' => 'bath.isbn', 'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        'slv' => ['type' => 'sru', 'name' => 'State Library Victoria', 'region' => 'en',
+            'url' => 'https://slv.alma.exlibrisgroup.com/view/sru/61SLV_INST', 'index' => 'alma.isbn', 'version' => '1.2',
+            'words' => 'alma.all_for_ui', 'relation' => 'all'],
     ];
 
-    /** @var string[] The order when the entity has not chosen one. */
-    public const DEFAULT = ['loc', 'openlibrary', 'bne'];
+    /** @var array<string, string[]> The order of each region when the centre has not chosen one. */
+    public const REGIONS = [
+        'es' => ['rebeca', 'bne', 'rebiun', 'csic', 'ccuc', 'loc', 'openlibrary'],
+        'la' => ['bne', 'unal', 'bnp', 'rebiun', 'loc', 'openlibrary'],
+        'pt' => ['unesp', 'usp', 'loc', 'openlibrary'],
+        'de' => ['dnb', 'k10plus', 'swisscovery', 'obv', 'loc', 'openlibrary'],
+        'nordic' => ['libris', 'melinda', 'bibsys', 'kbdk', 'loc', 'openlibrary'],
+        'it' => ['sbn', 'loc', 'openlibrary'],
+        'fr' => ['banq', 'loc', 'openlibrary'],
+        'en' => ['loc', 'nlw', 'slv', 'openlibrary'],
+    ];
 
-    /** @var string[] The order when the entity has not chosen one and the site speaks Spanish. */
-    public const DEFAULT_ES = ['rebeca', 'bne', 'rebiun', 'csic', 'loc', 'openlibrary'];
+    /** @var int Seconds a search by words may spend asking: a catalogue that does not answer must not hold the desk. */
+    public const BUDGET = 20;
 
     /** @var int How many books a search by words brings at most. */
     public const FOUND = 10;
@@ -149,6 +209,7 @@ final class lookup {
         }
         $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
         $seen = [];
+        $started = microtime(true);
         // How many of the words asked for are in its title or its authors: a catalogue that looks everywhere also
         // brings what has them only in a note, and that goes.
         $asked = array_values(array_filter(text::words($words), fn($w) => \core_text::strlen($w) >= 3));
@@ -186,7 +247,7 @@ final class lookup {
                 $result['found'][] = ['pick' => $pick, 'source' => $source['name'], 'description' => $description,
                     'score' => $points, 'order' => count($result['found'])];
             }
-            if (count($result['found']) >= self::ENOUGH) {
+            if (count($result['found']) >= self::ENOUGH || microtime(true) - $started > self::BUDGET) {
                 break;
             }
         }
@@ -223,13 +284,132 @@ final class lookup {
             true
         ) ?: [];
         $chosen = array_values(array_filter($settings['sources'] ?? [], fn($s) => isset(self::PRESETS[$s])));
-        if ($chosen) {
-            return $chosen;
+        return $chosen ?: self::REGIONS[self::region($entityid)];
+    }
+
+    /**
+     * The region whose catalogues a centre asks without a choice: by its time zone when it set one, and otherwise by the
+     * language the site speaks. A book is best known in the libraries of its own country.
+     *
+     * @param int $entityid
+     * @return string A key of REGIONS.
+     */
+    public static function region(int $entityid): string {
+        global $CFG, $DB;
+        $settings = json_decode(
+            (string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]),
+            true
+        ) ?: [];
+        $zone = (string) ($settings['timezone'] ?? '');
+        return $zone !== '' && zones::known($zone) ? self::zone_region($zone) : self::language_region((string) $CFG->lang);
+    }
+
+    /**
+     * The region of a time zone.
+     *
+     * @param string $zone
+     * @return string
+     */
+    public static function zone_region(string $zone): string {
+        $in = fn(array $zones) => in_array($zone, $zones, true);
+        if ($in(['Europe/Madrid', 'Atlantic/Canary', 'Africa/Ceuta'])) {
+            return 'es';
         }
-        // Without a choice, the catalogue of the language the site speaks goes first: Spanish books are best known in
-        // Spain's National Library, and little known elsewhere.
-        global $CFG;
-        return str_starts_with((string) $CFG->lang, 'es') ? self::DEFAULT_ES : self::DEFAULT;
+        if ($in(['Europe/Berlin', 'Europe/Vienna', 'Europe/Zurich', 'Europe/Busingen', 'Europe/Vaduz'])) {
+            return 'de';
+        }
+        if (
+            $in(['Europe/Stockholm', 'Europe/Helsinki', 'Europe/Oslo', 'Europe/Copenhagen', 'Atlantic/Reykjavik',
+                'Europe/Mariehamn', 'Arctic/Longyearbyen', 'Atlantic/Faroe'])
+        ) {
+            return 'nordic';
+        }
+        if ($in(['Europe/Rome', 'Europe/Vatican', 'Europe/San_Marino'])) {
+            return 'it';
+        }
+        if ($in(['Europe/Paris', 'Europe/Brussels', 'Europe/Monaco', 'Europe/Luxembourg', 'America/Montreal'])) {
+            return 'fr';
+        }
+        $brazil = ['Sao_Paulo', 'Fortaleza', 'Recife', 'Bahia', 'Belem', 'Manaus', 'Cuiaba', 'Porto_Velho', 'Boa_Vista',
+            'Rio_Branco', 'Noronha', 'Maceio', 'Araguaina', 'Campo_Grande', 'Santarem', 'Eirunepe'];
+        if ($in(['Europe/Lisbon', 'Atlantic/Madeira', 'Atlantic/Azores']) || $in(array_map(fn($c) => 'America/' . $c, $brazil))) {
+            return 'pt';
+        }
+        $english = ['New_York', 'Chicago', 'Denver', 'Los_Angeles', 'Phoenix', 'Anchorage', 'Juneau', 'Adak', 'Boise',
+            'Detroit', 'Indiana/Indianapolis', 'Kentucky/Louisville', 'Toronto', 'Vancouver', 'Edmonton', 'Winnipeg',
+            'Halifax', 'St_Johns', 'Regina', 'Jamaica', 'Nassau', 'Barbados', 'Belize'];
+        if ($in(array_map(fn($c) => 'America/' . $c, $english))) {
+            return 'en';
+        }
+        if (str_starts_with($zone, 'America/')) {
+            return 'la';
+        }
+        return 'en';
+    }
+
+    /**
+     * The region of a language, for a centre that did not set its time zone.
+     *
+     * @param string $lang
+     * @return string
+     */
+    public static function language_region(string $lang): string {
+        $base = substr($lang, 0, 2);
+        return ['es' => 'es', 'ca' => 'es', 'gl' => 'es', 'eu' => 'es', 'pt' => 'pt', 'de' => 'de', 'sv' => 'nordic',
+            'fi' => 'nordic', 'nb' => 'nordic', 'nn' => 'nordic', 'no' => 'nordic', 'da' => 'nordic', 'is' => 'nordic',
+            'it' => 'it', 'fr' => 'fr'][$base] ?? 'en';
+    }
+
+    /**
+     * Every catalogue, its region's first and then the rest by region, with whether a centre asks it now: for its
+     * settings.
+     *
+     * @param int $entityid
+     * @return array Groups: region, sources (key, name, on).
+     */
+    public static function choices(int $entityid): array {
+        $now = self::sources($entityid);
+        $mine = self::region($entityid);
+        $order = array_values(array_unique(array_merge([$mine], array_keys(self::REGIONS), ['world'])));
+        $groups = [];
+        // Within a region, in the order it is asked by default; what no region asks first, after.
+        $rank = array_flip(array_values(array_unique(array_merge(self::REGIONS[$mine], ...array_values(self::REGIONS)))));
+        $keys = array_keys(self::PRESETS);
+        usort($keys, fn($a, $b) => [$rank[$a] ?? PHP_INT_MAX, $a] <=> [$rank[$b] ?? PHP_INT_MAX, $b]);
+        foreach ($order as $region) {
+            $sources = [];
+            foreach ($keys as $key) {
+                $preset = self::PRESETS[$key];
+                if ($preset['region'] === $region) {
+                    $sources[] = ['key' => $key, 'name' => $preset['name'], 'on' => in_array($key, $now, true)];
+                }
+            }
+            if ($sources) {
+                $groups[] = ['region' => $region, 'sources' => $sources];
+            }
+        }
+        return $groups;
+    }
+
+    /**
+     * What a centre chose, to keep: in the order of its choices, and nothing when it is its region's order.
+     *
+     * @param int $entityid
+     * @param string[] $chosen
+     * @return string[]
+     */
+    public static function chosen(int $entityid, array $chosen): array {
+        $order = [];
+        foreach (self::choices($entityid) as $group) {
+            foreach ($group['sources'] as $source) {
+                if (in_array($source['key'], $chosen, true)) {
+                    $order[] = $source['key'];
+                }
+            }
+        }
+        $default = self::REGIONS[self::region($entityid)];
+        $same = $order && count($order) === count($default) && !array_diff($order, $default);
+        return $same ? [] : $order;
     }
 
     /**
@@ -301,10 +481,10 @@ final class lookup {
     private static function ask_words(array $source, string $words): array {
         try {
             if ($source['type'] === 'sru') {
-                if (empty($source['words'])) {
+                if (!isset($source['words'])) {
                     return [];
                 }
-                $sru = new sru($source['url'], $source['index'], $source['version']);
+                $sru = new sru($source['url'], $source['index'], $source['version'], $source['schema'] ?? 'marcxml');
                 $body = self::fetch($sru->url_words($source['words'], $source['relation'] ?? 'all', $words));
                 $found = $body === null ? [] : sru::descriptions($body);
             } else {
@@ -328,10 +508,12 @@ final class lookup {
     private static function ask(array $source, string $isbn): ?array {
         try {
             if ($source['type'] === 'sru') {
-                $sru = new sru($source['url'], $source['index'], $source['version']);
+                $sru = new sru($source['url'], $source['index'], $source['version'], $source['schema'] ?? 'marcxml');
                 // A catalogue that keeps the hyphens is asked every way of writing them: the ISBN-13 first, then the
                 // ISBN-10 of older books (two questions: it takes some thirty ways at a time).
-                $urls = empty($source['hyphens']) ? [$sru->url($isbn)]
+                // Any other is asked the ISBN-13 and then, if it does not know it, the ISBN-10 (São Paulo keeps that one).
+                $urls = empty($source['hyphens']) ? array_map(fn($code) => $sru->url($code), array_filter([$isbn,
+                    isbn::ten($isbn)]))
                     : array_map(fn($ways) => $sru->url_any($ways), array_filter(isbn::hyphenations($isbn)));
                 foreach ($urls as $url) {
                     $body = self::fetch($url);

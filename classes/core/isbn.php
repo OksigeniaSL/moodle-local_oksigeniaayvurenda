@@ -101,6 +101,19 @@ final class isbn {
     }
 
     /**
+     * The ISBN-10 of an ISBN-13 that has one (those starting with 978): how older catalogues keep older books.
+     *
+     * @param string $isbn13 Digits.
+     * @return string|null
+     */
+    public static function ten(string $isbn13): ?string {
+        if (!preg_match('/^978\d{10}$/', $isbn13)) {
+            return null;
+        }
+        return substr($isbn13, 3, 9) . self::checksum10(substr($isbn13, 3, 9));
+    }
+
+    /**
      * Check digit of the first twelve digits of an ISBN-13.
      *
      * @param string $twelve
