@@ -73,6 +73,7 @@ final class copies {
         'challenge' => 'yearid IN (SELECT id FROM {local_oksigeniaayvurenda_year} WHERE entityid = :entityid)',
         'review' => 'entityid = :entityid',
         'wish' => 'entityid = :entityid',
+        'ill' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'purchaseorder' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'purchase' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'purchasewho' => 'purchaseid IN (SELECT p.id FROM {local_oksigeniaayvurenda_purchase} p

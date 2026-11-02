@@ -569,6 +569,13 @@ final class desk {
      */
     private function rule(string $readertype, string $itemtype): ?array {
         global $DB;
+        // Another library is no reader of the rules: what it gets is what it agrees on, with no limit; only what is never
+        // lent stays here.
+        if ($readertype === ill::READERTYPE) {
+            return ['readertype' => $readertype, 'itemtype' => '*', 'loandays' => $itemtype === 'reference' ? 0 : 30,
+                'maxloans' => 0,
+                'renewals' => 1, 'renewdays' => 14];
+        }
         // A textbook bank lends a whole set, until the year ends, unless it has its own rules.
         if (bank::is($this->library) && !$DB->record_exists(self::T . 'rule', ['libraryid' => $this->library->id])) {
             // Lent (any days, the year's end sets the date), with no limit of copies and no renewal.

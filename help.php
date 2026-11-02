@@ -120,6 +120,8 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'me' => (string) $USER->id,
             'post' => $str('practicepost'),
             'vendor' => $str('practicevendor'),
+            'buy' => $str('practicebuy'),
+            'partner' => $str('practicepartner'),
             'material' => $str('practicematerial'),
             'sheet' => str_replace('|', "\n", $str('practicesheet')) . "\n",
             'sheetname' => $str('practicesheetname'),

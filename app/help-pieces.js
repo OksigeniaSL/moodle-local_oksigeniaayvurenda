@@ -634,6 +634,31 @@ window.AYVHelpPieces = {
             return h.you(4, '.ayv-tut-save .ayv-button');
         });
     },
+    // Lending between libraries: what it is, asking for a book, what happens when it comes, and lending one out.
+    ill: function(h) {
+        'use strict';
+        return h.point('.ayv-tabs').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.tap('[data-ayv-open="ayv-ill-ask"]');
+        }).then(function() {
+            return h.type('dialog[open] input[name="title"]', h.codes.buy);
+        }).then(function() {
+            return h.type('dialog[open] input[name="partner"]', h.codes.partner);
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.you(2, 'dialog[open] button[type="submit"]:not(.ayv-modal-close)');
+        }).then(function() {
+            return h.point('.ayv-ill-rows .ayv-self-row');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.go('.ayv-tabs a:nth-child(2)');
+        }).then(function() {
+            return h.say(4);
+        });
+    },
     // Buying: what readers ask for, the budget, saying yes, the list by vendor, the order and what happens when it comes.
     purchases: function(h) {
         'use strict';

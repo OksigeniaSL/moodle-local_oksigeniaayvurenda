@@ -1,0 +1,103 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/ill
+
+    Lending between libraries: what is asked of others, and what others ask of this one.
+
+    Example context (json):
+    {
+        "heading": "Préstamo entre bibliotecas", "intro": "Con otras bibliotecas.", "notice": "", "error": "", "action": "#", "sesskey": "x",
+        "isin": true, "isout": false, "tabs": [{"url": "#", "label": "Lo que pedimos", "current": true}],
+        "hasopen": true, "open": [{"id": 1, "title": "El faro", "partner": "Biblioteca Central", "who": "Para Ana", "state": "Pedido", "until": "",
+            "late": false, "needsdate": true, "quick": false, "step": "arrived", "steplabel": "Ha llegado", "cancancel": true}],
+        "hasclosed": false, "closed": [], "partners": [{"name": "Biblioteca Central"}],
+        "illask": "Pedir un libro", "illaskintro": "Un libro.", "illlend": "Prestar", "illlendintro": "Una copia.", "illfieldtitle": "Título",
+        "illfieldauthor": "Autor", "illfieldisbn": "ISBN", "illfieldnote": "Nota", "illfieldpartner": "Biblioteca", "illfieldcard": "Carné",
+        "illfieldcode": "Código", "illfielddue": "Hasta", "illfielddueask": "Hasta", "illnothingin": "Nada.", "illnothingout": "Nada.",
+        "illclosed": "Terminados", "illcancel": "Cancelar", "illclose": "Cerrar", "illoutnote": "Vuelve por el mostrador.", "illlate": "Con retraso",
+        "illgoarrived": "Ha llegado", "illarrivedintro": "Hasta cuándo."
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+<nav class="ayv-tabs" aria-label="{{heading}}">
+{{#tabs}}<a class="ayv-toggle" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
+</nav>
+<datalist id="ayv-ill-partners">{{#partners}}<option value="{{name}}"></option>{{/partners}}</datalist>
+{{#isin}}<p class="ayv-more ayv-pur-add"><button type="button" class="ayv-button" data-ayv-open="ayv-ill-ask">{{illask}}</button></p>{{/isin}}
+{{#isout}}<p class="ayv-more ayv-pur-add"><button type="button" class="ayv-button" data-ayv-open="ayv-ill-lend">{{illlend}}</button></p><p>{{illoutnote}}</p>{{/isout}}
+{{^hasopen}}<div class="ayv-nothing">{{#isin}}<p>{{illnothingin}}</p>{{/isin}}{{#isout}}<p>{{illnothingout}}</p>{{/isout}}</div>{{/hasopen}}
+{{#hasopen}}
+<ul class="ayv-self-rows ayv-ill-rows">
+{{#open}}
+    <li class="ayv-self-row">
+        <span class="ayv-self-row-what"><strong>{{title}}</strong> · {{partner}}{{#who}} · {{who}}{{/who}}<br>
+            {{state}}{{#until}} · {{until}}{{/until}}{{#late}} · <span class="ayv-pur-over">{{illlate}}</span>{{/late}}</span>
+        {{#needsdate}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-ill-got-{{id}}">{{steplabel}}</button>
+        <dialog class="ayv-modal" id="ayv-ill-got-{{id}}" aria-labelledby="ayv-ill-got-title-{{id}}">
+            <div class="ayv-modal-head"><h3 id="ayv-ill-got-title-{{id}}" class="ayv-section-title">{{title}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{illclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <p class="ayv-field-hint">{{illarrivedintro}}</p>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="move"><input type="hidden" name="id" value="{{id}}"><input type="hidden" name="state" value="arrived">
+                <label class="ayv-field ayv-dig-field">{{illfielddueask}} <input type="date" name="due"></label>
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{illgoarrived}}</button></p></form>
+        </dialog>{{/needsdate}}
+        {{#quick}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="move"><input type="hidden" name="id" value="{{id}}"><input type="hidden" name="state" value="{{step}}">
+            <button type="submit" class="ayv-button ayv-button-quiet">{{steplabel}}</button></form>{{/quick}}
+        {{#cancancel}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="move"><input type="hidden" name="id" value="{{id}}"><input type="hidden" name="state" value="cancelled">
+            <button type="submit" class="ayv-button ayv-button-quiet">{{illcancel}}</button></form>{{/cancancel}}
+    </li>
+{{/open}}
+</ul>
+{{/hasopen}}
+{{#hasclosed}}
+<section class="ayv-section"><h2 class="ayv-section-title">{{illclosed}}</h2>
+    <ul class="ayv-self-rows">{{#closed}}<li class="ayv-self-row"><span class="ayv-self-row-what"><strong>{{title}}</strong> · {{partner}}{{#who}} · {{who}}{{/who}} · {{state}}</span></li>{{/closed}}</ul>
+</section>
+{{/hasclosed}}
+{{#isin}}
+<dialog class="ayv-modal" id="ayv-ill-ask" aria-labelledby="ayv-ill-ask-title">
+    <div class="ayv-modal-head"><h3 id="ayv-ill-ask-title" class="ayv-section-title">{{illask}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{illclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <p class="ayv-field-hint">{{illaskintro}}</p>
+    <form method="post" action="{{action}}" autocomplete="off"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="ask">
+        <label class="ayv-field ayv-dig-field">{{illfieldtitle}} <input type="text" name="title" maxlength="255" required></label>
+        <div class="ayv-mat-grid">
+            <label class="ayv-field ayv-dig-field ayv-mat-name">{{illfieldauthor}} <input type="text" name="author" maxlength="255"></label>
+            <label class="ayv-field ayv-dig-field">{{illfieldisbn}} <input type="text" name="isbn" maxlength="20" inputmode="numeric"></label>
+        </div>
+        <label class="ayv-field ayv-dig-field">{{illfieldpartner}} <input type="text" name="partner" maxlength="255" list="ayv-ill-partners" required></label>
+        <label class="ayv-field ayv-dig-field">{{illfieldcard}} <input type="text" name="card" maxlength="40"></label>
+        <label class="ayv-field ayv-dig-field">{{illfieldnote}} <input type="text" name="note" maxlength="255"></label>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{illask}}</button></p></form>
+</dialog>
+{{/isin}}
+{{#isout}}
+<dialog class="ayv-modal" id="ayv-ill-lend" aria-labelledby="ayv-ill-lend-title">
+    <div class="ayv-modal-head"><h3 id="ayv-ill-lend-title" class="ayv-section-title">{{illlend}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{illclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <p class="ayv-field-hint">{{illlendintro}}</p>
+    <form method="post" action="{{action}}" autocomplete="off"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lend">
+        <label class="ayv-field ayv-dig-field">{{illfieldcode}} <input type="text" name="code" maxlength="40" required></label>
+        <label class="ayv-field ayv-dig-field">{{illfieldpartner}} <input type="text" name="partner" maxlength="255" list="ayv-ill-partners" required></label>
+        <label class="ayv-field ayv-dig-field">{{illfielddue}} <input type="date" name="due"></label>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{illlend}}</button></p></form>
+</dialog>
+{{/isout}}

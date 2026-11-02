@@ -61,6 +61,7 @@ final class howto {
         'lots' => ['lots.php', 'desk', ''],
         'selfloan' => ['selfloan.php', 'desk', 'selfloan'],
         'purchases' => ['purchases.php', 'catalogue', 'purchases'],
+        'ill' => ['ill.php', 'desk', 'ill'],
         'bank' => ['libraries.php', 'manage', ''],
         'activity' => ['activity.php', 'manage', ''],
         'bankround' => ['libraries.php', 'desk', ''],
@@ -107,6 +108,7 @@ final class howto {
         'tutors' => ['capability' => 'manage', 'page' => 'tutors.php', 'steps' => 5],
         'selfloan' => ['capability' => 'manage', 'page' => 'selfloan.php', 'steps' => 6],
         'purchases' => ['capability' => 'catalogue', 'page' => 'purchases.php', 'steps' => 8],
+        'ill' => ['capability' => 'desk', 'page' => 'ill.php', 'steps' => 5],
     ];
 
     /** @var string[] Words that say nothing about the task. */

@@ -93,6 +93,12 @@ class provider implements
             'groupname' => 'privacy:metadata:tutor:groupname',
             'timenotified' => 'privacy:metadata:tutor:timenotified',
         ], 'privacy:metadata:tutor');
+        $collection->add_database_table(self::T . 'ill', [
+            'readerid' => 'privacy:metadata:ill:readerid',
+            'title' => 'privacy:metadata:ill:title',
+            'note' => 'privacy:metadata:ill:note',
+            'createdby' => 'privacy:metadata:ill:createdby',
+        ], 'privacy:metadata:ill');
         $collection->add_database_table(self::T . 'purchasewho', [
             'purchaseid' => 'privacy:metadata:purchasewho:purchaseid',
             'readerid' => 'privacy:metadata:purchasewho:readerid',
@@ -289,6 +295,7 @@ class provider implements
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'selfpost} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'purchase} WHERE decidedby IS NOT NULL', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'ill} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql(
             'createdby',
             'SELECT createdby FROM {' . self::T . 'purchaseorder} WHERE createdby IS NOT NULL',
@@ -343,6 +350,19 @@ class provider implements
             $loans = [];
             foreach ($DB->get_records(self::T . 'loan', ['readerid' => $reader->id], 'timeloaned') as $loan) {
                 $loans[] = self::loan_export($loan);
+            }
+            $borrowed = $DB->get_records(
+                self::T . 'ill',
+                ['readerid' => $reader->id, 'direction' => 'in'],
+                'id',
+                'id, title, partner, status'
+            );
+            if ($borrowed) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:ill', 'local_oksigeniaayvurenda')]),
+                    (object) ['books' => array_values(array_map(fn($b) => ['title' => $b->title, 'from' => $b->partner,
+                        'status' => $b->status], $borrowed))]
+                );
             }
             $asked = \local_oksigeniaayvurenda\local\purchases::of_reader((int) $reader->id, 1000);
             if ($asked) {
@@ -576,6 +596,8 @@ class provider implements
         $DB->delete_records(self::T . 'relay');
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'purchasewho');
+        $DB->execute('UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE direction = 'in'");
+        $DB->set_field_select(self::T . 'ill', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader'");
         $DB->set_field_select(self::T . 'purchase', 'decidedby', null, 'decidedby IS NOT NULL');
         $DB->set_field_select(self::T . 'purchaseorder', 'createdby', null, 'createdby IS NOT NULL');
@@ -677,6 +699,10 @@ class provider implements
                 $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader' AND id $in", $params);
             }
             $DB->delete_records(self::T . 'purchasewho', ['readerid' => $reader->id]);
+            $DB->execute(
+                'UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE readerid = ? AND direction = 'in'",
+                [$reader->id]
+            );
         }
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
@@ -688,6 +714,7 @@ class provider implements
         $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'purchase', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'purchaseorder', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'ill', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'withdrawal', 'createdby', null, ['createdby' => $userid]);
@@ -732,6 +759,9 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'relay', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'ill', ['createdby' => $userid])) {
             return true;
         }
         if ($DB->record_exists(self::T . 'purchase', ['decidedby' => $userid])) {

@@ -865,6 +865,34 @@
         <INDEX NAME="libraryyear" UNIQUE="true" FIELDS="libraryid, yearid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_ill" COMMENT="A book asked of another library, or lent to one">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="direction" TYPE="char" LENGTH="3" NOTNULL="true" SEQUENCE="false" COMMENT="in: asked of another library; out: lent to one"/>
+        <FIELD NAME="partner" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The other library"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="author" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="isbn" TYPE="char" LENGTH="13" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="note" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="in: who it is for; out: the reader that stands for the other library"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="out: the copy"/>
+        <FIELD NAME="loanid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="out: its loan"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="12" NOTNULL="true" SEQUENCE="false" COMMENT="in: asked, arrived, lent, back, done or cancelled; out: sent or done"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When it has to be back with its owner"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+        <KEY NAME="loanid" TYPE="foreign" FIELDS="loanid" REFTABLE="local_oksigeniaayvurenda_loan" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_selfpost" COMMENT="A self-loan post: a screen where readers lend to themselves with their card, opened by its own key">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

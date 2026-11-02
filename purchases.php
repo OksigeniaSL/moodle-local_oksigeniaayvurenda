@@ -73,6 +73,10 @@ if (data_submitted() && confirm_sesskey()) {
         }
     } else if ($do === 'approve') {
         $notice = purchases::approve($library, $id, $fields, (int) $USER->id, $now) ? $str('purchaseapproved') : '';
+    } else if ($do === 'borrow') {
+        $partner = optional_param('partner', '', PARAM_TEXT);
+        $notice = \local_oksigeniaayvurenda\local\ill::from_purchase($library, $id, $partner, (int) $USER->id, $now)
+            ? $str('purchaseborrowed') : '';
     } else if ($do === 'decline') {
         $notice = purchases::decline($library, $id, (int) $USER->id, $now) ? $str('purchasedeclined') : '';
     } else if ($do === 'order') {
@@ -218,7 +222,8 @@ foreach (
     ['purchaseadd', 'purchaseaddintro', 'purchasefieldtitle', 'purchasefieldauthor', 'purchasefieldisbn', 'purchasefieldnote',
         'purchasefieldcopies', 'purchasefieldprice', 'purchasefieldpricehint', 'purchasefieldvendor', 'purchasesave',
         'purchaseclose',
-        'purchaseyes', 'purchaseno', 'purchaseideas', 'purchaseideasintro', 'purchaseideaadd', 'purchasenothingasked',
+        'purchaseyes', 'purchaseborrow', 'purchaseborrowintro', 'purchaseborrowfrom', 'purchaseno',
+        'purchaseideas', 'purchaseideasintro', 'purchaseideaadd', 'purchasenothingasked',
         'purchasenothingapproved', 'purchasenothingordered', 'purchasenothingdone', 'purchasechange', 'purchasearrived',
         'purchasearrivedintro', 'purchasefieldcode', 'purchasesheet', 'purchasedoneheading', 'purchasedeclinedheading',
         'purchasebudgetheading', 'purchasebudgetintro', 'purchasefieldamount', 'purchasefieldcurrency', 'purchasesuggestheading',

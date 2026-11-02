@@ -30,7 +30,7 @@ final class purchases {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] The states of a purchase, in their order. */
-    public const STATES = ['asked', 'approved', 'ordered', 'received', 'declined'];
+    public const STATES = ['asked', 'approved', 'ordered', 'received', 'declined', 'borrowed'];
 
     /** @var string[] Still open: someone asking for one of these is not asking for anything new. */
     private const OPEN = ['asked', 'approved', 'ordered'];

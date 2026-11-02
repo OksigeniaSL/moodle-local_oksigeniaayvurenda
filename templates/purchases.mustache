@@ -35,7 +35,7 @@
         "purchaseadd": "Añadir un libro", "purchaseaddintro": "Lo que quieres comprar.", "purchasefieldtitle": "Título",
         "purchasefieldauthor": "Autor", "purchasefieldisbn": "ISBN", "purchasefieldnote": "Nota", "purchasefieldcopies": "Ejemplares",
         "purchasefieldprice": "Precio", "purchasefieldpricehint": "Si lo sabes", "purchasefieldvendor": "A quién", "purchasesave": "Guardar",
-        "purchaseclose": "Cerrar", "purchaseyes": "Comprarlo", "purchaseno": "Esta vez no", "purchaseideas": "Lo que se queda corto",
+        "purchaseclose": "Cerrar", "purchaseyes": "Comprarlo", "purchaseborrow": "Pedirlo prestado", "purchaseborrowintro": "A otra biblioteca.", "purchaseborrowfrom": "A cuál", "purchaseno": "Esta vez no", "purchaseideas": "Lo que se queda corto",
         "purchaseideasintro": "Según las lecturas y las colas.", "purchaseideaadd": "A la lista", "purchasenothingasked": "Nada.",
         "purchasenothingapproved": "Nada.", "purchasenothingordered": "Nada.", "purchasenothingdone": "Nada.", "purchasechange": "Cambiar",
         "purchasearrived": "Ha llegado", "purchasearrivedintro": "Si ya está en el catálogo, su código.", "purchasefieldcode": "Código",
@@ -70,9 +70,18 @@
         {{#note}}<p class="ayv-field-hint">{{note}}</p>{{/note}}
         <div class="ayv-dig-actions">
             <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-yes-{{id}}">{{purchaseyes}}</button>
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-ill-{{id}}">{{purchaseborrow}}</button>
             <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="decline"><input type="hidden" name="id" value="{{id}}">
                 <button type="submit" class="ayv-button ayv-button-quiet">{{purchaseno}}</button></form>
         </div>
+        <dialog class="ayv-modal" id="ayv-pur-ill-{{id}}" aria-labelledby="ayv-pur-ill-title-{{id}}">
+            <div class="ayv-modal-head"><h3 id="ayv-pur-ill-title-{{id}}" class="ayv-section-title">{{title}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <p class="ayv-field-hint">{{purchaseborrowintro}}</p>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="borrow"><input type="hidden" name="id" value="{{id}}">
+                <label class="ayv-field ayv-dig-field">{{purchaseborrowfrom}} <input type="text" name="partner" maxlength="255" required></label>
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{purchaseborrow}}</button></p></form>
+        </dialog>
         <dialog class="ayv-modal" id="ayv-pur-yes-{{id}}" aria-labelledby="ayv-pur-yes-title-{{id}}">
             <div class="ayv-modal-head"><h3 id="ayv-pur-yes-title-{{id}}" class="ayv-section-title">{{title}}</h3>
                 <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>

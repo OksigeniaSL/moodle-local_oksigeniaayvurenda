@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.132.0 (2026-11-02)
+
+- Lending between libraries of different centres, whatever program the other one uses: what is asked of another library for a reader here, from the asking to going home, with a notice when it arrives; and copies lent to another library, which go out and come back at the desk. What a reader asks to buy can be asked of another library instead.
+
 ## 0.131.2 (2026-11-02)
 
 - The entrance of a site that is only a library says where to get Oksigenia Aty, once the site's setup link points to it in Google Play.
