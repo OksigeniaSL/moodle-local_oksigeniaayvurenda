@@ -31,16 +31,16 @@ final class plans {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] What a plan may bring or not. */
-    public const FEATURES = ['lti', 'connectors', 'voices', 'offsite', 'madewith'];
+    public const FEATURES = ['lti', 'connectors', 'voices', 'offsite', 'app', 'madewith'];
 
     /** @var array[] The plans of the hosted service (docs: price tiers), to set with one choice: limits and what they bring. */
     public const PRESETS = [
         'free' => ['copies' => 1000, 'readers' => 150, 'lti' => false, 'connectors' => false, 'voices' => false,
-            'offsite' => false, 'madewith' => true],
+            'offsite' => false, 'app' => false, 'madewith' => true],
         'small' => ['copies' => 5000, 'readers' => 600, 'lti' => false, 'connectors' => false, 'voices' => true,
-            'offsite' => true, 'madewith' => false],
+            'offsite' => true, 'app' => true, 'madewith' => false],
         'medium' => ['copies' => 25000, 'readers' => 2500, 'lti' => true, 'connectors' => true, 'voices' => true,
-            'offsite' => true, 'madewith' => false],
+            'offsite' => true, 'app' => true, 'madewith' => false],
     ];
 
     /**
@@ -58,6 +58,7 @@ final class plans {
             'connectors' => (bool) ($config->planconnectors ?? true),
             'voices' => (bool) ($config->planvoices ?? true),
             'offsite' => (bool) ($config->planoffsite ?? true),
+            'app' => (bool) ($config->planapp ?? true),
             'madewith' => (bool) ($config->planmadewith ?? false),
         ];
     }
@@ -273,6 +274,31 @@ final class plans {
      */
     public static function allows(int $entityid, string $feature): bool {
         return (bool) (self::of($entityid)[$feature] ?? true);
+    }
+
+    /**
+     * Whether someone may enter Oksigenia Aty, the app of the hosted service, by the plans of the centres they belong to: on
+     * a shared site, one whose plan brings it is enough. Someone of no centre, or a site that is not shared, is not for the
+     * library to say. The official app of Moodle does not ask.
+     *
+     * @param int $userid
+     * @return bool
+     */
+    public static function app_allowed(int $userid): bool {
+        global $DB;
+        if (!access::apart()) {
+            return true;
+        }
+        $centres = array_merge(
+            $DB->get_fieldset_select(self::T . 'reader', 'DISTINCT entityid', "userid = ? AND status = 'active'", [$userid]),
+            access::entities('local/oksigeniaayvurenda:desk', $userid)
+        );
+        foreach ($centres as $entityid) {
+            if (self::allows((int) $entityid, 'app')) {
+                return true;
+            }
+        }
+        return !$centres;
     }
 
     /**

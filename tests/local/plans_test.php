@@ -57,7 +57,7 @@ final class plans_test extends \advanced_testcase {
         $this->resetAfterTest();
         $old = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $this->assertSame(['name' => '', 'copies' => 0, 'readers' => 0, 'lti' => true, 'connectors' => true,
-            'voices' => true, 'offsite' => true, 'madewith' => false], plans::defaults());
+            'voices' => true, 'offsite' => true, 'app' => true, 'madewith' => false], plans::defaults());
         $this->assertNull(plans::summary((int) $old->entityid));
         $this->assertNull(plans::left((int) $old->entityid, 'copies'));
 
@@ -65,7 +65,7 @@ final class plans_test extends \advanced_testcase {
         $library = libraries::create_entity(['name' => 'Invented school']);
         $entityid = (int) $library->entityid;
         $this->assertSame(['name' => 'Free', 'copies' => 3, 'readers' => 2, 'lti' => false, 'connectors' => true,
-            'voices' => true, 'offsite' => true, 'madewith' => true], plans::of($entityid));
+            'voices' => true, 'offsite' => true, 'app' => true, 'madewith' => true], plans::of($entityid));
         $this->assertFalse(plans::allows($entityid, 'lti'));
         $this->assertSame('Plan Free: 0 of 3 copies · 0 of 2 readers', plans::summary($entityid));
 
@@ -74,7 +74,7 @@ final class plans_test extends \advanced_testcase {
         $this->assertSame('Annual', plans::of((int) $old->entityid)['name']);
         plans::save($entityid, ['name' => 'Annual', 'copies' => -5]);
         $this->assertSame(['name' => 'Annual', 'copies' => 0, 'readers' => 0, 'lti' => true, 'connectors' => true,
-            'voices' => true, 'offsite' => true, 'madewith' => false], plans::of($entityid));
+            'voices' => true, 'offsite' => true, 'app' => true, 'madewith' => false], plans::of($entityid));
         $this->assertSame('Plan Annual: 0 copies · 0 readers', plans::summary($entityid));
     }
 
@@ -198,6 +198,27 @@ final class plans_test extends \advanced_testcase {
     }
 
     /**
+     * The app of the hosted service goes by the plan of the centres someone belongs to.
+     */
+    public function test_the_app_by_plan(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $free = $gen->create_library();
+        $paid = $gen->create_library();
+        plans::save((int) $free->entityid, plans::preset('free'));
+        plans::save((int) $paid->entityid, plans::preset('small'));
+        $user = (int) $this->getDataGenerator()->create_user()->id;
+        $gen->create_reader(['entityid' => $free->entityid, 'userid' => $user, 'cardcode' => '10000H', 'firstname' => 'Ana']);
+        $this->assertTrue(plans::app_allowed($user), 'a site that is not shared: its own');
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
+        $this->assertFalse(plans::app_allowed($user), 'only in a free centre');
+        $gen->create_reader(['entityid' => $paid->entityid, 'userid' => $user, 'cardcode' => '10001L', 'firstname' => 'Ana']);
+        $this->assertTrue(plans::app_allowed($user), 'one that brings it is enough');
+        $this->assertTrue(plans::app_allowed((int) $this->getDataGenerator()->create_user()->id), 'of no centre');
+    }
+
+    /**
      * The plans of the service set everything with one choice; without the copy off the server in its plan, a centre adds no place
      * and sends nothing, and keeps what it had for when it comes back.
      */
@@ -219,6 +240,7 @@ final class plans_test extends \advanced_testcase {
             $this->assertSame($key !== 'free', $plan['voices']);
             $this->assertSame($key !== 'free', $plan['offsite']);
             $this->assertSame($key === 'free', $plan['madewith']);
+            $this->assertSame($key !== 'free', $plan['app']);
         }
         plans::save($entityid, plans::preset('free'));
         $this->assertNull(offsite::add_webdav($entityid, 'https://example.org/copias', 'u', 'p'));

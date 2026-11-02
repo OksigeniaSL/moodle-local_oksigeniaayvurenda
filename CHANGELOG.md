@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.134.1
+
+- The app of the hosted service (Oksigenia Aty) as a feature of a plan: in the paid ones, not in the free one. A plugin in
+  someone's own Moodle, and the official app of Moodle, do not ask.
+
 ## 0.134.0
 
 - SIP2, for self-loan machines, return boxes and RFID pads: a small bridge (`sip2-bridge/`, Python with nothing added, GPL)

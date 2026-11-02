@@ -187,6 +187,16 @@ function local_oksigeniaayvurenda_oksigeniaaty_home_cards(int $userid): array {
 }
 
 /**
+ * Whether someone may enter Oksigenia Aty, by the plans of their centres.
+ *
+ * @param int $userid
+ * @return bool
+ */
+function local_oksigeniaayvurenda_oksigeniaaty_user_allowed(int $userid): bool {
+    return \local_oksigeniaayvurenda\local\plans::app_allowed($userid);
+}
+
+/**
  * What a family sees in Oksigenia Aty of a child's library. Aty has checked that this adult is of this child's family.
  *
  * @param int $adultuserid
