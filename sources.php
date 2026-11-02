@@ -107,9 +107,14 @@ $chosencohorts = count(array_filter(array_column($rows, 'chosen')));
 $chosencourses = count(array_filter(array_column($courses, 'chosen')));
 $cifra = \local_oksigeniaayvurenda\local\sources\cifra::settings($entityid);
 $cifraon = $cifra['url'] !== '' && ($cifra['haskey'] || $cifra['hassecret']);
+// The readers of a OneRoster API and of its zip are the same ones: the connection says it, not the zip.
+$rosterapi = \local_oksigeniaayvurenda\local\sources\oneroster_api::connected($entityid);
+$rosterapion = $rosterapi && \local_oksigeniaayvurenda\local\sources\oneroster_api::settings($entityid)['enabled'];
 $cards = [
     ['key' => 'list', 'state' => $brought('csv'), 'url' => $page('readerslist.php'), 'sheet' => ''],
-    ['key' => 'oneroster', 'state' => $brought('oneroster'), 'url' => $page('oneroster.php'), 'sheet' => ''],
+    ['key' => 'oneroster', 'state' => $rosterapi ? '' : $brought('oneroster'), 'url' => $page('oneroster.php'), 'sheet' => ''],
+    ['key' => 'onerosterapi', 'url' => $page('onerosterapi.php'), 'sheet' => '', 'off' => !plans::allows($entityid, 'connectors'),
+        'state' => $rosterapi ? $str($rosterapion ? 'sourcestatenight' : 'sourcestatelinked') : ''],
     ['key' => 'cohorts', 'url' => '', 'sheet' => 'ayv-src-cohorts',
         'state' => $chosencohorts ? $str('sourcestatecohorts', $number($chosencohorts)) : ''],
     ['key' => 'courses', 'url' => '', 'sheet' => 'ayv-src-courses',
@@ -122,7 +127,7 @@ $cards = [
 ];
 if (\local_oksigeniaayvurenda\local\skins::no_courses($entityid)) {
     // What a school's programs and platforms bring: not for a town's library.
-    $school = ['oneroster', 'courses', 'lti', 'cifra'];
+    $school = ['oneroster', 'onerosterapi', 'courses', 'lti', 'cifra'];
     $cards = array_values(array_filter($cards, fn($card) => !in_array($card['key'], $school, true)));
 }
 $data = [

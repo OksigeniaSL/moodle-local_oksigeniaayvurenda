@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.148.0
+
+- Readers from the OneRoster REST API of a management program (1.1 or 1.2), from «Where the readers come from»: OAuth 2
+  with client credentials, or the OAuth 1.0a signature of 1.1; it is tried first without changing anything, the centre
+  chooses its school and whether the families come, and after the first time by hand the night keeps them up to date,
+  with the tutor of each homeroom. They are the same readers as the OneRoster zip brings.
+
 ## 0.147.0
 
 - ONIX for Books, the format of publishers and distributors (and of services such as DILVE): a message in 3.0 or 2.1,

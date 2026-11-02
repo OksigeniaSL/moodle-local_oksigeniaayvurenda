@@ -196,7 +196,7 @@ final class copies {
      */
     private static function shareable(string $settings): string {
         $all = json_decode($settings, true) ?: [];
-        foreach (['offsite', 'cifra', 'ltiregister'] as $name) {
+        foreach (['offsite', 'cifra', 'onerosterapi', 'ltiregister'] as $name) {
             unset($all[$name]);
         }
         return (string) json_encode($all);

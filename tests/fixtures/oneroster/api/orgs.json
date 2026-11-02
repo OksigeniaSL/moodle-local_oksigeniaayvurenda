@@ -1,0 +1,18 @@
+{
+ "orgs": [
+  {
+   "sourcedId": "sch1",
+   "status": "active",
+   "name": "Colegio Inventado Alfa",
+   "type": "school",
+   "identifier": "A1"
+  },
+  {
+   "sourcedId": "sch2",
+   "status": "active",
+   "name": "Colegio Inventado Beta",
+   "type": "school",
+   "identifier": "B2"
+  }
+ ]
+}

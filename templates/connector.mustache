@@ -42,7 +42,7 @@
     <div class="ayv-modal-head"><h2 id="ayv-conn-sheet-title" class="ayv-section-title">{{cifrachange}}</h2>
         <button type="button" class="ayv-modal-close" aria-label="{{offsiteclose}}" data-ayv-close>{{> local_oksigeniaayvurenda/icon_x}}</button></div>
     <p class="ayv-field-hint">{{how}}</p>
-    <form method="post" action="{{action}}" autocomplete="off">
+    <form method="post" action="{{action}}" autocomplete="off" class="ayv-dig-form">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <label class="ayv-field ayv-dig-field">{{cifraurl}} <span class="ayv-field-hint">{{cifraurlhint}}</span>
             <input type="text" name="url" value="{{url}}" inputmode="url" spellcheck="false"></label>

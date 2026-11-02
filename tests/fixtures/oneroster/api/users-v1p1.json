@@ -1,0 +1,168 @@
+{
+ "users": [
+  {
+   "sourcedId": "u1",
+   "status": "active",
+   "dateLastModified": "2026-10-30T08:00:00.000Z",
+   "enabledUser": "true",
+   "username": "ana.montes",
+   "userIds": [],
+   "givenName": "Ana",
+   "familyName": "Montes",
+   "middleName": "",
+   "identifier": "1001",
+   "email": "ana@example.invalid",
+   "sms": "",
+   "phone": "",
+   "agents": [],
+   "grades": [
+    "03"
+   ],
+   "role": "student",
+   "orgs": [
+    {
+     "href": "/orgs/sch1",
+     "sourcedId": "sch1",
+     "type": "org"
+    }
+   ]
+  },
+  {
+   "sourcedId": "u2",
+   "status": "active",
+   "dateLastModified": "2026-10-30T08:00:00.000Z",
+   "enabledUser": "true",
+   "username": "leo.faro",
+   "userIds": [],
+   "givenName": "Leo",
+   "familyName": "Faro, del Mar",
+   "middleName": "",
+   "identifier": "1002",
+   "email": "",
+   "sms": "",
+   "phone": "",
+   "agents": [],
+   "grades": [
+    "03"
+   ],
+   "role": "student",
+   "orgs": [
+    {
+     "href": "/orgs/sch1",
+     "sourcedId": "sch1",
+     "type": "org"
+    }
+   ]
+  },
+  {
+   "sourcedId": "u3",
+   "status": "active",
+   "dateLastModified": "2026-10-30T08:00:00.000Z",
+   "enabledUser": "false",
+   "username": "noa.rios",
+   "userIds": [],
+   "givenName": "Noa",
+   "familyName": "Ríos",
+   "middleName": "",
+   "identifier": "1003",
+   "email": "",
+   "sms": "",
+   "phone": "",
+   "agents": [],
+   "grades": [
+    "03"
+   ],
+   "role": "student",
+   "orgs": [
+    {
+     "href": "/orgs/sch1",
+     "sourcedId": "sch1",
+     "type": "org"
+    }
+   ]
+  },
+  {
+   "sourcedId": "t1",
+   "status": "active",
+   "dateLastModified": "2026-10-30T08:00:00.000Z",
+   "enabledUser": "true",
+   "username": "hugo.lago",
+   "userIds": [],
+   "givenName": "Hugo",
+   "familyName": "Lago",
+   "middleName": "",
+   "identifier": "2001",
+   "email": "hugo.lago@example.invalid",
+   "sms": "",
+   "phone": "",
+   "agents": [],
+   "grades": [],
+   "role": "teacher",
+   "orgs": [
+    {
+     "href": "/orgs/sch1",
+     "sourcedId": "sch1",
+     "type": "org"
+    }
+   ]
+  },
+  {
+   "sourcedId": "p1",
+   "status": "active",
+   "dateLastModified": "2026-10-30T08:00:00.000Z",
+   "enabledUser": "true",
+   "username": "bruno.montes",
+   "userIds": [],
+   "givenName": "Bruno",
+   "familyName": "Montes",
+   "middleName": "",
+   "identifier": "3001",
+   "email": "",
+   "sms": "",
+   "phone": "",
+   "agents": [
+    {
+     "href": "/users/u1",
+     "sourcedId": "u1",
+     "type": "user"
+    }
+   ],
+   "grades": [],
+   "role": "guardian",
+   "orgs": [
+    {
+     "href": "/orgs/sch1",
+     "sourcedId": "sch1",
+     "type": "org"
+    }
+   ]
+  },
+  {
+   "sourcedId": "b1",
+   "status": "active",
+   "dateLastModified": "2026-10-30T08:00:00.000Z",
+   "enabledUser": "true",
+   "username": "teo.brisa",
+   "userIds": [],
+   "givenName": "Teo",
+   "familyName": "Brisa",
+   "middleName": "",
+   "identifier": "1004",
+   "email": "",
+   "sms": "",
+   "phone": "",
+   "agents": [],
+   "grades": [
+    "05"
+   ],
+   "role": "student",
+   "orgs": [
+    {
+     "href": "/orgs/sch2",
+     "sourcedId": "sch2",
+     "type": "org"
+    }
+   ]
+  }
+ ]
+}

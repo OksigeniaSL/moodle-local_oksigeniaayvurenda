@@ -55,6 +55,18 @@ class sync_readers extends \core\task\scheduled_task {
                 }
             }
         }
+        // The OneRoster API of a management program, once someone brought its readers by hand.
+        $roster = \local_oksigeniaayvurenda\local\sources\oneroster_api::class;
+        foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
+            if ($roster::enabled((int) $entityid) && $roster::brought((int) $entityid)) {
+                try {
+                    mtrace('Ayvurenda: readers of entity ' . $entityid . ' from OneRoster: '
+                        . json_encode($roster::sync((int) $entityid)));
+                } catch (\moodle_exception $e) {
+                    mtrace('Ayvurenda: OneRoster did not answer for entity ' . $entityid . ': ' . $e->getMessage());
+                }
+            }
+        }
         // The courses of learning platforms whose students a teacher brought once.
         foreach (\local_oksigeniaayvurenda\local\ltitool::bring_all() as $courseid => $stats) {
             mtrace('Ayvurenda: LTI course ' . $courseid . ': ' . json_encode($stats));

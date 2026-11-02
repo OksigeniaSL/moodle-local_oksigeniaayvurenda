@@ -1247,6 +1247,9 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv form:has(input[name="mode"][value="key"]:checked) .ayv-connect-oauth,
 .ayv form:has(input[name="mode"][value="oauth"]:checked) .ayv-connect-key { display: none; }
+.ayv form:has(input[name="auth"][value="oauth1"]:checked) .ayv-connect-oauth2 { display: none; }
+.ayv .ayv-conn-more > summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+.ayv .ayv-conn-more[open] > summary { margin-bottom: .75rem; }
 
 .ayv form + .ayv-section-title { margin-top: 2rem; }
 

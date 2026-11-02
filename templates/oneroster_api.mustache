@@ -1,0 +1,93 @@
+{{!
+    @template local_oksigeniaayvurenda/oneroster_api
+
+    The connection with the OneRoster API of a management program: its state and what to do with it first, who comes
+    (the school, the families), and the connection, in a sheet.
+
+    Example context (json):
+    {
+        "heading": "Lectores desde la API de OneRoster", "intro": "Solo lee.", "how": "Una dirección y unas credenciales.",
+        "notice": "", "error": "", "action": "#", "sesskey": "abc", "connected": true, "state": "Conectado",
+        "stateline": "312 lectores vienen de OneRoster.", "nightline": "Cada noche se ponen al día.", "nightvalue": 0,
+        "nightgo": "Dejar de traerlos", "url": "https://roster.example.org", "tokenurl": "", "clientid": "ayv",
+        "scope": "", "moreopen": false, "v11": false, "v12": true, "oauth1": false, "oauth2": true, "secrethint": "guardado",
+        "who": {"schoolchoice": {"options": [{"value": "", "label": "Todos", "selected": true}, {"value": "s1", "label": "Colegio Alfa", "selected": false}]},
+            "families": false, "line": "Vienen todos los centros."},
+        "urlzip": "#", "onerosterapizip": "¿Sin API? El zip",
+        "cifrachange": "Cambiar la conexión", "cifraconnect": "Conectar", "cifrasavetest": "Guardar y probar", "cifrasecret": "Secreto",
+        "cifratest": "Probar", "cifrasync": "Traer ahora", "sourcessave": "Guardar", "offsiteclose": "Cerrar",
+        "onerosterapiurl": "Dirección", "onerosterapiurlhint": "La del servidor", "onerosterapiversion": "Versión",
+        "onerosterapiauth": "Cómo entra", "onerosterapioauth2": "OAuth 2", "onerosterapioauth1": "OAuth 1.0a",
+        "onerosterapitokenurl": "Token", "onerosterapitokenurlhint": "Si es otra", "onerosterapiclientid": "Identificador",
+        "onerosterapiscope": "Ámbito", "onerosterapiscopehint": "Vacío", "onerosterschool": "Centro",
+        "onerosterapifamilies": "Traer también a las familias", "onerosterapiwho": "Quién viene", "onerosterapimore": "Más"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+<section class="ayv-settingcard ayv-conn-state{{#connected}} ayv-conn-on{{/connected}}">
+    <h2 class="ayv-section-title"><span class="ayv-imp-tick{{^connected}} ayv-imp-tick-warn{{/connected}}" aria-hidden="true">{{#connected}}{{> local_oksigeniaayvurenda/icon_check}}{{/connected}}{{^connected}}{{> local_oksigeniaayvurenda/icon_x}}{{/connected}}</span> {{state}}</h2>
+    <p>{{stateline}}</p>
+    {{#connected}}
+    <form method="post" action="{{action}}" class="ayv-conn-actions" data-busy="{{cifrasync}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <button type="submit" class="ayv-button" name="do" value="sync">{{cifrasync}}</button>
+        <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="test">{{cifratest}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-conn-sheet">{{cifrachange}}</button>
+    </form>
+    <form method="post" action="{{action}}" class="ayv-conn-night">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="enabled" value="{{nightvalue}}">
+        <span>{{nightline}}</span> <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="night">{{nightgo}}</button>
+    </form>
+    {{/connected}}
+    {{^connected}}<p><button type="button" class="ayv-button" data-ayv-open="ayv-conn-sheet">{{cifraconnect}}</button></p>{{/connected}}
+</section>
+{{#who}}
+<section class="ayv-settingcard">
+    <h2 class="ayv-section-title">{{onerosterapiwho}}</h2>
+    <p>{{line}}</p>
+    <form method="post" action="{{action}}" class="ayv-conn-who">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="who">
+        {{#schoolchoice}}<label class="ayv-field ayv-readers-school">{{onerosterschool}} <select name="school">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/schoolchoice}}
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="families" value="1" {{#families}}checked{{/families}}> {{onerosterapifamilies}}</label>
+        <p><button type="submit" class="ayv-button ayv-button-quiet">{{sourcessave}}</button></p>
+    </form>
+</section>
+{{/who}}
+<p class="ayv-field-hint"><a href="{{urlzip}}">{{onerosterapizip}}</a></p>
+<dialog class="ayv-modal" id="ayv-conn-sheet" aria-labelledby="ayv-conn-sheet-title">
+    <div class="ayv-modal-head"><h2 id="ayv-conn-sheet-title" class="ayv-section-title">{{cifrachange}}</h2>
+        <button type="button" class="ayv-modal-close" aria-label="{{offsiteclose}}" data-ayv-close>{{> local_oksigeniaayvurenda/icon_x}}</button></div>
+    <p class="ayv-field-hint">{{how}}</p>
+    <form method="post" action="{{action}}" autocomplete="off" class="ayv-dig-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <label class="ayv-field ayv-dig-field">{{onerosterapiurl}} <span class="ayv-field-hint">{{onerosterapiurlhint}}</span>
+            <input type="text" name="url" value="{{url}}" inputmode="url" spellcheck="false"></label>
+        <fieldset class="ayv-dig-set">
+            <legend>{{onerosterapiversion}}</legend>
+            <label class="ayv-field ayv-field-check"><input type="radio" name="version" value="1.2" {{#v12}}checked{{/v12}}> OneRoster 1.2</label>
+            <label class="ayv-field ayv-field-check"><input type="radio" name="version" value="1.1" {{#v11}}checked{{/v11}}> OneRoster 1.1</label>
+        </fieldset>
+        <fieldset class="ayv-dig-set">
+            <legend>{{onerosterapiauth}}</legend>
+            <label class="ayv-field ayv-field-check"><input type="radio" name="auth" value="oauth2" {{#oauth2}}checked{{/oauth2}}> {{onerosterapioauth2}}</label>
+            <label class="ayv-field ayv-field-check"><input type="radio" name="auth" value="oauth1" {{#oauth1}}checked{{/oauth1}}> {{onerosterapioauth1}}</label>
+        </fieldset>
+        <label class="ayv-field ayv-dig-field">{{onerosterapiclientid}} <input type="text" name="clientid" value="{{clientid}}" spellcheck="false"></label>
+        <label class="ayv-field ayv-dig-field">{{cifrasecret}} {{#secrethint}}<span class="ayv-field-hint">{{secrethint}}</span>{{/secrethint}}
+            <input type="password" name="secret" autocomplete="new-password"></label>
+        <details class="ayv-conn-more ayv-connect-oauth2"{{#moreopen}} open{{/moreopen}}>
+            <summary>{{onerosterapimore}}</summary>
+            <div class="ayv-connect">
+            <label class="ayv-field ayv-dig-field">{{onerosterapitokenurl}} <span class="ayv-field-hint">{{onerosterapitokenurlhint}}</span>
+                <input type="text" name="tokenurl" value="{{tokenurl}}" inputmode="url" spellcheck="false"></label>
+            <label class="ayv-field ayv-dig-field">{{onerosterapiscope}} <span class="ayv-field-hint">{{onerosterapiscopehint}}</span>
+                <input type="text" name="scope" value="{{scope}}" spellcheck="false"></label>
+            </div>
+        </details>
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="connect">{{cifrasavetest}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="save">{{sourcessave}}</button></p>
+    </form>
+</dialog>

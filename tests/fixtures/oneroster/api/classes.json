@@ -1,0 +1,40 @@
+{
+ "classes": [
+  {
+   "sourcedId": "c1",
+   "status": "active",
+   "title": "3º A",
+   "classType": "homeroom",
+   "classCode": "3A",
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "c2",
+   "status": "active",
+   "title": "Matemáticas 3",
+   "classType": "scheduled",
+   "classCode": "M3",
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "c3",
+   "status": "active",
+   "title": "5º B",
+   "classType": "homeroom",
+   "classCode": "5B",
+   "school": {
+    "href": "/orgs/sch2",
+    "sourcedId": "sch2",
+    "type": "org"
+   }
+  }
+ ]
+}

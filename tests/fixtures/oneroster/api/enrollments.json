@@ -1,0 +1,130 @@
+{
+ "enrollments": [
+  {
+   "sourcedId": "e1",
+   "status": "active",
+   "role": "student",
+   "primary": false,
+   "user": {
+    "href": "/users/u1",
+    "sourcedId": "u1",
+    "type": "user"
+   },
+   "class": {
+    "href": "/classs/c1",
+    "sourcedId": "c1",
+    "type": "class"
+   },
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "e2",
+   "status": "active",
+   "role": "student",
+   "primary": false,
+   "user": {
+    "href": "/users/u2",
+    "sourcedId": "u2",
+    "type": "user"
+   },
+   "class": {
+    "href": "/classs/c1",
+    "sourcedId": "c1",
+    "type": "class"
+   },
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "e3",
+   "status": "active",
+   "role": "student",
+   "primary": false,
+   "user": {
+    "href": "/users/u2",
+    "sourcedId": "u2",
+    "type": "user"
+   },
+   "class": {
+    "href": "/classs/c2",
+    "sourcedId": "c2",
+    "type": "class"
+   },
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "e4",
+   "status": "active",
+   "role": "teacher",
+   "primary": true,
+   "user": {
+    "href": "/users/t1",
+    "sourcedId": "t1",
+    "type": "user"
+   },
+   "class": {
+    "href": "/classs/c1",
+    "sourcedId": "c1",
+    "type": "class"
+   },
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "e5",
+   "status": "active",
+   "role": "student",
+   "primary": false,
+   "user": {
+    "href": "/users/b1",
+    "sourcedId": "b1",
+    "type": "user"
+   },
+   "class": {
+    "href": "/classs/c3",
+    "sourcedId": "c3",
+    "type": "class"
+   },
+   "school": {
+    "href": "/orgs/sch2",
+    "sourcedId": "sch2",
+    "type": "org"
+   }
+  },
+  {
+   "sourcedId": "e6",
+   "status": "active",
+   "role": "student",
+   "primary": false,
+   "user": {
+    "href": "/users/u3",
+    "sourcedId": "u3",
+    "type": "user"
+   },
+   "class": {
+    "href": "/classs/c1",
+    "sourcedId": "c1",
+    "type": "class"
+   },
+   "school": {
+    "href": "/orgs/sch1",
+    "sourcedId": "sch1",
+    "type": "org"
+   }
+  }
+ ]
+}

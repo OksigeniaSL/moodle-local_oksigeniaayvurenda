@@ -47,7 +47,8 @@ final class recover {
     private const SELF = ['library' => 'parentid', 'authority' => 'parentid'];
 
     /** @var string[] What a centre's settings keep of the place they came from: none of it holds here. */
-    private const LEFT_BEHIND = ['cohorts', 'courses', 'cifra', 'offsite', 'plan', 'closed', 'demo', 'ltiregister', 'practice'];
+    private const LEFT_BEHIND = ['cohorts', 'courses', 'cifra', 'onerosterapi', 'offsite', 'plan', 'closed', 'demo', 'ltiregister',
+        'practice'];
 
     /** @var int The largest piece of a copy that is read, a guard against a file that is not one. */
     private const LIMIT = 1024 * 1048576;

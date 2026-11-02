@@ -75,6 +75,7 @@ final class howto {
         'tutors' => ['tutors.php', 'manage', 'tutors'],
         'twins' => ['twins.php', 'manage', 'twins'],
         'platforms' => ['lti.php', 'manage', ''],
+        'roster' => ['onerosterapi.php', 'manage', ''],
         'rules' => ['rules.php', 'manage', 'rules'],
         'sanctions' => ['rules.php', 'manage', 'sanctions'],
         'libraries' => ['libraries.php', 'manage', ''],
@@ -85,7 +86,7 @@ final class howto {
 
     /** @var string[] The tasks that need classes, or courses, to mean anything. */
     private const ONLY_WITH = ['myclass' => 'classes', 'wishes' => 'classes', 'tutors' => 'classes', 'bank' => 'classes',
-        'bankround' => 'classes', 'readings' => 'courses'];
+        'bankround' => 'classes', 'readings' => 'courses', 'roster' => 'courses'];
 
     /** @var array[] Each guided help: the permission it needs, the screen it plays on and how many steps it says. */
     public const PIECES = [
