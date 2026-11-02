@@ -634,6 +634,33 @@ window.AYVHelpPieces = {
             return h.you(4, '.ayv-tut-save .ayv-button');
         });
     },
+    // A post: what it is, making one, its address, who may use it, and going over what was done at it.
+    selfloan: function(h) {
+        'use strict';
+        return h.point('.ayv-results-title').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.tap('[data-ayv-open="ayv-self-new"]');
+        }).then(function() {
+            return h.type('#ayv-self-new input[name="name"]', h.codes.post);
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.you(2, '#ayv-self-new button[type="submit"]');
+        }).then(function() {
+            return h.point('.ayv-self-created');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point('.ayv-self-settings');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.point('.ayv-self-recent');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
     keepers: function(h) {
         'use strict';
         return h.point('.ayv-keepers h2').then(function() {

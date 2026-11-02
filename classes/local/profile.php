@@ -140,6 +140,28 @@ final class profile {
     }
 
     /**
+     * Gives a reader another card, for one that was lost: the old code stops working everywhere at once, and everything
+     * else stays theirs.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @return string|null The new code, or null if the reader is not of this centre.
+     */
+    public static function new_card(\stdClass $library, int $readerid): ?string {
+        global $DB;
+        $entityid = (int) $library->entityid;
+        if (!$DB->record_exists(self::T . 'reader', ['id' => $readerid, 'entityid' => $entityid])) {
+            return null;
+        }
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
+        $code = \local_oksigeniaayvurenda\core\readers\card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
+        $DB->update_record(self::T . 'reader', (object) ['id' => $readerid, 'cardcode' => $code, 'timemodified' => time()]);
+        \local_oksigeniaayvurenda\event\reader_card_replaced::fire($entityid, $readerid);
+        return $code;
+    }
+
+    /**
      * Saves the staff's notes of a reader of this centre.
      *
      * @param \stdClass $library

@@ -65,6 +65,8 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
         // The way into the app, by e-mail.
         $notice = $str(applink::send($reader));
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'newcard') {
+        $notice = $str('profilenewcarddone', profile::new_card($library, $id));
     } else {
         profile::save_notes($library, $id, optional_param('notes', '', PARAM_TEXT));
         $notice = $str('profilenotessaved');
@@ -156,6 +158,8 @@ $data = [
     'sesskey' => sesskey(),
     'deskurl' => $link('desk.php', ['reader' => $id]),
     'cardurl' => $link('card.php', ['reader' => $id]),
+    'canrecard' => !$limited,
+    'profilenewcardintro' => $str('profilenewcardintro', (string) $record['cardcode']),
     'app' => $app !== 'none' ? [
         'can' => $app !== 'noemail',
         'button' => $str($app === 'create' ? 'appcreatebutton' : 'appsendbutton'),
@@ -164,7 +168,8 @@ $data = [
 ];
 foreach (
     ['profiledesk', 'profilecard', 'profilenow', 'profilenothing', 'profileholds', 'profilenoread', 'profilepastheading',
-        'profilenotes', 'profilenoteshint', 'profilesave', 'profilegone', 'profilecode', 'appheading'] as $key
+        'profilenotes', 'profilenoteshint', 'profilesave', 'profilegone', 'profilecode', 'appheading',
+        'profilenewcard', 'profilenewcardgo', 'selfclose'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -43,6 +43,7 @@ final class howto {
         'readers' => ['readers.php', 'desk', 'readers'],
         'profile' => ['readers.php', 'desk', ''],
         'applink' => ['readers.php', 'desk', ''],
+        'newcard' => ['readers.php', 'desk', ''],
         'late' => ['late.php', 'desk', 'late'],
         'holds' => ['holds.php', 'desk', 'holds'],
         'reviews' => ['reviews.php', 'desk', 'reviews'],
@@ -58,6 +59,7 @@ final class howto {
         'stocktake' => ['stocktake.php', 'catalogue', ''],
         'weed' => ['weed.php', 'catalogue', 'weed'],
         'lots' => ['lots.php', 'desk', ''],
+        'selfloan' => ['selfloan.php', 'desk', 'selfloan'],
         'bank' => ['libraries.php', 'manage', ''],
         'activity' => ['activity.php', 'manage', ''],
         'bankround' => ['libraries.php', 'desk', ''],
@@ -102,6 +104,7 @@ final class howto {
         'material' => ['capability' => 'catalogue', 'page' => 'material.php', 'steps' => 5],
         'twins' => ['capability' => 'manage', 'page' => 'twins.php', 'steps' => 6],
         'tutors' => ['capability' => 'manage', 'page' => 'tutors.php', 'steps' => 5],
+        'selfloan' => ['capability' => 'manage', 'page' => 'selfloan.php', 'steps' => 6],
     ];
 
     /** @var string[] Words that say nothing about the task. */

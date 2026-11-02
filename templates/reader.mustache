@@ -42,7 +42,7 @@
         "read": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
             "when": "14 de octubre", "note": "Le encantó"}], "hasread": true, "readmore": "",
         "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
-        "notes": "", "staffonly": true, "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "appheading": "La app",
+        "notes": "", "staffonly": true, "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "canrecard": true, "profilenewcard": "Carné perdido", "profilenewcardintro": "Dejará de valer.", "profilenewcardgo": "Hacer otro carné", "selfclose": "Cerrar", "appheading": "La app",
         "app": {"can": true, "button": "Mandarle la app", "hint": "Le llega un correo con un enlace."},
         "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
         "profilenothing": "Nada prestado.", "profileholds": "Reservas", "profilenoread": "Nada este curso todavía.",
@@ -74,9 +74,20 @@
             <span class="ayv-profile-codelabel">{{profilecode}}</span>
             {{#barcode}}<span class="ayv-profile-barcode">{{{barcode}}}</span>{{/barcode}}
             <span class="ayv-profile-codetext">{{cardcode}}</span>
+            {{#canrecard}}<button type="button" class="ayv-button ayv-button-quiet ayv-profile-recard" data-ayv-open="ayv-profile-newcard">{{profilenewcard}}</button>{{/canrecard}}
         </div>
     </div>
 </header>
+{{#canrecard}}
+<dialog class="ayv-modal" id="ayv-profile-newcard" aria-labelledby="ayv-profile-newcard-title">
+    <div class="ayv-modal-head"><h3 id="ayv-profile-newcard-title" class="ayv-section-title">{{profilenewcard}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <p>{{profilenewcardintro}}</p>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="newcard">
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{profilenewcardgo}}</button></p></form>
+</dialog>
+{{/canrecard}}
 
 <div class="ayv-profile-grid">
     <div class="ayv-profile-col">

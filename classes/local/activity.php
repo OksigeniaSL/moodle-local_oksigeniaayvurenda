@@ -29,7 +29,8 @@ final class activity {
 
     /** @var array<string, string[]> The actions by what they touch; opening a record has its own, so it does not hide the rest. */
     public const KINDS = [
-        'people' => ['reader_merged', 'reader_paired', 'reader_matched', 'readers_synced', 'connector_changed', 'connector_tried',
+        'people' => ['reader_card_replaced',
+            'reader_merged', 'reader_paired', 'reader_matched', 'readers_synced', 'connector_changed', 'connector_tried',
             'tutor_changed', 'keeper_added', 'keeper_removed', 'applink_sent', 'voice_published', 'voice_removed',
             'voice_consent_changed'],
         'copies' => ['offsite_key_created', 'offsite_place_added', 'offsite_place_removed', 'offsite_pull_created',
@@ -38,6 +39,7 @@ final class activity {
             'digital_added', 'digital_removed', 'textbook_lost'],
         'centre' => ['plan_changed', 'skin_changed', 'centre_closed', 'centre_opened', 'centre_created', 'centre_removed',
             'library_deleted', 'window_changed', 'rules_changed', 'hold_settings_changed', 'voice_settings_changed',
+            'self_post_created', 'self_post_removed', 'self_post_undone', 'self_settings_changed',
             'lti_platform_saved', 'lti_platform_deleted'],
         'views' => ['reader_viewed'],
     ];

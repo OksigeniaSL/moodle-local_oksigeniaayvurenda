@@ -419,5 +419,49 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110204, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110211) {
+        // The self-loan posts, and which of them a loan went through.
+        $table = new xmldb_table('local_oksigeniaayvurenda_selfpost');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+            $table->add_field('libraryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_field('name', XMLDB_TYPE_CHAR, '100', null, XMLDB_NOTNULL);
+            $table->add_field('keyhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL);
+            $table->add_field('lang', XMLDB_TYPE_CHAR, '30');
+            $table->add_field('tries', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timetries', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('hourtries', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timehour', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timestopped', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('timelast', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('libraryid', XMLDB_KEY_FOREIGN, ['libraryid'], 'local_oksigeniaayvurenda_library', ['id']);
+            $table->add_key('createdby', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_index('keyhash', XMLDB_INDEX_UNIQUE, ['keyhash']);
+            $dbman->create_table($table);
+        }
+        foreach (
+            [new xmldb_field('hourtries', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, '0'),
+                new xmldb_field('timehour', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0'),
+                new xmldb_field('timestopped', XMLDB_TYPE_INTEGER, '10')] as $field
+        ) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        $table = new xmldb_table('local_oksigeniaayvurenda_loan');
+        foreach (['postid', 'returnpostid'] as $name) {
+            $field = new xmldb_field($name, XMLDB_TYPE_INTEGER, '10');
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+                $key = new xmldb_key($name, XMLDB_KEY_FOREIGN, [$name], 'local_oksigeniaayvurenda_selfpost', ['id']);
+                $dbman->add_key($table, $key);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110211, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

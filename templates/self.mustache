@@ -1,0 +1,54 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/self
+
+    A self-loan post, as it stays on the screen.
+
+    Example context (json):
+    {
+        "library": "Biblioteca central",
+        "figure": "https://example.org/memoria.webp",
+        "idle": "Pasa tu carné",
+        "idlehint": "Para devolver un libro, pásalo sin más.",
+        "codelabel": "Código del carné o del libro",
+        "camerabutton": "Con la cámara",
+        "typebutton": "Escribir el código",
+        "done": "Ya está"
+    }
+}}
+<div class="ayv-self" id="ayv-self" data-state="idle">
+    <p class="ayv-self-library">{{library}}</p>
+    <div class="ayv-self-stage">
+        {{#figure}}<img class="ayv-self-figure" src="{{figure}}" alt="" width="260" height="260">{{/figure}}
+        <div class="ayv-self-talk">
+            <h1 class="ayv-self-title" id="ayv-self-title">{{idle}}</h1>
+            <p class="ayv-self-hint" id="ayv-self-hint">{{idlehint}}</p>
+            <p class="ayv-self-said" id="ayv-self-said" role="status" aria-live="polite" hidden></p>
+            <ul class="ayv-self-list" id="ayv-self-list" hidden></ul>
+            <p class="ayv-self-actions"><button type="button" class="ayv-button ayv-self-done" id="ayv-self-done" hidden>{{done}}</button></p>
+        </div>
+    </div>
+    <form class="ayv-self-form" id="ayv-self-form" autocomplete="off">
+        <label class="ayv-sr" for="ayv-self-code">{{codelabel}}</label>
+        <input id="ayv-self-code" type="text" inputmode="none" autocomplete="off" autocapitalize="characters" spellcheck="false"
+            maxlength="40" placeholder="{{codelabel}}">
+        <button type="submit" class="ayv-sr">{{codelabel}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-self-camera" hidden>{{camerabutton}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet" id="ayv-self-type">{{typebutton}}</button>
+    </form>
+</div>

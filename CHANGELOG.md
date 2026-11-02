@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.130.0 (2026-11-02)
+
+- Self-loan: a tablet or computer in the library where readers lend to themselves with their card and give books back, opened by its own address, with no account left open on it. It only says the person's first name and what they have just taken. Whoever runs the library chooses who may use it and goes over what was done, undoing what is wrong. If its address gets out, it holds back what no queue would do and stops until someone looks, and everything it did in the last 24 hours can be undone at once.
+- A lost card: another one from the reader's page, and the old code stops working everywhere.
+
 ## 0.129.1 (2026-11-02)
 
 - The forms of a stocktake and of a box of books, with the label above the field.

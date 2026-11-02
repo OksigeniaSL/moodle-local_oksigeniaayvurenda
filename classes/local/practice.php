@@ -409,6 +409,17 @@ final class practice {
                     'readerid' => $readers[$code($who)], 'status' => 'waiting', 'timecreated' => $now - $ago * DAYSECS,
                     'timemodified' => $now - $ago * DAYSECS]);
             }
+        } else if ($piece === 'selfloan') {
+            // A post that already lent a book, so there is something to go over.
+            $post = $DB->insert_record(self::T . 'selfpost', ['libraryid' => $library->id,
+                'name' => get_string('practicepost', 'local_oksigeniaayvurenda'), 'keyhash' => hash('sha256', random_string(48)),
+                'tries' => 0, 'timetries' => 0, 'timelast' => $now - HOURSECS, 'createdby' => $userid,
+                'timecreated' => $now - DAYSECS]);
+            $answer = (new desk($library, 0, $now - HOURSECS, true))->scan(
+                $code(self::BOOKS[0][0]),
+                (int) $readers[$code(self::READERS[0][0])]
+            );
+            $DB->set_field(self::T . 'loan', 'postid', $post, ['id' => $answer['loanid']]);
         } else if ($piece === 'twins') {
             // Leo twice, as a list from another program leaves him: this one has no loans, so the first is offered to stay.
             $DB->insert_record(self::T . 'reader', ['entityid' => $library->entityid,

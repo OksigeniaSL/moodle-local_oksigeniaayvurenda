@@ -211,6 +211,8 @@
         <FIELD NAME="renewals" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="staffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who lent it"/>
         <FIELD NAME="returnstaffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who took it back"/>
+        <FIELD NAME="postid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The self-loan post it went out from"/>
+        <FIELD NAME="returnpostid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The self-loan post it came back at"/>
         <FIELD NAME="returnnote" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="The one-tap note on return: loved, unfinished, more…"/>
         <FIELD NAME="timenotified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Last notice of lateness to the reader"/>
         <FIELD NAME="conditionout" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="State of material when it was lent: good, worn, missingpart, broken"/>
@@ -222,6 +224,8 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
         <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+        <KEY NAME="postid" TYPE="foreign" FIELDS="postid" REFTABLE="local_oksigeniaayvurenda_selfpost" REFFIELDS="id"/>
+        <KEY NAME="returnpostid" TYPE="foreign" FIELDS="returnpostid" REFTABLE="local_oksigeniaayvurenda_selfpost" REFFIELDS="id"/>
         <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
         <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
         <KEY NAME="staffid" TYPE="foreign" FIELDS="staffid" REFTABLE="user" REFFIELDS="id"/>
@@ -779,6 +783,31 @@
         <KEY NAME="digitalid" TYPE="foreign-unique" FIELDS="digitalid" REFTABLE="local_oksigeniaayvurenda_digital" REFFIELDS="id"/>
         <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_selfpost" COMMENT="A self-loan post: a screen where readers lend to themselves with their card, opened by its own key">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Where it stands"/>
+        <FIELD NAME="keyhash" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The hash of the key that opens it; the key itself is not kept"/>
+        <FIELD NAME="lang" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="The language it speaks"/>
+        <FIELD NAME="tries" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cards and unknown codes read in the current minute"/>
+        <FIELD NAME="timetries" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When that minute began"/>
+        <FIELD NAME="hourtries" TYPE="int" LENGTH="6" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The same, in the current hour"/>
+        <FIELD NAME="timehour" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When that hour began"/>
+        <FIELD NAME="timestopped" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When it stopped by itself, until the staff open it"/>
+        <FIELD NAME="timelast" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When something was last read at it"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who made it"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="keyhash" UNIQUE="true" FIELDS="keyhash"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

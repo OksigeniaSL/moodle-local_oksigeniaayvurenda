@@ -482,7 +482,7 @@ final class desk {
             'timeloaned' => $this->now,
             'timedue' => $due,
             'renewals' => 0,
-            'staffid' => $this->staffid,
+            'staffid' => $this->staffid ?: null,
             'timecreated' => $this->now,
             'timemodified' => $this->now,
         ]);
@@ -520,7 +520,7 @@ final class desk {
             return $this->answer('returned', 'ok', 'deskreturnednoloan', $this->title($item), ['loanid' => 0]);
         }
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => $this->now,
-            'returnstaffid' => $this->staffid, 'timemodified' => $this->now]);
+            'returnstaffid' => $this->staffid ?: null, 'timemodified' => $this->now]);
         $material = $this->material($item, (int) $loan->id, 'in');
         $item->status = 'available';
         // A copy of a box that already went back goes home now.

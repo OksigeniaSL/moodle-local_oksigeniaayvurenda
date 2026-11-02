@@ -82,6 +82,8 @@ class provider implements
             'returnnote' => 'privacy:metadata:loan:returnnote',
             'staffid' => 'privacy:metadata:loan:staffid',
             'returnstaffid' => 'privacy:metadata:loan:returnstaffid',
+            'postid' => 'privacy:metadata:loan:postid',
+            'returnpostid' => 'privacy:metadata:loan:returnpostid',
             'timenotified' => 'privacy:metadata:loan:timenotified',
             'conditionout' => 'privacy:metadata:loan:conditionout',
             'conditionin' => 'privacy:metadata:loan:conditionin',
@@ -91,6 +93,12 @@ class provider implements
             'groupname' => 'privacy:metadata:tutor:groupname',
             'timenotified' => 'privacy:metadata:tutor:timenotified',
         ], 'privacy:metadata:tutor');
+        $collection->add_database_table(self::T . 'selfpost', [
+            'libraryid' => 'privacy:metadata:selfpost:libraryid',
+            'name' => 'privacy:metadata:selfpost:name',
+            'createdby' => 'privacy:metadata:selfpost:createdby',
+            'timecreated' => 'privacy:metadata:selfpost:timecreated',
+        ], 'privacy:metadata:selfpost');
         $collection->add_database_table(self::T . 'keeper', [
             'libraryid' => 'privacy:metadata:keeper:libraryid',
             'userid' => 'privacy:metadata:keeper:userid',
@@ -266,6 +274,7 @@ class provider implements
             []
         );
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'tutor}', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'selfpost} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'keeper}', []);
         $userlist->add_from_sql('staffid', 'SELECT staffid FROM {' . self::T . 'keeper} WHERE staffid IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'relay}', []);
@@ -491,6 +500,16 @@ class provider implements
                 ], $tutored))]
             );
         }
+        $posts = $DB->get_records(self::T . 'selfpost', ['createdby' => $userid], 'id', 'id, name, timecreated');
+        if ($posts) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:selfpost', 'local_oksigeniaayvurenda')]),
+                (object) ['posts' => array_values(array_map(fn($p) => [
+                    'name' => $p->name,
+                    'since' => transform::datetime($p->timecreated),
+                ], $posts))]
+            );
+        }
         $kept = $DB->get_records_sql(
             'SELECT k.id, b.name, k.timecreated
                FROM {' . self::T . 'keeper} k
@@ -526,6 +545,7 @@ class provider implements
         $DB->set_field_select(self::T . 'loan', 'staffid', null, 'staffid IS NOT NULL');
         $DB->set_field_select(self::T . 'loan', 'returnstaffid', null, 'returnstaffid IS NOT NULL');
         $DB->delete_records(self::T . 'tutor');
+        $DB->set_field_select(self::T . 'selfpost', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'keeper');
         $DB->delete_records(self::T . 'relay');
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
@@ -624,6 +644,7 @@ class provider implements
         $DB->set_field(self::T . 'loan', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'loan', 'returnstaffid', null, ['returnstaffid' => $userid]);
         $DB->delete_records(self::T . 'tutor', ['userid' => $userid]);
+        $DB->set_field(self::T . 'selfpost', 'createdby', null, ['createdby' => $userid]);
         $DB->delete_records(self::T . 'keeper', ['userid' => $userid]);
         $DB->set_field(self::T . 'keeper', 'staffid', null, ['staffid' => $userid]);
         $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
@@ -663,6 +684,9 @@ class provider implements
             return true;
         }
         if ($DB->record_exists(self::T . 'tutor', ['userid' => $userid])) {
+            return true;
+        }
+        if ($DB->record_exists(self::T . 'selfpost', ['createdby' => $userid])) {
             return true;
         }
         if ($DB->record_exists(self::T . 'keeper', ['userid' => $userid])) {
@@ -731,6 +755,8 @@ class provider implements
             'due' => transform::datetime($loan->timedue),
             'returned' => $loan->timereturned ? transform::datetime($loan->timereturned) : null,
             'renewals' => $loan->renewals,
+            'selfloan' => !empty($loan->postid),
+            'selfreturn' => !empty($loan->returnpostid),
             'note' => $loan->returnnote,
             'conditionout' => $loan->conditionout ?? null,
             'conditionin' => $loan->conditionin ?? null,

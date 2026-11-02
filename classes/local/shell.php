@@ -192,6 +192,10 @@ final class shell {
         $base = $CFG->wwwroot . '/local/oksigeniaayvurenda/';
         $app = $base . 'app/';
         $lang = str_replace('_', '-', current_language());
+        if (!empty($options['bare'])) {
+            self::bare($title, $main, $library, $options, $app, $version, $lang);
+            return;
+        }
         $str = fn(string $key, $a = null) => s(get_string($key, 'local_oksigeniaayvurenda', $a));
         $home = $library ? $base . 'index.php?library=' . rawurlencode($library->slug) : $base . 'index.php';
         // Someone without an account goes home to the library's door, when it has its window open.
@@ -617,6 +621,61 @@ Oksigenia Ayvurenda</button>
             ],
             'strings' => $strings,
         ];
+    }
+
+    /**
+     * A page with nothing around it: no header, no way out and nothing of the site, for a screen left alone in a room.
+     *
+     * @param string $title
+     * @param string $main
+     * @param \stdClass|null $library
+     * @param array $options config and scripts.
+     * @param string $app
+     * @param int $version
+     * @param string $lang
+     */
+    private static function bare(
+        string $title,
+        string $main,
+        ?\stdClass $library,
+        array $options,
+        string $app,
+        int $version,
+        string $lang
+    ): void {
+        $scripts = '';
+        foreach ($options['scripts'] ?? [] as $script) {
+            $scripts .= '<script src="' . $app . $script . '.js?v=' . $version . '"></script>' . "\n";
+        }
+        $config = json_encode($options['config'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+            | JSON_UNESCAPED_UNICODE);
+        @header('Content-Type: text/html; charset=utf-8');
+        @header('X-Frame-Options: SAMEORIGIN');
+        @header('Cache-Control: no-store');
+        echo '<!DOCTYPE html>
+<html lang="' . s($lang) . '"' . self::colour_mode() . '>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>' . s($title) . '</title>
+<link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
+<script>(function() {
+    var root = document.documentElement;
+    if (root.getAttribute(\'data-colourmode\') === \'auto\') {
+        root.setAttribute(\'data-bs-theme\', window.matchMedia(\'(prefers-color-scheme: dark)\').matches ? \'dark\' : \'light\');
+    }
+})();</script>
+</head>
+<body class="ayv ayv-skin-' . skins::of($library ? (int) $library->entityid : 0) . '">
+<main id="ayv-main" class="ayv-main" tabindex="-1">
+' . $main . '
+</main>
+<script>window.AYV = ' . $config . ';</script>
+' . $scripts . '</body>
+</html>';
     }
 
     /**

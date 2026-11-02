@@ -3989,3 +3989,35 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 /* What a list says with nothing in it, and the next step when there is one. */
 .ayv .ayv-nothing { display: flex; flex-direction: column; align-items: center; gap: .9rem; margin: 1.25rem 0; padding: 2rem 1.5rem; border: 1px dashed var(--line); border-radius: 16px; text-align: center; }
 .ayv .ayv-nothing p { margin: 0; font-size: 1.0625rem; }
+
+/* The self-loan post: one screen in big letters, nothing to get lost in. */
+.ayv .ayv-self { display: flex; flex-direction: column; gap: 1.5rem; min-height: 100vh; min-height: 100dvh; padding: clamp(1rem, 4vw, 3rem); box-sizing: border-box; }
+.ayv .ayv-self-library { margin: 0; font-family: var(--title); font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 600; color: var(--accent); }
+.ayv .ayv-self-stage { flex: 1 1 auto; display: flex; align-items: center; gap: clamp(1rem, 4vw, 3rem); min-height: 0; }
+.ayv .ayv-self-figure { flex: none; width: clamp(120px, 24vw, 320px); height: auto; }
+.ayv .ayv-self-talk { flex: 1 1 auto; min-width: 0; }
+.ayv .ayv-self-title { margin: 0; font-family: var(--title); font-size: clamp(2rem, 6vw, 4.25rem); font-weight: 600; line-height: 1.1; }
+.ayv .ayv-self-hint { margin: .6rem 0 0; font-size: clamp(1.1rem, 2.4vw, 1.6rem); }
+.ayv .ayv-self-said { margin: 1rem 0 0; padding: .85rem 1.15rem; border-radius: var(--radius); font-size: clamp(1.1rem, 2.4vw, 1.6rem); background: var(--notice-bg); }
+.ayv .ayv-self-said-look { background: var(--paper2); }
+.ayv .ayv-self-said-no { background: var(--no-bg); }
+.ayv .ayv-self-list { display: grid; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-self-book { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .2rem 1rem; padding: .8rem 1.1rem; border-radius: var(--radius); background: var(--surface); font-size: clamp(1.05rem, 2.2vw, 1.4rem); }
+.ayv .ayv-self-book-title { font-weight: 700; min-width: 0; }
+.ayv .ayv-self-actions { margin: 1.25rem 0 0; }
+.ayv .ayv-self-done { min-height: 56px; padding-inline: 2.25rem; font-size: 1.25rem; }
+.ayv .ayv-self-form { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.ayv .ayv-self-form input { flex: 1 1 14rem; min-width: 0; min-height: 48px; padding: .4rem 1rem; font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 999px; }
+.ayv .ayv-self-created { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; }
+.ayv .ayv-self-created-text { flex: 1 1 18rem; min-width: 0; }
+.ayv .ayv-self-qr { flex: none; background: #fff; border-radius: 8px; }
+.ayv .ayv-profile-recard { margin-top: .5rem; }
+.ayv .ayv-self-stopped { margin: 0; padding: .55rem .8rem; border-radius: 10px; background: var(--no-bg); }
+.ayv .ayv-self-rows { display: grid; gap: .5rem; margin: .75rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-self-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; padding: .6rem .9rem; border-radius: var(--radius); background: var(--surface); }
+.ayv .ayv-self-row-when { flex: none; font-size: .95rem; color: var(--ink2, inherit); }
+.ayv .ayv-self-row-what { flex: 1 1 16rem; min-width: 0; }
+@media (max-width: 640px) {
+    .ayv .ayv-self-stage { flex-direction: column; align-items: flex-start; }
+    .ayv .ayv-self-figure { width: 120px; }
+}

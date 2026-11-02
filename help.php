@@ -118,6 +118,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
             'isbn2' => practice::ISBNS[1][0],
             'wish' => $str('practicewishmine'),
             'me' => (string) $USER->id,
+            'post' => $str('practicepost'),
             'material' => $str('practicematerial'),
             'sheet' => str_replace('|', "\n", $str('practicesheet')) . "\n",
             'sheetname' => $str('practicesheetname'),

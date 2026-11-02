@@ -58,6 +58,7 @@ final class menu {
         $m = 'local/oksigeniaayvurenda:manage';
         return [
             'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d], ['lots.php', 'menulots', $d],
+                ['selfloan.php', 'menuselfloan', $d],
                 ['copies.php', 'menucopies', $m]],
             'menucataloguing' => [['add.php', 'menuadd', $c], ['material.php', 'menumaterial', $c],
                 ['import.php', 'menuimport', $c], ['free.php', 'menufree', $c], ['labels.php', 'menulabels', $c],
