@@ -123,6 +123,8 @@ $data = [
     'platformsheading' => $str('ltiplatforms'),
     'platforms' => $platforms,
     'hasplatforms' => (bool) $platforms,
+    'openhand' => $editing !== null || $typed || $error !== '',
+    'handsummary' => $str('ltihandsummary'),
     'noplatforms' => $str('ltinoplatforms'),
     'editlabel' => $str('ltiedit'),
     'deletelabel' => $str('ltidelete'),

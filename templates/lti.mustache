@@ -47,7 +47,7 @@
         "hasplatforms": true,
         "platforms": [{"platformid": 1, "platformname": "Moodle del centro", "issuer": "https://moodle.example.org",
             "clientid": "AbC123", "editurl": "https://example.org/e"}],
-        "noplatforms": "Todavía ninguna.",
+        "openhand": false, "handsummary": "Si tu plataforma no lo admite",
         "editlabel": "Cambiar",
         "deletelabel": "Quitar",
         "formheading": "Añadir una plataforma",
@@ -66,41 +66,42 @@
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#authoff}}<p class="ayv-notice ayv-notice-error" role="alert">{{authoff}} {{#authurl}}<a href="{{authurl}}">{{authlink}}</a>{{/authurl}}</p>{{/authoff}}
-<section class="ayv-section">
-    <h2 class="ayv-section-title">{{regheading}}</h2>
-    <p>{{regintro}}</p>
-    <p class="ayv-invite-link"><span>{{reglabel}}</span> <input type="text" readonly value="{{regurl}}" aria-label="{{reglabel}}">
-        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{regurl}}">{{copy}}</button></p>
-    <form method="post" action="{{action}}" class="ayv-inline-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
-        <input type="hidden" name="do" value="newreg"><span class="ayv-field-hint">{{regexpires}}</span>
-        <button type="submit" class="ayv-button ayv-button-quiet">{{regnew}}</button></form>
-</section>
-<section class="ayv-section">
-    <h2 class="ayv-section-title">{{toolheading}}</h2>
-    <p>{{toolintro}}</p>
-    {{#toolurls}}
-    <p class="ayv-invite-link"><span>{{label}}</span> <input type="text" readonly value="{{value}}" aria-label="{{label}}">
-        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{value}}">{{copy}}</button></p>
-    {{/toolurls}}
-    <p class="ayv-field-hint">{{toolhint}}</p>
-</section>
+{{#hasplatforms}}
 <section class="ayv-section">
     <h2 class="ayv-section-title">{{platformsheading}}</h2>
-    {{^hasplatforms}}<p class="ayv-empty">{{noplatforms}}</p>{{/hasplatforms}}
-    {{#hasplatforms}}
-    <ul class="ayv-people">
+    <ul class="ayv-dig-grid">
     {{#platforms}}
-        <li class="ayv-person"><span class="ayv-person-name">{{platformname}}</span>
-            <span class="ayv-field-hint">{{issuer}} · {{clientid}}</span>
-            <a class="ayv-button ayv-button-quiet" href="{{editurl}}">{{editlabel}}</a>
-            <form method="post" action="{{action}}" class="ayv-inline-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <li class="ayv-dig-card"><h3 class="ayv-dig-title">{{platformname}}</h3>
+            <p class="ayv-field-hint">{{issuer}} · {{clientid}}</p>
+            <div class="ayv-dig-actions"><a class="ayv-button ayv-button-quiet" href="{{editurl}}">{{editlabel}}</a>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
                 <input type="hidden" name="do" value="delete"><input type="hidden" name="id" value="{{platformid}}">
-                <button type="submit" class="ayv-button ayv-button-quiet">{{deletelabel}}</button></form></li>
+                <button type="submit" class="ayv-button ayv-button-quiet">{{deletelabel}}</button></form></div></li>
     {{/platforms}}
     </ul>
-    {{/hasplatforms}}
 </section>
-<section class="ayv-section" id="ayv-lti-form">
+{{/hasplatforms}}
+<section class="ayv-lti-card">
+    <h2 class="ayv-section-title">{{regheading}}</h2>
+    <p>{{regintro}}</p>
+    <p class="ayv-lti-url"><input type="text" readonly value="{{regurl}}" aria-label="{{reglabel}}">
+        <button type="button" class="ayv-button" data-copy="{{regurl}}">{{copy}}</button></p>
+    <form method="post" action="{{action}}" class="ayv-lti-renew"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="newreg"><span class="ayv-field-hint">{{regexpires}}</span>
+        <button type="submit" class="ayv-line-button">{{regnew}}</button></form>
+</section>
+<details class="ayv-lti-hand" id="ayv-lti-form"{{#openhand}} open{{/openhand}}>
+    <summary>{{handsummary}}</summary>
+    <h2 class="ayv-section-title">{{toolheading}}</h2>
+    <p>{{toolintro}}</p>
+    <dl class="ayv-lti-data">
+    {{#toolurls}}
+        <dt>{{label}}</dt>
+        <dd class="ayv-lti-url"><input type="text" readonly value="{{value}}" aria-label="{{label}}">
+            <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{value}}">{{copy}}</button></dd>
+    {{/toolurls}}
+    </dl>
+    <p class="ayv-field-hint">{{toolhint}}</p>
     <h2 class="ayv-section-title">{{formheading}}</h2>
     <form method="post" action="{{action}}" class="ayv-book" autocomplete="off">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
@@ -108,11 +109,11 @@
         <input type="hidden" name="id" value="{{editid}}">
         <p class="ayv-field-hint">{{moodlehint}}</p>
         {{#form}}
-        <label class="ayv-field ayv-field-wide">{{label}} <span class="ayv-field-hint">{{hint}}</span>
+        <label class="ayv-field ayv-dig-field">{{label}} <span class="ayv-field-hint">{{hint}}</span>
             {{#long}}<textarea name="{{field}}" rows="2" spellcheck="false">{{value}}</textarea>{{/long}}
             {{^long}}<input type="text" name="{{field}}" value="{{value}}" spellcheck="false" {{#required}}required{{/required}}>{{/long}}</label>
         {{/form}}
         <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{savelabel}}</button>
             {{#cancelurl}}<a class="ayv-button ayv-button-quiet" href="{{cancelurl}}">{{cancellabel}}</a>{{/cancelurl}}</p>
     </form>
-</section>
+</details>

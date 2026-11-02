@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.126.0 (2026-11-02)
+
+- The screens that were still forms, redone: labels (what, of which, and the first free one tapped on a map of the sheet), material (the
+  few things first), repeated readers (a card for each person, twenty at a time), tutors (by stage), platforms (one touch first) and
+  reports (the total and its file first, two columns on a wide screen).
+
 ## 0.125.0 (2026-11-02)
 
 - What a library reads, in the words of its kind: without classes, no challenges, no tutors, no «My class», no class wishes; without

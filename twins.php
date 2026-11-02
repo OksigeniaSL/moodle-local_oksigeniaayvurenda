@@ -78,7 +78,9 @@ $card = function (array $reader, bool $first) use ($str, $typelabel) {
 };
 $sets = [];
 $likely = twins::likely($entityid, $query);
-foreach (array_slice($likely, 0, 40) as $n => $ids) {
+$from = max(0, optional_param('from', 0, PARAM_INT));
+$pagesize = 20;
+foreach (array_slice($likely, $from, $pagesize) as $n => $ids) {
     $readers = array_values(twins::describe($entityid, $ids));
     // The one with more history is offered to stay.
     usort($readers, fn($x, $y) => [$y['account'], $y['loans']] <=> [$x['account'], $x['loans']]);
@@ -107,7 +109,17 @@ $data = [
     'sesskey' => sesskey(),
     'slug' => $library->slug,
     'likelyheading' => $str('twinslikely', count($likely)),
-    'more' => count($likely) > count($sets) ? $str('twinsmore', count($likely) - count($sets)) : '',
+    'pager' => count($likely) > $pagesize ? [
+        'prev' => $from > 0 ? (new moodle_url($PAGE->url, ['q' => $query, 'from' => max(0, $from - $pagesize)]))->out(false) : '',
+        'next' => $from + $pagesize < count($likely)
+            ? (new moodle_url($PAGE->url, ['q' => $query, 'from' => $from + $pagesize]))->out(false) : '',
+        'line' => $str('readerspage', (object) ['from' => $from + 1, 'to' => min($from + $pagesize, count($likely)),
+            'total' => count($likely)]),
+        'prevlabel' => $str('readersprev'),
+        'nextlabel' => $str('readersnext'),
+    ] : null,
+    'stayslabel' => $str('twinsstays'),
+    'closelabel' => $str('offsiteclose'),
     'query' => $query,
     'filterlabel' => $str('twinsfilter'),
     'filterbutton' => $str('windowsearchbutton'),

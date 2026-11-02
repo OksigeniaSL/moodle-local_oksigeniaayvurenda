@@ -57,13 +57,20 @@ if (data_submitted() && confirm_sesskey()) {
     $notice = $str('sourcessaved');
 }
 $candidates = tutors::candidates((int) $library->entityid);
-$rows = [];
+$stages = [];
+$with = 0;
+$all = 0;
 foreach (tutors::groups((int) $library->entityid, (int) $year->id) as $index => $row) {
     $options = [['value' => 0, 'label' => $str('tutornone'), 'selected' => !$row['userid']]];
     foreach ($candidates as $userid => $name) {
         $options[] = ['value' => $userid, 'label' => $name, 'selected' => $userid === $row['userid']];
     }
-    $rows[] = ['index' => $index, 'group' => $row['group'], 'options' => $options, 'proposed' => $row['proposed']];
+    $all++;
+    $with += $row['userid'] ? 1 : 0;
+    $stage = (string) ($row['stage'] ?? '');
+    $stages[$stage] = $stages[$stage] ?? ['stage' => $stage, 'rows' => []];
+    $stages[$stage]['rows'][] = ['index' => $index, 'group' => $row['group'], 'options' => $options, 'proposed' => $row['proposed'],
+        'hastutor' => (bool) $row['userid']];
 }
 $data = [
     'heading' => $str('tutorsheading', $year->name),
@@ -71,8 +78,9 @@ $data = [
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'rows' => $rows,
-    'hasrows' => (bool) $rows,
+    'stages' => array_values($stages),
+    'hasrows' => (bool) $stages,
+    'summary' => $all ? $str('tutorssummary', (object) ['with' => $with, 'all' => $all]) : '',
     'empty' => $str('readersempty'),
     'proposedlabel' => $str('tutorproposed'),
     'save' => $str('sourcessave'),

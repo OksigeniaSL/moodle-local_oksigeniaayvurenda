@@ -22,6 +22,7 @@
     * sets - likely groups (setid, members: id, name, cardcode, typelabel, group, loanslabel, accountlabel, checked)
     * pair - two readers found by their codes (members, as above), or nothing
     * action, sesskey, slug, codea, codeb - the forms
+    * pager - prev, next, line, prevlabel, nextlabel
     * the words of each section and button
     Example context (json):
     {
@@ -41,7 +42,7 @@
             {"id": 2, "name": "Jon Mar Prado", "cardcode": "10520K", "typelabel": "Profesor", "group": "",
              "loanslabel": "Préstamos: 0 (fuera: 0)", "accountlabel": "", "checked": false}]}],
         "nosets": "No hay ninguno.",
-        "more": "",
+        "pager": null, "stayslabel": "Se queda", "closelabel": "Cerrar",
         "query": "",
         "filterlabel": "Solo los que se llaman",
         "filterbutton": "Buscar",
@@ -63,53 +64,59 @@
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
-<section class="ayv-section" id="ayv-twins-hand">
-    <h2 class="ayv-section-title">{{handheading}}</h2>
-    <p>{{handintro}}</p>
-    <form method="get" action="{{action}}" class="ayv-inline-form">
-        <input type="hidden" name="library" value="{{slug}}">
-        <label class="ayv-field">{{codealabel}} <input type="text" name="a" value="{{codea}}" size="10" autocomplete="off" spellcheck="false"></label>
-        <label class="ayv-field">{{codeblabel}} <input type="text" name="b" value="{{codeb}}" size="10" autocomplete="off" spellcheck="false"></label>
-        <button type="submit" class="ayv-button ayv-button-quiet">{{lookuplabel}}</button>
-    </form>
-    {{#lookupnote}}<p class="ayv-empty">{{lookupnote}}</p>{{/lookupnote}}
-    {{#pair}}
-    <form method="post" action="{{action}}" class="ayv-book ayv-twins">
-        <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <fieldset class="ayv-fieldset"><legend>{{keeplabel}}</legend>
-        {{#members}}
-            <input type="hidden" name="ids[]" value="{{id}}">
-            <label class="ayv-field ayv-field-check ayv-twin"><input type="radio" name="keep" value="{{id}}" {{#checked}}checked{{/checked}}>
-                <span class="ayv-person-name">{{name}}</span>
-                <span class="ayv-field-hint">{{cardlabel}} {{cardcode}} · {{typelabel}}{{#group}} · {{group}}{{/group}} · {{loanslabel}}{{#accountlabel}} · {{accountlabel}}{{/accountlabel}}</span></label>
-        {{/members}}
-        </fieldset>
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{joinlabel}}</button></p>
-    </form>
-    {{/pair}}
-</section>
-<section class="ayv-section" id="ayv-twins-likely">
-    <h2 class="ayv-section-title">{{likelyheading}}</h2>
-    <p>{{likelyintro}}</p>
-    <form method="get" action="{{action}}" class="ayv-inline-form" role="search">
+<section class="ayv-twins-top" id="ayv-twins-hand">
+    <form method="get" action="{{action}}" class="ayv-readers-find" role="search">
         <input type="hidden" name="library" value="{{slug}}">
         <label class="ayv-field">{{filterlabel}} <input type="search" name="q" value="{{query}}" maxlength="100"></label>
         <button type="submit" class="ayv-button ayv-button-quiet">{{filterbutton}}</button>
     </form>
-    {{^hassets}}<p class="ayv-empty">{{nosets}}</p>{{/hassets}}
-    {{#sets}}
-    <form method="post" action="{{action}}" class="ayv-book ayv-twins">
+    <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-twins-bycode">{{handheading}}</button>
+    {{#lookupnote}}<p class="ayv-empty">{{lookupnote}}</p>{{/lookupnote}}
+    {{#pair}}
+    <form method="post" action="{{action}}" class="ayv-twins ayv-twinset">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <fieldset class="ayv-fieldset"><legend>{{keeplabel}}</legend>
+        <fieldset class="ayv-twinset-people"><legend class="ayv-sr">{{keeplabel}}</legend>
         {{#members}}
             <input type="hidden" name="ids[]" value="{{id}}">
-            <label class="ayv-field ayv-field-check ayv-twin"><input type="radio" name="keep" value="{{id}}" {{#checked}}checked{{/checked}}>
-                <span class="ayv-person-name">{{name}}</span>
-                <span class="ayv-field-hint">{{cardlabel}} {{cardcode}} · {{typelabel}}{{#group}} · {{group}}{{/group}} · {{loanslabel}}{{#accountlabel}} · {{accountlabel}}{{/accountlabel}}</span></label>
+            <label class="ayv-twinset-person"><input type="radio" name="keep" value="{{id}}" {{#checked}}checked{{/checked}}>
+                <span class="ayv-twinset-who"><span class="ayv-person-name">{{name}}</span> <span class="ayv-twinset-stays">{{stayslabel}}</span></span>
+                <span class="ayv-field-hint">{{cardlabel}} {{cardcode}} · {{typelabel}}{{#group}} · {{group}}{{/group}} · {{loanslabel}}{{#accountlabel}} · {{accountlabel}}{{/accountlabel}}</span>
+            </label>
         {{/members}}
         </fieldset>
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{joinlabel}}</button></p>
+        <button type="submit" class="ayv-button">{{joinlabel}}</button>
+    </form>
+    {{/pair}}
+    <dialog class="ayv-modal" id="ayv-twins-bycode" aria-labelledby="ayv-twins-bycode-title">
+        <div class="ayv-modal-head"><h3 id="ayv-twins-bycode-title" class="ayv-section-title">{{handheading}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{closelabel}}">×</button></form></div>
+        <p>{{handintro}}</p>
+        <form method="get" action="{{action}}">
+            <input type="hidden" name="library" value="{{slug}}">
+            <label class="ayv-field ayv-dig-field">{{codealabel}} <input type="text" name="a" value="{{codea}}" autocomplete="off" spellcheck="false"></label>
+            <label class="ayv-field ayv-dig-field">{{codeblabel}} <input type="text" name="b" value="{{codeb}}" autocomplete="off" spellcheck="false"></label>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{lookuplabel}}</button></p>
+        </form>
+    </dialog>
+</section>
+<section class="ayv-section" id="ayv-twins-likely">
+    <h2 class="ayv-section-title">{{likelyheading}}</h2>
+    <p>{{likelyintro}}</p>
+    {{^hassets}}<p class="ayv-empty">{{nosets}}</p>{{/hassets}}
+    {{#sets}}
+    <form method="post" action="{{action}}" class="ayv-twins ayv-twinset">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <fieldset class="ayv-twinset-people"><legend class="ayv-sr">{{keeplabel}}</legend>
+        {{#members}}
+            <input type="hidden" name="ids[]" value="{{id}}">
+            <label class="ayv-twinset-person"><input type="radio" name="keep" value="{{id}}" {{#checked}}checked{{/checked}}>
+                <span class="ayv-twinset-who"><span class="ayv-person-name">{{name}}</span> <span class="ayv-twinset-stays">{{stayslabel}}</span></span>
+                <span class="ayv-field-hint">{{cardlabel}} {{cardcode}} · {{typelabel}}{{#group}} · {{group}}{{/group}} · {{loanslabel}}{{#accountlabel}} · {{accountlabel}}{{/accountlabel}}</span>
+            </label>
+        {{/members}}
+        </fieldset>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{joinlabel}}</button>
     </form>
     {{/sets}}
-    {{#more}}<p class="ayv-field-hint">{{more}}</p>{{/more}}
+    {{#pager}}{{> local_oksigeniaayvurenda/readers_pager}}{{/pager}}
 </section>

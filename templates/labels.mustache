@@ -47,18 +47,34 @@
 }}
 <div class="ayv-print-head">
     <h1 class="ayv-results-title">{{heading}}</h1>
-    <form method="get" action="{{action}}" class="ayv-inline-form">
+    <form method="get" action="{{action}}" class="ayv-lab" data-ayv-lab>
         <input type="hidden" name="library" value="{{library}}">
-        <label class="ayv-field">{{labelskind}} <select name="kind">{{#kinds}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/kinds}}</select></label>
-        <label class="ayv-field">{{labelswhich}} <select name="which">{{#whiches}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/whiches}}</select></label>
-        <label class="ayv-field">{{labelssince}} <input type="date" name="since" value="{{since}}"></label>
-        <label class="ayv-field ayv-field-wide">{{labelscodes}} <textarea name="codes" rows="2" spellcheck="false">{{codes}}</textarea></label>
-        <label class="ayv-field">{{labelssheetlabel}} <select name="sheet">{{#sheets}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/sheets}}</select></label>
-        <label class="ayv-field">{{labelsstart}} <input type="number" name="start" min="1" max="65" value="{{start}}"></label>
-        <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
+        <input type="hidden" name="start" value="{{start}}">
+        <div class="ayv-lab-main">
+            <fieldset class="ayv-lab-kinds"><legend class="ayv-sr">{{labelskind}}</legend>
+                {{#kinds}}
+                <label class="ayv-lab-kind"><input type="radio" name="kind" value="{{value}}" {{#selected}}checked{{/selected}}>
+                    <span class="ayv-lab-sample" aria-hidden="true">
+                        {{#isspine}}<span class="ayv-lab-spine"><b>N</b><b>LAU</b><b>far</b></span>{{/isspine}}
+                        {{^isspine}}<span class="ayv-lab-code"><i></i><i></i><i></i></span>{{/isspine}}
+                    </span>
+                    <span class="ayv-lab-kindname">{{label}}</span></label>
+                {{/kinds}}
+            </fieldset>
+            <fieldset class="ayv-lab-which"><legend>{{labelswhich}}</legend>
+                {{#whiches}}<label class="ayv-lab-pill"><input type="radio" name="which" value="{{value}}" {{#selected}}checked{{/selected}}> <span>{{label}}</span></label>{{/whiches}}
+            </fieldset>
+            <label class="ayv-field ayv-dig-field ayv-lab-since"{{^issince}} hidden{{/issince}}>{{labelssince}} <input type="date" name="since" value="{{since}}"></label>
+            <label class="ayv-field ayv-dig-field ayv-lab-codes"{{^iscodes}} hidden{{/iscodes}}>{{labelscodes}} <textarea name="codes" rows="3" spellcheck="false">{{codes}}</textarea></label>
+            <p class="ayv-lab-go"{{#istoday}} hidden{{/istoday}}><button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button></p>
+        </div>
+        <div class="ayv-lab-side">
+            <label class="ayv-field ayv-dig-field">{{labelssheetlabel}} <select name="sheet">{{#sheets}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/sheets}}</select></label>
+            <p class="ayv-field-hint">{{labelsmaphint}}</p>
+            <div class="ayv-lab-map" style="--cols: {{cols}}" role="group" aria-label="{{labelsstart}}">{{#cells}}<button type="button" class="ayv-lab-cell{{#used}} ayv-lab-cell-used{{/used}}{{#first}} ayv-lab-cell-first{{/first}}" data-start="{{n}}" aria-label="{{label}}"{{#first}} aria-current="true"{{/first}}></button>{{/cells}}</div>
+        </div>
     </form>
-    <p>{{count}}</p>
-    {{#haspages}}<p><button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/haspages}}
+    <p class="ayv-lab-count"><span>{{count}}</span>{{#haspages}} <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button>{{/haspages}}</p>
 </div>
 {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
 {{^haspages}}<p class="ayv-empty">{{empty}}</p>{{/haspages}}

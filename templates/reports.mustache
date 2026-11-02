@@ -65,7 +65,10 @@
     <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
 </form>
 {{/never}}
-{{#summary}}<p class="ayv-notice">{{summary}}</p>{{/summary}}
+<div class="ayv-report-top">
+    {{#summary}}<p class="ayv-report-sum">{{summary}}</p>{{/summary}}
+    {{#hasrows}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{csv}}">{{reportcsv}}</a></p>{{/hasrows}}
+</div>
 {{#hasrows}}
 <ul class="ayv-people ayv-report">
 {{#rows}}
@@ -77,6 +80,5 @@
     </li>
 {{/rows}}
 </ul>
-<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{csv}}">{{reportcsv}}</a></p>
 {{/hasrows}}
 {{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}

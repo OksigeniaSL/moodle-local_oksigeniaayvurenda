@@ -44,19 +44,25 @@
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#nocandidates}}<p class="ayv-empty">{{nocandidates}}</p>{{/nocandidates}}
 {{#hasrows}}
+{{#summary}}<p class="ayv-tut-sum">{{summary}}</p>{{/summary}}
 <form method="post" action="{{action}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <ul class="ayv-sources">
-    {{#rows}}
-        <li class="ayv-source">
-            <span class="ayv-source-name">{{group}}</span>
-            <input type="hidden" name="group[{{index}}]" value="{{group}}">
-            <select name="tutor[{{index}}]" aria-label="{{group}}">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select>
-            {{#proposed}}<span class="ayv-source-count">{{proposedlabel}}</span>{{/proposed}}
-        </li>
-    {{/rows}}
-    </ul>
-    <p class="ayv-more"><button type="submit" class="ayv-button">{{save}}</button></p>
+    {{#stages}}
+    <section class="ayv-tut-stage">
+        {{#stage}}<h2 class="ayv-section-title">{{stage}}</h2>{{/stage}}
+        <ul class="ayv-sources ayv-tut-rows">
+        {{#rows}}
+            <li class="ayv-source{{^hastutor}} ayv-tut-none{{/hastutor}}">
+                <span class="ayv-source-name">{{group}}</span>
+                <input type="hidden" name="group[{{index}}]" value="{{group}}">
+                <select name="tutor[{{index}}]" aria-label="{{group}}">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select>
+                {{#proposed}}<span class="ayv-source-count">{{proposedlabel}}</span>{{/proposed}}
+            </li>
+        {{/rows}}
+        </ul>
+    </section>
+    {{/stages}}
+    <p class="ayv-tut-save"><button type="submit" class="ayv-button">{{save}}</button></p>
 </form>
 {{/hasrows}}
 {{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}

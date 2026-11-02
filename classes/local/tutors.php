@@ -43,6 +43,10 @@ final class tutors {
      */
     public static function groups(int $entityid, int $yearid): array {
         global $DB;
+        $stages = $DB->get_records_sql_menu(
+            'SELECT m.groupname, MAX(m.stage) FROM {' . self::T . 'member} m WHERE m.yearid = :yearid GROUP BY m.groupname',
+            ['yearid' => $yearid]
+        );
         $names = $DB->get_fieldset_sql(
             'SELECT DISTINCT m.groupname FROM {' . self::T . 'member} m WHERE m.yearid = :yearid ORDER BY m.groupname',
             ['yearid' => $yearid]
@@ -65,7 +69,8 @@ final class tutors {
         foreach ($names as $name) {
             $userid = (int) ($current[$name] ?? 0);
             $proposed = !$userid && !empty($before[$name]);
-            $groups[] = ['group' => $name, 'userid' => $userid ?: (int) ($before[$name] ?? 0), 'proposed' => $proposed];
+            $groups[] = ['group' => $name, 'userid' => $userid ?: (int) ($before[$name] ?? 0), 'proposed' => $proposed,
+                'stage' => (string) ($stages[$name] ?? '')];
         }
         return $groups;
     }

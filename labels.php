@@ -69,7 +69,7 @@ $data = [
     'library' => $library->slug,
     'kind' => $kind,
     'kinds' => array_map(
-        fn($k) => ['value' => $k, 'label' => $str($k . 'title'), 'selected' => $k === $kind],
+        fn($k) => ['value' => $k, 'label' => $str($k . 'title'), 'selected' => $k === $kind, 'isspine' => $k === 'spines'],
         ['labels', 'spines']
     ),
     'whiches' => array_map(
@@ -77,6 +77,12 @@ $data = [
         ['today', 'since', 'codes']
     ),
     'since' => $sincetext,
+    'istoday' => !in_array($which, ['since', 'codes'], true),
+    'issince' => $which === 'since',
+    'iscodes' => $which === 'codes',
+    'cols' => $format['columns'],
+    'cells' => array_map(fn($n) => ['n' => $n, 'used' => $n < $start, 'first' => $n === $start,
+        'label' => $str('labelsstartat', $n)], range(1, $format['columns'] * $format['rows'])),
     'codes' => $codestext,
     'sheets' => array_map(fn($s) => ['value' => $s, 'label' => $str('labelssheet', (object) labels::SHEETS[$s]),
         'selected' => $s === $sheet], array_keys(labels::SHEETS)),
@@ -99,13 +105,14 @@ $data = [
 ];
 foreach (
     ['labelskind', 'labelswhich', 'labelssince', 'labelscodes', 'labelssheetlabel', 'labelsstart', 'labelsshow',
-        'printnow'] as $key
+        'printnow', 'labelsmaphint'] as $key
 ) {
     $data[$key] = $str($key);
 }
 $url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($data['heading'], $OUTPUT->render_from_template('local_oksigeniaayvurenda/labels', $data), $library, '', [
     'search' => false,
+    'scripts' => ['labels'],
     'nav' => [['url' => $url('add.php'), 'label' => $str('addnav')], ['url' => $url('desk.php'), 'label' => $str('desktitle')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'labels']))
             ->out(false), 'label' => $str('helpnav')]],

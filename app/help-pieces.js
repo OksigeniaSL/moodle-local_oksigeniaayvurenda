@@ -417,10 +417,10 @@ window.AYVHelpPieces = {
     labels: function(h) {
         'use strict';
         var c = h.codes;
-        return h.point('select[name="kind"]').then(function() {
+        return h.point('.ayv-lab-kinds').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.choose('select[name="which"]', 'codes');
+            return h.tap('.ayv-lab-which .ayv-lab-pill:last-child');
         }).then(function() {
             return h.say(1);
         }).then(function() {
@@ -434,7 +434,7 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.point('input[name="start"]');
+            return h.point('.ayv-lab-map');
         }).then(function() {
             return h.say(4);
         }).then(function() {

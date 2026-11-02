@@ -119,8 +119,8 @@ final class notices_test extends \advanced_testcase {
         $gen->create_member(['readerid' => $readers['leo']->id, 'yearid' => $next->id, 'groupname' => '4º A']);
         $groups = tutors::groups((int) $library->entityid, (int) $next->id);
         $this->assertSame([
-            ['group' => '3º A', 'userid' => (int) $tutor->id, 'proposed' => true],
-            ['group' => '4º A', 'userid' => 0, 'proposed' => false],
+            ['group' => '3º A', 'userid' => (int) $tutor->id, 'proposed' => true, 'stage' => 'Primaria'],
+            ['group' => '4º A', 'userid' => 0, 'proposed' => false, 'stage' => 'Primaria'],
         ], $groups);
         $this->assertSame(0, $DB->count_records(self::T . 'tutor', ['yearid' => $next->id]));
         tutors::set((int) $next->id, '3º A', (int) $tutor->id);

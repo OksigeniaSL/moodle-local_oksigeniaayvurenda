@@ -112,7 +112,7 @@ $data = [
     'locations' => $locations,
     'types' => $types,
 ];
-$words = ['materialwhich', 'materialname', 'materialbrand', 'materialmodel', 'materialcount', 'materialserials',
+$words = ['materialwhich', 'materialname', 'materialmore', 'materialbrand', 'materialmodel', 'materialcount', 'materialserials',
     'materialserialshint', 'materiallabels', 'materiallabelshint', 'materialnotes', 'addlocation', 'addtype', 'materialsave'];
 foreach ($words as $key) {
     $data[$key] = $str($key);
