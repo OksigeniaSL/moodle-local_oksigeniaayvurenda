@@ -80,6 +80,7 @@ final class copies {
             JOIN {local_oksigeniaayvurenda_library} l ON l.id = p.libraryid WHERE l.entityid = :entityid)',
         'budget' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'sanction' => 'entityid = :entityid',
+        'formatask' => 'entityid = :entityid',
         'roomread' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'bankset' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'banktitle' => 'setid IN (SELECT s.id FROM {local_oksigeniaayvurenda_bankset} s

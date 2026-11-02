@@ -37,7 +37,7 @@ final class twins {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] Tables whose rows belong to a reader. */
-    private const OWNED = ['purchasewho', 'loan', 'hold', 'digital', 'voiceconsent', 'voiceinvite', 'sanction'];
+    private const OWNED = ['purchasewho', 'loan', 'hold', 'digital', 'voiceconsent', 'voiceinvite', 'sanction', 'formatask'];
 
     /**
      * Active readers that look like the same person: same words in the name, same type; in the order of the name.

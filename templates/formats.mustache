@@ -1,0 +1,75 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+{{!
+    @template local_oksigeniaayvurenda/formats
+
+    What readers asked for in another format: a card for each, with its cover, who and what format; «Ya lo tiene» opens a
+    sheet to say how (an accessible item of its digital collection, or some other way), and «No ha podido ser».
+
+    Example context (json):
+    {
+        "heading": "Otros formatos", "intro": "Lo que piden los lectores.", "notice": "", "empty": "Nada.",
+        "tabs": [{"label": "Por atender", "url": "#", "current": true}, {"label": "Atendidos", "url": "#", "current": false}],
+        "hasitems": true, "waiting": true, "herald": null, "action": "#", "sesskey": "x",
+        "items": [{"id": 1, "title": "El faro", "url": "#", "cover": null, "colour": 2, "name": "Leo Martín",
+            "readerurl": "#", "format": "Letra grande", "when": "Pedido el 3/11/26", "haschoices": true,
+            "choices": [{"value": 4, "label": "EPUB accesible", "first": true}], "digitalurl": "#"}],
+        "formatsserved": "Ya lo tiene", "formatsdeclined": "No ha podido ser", "formatsservedtitle": "¿Cómo se lo dan?",
+        "formatsservedwith": "Con lo del fondo digital", "formatsservedother": "De otra forma", "formatsnoitem": "Aún no hay",
+        "formatsadditem": "Añadir", "formatsservedgo": "Avisarle", "formatsclose": "Cerrar", "formatsreader": "Su ficha"
+    }
+}}
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+<nav class="ayv-tabs" aria-label="{{heading}}">{{#tabs}}<a class="ayv-tab" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}</nav>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#herald}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/herald}}
+{{#hasitems}}
+<ul class="ayv-holdcards">
+{{#items}}
+    <li class="ayv-holdcard ayv-formatcard">
+        <a class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" href="{{url}}" tabindex="-1" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}</a>
+        <span class="ayv-holdcard-words"><a class="ayv-holdcard-title" href="{{url}}">{{title}}</a>
+            <span><span class="ayv-format-chip">{{format}}</span> · <a href="{{readerurl}}">{{name}}</a></span>
+            <span class="ayv-weed-detail">{{when}}</span></span>
+        {{#waiting}}
+        <span class="ayv-format-actions">
+            <button type="button" class="ayv-button" data-ayv-open="ayv-format-{{id}}">{{formatsserved}}</button>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="ask" value="{{id}}">
+                <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="declined">{{formatsdeclined}}</button>
+            </form>
+        </span>
+        <dialog class="ayv-modal" id="ayv-format-{{id}}" aria-labelledby="ayv-format-{{id}}-title">
+            <div class="ayv-modal-head"><h2 id="ayv-format-{{id}}-title" class="ayv-section-title">{{formatsservedtitle}}</h2>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{formatsclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <p><b>{{title}}</b> · {{format}} · {{name}}</p>
+            <form method="post" action="{{action}}" class="ayv-dig-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="ask" value="{{id}}">
+                <fieldset class="ayv-dig-set"><legend class="ayv-sr">{{formatsservedtitle}}</legend><div class="ayv-segmented">
+                    {{#choices}}<label><input type="radio" name="item" value="{{value}}" {{#first}}checked{{/first}}><span>{{formatsservedwith}}: {{label}}</span></label>{{/choices}}
+                    <label><input type="radio" name="item" value="0" {{^haschoices}}checked{{/haschoices}}><span>{{formatsservedother}}</span></label>
+                </div></fieldset>
+                {{^haschoices}}<p class="ayv-field-hint">{{formatsnoitem}} <a href="{{digitalurl}}">{{formatsadditem}}</a></p>{{/haschoices}}
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="served">{{formatsservedgo}}</button></p>
+            </form>
+        </dialog>
+        {{/waiting}}
+    </li>
+{{/items}}
+</ul>
+{{/hasitems}}
+{{^hasitems}}{{^herald}}<div class="ayv-nothing"><p>{{empty}}</p></div>{{/herald}}{{/hasitems}}

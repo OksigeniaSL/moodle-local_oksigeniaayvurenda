@@ -115,6 +115,17 @@
         {{/hasholds}}
         {{#staffonly}}
         <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{profileneeds}}</h2>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="needs">
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="needs" value="1" {{#needs}}checked{{/needs}}> {{profileneedslabel}}</label>
+                <p class="ayv-field-hint">{{profileneedshint}}</p>
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
+            </form>
+            {{#asks.0}}<h3 class="ayv-profile-sub">{{profileneedsasks}}</h3>
+            <ul class="ayv-profile-holds">{{#asks}}<li><b>{{title}}</b> <span>{{format}} · {{state}}</span></li>{{/asks}}</ul>{{/asks.0}}
+        </section>
+        <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profilenotes}}</h2>
             <form method="post" action="{{action}}">
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notes">

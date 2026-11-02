@@ -181,9 +181,28 @@
         <div class="ayv-record-tools">
             {{#fulltext}}<a class="ayv-button ayv-button-quiet" href="{{url}}" target="_blank" rel="noopener">{{label}}</a>{{/fulltext}}
             {{#cite}}<a class="ayv-button ayv-button-quiet" href="{{citeurl}}" download>{{citelabel}}</a>{{/cite}}
+            {{#formatask}}{{^open}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-format-sheet">{{button}}</button>{{/open}}{{/formatask}}
             {{#passon}}<span class="ayv-passon"><span>{{heading}}</span> <a class="ayv-button ayv-button-quiet" href="{{classroom}}" target="_blank" rel="noopener">{{classroomlabel}}</a>
                 <a class="ayv-button ayv-button-quiet" href="{{teams}}" target="_blank" rel="noopener">{{teamslabel}}</a></span>{{/passon}}
         </div>
+        {{#formatask}}
+        {{#line}}<p class="ayv-notice" id="ayv-format" role="status">{{line}}</p>{{/line}}
+        {{^open}}
+        <dialog class="ayv-modal" id="ayv-format-sheet" aria-labelledby="ayv-format-title">
+            <div class="ayv-modal-head"><h2 id="ayv-format-title" class="ayv-section-title">{{heading}}</h2>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <p>{{intro}}</p>
+            <form method="post" action="{{action}}" class="ayv-dig-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{library}}">
+                <input type="hidden" name="record" value="{{recordid}}">
+                <fieldset class="ayv-dig-set"><legend class="ayv-sr">{{heading}}</legend><div class="ayv-segmented">
+                    {{#choices}}<label><input type="radio" name="format" value="{{value}}" {{#first}}checked{{/first}}><span>{{label}}</span></label>{{/choices}}
+                </div></fieldset>
+                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{go}}</button></p>
+            </form>
+        </dialog>
+        {{/open}}
+        {{/formatask}}
         {{#hascopies}}
         <h2 class="ayv-section-title">{{copiesheading}}</h2>
         <ul class="ayv-copies">

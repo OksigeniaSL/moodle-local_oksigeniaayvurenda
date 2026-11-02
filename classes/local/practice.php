@@ -409,6 +409,16 @@ final class practice {
                     'readerid' => $readers[$code($who)], 'status' => 'waiting', 'timecreated' => $now - $ago * DAYSECS,
                     'timemodified' => $now - $ago * DAYSECS]);
             }
+        } else if ($piece === 'formats') {
+            // Ana asks for a book in audio, and the book has it in its digital collection as an accessible format.
+            $faro = $items[$code(self::BOOKS[0][0])];
+            digital::add_link($library, (int) $faro->recordid, 'https://example.org/audio', ['title' => get_string(
+                'practiceaccessible',
+                'local_oksigeniaayvurenda'
+            ), 'licence' => 'rights', 'audience' => ['students'], 'accessible' => 1], $userid, $now);
+            $DB->insert_record(self::T . 'formatask', ['entityid' => $library->entityid, 'libraryid' => $library->id,
+                'readerid' => $readers[$code(self::READERS[0][0])], 'recordid' => $faro->recordid, 'format' => 'audio',
+                'status' => 'waiting', 'timecreated' => $now - DAYSECS, 'timemodified' => $now - DAYSECS]);
         } else if ($piece === 'purchases') {
             // Two readers ask for a book, one of them for the same; and there is a budget.
             purchases::save_settings($library, ['suggest' => true, 'stages' => []]);

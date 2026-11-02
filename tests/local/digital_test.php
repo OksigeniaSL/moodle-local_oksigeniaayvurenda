@@ -55,7 +55,7 @@ final class digital_test extends \advanced_testcase {
         $gen->create_reader(['entityid' => $entityid, 'userid' => $family->id, 'readertype' => 'family']);
 
         $this->assertSame(['who' => 'students', 'stage' => 'Primaria', 'userid' => (int) $student->id,
-            'readerid' => (int) $reader->id], digital::viewer($entityid, (int) $student->id));
+            'readerid' => (int) $reader->id, 'accessneeds' => false], digital::viewer($entityid, (int) $student->id));
         $this->assertSame('families', digital::viewer($entityid, (int) $family->id)['who']);
         $this->assertSame('nobody', digital::viewer($entityid, (int) $stranger->id)['who']);
         $this->assertSame('desk', digital::viewer($entityid, 2)['who']);

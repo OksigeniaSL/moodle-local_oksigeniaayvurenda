@@ -75,7 +75,7 @@
         <span class="ayv-dig-format ayv-dig-format-{{formatkey}}">{{format}}</span>
         <h2 class="ayv-dig-title">{{title}}</h2>
         <p class="ayv-dig-licence">{{licencelabel}}</p>
-        <ul class="ayv-dig-chips">{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}</ul>
+        <ul class="ayv-dig-chips">{{#accessible}}<li class="ayv-dig-chip-access">{{digitalaccessiblechip}}</li>{{/accessible}}{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}</ul>
         {{#onlyline}}<p class="ayv-dig-only">{{onlyline}}{{#pages}} · {{pages}}{{/pages}}</p>{{/onlyline}}
         {{#proxied}}<p class="ayv-dig-only">{{digitalsubscribedline}}</p>{{/proxied}}
         <p class="ayv-dig-actions"><a class="ayv-button" href="{{readurl}}">{{digitalread}}</a>
@@ -91,6 +91,7 @@
                     {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
                 {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
                     {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1" {{#accessible}}checked{{/accessible}}> {{digitalaccessible}}</label>
                 {{#canproxy}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="subscribed" value="1" {{#subscribed}}checked{{/subscribed}}> {{digitalsubscribed}}</label>{{/canproxy}}
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
                 {{#hascourses}}
@@ -124,6 +125,8 @@
         {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
             {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}"><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1"> {{digitalaccessible}}</label>
+        <p class="ayv-field-hint">{{digitalaccessiblehint}}</p>
         {{#hascourses}}
         <fieldset class="ayv-dig-set ayv-dig-course"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
             <label class="ayv-field ayv-dig-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}">{{name}}</option>{{/courses}}</select></label>

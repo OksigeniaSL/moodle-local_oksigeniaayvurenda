@@ -70,6 +70,10 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
         // The way into the app, by e-mail.
         $notice = $str(applink::send($reader));
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'needs') {
+        \local_oksigeniaayvurenda\local\formats::mark($library, $id, optional_param('needs', 0, PARAM_BOOL));
+        $notice = $str('profileneedssaved');
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
     } else if (optional_param('do', '', PARAM_ALPHA) === 'newcard') {
         $notice = $str('profilenewcarddone', profile::new_card($library, $id));
     } else if (optional_param('do', '', PARAM_ALPHA) === 'lift') {
@@ -186,6 +190,12 @@ $data = [
     'haspast' => (bool) $record['past'],
     'notes' => $record['notes'],
     'staffonly' => !$limited,
+    'needs' => !empty($reader->accessneeds),
+    'asks' => $limited ? [] : array_map(
+        fn($a) => ['title' => format_string($a['title'], true, ['escape' => false]),
+        'format' => $str('format' . $a['format'] . 'label'), 'state' => $str('formatsstate' . $a['status'])],
+        \local_oksigeniaayvurenda\local\formats::of_reader($id)
+    ),
     // What is open goes first, for the staff to see; what is closed or empty, after what they have now.
     'lateopen' => !$limited && array_filter(array_column($laterows, 'open')),
     'latequiet' => !$limited && !array_filter(array_column($laterows, 'open'))
@@ -211,7 +221,8 @@ foreach (
         'profilenotes', 'profilenoteshint', 'profilesave', 'profilegone', 'profilecode', 'appheading',
         'profilenewcard', 'profilenewcardgo', 'selfclose', 'sanctionstitle', 'sanctionsboxnone', 'sanctionlift',
         'sanctionpay', 'sanctionwaive', 'sanctionreopen', 'sanctionchargeadd', 'sanctionchargeintro', 'sanctionchargeamount',
-        'sanctionchargenote', 'sanctionchargego'] as $key
+        'sanctionchargenote', 'sanctionchargego', 'profileneeds', 'profileneedslabel', 'profileneedshint',
+        'profileneedsasks'] as $key
 ) {
     $data[$key] = $str($key);
 }

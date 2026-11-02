@@ -149,6 +149,7 @@
         <FIELD NAME="lastname" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="email" TYPE="char" LENGTH="254" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="active" SEQUENCE="false" COMMENT="active, suspended, left or deleted"/>
+        <FIELD NAME="accessneeds" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Needs accessible formats: sees the items made for that, and nothing says why"/>
         <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -432,6 +433,7 @@
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="url" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="For a link"/>
         <FIELD NAME="subscribed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a link: it opens through the centre's proxy"/>
+        <FIELD NAME="accessformat" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An accessible format: only for the readers who need one, and never public"/>
         <FIELD NAME="licence" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="rights" SEQUENCE="false"/>
         <FIELD NAME="audience" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="staff" SEQUENCE="false" COMMENT="students, families, staff, public, separated by commas"/>
         <FIELD NAME="stages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: the stages of the students it is for; all when empty"/>
@@ -953,6 +955,34 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="keyhash" UNIQUE="true" FIELDS="keyhash"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_formatask" COMMENT="A reader asks for a book in another format, and how the library answered">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Where it was asked"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="format" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="large, audio, braille, text or other"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="waiting" SEQUENCE="false" COMMENT="waiting, served or declined"/>
+        <FIELD NAME="digitalid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The accessible item that answered it"/>
+        <FIELD NAME="handledby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="recordid" TYPE="foreign" FIELDS="recordid" REFTABLE="local_oksigeniaayvurenda_record" REFFIELDS="id"/>
+        <KEY NAME="digitalid" TYPE="foreign" FIELDS="digitalid" REFTABLE="local_oksigeniaayvurenda_digital" REFFIELDS="id"/>
+        <KEY NAME="handledby" TYPE="foreign" FIELDS="handledby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="librarystatus" UNIQUE="false" FIELDS="libraryid, status"/>
+        <INDEX NAME="readerrecord" UNIQUE="false" FIELDS="readerid, recordid"/>
       </INDEXES>
     </TABLE>
   </TABLES>

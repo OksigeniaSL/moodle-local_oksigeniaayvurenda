@@ -57,6 +57,14 @@ $messageproviders = [
             'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To a reader: the book they asked for in another format is ready, or could not be.
+    'formatready' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To a reader: the book they asked the library to buy has arrived.
     'purchasearrived' => [
         'defaults' => [

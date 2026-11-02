@@ -518,5 +518,25 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110224, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110302) {
+        global $CFG;
+        // Accessible formats: who needs them, the items made for them, and asking for a book in another format.
+        $fields = ['reader' => new xmldb_field('accessneeds', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'status'),
+            'digital' => new xmldb_field('accessformat', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'subscribed')];
+        foreach ($fields as $name => $field) {
+            $table = new xmldb_table('local_oksigeniaayvurenda_' . $name);
+            if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        if (!$dbman->table_exists('local_oksigeniaayvurenda_formatask')) {
+            $dbman->install_one_table_from_xmldb_file(
+                $CFG->dirroot . '/local/oksigeniaayvurenda/db/install.xml',
+                'local_oksigeniaayvurenda_formatask'
+            );
+        }
+        upgrade_plugin_savepoint(true, 2026110302, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

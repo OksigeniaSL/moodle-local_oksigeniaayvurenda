@@ -51,8 +51,9 @@ final class digital {
     public static function viewer(int $entityid, int $userid, ?int $now = null): array {
         global $DB;
         $reader = $userid ? $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'userid' => $userid,
-            'status' => 'active'], 'id, readertype', IGNORE_MULTIPLE) : null;
-        $ids = ['userid' => $userid, 'readerid' => $reader ? (int) $reader->id : 0];
+            'status' => 'active'], 'id, readertype, accessneeds', IGNORE_MULTIPLE) : null;
+        $ids = ['userid' => $userid, 'readerid' => $reader ? (int) $reader->id : 0,
+            'accessneeds' => $reader && !empty($reader->accessneeds)];
         if ($userid && access::can('local/oksigeniaayvurenda:desk', $entityid, $userid)) {
             return ['who' => 'desk', 'stage' => null] + $ids;
         }
@@ -206,6 +207,7 @@ final class digital {
         );
         $DB->delete_records(self::T . 'digitalread', ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'fragment', ['digitalid' => $item->id]);
+        $DB->set_field(self::T . 'formatask', 'digitalid', null, ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'digital', ['id' => $item->id]);
         \local_oksigeniaayvurenda\event\digital_removed::fire((int) $library->entityid, $id);
     }
@@ -234,6 +236,10 @@ final class digital {
             return voices::can_hear($item, $viewer);
         }
         if ($item->status !== 'published' && $viewer['who'] !== 'desk') {
+            return false;
+        }
+        // An accessible format: the library, and the readers who need one.
+        if (!empty($item->accessformat) && $viewer['who'] !== 'desk' && empty($viewer['accessneeds'])) {
             return false;
         }
         // Only for the students of a course, until a date: they, and the library.
@@ -404,6 +410,11 @@ final class digital {
     private static function fields(array $data): array {
         $licence = in_array($data['licence'] ?? '', digital_rules::LICENCES, true) ? $data['licence'] : 'rights';
         $audience = digital_rules::audience((array) ($data['audience'] ?? ['staff']), $licence) ?: ['staff'];
+        // An accessible format is made for those who need it: never for the public window.
+        $accessible = !empty($data['accessible']);
+        if ($accessible) {
+            $audience = array_values(array_diff($audience, ['public'])) ?: ['staff'];
+        }
         $stages = array_values(array_filter(
             array_map(fn($s) => trim((string) $s), (array) ($data['stages'] ?? [])),
             fn($s) => $s !== ''
@@ -414,6 +425,7 @@ final class digital {
             'audience' => implode(',', $audience),
             'stages' => $stages ? json_encode($stages) : null,
             'download' => (int) digital_rules::can_download($licence, !empty($data['download'])),
+            'accessformat' => (int) $accessible,
         ];
     }
 }

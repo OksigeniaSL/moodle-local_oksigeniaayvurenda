@@ -3663,6 +3663,11 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-holdcard-words { display: grid; flex: 1 1 auto; min-width: 0; gap: .1rem; }
 .ayv .ayv-holdcard-title { font-weight: 700; color: var(--ink); overflow-wrap: anywhere; }
 .ayv .ayv-holdcard form { margin: 0; flex: 0 0 auto; }
+.ayv .ayv-formatcard { flex-wrap: wrap; }
+.ayv .ayv-format-actions { display: flex; flex: 1 0 100%; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }
+.ayv .ayv-format-chip { display: inline-block; padding: 0 .5rem; border-radius: 999px; background: var(--notice-bg); color: var(--accent); font-weight: 600; }
+.ayv .ayv-dig-chips li.ayv-dig-chip-access { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.ayv .ayv-profile-sub { margin: 1rem 0 .4rem; font-size: 1rem; }
 .ayv .ayv-holds-quiet { margin: 0 0 1.5rem; }
 .ayv .ayv-settingcard { margin: 1.5rem 0 0; padding: 1rem 1.2rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
 .ayv .ayv-settingcard .ayv-section-title { margin-top: 0; }

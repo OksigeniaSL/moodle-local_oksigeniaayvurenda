@@ -348,6 +348,52 @@ final class screens {
     }
 
     /**
+     * Asking for a book in another format: for a reader past the flower, or one the library knows needs it; what they
+     * already asked, and a word after asking.
+     *
+     * @param array $found As catalogue::record() gives it.
+     * @param \stdClass $library
+     * @param string $notice What just happened, from formatask.php: asked or no.
+     * @return array|null
+     */
+    public static function formatask(array $found, \stdClass $library, string $notice = ''): ?array {
+        global $DB, $USER;
+        $record = $found['record'];
+        if (!isloggedin() || isguestuser() || $record->doctype === 'device' || practice::is((int) $library->entityid)) {
+            return null;
+        }
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+            'status' => 'active'], '*', IGNORE_MULTIPLE);
+        // A child with the flower asks through the library, unless it already knows they need it.
+        if (!$reader || (cards::look_of($reader) === 'flower' && empty($reader->accessneeds))) {
+            return null;
+        }
+        $open = formats::open_of((int) $reader->id, (int) $record->id);
+        $label = fn(string $format) => self::str('format' . $format . 'label');
+        $line = $open ? self::str($notice === 'asked' ? 'formataskedfresh' : 'formataskedbefore', \core_text::strtolower(
+            $label((string) $open->format)
+        )) : ($notice === 'no' ? self::str('formataskno') : '');
+        return [
+            'open' => (bool) $open,
+            'line' => $line,
+            'button' => self::str('formataskbutton'),
+            'heading' => self::str('formataskheading'),
+            'intro' => self::str('formataskintro'),
+            'go' => self::str('formataskgo'),
+            'close' => self::str('formatsclose'),
+            'action' => (new \moodle_url('/local/oksigeniaayvurenda/formatask.php'))->out(false),
+            'sesskey' => sesskey(),
+            'library' => $library->slug,
+            'recordid' => (int) $record->id,
+            'choices' => array_map(
+                fn($format, $n) => ['value' => $format, 'label' => $label($format), 'first' => $n === 0],
+                formats::FORMATS,
+                array_keys(formats::FORMATS)
+            ),
+        ];
+    }
+
+    /**
      * The reservation box of a record: for a reader, what they reserved or the button to reserve it, if their stage
      * may; for the staff at the desk, reserving it for a reader. Nothing when a copy is free here.
      *

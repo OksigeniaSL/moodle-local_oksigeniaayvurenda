@@ -63,6 +63,7 @@ final class howto {
         'sip' => ['selfloan.php', 'manage', ''],
         'homelinks' => ['libraries.php', 'manage', ''],
         'shareclass' => ['search.php', 'desk', ''],
+        'formats' => ['formats.php', 'desk', 'formats'],
         'purchases' => ['purchases.php', 'catalogue', 'purchases'],
         'ill' => ['ill.php', 'desk', 'ill'],
         'bank' => ['libraries.php', 'manage', ''],
@@ -114,6 +115,7 @@ final class howto {
         'purchases' => ['capability' => 'catalogue', 'page' => 'purchases.php', 'steps' => 8],
         'ill' => ['capability' => 'desk', 'page' => 'ill.php', 'steps' => 5],
         'sanctions' => ['capability' => 'manage', 'page' => 'rules.php', 'steps' => 6],
+        'formats' => ['capability' => 'desk', 'page' => 'formats.php', 'steps' => 5],
     ];
 
     /** @var string[] Words that say nothing about the task. */

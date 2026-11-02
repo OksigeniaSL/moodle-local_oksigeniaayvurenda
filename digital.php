@@ -53,6 +53,7 @@ $fields = fn() => [
     'audience' => optional_param_array('audience', [], PARAM_ALPHA),
     'stages' => optional_param_array('stages', [], PARAM_TEXT),
     'download' => optional_param('download', 0, PARAM_BOOL),
+    'accessible' => optional_param('accessible', 0, PARAM_BOOL),
 ];
 // Only for the students of a course, until a date, with the part of the work it is.
 $fragment = function (int $id) use ($str, $library, $recordid) {
@@ -146,6 +147,7 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
             ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $only->courseid]), true, ['escape' => false]),
             'until' => zones::date((int) $only->timeend, 'strftimedateshort', $library)]) : '',
         'id' => (int) $item->id,
+        'accessible' => !empty($item->accessformat),
         'canproxy' => $hasproxy && $item->kind === 'link',
         'subscribed' => !empty($item->subscribed),
         'proxied' => $hasproxy && $item->kind === 'link' && !empty($item->subscribed),
@@ -189,6 +191,7 @@ $data = [
 ];
 foreach (
     ['digitaladd', 'digitalfile', 'digitalurl', 'digitalurlhint', 'digitalsubscribed', 'digitalsubscribedline',
+        'digitalaccessible', 'digitalaccessiblehint', 'digitalaccessiblechip',
         'digitaltitlefield', 'digitallicence',
         'digitallicencehint', 'digitalaudience', 'digitalstages', 'digitaldownload', 'digitalsave', 'digitaldelete',
         'digitalread', 'digitalnone', 'backtorecord', 'digitalchange', 'digitaladdhint', 'fragmentcourse', 'fragmentnone',

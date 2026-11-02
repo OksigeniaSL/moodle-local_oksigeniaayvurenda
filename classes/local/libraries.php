@@ -354,7 +354,7 @@ final class libraries {
         }
         foreach (
             ['rule', 'hold', 'stocktake', 'withdrawal', 'keeper', 'selfpost', 'purchase', 'purchaseorder',
-            'budget', 'ill', 'sanction'] as $table
+            'budget', 'ill', 'sanction', 'formatask'] as $table
         ) {
             $DB->delete_records(self::T . $table, ['libraryid' => $libraryid]);
         }

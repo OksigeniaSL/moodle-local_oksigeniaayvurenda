@@ -61,7 +61,16 @@ class provider implements
             'email' => 'privacy:metadata:reader:email',
             'status' => 'privacy:metadata:reader:status',
             'notes' => 'privacy:metadata:reader:notes',
+            'accessneeds' => 'privacy:metadata:reader:accessneeds',
         ], 'privacy:metadata:reader');
+        $collection->add_database_table(self::T . 'formatask', [
+            'readerid' => 'privacy:metadata:formatask:readerid',
+            'recordid' => 'privacy:metadata:formatask:recordid',
+            'format' => 'privacy:metadata:formatask:format',
+            'status' => 'privacy:metadata:formatask:status',
+            'handledby' => 'privacy:metadata:formatask:handledby',
+            'timecreated' => 'privacy:metadata:formatask:timecreated',
+        ], 'privacy:metadata:formatask');
         $collection->add_database_table(self::T . 'member', [
             'readerid' => 'privacy:metadata:member:readerid',
             'groupname' => 'privacy:metadata:member:groupname',
@@ -308,6 +317,11 @@ class provider implements
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'selfpost} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'sanction} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('closedby', 'SELECT closedby FROM {' . self::T . 'sanction} WHERE closedby IS NOT NULL', []);
+        $userlist->add_from_sql(
+            'handledby',
+            'SELECT handledby FROM {' . self::T . 'formatask} WHERE handledby IS NOT NULL',
+            []
+        );
         $userlist->add_from_sql('decidedby', 'SELECT decidedby FROM {' . self::T . 'purchase} WHERE decidedby IS NOT NULL', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'ill} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql(
@@ -386,6 +400,14 @@ class provider implements
                         'state' => $row['state'], 'when' => $row['when']], $late)]
                 );
             }
+            $formats = \local_oksigeniaayvurenda\local\formats::of_reader((int) $reader->id);
+            if ($formats) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:formats', 'local_oksigeniaayvurenda')]),
+                    (object) ['asked' => array_map(fn($a) => ['title' => $a['title'], 'format' => $a['format'],
+                        'status' => $a['status'], 'when' => transform::datetime($a['when'])], $formats)]
+                );
+            }
             $asked = \local_oksigeniaayvurenda\local\purchases::of_reader((int) $reader->id, 1000);
             if ($asked) {
                 writer::with_context($context)->export_data(
@@ -415,6 +437,7 @@ class provider implements
                     'email' => $reader->email,
                     'status' => $reader->status,
                     'notes' => $reader->notes,
+                    'accessneeds' => transform::yesno((bool) $reader->accessneeds),
                     'groups' => $groups,
                     'loans' => $loans,
                     'holds' => $holds,
@@ -619,6 +642,7 @@ class provider implements
         $DB->set_field_select(self::T . 'hold', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'purchasewho');
         $DB->delete_records(self::T . 'sanction');
+        $DB->delete_records(self::T . 'formatask');
         $DB->execute('UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE direction = 'in'");
         $DB->set_field_select(self::T . 'ill', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader'");
@@ -723,6 +747,7 @@ class provider implements
             }
             $DB->delete_records(self::T . 'purchasewho', ['readerid' => $reader->id]);
             $DB->delete_records(self::T . 'sanction', ['readerid' => $reader->id]);
+            $DB->delete_records(self::T . 'formatask', ['readerid' => $reader->id]);
             $DB->execute(
                 'UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE readerid = ? AND direction = 'in'",
                 [$reader->id]
@@ -739,6 +764,7 @@ class provider implements
         $DB->set_field(self::T . 'purchase', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'sanction', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'sanction', 'closedby', null, ['closedby' => $userid]);
+        $DB->set_field(self::T . 'formatask', 'handledby', null, ['handledby' => $userid]);
         $DB->set_field(self::T . 'purchaseorder', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'ill', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'stocktake', 'createdby', null, ['createdby' => $userid]);
@@ -792,7 +818,8 @@ class provider implements
         }
         if (
             $DB->record_exists(self::T . 'sanction', ['createdby' => $userid]) ||
-            $DB->record_exists(self::T . 'sanction', ['closedby' => $userid])
+            $DB->record_exists(self::T . 'sanction', ['closedby' => $userid]) ||
+            $DB->record_exists(self::T . 'formatask', ['handledby' => $userid])
         ) {
             return true;
         }

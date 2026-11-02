@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.138.0
+
+- Accessible formats. A reader can be marked as needing them, with no reason given; an item of the digital collection
+  can be an accessible format, seen only by those readers and never public. Any reader asks for a book in another format
+  (large print, audio, braille, a text that can be read aloud) from its page; the staff see the asks in «Otros formatos»,
+  with a card on the desk, answer with an accessible item or some other way, and the reader is told.
+
 ## 0.137.1
 
 - Copies in Google Drive with no client of the library's own: a Moodle that already has Google's OAuth 2 service uses it.

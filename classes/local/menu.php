@@ -60,7 +60,7 @@ final class menu {
         return [
             'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d],
                 ['sanctions.php', 'menusanctions', $d], ['lots.php', 'menulots', $d],
-                ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d],
+                ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d], ['formats.php', 'menuformats', $d],
                 ['copies.php', 'menucopies', $m]],
             'menucataloguing' => [['add.php', 'menuadd', $c], ['purchases.php', 'menupurchases', $c],
                 ['material.php', 'menumaterial', $c],

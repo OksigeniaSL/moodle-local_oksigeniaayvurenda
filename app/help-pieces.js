@@ -657,6 +657,25 @@ window.AYVHelpPieces = {
             return h.say(5);
         });
     },
+    // Other formats: what comes, how to give it, saving it, the answered ones, and marking a reader.
+    formats: function(h) {
+        'use strict';
+        return h.point('.ayv-formatcard').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.tap('.ayv-formatcard [data-ayv-open^="ayv-format-"]');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.you(2, 'dialog[open] button[name="do"][value="served"]');
+        }).then(function() {
+            return h.point('.ayv-tabs');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.say(4);
+        });
+    },
     // Lending between libraries: what it is, asking for a book, what happens when it comes, and lending one out.
     ill: function(h) {
         'use strict';
