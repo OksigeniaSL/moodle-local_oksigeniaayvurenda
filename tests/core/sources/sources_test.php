@@ -54,6 +54,9 @@ final class sources_test extends \basic_testcase {
         $xml = file_get_contents(__DIR__ . '/../../fixtures/marc/sru.xml');
         $marked = str_replace('El faro dormido', "\u{0098}El\u{009C} faro", $xml);
         $this->assertSame('El faro', sru::descriptions($marked)[1]['record']['title']);
+        // A character the bridge could not map, written as «<U+00BA>»: it is that character.
+        $unmapped = str_replace('El faro dormido', 'El faro 10&lt;U+00BA&gt;', $xml);
+        $this->assertSame('El faro 10º', sru::descriptions($unmapped)[1]['record']['title']);
         $apart = str_replace('El faro dormido', 'El faro de Miro' . "\u{0301}", $xml);
         $this->assertSame('El faro de Miró', sru::descriptions($apart)[1]['record']['title']);
         $descriptions = sru::descriptions(file_get_contents(__DIR__ . '/../../fixtures/marc/sru.xml'));

@@ -86,6 +86,45 @@ final class marc_test extends \basic_testcase {
     }
 
     /**
+     * A UNIMARC record (France, Portugal, Italy): its own fields, the same description; a MARC21 one stays as it was.
+     */
+    public function test_unimarc(): void {
+        $record = (new record('     cam  22        450 '))
+            ->data('010', ' ', ' ', [['a', '978-2-07-061275-8'], ['b', 'br.']])
+            ->data('101', '0', ' ', [['a', 'fre']])
+            ->data('200', '1', ' ', [['a', 'Le petit prince'], ['b', 'Texte imprimé'], ['e', 'roman'],
+                ['f', 'Antoine de Saint-Exupéry']])
+            ->data('205', ' ', ' ', [['a', '2e éd.']])
+            ->data('210', ' ', ' ', [['a', '[Paris]'], ['c', 'Gallimard'], ['d', 'DL 2007']])
+            ->data('215', ' ', ' ', [['a', '97 p.'], ['c', 'ill. en coul.'], ['d', '18 cm']])
+            ->data('225', '2', ' ', [['a', 'Folio junior'], ['v', '100']])
+            ->data('330', ' ', ' ', [['a', 'Un aviateur rencontre un petit prince.']])
+            ->data('606', ' ', ' ', [['a', 'Contes']])
+            ->data('676', ' ', ' ', [['a', '843.912']])
+            ->data('700', ' ', '1', [['a', 'Saint-Exupéry,'], ['b', 'Antoine de'], ['f', '1900-1944']])
+            ->data('702', ' ', '1', [['a', 'Dupont'], ['b', 'Marie']]);
+        $this->assertTrue(describer::is_unimarc($record));
+        $d = describer::describe($record);
+        $this->assertSame('book', $d['record']['doctype']);
+        $this->assertSame('Le petit prince', $d['record']['title']);
+        $this->assertSame('roman', $d['record']['subtitle']);
+        $this->assertSame('9782070612758', $d['record']['isbn']);
+        $this->assertSame('2007', $d['record']['pubyear']);
+        $this->assertSame('fre', $d['record']['lang']);
+        $this->assertSame('97 p.', $d['record']['extent']);
+        $this->assertSame(['Saint-Exupéry, Antoine de', 'Dupont, Marie'], $d['authorities']['author']);
+        $this->assertSame(['Gallimard'], $d['authorities']['publisher']);
+        $this->assertSame(['843.912'], $d['authorities']['class']);
+        $this->assertSame(['Contes'], $d['authorities']['subject']);
+        $this->assertSame(['Folio junior'], $d['authorities']['collection']);
+        $this->assertSame('ddc', $d['extra']['classscheme']);
+        $this->assertSame('unimarc', $d['extra']['format']);
+        $twentyone = (new record())->data('245', '1', '0', [['a', 'El faro dormido']])->data('200', ' ', ' ', [['a', 'x']]);
+        $this->assertFalse(describer::is_unimarc($twentyone));
+        $this->assertSame('El faro dormido', describer::describe($twentyone)['record']['title']);
+    }
+
+    /**
      * Kinds of document from the leader.
      */
     public function test_doctype(): void {

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.143.0
+
+- UNIMARC, the format of France, Portugal, Italy and much of Europe: its records are read as well as MARC 21's, in an
+  import from any program (with its holdings in 995, already read) and from the catalogues.
+- Two more catalogues for adding books: the Bibliothèque nationale de France (by SRU, in UNIMARC) and Portugal's National
+  Library (PORBASE, through the bridge, which gets a route for ISO 5426). Portugal and Brazil are now two regions.
+- A character the bridge could not map comes as itself, not as «<U+00BA>».
+
 ## 0.142.1
 
 - The copies made by hand are kept apart (the last two) and never push out the last seven nightly ones; the list says

@@ -66,11 +66,20 @@ final class lookup {
         'bnp' => ['type' => 'sru', 'name' => 'Biblioteca Nacional del Perú', 'region' => 'la', 'bridge' => 'bnp',
             'index' => 'bath.isbn', 'version' => '1.1', 'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
         // Brazil: São Paulo State University (UNESP) by SRU, and the University of São Paulo (DEDALUS) through the bridge.
-        'unesp' => ['type' => 'sru', 'name' => 'UNESP', 'region' => 'pt',
+        'unesp' => ['type' => 'sru', 'name' => 'UNESP', 'region' => 'br',
             'url' => 'https://unesp.alma.exlibrisgroup.com/view/sru/55UNESP_INST', 'index' => 'alma.isbn', 'version' => '1.2',
             'words' => 'alma.all_for_ui', 'relation' => 'all'],
-        'usp' => ['type' => 'sru', 'name' => 'USP Dedalus', 'region' => 'pt', 'bridge' => 'usp', 'index' => 'bath.isbn',
+        'usp' => ['type' => 'sru', 'name' => 'USP Dedalus', 'region' => 'br', 'bridge' => 'usp', 'index' => 'bath.isbn',
             'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // Portugal's National Library (PORBASE): UNIMARC in ISO 5426, through the bridge; it knows older books by their ISBN-10
+        // and takes no «or».
+        'porbase' => ['type' => 'sru', 'name' => 'Biblioteca Nacional de Portugal', 'region' => 'pt', 'bridge' => 'porbase',
+            'index' => 'bath.isbn', 'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // France's National Library, by SRU, in UNIMARC.
+        'bnf' => ['type' => 'sru', 'name' => 'Bibliothèque nationale de France', 'region' => 'fr',
+            'url' => 'https://catalogue.bnf.fr/api/SRU', 'index' => 'bib.isbn', 'isbnrelation' => 'all', 'version' => '1.2',
+            'schema' => 'unimarcXchange',
+            'words' => 'bib.anywhere', 'relation' => 'all'],
         // German: the National Library, the K10plus shared catalogue, and the Swiss and Austrian networks.
         'dnb' => ['type' => 'sru', 'name' => 'Deutsche Nationalbibliothek', 'region' => 'de',
             'url' => 'https://services.dnb.de/sru/dnb', 'index' => 'isbn', 'version' => '1.1', 'schema' => 'MARC21-xml',
@@ -113,11 +122,12 @@ final class lookup {
     public const REGIONS = [
         'es' => ['rebeca', 'bne', 'rebiun', 'csic', 'ccuc', 'loc', 'openlibrary'],
         'la' => ['bne', 'unal', 'bnp', 'rebiun', 'loc', 'openlibrary'],
-        'pt' => ['unesp', 'usp', 'loc', 'openlibrary'],
+        'pt' => ['porbase', 'unesp', 'usp', 'loc', 'openlibrary'],
+        'br' => ['unesp', 'usp', 'porbase', 'loc', 'openlibrary'],
         'de' => ['dnb', 'k10plus', 'swisscovery', 'obv', 'loc', 'openlibrary'],
         'nordic' => ['libris', 'melinda', 'bibsys', 'kbdk', 'loc', 'openlibrary'],
         'it' => ['sbn', 'loc', 'openlibrary'],
-        'fr' => ['banq', 'loc', 'openlibrary'],
+        'fr' => ['bnf', 'banq', 'loc', 'openlibrary'],
         'en' => ['loc', 'nlw', 'slv', 'openlibrary'],
     ];
 
@@ -332,8 +342,11 @@ final class lookup {
         }
         $brazil = ['Sao_Paulo', 'Fortaleza', 'Recife', 'Bahia', 'Belem', 'Manaus', 'Cuiaba', 'Porto_Velho', 'Boa_Vista',
             'Rio_Branco', 'Noronha', 'Maceio', 'Araguaina', 'Campo_Grande', 'Santarem', 'Eirunepe'];
-        if ($in(['Europe/Lisbon', 'Atlantic/Madeira', 'Atlantic/Azores']) || $in(array_map(fn($c) => 'America/' . $c, $brazil))) {
+        if ($in(['Europe/Lisbon', 'Atlantic/Madeira', 'Atlantic/Azores'])) {
             return 'pt';
+        }
+        if ($in(array_map(fn($c) => 'America/' . $c, $brazil))) {
+            return 'br';
         }
         $english = ['New_York', 'Chicago', 'Denver', 'Los_Angeles', 'Phoenix', 'Anchorage', 'Juneau', 'Adak', 'Boise',
             'Detroit', 'Indiana/Indianapolis', 'Kentucky/Louisville', 'Toronto', 'Vancouver', 'Edmonton', 'Winnipeg',
@@ -355,6 +368,9 @@ final class lookup {
      */
     public static function language_region(string $lang): string {
         $base = substr($lang, 0, 2);
+        if ($lang === 'pt_br') {
+            return 'br';
+        }
         return ['es' => 'es', 'ca' => 'es', 'gl' => 'es', 'eu' => 'es', 'pt' => 'pt', 'de' => 'de', 'sv' => 'nordic',
             'fi' => 'nordic', 'nb' => 'nordic', 'nn' => 'nordic', 'no' => 'nordic', 'da' => 'nordic', 'is' => 'nordic',
             'it' => 'it', 'fr' => 'fr'][$base] ?? 'en';
@@ -512,8 +528,9 @@ final class lookup {
                 // A catalogue that keeps the hyphens is asked every way of writing them: the ISBN-13 first, then the
                 // ISBN-10 of older books (two questions: it takes some thirty ways at a time).
                 // Any other is asked the ISBN-13 and then, if it does not know it, the ISBN-10 (São Paulo keeps that one).
-                $urls = empty($source['hyphens']) ? array_map(fn($code) => $sru->url($code), array_filter([$isbn,
-                    isbn::ten($isbn)]))
+                $relation = $source['isbnrelation'] ?? '=';
+                $urls = empty($source['hyphens'])
+                    ? array_map(fn($code) => $sru->url($code, $relation), array_filter([$isbn, isbn::ten($isbn)]))
                     : array_map(fn($ways) => $sru->url_any($ways), array_filter(isbn::hyphenations($isbn)));
                 foreach ($urls as $url) {
                     $body = self::fetch($url);

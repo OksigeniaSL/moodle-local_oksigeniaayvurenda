@@ -64,6 +64,30 @@ final class catalogue_import_test extends \advanced_testcase {
     }
 
     /**
+     * A French program's UNIMARC, in MarcXchange: the record read from its own fields, and its copy from 995.
+     */
+    public function test_unimarc(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $path = __DIR__ . '/../../fixtures/marc/unimarc.xml';
+        $stats = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
+        $this->assertSame(1, $stats['records']);
+        $this->assertSame(1, $stats['items']);
+        $record = $DB->get_record(self::T . 'record', ['entityid' => $library->entityid], '*', MUST_EXIST);
+        $this->assertSame('Le phare endormi', $record->title);
+        $this->assertSame('9791090000018', $record->isbn);
+        $this->assertSame('fre', $record->lang);
+        $item = $DB->get_record(self::T . 'item', ['barcode' => 'F100'], '*', MUST_EXIST);
+        $this->assertEquals($record->id, $item->recordid);
+        $this->assertSame('Laurier, Irène', $DB->get_field_sql(
+            'SELECT a.label FROM {' . self::T . 'authority} a JOIN {' . self::T . 'recauth} ra ON ra.authorityid = a.id
+              WHERE ra.recordid = ? AND a.kind = ?',
+            [$record->id, 'author']
+        ));
+    }
+
+    /**
      * A spreadsheet: the records and copies of the rows.
      */
     public function test_csv(): void {

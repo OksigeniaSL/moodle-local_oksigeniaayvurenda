@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A made-up UNIMARC record in MarcXchange, as a French library program exports it, with its copy in 995. -->
+<collection xmlns="info:lc/xmlns/marcxchange-v2" format="UNIMARC">
+  <record format="UNIMARC" type="Bibliographic">
+    <leader>     cam  22        450 </leader>
+    <controlfield tag="001">FR-0001</controlfield>
+    <datafield tag="010" ind1=" " ind2=" "><subfield code="a">979-10-90000-01-8</subfield></datafield>
+    <datafield tag="101" ind1="0" ind2=" "><subfield code="a">fre</subfield></datafield>
+    <datafield tag="200" ind1="1" ind2=" "><subfield code="a">Le phare endormi</subfield><subfield code="e">roman</subfield><subfield code="f">Irène Laurier</subfield></datafield>
+    <datafield tag="210" ind1=" " ind2=" "><subfield code="a">Villenuage</subfield><subfield code="c">Éditions Boussole</subfield><subfield code="d">2023</subfield></datafield>
+    <datafield tag="215" ind1=" " ind2=" "><subfield code="a">120 p.</subfield></datafield>
+    <datafield tag="676" ind1=" " ind2=" "><subfield code="a">843.92</subfield></datafield>
+    <datafield tag="700" ind1=" " ind2="1"><subfield code="a">Laurier,</subfield><subfield code="b">Irène</subfield></datafield>
+    <datafield tag="995" ind1=" " ind2=" "><subfield code="f">F100</subfield><subfield code="k">R LAU</subfield><subfield code="e">Salle jeunesse</subfield></datafield>
+  </record>
+</collection>

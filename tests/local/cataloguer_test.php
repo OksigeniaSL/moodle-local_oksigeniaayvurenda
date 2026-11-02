@@ -296,10 +296,13 @@ final class cataloguer_test extends \advanced_testcase {
         $CFG->lang = 'es';
         $this->assertSame(['rebeca', 'bne', 'rebiun', 'csic', 'ccuc', 'loc', 'openlibrary'], lookup::sources($entityid));
         $CFG->lang = 'pt_br';
+        $this->assertSame('br', lookup::region($entityid));
+        $CFG->lang = 'pt';
         $this->assertSame('pt', lookup::region($entityid));
         // A centre's own time zone wins over the language of the site.
-        $zones = ['Europe/Berlin' => 'de', 'America/Santiago' => 'la', 'America/Sao_Paulo' => 'pt', 'Europe/Oslo' => 'nordic',
-            'Australia/Melbourne' => 'en', 'America/Toronto' => 'en', 'Atlantic/Canary' => 'es', 'Europe/Rome' => 'it'];
+        $zones = ['Europe/Berlin' => 'de', 'America/Santiago' => 'la', 'America/Sao_Paulo' => 'br', 'Europe/Lisbon' => 'pt',
+            'Europe/Oslo' => 'nordic', 'Australia/Melbourne' => 'en', 'America/Toronto' => 'en', 'Atlantic/Canary' => 'es',
+            'Europe/Rome' => 'it'];
         foreach ($zones as $zone => $region) {
             libraries::update_entity($entityid, ['timezone' => $zone]);
             $this->assertSame($region, lookup::region($entityid), $zone);

@@ -58,13 +58,15 @@ final class sru {
      * The address that asks for an ISBN.
      *
      * @param string $isbn Digits.
+     * @param string $relation «=» with the digits alone; another («all» at the BnF), with the digits quoted.
      * @return string
      */
-    public function url(string $isbn): string {
+    public function url(string $isbn, string $relation = '='): string {
+        $digits = preg_replace('/[^0-9X]/', '', strtoupper($isbn));
         $query = http_build_query([
             'version' => $this->version,
             'operation' => 'searchRetrieve',
-            'query' => $this->index . '=' . preg_replace('/[^0-9X]/', '', strtoupper($isbn)),
+            'query' => $relation === '=' ? $this->index . '=' . $digits : $this->index . ' ' . $relation . ' "' . $digits . '"',
             'maximumRecords' => 5,
             'recordSchema' => $this->schema,
         ], '', '&', PHP_QUERY_RFC3986);
@@ -137,9 +139,11 @@ final class sru {
                 if (is_string($value) && !\Normalizer::isNormalized($value)) {
                     $value = \Normalizer::normalize($value, \Normalizer::FORM_C) ?: $value;
                 }
-                // The marks around a leading article that sorting skips («\u{98}Die\u{9C} Verwandlung») are not text.
+                // The marks around a leading article that sorting skips («\u{98}Die\u{9C} Verwandlung») are not text, and a
+                // character the bridge could not map comes written as «<U+00BA>»: it is that character.
                 if (is_string($value)) {
                     $value = preg_replace('/[\x{0098}\x{009C}]/u', '', $value);
+                    $value = preg_replace_callback('/<U\+([0-9A-F]{4,6})>/', fn($m) => mb_chr(hexdec($m[1]), 'UTF-8'), $value);
                 }
             });
         }

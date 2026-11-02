@@ -27,7 +27,7 @@ namespace local_oksigeniaayvurenda\core\marc;
 use local_oksigeniaayvurenda\core\isbn;
 
 /**
- * A MARC21 bibliographic record as a description: the fields of the record, its authorities by kind (authors,
+ * A MARC21 or UNIMARC bibliographic record as a description: the fields of the record, its authorities by kind (authors,
  * publishers, classes, subjects, collections, audience) and the rest as extras. The same shape as the Abies mapper
  * gives, so every way into the catalogue writes the same. Plain PHP, without Moodle.
  */
@@ -39,6 +39,9 @@ final class describer {
      * @return array{record: array, authorities: array, extra: array}
      */
     public static function describe(record $record): array {
+        if (self::is_unimarc($record)) {
+            return self::unimarc($record);
+        }
         $fixed = (string) $record->control_value('008');
         $year = self::year((string) self::first($record, ['264', '260'], 'c'));
         if ($year === null && preg_match('/^\d{4}$/', substr($fixed, 7, 4))) {
@@ -134,6 +137,90 @@ final class describer {
      */
     private static function first(record $record, array $tags, string $code): ?string {
         return $record->first($tags, $code);
+    }
+
+    /**
+     * Whether a record is UNIMARC (France, Portugal, Italy and much of Europe): its title is in 200, and there is no 245.
+     *
+     * @param record $record
+     * @return bool
+     */
+    public static function is_unimarc(record $record): bool {
+        return $record->first(['200'], 'a') !== null && !$record->data_fields('245');
+    }
+
+    /**
+     * The description of a UNIMARC record: the same shape as a MARC21 one, from UNIMARC's own fields.
+     *
+     * @param record $record
+     * @return array{record: array, authorities: array, extra: array}
+     */
+    private static function unimarc(record $record): array {
+        $isbns = [];
+        foreach ($record->values(['010'], 'a') as $raw) {
+            $normal = isbn::normalise(preg_replace('/\s.*$/', '', trim($raw)));
+            if ($normal !== null && !in_array($normal, $isbns, true)) {
+                $isbns[] = $normal;
+            }
+        }
+        $lang = strtolower((string) $record->first(['101'], 'a'));
+        // A person is «surname, forename» in two subfields; a body or a meeting, one.
+        $names = [];
+        foreach ($record->data_fields('700', '701', '702', '710', '711', '712') as $field) {
+            $part = ['a' => '', 'b' => ''];
+            foreach ($field['subfields'] as [$code, $value]) {
+                if (isset($part[$code]) && $part[$code] === '') {
+                    $part[$code] = (string) self::clean($value);
+                }
+            }
+            $names[] = $part['b'] !== '' ? $part['a'] . ', ' . $part['b'] : $part['a'];
+        }
+        $type = $record->leader[6] ?? 'a';
+        $level = $record->leader[7] ?? 'm';
+        $doctype = match (true) {
+            in_array($type, ['a', 'b', 'c', 'd', 'e', 'f'], true) && $level === 's' => 'periodical',
+            in_array($type, ['a', 'b', 'c', 'd', 'e', 'f'], true) => 'book',
+            in_array($type, ['i', 'j'], true) => 'audio',
+            $type === 'g' => 'video',
+            $type === 'l' => 'electronic',
+            $type === 'r' => 'device',
+            default => 'other',
+        };
+        $udc = $record->values(['675'], 'a');
+        $ddc = $record->values(['676'], 'a');
+        $notes = array_values(array_filter(array_map([self::class, 'text'], $record->values(['300'], 'a'))));
+        return [
+            'record' => [
+                'doctype' => $doctype,
+                'title' => self::clean($record->first(['200'], 'a')) ?? '',
+                'subtitle' => self::clean($record->first(['200'], 'e')),
+                'responsibility' => self::clean($record->first(['200'], 'f')),
+                'isbn' => $isbns[0] ?? null,
+                'edition' => self::clean($record->first(['205'], 'a')),
+                'pubplace' => self::clean($record->first(['214', '210'], 'a')),
+                'pubyear' => self::year((string) $record->first(['214', '210'], 'd')),
+                'lang' => preg_match('/^[a-z]{3}$/', $lang) ? $lang : null,
+                'extent' => self::clean($record->first(['215'], 'a')),
+                'summary' => self::text($record->first(['330'], 'a')),
+                'notes' => $notes ? implode("\n", $notes) : null,
+            ],
+            'authorities' => [
+                'author' => self::unique($names),
+                'publisher' => self::unique($record->values(['214', '210'], 'c')),
+                'class' => self::unique(array_merge($udc, $ddc, $record->values(['686'], 'a'))),
+                'subject' => array_slice(self::unique($record->values(['606', '607', '600', '601', '608'], 'a')), 0, 6),
+                'collection' => self::unique($record->values(['225'], 'a')),
+                'audience' => self::unique($record->values(['333'], 'a')),
+            ],
+            'extra' => array_filter([
+                'dimensions' => self::clean($record->first(['215'], 'd')),
+                'physical' => self::clean($record->first(['215'], 'c')),
+                'seriesnumber' => self::clean($record->first(['225'], 'v')),
+                'classscheme' => $udc ? 'udc' : ($ddc ? 'ddc' : null),
+                'isbns' => count($isbns) > 1 ? $isbns : null,
+                'format' => 'unimarc',
+            ], fn($v) => $v !== null && $v !== ''),
+        ];
     }
 
     /**
