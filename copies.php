@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\copies;
 use local_oksigeniaayvurenda\local\offsite;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -50,6 +51,10 @@ $secret = '';
 $pullurl = '';
 if (data_submitted() && confirm_sesskey() && $manage) {
     $do = optional_param('do', 'make', PARAM_ALPHA);
+    // The copy off the server goes with the plan; the daily copy, always.
+    if ($do !== 'make' && !plans::allows((int) $library->entityid, 'offsite')) {
+        $do = '';
+    }
     if ($do === 'make') {
         $file = copies::make($entityid);
         $out = offsite::send($entityid, $file);
@@ -131,7 +136,8 @@ $data = [
     'empty' => $str('copiesempty'),
     'download' => $str('copydownload'),
     'make' => $manage ? ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('copymake')] : null,
-    'offsite' => $manage ? copies_offsite($entityid, $secret, $pullurl, $str) : null,
+    'offsite' => $manage && plans::allows($entityid, 'offsite') ? copies_offsite($entityid, $secret, $pullurl, $str) : null,
+    'offsitenote' => $manage && !plans::allows($entityid, 'offsite') ? $str('offsitenotinplan') : '',
 ];
 
 /**

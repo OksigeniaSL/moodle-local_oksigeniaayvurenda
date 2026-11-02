@@ -57,7 +57,7 @@ final class plans_test extends \advanced_testcase {
         $this->resetAfterTest();
         $old = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $this->assertSame(['name' => '', 'copies' => 0, 'readers' => 0, 'lti' => true, 'connectors' => true,
-            'voices' => true, 'madewith' => false], plans::defaults());
+            'voices' => true, 'offsite' => true, 'madewith' => false], plans::defaults());
         $this->assertNull(plans::summary((int) $old->entityid));
         $this->assertNull(plans::left((int) $old->entityid, 'copies'));
 
@@ -65,7 +65,7 @@ final class plans_test extends \advanced_testcase {
         $library = libraries::create_entity(['name' => 'Invented school']);
         $entityid = (int) $library->entityid;
         $this->assertSame(['name' => 'Free', 'copies' => 3, 'readers' => 2, 'lti' => false, 'connectors' => true,
-            'voices' => true, 'madewith' => true], plans::of($entityid));
+            'voices' => true, 'offsite' => true, 'madewith' => true], plans::of($entityid));
         $this->assertFalse(plans::allows($entityid, 'lti'));
         $this->assertSame('Plan Free: 0 of 3 copies · 0 of 2 readers', plans::summary($entityid));
 
@@ -74,7 +74,7 @@ final class plans_test extends \advanced_testcase {
         $this->assertSame('Annual', plans::of((int) $old->entityid)['name']);
         plans::save($entityid, ['name' => 'Annual', 'copies' => -5]);
         $this->assertSame(['name' => 'Annual', 'copies' => 0, 'readers' => 0, 'lti' => true, 'connectors' => true,
-            'voices' => true, 'madewith' => false], plans::of($entityid));
+            'voices' => true, 'offsite' => true, 'madewith' => false], plans::of($entityid));
         $this->assertSame('Plan Annual: 0 copies · 0 readers', plans::summary($entityid));
     }
 
@@ -195,5 +195,33 @@ final class plans_test extends \advanced_testcase {
         $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage('does not include LTI');
         plans::require($entityid, 'lti');
+    }
+
+    /**
+     * The plans of the service set everything with one choice; without the copy off the server in its plan, a centre adds no place
+     * and sends nothing, and keeps what it had for when it comes back.
+     */
+    public function test_presets_and_offsite(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $this->assertNull(plans::preset('nobody'));
+        $plans = ['free' => [1000, 150, false], 'small' => [5000, 600, false], 'medium' => [25000, 2500, true]];
+        foreach ($plans as $key => $values) {
+            plans::save($entityid, plans::preset($key));
+            $plan = plans::of($entityid);
+            $this->assertSame($values[0], $plan['copies']);
+            $this->assertSame($values[1], $plan['readers']);
+            $this->assertSame($values[2], $plan['lti']);
+            $this->assertSame($values[2], $plan['connectors']);
+            $this->assertSame($key !== 'free', $plan['voices']);
+            $this->assertSame($key !== 'free', $plan['offsite']);
+            $this->assertSame($key === 'free', $plan['madewith']);
+        }
+        plans::save($entityid, plans::preset('free'));
+        $this->assertNull(offsite::add_webdav($entityid, 'https://example.org/copias', 'u', 'p'));
+        $this->assertNull(offsite::add_s3($entityid, 'https://s3.example.org', 'copias', 'eu', 'a', 'b'));
     }
 }

@@ -28,6 +28,7 @@
 
     Example context (json):
     {
+        "offsitenote": "",
         "heading": "Copias de la biblioteca",
         "intro": "Cada noche, una copia completa.",
         "notice": "",
@@ -47,6 +48,7 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#offsitenote}}<p class="ayv-empty">{{offsitenote}}</p>{{/offsitenote}}
 {{#offsite}}
 <section class="ayv-off" aria-labelledby="ayv-off-title">
     <h2 id="ayv-off-title" class="ayv-section-title">{{#str}}offsiteheading, local_oksigeniaayvurenda{{/str}}</h2>

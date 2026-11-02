@@ -30,6 +30,7 @@
             "play": [{"what": "visit", "label": "La biblioteca que se visita", "on": true}], "photos": true,
             "plansummary": "Plan Gratis: 812 de 1.000 ejemplares · 140 de 150 lectores",
             "planform": {"readersopen": true, "plannamenow": "Gratis", "plancopiesnow": 1000, "planreadersnow": 150,
+                "planpresets": [{"value": "free", "label": "Gratis"}],
                 "planfeatures": [{"feature": "lti", "featurelabel": "LTI", "featureon": false}]},
             "staffpart": {"staffparthint": "Da el rol de bibliotecario en la categoría del centro.", "staffentity": 1,
                 "staffassign": "#"},
@@ -58,6 +59,7 @@
         "librariesreviewsign": "Cómo se firman las reseñas", "librariesplan": "Plan",
         "librariesplay": "Lo que se enciende", "librariesplayhint": "De serie, lo de su piel.",
         "librariesplanhint": "Solo lo ven y lo cambian quienes administran el sitio.", "planname": "Nombre del plan",
+        "planpreset": "Plan de la tarifa", "planpresetcustom": "A medida",
         "plancopies": "Ejemplares", "planreaders": "Lectores", "planlimithint": "Con 0, sin tope",
         "librariesstaff": "Personal del centro", "librariesstaffassign": "Dar roles en el centro",
         "librariesstaffseparate": "Darle al centro su categoría"
@@ -178,6 +180,7 @@
                 <input type="hidden" name="planform" value="1">
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="readersopen" value="1" {{#readersopen}}checked{{/readersopen}}> {{librariesreadersopen}}</label>
                 <p class="ayv-field-hint">{{librariesreadersopenhint}}</p>
+                <label class="ayv-field">{{planpreset}} <select name="planpreset"><option value="">{{planpresetcustom}}</option>{{#planpresets}}<option value="{{value}}">{{label}}</option>{{/planpresets}}</select></label>
                 <label class="ayv-field">{{planname}} <input type="text" name="planname" value="{{plannamenow}}" maxlength="60"></label>
                 <label class="ayv-field">{{plancopies}} <span class="ayv-field-hint">{{planlimithint}}</span> <input type="number" name="plancopies" value="{{plancopiesnow}}" min="0" step="1" class="ayv-plan-limit"></label>
                 <label class="ayv-field">{{planreaders}} <span class="ayv-field-hint">{{planlimithint}}</span> <input type="number" name="planreaders" value="{{planreadersnow}}" min="0" step="1" class="ayv-plan-limit"></label>

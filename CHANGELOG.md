@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.121.1 (2026-11-02)
+
+- The plans of the hosted service with one choice in a centre's settings: Free, Small and Medium, each with its limits and what it
+  brings; and the copy off the server goes with the plan (the daily copy to download, always).
+
 ## 0.121.0 (2026-11-02)
 
 - A textbook bank's handing out and collecting («Handing out and collecting», from its desk and its sets). Collecting: how many books

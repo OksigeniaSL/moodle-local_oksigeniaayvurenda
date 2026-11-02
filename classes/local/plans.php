@@ -31,7 +31,17 @@ final class plans {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] What a plan may bring or not. */
-    public const FEATURES = ['lti', 'connectors', 'voices', 'madewith'];
+    public const FEATURES = ['lti', 'connectors', 'voices', 'offsite', 'madewith'];
+
+    /** @var array[] The plans of the hosted service (docs: price tiers), to set with one choice: limits and what they bring. */
+    public const PRESETS = [
+        'free' => ['copies' => 1000, 'readers' => 150, 'lti' => false, 'connectors' => false, 'voices' => false,
+            'offsite' => false, 'madewith' => true],
+        'small' => ['copies' => 5000, 'readers' => 600, 'lti' => false, 'connectors' => false, 'voices' => true,
+            'offsite' => true, 'madewith' => false],
+        'medium' => ['copies' => 25000, 'readers' => 2500, 'lti' => true, 'connectors' => true, 'voices' => true,
+            'offsite' => true, 'madewith' => false],
+    ];
 
     /**
      * The site's defaults, which a new centre takes: with nothing set, no limits and everything in.
@@ -47,6 +57,7 @@ final class plans {
             'lti' => (bool) ($config->planlti ?? true),
             'connectors' => (bool) ($config->planconnectors ?? true),
             'voices' => (bool) ($config->planvoices ?? true),
+            'offsite' => (bool) ($config->planoffsite ?? true),
             'madewith' => (bool) ($config->planmadewith ?? false),
         ];
     }
@@ -74,6 +85,19 @@ final class plans {
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $settings['plan'] = self::clean($plan);
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+    }
+
+    /**
+     * One of the plans of the service, with its name.
+     *
+     * @param string $key free, small or medium.
+     * @return array|null
+     */
+    public static function preset(string $key): ?array {
+        if (!isset(self::PRESETS[$key])) {
+            return null;
+        }
+        return ['name' => get_string('planpreset' . $key, 'local_oksigeniaayvurenda')] + self::PRESETS[$key];
     }
 
     /**

@@ -94,7 +94,7 @@ if (data_submitted() && confirm_sesskey()) {
             foreach (plans::FEATURES as $feature) {
                 $plan[$feature] = optional_param('plan' . $feature, 0, PARAM_BOOL);
             }
-            plans::save(required_param('entity', PARAM_INT), $plan);
+            plans::save(required_param('entity', PARAM_INT), plans::preset(optional_param('planpreset', '', PARAM_ALPHA)) ?? $plan);
             access::set_closed(required_param('entity', PARAM_INT), !optional_param('readersopen', 0, PARAM_BOOL));
         }
         $notice = $str('librariessaved');
@@ -266,6 +266,10 @@ foreach (libraries::all() as $one) {
             $plan = plans::of((int) $entity->id);
             return ['readersopen' => !access::closed((int) $entity->id),
                 'plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
+                'planpresets' => array_map(
+                    fn($key) => ['value' => $key, 'label' => $str('planpreset' . $key)],
+                    array_keys(plans::PRESETS)
+                ),
                 'planfeatures' => array_map(fn($f) => ['feature' => $f, 'featurelabel' => $str('plan' . $f),
                     'featureon' => $plan[$f]], plans::FEATURES)];
         })() : null,
@@ -295,7 +299,7 @@ foreach (
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
         'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplay',
         'librariesplayhint', 'librariesphotos', 'librariesphotoshint', 'librariesplan',
-        'librariesplanhint', 'planname', 'plancopies',
+        'librariesplanhint', 'planpreset', 'planpresetcustom', 'planname', 'plancopies',
         'planreaders', 'planlimithint', 'librariesstaff', 'librariesstaffassign', 'librariesstaffseparate',
         'librariesreadersopen', 'librariesreadersopenhint', 'librarieskeptby', 'librarieskeepers', 'librarieskeepershint',
         'librarieskeepersgo'] as $key

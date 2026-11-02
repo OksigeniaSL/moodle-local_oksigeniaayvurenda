@@ -113,7 +113,8 @@ if ($hassiteconfig) {
                 8
             ));
         }
-        foreach (['planlti' => 1, 'planconnectors' => 1, 'planvoices' => 1, 'planmadewith' => 0] as $feature => $default) {
+        $features = ['planlti' => 1, 'planconnectors' => 1, 'planvoices' => 1, 'planoffsite' => 1, 'planmadewith' => 0];
+        foreach ($features as $feature => $default) {
             $settings->add(new admin_setting_configcheckbox(
                 'local_oksigeniaayvurenda/' . $feature,
                 $str($feature),

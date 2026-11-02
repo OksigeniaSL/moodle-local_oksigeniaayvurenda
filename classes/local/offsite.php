@@ -118,6 +118,9 @@ final class offsite {
      * @return string|null The id of the place; null if the address is not one.
      */
     public static function add_webdav(int $entityid, string $url, string $user, string $password): ?string {
+        if (!plans::allows($entityid, 'offsite')) {
+            return null;
+        }
         $url = trim($url);
         $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
@@ -158,6 +161,9 @@ final class offsite {
         string $accesskey,
         string $secret
     ): ?string {
+        if (!plans::allows($entityid, 'offsite')) {
+            return null;
+        }
         $endpoint = rtrim(trim($endpoint), '/');
         $bucket = trim($bucket, " /");
         $scheme = strtolower((string) parse_url($endpoint, PHP_URL_SCHEME));
@@ -285,7 +291,7 @@ final class offsite {
     public static function send(int $entityid, \stored_file $copy, ?int $now = null): array {
         $now = $now ?? time();
         $settings = self::settings($entityid);
-        if ($settings['recipient'] === '' || !$settings['places']) {
+        if ($settings['recipient'] === '' || !$settings['places'] || !plans::allows($entityid, 'offsite')) {
             return ['sent' => 0, 'failed' => []];
         }
         $path = self::encrypted($entityid, $copy);
