@@ -1,0 +1,14 @@
+{
+    "host": "0.0.0.0",
+    "port": 6001,
+    "encoding": "utf-8",
+    "allow": ["192.168.1.50"],
+    "offline": "No connection with the library. Please go to the desk.",
+    "logins": [
+        {
+            "user": "machine1",
+            "password": "the-password-the-machine-is-set-to-use",
+            "post": "https://your-library.example/local/oksigeniaayvurenda/self.php?key=the-key-of-its-post"
+        }
+    ]
+}

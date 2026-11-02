@@ -934,6 +934,7 @@
         <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Where it stands"/>
         <FIELD NAME="keyhash" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="The hash of the key that opens it; the key itself is not kept"/>
+        <FIELD NAME="machine" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1: a machine that speaks SIP2, through the bridge; 0: a screen in a browser"/>
         <FIELD NAME="lang" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false" COMMENT="The language it speaks"/>
         <FIELD NAME="tries" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cards and unknown codes read in the current minute"/>
         <FIELD NAME="timetries" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="When that minute began"/>

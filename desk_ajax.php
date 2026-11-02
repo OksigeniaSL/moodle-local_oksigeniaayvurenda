@@ -82,7 +82,11 @@ switch ($action) {
     case 'sanction':
         // What a reader owes or the days they wait are for the staff of the centre, not for whoever only keeps this library.
         access::require('local/oksigeniaayvurenda:desk', $library);
-        $answer = $desk->sanction(required_param('readerid', PARAM_INT), required_param('what', PARAM_ALPHA));
+        $answer = $desk->sanction(
+            required_param('readerid', PARAM_INT),
+            required_param('what', PARAM_ALPHA),
+            optional_param('row', 0, PARAM_INT)
+        );
         break;
     case 'room':
         $answer = $desk->room(required_param('itemid', PARAM_INT));

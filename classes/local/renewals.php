@@ -45,10 +45,25 @@ final class renewals {
      */
     public static function until(\stdClass $library, int $readerid, int $loanid, int $userid, ?int $now = null): ?int {
         $now = $now ?? time();
-        if (!holds::renew_online($library, $readerid, $now)) {
+        if (!holds::renew_online($library, $readerid, $now) || self::late_counts($library, $loanid, $now)) {
             return null;
         }
         return (new desk($library, $userid, $now))->renewable($loanid);
+    }
+
+    /**
+     * Whether a loan is late where that costs something: giving it more time from home or at a machine would move its date
+     * and leave nothing. That is for the desk to decide.
+     *
+     * @param \stdClass $library
+     * @param int $loanid
+     * @param int $now
+     * @return bool
+     */
+    public static function late_counts(\stdClass $library, int $loanid, int $now): bool {
+        global $DB;
+        return sanctions::on((int) $library->entityid)
+            && (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $loanid]) < $now;
     }
 
     /**
@@ -74,7 +89,7 @@ final class renewals {
             return ['ok' => false, 'message' => $str('renewnotyours'), 'due' => 0];
         }
         $library = $DB->get_record(self::T . 'library', ['id' => $loan->libraryid], '*', MUST_EXIST);
-        if (sanctions::stop((int) $library->entityid, (int) $loan->readerid, $now)) {
+        if (sanctions::stop((int) $library->entityid, (int) $loan->readerid, $now) || self::late_counts($library, $loanid, $now)) {
             return ['ok' => false, 'message' => $str('renewsanction'), 'due' => 0];
         }
         if (!holds::renew_online($library, (int) $loan->readerid, $now)) {

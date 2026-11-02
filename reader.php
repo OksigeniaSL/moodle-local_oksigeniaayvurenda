@@ -56,9 +56,11 @@ if (!(new desk($library, (int) $USER->id, $now, $own))->allowed($id)) {
 }
 $notice = '';
 $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id, 'entityid' => $library->entityid]);
-if ($reader) {
-    \local_oksigeniaayvurenda\event\reader_viewed::fire((int) $library->entityid, (int) $reader->id);
+// A reader of another centre is nobody here: nothing is read, and nothing is written.
+if (!$reader) {
+    shell::missing($str('readernothere'), $library);
 }
+\local_oksigeniaayvurenda\event\reader_viewed::fire((int) $library->entityid, (int) $reader->id);
 // Whoever only keeps this library sees what it lends them: not their history elsewhere, nor the staff's notes, and
 // writes nothing here.
 $limited = $own && !access::can('local/oksigeniaayvurenda:desk', $library);

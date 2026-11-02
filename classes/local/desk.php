@@ -267,21 +267,24 @@ final class desk {
      *
      * @param int $readerid
      * @param string $what lift, pay or waive.
+     * @param int $row What one book left, from its line; 0 for all of it, from the panel.
      * @return array
      */
-    public function sanction(int $readerid, string $what): array {
-        if (!$this->allowed($readerid)) {
+    public function sanction(int $readerid, string $what, int $row = 0): array {
+        global $DB;
+        $ofcentre = $DB->record_exists(self::T . 'reader', ['id' => $readerid, 'entityid' => $this->library->entityid]);
+        if (!$ofcentre || !$this->allowed($readerid) || !in_array($what, ['lift', 'pay', 'waive'], true)) {
             return $this->answer('unknown', 'no', 'deskotherreader');
         }
         if ($what === 'lift') {
-            sanctions::lift($this->library, $readerid, $this->staffid, $this->now);
-            $message = 'sanctionlifted';
+            sanctions::lift($this->library, $readerid, $this->staffid, $this->now, $row);
         } else {
-            $paid = $what === 'pay';
-            sanctions::settle($this->library, $readerid, $paid ? sanctions::PAID : sanctions::WAIVED, $this->staffid, $this->now);
-            $message = $paid ? 'sanctionpaid' : 'sanctionwaived';
+            $status = $what === 'pay' ? sanctions::PAID : sanctions::WAIVED;
+            sanctions::settle($this->library, $readerid, $status, $this->staffid, $this->now, $row);
         }
-        return $this->answer('sanction', 'ok', $message, $this->who($readerid), ['readerid' => $readerid,
+        $words = ['lift' => 'lifted', 'pay' => 'paid', 'waive' => 'waived'][$what];
+        $message = $row ? 'sanctionrow' . $words : 'sanction' . $words;
+        return $this->answer('sanction', 'ok', $message, $row ? null : $this->who($readerid), ['readerid' => $readerid,
             'reader' => $this->reader_panel($readerid)]);
     }
 
@@ -490,7 +493,9 @@ final class desk {
             if ($decision === policy::HELD) {
                 $a->who = $this->who((int) $set->readerid);
             }
-            return $this->answer('stop', 'no', 'deskstop' . $decision, $a, [
+            // Why is for the staff of the centre: whoever only keeps this library hears where to send them.
+            $hidden = $sanction && !sanctions::may_know($this->library, $this->staffid);
+            return $this->answer('stop', 'no', $hidden ? 'deskstopelsewhere' : 'deskstop' . $decision, $a, [
                 'reason' => $decision,
                 'forceable' => in_array($decision, policy::FORCEABLE, true),
                 'code' => $item->barcode,

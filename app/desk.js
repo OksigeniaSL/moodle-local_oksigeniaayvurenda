@@ -246,12 +246,12 @@
     };
 
     // Lift the days or close what is owed, from the panel or from the line of the book that just came back.
-    var settle = function(choices, who, done) {
+    var settle = function(choices, who, done, row) {
         var box = el('div', 'ayv-line-actions');
         (choices || []).forEach(function(choice) {
             box.appendChild(button(choice.label, 'ayv-line-quiet', function(b) {
                 b.disabled = true;
-                post({action: 'sanction', readerid: who, what: choice.do}).then(function(answer) {
+                post({action: 'sanction', readerid: who, what: choice.do, row: row || 0}).then(function(answer) {
                     tone('ok');
                     if (done) {
                         done(answer);
@@ -278,7 +278,7 @@
             var settling = settle(answer.sanction.actions, answer.readerid, function(done) {
                 left.textContent = done.message;
                 settling.remove();
-            });
+            }, answer.sanction.id);
             li.appendChild(settling);
         }
         var actions = el('div', 'ayv-line-actions');

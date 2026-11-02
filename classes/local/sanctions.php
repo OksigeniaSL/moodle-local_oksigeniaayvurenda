@@ -129,7 +129,7 @@ final class sanctions {
      * @param int $dayslate
      * @param int $staffid
      * @param int $now
-     * @return array|null What the desk shows: id, text and what can be done with it.
+     * @return array|null What the desk shows: id, text and what can be done with it; nothing to whoever may not know.
      */
     public static function after_return(
         \stdClass $library,
@@ -166,7 +166,7 @@ final class sanctions {
             $row += ['kind' => self::KIND_FINE, 'cents' => $cents];
         }
         $row['id'] = $DB->insert_record(self::T . 'sanction', $row);
-        return self::answer((object) $row, $settings, $staffid, $library);
+        return self::may_know($library, $staffid) ? self::answer((object) $row, $settings) : null;
     }
 
     /**
@@ -174,13 +174,10 @@ final class sanctions {
      *
      * @param \stdClass $row
      * @param array $settings
-     * @param int $staffid
-     * @param \stdClass $library
      * @return array id, text and actions.
      */
-    private static function answer(\stdClass $row, array $settings, int $staffid, \stdClass $library): array {
+    private static function answer(\stdClass $row, array $settings): array {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
-        $can = $staffid && access::can('local/oksigeniaayvurenda:desk', $library, $staffid);
         if ($row->kind === self::KIND_DAYS) {
             $text = $str('sanctionleftdays', self::day((int) $row->timeuntil));
             $actions = [['do' => 'lift', 'label' => $str('sanctionlift')]];
@@ -188,7 +185,19 @@ final class sanctions {
             $text = $str('sanctionleftfine', self::money((int) $row->cents, $settings['currency']));
             $actions = [['do' => 'pay', 'label' => $str('sanctionpay')], ['do' => 'waive', 'label' => $str('sanctionwaive')]];
         }
-        return ['id' => (int) $row->id, 'text' => $text, 'actions' => $can ? $actions : []];
+        return ['id' => (int) $row->id, 'text' => $text, 'actions' => $actions];
+    }
+
+    /**
+     * Whether someone at a desk may know what a reader owes or how long they wait: the staff of the centre; not whoever
+     * only keeps this library, nor a post, which has its own neutral words.
+     *
+     * @param \stdClass $library
+     * @param int $staffid
+     * @return bool
+     */
+    public static function may_know(\stdClass $library, int $staffid): bool {
+        return $staffid && access::can('local/oksigeniaayvurenda:desk', $library, $staffid);
     }
 
     /**
@@ -198,7 +207,8 @@ final class sanctions {
      */
     public static function undo_return(int $loanid): void {
         global $DB;
-        $DB->delete_records(self::T . 'sanction', ['loanid' => $loanid]);
+        // What was paid was paid, even if the book turns out not to have come back.
+        $DB->delete_records(self::T . 'sanction', ['loanid' => $loanid, 'status' => self::OPEN]);
     }
 
     /**
@@ -255,9 +265,12 @@ final class sanctions {
      * @param int $readerid
      * @param int $now
      * @param int $staffid
-     * @return array|null text and actions (what can be done; none for whoever only keeps this library).
+     * @return array|null text and actions; nothing to whoever may not know.
      */
     public static function panel(\stdClass $library, int $readerid, int $now, int $staffid): ?array {
+        if (!self::may_know($library, $staffid)) {
+            return null;
+        }
         $entityid = (int) $library->entityid;
         $state = self::state($entityid, $readerid, $now);
         if (!$state['until'] && !$state['owes']) {
@@ -275,8 +288,7 @@ final class sanctions {
             $actions[] = ['do' => 'pay', 'label' => $str('sanctionpay')];
             $actions[] = ['do' => 'waive', 'label' => $str('sanctionwaive')];
         }
-        return ['text' => implode(' ', $lines),
-            'actions' => $staffid && access::can('local/oksigeniaayvurenda:desk', $library, $staffid) ? $actions : []];
+        return ['text' => implode(' ', $lines), 'actions' => $actions];
     }
 
     /**
@@ -329,10 +341,12 @@ final class sanctions {
      * @param int $readerid
      * @param int $staffid
      * @param int $now
+     * @param int $id One row only.
      * @return int How many rows closed.
      */
-    public static function lift(\stdClass $library, int $readerid, int $staffid, int $now): int {
-        $closed = self::close_rows($library, ['readerid' => $readerid, 'kind' => self::KIND_DAYS], self::LIFTED, $staffid, $now);
+    public static function lift(\stdClass $library, int $readerid, int $staffid, int $now, int $id = 0): int {
+        $where = ['readerid' => $readerid, 'kind' => self::KIND_DAYS] + ($id ? ['id' => $id] : []);
+        $closed = self::close_rows($library, $where, self::LIFTED, $staffid, $now);
         if ($closed) {
             \local_oksigeniaayvurenda\event\sanction_lifted::fire((int) $library->entityid, $readerid);
         }
@@ -423,10 +437,13 @@ final class sanctions {
      * @param string $note
      * @param int $staffid
      * @param int $now
-     * @return int The row.
+     * @return int The row, or 0 for a reader of another centre.
      */
     public static function charge(\stdClass $library, int $readerid, int $cents, string $note, int $staffid, int $now): int {
         global $DB;
+        if (!$DB->record_exists(self::T . 'reader', ['id' => $readerid, 'entityid' => $library->entityid])) {
+            return 0;
+        }
         $id = $DB->insert_record(self::T . 'sanction', ['entityid' => $library->entityid, 'readerid' => $readerid,
             'libraryid' => $library->id, 'kind' => self::KIND_CHARGE, 'dayslate' => 0, 'cents' => $cents,
             'note' => \core_text::substr(trim($note), 0, 255) ?: null, 'status' => self::OPEN,
@@ -441,12 +458,13 @@ final class sanctions {
      * @param int $entityid
      * @param int $readerid
      * @param int $now
+     * @param int $limit How many, the newest first; 0 for all.
      * @return array[] id, text, when, state, open, money.
      */
-    public static function of_reader(int $entityid, int $readerid, int $now): array {
+    public static function of_reader(int $entityid, int $readerid, int $now, int $limit = self::LISTED): array {
         global $DB;
         $rows = $DB->get_records_sql(self::SELECT . ' WHERE s.entityid = :entityid AND s.readerid = :readerid
-           ORDER BY s.timecreated DESC, s.id DESC', ['entityid' => $entityid, 'readerid' => $readerid], 0, self::LISTED);
+           ORDER BY s.timecreated DESC, s.id DESC', ['entityid' => $entityid, 'readerid' => $readerid], 0, $limit);
         $currency = self::settings($entityid)['currency'];
         $out = array_map(fn($row) => self::row_of($row, $currency, $now), array_values($rows));
         usort($out, fn($a, $b) => $b['open'] <=> $a['open']);
@@ -574,6 +592,7 @@ final class sanctions {
             $desk = new desk($library, 0, $now);
         }
         $currency = self::settings($entityid)['currency'];
+        $zone = \core_date::get_server_timezone();
         $out = [];
         $rows = $DB->get_recordset_sql(
             self::SELECT . ' WHERE s.entityid = :entityid ORDER BY s.timecreated, s.id',
@@ -585,17 +604,17 @@ final class sanctions {
                 $names[$id] = $desk ? $desk->reader($id) : ['name' => '', 'cardcode' => ''];
             }
             $out[] = spreadsheet::row([
-                userdate((int) $row->timecreated, '%Y-%m-%d'),
+                userdate((int) $row->timecreated, '%Y-%m-%d', $zone),
                 $names[$id]['name'],
                 $names[$id]['cardcode'],
                 $row->kind,
                 (string) ($row->title ?? $row->note ?? ''),
                 (int) $row->dayslate,
-                $row->timeuntil ? userdate((int) $row->timeuntil - 1, '%Y-%m-%d') : '',
+                $row->timeuntil ? userdate((int) $row->timeuntil - 1, '%Y-%m-%d', $zone) : '',
                 $row->cents !== null ? number_format((int) $row->cents / 100, 2, '.', '') : '',
                 $row->cents !== null ? $currency : '',
                 $row->status,
-                $row->timeclosed ? userdate((int) $row->timeclosed, '%Y-%m-%d') : '',
+                $row->timeclosed ? userdate((int) $row->timeclosed, '%Y-%m-%d', $zone) : '',
             ]);
         }
         $rows->close();
@@ -650,7 +669,6 @@ final class sanctions {
         $language = force_current_language((string) $user->lang);
         $entityid = (int) $library->entityid;
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
-        $timezone = \core_date::get_user_timezone($user);
         $record = $row->loanid ? $DB->get_record_sql(
             'SELECT r.id, r.title FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'item} i ON i.id = l.itemid
@@ -661,7 +679,11 @@ final class sanctions {
         $title = $record ? (string) $record->title : (string) ($row->note ?? '');
         $name = format_string($library->name, true, ['escape' => false]);
         if ($row->kind === self::KIND_DAYS) {
-            $value = userdate((int) $row->timeuntil - 1, get_string('strftimedateshort', 'langconfig'), $timezone);
+            $value = userdate(
+                (int) $row->timeuntil - 1,
+                get_string('strftimedateshort', 'langconfig'),
+                \core_date::get_server_timezone()
+            );
             $key = 'sanctionnoticedays';
             $label = $str('sanctionnoticeuntil');
         } else {
@@ -731,6 +753,6 @@ final class sanctions {
      * @return string
      */
     private static function day(int $until): string {
-        return userdate($until - 1, get_string('strftimedate', 'langconfig'));
+        return userdate($until - 1, get_string('strftimedate', 'langconfig'), \core_date::get_server_timezone());
     }
 }

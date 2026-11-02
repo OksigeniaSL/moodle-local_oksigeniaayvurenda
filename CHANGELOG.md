@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.134.0
+
+- SIP2, for self-loan machines, return boxes and RFID pads: a small bridge (`sip2-bridge/`, Python with nothing added, GPL)
+  that runs in the library, speaks SIP2 to the machines on its network and HTTPS to the library, with the address of a
+  self-loan post. A machine is one more post: the same rules, limits and record, and what it does can be undone.
+- It stands in a public room, so it says what a post says: the first name and what was just taken; never someone's
+  books, whether they are late or how much they owe.
+- A copy that failed also reaches the phones of whoever manages the centre.
+- The block's way to the desk for whoever keeps a library, lost when keepers had to be readers (block 0.1.6).
+
+What an independent review found in this and in 0.133.0:
+
+- A member of staff could write down an amount for a reader of another centre, by the address; that reader's message and
+  the report then failed. Now such a reader is nobody on that page, and the amount is refused.
+- «Paid» or «Forgive» on the line of one book closed everything the reader owed: now that book's, and the panel closes all.
+- Renewing a late book from home or at a machine moved its date and left nothing: not where a late book costs something.
+- Whoever only keeps a library saw how much someone owed and until when: now only where to send them.
+- Paid amounts survive undoing a return; a reader who owes is not melted away when matching; a blank amount keeps what it
+  was; the date of a stretch of days is the site's for everyone; privacy exports everything, with no cap.
+
 ## 0.133.0
 
 - If a book comes back late, a centre can now choose what it leaves, in the lending rules: only the warning (still the
@@ -15,7 +35,7 @@
 - Never at a textbook bank, nor for a library that borrows. Goes in the daily copy, recovery and merging of readers, and
   the privacy provider exports and deletes it.
 - A guided help with its voices; the desk's own help no longer promises there are no fines.
-- A copy that failed, what waits for the staff and a voice received also reach the staff's phones.
+- What waits for the staff and a voice received also reach the staff's phones.
 
 ## 0.132.1 (2026-11-02)
 

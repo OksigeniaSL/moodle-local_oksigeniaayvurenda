@@ -37,7 +37,7 @@ final class selfloan {
     private const CARDS = 20;
 
     /** @var int Cards and unknown codes in an hour: over this the post stops until someone of the staff looks. */
-    private const CARDSHOUR = 200;
+    public const CARDSHOUR = 200;
 
     /** @var int Books given back in a minute: nobody with books in their hands goes faster. */
     private const RETURNS = 30;
@@ -45,17 +45,33 @@ final class selfloan {
     /** @var int Books given back in an hour: over this the post stops until someone of the staff looks. */
     private const RETURNSHOUR = 300;
 
+    /** @var int Books given back in a minute at a machine: a return box takes them as fast as it can. */
+    private const MACHINERETURNS = 60;
+
+    /** @var int Books given back in an hour at a machine: a morning after a holiday stays under this. */
+    private const MACHINERETURNSHOUR = 1500;
+
     /** @var string[] Reader types without a stage, so the stages chosen do not apply to them. */
     private const ADULTS = ['teacher', 'staff', 'family'];
 
     /** @var int Seconds in which reading a book just taken again is a double read, not giving it back. */
-    private const DOUBLE = 300;
+    public const DOUBLE = 300;
 
     /** @var int Days of what a post did that are gone over. */
     public const DAYS = 7;
 
     /** @var string[] Why a book may not go out, as the desk's policy says it. */
     private const STOPS = ['held', 'late', 'limit', 'notlendable', 'unavailable', 'suspended', 'owes'];
+
+    /**
+     * Whether a reason of the desk is one a post answers in its own neutral words.
+     *
+     * @param string $reason
+     * @return bool
+     */
+    public static function is_stop(string $reason): bool {
+        return in_array($reason, self::STOPS, true);
+    }
 
     /**
      * Whether a library can have posts: a textbook bank hands out whole sets, at its desk.
@@ -116,13 +132,15 @@ final class selfloan {
      * @param string $name
      * @param int $userid
      * @param int|null $now
+     * @param bool $machine A machine that speaks SIP2, through the bridge, rather than a screen.
      * @return string The address that opens it.
      */
-    public static function create(\stdClass $library, string $name, int $userid, ?int $now = null): string {
+    public static function create(\stdClass $library, string $name, int $userid, ?int $now = null, bool $machine = false): string {
         global $DB;
         $key = random_string(48);
         $id = $DB->insert_record(self::T . 'selfpost', ['libraryid' => $library->id, 'name' => \core_text::substr($name, 0, 100),
-            'keyhash' => hash('sha256', $key), 'lang' => current_language(), 'tries' => 0, 'timetries' => 0,
+            'keyhash' => hash('sha256', $key), 'machine' => $machine ? 1 : 0, 'lang' => current_language(), 'tries' => 0,
+            'timetries' => 0,
             'createdby' => $userid ?: null, 'timecreated' => $now ?? time()]);
         \local_oksigeniaayvurenda\event\self_post_created::fire((int) $library->entityid, (int) $id);
         return (new \moodle_url('/local/oksigeniaayvurenda/self.php', ['key' => $key]))->out(false);
@@ -146,14 +164,16 @@ final class selfloan {
      * The post a key opens and its library, if it can be used.
      *
      * @param string $key
+     * @param bool $machine Asked by the bridge: only a machine's key works there, and only a screen's elsewhere.
      * @return array|null post and library.
      */
-    public static function by_key(string $key): ?array {
+    public static function by_key(string $key, bool $machine = false): ?array {
         global $DB;
         if ($key === '') {
             return null;
         }
-        $post = $DB->get_record(self::T . 'selfpost', ['keyhash' => hash('sha256', $key)]);
+        // The address of a screen does not work for a machine, nor the other way round: their limits differ.
+        $post = $DB->get_record(self::T . 'selfpost', ['keyhash' => hash('sha256', $key), 'machine' => $machine ? 1 : 0]);
         $library = $post ? $DB->get_record(self::T . 'library', ['id' => $post->libraryid]) : null;
         if (!$library || !self::available($library) || access::closed((int) $library->entityid)) {
             return null;
@@ -312,7 +332,7 @@ final class selfloan {
      * @param int $now
      * @return bool
      */
-    private static function may(\stdClass $library, \stdClass $reader, int $now): bool {
+    public static function may(\stdClass $library, \stdClass $reader, int $now): bool {
         global $DB;
         if (!(new desk($library, 0, $now, true))->allowed((int) $reader->id)) {
             return false;
@@ -333,7 +353,7 @@ final class selfloan {
      * @param int $now
      * @return bool
      */
-    private static function too_many(\stdClass $post, int $now): bool {
+    public static function too_many(\stdClass $post, int $now): bool {
         global $DB;
         $fresh = $now - (int) $post->timetries >= 60;
         $post->tries = $fresh ? 1 : (int) $post->tries + 1;
@@ -358,18 +378,19 @@ final class selfloan {
      * @param int $now
      * @return bool
      */
-    private static function too_many_back(\stdClass $post, int $now): bool {
+    public static function too_many_back(\stdClass $post, int $now): bool {
         global $DB;
         $since = fn(int $seconds) => $DB->count_records_select(
             self::T . 'loan',
             'returnpostid = ? AND timereturned >= ?',
             [$post->id, $now - $seconds]
         );
-        if ($since(HOURSECS) >= self::RETURNSHOUR) {
+        $machine = !empty($post->machine);
+        if ($since(HOURSECS) >= ($machine ? self::MACHINERETURNSHOUR : self::RETURNSHOUR)) {
             self::stop($post, $now);
             return true;
         }
-        return $since(MINSECS) >= self::RETURNS;
+        return $since(MINSECS) >= ($machine ? self::MACHINERETURNS : self::RETURNS);
     }
 
     /**

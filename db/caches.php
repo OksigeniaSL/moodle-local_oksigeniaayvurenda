@@ -42,6 +42,13 @@ $definitions = [
         'mode' => cache_store::MODE_APPLICATION,
         'simplekeys' => true,
     ],
+    // Who a machine that speaks SIP2 is serving, so that one visit counts once however many books it takes.
+    'selfvisit' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'ttl' => 1800,
+    ],
     // LTI 1.3: the nonces of the logins under way, the launches and the access tokens to the platforms' services.
     'lti' => [
         'mode' => cache_store::MODE_APPLICATION,

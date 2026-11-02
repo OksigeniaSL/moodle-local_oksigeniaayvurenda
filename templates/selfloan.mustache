@@ -47,11 +47,12 @@
 <section class="ayv-settingcard ayv-self-created">
     <div class="ayv-self-created-text">
         <h2 class="ayv-section-title">{{selfcreatedheading}}</h2>
-        <p>{{selfcreatedhint}}</p>
+        {{^ismachine}}<p>{{selfcreatedhint}}</p>{{/ismachine}}
+        {{#ismachine}}<p>{{selfmachinehint}} <a href="https://github.com/OksigeniaSL/moodle-local_oksigeniaayvurenda/tree/main/sip2-bridge" target="_blank" rel="noopener">{{selfsiplink}}</a></p>{{/ismachine}}
         <p class="ayv-lti-url"><input type="text" readonly value="{{address}}" aria-label="{{selfaddress}}">
             <button type="button" class="ayv-button" data-copy="{{address}}">{{selfcopy}}</button></p>
     </div>
-    <img class="ayv-self-qr" src="{{qr}}" alt="" width="148" height="148">
+    {{^ismachine}}<img class="ayv-self-qr" src="{{qr}}" alt="" width="148" height="148">{{/ismachine}}
 </section>
 {{/address}}
 {{#hasposts}}
@@ -79,7 +80,7 @@
     {{#hasposts}}
     <ul class="ayv-dig-grid">
     {{#posts}}
-        <li class="ayv-dig-card"><h3 class="ayv-dig-title">{{name}}</h3>
+        <li class="ayv-dig-card"><h3 class="ayv-dig-title">{{name}}{{#machine}} <span class="ayv-chip">{{selfmachinetag}}</span>{{/machine}}</h3>
             <p class="ayv-field-hint">{{last}}</p>
             {{#stopped}}<p class="ayv-self-stopped" role="status">{{selfstoppedhint}}</p>{{/stopped}}
             {{#manage}}<div class="ayv-dig-actions">
@@ -111,6 +112,7 @@
     <form method="post" action="{{action}}">
         <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="newpost">
         <label class="ayv-field ayv-dig-field">{{selfnamelabel}} <input type="text" name="name" maxlength="100" placeholder="{{selfnewname}}"></label>
+        <label class="ayv-field ayv-field-check"><input type="checkbox" name="machine" value="1"> {{selfmachinefield}}</label>
         <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{selfcreate}}</button></p>
     </form>
 </dialog>

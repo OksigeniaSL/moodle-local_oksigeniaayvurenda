@@ -50,15 +50,17 @@ $sm = get_string_manager();
 $notice = '';
 $entityid = (int) $library->entityid;
 if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'sanctions') {
-    // What a late book leaves, for the whole centre: its readers are the same in all its libraries.
+    // What a late book leaves, for the whole centre: its readers are the same in all its libraries. An amount left blank
+    // keeps what it was: it must not turn into a fine of next to nothing, or a stop at the first one.
+    $before = sanctions::settings($entityid);
     sanctions::save_settings($entityid, [
         'mode' => optional_param('mode', sanction_rules::NONE, PARAM_ALPHA),
         'grace' => optional_param('grace', 0, PARAM_INT),
         'perday' => optional_param('perday', 1, PARAM_INT),
         'maxdays' => optional_param('maxdays', 30, PARAM_INT),
-        'cents' => sanction_rules::to_cents(optional_param('amount', '', PARAM_RAW_TRIMMED)),
-        'maxcents' => sanction_rules::to_cents(optional_param('maxamount', '', PARAM_RAW_TRIMMED)),
-        'block' => sanction_rules::to_cents(optional_param('block', '', PARAM_RAW_TRIMMED)),
+        'cents' => sanction_rules::to_cents(optional_param('amount', '', PARAM_RAW_TRIMMED)) ?: $before['cents'],
+        'maxcents' => sanction_rules::to_cents(optional_param('maxamount', '', PARAM_RAW_TRIMMED)) ?: $before['maxcents'],
+        'block' => sanction_rules::to_cents(optional_param('block', '', PARAM_RAW_TRIMMED)) ?: $before['block'],
         'currency' => optional_param('currency', '', PARAM_ALPHA),
         // With all the stages marked, no stage is chosen: every one.
         'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),

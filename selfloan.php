@@ -52,6 +52,7 @@ $now = time();
 $notice = '';
 $error = '';
 $address = '';
+$machine = false;
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     if ($do === 'undo') {
@@ -68,7 +69,8 @@ if (data_submitted() && confirm_sesskey()) {
         }
     } else if ($manage && $do === 'newpost') {
         $name = trim(optional_param('name', '', PARAM_TEXT));
-        $address = selfloan::create($library, $name !== '' ? $name : $str('selfnewname'), (int) $USER->id, $now);
+        $machine = (bool) optional_param('machine', 0, PARAM_BOOL);
+        $address = selfloan::create($library, $name !== '' ? $name : $str('selfnewname'), (int) $USER->id, $now, $machine);
     } else if ($manage && $do === 'removepost') {
         selfloan::remove($library, required_param('post', PARAM_INT));
         $notice = $str('selfremoved');
@@ -94,6 +96,7 @@ $posts = array_map(fn($p) => [
     'last' => $p->timelast ? $str('selflast', userdate((int) $p->timelast, get_string('strftimedatetimeshort', 'langconfig')))
         : $str('selfnever'),
     'stopped' => !empty($p->timestopped),
+    'machine' => !empty($p->machine),
 ], selfloan::posts($library));
 $rows = array_map(fn($r) => $r + [
     'when' => userdate($r['at'], get_string('strftimedatetimeshort', 'langconfig')),
@@ -108,6 +111,7 @@ $data = [
     'sesskey' => sesskey(),
     'manage' => $manage,
     'address' => $address,
+    'ismachine' => $machine,
     'qr' => $address !== '' ? 'data:image/png;base64,' . base64_encode((new core_qrcode($address))->getBarcodePngData(4, 4)) : '',
     'hasposts' => (bool) $posts,
     'posts' => $posts,
@@ -123,7 +127,9 @@ $data = [
 ];
 foreach (
     ['selfnew', 'selfnewintro', 'selfnamelabel', 'selfnewname', 'selfcreate', 'selfpostsheading', 'selfremove',
-        'selfcreatedheading', 'selfcreatedhint', 'selfaddress', 'selfcopy', 'selfwhoheading', 'selfchange', 'selfstages',
+        'selfcreatedheading', 'selfcreatedhint', 'selfaddress', 'selfcopy', 'selfmachinefield', 'selfmachinehint',
+        'selfmachinetag', 'selfsiplink',
+        'selfwhoheading', 'selfchange', 'selfstages',
         'selfallstages',
         'selfreturnslabel', 'selfsave', 'selfrecentheading', 'selfrecentintro', 'selfnothing', 'selfundo', 'selfclose',
         'selfstoppedhint', 'selfreopen', 'selfundoday', 'selfundodayintro', 'selfmanyrows'] as $key

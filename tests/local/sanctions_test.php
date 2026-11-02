@@ -291,6 +291,81 @@ final class sanctions_test extends \advanced_testcase {
     }
 
     /**
+     * A reader of another centre takes no amount. What one book left closes by itself, from its line; a return undone
+     * takes back what is open and leaves what was paid. A blank word of the desk does nothing.
+     */
+    public function test_rows_and_edges(): void {
+        global $DB;
+        $w = $this->world();
+        sanctions::save_settings($w->entityid, ['mode' => 'fine', 'cents' => 10, 'maxcents' => 500, 'block' => 10000]);
+        $other = $w->gen->create_library();
+        $stranger = $w->gen->create_reader(['entityid' => (int) $other->entityid, 'cardcode' => '50000Z', 'firstname' => 'Otra',
+            'lastname' => 'Persona']);
+        $this->assertSame(0, sanctions::charge($w->library, (int) $stranger->id, 100, 'Nada', $w->staff, $w->now));
+        $this->assertFalse($DB->record_exists(self::T . 'sanction', ['readerid' => $stranger->id]));
+        $desk = new desk($w->library, $w->staff, $w->now);
+        $this->assertSame('unknown', $desk->sanction((int) $stranger->id, 'pay')['kind']);
+        $this->assertSame('unknown', $desk->sanction((int) $w->ana->id, 'nonsense')['kind']);
+
+        $first = $this->late($w, 'B1', 3);
+        $second = $this->late($w, 'B2', 4);
+        $desk = new desk($w->library, $w->staff, $second['at']);
+        $one = $desk->sanction((int) $w->ana->id, 'pay', (int) $first['sanction']['id']);
+        $this->assertSame(get_string('sanctionrowpaid', 'local_oksigeniaayvurenda'), $one['message']);
+        $this->assertSame(40, sanctions::state($w->entityid, (int) $w->ana->id, $second['at'])['owes'], 'only that one');
+
+        // Undone: what is open goes, and what was paid stays in the record.
+        $desk->undo($first['loanid'], 'returned');
+        $desk->undo($second['loanid'], 'returned');
+        $this->assertTrue($DB->record_exists(self::T . 'sanction', ['id' => $first['sanction']['id']]));
+        $this->assertFalse($DB->record_exists(self::T . 'sanction', ['id' => $second['sanction']['id']]));
+    }
+
+    /**
+     * Whoever only keeps a library lends, and hears where to send someone, but not how much or until when.
+     */
+    public function test_a_keeper_does_not_know(): void {
+        global $DB;
+        $w = $this->world();
+        sanctions::save_settings($w->entityid, ['mode' => 'days']);
+        $back = $this->late($w, 'B1', 5);
+        $keeper = (int) $this->getDataGenerator()->create_user()->id;
+        $desk = new desk($w->library, $keeper, $back['at'], true);
+        $this->assertNull($desk->reader_panel((int) $w->ana->id)['sanction']);
+        $stop = $desk->scan('B2', (int) $w->ana->id);
+        $this->assertSame(policy::SUSPENDED, $stop['reason']);
+        $until = userdate(
+            (int) $DB->get_field(self::T . 'sanction', 'timeuntil', ['id' => $back['sanction']['id']]) - 1,
+            get_string('strftimedate', 'langconfig'),
+            \core_date::get_server_timezone()
+        );
+        $this->assertStringNotContainsString($until, $stop['message']);
+        $lent = $desk->scan('B2', (int) $w->ana->id, true);
+        $this->assertSame('lent', $lent['kind']);
+        $DB->set_field(self::T . 'loan', 'timedue', $back['at'] - 2 * DAYSECS, ['id' => $lent['loanid']]);
+        $this->assertNull((new desk($w->library, $keeper, $back['at'], true))->scan('B2')['sanction'], 'nor on the line');
+    }
+
+    /**
+     * Giving a late book more time from home would leave nothing: that is for the desk, where it costs something.
+     */
+    public function test_a_late_book_is_not_renewed_from_home(): void {
+        global $DB;
+        $w = $this->world();
+        holds::save_settings($w->entityid, ['renewonline' => true]);
+        $lent = (new desk($w->library, $w->staff, $w->now))->scan('B1', (int) $w->ana->id, true);
+        $due = (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $lent['loanid']]);
+        $this->assertFalse(renewals::late_counts($w->library, (int) $lent['loanid'], $due + DAYSECS), 'off: as ever');
+        sanctions::save_settings($w->entityid, ['mode' => 'days']);
+        $this->assertFalse(renewals::late_counts($w->library, (int) $lent['loanid'], $w->now), 'not late');
+        $this->assertTrue(renewals::late_counts($w->library, (int) $lent['loanid'], $due + DAYSECS));
+        $until = renewals::until($w->library, (int) $w->ana->id, (int) $lent['loanid'], (int) $w->user->id, $due + DAYSECS);
+        $this->assertNull($until);
+        $this->setUser($w->user);
+        $this->assertFalse(renewals::mine((int) $lent['loanid'], (int) $w->user->id, $due + DAYSECS)['ok']);
+    }
+
+    /**
      * Each row is told once, in a message, and what is old is not told at all.
      */
     public function test_notify(): void {

@@ -103,6 +103,7 @@ $messageproviders = [
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
     // To a tutor: who in the group has books to bring back, without their titles.

@@ -498,5 +498,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110217, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110219) {
+        // A post may be a machine that speaks SIP2.
+        $table = new xmldb_table('local_oksigeniaayvurenda_selfpost');
+        $field = new xmldb_field('machine', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'keyhash');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110219, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

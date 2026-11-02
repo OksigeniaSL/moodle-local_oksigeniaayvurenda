@@ -188,7 +188,7 @@ final class pairing {
     private static function made(int $entityid): array {
         global $DB;
         $others = [];
-        foreach (['loan', 'hold', 'digital', 'voiceconsent', 'voiceinvite'] as $table) {
+        foreach (['loan', 'hold', 'digital', 'voiceconsent', 'voiceinvite', 'sanction'] as $table) {
             $others[] = "NOT EXISTS (SELECT 1 FROM {" . self::T . $table . "} o WHERE o.readerid = r.id)";
         }
         return array_map('intval', $DB->get_records_sql_menu(

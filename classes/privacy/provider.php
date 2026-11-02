@@ -378,7 +378,7 @@ class provider implements
                         'status' => $b->status], $borrowed))]
                 );
             }
-            $late = \local_oksigeniaayvurenda\local\sanctions::of_reader((int) $reader->entityid, (int) $reader->id, time());
+            $late = \local_oksigeniaayvurenda\local\sanctions::of_reader((int) $reader->entityid, (int) $reader->id, time(), 0);
             if ($late) {
                 writer::with_context($context)->export_data(
                     array_merge($base, [get_string('privacy:path:sanctions', 'local_oksigeniaayvurenda')]),

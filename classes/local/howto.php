@@ -60,6 +60,7 @@ final class howto {
         'weed' => ['weed.php', 'catalogue', 'weed'],
         'lots' => ['lots.php', 'desk', ''],
         'selfloan' => ['selfloan.php', 'desk', 'selfloan'],
+        'sip' => ['selfloan.php', 'manage', ''],
         'purchases' => ['purchases.php', 'catalogue', 'purchases'],
         'ill' => ['ill.php', 'desk', 'ill'],
         'bank' => ['libraries.php', 'manage', ''],
