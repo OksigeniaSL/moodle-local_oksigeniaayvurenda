@@ -358,6 +358,8 @@ class mobile {
         do {
             $before = $data;
             $data = html_entity_decode($data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            // What looks like an entity and is none would stop the app from compiling the whole page.
+            $data = preg_replace('/&#(\d+|x[0-9a-f]+);/i', '', $data);
         } while ($data !== $before);
         $map = ['{' => '｛', '}' => '｝'];
         return strtr($data, $address && preg_match('#^https?://#i', $data) ? $map : $map + ['@' => '＠']);

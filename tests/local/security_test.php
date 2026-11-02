@@ -110,10 +110,10 @@ final class security_test extends \advanced_testcase {
         $inert = new \ReflectionMethod(\local_oksigeniaayvurenda\output\mobile::class, 'inert');
         $cases = ['{{7*7}}', '&#123;&#123;7*7&#125;&#125;', '&#x7b;&#X7B;7*7&#x7D;&#x7d;', '&amp;#123;&amp;#123;7*7', '&#38;#123;',
             '&lbrace;&lbrace;7*7&rbrace;&rbrace;', 'data:{{7*7}}', 'https://x.io/{{7*7}}', '@if (a) {', 'https://x @if (a)',
-            '&commat;if (a)'];
+            '&commat;if (a)', '&#9999999999;', '&#x110000;', '&#&#1;123;'];
         foreach ($cases as $title) {
             $out = s($inert->invoke(null, ['title' => $title])['title']);
-            $running = '/[{}@]|&#0*(123|125|64);|&#x0*(7b|7d|40);|&lbrace|&rbrace|&commat/i';
+            $running = '/[{}@]|&#\d+;|&#x[0-9a-f]+;|&lbrace|&rbrace|&commat/i';
             $this->assertDoesNotMatchRegularExpression($running, $out, $title);
         }
         // An address stays one where one is expected.

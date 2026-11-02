@@ -3912,9 +3912,9 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-lab-kind input { position: absolute; top: .7rem; left: .7rem; }
 .ayv .ayv-lab-kindname { font-weight: 700; }
 .ayv .ayv-lab-sample { display: flex; align-items: center; justify-content: center; height: 64px; }
-.ayv .ayv-lab-spine { display: grid; gap: 2px; padding: .35rem .6rem; border-radius: 4px; background: var(--paper2); color: #1e2b2a; font-size: .8rem; line-height: 1.1; text-align: center; }
+.ayv .ayv-lab-spine { display: grid; gap: 2px; padding: .35rem .6rem; border-radius: 4px; background: #f2eadb; color: #1e2b2a; font-size: .8rem; line-height: 1.1; text-align: center; }
 .ayv .ayv-lab-spine b { font-weight: 700; }
-.ayv .ayv-lab-code { display: grid; gap: 4px; width: 96px; padding: .4rem .5rem; border-radius: 4px; background: var(--paper2); }
+.ayv .ayv-lab-code { display: grid; gap: 4px; width: 96px; padding: .4rem .5rem; border-radius: 4px; background: #f2eadb; }
 .ayv .ayv-lab-code i { display: block; height: 4px; border-radius: 2px; background: #1e2b2a; opacity: .35; }
 .ayv .ayv-lab-code i:first-child { width: 60%; }
 .ayv .ayv-lab-code i:last-child { height: 20px; border-radius: 0; opacity: 1; background: repeating-linear-gradient(90deg, #1e2b2a 0 2px, transparent 2px 4px, #1e2b2a 4px 5px, transparent 5px 8px); }
@@ -3933,7 +3933,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-lab-count { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin: 0 0 1rem; font-weight: 600; }
 /* Material: the few things first. */
 .ayv .ayv-mat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem 1rem; align-items: start; }
-.ayv .ayv-mat-grid .ayv-field > input, .ayv .ayv-mat-grid .ayv-field > select { flex: none; height: auto; }
+.ayv .ayv-book .ayv-dig-field input[type="text"], .ayv .ayv-book .ayv-dig-field input[type="number"], .ayv .ayv-book .ayv-dig-field select { flex: none; }
 .ayv .ayv-mat-name { grid-column: 1 / -1; }
 .ayv .ayv-mat-more { margin: 1rem 0 0; }
 .ayv .ayv-mat-more summary { margin: 0 0 .75rem; cursor: pointer; font-weight: 600; color: var(--accent); }
@@ -3973,6 +3973,9 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-report-top .ayv-more { margin: 0; }
 .ayv .ayv-report-sum { margin: 0; font-family: "Literata", Georgia, serif; font-size: 1.25rem; font-weight: 700; }
 .ayv .ayv-report { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr)); gap: .5rem; }
+@media screen and (max-width: 800px) {
+    .ayv .ayv-labelsheet { zoom: .36; }
+}
 @media (max-width: 800px) {
     .ayv .ayv-lab { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-mat-grid, .ayv .ayv-mat-more .ayv-mat-grid { grid-template-columns: minmax(0, 1fr); }

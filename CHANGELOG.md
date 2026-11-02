@@ -1,8 +1,13 @@
 # Changelog
 
+## 0.127.1 (2026-11-02)
+
+- What looks like an entity and is none no longer stops a page of the app from compiling.
+- The fields of a stacked form keep their height (material, platforms). The label samples, also in dark mode. The sheet of labels fits a phone. Thousands in the count of a search.
+
 ## 0.127.0 (2026-11-02)
 
-The findings of an independent security review (`docs/contrastes/2026-11-02-seguridad.md`, in the project's notes):
+The findings of an independent security review:
 
 - A practice library belongs to one person and nothing of the site comes through it: no accounts, cohorts or courses of other centres.
 - Nothing from a catalogue can run in the app: numeric entities no longer get past the guard, and the last search is data, not part

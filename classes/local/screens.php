@@ -154,7 +154,7 @@ final class screens {
             $found = catalogue::search($library, $query, $page, $onlyfree, $corner, $subject);
             $narrow = array_filter(['corner' => $corner, 'subject' => $subject]);
             $here = ['q' => $query] + $narrow;
-            $a = (object) ['count' => $found['total'], 'query' => $query];
+            $a = (object) ['count' => self::number((int) $found['total']), 'query' => $query];
             $heading = $found['total'] === 0 ? self::str('noresults', $query) :
                 self::str($found['total'] === 1 ? 'oneresult' : 'results', $a);
             $next = ['q' => $query, 'page' => $page + 1] + $narrow;
