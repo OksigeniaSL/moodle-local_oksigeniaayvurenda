@@ -46,13 +46,13 @@
             <span><span class="ayv-format-chip">{{format}}</span> · <a href="{{readerurl}}">{{name}}</a></span>
             <span class="ayv-weed-detail">{{when}}</span></span>
         {{#waiting}}
-        <span class="ayv-format-actions">
+        <div class="ayv-format-actions">
             <button type="button" class="ayv-button" data-ayv-open="ayv-format-{{id}}">{{formatsserved}}</button>
             <form method="post" action="{{action}}">
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="ask" value="{{id}}">
                 <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="declined">{{formatsdeclined}}</button>
             </form>
-        </span>
+        </div>
         <dialog class="ayv-modal" id="ayv-format-{{id}}" aria-labelledby="ayv-format-{{id}}-title">
             <div class="ayv-modal-head"><h2 id="ayv-format-{{id}}-title" class="ayv-section-title">{{formatsservedtitle}}</h2>
                 <form method="dialog"><button class="ayv-modal-close" aria-label="{{formatsclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
