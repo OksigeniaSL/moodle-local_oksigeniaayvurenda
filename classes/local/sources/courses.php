@@ -110,6 +110,7 @@ final class courses {
         }
         $settings['courses'] = $clean;
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        \local_oksigeniaayvurenda\event\connector_changed::fire($entityid, null, ['kind' => 'courses']);
     }
 
     /**

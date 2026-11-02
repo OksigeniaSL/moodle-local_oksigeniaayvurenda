@@ -83,8 +83,13 @@ final class plans {
     public static function save(int $entityid, array $plan): void {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $before = self::clean($settings['plan'] ?? self::defaults());
         $settings['plan'] = self::clean($plan);
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        if ($before != $settings['plan']) {
+            \local_oksigeniaayvurenda\event\plan_changed::fire($entityid, null, ['copies' => $settings['plan']['copies'],
+                'readers' => $settings['plan']['readers']]);
+        }
     }
 
     /**

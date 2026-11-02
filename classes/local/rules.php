@@ -85,6 +85,8 @@ final class rules {
             $DB->insert_records(self::TABLE, array_values($clean));
         }
         $transaction->allow_commit();
+        $entityid = (int) $DB->get_field('local_oksigeniaayvurenda_library', 'entityid', ['id' => $libraryid]);
+        \local_oksigeniaayvurenda\event\rules_changed::fire($entityid, $libraryid, ['count' => count($clean)]);
         return count($clean);
     }
 

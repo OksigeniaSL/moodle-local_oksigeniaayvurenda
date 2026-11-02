@@ -88,6 +88,7 @@ final class offsite {
     public static function new_key(int $entityid, ?int $now = null): string {
         $pair = age::keypair();
         self::change($entityid, ['recipient' => $pair['public'], 'keyed' => $now ?? time()]);
+        \local_oksigeniaayvurenda\event\offsite_key_created::fire($entityid, null, ['mode' => 'made']);
         return $pair['secret'];
     }
 
@@ -105,6 +106,7 @@ final class offsite {
             return false;
         }
         self::change($entityid, ['recipient' => strtolower($recipient), 'keyed' => $now ?? time()]);
+        \local_oksigeniaayvurenda\event\offsite_key_created::fire($entityid, null, ['mode' => 'brought']);
         return true;
     }
 
@@ -139,6 +141,7 @@ final class offsite {
             'label' => $host];
         set_config('offsite' . $entityid . '_' . $id, $password, 'local_oksigeniaayvurenda');
         self::change($entityid, ['places' => $places]);
+        \local_oksigeniaayvurenda\event\offsite_place_added::fire($entityid, null, ['kind' => 'webdav']);
         return $id;
     }
 
@@ -184,6 +187,7 @@ final class offsite {
             'region' => trim($region) !== '' ? trim($region) : 'us-east-1', 'label' => $host . ' · ' . $bucket];
         set_config('offsite' . $entityid . '_' . $id, $secret, 'local_oksigeniaayvurenda');
         self::change($entityid, ['places' => $places]);
+        \local_oksigeniaayvurenda\event\offsite_place_added::fire($entityid, null, ['kind' => 's3']);
         return $id;
     }
 
@@ -197,6 +201,7 @@ final class offsite {
         $places = array_values(array_filter(self::settings($entityid)['places'], fn($p) => $p['id'] !== $placeid));
         unset_config('offsite' . $entityid . '_' . $placeid, 'local_oksigeniaayvurenda');
         self::change($entityid, ['places' => $places]);
+        \local_oksigeniaayvurenda\event\offsite_place_removed::fire($entityid);
     }
 
     /**
@@ -221,6 +226,7 @@ final class offsite {
     public static function new_pull(int $entityid): string {
         $token = bin2hex(random_bytes(24));
         self::change($entityid, ['pull' => hash('sha256', $token)]);
+        \local_oksigeniaayvurenda\event\offsite_pull_created::fire($entityid);
         return (new \moodle_url('/local/oksigeniaayvurenda/pull.php', ['centre' => $entityid, 'key' => $token]))->out(false);
     }
 
@@ -231,6 +237,7 @@ final class offsite {
      */
     public static function stop_pull(int $entityid): void {
         self::change($entityid, ['pull' => '']);
+        \local_oksigeniaayvurenda\event\offsite_pull_stopped::fire($entityid);
     }
 
     /**

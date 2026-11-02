@@ -39,4 +39,5 @@ if (!$copy) {
     die();
 }
 $path = offsite::encrypted($centre, $copy);
+\local_oksigeniaayvurenda\event\copy_downloaded::fire($centre, null, ['how' => 'pull']);
 send_file($path, offsite::name($centre, (int) $copy->get_timecreated()), 0, 0, false, true, 'application/octet-stream');

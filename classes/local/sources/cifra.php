@@ -87,6 +87,7 @@ final class cifra {
                 set_config('cifra' . $name . $entityid, trim($settings[$name]), 'local_oksigeniaayvurenda');
             }
         }
+        \local_oksigeniaayvurenda\event\connector_changed::fire($entityid, null, ['kind' => 'cifra']);
     }
 
     /**
@@ -174,7 +175,9 @@ final class cifra {
             }
         }
         unset($stats['ids']);
-        return $stats + ['left' => $left];
+        $stats += ['left' => $left];
+        \local_oksigeniaayvurenda\event\readers_synced::tell($entityid, 'cifra', $stats);
+        return $stats;
     }
 
     /**

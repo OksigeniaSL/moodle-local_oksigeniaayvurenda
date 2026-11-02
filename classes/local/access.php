@@ -208,9 +208,15 @@ final class access {
     public static function set_closed(int $entityid, bool $closed): void {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $changed = !empty($settings['closed']) !== $closed;
         $settings['closed'] = $closed;
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
         \cache::make('local_oksigeniaayvurenda', 'access')->delete('closed_' . $entityid);
+        if ($changed && $closed) {
+            \local_oksigeniaayvurenda\event\centre_closed::fire($entityid);
+        } else if ($changed) {
+            \local_oksigeniaayvurenda\event\centre_opened::fire($entityid);
+        }
     }
 
     /**

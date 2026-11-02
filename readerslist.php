@@ -79,6 +79,7 @@ if (data_submitted() && confirm_sesskey()) {
                 'csv',
                 false
             ));
+            \local_oksigeniaayvurenda\event\readers_synced::tell($entityid, 'list', $done);
             $text = '';
         } catch (plan_full $e) {
             $error = $e->getMessage();

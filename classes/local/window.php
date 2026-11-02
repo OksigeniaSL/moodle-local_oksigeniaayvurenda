@@ -155,6 +155,8 @@ final class window {
         $DB->update_record(self::T . 'library', (object) ['id' => $library->id, 'settings' => json_encode($settings),
             'timemodified' => time()]);
         $library->settings = json_encode($settings);
+        $told = ['what' => $settings['window']['open'] ? 'open' : 'closed'] + array_diff_key($settings['window'], ['text' => 1]);
+        \local_oksigeniaayvurenda\event\window_changed::fire((int) $library->entityid, (int) $library->id, $told);
     }
 
     /**

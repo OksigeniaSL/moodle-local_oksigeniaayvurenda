@@ -104,9 +104,12 @@ final class tutors {
         global $DB;
         $now = time();
         $existing = $DB->get_record(self::T . 'tutor', ['yearid' => $yearid, 'groupname' => $group]);
+        $entityid = (int) $DB->get_field(self::T . 'year', 'entityid', ['id' => $yearid]);
         if (!$userid) {
             if ($existing) {
                 $DB->delete_records(self::T . 'tutor', ['id' => $existing->id]);
+                $gone = (int) $existing->userid;
+                \local_oksigeniaayvurenda\event\tutor_changed::fire($entityid, $yearid, ['what' => 'removed'], $gone);
             }
             return;
         }
@@ -114,10 +117,12 @@ final class tutors {
             if ((int) $existing->userid !== $userid) {
                 $DB->update_record(self::T . 'tutor', (object) ['id' => $existing->id, 'userid' => $userid,
                     'timenotified' => null, 'timemodified' => $now]);
+                \local_oksigeniaayvurenda\event\tutor_changed::fire($entityid, $yearid, ['what' => 'set'], $userid);
             }
             return;
         }
         $DB->insert_record(self::T . 'tutor', ['yearid' => $yearid, 'groupname' => $group, 'userid' => $userid,
             'timecreated' => $now, 'timemodified' => $now]);
+        \local_oksigeniaayvurenda\event\tutor_changed::fire($entityid, $yearid, ['what' => 'set'], $userid);
     }
 }

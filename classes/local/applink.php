@@ -94,6 +94,14 @@ final class applink {
         } catch (\moodle_exception $e) {
             return 'appnotallowed';
         }
+        if ($sent) {
+            \local_oksigeniaayvurenda\event\applink_sent::fire(
+                (int) $reader->entityid,
+                (int) $reader->id,
+                ['what' => $created ? 'created' : 'sent'],
+                (int) $reader->userid
+            );
+        }
         return !$sent ? 'appnomail' : ($created ? 'appcreated' : 'appsent');
     }
 

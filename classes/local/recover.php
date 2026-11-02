@@ -136,6 +136,7 @@ final class recover {
         if (get_config('local_oksigeniaayvurenda', 'entitycategories')) {
             access::category($entityid);
         }
+        \local_oksigeniaayvurenda\event\copy_recovered::fire($entityid);
         $first = $DB->get_records(self::T . 'library', ['entityid' => $entityid], 'id', '*', 0, 1);
         return reset($first);
     }

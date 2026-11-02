@@ -174,5 +174,6 @@ final class twins {
         }
         $DB->update_record(self::T . 'reader', (object) $update);
         $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\reader_merged::fire($entityid, $keepid, ['gone' => $goneid]);
     }
 }

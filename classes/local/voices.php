@@ -310,6 +310,7 @@ final class voices {
             'classgroup' => $class ? $class['group'] : null,
             'signature' => array_key_exists('signature', $data) ? self::signature((string) $data['signature'])
                 : $item->signature]);
+        \local_oksigeniaayvurenda\event\voice_published::fire((int) $library->entityid, $id);
     }
 
     /**
@@ -433,6 +434,8 @@ final class voices {
             $DB->set_field(self::T . 'voiceconsent', 'timerevoked', $now, ['readerid' => $readerid, 'timerevoked' => null]);
             $DB->set_field(self::T . 'digital', 'audience', '', ['readerid' => $readerid, 'kind' => 'voice']);
         }
+        $entityid = (int) $DB->get_field(self::T . 'reader', 'entityid', ['id' => $readerid]);
+        \local_oksigeniaayvurenda\event\voice_consent_changed::fire($entityid, $readerid, ['what' => $given ? 'given' : 'revoked']);
     }
 
     /**
@@ -566,6 +569,7 @@ final class voices {
         );
         $DB->delete_records(self::T . 'digitalread', ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'digital', ['id' => $item->id]);
+        \local_oksigeniaayvurenda\event\voice_removed::fire((int) $item->entityid, (int) $item->id);
     }
 
     /**

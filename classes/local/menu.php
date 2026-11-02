@@ -41,7 +41,7 @@ final class menu {
         'class' => ['class.php'],
         'readers' => ['readers.php', 'reader.php', 'readerslist.php', 'oneroster.php', 'pair.php', 'match.php',
             'twins.php', 'tutors.php', 'sources.php', 'connector.php'],
-        'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php'],
+        'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php', 'activity.php'],
     ];
 
     /**
@@ -61,7 +61,8 @@ final class menu {
                 ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c], ['stacks.php', 'stacksnav', $d],
                 ['posters.php', 'menuposters', $c]],
             'menureview' => [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
-                ['voices.php', 'menuvoices', $d], ['memoir.php', 'menumemoir', $d], ['readings.php', 'menureadings', $d]],
+                ['voices.php', 'menuvoices', $d], ['memoir.php', 'menumemoir', $d], ['readings.php', 'menureadings', $d],
+                ['activity.php', 'menuactivity', $m]],
             'menusettings' => [['libraries.php', 'navlibraries', $m], ['rules.php', 'menurules', $m],
                 ['year.php', 'menuyear', $m], ['tutors.php', 'menututors', $m], ['twins.php', 'menutwins', $m],
                 ['sources.php', 'menusources', $m], ['corners.php', 'menucorners', $m],

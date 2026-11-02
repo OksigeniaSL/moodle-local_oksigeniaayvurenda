@@ -191,10 +191,13 @@ final class ltitool {
         if ($id) {
             $DB->get_record(self::T . 'ltiplatform', ['id' => $id, 'entityid' => $entityid], 'id', MUST_EXIST);
             $DB->update_record(self::T . 'ltiplatform', (object) (['id' => $id, 'timemodified' => $now] + $clean));
+            \local_oksigeniaayvurenda\event\lti_platform_saved::fire($entityid, $id);
             return $id;
         }
-        return (int) $DB->insert_record(self::T . 'ltiplatform', (object) (['entityid' => $entityid, 'timecreated' => $now,
+        $id = (int) $DB->insert_record(self::T . 'ltiplatform', (object) (['entityid' => $entityid, 'timecreated' => $now,
             'timemodified' => $now] + $clean));
+        \local_oksigeniaayvurenda\event\lti_platform_saved::fire($entityid, $id);
+        return $id;
     }
 
     /**
@@ -439,6 +442,7 @@ final class ltitool {
         }
         $DB->update_record(self::T . 'lticontext', (object) ['id' => $course->id, 'groupname' => $group,
             'lastsync' => $now, 'timemodified' => $now]);
+        \local_oksigeniaayvurenda\event\readers_synced::tell($entityid, 'lti', $stats);
         return $stats;
     }
 
@@ -472,6 +476,7 @@ final class ltitool {
             $DB->delete_records(self::T . 'lticontext', ['platformid' => $id]);
         }
         $DB->delete_records(self::T . 'ltiplatform', ['id' => $id, 'entityid' => $entityid]);
+        \local_oksigeniaayvurenda\event\lti_platform_deleted::fire($entityid, $id);
     }
 
     /**

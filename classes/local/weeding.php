@@ -139,6 +139,7 @@ final class weeding {
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'withdrawn', 'timemodified' => $now]);
         }
         $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\copies_withdrawn::fire((int) $library->entityid, $id, ['count' => count($items)]);
         return $id;
     }
 
@@ -169,6 +170,7 @@ final class weeding {
             holds::place($item, $now);
         }
         $DB->set_field(self::T . 'withdrawn', 'timerestored', $now, ['id' => $row->id]);
+        \local_oksigeniaayvurenda\event\copy_restored::fire((int) $library->entityid, (int) $row->id);
     }
 
     /**

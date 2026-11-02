@@ -168,6 +168,7 @@ final class pairing {
         if (!$source) {
             $DB->insert_record(self::T . 'source', $where + ['externalid' => $key, 'localid' => $readerid,
                 'timecreated' => time()]);
+            \local_oksigeniaayvurenda\event\reader_paired::fire($entityid, $readerid);
             return true;
         }
         $made = $made ?? (int) (self::made($entityid)[$key] ?? 0);
@@ -175,6 +176,7 @@ final class pairing {
             return false;
         }
         self::melt($entityid, $readerid, $made);
+        \local_oksigeniaayvurenda\event\reader_paired::fire($entityid, $readerid);
         return true;
     }
     /**

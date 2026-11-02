@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.123.0 (2026-11-02)
+
+- Who did what: each delicate action (joining readers, taking a copy, changing a rule, publishing a voice, a plan, a skin…) tells
+  Moodle's logs who did it, with ids and codes only; loans and searches are not told.
+- «Who did what», a page for whoever manages a library, who in a shared site has no way into the site's logs.
+
 ## 0.122.0 (2026-11-02)
 
 - The memory works with the staff too: when cataloguing a book, she says if a class asked for it or what else there is by its author;

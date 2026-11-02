@@ -104,6 +104,7 @@ final class digital {
         get_file_storage()->create_file_from_pathname(['contextid' => \context_system::instance()->id,
             'component' => 'local_oksigeniaayvurenda', 'filearea' => self::AREA, 'itemid' => $id, 'filepath' => '/',
             'filename' => $filename], $path);
+        \local_oksigeniaayvurenda\event\digital_added::fire((int) $library->entityid, $id, ['kind' => 'file']);
         return $id;
     }
 
@@ -149,7 +150,9 @@ final class digital {
         int $userid,
         ?int $now = null
     ): int {
-        return self::insert($library, $recordid, 'link', 'link', clean_param(trim($url), PARAM_URL), $data, $userid, $now);
+        $id = self::insert($library, $recordid, 'link', 'link', clean_param(trim($url), PARAM_URL), $data, $userid, $now);
+        \local_oksigeniaayvurenda\event\digital_added::fire((int) $library->entityid, $id, ['kind' => 'link']);
+        return $id;
     }
 
     /**
@@ -185,6 +188,7 @@ final class digital {
         $DB->delete_records(self::T . 'digitalread', ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'fragment', ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'digital', ['id' => $item->id]);
+        \local_oksigeniaayvurenda\event\digital_removed::fire((int) $library->entityid, $id);
     }
 
     /**

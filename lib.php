@@ -72,6 +72,7 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         // The daily copies of a centre (the item is the centre): for its staff.
         require_login(null, false);
         \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:desk', $itemid);
+        \local_oksigeniaayvurenda\event\copy_downloaded::fire($itemid, null, ['how' => 'page']);
     } else if ($filearea === 'libraryimage' || $filearea === 'portrait') {
         // A library's own picture, or its characters' portraits (the item is the centre): for whoever sees the library,
         // and for anyone where its public window is open.

@@ -80,6 +80,7 @@ final class matching {
         $DB->update_record(self::T . 'reader', (object) ['id' => $keep->id, 'userid' => $userid, 'readertype' => $type,
             'firstname' => null, 'lastname' => null, 'email' => null, 'status' => 'active', 'timemodified' => $now]);
         $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\reader_matched::fire($entityid, $readerid, [], $userid);
     }
 
     /**

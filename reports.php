@@ -137,6 +137,7 @@ switch ($report) {
 // Every line says what it has: in Mustache, a missing key is looked up in the page around it.
 $rows = array_map(fn($row) => $row + ['part' => '', 'share' => 0, 'note' => ''], $rows);
 if ($format === 'csv') {
+    \local_oksigeniaayvurenda\event\report_exported::fire((int) $library->entityid, null, ['report' => $report]);
     $filename = clean_filename('ayvurenda-' . $report . '-' . date('Ymd') . '.csv');
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');

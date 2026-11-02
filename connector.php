@@ -73,6 +73,7 @@ if (data_submitted() && confirm_sesskey()) {
     }
     try {
         if ($action === 'test' || $action === 'connect') {
+            \local_oksigeniaayvurenda\event\connector_tried::fire($entityid, null, ['kind' => 'cifra']);
             $found = cifra_people::readers(cifra::people($entityid), time());
             $groups = array_count_values(array_filter(array_map(fn($r) => $r['group'] ?? '', $found['readers'])));
             ksort($groups, SORT_NATURAL);

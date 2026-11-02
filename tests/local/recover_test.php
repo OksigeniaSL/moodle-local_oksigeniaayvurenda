@@ -66,7 +66,11 @@ final class recover_test extends \advanced_testcase {
         $this->assertSame(1, $look['loans']);
         $this->assertSame(2, $look['readers']);
 
+        $sink = $this->redirectEvents();
         $back = recover::restore($path, (int) get_admin()->id);
+        $told = array_map(fn($event) => get_class($event), $sink->get_events());
+        $sink->close();
+        $this->assertContains('local_oksigeniaayvurenda\event\copy_recovered', $told);
         $this->assertNotSame((int) $back->entityid, $entityid);
         $this->assertNotSame($back->slug, $library->slug);
         $this->assertSame($itemsbefore, $count('item', ['entityid' => $entityid]));

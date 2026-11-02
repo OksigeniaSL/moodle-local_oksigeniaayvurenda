@@ -91,6 +91,7 @@ final class libraries {
         if (get_config('local_oksigeniaayvurenda', 'entitycategories')) {
             access::category((int) $entityid);
         }
+        \local_oksigeniaayvurenda\event\centre_created::fire((int) $entityid);
         $library = trim((string) ($data['library'] ?? '')) !== '' ? trim($data['library']) : $name;
         return self::create_library((int) $entityid, ['name' => $library, 'kind' => 'central'], $now);
     }
@@ -106,14 +107,20 @@ final class libraries {
         global $DB;
         $entity = $DB->get_record(self::T . 'entity', ['id' => $entityid], '*', MUST_EXIST);
         $settings = json_decode((string) $entity->settings, true) ?: [];
+        $after = self::entity_settings($settings, $data);
         $DB->update_record(self::T . 'entity', (object) [
             'id' => $entityid,
             'name' => trim((string) ($data['name'] ?? '')) !== '' ? \core_text::substr(trim($data['name']), 0, 255) : $entity->name,
             'yearstart' => self::yearstart((string) ($data['yearstart'] ?? $entity->yearstart)),
-            'settings' => json_encode(self::entity_settings($settings, $data)),
+            'settings' => json_encode($after),
             'timemodified' => $now ?? time(),
         ]);
         skins::forget($entityid);
+        $from = $settings['skin'] ?? skins::SKINS[0];
+        $to = $after['skin'] ?? skins::SKINS[0];
+        if ($from !== $to) {
+            \local_oksigeniaayvurenda\event\skin_changed::fire($entityid, null, ['from' => $from, 'to' => $to]);
+        }
     }
 
     /**
@@ -343,6 +350,7 @@ final class libraries {
             $DB->delete_records(self::T . $table, ['libraryid' => $libraryid]);
         }
         $DB->delete_records(self::T . 'library', ['id' => $libraryid]);
+        \local_oksigeniaayvurenda\event\library_deleted::fire((int) $library->entityid, $libraryid);
         return true;
     }
 

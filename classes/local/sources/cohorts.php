@@ -96,6 +96,7 @@ final class cohorts {
         $settings['cohorts'] = $clean;
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
         $DB->set_field(self::T . 'entity', 'timemodified', time(), ['id' => $entityid]);
+        \local_oksigeniaayvurenda\event\connector_changed::fire($entityid, null, ['kind' => 'cohorts']);
     }
 
     /**
@@ -218,6 +219,7 @@ final class cohorts {
             }
         }
         $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\readers_synced::tell($entityid, 'moodle', $stats);
         return $stats;
     }
 

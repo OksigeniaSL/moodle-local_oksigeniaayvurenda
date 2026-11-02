@@ -51,6 +51,8 @@ final class removal {
         global $DB;
         $rows = self::rows($entityid);
         $counts = array_map('count', $rows);
+        \local_oksigeniaayvurenda\event\centre_removed::fire($entityid, null, ['readers' => $counts['reader'] ?? 0,
+            'items' => $counts['item'] ?? 0]);
         $categoryid = (int) $DB->get_field(self::T . 'entity', 'categoryid', ['id' => $entityid]);
         $context = \context_system::instance();
         $storage = get_file_storage();

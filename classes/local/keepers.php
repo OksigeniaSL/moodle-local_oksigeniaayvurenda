@@ -150,6 +150,7 @@ final class keepers {
         $DB->insert_record(self::T . 'keeper', (object) ['libraryid' => $library->id, 'userid' => $userid,
             'staffid' => $staffid, 'timecreated' => time()]);
         \cache::make('local_oksigeniaayvurenda', 'access')->delete('keeper_' . $library->id . '_' . $userid);
+        \local_oksigeniaayvurenda\event\keeper_added::fire((int) $library->entityid, (int) $library->id, [], $userid);
         return true;
     }
 
@@ -163,5 +164,6 @@ final class keepers {
         global $DB;
         $DB->delete_records(self::T . 'keeper', ['libraryid' => $library->id, 'userid' => $userid]);
         \cache::make('local_oksigeniaayvurenda', 'access')->delete('keeper_' . $library->id . '_' . $userid);
+        \local_oksigeniaayvurenda\event\keeper_removed::fire((int) $library->entityid, (int) $library->id, [], $userid);
     }
 }

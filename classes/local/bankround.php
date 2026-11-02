@@ -193,6 +193,7 @@ final class bankround {
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => $now, 'returnstaffid' => $staffid,
             'conditionin' => self::LOST, 'timemodified' => $now]);
         $DB->set_field(self::T . 'item', 'status', 'lost', ['id' => $loan->itemid]);
+        \local_oksigeniaayvurenda\event\textbook_lost::fire((int) $library->entityid, (int) $loan->id);
         return true;
     }
 

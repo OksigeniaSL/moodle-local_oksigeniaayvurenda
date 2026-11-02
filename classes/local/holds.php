@@ -64,6 +64,7 @@ final class holds {
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $entity['holds'] = hold_rules::settings($settings);
         $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
+        \local_oksigeniaayvurenda\event\hold_settings_changed::fire($entityid);
     }
 
     /**

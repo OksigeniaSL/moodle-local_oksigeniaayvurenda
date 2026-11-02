@@ -302,6 +302,7 @@ final class stocktake {
             $DB->set_field_select(self::T . 'item', 'status', 'lost', "id $in", $params);
             $DB->set_field_select(self::T . 'item', 'timemodified', $now, "id $in", $params);
         }
+        self::tell($stocktake, 'lost', count($ids));
         return count($ids);
     }
 
@@ -323,7 +324,24 @@ final class stocktake {
             holds::place($item, $now);
             $count++;
         }
+        self::tell($stocktake, 'found', $count);
         return $count;
+    }
+
+    /**
+     * Tells the logs what a stocktake changed, if it changed anything.
+     *
+     * @param \stdClass $stocktake
+     * @param string $what
+     * @param int $count
+     */
+    private static function tell(\stdClass $stocktake, string $what, int $count): void {
+        global $DB;
+        if ($count) {
+            $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $stocktake->libraryid]);
+            $told = ['what' => $what, 'count' => $count];
+            \local_oksigeniaayvurenda\event\stocktake_applied::fire($entityid, (int) $stocktake->id, $told);
+        }
     }
 
     /**

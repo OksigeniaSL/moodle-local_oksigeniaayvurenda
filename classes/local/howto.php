@@ -58,6 +58,7 @@ final class howto {
         'weed' => ['weed.php', 'catalogue', 'weed'],
         'lots' => ['lots.php', 'desk', ''],
         'bank' => ['libraries.php', 'manage', ''],
+        'activity' => ['activity.php', 'manage', ''],
         'bankround' => ['libraries.php', 'desk', ''],
         'import' => ['import.php', 'manage', 'import'],
         'year' => ['year.php', 'manage', ''],

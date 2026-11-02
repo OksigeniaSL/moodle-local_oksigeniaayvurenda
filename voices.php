@@ -64,6 +64,7 @@ if (data_submitted() && confirm_sesskey()) {
             optional_param_array('familyoptions', [], PARAM_ALPHA)
         ));
         $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $library->entityid]);
+        \local_oksigeniaayvurenda\event\voice_settings_changed::fire((int) $library->entityid);
         $notice = $str('voicessaved');
     } else {
         $item = digital::get(required_param('item', PARAM_INT), $library);

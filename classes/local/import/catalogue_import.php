@@ -139,6 +139,8 @@ final class catalogue_import {
         $transaction->allow_commit();
         catalogue::purge($entityid);
         stacks::refresh_keys($entityid);
+        $told = ['how' => $this->system] + array_filter($this->stats, 'is_int');
+        \local_oksigeniaayvurenda\event\catalogue_imported::fire($entityid, null, $told);
         return $this->stats;
     }
 

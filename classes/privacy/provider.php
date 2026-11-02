@@ -182,6 +182,7 @@ class provider implements
         ], 'privacy:metadata:relay');
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
+        $collection->add_plugintype_link('logstore', [], 'privacy:metadata:logstore');
         $collection->add_external_location_link(
             'offsite',
             ['copy' => 'privacy:metadata:offsite:copy'],

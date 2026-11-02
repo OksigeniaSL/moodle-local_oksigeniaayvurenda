@@ -114,6 +114,8 @@ final class oneroster {
             }
         }
         unset($stats['ids']);
-        return $stats + ['left' => $left, 'tutors' => $tutors];
+        $stats += ['left' => $left, 'tutors' => $tutors];
+        \local_oksigeniaayvurenda\event\readers_synced::tell($entityid, 'oneroster', $stats);
+        return $stats;
     }
 }

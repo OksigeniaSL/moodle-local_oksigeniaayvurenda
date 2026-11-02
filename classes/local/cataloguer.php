@@ -229,6 +229,7 @@ final class cataloguer {
             covers::remove($recordid);
         }
         $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\addition_undone::fire($entityid, $recordid, ['count' => count($itemids)]);
         return true;
     }
 
