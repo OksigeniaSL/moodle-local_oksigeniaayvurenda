@@ -27,6 +27,7 @@ namespace local_oksigeniaayvurenda\local;
 use local_oksigeniaayvurenda\core\isbn;
 use local_oksigeniaayvurenda\core\sources\openlibrary;
 use local_oksigeniaayvurenda\core\sources\sru;
+use local_oksigeniaayvurenda\core\text;
 
 /**
  * The catalogues an entity asks, in its order, until one knows the book; the cover from the first that has it. Each
@@ -37,22 +38,37 @@ final class lookup {
     /** @var array<string, array> The catalogues that can be asked without anything else. */
     public const PRESETS = [
         'loc' => ['type' => 'sru', 'name' => 'Library of Congress', 'url' => 'https://lx2.loc.gov/sru/lcdb',
-            'index' => 'bath.isbn', 'version' => '1.1'],
+            'index' => 'bath.isbn', 'version' => '1.1', 'words' => 'cql.anywhere', 'relation' => '='],
         'openlibrary' => ['type' => 'openlibrary', 'name' => 'Open Library'],
         // Spain's National Library: its Alma catalogue by SRU, without a key, with most books in Spanish.
         'bne' => ['type' => 'sru', 'name' => 'Biblioteca Nacional de España',
-            'url' => 'https://catalogo.bne.es/view/sru/34BNE_INST', 'index' => 'alma.isbn', 'version' => '1.2'],
+            'url' => 'https://catalogo.bne.es/view/sru/34BNE_INST', 'index' => 'alma.isbn', 'version' => '1.2',
+            'words' => 'alma.all_for_ui', 'relation' => 'all'],
+        // The libraries of Spain's research council (CSIC): their Alma catalogue by SRU, without a key.
+        'csic' => ['type' => 'sru', 'name' => 'Bibliotecas del CSIC',
+            'url' => 'https://eu00.alma.exlibrisgroup.com/view/sru/34CSIC_INST', 'index' => 'alma.isbn', 'version' => '1.2',
+            'words' => 'alma.all_for_ui', 'relation' => 'all'],
         // REBECA, the shared catalogue of Spain's public libraries, with their CDU: it only speaks Z39.50, so it is asked
         // through the Z39.50 bridge the site sets, and it only finds an ISBN written with its hyphens.
         'rebeca' => ['type' => 'sru', 'name' => 'REBECA', 'bridge' => 'rebeca', 'index' => 'bath.isbn', 'version' => '1.1',
-            'hyphens' => true],
+            'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
+        // REBIUN, the shared catalogue of Spain's university libraries, with their CDU: Z39.50 only, through the bridge,
+        // and its ISBN with hyphens too.
+        'rebiun' => ['type' => 'sru', 'name' => 'REBIUN', 'bridge' => 'rebiun', 'index' => 'bath.isbn', 'version' => '1.1',
+            'hyphens' => true, 'words' => 'cql.anywhere', 'relation' => 'all'],
     ];
 
     /** @var string[] The order when the entity has not chosen one. */
     public const DEFAULT = ['loc', 'openlibrary', 'bne'];
 
     /** @var string[] The order when the entity has not chosen one and the site speaks Spanish. */
-    public const DEFAULT_ES = ['rebeca', 'bne', 'loc', 'openlibrary'];
+    public const DEFAULT_ES = ['rebeca', 'bne', 'rebiun', 'csic', 'loc', 'openlibrary'];
+
+    /** @var int How many books a search by words brings at most. */
+    public const FOUND = 10;
+
+    /** @var int With this many, the next catalogue is not asked: there is enough to choose from. */
+    public const ENOUGH = 6;
 
     /** @var callable|null How to fetch an address; tests put their own. Given the address, gives the body, null, or 429. */
     public static $fetcher = null;
@@ -110,6 +126,88 @@ final class lookup {
             $cache->set($key, ['time' => time(), 'result' => $result]);
         }
         return $result;
+    }
+
+    /**
+     * What the catalogues have for some words of a title or its authors, for a book with no ISBN to read: each with a
+     * key to choose it by, kept a day.
+     *
+     * @param int $entityid
+     * @param string $words
+     * @return array found (pick, source, description), tried.
+     */
+    public static function words(int $entityid, string $words): array {
+        $words = trim(preg_replace('/\s+/u', ' ', $words));
+        $result = ['found' => [], 'tried' => []];
+        if (\core_text::strlen($words) < 3) {
+            return $result;
+        }
+        if (practice::is($entityid)) {
+            // The practice library asks no one.
+            $result['tried'][] = get_string('practicecatalogue', 'local_oksigeniaayvurenda');
+            return $result;
+        }
+        $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
+        $seen = [];
+        // How many of the words asked for are in its title or its authors: a catalogue that looks everywhere also
+        // brings what has them only in a note, and that goes.
+        $asked = array_values(array_filter(text::words($words), fn($w) => \core_text::strlen($w) >= 3));
+        $score = function (array $description) use ($asked): int {
+            $have = array_flip(text::words(implode(' ', array_merge(
+                [(string) ($description['record']['title'] ?? ''), (string) ($description['record']['subtitle'] ?? '')],
+                (array) ($description['authorities']['author'] ?? [])
+            ))));
+            return count(array_filter($asked, fn($w) => isset($have[$w])));
+        };
+        foreach (self::sources($entityid) as $name) {
+            $source = self::source($name);
+            if (!$source) {
+                continue;
+            }
+            $result['tried'][] = $source['name'];
+            foreach (self::ask_words($source, $words) as $description) {
+                if (count($result['found']) >= self::FOUND) {
+                    break 2;
+                }
+                $points = $asked ? $score($description) : 1;
+                if (!$points) {
+                    continue;
+                }
+                // The same book in two catalogues is shown once: the first catalogue's.
+                $same = \local_oksigeniaayvurenda\core\text::normalise((string) $description['record']['title']) . '|'
+                    . ($description['record']['pubyear'] ?? '') . '|'
+                    . \local_oksigeniaayvurenda\core\text::normalise((string) ($description['authorities']['author'][0] ?? ''));
+                if (isset($seen[$same])) {
+                    continue;
+                }
+                $seen[$same] = true;
+                $pick = sha1($name . json_encode($description));
+                $cache->set('pick_' . $pick, ['time' => time(), 'source' => $source['name'], 'description' => $description]);
+                $result['found'][] = ['pick' => $pick, 'source' => $source['name'], 'description' => $description,
+                    'score' => $points, 'order' => count($result['found'])];
+            }
+            if (count($result['found']) >= self::ENOUGH) {
+                break;
+            }
+        }
+        // The ones with most of the words first; among them, the order of the catalogues.
+        usort($result['found'], fn($a, $b) => [$b['score'], $a['order']] <=> [$a['score'], $b['order']]);
+        $result['found'] = array_map(fn($f) => array_diff_key($f, ['score' => 0, 'order' => 0]), $result['found']);
+        return $result;
+    }
+
+    /**
+     * A book chosen from a search by words, as it was found.
+     *
+     * @param string $pick
+     * @return array|null source and description.
+     */
+    public static function picked(string $pick): ?array {
+        if (!preg_match('/^[0-9a-f]{40}$/', $pick)) {
+            return null;
+        }
+        $kept = \cache::make('local_oksigeniaayvurenda', 'lookup')->get('pick_' . $pick);
+        return $kept !== false && $kept['time'] > time() - DAYSECS ? $kept : null;
     }
 
     /**
@@ -191,6 +289,33 @@ final class lookup {
             }
         }
         return $curl->get_errno() || $code !== 200 || !is_string($body) ? null : $body;
+    }
+
+    /**
+     * Asks one catalogue for some words.
+     *
+     * @param array $source
+     * @param string $words
+     * @return array[] Descriptions with a title.
+     */
+    private static function ask_words(array $source, string $words): array {
+        try {
+            if ($source['type'] === 'sru') {
+                if (empty($source['words'])) {
+                    return [];
+                }
+                $sru = new sru($source['url'], $source['index'], $source['version']);
+                $body = self::fetch($sru->url_words($source['words'], $source['relation'] ?? 'all', $words));
+                $found = $body === null ? [] : sru::descriptions($body);
+            } else {
+                $body = self::fetch(openlibrary::search_url($words));
+                $found = $body === null ? [] : openlibrary::search($body);
+            }
+            return array_values(array_filter($found, fn($d) => trim((string) ($d['record']['title'] ?? '')) !== ''));
+        } catch (\Throwable $e) {
+            debugging('Ayvurenda: ' . $source['name'] . ' did not answer well: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return [];
+        }
     }
 
     /**

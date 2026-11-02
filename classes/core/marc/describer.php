@@ -159,6 +159,8 @@ final class describer {
         $value = trim(preg_replace('/\s+/u', ' ', $value));
         // A closing full stop stays after an initial («Tolkien, J. R. R.») and in abbreviations of one letter.
         $value = preg_replace('/\s*[\/:;,=+]\s*$/u', '', $value);
+        // An opening bracket left alone at the end, when the dates went to their own subfield («Miró, Gabriel (»).
+        $value = preg_replace('/\s*\($/u', '', $value);
         if (preg_match('/[^.\s]{2,}\.$/u', $value) && !preg_match('/\b(p|il|ed|cm|v|t|vol|etc)\.$/iu', $value)) {
             $value = substr($value, 0, -1);
         }

@@ -59,50 +59,120 @@ function local_oksigeniaayvurenda_join(array $names, string $last): string {
     return $names ? implode(', ', $names) . $last . $tail : (string) $tail;
 }
 
+/**
+ * A book on the screen: what a catalogue said of it, whether the library has it already, its spine and its cover.
+ *
+ * @param stdClass $library
+ * @param string $isbn Empty when it has none.
+ * @param array $description
+ * @param array $how found, source, tried (names), cover (an address or null).
+ * @return array
+ */
+function local_oksigeniaayvurenda_book(stdClass $library, string $isbn, array $description, array $how): array {
+    global $USER;
+    $entityid = (int) $library->entityid;
+    $existing = $isbn !== '' ? cataloguer::existing($entityid, $isbn) : [];
+    $record = $description['record'];
+    $cover = null;
+    if ($existing) {
+        $cover = covers::url($existing[0]['id']);
+    } else if ($isbn !== '') {
+        $cover = covers::draft((int) $USER->id, $isbn, $how['cover']);
+    }
+    return [
+        'kind' => 'book',
+        'isbn' => $isbn,
+        'found' => $how['found'],
+        'source' => $how['source'],
+        'tried' => local_oksigeniaayvurenda_join($how['tried'], get_string('addor', 'local_oksigeniaayvurenda')),
+        'title' => $existing ? $existing[0]['title'] : $record['title'],
+        'subtitle' => $record['subtitle'] ?? '',
+        'authors' => $description['authorities']['author'] ?? [],
+        'publisher' => $description['authorities']['publisher'][0] ?? '',
+        'year' => $record['pubyear'] ?? '',
+        'extent' => $record['extent'] ?? '',
+        'existing' => $existing,
+        'remark' => \local_oksigeniaayvurenda\local\memory::cataloguing(
+            $entityid,
+            (string) ($existing ? $existing[0]['title'] : ($record['title'] ?? '')),
+            (array) ($description['authorities']['author'] ?? [])
+        ),
+        'spine' => cataloguer::spine($library, $description, $existing[0]['id'] ?? 0),
+        'spinebefore' => (bool) $existing,
+        'cover' => $cover,
+    ];
+}
+
 switch ($action) {
     case 'lookup':
         $found = lookup::isbn($entityid, required_param('isbn', PARAM_TEXT));
-        $answer = ['kind' => $found['valid'] ? 'book' : 'notisbn', 'isbn' => $found['isbn']];
+        $answer = ['kind' => 'notisbn', 'isbn' => $found['isbn']];
         if ($found['valid']) {
-            $existing = cataloguer::existing($entityid, $found['isbn']);
-            $description = $found['description'] ?? ['record' => ['title' => ''], 'authorities' => []];
-            $record = $description['record'];
-            $answer += [
-                'found' => $found['found'],
-                'source' => $found['sourcename'],
-                'tried' => local_oksigeniaayvurenda_join($found['tried'], $str('addor')),
-                'title' => $existing ? $existing[0]['title'] : $record['title'],
-                'subtitle' => $record['subtitle'] ?? '',
-                'authors' => $description['authorities']['author'] ?? [],
-                'publisher' => $description['authorities']['publisher'][0] ?? '',
-                'year' => $record['pubyear'] ?? '',
-                'extent' => $record['extent'] ?? '',
-                'existing' => $existing,
-                'remark' => \local_oksigeniaayvurenda\local\memory::cataloguing(
-                    $entityid,
-                    (string) ($existing ? $existing[0]['title'] : ($record['title'] ?? '')),
-                    (array) ($description['authorities']['author'] ?? [])
-                ),
-                'spine' => cataloguer::spine($library, $description, $existing[0]['id'] ?? 0),
-                'spinebefore' => (bool) $existing,
-                'cover' => $existing ? covers::url($existing[0]['id']) : covers::draft(
-                    (int) $USER->id,
-                    $found['isbn'],
-                    $found['cover']
-                ),
-            ];
+            $answer = local_oksigeniaayvurenda_book(
+                $library,
+                $found['isbn'],
+                $found['description'] ?? ['record' => ['title' => ''], 'authorities' => []],
+                ['found' => $found['found'], 'source' => $found['sourcename'], 'tried' => $found['tried'],
+                    'cover' => $found['cover']]
+            );
         }
         break;
+    case 'search':
+        // Some words of a title or its authors, for a book with no ISBN to read: what the catalogues have.
+        $words = required_param('q', PARAM_TEXT);
+        $searched = lookup::words($entityid, $words);
+        $answer = ['kind' => 'results', 'words' => $words,
+            'tried' => local_oksigeniaayvurenda_join($searched['tried'], $str('addor')),
+            'from' => local_oksigeniaayvurenda_join(
+                array_values(array_unique(array_column($searched['found'], 'source'))),
+                $str('addand')
+            ),
+            'items' => array_map(fn($f) => [
+                'pick' => $f['pick'],
+                'source' => $f['source'],
+                'title' => $f['description']['record']['title'] . (!empty($f['description']['record']['subtitle'])
+                    ? ': ' . $f['description']['record']['subtitle'] : ''),
+                'authors' => implode(' · ', $f['description']['authorities']['author'] ?? []),
+                'facts' => implode(' · ', array_filter([
+                    $f['description']['authorities']['publisher'][0] ?? '',
+                    $f['description']['record']['pubyear'] ?? '',
+                    $f['description']['record']['isbn'] ?? '',
+                ])),
+            ], $searched['found'])];
+        break;
+    case 'pick':
+        // One of them, or none (to write it by hand).
+        $chosen = lookup::picked(optional_param('pick', '', PARAM_ALPHANUM));
+        $description = $chosen['description'] ?? ['record' => ['title' => ''], 'authorities' => []];
+        $answer = local_oksigeniaayvurenda_book(
+            $library,
+            (string) ($description['record']['isbn'] ?? ''),
+            $description,
+            ['found' => (bool) $chosen, 'source' => $chosen['source'] ?? '', 'tried' => [],
+                'cover' => !empty($description['record']['isbn'])
+                    ? ($description['extra']['cover'] ?? \local_oksigeniaayvurenda\core\sources\openlibrary::cover_url(
+                        (string) $description['record']['isbn']
+                    )) : null]
+        ) + ['pick' => $chosen ? optional_param('pick', '', PARAM_ALPHANUM) : ''];
+        break;
     case 'save':
-        $isbn = required_param('isbn', PARAM_ALPHANUMEXT);
+        $isbn = optional_param('isbn', '', PARAM_ALPHANUMEXT);
+        $chosen = lookup::picked(optional_param('pick', '', PARAM_ALPHANUM));
         $target = catalogue::library(optional_param('target', $library->slug, PARAM_ALPHANUMEXT));
         if (!$target || (int) $target->entityid !== $entityid) {
             throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
         }
         $recordid = optional_param('recordid', 0, PARAM_INT);
-        $found = lookup::isbn($entityid, $isbn);
-        $description = $found['description'] ?? ['record' => ['isbn' => $found['isbn'] ?? null], 'authorities' => [],
-            'extra' => []];
+        if ($chosen) {
+            // Chosen from a search by words: as that catalogue described it.
+            $description = $chosen['description'];
+            $isbn = (string) ($description['record']['isbn'] ?? '');
+            $found = ['valid' => $isbn !== '', 'isbn' => $isbn, 'sourcename' => $chosen['source']];
+        } else {
+            $found = $isbn !== '' ? lookup::isbn($entityid, $isbn) : ['valid' => false, 'isbn' => ''];
+            $description = $found['description'] ?? ['record' => ['isbn' => $found['valid'] ? $found['isbn'] : null],
+                'authorities' => [], 'extra' => []];
+        }
         // What the person typed or corrected wins over what the catalogue said.
         foreach (['title' => 'title', 'subtitle' => 'subtitle', 'year' => 'pubyear'] as $param => $field) {
             $value = trim(optional_param($param, '', PARAM_TEXT));

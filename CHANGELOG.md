@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.139.0
+
+- A book with no ISBN, by its words: type its title or its author in «Add books» and what other catalogues have comes up,
+  the ones with most of the words first; choose the one in your hands and it comes in as that catalogue described it,
+  or write it by hand. Each catalogue is asked in its own way (CQL «all», «=», or Alma's index).
+- Two more catalogues: REBIUN (Spain's university libraries, through the Z39.50 bridge, in MARC-8) and the libraries of
+  Spain's research council (CSIC, by SRU). A catalogue in MARC-8 sends each accent apart from its letter: it comes in
+  as one character.
+
 ## 0.138.0
 
 - Accessible formats. A reader can be marked as needing them, with no reason given; an item of the digital collection

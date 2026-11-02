@@ -39,6 +39,15 @@ final class sources_test extends \basic_testcase {
             'https://example.org/sru?x-db=books&version=2.0',
             (new sru('https://example.org/sru?x-db=books', 'dc.identifier', '2.0'))->url('9788490000014')
         );
+        $this->assertSame(
+            'https://example.org/sru?version=1.2&operation=searchRetrieve&query=alma.all_for_ui%20all%20%22el%20faro%20dormido%22'
+                . '&maximumRecords=8&recordSchema=marcxml',
+            (new sru('https://example.org/sru', 'alma.isbn', '1.2'))->url_words('alma.all_for_ui', 'all', ' el "faro"  dormido*\\')
+        );
+        // A catalogue in MARC-8 sends each accent apart from its letter: it comes back as one character.
+        $xml = file_get_contents(__DIR__ . '/../../fixtures/marc/sru.xml');
+        $apart = str_replace('El faro dormido', 'El faro de Miro' . "\u{0301}", $xml);
+        $this->assertSame('El faro de Miró', sru::descriptions($apart)[1]['record']['title']);
         $descriptions = sru::descriptions(file_get_contents(__DIR__ . '/../../fixtures/marc/sru.xml'));
         $this->assertCount(2, $descriptions);
         $this->assertSame('The sleeping lighthouse', $descriptions[0]['record']['title']);

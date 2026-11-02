@@ -43,6 +43,49 @@ final class openlibrary {
     }
 
     /**
+     * The address that asks for books by the words of their title or their authors.
+     *
+     * @param string $words
+     * @param int $max
+     * @return string
+     */
+    public static function search_url(string $words, int $max = 8): string {
+        return 'https://openlibrary.org/search.json?' . http_build_query(['q' => trim($words), 'limit' => $max,
+            'fields' => 'key,title,subtitle,author_name,first_publish_year,publisher,isbn'], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * The books in an answer to a search: works, so the year is the first edition's and there is no ISBN to trust.
+     *
+     * @param string $json
+     * @return array[] Descriptions, as describer gives them.
+     */
+    public static function search(string $json): array {
+        $data = json_decode($json, true);
+        $found = [];
+        foreach ((array) ($data['docs'] ?? []) as $doc) {
+            $title = describer::clean((string) ($doc['title'] ?? ''));
+            if (!$title) {
+                continue;
+            }
+            $list = fn(string $key, int $max) => array_slice(array_values(array_unique(array_filter(array_map(
+                fn($v) => describer::clean((string) $v),
+                (array) ($doc[$key] ?? [])
+            )))), 0, $max);
+            $found[] = [
+                'record' => ['doctype' => 'book', 'title' => $title, 'subtitle' => describer::clean($doc['subtitle'] ?? null),
+                    'responsibility' => null, 'isbn' => null, 'edition' => null, 'pubplace' => null,
+                    'pubyear' => isset($doc['first_publish_year']) ? (string) (int) $doc['first_publish_year'] : null,
+                    'lang' => null, 'extent' => null, 'summary' => null, 'notes' => null],
+                'authorities' => ['author' => $list('author_name', 3), 'publisher' => $list('publisher', 1), 'class' => [],
+                    'subject' => [], 'collection' => [], 'audience' => []],
+                'extra' => isset($doc['key']) ? ['openlibrary' => 'https://openlibrary.org' . $doc['key']] : [],
+            ];
+        }
+        return $found;
+    }
+
+    /**
      * The address of the cover of an ISBN, or a 404 when there is none.
      *
      * @param string $isbn

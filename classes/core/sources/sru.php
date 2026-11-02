@@ -86,6 +86,28 @@ final class sru {
     }
 
     /**
+     * The address that asks for books by the words of their title or their authors, wherever they are.
+     *
+     * @param string $index The CQL index that looks everywhere.
+     * @param string $relation «all» where the catalogue takes it; «=» where it reads all the words that way.
+     * @param string $words
+     * @param int $max
+     * @return string
+     */
+    public function url_words(string $index, string $relation, string $words, int $max = 8): string {
+        // What CQL would read as something else goes: quotes, masks and the backslash.
+        $clean = trim(preg_replace('/\s+/u', ' ', preg_replace('/["\\\\*?^]/u', ' ', $words)));
+        $query = http_build_query([
+            'version' => $this->version,
+            'operation' => 'searchRetrieve',
+            'query' => $index . ' ' . $relation . ' "' . $clean . '"',
+            'maximumRecords' => $max,
+            'recordSchema' => 'marcxml',
+        ], '', '&', PHP_QUERY_RFC3986);
+        return rtrim($this->base, '?&') . (str_contains($this->base, '?') ? '&' : '?') . $query;
+    }
+
+    /**
      * The descriptions in an answer.
      *
      * @param string $xml
@@ -96,6 +118,23 @@ final class sru {
         if (preg_match('/<(?:\w+:)?diagnostic\b.*?<(?:\w+:)?message>([^<]*)</s', $xml, $matches)) {
             throw new \RuntimeException('SRU: ' . trim($matches[1]));
         }
-        return array_map([describer::class, 'describe'], marcxml::read($xml));
+        return array_map(fn($record) => self::composed(describer::describe($record)), marcxml::read($xml));
+    }
+
+    /**
+     * A description with its accents as one character each: a catalogue in MARC-8 sends «o» and its accent apart.
+     *
+     * @param array $description
+     * @return array
+     */
+    private static function composed(array $description): array {
+        if (class_exists(\Normalizer::class)) {
+            array_walk_recursive($description, function (&$value) {
+                if (is_string($value) && !\Normalizer::isNormalized($value)) {
+                    $value = \Normalizer::normalize($value, \Normalizer::FORM_C) ?: $value;
+                }
+            });
+        }
+        return $description;
     }
 }

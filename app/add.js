@@ -31,6 +31,7 @@
     var status = document.getElementById('ayv-add-status');
     var book = document.getElementById('ayv-book');
     var log = document.getElementById('ayv-log');
+    var results = document.getElementById('ayv-found');
     if (!scan || !input || !book || !log || !window.fetch) {
         return;
     }
@@ -102,8 +103,12 @@
             });
     };
 
-    // What was read: a book's ISBN (EAN-13 from 978 or 979, or ISBN-10), a copy's label, or neither.
+    // What was read: a book's ISBN (EAN-13 from 978 or 979, or ISBN-10), a copy's label, words of a title or its
+    // authors (with a space, or letters in small type and no digits: a reader of codes writes neither), or nothing.
     var kind = function(code) {
+        if (/\s/.test(code.trim()) || (!/\d/.test(code) && /[a-z\u00e0-\u00ff]/.test(code))) {
+            return 'words';
+        }
         var digits = code.replace(/[\s-]/g, '').toUpperCase();
         if (/^97[89]\d{10}$/.test(digits)) {
             var sum = 0;
@@ -155,7 +160,9 @@
 
     var show = function(answer) {
         current = {isbn: answer.isbn, found: answer.found, recordid: answer.existing.length ? answer.existing[0].id : 0,
-            newrecord: !answer.existing.length};
+            newrecord: !answer.existing.length, pick: answer.pick || ''};
+        results.hidden = true;
+        results.textContent = '';
         book.hidden = false;
         var cover = $('ayv-book-cover');
         cover.textContent = '';
@@ -176,7 +183,8 @@
             .filter(Boolean).join(' · ');
         $('ayv-book-memory').textContent = answer.remark || '';
         $('ayv-book-memory').hidden = !answer.remark;
-        $('ayv-book-source').textContent = answer.found ? fill(str.addfound, answer.source) : fill(str.addnotfound, answer.tried);
+        $('ayv-book-source').textContent = answer.found ? fill(str.addfound, answer.source)
+            : (answer.tried ? fill(str.addnotfound, answer.tried) : str.addbyhand);
         var manual = $('ayv-book-manual');
         manual.hidden = answer.found || answer.existing.length > 0;
         ['title', 'subtitle', 'author', 'publisher', 'year', 'pages'].forEach(function(name) {
@@ -287,7 +295,7 @@
             field('title').focus();
             return Promise.reject(new Error('title'));
         }
-        var params = {action: 'save', isbn: current.isbn, recordid: current.recordid};
+        var params = {action: 'save', isbn: current.isbn, recordid: current.recordid, pick: current.pick};
         ['callnumber1', 'callnumber2', 'callnumber3', 'locationid', 'itemtype', 'count', 'barcodes',
             'title', 'subtitle', 'author', 'publisher', 'year', 'pages'].forEach(function(name) {
             params[name] = field(name).value;
@@ -324,8 +332,70 @@
         });
     };
 
+    // Choosing one of the books found by words, or none to write it by hand.
+    var choose = function(pick, words) {
+        return post({action: 'pick', pick: pick}).then(function(answer) {
+            show(answer);
+            if (!pick) {
+                field('title').value = words;
+                field('title').focus();
+            }
+            return answer;
+        });
+    };
+
+    var search = function(words) {
+        say(fill(str.addsearching, words));
+        results.hidden = true;
+        results.textContent = '';
+        return post({action: 'search', q: words}).then(function(answer) {
+            say(answer.items.length ? fill(str.addsearchfound, answer.from) : fill(str.addsearchnone, answer.tried),
+                answer.items.length ? 'look' : 'no');
+            answer.items.forEach(function(item) {
+                var li = el('li');
+                var button = el('button', 'ayv-found-item');
+                button.type = 'button';
+                button.appendChild(el('strong', 'ayv-found-title', item.title));
+                if (item.authors) {
+                    button.appendChild(el('span', 'ayv-found-by', item.authors));
+                }
+                button.appendChild(el('span', 'ayv-found-facts', [item.facts, item.source].filter(Boolean).join(' · ')));
+                button.addEventListener('click', function() {
+                    choose(item.pick, words).catch(function(error) {
+                        say(error.message || str.adderror, 'no');
+                    });
+                });
+                li.appendChild(button);
+                results.appendChild(li);
+            });
+            var none = el('li');
+            var byhand = el('button', 'ayv-button ayv-button-quiet', str.addsearchbyhand);
+            byhand.type = 'button';
+            byhand.addEventListener('click', function() {
+                choose('', words).catch(function(error) {
+                    say(error.message || str.adderror, 'no');
+                });
+            });
+            none.appendChild(byhand);
+            results.appendChild(none);
+            results.hidden = false;
+            var first = results.querySelector('button');
+            if (first) {
+                first.focus();
+            }
+            return answer;
+        });
+    };
+
     var handle = function(code) {
         var what = kind(code);
+        if (what === 'words') {
+            var waiting = current && !(!$('ayv-book-manual').hidden && !field('title').value.trim()) ? save()
+                : Promise.resolve();
+            return waiting.then(function() {
+                return search(code);
+            });
+        }
         if (what === 'label') {
             if (!current) {
                 say(str.additemcode, 'no');

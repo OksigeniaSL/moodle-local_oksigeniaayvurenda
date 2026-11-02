@@ -84,7 +84,8 @@ $strings = [];
 foreach (
     ['addnotisbn', 'additemcode', 'addlooking', 'addfound', 'addnotfound', 'addexisting', 'addexistingcopies',
         'addaddcopy', 'addotheredition', 'addspineproposed', 'addspinebefore', 'addsaved', 'addundo', 'addundone',
-        'addcantundo', 'adderror', 'addnocover', 'addbadletter'] as $key
+        'addcantundo', 'adderror', 'addnocover', 'addbadletter', 'addsearching', 'addsearchfound', 'addsearchnone',
+        'addsearchbyhand', 'addbyhand'] as $key
 ) {
     $strings[$key] = $str($key);
 }

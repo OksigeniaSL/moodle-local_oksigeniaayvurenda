@@ -226,6 +226,55 @@ final class cataloguer_test extends \advanced_testcase {
     }
 
     /**
+     * A book with no ISBN, by some words: each catalogue asked in its way until there is enough to choose from, the same
+     * book once, and each kept to be chosen; too few letters ask nobody, and neither does the practice library.
+     */
+    public function test_words(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $CFG->lang = 'en';
+        $asked = [];
+        lookup::$fetcher = function (string $url) use (&$asked) {
+            $asked[] = urldecode($url);
+            if (str_contains($url, 'lx2.loc.gov') || str_contains($url, 'catalogo.bne.es')) {
+                return file_get_contents(__DIR__ . '/../fixtures/marc/sru.xml');
+            }
+            if (str_contains($url, 'openlibrary.org/search.json')) {
+                return file_get_contents(__DIR__ . '/../fixtures/openlibrary/search.json');
+            }
+            return null;
+        };
+        $this->assertSame([], lookup::words((int) $library->entityid, 'el')['found']);
+        $this->assertSame([], $asked);
+
+        $found = lookup::words((int) $library->entityid, 'faro "dormido"');
+        $this->assertSame(['Library of Congress', 'Open Library', 'Biblioteca Nacional de España'], $found['tried']);
+        $nube = lookup::words((int) $library->entityid, 'nube tinta quintana');
+        $this->assertSame('Open Library', $nube['found'][0]['source']);
+        $this->assertSame('2019', $nube['found'][0]['description']['record']['pubyear']);
+        $this->assertNull($nube['found'][0]['description']['record']['isbn']);
+        $this->assertStringContainsString('query=cql.anywhere = "faro dormido"', $asked[0]);
+        $this->assertStringContainsString('openlibrary.org/search.json?q=faro "dormido"', $asked[1]);
+        $this->assertStringContainsString('query=alma.all_for_ui all "faro dormido"', $asked[2]);
+        // What has the words in its title or authors, the most first: «El faro dormido»; «The sleeping lighthouse» and
+        // Open Library's «La nube de tinta» have none of them and go.
+        $this->assertCount(1, $found['found']);
+        $this->assertSame('El faro dormido', $found['found'][0]['description']['record']['title']);
+        $kept = lookup::picked($found['found'][0]['pick']);
+        $this->assertSame('El faro dormido', $kept['description']['record']['title']);
+        $this->assertSame('Library of Congress', $kept['source']);
+        $this->assertNull(lookup::picked('nothing'));
+        $this->assertNull(lookup::picked(str_repeat('a', 40)));
+
+        $this->setAdminUser();
+        $practice = practice::library();
+        $asked = [];
+        $this->assertSame([], lookup::words((int) $practice->entityid, 'faro dormido')['found']);
+        $this->assertSame([], $asked);
+    }
+
+    /**
      * Without a choice, the order depends on the language of the site: Spain's National Library first in Spanish; a
      * choice of the entity wins.
      */
@@ -237,7 +286,7 @@ final class cataloguer_test extends \advanced_testcase {
         $CFG->lang = 'en';
         $this->assertSame(['loc', 'openlibrary', 'bne'], lookup::sources($entityid));
         $CFG->lang = 'es';
-        $this->assertSame(['rebeca', 'bne', 'loc', 'openlibrary'], lookup::sources($entityid));
+        $this->assertSame(['rebeca', 'bne', 'rebiun', 'csic', 'loc', 'openlibrary'], lookup::sources($entityid));
         $DB->set_field(
             'local_oksigeniaayvurenda_entity',
             'settings',
