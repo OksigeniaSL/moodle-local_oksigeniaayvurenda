@@ -64,7 +64,9 @@ $data = [
     'pdf' => $item->format === 'pdf',
     'audio' => $item->format === 'audio',
     'video' => $item->format === 'video',
-    'link' => $item->kind === 'link' ? $item->url : '',
+    'link' => $item->kind === 'link' ? \local_oksigeniaayvurenda\local\links::out($library, $item) : '',
+    'throughproxy' => $item->kind === 'link'
+        && \local_oksigeniaayvurenda\local\links::out($library, $item) !== $item->url,
     'other' => $item->format === 'other',
     'fileurl' => $item->kind === 'link' ? '' : digital::file_url($item),
     'downloadurl' => $candownload && $item->kind !== 'link' ? digital::file_url($item, true) : '',
@@ -76,7 +78,8 @@ $data = [
             ->out(false),
 ];
 foreach (
-    ['readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readmarks', 'readdownload', 'readopenlink',
+    ['readthroughproxy', 'readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readmarks', 'readdownload',
+        'readopenlink',
         'readnodownload', 'backtorecord', 'readloading', 'readprogress', 'readfullscreen', 'readfullscreenexit'] as $key
 ) {
     $data[$key] = $str($key);

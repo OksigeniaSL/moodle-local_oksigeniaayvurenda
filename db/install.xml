@@ -431,6 +431,7 @@
         <FIELD NAME="format" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="epub, pdf, audio, video, other or link"/>
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="url" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="For a link"/>
+        <FIELD NAME="subscribed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a link: it opens through the centre's proxy"/>
         <FIELD NAME="licence" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="rights" SEQUENCE="false"/>
         <FIELD NAME="audience" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="staff" SEQUENCE="false" COMMENT="students, families, staff, public, separated by commas"/>
         <FIELD NAME="stages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: the stages of the students it is for; all when empty"/>

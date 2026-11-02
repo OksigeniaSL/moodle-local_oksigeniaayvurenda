@@ -162,6 +162,11 @@
                     <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
             </fieldset>
             <label class="ayv-field">{{librarieszone}} <span class="ayv-field-hint">{{librarieszonehint}}</span> <select name="timezone">{{#zones}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/zones}}</select></label>
+            <details class="ayv-fieldset"><summary>{{librarieslinks}}</summary>
+                <p class="ayv-field-hint">{{librarieslinkshint}}</p>
+                <label class="ayv-field">{{librariesproxy}} <span class="ayv-field-hint">{{librariesproxyhint}}</span> <input type="text" inputmode="url" name="linkproxy" value="{{linkproxy}}" placeholder="https://login.proxy.example.org/login?url=" spellcheck="false"></label>
+                <label class="ayv-field">{{librariesresolver}} <span class="ayv-field-hint">{{librariesresolverhint}}</span> <input type="text" inputmode="url" name="linkresolver" value="{{linkresolver}}" spellcheck="false"></label>
+            </details>
             <label class="ayv-field">{{librariesskin}} <span class="ayv-field-hint">{{librariesskinhint}}</span> <select name="skin">{{#skins}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/skins}}</select></label>
             <fieldset class="ayv-fieldset"><legend>{{librariesplay}}</legend>
                 <p class="ayv-field-hint">{{librariesplayhint}}</p>

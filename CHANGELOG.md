@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.137.0
+
+- Links that open from home: in a centre's settings, the prefix of its proxy and its link resolver. A link marked as
+  subscribed goes through the proxy, a pasted DOI becomes its permanent address, and a book's page asks the resolver for
+  its full text. This is no proxy: whoever opens it goes through the institution's, with its own login.
+- To pass a book to a class: on its page, for whoever teaches, in Google Classroom or Microsoft Teams.
+
 ## 0.136.0
 
 - Taking a centre away with `--accounts` also takes its staff, who have no reader's card, when they have nothing else.

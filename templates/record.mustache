@@ -178,7 +178,12 @@
             {{#facts}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/facts}}
         </dl>
         {{/hasfacts}}
-        {{#cite}}<p class="ayv-cite"><a class="ayv-button ayv-button-quiet" href="{{citeurl}}" download>{{citelabel}}</a></p>{{/cite}}
+        <div class="ayv-record-tools">
+            {{#fulltext}}<a class="ayv-button ayv-button-quiet" href="{{url}}" target="_blank" rel="noopener">{{label}}</a>{{/fulltext}}
+            {{#cite}}<a class="ayv-button ayv-button-quiet" href="{{citeurl}}" download>{{citelabel}}</a>{{/cite}}
+            {{#passon}}<span class="ayv-passon"><span>{{heading}}</span> <a class="ayv-button ayv-button-quiet" href="{{classroom}}" target="_blank" rel="noopener">{{classroomlabel}}</a>
+                <a class="ayv-button ayv-button-quiet" href="{{teams}}" target="_blank" rel="noopener">{{teamslabel}}</a></span>{{/passon}}
+        </div>
         {{#hascopies}}
         <h2 class="ayv-section-title">{{copiesheading}}</h2>
         <ul class="ayv-copies">

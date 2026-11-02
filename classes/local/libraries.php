@@ -450,6 +450,12 @@ final class libraries {
         if (array_key_exists('photos', $data)) {
             $settings['photos'] = !empty($data['photos']);
         }
+        foreach (['linkproxy', 'linkresolver'] as $name) {
+            if (array_key_exists($name, $data)) {
+                $address = trim((string) $data[$name]);
+                $settings[$name] = \local_oksigeniaayvurenda\core\links::usable($address) ? $address : '';
+            }
+        }
         if (array_key_exists('timezone', $data)) {
             $settings['timezone'] = zones::known((string) $data['timezone']) ? (string) $data['timezone'] : '';
         }

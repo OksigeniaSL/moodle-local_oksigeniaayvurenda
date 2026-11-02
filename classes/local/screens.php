@@ -307,9 +307,28 @@ final class screens {
         $young = $reader && cards::look_of($reader) === 'flower' && !access::can('local/oksigeniaayvurenda:desk', $library);
         $cite = !$young && $record->doctype !== 'device' ? ['citeurl' => self::url('cite.php', $library, ['id' => $record->id]),
             'citelabel' => self::str('citeris')] : null;
+        // Where the institution finds its full text; and to pass it to a class, for whoever teaches.
+        $firstauthor = (string) ($authors[0]['name'] ?? '');
+        $fulltext = $young || $record->doctype === 'device' ? null : \local_oksigeniaayvurenda\core\links::openurl(
+            links::settings($library)['resolver'],
+            (string) $record->isbn,
+            (string) $record->title,
+            $firstauthor
+        );
+        $teaches = !$young && $record->doctype !== 'device' && (access::can('local/oksigeniaayvurenda:desk', $library)
+            || ($reader && $reader->readertype === 'teacher'));
+        // Where the catalogue is open, the page anyone can see: nobody in the class needs an account to follow it.
+        $address = window::catalogue_open($library) ? self::url('public.php', $library, ['record' => $record->id])
+            : self::url('record.php', $library, ['id' => $record->id]);
         return [
             'card' => $card,
             'cite' => $cite,
+            'fulltext' => $fulltext ? ['url' => $fulltext, 'label' => self::str('recordfulltext')] : null,
+            'passon' => $teaches ? ['heading' => self::str('recordshare'),
+                'classroom' => \local_oksigeniaayvurenda\core\links::classroom($address),
+                'classroomlabel' => self::str('recordshareclassroom'),
+                'teams' => \local_oksigeniaayvurenda\core\links::teams($address, (string) $record->title),
+                'teamslabel' => self::str('recordshareteams')] : null,
             'title' => $record->title,
             'subtitle' => $record->subtitle,
             'authors' => $authors,

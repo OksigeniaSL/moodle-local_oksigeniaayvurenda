@@ -508,5 +508,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110219, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110224) {
+        // A link may be to something the centre subscribes to.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $field = new xmldb_field('subscribed', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'url');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110224, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

@@ -61,6 +61,8 @@ final class howto {
         'lots' => ['lots.php', 'desk', ''],
         'selfloan' => ['selfloan.php', 'desk', 'selfloan'],
         'sip' => ['selfloan.php', 'manage', ''],
+        'homelinks' => ['libraries.php', 'manage', ''],
+        'shareclass' => ['search.php', 'desk', ''],
         'purchases' => ['purchases.php', 'catalogue', 'purchases'],
         'ill' => ['ill.php', 'desk', 'ill'],
         'bank' => ['libraries.php', 'manage', ''],

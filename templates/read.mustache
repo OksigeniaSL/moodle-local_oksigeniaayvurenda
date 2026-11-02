@@ -38,6 +38,7 @@
 {{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></audio>{{/audio}}
 {{#video}}<video id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></video>{{/video}}
 {{#link}}<p class="ayv-more"><a class="ayv-button" href="{{link}}" target="_blank" rel="noopener">{{readopenlink}}</a></p>{{/link}}
+{{#throughproxy}}<p class="ayv-field-hint">{{readthroughproxy}}</p>{{/throughproxy}}
 <div id="ayv-marks" class="ayv-read-marks" hidden><h2 class="ayv-section-title">{{readmarks}}</h2><ul class="ayv-holds"></ul></div>
 {{#downloadurl}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{downloadurl}}">{{readdownload}}</a></p>{{/downloadurl}}
 {{^downloadurl}}{{^link}}<p class="ayv-field-hint">{{readnodownload}}</p>{{/link}}{{/downloadurl}}

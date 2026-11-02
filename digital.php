@@ -75,7 +75,9 @@ $fragment = function (int $id) use ($str, $library, $recordid) {
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     if ($do === 'add') {
-        $url = trim(optional_param('url', '', PARAM_URL));
+        // Raw: a DOI pasted as it comes is not an address yet, and the function that adds it makes it one, or cleans it.
+        $url = trim(optional_param('url', '', PARAM_RAW_TRIMMED));
+        $url = \local_oksigeniaayvurenda\core\links::doi($url) ?? clean_param($url, PARAM_URL);
         if (
             !empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])
             && !digital::acceptable($_FILES['file']['tmp_name'], (string) $_FILES['file']['name'])
@@ -92,13 +94,18 @@ if (data_submitted() && confirm_sesskey()) {
             ));
             $notice = $str('digitaladded');
         } else if ($url !== '') {
-            $fragment(digital::add_link($library, $recordid, $url, $fields(), (int) $USER->id));
+            $fragment(digital::add_link($library, $recordid, $url, $fields() + ['subscribed' => optional_param(
+                'subscribed',
+                0,
+                PARAM_BOOL
+            )], (int) $USER->id));
             $notice = $str('digitaladded');
         } else {
             $notice = $str('digitalnothing');
         }
     } else if ($do === 'save') {
         digital::update(required_param('item', PARAM_INT), $library, $fields());
+        digital::mark_subscribed(required_param('item', PARAM_INT), $library, optional_param('subscribed', 0, PARAM_BOOL));
         $fragment((int) digital::get(required_param('item', PARAM_INT), $library)->id);
         $notice = $str('digitalsaved');
     } else if ($do === 'delete') {
@@ -120,6 +127,7 @@ $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->e
 $courselist = fn(int $chosen) => array_values(array_map(fn($id, $name) => ['id' => $id, 'name' => $name,
     'selected' => $id === $chosen], array_keys($courses), $courses));
 $items = [];
+$hasproxy = \local_oksigeniaayvurenda\local\links::settings($library)['proxy'] !== '';
 foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => null]) as $item) {
     $chosenstages = json_decode((string) $item->stages, true) ?: [];
     $only = \local_oksigeniaayvurenda\local\fragments::of_item((int) $item->id);
@@ -138,6 +146,9 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
             ?? format_string((string) $DB->get_field('course', 'fullname', ['id' => $only->courseid]), true, ['escape' => false]),
             'until' => zones::date((int) $only->timeend, 'strftimedateshort', $library)]) : '',
         'id' => (int) $item->id,
+        'canproxy' => $hasproxy && $item->kind === 'link',
+        'subscribed' => !empty($item->subscribed),
+        'proxied' => $hasproxy && $item->kind === 'link' && !empty($item->subscribed),
         'title' => $item->title !== '' && $item->title !== null ? $item->title : $str('format' . $item->format),
         'rawtitle' => (string) $item->title,
         'format' => $str('format' . $item->format),
@@ -169,6 +180,7 @@ $data = [
     'audiences' => $audiences(['staff']),
     'stages' => $stagelist([]),
     'hasstages' => (bool) $stages,
+    'hasproxy' => $hasproxy,
     'hascourses' => (bool) $courses,
     'courses' => $courselist(0),
     'until' => zones::date($yearend, '%Y-%m-%d', $library),
@@ -176,7 +188,8 @@ $data = [
         ->out(false),
 ];
 foreach (
-    ['digitaladd', 'digitalfile', 'digitalurl', 'digitalurlhint', 'digitaltitlefield', 'digitallicence',
+    ['digitaladd', 'digitalfile', 'digitalurl', 'digitalurlhint', 'digitalsubscribed', 'digitalsubscribedline',
+        'digitaltitlefield', 'digitallicence',
         'digitallicencehint', 'digitalaudience', 'digitalstages', 'digitaldownload', 'digitalsave', 'digitaldelete',
         'digitalread', 'digitalnone', 'backtorecord', 'digitalchange', 'digitaladdhint', 'fragmentcourse', 'fragmentnone',
         'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint'] as $key

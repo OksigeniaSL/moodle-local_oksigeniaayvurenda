@@ -150,7 +150,11 @@ final class digital {
         int $userid,
         ?int $now = null
     ): int {
+        global $DB;
+        // A DOI, however it was pasted, becomes its permanent address.
+        $url = \local_oksigeniaayvurenda\core\links::doi($url) ?? $url;
         $id = self::insert($library, $recordid, 'link', 'link', clean_param(trim($url), PARAM_URL), $data, $userid, $now);
+        $DB->set_field(self::T . 'digital', 'subscribed', empty($data['subscribed']) ? 0 : 1, ['id' => $id]);
         \local_oksigeniaayvurenda\event\digital_added::fire((int) $library->entityid, $id, ['kind' => 'link']);
         return $id;
     }
@@ -168,6 +172,21 @@ final class digital {
         $item = self::get($id, $library);
         $DB->update_record(self::T . 'digital', (object) (['id' => $item->id, 'timemodified' => $now ?? time()] +
             self::fields($data)));
+    }
+
+    /**
+     * Says whether a link is to something the centre subscribes to. A file never is.
+     *
+     * @param int $id
+     * @param \stdClass $library
+     * @param bool $subscribed
+     */
+    public static function mark_subscribed(int $id, \stdClass $library, bool $subscribed): void {
+        global $DB;
+        $item = self::get($id, $library);
+        if ($item->kind === 'link') {
+            $DB->set_field(self::T . 'digital', 'subscribed', $subscribed ? 1 : 0, ['id' => $item->id]);
+        }
     }
 
     /**
