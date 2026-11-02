@@ -25,6 +25,7 @@
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\copies;
+use local_oksigeniaayvurenda\local\gdrive;
 use local_oksigeniaayvurenda\local\offsite;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
@@ -50,6 +51,18 @@ $notice = '';
 // Shown once, on the page that made them: the secret key and the address of the library's computer.
 $secret = '';
 $pullurl = '';
+// Back from Google, with a code for the permission just given: Moodle's page checked the key, and so does this.
+$code = optional_param('oauth2code', '', PARAM_RAW);
+if ($code !== '' && $manage && confirm_sesskey() && optional_param('drivefor', 0, PARAM_INT) === $entityid) {
+    $id = offsite::add_drive($entityid, $code);
+    $good = $id !== null && offsite::test($entityid, $id) === null;
+    // Back to a clean address: the code does not stay in the bar or in the history.
+    redirect(new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $ref, 'drive' => $good ? 'ok' : 'no']));
+}
+$drive = optional_param('drive', '', PARAM_ALPHA);
+if ($drive !== '') {
+    $notice = $str($drive === 'ok' ? 'offsitedriveadded' : 'offsitedrivefailed');
+}
 if (data_submitted() && confirm_sesskey() && $manage) {
     $do = optional_param('do', 'make', PARAM_ALPHA);
     // The copy off the server goes with the plan; the daily copy, always.
@@ -96,6 +109,10 @@ if (data_submitted() && confirm_sesskey() && $manage) {
         );
         $error = $id === null ? $str('offsiteplacebad') : offsite::test($entityid, $id);
         $notice = $error === null ? $str('offsiteplaceadded') : ($id === null ? $error : $str('offsiteplacefails', $error));
+    } else if ($do === 'drive' && gdrive::configured()) {
+        // To Google, which brings its answer back here through Moodle's page, with the session's key.
+        redirect(gdrive::auth_url(new moodle_url('/local/oksigeniaayvurenda/copies.php', ['library' => $ref,
+            'sesskey' => sesskey(), 'drivefor' => $entityid])));
     } else if ($do === 'testplace') {
         $error = offsite::test($entityid, optional_param('place', '', PARAM_ALPHANUM));
         $notice = $error === null ? $str('offsiteplaceworks') : $str('offsiteplacefails', $error);
@@ -242,6 +259,7 @@ function copies_offsite(int $entityid, string $secret, string $pullurl, callable
         ),
         'hasplaces' => (bool) $settings['places'],
         'canadd' => count($settings['places']) < offsite::PLACES,
+        'candrive' => gdrive::configured() && count($settings['places']) < offsite::PLACES,
         'keepline' => $str('offsitekeepline', (object) $keep),
         'keepdaily' => $keep['daily'],
         'keepweekly' => $keep['weekly'],

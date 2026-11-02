@@ -56,6 +56,21 @@ if ($hassiteconfig) {
             PARAM_TEXT,
             50
         ));
+        // The site's client at Google, for centres to keep their copies in their own Drive; none, and it is not offered.
+        $settings->add(new admin_setting_configtext(
+            'local_oksigeniaayvurenda/driveclientid',
+            $str('driveclientid'),
+            $str('driveclientid_desc'),
+            '',
+            PARAM_RAW_TRIMMED,
+            60
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_oksigeniaayvurenda/driveclientsecret',
+            $str('driveclientsecret'),
+            '',
+            ''
+        ));
         // A line on every page of the library, for whoever runs the site (an open demo that starts again each night).
         $settings->add(new admin_setting_configtextarea(
             'local_oksigeniaayvurenda/sitenotice',

@@ -147,6 +147,38 @@ final class offsite {
     }
 
     /**
+     * Connects a centre's Google Drive, with what Google sent back: a folder of its own, made by this.
+     *
+     * @param int $entityid
+     * @param string $code What Google gave for the permission.
+     * @return string|null The id of the place; null if it could not be done.
+     */
+    public static function add_drive(int $entityid, string $code): ?string {
+        global $DB;
+        $places = self::settings($entityid)['places'];
+        if (!plans::allows($entityid, 'offsite') || count($places) >= self::PLACES || !gdrive::configured()) {
+            return null;
+        }
+        $refresh = gdrive::exchange($code);
+        if ($refresh === null) {
+            return null;
+        }
+        $name = format_string((string) $DB->get_field(self::T . 'entity', 'name', ['id' => $entityid]), true, ['escape' => false]);
+        $folder = gdrive::make_folder($refresh, get_string('offsitedrivefolder', 'local_oksigeniaayvurenda', $name));
+        if ($folder === null) {
+            gdrive::revoke($refresh);
+            return null;
+        }
+        $id = substr(bin2hex(random_bytes(6)), 0, 10);
+        $places[] = ['id' => $id, 'kind' => 'gdrive', 'url' => 'https://drive.google.com/drive/folders/' . $folder . '/',
+            'user' => '', 'folder' => $folder, 'label' => get_string('offsitedrivelabel', 'local_oksigeniaayvurenda')];
+        secrets::put('offsite' . $entityid . '_' . $id, $refresh);
+        self::change($entityid, ['places' => $places]);
+        \local_oksigeniaayvurenda\event\offsite_place_added::fire($entityid, null, ['kind' => 'gdrive']);
+        return $id;
+    }
+
+    /**
      * Adds an S3-compatible store (AWS, Backblaze, Wasabi, MinIO…) as a place for the copies.
      *
      * @param int $entityid
@@ -199,6 +231,12 @@ final class offsite {
      * @param string $placeid
      */
     public static function remove(int $entityid, string $placeid): void {
+        foreach (self::settings($entityid)['places'] as $place) {
+            // Google's permission goes too, not only our note of it.
+            if ($place['id'] === $placeid && ($place['kind'] ?? '') === 'gdrive') {
+                gdrive::revoke(secrets::get('offsite' . $entityid . '_' . $placeid));
+            }
+        }
         $places = array_values(array_filter(self::settings($entityid)['places'], fn($p) => $p['id'] !== $placeid));
         unset_config('offsite' . $entityid . '_' . $placeid, 'local_oksigeniaayvurenda');
         self::change($entityid, ['places' => $places]);
@@ -447,7 +485,12 @@ final class offsite {
      * @return string[]
      */
     private static function names(int $entityid, array $place): array {
-        $s3 = ($place['kind'] ?? 'webdav') === 's3';
+        $kind = $place['kind'] ?? 'webdav';
+        if ($kind === 'gdrive') {
+            [$code, $body] = self::call($entityid, $place, 'LIST', '');
+            return $code === 200 ? array_map('strval', (array) json_decode((string) $body, true)) : [];
+        }
+        $s3 = $kind === 's3';
         [$code, $body] = $s3 ? self::call($entityid, $place, 'LIST', '') : self::call(
             $entityid,
             $place,
@@ -508,6 +551,9 @@ final class offsite {
         if (($place['kind'] ?? 'webdav') === 's3') {
             return self::call_s3($entityid, $place, $method, $name, $payload);
         }
+        if (($place['kind'] ?? 'webdav') === 'gdrive') {
+            return self::call_drive($entityid, $place, $method, $name, $payload);
+        }
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
         // Moodle's HTTP security stands, except for a host of the server's network the administrator allowed.
         $curl = new \curl(['ignoresecurity' => self::internal($host)]);
@@ -524,6 +570,31 @@ final class offsite {
             $body = $curl->post($url, $payload, $auth + ['CURLOPT_CUSTOMREQUEST' => $method]);
         }
         return [(int) ($curl->get_info()['http_code'] ?? 0), (string) $body];
+    }
+
+    /**
+     * One question to a Google Drive, by what its files are called here.
+     *
+     * @param int $entityid
+     * @param array $place
+     * @param string $method PUT, LIST or DELETE.
+     * @param string $name A file in the folder.
+     * @param string $path A file's path (PUT).
+     * @return array The answer's code and body; the list comes as the names, in JSON.
+     */
+    private static function call_drive(int $entityid, array $place, string $method, string $name, string $path): array {
+        $refresh = secrets::get('offsite' . $entityid . '_' . $place['id']);
+        if ($method === 'PUT') {
+            return gdrive::upload($refresh, (string) $place['folder'], $name, $path);
+        }
+        $files = gdrive::files($refresh, (string) $place['folder']);
+        if ($files === null) {
+            return [401, ''];
+        }
+        if ($method === 'LIST') {
+            return [200, json_encode(array_keys($files))];
+        }
+        return isset($files[$name]) ? [gdrive::delete($refresh, $files[$name]), ''] : [404, ''];
     }
 
     /**
@@ -585,7 +656,7 @@ final class offsite {
      * @param string $path What a PUT sends.
      * @return array cURL's options.
      */
-    private static function limits(string $method, string $path): array {
+    public static function limits(string $method, string $path): array {
         if ($method !== 'PUT') {
             return ['CURLOPT_TIMEOUT' => 30, 'CURLOPT_CONNECTTIMEOUT' => 15];
         }

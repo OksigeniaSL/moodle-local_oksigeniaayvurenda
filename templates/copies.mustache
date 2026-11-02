@@ -89,7 +89,10 @@
             {{/places}}</ul>{{/hasplaces}}
             {{^hasplaces}}<p>{{#str}}offsitenoplaces, local_oksigeniaayvurenda{{/str}}</p>{{/hasplaces}}
             <p class="ayv-field-hint">{{#str}}offsitekeeps, local_oksigeniaayvurenda, {{keepline}}{{/str}}</p>
-            <p class="ayv-dig-actions">{{#canadd}}<button type="button" class="ayv-button{{#hasplaces}} ayv-button-quiet{{/hasplaces}}" data-ayv-open="ayv-off-addplace">{{#str}}offsiteaddplace, local_oksigeniaayvurenda{{/str}}</button>{{/canadd}}
+            {{#candrive}}<form method="post" action="{{action}}" class="ayv-dig-actions"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <button type="submit" class="ayv-button{{#hasplaces}} ayv-button-quiet{{/hasplaces}}" name="do" value="drive">{{#str}}offsitedrive, local_oksigeniaayvurenda{{/str}}</button></form>
+            <p class="ayv-field-hint">{{#str}}offsitedrivehint, local_oksigeniaayvurenda{{/str}}</p>{{/candrive}}
+            <p class="ayv-dig-actions">{{#canadd}}<button type="button" class="ayv-button{{#hasplaces}} ayv-button-quiet{{/hasplaces}}{{#candrive}} ayv-button-quiet{{/candrive}}" data-ayv-open="ayv-off-addplace">{{#str}}offsiteaddplace, local_oksigeniaayvurenda{{/str}}</button>{{/canadd}}
                 <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-off-keep">{{#str}}offsitekeepchange, local_oksigeniaayvurenda{{/str}}</button></p>
         </li>
         <li class="ayv-dig-card">

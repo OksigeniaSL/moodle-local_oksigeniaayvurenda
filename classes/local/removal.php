@@ -43,7 +43,8 @@ final class removal {
     }
 
     /**
-     * The accounts that have nothing on the site but being readers of a centre: when the centre goes, nobody needs them.
+     * The accounts that have nothing on the site but being readers or staff of a centre: when the centre goes, nobody needs
+     * them.
      *
      * @param int $entityid
      * @return int[]
@@ -51,14 +52,21 @@ final class removal {
     public static function lonely_accounts(int $entityid): array {
         global $DB, $CFG;
         $keep = array_merge(array_map('intval', explode(',', (string) $CFG->siteadmins)), [(int) $CFG->siteguest]);
+        // Its staff have no reader's card: they are there by their roles in the centre's category, and they go too.
+        $categoryid = (int) $DB->get_field(self::T . 'entity', 'categoryid', ['id' => $entityid]);
+        $context = $categoryid ? \context_coursecat::instance($categoryid, IGNORE_MISSING) : null;
+        $here = $context ? (int) $context->id : 0;
+        $candidates = $DB->get_fieldset_select(self::T . 'reader', 'userid', 'entityid = ? AND userid IS NOT NULL', [$entityid]);
+        if ($here) {
+            $staff = $DB->get_fieldset_select('role_assignments', 'userid', 'contextid = ?', [$here]);
+            $candidates = array_merge($candidates, $staff);
+        }
         $lonely = [];
-        $readers = $DB->get_fieldset_select(self::T . 'reader', 'userid', 'entityid = ? AND userid IS NOT NULL', [$entityid]);
-        foreach ($readers as $userid) {
-            $userid = (int) $userid;
+        foreach (array_unique(array_map('intval', $candidates)) as $userid) {
             if (
                 !in_array($userid, $keep, true)
                 && !$DB->record_exists_select(self::T . 'reader', 'userid = ? AND entityid <> ?', [$userid, $entityid])
-                && !$DB->record_exists('role_assignments', ['userid' => $userid])
+                && !$DB->record_exists_select('role_assignments', 'userid = ? AND contextid <> ?', [$userid, $here])
                 && !$DB->record_exists('user_enrolments', ['userid' => $userid])
             ) {
                 $lonely[] = $userid;

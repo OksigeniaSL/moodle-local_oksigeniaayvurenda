@@ -295,6 +295,26 @@ final class security_test extends \advanced_testcase {
     }
 
     /**
+     * The staff of a centre have no reader's card: they go with it, if they have nothing else.
+     */
+    public function test_lonely_staff(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $dg = $this->getDataGenerator();
+        $library = $this->gen()->create_library(['slug' => 'una']);
+        $category = $dg->create_category();
+        $DB->set_field('local_oksigeniaayvurenda_entity', 'categoryid', $category->id, ['id' => $library->entityid]);
+        $role = (int) $dg->create_role();
+        $context = \context_coursecat::instance($category->id);
+        $only = $dg->create_user();
+        $elsewhere = $dg->create_user();
+        role_assign($role, $only->id, $context->id);
+        role_assign($role, $elsewhere->id, $context->id);
+        role_assign($role, $elsewhere->id, \context_coursecat::instance($dg->create_category()->id)->id);
+        $this->assertSame([(int) $only->id], removal::lonely_accounts((int) $library->entityid));
+    }
+
+    /**
      * A recovered centre does not come back as a practice library, and its links are clean.
      */
     public function test_recover_leaves_practice_behind(): void {

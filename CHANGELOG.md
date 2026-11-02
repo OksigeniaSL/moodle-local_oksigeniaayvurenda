@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.136.0
+
+- Taking a centre away with `--accounts` also takes its staff, who have no reader's card, when they have nothing else.
+- The copies out of the server can also go to a centre's own Google Drive: it connects its account from «Copies», with the
+  narrowest permission Google has (only what this creates), and they go there encrypted with its own key. Taking the place
+  away gives the permission back; what is already there stays. Needs the site's client at Google, in the plugin's settings.
+
 ## 0.135.0
 
 - Each centre has its own time zone, in its settings; none chosen, the site's. Its day ends at its own midnight: due dates,
