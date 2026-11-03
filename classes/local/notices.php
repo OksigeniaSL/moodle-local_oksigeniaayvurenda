@@ -332,6 +332,10 @@ final class notices {
         string $from = '',
         ?array $design = null
     ): bool {
+        // While every centre is getting ready, only its staff hear from the library.
+        if (access::shut_for((int) $user->id)) {
+            return false;
+        }
         $message = new \core\message\message();
         $message->component = 'local_oksigeniaayvurenda';
         $message->name = $provider;

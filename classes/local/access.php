@@ -181,6 +181,44 @@ final class access {
     }
 
     /**
+     * Whether someone sees a way into any library: the site's menu entry, a course's «Readings», the app's entry. A centre
+     * still open only to its staff counts only for its staff, so a site whose centres are all getting ready shows nothing
+     * to anybody else.
+     *
+     * @param int|null $userid
+     * @return bool
+     */
+    public static function sees_any(?int $userid = null): bool {
+        global $USER;
+        $userid = $userid ?? (int) ($USER->id ?? 0);
+        $view = 'local/oksigeniaayvurenda:view';
+        // With centres apart, looking up is only ever in a centre, and can() already asks each.
+        return self::apart() ? self::can($view, null, $userid) : self::anywhere($view, $userid);
+    }
+
+    /**
+     * Whether the library is still shut for someone: every centre of the site is open only to its staff, and they are
+     * staff of none. The library then sends them nothing.
+     *
+     * @param int $userid
+     * @return bool
+     */
+    public static function shut_for(int $userid): bool {
+        global $DB;
+        $centres = 0;
+        foreach ($DB->get_fieldset_select(self::T . 'entity', 'id', '1 = 1') as $entityid) {
+            if (practice::is((int) $entityid)) {
+                continue;
+            }
+            if (!self::closed((int) $entityid) || self::is_staff((int) $entityid, $userid)) {
+                return false;
+            }
+            $centres++;
+        }
+        return $centres > 0;
+    }
+
+    /**
      * Whether a centre is open only to its staff for now, while it gets ready: its readers see no way in and get no
      * notices, and its public door is shut. Only whoever sets the plans opens it, where its staff do not see it.
      *

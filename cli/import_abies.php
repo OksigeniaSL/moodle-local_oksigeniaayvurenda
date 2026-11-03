@@ -32,8 +32,8 @@ use local_oksigeniaayvurenda\core\abies\survey;
 use local_oksigeniaayvurenda\local\import\abies_import;
 
 [$options, $unrecognized] = cli_get_params(
-    ['help' => false, 'file' => '', 'library' => 0, 'create' => '', 'dry-run' => false, 'without-notes' => false,
-        'with-readers' => false],
+    ['help' => false, 'file' => '', 'library' => 0, 'create' => '', 'closed' => false, 'dry-run' => false,
+        'without-notes' => false, 'with-readers' => false, 'as-returned' => false],
     ['h' => 'help', 'n' => 'dry-run']
 );
 
@@ -45,15 +45,20 @@ if ($options['help'] || $options['file'] === '') {
     echo "Imports the catalogue of an Abies Web export into a library: records, authors, classification, subjects,
 publishers, places, copies with their own codes, types and loan rules. Run it again with a newer export to bring the
 library up to date: nothing is duplicated. With --with-readers, also the readers and their loans; they come
-without an account, to be matched with the site's accounts in «Readers».
+without an account, to be matched with the site's accounts in «Readers». An old export, from before the library
+lent with Ayvurenda, goes with --as-returned: what it had out comes in on the shelf and as returned.
 
 Options:
   --file=PATH       The export: the zip Abies Web gives, or the XML inside it
   --library=ID      The library to import into
   --create=NAME     Or create a new entity with a central library of that name
+  --closed          With --create, the new entity starts open only to its staff: its readers see no way in
+                    and hear nothing until it opens (cli/centre.php --entity=ID --closed=0)
   -n, --dry-run     Only report what the export brings, without importing
   --without-notes   Leave out the free notes of the copies
   --with-readers    Bring the readers and their loans too
+  --as-returned     The export is old: the copies it had out come in on the shelf, its loans still out come in
+                    returned on the day of the export, and copies already here keep their status
   -h, --help        This help
 
 Example:
@@ -114,7 +119,7 @@ $libraryid = (int) $options['library'];
 if ($libraryid === 0 && $options['create'] !== '') {
     $now = time();
     $entityid = $DB->insert_record('local_oksigeniaayvurenda_entity', ['name' => $options['create'], 'yearstart' => '09-01',
-        'timecreated' => $now, 'timemodified' => $now]);
+        'settings' => $options['closed'] ? json_encode(['closed' => true]) : null, 'timecreated' => $now, 'timemodified' => $now]);
     $libraryid = $DB->insert_record('local_oksigeniaayvurenda_library', ['entityid' => $entityid,
         'name' => $options['create'], 'slug' => 'library-' . $entityid, 'kind' => 'central',
         'timecreated' => $now, 'timemodified' => $now]);
@@ -124,13 +129,16 @@ if ($libraryid === 0 || !$DB->record_exists('local_oksigeniaayvurenda_library', 
 }
 
 $start = microtime(true);
-$stats = (new abies_import($libraryid, !$options['without-notes'], (bool) $options['with-readers']))->run($export);
-\local_oksigeniaayvurenda\local\catalogue::purge((int) $DB->get_field(
-    'local_oksigeniaayvurenda_library',
-    'entityid',
-    ['id' => $libraryid]
-));
-cli_heading('Imported into library ' . $libraryid . ' in ' . round(microtime(true) - $start, 1) . ' s');
+$stats = (new abies_import(
+    $libraryid,
+    !$options['without-notes'],
+    (bool) $options['with-readers'],
+    (bool) $options['as-returned']
+))->run($export);
+$entityid = (int) $DB->get_field('local_oksigeniaayvurenda_library', 'entityid', ['id' => $libraryid]);
+\local_oksigeniaayvurenda\local\catalogue::purge($entityid);
+cli_heading('Imported into library ' . $libraryid . ' of centre ' . $entityid . ' in ' . round(microtime(true) - $start, 1) .
+    ' s' . (\local_oksigeniaayvurenda\local\access::closed($entityid) ? ', open only to its staff' : ''));
 foreach ($stats as $table => $counts) {
     cli_writeln($table . ': ' . json_encode($counts));
 }

@@ -220,6 +220,10 @@ function local_oksigeniaayvurenda_extend_navigation_course(navigation_node $navi
     if ((int) $course->id === (int) SITEID) {
         return;
     }
+    // Nobody's course shows it while every library they could reach is still getting ready for its readers.
+    if (!\local_oksigeniaayvurenda\local\access::sees_any()) {
+        return;
+    }
     $list = \local_oksigeniaayvurenda\local\readings::of_course((int) $course->id);
     if (has_capability('moodle/course:update', $context)) {
         if (!$list && !$DB->record_exists_select('local_oksigeniaayvurenda_library', 'kind <> :bank', ['bank' => 'bank'])) {

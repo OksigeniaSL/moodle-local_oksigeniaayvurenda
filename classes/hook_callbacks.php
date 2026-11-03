@@ -54,7 +54,8 @@ final class hook_callbacks {
         if (!isloggedin() || isguestuser() || !$DB->record_exists('local_oksigeniaayvurenda_library', [])) {
             return;
         }
-        if (!\local_oksigeniaayvurenda\local\access::can('local/oksigeniaayvurenda:view', null)) {
+        // Not while every centre the person could see is still getting ready for its readers.
+        if (!\local_oksigeniaayvurenda\local\access::sees_any()) {
             return;
         }
         $hook->get_primaryview()->add(

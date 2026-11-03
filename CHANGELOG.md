@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.150.0
+
+- A centre open only to its staff while it gets ready now shows nothing to anybody else: no «Library» in the site's
+  menu, no «Readings» in the courses, no «Library» in the app's menu (its init says disabled), and no message from the
+  library while every centre of the site is getting ready, except to their staff.
+- Importing an Abies export: `--closed` makes the new centre open only to its staff from the start, and `--as-returned`
+  takes an old export as history: its copies come in on the shelf, its loans still out come in returned on the day of
+  the export, and copies already here keep what the desk has done with them.
+- `cli/centre.php`: a centre got ready from the console, as its screens would: its names, open or only for its staff, its
+  two characters (and the herald's own drawings) and the cohorts its readers come from; `--list` says which centres
+  there are.
+
 ## 0.149.0
 
 - «How do I…?» links the printed guides on Ayvurenda's website (starting the library, the desk and the readers), in the

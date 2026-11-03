@@ -58,6 +58,9 @@ final class abies_import {
     /** @var bool Whether readers and loans come in. */
     private bool $withreaders;
 
+    /** @var bool Whether the export is history: its copies come in on the shelf and its loans out as returned. */
+    private bool $asreturned;
+
     /** @var int */
     private int $now;
 
@@ -76,13 +79,16 @@ final class abies_import {
      * @param int $libraryid
      * @param bool $withnotes
      * @param bool $withreaders
+     * @param bool $asreturned The export is old (the library has lent since, or will): the copies it had out come in on
+     *     the shelf, the loans it had out come back on the day of the export, and the copies already here keep their status.
      */
-    public function __construct(int $libraryid, bool $withnotes = true, bool $withreaders = false) {
+    public function __construct(int $libraryid, bool $withnotes = true, bool $withreaders = false, bool $asreturned = false) {
         global $DB;
         $this->libraryid = $libraryid;
         $this->entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $libraryid], MUST_EXIST);
         $this->withnotes = $withnotes;
         $this->withreaders = $withreaders;
+        $this->asreturned = $asreturned;
         $this->now = time();
     }
 
@@ -329,7 +335,14 @@ final class abies_import {
                 'notes' => $this->withnotes && ($item['Observaciones'] ?? '') !== '' ? $item['Observaciones'] : null,
                 'timeacquired' => $acquired,
             ];
-            [$itemid] = $this->upsert_tracked('item', $abiesid, $data, [], ['libraryid' => $this->libraryid]);
+            $oninsert = ['libraryid' => $this->libraryid];
+            if ($this->asreturned) {
+                // What an old export had out is on the shelf now, or the desk says otherwise; a copy already here keeps
+                // whatever the desk has done with it since.
+                unset($data['status']);
+                $oninsert['status'] = 'available';
+            }
+            [$itemid] = $this->upsert_tracked('item', $abiesid, $data, [], $oninsert);
             $barcodes[$barcode] = $itemid;
         }
         $this->stats['item']['missing'] = count(array_diff_key($this->map['item'], $seen));
@@ -460,6 +473,8 @@ final class abies_import {
             $day = new \DateTimeImmutable(substr($value, 0, 10), $tz);
             return ($endofday ? $day->setTime(23, 59, 59) : $day->setTime(12, 0))->getTimestamp();
         };
+        // An old export's loans still out come back on its day: they are history, not books a year late.
+        $back = $this->asreturned ? $this->export_moment($export) : null;
         foreach ($export->loans() as $row) {
             $itemid = $this->map['item'][$row['IdEjemplar'] ?? ''][0] ?? null;
             $readerid = $this->map['reader'][$row['IdLector'] ?? ''][0] ?? null;
@@ -482,7 +497,7 @@ final class abies_import {
                 'groupname' => $group ?: null,
                 'timeloaned' => $loaned,
                 'timedue' => $date($row['FechaCalculada'] ?? null, true) ?? $loaned,
-                'timereturned' => $date($row['FechaDevolucion'] ?? null),
+                'timereturned' => $date($row['FechaDevolucion'] ?? null) ?? ($back !== null ? max($back, $loaned) : null),
                 'renewals' => (int) ($row['NumProrrogas'] ?? 0),
             ];
             $this->upsert_tracked('loan', $row['Id'] ?? '', $data, [], ['libraryid' => $this->libraryid]);

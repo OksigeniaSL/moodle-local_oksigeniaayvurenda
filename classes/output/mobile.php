@@ -63,6 +63,8 @@ class mobile {
             'templates' => [],
             'javascript' => (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/mobile-links.js'),
             'otherdata' => '',
+            // No «Library» in the app's menu for whoever has no library to go to yet (one still closed to its readers).
+            'disabled' => !access::sees_any(),
         ];
     }
 

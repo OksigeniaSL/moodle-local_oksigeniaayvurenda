@@ -137,4 +137,39 @@ final class abies_import_test extends \advanced_testcase {
         (new abies_import($library->id, false))->run($this->export());
         $this->assertNull($DB->get_field(self::T . 'item', 'notes', ['barcode' => '100000L']));
     }
+
+    /**
+     * An old export: what it had out comes in on the shelf and returned on its day, never a year late; and a copy lent
+     * here since keeps its loan when the same export comes again.
+     */
+    public function test_as_returned(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+
+        // As it was, the copy Abies had out comes in out, with its loan open.
+        $then = $generator->create_library();
+        (new abies_import($then->id, true, true))->run($this->export());
+        $item = $DB->get_record(self::T . 'item', ['entityid' => $then->entityid, 'barcode' => '100001C'], '*', MUST_EXIST);
+        $this->assertSame('onloan', $item->status);
+        $this->assertSame(1, $DB->count_records_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$item->id]));
+
+        $library = $generator->create_library();
+        (new abies_import($library->id, true, true, true))->run($this->export());
+        $item = $DB->get_record(self::T . 'item', ['entityid' => $library->entityid, 'barcode' => '100001C'], '*', MUST_EXIST);
+        $this->assertSame('available', $item->status);
+        $loan = $DB->get_record(self::T . 'loan', ['itemid' => $item->id], '*', MUST_EXIST);
+        $this->assertNotNull($loan->timereturned);
+        $this->assertGreaterThanOrEqual((int) $loan->timeloaned, (int) $loan->timereturned);
+        $this->assertSame(0, $DB->count_records_select(
+            self::T . 'loan',
+            'libraryid = ? AND timereturned IS NULL',
+            [$library->id]
+        ));
+
+        // Lent at the desk since: the same export again leaves it lent.
+        $DB->set_field(self::T . 'item', 'status', 'onloan', ['id' => $item->id]);
+        (new abies_import($library->id, true, true, true))->run($this->export());
+        $this->assertSame('onloan', $DB->get_field(self::T . 'item', 'status', ['id' => $item->id]));
+    }
 }
