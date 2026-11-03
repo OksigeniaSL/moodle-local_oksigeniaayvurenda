@@ -544,5 +544,11 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110304, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110316) {
+        // In a site with one centre, its library manager is given on the site.
+        \local_oksigeniaayvurenda\local\roles::ensure_manager();
+        upgrade_plugin_savepoint(true, 2026110316, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

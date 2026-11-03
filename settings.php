@@ -108,12 +108,15 @@ if ($hassiteconfig) {
             $str('centresheading'),
             $str('centresheading_desc')
         ));
-        $settings->add(new admin_setting_configcheckbox(
+        $centres = new admin_setting_configcheckbox(
             'local_oksigeniaayvurenda/entitycategories',
             $str('entitycategories'),
             $str('entitycategories_desc'),
             0
-        ));
+        );
+        // Where the library manager's role may be given follows it: on the site with one centre, in categories with many.
+        $centres->set_updatedcallback(fn() => \local_oksigeniaayvurenda\local\roles::ensure_manager());
+        $settings->add($centres);
         $settings->add(new admin_setting_heading(
             'local_oksigeniaayvurenda/planheading',
             $str('planheading'),

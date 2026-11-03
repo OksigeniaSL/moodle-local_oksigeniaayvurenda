@@ -26,9 +26,11 @@ namespace local_oksigeniaayvurenda\local;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_oksigeniaayvurenda\local\access
  * @covers     \local_oksigeniaayvurenda\local\centre_setup
+ * @covers     \local_oksigeniaayvurenda\local\roles
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(access::class)]
 #[\PHPUnit\Framework\Attributes\CoversClass(centre_setup::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(roles::class)]
 final class getting_ready_test extends \advanced_testcase {
     /**
      * A site with one centre, a reader of it, someone who is neither, and its librarian.
@@ -143,5 +145,24 @@ final class getting_ready_test extends \advanced_testcase {
             $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]),
             true
         )['cohorts']);
+    }
+
+    /**
+     * In a site with one centre, its library manager is given on the site and runs the centre; with a category for
+     * each centre, only in a category.
+     */
+    public function test_manager_on_site(): void {
+        $this->resetAfterTest();
+        $w = $this->site();
+        $roleid = roles::ensure_manager();
+        $this->assertContains(CONTEXT_SYSTEM, array_map('intval', get_role_contextlevels($roleid)));
+        $head = $this->getDataGenerator()->create_user();
+        role_assign($roleid, $head->id, \context_system::instance()->id);
+        $this->assertTrue(access::can('local/oksigeniaayvurenda:manage', (int) $w->library->entityid, (int) $head->id));
+        $this->assertFalse(access::can('local/oksigeniaayvurenda:manage', (int) $w->library->entityid, (int) $w->staff->id));
+
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
+        roles::ensure_manager();
+        $this->assertSame([CONTEXT_COURSECAT], array_map('intval', array_values(get_role_contextlevels($roleid))));
     }
 }

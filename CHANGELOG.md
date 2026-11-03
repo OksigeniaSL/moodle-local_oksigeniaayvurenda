@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.150.1
+
+- In a site with one centre, «Library manager» (the librarian's work and the centre's settings: rules, readers,
+  characters, matching readers) can be given on the site, the centre's place; with a category for each centre it is
+  still given only in that category. Turning that setting on or off moves it.
+
 ## 0.150.0
 
 - A centre open only to its staff while it gets ready now shows nothing to anybody else: no «Library» in the site's

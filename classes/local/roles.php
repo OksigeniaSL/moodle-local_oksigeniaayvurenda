@@ -83,7 +83,9 @@ final class roles {
                 get_string('rolemanager_desc', 'local_oksigeniaayvurenda')
             );
         }
-        set_role_contextlevels($roleid, [CONTEXT_COURSECAT]);
+        // In a site with one centre it is given on the site, the centre's place; with a category for each centre, only in
+        // its category, where it reaches that centre and no other.
+        set_role_contextlevels($roleid, access::apart() ? [CONTEXT_COURSECAT] : [CONTEXT_SYSTEM, CONTEXT_COURSECAT]);
         $system = \context_system::instance();
         foreach (['view', 'desk', 'catalogue', 'manage'] as $capability) {
             assign_capability('local/oksigeniaayvurenda:' . $capability, CAP_ALLOW, $roleid, $system->id, true);
