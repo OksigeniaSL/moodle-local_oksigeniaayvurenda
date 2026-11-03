@@ -559,7 +559,11 @@ final class desk {
      */
     public function sanction(int $readerid, string $what, int $row = 0): array {
         global $DB;
-        $ofcentre = $DB->record_exists(self::T . 'reader', ['id' => $readerid, 'entityid' => $this->library->entityid]);
+        $ofcentre = $DB->record_exists_select(
+            self::T . 'reader',
+            "id = ? AND entityid = ? AND status <> 'deleted'",
+            [$readerid, $this->library->entityid]
+        );
         if (!$ofcentre || !$this->allowed($readerid) || !in_array($what, ['lift', 'pay', 'waive'], true)) {
             return $this->answer('unknown', 'no', 'deskotherreader');
         }

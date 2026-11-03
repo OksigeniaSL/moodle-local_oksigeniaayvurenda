@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.154.1
+
+- Erasing a reader is final everywhere: no list, program or cohort that still has them brings them back the next night
+  (a fingerprint stays, as with Abies); the staff no longer finds their record, card or desk panel; and what their
+  account left in the library (their place in a book, the phone's code, their choices) goes too.
+- A centre that fails at night no longer stops the readers or the notices of the others, and a step that fails no longer
+  stops the rest.
+- A copy that cannot be written whole, on a full disk, is an error and not a short copy that looks fine.
+- With centres apart, a centre that loses its category closes instead of opening to the whole site.
+
 ## 0.154.0
 
 - A copy comes back whole: a text ending in a backslash no longer swallows its row and the next, and the screen says when a

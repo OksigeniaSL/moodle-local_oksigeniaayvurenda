@@ -99,6 +99,7 @@ final class csvlist {
             '',
             'externalid, localid'
         );
+        $erased = \local_oksigeniaayvurenda\local\erasure::fingerprints($entityid);
         $members = [];
         foreach ($DB->get_records_select(self::T . 'member', 'yearid = :yearid', ['yearid' => $year->id]) as $row) {
             $members[(int) $row->readerid] = $row;
@@ -112,6 +113,10 @@ final class csvlist {
             if (($names[$key] ?? 0) > 1 && str_starts_with($key, 'name:')) {
                 $key .= '|' . text::normalise($person['group'] ?? '');
             }
+            // Someone erased at their request does not come back with the list that still has them.
+            if ($erased && isset($erased[\local_oksigeniaayvurenda\local\import\abies_import::erased($key)])) {
+                continue;
+            }
             $readerid = 0;
             if (($person['cardcode'] ?? '') !== '') {
                 $readerid = $bycard[\core_text::strtolower($person['cardcode'])] ?? 0;
@@ -124,6 +129,9 @@ final class csvlist {
                 unset($lookup['email']);
             }
             $userid = self::account($lookup, $entityid);
+            if ($userid && isset($erased[\local_oksigeniaayvurenda\local\erasure::fingerprint($userid)])) {
+                continue;
+            }
             if (!$readerid && $userid) {
                 $readerid = $byuser[$userid] ?? 0;
             }

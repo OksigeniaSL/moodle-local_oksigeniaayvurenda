@@ -260,4 +260,22 @@ final class access_test extends \advanced_testcase {
         $this->assertTrue(access::can('local/oksigeniaayvurenda:desk', $practice, (int) $w->la->id));
         $this->assertFalse(access::can('local/oksigeniaayvurenda:desk', $practice, (int) $w->outsider->id));
     }
+
+    /**
+     * With centres apart, a centre whose category was deleted does not open to the whole site.
+     */
+    public function test_category_gone(): void {
+        global $DB;
+        $this->resetAfterTest();
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
+        $dg = $this->getDataGenerator();
+        $library = $dg->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $category = $dg->create_category();
+        $DB->set_field('local_oksigeniaayvurenda_entity', 'categoryid', $category->id, ['id' => $library->entityid]);
+        $anyone = $dg->create_user();
+        $category->delete_full(false);
+        access::forget();
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
+        $this->assertFalse(access::can('local/oksigeniaayvurenda:view', (int) $library->entityid, (int) $anyone->id));
+    }
 }

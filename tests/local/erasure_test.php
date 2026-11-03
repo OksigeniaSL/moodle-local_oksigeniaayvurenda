@@ -121,4 +121,35 @@ final class erasure_test extends \advanced_testcase {
         $this->assertTrue($done['account']);
         $this->assertSame(1, (int) $DB->get_field('user', 'deleted', ['id' => $w->user->id]));
     }
+
+    /**
+     * Erased means gone: their record and their panel are gone, a list and a cohort that still have them do not bring
+     * them back, and what their account left goes.
+     */
+    public function test_stays_erased(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $dg = $this->getDataGenerator();
+        $library = $dg->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $row = ['firstname' => 'Nora', 'lastname' => 'Zeta', 'group' => '1º A', 'idnumber' => '55'];
+        sources\csvlist::load($entityid, [$row], 'student', time(), 'list');
+        $listed = (int) $DB->get_field('local_oksigeniaayvurenda_reader', 'id', ['entityid' => $entityid]);
+        erasure::erase($library, $listed);
+        $this->assertNull(profile::of($library, $listed, time()));
+        $again = sources\csvlist::load($entityid, [$row], 'student', time(), 'list');
+        $this->assertSame(0, $again['created']);
+
+        $user = $dg->create_user();
+        $cohort = $dg->create_cohort(['name' => '2º B']);
+        cohort_add_member($cohort->id, $user->id);
+        sources\cohorts::save($entityid, [$cohort->id => ['type' => 'student', 'stage' => '', 'group' => true]]);
+        sources\cohorts::sync($entityid);
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['userid' => $user->id], '*', MUST_EXIST);
+        set_user_preference('local_oksigeniaayvurenda_lastsearch', 'algo', $user->id);
+        erasure::erase($library, (int) $reader->id);
+        $this->assertNull(get_user_preferences('local_oksigeniaayvurenda_lastsearch', null, $user->id));
+        $this->assertSame(0, sources\cohorts::sync($entityid)['created']);
+        $this->assertFalse($DB->record_exists('local_oksigeniaayvurenda_reader', ['userid' => $user->id]));
+    }
 }

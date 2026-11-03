@@ -711,7 +711,6 @@ class provider implements
         $DB->set_field(self::T . 'selfpost', 'createdby', null, ['createdby' => $userid]);
         $DB->delete_records(self::T . 'keeper', ['userid' => $userid]);
         $DB->set_field(self::T . 'keeper', 'staffid', null, ['staffid' => $userid]);
-        $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
         $DB->set_field(self::T . 'hold', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'purchase', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'sanction', 'createdby', null, ['createdby' => $userid]);
@@ -728,7 +727,6 @@ class provider implements
             \local_oksigeniaayvurenda\local\voices::remove($voice);
         }
         $DB->set_field(self::T . 'digital', 'createdby', null, ['createdby' => $userid]);
-        $DB->delete_records(self::T . 'digitalread', ['userid' => $userid]);
         $DB->set_field(self::T . 'voiceconsent', 'notedby', null, ['notedby' => $userid]);
         $DB->set_field(self::T . 'voiceinvite', 'invitedby', null, ['invitedby' => $userid]);
         $DB->set_field(self::T . 'review', 'decidedby', null, ['decidedby' => $userid]);
@@ -736,10 +734,8 @@ class provider implements
         $DB->set_field(self::T . 'roomread', 'staffid', null, ['staffid' => $userid]);
         $DB->set_field(self::T . 'wish', 'decidedby', null, ['decidedby' => $userid]);
         $DB->set_field(self::T . 'readinglist', 'createdby', null, ['createdby' => $userid]);
-        // Their choices in the library go too, also when they keep their account.
-        foreach (['cardlook', 'stafftold', 'newbooks', 'newbookslast', 'goal', 'lastsearch'] as $name) {
-            unset_user_preference('local_oksigeniaayvurenda_' . $name, $userid);
-        }
+        // Their place in a book and their choices in the library go too, also when they keep their account.
+        \local_oksigeniaayvurenda\local\erasure::account_traces($userid);
     }
 
     /**

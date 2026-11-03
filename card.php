@@ -69,7 +69,7 @@ $previewid = $isdesk ? optional_param('reader', 0, PARAM_INT) : 0;
 $previewlook = $isdesk ? optional_param('look', '', PARAM_ALPHA) : '';
 $preview = $previewid ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $previewid,
     'entityid' => $library->entityid]) : null;
-if ($previewid && !$preview) {
+if ($previewid && (!$preview || $preview->status === 'deleted')) {
     shell::missing(get_string('readernothere', 'local_oksigeniaayvurenda'), $library);
 }
 $readers = $preview ? [$preview]

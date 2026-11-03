@@ -50,8 +50,8 @@ class sync_readers extends \core\task\scheduled_task {
                 try {
                     $stats = \local_oksigeniaayvurenda\local\sources\cifra::sync((int) $entityid);
                     mtrace('Ayvurenda: readers of entity ' . $entityid . ' from Cifra: ' . json_encode($stats));
-                } catch (\moodle_exception $e) {
-                    mtrace('Ayvurenda: Cifra did not answer for entity ' . $entityid . ': ' . $e->getMessage());
+                } catch (\Throwable $e) {
+                    self::failed('Cifra did not answer for entity ' . $entityid, $e);
                 }
             }
         }
@@ -62,8 +62,8 @@ class sync_readers extends \core\task\scheduled_task {
                 try {
                     mtrace('Ayvurenda: readers of entity ' . $entityid . ' from OneRoster: '
                         . json_encode($roster::sync((int) $entityid)));
-                } catch (\moodle_exception $e) {
-                    mtrace('Ayvurenda: OneRoster did not answer for entity ' . $entityid . ': ' . $e->getMessage());
+                } catch (\Throwable $e) {
+                    self::failed('OneRoster did not answer for entity ' . $entityid, $e);
                 }
             }
         }
@@ -76,8 +76,26 @@ class sync_readers extends \core\task\scheduled_task {
             if (empty($settings['cohorts']) && empty($settings['courses'])) {
                 continue;
             }
-            $stats = \local_oksigeniaayvurenda\local\sources\cohorts::sync((int) $entity->id);
-            mtrace("Ayvurenda: entity {$entity->id}: " . json_encode($stats));
+            try {
+                $stats = \local_oksigeniaayvurenda\local\sources\cohorts::sync((int) $entity->id);
+                mtrace("Ayvurenda: entity {$entity->id}: " . json_encode($stats));
+            } catch (\Throwable $e) {
+                self::failed('the cohorts of entity ' . $entity->id . ' failed', $e);
+            }
         }
+    }
+
+    /**
+     * One centre that fails does not stop the others: what it left half done is undone.
+     *
+     * @param string $what
+     * @param \Throwable $e
+     */
+    private static function failed(string $what, \Throwable $e): void {
+        global $DB;
+        if ($DB->is_transaction_started()) {
+            $DB->force_transaction_rollback();
+        }
+        mtrace('Ayvurenda: ' . $what . ': ' . $e->getMessage());
     }
 }

@@ -457,7 +457,10 @@ final class ltitool {
         foreach ($DB->get_records_select(self::T . 'lticontext', 'lastsync IS NOT NULL') as $course) {
             try {
                 $done[$course->id] = self::bring($course, $course->groupname);
-            } catch (\moodle_exception $e) {
+            } catch (\Throwable $e) {
+                if ($DB->is_transaction_started()) {
+                    $DB->force_transaction_rollback();
+                }
                 $done[$course->id] = ['error' => $e->getMessage()];
             }
         }

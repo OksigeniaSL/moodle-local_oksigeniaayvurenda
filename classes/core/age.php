@@ -104,13 +104,13 @@ final class age {
         if (!$from || !$to) {
             throw new \InvalidArgumentException('The files cannot be opened.');
         }
-        fwrite($to, $header . ' ' . self::b64($mac) . "\n" . $nonce);
+        self::write($to, $header . ' ' . self::b64($mac) . "\n" . $nonce);
         $counter = 0;
         $chunk = self::read($from, self::CHUNK);
         while (true) {
             $next = self::read($from, self::CHUNK);
             $last = $next === '';
-            fwrite($to, sodium_crypto_aead_chacha20poly1305_ietf_encrypt($chunk, '', self::nonce($counter, $last), $key));
+            self::write($to, sodium_crypto_aead_chacha20poly1305_ietf_encrypt($chunk, '', self::nonce($counter, $last), $key));
             if ($last) {
                 break;
             }
@@ -118,9 +118,23 @@ final class age {
             $counter++;
         }
         fclose($from);
-        fclose($to);
+        if (!fclose($to)) {
+            throw new \RuntimeException('The file cannot be written.');
+        }
         sodium_memzero($filekey);
         sodium_memzero($ephemeral);
+    }
+
+    /**
+     * Writes it all, or says it could not: a full disk would otherwise leave a copy cut short that looks fine.
+     *
+     * @param resource $to
+     * @param string $data
+     */
+    private static function write($to, string $data): void {
+        if (@fwrite($to, $data) !== strlen($data)) {
+            throw new \RuntimeException('The file cannot be written.');
+        }
     }
 
     /**

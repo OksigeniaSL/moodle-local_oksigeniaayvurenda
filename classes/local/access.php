@@ -97,8 +97,12 @@ final class access {
             return true;
         }
         $context = self::context($entityid);
-        if (!self::apart() || $context->contextlevel !== CONTEXT_COURSECAT) {
+        if (!self::apart()) {
             return has_capability($capability, $context, $userid);
+        }
+        // With centres apart, one that lost its category does not open to the whole site: only to who runs the site.
+        if ($context->contextlevel !== CONTEXT_COURSECAT) {
+            return has_capability('local/oksigeniaayvurenda:manage', $context, $userid);
         }
         // With centres apart, the authenticated user's grant on the whole site does not open a centre: its staff, the
         // site's managers or a role given in its category do.

@@ -95,7 +95,7 @@ final class profile {
     public static function of(\stdClass $library, int $readerid, int $now): ?array {
         global $DB;
         $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $library->entityid]);
-        if (!$reader) {
+        if (!$reader || $reader->status === 'deleted') {
             return null;
         }
         $user = $reader->userid ? \core_user::get_user((int) $reader->userid) : null;

@@ -158,6 +158,13 @@ final class cohorts {
             }
         }
 
+        // Someone erased at their request does not come back with a cohort that still has them.
+        $erased = \local_oksigeniaayvurenda\local\erasure::fingerprints($entityid);
+        if ($erased) {
+            $fingerprint = fn($userid) => \local_oksigeniaayvurenda\local\erasure::fingerprint((int) $userid);
+            $people = array_filter($people, fn($userid) => !isset($erased[$fingerprint($userid)]), ARRAY_FILTER_USE_KEY);
+        }
+
         $transaction = $DB->start_delegated_transaction();
         $year = \local_oksigeniaayvurenda\local\years::around($entityid, $now);
         $readers = $DB->get_records_select(

@@ -75,6 +75,9 @@ final class erasure {
         }
         $userid = (int) $reader->userid;
         self::reader($readerid, $now);
+        if ($userid && !$DB->record_exists(self::T . 'reader', ['userid' => $userid])) {
+            self::account_traces($userid);
+        }
         $account = false;
         if ($userid && self::alone($userid)) {
             require_once($CFG->dirroot . '/user/lib.php');
@@ -96,6 +99,7 @@ final class erasure {
     public static function reader(int $readerid, ?int $now = null): void {
         global $DB;
         $now = $now ?? time();
+        $was = $DB->get_record(self::T . 'reader', ['id' => $readerid], 'id, entityid, userid');
         $DB->update_record(self::T . 'reader', (object) [
             'id' => $readerid,
             'userid' => null,
@@ -117,15 +121,15 @@ final class erasure {
         foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'readerid' => $readerid]) as $voice) {
             voices::remove($voice);
         }
-        // The key their origin knew them by (a file number, an email, a name) goes too. From an Abies export, which can
-        // be imported again, only a fingerprint of it stays, so that they do not come back with it.
+        // The key their origin knew them by (a file number, an email, a name) goes too. Only a fingerprint of it stays,
+        // and one of their account, so that a list, a program or a cohort that still has them does not bring them back.
         foreach ($DB->get_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $readerid]) as $source) {
-            if ($source->system === 'abies') {
-                $DB->update_record(self::T . 'source', (object) ['id' => $source->id, 'localid' => 0, 'hash' => null,
-                    'localhash' => null, 'externalid' => import\abies_import::erased((string) $source->externalid)]);
-            } else {
-                $DB->delete_records(self::T . 'source', ['id' => $source->id]);
-            }
+            $DB->update_record(self::T . 'source', (object) ['id' => $source->id, 'localid' => 0, 'hash' => null,
+                'localhash' => null, 'externalid' => import\abies_import::erased((string) $source->externalid)]);
+        }
+        if ($was && $was->userid) {
+            $DB->insert_record(self::T . 'source', ['entityid' => $was->entityid, 'system' => 'account', 'tablename' => 'reader',
+                'externalid' => self::fingerprint((int) $was->userid), 'localid' => 0, 'timecreated' => $now]);
         }
         $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $readerid]);
         foreach ($drawn as $id) {
@@ -159,6 +163,47 @@ final class erasure {
             'UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE readerid = ? AND direction = 'in'",
             [$readerid]
         );
+    }
+
+    /**
+     * The fingerprint an erased reader's account leaves.
+     *
+     * @param int $userid
+     * @return string
+     */
+    public static function fingerprint(int $userid): string {
+        return import\abies_import::erased('user:' . $userid);
+    }
+
+    /**
+     * The fingerprints of who was erased from a centre.
+     *
+     * @param int $entityid
+     * @return array Fingerprint => its key.
+     */
+    public static function fingerprints(int $entityid): array {
+        global $DB;
+        return array_flip($DB->get_fieldset_select(
+            self::T . 'source',
+            'externalid',
+            "entityid = ? AND tablename = 'reader' AND localid = 0",
+            [$entityid]
+        ));
+    }
+
+    /**
+     * What an account leaves in the library besides its readers: their place in a book, the code of their phone, their
+     * choices.
+     *
+     * @param int $userid
+     */
+    public static function account_traces(int $userid): void {
+        global $DB;
+        $DB->delete_records(self::T . 'relay', ['userid' => $userid]);
+        $DB->delete_records(self::T . 'digitalread', ['userid' => $userid]);
+        foreach (['cardlook', 'stafftold', 'newbooks', 'newbookslast', 'goal', 'lastsearch'] as $name) {
+            unset_user_preference('local_oksigeniaayvurenda_' . $name, $userid);
+        }
     }
 
     /**

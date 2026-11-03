@@ -42,19 +42,26 @@ class send_notices extends \core\task\scheduled_task {
      * Runs it.
      */
     public function execute(): void {
-        $stats = \local_oksigeniaayvurenda\local\notices::run();
-        mtrace('Ayvurenda: notices of late books: ' . json_encode($stats));
-        $expired = \local_oksigeniaayvurenda\local\holds::expire();
-        mtrace('Ayvurenda: reservations no longer set aside: ' . $expired);
-        $voices = \local_oksigeniaayvurenda\local\voices::expire();
-        mtrace('Ayvurenda: voices past the days the centre keeps them: ' . $voices);
-        $reviewvoices = \local_oksigeniaayvurenda\local\reviews::expire_voices();
-        mtrace('Ayvurenda: voices of reviews past the days the centre keeps voices: ' . $reviewvoices);
-        $staff = \local_oksigeniaayvurenda\local\staffnotices::run();
-        mtrace('Ayvurenda: what waits for the staff: ' . json_encode($staff));
-        $sanctions = \local_oksigeniaayvurenda\local\sanctions::notify();
-        mtrace('Ayvurenda: readers told what a late book left: ' . $sanctions);
-        $news = \local_oksigeniaayvurenda\local\newsletter::run();
-        mtrace('Ayvurenda: the library\'s news to whoever signed up: ' . json_encode($news));
+        global $DB;
+        // Each step apart: one that fails does not stop the others, nor the other centres' notices.
+        $steps = [
+            'notices of late books' => fn() => \local_oksigeniaayvurenda\local\notices::run(),
+            'reservations no longer set aside' => fn() => \local_oksigeniaayvurenda\local\holds::expire(),
+            'voices past the days the centre keeps them' => fn() => \local_oksigeniaayvurenda\local\voices::expire(),
+            'voices of reviews past those days' => fn() => \local_oksigeniaayvurenda\local\reviews::expire_voices(),
+            'what waits for the staff' => fn() => \local_oksigeniaayvurenda\local\staffnotices::run(),
+            'readers told what a late book left' => fn() => \local_oksigeniaayvurenda\local\sanctions::notify(),
+            'the library\'s news to whoever signed up' => fn() => \local_oksigeniaayvurenda\local\newsletter::run(),
+        ];
+        foreach ($steps as $what => $step) {
+            try {
+                mtrace('Ayvurenda: ' . $what . ': ' . json_encode($step()));
+            } catch (\Throwable $e) {
+                if ($DB->is_transaction_started()) {
+                    $DB->force_transaction_rollback();
+                }
+                mtrace('Ayvurenda: ' . $what . ' failed: ' . $e->getMessage());
+            }
+        }
     }
 }

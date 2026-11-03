@@ -340,4 +340,17 @@ final class security_test extends \advanced_testcase {
         $this->assertFalse(practice::is((int) $back->entityid));
         $this->assertSame('public', skins::of((int) $back->entityid));
     }
+
+    /**
+     * A copy that cannot be written whole is an error, not a short copy that looks fine.
+     */
+    public function test_copy_on_a_full_disk(): void {
+        if (!file_exists('/dev/full')) {
+            $this->markTestSkipped('This system has no full disk to try.');
+        }
+        $plain = make_request_directory() . '/claro.txt';
+        file_put_contents($plain, 'una copia');
+        $this->expectException(\RuntimeException::class);
+        age::encrypt($plain, '/dev/full', age::keypair()['public']);
+    }
 }

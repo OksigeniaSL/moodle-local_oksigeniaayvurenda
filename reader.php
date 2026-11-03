@@ -57,8 +57,8 @@ if (!(new desk($library, (int) $USER->id, $now, $own))->allowed($id)) {
 }
 $notice = '';
 $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id, 'entityid' => $library->entityid]);
-// A reader of another centre is nobody here: nothing is read, and nothing is written.
-if (!$reader) {
+// A reader of another centre, or one erased, is nobody here: nothing is read, and nothing is written.
+if (!$reader || $reader->status === 'deleted') {
     shell::missing($str('readernothere'), $library);
 }
 \local_oksigeniaayvurenda\event\reader_viewed::fire((int) $library->entityid, (int) $reader->id);
