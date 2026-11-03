@@ -82,8 +82,9 @@ final class centre_setup {
 
     /**
      * Reads the cohorts a centre takes its readers from: «INF=student, PRI=student:Primaria, 1A=student:Primaria:group,
-     * CLAUSTRO=teacher». Each cohort by its id number (or its exact name), the kind of reader, the stage (guessed from
-     * the cohort's name when left out) and «group» when the cohort's name is the readers' class.
+     * ESO *=student::group, CLAUSTRO=teacher». Each cohort by its id number (or its exact name), or every cohort whose id
+     * number or name starts so when it ends in *; the kind of reader, the stage (guessed from each cohort's name when
+     * left out) and «group» when the cohort's name is the readers' class.
      *
      * @param int $entityid
      * @param string $list
@@ -99,16 +100,31 @@ final class centre_setup {
             if (!in_array($type, self::TYPES, true)) {
                 throw new \moodle_exception('error', 'error', '', null, "Unknown kind of reader for $key: $type");
             }
-            $cohort = $DB->get_record('cohort', ['idnumber' => $key], 'id, name', IGNORE_MULTIPLE)
-                ?: $DB->get_record('cohort', ['name' => $key], 'id, name', IGNORE_MULTIPLE);
-            if (!$cohort) {
+            if (str_ends_with($key, '*')) {
+                $start = $DB->sql_like_escape(substr($key, 0, -1)) . '%';
+                $found = $DB->get_records_select(
+                    'cohort',
+                    $DB->sql_like('idnumber', ':a', false) . ' OR ' . $DB->sql_like('name', ':b', false),
+                    ['a' => $start, 'b' => $start],
+                    'name',
+                    'id, name'
+                );
+            } else {
+                $cohort = $DB->get_record('cohort', ['idnumber' => $key], 'id, name', IGNORE_MULTIPLE)
+                    ?: $DB->get_record('cohort', ['name' => $key], 'id, name', IGNORE_MULTIPLE);
+                $found = $cohort ? [$cohort] : [];
+            }
+            if (!$found) {
                 throw new \moodle_exception('error', 'error', '', null, "There is no cohort $key");
             }
-            $chosen[(int) $cohort->id] = [
-                'type' => $type,
-                'stage' => $stage !== '' ? $stage : \local_oksigeniaayvurenda\core\readers\stage_guesser::guess($cohort->name),
-                'group' => $group === 'group',
-            ];
+            foreach ($found as $cohort) {
+                $chosen[(int) $cohort->id] = [
+                    'type' => $type,
+                    'stage' => $stage !== '' ? $stage
+                        : \local_oksigeniaayvurenda\core\readers\stage_guesser::guess($cohort->name),
+                    'group' => $group === 'group',
+                ];
+            }
         }
         return $chosen;
     }

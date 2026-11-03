@@ -124,6 +124,16 @@ final class getting_ready_test extends \advanced_testcase {
         $this->assertSame('teacher', $chosen[$staffroom->id]['type']);
         $this->assertTrue($chosen[$class->id]['group']);
 
+        // Every cohort that starts so, each with its own stage and its name as the group.
+        $eso = [$this->getDataGenerator()->create_cohort(['name' => 'ESO 3º C', 'idnumber' => 'ESO 3º C']),
+            $this->getDataGenerator()->create_cohort(['name' => 'ESO 1º A', 'idnumber' => 'ESO 1º A'])];
+        $chosen = centre_setup::cohorts($entityid, 'ESO *=student::group, Claustro=teacher');
+        $this->assertCount(3, $chosen);
+        foreach ($eso as $cohort) {
+            $this->assertSame(['type' => 'student', 'stage' => 'ESO', 'group' => true], $chosen[$cohort->id]);
+        }
+        $this->assertSame('teacher', $chosen[$staffroom->id]['type']);
+
         // A name alone keeps the rest; opening says so.
         centre_setup::apply($entityid, ['herald' => 'Otra', 'closed' => false]);
         $characters = characters::of($entityid);

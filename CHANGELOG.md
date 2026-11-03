@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.150.2
+
+- Readers from a cohort for a whole stage (not a class) take their class from the group of a chosen course, keeping the
+  kind and stage of the cohort; before, the cohort hid the course's group and they had no class.
+- `cli/centre.php --cohorts`: a cohort ending in * is every cohort whose id number or name starts so («ESO *»), each with
+  its own stage guessed from its name; for a site with a cohort for each class.
+
 ## 0.150.1
 
 - In a site with one centre, «Library manager» (the librarian's work and the centre's settings: rules, readers,

@@ -142,9 +142,19 @@ final class cohorts {
             ];
         }
         $rows->close();
-        // Then the courses: whoever is in a cohort already has their group.
+        // Then the courses: whoever is in a cohort keeps the kind it gave; when that cohort only says the stage (a cohort
+        // for all of a stage, not a class), the course's group says the class.
         foreach (courses::people($entityid) as $userid => $person) {
-            $people[$userid] = $people[$userid] ?? $person;
+            if (!isset($people[$userid])) {
+                $people[$userid] = $person;
+                continue;
+            }
+            if ($people[$userid]['group'] === '' && $person['group'] !== '') {
+                $people[$userid]['group'] = $person['group'];
+            }
+            if ($people[$userid]['stage'] === '' && $person['stage'] !== '') {
+                $people[$userid]['stage'] = $person['stage'];
+            }
         }
 
         $transaction = $DB->start_delegated_transaction();

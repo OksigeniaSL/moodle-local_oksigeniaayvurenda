@@ -169,11 +169,26 @@ final class cohorts_test extends \advanced_testcase {
         $this->assertSame('teacher', $reader($profe)->readertype);
         $this->assertFalse($group($profe));
 
+        // Someone new in a cohort for a whole stage keeps its kind and stage, and the course's group gives the class.
+        $eva = $dg->create_user();
+        $dg->enrol_user($eva->id, $course->id, 'student');
+        $dg->create_group_member(['groupid' => $DB->get_field('groups', 'id', ['courseid' => $course->id]), 'userid' => $eva->id]);
+        $stage = $dg->create_cohort(['name' => 'Secundaria']);
+        cohort_add_member($stage->id, $eva->id);
+        cohorts::save($entityid, [$stage->id => ['type' => 'student', 'stage' => 'Secundaria', 'group' => false]]);
+        cohorts::sync($entityid);
+        $this->assertSame('3º A', $group($eva));
+        $this->assertSame(
+            'Secundaria',
+            $DB->get_field('local_oksigeniaayvurenda_member', 'stage', ['readerid' => $reader($eva)->id])
+        );
+        cohorts::save($entityid, []);
+
         courses::save($entityid, []);
         $this->assertSame(0, cohorts::sync($entityid)['total']);
         courses::save($entityid, [$course->id => ['stage' => '', 'group' => false]]);
         $this->assertSame(
-            ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 3, 'overlimit' => 0],
+            ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 4, 'overlimit' => 0],
             cohorts::sync($entityid)
         );
     }

@@ -56,9 +56,10 @@ Options:
   --herald-sex=f|m      Whether the herald is a woman or a man
   --herald-pack=ZIP     The herald's own drawings (retrato, saluda, senala, celebra, lee, piensa, marioneta)
   --cohorts=LIST        The cohorts its readers come from, replacing the ones chosen: each by its id number or its
-                        exact name, = the kind of reader (student, teacher, staff, family), and then, optional, :the
-                        stage and :group when the cohort's name is the readers' class.
-                        Example: \"INF=student:Infantil,PRI=student:Primaria,CLAUSTRO=teacher\"
+                        exact name (ending in * for every one that starts so), = the kind of reader (student, teacher,
+                        staff, family), and then, optional, :the stage (guessed from the name when left out) and
+                        :group when the cohort's name is the readers' class.
+                        Example: \"ESO *=student:ESO:group,BAC *=student:Bachillerato:group,CLAUSTRO=teacher\"
   -h, --help            This help
 
 Example:
