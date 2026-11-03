@@ -448,6 +448,14 @@ final class libraries {
         if (array_key_exists('controlletter', $data)) {
             $settings['controlletter'] = !empty($data['controlletter']);
         }
+        if (array_key_exists('copyfrom', $data)) {
+            $from = cataloguer::first_code((string) $data['copyfrom']);
+            if ($from === null) {
+                unset($settings['copyfrom']);
+            } else {
+                $settings['copyfrom'] = $from;
+            }
+        }
         if (isset($data['reviewsign'])) {
             $settings['reviewsign'] = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : 'name';
         }

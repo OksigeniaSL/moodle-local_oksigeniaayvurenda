@@ -44,7 +44,10 @@ if ($unrecognized) {
 if ($options['help'] || $options['file'] === '') {
     echo "Imports the catalogue of an Abies Web export into a library: records, authors, classification, subjects,
 publishers, places, copies with their own codes, types and loan rules. Run it again with a newer export to bring the
-library up to date: nothing is duplicated. With --with-readers, also the readers and their loans; they come
+library up to date: nothing is duplicated, and what the library did since wins. A row changed here is left as it is,
+one deleted here does not come back, nor a reader erased at their request; a copy made here with the code of its Abies
+label is taken as that copy, with its record; and a copy made here whose new code Abies printed on another copy gets a
+new code, listed at the end to print its label. With --with-readers, also the readers and their loans; they come
 without an account, to be matched with the site's accounts in «Readers». An old export, from before the library
 lent with Ayvurenda, goes with --as-returned: what it had out comes in on the shelf and as returned.
 
@@ -129,16 +132,23 @@ if ($libraryid === 0 || !$DB->record_exists('local_oksigeniaayvurenda_library', 
 }
 
 $start = microtime(true);
-$stats = (new abies_import(
+$importer = new abies_import(
     $libraryid,
     !$options['without-notes'],
     (bool) $options['with-readers'],
     (bool) $options['as-returned']
-))->run($export);
+);
+$stats = $importer->run($export);
 $entityid = (int) $DB->get_field('local_oksigeniaayvurenda_library', 'entityid', ['id' => $libraryid]);
 \local_oksigeniaayvurenda\local\catalogue::purge($entityid);
 cli_heading('Imported into library ' . $libraryid . ' of centre ' . $entityid . ' in ' . round(microtime(true) - $start, 1) .
     ' s' . (\local_oksigeniaayvurenda\local\access::closed($entityid) ? ', open only to its staff' : ''));
 foreach ($stats as $table => $counts) {
     cli_writeln($table . ': ' . json_encode($counts));
+}
+if ($importer->relabelled()) {
+    cli_heading('Copies made here with a code Abies printed on another copy: print their new label');
+    foreach ($importer->relabelled() as [$old, $new, $title]) {
+        cli_writeln($old . ' -> ' . $new . "\t" . $title);
+    }
 }

@@ -527,6 +527,7 @@
         <FIELD NAME="externalid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="localid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="hash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Fingerprint of the row as it came, to skip unchanged rows on a new import"/>
+        <FIELD NAME="localhash" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Fingerprint of what the library can change in the row, as the import left it: a row changed here since is not overwritten"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

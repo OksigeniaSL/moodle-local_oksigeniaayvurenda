@@ -16,6 +16,7 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\control_letter;
 use local_oksigeniaayvurenda\core\marc\describer;
 use local_oksigeniaayvurenda\core\marc\marcxml;
 
@@ -115,6 +116,44 @@ final class cataloguer_test extends \advanced_testcase {
 
         $this->expectException(\invalid_parameter_exception::class);
         cataloguer::add($library, [], ['count' => 1, 'barcodes' => ['100042S']], $existing[0]['id']);
+    }
+
+    /**
+     * When an old program kept printing labels after the copy that came, new copy codes start where the centre says,
+     * keep their zeros and letter, and follow the highest there is once past it; also those of an import.
+     */
+    public function test_first_code(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $gen->create_item(['libraryid' => $library->id, 'barcode' => '020661K']);
+        $this->assertNull(cataloguer::first_code(' 0 '));
+        $this->assertSame('020800', cataloguer::first_code('020800T'));
+        libraries::update_entity((int) $library->entityid, ['controlletter' => 1, 'copyfrom' => '020800']);
+        $settings = json_decode($DB->get_field(self::T . 'entity', 'settings', ['id' => $library->entityid]), true);
+        $this->assertSame('020800', $settings['copyfrom']);
+
+        $added = cataloguer::add($library, $this->description(), ['count' => 2]);
+        $this->assertSame([control_letter::append('020800'), control_letter::append('020801')], $added['barcodes']);
+        $gen->create_item(['libraryid' => $library->id, 'barcode' => '020900Q']);
+        $this->assertSame([control_letter::append('020901')], cataloguer::add(
+            $library,
+            [],
+            ['count' => 1],
+            $added['recordid']
+        )['barcodes']);
+
+        $other = $gen->create_library();
+        libraries::update_entity((int) $other->entityid, ['copyfrom' => '5000']);
+        $stats = (new import\catalogue_import($other, 'csv'))->run([['key' => 'a', 'description' => $this->description(),
+            'items' => [['barcode' => '']]]]);
+        $this->assertSame(1, $stats['newcodes']);
+        $this->assertTrue($DB->record_exists(self::T . 'item', ['entityid' => $other->entityid, 'barcode' => '005000']));
+
+        libraries::update_entity((int) $library->entityid, ['copyfrom' => '']);
+        $settings = json_decode($DB->get_field(self::T . 'entity', 'settings', ['id' => $library->entityid]), true);
+        $this->assertArrayNotHasKey('copyfrom', $settings);
     }
 
     /**

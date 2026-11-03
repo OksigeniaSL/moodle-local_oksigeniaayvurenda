@@ -37,7 +37,8 @@ final class centre_setup {
      *
      * @param int $entityid
      * @param array $changes Any of: name, library (the central library's name), closed (bool), memory, herald (names),
-     *     heraldsex (f or m), heraldpack (path of a zip with the herald's own drawings), cohorts (as cohorts() reads it).
+     *     heraldsex (f or m), heraldpack (path of a zip with the herald's own drawings), cohorts (as cohorts() reads it),
+     *     copyfrom (the number new copy codes start at; 0 for after the highest there is).
      * @return string[] What changed, in words for the console.
      */
     public static function apply(int $entityid, array $changes): array {
@@ -70,6 +71,17 @@ final class centre_setup {
                 throw new \moodle_exception('error', 'error', '', null, 'The zip cannot be opened: ' . $changes['heraldpack']);
             }
             $done[] = 'herald drawings: ' . $kept . ' files';
+        }
+        if (isset($changes['copyfrom'])) {
+            $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+            $from = cataloguer::first_code((string) $changes['copyfrom']);
+            if ($from === null) {
+                unset($settings['copyfrom']);
+            } else {
+                $settings['copyfrom'] = $from;
+            }
+            $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+            $done[] = 'new copy codes: ' . ($from === null ? 'after the highest there is' : 'from ' . $from);
         }
         if (isset($changes['cohorts'])) {
             $cohorts = self::cohorts($entityid, (string) $changes['cohorts']);
@@ -156,6 +168,9 @@ final class centre_setup {
                 ($c['group'] ? ', its name is the group' : ''), $cohorts),
             'readers' => $DB->count_records(self::T . 'reader', ['entityid' => $entityid, 'status' => 'active']),
             'copies' => $DB->count_records(self::T . 'item', ['entityid' => $entityid]),
+            'new codes' => ($from = cataloguer::below_first_code($entityid))
+                ? 'from ' . str_pad((string) ((int) $from[0] + 1), strlen($from[0]), '0', STR_PAD_LEFT)
+                : 'after the highest there is',
         ];
     }
 

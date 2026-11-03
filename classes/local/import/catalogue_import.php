@@ -242,6 +242,11 @@ final class catalogue_import {
             }
         }
         $rows->close();
+        // Where the centre said its new codes start.
+        foreach (\local_oksigeniaayvurenda\local\cataloguer::below_first_code($entityid) as $below) {
+            $this->lastcode = max($this->lastcode, (int) $below);
+            $this->digits = max($this->digits, strlen($below));
+        }
         foreach (
             $DB->get_records_menu(
                 self::T . 'authority',

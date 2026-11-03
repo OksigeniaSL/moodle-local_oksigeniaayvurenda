@@ -172,4 +172,221 @@ final class abies_import_test extends \advanced_testcase {
         (new abies_import($library->id, true, true, true))->run($this->export());
         $this->assertSame('onloan', $DB->get_field(self::T . 'item', 'status', ['id' => $item->id]));
     }
+
+    /**
+     * An export of the fixtures with some changes, as a newer export would bring them.
+     *
+     * @param array $changes Text to replace => new text.
+     * @return export_reader
+     */
+    private function newer(array $changes): export_reader {
+        $fixture = file_get_contents(__DIR__ . '/../../fixtures/abies/small.xml');
+        foreach ($changes as $from => $to) {
+            $this->assertSame(1, substr_count($fixture, $from), $from);
+            $fixture = str_replace($from, $to, $fixture);
+        }
+        $file = make_request_directory() . '/newer.xml';
+        file_put_contents($file, $fixture);
+        return new export_reader($file);
+    }
+
+    /**
+     * What an import leaves is its starting point: the fingerprint it keeps is the one the rows give back, also when
+     * it is taken afterwards from what there is, as the upgrade does.
+     */
+    public function test_starting_point(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        (new abies_import($library->id, true, true))->run($this->export());
+        $written = $DB->get_records_menu(self::T . 'source', ['entityid' => $library->entityid], 'id', 'id, localhash');
+        $this->assertCount(0, array_filter($written, fn($hash) => $hash === null));
+        $DB->set_field(self::T . 'source', 'localhash', null, ['entityid' => $library->entityid]);
+        abies_import::settle((int) $library->entityid);
+        $this->assertSame(
+            $written,
+            $DB->get_records_menu(self::T . 'source', ['entityid' => $library->entityid], 'id', 'id, localhash')
+        );
+    }
+
+    /**
+     * A newer export updates what was not changed here and leaves what was: a record, a copy and a loan.
+     */
+    public function test_changed_here(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        (new abies_import($library->id, true, true))->run($this->export());
+        // From before this version: the upgrade takes what there is as the starting point.
+        $DB->set_field(self::T . 'source', 'localhash', null, ['entityid' => $library->entityid]);
+        abies_import::settle((int) $library->entityid);
+
+        $record = fn(string $title) => $DB->get_record(self::T . 'record', ['entityid' => $library->entityid,
+            'title' => $title], '*', MUST_EXIST);
+        $item = fn(string $code) => $DB->get_record(self::T . 'item', ['entityid' => $library->entityid,
+            'barcode' => $code], '*', MUST_EXIST);
+        $faro = $record('El faro dormido');
+        $DB->set_field(self::T . 'record', 'notes', 'Corregida aquí', ['id' => $faro->id]);
+        $DB->set_field(self::T . 'item', 'callnumber3', 'FAR', ['id' => $item('100000L')->id]);
+        $out = $DB->get_record_select(
+            self::T . 'loan',
+            'itemid = ? AND timereturned IS NULL',
+            [$item('100001C')->id],
+            '*',
+            MUST_EXIST
+        );
+        $DB->set_field(self::T . 'loan', 'timereturned', time(), ['id' => $out->id]);
+
+        $stats = (new abies_import($library->id, true, true))->run($this->newer([
+            '<Titulo>El faro dormido</Titulo>' => '<Titulo>El faro despierto</Titulo>',
+            '<Titulo>La isla de los animales</Titulo>' => '<Titulo>La isla de las aves</Titulo>',
+            'Observaciones="Donado por la clase de 4.º"' => 'Observaciones="Donado por la clase de 5.º"',
+            'NumRegistro="2001"' => 'NumRegistro="2002"',
+            'FechaCalculada="2025-09-27"' => 'FechaCalculada="2025-10-04"',
+        ]));
+
+        $this->assertSame(1, $stats['record']['changedhere']);
+        $this->assertSame(1, $stats['record']['updated']);
+        $this->assertSame(1, $stats['item']['changedhere']);
+        $this->assertSame(1, $stats['item']['updated']);
+        $this->assertSame(1, $stats['loan']['changedhere']);
+        $kept = $DB->get_record(self::T . 'record', ['id' => $faro->id], '*', MUST_EXIST);
+        $this->assertSame('El faro dormido', $kept->title);
+        $this->assertSame('Corregida aquí', $kept->notes);
+        $this->assertSame('La isla de las aves', $record('La isla de las aves')->title);
+        $this->assertSame('Donado por la clase de 4.º', $item('100000L')->notes);
+        $this->assertSame('2002', $item('100001C')->regnumber);
+        $this->assertNotNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $out->id]));
+        $this->assertSame(4, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+
+        // What was updated is the new starting point: the same export again changes nothing.
+        $again = (new abies_import($library->id, true, true))->run($this->newer([
+            '<Titulo>El faro dormido</Titulo>' => '<Titulo>El faro despierto</Titulo>',
+            '<Titulo>La isla de los animales</Titulo>' => '<Titulo>La isla de las aves</Titulo>',
+            'Observaciones="Donado por la clase de 4.º"' => 'Observaciones="Donado por la clase de 5.º"',
+            'NumRegistro="2001"' => 'NumRegistro="2002"',
+            'FechaCalculada="2025-09-27"' => 'FechaCalculada="2025-10-04"',
+        ]));
+        $this->assertArrayNotHasKey('updated', $again['record']);
+        $this->assertArrayNotHasKey('updated', $again['item']);
+    }
+
+    /**
+     * What was deleted here does not come back with a newer export: a record with its copies, and a loan.
+     */
+    public function test_deleted_here(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        (new abies_import($library->id, true, true))->run($this->export());
+        $isla = $DB->get_record(
+            self::T . 'record',
+            ['entityid' => $library->entityid, 'title' => 'La isla de los animales'],
+            '*',
+            MUST_EXIST
+        );
+        $DB->delete_records(self::T . 'item', ['recordid' => $isla->id]);
+        $DB->delete_records(self::T . 'recauth', ['recordid' => $isla->id]);
+        $DB->delete_records(self::T . 'record', ['id' => $isla->id]);
+        $returned = $DB->get_record_select(
+            self::T . 'loan',
+            'libraryid = ? AND timereturned IS NOT NULL',
+            [$library->id],
+            '*',
+            IGNORE_MULTIPLE
+        );
+        $DB->delete_records(self::T . 'loan', ['id' => $returned->id]);
+        $loans = $DB->count_records(self::T . 'loan', ['libraryid' => $library->id]);
+
+        $stats = (new abies_import($library->id, true, true))->run($this->newer([
+            '<Titulo>La isla de los animales</Titulo>' => '<Titulo>La isla de las aves</Titulo>',
+        ]));
+
+        $this->assertSame(1, $stats['record']['deletedhere']);
+        $this->assertSame(2, $stats['item']['deletedhere']);
+        $this->assertSame(1, $stats['loan']['deletedhere']);
+        $this->assertFalse($DB->record_exists_select(
+            self::T . 'record',
+            'entityid = ? AND title LIKE ?',
+            [$library->entityid, 'La isla%']
+        ));
+        $this->assertFalse($DB->record_exists(self::T . 'item', ['entityid' => $library->entityid, 'barcode' => '100005A']));
+        $this->assertSame($loans, $DB->count_records(self::T . 'loan', ['libraryid' => $library->id]));
+    }
+
+    /**
+     * Books added here before the export came: a copy with the code of its Abies label is that copy, with its record;
+     * a record with the ISBN of one of the export is that record; and a copy that got the code Abies printed on
+     * another book gets a new one, so that the printed label wins.
+     */
+    public function test_made_here(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $faro = $generator->create_record(['entityid' => $library->entityid, 'title' => 'El faro dormido: una aventura']);
+        $label = $generator->create_item(['libraryid' => $library->id, 'recordid' => $faro->id, 'barcode' => '100000L']);
+        $atlas = $generator->create_record(['entityid' => $library->entityid, 'title' => 'Atlas de los mares']);
+        $clash = $generator->create_item(['libraryid' => $library->id, 'recordid' => $atlas->id, 'barcode' => '100005A']);
+
+        $importer = new abies_import($library->id);
+        $stats = $importer->run($this->export());
+
+        $this->assertSame(1, $stats['record']['madehere']);
+        $this->assertSame(1, $stats['item']['madehere']);
+        $this->assertSame(1, $stats['item']['relabelled']);
+        $this->assertSame(5, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+        $this->assertSame(1, $DB->count_records_select(
+            self::T . 'record',
+            'entityid = ? AND title LIKE ?',
+            [$library->entityid, 'El faro%']
+        ));
+        // The copy with the label is the same one, and the other copy of the record joins it.
+        $this->assertSame((int) $label->id, (int) $DB->get_field(self::T . 'item', 'id', ['entityid' => $library->entityid,
+            'barcode' => '100000L']));
+        $this->assertSame((int) $faro->id, (int) $DB->get_field(self::T . 'item', 'recordid', ['entityid' => $library->entityid,
+            'barcode' => '100001C']));
+        // The printed label wins; the copy made here is listed to be relabelled.
+        $isla = $DB->get_field(self::T . 'record', 'id', ['entityid' => $library->entityid,
+            'title' => 'La isla de los animales']);
+        $this->assertEquals($isla, $DB->get_field(self::T . 'item', 'recordid', ['entityid' => $library->entityid,
+            'barcode' => '100005A']));
+        [[$old, $new, $title]] = $importer->relabelled();
+        $this->assertSame(['100005A', 'Atlas de los mares'], [$old, $title]);
+        $this->assertSame($new, $DB->get_field(self::T . 'item', 'barcode', ['id' => $clash->id]));
+        $this->assertStringStartsWith('100006', $new);
+
+        // Only the ISBN: the record made here is that one, and its copies come into it.
+        $other = $generator->create_library();
+        $made = $generator->create_record(['entityid' => $other->entityid, 'title' => 'Faro', 'isbn' => '9780306406157']);
+        $stats = (new abies_import($other->id))->run($this->export());
+        $this->assertSame(1, $stats['record']['madehere']);
+        $this->assertSame(4, $DB->count_records(self::T . 'record', ['entityid' => $other->entityid]));
+        $this->assertSame(2, $DB->count_records(self::T . 'item', ['recordid' => $made->id]));
+        $this->assertSame('Faro', $DB->get_field(self::T . 'record', 'title', ['id' => $made->id]));
+    }
+
+    /**
+     * A reader erased at their request does not come back with the export, and only a fingerprint of their Abies id
+     * stays.
+     */
+    public function test_erased_reader(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        (new abies_import($library->id, true, true))->run($this->export());
+        $reader = $DB->get_record(
+            self::T . 'reader',
+            ['entityid' => $library->entityid, 'cardcode' => '10002C'],
+            '*',
+            MUST_EXIST
+        );
+        \local_oksigeniaayvurenda\local\erasure::reader((int) $reader->id);
+        $this->assertFalse($DB->record_exists(self::T . 'source', ['entityid' => $library->entityid, 'tablename' => 'reader',
+            'externalid' => '70003']));
+
+        $stats = (new abies_import($library->id, true, true))->run($this->export());
+        $this->assertSame(1, $stats['reader']['erased']);
+        $this->assertFalse($DB->record_exists(self::T . 'reader', ['entityid' => $library->entityid, 'firstname' => 'Antigua']));
+    }
 }

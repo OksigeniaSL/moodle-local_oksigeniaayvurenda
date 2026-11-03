@@ -550,5 +550,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110316, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110319) {
+        // What came from Abies, as it is now, is where what the library changes here starts: a new import leaves it.
+        $table = new xmldb_table('local_oksigeniaayvurenda_source');
+        $field = new xmldb_field('localhash', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'hash');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        \local_oksigeniaayvurenda\local\import\abies_import::settle();
+        upgrade_plugin_savepoint(true, 2026110319, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

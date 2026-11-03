@@ -32,7 +32,7 @@ use local_oksigeniaayvurenda\local\centre_setup;
 
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'list' => false, 'entity' => 0, 'name' => null, 'library' => null, 'closed' => null, 'memory' => null,
-        'herald' => null, 'herald-sex' => null, 'herald-pack' => null, 'cohorts' => null],
+        'herald' => null, 'herald-sex' => null, 'herald-pack' => null, 'cohorts' => null, 'first-copy-code' => null],
     ['h' => 'help']
 );
 
@@ -60,6 +60,8 @@ Options:
                         staff, family), and then, optional, :the stage (guessed from the name when left out) and
                         :group when the cohort's name is the readers' class.
                         Example: \"ESO *=student:ESO:group,BAC *=student:Bachillerato:group,CLAUSTRO=teacher\"
+  --first-copy-code=N   The number the new copy codes start at, when an old program kept printing labels after the
+                        copy that came: the one after its last label. 0: after the highest there is
   -h, --help            This help
 
 Example:
@@ -102,6 +104,7 @@ $changes = array_filter([
     'heraldsex' => $options['herald-sex'],
     'heraldpack' => $options['herald-pack'],
     'cohorts' => $options['cohorts'],
+    'copyfrom' => $options['first-copy-code'],
 ], fn($value) => $value !== null);
 
 try {

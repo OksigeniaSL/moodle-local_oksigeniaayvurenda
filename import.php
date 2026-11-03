@@ -109,7 +109,22 @@ if (data_submitted() && confirm_sesskey()) {
                     $figures[] = $figure($stats['reader']['created'] ?? 0, 'importfigreaders');
                     $figures[] = $figure($stats['loan']['created'] ?? 0, 'importfigloans');
                 }
-                $data['done'] = ['figures' => $figures, 'again' => $str('importabiesagain'), 'newcodes' => ''];
+                $here = 0;
+                $made = 0;
+                foreach ($stats as $counts) {
+                    $here += ($counts['changedhere'] ?? 0) + ($counts['deletedhere'] ?? 0) + ($counts['erased'] ?? 0);
+                    $made += $counts['madehere'] ?? 0;
+                }
+                $again = [$str('importabiesagain')];
+                if ($here) {
+                    $again[] = $str('importabieshere');
+                }
+                if ($made) {
+                    $again[] = $str('importabiesmade');
+                }
+                $relabelled = array_map(fn($copy) => $copy[0] . ' → ' . $copy[1], $importer->relabelled());
+                $data['done'] = ['figures' => $figures, 'again' => implode(' ', $again),
+                    'newcodes' => $relabelled ? $str('importrelabelled', implode(', ', $relabelled)) : ''];
                 catalogue::purge($entityid);
             } else {
                 $map = array_filter(

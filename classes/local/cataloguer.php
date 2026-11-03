@@ -98,6 +98,32 @@ final class cataloguer {
     }
 
     /**
+     * The number the new copy codes of a centre start at, as written (with its zeros, without its control letter); null
+     * for none: then they follow the highest there is.
+     *
+     * @param string $raw
+     * @return string|null
+     */
+    public static function first_code(string $raw): ?string {
+        $from = preg_replace('/[^0-9]/', '', preg_replace('/[A-Za-z]$/', '', trim($raw)));
+        return $from === '' || (int) $from === 0 ? null : $from;
+    }
+
+    /**
+     * The code just before the first new copy code of a centre, to count from it with the codes there are: when an old
+     * program kept printing labels after the copy that came, the new codes start after its last label.
+     *
+     * @param int $entityid
+     * @return string[] That code, or nothing when the centre did not say where they start.
+     */
+    public static function below_first_code(int $entityid): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $from = self::first_code((string) ($settings['copyfrom'] ?? ''));
+        return $from === null ? [] : [str_pad((string) ((int) $from - 1), strlen($from), '0', STR_PAD_LEFT)];
+    }
+
+    /**
      * Adds a book: a new record if it has none, and its copies.
      *
      * @param \stdClass $library
@@ -149,7 +175,7 @@ final class cataloguer {
         if (count($barcodes) < $count) {
             $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
             $barcodes = array_merge($barcodes, card_codes::next(
-                array_merge($existing, $barcodes),
+                array_merge($existing, $barcodes, self::below_first_code($entityid)),
                 $count - count($barcodes),
                 !empty($settings['controlletter']),
                 6

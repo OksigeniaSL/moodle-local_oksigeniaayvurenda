@@ -117,8 +117,16 @@ final class erasure {
         foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'readerid' => $readerid]) as $voice) {
             voices::remove($voice);
         }
-        // The key their origin knew them by (a file number, an email, a name) goes too.
-        $DB->delete_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $readerid]);
+        // The key their origin knew them by (a file number, an email, a name) goes too. From an Abies export, which can
+        // be imported again, only a fingerprint of it stays, so that they do not come back with it.
+        foreach ($DB->get_records(self::T . 'source', ['tablename' => 'reader', 'localid' => $readerid]) as $source) {
+            if ($source->system === 'abies') {
+                $DB->update_record(self::T . 'source', (object) ['id' => $source->id, 'localid' => 0, 'hash' => null,
+                    'localhash' => null, 'externalid' => import\abies_import::erased((string) $source->externalid)]);
+            } else {
+                $DB->delete_records(self::T . 'source', ['id' => $source->id]);
+            }
+        }
         $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $readerid]);
         foreach ($drawn as $id) {
             foreach (['reviewdrawing', 'reviewvoice'] as $area) {

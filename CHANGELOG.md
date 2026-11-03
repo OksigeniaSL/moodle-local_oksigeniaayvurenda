@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.151.0
+
+- Importing a newer Abies export over a library already in use keeps what the library did since: a record, copy, reader
+  or loan changed here is left as it is (the rest is brought up to date), one deleted here does not come back, and a
+  reader erased at their request does not come back either (only a fingerprint of their Abies id stays).
+- A book added here before the export came is not repeated: a copy made with the code of its Abies label is that copy,
+  with its record, when both are the same book; and a record made here with the ISBN of one of the export is that
+  record. A copy made here whose new code Abies had printed on another book gets a new code, and the import lists it to
+  print its label: the printed label wins.
+- Updating a record from Abies keeps what was added to it here, such as its cover.
+- The upgrade takes what came from Abies, as it is now, as the starting point.
+
 ## 0.150.3
 
 - Matching readers who came without an account (from Abies, from a list) compares their group only when it is this

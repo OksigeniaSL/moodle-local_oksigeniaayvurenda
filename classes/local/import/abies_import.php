@@ -26,6 +26,8 @@ namespace local_oksigeniaayvurenda\local\import;
 
 use local_oksigeniaayvurenda\core\abies\export_reader;
 use local_oksigeniaayvurenda\core\abies\mapper;
+use local_oksigeniaayvurenda\core\isbn;
+use local_oksigeniaayvurenda\core\readers\card_codes;
 use local_oksigeniaayvurenda\core\text;
 use local_oksigeniaayvurenda\local\years;
 
@@ -36,8 +38,10 @@ use local_oksigeniaayvurenda\local\years;
  * loans, out and returned; readers come without an account, to be matched with the site's accounts afterwards.
  *
  * It can run again with a newer export: each row keeps its Abies id and a fingerprint, so a second run adds what is
- * new, updates what changed, leaves the rest alone and never duplicates. While a library still works in Abies, Abies
- * wins on what comes from it; what only exists in Ayvurenda is not touched.
+ * new, updates what changed in Abies, leaves the rest alone and never duplicates. What the library did here since wins:
+ * a row changed here is not touched, one deleted here does not come back (nor a reader erased at their request), and a
+ * copy made here with the code of its Abies label is recognised as that copy, with its record. A copy made here whose
+ * new code Abies had printed on another copy gets a new code, to be relabelled: the printed label wins.
  */
 final class abies_import {
     /** @var string Prefix of the plugin tables. */
@@ -45,6 +49,17 @@ final class abies_import {
 
     /** @var string Name of the source system. */
     private const SYSTEM = 'abies';
+
+    /** @var array What the library can change in each kind of row: a row where any of it changed here is left alone. */
+    private const OWN = [
+        'authority' => ['kind', 'code', 'label', 'extra'],
+        'record' => ['doctype', 'title', 'subtitle', 'responsibility', 'isbn', 'edition', 'pubplace', 'pubyear', 'lang',
+            'extent', 'summary', 'notes'],
+        'item' => ['recordid', 'barcode', 'regnumber', 'callnumber1', 'callnumber2', 'callnumber3', 'locationid', 'itemtype',
+            'status', 'notes', 'timeacquired'],
+        'reader' => ['cardcode', 'readertype', 'firstname', 'lastname', 'email'],
+        'loan' => ['itemid', 'readerid', 'yearid', 'groupname', 'timeloaned', 'timedue', 'timereturned', 'renewals'],
+    ];
 
     /** @var int */
     private int $entityid;
@@ -64,8 +79,29 @@ final class abies_import {
     /** @var int */
     private int $now;
 
-    /** @var array Local id of each Abies id, by table: [table][externalid] => [localid, hash]. */
+    /** @var array Local id of each Abies id, by table: [table][externalid] => [localid, hash, hash as left here, source id]. */
     private array $map = [];
+
+    /** @var array The rows there are now, by table: [table][id] => true. */
+    private array $here = [];
+
+    /** @var array The rows that came from Abies, by table: [table][localid] => true. */
+    private array $fromabies = [];
+
+    /** @var array Copy codes of the entity: code => item id. */
+    private array $codes = [];
+
+    /** @var array Records made here, by ISBN: isbn => record ids. */
+    private array $madeisbns = [];
+
+    /** @var array Title and ISBN of each record of the export, by Abies id. */
+    private array $docs = [];
+
+    /** @var array Copies made here that had a code Abies printed on another copy: [code, new code, title]. */
+    private array $relabelled = [];
+
+    /** @var string[] The codes of the copies of the export, which a new code made here must not take. */
+    private array $exportcodes = [];
 
     /** @var array Authority id by kind and normalised label (or code, for classes). */
     private array $labels = [];
@@ -101,6 +137,8 @@ final class abies_import {
     public function run(export_reader $export): array {
         global $DB;
         $this->stats = [];
+        $this->relabelled = [];
+        $this->exportcodes = [];
         $this->load_maps();
         $transaction = $DB->start_delegated_transaction();
         $authorlinks = $this->authorities($export);
@@ -124,14 +162,48 @@ final class abies_import {
     private function load_maps(): void {
         global $DB;
         $this->map = ['authority' => [], 'record' => [], 'item' => [], 'reader' => [], 'loan' => []];
+        $this->fromabies = ['authority' => [], 'record' => [], 'item' => [], 'reader' => [], 'loan' => []];
         $rows = $DB->get_recordset(
             self::T . 'source',
             ['entityid' => $this->entityid, 'system' => self::SYSTEM],
             '',
-            'id, tablename, externalid, localid, hash'
+            'id, tablename, externalid, localid, hash, localhash'
         );
         foreach ($rows as $row) {
-            $this->map[$row->tablename][$row->externalid] = [(int) $row->localid, $row->hash];
+            $this->map[$row->tablename][$row->externalid] = [(int) $row->localid, $row->hash, $row->localhash, (int) $row->id];
+            $this->fromabies[$row->tablename][(int) $row->localid] = true;
+        }
+        $rows->close();
+        // What there is now, to tell what was deleted here.
+        foreach (['authority', 'record', 'item', 'reader'] as $table) {
+            $this->here[$table] = array_fill_keys(
+                $DB->get_fieldset_select(self::T . $table, 'id', 'entityid = :entityid', ['entityid' => $this->entityid]),
+                true
+            );
+        }
+        $this->here['loan'] = array_fill_keys($DB->get_fieldset_sql(
+            'SELECT l.id FROM {' . self::T . 'loan} l JOIN {' . self::T . 'library} b ON b.id = l.libraryid
+              WHERE b.entityid = :entityid',
+            ['entityid' => $this->entityid]
+        ), true);
+        $this->codes = [];
+        $rows = $DB->get_recordset(self::T . 'item', ['entityid' => $this->entityid], '', 'id, barcode');
+        foreach ($rows as $row) {
+            $this->codes[strtoupper((string) $row->barcode)] = (int) $row->id;
+        }
+        $rows->close();
+        $this->madeisbns = [];
+        $rows = $DB->get_recordset_select(
+            self::T . 'record',
+            'entityid = :entityid AND isbn IS NOT NULL',
+            ['entityid' => $this->entityid],
+            '',
+            'id, isbn'
+        );
+        foreach ($rows as $row) {
+            if (!isset($this->fromabies['record'][(int) $row->id])) {
+                $this->madeisbns[isbn::normalise((string) $row->isbn) ?? (string) $row->isbn][] = (int) $row->id;
+            }
         }
         $rows->close();
         $this->labels = [];
@@ -231,6 +303,15 @@ final class abies_import {
     private function records(export_reader $export, array $authorlinks): void {
         global $DB;
         $seen = [];
+        // The codes of the copies of each record, to recognise a record made here by the label of one of its copies.
+        $codesof = [];
+        foreach ($export->items() as $item) {
+            $code = strtoupper(trim($item['CodigoEjemplar'] ?? ''));
+            if ($code !== '') {
+                $codesof[$item['IdRegistro'] ?? ''][] = $code;
+                $this->exportcodes[] = $code;
+            }
+        }
         foreach ($export->documents() as $doc) {
             $seen[$doc['id']] = true;
             $mapped = mapper::record($doc);
@@ -263,20 +344,30 @@ final class abies_import {
             if ($data['title'] === '') {
                 $data['title'] = '?';
             }
-            [$recordid, $changed] = $this->upsert_tracked('record', $doc['id'], $data, $links);
+            $this->docs[$doc['id']] = ['title' => $data['title'], 'isbn' => $mapped['record']['isbn']];
+            // Each author once in each role, in the order they came.
+            $rows = [];
+            $done = [];
+            foreach ($links as $order => [$authorityid, $role]) {
+                if (isset($done[$authorityid . '/' . $role])) {
+                    continue;
+                }
+                $done[$authorityid . '/' . $role] = true;
+                $rows[] = ['authorityid' => $authorityid, 'role' => $role, 'sortorder' => $order];
+            }
+            $own = array_map(fn($row) => [$row['authorityid'], $row['role']], $rows);
+            if (!isset($this->map['record'][$doc['id']])) {
+                $made = $this->made_here($doc['id'], $codesof[$doc['id']] ?? []);
+                if ($made !== null) {
+                    $this->adopt('record', $doc['id'], $made, sha1(json_encode([$data, $links])));
+                    continue;
+                }
+            }
+            [$recordid, $changed] = $this->upsert_tracked('record', $doc['id'], $data, $links, [], $own);
             if ($changed) {
                 $DB->delete_records(self::T . 'recauth', ['recordid' => $recordid]);
-                $rows = [];
-                $done = [];
-                foreach ($links as $order => [$authorityid, $role]) {
-                    if (isset($done[$authorityid . '/' . $role])) {
-                        continue;
-                    }
-                    $done[$authorityid . '/' . $role] = true;
-                    $rows[] = ['recordid' => $recordid, 'authorityid' => $authorityid, 'role' => $role, 'sortorder' => $order];
-                }
                 if ($rows) {
-                    $DB->insert_records(self::T . 'recauth', $rows);
+                    $DB->insert_records(self::T . 'recauth', array_map(fn($row) => ['recordid' => $recordid] + $row, $rows));
                 }
             }
         }
@@ -289,63 +380,114 @@ final class abies_import {
     }
 
     /**
-     * The copies, with their own codes. A code already taken by another copy gets the Abies id after it, to be
-     * relabelled; the import reports it.
+     * The copies, with their own codes. A code that another copy of the export already took gets the Abies id after
+     * it, to be relabelled; the import reports it. A copy made here with the code of an Abies label is that copy, when
+     * both are the same book; when they are not, the label Abies printed wins and the copy made here gets a new code.
      *
      * @param export_reader $export
      */
     private function items(export_reader $export): void {
         global $DB;
         $types = $export->item_types();
-        $barcodes = $DB->get_records_menu(self::T . 'item', ['entityid' => $this->entityid], '', 'barcode, id');
         $tz = \local_oksigeniaayvurenda\local\zones::of($this->entityid);
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $this->entityid]), true) ?: [];
         $seen = [];
         foreach ($export->items() as $item) {
             $abiesid = $item['Id'] ?? '';
-            $recordid = $this->map['record'][$item['IdRegistro'] ?? ''][0] ?? null;
-            if ($recordid === null) {
+            $docid = $item['IdRegistro'] ?? '';
+            if (!isset($this->map['record'][$docid])) {
                 $this->count('item', 'skipped');
                 continue;
             }
             $seen[$abiesid] = true;
+            $recordid = $this->live('record', $docid);
+            if ($recordid === null) {
+                // Its record was deleted here.
+                $this->count('item', 'deletedhere');
+                continue;
+            }
             $known = $this->map['item'][$abiesid][0] ?? null;
             $barcode = strtoupper(trim($item['CodigoEjemplar'] ?? ''));
-            if ($barcode === '' || (isset($barcodes[$barcode]) && (int) $barcodes[$barcode] !== $known)) {
+            $holder = $barcode !== '' ? ($this->codes[$barcode] ?? null) : null;
+            if ($known === null && $holder !== null && !isset($this->fromabies['item'][$holder])) {
+                $mine = $DB->get_record(self::T . 'item', ['id' => $holder], 'id, recordid', MUST_EXIST);
+                if ((int) $mine->recordid === $recordid || $this->alike($docid, (int) $mine->recordid)) {
+                    $data = $this->item_data($item, $recordid, $barcode, $types, $tz);
+                    $this->adopt('item', $abiesid, $holder, sha1(json_encode([$data, []])));
+                    continue;
+                }
+                $new = card_codes::next(
+                    array_merge(
+                        array_keys($this->codes),
+                        $this->exportcodes,
+                        \local_oksigeniaayvurenda\local\cataloguer::below_first_code($this->entityid)
+                    ),
+                    1,
+                    !empty($settings['controlletter'])
+                )[0];
+                $DB->update_record(self::T . 'item', (object) ['id' => $holder, 'barcode' => $new, 'timemodified' => $this->now]);
+                $this->codes[$new] = $holder;
+                unset($this->codes[$barcode]);
+                $this->relabelled[] = [$barcode, $new,
+                    (string) $DB->get_field(self::T . 'record', 'title', ['id' => $mine->recordid])];
+                $this->count('item', 'relabelled');
+                $holder = null;
+            }
+            if ($barcode === '' || ($holder !== null && $holder !== $known)) {
                 $barcode = ($barcode === '' ? 'ABIES' : $barcode) . '-' . $abiesid;
                 $this->count('item', 'recoded');
             }
-            $location = null;
-            if (($item['Ubicacion'] ?? '-1') !== '-1') {
-                $location = $this->map['authority']['Ubicacion:' . $item['Ubicacion']][0] ?? null;
-            }
-            $acquired = null;
-            if (!empty($item['Fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $item['Fecha'])) {
-                $acquired = (new \DateTimeImmutable(substr($item['Fecha'], 0, 10), $tz))->getTimestamp();
-            }
-            $data = [
-                'recordid' => $recordid,
-                'barcode' => $barcode,
-                'regnumber' => ($item['NumRegistro'] ?? '') !== '' ? $item['NumRegistro'] : null,
-                'callnumber1' => ($item['Signatura1'] ?? '') !== '' ? $item['Signatura1'] : null,
-                'callnumber2' => ($item['Signatura2'] ?? '') !== '' ? $item['Signatura2'] : null,
-                'callnumber3' => ($item['Signatura3'] ?? '') !== '' ? $item['Signatura3'] : null,
-                'locationid' => $location,
-                'itemtype' => mapper::item_type($types[$item['IdTipoEjemplar'] ?? ''] ?? 'normal'),
-                'status' => mapper::item_status($item['Estado'] ?? null),
-                'notes' => $this->withnotes && ($item['Observaciones'] ?? '') !== '' ? $item['Observaciones'] : null,
-                'timeacquired' => $acquired,
-            ];
+            $data = $this->item_data($item, $recordid, $barcode, $types, $tz);
             $oninsert = ['libraryid' => $this->libraryid];
             if ($this->asreturned) {
-                // What an old export had out is on the shelf now, or the desk says otherwise; a copy already here keeps
-                // whatever the desk has done with it since.
-                unset($data['status']);
+                // What an old export had out is on the shelf now, or the desk says otherwise.
                 $oninsert['status'] = 'available';
             }
             [$itemid] = $this->upsert_tracked('item', $abiesid, $data, [], $oninsert);
-            $barcodes[$barcode] = $itemid;
+            if ($itemid) {
+                $this->codes[$barcode] = $itemid;
+            }
         }
         $this->stats['item']['missing'] = count(array_diff_key($this->map['item'], $seen));
+    }
+
+    /**
+     * A copy of the export as a row of the copies table. From an old export, without its status: a copy already here
+     * keeps whatever the desk has done with it since.
+     *
+     * @param array $item
+     * @param int $recordid
+     * @param string $barcode
+     * @param array $types
+     * @param \DateTimeZone $tz
+     * @return array
+     */
+    private function item_data(array $item, int $recordid, string $barcode, array $types, \DateTimeZone $tz): array {
+        $location = null;
+        if (($item['Ubicacion'] ?? '-1') !== '-1') {
+            $location = $this->map['authority']['Ubicacion:' . $item['Ubicacion']][0] ?? null;
+        }
+        $acquired = null;
+        if (!empty($item['Fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $item['Fecha'])) {
+            $acquired = (new \DateTimeImmutable(substr($item['Fecha'], 0, 10), $tz))->getTimestamp();
+        }
+        $data = [
+            'recordid' => $recordid,
+            'barcode' => $barcode,
+            'regnumber' => ($item['NumRegistro'] ?? '') !== '' ? $item['NumRegistro'] : null,
+            'callnumber1' => ($item['Signatura1'] ?? '') !== '' ? $item['Signatura1'] : null,
+            'callnumber2' => ($item['Signatura2'] ?? '') !== '' ? $item['Signatura2'] : null,
+            'callnumber3' => ($item['Signatura3'] ?? '') !== '' ? $item['Signatura3'] : null,
+            'locationid' => $location,
+            'itemtype' => mapper::item_type($types[$item['IdTipoEjemplar'] ?? ''] ?? 'normal'),
+            'status' => mapper::item_status($item['Estado'] ?? null),
+            'notes' => $this->withnotes && ($item['Observaciones'] ?? '') !== '' ? $item['Observaciones'] : null,
+            'timeacquired' => $acquired,
+        ];
+        if ($this->asreturned) {
+            unset($data['status']);
+        }
+        return $data;
     }
 
     /**
@@ -423,6 +565,11 @@ final class abies_import {
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $this->entityid]), true) ?: [];
         foreach ($export->readers() as $row) {
             $abiesid = $row['Id'] ?? '';
+            if (!isset($this->map['reader'][$abiesid]) && isset($this->map['reader'][self::erased($abiesid)])) {
+                // Erased here at their request: they do not come back.
+                $this->count('reader', 'erased');
+                continue;
+            }
             $known = $this->map['reader'][$abiesid][0] ?? null;
             $code = strtoupper(trim($row['CodLector'] ?? ''));
             $holder = $code !== '' ? (int) ($codes[$code] ?? 0) : 0;
@@ -448,6 +595,9 @@ final class abies_import {
                 'email' => ($row['Email'] ?? '') !== '' ? $row['Email'] : null,
             ];
             [$readerid] = $this->upsert_tracked('reader', $abiesid, $data, [], ['status' => 'active']);
+            if (!$readerid) {
+                continue;
+            }
             $codes[$code] = $readerid;
             $fromabies[$readerid] = true;
             $group = $groups[$row['Curso'] ?? ''] ?? '';
@@ -476,8 +626,8 @@ final class abies_import {
         // An old export's loans still out come back on its day: they are history, not books a year late.
         $back = $this->asreturned ? $this->export_moment($export) : null;
         foreach ($export->loans() as $row) {
-            $itemid = $this->map['item'][$row['IdEjemplar'] ?? ''][0] ?? null;
-            $readerid = $this->map['reader'][$row['IdLector'] ?? ''][0] ?? null;
+            $itemid = $this->live('item', $row['IdEjemplar'] ?? '');
+            $readerid = $this->live('reader', $row['IdLector'] ?? '');
             $loaned = $date($row['Fecha'] ?? null);
             if ($itemid === null || $readerid === null || $loaned === null || ($row['Anulado'] ?? '0') === '1') {
                 $this->count('loan', 'skipped');
@@ -560,56 +710,276 @@ final class abies_import {
     }
 
     /**
-     * Inserts or updates a row that came from Abies; a row whose fingerprint did not change is left alone.
+     * Inserts or updates a row that came from Abies; a row whose fingerprint did not change is left alone, and so is
+     * one changed here since it came. One deleted here stays deleted, except an authority, which the records need.
      *
      * @param string $table
      * @param string $externalid
      * @param array $data Fields from Abies.
      * @param array $alsohash More data that counts for the fingerprint (the links of a record).
      * @param array $oninsert Fields only set when the row is new.
-     * @return array [local id, whether it was written].
+     * @param array|null $links The authorities of a record, each once, as they are written: [authority id, role].
+     * @return array [local id, or 0 when it was deleted here; whether it was written].
      */
     private function upsert_tracked(
         string $table,
         string $externalid,
         array $data,
         array $alsohash = [],
-        array $oninsert = []
+        array $oninsert = [],
+        ?array $links = null
     ): array {
         global $DB;
         $hash = sha1(json_encode([$data, $alsohash]));
         $known = $this->map[$table][$externalid] ?? null;
-        if ($known !== null && $known[1] === $hash) {
+        $exists = $known !== null && isset($this->here[$table][$known[0]]);
+        if ($known !== null && !$exists && $table !== 'authority') {
+            $this->count($table, 'deletedhere');
+            return [0, false];
+        }
+        if ($exists && $known[1] === $hash) {
             $this->count($table, 'unchanged');
             return [$known[0], false];
         }
-        if ($known !== null && $DB->record_exists(self::T . $table, ['id' => $known[0]])) {
+        if ($exists) {
+            $row = $DB->get_record(self::T . $table, ['id' => $known[0]], '*', MUST_EXIST);
+            if ($known[2] !== null && self::own_hash($table, $row, $this->links_here($table, $known[0])) !== $known[2]) {
+                $this->count($table, 'changedhere');
+                return [$known[0], false];
+            }
+            if ($table === 'record' && isset($data['extra'])) {
+                // What was added here, as its cover, stays.
+                $data['extra'] = json_encode(array_merge(
+                    json_decode((string) $row->extra, true) ?: [],
+                    json_decode($data['extra'], true) ?: []
+                ));
+            }
             $DB->update_record(self::T . $table, (object) (['id' => $known[0], 'timemodified' => $this->now] + $data));
-            $DB->set_field(self::T . 'source', 'hash', $hash, ['entityid' => $this->entityid, 'system' => self::SYSTEM,
-                'tablename' => $table, 'externalid' => $externalid]);
-            $this->map[$table][$externalid] = [$known[0], $hash];
+            $own = self::own_hash($table, $data + (array) $row, $links);
+            $DB->update_record(self::T . 'source', (object) ['id' => $known[3], 'hash' => $hash, 'localhash' => $own]);
+            $this->map[$table][$externalid] = [$known[0], $hash, $own, $known[3]];
             $this->count($table, 'updated');
             return [$known[0], true];
         }
         if ($known !== null) {
-            // The row was deleted here: forget the old link and bring it back.
-            $DB->delete_records(self::T . 'source', ['entityid' => $this->entityid, 'system' => self::SYSTEM,
-                'tablename' => $table, 'externalid' => $externalid]);
+            // An authority deleted here: forget the old link and bring it back.
+            $DB->delete_records(self::T . 'source', ['id' => $known[3]]);
         }
-        $id = (int) $DB->insert_record(self::T . $table, (object) (['entityid' => $this->entityid,
-            'timecreated' => $this->now, 'timemodified' => $this->now] + $oninsert + $data));
-        $DB->insert_record(self::T . 'source', [
+        $row = ['entityid' => $this->entityid, 'timecreated' => $this->now, 'timemodified' => $this->now] + $oninsert + $data;
+        $id = (int) $DB->insert_record(self::T . $table, (object) $row);
+        $own = self::own_hash($table, $row, $links);
+        $sourceid = (int) $DB->insert_record(self::T . 'source', [
             'entityid' => $this->entityid,
             'system' => self::SYSTEM,
             'tablename' => $table,
             'externalid' => $externalid,
             'localid' => $id,
             'hash' => $hash,
+            'localhash' => $own,
             'timecreated' => $this->now,
         ]);
-        $this->map[$table][$externalid] = [$id, $hash];
+        $this->map[$table][$externalid] = [$id, $hash, $own, $sourceid];
+        $this->here[$table][$id] = true;
+        $this->fromabies[$table][$id] = true;
         $this->count($table, 'created');
         return [$id, true];
+    }
+
+    /**
+     * Takes a row made here as the one of the export, as it is: from now on it updates like one that came from Abies.
+     *
+     * @param string $table record or item.
+     * @param string $externalid
+     * @param int $localid
+     * @param string $hash The fingerprint of what the export has.
+     */
+    private function adopt(string $table, string $externalid, int $localid, string $hash): void {
+        global $DB;
+        $row = $DB->get_record(self::T . $table, ['id' => $localid], '*', MUST_EXIST);
+        $own = self::own_hash($table, $row, $this->links_here($table, $localid));
+        $sourceid = (int) $DB->insert_record(self::T . 'source', [
+            'entityid' => $this->entityid,
+            'system' => self::SYSTEM,
+            'tablename' => $table,
+            'externalid' => $externalid,
+            'localid' => $localid,
+            'hash' => $hash,
+            'localhash' => $own,
+            'timecreated' => $this->now,
+        ]);
+        $this->map[$table][$externalid] = [$localid, $hash, $own, $sourceid];
+        $this->fromabies[$table][$localid] = true;
+        $this->count($table, 'madehere');
+    }
+
+    /**
+     * The record made here that is this one of the export: the one of a copy made here with the code of one of its
+     * Abies labels, when it is the same book; else the only one made here with its ISBN.
+     *
+     * @param string $docid
+     * @param string[] $codes The codes of its copies in the export.
+     * @return int|null
+     */
+    private function made_here(string $docid, array $codes): ?int {
+        global $DB;
+        foreach ($codes as $code) {
+            $holder = $this->codes[$code] ?? null;
+            if ($holder === null || isset($this->fromabies['item'][$holder])) {
+                continue;
+            }
+            $recordid = (int) $DB->get_field(self::T . 'item', 'recordid', ['id' => $holder]);
+            if (!isset($this->fromabies['record'][$recordid]) && $this->alike($docid, $recordid)) {
+                return $recordid;
+            }
+        }
+        $isbn = $this->docs[$docid]['isbn'] ?? null;
+        $made = array_values(array_filter(
+            $this->madeisbns[$isbn ?? ''] ?? [],
+            fn($id) => !isset($this->fromabies['record'][$id])
+        ));
+        return $isbn !== null && count($made) === 1 ? $made[0] : null;
+    }
+
+    /**
+     * Whether a record here is the same book as one of the export: the same ISBN when both have one, else titles that
+     * share most of their words, or all those of the shorter one.
+     *
+     * @param string $docid
+     * @param int $recordid
+     * @return bool
+     */
+    private function alike(string $docid, int $recordid): bool {
+        global $DB;
+        $doc = $this->docs[$docid] ?? null;
+        $record = $DB->get_record(self::T . 'record', ['id' => $recordid], 'id, title, isbn');
+        if ($doc === null || !$record) {
+            return false;
+        }
+        $isbn = trim((string) $record->isbn) !== '' ? (isbn::normalise((string) $record->isbn) ?? trim($record->isbn)) : null;
+        if ($doc['isbn'] !== null && $isbn !== null) {
+            return $doc['isbn'] === $isbn;
+        }
+        [$a, $b] = [text::words((string) $doc['title']), text::words((string) $record->title)];
+        if (!$a || !$b) {
+            return false;
+        }
+        $shared = count(array_intersect($a, $b));
+        return $shared === min(count($a), count($b)) || $shared / count(array_unique(array_merge($a, $b))) >= 0.5;
+    }
+
+    /**
+     * The authorities of a record as they are here, in their order; null for any other table.
+     *
+     * @param string $table
+     * @param int $id
+     * @return array|null [authority id, role]
+     */
+    private function links_here(string $table, int $id): ?array {
+        global $DB;
+        if ($table !== 'record') {
+            return null;
+        }
+        return array_map(
+            fn($row) => [(int) $row->authorityid, $row->role],
+            array_values($DB->get_records(self::T . 'recauth', ['recordid' => $id], 'sortorder, id', 'id, authorityid, role'))
+        );
+    }
+
+    /**
+     * The fingerprint of what the library can change in a row, as the database gives it back.
+     *
+     * @param string $table
+     * @param array|\stdClass $row
+     * @param array|null $links The authorities of a record: [authority id, role].
+     * @return string
+     */
+    public static function own_hash(string $table, $row, ?array $links = null): string {
+        $row = (array) $row;
+        $values = [];
+        foreach (self::OWN[$table] as $field) {
+            $values[] = isset($row[$field]) ? (string) $row[$field] : null;
+        }
+        if ($links !== null) {
+            $values[] = array_map(fn($link) => (int) $link[0] . '/' . (string) ($link[1] ?? ''), $links);
+        }
+        return sha1(json_encode($values));
+    }
+
+    /**
+     * The mark an Abies reader erased at their request leaves, so that no later import brings them back: a fingerprint
+     * of their Abies id, never the id itself.
+     *
+     * @param string $externalid
+     * @return string
+     */
+    public static function erased(string $externalid): string {
+        return 'erased:' . sha1(get_site_identifier() . ':' . $externalid);
+    }
+
+    /**
+     * Takes what came from Abies into the entities as it is now as their starting point: from then on, what changes
+     * here is the library's. For what came before that was kept.
+     *
+     * @param int|null $entityid One entity, or every one.
+     */
+    public static function settle(?int $entityid = null): void {
+        global $DB;
+        $where = 's.system = :system AND s.tablename = :tablename AND s.localhash IS NULL';
+        $params = ['system' => self::SYSTEM];
+        if ($entityid !== null) {
+            $where .= ' AND s.entityid = :entityid';
+            $params['entityid'] = $entityid;
+        }
+        foreach (array_keys(self::OWN) as $table) {
+            $links = [];
+            if ($table === 'record') {
+                $rows = $DB->get_recordset_sql(
+                    'SELECT ra.id, ra.recordid, ra.authorityid, ra.role
+                       FROM {' . self::T . 'recauth} ra
+                       JOIN {' . self::T . "source} s ON s.localid = ra.recordid
+                      WHERE $where
+                   ORDER BY ra.recordid, ra.sortorder, ra.id",
+                    $params + ['tablename' => $table]
+                );
+                foreach ($rows as $row) {
+                    $links[(int) $row->recordid][] = [(int) $row->authorityid, $row->role];
+                }
+                $rows->close();
+            }
+            $rows = $DB->get_recordset_sql(
+                'SELECT s.id AS sourceid, t.*
+                   FROM {' . self::T . 'source} s
+                   JOIN {' . self::T . $table . "} t ON t.id = s.localid
+                  WHERE $where",
+                $params + ['tablename' => $table]
+            );
+            foreach ($rows as $row) {
+                $own = self::own_hash($table, $row, $table === 'record' ? ($links[(int) $row->id] ?? []) : null);
+                $DB->set_field(self::T . 'source', 'localhash', $own, ['id' => $row->sourceid]);
+            }
+            $rows->close();
+        }
+    }
+
+    /**
+     * Copies made here that had a code Abies printed on another copy, with the new code they got.
+     *
+     * @return array [code they had, new code, title]
+     */
+    public function relabelled(): array {
+        return $this->relabelled;
+    }
+
+    /**
+     * The local id of a row of the export, when it is still here.
+     *
+     * @param string $table
+     * @param string $externalid
+     * @return int|null
+     */
+    private function live(string $table, string $externalid): ?int {
+        $id = $this->map[$table][$externalid][0] ?? null;
+        return $id !== null && isset($this->here[$table][$id]) ? $id : null;
     }
 
     /**
