@@ -119,4 +119,31 @@ final class matching_test extends \advanced_testcase {
         $this->assertSame('left', $DB->get_field(self::T . 'reader', 'status', ['id' => $piles['none'][0]]));
         $this->assertSame(1, count(matching::piles((int) $library->entityid)['doubt']));
     }
+
+    /**
+     * An export from an earlier year brings last year's groups: the same name in this year's class is still sure; a
+     * different group this year is still worth a look.
+     */
+    public function test_last_years_group(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $dg = $this->getDataGenerator();
+        $library = $dg->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        // Abies had her in «1 PRI A» the year of the export; she has moved up since.
+        $cohort = $dg->create_cohort(['name' => '2 PRI A']);
+        $inventada = $dg->create_user(['firstname' => 'Inventada', 'lastname' => 'Lectora Uno']);
+        cohort_add_member($cohort->id, $inventada->id);
+        cohorts::save($entityid, [$cohort->id => ['type' => 'student', 'stage' => 'Primaria', 'group' => true]]);
+        cohorts::sync($entityid);
+        (new abies_import($library->id, true, true))->run($this->export());
+        $abiesana = (int) $DB->get_field(self::T . 'reader', 'id', ['cardcode' => '10000H']);
+        $this->assertSame((int) $inventada->id, matching::piles($entityid)['sure'][$abiesana] ?? null);
+
+        $DB->insert_record(self::T . 'member', ['readerid' => $abiesana, 'groupname' => '6 PRI C', 'source' => 'csv',
+            'yearid' => (int) years::around($entityid, time())->id, 'timecreated' => time()]);
+        $piles = matching::piles($entityid);
+        $this->assertArrayNotHasKey($abiesana, $piles['sure']);
+        $this->assertContains((int) $inventada->id, $piles['doubt'][$abiesana]);
+    }
 }

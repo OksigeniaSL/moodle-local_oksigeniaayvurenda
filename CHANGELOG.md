@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.150.3
+
+- Matching readers who came without an account (from Abies, from a list) compares their group only when it is this
+  year's: an export from an earlier year brings last year's groups, and the same name in this year's class is sure, not
+  a doubt. A different group this year is still worth a look.
+
 ## 0.150.2
 
 - Readers from a cohort for a whole stage (not a class) take their class from the group of a chosen course, keeping the

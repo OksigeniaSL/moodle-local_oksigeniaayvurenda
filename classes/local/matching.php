@@ -123,15 +123,15 @@ final class matching {
         foreach ($rows as $row) {
             $readers[$row->id] = ['id' => (int) $row->id, 'name' => trim($row->firstname . ' ' . $row->lastname), 'group' => ''];
         }
-        // The latest group of each: members ordered by year, the last one wins.
+        // Their group this year, when they have one: an older export's groups are last year's, and the accounts are in
+        // this year's, so a different one says nothing against the same name.
         $members = $DB->get_recordset_sql(
             "SELECT m.id, m.readerid, m.groupname
                FROM {" . self::T . "member} m
-               JOIN {" . self::T . "year} y ON y.id = m.yearid
                JOIN {" . self::T . "reader} r ON r.id = m.readerid
-              WHERE r.entityid = :entityid AND r.userid IS NULL
-           ORDER BY y.timestart, m.id",
-            ['entityid' => $entityid]
+              WHERE r.entityid = :entityid AND r.userid IS NULL AND m.yearid = :yearid
+           ORDER BY m.id",
+            ['entityid' => $entityid, 'yearid' => (int) years::around($entityid, time())->id]
         );
         foreach ($members as $member) {
             if (isset($readers[$member->readerid])) {
