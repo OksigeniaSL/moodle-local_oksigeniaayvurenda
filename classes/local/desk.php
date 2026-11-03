@@ -178,17 +178,28 @@ final class desk {
         if ($reader) {
             return $this->answer('reader', 'ok', null, null, ['reader' => $this->reader_panel((int) $reader->id)]);
         }
-        // Not a code: perhaps the name of a reader who came without the card.
-        if (preg_match('/\p{L}{3,}/u', $code)) {
+        // Not a code: with a reader open, the title of a book without a label (or whose label does not read); without
+        // one, the name of a reader who came without the card, or the title of a book that comes back.
+        $words = (bool) preg_match('/\p{L}{3,}/u', $code);
+        if ($words) {
+            if ($readerid) {
+                $books = $this->find_books($code, true);
+                if ($books) {
+                    return $this->answer('choose', 'look', 'deskchoosebooks', $code, ['books' => $books,
+                        'readerid' => $readerid]);
+                }
+            }
             $found = $this->find_readers($code);
-            if (count($found) === 1) {
+            if (!$readerid && count($found) === 1) {
                 return $this->answer('reader', 'ok', null, null, ['reader' => $this->reader_panel($found[0]['id'])]);
             }
-            if ($found) {
-                return $this->answer('choose', 'look', 'deskchoose', $code, ['readers' => $found]);
+            $out = $readerid ? [] : $this->find_books($code, false);
+            if ($found || $out) {
+                return $this->answer('choose', 'look', $found ? 'deskchoose' : 'deskchooseout', $code, ['readers' => $found,
+                    'out' => $out]);
             }
         }
-        return $this->answer('unknown', 'no', 'deskunknown', $code);
+        return $this->answer('unknown', 'no', $readerid && $words ? 'deskunknownbook' : 'deskunknown', $code);
     }
 
     /**
@@ -252,6 +263,158 @@ final class desk {
         $DB->update_record(self::T . 'item', (object) ['id' => $from->id, 'status' => 'available', 'timemodified' => $this->now]);
         $DB->update_record(self::T . 'item', (object) ['id' => $to->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         $transaction->allow_commit();
+    }
+
+    /**
+     * Books of this library whose title, author or subject has every word typed: those with a copy on the shelf, to
+     * lend, or the loans out of them, to bring back.
+     *
+     * @param string $text
+     * @param bool $shelf On the shelf (true) or out (false).
+     * @param int $limit
+     * @return array[] On the shelf: recordid, title, author, free (how many), callnumber. Out: loanid, title, who, due.
+     */
+    public function find_books(string $text, bool $shelf, int $limit = 8): array {
+        global $DB;
+        $words = \local_oksigeniaayvurenda\core\text::words($text);
+        if (!$words) {
+            return [];
+        }
+        $conditions = [];
+        $params = ['libraryid' => $this->library->id, 'entityid' => $this->library->entityid];
+        foreach ($words as $i => $word) {
+            $conditions[] = $DB->sql_like('r.searchtext', ':w' . $i, false, false);
+            $params['w' . $i] = '%' . $DB->sql_like_escape($word) . '%';
+        }
+        $match = implode(' AND ', $conditions);
+        if ($shelf) {
+            $rows = $DB->get_records_sql(
+                "SELECT r.id, r.title, COUNT(i.id) AS free, MIN(i.callnumber1) AS line1, MIN(i.callnumber2) AS line2
+                   FROM {" . self::T . "record} r
+                   JOIN {" . self::T . "item} i ON i.recordid = r.id
+                  WHERE r.entityid = :entityid AND i.libraryid = :libraryid AND i.status = 'available' AND $match
+                    AND NOT EXISTS (SELECT 1 FROM {" . self::T . "loan} l WHERE l.itemid = i.id AND l.timereturned IS NULL)
+               GROUP BY r.id, r.title",
+                $params,
+                0,
+                200
+            );
+            $rows = self::best_first($rows, $words, $limit);
+            return array_values(array_map(fn($row) => [
+                'recordid' => (int) $row->id,
+                'title' => format_string($row->title, true, ['escape' => false]),
+                'author' => $this->author((int) $row->id),
+                'free' => (int) $row->free,
+                'callnumber' => trim($row->line1 . ' ' . $row->line2),
+            ], $rows));
+        }
+        $rows = $DB->get_records_sql(
+            "SELECT l.id, l.readerid, l.timedue, r.title
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL AND r.entityid = :entityid AND $match
+           ORDER BY l.timeloaned",
+            $params,
+            0,
+            200
+        );
+        $rows = self::best_first($rows, $words, $limit);
+        $out = [];
+        foreach ($rows as $row) {
+            if (!$this->allowed((int) $row->readerid)) {
+                continue;
+            }
+            $who = $this->reader((int) $row->readerid);
+            $out[] = [
+                'loanid' => (int) $row->id,
+                'title' => format_string($row->title, true, ['escape' => false]),
+                'who' => $who['name'] . ($who['group'] !== '' ? ' · ' . $who['group'] : ''),
+                'due' => $this->date((int) $row->timedue),
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * The books found, those with the words in their title first: the words as they were typed, then all of them, then
+     * the rest (a word in the author or a subject); shorter titles first.
+     *
+     * @param \stdClass[] $rows Each with a title.
+     * @param string[] $words
+     * @param int $limit
+     * @return \stdClass[]
+     */
+    private static function best_first(array $rows, array $words, int $limit): array {
+        $phrase = implode(' ', $words);
+        $rank = function (\stdClass $row) use ($words, $phrase): array {
+            $title = \local_oksigeniaayvurenda\core\text::normalise((string) $row->title);
+            $all = !array_diff($words, \local_oksigeniaayvurenda\core\text::words((string) $row->title));
+            return [str_contains(' ' . $title . ' ', ' ' . $phrase . ' ') ? 0 : ($all ? 1 : 2), strlen($title), $title];
+        };
+        usort($rows, fn($a, $b) => $rank($a) <=> $rank($b));
+        return array_slice($rows, 0, $limit);
+    }
+
+    /**
+     * Lends a book chosen by its title: the first copy on the shelf that can go. When the record has more than one, which
+     * went is not known: the loan says so, and the copy that comes back is taken as the one.
+     *
+     * @param int $recordid
+     * @param int $readerid
+     * @param bool $force
+     * @return array As scan() answers.
+     */
+    public function lend_record(int $recordid, int $readerid, bool $force = false): array {
+        global $DB;
+        $copies = $DB->get_records_sql(
+            "SELECT i.*
+               FROM {" . self::T . "item} i
+              WHERE i.recordid = :recordid AND i.libraryid = :libraryid AND i.status = 'available'
+                AND NOT EXISTS (SELECT 1 FROM {" . self::T . "loan} l WHERE l.itemid = i.id AND l.timereturned IS NULL)
+           ORDER BY i.barcode",
+            ['recordid' => $recordid, 'libraryid' => $this->library->id]
+        );
+        if (!$copies) {
+            return $this->answer('stop', 'no', 'desknocopy', format_string(
+                (string) $DB->get_field(self::T . 'record', 'title', ['id' => $recordid, 'entityid' => $this->library->entityid]),
+                true,
+                ['escape' => false]
+            ));
+        }
+        $several = $DB->count_records(self::T . 'item', ['recordid' => $recordid, 'libraryid' => $this->library->id]) > 1;
+        $answer = null;
+        foreach ($copies as $item) {
+            $answer = $this->lend($item, $readerid, $force);
+            if ($answer['kind'] === 'lent') {
+                if ($several) {
+                    $DB->set_field(self::T . 'loan', 'copyguessed', 1, ['id' => $answer['loanid']]);
+                }
+                return $answer;
+            }
+            // One only for the room says so; the next may go.
+            if (($answer['reason'] ?? '') !== policy::NOT_LENDABLE) {
+                break;
+            }
+        }
+        return $answer + ['recordid' => $recordid];
+    }
+
+    /**
+     * Brings back a loan chosen from the list, for a book without a label.
+     *
+     * @param int $loanid
+     * @param int $readerid The reader open at the desk, 0 if none.
+     * @return array As scan() answers.
+     */
+    public function give_back_loan(int $loanid, int $readerid = 0): array {
+        global $DB;
+        $loan = $this->loan($loanid);
+        if ($loan->timereturned !== null) {
+            return $this->answer('stop', 'no', 'deskalreadyback');
+        }
+        $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
+        return $this->give_back($item, $loan, $readerid);
     }
 
     /**
@@ -822,7 +985,27 @@ final class desk {
     }
 
     /**
-     * The title of a copy's record.
+     * The first author of a record, as the desk shows it next to the title.
+     *
+     * @param int $recordid
+     * @return string
+     */
+    private function author(int $recordid): string {
+        global $DB;
+        $author = $DB->get_field_sql(
+            "SELECT a.label
+               FROM {" . self::T . "recauth} ra
+               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+              WHERE ra.recordid = :recordid AND a.kind = 'author'
+           ORDER BY ra.sortorder",
+            ['recordid' => $recordid],
+            IGNORE_MULTIPLE
+        );
+        return $author ? format_string($author, true, ['escape' => false]) : '';
+    }
+
+    /**
+     * The title of a copy's record, as the desk says it.
      *
      * @param \stdClass $item
      * @return string

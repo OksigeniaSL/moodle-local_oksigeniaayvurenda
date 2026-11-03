@@ -35,6 +35,7 @@ final class howto {
         'renew' => ['desk.php', 'desk', ''],
         'offline' => ['desk.php', 'desk', ''],
         'room' => ['desk.php', 'desk', ''],
+        'nolabel' => ['desk.php', 'desk', ''],
         'add' => ['add.php', 'catalogue', 'add'],
         'material' => ['material.php', 'catalogue', 'material'],
         'free' => ['free.php', 'catalogue', 'free'],

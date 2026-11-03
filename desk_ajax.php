@@ -55,6 +55,17 @@ switch ($action) {
             optional_param('force', false, PARAM_BOOL)
         );
         break;
+    case 'lendrecord':
+        // A book without a label, chosen by its title.
+        $answer = $desk->lend_record(
+            required_param('recordid', PARAM_INT),
+            required_param('readerid', PARAM_INT),
+            optional_param('force', false, PARAM_BOOL)
+        );
+        break;
+    case 'giveback':
+        $answer = $desk->give_back_loan(required_param('loanid', PARAM_INT), optional_param('readerid', 0, PARAM_INT));
+        break;
     case 'reader':
         $answer = ['kind' => 'reader', 'sound' => 'ok', 'message' => '',
             'reader' => $desk->reader_panel(required_param('readerid', PARAM_INT))];

@@ -211,6 +211,11 @@
             var item = el('li', loan.late ? 'ayv-loan ayv-loan-late' : 'ayv-loan');
             item.appendChild(el('span', 'ayv-loan-title', loan.title));
             item.appendChild(el('span', 'ayv-loan-due', loan.late || loan.due));
+            // A book without a label comes back with a touch.
+            item.appendChild(button(str.deskgiveback, 'ayv-line-quiet ayv-loan-back', function(b) {
+                b.disabled = true;
+                choose({action: 'giveback', loanid: loan.id, readerid: reader.id}, loan.title);
+            }));
             list.appendChild(item);
         });
         panel.appendChild(list);
@@ -390,10 +395,33 @@
                 b.disabled = true;
                 li.classList.add('ayv-line-undone');
                 actions.textContent = '';
-                enqueue(answer.code, true);
+                if (answer.recordid) {
+                    // A book chosen by its title goes the same way, now despite the reason.
+                    choose({action: 'lendrecord', recordid: answer.recordid, readerid: answer.readerid || readerid, force: 1}, '');
+                } else {
+                    enqueue(answer.code, true);
+                }
             }));
-        } else if (answer.kind === 'choose' && answer.readers) {
-            answer.readers.forEach(function(reader) {
+        } else if (answer.kind === 'choose') {
+            // A book without a label, by its title: on the shelf to lend, or out to bring back.
+            (answer.books || []).forEach(function(book) {
+                var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
+                    return book.free;
+                });
+                actions.appendChild(bookChoice(book.title, [book.author, free, book.callnumber], function() {
+                    li.classList.add('ayv-line-undone');
+                    actions.textContent = '';
+                    choose({action: 'lendrecord', recordid: book.recordid, readerid: answer.readerid || readerid}, book.title);
+                }));
+            });
+            (answer.out || []).forEach(function(loan) {
+                actions.appendChild(bookChoice(loan.title, [loan.who, loan.due], function() {
+                    li.classList.add('ayv-line-undone');
+                    actions.textContent = '';
+                    choose({action: 'giveback', loanid: loan.loanid, readerid: readerid}, loan.title);
+                }));
+            });
+            (answer.readers || []).forEach(function(reader) {
                 var choice = button(reader.name + (reader.group ? ' · ' + reader.group : ''), 'ayv-line-choice', function() {
                     post({action: 'reader', readerid: reader.id}).then(function(found) {
                         li.classList.add('ayv-line-undone');
@@ -416,6 +444,33 @@
         log.insertBefore(li, log.firstChild);
         lastline = li;
         return li;
+    };
+
+    // A book to choose: its title, and below what tells it apart.
+    var bookChoice = function(title, more, onclick) {
+        var choice = button('', 'ayv-line-choice ayv-line-book', function(b) {
+            b.disabled = true;
+            onclick(b);
+        });
+        choice.appendChild(el('span', 'ayv-line-book-title', title));
+        var rest = more.filter(function(part) {
+            return part;
+        }).join(' · ');
+        if (rest) {
+            choice.appendChild(el('span', 'ayv-line-book-more', rest));
+        }
+        return choice;
+    };
+
+    // What the desk answers to a choice is shown as a scan's answer.
+    var choose = function(params, what) {
+        post(params).then(function(answer) {
+            add(answer, what);
+            return answer;
+        }).catch(function() {
+            tone('no');
+            line({kind: 'stop', sound: 'no', message: str.deskerror}, what);
+        });
     };
 
     var add = function(answer, code) {

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.153.0
+
+- A book without a label, by its title, at the desk: with the reader open, a word of the title or the author brings up
+  the books on the shelf (those with it in their title first, each with its author, how many are on the shelf and its
+  call number) and a touch lends one; with no reader open, it brings up the loans out of it and who has them, and a
+  touch brings one back. A reader's name still opens the reader.
+- «Return» next to each book in the reader's list at the desk.
+- A record with several copies lent by its title marks the loan as not knowing which copy went: the copy that comes
+  back is taken as the one (as with the loans written on paper).
+- «How do I…?»: lending or taking back a book without a label.
+
 ## 0.152.0
 
 - Loans written on paper while the desk could not be used (`cli/paper_loans.php`): a list saved as CSV, with who, what,

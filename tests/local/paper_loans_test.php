@@ -56,7 +56,8 @@ final class paper_loans_test extends \advanced_testcase {
         $w->iker = $reader('Iker', 'Ruiz Sol', '3º B');
         $w->other = $reader('Iker', 'Ruiz Gil', '4º B');
         $book = function (string $title, array $codes, array $extra = []) use ($gen, $w, $entityid) {
-            $record = $gen->create_record(['entityid' => $entityid, 'title' => $title, 'extra' => json_encode($extra)]);
+            $record = $gen->create_record(['entityid' => $entityid, 'title' => $title, 'extra' => json_encode($extra),
+                'searchtext' => \local_oksigeniaayvurenda\core\text::normalise($title)]);
             foreach ($codes as $code) {
                 $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id, 'barcode' => $code]);
             }
@@ -186,5 +187,42 @@ final class paper_loans_test extends \advanced_testcase {
         $this->assertSame(0, (int) $closed->copyguessed);
         $this->assertSame('available', $DB->get_field(self::T . 'item', 'status', ['id' => $a->id]));
         $this->assertSame('available', $DB->get_field(self::T . 'item', 'status', ['id' => $b->id]));
+    }
+
+    /**
+     * At the desk, a book without a label by its title: with the reader open, those on the shelf to lend; without one,
+     * those out to bring back; and in the reader's list, a touch brings one back.
+     */
+    public function test_desk_titles(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $desk = new desk($w->library, 0);
+
+        $books = $desk->scan('faro dormido', (int) $w->ana->id);
+        $this->assertSame('choose', $books['kind']);
+        $this->assertSame([[(int) $w->faro->id, 2]], array_map(fn($b) => [$b['recordid'], $b['free']], $books['books']));
+        $this->assertSame('unknown', $desk->scan('ningun titulo asi', (int) $w->ana->id)['kind']);
+
+        // Two copies: which one went is not known, and the loan says so; one copy, it is known.
+        $lent = $desk->lend_record((int) $w->faro->id, (int) $w->ana->id);
+        $this->assertSame('lent', $lent['kind']);
+        $this->assertSame(1, (int) $DB->get_field(self::T . 'loan', 'copyguessed', ['id' => $lent['loanid']]));
+        $one = $desk->lend_record((int) $w->sirenita->id, (int) $w->ana->id);
+        $this->assertSame(0, (int) $DB->get_field(self::T . 'loan', 'copyguessed', ['id' => $one['loanid']]));
+        $this->assertSame('stop', $desk->lend_record((int) $w->sirenita->id, (int) $w->leo->id)['kind']);
+
+        // Without a reader, the title finds who has it, and a touch brings it back.
+        $out = $desk->scan('sirenita');
+        $this->assertSame('choose', $out['kind']);
+        $this->assertSame([(int) $one['loanid']], array_column($out['out'], 'loanid'));
+        $this->assertStringContainsString('Ana', $out['out'][0]['who']);
+        $back = $desk->give_back_loan((int) $one['loanid']);
+        $this->assertSame('returned', $back['kind']);
+        $this->assertNotNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $one['loanid']]));
+        $this->assertSame('stop', $desk->give_back_loan((int) $one['loanid'])['kind']);
+
+        // A reader's name still opens the reader.
+        $this->assertSame('reader', $desk->scan('Ruiz Sol')['kind']);
     }
 }

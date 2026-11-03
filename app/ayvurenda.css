@@ -648,6 +648,21 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-line-choice { background: var(--surface); border-color: var(--green2); }
 
+/* A book chosen by its title: the title, and below what tells it apart. */
+.ayv .ayv-line-book {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .1rem;
+    text-align: left;
+}
+
+.ayv .ayv-line-book-title { font-weight: 700; }
+
+.ayv .ayv-line-book-more { font-size: .85rem; font-weight: 400; color: var(--muted); }
+
+.ayv .ayv-loan-back { margin-left: auto; padding: .15rem .6rem; font-size: .85rem; }
+
 .ayv .ayv-staff { margin: .25rem 0 0; }
 
 /* Readers and where they come from. */

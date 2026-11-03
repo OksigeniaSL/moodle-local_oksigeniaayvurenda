@@ -60,7 +60,7 @@ foreach (
         'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint',
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
         'deskbankset', 'deskbankmissing', 'deskbankdone', 'deskbankcontract',
-        'desklendheld', 'deskroom'] as $key
+        'desklendheld', 'deskroom', 'deskgiveback', 'deskbookfree', 'deskbookfreeone'] as $key
 ) {
     $strings[$key] = $str($key);
 }
