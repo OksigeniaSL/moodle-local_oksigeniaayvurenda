@@ -421,6 +421,29 @@
                     choose({action: 'giveback', loanid: loan.loanid, readerid: readerid}, loan.title);
                 }));
             });
+            // What is on the shelf, to know it is there: lending it needs the reader first.
+            if (answer.shelf && answer.shelf.length) {
+                if ((answer.out || []).length || (answer.readers || []).length) {
+                    actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskshelfhint));
+                }
+                answer.shelf.forEach(function(book) {
+                    var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
+                        return book.free;
+                    });
+                    var row = el('div', 'ayv-line-book ayv-line-book-info');
+                    row.appendChild(el('span', 'ayv-line-book-title', book.title));
+                    row.appendChild(el('span', 'ayv-line-book-more', [book.author, free, book.callnumber].filter(function(part) {
+                        return part;
+                    }).join(' · ')));
+                    actions.appendChild(row);
+                });
+            }
+            // More than it shows: another word narrows it.
+            if (answer.more > 0) {
+                actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskmorebooks.replace('{$a}', function() {
+                    return answer.more;
+                })));
+            }
             (answer.readers || []).forEach(function(reader) {
                 var choice = button(reader.name + (reader.group ? ' · ' + reader.group : ''), 'ayv-line-choice', function() {
                     post({action: 'reader', readerid: reader.id}).then(function(found) {

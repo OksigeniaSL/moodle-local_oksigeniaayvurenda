@@ -33,7 +33,7 @@ use local_oksigeniaayvurenda\local\centre_setup;
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'list' => false, 'entity' => 0, 'name' => null, 'library' => null, 'closed' => null, 'memory' => null,
         'herald' => null, 'herald-sex' => null, 'herald-pack' => null, 'cohorts' => null, 'first-copy-code' => null,
-        'first-card-code' => null],
+        'first-card-code' => null, 'match-sure' => false],
     ['h' => 'help']
 );
 
@@ -64,6 +64,8 @@ Options:
   --first-copy-code=N   The number the new copy codes start at, when an old program kept printing labels after the
                         copy that came: the one after its last label. 0: after the highest there is
   --first-card-code=N   The same for new reader cards: the one after the last card the old program gave
+  --match-sure          Links the readers without an account (from Abies, from a list) that are sure to their account,
+                        as «Readers» does with one touch; the doubtful ones are left for that screen
   -h, --help            This help
 
 Example:
@@ -108,6 +110,7 @@ $changes = array_filter([
     'cohorts' => $options['cohorts'],
     'copyfrom' => $options['first-copy-code'],
     'cardfrom' => $options['first-card-code'],
+    'matchsure' => $options['match-sure'] ? true : null,
 ], fn($value) => $value !== null);
 
 try {

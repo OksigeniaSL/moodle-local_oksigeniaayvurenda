@@ -661,6 +661,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-line-book-more { font-size: .85rem; font-weight: 400; color: var(--muted); }
 
+/* On the shelf, without a reader open: to know it is there, not to touch. */
+.ayv .ayv-line-book-info { padding: .3rem 1rem; border: 1px dashed var(--line); border-radius: 999px; }
+
+.ayv .ayv-line-shelf-hint { flex-basis: 100%; margin: .25rem 0 0; }
+
 .ayv .ayv-loan-back { margin-left: auto; padding: .15rem .6rem; font-size: .85rem; }
 
 .ayv .ayv-staff { margin: .25rem 0 0; }

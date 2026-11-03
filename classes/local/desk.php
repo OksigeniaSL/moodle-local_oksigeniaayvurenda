@@ -61,6 +61,9 @@ final class desk {
     /** @var \DateTimeZone */
     private \DateTimeZone $tz;
 
+    /** @var int How many more books the last search by title found than it shows. */
+    private int $more = 0;
+
     /**
      * The desk of a library.
      *
@@ -186,20 +189,32 @@ final class desk {
                 $books = $this->find_books($code, true);
                 if ($books) {
                     return $this->answer('choose', 'look', 'deskchoosebooks', $code, ['books' => $books,
-                        'readerid' => $readerid]);
+                        'readerid' => $readerid, 'more' => $this->more]);
                 }
             }
             $found = $this->find_readers($code);
             if (!$readerid && count($found) === 1) {
                 return $this->answer('reader', 'ok', null, null, ['reader' => $this->reader_panel($found[0]['id'])]);
             }
+            // Without a reader: the loans out of it, to bring one back, and what is on the shelf, to know it is there.
             $out = $readerid ? [] : $this->find_books($code, false);
-            if ($found || $out) {
-                return $this->answer('choose', 'look', $found ? 'deskchoose' : 'deskchooseout', $code, ['readers' => $found,
-                    'out' => $out]);
+            $shelf = $readerid ? [] : $this->find_books($code, true);
+            $more = $this->more;
+            // When one list has the words in its titles and the other only elsewhere, the other is noise.
+            $titled = fn(array $books) => (bool) array_filter($books, fn($book) => $book['intitle']);
+            if ($titled($shelf) && !$titled($out)) {
+                $out = [];
+            } else if ($titled($out) && !$titled($shelf)) {
+                $shelf = [];
+            }
+            if ($found || $out || $shelf) {
+                $message = $found ? 'deskchoose' : ($out ? 'deskchooseout' : 'deskshelfreader');
+                return $this->answer('choose', 'look', $message, $code, ['readers' => $found, 'out' => $out,
+                    'shelf' => $shelf, 'more' => $shelf ? $more : 0]);
             }
         }
-        return $this->answer('unknown', 'no', $readerid && $words ? 'deskunknownbook' : 'deskunknown', $code);
+        $unknown = !$words ? 'deskunknown' : ($readerid ? 'deskunknownbook' : 'deskunknownwords');
+        return $this->answer('unknown', 'no', $unknown, $code);
     }
 
     /**
@@ -299,6 +314,7 @@ final class desk {
                 0,
                 200
             );
+            $this->more = self::beyond($rows, $words, $limit);
             $rows = self::best_first($rows, $words, $limit);
             return array_values(array_map(fn($row) => [
                 'recordid' => (int) $row->id,
@@ -306,6 +322,7 @@ final class desk {
                 'author' => $this->author((int) $row->id),
                 'free' => (int) $row->free,
                 'callnumber' => trim($row->line1 . ' ' . $row->line2),
+                'intitle' => $row->intitle,
             ], $rows));
         }
         $rows = $DB->get_records_sql(
@@ -331,14 +348,16 @@ final class desk {
                 'title' => format_string($row->title, true, ['escape' => false]),
                 'who' => $who['name'] . ($who['group'] !== '' ? ' · ' . $who['group'] : ''),
                 'due' => $this->date((int) $row->timedue),
+                'intitle' => $row->intitle,
             ];
         }
         return $out;
     }
 
     /**
-     * The books found, those with the words in their title first: the words as they were typed, then all of them, then
-     * the rest (a word in the author or a subject); shorter titles first.
+     * The books found, those with the words in their title first: the words as they were typed, then all of them; the
+     * rest (a word only in the author or a subject) only when no title has them all. Shorter titles first; each says
+     * whether its title has them all (intitle).
      *
      * @param \stdClass[] $rows Each with a title.
      * @param string[] $words
@@ -352,8 +371,29 @@ final class desk {
             $all = !array_diff($words, \local_oksigeniaayvurenda\core\text::words((string) $row->title));
             return [str_contains(' ' . $title . ' ', ' ' . $phrase . ' ') ? 0 : ($all ? 1 : 2), strlen($title), $title];
         };
+        foreach ($rows as $row) {
+            $row->intitle = $rank($row)[0] < 2;
+        }
+        if (array_filter($rows, fn($row) => $row->intitle)) {
+            $rows = array_filter($rows, fn($row) => $row->intitle);
+        }
         usort($rows, fn($a, $b) => $rank($a) <=> $rank($b));
         return array_slice($rows, 0, $limit);
+    }
+
+    /**
+     * How many more books a list found than it shows.
+     *
+     * @param \stdClass[] $rows
+     * @param string[] $words
+     * @param int $limit
+     * @return int
+     */
+    private static function beyond(array $rows, array $words, int $limit): int {
+        $titled = array_filter($rows, fn($row) => !array_diff($words, \local_oksigeniaayvurenda\core\text::words(
+            (string) $row->title
+        )));
+        return max(0, count($titled ?: $rows) - $limit);
     }
 
     /**

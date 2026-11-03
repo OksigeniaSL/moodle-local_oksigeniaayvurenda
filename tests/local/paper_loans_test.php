@@ -222,6 +222,30 @@ final class paper_loans_test extends \advanced_testcase {
         $this->assertNotNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $one['loanid']]));
         $this->assertSame('stop', $desk->give_back_loan((int) $one['loanid'])['kind']);
 
+        // Without a reader, what is on the shelf too, to know it is there; nothing, says so.
+        $shelf = $desk->scan('piedra filosofal');
+        $this->assertSame('choose', $shelf['kind']);
+        $this->assertSame([(int) $w->potter1->id], array_column($shelf['shelf'], 'recordid'));
+        $this->assertStringContainsString('first open the reader', $shelf['message']);
+        // One out and one on the shelf: both.
+        $both = $desk->scan('faro dormido');
+        $this->assertCount(1, $both['out']);
+        $this->assertSame([(int) $w->faro->id], array_column($both['shelf'], 'recordid'));
+        $none = $desk->scan('ningun titulo asi');
+        $this->assertSame('unknown', $none['kind']);
+        $this->assertStringContainsString('No reader and no book', $none['message']);
+
+        // More than fit: it says how many more.
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        for ($i = 1; $i <= 10; $i++) {
+            $record = $gen->create_record(['entityid' => $w->library->entityid, 'title' => 'Caperucita roja ' . $i,
+                'searchtext' => 'caperucita roja ' . $i]);
+            $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id]);
+        }
+        $many = $desk->scan('caperucita');
+        $this->assertCount(8, $many['shelf']);
+        $this->assertSame(2, $many['more']);
+
         // A reader's name still opens the reader.
         $this->assertSame('reader', $desk->scan('Ruiz Sol')['kind']);
     }

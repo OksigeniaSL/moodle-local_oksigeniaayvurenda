@@ -38,7 +38,8 @@ final class centre_setup {
      * @param int $entityid
      * @param array $changes Any of: name, library (the central library's name), closed (bool), memory, herald (names),
      *     heraldsex (f or m), heraldpack (path of a zip with the herald's own drawings), cohorts (as cohorts() reads it),
-     *     copyfrom and cardfrom (the number new copy and card codes start at; 0 for after the highest there is).
+     *     copyfrom and cardfrom (the number new copy and card codes start at; 0 for after the highest there is),
+     *     matchsure (link the readers without an account that are sure, as «Lectores» does with one touch).
      * @return string[] What changed, in words for the console.
      */
     public static function apply(int $entityid, array $changes): array {
@@ -85,6 +86,14 @@ final class centre_setup {
             }
             $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
             $done[] = 'new ' . $what . ' codes: ' . ($from === null ? 'after the highest there is' : 'from ' . $from);
+        }
+        if (!empty($changes['matchsure'])) {
+            $piles = matching::piles($entityid);
+            foreach ($piles['sure'] as $readerid => $userid) {
+                matching::link($entityid, (int) $readerid, (int) $userid);
+            }
+            $done[] = 'readers matched: ' . count($piles['sure']) . '; doubtful, for «Readers»: ' . count($piles['doubt']) .
+                '; without an account here: ' . count($piles['none']);
         }
         if (isset($changes['cohorts'])) {
             $cohorts = self::cohorts($entityid, (string) $changes['cohorts']);

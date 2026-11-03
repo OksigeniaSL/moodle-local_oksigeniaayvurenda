@@ -175,4 +175,26 @@ final class getting_ready_test extends \advanced_testcase {
         roles::ensure_manager();
         $this->assertSame([CONTEXT_COURSECAT], array_map('intval', array_values(get_role_contextlevels($roleid))));
     }
+
+    /**
+     * From the console, the readers without an account that are sure are linked to theirs, as «Readers» does with one
+     * touch; a doubtful one is left for that screen.
+     */
+    public function test_match_sure(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $ana = $this->getDataGenerator()->create_user(['firstname' => 'Ana', 'lastname' => 'Zeta Montes']);
+        $this->getDataGenerator()->create_user(['firstname' => 'Leo', 'lastname' => 'Zeta Prado']);
+        $this->getDataGenerator()->create_user(['firstname' => 'Leo', 'lastname' => 'Zeta Prado']);
+        $sure = $gen->create_reader(['entityid' => $entityid, 'firstname' => 'Ana', 'lastname' => 'Zeta Montes']);
+        $doubt = $gen->create_reader(['entityid' => $entityid, 'firstname' => 'Leo', 'lastname' => 'Zeta Prado']);
+
+        $done = centre_setup::apply($entityid, ['matchsure' => true]);
+        $this->assertStringStartsWith('readers matched: 1;', $done[0]);
+        $this->assertEquals($ana->id, $DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $sure->id]));
+        $this->assertNull($DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $doubt->id]));
+    }
 }

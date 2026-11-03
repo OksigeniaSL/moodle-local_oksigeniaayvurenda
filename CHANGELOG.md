@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.153.1
+
+- At the desk with no reader open, a title also brings up the books on the shelf (with their author, how many and their
+  call number), saying that lending one needs the reader first; before, it only looked among the loans out and, with
+  none, answered «I do not know». When nothing has the words, it says no reader and no book has them.
+- Only the books with every word in their title come up when there are any; a word only in the author or a subject
+  counts when no title has them all. When more books have them than fit, it says how many more, to add a word.
+- `cli/centre.php --match-sure`: links the readers without an account that are sure to theirs, as «Readers» does with
+  one touch, and says how many are left doubtful and how many have no account here.
+
 ## 0.153.0
 
 - A book without a label, by its title, at the desk: with the reader open, a word of the title or the author brings up
