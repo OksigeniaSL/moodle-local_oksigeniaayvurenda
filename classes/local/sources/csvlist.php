@@ -81,7 +81,10 @@ final class csvlist {
             '',
             'id, cardcode, userid, status, readertype, firstname, lastname, email'
         );
-        $codes = array_column($known, 'cardcode');
+        $codes = array_merge(
+            array_column($known, 'cardcode'),
+            \local_oksigeniaayvurenda\local\cataloguer::below_first_code($entityid, 'card')
+        );
         $bycard = [];
         $byuser = [];
         foreach ($known as $one) {

@@ -155,7 +155,11 @@ final class profile {
         }
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
-        $code = \local_oksigeniaayvurenda\core\readers\card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
+        $code = \local_oksigeniaayvurenda\core\readers\card_codes::next(
+            array_merge($codes, cataloguer::below_first_code($entityid, 'card')),
+            1,
+            !empty($settings['controlletter'])
+        )[0];
         $DB->update_record(self::T . 'reader', (object) ['id' => $readerid, 'cardcode' => $code, 'timemodified' => time()]);
         \local_oksigeniaayvurenda\event\reader_card_replaced::fire($entityid, $readerid);
         return $code;

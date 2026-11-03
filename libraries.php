@@ -72,6 +72,7 @@ if (data_submitted() && confirm_sesskey()) {
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
             'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
             'copyfrom' => optional_param('copyfrom', '', PARAM_ALPHANUM),
+            'cardfrom' => optional_param('cardfrom', '', PARAM_ALPHANUM),
             // Stage names go as values: array keys in Moodle's parameters only take letters, digits, - and _.
             'cardlooks' => array_combine(
                 optional_param_array('cardstage', [], PARAM_TEXT),
@@ -227,6 +228,7 @@ foreach (libraries::all() as $one) {
         'classifications' => $classifications((string) ($settings['classification'] ?? 'udc')),
         'controlletter' => !empty($settings['controlletter']),
         'copyfrom' => (string) ($settings['copyfrom'] ?? ''),
+        'cardfrom' => (string) ($settings['cardfrom'] ?? ''),
         'demo' => !empty($settings['demo']),
         'libraries' => $libs,
         'kinds' => $kinds('classroom'),
@@ -310,7 +312,7 @@ $data = [
 foreach (
     ['librariesfirst', 'librariesfirsthint', 'librariesentityname', 'librarieslibraryname', 'librariesyearstart',
         'librariesyearstarthint', 'librariesclassification', 'librariescontrolletter', 'librariescopyfrom',
-        'librariescopyfromhint', 'librariescreate', 'librariesadd',
+        'librariescopyfromhint', 'librariescardfrom', 'librariescardfromhint', 'librariescreate', 'librariesadd',
         'librariesname', 'librarieskind', 'librariesparent', 'librariesnoparent', 'librariesslug', 'librariesslughint',
         'librariesgroup', 'librariessave', 'librariesremove', 'librariesanother', 'librariesdemo',
         'librariesedit', 'librariesentity', 'librariescardlooks', 'librariescardlookshint', 'librarieslook',

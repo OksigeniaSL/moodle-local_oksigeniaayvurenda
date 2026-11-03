@@ -38,7 +38,7 @@ final class centre_setup {
      * @param int $entityid
      * @param array $changes Any of: name, library (the central library's name), closed (bool), memory, herald (names),
      *     heraldsex (f or m), heraldpack (path of a zip with the herald's own drawings), cohorts (as cohorts() reads it),
-     *     copyfrom (the number new copy codes start at; 0 for after the highest there is).
+     *     copyfrom and cardfrom (the number new copy and card codes start at; 0 for after the highest there is).
      * @return string[] What changed, in words for the console.
      */
     public static function apply(int $entityid, array $changes): array {
@@ -72,16 +72,19 @@ final class centre_setup {
             }
             $done[] = 'herald drawings: ' . $kept . ' files';
         }
-        if (isset($changes['copyfrom'])) {
+        foreach (['copyfrom' => 'copy', 'cardfrom' => 'card'] as $key => $what) {
+            if (!isset($changes[$key])) {
+                continue;
+            }
             $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-            $from = cataloguer::first_code((string) $changes['copyfrom']);
+            $from = cataloguer::first_code((string) $changes[$key]);
             if ($from === null) {
-                unset($settings['copyfrom']);
+                unset($settings[$key]);
             } else {
-                $settings['copyfrom'] = $from;
+                $settings[$key] = $from;
             }
             $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
-            $done[] = 'new copy codes: ' . ($from === null ? 'after the highest there is' : 'from ' . $from);
+            $done[] = 'new ' . $what . ' codes: ' . ($from === null ? 'after the highest there is' : 'from ' . $from);
         }
         if (isset($changes['cohorts'])) {
             $cohorts = self::cohorts($entityid, (string) $changes['cohorts']);
@@ -168,10 +171,22 @@ final class centre_setup {
                 ($c['group'] ? ', its name is the group' : ''), $cohorts),
             'readers' => $DB->count_records(self::T . 'reader', ['entityid' => $entityid, 'status' => 'active']),
             'copies' => $DB->count_records(self::T . 'item', ['entityid' => $entityid]),
-            'new codes' => ($from = cataloguer::below_first_code($entityid))
-                ? 'from ' . str_pad((string) ((int) $from[0] + 1), strlen($from[0]), '0', STR_PAD_LEFT)
-                : 'after the highest there is',
+            'copy codes' => self::starts($entityid, 'copy'),
+            'card codes' => self::starts($entityid, 'card'),
         ];
+    }
+
+    /**
+     * Where the new copy or card codes of a centre start, in words for the console.
+     *
+     * @param int $entityid
+     * @param string $kind copy or card.
+     * @return string
+     */
+    private static function starts(int $entityid, string $kind): string {
+        $below = cataloguer::below_first_code($entityid, $kind);
+        return $below ? 'new from ' . str_pad((string) ((int) $below[0] + 1), strlen($below[0]), '0', STR_PAD_LEFT)
+            : 'new after the highest there is';
     }
 
     /**

@@ -155,7 +155,13 @@ final class abies_import_test extends \advanced_testcase {
         $this->assertSame(1, $DB->count_records_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$item->id]));
 
         $library = $generator->create_library();
-        (new abies_import($library->id, true, true, true))->run($this->export());
+        $importer = new abies_import($library->id, true, true, true);
+        $importer->run($this->export());
+        // Nothing here says the copy came back: it is listed to look on the shelf.
+        $this->assertSame([['100001C', 'El faro dormido', '10000H']], array_map(
+            fn($out) => array_slice($out, 0, 3),
+            $importer->out_then()
+        ));
         $item = $DB->get_record(self::T . 'item', ['entityid' => $library->entityid, 'barcode' => '100001C'], '*', MUST_EXIST);
         $this->assertSame('available', $item->status);
         $loan = $DB->get_record(self::T . 'loan', ['itemid' => $item->id], '*', MUST_EXIST);
@@ -167,10 +173,12 @@ final class abies_import_test extends \advanced_testcase {
             [$library->id]
         ));
 
-        // Lent at the desk since: the same export again leaves it lent.
+        // Lent at the desk since: the same export again leaves it lent, and it is not listed.
         $DB->set_field(self::T . 'item', 'status', 'onloan', ['id' => $item->id]);
-        (new abies_import($library->id, true, true, true))->run($this->export());
+        $again = new abies_import($library->id, true, true, true);
+        $again->run($this->export());
         $this->assertSame('onloan', $DB->get_field(self::T . 'item', 'status', ['id' => $item->id]));
+        $this->assertSame([], $again->out_then());
     }
 
     /**

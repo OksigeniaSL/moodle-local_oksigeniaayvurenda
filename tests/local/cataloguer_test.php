@@ -154,6 +154,11 @@ final class cataloguer_test extends \advanced_testcase {
         libraries::update_entity((int) $library->entityid, ['copyfrom' => '']);
         $settings = json_decode($DB->get_field(self::T . 'entity', 'settings', ['id' => $library->entityid]), true);
         $this->assertArrayNotHasKey('copyfrom', $settings);
+
+        // Cards, the same: a new card starts where the centre says.
+        $reader = $gen->create_reader(['entityid' => $library->entityid, 'cardcode' => '10234X']);
+        libraries::update_entity((int) $library->entityid, ['cardfrom' => '12000']);
+        $this->assertSame(control_letter::append('12000'), profile::new_card($library, (int) $reader->id));
     }
 
     /**

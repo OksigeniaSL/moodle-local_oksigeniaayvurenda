@@ -103,6 +103,9 @@ final class abies_import {
     /** @var string[] The codes of the copies of the export, which a new code made here must not take. */
     private array $exportcodes = [];
 
+    /** @var array Loans out in an old export, come in as returned, whose copy has not moved here since. */
+    private array $outthen = [];
+
     /** @var array Authority id by kind and normalised label (or code, for classes). */
     private array $labels = [];
 
@@ -139,6 +142,7 @@ final class abies_import {
         $this->stats = [];
         $this->relabelled = [];
         $this->exportcodes = [];
+        $this->outthen = [];
         $this->load_maps();
         $transaction = $DB->start_delegated_transaction();
         $authorlinks = $this->authorities($export);
@@ -578,7 +582,10 @@ final class abies_import {
                 $this->count('reader', 'recoded');
             } else if ($holder && $holder !== $known) {
                 $new = \local_oksigeniaayvurenda\core\readers\card_codes::next(
-                    array_keys($codes),
+                    array_merge(array_keys($codes), \local_oksigeniaayvurenda\local\cataloguer::below_first_code(
+                        $this->entityid,
+                        'card'
+                    )),
                     1,
                     !empty($settings['controlletter'])
                 )[0];
@@ -650,8 +657,48 @@ final class abies_import {
                 'timereturned' => $date($row['FechaDevolucion'] ?? null) ?? ($back !== null ? max($back, $loaned) : null),
                 'renewals' => (int) ($row['NumProrrogas'] ?? 0),
             ];
-            $this->upsert_tracked('loan', $row['Id'] ?? '', $data, [], ['libraryid' => $this->libraryid]);
+            [$loanid] = $this->upsert_tracked('loan', $row['Id'] ?? '', $data, [], ['libraryid' => $this->libraryid]);
+            if ($back !== null && $loanid && $date($row['FechaDevolucion'] ?? null) === null && !$this->moved($itemid, $loanid)) {
+                // Out in the export and back on its day, as history; nothing here says it came back, so someone looks.
+                $this->outthen[] = [
+                    (string) $DB->get_field(self::T . 'item', 'barcode', ['id' => $itemid]),
+                    (string) $DB->get_field_sql('SELECT r.title FROM {' . self::T . 'record} r JOIN {' . self::T .
+                        'item} i ON i.recordid = r.id WHERE i.id = ?', [$itemid]),
+                    (string) $DB->get_field(self::T . 'reader', 'cardcode', ['id' => $readerid]),
+                    $loaned,
+                ];
+            }
         }
+    }
+
+    /**
+     * Whether a copy moved here after a loan of the export: lent again, or not on the shelf.
+     *
+     * @param int $itemid
+     * @param int $loanid
+     * @return bool
+     */
+    private function moved(int $itemid, int $loanid): bool {
+        global $DB;
+        if ($DB->get_field(self::T . 'item', 'status', ['id' => $itemid]) !== 'available') {
+            return true;
+        }
+        return $DB->record_exists_select(
+            self::T . 'loan',
+            'itemid = :itemid AND id <> :loanid
+             AND timeloaned > (SELECT l.timeloaned FROM {' . self::T . 'loan} l WHERE l.id = :id)',
+            ['itemid' => $itemid, 'loanid' => $loanid, 'id' => $loanid]
+        );
+    }
+
+    /**
+     * Loans out in an old export, brought in as returned on its day, whose copy has not moved here since: to look on the
+     * shelf whether they really came back.
+     *
+     * @return array [copy code, title, reader's card, when it was lent]
+     */
+    public function out_then(): array {
+        return $this->outthen;
     }
 
     /**

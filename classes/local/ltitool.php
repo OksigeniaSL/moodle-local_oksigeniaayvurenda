@@ -547,7 +547,10 @@ final class ltitool {
                 return (int) $reader->id;
             }
             $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-            $codes = $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]);
+            $codes = array_merge(
+                $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]),
+                cataloguer::below_first_code($entityid, 'card')
+            );
             $code = card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
             return (int) $DB->insert_record(self::T . 'reader', (object) ['entityid' => $entityid, 'userid' => $userid,
                 'cardcode' => $code, 'readertype' => $type, 'status' => 'active', 'timecreated' => $now,

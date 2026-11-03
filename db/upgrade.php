@@ -561,5 +561,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110319, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110320) {
+        // A loan written on paper whose copy nobody wrote down.
+        $table = new xmldb_table('local_oksigeniaayvurenda_loan');
+        $field = new xmldb_field('copyguessed', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'conditionin');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110320, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

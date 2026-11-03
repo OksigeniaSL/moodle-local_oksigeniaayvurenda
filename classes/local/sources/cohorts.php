@@ -172,7 +172,10 @@ final class cohorts {
         }
         $newusers = array_diff(array_keys($people), array_keys($byuser));
         $codes = card_codes::next(
-            $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]),
+            array_merge(
+                $DB->get_fieldset_select(self::T . 'reader', 'cardcode', 'entityid = :entityid', ['entityid' => $entityid]),
+                \local_oksigeniaayvurenda\local\cataloguer::below_first_code($entityid, 'card')
+            ),
             count($newusers),
             !empty($settings['controlletter'])
         );

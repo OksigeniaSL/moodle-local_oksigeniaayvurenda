@@ -110,16 +110,17 @@ final class cataloguer {
     }
 
     /**
-     * The code just before the first new copy code of a centre, to count from it with the codes there are: when an old
-     * program kept printing labels after the copy that came, the new codes start after its last label.
+     * The code just before the first new copy or card code of a centre, to count from it with the codes there are: when
+     * an old program kept printing labels or cards after the copy that came, the new codes start after its last one.
      *
      * @param int $entityid
+     * @param string $kind copy or card.
      * @return string[] That code, or nothing when the centre did not say where they start.
      */
-    public static function below_first_code(int $entityid): array {
+    public static function below_first_code(int $entityid, string $kind = 'copy'): array {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $from = self::first_code((string) ($settings['copyfrom'] ?? ''));
+        $from = self::first_code((string) ($settings[$kind === 'card' ? 'cardfrom' : 'copyfrom'] ?? ''));
         return $from === null ? [] : [str_pad((string) ((int) $from - 1), strlen($from), '0', STR_PAD_LEFT)];
     }
 

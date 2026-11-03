@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.152.0
+
+- Loans written on paper while the desk could not be used (`cli/paper_loans.php`): a list saved as CSV, with who, what,
+  what happened and when, is first read and explained line by line (its reader and its book, sure, close with a slip of
+  a letter, or doubtful with the candidates), and with `--apply` done in date order as the desk would have done it on
+  each day: loans, returns and renewals; a renewal of a loan that came before lends it from that day, and a return of
+  one that is not here only says so. Running it again repeats nothing; `--due` gives every loan of the list one day.
+- A copy nobody wrote down is the first free one of its record that can be lent. When another copy of that record comes
+  back with the reader open, the desk takes it as the one that went; when someone else takes the one it took, the loan
+  moves to another free copy; with no reader open, the desk says who has it.
+- «New cards start at code», in the centre's settings (and `cli/centre.php --first-card-code`): like copies, for when
+  an old program kept giving cards after the export that came; new cards from cohorts, lists, LTI, another library or
+  a lost card start after its last one.
+- An old export brought in as returned lists the loans it had out whose copy has not moved here since, to look on the
+  shelf whether they really came back.
+
 ## 0.151.0
 
 - Importing a newer Abies export over a library already in use keeps what the library did since: a record, copy, reader

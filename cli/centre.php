@@ -32,7 +32,8 @@ use local_oksigeniaayvurenda\local\centre_setup;
 
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'list' => false, 'entity' => 0, 'name' => null, 'library' => null, 'closed' => null, 'memory' => null,
-        'herald' => null, 'herald-sex' => null, 'herald-pack' => null, 'cohorts' => null, 'first-copy-code' => null],
+        'herald' => null, 'herald-sex' => null, 'herald-pack' => null, 'cohorts' => null, 'first-copy-code' => null,
+        'first-card-code' => null],
     ['h' => 'help']
 );
 
@@ -62,6 +63,7 @@ Options:
                         Example: \"ESO *=student:ESO:group,BAC *=student:Bachillerato:group,CLAUSTRO=teacher\"
   --first-copy-code=N   The number the new copy codes start at, when an old program kept printing labels after the
                         copy that came: the one after its last label. 0: after the highest there is
+  --first-card-code=N   The same for new reader cards: the one after the last card the old program gave
   -h, --help            This help
 
 Example:
@@ -105,6 +107,7 @@ $changes = array_filter([
     'heraldpack' => $options['herald-pack'],
     'cohorts' => $options['cohorts'],
     'copyfrom' => $options['first-copy-code'],
+    'cardfrom' => $options['first-card-code'],
 ], fn($value) => $value !== null);
 
 try {

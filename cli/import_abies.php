@@ -146,6 +146,12 @@ cli_heading('Imported into library ' . $libraryid . ' of centre ' . $entityid . 
 foreach ($stats as $table => $counts) {
     cli_writeln($table . ': ' . json_encode($counts));
 }
+if ($importer->out_then()) {
+    cli_heading('Out in the export, come in as returned on its day, and not seen here since: look whether they are back');
+    foreach ($importer->out_then() as [$code, $title, $card, $when]) {
+        cli_writeln($code . "\t" . userdate($when, '%Y-%m-%d') . "\t" . $card . "\t" . $title);
+    }
+}
 if ($importer->relabelled()) {
     cli_heading('Copies made here with a code Abies printed on another copy: print their new label');
     foreach ($importer->relabelled() as [$old, $new, $title]) {

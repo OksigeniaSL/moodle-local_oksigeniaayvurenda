@@ -135,14 +135,35 @@ final class desk {
                 '*',
                 IGNORE_MULTIPLE
             );
+            if ($open && $readerid && !empty($open->copyguessed) && (int) $open->readerid !== $readerid) {
+                // A loan on paper took this copy without knowing which went: it is still here, and another goes with it.
+                $other = $this->free_copy((int) $item->recordid, (int) $item->id);
+                if ($other) {
+                    $this->move_loan($open, $item, $other, false);
+                    $open = null;
+                    $item->status = 'available';
+                }
+            }
             if ($open || $item->status === 'onloan') {
                 return $this->give_back($item, $open, $readerid);
+            }
+            // A loan on paper of this record took another copy: this is the one that went.
+            $guessed = $this->guessed($item, $readerid);
+            if ($guessed && $readerid) {
+                $from = $DB->get_record(self::T . 'item', ['id' => $guessed->itemid], '*', MUST_EXIST);
+                $this->move_loan($guessed, $from, $item, true);
+                $item->status = 'onloan';
+                return $this->give_back($item, $DB->get_record(self::T . 'loan', ['id' => $guessed->id]), $readerid);
             }
             if (!$readerid) {
                 $hold = $item->status === 'held' ? holds::ready_for((int) $item->id) : null;
                 if ($hold) {
                     return $this->answer('needreader', 'look', 'deskheldfor', (object) ['title' => $this->title($item),
                         'who' => $this->who((int) $hold->readerid)]);
+                }
+                if ($guessed) {
+                    return $this->answer('needreader', 'look', 'deskguessed', (object) ['title' => $this->title($item),
+                        'who' => $this->who((int) $guessed->readerid)], ['itemid' => (int) $item->id, 'room' => true]);
                 }
                 // Or it was read here, without going home: one touch counts it.
                 return $this->answer('needreader', 'look', 'deskneedreader', $this->title($item), ['itemid' => (int) $item->id,
@@ -168,6 +189,69 @@ final class desk {
             }
         }
         return $this->answer('unknown', 'no', 'deskunknown', $code);
+    }
+
+    /**
+     * The loan on paper of another copy of this one's record, of the reader open at the desk, or the only one when no
+     * reader is open.
+     *
+     * @param \stdClass $item
+     * @param int $readerid
+     * @return \stdClass|null
+     */
+    private function guessed(\stdClass $item, int $readerid): ?\stdClass {
+        global $DB;
+        $loans = $DB->get_records_sql(
+            'SELECT l.*
+               FROM {' . self::T . 'loan} l
+               JOIN {' . self::T . 'item} i ON i.id = l.itemid
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL AND l.copyguessed = 1
+                AND i.recordid = :recordid AND i.id <> :itemid',
+            ['libraryid' => $this->library->id, 'recordid' => $item->recordid, 'itemid' => $item->id]
+        );
+        if ($readerid) {
+            $loans = array_filter($loans, fn($loan) => (int) $loan->readerid === $readerid);
+        }
+        return count($loans) === 1 ? reset($loans) : null;
+    }
+
+    /**
+     * Another copy of a record on the shelf of this library.
+     *
+     * @param int $recordid
+     * @param int $notid
+     * @return \stdClass|null
+     */
+    private function free_copy(int $recordid, int $notid): ?\stdClass {
+        global $DB;
+        return $DB->get_record_sql(
+            'SELECT i.*
+               FROM {' . self::T . 'item} i
+              WHERE i.recordid = :recordid AND i.libraryid = :libraryid AND i.status = :available AND i.id <> :notid
+                AND NOT EXISTS (SELECT 1 FROM {' . self::T . 'loan} l WHERE l.itemid = i.id AND l.timereturned IS NULL)
+           ORDER BY i.barcode',
+            ['recordid' => $recordid, 'libraryid' => $this->library->id, 'available' => 'available', 'notid' => $notid],
+            IGNORE_MULTIPLE
+        ) ?: null;
+    }
+
+    /**
+     * Moves a loan on paper from the copy it took to another: the one that really went, or one more still to guess. The
+     * first goes back on the shelf.
+     *
+     * @param \stdClass $loan
+     * @param \stdClass $from
+     * @param \stdClass $to
+     * @param bool $known Whether $to is the copy that went.
+     */
+    private function move_loan(\stdClass $loan, \stdClass $from, \stdClass $to, bool $known): void {
+        global $DB;
+        $transaction = $DB->start_delegated_transaction();
+        $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'itemid' => $to->id, 'copyguessed' => $known ? 0 : 1,
+            'timemodified' => $this->now]);
+        $DB->update_record(self::T . 'item', (object) ['id' => $from->id, 'status' => 'available', 'timemodified' => $this->now]);
+        $DB->update_record(self::T . 'item', (object) ['id' => $to->id, 'status' => 'onloan', 'timemodified' => $this->now]);
+        $transaction->allow_commit();
     }
 
     /**
