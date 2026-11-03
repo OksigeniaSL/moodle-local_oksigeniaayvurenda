@@ -28,6 +28,18 @@ namespace local_oksigeniaayvurenda\core\readers;
 #[\PHPUnit\Framework\Attributes\CoversClass(csv_list::class)]
 final class csv_list_test extends \basic_testcase {
     /**
+     * A cell in quotes can hold several lines; a backslash at its end is only a backslash.
+     */
+    public function test_read_several_lines(): void {
+        $read = csv_list::read("titulo,resumen\r\n\"Uno\",\"primera\nsegunda\"\r\n\r\nDos,\"ruta C:\\\"\r\nTres,x\r\n");
+        $this->assertSame(['titulo', 'resumen'], $read['columns']);
+        $this->assertCount(3, $read['rows']);
+        $this->assertSame("primera\nsegunda", $read['rows'][0][1]);
+        $this->assertSame('ruta C:\\', $read['rows'][1][1]);
+        $this->assertSame('Tres', $read['rows'][2][0]);
+    }
+
+    /**
      * The separator is found, the headings are understood in Spanish and English, Latin 1 is read, a full name is
      * split, and rows without a name are left out.
      */

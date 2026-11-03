@@ -99,6 +99,32 @@ final class recover_test extends \advanced_testcase {
     }
 
     /**
+     * A text that ends in a backslash, or has one before a quote, comes back as it was, with the row after it.
+     */
+    public function test_backslash(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $texts = ['Ruta C:\\', 'Con \\"comillas\\" dentro', 'Normal'];
+        foreach ($texts as $text) {
+            $gen->create_record(['entityid' => $entityid, 'title' => $text]);
+        }
+        $path = make_request_directory() . '/copia.zip';
+        copies::make($entityid)->copy_content_to($path);
+        $look = recover::look($path);
+        $this->assertSame(3, $look['records']);
+        $this->assertSame(0, $look['missing']);
+        $back = recover::restore($path, (int) get_admin()->id);
+        $titles = $DB->get_fieldset_select('local_oksigeniaayvurenda_record', 'title', 'entityid = ?', [$back->entityid]);
+        sort($titles);
+        $wanted = $texts;
+        sort($wanted);
+        $this->assertSame($wanted, $titles);
+    }
+
+    /**
      * What is not a copy says so, and leaves nothing.
      */
     public function test_not_a_copy(): void {

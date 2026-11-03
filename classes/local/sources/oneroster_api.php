@@ -193,7 +193,7 @@ final class oneroster_api {
             $entity[self::KEY]['brought'] = $entity[self::KEY]['brought'] ?? $now;
             $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
         }
-        return oneroster::load($entityid, $found, $now);
+        return oneroster::load($entityid, $found, $now, true, $byhand);
     }
 
     /**

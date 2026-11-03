@@ -168,11 +168,21 @@ final class cifra {
         // Who came from Cifra before and is not there now, or left, stops being an active reader.
         $sources = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'system' => 'cifra',
             'tablename' => 'reader'], '', 'id, localid');
-        foreach (array_unique($sources) as $readerid) {
-            if (!isset($here[$readerid])) {
-                $left += $DB->count_records(self::T . 'reader', ['id' => $readerid, 'status' => 'active']);
-                $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $readerid, 'status' => 'active']);
+        $active = array_flip($DB->get_fieldset_select(
+            self::T . 'reader',
+            'id',
+            'entityid = ? AND status = ?',
+            [$entityid, 'active']
+        ));
+        $ours = array_filter(array_unique($sources), fn($readerid) => isset($active[$readerid]));
+        $leaving = array_filter($ours, fn($readerid) => !isset($here[$readerid]));
+        if (leavers::allow($entityid, 'cifra', count($ours), count($leaving), $byhand, false, $now)) {
+            foreach ($leaving as $readerid) {
+                $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $readerid]);
+                $left++;
             }
+        } else {
+            $stats['held'] = count($leaving);
         }
         unset($stats['ids']);
         $stats += ['left' => $left];

@@ -76,9 +76,10 @@ final class oneroster {
      * @param array $found What the core reader gave (readers, gone, tutors, mode).
      * @param int|null $now
      * @param bool $partly Past the centre's plan, leave out who does not fit; when false, the caller refuses it whole.
+     * @param bool $byhand A person is looking: half the readers may leave.
      * @return array created, updated, linked, total, overlimit, left, tutors.
      */
-    public static function load(int $entityid, array $found, ?int $now = null, bool $partly = true): array {
+    public static function load(int $entityid, array $found, ?int $now = null, bool $partly = true, bool $byhand = false): array {
         global $DB;
         $now = $now ?? time();
         $stats = csvlist::load($entityid, $found['readers'], 'student', $now, 'oneroster', $partly);
@@ -86,11 +87,27 @@ final class oneroster {
         // Who left: those the export says, and, in a whole export, those who came from it and are not in it.
         $sources = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'system' => 'oneroster',
             'tablename' => 'reader'], '', 'externalid, localid');
+        $active = array_flip($DB->get_fieldset_select(
+            self::T . 'reader',
+            'id',
+            'entityid = ? AND status = ?',
+            [$entityid, 'active']
+        ));
         $leaving = [];
+        $absent = [];
         foreach ($sources as $key => $readerid) {
-            if (in_array($key, $found['gone'], true) || (($found['mode'] ?? 'bulk') === 'bulk' && !isset($here[$readerid]))) {
+            if (in_array($key, $found['gone'], true)) {
                 $leaving[(int) $readerid] = true;
+            } else if (($found['mode'] ?? 'bulk') === 'bulk' && !isset($here[$readerid]) && isset($active[$readerid])) {
+                $absent[(int) $readerid] = true;
             }
+        }
+        // That the export says someone left is believed; that it no longer brings them, only so far.
+        $ours = count(array_intersect_key($active, array_flip($sources)));
+        if (leavers::allow($entityid, 'oneroster', $ours, count($absent), $byhand, false, $now)) {
+            $leaving += $absent;
+        } else {
+            $stats['held'] = count($absent);
         }
         $left = 0;
         foreach (array_keys($leaving) as $readerid) {

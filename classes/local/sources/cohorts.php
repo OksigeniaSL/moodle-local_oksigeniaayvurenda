@@ -104,9 +104,10 @@ final class cohorts {
      *
      * @param int $entityid
      * @param int|null $now
+     * @param bool $byhand A person is looking: half the readers may leave.
      * @return array{created: int, updated: int, left: int, back: int, total: int, overlimit: int}
      */
-    public static function sync(int $entityid, ?int $now = null): array {
+    public static function sync(int $entityid, ?int $now = null, bool $byhand = false): array {
         global $DB;
         $now = $now ?? time();
         $stats = ['created' => 0, 'updated' => 0, 'left' => 0, 'back' => 0, 'total' => 0, 'overlimit' => 0];
@@ -227,15 +228,35 @@ final class cohorts {
             "entityid = :entityid AND tablename = 'reader'",
             ['entityid' => $entityid]
         ));
-        foreach ($byuser as $userid => $reader) {
-            if (!isset($people[$userid]) && $reader->status === 'active' && !isset($elsewhere[$reader->id])) {
+        $ours = array_filter($byuser, fn($reader) => $reader->status === 'active' && !isset($elsewhere[$reader->id]));
+        $leaving = array_diff_key($ours, $people);
+        if (leavers::allow($entityid, 'moodle', count($ours), count($leaving), $byhand, self::some_gone($settings), $now)) {
+            foreach ($leaving as $reader) {
                 $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'left', 'timemodified' => $now]);
                 $stats['left']++;
             }
+        } else {
+            $stats['held'] = count($leaving);
         }
         $transaction->allow_commit();
         \local_oksigeniaayvurenda\event\readers_synced::tell($entityid, 'moodle', $stats);
         return $stats;
+    }
+
+    /**
+     * Whether a chosen cohort no longer exists: it says nothing about who was in it.
+     *
+     * @param array $settings
+     * @return bool
+     */
+    private static function some_gone(array $settings): bool {
+        global $DB;
+        $ids = array_map('intval', array_keys($settings['cohorts'] ?? []));
+        if (!$ids) {
+            return false;
+        }
+        [$in, $params] = $DB->get_in_or_equal($ids);
+        return $DB->count_records_select('cohort', "id $in", $params) < count($ids);
     }
 
     /**

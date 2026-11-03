@@ -62,7 +62,7 @@ final class oneroster_rest_test extends \basic_testcase {
                 foreach (['readers', 'gone', 'tutors', 'schools'] as $part) {
                     $this->assertEquals($expected[$part], $found[$part], $version . ' ' . $part . ' ' . $school);
                 }
-                $this->assertSame('bulk', $found['mode']);
+                $this->assertSame('delta', $found['mode']);
             }
         }
     }

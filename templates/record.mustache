@@ -80,6 +80,7 @@
             {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
             {{#mine}}
             <p class="ayv-hold-mine">{{mine}}{{#ahead}} {{ahead}}{{/ahead}}</p>
+            {{#holdid}}
             <form method="post" action="{{action}}">
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <input type="hidden" name="library" value="{{library}}">
@@ -87,6 +88,7 @@
                 <input type="hidden" name="hold" value="{{holdid}}">
                 <button type="submit" class="ayv-button ayv-button-quiet" name="action" value="cancel">{{holdcancelmine}}</button>
             </form>
+            {{/holdid}}
             {{/mine}}
             {{#canask}}
             <p>{{holdaskhint}}</p>

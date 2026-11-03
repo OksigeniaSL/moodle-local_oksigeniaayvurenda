@@ -54,9 +54,9 @@ if (optional_param('format', '', PARAM_ALPHA) === 'csv') {
     header('Content-Disposition: attachment; filename="' . clean_filename('ayvurenda-sanctions-' . date('Ymd') . '.csv') . '"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
-    fputcsv($out, explode('|', $str('sanctionscolumns')), ',', '"', '\\');
+    fputcsv($out, explode('|', $str('sanctionscolumns')), ',', '"', '');
     foreach (sanctions::export($entityid, $now) as $row) {
-        fputcsv($out, $row, ',', '"', '\\');
+        fputcsv($out, $row, ',', '"', '');
     }
     fclose($out);
     exit;

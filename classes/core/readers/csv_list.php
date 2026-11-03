@@ -64,8 +64,8 @@ final class csv_list {
             // Spreadsheets on Windows still save in Latin 1.
             $data = mb_convert_encoding($data, 'UTF-8', 'Windows-1252');
         }
-        $lines = preg_split('/\R/', trim($data));
-        $first = $lines[0] ?? '';
+        $data = preg_replace('/\r\n?/', "\n", trim($data));
+        $first = strtok($data, "\n") ?: '';
         $separator = ',';
         $best = 0;
         foreach ([';', ',', "\t", '|'] as $candidate) {
@@ -75,13 +75,18 @@ final class csv_list {
                 $separator = $candidate;
             }
         }
+        // A stream and not line by line: a cell in quotes can hold several lines.
+        $stream = fopen('php://temp', 'w+');
+        fwrite($stream, $data);
+        rewind($stream);
         $rows = [];
-        foreach ($lines as $line) {
-            if (trim($line) === '') {
-                continue;
+        while (($cells = fgetcsv($stream, 0, $separator, '"', '')) !== false) {
+            $cells = array_map(fn($cell) => trim((string) $cell), $cells);
+            if (count($cells) > 1 || $cells[0] !== '') {
+                $rows[] = $cells;
             }
-            $rows[] = array_map('trim', str_getcsv($line, $separator, '"', '\\'));
         }
+        fclose($stream);
         $columns = array_shift($rows) ?? [];
         return ['columns' => $columns, 'rows' => $rows];
     }

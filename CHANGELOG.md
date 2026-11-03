@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.154.0
+
+- A copy comes back whole: a text ending in a backslash no longer swallows its row and the next, and the screen says when a
+  copy has fewer rows than it declares. Older copies still read.
+- A source that stops bringing many readers at once no longer leaves them as gone: a deleted cohort, an empty answer or
+  a file for another school is held back and whoever manages the centre is told. A OneRoster zip without a manifest
+  no longer counts as a whole export.
+- Loading a list, or the night of a management program, keeps the account a reader was matched with by hand.
+- A cell in quotes with several lines no longer makes rubbish records from a CSV.
+- «I no longer want it» is gone from a book the reader has on loan, where it led to an error.
+
 ## 0.153.2
 
 - Loans written on paper find the readers with an account by the account's name (the library keeps no copy of it);

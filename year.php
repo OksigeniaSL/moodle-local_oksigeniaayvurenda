@@ -49,7 +49,7 @@ $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $action = optional_param('do', '', PARAM_ALPHA);
     if ($action === 'sync') {
-        $stats = cohorts::sync($entityid);
+        $stats = cohorts::sync($entityid, null, true);
         $notice = $str('yearsynced', (object) $stats) . plans::left_out($stats);
     } else if ($action === 'start') {
         $ok = year_change::set_start($entityid, optional_param('month', 0, PARAM_INT), optional_param('day', 0, PARAM_INT));

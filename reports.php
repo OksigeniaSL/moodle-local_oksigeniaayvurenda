@@ -144,9 +144,9 @@ if ($format === 'csv') {
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     $out = fopen('php://output', 'w');
     fwrite($out, "\xEF\xBB\xBF");
-    fputcsv($out, $columns, ',', '"', '\\');
+    fputcsv($out, $columns, ',', '"', '');
     foreach ($rows as $row) {
-        fputcsv($out, \local_oksigeniaayvurenda\core\spreadsheet::row($row['csv']), ',', '"', '\\');
+        fputcsv($out, \local_oksigeniaayvurenda\core\spreadsheet::row($row['csv']), ',', '"', '');
     }
     fclose($out);
     die();

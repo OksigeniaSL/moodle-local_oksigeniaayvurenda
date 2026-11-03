@@ -57,7 +57,7 @@ final class recover {
      * Whether a file is a copy, and what it holds.
      *
      * @param string $path A zip.
-     * @return array|null name, libraries, records, items, readers, loans; null if it is not a copy.
+     * @return array|null name, libraries, records, items, readers, loans, missing; null if it is not a copy.
      */
     public static function look(string $path): ?array {
         $zip = new \ZipArchive();
@@ -72,7 +72,8 @@ final class recover {
         $look = ['name' => (string) ($entity[0]['name'] ?? ''), 'libraries' => count(self::rows($zip, 'library')),
             'records' => count(self::rows($zip, 'record')), 'items' => count(self::rows($zip, 'item')),
             'readers' => count(self::rows($zip, 'reader')),
-            'loans' => count(array_filter(self::rows($zip, 'loan'), fn($l) => (string) ($l['timereturned'] ?? '') === ''))];
+            'loans' => count(array_filter(self::rows($zip, 'loan'), fn($l) => (string) ($l['timereturned'] ?? '') === '')),
+            'missing' => self::missing($zip)];
         $zip->close();
         return $look;
     }
@@ -379,18 +380,61 @@ final class recover {
         stream_copy_to_stream($stream, $temp);
         fclose($stream);
         rewind($temp);
-        $rows = [];
-        $columns = fgetcsv($temp, 0, ',', '"', '\\');
-        if ($columns) {
-            $columns[0] = ltrim((string) $columns[0], "\xEF\xBB\xBF");
-            while (($line = fgetcsv($temp, 0, ',', '"', '\\')) !== false) {
-                if (count($line) === count($columns)) {
-                    $rows[] = array_combine($columns, $line);
-                }
+        // Copies made before 0.154.0 escaped with a backslash.
+        [$rows, $bad] = self::parse($temp, '');
+        if ($bad) {
+            [$old, $oldbad] = self::parse($temp, '\\');
+            if ($oldbad < $bad) {
+                $rows = $old;
             }
         }
         fclose($temp);
         return $rows;
+    }
+
+    /**
+     * Reads a table of a copy.
+     *
+     * @param resource $stream
+     * @param string $escape
+     * @return array The rows, and how many could not be read.
+     */
+    private static function parse($stream, string $escape): array {
+        rewind($stream);
+        $rows = [];
+        $bad = 0;
+        $columns = fgetcsv($stream, 0, ',', '"', $escape);
+        if ($columns) {
+            $columns[0] = ltrim((string) $columns[0], "\xEF\xBB\xBF");
+            while (($line = fgetcsv($stream, 0, ',', '"', $escape)) !== false) {
+                if (count($line) === count($columns)) {
+                    $rows[] = array_combine($columns, $line);
+                } else {
+                    $bad++;
+                }
+            }
+        }
+        return [$rows, $bad];
+    }
+
+    /**
+     * How many rows the copy has fewer than it says it has.
+     *
+     * @param \ZipArchive $zip
+     * @return int
+     */
+    private static function missing(\ZipArchive $zip): int {
+        $said = [];
+        if (preg_match('/\{[^{}]*\}/', (string) $zip->getFromName('LEEME.txt'), $found)) {
+            $said = json_decode($found[0], true) ?: [];
+        }
+        $missing = 0;
+        foreach (['library', 'record', 'item', 'reader', 'loan'] as $table) {
+            if (isset($said[$table])) {
+                $missing += max(0, (int) $said[$table] - count(self::rows($zip, $table)));
+            }
+        }
+        return $missing;
     }
 
     /**

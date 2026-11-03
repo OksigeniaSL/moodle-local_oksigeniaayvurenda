@@ -70,7 +70,7 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param('families', 0, PARAM_BOOL),
                 time()
             );
-            $done = plans::within($entityid, fn() => oneroster::load($entityid, $found, null, false));
+            $done = plans::within($entityid, fn() => oneroster::load($entityid, $found, null, false, true));
             @unlink($pending['path']);
             $pending = null;
         } else if ($step === 'cancel' && $pending) {

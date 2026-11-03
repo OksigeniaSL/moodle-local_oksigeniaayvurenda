@@ -123,7 +123,7 @@ final class oneroster {
             }
         }
         return ['readers' => $readers, 'gone' => $gone, 'tutors' => $tutors, 'schools' => $schools,
-            'mode' => $manifest['file.users'] ?? 'bulk', 'version' => $manifest['oneroster.version'] ?? ''];
+            'mode' => $manifest['file.users'] ?? 'delta', 'version' => $manifest['oneroster.version'] ?? ''];
     }
 
     /**

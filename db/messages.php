@@ -114,6 +114,15 @@ $messageproviders = [
             'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To whoever manages a centre: a source stopped bringing so many readers that nobody was marked as gone.
+    'readersheld' => [
+        'capability' => 'local/oksigeniaayvurenda:manage',
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To a tutor: who in the group has books to bring back, without their titles.
     'overduetutor' => [
         'defaults' => [

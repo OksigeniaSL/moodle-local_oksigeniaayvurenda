@@ -127,9 +127,11 @@ final class csvlist {
             if (!$readerid && $userid) {
                 $readerid = $byuser[$userid] ?? 0;
             }
-            // An account that another reader already has is not taken from it.
-            if ($userid && ($byuser[$userid] ?? $readerid) !== $readerid) {
-                $userid = 0;
+            // An account that another reader already has is not taken from it, and a match made by hand stays when the
+            // row names no account.
+            $matched = (int) ($known[$readerid]->userid ?? 0);
+            if (!$userid || ($byuser[$userid] ?? $readerid) !== $readerid) {
+                $userid = $matched;
             }
             // A new reader, or one who had left, takes a place in the plan.
             if ($room !== null && (!$readerid || ($known[$readerid]->status ?? '') !== 'active')) {

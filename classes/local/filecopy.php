@@ -90,7 +90,7 @@ final class filecopy {
         $zip->open($path, \file_archive::CREATE);
         $titles = $DB->get_records_menu(self::T . 'record', ['entityid' => $entityid], '', 'id, title');
         $list = fopen($dir . '/ficheros.csv', 'w');
-        fputcsv($list, ['area', 'item', 'path', 'file', 'what', 'size'], ',', '"', '\\');
+        fputcsv($list, ['area', 'item', 'path', 'file', 'what', 'size'], ',', '"', '');
         $total = 0;
         foreach (array_keys(self::AREAS) as $area) {
             $rows = self::owned($entityid, $area);
@@ -99,7 +99,7 @@ final class filecopy {
                 $inzip = $area . '/' . $row->itemid . '/' . $row->filename;
                 $file->archive_file($zip, $inzip);
                 $what = $area === 'cover' ? spreadsheet::cell((string) ($titles[$row->itemid] ?? '')) : '';
-                fputcsv($list, [$area, $row->itemid, $inzip, $row->filename, $what, $row->filesize], ',', '"', '\\');
+                fputcsv($list, [$area, $row->itemid, $inzip, $row->filename, $what, $row->filesize], ',', '"', '');
                 $total++;
             }
             $rows->close();
@@ -109,10 +109,10 @@ final class filecopy {
         // The rows of the digital collection that have a file: without them, its files would say nothing.
         $digital = fopen($dir . '/digital.csv', 'w');
         $columns = array_keys($DB->get_columns(self::T . 'digital'));
-        fputcsv($digital, $columns, ',', '"', '\\');
+        fputcsv($digital, $columns, ',', '"', '');
         $rows = $DB->get_recordset(self::T . 'digital', ['entityid' => $entityid, 'kind' => 'file'], 'id');
         foreach ($rows as $row) {
-            fputcsv($digital, array_map(fn($c) => $row->$c, $columns), ',', '"', '\\');
+            fputcsv($digital, array_map(fn($c) => $row->$c, $columns), ',', '"', '');
         }
         $rows->close();
         fclose($digital);

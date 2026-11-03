@@ -76,7 +76,7 @@ if (data_submitted() && confirm_sesskey()) {
     }
     $notice = $str('sourcessaved');
     if (optional_param('syncnow', false, PARAM_BOOL)) {
-        $stats = cohorts::sync($entityid);
+        $stats = cohorts::sync($entityid, null, true);
         $notice = $str('sourcessynced', (object) $stats) . plans::left_out($stats);
     }
 }
@@ -134,6 +134,7 @@ $data = [
     'heading' => $str('readerssources'),
     'intro' => $str('sourcesintroshort'),
     'notice' => $notice,
+    'held' => \local_oksigeniaayvurenda\local\sources\leavers::held($entityid),
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
     'cards' => array_map(fn($card) => [

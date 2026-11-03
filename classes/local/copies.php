@@ -118,14 +118,14 @@ final class copies {
             // A byte-order mark so that spreadsheets open accents right.
             fwrite($handle, "\xEF\xBB\xBF");
             $columns = array_keys($DB->get_columns(self::T . $table));
-            fputcsv($handle, $columns, ',', '"', '\\');
+            fputcsv($handle, $columns, ',', '"', '');
             $rows = $DB->get_recordset_select(self::T . $table, $where, ['entityid' => $entityid], 'id');
             $count = 0;
             foreach ($rows as $row) {
                 if ($table === 'entity') {
                     $row->settings = self::shareable((string) $row->settings);
                 }
-                fputcsv($handle, array_map(fn($c) => $row->$c, $columns), ',', '"', '\\');
+                fputcsv($handle, array_map(fn($c) => $row->$c, $columns), ',', '"', '');
                 $count++;
             }
             $rows->close();
@@ -321,7 +321,7 @@ final class copies {
         );
         $kinds = ['student' => 'ST', 'teacher' => 'T', 'staff' => 'S', 'family' => 'PT'];
         $people = fopen($dir . '/koha-lectores.csv', 'w');
-        fputcsv($people, ['cardnumber', 'surname', 'firstname', 'categorycode', 'branchcode', 'email', 'sort1'], ',', '"', '\\');
+        fputcsv($people, ['cardnumber', 'surname', 'firstname', 'categorycode', 'branchcode', 'email', 'sort1'], ',', '"', '');
         $readers = 0;
         $rows = $DB->get_recordset_sql(
             'SELECT r.id, r.cardcode, r.readertype, r.firstname, r.lastname, r.email,
@@ -342,7 +342,7 @@ final class copies {
                 $branch,
                 $row->uemail ?? $row->email,
                 $groups[$row->id] ?? '',
-            ]), ',', '"', '\\');
+            ]), ',', '"', '');
             $readers++;
         }
         $rows->close();
