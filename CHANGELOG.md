@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.153.2
+
+- Loans written on paper find the readers with an account by the account's name (the library keeps no copy of it);
+  before, only those without an account were found. The same name once with an account and once without (a reader from
+  an old program not matched yet) is the one with the account; matching later brings the two together, loans and all.
+
 ## 0.153.1
 
 - At the desk with no reader open, a title also brings up the books on the shelf (with their author, how many and their

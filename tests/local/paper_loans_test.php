@@ -249,4 +249,28 @@ final class paper_loans_test extends \advanced_testcase {
         // A reader's name still opens the reader.
         $this->assertSame('reader', $desk->scan('Ruiz Sol')['kind']);
     }
+
+    /**
+     * Readers with an account take their name from it; the same name once with an account and once without (from an old
+     * program, not matched yet) is the one with the account.
+     */
+    public function test_accounts(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $marta = $this->getDataGenerator()->create_user(['firstname' => 'Marta', 'lastname' => 'Sol Ruiz']);
+        $pablo = $this->getDataGenerator()->create_user(['firstname' => 'Pablo', 'lastname' => 'Gil Mar']);
+        $withaccount = $gen->create_reader(['entityid' => $w->library->entityid, 'userid' => $marta->id,
+            'firstname' => null, 'lastname' => null]);
+        $gen->create_reader(['entityid' => $w->library->entityid, 'firstname' => 'Marta', 'lastname' => 'Sol Ruiz']);
+        $onlyaccount = $gen->create_reader(['entityid' => $w->library->entityid, 'userid' => $pablo->id,
+            'firstname' => '', 'lastname' => '']);
+        $loans = new paper_loans($w->library);
+        $plan = array_column($loans->plan($loans->lines("lector;titulo;fecha\n\"Sol Ruiz, Marta\";El faro dormido;21/10/2026\n" .
+            "\"Gil Mar, Pablo\";La sirenita;22/10/2026\n")), null, 'line');
+        $this->assertSame([(int) $withaccount->id, 'sure'], [$plan[2]['readerid'], $plan[2]['readerhow']]);
+        $this->assertSame([(int) $onlyaccount->id, 'sure'], [$plan[3]['readerid'], $plan[3]['readerhow']]);
+        $this->assertSame('', $plan[3]['problem']);
+    }
 }

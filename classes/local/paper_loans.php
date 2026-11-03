@@ -368,6 +368,14 @@ final class paper_loans {
                 $same = array_values(array_filter($ids, fn($id) => text::normalise($this->readers[$id]['group']) === $group));
                 $found[$how] = $same ?: $ids;
             }
+            // The same name, once with an account and once without (one that came from an old program and is not matched
+            // yet): the one with the account is who borrows now; matching later brings the two together, loans and all.
+            if (count($found[$how]) > 1) {
+                $accounts = array_values(array_filter($found[$how], fn($id) => $this->readers[$id]['account']));
+                if (count($accounts) === 1) {
+                    $found[$how] = $accounts;
+                }
+            }
         }
         if (count($found['exact']) === 1) {
             return [$found['exact'][0], 'sure', []];
@@ -424,17 +432,21 @@ final class paper_loans {
         if ($this->readers === null) {
             $year = years::around($this->entityid, time());
             $this->readers = [];
+            // A reader with an account takes its name from the account; one without, from the library.
             $rows = $DB->get_recordset_sql(
-                'SELECT r.id, r.firstname, r.lastname, r.cardcode, m.groupname
+                'SELECT r.id, r.firstname, r.lastname, r.cardcode, r.userid, u.firstname AS ufirst, u.lastname AS ulast,
+                        m.groupname
                    FROM {' . self::T . 'reader} r
+              LEFT JOIN {user} u ON u.id = r.userid AND u.deleted = 0
               LEFT JOIN {' . self::T . 'member} m ON m.readerid = r.id AND m.yearid = :yearid
                   WHERE r.entityid = :entityid AND r.status = :active',
                 ['yearid' => $year->id, 'entityid' => $this->entityid, 'active' => 'active']
             );
             foreach ($rows as $row) {
-                $name = trim($row->firstname . ' ' . $row->lastname);
+                $name = $row->userid && $row->ufirst !== null ? trim($row->ufirst . ' ' . $row->ulast)
+                    : trim($row->firstname . ' ' . $row->lastname);
                 $this->readers[(int) $row->id] = ['words' => text::words($name), 'card' => (string) $row->cardcode,
-                    'name' => $name, 'group' => (string) $row->groupname];
+                    'name' => $name, 'group' => (string) $row->groupname, 'account' => (bool) $row->userid];
             }
             $rows->close();
         }
@@ -448,7 +460,7 @@ final class paper_loans {
      * @return array[] id, card, name, group.
      */
     private function candidates(array $ids): array {
-        return array_map(fn($id) => ['id' => $id] + array_diff_key($this->readers[$id], ['words' => 1]), $ids);
+        return array_map(fn($id) => ['id' => $id] + array_diff_key($this->readers[$id], ['words' => 1, 'account' => 1]), $ids);
     }
 
     /**
