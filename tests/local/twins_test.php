@@ -57,7 +57,7 @@ final class twins_test extends \advanced_testcase {
         $year = years::around($entityid, time());
         $generator->create_member(['readerid' => $one->id, 'yearid' => $year->id, 'groupname' => 'Claustro']);
         $generator->create_member(['readerid' => $two->id, 'yearid' => $year->id, 'groupname' => 'Otro']);
-        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => 'abies', 'tablename' => 'reader',
+        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => 'abies', 'tablename' => 'reader',
             'externalid' => '88', 'localid' => $two->id, 'timecreated' => time()]);
         $described = twins::describe($entityid, [(int) $one->id, (int) $two->id]);
         $this->assertSame(1, $described[$two->id]['out']);

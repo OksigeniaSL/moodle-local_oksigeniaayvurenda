@@ -124,7 +124,7 @@ final class bank {
         $now = time();
         if ($setid && $DB->record_exists(self::T . 'bankset', ['id' => $setid, 'libraryid' => $library->id])) {
             $DB->update_record(self::T . 'bankset', (object) ['id' => $setid, 'name' => $name !== '' ? $name : '—',
-                'groups' => json_encode($groups), 'timemodified' => $now]);
+                'groupnames' => json_encode($groups), 'timemodified' => $now]);
             return $setid;
         }
         $order = (int) $DB->get_field_sql(
@@ -132,7 +132,7 @@ final class bank {
             [$library->id]
         );
         return (int) $DB->insert_record(self::T . 'bankset', ['libraryid' => $library->id, 'name' => $name !== '' ? $name : '—',
-            'groups' => json_encode($groups), 'sortorder' => $order + 1, 'timecreated' => $now, 'timemodified' => $now]);
+            'groupnames' => json_encode($groups), 'sortorder' => $order + 1, 'timecreated' => $now, 'timemodified' => $now]);
     }
 
     /**
@@ -430,6 +430,6 @@ final class bank {
      * @return string[]
      */
     private static function groups_of(\stdClass $set): array {
-        return array_values(array_filter((array) (json_decode((string) $set->groups, true) ?: []), 'is_string'));
+        return array_values(array_filter((array) (json_decode((string) $set->groupnames, true) ?: []), 'is_string'));
     }
 }

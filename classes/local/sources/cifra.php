@@ -166,7 +166,7 @@ final class cifra {
         $here = array_flip($stats['ids']);
         $left = 0;
         // Who came from Cifra before and is not there now, or left, stops being an active reader.
-        $sources = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'system' => 'cifra',
+        $sources = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'origin' => 'cifra',
             'tablename' => 'reader'], '', 'id, localid');
         $active = array_flip($DB->get_fieldset_select(
             self::T . 'reader',

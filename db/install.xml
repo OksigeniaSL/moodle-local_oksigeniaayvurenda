@@ -523,7 +523,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="system" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="abies, cifra, csv…"/>
+        <FIELD NAME="origin" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="abies, cifra, csv…"/>
         <FIELD NAME="tablename" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="record, authority, item, reader, loan"/>
         <FIELD NAME="externalid" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="localid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -536,7 +536,7 @@
         <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="external" UNIQUE="true" FIELDS="entityid, system, tablename, externalid"/>
+        <INDEX NAME="external" UNIQUE="true" FIELDS="entityid, origin, tablename, externalid"/>
         <INDEX NAME="local" UNIQUE="false" FIELDS="tablename, localid"/>
       </INDEXES>
     </TABLE>
@@ -695,7 +695,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="groups" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of the groups it serves"/>
+        <FIELD NAME="groupnames" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of the groups it serves"/>
         <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

@@ -169,7 +169,7 @@ final class abies_import {
         $this->fromabies = ['authority' => [], 'record' => [], 'item' => [], 'reader' => [], 'loan' => []];
         $rows = $DB->get_recordset(
             self::T . 'source',
-            ['entityid' => $this->entityid, 'system' => self::SYSTEM],
+            ['entityid' => $this->entityid, 'origin' => self::SYSTEM],
             '',
             'id, tablename, externalid, localid, hash, localhash'
         );
@@ -817,7 +817,7 @@ final class abies_import {
         $own = self::own_hash($table, $row, $links);
         $sourceid = (int) $DB->insert_record(self::T . 'source', [
             'entityid' => $this->entityid,
-            'system' => self::SYSTEM,
+            'origin' => self::SYSTEM,
             'tablename' => $table,
             'externalid' => $externalid,
             'localid' => $id,
@@ -846,7 +846,7 @@ final class abies_import {
         $own = self::own_hash($table, $row, $this->links_here($table, $localid));
         $sourceid = (int) $DB->insert_record(self::T . 'source', [
             'entityid' => $this->entityid,
-            'system' => self::SYSTEM,
+            'origin' => self::SYSTEM,
             'tablename' => $table,
             'externalid' => $externalid,
             'localid' => $localid,
@@ -971,8 +971,8 @@ final class abies_import {
      */
     public static function settle(?int $entityid = null): void {
         global $DB;
-        $where = 's.system = :system AND s.tablename = :tablename AND s.localhash IS NULL';
-        $params = ['system' => self::SYSTEM];
+        $where = 's.origin = :origin AND s.tablename = :tablename AND s.localhash IS NULL';
+        $params = ['origin' => self::SYSTEM];
         if ($entityid !== null) {
             $where .= ' AND s.entityid = :entityid';
             $params['entityid'] = $entityid;

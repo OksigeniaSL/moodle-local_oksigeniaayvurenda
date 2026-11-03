@@ -95,7 +95,7 @@ final class csvlist {
         }
         $sources = $DB->get_records_menu(
             self::T . 'source',
-            ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader'],
+            ['entityid' => $entityid, 'origin' => $system, 'tablename' => 'reader'],
             '',
             'externalid, localid'
         );
@@ -182,7 +182,7 @@ final class csvlist {
                 $stats['linked']++;
             }
             if (!isset($sources[$key])) {
-                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => $system, 'tablename' => 'reader',
+                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => $system, 'tablename' => 'reader',
                     'externalid' => $key, 'localid' => $readerid, 'timecreated' => $now]);
                 $sources[$key] = $readerid;
             }

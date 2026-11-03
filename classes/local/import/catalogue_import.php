@@ -118,7 +118,7 @@ final class catalogue_import {
                 }
             }
             if ($key !== '' && !isset($this->sources[$key])) {
-                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => $this->system,
+                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => $this->system,
                     'tablename' => 'record', 'externalid' => \core_text::substr($key, 0, 255), 'localid' => $recordid,
                     'timecreated' => $now]);
                 $this->sources[$key] = $recordid;
@@ -269,6 +269,6 @@ final class catalogue_import {
         }
         $rows->close();
         $this->sources = array_map('intval', $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid,
-            'system' => $this->system, 'tablename' => 'record'], '', 'externalid, localid'));
+            'origin' => $this->system, 'tablename' => 'record'], '', 'externalid, localid'));
     }
 }

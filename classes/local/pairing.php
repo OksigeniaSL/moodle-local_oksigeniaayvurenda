@@ -75,15 +75,15 @@ final class pairing {
     public static function piles(int $entityid, ?array $people = null): array {
         global $DB;
         $people = $people ?? self::people($entityid);
-        $paired = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'system' => self::SYSTEM,
+        $paired = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'origin' => self::SYSTEM,
             'tablename' => 'reader'], '', 'id, externalid');
         $made = self::made($entityid);
         $taken = array_diff_key(array_flip($paired), $made);
         $pairedreaders = array_flip(array_map('intval', $DB->get_fieldset_select(
             self::T . 'source',
             'localid',
-            'entityid = :entityid AND system = :system AND tablename = :tablename',
-            ['entityid' => $entityid, 'system' => self::SYSTEM, 'tablename' => 'reader']
+            'entityid = :entityid AND origin = :origin AND tablename = :tablename',
+            ['entityid' => $entityid, 'origin' => self::SYSTEM, 'tablename' => 'reader']
         )));
         $readers = [];
         $rows = $DB->get_records_select(
@@ -160,7 +160,7 @@ final class pairing {
         global $DB;
         $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $entityid], 'id', MUST_EXIST);
         $key = csvlist::key($person);
-        $where = ['entityid' => $entityid, 'system' => self::SYSTEM, 'tablename' => 'reader'];
+        $where = ['entityid' => $entityid, 'origin' => self::SYSTEM, 'tablename' => 'reader'];
         if ($DB->record_exists(self::T . 'source', $where + ['localid' => $readerid])) {
             return false;
         }
@@ -195,11 +195,11 @@ final class pairing {
             "SELECT s.externalid, r.id
                FROM {" . self::T . "source} s
                JOIN {" . self::T . "reader} r ON r.id = s.localid AND r.entityid = s.entityid
-              WHERE s.entityid = :entityid AND s.system = :system AND s.tablename = 'reader'
+              WHERE s.entityid = :entityid AND s.origin = :origin AND s.tablename = 'reader'
                 AND NOT EXISTS (SELECT 1 FROM {" . self::T . "source} x WHERE x.entityid = s.entityid
-                                AND x.tablename = 'reader' AND x.localid = r.id AND x.system <> s.system)
+                                AND x.tablename = 'reader' AND x.localid = r.id AND x.origin <> s.origin)
                 AND " . implode(' AND ', $others),
-            ['entityid' => $entityid, 'system' => self::SYSTEM]
+            ['entityid' => $entityid, 'origin' => self::SYSTEM]
         ));
     }
 
@@ -221,7 +221,7 @@ final class pairing {
         }
         $DB->set_field(self::T . 'member', 'readerid', $keepid, ['readerid' => $madeid]);
         reviews::move($madeid, $keepid);
-        $DB->set_field(self::T . 'source', 'localid', $keepid, ['entityid' => $entityid, 'system' => self::SYSTEM,
+        $DB->set_field(self::T . 'source', 'localid', $keepid, ['entityid' => $entityid, 'origin' => self::SYSTEM,
             'tablename' => 'reader', 'localid' => $madeid]);
         $DB->delete_records(self::T . 'reader', ['id' => $madeid]);
         $update = ['id' => $keepid, 'status' => 'active', 'timemodified' => time()];
@@ -262,13 +262,13 @@ final class pairing {
      */
     public static function unpaired(int $entityid): int {
         global $DB;
-        $params = ['entityid' => $entityid, 'system' => self::SYSTEM];
+        $params = ['entityid' => $entityid, 'origin' => self::SYSTEM];
         // Once the platform has brought someone, only the types it brings: teachers it does not have are not waiting.
         $types = $DB->get_fieldset_sql(
             "SELECT DISTINCT r.readertype
                FROM {" . self::T . "reader} r
                JOIN {" . self::T . "source} s ON s.localid = r.id AND s.entityid = r.entityid
-              WHERE r.entityid = :entityid AND s.system = :system AND s.tablename = 'reader'",
+              WHERE r.entityid = :entityid AND s.origin = :origin AND s.tablename = 'reader'",
             $params
         );
         $only = '';
@@ -282,7 +282,7 @@ final class pairing {
                FROM {" . self::T . "reader} r
               WHERE r.entityid = :entityid AND r.status = 'active'$only
                 AND NOT EXISTS (SELECT 1 FROM {" . self::T . "source} s WHERE s.entityid = r.entityid
-                                AND s.system = :system AND s.tablename = 'reader' AND s.localid = r.id)",
+                                AND s.origin = :origin AND s.tablename = 'reader' AND s.localid = r.id)",
             $params
         );
     }

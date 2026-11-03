@@ -471,6 +471,7 @@ final class desk {
             return [];
         }
         $name = $DB->sql_concat_join("' '", ["COALESCE(r.firstname, u.firstname, '')", "COALESCE(r.lastname, u.lastname, '')"]);
+        $name = readers::without_accents($name);
         $conditions = [];
         $params = ['entityid' => $this->library->entityid];
         foreach ($words as $i => $word) {

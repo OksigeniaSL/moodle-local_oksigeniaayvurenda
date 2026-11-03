@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.155.0
+
+- MySQL 8: the columns `source.system` and `bankset.groups`, words it reserves, are now `origin` and `groupnames`. Older
+  copies still come back.
+- PostgreSQL: the desk and the people who keep a library find names with accents by a word typed without them.
+- Subjects and short notices no longer say which book or how much: a phone's locked screen and the push service do not
+  need to know; the title stays in the message.
+- The reader of EPUB books lets a book ask nothing of other sites, which would tell them who is reading it.
+
 ## 0.154.1
 
 - Erasing a reader is final everywhere: no list, program or cohort that still has them brings them back the next night

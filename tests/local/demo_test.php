@@ -142,7 +142,7 @@ final class demo_test extends \advanced_testcase {
         /** @var \local_oksigeniaayvurenda_generator $gen */
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $real = $gen->create_library();
-        $DB->insert_record(self::T . 'source', ['entityid' => $real->entityid, 'system' => 'abies', 'tablename' => 'record',
+        $DB->insert_record(self::T . 'source', ['entityid' => $real->entityid, 'origin' => 'abies', 'tablename' => 'record',
             'externalid' => '1', 'localid' => 1, 'hash' => 'x', 'timecreated' => time()]);
         $this->assertSame(-1, demo::refine((int) $real->id));
     }
@@ -194,7 +194,7 @@ final class demo_test extends \advanced_testcase {
         /** @var \local_oksigeniaayvurenda_generator $gen */
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $real = $gen->create_library();
-        $DB->insert_record(self::T . 'source', ['entityid' => $real->entityid, 'system' => 'abies', 'tablename' => 'record',
+        $DB->insert_record(self::T . 'source', ['entityid' => $real->entityid, 'origin' => 'abies', 'tablename' => 'record',
             'externalid' => '1', 'localid' => 1, 'hash' => 'x', 'timecreated' => time()]);
         $this->assertSame(-1, demo::settle((int) $real->id));
     }
@@ -251,7 +251,7 @@ final class demo_test extends \advanced_testcase {
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $real = $gen->create_library();
         $record = $gen->create_record(['entityid' => $real->entityid, 'title' => 'El faro dormido']);
-        $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $real->entityid, 'system' => 'abies',
+        $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $real->entityid, 'origin' => 'abies',
             'tablename' => 'record', 'externalid' => '1', 'localid' => $record->id, 'hash' => 'x', 'timecreated' => time()]);
         $this->assertSame(-1, demo::covers((int) $real->id));
         $this->assertNull(covers::url((int) $record->id));

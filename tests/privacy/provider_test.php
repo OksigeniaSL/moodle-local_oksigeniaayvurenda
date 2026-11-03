@@ -182,7 +182,7 @@ final class provider_test extends provider_testcase {
         $w = $this->make_world();
         $system = \context_system::instance();
         // Ana came from a list, which knew her by her email.
-        $DB->insert_record(self::T . 'source', ['entityid' => $w->anareader->entityid, 'system' => 'csv',
+        $DB->insert_record(self::T . 'source', ['entityid' => $w->anareader->entityid, 'origin' => 'csv',
             'tablename' => 'reader', 'externalid' => 'email:ana@example.invalid', 'localid' => $w->anareader->id,
             'timecreated' => time()]);
         provider::delete_data_for_user(new approved_contextlist($w->ana, 'local_oksigeniaayvurenda', [$system->id]));

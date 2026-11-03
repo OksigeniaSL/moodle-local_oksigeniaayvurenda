@@ -85,7 +85,7 @@ final class oneroster {
         $stats = csvlist::load($entityid, $found['readers'], 'student', $now, 'oneroster', $partly);
         $here = array_flip($stats['ids']);
         // Who left: those the export says, and, in a whole export, those who came from it and are not in it.
-        $sources = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'system' => 'oneroster',
+        $sources = $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid, 'origin' => 'oneroster',
             'tablename' => 'reader'], '', 'externalid, localid');
         $active = array_flip($DB->get_fieldset_select(
             self::T . 'reader',
@@ -122,8 +122,8 @@ final class oneroster {
                 'SELECT r.userid
                    FROM {' . self::T . 'source} s
                    JOIN {' . self::T . 'reader} r ON r.id = s.localid
-                  WHERE s.entityid = :entityid AND s.system = :system AND s.tablename = :tablename AND s.externalid = :key',
-                ['entityid' => $entityid, 'system' => 'oneroster', 'tablename' => 'reader', 'key' => 'id:' . $teacher]
+                  WHERE s.entityid = :entityid AND s.origin = :origin AND s.tablename = :tablename AND s.externalid = :key',
+                ['entityid' => $entityid, 'origin' => 'oneroster', 'tablename' => 'reader', 'key' => 'id:' . $teacher]
             );
             if ($userid && !$DB->record_exists(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => $group])) {
                 tutors::set((int) $year->id, $group, $userid);

@@ -39,6 +39,15 @@ final class text {
         'Ü' => 'u', 'Û' => 'u', 'Ñ' => 'n', 'Ç' => 'c'];
 
     /**
+     * The accents, as the two strings the SQL translate() of a database without accent-insensitive search asks for.
+     *
+     * @return string[] From, to.
+     */
+    public static function accents(): array {
+        return [implode('', array_keys(self::ACCENTS)), implode('', array_values(self::ACCENTS))];
+    }
+
+    /**
      * Lower case, without accents, with single spaces and no punctuation.
      *
      * @param string $text

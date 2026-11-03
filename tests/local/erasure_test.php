@@ -61,7 +61,7 @@ final class erasure_test extends \advanced_testcase {
         $DB->insert_record(self::T . 'formatask', $common + ['format' => 'audio', 'status' => 'waiting']);
         $DB->insert_record(self::T . 'voiceinvite', $common + ['token' => 'abc', 'name' => 'Familia de Lucía',
             'timeexpires' => $now + DAYSECS]);
-        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => 'list', 'tablename' => 'reader',
+        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => 'list', 'tablename' => 'reader',
             'externalid' => 'lucia-ríos', 'localid' => $w->reader->id, 'timecreated' => $now]);
         return $w;
     }

@@ -42,7 +42,7 @@ final class newsletter_test extends \advanced_testcase {
         $now = time();
         $since = $now - WEEKSECS;
         $source = fn($record, $when) => $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $entityid,
-            'system' => 'marc', 'tablename' => 'record', 'externalid' => 'x' . $record->id, 'localid' => $record->id,
+            'origin' => 'marc', 'tablename' => 'record', 'externalid' => 'x' . $record->id, 'localid' => $record->id,
             'timecreated' => $when]);
         $whole = $gen->create_record(['entityid' => $entityid, 'title' => 'Traído con el catálogo']);
         $source($whole, $now);

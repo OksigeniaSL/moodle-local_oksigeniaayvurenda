@@ -85,6 +85,10 @@ foreach (
     $data[$key] = $str($key);
 }
 $scripts = $item->format === 'epub' ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader'] : ['reader'];
+// A book may ask other sites for its styles, pictures or scripts, and that would tell them who is reading it.
+@header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' blob:; "
+    . "img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' blob:; "
+    . "frame-src 'self' blob:; worker-src 'self' blob:");
 shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/read', $data), $library, '', [
     'search' => false,
     'scripts' => $scripts,

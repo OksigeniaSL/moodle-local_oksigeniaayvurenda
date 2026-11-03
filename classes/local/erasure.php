@@ -128,7 +128,7 @@ final class erasure {
                 'localhash' => null, 'externalid' => import\abies_import::erased((string) $source->externalid)]);
         }
         if ($was && $was->userid) {
-            $DB->insert_record(self::T . 'source', ['entityid' => $was->entityid, 'system' => 'account', 'tablename' => 'reader',
+            $DB->insert_record(self::T . 'source', ['entityid' => $was->entityid, 'origin' => 'account', 'tablename' => 'reader',
                 'externalid' => self::fingerprint((int) $was->userid), 'localid' => 0, 'timecreated' => $now]);
         }
         $drawn = $DB->get_fieldset_select(self::T . 'review', 'id', 'readerid = :readerid', ['readerid' => $readerid]);

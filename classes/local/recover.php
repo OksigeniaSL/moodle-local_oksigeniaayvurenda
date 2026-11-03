@@ -27,6 +27,9 @@ namespace local_oksigeniaayvurenda\local;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class recover {
+    /** @var string[] Columns that had another name in copies made before 0.155.0. */
+    private const OLD_NAMES = ['origin' => 'system', 'groupnames' => 'groups'];
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -300,10 +303,11 @@ final class recover {
     private static function row(string $table, array $row, array $columns, array $keys, array $map, int $userid): ?\stdClass {
         $new = new \stdClass();
         foreach ($columns as $name => $column) {
-            if ($name === 'id' || !array_key_exists($name, $row)) {
+            $from = array_key_exists($name, $row) ? $name : (self::OLD_NAMES[$name] ?? $name);
+            if ($name === 'id' || !array_key_exists($from, $row)) {
                 continue;
             }
-            $value = $row[$name];
+            $value = $row[$from];
             if ($value === '' && !$column->not_null) {
                 $value = null;
             } else if ($value === '' && $column->meta_type === 'I') {

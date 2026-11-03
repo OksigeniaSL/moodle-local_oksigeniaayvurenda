@@ -55,7 +55,7 @@ final class readers_page_test extends \advanced_testcase {
         $make('Estrada', null);
         $gone = $make('Faro', null);
         $DB->set_field($t . 'reader', 'status', 'left', ['id' => $gone]);
-        $DB->insert_record($t . 'source', ['entityid' => $library->entityid, 'system' => 'csv', 'tablename' => 'reader',
+        $DB->insert_record($t . 'source', ['entityid' => $library->entityid, 'origin' => 'csv', 'tablename' => 'reader',
             'externalid' => 'x', 'localid' => $gone, 'timecreated' => $now, 'timemodified' => $now]);
 
         $this->assertSame(5, readers::total($library));

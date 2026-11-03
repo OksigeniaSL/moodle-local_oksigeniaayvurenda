@@ -115,7 +115,7 @@ final class keepers {
         if (!$words) {
             return [];
         }
-        $name = $DB->sql_concat_join("' '", ['u.firstname', 'u.lastname']);
+        $name = readers::without_accents($DB->sql_concat_join("' '", ['u.firstname', 'u.lastname']));
         $conditions = [];
         $params = ['entityid' => $library->entityid, 'libraryid' => $library->id];
         foreach ($words as $i => $word) {

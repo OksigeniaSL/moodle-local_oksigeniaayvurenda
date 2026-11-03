@@ -77,6 +77,21 @@ final class readers {
     }
 
     /**
+     * A column to search by a word typed without accents: PostgreSQL has no accent-insensitive search.
+     *
+     * @param string $sql
+     * @return string
+     */
+    public static function without_accents(string $sql): string {
+        global $DB;
+        if ($DB->get_dbfamily() !== 'postgres') {
+            return $sql;
+        }
+        [$from, $to] = \local_oksigeniaayvurenda\core\text::accents();
+        return "translate($sql, '$from', '$to')";
+    }
+
+    /**
      * How many readers each place brought: by what the import keeps of each one, and by where its group came from
      * this year. Connected places bring the same reader in both; the larger figure is the true one.
      *
@@ -88,10 +103,10 @@ final class readers {
         global $DB;
         $now = $now ?? time();
         $kept = $DB->get_records_sql_menu(
-            "SELECT system, COUNT(1)
+            "SELECT origin, COUNT(1)
                FROM {" . self::T . "source}
               WHERE entityid = :entityid AND tablename = 'reader'
-           GROUP BY system",
+           GROUP BY origin",
             ['entityid' => $entityid]
         );
         $members = $DB->get_records_sql_menu(

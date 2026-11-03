@@ -571,5 +571,28 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110320, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110402) {
+        // Two words MySQL 8 reserves, and Moodle does not quote its columns.
+        $table = new xmldb_table('local_oksigeniaayvurenda_source');
+        $index = new xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'system', 'tablename', 'externalid']);
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+        $field = new xmldb_field('system', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null, 'entityid');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'origin');
+        }
+        $index = new xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'origin', 'tablename', 'externalid']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        $table = new xmldb_table('local_oksigeniaayvurenda_bankset');
+        $field = new xmldb_field('groups', XMLDB_TYPE_TEXT, null, null, null, null, null, 'name');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'groupnames');
+        }
+        upgrade_plugin_savepoint(true, 2026110402, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }

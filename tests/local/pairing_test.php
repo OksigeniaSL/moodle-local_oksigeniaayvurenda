@@ -110,7 +110,7 @@ final class pairing_test extends \advanced_testcase {
         // Someone of the staff named like a student of Cifra, which brings no staff: left alone.
         $generator->create_reader(['entityid' => $entityid, 'firstname' => 'Lía', 'lastname' => 'Olmo Ríos',
             'readertype' => 'staff']);
-        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'system' => 'abies', 'tablename' => 'reader',
+        $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => 'abies', 'tablename' => 'reader',
             'externalid' => '12', 'localid' => $irene->id, 'timecreated' => time()]);
         cifra::save($entityid, ['enabled' => 1, 'url' => 'http://cifra-puente.invalid:8080/', 'mode' => 'key',
             'example' => 1, 'key' => 'made-up-key']);
@@ -138,7 +138,7 @@ final class pairing_test extends \advanced_testcase {
         $this->assertTrue(pairing::link($entityid, (int) $irene->id, $piles['people'][$number]['person'], $made));
         $this->assertFalse($DB->record_exists(self::T . 'reader', ['id' => $made]));
         $this->assertSame(6, $DB->count_records(self::T . 'reader', ['entityid' => $entityid]));
-        $this->assertSame(1, $DB->count_records(self::T . 'source', ['entityid' => $entityid, 'system' => 'cifra',
+        $this->assertSame(1, $DB->count_records(self::T . 'source', ['entityid' => $entityid, 'origin' => 'cifra',
             'localid' => $irene->id]));
         $this->assertSame($irene->cardcode, $DB->get_field(self::T . 'reader', 'cardcode', ['id' => $irene->id]));
 
