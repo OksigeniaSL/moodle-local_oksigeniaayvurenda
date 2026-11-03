@@ -11,6 +11,9 @@
   print its label: the printed label wins.
 - Updating a record from Abies keeps what was added to it here, such as its cover.
 - The upgrade takes what came from Abies, as it is now, as the starting point.
+- «New copies start at code», in the centre's settings (and `cli/centre.php --first-copy-code`): when an old program
+  kept printing labels after the copy that came, new copy codes start after its last label, in the desk, in imports
+  and for the copies the Abies import relabels.
 
 ## 0.150.3
 
