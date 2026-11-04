@@ -82,9 +82,6 @@ $spanof = fn(int $days) => $days > 30 ? 'old' : ($days >= 15 ? 'mid' : 'new');
 // Red past 30 days, orange from 15: what is close to it shows too.
 $toneof = fn(int $days) => $days > 30 ? 'late' : ($days >= 15 ? 'near' : ($days > 0 ? 'soon' : 'ok'));
 $counts = ['old' => 0, 'mid' => 0, 'new' => 0];
-// What is out, by how soon it comes back: today, in three days, this week, this fortnight.
-$windows = ['today' => 0, 'three' => 3, 'week' => 7, 'fortnight' => 15];
-$inwindow = fn(array $line, string $window) => $line['days'] === 0 && $line['left'] <= $windows[$window];
 $order = optional_param('order', 'date', PARAM_ALPHA);
 $lines = [];
 foreach ($groups as $group) {
@@ -134,7 +131,7 @@ foreach ($lines as $line) {
     if (!$all && $span !== '' && isset($counts[$span]) && $spanof($line['days']) !== $span) {
         continue;
     }
-    if ($all && isset($windows[$span]) && !$inwindow($line, $span)) {
+    if ($all && isset(late::WINDOWS[$span]) && !late::in_window($line, $span)) {
         continue;
     }
     $key = $adults ? 'r' . $line['readerid'] : 'g' . $line['group'];
@@ -236,10 +233,13 @@ $data = [
         ['label' => $str('latetaball'), 'url' => $url(['all' => 1]), 'current' => $all],
     ],
     'spans' => $all ? array_map(
-        fn($key) => ['key' => $key,
-        'count' => count(array_filter($lines, fn($line) => $inwindow($line, $key))), 'label' => $str('latewindow' . $key),
-        'url' => $url($span === $key ? ['all' => 1] : ['all' => 1, 'span' => $key]), 'current' => $span === $key],
-        array_keys($windows)
+        function ($key) use ($lines, $str, $url, $span) {
+            $count = count(array_filter($lines, fn($line) => late::in_window($line, $key)));
+            return ['key' => $key, 'count' => \local_oksigeniaayvurenda\local\screens::number($count),
+                'label' => $str('latewindow' . $key), 'alarm' => $key === 'overdue' && $count > 0,
+                'url' => $url($span === $key ? ['all' => 1] : ['all' => 1, 'span' => $key]), 'current' => $span === $key];
+        },
+        array_keys(late::WINDOWS)
     ) : array_map(fn($key) => ['key' => $key, 'count' => \local_oksigeniaayvurenda\local\screens::number(
         $counts[$key]
     ), 'label' => $str('latespan' . $key), 'url' => $url($span === $key ? [] : ['span' => $key]),

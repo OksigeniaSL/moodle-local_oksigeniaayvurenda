@@ -35,6 +35,20 @@ final class late {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
+    /** @var array What is out, by how soon it comes back: what should be back already, then the days ahead of today. */
+    public const WINDOWS = ['overdue' => -1, 'today' => 0, 'three' => 3, 'week' => 7, 'fortnight' => 15];
+
+    /**
+     * Whether a line of by_group() falls in one of the windows.
+     *
+     * @param array $line
+     * @param string $window A key of WINDOWS.
+     * @return bool
+     */
+    public static function in_window(array $line, string $window): bool {
+        return $window === 'overdue' ? $line['days'] > 0 : $line['days'] === 0 && $line['left'] <= self::WINDOWS[$window];
+    }
+
     /**
      * Loans out of a library, by group of this school year: only the late ones, or all of them.
      *

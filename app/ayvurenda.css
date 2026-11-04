@@ -3746,7 +3746,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-weed-reason-empty .ayv-weed-count { color: color-mix(in srgb, var(--ink) 70%, transparent); }
 .ayv .ayv-weed-count { font-family: var(--title); font-size: 2rem; line-height: 1.1; color: var(--accent); }
 .ayv .ayv-weed-reason-lost .ayv-weed-count,
-.ayv .ayv-weed-reason-worn .ayv-weed-count { color: var(--coral-ink, #a3321e); }
+.ayv .ayv-weed-reason-worn .ayv-weed-count { color: var(--late); }
 .ayv .ayv-weed-label { font-weight: 700; }
 .ayv .ayv-weed-hint { font-size: .85rem; color: color-mix(in srgb, currentColor 80%, transparent); }
 .ayv .ayv-weed-tools { margin: 0 0 1rem; }
@@ -3791,7 +3791,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-rule-numbers { align-items: start; gap: .75rem 1.5rem; margin: .5rem 0; }
 
 /* Late books: spans that filter, groups folded, the red only past two weeks. */
-.ayv .ayv-late-spans .ayv-late-span-old .ayv-weed-count { color: #a3321e; }
+.ayv .ayv-late-spans .ayv-late-span-old .ayv-weed-count { color: var(--late); }
 .ayv .ayv-late-group { margin: 0 0 .75rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
 .ayv .ayv-late-group summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .9rem; padding: .9rem 1.1rem; cursor: pointer; }
 .ayv .ayv-late-name { font-family: var(--title); font-size: 1.1rem; font-weight: 700; color: var(--accent); }
@@ -3814,6 +3814,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-late-late { background: #f6d9d2; color: #8a2a17; }
 .ayv .ayv-late-near { background: #fbe3c6; color: #7a4100; }
 .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-count { color: #b05a00; }
+html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-count { color: #f0b264; }
 .ayv .ayv-late-week { background: #fbf0c4; color: #5f4a00; }
 .ayv .ayv-late-orders { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0 0 .75rem; }
 .ayv .ayv-late-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: .5rem 1.1rem 1rem; }

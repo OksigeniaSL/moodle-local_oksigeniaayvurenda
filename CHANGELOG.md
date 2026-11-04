@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.166.0
+
+- Books out: what is already late has its own filter, the first of the row, in red when there is any.
+- Print cards speaks of readers, not of a centre, where the library is not a school.
+
 ## 0.165.0
 
 - Print cards: with a stage chosen, the list of classes has only its classes, and with everyone they go under their stages;
