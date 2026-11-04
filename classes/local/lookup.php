@@ -217,45 +217,20 @@ final class lookup {
             $result['tried'][] = get_string('practicecatalogue', 'local_oksigeniaayvurenda');
             return $result;
         }
-        $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
         $seen = [];
         $started = microtime(true);
-        // How many of the words asked for are in its title or its authors: a catalogue that looks everywhere also
-        // brings what has them only in a note, and that goes.
-        $asked = array_values(array_filter(text::words($words), fn($w) => \core_text::strlen($w) >= 3));
-        $score = function (array $description) use ($asked): int {
-            $have = array_flip(text::words(implode(' ', array_merge(
-                [(string) ($description['record']['title'] ?? ''), (string) ($description['record']['subtitle'] ?? '')],
-                (array) ($description['authorities']['author'] ?? [])
-            ))));
-            return count(array_filter($asked, fn($w) => isset($have[$w])));
-        };
-        foreach (self::sources($entityid) as $name) {
-            $source = self::source($name);
-            if (!$source) {
-                continue;
-            }
+        foreach (self::word_sources($entityid) as $source) {
             $result['tried'][] = $source['name'];
-            foreach (self::ask_words($source, $words) as $description) {
+            foreach (self::words_in($entityid, $words, $source['key']) as $found) {
                 if (count($result['found']) >= self::FOUND) {
                     break 2;
                 }
-                $points = $asked ? $score($description) : 1;
-                if (!$points) {
-                    continue;
-                }
                 // The same book in two catalogues is shown once: the first catalogue's.
-                $same = \local_oksigeniaayvurenda\core\text::normalise((string) $description['record']['title']) . '|'
-                    . ($description['record']['pubyear'] ?? '') . '|'
-                    . \local_oksigeniaayvurenda\core\text::normalise((string) ($description['authorities']['author'][0] ?? ''));
-                if (isset($seen[$same])) {
+                if (isset($seen[$found['same']])) {
                     continue;
                 }
-                $seen[$same] = true;
-                $pick = sha1($name . json_encode($description));
-                $cache->set('pick_' . $pick, ['time' => time(), 'source' => $source['name'], 'description' => $description]);
-                $result['found'][] = ['pick' => $pick, 'source' => $source['name'], 'description' => $description,
-                    'score' => $points, 'order' => count($result['found'])];
+                $seen[$found['same']] = true;
+                $result['found'][] = $found + ['order' => count($result['found'])];
             }
             if (count($result['found']) >= self::ENOUGH || microtime(true) - $started > self::BUDGET) {
                 break;
@@ -263,8 +238,96 @@ final class lookup {
         }
         // The ones with most of the words first; among them, the order of the catalogues.
         usort($result['found'], fn($a, $b) => [$b['score'], $a['order']] <=> [$a['score'], $b['order']]);
-        $result['found'] = array_map(fn($f) => array_diff_key($f, ['score' => 0, 'order' => 0]), $result['found']);
+        $result['found'] = array_map(fn($f) => array_diff_key($f, ['score' => 0, 'order' => 0, 'same' => 0]), $result['found']);
         return $result;
+    }
+
+    /**
+     * The catalogues a search by words asks, one by one, so the screen can say how it goes.
+     *
+     * @param int $entityid
+     * @return array[] key and name.
+     */
+    public static function word_sources(int $entityid): array {
+        if (practice::is($entityid)) {
+            return [];
+        }
+        $where = [];
+        foreach (self::sources($entityid) as $name) {
+            $source = self::source($name);
+            if ($source) {
+                $where[] = ['key' => $name, 'name' => $source['name']];
+            }
+        }
+        return $where;
+    }
+
+    /**
+     * What one catalogue has for some words of a title or its authors, each with a key to choose it by, kept a day.
+     *
+     * @param int $entityid
+     * @param string $words
+     * @param string $name The catalogue: one of this entity's.
+     * @return array[] pick, source, description, score (how many of the words it has) and same (to show the same book once).
+     */
+    public static function words_in(int $entityid, string $words, string $name): array {
+        $words = trim(preg_replace('/\s+/u', ' ', $words));
+        $source = in_array($name, self::sources($entityid), true) ? self::source($name) : null;
+        if (!$source || \core_text::strlen($words) < 3 || practice::is($entityid)) {
+            return [];
+        }
+        $cache = \cache::make('local_oksigeniaayvurenda', 'lookup');
+        $asked = array_values(array_filter(text::words($words), fn($w) => \core_text::strlen($w) >= 3));
+        $found = [];
+        foreach (self::ask_words($source, $words) as $description) {
+            $have = array_flip(text::words(implode(' ', array_merge(
+                [(string) ($description['record']['title'] ?? ''), (string) ($description['record']['subtitle'] ?? '')],
+                (array) ($description['authorities']['author'] ?? [])
+            ))));
+            $points = $asked ? count(array_filter($asked, fn($w) => isset($have[$w]))) : 1;
+            if (!$points) {
+                continue;
+            }
+            $pick = sha1($name . json_encode($description));
+            $cache->set('pick_' . $pick, ['time' => time(), 'source' => $source['name'], 'description' => $description]);
+            $found[] = ['pick' => $pick, 'source' => $source['name'], 'description' => $description, 'score' => $points,
+                'same' => text::normalise((string) $description['record']['title']) . '|'
+                    . ($description['record']['pubyear'] ?? '') . '|'
+                    . text::normalise((string) ($description['authorities']['author'][0] ?? ''))];
+        }
+        return $found;
+    }
+
+    /**
+     * What some words written wrong may have meant: first by the words of the catalogue itself, then by what Wikipedia
+     * would say, which knows surnames this library has never seen. It is told only the words of the search, as the
+     * catalogues are.
+     *
+     * @param int $entityid
+     * @param string $words
+     * @return string|null
+     */
+    public static function spelled(int $entityid, string $words): ?string {
+        $words = trim(preg_replace('/\s+/u', ' ', $words));
+        if (\core_text::strlen($words) < 3) {
+            return null;
+        }
+        $vocabulary = catalogue::vocabulary($entityid);
+        $own = (new \local_oksigeniaayvurenda\core\search\suggester($vocabulary))->suggest($words, 1)[0] ?? null;
+        if ($own !== null) {
+            return $own;
+        }
+        if (practice::is($entityid)) {
+            return null;
+        }
+        $language = substr(current_language(), 0, 2);
+        $language = preg_match('/^[a-z]{2}$/', $language) ? $language : 'en';
+        $body = self::fetch('https://' . $language . '.wikipedia.org/w/api.php?' . http_build_query(['action' => 'query',
+            'list' => 'search', 'srsearch' => $words, 'srinfo' => 'suggestion', 'srprop' => '', 'srlimit' => 1,
+            'format' => 'json']), 6);
+        $said = $body !== null ? json_decode($body, true) : null;
+        $suggestion = trim((string) ($said['query']['searchinfo']['suggestion'] ?? ''));
+        return $suggestion !== '' && text::normalise($suggestion) !== text::normalise($words) ? $suggestion : null;
     }
 
     /**

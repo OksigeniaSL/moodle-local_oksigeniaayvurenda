@@ -319,10 +319,39 @@ final class cataloguer_test extends \advanced_testcase {
         $this->assertNull(lookup::picked('nothing'));
         $this->assertNull(lookup::picked(str_repeat('a', 40)));
 
+        // The screen asks them one by one: only this entity's catalogues, each with what tells its books apart.
+        $entityid = (int) $library->entityid;
+        $this->assertSame(
+            ['Library of Congress', 'Open Library', 'Biblioteca Nacional de España'],
+            array_column(lookup::word_sources($entityid), 'name')
+        );
+        $this->assertSame([], lookup::words_in($entityid, 'faro dormido', 'nadie'));
+        $one = lookup::words_in($entityid, 'faro dormido', lookup::word_sources($entityid)[0]['key']);
+        $this->assertSame('Library of Congress', $one[0]['source']);
+        $this->assertNotSame('', $one[0]['same']);
+
+        // Written wrong: by the words of the catalogue, or else by what Wikipedia suggests; nothing, nothing.
+        $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_record(['entityid' => $entityid,
+            'title' => 'El faro dormido', 'searchtext' => 'el faro dormido']);
+        \local_oksigeniaayvurenda\local\catalogue::purge($entityid);
+        lookup::$fetcher = function (string $url) use (&$asked) {
+            $asked[] = $url;
+            return str_contains($url, 'tolken') ? '{"query":{"searchinfo":{"suggestion":"tolkien"},"search":[]}}'
+                : '{"query":{"search":[]}}';
+        };
+        $asked = [];
+        $this->assertSame('faro dormido', lookup::spelled($entityid, 'faro dormdo'));
+        $this->assertSame([], $asked);
+        $this->assertSame('tolkien', lookup::spelled($entityid, 'tolken'));
+        $this->assertStringContainsString('wikipedia.org/w/api.php', $asked[0]);
+        $this->assertNull(lookup::spelled($entityid, 'xqzwv'));
+        $this->assertNull(lookup::spelled($entityid, 'x'));
+
         $this->setAdminUser();
         $practice = practice::library();
         $asked = [];
         $this->assertSame([], lookup::words((int) $practice->entityid, 'faro dormido')['found']);
+        $this->assertSame([], lookup::word_sources((int) $practice->entityid));
         $this->assertSame([], $asked);
     }
 

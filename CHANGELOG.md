@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.161.0
+
+- A search of the catalogues when adding a book shows how it goes, catalogue by catalogue, and what is found can be chosen
+  while the others answer; writing it by hand is there from the first moment.
+- A title or an author written wrong is searched as it may have been meant, by the words of the catalogue itself or,
+  if they do not have it, by Wikipedia's spelling suggestion; the page says that it did so.
+- Readers without a photo have a bichito, always the same for each one; not in the sober skins.
+- The list of books out shows the reader's face, and with few readers, a card for each one instead of groups to open.
+- The row of the call number no longer has two bands across it.
+
 ## 0.160.0
 
 - The menu is on every page of the staff, also on the list of libraries.

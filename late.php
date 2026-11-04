@@ -95,6 +95,19 @@ $only = optional_param('group', '', PARAM_TEXT);
 $covers = \local_oksigeniaayvurenda\local\covers::urls(array_column($lines, 'recordid'));
 $readerurl = fn(int $id) => (new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug, 'id' => $id]))
     ->out(false);
+// Their faces: the staff know the child, not the cover of the book.
+$people = $DB->get_records_list(
+    'local_oksigeniaayvurenda_reader',
+    'id',
+    array_unique(array_column($lines, 'readerid')),
+    '',
+    'id, entityid, userid'
+);
+$accounts = $DB->get_records_list('user', 'id', array_filter(array_column($people, 'userid')));
+$faces = [];
+foreach ($people as $person) {
+    $faces[(int) $person->id] = \local_oksigeniaayvurenda\local\profile::photo($person, $accounts[$person->userid] ?? null);
+}
 // The tutors of each group this year, by their names: the button says whom it tells.
 $tutornames = [];
 foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id]) as $tutor) {
@@ -123,6 +136,8 @@ foreach ($lines as $line) {
         'url' => $readerurl($line['readerid']),
         'cover' => $covers[$line['recordid']] ?? null,
         'colour' => $line['recordid'] % 6,
+        'photo' => $faces[(int) $line['readerid']] ?? '',
+        'initial' => \local_oksigeniaayvurenda\local\profile::initial((string) $line['name']),
         'when' => $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
             : $str('lateuntil', $line['due']),
         'tone' => $toneof($line['days']),
@@ -170,6 +185,23 @@ foreach ($boxes as $box) {
         'printurl' => $adults ? '' : $url(['group' => $box['group'], 'all' => (int) $all]),
     ];
 }
+// With few readers out, they are seen at once, each with their face: no group to open.
+$cards = [];
+if ($all && $only === '' && !$adults && count($people) <= 24) {
+    foreach ($boxes as $box) {
+        foreach ($box['lines'] as $line) {
+            $id = (int) $line['readerid'];
+            $cards[$id] ??= ['name' => $line['name'], 'url' => $line['url'], 'photo' => $line['photo'],
+                'initial' => $line['initial'], 'group' => $box['group'], 'books' => []];
+            $cards[$id]['books'][] = ['title' => $line['title'], 'when' => $line['when'], 'tone' => $line['tone'],
+                'url' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
+                    'id' => $line['recordid']]))->out(false)];
+        }
+    }
+    usort($cards, fn($a, $b) => [\core_text::strtolower($a['group']), \core_text::strtolower($a['name'])]
+        <=> [\core_text::strtolower($b['group']), \core_text::strtolower($b['name'])]);
+    $shown = [];
+}
 $data = [
     'heading' => $str($all ? 'lateallheading' : 'lateheading'),
     'notice' => $notice,
@@ -183,9 +215,11 @@ $data = [
         'current' => $span === $key], ['old', 'mid', 'new']),
     'groups' => $shown,
     'hasgroups' => (bool) $shown,
+    'cards' => $cards,
+    'hascards' => (bool) $cards,
     'only' => $only !== '',
     'allurl' => $url(['all' => (int) $all]),
-    'empty' => $str($all ? 'lateallempty' : 'lateempty'),
+    'empty' => $shown || $cards ? '' : $str($all ? 'lateallempty' : 'lateempty'),
     'action' => $url(['all' => (int) $all]),
     'sesskey' => sesskey(),
 ];

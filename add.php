@@ -85,6 +85,7 @@ foreach (
     ['addnotisbn', 'additemcode', 'addlooking', 'addfound', 'addnotfound', 'addexisting', 'addexistingcopies',
         'addaddcopy', 'addotheredition', 'addspineproposed', 'addspinebefore', 'addsaved', 'addundo', 'addundone',
         'addcantundo', 'adderror', 'addnocover', 'addbadletter', 'addsearching', 'addsearchfound', 'addsearchnone',
+        'addsearchprogress', 'addsearchspelled', 'addsearchmeant', 'addand',
         'addsearchbyhand', 'addbyhand'] as $key
 ) {
     $strings[$key] = $str($key);

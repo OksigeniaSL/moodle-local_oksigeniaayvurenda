@@ -17,14 +17,15 @@
     @template local_oksigeniaayvurenda/late
 
     Books out of the library: the late ones by span and by group (folded, in the order of the stages), or all of them;
-    each reader to their record; for each group, its list to print and its tutor told now.
+    each reader to their record; for each group, its list to print and its tutor told now. With few readers out, each one
+    in a card with their face, without groups to open.
 
     Example context (json):
     {
         "heading": "Libros con retraso", "notice": "", "action": "#", "sesskey": "abc", "only": false, "allurl": "#",
         "tabs": [{"label": "Con retraso", "url": "#", "current": true}, {"label": "Prestados", "url": "#", "current": false}],
         "spans": [{"key": "old", "count": "4", "label": "Más de 30 días", "url": "#", "current": false}],
-        "hasgroups": true,
+        "hasgroups": true, "hascards": false, "cards": [],
         "groups": [{"heading": "3º Primaria A", "group": "3º Primaria A", "summary": "2 lectores · el más antiguo, 31 días",
             "tone": "late", "open": false, "tell": "Avisar a Irene López", "remind": "", "settutor": "", "readerid": 0,
             "readerurl": "", "printurl": "#",
@@ -41,6 +42,22 @@
     {{#spans}}<li><a class="ayv-weed-reason ayv-late-span-{{key}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}><span class="ayv-weed-count">{{count}}</span> <span class="ayv-weed-label">{{label}}</span></a></li>{{/spans}}
 </ul>{{/only}}
 {{#only}}<p class="ayv-print-head"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{lateallgroups}}</a> <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/only}}
+{{#hascards}}
+<ul class="ayv-late-cards">
+{{#cards}}
+    <li class="ayv-late-card">
+        <span class="ayv-person-face ayv-late-card-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="" loading="lazy">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>
+        <div class="ayv-late-card-text">
+            <a class="ayv-late-who" href="{{url}}">{{name}}</a>
+            {{#group}}<span class="ayv-weed-detail">{{group}}</span>{{/group}}
+            <ul class="ayv-late-card-books">
+            {{#books}}<li><a href="{{url}}">«{{title}}»</a> <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span></li>{{/books}}
+            </ul>
+        </div>
+    </li>
+{{/cards}}
+</ul>
+{{/hascards}}
 {{#hasgroups}}
 {{#groups}}
 <details class="ayv-late-group"{{#open}} open{{/open}}>
@@ -48,7 +65,8 @@
     <ul class="ayv-weed-list">
     {{#lines}}
         <li class="ayv-late-row">
-            <span class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}</span>
+            {{#bybook}}<span class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}</span>{{/bybook}}
+            {{^bybook}}<span class="ayv-person-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="" loading="lazy">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>{{/bybook}}
             {{#bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{bookurl}}">{{title}}</a> <span class="ayv-weed-detail">{{wasdue}}</span></span>{{/bybook}}
             {{^bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{url}}">{{name}}</a> <span class="ayv-weed-detail">«{{title}}»</span></span>{{/bybook}}
             <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span>

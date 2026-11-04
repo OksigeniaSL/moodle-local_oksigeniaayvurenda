@@ -57,13 +57,61 @@ final class profile {
     }
 
     /**
+     * Whether a reader without a photo gets a bichito here: not in the sober skins, where an initial is what fits.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function creatures_on(int $entityid): bool {
+        return !in_array(skins::of($entityid), ['university', 'company'], true);
+    }
+
+    /**
+     * A bichito for a reader without a photo, as an image: always the same one for each reader, and different for brothers
+     * and sisters, whose ids follow one another.
+     *
+     * @param int $readerid
+     * @return string The address of the image, or '' if the drawings are not there.
+     */
+    public static function creature(int $readerid): string {
+        global $CFG;
+        static $symbols = null;
+        if ($symbols === null) {
+            $file = $CFG->dirroot . '/local/oksigeniaayvurenda/pix/bichos.svg';
+            $sprite = is_readable($file) ? (string) file_get_contents($file) : '';
+            preg_match_all('/<symbol id="bicho-\d+"[^>]*>(.*?)<\/symbol>/s', $sprite, $found);
+            $symbols = $found[1];
+        }
+        if (!$symbols) {
+            return '';
+        }
+        return 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+            . $symbols[$readerid % count($symbols)] . '</svg>');
+    }
+
+    /**
+     * The face of a reader: their photo, or a bichito where the skin of the centre has them.
+     *
+     * @param \stdClass $reader With id, userid and entityid.
+     * @param \stdClass|null $user Their account, if already at hand.
+     * @return string The address of the image, or ''.
+     */
+    public static function photo(\stdClass $reader, ?\stdClass $user = null): string {
+        $picture = self::picture($reader, $user);
+        if ($picture !== '' || empty($reader->id) || !self::creatures_on((int) $reader->entityid)) {
+            return $picture;
+        }
+        return self::creature((int) $reader->id);
+    }
+
+    /**
      * The photo of a reader, from their Moodle account's picture; '' without one or where the centre does not show them.
      *
      * @param \stdClass $reader With userid and entityid.
      * @param \stdClass|null $user Their account, if already at hand.
      * @return string
      */
-    public static function photo(\stdClass $reader, ?\stdClass $user = null): string {
+    public static function picture(\stdClass $reader, ?\stdClass $user = null): string {
         global $PAGE;
         if (empty($reader->userid) || !self::photos_on((int) $reader->entityid)) {
             return '';

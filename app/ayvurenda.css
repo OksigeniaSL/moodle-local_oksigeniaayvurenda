@@ -906,7 +906,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-field input[type="number"],
 .ayv .ayv-field input[type="date"],
 .ayv .ayv-field textarea,
-.ayv .ayv-spine input {
+.ayv .ayv-callnumber input {
     min-height: 44px;
     padding: .4rem .85rem;
     font: inherit;
@@ -921,7 +921,13 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 /* The limits of a plan go up to six figures. */
 .ayv .ayv-field input.ayv-plan-limit { width: 8rem; }
 
-.ayv .ayv-spine { flex-wrap: wrap; }
+.ayv .ayv-callnumber { flex-wrap: wrap; }
+
+.ayv .ayv-field.ayv-callnumber input { flex: 0 1 5rem; width: 5rem; min-width: 0; }
+
+.ayv .ayv-field.ayv-callnumber input:first-of-type { flex-basis: 9rem; width: 9rem; }
+
+.ayv .ayv-callnumber .ayv-spine-note { flex-basis: 100%; }
 
 .ayv .ayv-spine-note { font-size: .85rem; color: var(--accent); }
 
@@ -3719,6 +3725,14 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-late-summary-late { color: #8a2a17; font-weight: 700; }
 .ayv .ayv-late-summary-near { color: #8a4a00; font-weight: 700; }
 .ayv .ayv-late-group .ayv-weed-list { padding: 0 .9rem .25rem; }
+.ayv .ayv-late-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-late-card { display: flex; align-items: flex-start; gap: .9rem; padding: .9rem 1rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-person-face.ayv-late-card-face { flex: 0 0 auto; width: 4.5rem; height: 4.5rem; font-size: 1.6rem; }
+.ayv .ayv-late-card-text { display: grid; gap: .1rem; min-width: 0; }
+.ayv .ayv-late-card-books { display: grid; gap: .3rem; margin: .35rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-late-card-books li { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem .6rem; }
+.ayv .ayv-late-card-books a { overflow-wrap: anywhere; }
+.ayv .ayv-late-row .ayv-person-face { flex: 0 0 auto; }
 .ayv .ayv-late-row { display: flex; align-items: center; gap: .75rem; padding: .45rem .5rem; border-top: 1px solid var(--line); }
 .ayv .ayv-late-row .ayv-weed-words { flex: 1 1 auto; }
 .ayv .ayv-late-who { font-weight: 700; color: var(--ink); }
@@ -3741,8 +3755,39 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-holdcard form { margin: 0; flex: 0 0 auto; }
 .ayv .ayv-formatcard { flex-wrap: wrap; }
 .ayv .ayv-found { display: grid; gap: .5rem; margin: 0 0 1.2rem; padding: 0; list-style: none; }
+/* While the catalogues answer: a ring that turns, and a line under the words that fills as they do. */
+.ayv .ayv-add-asking { position: relative; padding-bottom: .6rem; }
+.ayv .ayv-add-asking::before {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: .55em;
+    border: 2px solid var(--accent);
+    border-right-color: transparent;
+    border-radius: 50%;
+    vertical-align: -.15em;
+    animation: ayv-busy-turn .8s linear infinite;
+}
+.ayv .ayv-add-asking::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: var(--ayv-asked, 0%);
+    min-width: 2rem;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width .3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-add-asking::before { animation: none; border-right-color: var(--accent); opacity: .5; }
+    .ayv .ayv-add-asking::after { transition: none; }
+}
 .ayv .ayv-found-item { display: grid; gap: .15rem; width: 100%; padding: .7rem .9rem; border: 0; border-radius: var(--radius); background: var(--surface); color: var(--ink); text-align: start; box-shadow: 0 1px 0 var(--line); cursor: pointer; font: inherit; }
 .ayv .ayv-found-item:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-found-meant { margin: 0 0 .25rem; }
 @media (hover: hover) {
     .ayv .ayv-found-item:hover { box-shadow: inset 4px 0 0 var(--green), 0 1px 0 var(--line); }
 }

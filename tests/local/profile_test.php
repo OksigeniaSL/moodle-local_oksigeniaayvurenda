@@ -71,9 +71,13 @@ final class profile_test extends \advanced_testcase {
         $record = profile::of($library, (int) $reader->id, $now);
         $this->assertSame('Lucía Arenas', $record['name']);
         $this->assertSame(
-            ['2º A', 'Primaria', 'L', ''],
-            [$record['group'], $record['stage'], $record['initial'], $record['photo']]
+            ['2º A', 'Primaria', 'L'],
+            [$record['group'], $record['stage'], $record['initial']]
         );
+        // Without a photo, a bichito: always the same for a reader, another for the next one.
+        $this->assertStringStartsWith('data:image/svg+xml;base64,', $record['photo']);
+        $this->assertSame($record['photo'], profile::photo($reader));
+        $this->assertNotSame(profile::creature(5), profile::creature(6));
         $this->assertSame(['El faro dormido', 'Matemáticas 2'], array_column($record['loans'], 'title'));
         $this->assertSame(3, $record['loans'][0]['late']);
         $this->assertSame(1, $record['read']['total']);
@@ -83,8 +87,12 @@ final class profile_test extends \advanced_testcase {
         $DB->set_field('user', 'picture', 1, ['id' => $user->id]);
         $this->assertStringContainsString('/user/icon/', profile::photo($reader));
         libraries::update_entity($entityid, ['photos' => false]);
+        $this->assertStringStartsWith('data:image/svg', profile::photo($reader));
+        $this->assertStringStartsWith('data:image/svg', (new desk($library, 2, $now))->reader((int) $reader->id)['photo']);
+        // In a sober skin, no bichitos: the initial.
+        libraries::update_entity($entityid, ['skin' => 'university']);
         $this->assertSame('', profile::photo($reader));
-        $this->assertSame('', (new desk($library, 2, $now))->reader((int) $reader->id)['photo']);
+        libraries::update_entity($entityid, ['skin' => 'school']);
         $this->assertStringContainsString('reader.php', (new desk($library, 2, $now))->reader((int) $reader->id)['url']);
 
         profile::save_notes($library, (int) $reader->id, '  Necesita letra grande.  ');

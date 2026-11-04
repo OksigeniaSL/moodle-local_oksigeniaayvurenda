@@ -259,6 +259,7 @@ final class readers {
         $users = profile::photos_on((int) $library->entityid) ? $DB->get_records_list('user', 'id', array_values(array_filter(
             array_map(fn($r) => (int) $r->userid, $rows)
         ))) : [];
+        $creatures = profile::creatures_on((int) $library->entityid);
         foreach ($rows as $row) {
             $first = $row->userid ? $row->ufirstname : $row->firstname;
             $last = $row->userid ? $row->ulastname : $row->lastname;
@@ -267,8 +268,9 @@ final class readers {
                 'id' => (int) $row->id,
                 'userid' => $row->userid ? (int) $row->userid : null,
                 'name' => $name,
-                'photo' => isset($users[$row->userid]) ? profile::photo((object) ['userid' => $row->userid,
-                    'entityid' => $library->entityid], $users[$row->userid]) : '',
+                'photo' => (isset($users[$row->userid]) ? profile::picture((object) ['userid' => $row->userid,
+                    'entityid' => $library->entityid], $users[$row->userid]) : '') ?: ($creatures
+                    ? profile::creature((int) $row->id) : ''),
                 'initial' => profile::initial($name),
                 'url' => (new \moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug,
                     'id' => $row->id] + $back))->out(false),

@@ -117,28 +117,32 @@ switch ($action) {
             );
         }
         break;
-    case 'search':
-        // Some words of a title or its authors, for a book with no ISBN to read: what the catalogues have.
-        $words = required_param('q', PARAM_TEXT);
-        $searched = lookup::words($entityid, $words);
-        $answer = ['kind' => 'results', 'words' => $words,
-            'tried' => local_oksigeniaayvurenda_join($searched['tried'], $str('addor')),
-            'from' => local_oksigeniaayvurenda_join(
-                array_values(array_unique(array_column($searched['found'], 'source'))),
-                $str('addand')
-            ),
-            'items' => array_map(fn($f) => [
-                'pick' => $f['pick'],
-                'source' => $f['source'],
-                'title' => $f['description']['record']['title'] . (!empty($f['description']['record']['subtitle'])
-                    ? ': ' . $f['description']['record']['subtitle'] : ''),
-                'authors' => implode(' · ', $f['description']['authorities']['author'] ?? []),
-                'facts' => implode(' · ', array_filter([
-                    $f['description']['authorities']['publisher'][0] ?? '',
-                    $f['description']['record']['pubyear'] ?? '',
-                    $f['description']['record']['isbn'] ?? '',
-                ])),
-            ], $searched['found'])];
+    case 'searchwhere':
+        // Which catalogues a search asks: the screen asks them itself, a few at a time, and shows how it goes.
+        $where = lookup::word_sources($entityid);
+        $answer = ['kind' => 'where', 'sources' => $where, 'enough' => lookup::ENOUGH, 'most' => lookup::FOUND,
+            'tried' => $where ? local_oksigeniaayvurenda_join(array_column($where, 'name'), $str('addor'))
+                : $str('practicecatalogue')];
+        break;
+    case 'searchone':
+        $answer = ['kind' => 'results', 'items' => array_map(fn($f) => [
+            'pick' => $f['pick'],
+            'same' => $f['same'],
+            'score' => $f['score'],
+            'source' => $f['source'],
+            'title' => $f['description']['record']['title'] . (!empty($f['description']['record']['subtitle'])
+                ? ': ' . $f['description']['record']['subtitle'] : ''),
+            'authors' => implode(' · ', $f['description']['authorities']['author'] ?? []),
+            'facts' => implode(' · ', array_filter([
+                $f['description']['authorities']['publisher'][0] ?? '',
+                $f['description']['record']['pubyear'] ?? '',
+                $f['description']['record']['isbn'] ?? '',
+            ])),
+        ], lookup::words_in($entityid, required_param('q', PARAM_TEXT), required_param('source', PARAM_ALPHANUMEXT)))];
+        break;
+    case 'searchspell':
+        // Nothing found: what it may have been meant to say.
+        $answer = ['kind' => 'spelled', 'near' => lookup::spelled($entityid, required_param('q', PARAM_TEXT))];
         break;
     case 'pick':
         // One of them, or none (to write it by hand).

@@ -144,9 +144,18 @@
 
     var say = function(text, sound) {
         status.textContent = text || '';
+        status.classList.remove('ayv-add-asking');
+        status.style.removeProperty('--ayv-asked');
         if (sound) {
             tone(sound);
         }
+    };
+
+    // While the catalogues answer: a ring that turns and a line that fills, so the page is seen working.
+    var saying = function(text, part) {
+        status.textContent = text;
+        status.classList.add('ayv-add-asking');
+        status.style.setProperty('--ayv-asked', Math.round(part * 100) + '%');
     };
 
     var field = function(name) {
@@ -344,46 +353,140 @@
         });
     };
 
-    var search = function(words) {
-        say(fill(str.addsearching, words));
+    // Each search has its number: answers to an older one are forgotten.
+    var searching = 0;
+    var joined = function(names) {
+        return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + str.addand + names[names.length - 1];
+    };
+
+    // A book found, in its place: those with more of the words first, and the list does not jump under the finger.
+    var foundItem = function(item, words, token) {
+        var li = el('li');
+        li.setAttribute('data-score', item.score);
+        var button = el('button', 'ayv-found-item');
+        button.type = 'button';
+        button.appendChild(el('strong', 'ayv-found-title', item.title));
+        if (item.authors) {
+            button.appendChild(el('span', 'ayv-found-by', item.authors));
+        }
+        button.appendChild(el('span', 'ayv-found-facts', [item.facts, item.source].filter(Boolean).join(' · ')));
+        button.addEventListener('click', function() {
+            // Chosen: the rest of the catalogues are no longer waited for.
+            if (token === searching) {
+                searching++;
+            }
+            choose(item.pick, words).catch(function(error) {
+                say(error.message || str.adderror, 'no');
+            });
+        });
+        li.appendChild(button);
+        var after = Array.prototype.filter.call(results.children, function(other) {
+            return other.hasAttribute('data-score') && Number(other.getAttribute('data-score')) < item.score;
+        })[0];
+        results.insertBefore(li, after || results.querySelector('.ayv-found-hand'));
+    };
+
+    var search = function(words, wrong) {
+        var token = ++searching;
+        saying(fill(str.addsearching, words), 0);
         results.hidden = true;
         results.textContent = '';
-        return post({action: 'search', q: words}).then(function(answer) {
-            say(answer.items.length ? fill(str.addsearchfound, answer.from) : fill(str.addsearchnone, answer.tried),
-                answer.items.length ? 'look' : 'no');
-            answer.items.forEach(function(item) {
-                var li = el('li');
-                var button = el('button', 'ayv-found-item');
-                button.type = 'button';
-                button.appendChild(el('strong', 'ayv-found-title', item.title));
-                if (item.authors) {
-                    button.appendChild(el('span', 'ayv-found-by', item.authors));
-                }
-                button.appendChild(el('span', 'ayv-found-facts', [item.facts, item.source].filter(Boolean).join(' · ')));
-                button.addEventListener('click', function() {
-                    choose(item.pick, words).catch(function(error) {
-                        say(error.message || str.adderror, 'no');
-                    });
-                });
-                li.appendChild(button);
-                results.appendChild(li);
+        var hand = el('li', 'ayv-found-hand');
+        var byhand = el('button', 'ayv-button ayv-button-quiet', str.addsearchbyhand);
+        byhand.type = 'button';
+        byhand.addEventListener('click', function() {
+            searching++;
+            choose('', wrong || words).catch(function(error) {
+                say(error.message || str.adderror, 'no');
             });
-            var none = el('li');
-            var byhand = el('button', 'ayv-button ayv-button-quiet', str.addsearchbyhand);
-            byhand.type = 'button';
-            byhand.addEventListener('click', function() {
-                choose('', words).catch(function(error) {
+        });
+        hand.appendChild(byhand);
+        results.appendChild(hand);
+        // Writing it by hand is always there: nobody has to wait for all the catalogues.
+        results.hidden = false;
+        // What it may have meant, at the same time: a misspelt name may also be someone else's, and then there are results.
+        var spell = wrong ? Promise.resolve({near: null}) : post({action: 'searchspell', q: words}).catch(function() {
+            return {near: null};
+        });
+        spell.then(function(spelled) {
+            if (!spelled.near || token !== searching) {
+                return null;
+            }
+            var meant = el('li', 'ayv-found-meant');
+            var again = el('button', 'ayv-button', fill(str.addsearchmeant, spelled.near));
+            again.type = 'button';
+            again.addEventListener('click', function() {
+                search(spelled.near, words).catch(function(error) {
                     say(error.message || str.adderror, 'no');
                 });
             });
-            none.appendChild(byhand);
-            results.appendChild(none);
-            results.hidden = false;
-            var first = results.querySelector('button');
+            meant.appendChild(again);
+            results.insertBefore(meant, results.firstChild);
+            return null;
+        });
+        return post({action: 'searchwhere'}).then(function(where) {
+            var left = where.sources.slice();
+            var total = left.length;
+            var done = 0;
+            var seen = {};
+            var from = [];
+            var count = 0;
+            var ask = function() {
+                if (token !== searching || !left.length || count >= where.enough) {
+                    return null;
+                }
+                var source = left.shift();
+                return post({action: 'searchone', q: words, source: source.key}).catch(function() {
+                    return {items: []};
+                }).then(function(answer) {
+                    done++;
+                    if (token !== searching) {
+                        return null;
+                    }
+                    answer.items.forEach(function(item) {
+                        if (!seen[item.same] && count < where.most) {
+                            seen[item.same] = true;
+                            count++;
+                            foundItem(item, words, token);
+                            if (from.indexOf(item.source) < 0) {
+                                from.push(item.source);
+                            }
+                        }
+                    });
+                    saying(fill(str.addsearchprogress, {done: done, total: total}), total ? done / total : 1);
+                    return ask();
+                });
+            };
+            return Promise.all([ask(), ask(), ask()]).then(function() {
+                if (token !== searching) {
+                    return null;
+                }
+                if (count) {
+                    say(fill(str.addsearchfound, joined(from)), 'look');
+                    return null;
+                }
+                // Nothing: it is searched as it may have been meant, once.
+                return spell.then(function(spelled) {
+                    if (token !== searching) {
+                        return null;
+                    }
+                    if (spelled.near) {
+                        return search(spelled.near, words);
+                    }
+                    say(fill(str.addsearchnone, where.tried), 'no');
+                    return null;
+                });
+            });
+        }).then(function() {
+            // Corrected, it says so, because it is not what was typed.
+            if (wrong && token === searching && results.querySelector('.ayv-found-item')) {
+                status.textContent = fill(str.addsearchspelled, {wrong: wrong, near: words}) + ' ' + status.textContent;
+            }
+            var first = token === searching ? results.querySelector('.ayv-found-item') || results.querySelector('button') : null;
             if (first) {
                 first.focus();
             }
-            return answer;
+            return null;
         });
     };
 
