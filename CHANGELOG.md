@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.160.0
+
+- The menu is on every page of the staff, also on the list of libraries.
+- «More» fits without scrolling on a computer, and is in the order people look for things: lending, readers, catalogue,
+  labels and stocktake, what to review, reports and settings.
+- The library's copies are now «Backups», in the settings, and say that they make themselves.
+
 ## 0.159.0
 
 - At the desk and in «Readers», a name typed wrong finds who it may have meant: written by ear, a letter out, two letters

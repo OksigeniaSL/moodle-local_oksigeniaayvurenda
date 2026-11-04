@@ -237,8 +237,10 @@ final class shell {
         }
         global $OUTPUT, $USER;
         // The same doors on every page (menu::doors), the one you are in marked; then the way back to Moodle.
-        $doors = $library ? menu::doors($library, (int) ($USER->id ?? 0)) : [];
-        if (!$library && access::can('local/oksigeniaayvurenda:manage', null)) {
+        // On a page of no library (the list of them), the menu of the one this person works in: it never goes away.
+        $menufor = $library ?: menu::home((int) ($USER->id ?? 0));
+        $doors = $menufor ? menu::doors($menufor, (int) ($USER->id ?? 0)) : [];
+        if (!$menufor && access::can('local/oksigeniaayvurenda:manage', null)) {
             $doors[] = ['key' => 'libraries', 'url' => $base . 'libraries.php', 'label' => $str('navlibraries'),
                 'current' => menu::here() === 'libraries.php'];
         }

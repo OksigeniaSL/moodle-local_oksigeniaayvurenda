@@ -59,23 +59,37 @@ final class menu {
         $m = 'local/oksigeniaayvurenda:manage';
         return [
             'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d],
-                ['sanctions.php', 'menusanctions', $d], ['lots.php', 'menulots', $d],
-                ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d], ['formats.php', 'menuformats', $d],
-                ['copies.php', 'menucopies', $m]],
-            'menucataloguing' => [['add.php', 'menuadd', $c], ['purchases.php', 'menupurchases', $c],
-                ['material.php', 'menumaterial', $c],
-                ['import.php', 'menuimport', $c], ['free.php', 'menufree', $c], ['labels.php', 'menulabels', $c],
-                ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c], ['stacks.php', 'stacksnav', $d],
-                ['posters.php', 'menuposters', $c]],
+                ['sanctions.php', 'menusanctions', $d], ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d],
+                ['lots.php', 'menulots', $d], ['formats.php', 'menuformats', $d]],
+            'menupeople' => [['sources.php', 'menusources', $m], ['twins.php', 'menutwins', $m],
+                ['tutors.php', 'menututors', $m]],
+            'menucataloguing' => [['add.php', 'menuadd', $c], ['import.php', 'menuimport', $c], ['free.php', 'menufree', $c],
+                ['material.php', 'menumaterial', $c], ['purchases.php', 'menupurchases', $c]],
+            'menushelves' => [['stacks.php', 'stacksnav', $d], ['labels.php', 'menulabels', $c],
+                ['posters.php', 'menuposters', $c], ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c]],
             'menureview' => [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
-                ['voices.php', 'menuvoices', $d], ['memoir.php', 'menumemoir', $d], ['readings.php', 'menureadings', $d],
-                ['activity.php', 'menuactivity', $m]],
-            'menusettings' => [['libraries.php', 'navlibraries', $m], ['rules.php', 'menurules', $m],
-                ['year.php', 'menuyear', $m], ['tutors.php', 'menututors', $m], ['twins.php', 'menutwins', $m],
-                ['sources.php', 'menusources', $m], ['corners.php', 'menucorners', $m],
+                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d]],
+            'menureports' => [['memoir.php', 'menumemoir', $d], ['activity.php', 'menuactivity', $m]],
+            'menusettings' => [['copies.php', 'menucopies', $m], ['rules.php', 'menurules', $m],
+                ['year.php', 'menuyear', $m], ['libraries.php', 'navlibraries', $m], ['corners.php', 'menucorners', $m],
                 ['characters.php', 'menucharacters', $m], ['lti.php', 'menulti', $m]],
             'menuhelp' => [['howto.php', 'menuhowto', $d]],
         ];
+    }
+
+    /**
+     * The library whose doors someone sees on a page that is not of any library: the first one they work in.
+     *
+     * @param int $userid
+     * @return \stdClass|null
+     */
+    public static function home(int $userid): ?\stdClass {
+        foreach (catalogue::visible($userid) as $library) {
+            if (access::can('local/oksigeniaayvurenda:desk', $library, $userid)) {
+                return $library;
+            }
+        }
+        return null;
     }
 
     /**
