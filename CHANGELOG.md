@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.156.0
+
+- A record or a copy can be corrected after it was catalogued, from its own page: title, authors, subjects, ISBN and
+  the rest; a copy's code, spine label, location and notes. What was entered by mistake and has nothing behind it can
+  be taken out; what was lent stays, and is withdrawn as always.
+- The desk without a network in two tabs no longer passes each scan twice, which brought back what it had just lent; and
+  a kept scan whose answer was lost is not passed again.
+
 ## 0.155.0
 
 - MySQL 8: the columns `source.system` and `bankset.groups`, words it reserves, are now `origin` and `groupnames`. Older

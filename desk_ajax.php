@@ -49,11 +49,14 @@ $at = optional_param('at', 0, PARAM_INT);
 $desk = new desk($library, (int) $USER->id, $at && $at <= time() && $at > time() - 3 * DAYSECS ? $at : null, $own);
 switch ($action) {
     case 'scan':
-        $answer = $desk->scan(
-            core_text::substr(required_param('code', PARAM_TEXT), 0, 200),
-            optional_param('readerid', 0, PARAM_INT),
-            optional_param('force', false, PARAM_BOOL)
-        );
+        $code = core_text::substr(required_param('code', PARAM_TEXT), 0, 200);
+        // A kept scan that reached the server when its answer was lost is not passed twice.
+        if ($at && $desk->passed_at($code)) {
+            $said = get_string('deskpassedbefore', 'local_oksigeniaayvurenda');
+            $answer = ['kind' => 'note', 'sound' => 'look', 'message' => $said];
+            break;
+        }
+        $answer = $desk->scan($code, optional_param('readerid', 0, PARAM_INT), optional_param('force', false, PARAM_BOOL));
         break;
     case 'lendrecord':
         // A book without a label, chosen by its title.

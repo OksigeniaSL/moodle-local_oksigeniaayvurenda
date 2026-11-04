@@ -81,6 +81,22 @@ final class desk {
     }
 
     /**
+     * Whether a copy was already lent or brought back at this very moment: a kept scan that is sent twice.
+     *
+     * @param string $code
+     * @return bool
+     */
+    public function passed_at(string $code): bool {
+        global $DB;
+        $item = self::by_code('item', 'barcode', (int) $this->library->entityid, trim($code));
+        return $item && $DB->record_exists_select(
+            self::T . 'loan',
+            'itemid = :itemid AND (timeloaned = :lent OR timereturned = :back)',
+            ['itemid' => $item->id, 'lent' => $this->now, 'back' => $this->now]
+        );
+    }
+
+    /**
      * A copy or a card by its code, as the scanner or the keyboard gives it: first as it is and in capitals, which the
      * index finds at once; only if neither is there, without minding capitals (a read of every code of the centre).
      *

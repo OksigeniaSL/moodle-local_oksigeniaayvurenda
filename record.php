@@ -42,6 +42,40 @@ $found = $library ? catalogue::record($id, $library) : null;
 if (!$found) {
     shell::missing(get_string('recordnotfound', 'local_oksigeniaayvurenda'), $library);
 }
+// Whoever catalogues corrects what was entered, or takes it out.
+$correct = access::can('local/oksigeniaayvurenda:catalogue', $library);
+$fix = optional_param('fix', '', PARAM_ALPHA);
+$fixnotice = '';
+$fixerror = '';
+if ($correct && $fix !== '' && data_submitted() && confirm_sesskey()) {
+    $corrections = \local_oksigeniaayvurenda\local\corrections::class;
+    $item = optional_param('item', 0, PARAM_INT);
+    $copyform = [];
+    foreach (['barcode', 'callnumber1', 'callnumber2', 'callnumber3', 'itemtype', 'notes'] as $field) {
+        $copyform[$field] = optional_param($field, '', PARAM_TEXT);
+    }
+    $copyform['locationid'] = optional_param('locationid', 0, PARAM_INT);
+    $recordform = [];
+    foreach (['title', 'subtitle', 'isbn', 'edition', 'pubplace', 'pubyear', 'summary', 'notes', 'authors', 'subjects'] as $field) {
+        $recordform[$field] = optional_param($field, '', PARAM_TEXT);
+    }
+    $failed = match ($fix) {
+        'record' => $corrections::record($library, $id, $recordform) ? '' : 'correctnotitle',
+        'copy' => $corrections::copy($library, $item, $copyform),
+        'dropcopy' => $corrections::remove_copy($library, $item),
+        'droprecord' => $corrections::remove_record($library, $id),
+        default => 'recordnotfound',
+    };
+    if (!$failed && $fix === 'droprecord') {
+        redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $ref]), get_string(
+            'correctrecordgone',
+            'local_oksigeniaayvurenda'
+        ));
+    }
+    $fixerror = $failed ? get_string($failed, 'local_oksigeniaayvurenda') : '';
+    $fixnotice = $failed ? '' : get_string('correctsaved', 'local_oksigeniaayvurenda');
+    $found = catalogue::record($id, $library);
+}
 // A reader who took the book home tells what they thought, or takes it back.
 $do = optional_param('review', '', PARAM_ALPHA);
 if ($do !== '' && data_submitted() && confirm_sesskey()) {
@@ -121,6 +155,44 @@ $data['memoryalso'] = $said ? [
     'said' => $said,
     'cards' => array_values(screens::cards(catalogue::cards_of($also, $library), $library)),
 ] : null;
+if ($correct) {
+    $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+    $form = \local_oksigeniaayvurenda\local\corrections::record_form($found['record']);
+    $places = \local_oksigeniaayvurenda\local\cataloguer::locations((int) $library->entityid);
+    $data['correct'] = [
+        'action' => $PAGE->url->out(false),
+        'sesskey' => sesskey(),
+        'notice' => $fixnotice,
+        'error' => $fixerror,
+        'form' => $form,
+    ];
+    foreach (
+        ['correctrecord', 'correctcopy', 'correctsave', 'correcttitle', 'correctsubtitle', 'correctauthors', 'correctsubjects',
+        'correctlines', 'correctisbn', 'correctedition', 'correctplace', 'correctyear', 'correctsummary', 'correctnotes',
+        'correctcode', 'correctcall1', 'correctcall2', 'correctcall3', 'correctlocation', 'correctremoverecord',
+        'correctremovecopy', 'correctremovehint', 'correctclose'] as $key
+    ) {
+        $data['correct'][$key] = $str($key);
+    }
+    foreach ($data['copies'] as $n => $copy) {
+        if (empty($copy['here'])) {
+            continue;
+        }
+        $item = $DB->get_record('local_oksigeniaayvurenda_item', ['id' => $copy['id']]);
+        $data['copies'][$n]['fix'] = ['id' => $item->id, 'barcode' => $item->barcode, 'call1' => $item->callnumber1,
+            'call2' => $item->callnumber2, 'call3' => $item->callnumber3, 'notes' => $item->notes, 'itemtype' => $item->itemtype,
+            'places' => array_map(fn($id, $label) => ['id' => $id, 'label' => $label,
+                'selected' => (int) $id === (int) $item->locationid], array_keys($places), $places)];
+        foreach (
+            ['correctcopy', 'correctsave', 'correctcode', 'correctcall1', 'correctcall2', 'correctcall3', 'correctlocation',
+            'correctnotes', 'correctremovecopy', 'correctremovehint', 'correctclose'] as $key
+        ) {
+            $data['copies'][$n]['fix'][$key] = $str($key);
+        }
+        $data['copies'][$n]['fix']['action'] = $PAGE->url->out(false);
+        $data['copies'][$n]['fix']['sesskey'] = sesskey();
+    }
+}
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
     'scripts' => array_merge(!empty($data['reviews']['write']) ? ['draw', 'speak'] : [], $data['beside'] ? ['stacks'] : []),
 ]);

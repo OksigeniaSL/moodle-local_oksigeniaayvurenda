@@ -206,6 +206,39 @@
         </dialog>
         {{/open}}
         {{/formatask}}
+        {{#correct}}
+        {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+        {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+        <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-fix-record">{{correctrecord}}</button></p>
+        <dialog class="ayv-modal" id="ayv-fix-record" aria-labelledby="ayv-fix-record-title">
+            <div class="ayv-modal-head"><h3 id="ayv-fix-record-title" class="ayv-section-title">{{correctrecord}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{correctclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <form method="post" action="{{action}}" class="ayv-fix-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="fix" value="record">
+                {{#form}}
+                <label class="ayv-field ayv-dig-field">{{correcttitle}} <input type="text" name="title" value="{{title}}" required></label>
+                <label class="ayv-field ayv-dig-field">{{correctsubtitle}} <input type="text" name="subtitle" value="{{subtitle}}"></label>
+                <label class="ayv-field ayv-dig-field">{{correctauthors}} <textarea name="authors" rows="3">{{authors}}</textarea></label>
+                <label class="ayv-field ayv-dig-field">{{correctsubjects}} <textarea name="subjects" rows="3">{{subjects}}</textarea></label>
+                <p class="ayv-field-hint">{{correctlines}}</p>
+                <div class="ayv-fix-two">
+                <label class="ayv-field ayv-dig-field">{{correctisbn}} <input type="text" name="isbn" value="{{isbn}}"></label>
+                <label class="ayv-field ayv-dig-field">{{correctedition}} <input type="text" name="edition" value="{{edition}}"></label>
+                <label class="ayv-field ayv-dig-field">{{correctplace}} <input type="text" name="pubplace" value="{{pubplace}}"></label>
+                <label class="ayv-field ayv-dig-field">{{correctyear}} <input type="text" name="pubyear" value="{{pubyear}}"></label>
+                </div>
+                <label class="ayv-field ayv-dig-field">{{correctsummary}} <textarea name="summary" rows="4">{{summary}}</textarea></label>
+                <label class="ayv-field ayv-dig-field">{{correctnotes}} <textarea name="notes" rows="2">{{notes}}</textarea></label>
+                {{/form}}
+                <button type="submit" class="ayv-button">{{correctsave}}</button>
+            </form>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="fix" value="droprecord">
+                <p class="ayv-field-hint">{{correctremovehint}}</p>
+                <button type="submit" class="ayv-button ayv-button-quiet">{{correctremoverecord}}</button>
+            </form>
+        </dialog>
+        {{/correct}}
         {{#hascopies}}
         <h2 class="ayv-section-title">{{copiesheading}}</h2>
         <ul class="ayv-copies">
@@ -213,6 +246,28 @@
             <li class="ayv-copy">
                 <span class="ayv-state ayv-state-{{state}}">{{statelabel}}</span>
                 <span class="ayv-copy-where">{{where}}{{#location}} · <strong>{{location}}</strong>{{/location}}</span>
+                {{#fix}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-fix-copy-{{id}}">{{correctcopy}}</button>
+                <dialog class="ayv-modal" id="ayv-fix-copy-{{id}}" aria-labelledby="ayv-fix-copy-title-{{id}}">
+                    <div class="ayv-modal-head"><h3 id="ayv-fix-copy-title-{{id}}" class="ayv-section-title">{{correctcopytitle}}</h3>
+                        <form method="dialog"><button class="ayv-modal-close" aria-label="{{correctclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                    <form method="post" action="{{action}}" class="ayv-fix-form">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="fix" value="copy"><input type="hidden" name="item" value="{{id}}"><input type="hidden" name="itemtype" value="{{itemtype}}">
+                        <label class="ayv-field ayv-dig-field">{{correctcode}} <input type="text" name="barcode" value="{{barcode}}" required></label>
+                        <div class="ayv-fix-three">
+                        <label class="ayv-field ayv-dig-field">{{correctcall1}} <input type="text" name="callnumber1" value="{{call1}}"></label>
+                        <label class="ayv-field ayv-dig-field">{{correctcall2}} <input type="text" name="callnumber2" value="{{call2}}"></label>
+                        <label class="ayv-field ayv-dig-field">{{correctcall3}} <input type="text" name="callnumber3" value="{{call3}}"></label>
+                        </div>
+                        <label class="ayv-field ayv-dig-field">{{correctlocation}} <select name="locationid"><option value="0"></option>{{#places}}<option value="{{id}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/places}}</select></label>
+                        <label class="ayv-field ayv-dig-field">{{correctnotes}} <textarea name="notes" rows="2">{{notes}}</textarea></label>
+                        <button type="submit" class="ayv-button">{{correctsave}}</button>
+                    </form>
+                    <form method="post" action="{{action}}">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="fix" value="dropcopy"><input type="hidden" name="item" value="{{id}}">
+                        <p class="ayv-field-hint">{{correctremovehint}}</p>
+                        <button type="submit" class="ayv-button ayv-button-quiet">{{correctremovecopy}}</button>
+                    </form>
+                </dialog>{{/fix}}
                 {{#callnumber}}<span class="ayv-copy-call" title="{{callnumberlabel}}"><span class="ayv-sr">{{callnumberlabel}}: </span>{{callnumber}}</span>{{/callnumber}}
             </li>
             {{/copies}}

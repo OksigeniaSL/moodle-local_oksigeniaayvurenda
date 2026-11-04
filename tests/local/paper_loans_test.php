@@ -273,4 +273,22 @@ final class paper_loans_test extends \advanced_testcase {
         $this->assertSame([(int) $onlyaccount->id, 'sure'], [$plan[3]['readerid'], $plan[3]['readerhow']]);
         $this->assertSame('', $plan[3]['problem']);
     }
+
+    /**
+     * A scan kept without a network and sent twice, its answer lost, is known; one at another moment is not.
+     */
+    public function test_passed_at(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $reader = $gen->create_reader(['entityid' => $library->entityid, 'cardcode' => 'C1']);
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Libro']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'barcode' => '77']);
+        $at = time() - 600;
+        $desk = new desk($library, 0, $at);
+        $this->assertFalse($desk->passed_at('77'));
+        $desk->scan('77', (int) $reader->id);
+        $this->assertTrue($desk->passed_at('77'));
+        $this->assertFalse((new desk($library, 0, $at + 1))->passed_at('77'));
+    }
 }

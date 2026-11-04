@@ -546,11 +546,15 @@
     // to the server as soon as the network is back; what it answers then is shown as if it had just happened.
     var pendingkey = 'ayv-desk-pending-' + config.library;
     var pending = [];
-    try {
-        pending = JSON.parse(window.localStorage.getItem(pendingkey) || '[]') || [];
-    } catch (e) {
-        pending = [];
-    }
+    // Another tab may have kept scans or passed them: what is stored is what counts.
+    var loadPending = function() {
+        try {
+            pending = JSON.parse(window.localStorage.getItem(pendingkey) || 'null') || pending;
+        } catch (e) {
+            // Without storage they are the ones in this page.
+        }
+    };
+    loadPending();
     var offline = false;
     var replaying = false;
     var bar = el('p', 'ayv-desk-offline');
@@ -570,23 +574,24 @@
         return !navigator.onLine || error instanceof TypeError || error instanceof SyntaxError;
     };
     var keep = function(job) {
+        loadPending();
         pending.push({code: job.code, force: job.force, readerid: readerid, at: job.at || Math.floor(Date.now() / 1000)});
         keepPending();
         tone('look');
         line({kind: 'offline', sound: 'look', message: str.deskoffline}, job.code);
     };
-    var replay = function() {
-        if (replaying || !pending.length) {
-            return;
-        }
-        replaying = true;
+    var replayed = function() {
         var reader = pending[0].readerid || 0;
         var passed = 0;
         var step = function() {
+            loadPending();
             if (!pending.length) {
                 offline = false;
                 replaying = false;
                 keepPending();
+                if (!passed) {
+                    return null;
+                }
                 line({kind: 'online', sound: 'ok', message: (str.deskbackonline || '').replace('{$a}', function() { return passed; })}, '');
                 return null;
             }
@@ -615,7 +620,26 @@
                     return null;
                 });
         };
-        step();
+        return step();
+    };
+    var replay = function() {
+        loadPending();
+        if (replaying || !pending.length) {
+            return;
+        }
+        replaying = true;
+        // One tab at a time: two passing the same scans would lend a book and bring it back.
+        if (!navigator.locks) {
+            replayed();
+            return;
+        }
+        navigator.locks.request(pendingkey, {ifAvailable: true}, function(lock) {
+            if (!lock) {
+                replaying = false;
+                return null;
+            }
+            return replayed();
+        });
     };
     window.addEventListener('online', replay);
     setInterval(function() {

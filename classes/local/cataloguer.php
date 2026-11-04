@@ -367,7 +367,7 @@ final class cataloguer {
      * @param int $now
      * @return int
      */
-    private static function authority(int $entityid, string $kind, string $label, int $now): int {
+    public static function authority(int $entityid, string $kind, string $label, int $now): int {
         global $DB;
         $label = \core_text::substr(trim($label), 0, 1333);
         $field = $kind === 'class' ? 'code' : 'label';

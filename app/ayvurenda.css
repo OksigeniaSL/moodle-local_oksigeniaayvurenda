@@ -4128,3 +4128,28 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-order-table { width: 100%; border-collapse: collapse; margin-top: .75rem; }
 .ayv .ayv-order-table th, .ayv .ayv-order-table td { padding: .55rem .6rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
 .ayv .ayv-order-table .ayv-order-n { text-align: right; white-space: nowrap; }
+
+/* Correcting a record or a copy: the fields breathe, the short ones side by side. */
+.ayv .ayv-fix-form {
+    display: grid;
+    gap: .85rem;
+    margin-bottom: 1rem;
+}
+.ayv .ayv-fix-two,
+.ayv .ayv-fix-three {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+}
+.ayv .ayv-fix-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ayv .ayv-copy .ayv-button-quiet {
+    margin-left: auto;
+}
+@media (max-width: 480px) {
+    .ayv .ayv-fix-two,
+    .ayv .ayv-fix-three {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
