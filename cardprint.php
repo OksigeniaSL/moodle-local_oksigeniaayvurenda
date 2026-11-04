@@ -112,6 +112,20 @@ if (data_submitted() && confirm_sesskey()) {
                 $notice = $str('cardprintremoved');
             }
         }
+    } else if ($do === 'design' && $manage) {
+        $designs = optional_param_array('design', [], PARAM_ALPHA);
+        $chosen = [];
+        foreach (optional_param_array('designstage', [], PARAM_TEXT) as $index => $key) {
+            $chosen[$key] = (string) ($designs[$index] ?? '');
+        }
+        cardprint::choose_designs($entityid, $chosen);
+        $notice = $str('cardprintsaved');
+    } else if ($do === 'logo' && $manage) {
+        $kept = cardprint::keep_logo($entityid, 'logo');
+        $notice = $kept === null ? '' : $str($kept ? 'cardprintsaved' : 'cardprintlogobad');
+    } else if ($do === 'logogone' && $manage) {
+        \local_oksigeniaayvurenda\local\images::remove(cardprint::LOGO, $entityid, 'logo');
+        $notice = $str('cardprintremoved');
     } else if ($do === 'faces' && $manage) {
         cardprint::save($entityid, ['backs' => optional_param('backs', 0, PARAM_BOOL) ? 1 : 0]);
     } else if ($do === 'make' && $people) {
@@ -161,6 +175,33 @@ foreach (cardprint::FORMATS as $way) {
         'ispress' => $way === 'press', 'isplastic' => $way === 'plastic', 'issheet' => $way === 'sheet',
         'isplain' => $way === 'plain'];
 }
+// The designs, each with who gets it, and what the centre can change.
+$logourl = \local_oksigeniaayvurenda\local\images::url(cardprint::LOGO, $entityid, 'logo') ?? '';
+$map = cardprint::design_map($library, $now);
+$whoname = fn(string $key) => $key === cardprint::ADULTS ? $str('cardprintadults') : ($key === cardprint::EVERYONE
+    ? $str('cardprintall') : $key);
+$samplelang = substr(current_language(), 0, 2) === 'es' ? 'es' : 'en';
+$designs = [];
+foreach (cardprint::DESIGNS as $design) {
+    $designs[] = ['title' => $str('cardprintdesign' . $design),
+        'sampleurl' => screens::art('carne/imprenta/muestra/' . $samplelang . '/' . $design)
+            ?? screens::art('carne/imprenta/' . $design . '-anverso', 'png'),
+        'used' => (bool) $map[$design],
+        'whofor' => $map[$design] ? implode(' · ', array_map($whoname, $map[$design])) : $str('cardprintdesignnone')];
+}
+$chosen = $own['designs'];
+$option = fn(string $value, string $title, string $on) => ['value' => $value, 'title' => $title, 'selected' => $value === $on];
+$choices = fn(string $none, string $on) => array_merge([$option('', $none, $on)], array_map(
+    fn($design) => $option($design, $str('cardprintdesign' . $design), $on),
+    cardprint::DESIGNS
+));
+$designrows = [['key' => cardprint::EVERYONE, 'label' => $str('cardprintdesigneveryone'),
+    'options' => $choices($str('cardprintdesignauto'), (string) ($chosen[cardprint::EVERYONE] ?? ''))]];
+$stagenames = array_map('strval', array_keys(cardprint::stages($library, $now)));
+foreach ($stagenames ? array_merge($stagenames, [cardprint::ADULTS]) : [] as $key) {
+    $designrows[] = ['key' => $key, 'label' => $whoname($key),
+        'options' => $choices($str('cardprintdesignsame'), (string) ($chosen[$key] ?? ''))];
+}
 $waiting = cardprint::waiting($library);
 $ready = [];
 $done = optional_param('done', 0, PARAM_INT);
@@ -183,6 +224,13 @@ $data = [
     'backlabel' => $str('readers'),
     'backword' => $str('profileback'),
     'whomheading' => $str('cardprintwhom'),
+    'designheading' => $str('cardprintdesign'),
+    'designhint' => $str($stagenames ? 'cardprintdesignhint' : 'cardprintdesignhintone'),
+    'designs' => $designs,
+    'designrows' => $designrows,
+    'logoheading' => $str('cardprintlogo'),
+    'logohint' => $str('cardprintlogohint'),
+    'logourl' => $logourl,
     'whom' => $whom,
     'haswhom' => (bool) $whom,
     'manage' => $manage,

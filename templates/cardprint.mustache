@@ -22,6 +22,7 @@
     Example context (json):
     {
         "ready": true, "heading": "Imprimir carnés", "intro": "De quién y cómo.", "notice": "", "backurl": "#", "backlabel": "Lectores",
+        "designheading": "El diseño", "designhint": "", "designs": [], "designrows": [], "logoheading": "El logo", "logohint": "",
         "backword": "Volver a", "whomheading": "¿De quién?", "haswhom": true, "whom": [{"title": "Todo el centro", "count": "20", "url": "#", "on": true}],
         "hasclasses": false, "classes": [], "onereader": "", "waysheading": "¿Dónde?",
         "ways": [{"title": "En una imprenta", "hint": "PDF", "on": true, "url": "#", "ispress": true, "issheet": false, "isplain": false}],
@@ -55,6 +56,41 @@
     </form>
     {{/hasclasses}}
     <p class="ayv-field-hint">{{onehint}}</p>
+</div>
+<div class="ayv-mine-box ayv-cards-step">
+    <h2 class="ayv-mine-title">{{designheading}}</h2>
+    <p class="ayv-field-hint">{{designhint}}</p>
+    <ul class="ayv-cards-designs">
+    {{#designs}}
+        <li class="ayv-cards-design{{^used}} ayv-cards-design-off{{/used}}">
+            <span class="ayv-cards-design-face">{{#sampleurl}}<img src="{{sampleurl}}" alt="" loading="lazy">{{/sampleurl}}{{#logourl}}<span class="ayv-cards-design-plate"><img src="{{logourl}}" alt=""></span>{{/logourl}}</span>
+            <b>{{title}}</b>
+            <span class="ayv-field-hint">{{whofor}}</span>
+        </li>
+    {{/designs}}
+    </ul>
+    {{#manage}}<p class="ayv-book-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-cards-designform">{{backchange}}</button></p>
+    <dialog class="ayv-modal" id="ayv-cards-designform" aria-labelledby="ayv-cards-designtitle">
+        <div class="ayv-modal-head"><h3 id="ayv-cards-designtitle" class="ayv-section-title">{{designheading}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{pageurl}}" class="ayv-dig-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="design">
+            {{#designrows}}<label class="ayv-field ayv-field-wide">{{label}} <input type="hidden" name="designstage[]" value="{{key}}"><select name="design[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{title}}</option>{{/options}}</select></label>{{/designrows}}
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{save}}</button></p>
+        </form>
+    </dialog>{{/manage}}
+    <div class="ayv-cards-logo">
+        {{#logourl}}<span class="ayv-cards-logo-plate"><img src="{{logourl}}" alt=""></span>{{/logourl}}
+        <div class="ayv-cards-logo-words"><b>{{logoheading}}</b><p class="ayv-field-hint">{{logohint}}</p></div>
+        {{#manage}}<div class="ayv-book-actions">
+            <form method="post" action="{{pageurl}}" enctype="multipart/form-data">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="logo">
+                <label class="ayv-field"><span class="ayv-sr">{{logoheading}}</span> <input type="file" name="logo" accept="image/png,image/jpeg" data-ayv-submit></label>
+            </form>
+            {{#logourl}}<form method="post" action="{{pageurl}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="logogone">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{removelabel}}</button></form>{{/logourl}}
+        </div>{{/manage}}
+    </div>
 </div>
 <div class="ayv-mine-box ayv-cards-step">
     <h2 class="ayv-mine-title">{{waysheading}}</h2>

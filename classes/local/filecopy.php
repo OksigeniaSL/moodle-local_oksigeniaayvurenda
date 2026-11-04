@@ -32,7 +32,7 @@ final class filecopy {
 
     /** @var string[] The areas it carries, each with the table its item id belongs to. */
     public const AREAS = ['cover' => 'record', 'digital' => 'digital', 'reviewdrawing' => 'review', 'libraryimage' => 'library',
-        'portrait' => 'entity'];
+        'portrait' => 'entity', 'cardlogo' => 'entity'];
 
     /** @var int Days between one and the next when it goes out of the server. */
     public const EVERY = 7;

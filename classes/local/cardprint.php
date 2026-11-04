@@ -24,6 +24,7 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\card_look;
 use local_oksigeniaayvurenda\core\group_order;
 
 /**
@@ -61,6 +62,18 @@ final class cardprint {
         'other' => ['name' => '', 'width' => 85.0, 'height' => 54.0],
     ];
 
+    /** @var string[] The designs of a printed card. */
+    public const DESIGNS = ['flor', 'cielo', 'sobria'];
+
+    /** @var string What a centre chooses for all its readers. */
+    public const EVERYONE = '*';
+
+    /** @var string What a centre chooses for teachers, staff and families, who have no stage. */
+    public const ADULTS = 'adults';
+
+    /** @var string Where a centre's logo is kept, with the centre as its item. */
+    public const LOGO = 'cardlogo';
+
     /** @var array[] The sheets of ten: the plain one, cut by hand, and those that come cut, whose margins the centre sets. */
     public const SHEETS = [
         'plain' => ['columns' => 2, 'rows' => 5, 'width' => 85.6, 'height' => 54.0, 'left' => 19.4, 'top' => 13.5, 'gap' => 0.0,
@@ -94,7 +107,8 @@ final class cardprint {
      * What a centre says on the back and how its sheets fall.
      *
      * @param int $entityid
-     * @return array where, notes, model, left, top, gap, pwidth, pheight and backs (whether a card has its back).
+     * @return array where, notes, model, left, top, gap, pwidth, pheight, backs (whether a card has its back) and designs
+     *     (what the centre chose, by stage).
      */
     public static function settings(int $entityid): array {
         global $DB;
@@ -102,7 +116,7 @@ final class cardprint {
         return ($settings['cardprint'] ?? []) + ['where' => '', 'notes' => '', 'model' => 'other',
             'left' => self::SHEETS['sheet']['left'],
             'top' => self::SHEETS['sheet']['top'], 'gap' => self::SHEETS['sheet']['gap'], 'pwidth' => 85.6, 'pheight' => 54.0,
-            'backs' => 1];
+            'backs' => 1, 'designs' => []];
     }
 
     /**
@@ -114,7 +128,7 @@ final class cardprint {
     public static function save(int $entityid, array $changes): void {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $known = array_flip(['where', 'notes', 'model', 'left', 'top', 'gap', 'pwidth', 'pheight', 'backs']);
+        $known = array_flip(['where', 'notes', 'model', 'left', 'top', 'gap', 'pwidth', 'pheight', 'backs', 'designs']);
         $settings['cardprint'] = array_intersect_key($changes, $known) + self::settings($entityid);
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
     }
@@ -175,6 +189,115 @@ final class cardprint {
     }
 
     /**
+     * The design a card comes out in: what the centre chose for that stage, else for everyone, else what goes with the
+     * reader.
+     *
+     * @param string $skin
+     * @param string $look
+     * @param string $stage The reader's stage, or ADULTS.
+     * @param array $chosen What the centre chose, by stage.
+     * @return string flor, cielo or sobria.
+     */
+    public static function design(string $skin, string $look, string $stage, array $chosen): string {
+        $own = ($chosen[$stage] ?? '') ?: ($chosen[self::EVERYONE] ?? '');
+        return in_array($own, self::DESIGNS, true) ? $own : self::variant($skin, $look);
+    }
+
+    /**
+     * Keeps what a centre chose: only designs, and nothing for what stays as it was.
+     *
+     * @param int $entityid
+     * @param array $chosen By stage, EVERYONE or ADULTS.
+     */
+    public static function choose_designs(int $entityid, array $chosen): void {
+        self::save($entityid, ['designs' => array_filter($chosen, fn($design) => in_array($design, self::DESIGNS, true))]);
+    }
+
+    /**
+     * Who gets each design, to show it: the stages of this year, and the adults.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @return array[] By design, the keys of what goes with it: stage names, ADULTS, or EVERYONE where there are no stages.
+     */
+    public static function design_map(\stdClass $library, int $now): array {
+        global $DB;
+        $entityid = (int) $library->entityid;
+        $skin = skins::of($entityid);
+        $chosen = self::settings($entityid)['designs'];
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $map = array_fill_keys(self::DESIGNS, []);
+        $stages = array_map('strval', array_keys(self::stages($library, $now)));
+        foreach ($stages as $stage) {
+            $look = card_look::resolve(card_look::guess('student', $stage, ''), $settings['cardlooks'][$stage] ?? null, null);
+            $map[self::design($skin, $look, $stage, $chosen)][] = $stage;
+        }
+        $rest = $stages ? self::ADULTS : self::EVERYONE;
+        $map[self::design($skin, 'none', $rest, $chosen)][] = $rest;
+        return $map;
+    }
+
+    /**
+     * Keeps the logo a form sent, if a card can use it.
+     *
+     * @param int $entityid
+     * @param string $field
+     * @return bool|null Null when nothing was sent; else whether it was kept.
+     */
+    public static function keep_logo(int $entityid, string $field): ?bool {
+        $kept = images::store_upload($field, self::LOGO, $entityid, 'logo');
+        if ($kept && !self::logo_image($entityid)) {
+            images::remove(self::LOGO, $entityid, 'logo');
+            return false;
+        }
+        return $kept;
+    }
+
+    /**
+     * A centre's logo as something to draw on: on white, without the white around it.
+     *
+     * @param int $entityid
+     * @return \GdImage|null
+     */
+    private static function logo_image(int $entityid): ?\GdImage {
+        $file = images::file(self::LOGO, $entityid, 'logo');
+        if (!$file || !function_exists('imagecreatefromstring')) {
+            return null;
+        }
+        $image = @imagecreatefromstring($file->get_content());
+        if (!$image) {
+            return null;
+        }
+        imagepalettetotruecolor($image);
+        [$w, $h] = [imagesx($image), imagesy($image)];
+        $flat = imagecreatetruecolor($w, $h);
+        imagefill($flat, 0, 0, imagecolorallocate($flat, 255, 255, 255));
+        imagecopy($flat, $image, 0, 0, 0, 0, $w, $h);
+        return imagecropauto($flat, IMG_CROP_WHITE) ?: $flat;
+    }
+
+    /**
+     * A centre's logo as the card takes it: flat on white, which also prints on any machine, and not larger than it needs.
+     *
+     * @param int $entityid
+     * @param string $dir Where to leave it.
+     * @return array file and ratio (width by height), or nothing without a logo.
+     */
+    public static function logo(int $entityid, string $dir): array {
+        $image = self::logo_image($entityid);
+        if (!$image) {
+            return [];
+        }
+        [$w, $h] = [imagesx($image), imagesy($image)];
+        // A plate of 13 by 9 mm, at 600 ppi at most.
+        $scale = min(1, 310 / $w, 220 / $h);
+        $small = imagescale($image, max(1, (int) round($w * $scale)), max(1, (int) round($h * $scale)));
+        $path = $dir . '/logo.png';
+        imagepng($small ?: $image, $path);
+        return ['file' => $path, 'ratio' => $w / $h];
+    }
+
+    /**
      * The stages of this school year, with how many readers each has.
      *
      * @param \stdClass $library
@@ -192,6 +315,7 @@ final class cardprint {
            GROUP BY m.stage",
             ['yearid' => $year->id, 'entityid' => $library->entityid]
         );
+        uksort($rows, fn($a, $b) => group_order::compare('', '', (string) $a, (string) $b));
         return array_map('intval', $rows);
     }
 
@@ -256,6 +380,7 @@ final class cardprint {
      * @param bool $photos Whether the centre shows photos.
      * @param string $dir Where to leave the photo.
      * @param int $now
+     * @param array $chosen The designs the centre chose.
      * @return array As cardpdf::card() wants it.
      */
     private static function person(
@@ -265,7 +390,8 @@ final class cardprint {
         string $skin,
         bool $photos,
         string $dir,
-        int $now
+        int $now,
+        array $chosen
     ): array {
         $first = $row->userid ? (string) $row->ufirstname : (string) $row->firstname;
         $last = $row->userid ? (string) $row->ulastname : (string) $row->lastname;
@@ -274,7 +400,7 @@ final class cardprint {
         $type = get_string_manager()->string_exists('profiletype' . $row->readertype, 'local_oksigeniaayvurenda')
             ? skins::say((int) $library->entityid, 'profiletype' . $row->readertype) : '';
         return [
-            'variant' => self::variant($skin, cards::look_of($row, $now)),
+            'variant' => self::design($skin, cards::look_of($row, $now), $student ? (string) $row->stage : self::ADULTS, $chosen),
             'name' => $name,
             'group' => (string) $row->groupname,
             'stage' => $student ? (string) $row->stage : $type,
@@ -339,9 +465,10 @@ final class cardprint {
      *
      * @param \stdClass $library
      * @param string $format
+     * @param array $logo As logo() gives it.
      * @return cardpdf
      */
-    private static function document(\stdClass $library, string $format): cardpdf {
+    private static function document(\stdClass $library, string $format, array $logo = []): cardpdf {
         global $CFG;
         $design = json_decode((string) file_get_contents(self::folder() . '/carne.json'), true);
         return new cardpdf(
@@ -350,7 +477,8 @@ final class cardprint {
             $CFG->dirroot . '/local/oksigeniaayvurendaarte/fuentes',
             self::sheet($format, (int) $library->entityid),
             self::texts($library),
-            in_array($format, ['sheet', 'plain'], true) || !empty(self::settings((int) $library->entityid)['backs'])
+            in_array($format, ['sheet', 'plain'], true) || !empty(self::settings((int) $library->entityid)['backs']),
+            $logo
         );
     }
 
@@ -396,13 +524,15 @@ final class cardprint {
         $skin = skins::of($entityid);
         $photos = profile::photos_on($entityid);
         $dir = make_request_directory();
+        $chosen = self::settings($entityid)['designs'];
+        $logo = self::logo($entityid, $dir);
         $base = clean_filename(str_replace(' ', '-', get_string('cardprintfile', 'local_oksigeniaayvurenda') . '-' . $label)) . '-'
             . date('Ymd-His', $now);
         $paths = [];
         foreach (array_chunk($rows, self::PERFILE) as $index => $part) {
-            $document = self::document($library, $format);
+            $document = self::document($library, $format, $logo);
             foreach ($part as $row) {
-                $document->card(self::person($row, $library, $centre, $skin, $photos, $dir, $now));
+                $document->card(self::person($row, $library, $centre, $skin, $photos, $dir, $now, $chosen));
             }
             $name = $base . (count($rows) > self::PERFILE ? '-' . ($index + 1) : '') . '.pdf';
             file_put_contents($dir . '/' . $name, $document->output());

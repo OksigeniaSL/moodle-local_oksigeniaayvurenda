@@ -157,7 +157,7 @@ final class images {
      * @param string $name
      * @return \stored_file|null
      */
-    private static function file(string $area, int $itemid, string $name): ?\stored_file {
+    public static function file(string $area, int $itemid, string $name): ?\stored_file {
         $files = get_file_storage()->get_area_files(
             \context_system::instance()->id,
             'local_oksigeniaayvurenda',

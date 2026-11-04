@@ -37,7 +37,8 @@
  */
 function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $USER;
-    $areas = ['copies', 'filecopies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'reviewdrawing', 'reviewvoice'];
+    $areas = ['copies', 'filecopies', 'cover', 'coverdraft', 'digital', 'libraryimage', 'portrait', 'cardlogo', 'reviewdrawing',
+        'reviewvoice'];
     if ($context->contextlevel != CONTEXT_SYSTEM || !in_array($filearea, $areas, true)) {
         return false;
     }
@@ -92,6 +93,11 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
             require_login(null, false);
             \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:view', $entityid);
         }
+        $forcedownload = false;
+    } else if ($filearea === 'cardlogo') {
+        // A centre's logo: for whoever prints its cards.
+        require_login(null, false);
+        \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:desk', $itemid);
         $forcedownload = false;
     } else if ($filearea === 'reviewdrawing') {
         // A reader's drawing about a book: published, for whoever sees the library; before, for its author and the staff.

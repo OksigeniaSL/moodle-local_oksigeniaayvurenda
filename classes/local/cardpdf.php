@@ -40,6 +40,9 @@ final class cardpdf {
     /** @var float The bleed around it, in mm. */
     private const BLEED = 3.0;
 
+    /** @var float[] A logo on the front: the right edge and top of its white plate, its size at most, and the air around. */
+    private const PLATE = ['right' => 82.1, 'top' => 2.6, 'width' => 13.0, 'height' => 9.4, 'pad' => .7, 'gap' => 1.0];
+
     /** @var int[] Pure black, as CMYK. */
     private const BLACK = [0, 0, 0, 100];
 
@@ -62,6 +65,7 @@ final class cardpdf {
      *     when each card is a page of the size of the plastic.
      * @param array $texts Of the back, by variant and box.
      * @param bool $backs Whether the cards have a back: a printer of one side only wants the fronts.
+     * @param array $logo The centre's logo, if it has one: file and ratio.
      */
     public function __construct(
         /** @var array As carne.json has it. */
@@ -74,7 +78,9 @@ final class cardpdf {
         /** @var array Of the back, by variant and box. */
         private array $texts,
         /** @var bool Whether the cards have a back. */
-        private bool $backs = true
+        private bool $backs = true,
+        /** @var array The centre's logo: file and ratio. */
+        private array $logo = []
     ) {
         global $CFG;
         require_once($CFG->libdir . '/pdflib.php');
@@ -241,6 +247,13 @@ final class cardpdf {
         $boxes = $this->design['variants'][$variant]['front'];
         $this->ground($variant, 'front', $x, $y);
         $this->face($person, $boxes, $x, $y);
+        // What is beside the logo makes room for it; what is lower down, as the sober design's label, stays.
+        $taken = $this->logo ? $this->logo_plate($x, $y) : 0.0;
+        foreach (['rotulo', 'biblioteca'] as $key) {
+            if ($boxes[$key]['y'] < self::PLATE['top'] + self::PLATE['height']) {
+                $boxes[$key]['w'] -= $taken;
+            }
+        }
         $this->text($boxes['rotulo'], $this->texts[$variant]['rotulo'] ?? '', $x, $y);
         $this->text($boxes['biblioteca'], $person['library'], $x, $y);
         $this->text($boxes['nombre'], $person['name'], $x, $y);
@@ -269,6 +282,33 @@ final class cardpdf {
         foreach ($this->design['variants'][$variant]['back'] as $key => $box) {
             $this->text($box, $this->texts[$variant][$key] ?? '', $x, $y);
         }
+    }
+
+    /**
+     * The centre's logo, on its white plate at the top right, as wide as the logo asks up to its largest.
+     *
+     * @param float $x Left of the cut card.
+     * @param float $y Top of the cut card.
+     * @return float The width it takes from what is beside it.
+     */
+    private function logo_plate(float $x, float $y): float {
+        $plate = self::PLATE;
+        $inside = $plate['height'] - 2 * $plate['pad'];
+        $width = min($inside * $this->logo['ratio'], $plate['width'] - 2 * $plate['pad']);
+        $height = $width / $this->logo['ratio'];
+        $wide = max($plate['height'], $width + 2 * $plate['pad']);
+        $left = $x + $plate['right'] - $wide;
+        $top = $y + $plate['top'];
+        $this->pdf->RoundedRect($left, $top, $wide, $plate['height'], 1.2, '1111', 'F', [], [0, 0, 0, 0]);
+        $this->pdf->Image(
+            $this->logo['file'],
+            $left + ($wide - $width) / 2,
+            $top + ($plate['height'] - $height) / 2,
+            $width,
+            $height,
+            'PNG'
+        );
+        return $wide + $plate['gap'];
     }
 
     /**

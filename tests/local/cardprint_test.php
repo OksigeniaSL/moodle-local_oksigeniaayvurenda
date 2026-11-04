@@ -97,6 +97,60 @@ final class cardprint_test extends \advanced_testcase {
     }
 
     /**
+     * What the centre chooses goes before the reader's look, its stage before everyone; what is left says who gets it.
+     */
+    public function test_designs(): void {
+        $this->resetAfterTest();
+        $this->assertSame('flor', cardprint::design('school', 'flower', 'Primaria', []));
+        $this->assertSame('cielo', cardprint::design('school', 'flower', 'Primaria', [cardprint::EVERYONE => 'cielo']));
+        $both = [cardprint::EVERYONE => 'cielo', 'Primaria' => 'sobria'];
+        $this->assertSame('sobria', cardprint::design('school', 'flower', 'Primaria', $both));
+        $this->assertSame('cielo', cardprint::design('school', 'none', cardprint::ADULTS, $both));
+        $this->assertSame('flor', cardprint::design('public', 'none', cardprint::ADULTS, [cardprint::EVERYONE => 'flor']));
+        $this->assertSame('sobria', cardprint::design('school', 'none', 'Primaria', [cardprint::EVERYONE => 'nada']));
+
+        $w = $this->world();
+        $map = cardprint::design_map($w->library, $w->now);
+        $this->assertSame(['Primaria'], $map['flor']);
+        $this->assertSame(['Secundaria'], $map['cielo']);
+        $this->assertSame([cardprint::ADULTS], $map['sobria']);
+        cardprint::choose_designs($w->entityid, ['Primaria' => 'cielo', 'Secundaria' => 'nada', cardprint::ADULTS => '']);
+        $this->assertSame(['Primaria' => 'cielo'], cardprint::settings($w->entityid)['designs']);
+        $map = cardprint::design_map($w->library, $w->now);
+        $this->assertSame([], $map['flor']);
+        $this->assertEqualsCanonicalizing(['Primaria', 'Secundaria'], $map['cielo']);
+        cardprint::choose_designs($w->entityid, []);
+        $this->assertSame(['Primaria'], cardprint::design_map($w->library, $w->now)['flor']);
+    }
+
+    /**
+     * A centre's logo reaches the card flat and without the white around it; without one, nothing; and what is not a picture
+     * stays out.
+     */
+    public function test_logo(): void {
+        $this->resetAfterTest();
+        $w = $this->world();
+        $dir = make_request_directory();
+        $this->assertSame([], cardprint::logo($w->entityid, $dir));
+        $this->assertFalse(images::store(cardprint::LOGO, $w->entityid, 'logo', __FILE__));
+        $image = imagecreatetruecolor(300, 200);
+        imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+        imagefilledrectangle($image, 100, 50, 199, 99, imagecolorallocate($image, 0, 0, 0));
+        imagepng($image, $dir . '/logo-subido.png');
+        $this->assertTrue(images::store(cardprint::LOGO, $w->entityid, 'logo', $dir . '/logo-subido.png'));
+        $logo = cardprint::logo($w->entityid, $dir);
+        $this->assertEqualsWithDelta(2.0, $logo['ratio'], .05);
+        $this->assertSame(IMAGETYPE_PNG, getimagesize($logo['file'])[2]);
+        if (cardprint::ready()) {
+            $file = cardprint::make($w->library, ['who' => 'all'], 'press', 'prueba', 2, $w->now);
+            $this->assertStringStartsWith('%PDF', $file->get_content());
+            $file->delete();
+        }
+        images::remove(cardprint::LOGO, $w->entityid, 'logo');
+        $this->assertSame([], cardprint::logo($w->entityid, $dir));
+    }
+
+    /**
      * Where a card falls on a sheet, with the margins of the centre; plastic is a page of its size; a printer has no sheet.
      */
     public function test_sheets(): void {

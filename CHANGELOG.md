@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.167.0
+
+- Print cards: «The design» shows the flower, the sky and the sober one with who gets each, and each centre chooses one for
+  everyone or one for each stage, whatever its kind, without changing the card each reader sees on screen.
+- The logo of the centre goes at the top right of every printed card, on a white plate.
+- The stages come in the order of the school, not of the alphabet.
+
 ## 0.166.1
 
 - Print cards: when they are ready the page says so and offers them, instead of leaving the button turning.
