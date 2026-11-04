@@ -142,7 +142,9 @@ if ($group === null) {
     }
     if ($total && !$groups && $query === '') {
         // Without classes there is no group to print the cards of: those of everyone, from here.
-        $data['tools'][] = ['url' => $page('print.php'), 'label' => $str('printcards')];
+        $data['tools'][] = ['url' => $page('cardprint.php'), 'label' => $str('printcards')];
+    } else if ($groups && $query === '') {
+        $data['tools'][] = ['url' => $page('cardprint.php'), 'label' => $str('printcards')];
     }
     if ($manage) {
         $unlinked = $DB->count_records_select(
@@ -252,8 +254,8 @@ if ($group === null) {
         'back' => ['url' => $url([]), 'label' => $str('readers')],
         'backword' => $str('profileback'),
         'empty' => $people ? '' : $str('readersnone'),
-        'print' => $people && $type === '' && !$left ? ['url' => (new moodle_url(
-            '/local/oksigeniaayvurenda/print.php',
+        'print' => $people && $group !== '' && !$left ? ['url' => (new moodle_url(
+            '/local/oksigeniaayvurenda/cardprint.php',
             ['library' => $library->slug, 'group' => $group]
         ))->out(false), 'label' => $str('printcards')] : null,
         'challenge' => $challengeview,

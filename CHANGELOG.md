@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.163.0
+
+- «Print cards»: of everyone, a stage, a class or one reader (from their record), with their photo or their bichito and the
+  design of their stage: the flower, the sky, or the sober one for adults and for whoever chose it. For a print shop, an
+  actual-size PDF with each face on its page, with bleed and trim box; on pre-cut sheets of ten, with a test sheet to fit any
+  brand; on plastic, one page per face at the exact size of the card, for a card printer; or on plain paper with marks to cut
+  by. Many cards are prepared apart, and what is made deletes itself after seven days.
+- The back of the card says the library's address and a few lines of its own.
+
 ## 0.162.0
 
 - «For you» on the card is no longer a form: the goal of the year is a ring with numbers to tap, the news a switch, and how

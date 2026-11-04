@@ -434,8 +434,16 @@
             said.textContent = on ? form.getAttribute('data-busyhint') : '';
         }
     };
-    // A number that saves itself when it is left, with nothing else to press.
-    Array.prototype.forEach.call(document.querySelectorAll('input[data-ayv-submit]'), function(input) {
+    // A page waiting for something done elsewhere looks again by itself.
+    var reloads = document.querySelector('[data-ayv-reload]');
+    if (reloads) {
+        window.setTimeout(function() {
+            window.location.reload();
+        }, Number(reloads.getAttribute('data-ayv-reload')) * 1000);
+    }
+
+    // What saves itself when it is left, with nothing else to press.
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ayv-submit]'), function(input) {
         input.addEventListener('change', function() {
             if (input.value !== '' && input.form.requestSubmit) {
                 input.form.requestSubmit();

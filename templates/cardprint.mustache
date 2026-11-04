@@ -1,0 +1,139 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/cardprint
+
+    Reader cards in print: of whom, how, what the back says, and what is ready to take.
+
+    Example context (json):
+    {
+        "ready": true, "heading": "Imprimir carnés", "intro": "De quién y cómo.", "notice": "", "backurl": "#", "backlabel": "Lectores",
+        "backword": "Volver a", "whomheading": "¿De quién?", "haswhom": true, "whom": [{"title": "Todo el centro", "count": "20", "url": "#", "on": true}],
+        "hasclasses": false, "classes": [], "onereader": "", "waysheading": "¿Dónde?",
+        "ways": [{"title": "En una imprenta", "hint": "PDF", "on": true, "url": "#", "ispress": true, "issheet": false, "isplain": false}],
+        "sheet": null, "backheading": "El reverso", "backhint": "", "hasback": false, "backempty": "Vacío", "backchange": "Cambiar", "where": "", "notes": "",
+        "manage": false, "cando": true, "makelabel": "Preparar 20 carnés", "makebusy": "Preparando…", "makehint": "", "nobody": "", "pageurl": "#", "sesskey": "x",
+        "hasfiles": false, "files": [], "waiting": "", "readyheading": "Preparados", "readyhint": "", "download": "Descargar", "close": "Cerrar"
+    }
+}}
+<section class="ayv-cards-print">
+<p class="ayv-back"><a href="{{backurl}}"><span aria-hidden="true">←</span> <span class="ayv-sr">{{backword}}: </span>{{backlabel}}</a></p>
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{^ready}}
+<p class="ayv-empty">{{notready}}</p>
+<p class="ayv-more"><a class="ayv-button" href="{{plainurl}}">{{plainlabel}}</a></p>
+{{/ready}}
+{{#ready}}
+<div class="ayv-mine-box ayv-cards-step">
+    <h2 class="ayv-mine-title">{{whomheading}}</h2>
+    {{#onereader}}<p class="ayv-cards-one"><b>{{onereader}}</b></p>{{/onereader}}
+    {{#haswhom}}<ul class="ayv-cards-whom">
+    {{#whom}}<li><a class="ayv-cards-who" href="{{url}}"{{#on}} aria-current="true"{{/on}}><b>{{title}}</b><span>{{count}}</span></a></li>{{/whom}}
+    </ul>{{/haswhom}}
+    {{#hasclasses}}
+    <form method="get" action="{{action}}" class="ayv-cards-class">
+        <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="how" value="{{how}}">
+        <label class="ayv-field">{{classlabel}} <select name="group" data-ayv-submit><option value="">{{classnone}}</option>{{#classes}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/classes}}</select></label>
+        <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{classlabel}}</button></noscript>
+    </form>
+    {{/hasclasses}}
+    <p class="ayv-field-hint">{{onehint}}</p>
+</div>
+<div class="ayv-mine-box ayv-cards-step">
+    <h2 class="ayv-mine-title">{{waysheading}}</h2>
+    <div class="ayv-mine-tiles">
+    {{#ways}}
+        <a class="ayv-mine-tile" href="{{url}}"{{#on}} aria-current="true"{{/on}}>
+            <span class="ayv-mine-tile-art">{{#ispress}}{{> local_oksigeniaayvurenda/icon_book}}{{/ispress}}{{#isplastic}}{{> local_oksigeniaayvurenda/icon_id_card}}{{/isplastic}}{{#issheet}}{{> local_oksigeniaayvurenda/icon_sheet}}{{/issheet}}{{#isplain}}{{> local_oksigeniaayvurenda/icon_tag}}{{/isplain}}</span>
+            <span class="ayv-mine-tile-words"><b>{{title}}</b><span>{{hint}}</span></span>
+            {{#on}}<span class="ayv-mine-tile-on">{{> local_oksigeniaayvurenda/icon_check}}</span>{{/on}}
+        </a>
+    {{/ways}}
+    </div>
+    {{#sheet}}
+    <div class="ayv-cards-sheet">
+        <h3 class="ayv-mine-title">{{sheetheading}}</h3>
+        <p class="ayv-field-hint">{{sheethint}}</p>
+        <p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{testurl}}">{{sheettest}}</a></p>
+        {{#canset}}<form method="post" action="{{pageurl}}" class="ayv-cards-margins">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sheet">
+            <label class="ayv-field">{{sheetleft}} <input type="number" name="left" step="0.1" min="0" max="60" value="{{left}}"></label>
+            <label class="ayv-field">{{sheettop}} <input type="number" name="top" step="0.1" min="0" max="60" value="{{top}}"></label>
+            <label class="ayv-field">{{sheetgap}} <input type="number" name="gap" step="0.1" min="0" max="30" value="{{gap}}"></label>
+            <button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button>
+        </form>{{/canset}}
+    </div>
+    {{/sheet}}
+    {{#plastic}}
+    <div class="ayv-cards-sheet">
+        <h3 class="ayv-mine-title">{{plasticheading}}</h3>
+        {{#canset}}<form method="post" action="{{pageurl}}" class="ayv-cards-margins">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="plastic">
+            <label class="ayv-field">{{plasticwidth}} <input type="number" name="pwidth" step="0.1" min="40" max="200" value="{{width}}"></label>
+            <label class="ayv-field">{{plasticheight}} <input type="number" name="pheight" step="0.1" min="30" max="200" value="{{height}}"></label>
+            <button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button>
+        </form>{{/canset}}
+        {{^canset}}<p>{{width}} × {{height}} mm</p>{{/canset}}
+    </div>
+    {{/plastic}}
+    {{#faces}}
+    <div class="ayv-cards-faces">
+        <div><b>{{faceslabel}}</b><p class="ayv-field-hint">{{faceshint}}</p></div>
+        {{#canset}}<form method="post" action="{{pageurl}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="faces">
+            <button type="submit" name="backs" value="{{#backson}}0{{/backson}}{{^backson}}1{{/backson}}" class="ayv-switch" role="switch" aria-checked="{{#backson}}true{{/backson}}{{^backson}}false{{/backson}}" aria-label="{{faceslabel}}"><span></span></button>
+        </form>{{/canset}}
+    </div>
+    {{/faces}}
+</div>
+<div class="ayv-mine-box ayv-cards-step">
+    <h2 class="ayv-mine-title">{{backheading}}</h2>
+    <p class="ayv-field-hint">{{backhint}}</p>
+    {{#hasback}}<p class="ayv-cards-back">{{where}}</p><p class="ayv-cards-back">{{notes}}</p>{{/hasback}}
+    {{^hasback}}<p class="ayv-empty">{{backempty}}</p>{{/hasback}}
+    {{#manage}}<p class="ayv-book-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-cards-backform">{{backchange}}</button></p>
+    <dialog class="ayv-modal" id="ayv-cards-backform" aria-labelledby="ayv-cards-backtitle">
+        <div class="ayv-modal-head"><h3 id="ayv-cards-backtitle" class="ayv-section-title">{{backheading}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{pageurl}}" class="ayv-dig-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="back">
+            <label class="ayv-field ayv-field-wide">{{wherelabel}} <textarea name="where" rows="3" maxlength="200">{{where}}</textarea></label>
+            <label class="ayv-field ayv-field-wide">{{noteslabel}} <textarea name="notes" rows="4" maxlength="300">{{notes}}</textarea></label>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{save}}</button></p>
+        </form>
+    </dialog>{{/manage}}
+</div>
+{{#nobody}}<p class="ayv-empty">{{nobody}}</p>{{/nobody}}
+{{#cando}}
+<form method="post" action="{{pageurl}}" class="ayv-cards-go" data-busy="{{makebusy}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="make">
+    <button type="submit" class="ayv-button">{{makelabel}}</button>
+    {{#makehint}}<p class="ayv-field-hint">{{makehint}}</p>{{/makehint}}
+</form>
+{{/cando}}
+{{#waiting}}<p class="ayv-add-status ayv-add-asking" role="status" data-ayv-reload="15">{{waiting}}</p>{{/waiting}}
+{{#hasfiles}}
+<div class="ayv-mine-box ayv-cards-step">
+    <h2 class="ayv-mine-title">{{readyheading}}</h2>
+    <p class="ayv-field-hint">{{readyhint}}</p>
+    <ul class="ayv-copies-list">{{#files}}<li><span><b>{{name}}</b> <span class="ayv-field-hint">{{when}} · {{size}}</span></span> <a class="ayv-button ayv-button-quiet" href="{{url}}">{{download}}</a></li>{{/files}}</ul>
+</div>
+{{/hasfiles}}
+{{/ready}}
+</section>

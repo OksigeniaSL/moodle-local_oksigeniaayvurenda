@@ -3240,6 +3240,27 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-switch[aria-checked="true"] span { transform: translateX(1.5rem); }
 .ayv .ayv-switch:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 .ayv .ayv-mine-look { grid-column: 1 / -1; }
+.ayv .ayv-cards-print { display: grid; gap: 1rem; }
+.ayv .ayv-cards-print > * { margin-top: 0; margin-bottom: 0; }
+.ayv .ayv-cards-whom { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; padding: 0; list-style: none; }
+.ayv .ayv-cards-who { display: flex; align-items: center; gap: .6rem; min-height: 44px; padding: .4rem 1rem; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 999px; text-decoration: none; }
+.ayv .ayv-cards-who span { color: var(--accent); font-weight: 700; }
+.ayv .ayv-cards-who:hover { border-color: var(--accent); }
+.ayv .ayv-cards-who[aria-current="true"] { background: var(--notice-bg); border-color: var(--accent); }
+.ayv .ayv-cards-one { margin: .5rem 0; font-size: 1.1rem; }
+.ayv .ayv-cards-class { margin: .25rem 0 .5rem; }
+.ayv .ayv-cards-step .ayv-field-hint { margin-top: .4rem; }
+.ayv a.ayv-mine-tile { text-decoration: none; }
+.ayv .ayv-mine-tile[aria-current="true"] { border-color: var(--accent); background: var(--notice-bg); }
+.ayv .ayv-cards-print .ayv-mine-tiles { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.ayv .ayv-cards-sheet { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.ayv .ayv-cards-faces { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.ayv .ayv-cards-margins { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; margin-top: .75rem; }
+.ayv .ayv-cards-back { margin: .15rem 0; white-space: pre-line; }
+.ayv .ayv-cards-go { display: grid; justify-items: start; gap: .4rem; }
+.ayv .ayv-copies-list { display: grid; gap: .5rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-copies-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem 1rem; padding: .5rem 0; border-top: 1px solid var(--line); }
+.ayv .ayv-copies-list b { overflow-wrap: anywhere; }
 .ayv .ayv-mine-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-top: .75rem; }
 .ayv .ayv-mine-tile { position: relative; display: flex; align-items: center; gap: .8rem; min-height: 5rem; padding: .7rem .9rem; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); cursor: pointer; transition: transform .12s ease, border-color .12s ease; }
 .ayv .ayv-mine-tile:hover { border-color: var(--accent); transform: translateY(-1px); }

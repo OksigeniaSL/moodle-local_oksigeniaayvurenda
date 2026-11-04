@@ -297,6 +297,7 @@ $data = [
     'sesskey' => sesskey(),
     'deskurl' => $link('desk.php', ['reader' => $id]),
     'cardurl' => $link('card.php', ['reader' => $id]),
+    'printurl' => $limited || $reader->status !== 'active' ? '' : $link('cardprint.php', ['reader' => $id]),
     'canrecard' => !$limited,
     'profilenewcardintro' => $str('profilenewcardintro', (string) $record['cardcode']),
     'app' => $app !== 'none' ? [
@@ -316,7 +317,8 @@ foreach (
         'readererasestays', 'readererasecheck', 'readererasekeep', 'profiledata', 'profiledatafirst', 'profiledatalast',
         'profiledataemail', 'profiledatatype', 'profiledatagroup', 'profiledatanogroup', 'profiledataaccount', 'profiledatatutor',
         'profiledatatutornone', 'profiledatatutorhint', 'profileback', 'profileleaveheading', 'profileleavehint', 'profileleavego',
-        'profilebackheading', 'profilebackhint', 'profilebackgo', 'profilematch', 'profiletwin', 'appaddemail'] as $key
+        'profilebackheading', 'profilebackhint', 'profilebackgo', 'profilematch', 'profiletwin', 'appaddemail',
+        'profileprint'] as $key
 ) {
     $data[$key] = $str($key);
 }

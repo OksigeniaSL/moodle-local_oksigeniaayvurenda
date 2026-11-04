@@ -66,5 +66,6 @@ class make_copies extends \core\task\scheduled_task {
             }
         }
         \local_oksigeniaayvurenda\local\filecopy::sweep_temp();
+        \local_oksigeniaayvurenda\local\cardprint::sweep();
     }
 }

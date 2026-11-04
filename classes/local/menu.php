@@ -39,8 +39,8 @@ final class menu {
         'stacks' => ['stacks.php', 'visit.php', 'shelf.php'],
         'card' => ['card.php'],
         'class' => ['class.php'],
-        'readers' => ['readers.php', 'reader.php', 'readerslist.php', 'oneroster.php', 'pair.php', 'match.php',
-            'twins.php', 'tutors.php', 'sources.php', 'connector.php'],
+        'readers' => ['readers.php', 'reader.php', 'history.php', 'cardprint.php', 'print.php', 'readerslist.php', 'oneroster.php',
+            'pair.php', 'match.php', 'twins.php', 'tutors.php', 'sources.php', 'connector.php'],
         'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php', 'activity.php', 'sanctions.php'],
     ];
 
@@ -61,8 +61,8 @@ final class menu {
             'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d],
                 ['sanctions.php', 'menusanctions', $d], ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d],
                 ['lots.php', 'menulots', $d], ['formats.php', 'menuformats', $d]],
-            'menupeople' => [['sources.php', 'menusources', $m], ['twins.php', 'menutwins', $m],
-                ['tutors.php', 'menututors', $m]],
+            'menupeople' => [['cardprint.php', 'menucards', $d], ['sources.php', 'menusources', $m],
+                ['twins.php', 'menutwins', $m], ['tutors.php', 'menututors', $m]],
             'menucataloguing' => [['add.php', 'menuadd', $c], ['import.php', 'menuimport', $c], ['free.php', 'menufree', $c],
                 ['material.php', 'menumaterial', $c], ['purchases.php', 'menupurchases', $c]],
             'menushelves' => [['stacks.php', 'stacksnav', $d], ['labels.php', 'menulabels', $c],
