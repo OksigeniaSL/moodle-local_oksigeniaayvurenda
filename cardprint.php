@@ -118,7 +118,8 @@ if (data_submitted() && confirm_sesskey()) {
         if (count($people) <= cardprint::NOW) {
             raise_memory_limit(MEMORY_EXTRA);
             $file = cardprint::make($library, $scope, $how, $label, (int) $USER->id, $now);
-            redirect($url($state + ['file' => $file->get_id()]));
+            // To the page, not to the file: a download leaves the page as it was, with its button still turning.
+            redirect($url($state + ['done' => $file->get_id()]) . '#ayv-cards-ready');
         }
         cardprint::queue($library, $scope, $how, $label, (int) $USER->id);
         $notice = $str('cardprintqueued');
@@ -162,8 +163,10 @@ foreach (cardprint::FORMATS as $way) {
 }
 $waiting = cardprint::waiting($library);
 $ready = [];
+$done = optional_param('done', 0, PARAM_INT);
 foreach (cardprint::files($entityid) as $file) {
     $ready[] = ['id' => $file->get_id(), 'name' => $file->get_filename(), 'size' => display_size($file->get_filesize()),
+        'fresh' => (int) $file->get_id() === $done,
         'url' => $url($state + ['file' => $file->get_id()]),
         'when' => userdate($file->get_timecreated(), get_string('strftimedatetimeshort', 'langconfig'))];
 }
@@ -224,6 +227,7 @@ $data = [
     'makelabel' => $count === 1 ? $str('cardprintmakeone') : $str('cardprintmake', screens::number($count)),
     'makebusy' => $str('cardprintbusy'),
     'makehint' => $count > cardprint::NOW ? $str('cardprintlong') : '',
+    'doneword' => in_array(true, array_column($ready, 'fresh'), true) ? $str('cardprintdone') : '',
     'nobody' => $who === 'pick' ? $str('cardprintpick') : ($count ? '' : $str('readersnone')),
     'readyheading' => $str('cardprintready'),
     'readyhint' => $str('cardprintreadyhint', cardprint::DAYS),

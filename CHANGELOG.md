@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.166.1
+
+- Print cards: when they are ready the page says so and offers them, instead of leaving the button turning.
+
 ## 0.166.0
 
 - Books out: what is already late has its own filter, the first of the row, in red when there is any.

@@ -135,10 +135,11 @@
 {{/cando}}
 {{#waiting}}<p class="ayv-add-status ayv-add-asking" role="status" data-ayv-reload="15">{{waiting}}</p>{{/waiting}}
 {{#hasfiles}}
-<div class="ayv-mine-box ayv-cards-step">
+<div class="ayv-mine-box ayv-cards-step" id="ayv-cards-ready">
     <h2 class="ayv-mine-title">{{readyheading}}</h2>
+    {{#doneword}}<p class="ayv-notice" role="status">{{doneword}}</p>{{/doneword}}
     <p class="ayv-field-hint">{{readyhint}}</p>
-    <ul class="ayv-copies-list">{{#files}}<li><span><b>{{name}}</b> <span class="ayv-field-hint">{{when}} · {{size}}</span></span> <span class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{download}}</a>
+    <ul class="ayv-copies-list">{{#files}}<li{{#fresh}} class="ayv-cards-fresh"{{/fresh}}><span><b>{{name}}</b> <span class="ayv-field-hint">{{when}} · {{size}}</span></span> <span class="ayv-book-actions"><a class="ayv-button{{^fresh}} ayv-button-quiet{{/fresh}}" href="{{url}}">{{download}}</a>
         <form method="post" action="{{pageurl}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="remove">
             <button type="submit" name="remove" value="{{id}}" class="ayv-button ayv-button-quiet">{{removelabel}}</button></form></span></li>{{/files}}</ul>
 </div>

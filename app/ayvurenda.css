@@ -3252,7 +3252,9 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-cards-step .ayv-field-hint { margin-top: .4rem; }
 .ayv a.ayv-mine-tile { text-decoration: none; }
 .ayv .ayv-mine-tile[aria-current="true"] { border-color: var(--accent); background: var(--notice-bg); }
-.ayv .ayv-cards-print .ayv-mine-tiles { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.ayv .ayv-cards-print .ayv-mine-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ayv #ayv-cards-ready { scroll-margin-top: 6rem; }
+.ayv .ayv-copies-list .ayv-cards-fresh b { color: var(--accent); }
 .ayv .ayv-cards-sheet { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 .ayv .ayv-cards-faces { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 .ayv .ayv-cards-margins { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; margin-top: .75rem; }
@@ -3280,7 +3282,8 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 }
 @media (max-width: 760px) {
     .ayv .ayv-mine-grid,
-    .ayv .ayv-mine-tiles { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-mine-tiles,
+    .ayv .ayv-cards-print .ayv-mine-tiles { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-mine-goal { flex-direction: column; align-items: flex-start; }
 }
 /* A reader's record, for the staff: their face and who they are on top, with their card; what they have now and the
