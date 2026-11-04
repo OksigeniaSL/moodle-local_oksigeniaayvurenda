@@ -466,6 +466,9 @@
                 choice.insertBefore(face(reader, 'ayv-choice-face'), choice.firstChild);
                 actions.appendChild(choice);
             });
+            if (answer.morereaders) {
+                actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskmorereaders));
+            }
         }
         if (actions.childNodes.length) {
             li.appendChild(actions);

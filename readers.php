@@ -117,9 +117,12 @@ if ($group === null) {
     if ($query !== '') {
         // By name, or by the card itself: a reader may be standing there with it.
         $desk = new \local_oksigeniaayvurenda\local\desk($library, (int) $USER->id);
+        $people = $desk->find_readers($query, 40);
+        // Nobody by those letters: who it may have meant.
+        $near = !$people;
         $people = array_map(
             fn($r) => $r + ['url' => $page('reader.php') . '&id=' . $r['id'] . '&q=' . rawurlencode($query), 'cardcode' => ''],
-            $desk->find_readers($query, 40)
+            $people ?: $desk->near_readers($query, 40)
         );
         $bycard = $DB->get_field('local_oksigeniaayvurenda_reader', 'id', ['entityid' => $entityid,
             'cardcode' => \core_text::strtoupper($query), 'status' => 'active']);
@@ -129,7 +132,8 @@ if ($group === null) {
                 'photo' => $reader['photo'] ?? '', 'initial' => $reader['initial'] ?? '',
                 'url' => $page('reader.php') . '&id=' . $bycard . '&q=' . rawurlencode($query), 'cardcode' => ''];
         }
-        $data['found'] = ['heading' => $str('readersfound', $query), 'none' => $people ? '' : $str('readersfoundnone'),
+        $data['found'] = ['heading' => $str('readersfound', $query),
+            'none' => $people ? ($near ? $str('readersnear') : '') : $str('readersfoundnone'),
             'people' => $people, 'clear' => $url([]), 'clearlabel' => $str('readersfindclear')];
     } else if ($total && !$groups) {
         // No classes: the readers themselves, a page at a time.

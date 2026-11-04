@@ -78,6 +78,43 @@ final class text {
     }
 
     /**
+     * How far a word someone typed is from a word of a name, or null if it is not that word: what is written the way it
+     * sounds, one or two letters wrong in a long word or two letters swapped. Foreign surnames are typed by ear.
+     *
+     * @param string $typed Normalised.
+     * @param string $word Normalised.
+     * @return int|null 0 for the word or its start; more, the further it is.
+     */
+    public static function near(string $typed, string $word): ?int {
+        if ($typed === $word || ($typed !== '' && str_starts_with($word, $typed))) {
+            return 0;
+        }
+        $length = strlen($typed);
+        if ($length < 3) {
+            return null;
+        }
+        if (self::phonetic($typed) === self::phonetic($word)) {
+            return 1;
+        }
+        if ($length < 4) {
+            return null;
+        }
+        $start = substr($word, 0, $length);
+        $distance = min(levenshtein($typed, $word), levenshtein($typed, $start));
+        if ($distance <= ($length >= 7 ? 2 : 1)) {
+            return $distance;
+        }
+        for ($i = 0; $i < $length - 1; $i++) {
+            $swapped = $typed;
+            [$swapped[$i], $swapped[$i + 1]] = [$typed[$i + 1], $typed[$i]];
+            if ($swapped === $word || $swapped === $start) {
+                return 1;
+            }
+        }
+        return null;
+    }
+
+    /**
      * A key that sounds the same for words a child may spell either way in Spanish: b and v, ll and y, a silent h, c, z
      * and s before e and i, qu and k, g and j before e and i. Other languages get the same simplification, which is
      * harmless: it only finds suggestions.

@@ -119,7 +119,8 @@ final class suggester {
      * @return string[]
      */
     private function alternatives(string $word): array {
-        if (isset($this->vocabulary[$word])) {
+        // An empty word stays as it is, so a slip in the next one still finds its way (la sirenitta).
+        if (isset($this->vocabulary[$word]) || isset(self::EMPTY[$word])) {
             return [$word];
         }
         $candidates = [];

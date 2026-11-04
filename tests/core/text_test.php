@@ -28,6 +28,26 @@ namespace local_oksigeniaayvurenda\core;
 #[\PHPUnit\Framework\Attributes\CoversClass(text::class)]
 final class text_test extends \basic_testcase {
     /**
+     * A word near another: its start, the way it sounds, a letter or two wrong, two letters swapped; and not what only
+     * looks a little like it, nor a very short word.
+     */
+    public function test_near(): void {
+        $this->assertSame(0, text::near('garcia', 'garcia'));
+        $this->assertSame(0, text::near('garc', 'garcia'));
+        $this->assertSame(1, text::near('basquez', 'vazquez'));
+        $this->assertSame(1, text::near('ernandez', 'hernandez'));
+        $this->assertSame(1, text::near('monets', 'montes'));
+        $this->assertSame(1, text::near('gracia', 'garcia'));
+        $this->assertSame(1, text::near('garsia', 'garcia'));
+        $this->assertSame(1, text::near('schnaider', 'schneider'));
+        $this->assertSame(2, text::near('sneider', 'schneider'));
+        $this->assertSame(1, text::near('prao', 'prado'));
+        $this->assertNull(text::near('garcia', 'perez'));
+        $this->assertNull(text::near('ana', 'ada'));
+        $this->assertNull(text::near('lopez', 'gomez'));
+    }
+
+    /**
      * Without accents, in lower case, with single spaces and no punctuation.
      */
     public function test_normalise(): void {

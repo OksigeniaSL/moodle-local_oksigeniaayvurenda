@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.159.0
+
+- At the desk and in «Readers», a name typed wrong finds who it may have meant: written by ear, a letter out, two letters
+  swapped, a foreign surname. They are offered to choose: a guess never opens a reader or lends by itself.
+- At the desk, so does a title typed wrong.
+- A list of readers that does not fit says that there are more.
+
 ## 0.158.0
 
 - Readers without a group are no longer one long list: teachers, staff and students each have their own place, with a

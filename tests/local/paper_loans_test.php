@@ -190,6 +190,52 @@ final class paper_loans_test extends \advanced_testcase {
     }
 
     /**
+     * A name or a title typed wrong finds what it may have meant, to choose: a guess never opens a reader by itself, nor
+     * lends. A long list of readers says that there are more.
+     */
+    public function test_desk_slips(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $desk = new desk($w->library, 0);
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $foreign = $gen->create_reader(['entityid' => $w->library->entityid, 'firstname' => 'Lukas',
+            'lastname' => 'Schneider Vogel']);
+
+        // By ear, one letter wrong, two swapped, a foreign surname: with a book waiting, and with none.
+        foreach (['montez prado', 'monets prado', 'montes prao', 'monte prado'] as $typed) {
+            $slip = $desk->scan($typed, 0, false, true);
+            $this->assertSame('choose', $slip['kind'], $typed);
+            $names = array_column($slip['readers'], 'name');
+            $this->assertEqualsCanonicalizing(['Ana Montes Prado', 'Leo Montes Prado'], $names, $typed);
+        }
+        foreach (['Schnaider', 'sneider vogel', 'Shneider'] as $typed) {
+            $slip = $desk->scan($typed, 0, false, true);
+            $this->assertSame('choose', $slip['kind'], $typed);
+            $this->assertSame(['Lukas Schneider Vogel'], array_column($slip['readers'], 'name'), $typed);
+            $this->assertSame('choose', $desk->scan($typed)['kind'], $typed);
+        }
+        $this->assertSame((int) $foreign->id, $desk->near_readers('Schnaider')[0]['id']);
+        $this->assertSame('unknown', $desk->scan('xqzw', 0, false, true)['kind']);
+
+        // A title, with the reader open or with none.
+        $title = $desk->scan('la sirenitta', (int) $w->ana->id);
+        $this->assertSame('choose', $title['kind']);
+        $this->assertSame((int) $w->sirenita->id, $title['books'][0]['recordid']);
+        $this->assertSame((int) $w->sirenita->id, $desk->scan('la sirenitta')['shelf'][0]['recordid']);
+
+        // Past the eight it shows, it says so; up to eight, it does not.
+        $this->assertFalse($desk->scan('montes prado')['morereaders']);
+        for ($i = 0; $i < 9; $i++) {
+            $gen->create_reader(['entityid' => $w->library->entityid, 'firstname' => 'Zoe' . $i, 'lastname' => 'Garmendia']);
+        }
+        $many = $desk->scan('garmendia');
+        $this->assertCount(8, $many['readers']);
+        $this->assertTrue($many['morereaders']);
+        $this->assertSame(0, $DB->count_records(self::T . 'loan', ['readerid' => $foreign->id]));
+    }
+
+    /**
      * A book chosen before its reader: while it waits, words are a name and never a title, and the record says what the
      * desk shows of it; with nothing on the shelf, it says nothing.
      */

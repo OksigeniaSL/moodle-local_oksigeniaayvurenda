@@ -64,6 +64,9 @@ final class desk {
     /** @var int How many more books the last search by title found than it shows. */
     private int $more = 0;
 
+    /** @var bool Whether the last search of readers found more than it shows. */
+    private bool $morereaders = false;
+
     /**
      * The desk of a library.
      *
@@ -210,6 +213,14 @@ final class desk {
                         'who' => $this->reader($readerid)['name']], ['books' => $books, 'readerid' => $readerid,
                         'more' => $this->more]);
                 }
+                // A title typed wrong: what it may have meant.
+                $title = $this->near_title($code);
+                $books = $title !== null ? $this->find_books($title, true) : [];
+                if ($books) {
+                    return $this->answer('choose', 'look', 'deskchoosebooksnear', (object) ['text' => $code,
+                        'who' => $this->reader($readerid)['name']], ['books' => $books, 'readerid' => $readerid,
+                        'more' => $this->more]);
+                }
             }
             $found = $this->find_readers($code);
             if (!$readerid && count($found) === 1) {
@@ -217,13 +228,20 @@ final class desk {
             }
             // A book is waiting for its reader: only people, or a title would answer the question of who takes it.
             if ($forwhom) {
-                return $found ? $this->answer('choose', 'look', 'deskchoose', $code, ['readers' => $found])
+                if ($found) {
+                    return $this->answer('choose', 'look', 'deskchoose', $code, ['readers' => $found,
+                        'morereaders' => $this->morereaders]);
+                }
+                // Never lent straight to someone whose name was only guessed: they are chosen.
+                $near = $this->near_readers($code);
+                return $near ? $this->answer('choose', 'look', 'desknearreaders', $code, ['readers' => $near])
                     : $this->answer('unknown', 'no', 'deskunknownreader', $code);
             }
             // Without a reader: the loans out of it, to bring one back, and what is on the shelf, to lend it.
             $out = $readerid ? [] : $this->find_books($code, false);
             $shelf = $readerid ? [] : $this->find_books($code, true);
             $more = $this->more;
+            $morereaders = $this->morereaders;
             // When one list has the words in its titles and the other only elsewhere, the other is noise.
             $titled = fn(array $books) => (bool) array_filter($books, fn($book) => $book['intitle']);
             if ($titled($shelf) && !$titled($out)) {
@@ -234,7 +252,17 @@ final class desk {
             if ($found || $out || $shelf) {
                 $message = $found ? 'deskchoose' : ($out ? 'deskchooseout' : 'deskshelfreader');
                 return $this->answer('choose', 'look', $message, $code, ['readers' => $found, 'out' => $out,
-                    'shelf' => $shelf, 'more' => $shelf ? $more : 0]);
+                    'shelf' => $shelf, 'more' => $shelf ? $more : 0, 'morereaders' => $morereaders]);
+            }
+            // Nothing as it was typed: who or what it may have meant, to choose, never at once.
+            if (!$readerid) {
+                $near = $this->near_readers($code);
+                $title = $this->near_title($code);
+                $shelf = $title !== null ? $this->find_books($title, true) : [];
+                if ($near || $shelf) {
+                    return $this->answer('choose', 'look', 'desknear', $code, ['readers' => $near, 'shelf' => $shelf,
+                        'more' => $shelf ? $this->more : 0]);
+                }
             }
         }
         $unknown = !$words ? 'deskunknown' : ($readerid ? 'deskunknownbook' : 'deskunknownwords');
@@ -536,10 +564,63 @@ final class desk {
            ORDER BY r.lastname, r.firstname, r.id",
             $params,
             0,
-            $limit
+            $limit + 1
         );
+        $this->morereaders = count($rows) > $limit;
+        return $this->shown(array_slice(array_keys($rows), 0, $limit));
+    }
+
+    /**
+     * Readers whose name is close to what was typed, the closest first, for a name written by ear or with a slip: every
+     * word typed is near a word of the name.
+     *
+     * @param string $text
+     * @param int $limit
+     * @return array[] id, name and group.
+     */
+    public function near_readers(string $text, int $limit = 8): array {
+        global $DB;
+        $words = \local_oksigeniaayvurenda\core\text::words($text);
+        if (!$words) {
+            return [];
+        }
+        $rows = $DB->get_recordset_sql(
+            "SELECT r.id, COALESCE(r.firstname, u.firstname, '') AS firstname, COALESCE(r.lastname, u.lastname, '') AS lastname
+               FROM {" . self::T . "reader} r
+          LEFT JOIN {user} u ON u.id = r.userid
+              WHERE r.entityid = :entityid AND r.status = 'active'",
+            ['entityid' => $this->library->entityid]
+        );
+        $scores = [];
+        foreach ($rows as $row) {
+            $theirs = \local_oksigeniaayvurenda\core\text::words($row->firstname . ' ' . $row->lastname);
+            $total = 0;
+            foreach ($words as $word) {
+                $distances = array_filter(array_map(
+                    fn($their) => \local_oksigeniaayvurenda\core\text::near($word, $their),
+                    $theirs
+                ), fn($distance) => $distance !== null);
+                if (!$distances) {
+                    continue 2;
+                }
+                $total += min($distances);
+            }
+            $scores[(int) $row->id] = $total;
+        }
+        $rows->close();
+        asort($scores);
+        return $this->shown(array_slice(array_keys($scores), 0, $limit));
+    }
+
+    /**
+     * What a search shows of each reader found, of those who may be seen here.
+     *
+     * @param int[] $ids
+     * @return array[] id, name, group, photo and initial.
+     */
+    private function shown(array $ids): array {
         $found = [];
-        foreach (array_keys($rows) as $id) {
+        foreach ($ids as $id) {
             if (!$this->allowed((int) $id)) {
                 continue;
             }
@@ -548,6 +629,17 @@ final class desk {
                 'initial' => $reader['initial']];
         }
         return $found;
+    }
+
+    /**
+     * What a title typed wrong may have meant, by the words of the catalogue.
+     *
+     * @param string $text
+     * @return string|null
+     */
+    private function near_title(string $text): ?string {
+        $vocabulary = catalogue::vocabulary((int) $this->library->entityid);
+        return (new \local_oksigeniaayvurenda\core\search\suggester($vocabulary))->suggest($text, 1)[0] ?? null;
     }
 
     /**
