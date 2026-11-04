@@ -82,6 +82,10 @@ $spanof = fn(int $days) => $days > 30 ? 'old' : ($days >= 15 ? 'mid' : 'new');
 // Red past 30 days, orange from 15: what is close to it shows too.
 $toneof = fn(int $days) => $days > 30 ? 'late' : ($days >= 15 ? 'near' : ($days > 0 ? 'soon' : 'ok'));
 $counts = ['old' => 0, 'mid' => 0, 'new' => 0];
+// What is out, by how soon it comes back: today, in three days, this week, this fortnight.
+$windows = ['today' => 0, 'three' => 3, 'week' => 7, 'fortnight' => 15];
+$inwindow = fn(array $line, string $window) => $line['days'] === 0 && $line['left'] <= $windows[$window];
+$order = optional_param('order', 'date', PARAM_ALPHA);
 $lines = [];
 foreach ($groups as $group) {
     foreach ($group['lines'] as $line) {
@@ -116,11 +120,21 @@ foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->
         $tutornames[(string) $tutor->groupname][] = fullname($user);
     }
 }
+// What is out says how long it has, when that is little.
+$leftwords = function (array $line) use ($str) {
+    if ($line['left'] > 7) {
+        return $str('lateuntil', $line['due']);
+    }
+    return !$line['left'] ? $str('latelefttoday') : ($line['left'] === 1 ? $str('lateleftone') : $str('lateleft', $line['left']));
+};
 // The boxes of the page: a group each (a reader each, with adults), the most late first, and in each the most late
 // first; also when a span filters.
 $boxes = [];
 foreach ($lines as $line) {
     if (!$all && $span !== '' && isset($counts[$span]) && $spanof($line['days']) !== $span) {
+        continue;
+    }
+    if ($all && isset($windows[$span]) && !$inwindow($line, $span)) {
         continue;
     }
     $key = $adults ? 'r' . $line['readerid'] : 'g' . $line['group'];
@@ -139,8 +153,10 @@ foreach ($lines as $line) {
         'photo' => $faces[(int) $line['readerid']] ?? '',
         'initial' => \local_oksigeniaayvurenda\local\profile::initial((string) $line['name']),
         'when' => $line['days'] > 0 ? $str($line['days'] === 1 ? 'desklateoneday' : 'desklatedays', $line['days'])
-            : $str('lateuntil', $line['due']),
-        'tone' => $toneof($line['days']),
+            : $leftwords($line),
+        // Among what is out, anything late is what shows most.
+        'tone' => $line['days'] > 0 ? ($all ? 'late' : $toneof($line['days']))
+            : ($line['left'] <= 3 ? 'near' : ($line['left'] <= 7 ? 'week' : 'ok')),
         // In a box of one reader, the row is the book: its name is already the box's.
         'bybook' => $adults,
         'bookurl' => $adults ? (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
@@ -187,19 +203,29 @@ foreach ($boxes as $box) {
 }
 // With few readers out, they are seen at once, each with their face: no group to open.
 $cards = [];
-if ($all && $only === '' && !$adults && count($people) <= 24) {
+$showing = [];
+foreach ($boxes as $box) {
+    $showing += $box['readers'];
+}
+if ($all && $only === '' && !$adults && count($showing) <= 24) {
     foreach ($boxes as $box) {
         foreach ($box['lines'] as $line) {
             $id = (int) $line['readerid'];
             $cards[$id] ??= ['name' => $line['name'], 'url' => $line['url'], 'photo' => $line['photo'],
-                'initial' => $line['initial'], 'group' => $box['group'], 'books' => []];
+                'initial' => $line['initial'], 'group' => $box['group'], 'books' => [], 'first' => $line['timedue']];
+            $cards[$id]['first'] = min($cards[$id]['first'], $line['timedue']);
             $cards[$id]['books'][] = ['title' => $line['title'], 'when' => $line['when'], 'tone' => $line['tone'],
                 'url' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
                     'id' => $line['recordid']]))->out(false)];
         }
     }
-    usort($cards, fn($a, $b) => [\core_text::strtolower($a['group']), \core_text::strtolower($a['name'])]
-        <=> [\core_text::strtolower($b['group']), \core_text::strtolower($b['name'])]);
+    $sortname = fn($card) => \core_text::strtolower($card['name']);
+    $sortgroup = fn($card) => \core_text::strtolower($card['group']);
+    usort($cards, fn($a, $b) => match ($order) {
+        'name' => $sortname($a) <=> $sortname($b),
+        'group' => [$sortgroup($a), $sortname($a)] <=> [$sortgroup($b), $sortname($b)],
+        default => [$a['first'], $sortname($a)] <=> [$b['first'], $sortname($b)],
+    });
     $shown = [];
 }
 $data = [
@@ -209,19 +235,27 @@ $data = [
         ['label' => $str('latetablate'), 'url' => $url(), 'current' => !$all],
         ['label' => $str('latetaball'), 'url' => $url(['all' => 1]), 'current' => $all],
     ],
-    'spans' => $all ? [] : array_map(fn($key) => ['key' => $key, 'count' => \local_oksigeniaayvurenda\local\screens::number(
+    'spans' => $all ? array_map(
+        fn($key) => ['key' => $key,
+        'count' => count(array_filter($lines, fn($line) => $inwindow($line, $key))), 'label' => $str('latewindow' . $key),
+        'url' => $url($span === $key ? ['all' => 1] : ['all' => 1, 'span' => $key]), 'current' => $span === $key],
+        array_keys($windows)
+    ) : array_map(fn($key) => ['key' => $key, 'count' => \local_oksigeniaayvurenda\local\screens::number(
         $counts[$key]
     ), 'label' => $str('latespan' . $key), 'url' => $url($span === $key ? [] : ['span' => $key]),
         'current' => $span === $key], ['old', 'mid', 'new']),
-    'groups' => $shown,
-    'hasgroups' => (bool) $shown,
-    'cards' => $cards,
-    'hascards' => (bool) $cards,
-    'only' => $only !== '',
-    'allurl' => $url(['all' => (int) $all]),
-    'empty' => $shown || $cards ? '' : $str($all ? 'lateallempty' : 'lateempty'),
-    'action' => $url(['all' => (int) $all]),
-    'sesskey' => sesskey(),
+        'groups' => $shown,
+        'hasgroups' => (bool) $shown,
+        'cards' => $cards,
+        'hascards' => (bool) $cards,
+        'orderlabel' => $str('lateorder'),
+        'orders' => $cards ? array_map(fn($key) => ['label' => $str('lateorder' . $key), 'current' => $order === $key,
+        'url' => $url(['all' => 1, 'order' => $key] + ($span !== '' ? ['span' => $span] : []))], ['date', 'group', 'name']) : [],
+        'only' => $only !== '',
+        'allurl' => $url(['all' => (int) $all]),
+        'empty' => $shown || $cards ? '' : $str($all ? 'lateallempty' : 'lateempty'),
+        'action' => $url(['all' => (int) $all]),
+        'sesskey' => sesskey(),
 ];
 foreach (['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord'] as $key) {
     $data[$key] = $str($key);

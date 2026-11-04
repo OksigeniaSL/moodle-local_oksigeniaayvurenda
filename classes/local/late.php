@@ -74,6 +74,8 @@ final class late {
                 'title' => $row->title,
                 'due' => zones::date((int) $row->timedue, 'strftimedateshort', $library),
                 'days' => $days,
+                'left' => $days > 0 ? 0 : loan_rules::days_late($now, (int) $row->timedue, $tz),
+                'timedue' => (int) $row->timedue,
             ];
         }
         $list = [];

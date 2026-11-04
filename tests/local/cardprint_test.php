@@ -108,6 +108,12 @@ final class cardprint_test extends \advanced_testcase {
         $sheet = cardprint::sheet('sheet', $w->entityid);
         $this->assertSame([15.5 + 85 + 10, 13.5 + 54 * 2], cardpdf::position($sheet, 1, 2));
         $this->assertSame(85.0, cardprint::sheet('plastic', $w->entityid)['width']);
+        // A model by its name: its size, centred on the page.
+        cardprint::choose_model($w->entityid, 'apli-10408');
+        $sheet = cardprint::sheet('sheet', $w->entityid);
+        $this->assertSame([86.0, 19.0, 13.5, 0.0], [$sheet['width'], $sheet['left'], $sheet['top'], $sheet['gap']]);
+        cardprint::choose_model($w->entityid, 'nada');
+        $this->assertSame('apli-10408', cardprint::settings($w->entityid)['model']);
         $this->assertArrayNotHasKey('nothing', cardprint::settings($w->entityid));
     }
 

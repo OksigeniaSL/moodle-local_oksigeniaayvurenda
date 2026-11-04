@@ -102,6 +102,16 @@ if (data_submitted() && confirm_sesskey()) {
         $number = fn(string $name) => (float) str_replace(',', '.', optional_param($name, '0', PARAM_RAW_TRIMMED));
         cardprint::save($entityid, ['pwidth' => max(40, $number('pwidth')), 'pheight' => max(30, $number('pheight'))]);
         $notice = $str('cardprintsaved');
+    } else if ($do === 'model' && $manage) {
+        cardprint::choose_model($entityid, optional_param('model', 'other', PARAM_ALPHANUMEXT));
+        $notice = $str('cardprintsaved');
+    } else if ($do === 'remove') {
+        foreach (cardprint::files($entityid) as $file) {
+            if ((int) $file->get_id() === optional_param('remove', 0, PARAM_INT)) {
+                $file->delete();
+                $notice = $str('cardprintremoved');
+            }
+        }
     } else if ($do === 'faces' && $manage) {
         cardprint::save($entityid, ['backs' => optional_param('backs', 0, PARAM_BOOL) ? 1 : 0]);
     } else if ($do === 'make' && $people) {
@@ -121,7 +131,7 @@ if ($manage) {
     $total = count($who === 'all' ? $people : cardprint::people($library, ['who' => 'all'], $now));
     $whom[] = $tile($str('cardprintall'), $total, [], $who === 'all');
     foreach (cardprint::stages($library, $now) as $name => $count) {
-        $whom[] = $tile($name, $count, ['stage' => $name], $who === 'stage' && $stage === $name);
+        $whom[] = $tile($name, $count, ['stage' => $name], $stage === $name);
     }
     $kinds = \local_oksigeniaayvurenda\local\readers::without_group($library, $now);
     foreach (['teacher', 'staff'] as $kind) {
@@ -130,10 +140,16 @@ if ($manage) {
         }
     }
 }
-$classes = array_map(
-    fn($row) => ['name' => $row['name'], 'selected' => $who === 'group' && $row['name'] === $group],
-    \local_oksigeniaayvurenda\local\readers::groups($library, $now)
-);
+// The classes of the stage chosen; with none, all of them under their stages. Teachers and staff have no class to choose.
+$classes = [];
+if ($type === '') {
+    foreach (\local_oksigeniaayvurenda\local\readers::groups($library, $now) as $row) {
+        if ($stage === '' || $row['stage'] === $stage) {
+            $classes[$row['stage']] ??= ['stage' => $row['stage'], 'named' => $stage === '' && $row['stage'] !== '', 'rows' => []];
+            $classes[$row['stage']]['rows'][] = ['name' => $row['name'], 'selected' => $row['name'] === $group];
+        }
+    }
+}
 $own = cardprint::settings($entityid);
 $ways = [];
 foreach (cardprint::FORMATS as $way) {
@@ -147,7 +163,7 @@ foreach (cardprint::FORMATS as $way) {
 $waiting = cardprint::waiting($library);
 $ready = [];
 foreach (cardprint::files($entityid) as $file) {
-    $ready[] = ['name' => $file->get_filename(), 'size' => display_size($file->get_filesize()),
+    $ready[] = ['id' => $file->get_id(), 'name' => $file->get_filename(), 'size' => display_size($file->get_filesize()),
         'url' => $url($state + ['file' => $file->get_id()]),
         'when' => userdate($file->get_timecreated(), get_string('strftimedatetimeshort', 'langconfig'))];
 }
@@ -167,10 +183,11 @@ $data = [
     'whom' => $whom,
     'haswhom' => (bool) $whom,
     'manage' => $manage,
-    'classes' => $classes,
+    'classes' => array_values($classes),
     'hasclasses' => (bool) $classes,
-    'classlabel' => $str('cardprintclass'),
-    'classnone' => $str('cardprintclasspick'),
+    'classlabel' => $stage !== '' ? $str('cardprintclassof', $stage) : $str('cardprintclass'),
+    'classnone' => $stage !== '' ? $str('cardprintclassall') : $str('cardprintclasspick'),
+    'stage' => $stage,
     'action' => (new moodle_url('/local/oksigeniaayvurenda/cardprint.php'))->out(false),
     'library' => $ref,
     'how' => $how,
@@ -179,7 +196,11 @@ $data = [
     'waysheading' => $str('cardprintways'),
     'ways' => $ways,
     'sheet' => $how === 'sheet' ? ['left' => $own['left'], 'top' => $own['top'], 'gap' => $own['gap'],
-        'testurl' => $url($state + ['test' => 1]), 'canset' => $manage] : null,
+        'testurl' => $url($state + ['test' => 1]), 'canset' => $manage,
+        'models' => array_map(fn($key, $model) => ['value' => $key, 'label' => $key === 'other' ? $str('cardprintmodelother')
+            : $model['name'] . ' · ' . str_replace('.', ',', (string) $model['width']) . ' × ' . $model['height'] . ' mm',
+            'selected' => $key === $own['model']], array_keys(cardprint::MODELS), cardprint::MODELS)] : null,
+    'modellabel' => $str('cardprintmodel'),
     'sheetheading' => $str('cardprintsheetheading'),
     'sheethint' => $str('cardprintsheethint'),
     'sheetleft' => $str('cardprintsheetleft'),
@@ -206,6 +227,7 @@ $data = [
     'nobody' => $who === 'pick' ? $str('cardprintpick') : ($count ? '' : $str('readersnone')),
     'readyheading' => $str('cardprintready'),
     'readyhint' => $str('cardprintreadyhint', cardprint::DAYS),
+    'removelabel' => $str('cardprintremove'),
     'files' => $ready,
     'hasfiles' => (bool) $ready,
     'waiting' => $waiting ? $str('cardprintwaiting') : '',

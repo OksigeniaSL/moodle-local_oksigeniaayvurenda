@@ -49,7 +49,8 @@
     {{#hasclasses}}
     <form method="get" action="{{action}}" class="ayv-cards-class">
         <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="how" value="{{how}}">
-        <label class="ayv-field">{{classlabel}} <select name="group" data-ayv-submit><option value="">{{classnone}}</option>{{#classes}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/classes}}</select></label>
+        {{#stage}}<input type="hidden" name="stage" value="{{stage}}">{{/stage}}
+        <label class="ayv-field">{{classlabel}} <select name="group" data-ayv-submit><option value="">{{classnone}}</option>{{#classes}}{{#named}}<optgroup label="{{stage}}">{{/named}}{{#rows}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/rows}}{{#named}}</optgroup>{{/named}}{{/classes}}</select></label>
         <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{classlabel}}</button></noscript>
     </form>
     {{/hasclasses}}
@@ -69,6 +70,11 @@
     {{#sheet}}
     <div class="ayv-cards-sheet">
         <h3 class="ayv-mine-title">{{sheetheading}}</h3>
+        {{#canset}}<form method="post" action="{{pageurl}}" class="ayv-cards-margins">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="model">
+            <label class="ayv-field">{{modellabel}} <select name="model" data-ayv-submit>{{#models}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/models}}</select></label>
+            <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></noscript>
+        </form>{{/canset}}
         <p class="ayv-field-hint">{{sheethint}}</p>
         <p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{testurl}}">{{sheettest}}</a></p>
         {{#canset}}<form method="post" action="{{pageurl}}" class="ayv-cards-margins">
@@ -132,7 +138,9 @@
 <div class="ayv-mine-box ayv-cards-step">
     <h2 class="ayv-mine-title">{{readyheading}}</h2>
     <p class="ayv-field-hint">{{readyhint}}</p>
-    <ul class="ayv-copies-list">{{#files}}<li><span><b>{{name}}</b> <span class="ayv-field-hint">{{when}} · {{size}}</span></span> <a class="ayv-button ayv-button-quiet" href="{{url}}">{{download}}</a></li>{{/files}}</ul>
+    <ul class="ayv-copies-list">{{#files}}<li><span><b>{{name}}</b> <span class="ayv-field-hint">{{when}} · {{size}}</span></span> <span class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{download}}</a>
+        <form method="post" action="{{pageurl}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="remove">
+            <button type="submit" name="remove" value="{{id}}" class="ayv-button ayv-button-quiet">{{removelabel}}</button></form></span></li>{{/files}}</ul>
 </div>
 {{/hasfiles}}
 {{/ready}}

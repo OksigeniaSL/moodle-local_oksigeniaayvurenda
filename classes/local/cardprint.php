@@ -50,6 +50,17 @@ final class cardprint {
     /** @var string[] How they can be printed. */
     public const FORMATS = ['press', 'plastic', 'sheet', 'plain'];
 
+    /**
+     * @var array[] Cut sheets of ten that can be chosen by name. Their makers publish the size of the card but not its margins,
+     * so these start centred on the page, and the test sheet says how far off they are.
+     */
+    public const MODELS = [
+        'avery-c32011' => ['name' => 'Avery C32011', 'width' => 85.0, 'height' => 54.0],
+        'avery-c32016' => ['name' => 'Avery C32016', 'width' => 85.0, 'height' => 54.0],
+        'apli-10408' => ['name' => 'Apli 10408', 'width' => 86.0, 'height' => 54.0],
+        'other' => ['name' => '', 'width' => 85.0, 'height' => 54.0],
+    ];
+
     /** @var array[] The sheets of ten: the plain one, cut by hand, and those that come cut, whose margins the centre sets. */
     public const SHEETS = [
         'plain' => ['columns' => 2, 'rows' => 5, 'width' => 85.6, 'height' => 54.0, 'left' => 19.4, 'top' => 13.5, 'gap' => 0.0,
@@ -83,12 +94,13 @@ final class cardprint {
      * What a centre says on the back and how its sheets fall.
      *
      * @param int $entityid
-     * @return array where, notes, left, top, gap, pwidth, pheight and backs (whether a card has its back).
+     * @return array where, notes, model, left, top, gap, pwidth, pheight and backs (whether a card has its back).
      */
     public static function settings(int $entityid): array {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        return ($settings['cardprint'] ?? []) + ['where' => '', 'notes' => '', 'left' => self::SHEETS['sheet']['left'],
+        return ($settings['cardprint'] ?? []) + ['where' => '', 'notes' => '', 'model' => 'other',
+            'left' => self::SHEETS['sheet']['left'],
             'top' => self::SHEETS['sheet']['top'], 'gap' => self::SHEETS['sheet']['gap'], 'pwidth' => 85.6, 'pheight' => 54.0,
             'backs' => 1];
     }
@@ -102,9 +114,23 @@ final class cardprint {
     public static function save(int $entityid, array $changes): void {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $known = array_flip(['where', 'notes', 'left', 'top', 'gap', 'pwidth', 'pheight', 'backs']);
+        $known = array_flip(['where', 'notes', 'model', 'left', 'top', 'gap', 'pwidth', 'pheight', 'backs']);
         $settings['cardprint'] = array_intersect_key($changes, $known) + self::settings($entityid);
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+    }
+
+    /**
+     * Chooses a model of sheet: its cards, centred on the page, to correct with the test sheet.
+     *
+     * @param int $entityid
+     * @param string $key
+     */
+    public static function choose_model(int $entityid, string $key): void {
+        $model = self::MODELS[$key] ?? null;
+        if ($model) {
+            self::save($entityid, ['model' => $key, 'left' => round((210 - 2 * $model['width']) / 2, 1),
+                'top' => round((297 - 5 * $model['height']) / 2, 1), 'gap' => 0.0]);
+        }
     }
 
     /**
@@ -126,7 +152,9 @@ final class cardprint {
         $sheet = self::SHEETS[$format];
         if ($format === 'sheet') {
             $own = self::settings($entityid);
-            $sheet = ['left' => (float) $own['left'], 'top' => (float) $own['top'], 'gap' => (float) $own['gap']] + $sheet;
+            $model = self::MODELS[$own['model']] ?? self::MODELS['other'];
+            $sheet = ['left' => (float) $own['left'], 'top' => (float) $own['top'], 'gap' => (float) $own['gap'],
+                'width' => $model['width'], 'height' => $model['height']] + $sheet;
         }
         return $sheet;
     }

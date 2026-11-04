@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.165.0
+
+- Print cards: with a stage chosen, the list of classes has only its classes, and with everyone they go under their stages;
+  what is ready can be removed; and sheets can be chosen by model (Avery, Apli), to correct with the test sheet.
+- Books out: by default the closest date first, with filters for today, three days, this week and this fortnight; the cards can
+  be sorted by date, class or name, and what has little time left says so, in colour.
+
 ## 0.164.0
 
 - Print cards: teachers and staff have their own choice, and «Everyone» leaves out students without a class this year, who are

@@ -3814,6 +3814,8 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-late-late { background: #f6d9d2; color: #8a2a17; }
 .ayv .ayv-late-near { background: #fbe3c6; color: #7a4100; }
 .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-count { color: #b05a00; }
+.ayv .ayv-late-week { background: #fbf0c4; color: #5f4a00; }
+.ayv .ayv-late-orders { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0 0 .75rem; }
 .ayv .ayv-late-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: .5rem 1.1rem 1rem; }
 .ayv .ayv-late-actions form { margin: 0; }
 @media print {

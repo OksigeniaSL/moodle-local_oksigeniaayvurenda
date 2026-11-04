@@ -25,7 +25,7 @@
         "heading": "Libros con retraso", "notice": "", "action": "#", "sesskey": "abc", "only": false, "allurl": "#",
         "tabs": [{"label": "Con retraso", "url": "#", "current": true}, {"label": "Prestados", "url": "#", "current": false}],
         "spans": [{"key": "old", "count": "4", "label": "Más de 30 días", "url": "#", "current": false}],
-        "hasgroups": true, "hascards": false, "cards": [],
+        "hasgroups": true, "hascards": false, "cards": [], "orders": [], "orderlabel": "Ordenar por",
         "groups": [{"heading": "3º Primaria A", "group": "3º Primaria A", "summary": "2 lectores · el más antiguo, 31 días",
             "tone": "late", "open": false, "tell": "Avisar a Irene López", "remind": "", "settutor": "", "readerid": 0,
             "readerurl": "", "printurl": "#",
@@ -43,6 +43,7 @@
 </ul>{{/only}}
 {{#only}}<p class="ayv-print-head"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{lateallgroups}}</a> <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/only}}
 {{#hascards}}
+<p class="ayv-late-orders">{{orderlabel}} {{#orders}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a> {{/orders}}</p>
 <ul class="ayv-late-cards">
 {{#cards}}
     <li class="ayv-late-card">
