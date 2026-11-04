@@ -3204,11 +3204,64 @@ html[data-bs-theme="dark"] .ayv .ayv-memoir { --bar: var(--accent); }
     .ayv .ayv-roll-book { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 /* Just for the reader, on their card: their goal for the year (a bar of one hue) and the library's news. */
-.ayv .ayv-mine { --bar: var(--green2); margin-top: 1.5rem; }
+.ayv .ayv-mine { --bar: var(--green2); --soft: color-mix(in srgb, var(--ink) 72%, var(--surface)); margin-top: 1.5rem; scroll-margin-top: 5rem; }
 html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
-.ayv .ayv-mine form { margin: 0 0 1rem; padding: 1rem 1.25rem; border-radius: var(--radius); background: var(--surface); }
-.ayv .ayv-mine-number { width: 6rem; }
-.ayv .ayv-mine-progress { margin: .5rem 0 .4rem; font-weight: 700; }
+.ayv .ayv-mine-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1rem; }
+.ayv .ayv-mine-box { min-width: 0; padding: 1.25rem 1.4rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+.ayv .ayv-mine-title { margin: 0; font-family: var(--title); font-size: 1.15rem; font-weight: 600; }
+.ayv .ayv-mine-progress { margin: .15rem 0 .7rem; }
+.ayv .ayv-mine-goal { display: flex; align-items: center; gap: 1.5rem; }
+.ayv .ayv-mine-goal-text { flex: 1 1 auto; min-width: 0; }
+.ayv .ayv-mine-goal-met .ayv-mine-progress { font-weight: 700; color: var(--accent); }
+.ayv .ayv-mine-ring { position: relative; flex: 0 0 8rem; width: 8rem; height: 8rem; }
+.ayv .ayv-mine-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ayv .ayv-mine-ring circle { fill: none; stroke-width: 11; }
+.ayv .ayv-mine-ring-track { stroke: var(--paper2); }
+.ayv .ayv-mine-ring-done { stroke: var(--bar); stroke-linecap: round; transition: stroke-dasharray .5s ease; }
+.ayv .ayv-mine-ring-text { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.05; }
+.ayv .ayv-mine-ring-text b { font-family: var(--title); font-size: 2.3rem; font-weight: 600; }
+.ayv .ayv-mine-ring-text span { font-size: .85rem; color: var(--soft); }
+.ayv .ayv-mine-presets { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0 0 .6rem; }
+.ayv .ayv-mine-preset,
+.ayv .ayv-mine-other input { min-width: 44px; min-height: 44px; font: inherit; font-weight: 700; color: var(--accent); background: var(--surface); border: 2px solid var(--line); border-radius: 999px; }
+.ayv .ayv-mine-preset { cursor: pointer; transition: transform .12s ease, background .12s ease; }
+.ayv .ayv-mine-preset:hover { background: var(--paper2); transform: translateY(-1px); }
+.ayv .ayv-mine-preset[aria-pressed="true"] { color: var(--surface); background: var(--accent); border-color: var(--accent); }
+.ayv .ayv-mine-other input { width: 5rem; padding: 0 .6rem; text-align: center; }
+.ayv .ayv-mine-other input::placeholder { color: var(--soft); opacity: 1; }
+.ayv .ayv-mine-off { padding: .2rem .4rem; font: inherit; font-size: .9rem; color: var(--soft); background: none; border: 0; text-decoration: underline; cursor: pointer; }
+.ayv .ayv-mine-news { display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; gap: .35rem .75rem; }
+.ayv .ayv-mine-news-icon { display: grid; place-items: center; grid-row: span 1; width: 2.4rem; height: 2.4rem; border-radius: 50%; color: var(--accent); background: var(--paper2); }
+.ayv .ayv-mine-news .ayv-mine-title { align-self: center; }
+.ayv .ayv-mine-news .ayv-field-hint { grid-column: 1 / -1; margin: .25rem 0 .5rem; }
+.ayv .ayv-switch { position: relative; grid-column: 1 / -1; justify-self: start; width: 3.6rem; height: 2.1rem; padding: 0; border: 0; border-radius: 999px; background: var(--line); cursor: pointer; transition: background .15s ease; }
+.ayv .ayv-switch span { position: absolute; top: .25rem; left: .25rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .15s ease; }
+.ayv .ayv-switch[aria-checked="true"] { background: var(--green2); }
+.ayv .ayv-switch[aria-checked="true"] span { transform: translateX(1.5rem); }
+.ayv .ayv-switch:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-mine-look { grid-column: 1 / -1; }
+.ayv .ayv-mine-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-top: .75rem; }
+.ayv .ayv-mine-tile { position: relative; display: flex; align-items: center; gap: .8rem; min-height: 5rem; padding: .7rem .9rem; font: inherit; text-align: left; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); cursor: pointer; transition: transform .12s ease, border-color .12s ease; }
+.ayv .ayv-mine-tile:hover { border-color: var(--accent); transform: translateY(-1px); }
+.ayv .ayv-mine-tile[aria-pressed="true"] { border-color: var(--accent); background: var(--notice-bg); }
+.ayv .ayv-mine-tile-art { display: grid; place-items: center; flex: 0 0 3.2rem; width: 3.2rem; height: 3.2rem; overflow: hidden; border-radius: 50%; color: var(--accent); background: var(--paper2); }
+.ayv .ayv-mine-tile-art img { width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-mine-tile-art .ayv-icon { width: 24px; height: 24px; }
+.ayv .ayv-mine-tile-words { display: grid; gap: .1rem; min-width: 0; }
+.ayv .ayv-mine-tile-words span { font-size: .88rem; color: var(--soft); }
+.ayv .ayv-mine-tile-on { position: absolute; top: .4rem; right: .5rem; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-mine-ring-done,
+    .ayv .ayv-mine-preset,
+    .ayv .ayv-mine-tile,
+    .ayv .ayv-switch,
+    .ayv .ayv-switch span { transition: none; }
+}
+@media (max-width: 760px) {
+    .ayv .ayv-mine-grid,
+    .ayv .ayv-mine-tiles { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-mine-goal { flex-direction: column; align-items: flex-start; }
+}
 /* A reader's record, for the staff: their face and who they are on top, with their card; what they have now and the
    notes on one side, what they took home on the other. */
 .ayv .ayv-profile { --soft: color-mix(in srgb, var(--ink) 72%, var(--surface)); display: grid; gap: 1.25rem; }

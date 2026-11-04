@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.162.0
+
+- «For you» on the card is no longer a form: the goal of the year is a ring with numbers to tap, the news a switch, and how
+  the card looks three tiles. Each saves itself, with no «Save» button.
+
 ## 0.161.0
 
 - A search of the catalogues when adding a book shows how it goes, catalogue by catalogue, and what is found can be chosen

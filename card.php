@@ -55,7 +55,9 @@ if (data_submitted() && confirm_sesskey()) {
     if ($do === 'newbooks') {
         newsletter::subscribe((int) $USER->id, optional_param('newbooks', 0, PARAM_BOOL));
     } else if ($do === 'goal') {
-        goals::set((int) $USER->id, required_param('year', PARAM_INT), optional_param('goal', 0, PARAM_INT));
+        // A number written, or one of those offered.
+        $wanted = optional_param('goalother', 0, PARAM_INT) ?: optional_param('goal', 0, PARAM_INT);
+        goals::set((int) $USER->id, required_param('year', PARAM_INT), $wanted);
     } else {
         $chosen = optional_param('look', '', PARAM_ALPHA);
         set_user_preference($pref, in_array($chosen, card_look::OWN, true) ? $chosen : null);
@@ -153,17 +155,28 @@ foreach ($readers as $reader) {
     unset($cromo);
     $woncromos = count(array_filter(array_column($cromos, 'won')));
     // From twelve on, and for adults, each reader chooses: the sky, the classic look, or none.
-    $choices = $look === 'flower' || $previewid ? [] : array_map(fn($o) => ['value' => $o, 'label' => $str('cardlook' . $o),
+    $choices = $look === 'flower' || $previewid ? [] : array_map(fn($o) => ['value' => $o, 'title' => $str('cardlooktitle' . $o),
+        'hint' => $str('cardlookhint' . $o), 'art' => $o === 'sky' ? (\local_oksigeniaayvurenda\local\screens::art(
+            'carne/impreso/luna-nueva'
+        ) ?? '') : '', 'isclassic' => $o === 'classic', 'isnone' => $o === 'none',
         'checked' => $o === ($sky ? 'sky' : $look)], card_look::OWN);
     // From twelve on, and for adults: their own goal for the year, which only they see, and the library's news.
     $mine = false;
     if ($look !== 'flower' && !$previewid) {
         $goal = goals::of((int) $USER->id, (int) $album['year']->id);
         $done = goals::done((int) $reader->id, (int) $album['year']->id);
-        $mine = ['yearid' => (int) $album['year']->id, 'goal' => $goal ?: '', 'hasgoal' => $goal > 0,
+        $mine = ['yearid' => (int) $album['year']->id, 'done' => $done, 'hasgoal' => $goal > 0,
+            'goalreached' => $goal > 0 && $done >= $goal,
             'goalwidth' => $goal ? (int) round(min($done, $goal) * 100 / $goal) : 0,
-            'goaltext' => $goal ? $str($done >= $goal ? 'goalmet' : 'goalprogress', (object) ['done' => $done, 'goal' => $goal])
-                : '',
+            'goalstarted' => $goal > 0 && $done > 0,
+            'goalunder' => $goal ? $str('goalof', $goal) : $str($done === 1 ? 'goalbook' : 'goalbooks'),
+            'goalline' => $goal ? $str($done >= $goal ? 'goalmet' : 'goalprogress', (object) ['done' => $done, 'goal' => $goal])
+                : $str('goalask'),
+            // What most people choose, and what this person chose if it is another number.
+            'presets' => array_map(
+                fn($n) => ['number' => $n, 'on' => $n === $goal],
+                array_values(array_unique(array_filter(array_merge([5, 10, 15, 20, 30, 50], [$goal]), fn($n) => $n > 0)))
+            ),
             'newbookson' => newsletter::subscribed((int) $USER->id)];
     }
     $cardsdata[] = $card + [
@@ -238,18 +251,20 @@ $data = [
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
     'lookheading' => $str('cardlookheading'),
-    'looksave' => $str('cardlooksave'),
     'booksheading' => $str('cardbooks'),
     'nobooks' => $str('cardnobooks'),
     'pastheading' => $str('cardpast'),
     'showcode' => $str('cardshowcode'),
     'saved' => $saved,
     'mineheading' => $str('mineheading'),
+    'goaltitle' => $str('goaltitle'),
     'goallabel' => $str('goallabel'),
     'goalhint' => $str('goalhint'),
+    'goalother' => $str('goalother'),
+    'goaloff' => $str('goaloff'),
+    'newbookstitle' => $str('newbookstitle'),
     'newbookslabel' => $str('newbookslabel'),
     'newbookshint' => $str('newbookshint'),
-    'minesave' => $str('cardlooksave'),
 ];
 // The staff find here the guided help of the card (not inside the help itself).
 $flower = in_array(\local_oksigeniaayvurenda\local\skins::of((int) $library->entityid), ['school', 'secondary'], true);

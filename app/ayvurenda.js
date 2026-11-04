@@ -434,6 +434,14 @@
             said.textContent = on ? form.getAttribute('data-busyhint') : '';
         }
     };
+    // A number that saves itself when it is left, with nothing else to press.
+    Array.prototype.forEach.call(document.querySelectorAll('input[data-ayv-submit]'), function(input) {
+        input.addEventListener('change', function() {
+            if (input.value !== '' && input.form.requestSubmit) {
+                input.form.requestSubmit();
+            }
+        });
+    });
     Array.prototype.forEach.call(document.querySelectorAll('form[data-busy]'), function(form) {
         form.addEventListener('submit', function(event) {
             if (form.getAttribute('aria-busy') === 'true') {
