@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/reader_history
+
+    Everything a reader took out, year by year: each book, when it went, when it came back and what the desk noted.
+
+    Example context (json):
+    {
+        "backurl": "#", "backlabel": "Ana Montes", "backword": "Volver a", "heading": "Historial de préstamos",
+        "name": "Ana Montes", "summary": "12 préstamos", "empty": "", "pager": null,
+        "years": [{"year": "2025-2026", "rows": [{"title": "El faro dormido", "url": "#", "hascover": true,
+            "coverurl": "https://example.com/portada.jpg", "colour": 2, "when": "Del 3 de marzo al 17 de marzo",
+            "isout": false, "note": "Le encantó", "library": ""}]}]
+    }
+}}
+<section class="ayv-history">
+<p class="ayv-back"><a href="{{backurl}}"><span aria-hidden="true">←</span> <span class="ayv-sr">{{backword}}: </span>{{backlabel}}</a></p>
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-readers-sum">{{name}} · {{summary}}</p>
+{{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
+{{#years}}
+<section class="ayv-profile-box ayv-history-year">
+    <h2 class="ayv-profile-heading">{{year}}</h2>
+    <ul class="ayv-profile-read">
+        {{#rows}}
+        <li{{#isout}} class="ayv-history-out"{{/isout}}><a href="{{url}}"><span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
+            <span><b>{{title}}</b><span>{{when}}{{#note}} · {{note}}{{/note}}{{#library}} · {{library}}{{/library}}</span></span></a></li>
+        {{/rows}}
+    </ul>
+</section>
+{{/years}}
+{{#pager}}{{> local_oksigeniaayvurenda/readers_pager}}{{/pager}}
+</section>

@@ -46,7 +46,10 @@ if (!$own) {
     shell::require('local/oksigeniaayvurenda:desk', $library);
 }
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $ref, 'id' => $id]));
+// Where the record was opened from, to go back there.
+$from = array_filter(['group' => optional_param('group', '', PARAM_TEXT), 'type' => optional_param('type', '', PARAM_ALPHA),
+    'list' => optional_param('list', '', PARAM_ALPHA), 'q' => optional_param('q', '', PARAM_TEXT)]);
+$PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $ref, 'id' => $id] + $from));
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 if (!$library) {
     shell::missing($str('readernothere'));
@@ -91,6 +94,21 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
     } else if (optional_param('do', '', PARAM_ALPHA) === 'needs') {
         \local_oksigeniaayvurenda\local\formats::mark($library, $id, optional_param('needs', 0, PARAM_BOOL));
         $notice = $str('profileneedssaved');
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'data') {
+        $notice = $str(profile::change($library, $id, [
+            'firstname' => optional_param('firstname', '', PARAM_TEXT),
+            'lastname' => optional_param('lastname', '', PARAM_TEXT),
+            'email' => optional_param('email', '', PARAM_RAW_TRIMMED),
+            'type' => optional_param('newtype', '', PARAM_ALPHA),
+            'group' => optional_param('newgroup', '', PARAM_TEXT),
+            'tutorof' => optional_param('tutorof', '', PARAM_TEXT),
+        ], $now, access::can('local/oksigeniaayvurenda:manage', $library)));
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else if (in_array(optional_param('do', '', PARAM_ALPHA), ['left', 'back'], true)) {
+        $gone = optional_param('do', '', PARAM_ALPHA) === 'left';
+        profile::set_gone($library, $id, $gone);
+        $notice = $str($gone ? 'profileleavedone' : 'profilebackdone');
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
     } else if (optional_param('do', '', PARAM_ALPHA) === 'newcard') {
         $notice = $str('profilenewcarddone', profile::new_card($library, $id));
@@ -152,7 +170,23 @@ $facts = array_values(array_filter([
     $record['group'] !== '' ? $record['group'] . ($record['stage'] !== '' ? ' · ' . $record['stage'] : '') : '',
     !$limited && $record['tutor'] !== '' ? $str('profiletutor', $record['tutor']) : '',
     $limited ? '' : $record['email'],
+    !$limited && !$record['hasaccount'] ? $str('profilenoaccount') : '',
 ]));
+$manages = access::can('local/oksigeniaayvurenda:manage', $library);
+$form = profile::form($library, $reader, $now, $manages);
+$say = fn(string $key) => \local_oksigeniaayvurenda\local\skins::say((int) $library->entityid, $key);
+// The way back, to where the record was opened from.
+$backlabel = $str('readers');
+if (($from['list'] ?? '') === 'left') {
+    $backlabel = $str('readersleft');
+} else if (isset($from['type']) && in_array($from['type'], \local_oksigeniaayvurenda\local\readers::KINDS, true)) {
+    $backlabel = $say('readerstype' . $from['type']);
+} else if (isset($from['group'])) {
+    $backlabel = $from['group'];
+} else if (isset($from['q'])) {
+    $backlabel = $str('profilebackfound', $from['q']);
+}
+$historytotal = profile::history_total($library, $id, $limited);
 $looks = ['flower' => 'flower', 'sky' => 'sky', 'skysober' => 'sky'];
 $drawing = '';
 $stagename = '';
@@ -182,6 +216,36 @@ $data = [
     'type' => get_string_manager()->string_exists('profiletype' . $record['type'], 'local_oksigeniaayvurenda')
         ? \local_oksigeniaayvurenda\local\skins::say((int) $library->entityid, 'profiletype' . $record['type']) : '',
     'facts' => array_map(fn($f) => ['fact' => $f], $facts),
+    'tutorof' => $limited ? [] : array_map(fn($g) => ['label' => $str('profiletutorof', $g),
+        'url' => $link('readers.php', ['group' => $g])], $record['tutoring']),
+    // Whoever only keeps this library has no list of readers: they came from their desk.
+    'backurl' => $limited ? $link('desk.php') : $link('readers.php', $from),
+    'backlabel' => $limited ? $str('desktitle') : $backlabel,
+    'historyurl' => $historytotal ? $link('history.php', ['id' => $id] + $from) : '',
+    'historylabel' => $str('profilehistory', $historytotal),
+    'canedit' => !$limited,
+    'hasaccount' => $record['hasaccount'],
+    'formfirst' => $form['firstname'],
+    'formlast' => $form['lastname'],
+    'formemail' => $form['email'],
+    'formtypes' => array_map(
+        fn($t) => ['value' => $t, 'label' => $say('profiletype' . $t), 'selected' => $t === $form['type']],
+        $form['types']
+    ),
+    'formhastypes' => (bool) $form['types'],
+    'formgroups' => array_map(fn($g) => ['name' => $g, 'selected' => $g === $form['group']], $form['groups']),
+    'formlocked' => $form['lockedgroup'] !== '' ? $str('profiledatalocked', $form['lockedgroup']) : '',
+    'formcanteach' => $form['canteach'],
+    'formtutors' => array_map(
+        fn($g) => ['name' => $g['name'], 'selected' => $g['name'] === $form['tutorof'],
+        'label' => $g['who'] !== '' ? $str('profiledatatutoris', (object) ['group' => $g['name'], 'who' => $g['who']])
+            : $g['name']],
+        $form['tutorgroups']
+    ),
+    'gonenow' => $reader->status === 'left',
+    'stayaccount' => $record['hasaccount'] ? $str('profileleaveaccount') : '',
+    'canmatch' => !$limited && $manages && !$record['hasaccount'] ? $link('match.php') : '',
+    'cantwin' => !$limited && $manages ? $link('twins.php', ['a' => $record['cardcode']]) : '',
     'cardcode' => $record['cardcode'],
     'barcode' => $record['barcode'],
     'since' => $str('profilesince', $day($record['since'])),
@@ -237,6 +301,7 @@ $data = [
     'profilenewcardintro' => $str('profilenewcardintro', (string) $record['cardcode']),
     'app' => $app !== 'none' ? [
         'can' => $app !== 'noemail',
+        'needsemail' => $app === 'noemail',
         'button' => $str($app === 'create' ? 'appcreatebutton' : 'appsendbutton'),
         'hint' => $str($app === 'noemail' ? 'appnoemailhint' : 'apphint', applink::DAYS),
     ] : false,
@@ -248,7 +313,10 @@ foreach (
         'sanctionpay', 'sanctionwaive', 'sanctionreopen', 'sanctionchargeadd', 'sanctionchargeintro', 'sanctionchargeamount',
         'sanctionchargenote', 'sanctionchargego', 'profileneeds', 'profileneedslabel', 'profileneedshint',
         'profileneedsasks', 'readererase', 'readererasehint', 'readererasego', 'readererasetitle', 'readererasegoes',
-        'readererasestays', 'readererasecheck', 'readererasekeep'] as $key
+        'readererasestays', 'readererasecheck', 'readererasekeep', 'profiledata', 'profiledatafirst', 'profiledatalast',
+        'profiledataemail', 'profiledatatype', 'profiledatagroup', 'profiledatanogroup', 'profiledataaccount', 'profiledatatutor',
+        'profiledatatutornone', 'profiledatatutorhint', 'profileback', 'profileleaveheading', 'profileleavehint', 'profileleavego',
+        'profilebackheading', 'profilebackhint', 'profilebackgo', 'profilematch', 'profiletwin', 'appaddemail'] as $key
 ) {
     $data[$key] = $str($key);
 }

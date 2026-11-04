@@ -42,34 +42,44 @@ if (!$library) {
     throw new moodle_exception('invalidparameter', 'debug');
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
-// In words, when the site has its own AI: first its policy, accepted once; then the answer, from the guide only.
-$ai = $query !== '' && howto::ai_ready();
+// In words, when the site has its own AI: first its policy, accepted once; then each question is answered as it is asked,
+// from the guide only. The links to a task are plain pages: they ask nothing of the AI.
+$ai = howto::ai_ready();
 $answer = null;
 $failed = false;
 if ($ai && data_submitted() && confirm_sesskey()) {
     if (optional_param('policy', 0, PARAM_BOOL)) {
         \core_ai\manager::user_policy_accepted((int) $USER->id, $context->id);
     }
-    if (optional_param('ask', 0, PARAM_BOOL) && \core_ai\manager::get_user_policy_status((int) $USER->id)) {
+    if ($query !== '' && optional_param('ask', 0, PARAM_BOOL) && \core_ai\manager::get_user_policy_status((int) $USER->id)) {
         $answer = howto::ask($query, $library, (int) $USER->id);
         $failed = $answer === null;
     }
 }
 $accepted = $ai && \core_ai\manager::get_user_policy_status((int) $USER->id);
 $found = howto::find($query, $library, (int) $USER->id);
+// What it answered with, with its screen and its guided help.
+$named = $answer ? howto::named($answer['tasks'], $library, (int) $USER->id) : [];
+$found = $named ?: $found;
 $all = $query !== '' ? howto::find('', $library, (int) $USER->id) : [];
 $card = fn(array $task) => ['title' => $task['title'], 'steps' => array_map(fn($s) => ['step' => $s], $task['steps']),
     'url' => $task['url'], 'help' => $task['help']];
 
 shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/howto', [
     'heading' => $str('howtotitle'),
-    'intro' => $str('howtointro'),
+    'intro' => $str($accepted ? 'howtointroai' : 'howtointro'),
+    'method' => $accepted ? 'post' : 'get',
+    'asks' => $accepted,
+    'sesskey' => sesskey(),
+    'busy' => $accepted ? $str('howtoaibusy') : '',
+    'busyhint' => $accepted ? $str('howtoaibusyhint') : '',
+    'hint' => $accepted ? $str('howtoaihint') : '',
     'action' => (new moodle_url('/local/oksigeniaayvurenda/howto.php'))->out(false),
     'library' => $library->slug,
     'query' => $query,
-    'label' => $str('howtolabel'),
-    'placeholder' => $str('howtoplaceholder'),
-    'search' => $str('howtosearch'),
+    'label' => $str($accepted ? 'howtoailabel' : 'howtolabel'),
+    'placeholder' => $str($accepted ? 'howtoaiplaceholder' : 'howtoplaceholder'),
+    'search' => $str($accepted ? 'howtoaigo' : 'howtosearch'),
     'searched' => $query !== '',
     'found' => array_map($card, $found),
     'hasfound' => (bool) $found,
@@ -93,13 +103,14 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
         'action' => $PAGE->url->out(false),
         'sesskey' => sesskey(),
         'accepted' => $accepted,
+        // Nothing to show once it was accepted and no question was asked.
+        'visible' => !$accepted || $answer !== null || $failed,
         'policy' => $accepted ? '' : get_string('userpolicy', 'ai'),
         'policyhint' => $str('howtoaipolicy'),
         'policyread' => $str('howtoaipolicyread'),
-        'accept' => $str('howtoaiaccept'),
+        'accept' => $str($query !== '' ? 'howtoaiaccept' : 'howtoaiacceptonly'),
         'ask' => $str('howtoai'),
-        'hint' => $str('howtoaihint'),
-        'answer' => $answer !== null ? nl2br(s($answer)) : '',
+        'answer' => $answer !== null ? nl2br(s($answer['text'])) : '',
         'answerlabel' => $str('howtoaianswer'),
         'failed' => $failed ? $str('howtoaifailed') : '',
     ] : null,

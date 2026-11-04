@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.158.0
+
+- Readers without a group are no longer one long list: teachers, staff and students each have their own place, with a
+  search. Those who stopped coming have theirs too.
+- A reader's record has a way back to the list it was opened from, and says which group a teacher tutors.
+- «Change their details»: name and e-mail for someone without an account, kind of reader, group, and the group they tutor.
+  What an account or the platform brings stays with them, and says so.
+- «They no longer come» takes someone off the lists and keeps their history; «They are back» undoes it. Erasing is only for
+  a person who asks for it.
+- «See their whole history»: every book a reader took out, with its dates, year by year.
+- «How do I…?» with the site's AI answers as soon as you ask, with no second button, and brings the screen and the guided
+  help of the tasks it used.
+
 ## 0.157.0
 
 - The desk starts wherever the person in front of it starts. A book found by its title with no reader open is a button:

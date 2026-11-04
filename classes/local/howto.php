@@ -191,7 +191,7 @@ final class howto {
     public static function guide(\stdClass $library, int $userid): string {
         $text = '';
         foreach (self::find('', $library, $userid) as $task) {
-            $text .= '## ' . $task['title'] . "\n";
+            $text .= '## [' . $task['key'] . '] ' . $task['title'] . "\n";
             foreach ($task['steps'] as $i => $step) {
                 $text .= ($i + 1) . '. ' . $step . "\n";
             }
@@ -206,9 +206,9 @@ final class howto {
      * @param string $question
      * @param \stdClass $library
      * @param int $userid
-     * @return string|null The answer, or null when it could not answer.
+     * @return array|null text, and tasks: the keys of those it used; null when it could not answer.
      */
-    public static function ask(string $question, \stdClass $library, int $userid): ?string {
+    public static function ask(string $question, \stdClass $library, int $userid): ?array {
         $question = \core_text::substr(trim($question), 0, 300);
         if ($question === '' || !self::ai_ready()) {
             return null;
@@ -224,8 +224,37 @@ final class howto {
         if (!$response->get_success()) {
             return null;
         }
-        $answer = trim((string) ($response->get_response_data()['generatedcontent'] ?? ''));
-        return $answer !== '' ? $answer : null;
+        return self::reply((string) ($response->get_response_data()['generatedcontent'] ?? ''));
+    }
+
+    /**
+     * What the site's AI said, apart from the line that names the tasks it used.
+     *
+     * @param string $said
+     * @return array|null text and tasks; null when it said nothing.
+     */
+    public static function reply(string $said): ?array {
+        $tasks = [];
+        $text = preg_replace_callback('/^[\s*_#]*(?:TAREAS|TASKS)[\s*_]*:(.*)$/mi', function ($line) use (&$tasks) {
+            preg_match_all('/[a-z]+/', $line[1], $keys);
+            $tasks = array_values(array_intersect($keys[0], array_keys(self::TASKS)));
+            return '';
+        }, $said);
+        $text = trim((string) $text);
+        return $text !== '' ? ['text' => $text, 'tasks' => array_slice($tasks, 0, 3)] : null;
+    }
+
+    /**
+     * The tasks the site's AI named that this person may do, as find() gives them.
+     *
+     * @param string[] $keys
+     * @param \stdClass $library
+     * @param int $userid
+     * @return array[]
+     */
+    public static function named(array $keys, \stdClass $library, int $userid): array {
+        $all = array_column(self::find('', $library, $userid), null, 'key');
+        return array_values(array_intersect_key($all, array_flip($keys)));
     }
 
     /**

@@ -550,15 +550,23 @@ Oksigenia Ayvurenda</button>
         }
         global $OUTPUT;
         $str = fn(string $key) => s(get_string($key, 'local_oksigeniaayvurenda'));
+        global $USER;
+        // With the site's AI, the question goes straight to it.
+        $asks = howto::ai_ready() && \core_ai\manager::get_user_policy_status((int) $USER->id);
+        $how = $asks ? 'method="post" data-busy="' . $str('howtoaibusy') . '" data-busyhint="' . $str('howtoaibusyhint') . '"'
+            : 'method="get"';
+        $more = $asks ? '<input type="hidden" name="sesskey" value="' . sesskey() . '">'
+            . '<input type="hidden" name="ask" value="1">' : '';
         // Always at hand, down on the right, folded until it is opened; it remembers how it was left.
         return '<details class="ayv-howto-dock" data-ayv-howto>
 <summary class="ayv-howto-toggle">' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_help', []) . ' ' .
             $str('howtobox') . '</summary>
-<form class="ayv-howto-box" role="search" aria-label="' . $str('howtobox') . '" method="get" action="' . $base . 'howto.php">
-<input type="hidden" name="library" value="' . s($library->slug) . '">
-<label for="ayv-howto-q">' . $str('howtoask') . '</label>
-<input id="ayv-howto-q" type="search" name="q" placeholder="' . $str('howtoplaceholder') . '" maxlength="200">
-<button type="submit" class="ayv-button">' . $str('howtosearch') . '</button>
+<form class="ayv-howto-box" role="search" aria-label="' . $str('howtobox') . '" ' . $how . ' action="' . $base . 'howto.php">
+<input type="hidden" name="library" value="' . s($library->slug) . '">' . $more . '
+<label for="ayv-howto-q">' . $str($asks ? 'howtoailabel' : 'howtoask') . '</label>
+<input id="ayv-howto-q" type="search" name="q" placeholder="' . $str($asks ? 'howtoaiplaceholder' : 'howtoplaceholder')
+            . '" maxlength="200">
+<button type="submit" class="ayv-button">' . $str($asks ? 'howtoaigo' : 'howtosearch') . '</button>
 </form>
 </details>';
     }

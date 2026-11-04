@@ -29,7 +29,7 @@ final class activity {
 
     /** @var array<string, string[]> The actions by what they touch; opening a record has its own, so it does not hide the rest. */
     public const KINDS = [
-        'people' => ['reader_card_replaced',
+        'people' => ['reader_card_replaced', 'reader_changed',
             'reader_merged', 'reader_paired', 'reader_matched', 'readers_synced', 'connector_changed', 'connector_tried',
             'tutor_changed', 'keeper_added', 'keeper_removed', 'applink_sent', 'voice_published', 'voice_removed',
             'voice_consent_changed', 'sanction_settings_changed', 'sanction_lifted', 'fine_paid', 'fine_waived', 'charge_added',

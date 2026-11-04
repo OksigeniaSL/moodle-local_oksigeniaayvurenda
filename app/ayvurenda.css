@@ -671,6 +671,35 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-record-lend { margin: 0 0 1rem; }
 
+.ayv .ayv-howto-ai { margin: 0 0 1rem; }
+
+/* The way back, at the top of what was opened from a list. */
+.ayv .ayv-back { margin: 0 0 .5rem; }
+
+.ayv .ayv-back a {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    min-height: 44px;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.ayv .ayv-back a:hover { text-decoration: underline; }
+
+.ayv .ayv-profile-facts a { color: var(--accent); font-weight: 700; }
+
+.ayv .ayv-history { display: grid; gap: 1rem; }
+
+.ayv .ayv-history-year { margin: 0; }
+
+.ayv .ayv-history-out b { color: var(--accent); }
+
+.ayv .ayv-profile-read + .ayv-profile-empty,
+.ayv .ayv-profile-read + .ayv-book-actions,
+.ayv .ayv-profile-empty + .ayv-book-actions { margin-top: .9rem; }
+
 /* A book chosen by its title: the title, and below what tells it apart. */
 .ayv .ayv-line-book {
     display: inline-flex;

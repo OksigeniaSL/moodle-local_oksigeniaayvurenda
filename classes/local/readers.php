@@ -34,6 +34,9 @@ final class readers {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
+    /** @var string[] The kinds of reader the staff can give someone. */
+    public const KINDS = ['student', 'teacher', 'staff', 'family', 'other'];
+
     /**
      * The groups of this school year, with how many readers each has; readers without a group go apart.
      *
@@ -132,19 +135,68 @@ final class readers {
      * @param \stdClass $library
      * @param string $group
      * @param int $now
+     * @param array $filter type, a kind of reader; status, left for those who stopped coming.
      * @return array The condition and its parameters.
      */
-    private static function in_group_where(\stdClass $library, string $group, int $now): array {
+    private static function in_group_where(\stdClass $library, string $group, int $now, array $filter = []): array {
+        // Those who stopped coming, whatever group they had.
+        if (($filter['status'] ?? 'active') !== 'active') {
+            return ['r.status = :status', ['status' => $filter['status']]];
+        }
+        $type = '';
         $params = ['entityid' => $library->entityid, 'a' => $now, 'b' => $now];
+        if (($filter['type'] ?? '') !== '') {
+            [$type, $params] = self::type_where((string) $filter['type'], $params);
+        }
         $member = "SELECT m.readerid
                      FROM {" . self::T . "member} m
                      JOIN {" . self::T . "year} y ON y.id = m.yearid
                     WHERE y.entityid = :entityid AND y.timestart <= :a AND y.timeend > :b";
         if ($group === '') {
-            return ["r.id NOT IN ($member AND m.groupname IS NOT NULL AND m.groupname <> '')", $params];
+            $grouped = "$member AND m.groupname IS NOT NULL AND m.groupname <> ''";
+            return ["r.status = 'active' $type AND r.id NOT IN ($grouped)", $params];
         }
         $params['groupname'] = $group;
-        return ["r.id IN ($member AND m.groupname = :groupname)", $params];
+        return ["r.status = 'active' $type AND r.id IN ($member AND m.groupname = :groupname)", $params];
+    }
+
+    /**
+     * What selects a kind of reader: «other» is everyone the staff has no kind of their own for.
+     *
+     * @param string $type
+     * @param array $params
+     * @return array The condition, starting with AND, and the parameters with its own.
+     */
+    private static function type_where(string $type, array $params): array {
+        if ($type === 'other') {
+            return ["AND r.readertype NOT IN ('student', 'teacher', 'staff', 'family')", $params];
+        }
+        return ['AND r.readertype = :readertype', $params + ['readertype' => $type]];
+    }
+
+    /**
+     * Those without a group this school year, by kind: teachers and staff have none, and students may have lost theirs.
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return int[] Kind (student, teacher, staff, family, other) => readers.
+     */
+    public static function without_group(\stdClass $library, ?int $now = null): array {
+        global $DB;
+        [$where, $params] = self::in_group_where($library, '', $now ?? time());
+        $rows = $DB->get_records_sql_menu(
+            "SELECT r.readertype, COUNT(1)
+               FROM {" . self::T . "reader} r
+              WHERE r.entityid = :entityid2 AND $where
+           GROUP BY r.readertype",
+            $params + ['entityid2' => $library->entityid]
+        );
+        $kinds = [];
+        foreach ($rows as $type => $count) {
+            $kind = in_array($type, self::KINDS, true) ? $type : 'other';
+            $kinds[$kind] = ($kinds[$kind] ?? 0) + (int) $count;
+        }
+        return $kinds;
     }
 
     /**
@@ -153,13 +205,14 @@ final class readers {
      * @param \stdClass $library
      * @param string $group
      * @param int|null $now
+     * @param array $filter type, a kind of reader; status, left for those who stopped coming.
      * @return int
      */
-    public static function in_group_count(\stdClass $library, string $group, ?int $now = null): int {
+    public static function in_group_count(\stdClass $library, string $group, ?int $now = null, array $filter = []): int {
         global $DB;
-        [$where, $params] = self::in_group_where($library, $group, $now ?? time());
+        [$where, $params] = self::in_group_where($library, $group, $now ?? time(), $filter);
         return (int) $DB->count_records_sql(
-            "SELECT COUNT(1) FROM {" . self::T . "reader} r WHERE r.entityid = :entityid2 AND r.status = 'active' AND $where",
+            "SELECT COUNT(1) FROM {" . self::T . "reader} r WHERE r.entityid = :entityid2 AND $where",
             $params + ['entityid2' => $library->entityid]
         );
     }
@@ -172,19 +225,30 @@ final class readers {
      * @param int|null $now
      * @param int $limit How many, for a library without classes that may have thousands; 0 for all.
      * @param int $from From which.
+     * @param array $filter type, a kind of reader; status, left for those who stopped coming.
      * @return array[] id, name, photo, initial, url (their record), cardcode, type and loans out.
      */
-    public static function in_group(\stdClass $library, string $group, ?int $now = null, int $limit = 0, int $from = 0): array {
+    public static function in_group(
+        \stdClass $library,
+        string $group,
+        ?int $now = null,
+        int $limit = 0,
+        int $from = 0,
+        array $filter = []
+    ): array {
         global $DB;
         $now = $now ?? time();
-        [$where, $params] = self::in_group_where($library, $group, $now);
+        [$where, $params] = self::in_group_where($library, $group, $now, $filter);
+        // Their record comes back to this list.
+        $back = array_filter(['group' => $group, 'type' => $filter['type'] ?? '',
+            'list' => ($filter['status'] ?? '') === 'left' ? 'left' : '']);
         $rows = $DB->get_records_sql(
             "SELECT r.id, r.cardcode, r.readertype, r.firstname, r.lastname, r.userid,
                     u.firstname AS ufirstname, u.lastname AS ulastname,
                     (SELECT COUNT(1) FROM {" . self::T . "loan} l WHERE l.readerid = r.id AND l.timereturned IS NULL) AS loans
                FROM {" . self::T . "reader} r
           LEFT JOIN {user} u ON u.id = r.userid
-              WHERE r.entityid = :entityid2 AND r.status = 'active' AND $where
+              WHERE r.entityid = :entityid2 AND $where
            ORDER BY COALESCE(u.lastname, r.lastname), COALESCE(u.firstname, r.firstname), r.id",
             $params + ['entityid2' => $library->entityid],
             $from,
@@ -207,7 +271,7 @@ final class readers {
                     'entityid' => $library->entityid], $users[$row->userid]) : '',
                 'initial' => profile::initial($name),
                 'url' => (new \moodle_url('/local/oksigeniaayvurenda/reader.php', ['library' => $library->slug,
-                    'id' => $row->id]))->out(false),
+                    'id' => $row->id] + $back))->out(false),
                 'sortname' => \local_oksigeniaayvurenda\core\text::normalise($last . ' ' . $first),
                 'cardcode' => $row->cardcode,
                 'type' => $row->readertype,

@@ -21,7 +21,10 @@
     or sky, what they have now and their reservations, what they took home this year and before, and the staff's notes.
 
     Context variables required for this template:
-    * name, hasphoto, photo, initial, type, facts (fact), cardcode, barcode, since, gone, drawing, stagename
+    * name, hasphoto, photo, initial, type, facts (fact), tutorof (label, url), cardcode, barcode, since, gone, drawing,
+      stagename; backurl, backlabel, profileback: the way back; historyurl, historylabel: everything they took out
+    * canedit, hasaccount, formfirst, formlast, formemail, formhastypes, formtypes, formgroups, formlocked, formcanteach,
+      formtutors: what the staff can change; gonenow, stayaccount, canmatch, cantwin: whether they still come
     * loans - title, url, hascover, coverurl, colour, due, library, late; hasloans
     * holds - title, state; hasholds
     * readheading, read (title, url, hascover, coverurl, colour, when, note), hasread, readmore
@@ -42,6 +45,8 @@
         "read": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
             "when": "14 de octubre", "note": "Le encantó"}], "hasread": true, "readmore": "",
         "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
+        "backurl": "#", "backlabel": "Lectores", "profileback": "Volver a", "tutorof": [], "historyurl": "#",
+        "historylabel": "Ver todo su historial (3)", "canedit": false, "gonenow": false,
         "notes": "", "staffonly": true, "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "canrecard": true, "profilenewcard": "Carné perdido", "profilenewcardintro": "Dejará de valer.", "profilenewcardgo": "Hacer otro carné", "selfclose": "Cerrar", "appheading": "La app",
         "app": {"can": true, "button": "Mandarle la app", "hint": "Le llega un correo con un enlace."},
         "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
@@ -52,6 +57,7 @@
     }
 }}
 <section class="ayv-profile">
+<p class="ayv-back"><a href="{{backurl}}"><span aria-hidden="true">←</span> <span class="ayv-sr">{{profileback}}: </span>{{backlabel}}</a></p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 <header class="ayv-profile-head">
     <div class="ayv-profile-face">
@@ -62,10 +68,11 @@
         {{#type}}<p class="ayv-profile-type">{{type}}</p>{{/type}}
         <h1 class="ayv-profile-name">{{name}}</h1>
         {{#gone}}<p class="ayv-profile-gone">{{profilegone}}</p>{{/gone}}
-        <ul class="ayv-profile-facts">{{#facts}}<li>{{fact}}</li>{{/facts}}<li>{{since}}</li></ul>
+        <ul class="ayv-profile-facts">{{#facts}}<li>{{fact}}</li>{{/facts}}{{#tutorof}}<li><a href="{{url}}">{{label}}</a></li>{{/tutorof}}<li>{{since}}</li></ul>
         <p class="ayv-profile-actions">
             <a class="ayv-button" href="{{deskurl}}">{{profiledesk}}</a>
             <a class="ayv-button ayv-button-quiet" href="{{cardurl}}">{{profilecard}}</a>
+            {{#canedit}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-reader-data">{{profiledata}}</button>{{/canedit}}
         </p>
     </div>
     <div class="ayv-profile-card">
@@ -78,6 +85,27 @@
         </div>
     </div>
 </header>
+{{#canedit}}
+<dialog class="ayv-modal" id="ayv-reader-data" aria-labelledby="ayv-reader-data-title">
+    <div class="ayv-modal-head"><h3 id="ayv-reader-data-title" class="ayv-section-title">{{profiledata}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <form method="post" action="{{action}}" class="ayv-dig-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="data">
+        {{^hasaccount}}
+        <label class="ayv-field">{{profiledatafirst}} <input type="text" name="firstname" value="{{formfirst}}" maxlength="255"></label>
+        <label class="ayv-field">{{profiledatalast}} <input type="text" name="lastname" value="{{formlast}}" maxlength="255"></label>
+        <label class="ayv-field">{{profiledataemail}} <input type="email" name="email" value="{{formemail}}" maxlength="254"></label>
+        {{/hasaccount}}
+        {{#hasaccount}}<p class="ayv-field-hint">{{profiledataaccount}}</p>{{/hasaccount}}
+        {{#formhastypes}}<label class="ayv-field">{{profiledatatype}} <select name="newtype">{{#formtypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtypes}}</select></label>{{/formhastypes}}
+        {{#formlocked}}<p class="ayv-field-hint">{{formlocked}}</p>{{/formlocked}}
+        {{^formlocked}}<label class="ayv-field">{{profiledatagroup}} <select name="newgroup"><option value="">{{profiledatanogroup}}</option>{{#formgroups}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/formgroups}}</select></label>{{/formlocked}}
+        {{#formcanteach}}<label class="ayv-field">{{profiledatatutor}} <select name="tutorof"><option value="">{{profiledatatutornone}}</option>{{#formtutors}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtutors}}</select></label>
+        <p class="ayv-field-hint">{{profiledatatutorhint}}</p>{{/formcanteach}}
+        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{profilesave}}</button></p>
+    </form>
+</dialog>
+{{/canedit}}
 {{#canrecard}}
 <dialog class="ayv-modal" id="ayv-profile-newcard" aria-labelledby="ayv-profile-newcard-title">
     <div class="ayv-modal-head"><h3 id="ayv-profile-newcard-title" class="ayv-section-title">{{profilenewcard}}</h3>
@@ -146,6 +174,7 @@
                 <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{button}}</button></p>
             </form>
             {{/can}}
+            {{#needsemail}}{{#canedit}}<p class="ayv-book-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-reader-data">{{appaddemail}}</button></p>{{/canedit}}{{/needsemail}}
         </section>
         {{/app}}
     </div>
@@ -160,6 +189,7 @@
                 {{/read}}
             </ul>
             {{#readmore}}<p class="ayv-profile-empty">{{readmore}}</p>{{/readmore}}
+            {{#historyurl}}<p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{historyurl}}">{{historylabel}}</a></p>{{/historyurl}}
         </section>
         {{#haspast}}
         <section class="ayv-profile-box">
@@ -167,6 +197,21 @@
             <ul class="ayv-profile-past">{{#past}}<li><span>{{year}}</span><b>{{loans}}</b></li>{{/past}}</ul>
         </section>
         {{/haspast}}
+        {{#canedit}}
+        <section class="ayv-profile-box">
+            {{^gonenow}}<h2 class="ayv-profile-heading">{{profileleaveheading}}</h2>
+            <p class="ayv-field-hint">{{profileleavehint}} {{stayaccount}}</p>{{/gonenow}}
+            {{#gonenow}}<h2 class="ayv-profile-heading">{{profilebackheading}}</h2>
+            <p class="ayv-field-hint">{{profilebackhint}}</p>{{/gonenow}}
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="do" value="{{^gonenow}}left{{/gonenow}}{{#gonenow}}back{{/gonenow}}">
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{^gonenow}}{{profileleavego}}{{/gonenow}}{{#gonenow}}{{profilebackgo}}{{/gonenow}}</button>
+                {{#canmatch}}<a class="ayv-button ayv-button-quiet" href="{{canmatch}}">{{profilematch}}</a>{{/canmatch}}
+                {{#cantwin}}<a class="ayv-button ayv-button-quiet" href="{{cantwin}}">{{profiletwin}}</a>{{/cantwin}}</p>
+            </form>
+        </section>
+        {{/canedit}}
         {{#canerase}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{readererase}}</h2>

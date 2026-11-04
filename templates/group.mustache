@@ -21,7 +21,8 @@
     Context variables required for this template:
     * heading - the group
     * readers - list of name, photo, initial, url (their record), cardcode and loans
-    * back - url and label to go back
+    * back - url and label to go back; backword, what a screen reader says before it
+    * intro, find - what the list is, and the search of all the readers, where the list is long
 
     Example context (json):
     {
@@ -30,12 +31,23 @@
         "readers": [{"name": "Ana Montes", "photo": false, "initial": "A", "url": "#", "cardcode": "10000H", "loans": 1}],
         "cardlabel": "Carné",
         "loanslabel": "Tiene prestados:",
-        "back": {"url": "#", "label": "Todos los grupos"},
+        "back": {"url": "#", "label": "Lectores"},
+        "backword": "Volver a",
         "print": {"url": "#", "label": "Imprimir carnés"},
         "empty": ""
     }
 }}
+{{#back}}<p class="ayv-back"><a href="{{url}}"><span aria-hidden="true">←</span> <span class="ayv-sr">{{backword}}: </span>{{label}}</a></p>{{/back}}
 <h1 class="ayv-results-title">{{heading}}</h1>
+{{#intro}}<p>{{intro}}</p>{{/intro}}
+{{#find}}
+<form class="ayv-readers-find" role="search" method="get" action="{{action}}">
+    <input type="hidden" name="library" value="{{library}}">
+    <label for="ayv-readers-q" class="ayv-sr">{{findlabel}}</label>
+    <input id="ayv-readers-q" type="search" name="q" placeholder="{{findhint}}" maxlength="100" autocomplete="off">
+    <button type="submit" class="ayv-button ayv-button-quiet">{{findgo}}</button>
+</form>
+{{/find}}
 {{#challenge}}
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 <section class="ayv-classbar">
@@ -73,7 +85,4 @@
 {{/hasreaders}}
 {{#pager}}{{> local_oksigeniaayvurenda/readers_pager}}{{/pager}}
 {{#empty}}<p class="ayv-empty">{{empty}}</p>{{/empty}}
-<p class="ayv-more">
-    {{#print}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/print}}
-    {{#back}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/back}}
-</p>
+{{#print}}<p class="ayv-more"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/print}}

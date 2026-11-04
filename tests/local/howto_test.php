@@ -52,7 +52,15 @@ final class howto_test extends \advanced_testcase {
         // Without the site's AI, nothing changes: no answer in words, and the guide is there as text.
         $this->assertFalse(howto::ai_ready());
         $this->assertNull(howto::ask('How do I lend a book?', $library, $admin));
-        $this->assertStringContainsString('## Lend a book', howto::guide($library, $admin));
+        $this->assertStringContainsString('## [lend] Lend a book', howto::guide($library, $admin));
+
+        // What the site's AI answers: the words on one side, the tasks it used on the other, only tasks that exist.
+        $reply = howto::reply("1. Open the desk.\n2. Scan the card.\n\n**TASKS:** lend, nolabel, inventada, [giveback], newcard");
+        $this->assertSame("1. Open the desk.\n2. Scan the card.", $reply['text']);
+        $this->assertSame(['lend', 'nolabel', 'giveback'], $reply['tasks']);
+        $this->assertSame([], howto::reply('Abre el mostrador.')['tasks']);
+        $this->assertNull(howto::reply("TAREAS: lend\n"));
+        $this->assertSame(['lend', 'nolabel'], array_column(howto::named(['nolabel', 'lend'], $library, $admin), 'key'));
 
         // A teacher who only sees the library: only what is theirs.
         $teacher = $this->getDataGenerator()->create_user();

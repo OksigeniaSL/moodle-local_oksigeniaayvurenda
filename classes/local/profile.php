@@ -41,6 +41,9 @@ final class profile {
     /** @var int The longest notes the staff keep of a reader. */
     public const NOTES = 1000;
 
+    /** @var int How many loans a page of a reader's history shows. */
+    public const HISTORY = 100;
+
     /**
      * Whether a centre shows its readers' photos to the staff (on, unless it turned them off).
      *
@@ -114,6 +117,12 @@ final class profile {
         $tutor = $tutorid ? \core_user::get_user($tutorid) : null;
         $look = cards::look_of($reader, $now);
         $flower = garden::flower($reader, $year);
+        $tutoring = $reader->userid ? $DB->get_fieldset_select(
+            self::T . 'tutor',
+            'groupname',
+            'yearid = :yearid AND userid = :userid',
+            ['yearid' => $year->id, 'userid' => $reader->userid]
+        ) : [];
         return [
             'id' => $readerid,
             'name' => $name,
@@ -123,6 +132,8 @@ final class profile {
             'group' => $group,
             'stage' => $member ? (string) $member->stage : '',
             'tutor' => $tutor ? fullname($tutor) : '',
+            'tutoring' => $tutoring,
+            'hasaccount' => !empty($reader->userid),
             'email' => $reader->readertype !== 'student' ? (string) ($user->email ?? $reader->email ?? '') : '',
             'cardcode' => (string) $reader->cardcode,
             'barcode' => code39::can((string) $reader->cardcode) ? code39::svg((string) $reader->cardcode, 40, false) : '',
@@ -163,6 +174,199 @@ final class profile {
         $DB->update_record(self::T . 'reader', (object) ['id' => $readerid, 'cardcode' => $code, 'timemodified' => time()]);
         \local_oksigeniaayvurenda\event\reader_card_replaced::fire($entityid, $readerid);
         return $code;
+    }
+
+    /**
+     * What the staff can change of a reader, for the form: what their account or the centre's platform brings stays
+     * as it is, because the night would put it back.
+     *
+     * @param \stdClass $library
+     * @param \stdClass $reader
+     * @param int $now
+     * @param bool $cantutor Whether whoever looks can say who tutors a group.
+     * @return array firstname, lastname, email, type, types, group, groups, lockedgroup, istutor, tutorgroups, cantutor.
+     */
+    public static function form(\stdClass $library, \stdClass $reader, int $now, bool $cantutor): array {
+        global $DB;
+        $year = years::around((int) $library->entityid, $now);
+        $member = $DB->get_record(self::T . 'member', ['readerid' => $reader->id, 'yearid' => $year->id], '*', IGNORE_MULTIPLE);
+        $group = $member ? (string) $member->groupname : '';
+        $tutors = $DB->get_records_menu(self::T . 'tutor', ['yearid' => $year->id], '', 'groupname, userid');
+        $mine = array_keys(array_filter($tutors, fn($userid) => (int) $userid === (int) $reader->userid));
+        $names = tutors::candidates((int) $library->entityid);
+        $groups = array_column(readers::groups($library, $now), 'name');
+        return [
+            'firstname' => (string) $reader->firstname,
+            'lastname' => (string) $reader->lastname,
+            'email' => (string) $reader->email,
+            'type' => (string) $reader->readertype,
+            'types' => in_array($reader->readertype, readers::KINDS, true) ? readers::KINDS : [],
+            'group' => $group,
+            'groups' => $groups,
+            // A group the platform brought comes back every night: it is changed there.
+            'lockedgroup' => $member && !in_array((string) $member->source, ['', 'manual'], true) ? $group : '',
+            'canteach' => !empty($reader->userid) && $reader->readertype !== 'student' && $cantutor,
+            'tutorof' => (string) ($mine[0] ?? ''),
+            'tutorgroups' => array_map(fn($name) => ['name' => $name,
+                'who' => !empty($tutors[$name]) && (int) $tutors[$name] !== (int) $reader->userid
+                    ? (string) ($names[(int) $tutors[$name]] ?? '') : ''], $groups),
+        ];
+    }
+
+    /**
+     * Changes what the staff can change of a reader of this centre.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param array $form firstname, lastname, email, type, group; tutorof when whoever saves can say who tutors a group.
+     * @param int $now
+     * @param bool $cantutor Whether whoever saves can say who tutors a group.
+     * @return string The key of what to say: profiledatasaved, or what stopped it.
+     */
+    public static function change(\stdClass $library, int $readerid, array $form, int $now, bool $cantutor): string {
+        global $DB;
+        $entityid = (int) $library->entityid;
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'entityid' => $entityid]);
+        if (!$reader || $reader->status === 'deleted') {
+            return 'readernothere';
+        }
+        $row = (object) ['id' => $readerid, 'timemodified' => $now];
+        // The name and the address of someone with an account are the account's.
+        if (empty($reader->userid)) {
+            $row->firstname = \core_text::substr(trim($form['firstname'] ?? ''), 0, 255);
+            $row->lastname = \core_text::substr(trim($form['lastname'] ?? ''), 0, 255);
+            $email = trim($form['email'] ?? '');
+            if ($row->firstname === '' && $row->lastname === '') {
+                return 'profiledatanoname';
+            }
+            if ($email !== '' && !validate_email($email)) {
+                return 'profiledatabademail';
+            }
+            $row->email = $email !== '' ? $email : null;
+        }
+        $type = (string) ($form['type'] ?? '');
+        if (in_array($type, readers::KINDS, true) && in_array($reader->readertype, readers::KINDS, true)) {
+            $row->readertype = $type;
+        }
+        $form = $form + ['group' => '', 'tutorof' => ''];
+        $transaction = $DB->start_delegated_transaction();
+        $DB->update_record(self::T . 'reader', $row);
+        $view = self::form($library, $reader, $now, $cantutor);
+        if ($view['lockedgroup'] === '' && (string) $form['group'] !== $view['group']) {
+            self::move($library, $readerid, (string) $form['group'], $now);
+        }
+        if ($view['canteach'] && (string) $form['tutorof'] !== $view['tutorof']) {
+            $year = years::around($entityid, $now);
+            if ($view['tutorof'] !== '') {
+                tutors::set((int) $year->id, $view['tutorof'], 0);
+            }
+            if ((string) $form['tutorof'] !== '' && in_array($form['tutorof'], $view['groups'], true)) {
+                tutors::set((int) $year->id, (string) $form['tutorof'], (int) $reader->userid);
+            }
+        }
+        $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\reader_changed::fire($entityid, $readerid, ['what' => 'data']);
+        return 'profiledatasaved';
+    }
+
+    /**
+     * Puts a reader in one of this year's groups, or in none. The row says it was done by hand: from where the group
+     * would have come, nothing touches it.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param string $group
+     * @param int $now
+     */
+    private static function move(\stdClass $library, int $readerid, string $group, int $now): void {
+        global $DB;
+        $year = years::around((int) $library->entityid, $now);
+        $DB->delete_records(self::T . 'member', ['readerid' => $readerid, 'yearid' => $year->id]);
+        foreach (readers::groups($library, $now) as $known) {
+            if ($known['name'] === $group) {
+                $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $year->id, 'groupname' => $group,
+                    'stage' => $known['stage'] !== '' ? $known['stage'] : null, 'source' => 'manual', 'timecreated' => $now]);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Someone who stopped coming leaves the lists and keeps everything; someone who comes back is as they were.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param bool $gone
+     */
+    public static function set_gone(\stdClass $library, int $readerid, bool $gone): void {
+        global $DB;
+        $entityid = (int) $library->entityid;
+        $from = $gone ? 'active' : 'left';
+        if (!$DB->record_exists(self::T . 'reader', ['id' => $readerid, 'entityid' => $entityid, 'status' => $from])) {
+            return;
+        }
+        $DB->update_record(self::T . 'reader', (object) ['id' => $readerid, 'status' => $gone ? 'left' : 'active',
+            'timemodified' => time()]);
+        \local_oksigeniaayvurenda\event\reader_changed::fire($entityid, $readerid, ['what' => $gone ? 'left' : 'back']);
+    }
+
+    /**
+     * Everything a reader took out, the last first: the books of the textbook bank too, because this is the record of
+     * what they had, not of what they read.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param int $from
+     * @param bool $onlyhere Only what this library lent.
+     * @return array[] recordid, title, library, year, lent, due, returned, note.
+     */
+    public static function history(\stdClass $library, int $readerid, int $from = 0, bool $onlyhere = false): array {
+        global $DB;
+        $params = ['readerid' => $readerid, 'entityid' => $library->entityid];
+        $here = '';
+        if ($onlyhere) {
+            $here = ' AND l.libraryid = :libraryid';
+            $params['libraryid'] = $library->id;
+        }
+        $where = "l.readerid = :readerid AND b.entityid = :entityid$here";
+        $join = "JOIN {" . self::T . "library} b ON b.id = l.libraryid";
+        $rows = $DB->get_records_sql(
+            "SELECT l.id, l.timeloaned, l.timedue, l.timereturned, l.returnnote, i.recordid, r.title, b.name AS library,
+                    y.name AS year
+               FROM {" . self::T . "loan} l
+               $join
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+          LEFT JOIN {" . self::T . "year} y ON y.id = l.yearid
+              WHERE $where
+           ORDER BY l.timeloaned DESC, l.id DESC",
+            $params,
+            $from,
+            self::HISTORY
+        );
+        return array_values(array_map(fn($r) => ['recordid' => (int) $r->recordid, 'title' => $r->title,
+            'library' => format_string($r->library, true, ['escape' => false]), 'year' => (string) $r->year,
+            'lent' => (int) $r->timeloaned, 'due' => (int) $r->timedue, 'returned' => (int) $r->timereturned,
+            'note' => (string) ($r->returnnote ?? '')], $rows));
+    }
+
+    /**
+     * How many loans a reader's history has.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param bool $onlyhere Only what this library lent.
+     * @return int
+     */
+    public static function history_total(\stdClass $library, int $readerid, bool $onlyhere = false): int {
+        global $DB;
+        return (int) $DB->count_records_sql(
+            "SELECT COUNT(1)
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "library} b ON b.id = l.libraryid
+              WHERE l.readerid = :readerid AND b.entityid = :entityid" . ($onlyhere ? ' AND l.libraryid = :libraryid' : ''),
+            ['readerid' => $readerid, 'entityid' => $library->entityid] + ($onlyhere ? ['libraryid' => $library->id] : [])
+        );
     }
 
     /**

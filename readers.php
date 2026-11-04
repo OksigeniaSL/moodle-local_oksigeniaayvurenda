@@ -31,6 +31,13 @@ require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 $group = optional_param('group', null, PARAM_TEXT);
+$type = optional_param('type', '', PARAM_ALPHA);
+$list = optional_param('list', '', PARAM_ALPHA);
+$type = in_array($type, readers::KINDS, true) ? $type : '';
+$left = $list === 'left';
+if ($group === null && ($type !== '' || $left)) {
+    $group = '';
+}
 $query = trim(optional_param('q', '', PARAM_TEXT));
 $from = max(0, optional_param('from', 0, PARAM_INT));
 require_login(null, false);
@@ -39,7 +46,8 @@ $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:desk', $library);
 $PAGE->set_context(context_system::instance());
 $keep = optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [];
-$params = ['library' => $ref] + ($group !== null ? ['group' => $group] : []) + $keep;
+$params = ['library' => $ref] + ($group !== null ? ['group' => $group] : []) + ($type !== '' ? ['type' => $type] : [])
+    + ($left ? ['list' => 'left'] : []) + $keep;
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readers.php', $params));
 
 if (!$library) {
@@ -110,7 +118,7 @@ if ($group === null) {
         // By name, or by the card itself: a reader may be standing there with it.
         $desk = new \local_oksigeniaayvurenda\local\desk($library, (int) $USER->id);
         $people = array_map(
-            fn($r) => $r + ['url' => $page('reader.php') . '&id=' . $r['id'], 'cardcode' => ''],
+            fn($r) => $r + ['url' => $page('reader.php') . '&id=' . $r['id'] . '&q=' . rawurlencode($query), 'cardcode' => ''],
             $desk->find_readers($query, 40)
         );
         $bycard = $DB->get_field('local_oksigeniaayvurenda_reader', 'id', ['entityid' => $entityid,
@@ -119,7 +127,7 @@ if ($group === null) {
             $reader = $desk->reader((int) $bycard);
             $people[] = ['id' => (int) $bycard, 'name' => $reader['name'], 'group' => $reader['group'],
                 'photo' => $reader['photo'] ?? '', 'initial' => $reader['initial'] ?? '',
-                'url' => $page('reader.php') . '&id=' . $bycard, 'cardcode' => ''];
+                'url' => $page('reader.php') . '&id=' . $bycard . '&q=' . rawurlencode($query), 'cardcode' => ''];
         }
         $data['found'] = ['heading' => $str('readersfound', $query), 'none' => $people ? '' : $str('readersfoundnone'),
             'people' => $people, 'clear' => $url([]), 'clearlabel' => $str('readersfindclear')];
@@ -144,8 +152,25 @@ if ($group === null) {
                 'hint' => $str('readersnoaccounthint')];
         }
     }
+    // Teachers and staff have no group, and no group is no problem: each kind on its own.
     if ($groups && $nogroup) {
-        $data['tools'][] = ['url' => $url(['group' => '']), 'label' => $str('readersnogroupcount', $number($nogroup))];
+        $tiles = [];
+        $kinds = readers::without_group($library);
+        foreach (['teacher', 'staff', 'student', 'family', 'other'] as $kind) {
+            if (!empty($kinds[$kind])) {
+                // Under «No group», the students are just that.
+                $tiles[] = ['name' => \local_oksigeniaayvurenda\local\skins::say(
+                    $entityid,
+                    $kind === 'student' ? 'profiletypestudents' : 'readerstype' . $kind
+                ),
+                    'url' => $url(['type' => $kind]), 'count' => $number($kinds[$kind]), 'countlabel' => $howmany($kinds[$kind])];
+            }
+        }
+        $data['stages'][] = ['name' => $str('readersnogroup'), 'named' => true, 'groups' => $tiles];
+    }
+    $gone = readers::in_group_count($library, '', null, ['status' => 'left']);
+    if ($gone && $query === '') {
+        $data['tools'][] = ['url' => $url(['list' => 'left']), 'label' => $str('readersleftcount', $number($gone))];
     }
     if ($manage) {
         $data['tools'][] = ['url' => $page('twins.php'), 'label' => $str('twinsnav')];
@@ -201,18 +226,32 @@ if ($group === null) {
     }
     // Those without a group may be many; a class, never.
     $paged = $group === '';
-    $list = readers::in_group($library, $group, null, $paged ? $pagesize : 0, $paged ? $from : 0);
+    $filter = ['type' => $type] + ($left ? ['status' => 'left'] : []);
+    $people = readers::in_group($library, $group, null, $paged ? $pagesize : 0, $paged ? $from : 0, $filter);
+    $entityid = (int) $library->entityid;
     $data = [
-        'pager' => $paged ? $pager(readers::in_group_count($library, ''), ['group' => '']) : null,
-        'heading' => $group !== '' ? $group : $str('readersnogroup'),
-        'readers' => $list,
-        'hasreaders' => (bool) $list,
+        'pager' => $paged ? $pager(
+            readers::in_group_count($library, '', null, $filter),
+            ['group' => ''] + ($type !== '' ? ['type' => $type] : []) + ($left ? ['list' => 'left'] : [])
+        ) : null,
+        'heading' => $left ? $str('readersleft') : ($type !== ''
+            ? \local_oksigeniaayvurenda\local\skins::say($entityid, 'readerstype' . $type)
+            : ($group !== '' ? $group : $str('readersnogroup'))),
+        'intro' => $left ? $str('readerslefthint') : ($type === 'student' ? $str('readersstudentshint') : ''),
+        'find' => $paged ? ['action' => (new moodle_url('/local/oksigeniaayvurenda/readers.php'))->out(false),
+            'library' => $library->slug, 'findlabel' => $str('readersfind'), 'findhint' => $str('readersfindhint'),
+            'findgo' => $str('readersfindgo')] : null,
+        'readers' => $people,
+        'hasreaders' => (bool) $people,
         'cardlabel' => $str('cardcode'),
         'loanslabel' => $str('deskloans'),
-        'back' => ['url' => $url([]), 'label' => $str('readersback')],
-        'empty' => $list ? '' : $str('readersnone'),
-        'print' => $list ? ['url' => (new moodle_url('/local/oksigeniaayvurenda/print.php', ['library' => $library->slug,
-            'group' => $group]))->out(false), 'label' => $str('printcards')] : null,
+        'back' => ['url' => $url([]), 'label' => $str('readers')],
+        'backword' => $str('profileback'),
+        'empty' => $people ? '' : $str('readersnone'),
+        'print' => $people && $type === '' && !$left ? ['url' => (new moodle_url(
+            '/local/oksigeniaayvurenda/print.php',
+            ['library' => $library->slug, 'group' => $group]
+        ))->out(false), 'label' => $str('printcards')] : null,
         'challenge' => $challengeview,
     ];
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/group', $data);
