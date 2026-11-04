@@ -34,15 +34,18 @@ $ref = required_param('library', PARAM_ALPHANUMEXT);
 $stage = optional_param('stage', '', PARAM_TEXT);
 $group = optional_param('group', '', PARAM_TEXT);
 $readerid = optional_param('reader', 0, PARAM_INT);
+$type = optional_param('type', '', PARAM_ALPHA);
+$type = in_array($type, ['teacher', 'staff'], true) ? $type : '';
 $how = optional_param('how', 'press', PARAM_ALPHA);
 require_login(null, false);
 $library = catalogue::library($ref);
 shell::require('local/oksigeniaayvurenda:desk', $library);
 shell::no_practice($library);
 $PAGE->set_context(context_system::instance());
-$who = $readerid ? 'reader' : ($group !== '' ? 'group' : ($stage !== '' ? 'stage' : 'all'));
+$who = $readerid ? 'reader' : ($group !== '' ? 'group' : ($stage !== '' ? 'stage' : ($type !== '' ? 'type' : 'all')));
 $how = in_array($how, cardprint::FORMATS, true) ? $how : 'press';
-$state = ['library' => $ref, 'how' => $how] + array_filter(['stage' => $stage, 'group' => $group, 'reader' => $readerid]);
+$state = ['library' => $ref, 'how' => $how] + array_filter(['stage' => $stage, 'group' => $group, 'reader' => $readerid,
+    'type' => $type]);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/cardprint.php', $state));
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -53,7 +56,7 @@ $manage = access::can('local/oksigeniaayvurenda:manage', $library);
 $url = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/cardprint.php', $params + ['library' => $ref]))
     ->out(false);
 // A whole stage or everyone means every photo of the centre: for whoever manages it.
-if (in_array($who, ['all', 'stage'], true) && !$manage) {
+if (in_array($who, ['all', 'stage', 'type'], true) && !$manage) {
     $who = 'pick';
 }
 $now = time();
@@ -76,12 +79,14 @@ if (optional_param('test', 0, PARAM_BOOL) && cardprint::ready()) {
     exit;
 }
 
-$scope = ['who' => $who, 'stage' => $stage, 'group' => $group, 'reader' => $readerid];
+$scope = ['who' => $who, 'stage' => $stage, 'group' => $group, 'reader' => $readerid, 'type' => $type];
 $people = $who === 'pick' || !cardprint::ready() ? [] : cardprint::people($library, $scope, $now);
 $one = $who === 'reader' && $people ? $people[0] : null;
 $oneuser = $one && $one->userid ? core_user::get_user((int) $one->userid) : null;
 $onename = $one ? ($oneuser ? fullname($oneuser) : trim($one->firstname . ' ' . $one->lastname)) : '';
-$label = ['all' => $str('cardprintall'), 'stage' => $stage, 'group' => $group, 'reader' => $onename, 'pick' => ''][$who] ?? '';
+$typename = $type !== '' ? $str('readerstype' . $type) : '';
+$label = ['all' => $str('cardprintall'), 'stage' => $stage, 'group' => $group, 'reader' => $onename, 'type' => $typename,
+    'pick' => ''][$who] ?? '';
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', '', PARAM_ALPHA);
@@ -113,10 +118,16 @@ $tile = fn(string $title, int $count, array $params, bool $on) => ['title' => $t
     'url' => $url($params + ['how' => $how]), 'on' => $on];
 $whom = [];
 if ($manage) {
-    $total = \local_oksigeniaayvurenda\local\readers::total($library);
+    $total = count($who === 'all' ? $people : cardprint::people($library, ['who' => 'all'], $now));
     $whom[] = $tile($str('cardprintall'), $total, [], $who === 'all');
     foreach (cardprint::stages($library, $now) as $name => $count) {
         $whom[] = $tile($name, $count, ['stage' => $name], $who === 'stage' && $stage === $name);
+    }
+    $kinds = \local_oksigeniaayvurenda\local\readers::without_group($library, $now);
+    foreach (['teacher', 'staff'] as $kind) {
+        if (!empty($kinds[$kind])) {
+            $whom[] = $tile($str('readerstype' . $kind), $kinds[$kind], ['type' => $kind], $who === 'type' && $type === $kind);
+        }
     }
 }
 $classes = array_map(
@@ -128,7 +139,8 @@ $ways = [];
 foreach (cardprint::FORMATS as $way) {
     $ways[] = ['title' => $str('cardprint' . $way), 'hint' => $str('cardprint' . $way . 'hint' . ($way === 'sheet' ? 'model' : '')),
         'on' => $how === $way,
-        'url' => $url(['how' => $way] + array_filter(['stage' => $stage, 'group' => $group, 'reader' => $readerid])),
+        'url' => $url(['how' => $way] + array_filter(['stage' => $stage, 'group' => $group, 'reader' => $readerid,
+            'type' => $type])),
         'ispress' => $way === 'press', 'isplastic' => $way === 'plastic', 'issheet' => $way === 'sheet',
         'isplain' => $way === 'plain'];
 }

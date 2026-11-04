@@ -171,7 +171,8 @@ final class cardprint {
      * The readers of what was chosen.
      *
      * @param \stdClass $library
-     * @param array $scope who (all, stage, group or reader), and its stage, group or reader.
+     * @param array $scope who (all, stage, group, type or reader), and its stage, group, type or reader. Everyone is whoever
+     *     is at the centre this year: a student without a class, where there are classes, has to be asked for by name.
      * @param int $now
      * @return \stdClass[] In the order of the classes, and by name in each.
      */
@@ -186,9 +187,14 @@ final class cardprint {
         } else if ($scope['who'] === 'group') {
             $where = ' AND m.groupname = :groupname';
             $params['groupname'] = (string) $scope['group'];
+        } else if ($scope['who'] === 'type') {
+            $where = ' AND r.readertype = :readertype';
+            $params['readertype'] = (string) $scope['type'];
         } else if ($scope['who'] === 'reader') {
             $where = ' AND r.id = :id';
             $params['id'] = (int) $scope['reader'];
+        } else if (!skins::no_classes((int) $library->entityid) && readers::groups($library, $now)) {
+            $where = " AND (m.id IS NOT NULL OR r.readertype <> 'student')";
         }
         $rows = $DB->get_records_sql(
             "SELECT r.id, r.entityid, r.userid, r.cardcode, r.readertype, r.firstname, r.lastname, m.groupname, m.stage,

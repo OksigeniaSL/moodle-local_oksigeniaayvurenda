@@ -342,7 +342,9 @@ final class cardpdf {
         $pdf->setCellHeightRatio((float) ($box['leading'] ?? 1.15));
         $font = $this->fonts[$box['font']];
         $pdf->SetFont($font, '', $size);
-        while ($pdf->getNumLines($text, $box['w']) > $lines && $size > $least) {
+        // A long word (an e-mail) is not split: the size goes down until it fits on its line.
+        $widest = fn() => max(array_map(fn($word) => $pdf->GetStringWidth($word), preg_split('/\s+/u', $text)));
+        while (($pdf->getNumLines($text, $box['w']) > $lines || $widest() > $box['w']) && $size > $least) {
             $size = max($least, $size - .25);
             $pdf->SetFont($font, '', $size);
         }

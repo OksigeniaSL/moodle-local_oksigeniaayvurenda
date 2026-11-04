@@ -63,7 +63,12 @@ final class cardprint_test extends \advanced_testcase {
         $this->resetAfterTest();
         $w = $this->world();
         $ids = fn(array $scope) => array_map(fn($row) => (int) $row->id, cardprint::people($w->library, $scope, $w->now));
+        // A student without a class is not everyone's: they are asked for by name.
+        $gone = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_reader([
+            'entityid' => $w->entityid, 'firstname' => 'Raúl', 'lastname' => 'Zeta']);
         $this->assertCount(4, $ids(['who' => 'all']));
+        $this->assertSame([(int) $gone->id], $ids(['who' => 'reader', 'reader' => $gone->id]));
+        $this->assertSame([(int) $w->paula->id], $ids(['who' => 'type', 'type' => 'teacher']));
         $this->assertEqualsCanonicalizing(
             [(int) $w->ana->id, (int) $w->leo->id],
             $ids(['who' => 'stage', 'stage' => 'Primaria'])

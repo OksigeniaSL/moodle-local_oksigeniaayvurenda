@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.164.0
+
+- Print cards: teachers and staff have their own choice, and «Everyone» leaves out students without a class this year, who are
+  printed one by one. A long word on a card, such as an e-mail, makes the text smaller instead of splitting.
+
 ## 0.163.0
 
 - «Print cards»: of everyone, a stage, a class or one reader (from their record), with their photo or their bichito and the
