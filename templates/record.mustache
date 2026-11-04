@@ -75,6 +75,7 @@
         <p class="ayv-record-authors">
             {{#authors}}<span class="ayv-author">{{name}}{{#role}} <span class="ayv-role">({{role}})</span>{{/role}}</span>{{/authors}}
         </p>
+        {{#lend}}<p class="ayv-record-lend"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/lend}}
         {{#hold}}
         <section class="ayv-hold" aria-label="{{holdask}}">
             {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}

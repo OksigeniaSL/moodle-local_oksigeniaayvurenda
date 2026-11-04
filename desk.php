@@ -50,6 +50,9 @@ $today = $desk->today();
 $preload = optional_param('reader', 0, PARAM_INT);
 $preload = $preload && $DB->record_exists('local_oksigeniaayvurenda_reader', ['id' => $preload, 'entityid' => $library->entityid])
     && $desk->allowed($preload) ? $desk->reader_panel($preload) : null;
+// From a book's page: the desk opens with the book, asking who takes it.
+$book = optional_param('book', 0, PARAM_INT);
+$book = $book && !$preload ? $desk->shelf_book($book) : null;
 $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $library->entityid]), true);
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $strings = [];
@@ -61,7 +64,7 @@ foreach (
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
         'deskbankset', 'deskbankmissing', 'deskbankdone', 'deskbankcontract',
         'desklendheld', 'deskroom', 'deskgiveback', 'deskbookfree', 'deskbookfreeone',
-        'deskshelfhint', 'deskmorebooks'] as $key
+        'deskshelfhint', 'deskmorebooks', 'deskforwhom'] as $key
 ) {
     $strings[$key] = $str($key);
 }
@@ -172,6 +175,7 @@ shell::output($str('desktitle'), $main, $library, '', [
         'sesskey' => sesskey(),
         'controlletter' => !empty($settings['controlletter']),
         'preload' => $preload,
+        'book' => $book,
         'strings' => $strings + $tools['strings'],
     ] + $tools['config'],
 ]);

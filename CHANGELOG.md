@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.157.0
+
+- The desk starts wherever the person in front of it starts. A book found by its title with no reader open is a button:
+  a touch puts it in the desk's hand, the field asks who it is for, and the reader who opens takes it, by card or by name.
+  The same for a book scanned before its card, and for several books before one card.
+- A book's page has «Lend this book» for the staff: the desk opens with that book in its hand.
+- While a book waits for its reader, words typed are a name and never a title. «Leave it» or Escape puts it down, and the
+  list it came from comes back.
+- With a reader open, the list of books says who takes the one you touch.
+
 ## 0.156.0
 
 - A record or a copy can be corrected after it was catalogued, from its own page: title, authors, subjects, ISBN and

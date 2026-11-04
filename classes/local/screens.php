@@ -323,6 +323,7 @@ final class screens {
         return [
             'card' => $card,
             'cite' => $cite,
+            'lend' => self::lend_link($record, $library),
             'fulltext' => $fulltext ? ['url' => $fulltext, 'label' => self::str('recordfulltext')] : null,
             // COinS: what Zotero and Mendeley find on the page to take the book with a click.
             'coins' => $young || $record->doctype === 'device' ? '' : \local_oksigeniaayvurenda\core\links::kev(
@@ -474,6 +475,23 @@ final class screens {
             $box[$key] = self::str($key);
         }
         return $box;
+    }
+
+    /**
+     * For whoever works at the desk of this library, the way to lend a book from its page: the desk opens with it.
+     *
+     * @param \stdClass $record
+     * @param \stdClass $library
+     * @return array|null
+     */
+    private static function lend_link(\stdClass $record, \stdClass $library): ?array {
+        global $USER;
+        if (!access::can('local/oksigeniaayvurenda:desk', $library) && !access::keeps($library)) {
+            return null;
+        }
+        $desk = new desk($library, (int) $USER->id);
+        return $desk->shelf_book((int) $record->id) ? ['url' => self::url('desk.php', $library, ['book' => $record->id]),
+            'label' => self::str('recordlend')] : null;
     }
 
     /**

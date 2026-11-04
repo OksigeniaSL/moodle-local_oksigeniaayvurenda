@@ -39,6 +39,11 @@
     var busy = false;
     var lastline = null;
     var audio = null;
+    // Books at the desk before their reader: the field asks who takes them, and the reader who opens takes them.
+    var hand = [];
+    var handbox = null;
+    var label = form.querySelector('.ayv-scan-label');
+    var prompt = label ? label.textContent : '';
 
     // Sounds: short, made here, the same on every machine. The scanner's own beep should be off.
     var tone = function(kind) {
@@ -361,6 +366,8 @@
             var room = button(str.deskroom, 'ayv-line-room', function(b) {
                 b.disabled = true;
                 post({action: 'room', itemid: answer.itemid}).then(function(read) {
+                    // It stayed in the room: nobody takes it.
+                    dropFromHand(code);
                     actions.textContent = '';
                     li.querySelector('.ayv-line-text').textContent = read.message;
                     tone('ok');
@@ -421,7 +428,7 @@
                     choose({action: 'giveback', loanid: loan.loanid, readerid: readerid}, loan.title);
                 }));
             });
-            // What is on the shelf, to know it is there: lending it needs the reader first.
+            // What is on the shelf: a touch and the desk asks who takes it.
             if (answer.shelf && answer.shelf.length) {
                 if ((answer.out || []).length || (answer.readers || []).length) {
                     actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskshelfhint));
@@ -430,12 +437,10 @@
                     var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
                         return book.free;
                     });
-                    var row = el('div', 'ayv-line-book ayv-line-book-info');
-                    row.appendChild(el('span', 'ayv-line-book-title', book.title));
-                    row.appendChild(el('span', 'ayv-line-book-more', [book.author, free, book.callnumber].filter(function(part) {
-                        return part;
-                    }).join(' · ')));
-                    actions.appendChild(row);
+                    actions.appendChild(bookChoice(book.title, [book.author, free, book.callnumber], function(b) {
+                        b.disabled = false;
+                        takeUp([{recordid: book.recordid, title: book.title, more: [book.author, book.callnumber]}], li);
+                    }));
                 });
             }
             // More than it shows: another word narrows it.
@@ -451,6 +456,7 @@
                         actions.textContent = '';
                         showReader(found.reader);
                         tone('ok');
+                        handOver(found.reader.id);
                         return found;
                     }).catch(function() {
                         tone('no');
@@ -487,7 +493,7 @@
 
     // What the desk answers to a choice is shown as a scan's answer.
     var choose = function(params, what) {
-        post(params).then(function(answer) {
+        return post(params).then(function(answer) {
             add(answer, what);
             return answer;
         }).catch(function() {
@@ -500,15 +506,100 @@
         tone(answer.sound || 'ok');
         if (answer.kind === 'reader') {
             showReader(answer.reader);
+            handOver(answer.reader.id);
             return;
         }
         if (answer.reader && (!readerid || answer.reader.id === readerid)) {
             showReader(answer.reader);
         }
         line(answer, code);
+        // A book read with no reader open: whoever comes next takes it. Scans passed later keep their own order.
+        if (answer.kind === 'needreader' && !replaying) {
+            takeUp([{code: code, title: answer.title, more: []}], null);
+        }
         if (answer.herald) {
             heraldSays(answer.herald);
         }
+    };
+
+    // What the desk has in its hand, above the field, and the field asking who takes it.
+    var paintHand = function() {
+        form.classList.toggle('ayv-scan-hand', hand.length > 0);
+        if (label) {
+            label.textContent = hand.length ? str.deskforwhom : prompt;
+        }
+        if (handbox) {
+            handbox.remove();
+            handbox = null;
+        }
+        if (!hand.length) {
+            return;
+        }
+        handbox = el('div', 'ayv-hand');
+        handbox.setAttribute('role', 'status');
+        var books = el('ul', 'ayv-hand-books');
+        hand.forEach(function(book) {
+            var row = el('li', 'ayv-hand-book');
+            row.appendChild(el('span', 'ayv-hand-title', book.title));
+            var more = book.more.filter(function(part) {
+                return part;
+            }).join(' · ');
+            if (more) {
+                row.appendChild(el('span', 'ayv-hand-more', more));
+            }
+            books.appendChild(row);
+        });
+        handbox.appendChild(books);
+        handbox.appendChild(button(str.deskdismiss, 'ayv-line-quiet', function() {
+            dropHand();
+        }));
+        form.insertBefore(handbox, form.firstChild);
+    };
+    var takeUp = function(books, li) {
+        books.forEach(function(book) {
+            var same = hand.some(function(held) {
+                return book.code ? held.code === book.code : held.recordid === book.recordid;
+            });
+            if (!same) {
+                book.line = li;
+                hand.push(book);
+            }
+        });
+        // The list stays out of the way; left, it comes back.
+        if (li) {
+            li.hidden = true;
+        }
+        paintHand();
+        input.focus();
+        // On a phone the field may sit at the top with the book above it, out of sight.
+        form.scrollIntoView({block: 'nearest'});
+    };
+    var dropHand = function() {
+        hand.forEach(function(book) {
+            if (book.line) {
+                book.line.hidden = false;
+            }
+        });
+        hand = [];
+        paintHand();
+    };
+    var dropFromHand = function(code) {
+        hand = hand.filter(function(book) {
+            return book.code !== code;
+        });
+        paintHand();
+    };
+    // Their reader is here: each book goes as if it had been read now, and red cards ask as always.
+    var handOver = function(who) {
+        var books = hand;
+        hand = [];
+        paintHand();
+        books.reduce(function(chain, book) {
+            return chain.then(function() {
+                return choose(book.code ? {action: 'scan', code: book.code, readerid: who}
+                    : {action: 'lendrecord', recordid: book.recordid, readerid: who}, book.title);
+            });
+        }, Promise.resolve());
     };
 
     // The herald, in a corner, a word as a book comes home: it never waits for anything and goes by itself.
@@ -575,7 +666,8 @@
     };
     var keep = function(job) {
         loadPending();
-        pending.push({code: job.code, force: job.force, readerid: readerid, at: job.at || Math.floor(Date.now() / 1000)});
+        pending.push({code: job.code, force: job.force, readerid: readerid, forwhom: job.forwhom,
+            at: job.at || Math.floor(Date.now() / 1000)});
         keepPending();
         tone('look');
         line({kind: 'offline', sound: 'look', message: str.deskoffline}, job.code);
@@ -596,7 +688,8 @@
                 return null;
             }
             var job = pending[0];
-            return post({action: 'scan', code: job.code, readerid: reader, force: job.force ? 1 : 0, at: job.at})
+            return post({action: 'scan', code: job.code, readerid: reader, force: job.force ? 1 : 0, forwhom: job.forwhom ? 1 : 0,
+                at: job.at})
                 .then(function(answer) {
                     pending.shift();
                     passed++;
@@ -659,6 +752,7 @@
         }
         busy = true;
         var job = queue.shift();
+        job.forwhom = hand.length > 0;
         // While scans wait for the network, new ones wait behind them, in order.
         if (offline || pending.length) {
             keep(job);
@@ -666,7 +760,7 @@
             next();
             return;
         }
-        post({action: 'scan', code: job.code, readerid: readerid, force: job.force ? 1 : 0})
+        post({action: 'scan', code: job.code, readerid: readerid, force: job.force ? 1 : 0, forwhom: job.forwhom ? 1 : 0})
             .then(function(answer) {
                 add(answer, job.code);
                 return answer;
@@ -718,6 +812,11 @@
     }
 
     document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && hand.length) {
+            dropHand();
+            event.preventDefault();
+            return;
+        }
         if (event.key === 'Escape' && readerid) {
             showReader(null);
             event.preventDefault();
@@ -747,6 +846,11 @@
     // Opened from a reader's record: the desk starts with them.
     if (config.preload) {
         showReader(config.preload);
+    }
+    // Opened from a book's page: the desk starts with it in its hand.
+    if (config.book) {
+        takeUp([{recordid: config.book.recordid, title: config.book.title, more: [config.book.author, config.book.callnumber]}],
+            null);
     }
 
     // The field keeps the focus: after a click anywhere that is not a button or a link, it comes back.

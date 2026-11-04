@@ -134,9 +134,10 @@ final class desk {
      * @param string $code
      * @param int $readerid The reader open at the desk, 0 if none.
      * @param bool $force The librarian said to lend despite a reason that can be overridden.
+     * @param bool $forwhom A book is waiting for its reader: words are a name, not a title.
      * @return array The answer: kind, sound, message and what the screen needs.
      */
-    public function scan(string $code, int $readerid = 0, bool $force = false): array {
+    public function scan(string $code, int $readerid = 0, bool $force = false, bool $forwhom = false): array {
         global $DB;
         $code = trim($code);
         if ($code === '') {
@@ -178,15 +179,16 @@ final class desk {
                 $hold = $item->status === 'held' ? holds::ready_for((int) $item->id) : null;
                 if ($hold) {
                     return $this->answer('needreader', 'look', 'deskheldfor', (object) ['title' => $this->title($item),
-                        'who' => $this->who((int) $hold->readerid)]);
+                        'who' => $this->who((int) $hold->readerid)], ['title' => $this->title($item)]);
                 }
                 if ($guessed) {
                     return $this->answer('needreader', 'look', 'deskguessed', (object) ['title' => $this->title($item),
-                        'who' => $this->who((int) $guessed->readerid)], ['itemid' => (int) $item->id, 'room' => true]);
+                        'who' => $this->who((int) $guessed->readerid)], ['itemid' => (int) $item->id, 'room' => true,
+                        'title' => $this->title($item)]);
                 }
                 // Or it was read here, without going home: one touch counts it.
                 return $this->answer('needreader', 'look', 'deskneedreader', $this->title($item), ['itemid' => (int) $item->id,
-                    'room' => true]);
+                    'room' => true, 'title' => $this->title($item)]);
             }
             return $this->lend($item, $readerid, $force);
         }
@@ -204,15 +206,21 @@ final class desk {
             if ($readerid) {
                 $books = $this->find_books($code, true);
                 if ($books) {
-                    return $this->answer('choose', 'look', 'deskchoosebooks', $code, ['books' => $books,
-                        'readerid' => $readerid, 'more' => $this->more]);
+                    return $this->answer('choose', 'look', 'deskchoosebooks', (object) ['text' => $code,
+                        'who' => $this->reader($readerid)['name']], ['books' => $books, 'readerid' => $readerid,
+                        'more' => $this->more]);
                 }
             }
             $found = $this->find_readers($code);
             if (!$readerid && count($found) === 1) {
                 return $this->answer('reader', 'ok', null, null, ['reader' => $this->reader_panel($found[0]['id'])]);
             }
-            // Without a reader: the loans out of it, to bring one back, and what is on the shelf, to know it is there.
+            // A book is waiting for its reader: only people, or a title would answer the question of who takes it.
+            if ($forwhom) {
+                return $found ? $this->answer('choose', 'look', 'deskchoose', $code, ['readers' => $found])
+                    : $this->answer('unknown', 'no', 'deskunknownreader', $code);
+            }
+            // Without a reader: the loans out of it, to bring one back, and what is on the shelf, to lend it.
             $out = $readerid ? [] : $this->find_books($code, false);
             $shelf = $readerid ? [] : $this->find_books($code, true);
             $more = $this->more;
@@ -368,6 +376,32 @@ final class desk {
             ];
         }
         return $out;
+    }
+
+    /**
+     * A record as the search of the desk shows it, if a copy is on the shelf of this library.
+     *
+     * @param int $recordid
+     * @return array|null recordid, title, author, free and callnumber.
+     */
+    public function shelf_book(int $recordid): ?array {
+        global $DB;
+        $rows = $DB->get_records_sql(
+            "SELECT i.id, i.callnumber1, i.callnumber2, r.title
+               FROM {" . self::T . "item} i
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+              WHERE r.id = :recordid AND r.entityid = :entityid AND i.libraryid = :libraryid AND i.status = 'available'
+                AND NOT EXISTS (SELECT 1 FROM {" . self::T . "loan} l WHERE l.itemid = i.id AND l.timereturned IS NULL)
+           ORDER BY i.barcode",
+            ['recordid' => $recordid, 'entityid' => $this->library->entityid, 'libraryid' => $this->library->id]
+        );
+        if (!$rows) {
+            return null;
+        }
+        $first = reset($rows);
+        return ['recordid' => $recordid, 'title' => format_string($first->title, true, ['escape' => false]),
+            'author' => $this->author($recordid), 'free' => count($rows),
+            'callnumber' => trim($first->callnumber1 . ' ' . $first->callnumber2)];
     }
 
     /**

@@ -56,7 +56,12 @@ switch ($action) {
             $answer = ['kind' => 'note', 'sound' => 'look', 'message' => $said];
             break;
         }
-        $answer = $desk->scan($code, optional_param('readerid', 0, PARAM_INT), optional_param('force', false, PARAM_BOOL));
+        $answer = $desk->scan(
+            $code,
+            optional_param('readerid', 0, PARAM_INT),
+            optional_param('force', false, PARAM_BOOL),
+            optional_param('forwhom', false, PARAM_BOOL)
+        );
         break;
     case 'lendrecord':
         // A book without a label, chosen by its title.

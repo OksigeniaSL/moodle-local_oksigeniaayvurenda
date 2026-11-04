@@ -648,6 +648,29 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-line-choice { background: var(--surface); border-color: var(--green2); }
 
+/* The book at the desk before its reader, above the field that asks who takes it. */
+.ayv .ayv-hand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    padding: .6rem .9rem;
+    background: var(--paper2);
+    border-left: 8px solid var(--sun);
+    border-radius: 12px;
+}
+
+.ayv .ayv-hand-books { flex: 1 1 14rem; min-width: 0; display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+
+.ayv .ayv-hand-book { display: grid; gap: .05rem; }
+
+.ayv .ayv-hand-title { font-family: var(--title); font-weight: 600; font-size: 1.2rem; overflow-wrap: anywhere; }
+
+.ayv .ayv-hand-more { font-size: .9rem; color: var(--muted); }
+
+.ayv .ayv-record-lend { margin: 0 0 1rem; }
+
 /* A book chosen by its title: the title, and below what tells it apart. */
 .ayv .ayv-line-book {
     display: inline-flex;
@@ -660,9 +683,6 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-line-book-title { font-weight: 700; }
 
 .ayv .ayv-line-book-more { font-size: .85rem; font-weight: 400; color: var(--muted); }
-
-/* On the shelf, without a reader open: to know it is there, not to touch. */
-.ayv .ayv-line-book-info { padding: .3rem 1rem; border: 1px dashed var(--line); border-radius: 999px; }
 
 .ayv .ayv-line-shelf-hint { flex-basis: 100%; margin: .25rem 0 0; }
 

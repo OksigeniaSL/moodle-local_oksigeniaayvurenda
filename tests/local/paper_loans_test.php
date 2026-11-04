@@ -190,6 +190,40 @@ final class paper_loans_test extends \advanced_testcase {
     }
 
     /**
+     * A book chosen before its reader: while it waits, words are a name and never a title, and the record says what the
+     * desk shows of it; with nothing on the shelf, it says nothing.
+     */
+    public function test_desk_book_first(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $desk = new desk($w->library, 0);
+
+        // Without a book waiting, the title brings up what is on the shelf; with one, it asks only for people.
+        $shelf = $desk->scan('sirenita');
+        $this->assertSame('choose', $shelf['kind']);
+        $this->assertSame((int) $w->sirenita->id, $shelf['shelf'][0]['recordid']);
+        $this->assertSame('unknown', $desk->scan('sirenita', 0, false, true)['kind']);
+
+        // One reader of that name opens; several ask which, and bring no books with them.
+        $this->assertSame('reader', $desk->scan('ana montes', 0, false, true)['kind']);
+        $several = $desk->scan('montes prado', 0, false, true);
+        $this->assertSame('choose', $several['kind']);
+        $this->assertCount(2, $several['readers']);
+        $this->assertArrayNotHasKey('shelf', $several);
+
+        // The reader who opens takes it.
+        $book = $desk->shelf_book((int) $w->sirenita->id);
+        $this->assertSame(['La sirenita', 1], [$book['title'], $book['free']]);
+        $this->assertSame('lent', $desk->lend_record($book['recordid'], (int) $w->ana->id)['kind']);
+        $this->assertNull($desk->shelf_book((int) $w->sirenita->id));
+
+        // Read with no reader open, the answer names the book the desk keeps in its hand.
+        $this->assertSame('El faro dormido', $desk->scan('100000L')['title']);
+        $DB->delete_records(self::T . 'loan');
+    }
+
+    /**
      * At the desk, a book without a label by its title: with the reader open, those on the shelf to lend; without one,
      * those out to bring back; and in the reader's list, a touch brings one back.
      */
@@ -222,11 +256,11 @@ final class paper_loans_test extends \advanced_testcase {
         $this->assertNotNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $one['loanid']]));
         $this->assertSame('stop', $desk->give_back_loan((int) $one['loanid'])['kind']);
 
-        // Without a reader, what is on the shelf too, to know it is there; nothing, says so.
+        // Without a reader, what is on the shelf too, to lend it; nothing, says so.
         $shelf = $desk->scan('piedra filosofal');
         $this->assertSame('choose', $shelf['kind']);
         $this->assertSame([(int) $w->potter1->id], array_column($shelf['shelf'], 'recordid'));
-        $this->assertStringContainsString('first open the reader', $shelf['message']);
+        $this->assertStringContainsString('tap the one going out', $shelf['message']);
         // One out and one on the shelf: both.
         $both = $desk->scan('faro dormido');
         $this->assertCount(1, $both['out']);
