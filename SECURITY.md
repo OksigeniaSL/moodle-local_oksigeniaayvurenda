@@ -23,8 +23,8 @@ steps, and your assessment of impact.
 
 ## Supported versions
 
-Security patches land on the latest released line. Older versions are not back-patched. While the plugin is in
-pre-alpha, only the latest release is supported.
+Security patches land on the latest release. Older versions are not back-patched: update to the latest one to get a
+fix.
 
 ## Scope
 

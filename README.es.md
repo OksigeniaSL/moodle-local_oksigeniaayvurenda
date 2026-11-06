@@ -2,7 +2,7 @@
 
 [![Licencia: GPLv3](https://img.shields.io/badge/licencia-GPLv3+-blue.svg)](LICENSE)
 ![Moodle](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-orange)
-![Estado](https://img.shields.io/badge/estado-prealfa-red)
+![Estado](https://img.shields.io/badge/estado-beta-yellow)
 [![Patrocinio](https://img.shields.io/badge/patrocinio-Oksigenia-00d4ff)](https://oksigenia.com/en/open-source#sponsor)
 
 **Ayvurenda** es la gestión de bibliotecas en línea, para cualquier biblioteca: el mostrador, el catálogo, el carné de cada
@@ -14,8 +14,8 @@ Desarrollado por [Oksigenia](https://oksigenia.com).
 
 ## Estado
 
-**Prealfa.** Es la base del plugin, con sus comprobaciones: la biblioteca se construye encima en versiones pequeñas,
-cada una probada antes de publicarse. No es para sitios en producción.
+**Beta.** En uso a diario en una biblioteca, y la base del servicio alojado de [ayvurenda.com](https://ayvurenda.com).
+Crece en versiones pequeñas, cada una probada antes de publicarse; lo que trae cada una está en el [CHANGELOG](CHANGELOG.md).
 
 ## Instalación
 
