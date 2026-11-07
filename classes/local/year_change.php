@@ -111,10 +111,13 @@ final class year_change {
      * A school year in numbers: loans, readers who borrowed and readers in groups, in all and by group.
      *
      * @param \stdClass $year
+     * @param int|null $libraryid Only one library's loans; the whole centre's without it.
      * @return array loans, borrowers, members, groups (group, members, borrowers, loans).
      */
-    public static function summary(\stdClass $year): array {
+    public static function summary(\stdClass $year, ?int $libraryid = null): array {
         global $DB;
+        // One library's (a classroom's, a department's), or the whole centre's.
+        $here = $libraryid ? ' AND libraryid = ' . (int) $libraryid : '';
         $members = $DB->get_records_sql_menu(
             'SELECT groupname, COUNT(1) FROM {' . self::T . 'member} WHERE yearid = :yearid AND groupname IS NOT NULL
            GROUP BY groupname',
@@ -122,7 +125,7 @@ final class year_change {
         );
         $loans = $DB->get_records_sql(
             'SELECT groupname, COUNT(1) AS loans, COUNT(DISTINCT readerid) AS borrowers
-               FROM {' . self::T . 'loan} WHERE yearid = :yearid AND ' . bank::reading('libraryid') . ' GROUP BY groupname',
+               FROM {' . self::T . 'loan} WHERE yearid = :yearid AND ' . bank::reading('libraryid') . $here . ' GROUP BY groupname',
             ['yearid' => $year->id]
         );
         $groups = [];
@@ -138,10 +141,15 @@ final class year_change {
             }
         }
         $total['borrowers'] = (int) $DB->count_records_sql(
-            'SELECT COUNT(DISTINCT readerid) FROM {' . self::T . 'loan} WHERE yearid = :yearid AND ' . bank::reading('libraryid'),
+            'SELECT COUNT(DISTINCT readerid) FROM {' . self::T . 'loan} WHERE yearid = :yearid AND ' . bank::reading('libraryid')
+                . $here,
             ['yearid' => $year->id]
         );
         ksort($groups, SORT_NATURAL);
+        if ($libraryid) {
+            // Of one library, the groups that read there.
+            $groups = array_filter($groups, fn($g) => $g['loans'] > 0);
+        }
         return $total + ['name' => $year->name, 'members' => (int) array_sum($members), 'groups' => array_values($groups)];
     }
 

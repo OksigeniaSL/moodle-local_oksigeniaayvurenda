@@ -72,7 +72,8 @@ final class menu {
             'menureview' => [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
                 ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d]],
             'menureports' => [['memoir.php', 'menumemoir', $d], ['activity.php', 'menuactivity', $m]],
-            'menusettings' => [['copies.php', 'menucopies', $m], ['rules.php', 'menurules', $m],
+            'menusettings' => [['centre', 'librariesentity', $m], ['copies.php', 'menucopies', $m],
+                ['rules.php', 'menurules', $m],
                 ['year.php', 'menuyear', $m], ['libraries.php', 'navlibraries', $m], ['corners.php', 'menucorners', $m],
                 ['characters.php', 'menucharacters', $m], ['lti.php', 'menulti', $m]],
             'menuhelp' => [['howto.php', 'menuhowto', $d]],
@@ -130,6 +131,11 @@ final class menu {
             // Whoever keeps a library of this centre has its desk.
             foreach (keepers::libraries($userid) as $kept) {
                 if ((int) $kept->entityid === (int) $library->entityid) {
+                    // And what it has out, and who has it.
+                    array_unshift($doors, ['key' => 'reports', 'url' => (new \moodle_url(
+                        '/local/oksigeniaayvurenda/late.php',
+                        ['library' => $kept->slug, 'all' => 1]
+                    ))->out(false), 'label' => $str('latetaball'), 'current' => $here === 'late.php']);
                     array_unshift($doors, ['key' => 'desk', 'url' => (new \moodle_url(
                         '/local/oksigeniaayvurenda/desk.php',
                         ['library' => $kept->slug]
@@ -162,7 +168,9 @@ final class menu {
                 if (access::can($capability, $library, $userid)) {
                     $count = $waiting[$page] ?? 0;
                     $total += $count;
-                    $shown[] = ['url' => $url($page), 'label' => skins::say($entityid, $label), 'current' => $here === $page,
+                    // The centre's own settings live in a window of «Libraries»: the link opens it.
+                    $link = $page === 'centre' ? $url('libraries.php') . '#ayv-entity-' . $entityid : $url($page);
+                    $shown[] = ['url' => $link, 'label' => skins::say($entityid, $label), 'current' => $here === $page,
                         'count' => $count];
                     $inmore = $inmore || ($here === $page && !self::in_doors($here));
                 }

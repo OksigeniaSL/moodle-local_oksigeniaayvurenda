@@ -128,6 +128,20 @@ final class csvlist {
             if (!$readerid) {
                 $readerid = (int) ($sources[$key] ?? 0);
             }
+            // A name kept the other way the time before (alone then, twice now, or the reverse): the same reader if its
+            // group this year is this row's, or if the name comes once.
+            if (!$readerid && str_starts_with($key, 'name:')) {
+                $base = explode('|', $key)[0];
+                $group = text::normalise($person['group'] ?? '');
+                foreach ([$base, $base . '|' . $group] as $other) {
+                    $was = (int) ($sources[$other] ?? 0);
+                    $where = isset($members[$was]) ? text::normalise((string) $members[$was]->groupname) : '';
+                    if ($was && ($where === $group || ($names[$base] ?? 0) <= 1)) {
+                        $readerid = $was;
+                        break;
+                    }
+                }
+            }
             $lookup = $person;
             if (($emails[\core_text::strtolower($person['email'] ?? '')] ?? 0) > 1) {
                 unset($lookup['email']);

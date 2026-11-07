@@ -152,7 +152,16 @@ if ($group === null) {
             "entityid = :entityid AND userid IS NULL AND status = 'active'",
             ['entityid' => $library->entityid]
         );
-        if ($unlinked) {
+        // Only where there are accounts to link them with: not on a shared site, nor where every account already has its
+        // reader (a public library, a company or a school whose pupils have none would see it for ever); not on a search.
+        $accounts = $unlinked && $query === '' && !\local_oksigeniaayvurenda\local\access::apart() ? $DB->count_records_sql(
+            "SELECT COUNT(1) FROM {user} u
+              WHERE u.deleted = 0 AND u.suspended = 0 AND u.id > 2
+                    AND NOT EXISTS (SELECT 1 FROM {local_oksigeniaayvurenda_reader} r
+                                     WHERE r.userid = u.id AND r.entityid = :entityid)",
+            ['entityid' => $library->entityid]
+        ) : 0;
+        if ($unlinked && $accounts) {
             $data['match'] = ['url' => $page('match.php'), 'go' => $str('readersnoaccountgo'),
                 'line' => $unlinked === 1 ? $str('readersnoaccountone') : $str('readersnoaccount', $number($unlinked)),
                 'hint' => $str('readersnoaccounthint')];

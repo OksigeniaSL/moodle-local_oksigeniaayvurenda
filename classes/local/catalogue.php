@@ -261,15 +261,19 @@ final class catalogue {
         // How many records each corner has: counted over every class of the catalogue (thousands of rows), so kept a
         // while for the centre, apart for a bank (where textbooks count) and for reading.
         $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
-        $key = $library->entityid . '_' . (bank::is($library) ? 'bank' : 'reading');
+        // A library under another (a classroom, a department) counts the books it has; the central one, the centre's.
+        $mine = !empty($library->parentid) && !bank::is($library);
+        $key = $library->entityid . '_' . (bank::is($library) ? 'bank' : 'reading') . ($mine ? '_' . $library->id : '');
         $counts = $cache->get($key);
         if ($counts === false) {
             $rows = $DB->get_recordset_sql(
                 "SELECT ra.recordid, a.code
                    FROM {" . self::T . "recauth} ra
                    JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
-                  WHERE a.entityid = :entityid AND a.kind = 'class'",
-                ['entityid' => $library->entityid]
+                  WHERE a.entityid = :entityid AND a.kind = 'class'"
+                    . ($mine ? " AND EXISTS (SELECT 1 FROM {" . self::T . "item} i
+                                            WHERE i.recordid = ra.recordid AND i.libraryid = :libraryid)" : ''),
+                ['entityid' => $library->entityid, 'libraryid' => $library->id]
             );
             $records = [];
             $only = bank::is($library) ? [] : array_flip(bank::only((int) $library->entityid));
@@ -580,7 +584,12 @@ final class catalogue {
      */
     public static function purge(int $entityid): void {
         \cache::make('local_oksigeniaayvurenda', 'vocabulary')->delete($entityid);
-        \cache::make('local_oksigeniaayvurenda', 'corners')->delete_many([$entityid . '_reading', $entityid . '_bank']);
+        global $DB;
+        $keys = [$entityid . '_reading', $entityid . '_bank'];
+        foreach ($DB->get_fieldset_select(self::T . 'library', 'id', 'entityid = ? AND parentid IS NOT NULL', [$entityid]) as $id) {
+            $keys[] = $entityid . '_reading_' . $id;
+        }
+        \cache::make('local_oksigeniaayvurenda', 'corners')->delete_many($keys);
     }
 
     /**

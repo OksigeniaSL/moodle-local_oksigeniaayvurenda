@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.180.0
+
+- Whoever looks after one library (a classroom's, a department's) sees what it has out and who has it («Lent», in its
+  header and from the desk's figures), and a page that is not for them says what they can do instead of sending them to
+  ask for a permission.
+- The year report and the corners of a classroom or department library count its own books and loans, not the whole
+  centre's.
+- Choosing who looks after a library shows each person's group.
+- The memory offers again only a search that found something.
+- «N readers without an account» shows only where there are accounts to link them with, and not over a search.
+- «Centre settings» is the first entry of «More» › «Settings», and opens its window.
+- Words that talked like a platform: «Other platforms», «Site groups (cohorts)», «Site courses», «Download the sheet».
+- A name alone in a list the first time and twice the next keeps the reader of before, by their group.
+
 ## 0.179.0
 
 - Readers who came through a platform (LTI) have their origin noted, and the night of the cohorts no longer takes them
@@ -9,6 +23,8 @@
 - «Tutors»: saving does not take away a tutor who is no longer a reader (they show as such until another is chosen),
   and the groups listed are those of readers who are here.
 - The reader's card at the desk: «Renew», «Return» and «Lost» of one size, together at the end of each row.
+- A list of readers takes «Curso» (and course, grade, form, homeroom…) as the group, and a group named for teachers,
+  staff or families says the kind of its readers.
 
 ## 0.178.0
 

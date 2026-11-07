@@ -64,10 +64,11 @@ $data = [
     'haskeepers' => (bool) keepers::of((int) $library->id),
     'none' => $str('keepersnone'),
     'query' => $query,
-    'found' => array_map(fn($c) => $c + ['typelabel' => get_string_manager()->string_exists(
+    'found' => array_map(fn($c) => $c + ['typelabel' => implode(' · ', array_filter([get_string_manager()->string_exists(
         'keepertype' . $c['type'],
         'local_oksigeniaayvurenda'
-    ) ? $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'keepertype' . $c['type'])) : ''], $found),
+    ) ? $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'keepertype' . $c['type'])) : '',
+        $c['group']]))], $found),
     'hasfound' => (bool) $found,
     'nothing' => $query !== '' && !$found ? $str('keepersnothing') : '',
 ];

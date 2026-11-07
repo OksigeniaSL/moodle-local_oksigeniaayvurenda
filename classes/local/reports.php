@@ -180,7 +180,8 @@ final class reports {
      */
     public static function year(\stdClass $library, \stdClass $year): array {
         global $DB;
-        $summary = year_change::summary($year);
+        // A library under another (a classroom, a department) counts its own; the central one, the whole centre.
+        $summary = year_change::summary($year, !empty($library->parentid) ? (int) $library->id : null);
         $acquired = $DB->count_records_select(
             self::T . 'item',
             'libraryid = :libraryid AND timecreated >= :a AND timecreated < :b',

@@ -34,7 +34,11 @@ $all = optional_param('all', false, PARAM_BOOL);
 require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
-shell::require('local/oksigeniaayvurenda:desk', $library);
+// Whoever keeps only this library (a classroom's, a department's) sees what it has out, and who has it.
+$own = $library && access::keeps($library) && !access::can('local/oksigeniaayvurenda:desk', $library);
+if (!$own) {
+    shell::require('local/oksigeniaayvurenda:desk', $library);
+}
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $ref, 'all' => (int) $all] +
     (optional_param('help', 0, PARAM_BOOL) ? ['help' => 1] : [])));
@@ -67,7 +71,7 @@ if (data_submitted() && confirm_sesskey()) {
             : $str('latenotutor', $groupname);
     } else if ($do === 'lost') {
         // A book its reader says is lost, from the list: as at the desk (it may leave something to pay).
-        $notice = (new \local_oksigeniaayvurenda\local\desk($library, (int) $USER->id, $now))
+        $notice = (new \local_oksigeniaayvurenda\local\desk($library, (int) $USER->id, $now, $own))
             ->lose(required_param('loan', PARAM_INT))['message'];
     } else if ($do === 'remind') {
         // Remind a reader now.

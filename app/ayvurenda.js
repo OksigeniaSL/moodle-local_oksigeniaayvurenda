@@ -245,6 +245,13 @@
             sheet.showModal();
         });
     });
+    // A sheet named in the address (from «More»: the centre's settings) opens with the page.
+    if (window.location.hash.length > 1) {
+        var named = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+        if (named && named.tagName === 'DIALOG' && named.showModal && !named.open) {
+            named.showModal();
+        }
+    }
     // A button that closes its sheet, where the sheet sits inside a form and cannot have a form of its own.
     document.querySelectorAll('[data-ayv-close]').forEach(function(button) {
         button.addEventListener('click', function() {

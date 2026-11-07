@@ -135,8 +135,22 @@ final class keepers {
             0,
             $limit
         );
+        // Twelve with the same first name are told apart by their group of this year.
+        $groups = [];
+        if ($rows) {
+            $year = years::around((int) $library->entityid, time());
+            [$in, $inparams] = $DB->get_in_or_equal(array_keys($rows), SQL_PARAMS_NAMED, 'u');
+            $groups = $DB->get_records_sql_menu(
+                "SELECT r.userid, MAX(m.groupname)
+                   FROM {" . self::T . "reader} r
+                   JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid
+                  WHERE r.entityid = :entityid AND r.userid $in
+               GROUP BY r.userid",
+                ['yearid' => $year->id, 'entityid' => $library->entityid] + $inparams
+            );
+        }
         return array_values(array_map(fn($row) => ['userid' => (int) $row->id, 'name' => trim($row->firstname . ' ' .
-            $row->lastname), 'type' => (string) $row->readertype], $rows));
+            $row->lastname), 'type' => (string) $row->readertype, 'group' => (string) ($groups[$row->id] ?? '')], $rows));
     }
 
     /**

@@ -131,4 +131,22 @@ final class csvlist_test extends \advanced_testcase {
         $this->assertSame('teacher', $kind('Fermín'));
         $this->assertSame('staff', $kind('Rosa'));
     }
+
+    /**
+     * A name alone the first time and twice the next (another reader of the same name came): the one of before is kept,
+     * by their group, and only the new one is made.
+     */
+    public function test_a_name_that_comes_twice(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $entityid = (int) $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library()->entityid;
+        csvlist::load($entityid, [['firstname' => 'Elena', 'lastname' => 'Zeta', 'group' => '2º A']]);
+        $first = (int) $DB->get_field('local_oksigeniaayvurenda_reader', 'id', ['entityid' => $entityid, 'firstname' => 'Elena']);
+        csvlist::load($entityid, [['firstname' => 'Elena', 'lastname' => 'Zeta', 'group' => '2º A'],
+            ['firstname' => 'Elena', 'lastname' => 'Zeta', 'group' => '3º B']]);
+        $elenas = $DB->get_records('local_oksigeniaayvurenda_reader', ['entityid' => $entityid, 'firstname' => 'Elena',
+            'status' => 'active']);
+        $this->assertCount(2, $elenas);
+        $this->assertArrayHasKey($first, $elenas);
+    }
 }

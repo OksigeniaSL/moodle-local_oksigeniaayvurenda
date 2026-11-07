@@ -72,4 +72,25 @@ final class reports_test extends \advanced_testcase {
         $this->assertSame(7, $summary['acquired']);
         $this->assertCount(4, $summary['top']);
     }
+
+    /**
+     * A classroom library\'s year counts what was lent there, not the whole centre\'s.
+     */
+    public function test_year_of_a_classroom(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $central = $gen->create_library();
+        $entityid = (int) $central->entityid;
+        $classroom = $gen->create_library(['entityid' => $entityid, 'kind' => 'classroom', 'parentid' => $central->id]);
+        $year = years::around($entityid, time());
+        $reader = $gen->create_reader(['entityid' => $entityid]);
+        $gen->create_member(['readerid' => $reader->id, 'yearid' => $year->id, 'groupname' => '1º A']);
+        foreach ([$central, $central, $classroom] as $library) {
+            $gen->create_loan(['libraryid' => $library->id, 'itemid' => $gen->create_item(['libraryid' => $library->id])->id,
+                'readerid' => $reader->id, 'yearid' => $year->id, 'groupname' => '1º A']);
+        }
+        $this->assertSame(3, reports::year($central, $year)['loans']);
+        $this->assertSame(1, reports::year($classroom, $year)['loans']);
+    }
 }

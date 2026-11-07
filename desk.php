@@ -84,7 +84,7 @@ foreach (
     if ($today[$key] > 0) {
         $inner = '<span class="ayv-today-number">' . $today[$key] . '</span><span class="ayv-today-label">' .
             s($str($label)) . '</span>';
-        if ($own) {
+        if ($own && !in_array($key, ['today', 'late', 'out'], true)) {
             $cards .= '<li class="ayv-today-card ayv-today-' . $key . '">' . $inner . '</li>';
         } else {
             $page = ['held' => 'holds.php', 'reviews' => 'reviews.php', 'wishes' => 'wishes.php',

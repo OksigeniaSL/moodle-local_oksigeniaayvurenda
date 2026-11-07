@@ -56,6 +56,10 @@ final class shell {
             );
         }
         $name = get_string(str_replace('local/', '', $capability), 'local_oksigeniaayvurenda');
+        // Whoever keeps this library hears what they can do here, not to ask someone for a permission.
+        if ($library && access::keeps($library)) {
+            self::refuse(get_string('keeperonlyhint', 'local_oksigeniaayvurenda'), $library);
+        }
         // A library of a centre that is not theirs is not even named.
         $theirs = $library && access::can('local/oksigeniaayvurenda:view', $library) ? $library : null;
         self::refuse(get_string('staffonlyhint', 'local_oksigeniaayvurenda', $name), $theirs);
