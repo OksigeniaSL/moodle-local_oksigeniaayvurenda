@@ -177,7 +177,12 @@ final class plans {
         }
         $before = self::used($entityid);
         $transaction = $DB->start_delegated_transaction();
-        $result = $work();
+        try {
+            $result = $work();
+        } catch (\Throwable $e) {
+            // Whatever broke, nothing of it stays and the transaction does not stay open for the rest of the page.
+            $transaction->rollback($e);
+        }
         $after = self::used($entityid);
         foreach (['copies', 'readers'] as $what) {
             if ($plan[$what] && $after[$what] > $plan[$what] && $after[$what] > $before[$what]) {

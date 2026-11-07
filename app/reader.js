@@ -135,11 +135,23 @@
         }
     };
     var colours = window.getComputedStyle(area);
+    // A book that cannot be opened says so, instead of a blank page.
+    var fail = function() {
+        area.textContent = '';
+        var said = document.createElement('p');
+        said.className = 'ayv-empty';
+        said.textContent = area.getAttribute('data-failed') || '';
+        area.appendChild(said);
+    };
     fetch(area.getAttribute('data-url'), {credentials: 'same-origin'}).then(function(response) {
+        if (!response.ok) {
+            throw new Error(response.status);
+        }
         return response.arrayBuffer();
     }).then(function(data) {
         area.textContent = '';
         var book = window.ePub(data);
+        book.opened.catch(fail);
         var rendition = book.renderTo(area, {width: '100%', height: '100%',
             spread: area.getAttribute('data-spread') === 'auto' ? 'auto' : 'none', minSpreadWidth: 760});
         var go = function(place) {
@@ -299,7 +311,5 @@
         });
         showMarks(go);
         return book;
-    }).catch(function() {
-        area.textContent = '';
-    });
+    }).catch(fail);
 })();

@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.183.0
+
+- With 0.182.0, which was never installed (a test that picked one of two top libraries at random failed in the CI).
+- Corners for libraries that sort by letters (N, P, C…), on their own after the figures, coloured in turn, in the
+  catalogue, the search, the shelves, the hidden-book game and the memory; «J 821» is in the corner of 8.
+- A spreadsheet: «Fecha de alta» is when the copy came, no longer the year; a column with the kind of document (book,
+  DVD, magazine…); two editions without an ISBN are two books; Excel's «Unicode text» (UTF-16) is read.
+- One MARCXML record on its own, without a namespace, is recognised.
+- Weeding counts a copy's loans wherever it was lent (a box in a classroom too).
+- A call number's title letters keep a word said twice.
+- An ONIX edition is written in the language of the book, or as the publisher says it.
+- The search simplifies ß, æ, œ, ø, ł and their company («strasse» finds «Straße»); the stored search text is rewritten.
+- The app's home picks the centre's reading library every time, never the bank of textbooks.
+- What a child writes: «dragones» finds «dragón», «un libro de dragones» finds the dragons; with close words, the memory
+  no longer says she is sure there is nothing.
+- A spreadsheet ISBN typed wrong goes to the record's notes and the preview says it.
+- Labels open on the last day copies came in when none came today.
+- Two people adding books at once no longer take the same code (a lock per centre, also for new cards and lists).
+- A corner shows all its pages, not only the first.
+- A field longer than its column (an edition statement, a physical description) is cut instead of stopping an import.
+- «Came this year» in the course's memoir and in «The year in figures» counts when copies came, not when a catalogue
+  was imported; an import that does not say when leaves it unknown.
+- A failure inside a plan's check no longer leaves its transaction open.
+- A centre's own character is drawn in the public visit without an account.
+- The stocktake keeps what was read when the session runs out or the server says no, and says why.
+- Adding: one save at a time (a double Intro or click no longer makes two records), and a lookup or search that fails says
+  so instead of «Looking up…» for ever.
+- An EPUB that cannot be opened says so.
+- The daily copy and OAI-PMH write the class number in 080 and 082, not its name.
+- Bringing a MARC or spreadsheet catalogue again takes the corrections made in its program, on records not changed here
+  (as with Abies); a record with the same first author is the same book even if its title was corrected.
+- A MARC or MARCXML file is read a record at a time from the disk: a big catalogue no longer sits whole in memory.
+
 ## 0.182.0
 
 - Bringing a catalogue in:

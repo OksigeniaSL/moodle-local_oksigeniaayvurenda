@@ -117,4 +117,46 @@ final class catalogue_csv_test extends \basic_testcase {
         $this->assertSame('LT1', $records[0]['items'][0]['barcode']);
         $this->assertSame(['N', 'LAU', ''], $records[0]['items'][0]['callnumber']);
     }
+
+    /**
+     * A date that is when the copy came is not the year, the kind of document is said, two editions without an ISBN are two
+     * books, and Excel's «Unicode text» (UTF-16) is read.
+     */
+    public function test_dates_kinds_and_editions(): void {
+        $columns = ['Título', 'Autor', 'Fecha de alta', 'Año de edición', 'Editor', 'Tipo de documento'];
+        $map = catalogue_csv::guess($columns);
+        ksort($map);
+        $this->assertSame(['title', 'author', 'acquired', 'year', 'publisher', 'doctype'], array_values($map));
+        // A heading of just Fecha is still the year; inside a longer heading it is not.
+        $this->assertSame([0 => 'title', 1 => 'year'], catalogue_csv::guess(['Title', 'Date']));
+        $this->assertNotContains('year', catalogue_csv::guess(['Título', 'Fecha de baja']));
+        $rows = [
+            ['Bloque H', 'Ruiz Mar, Ana', '01/03/2024', '1998', 'Brújula', 'Libro'],
+            ['Bloque H', 'Ruiz Mar, Ana', '2024-03-02', '2015', 'Brújula', 'Libro'],
+            ['Bloque H', 'Ruiz Mar, Ana', '31/02/2024', '2015', 'Brújula', 'Libro'],
+            ['Mares del sur', 'Lago, Iker', '', '', '', 'DVD'],
+            ['Revista Zeta', '', '', '', '', 'Revista'],
+        ];
+        $records = catalogue_csv::records($rows, $map);
+        $this->assertCount(4, $records);
+        $this->assertSame(['1998', '2015'], [$records[0]['description']['record']['pubyear'],
+            $records[1]['description']['record']['pubyear']]);
+        $this->assertSame('bloque h ruiz mar ana', $records[0]['oldkey']);
+        $this->assertSame(['2024-03-02', ''], array_column($records[1]['items'], 'acquired'));
+        $this->assertSame('2024-03-01', $records[0]['items'][0]['acquired']);
+        $this->assertSame(['book', 'book', 'video', 'periodical'], array_map(
+            fn($r) => $r['description']['record']['doctype'],
+            $records
+        ));
+        // An ISBN typed wrong goes to the notes and is said.
+        $bad = catalogue_csv::records([['Zeta mal tecleado', '9788400000016']], catalogue_csv::guess(['Título', 'ISBN']));
+        $this->assertNull($bad[0]['description']['record']['isbn']);
+        $this->assertSame('9788400000016', $bad[0]['badisbn']);
+        $this->assertSame('ISBN 9788400000016', $bad[0]['description']['record']['notes']);
+        $this->assertSame(['9788400000016'], \local_oksigeniaayvurenda\local\import\preview::of($bad)['badisbn']);
+        $utf16 = "\xFF\xFE" . mb_convert_encoding("Título;Autor\nÑandú;Pérez", 'UTF-16LE', 'UTF-8');
+        $list = \local_oksigeniaayvurenda\core\readers\csv_list::read($utf16);
+        $this->assertSame(['Título', 'Autor'], $list['columns']);
+        $this->assertSame([['Ñandú', 'Pérez']], $list['rows']);
+    }
 }

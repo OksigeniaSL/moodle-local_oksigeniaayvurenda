@@ -161,4 +161,34 @@ final class marc_test extends \basic_testcase {
         $other->data('245', '0', '0', [['b', 'cuentos del valle']]);
         $this->assertSame('cuentos del valle', describer::describe($other)['record']['title']);
     }
+
+    /**
+     * A file read a record at a time gives what reading it whole gives, across the pieces it is read in.
+     */
+    public function test_stream(): void {
+        $records = [];
+        for ($i = 0; $i < 3000; $i++) {
+            $record = new record();
+            $record->control('001', 'z' . $i);
+            $record->data('245', '0', '0', [['a', 'Libro número ' . $i . ' ' . str_repeat('ñandú ', 60)]]);
+            $records[] = iso2709::write($record);
+        }
+        $path = make_request_directory() . '/grande.mrc';
+        file_put_contents($path, implode('', $records));
+        $this->assertGreaterThan(1024 * 1024, filesize($path));
+        $whole = iso2709::read((string) file_get_contents($path), 'utf8');
+        $streamed = iterator_to_array(iso2709::stream($path, 'utf8'), false);
+        $this->assertCount(3000, $streamed);
+        $this->assertSame(
+            array_map(fn($r) => $r->control_value('001'), $whole),
+            array_map(fn($r) => $r->control_value('001'), $streamed)
+        );
+        $this->assertSame($whole[2999]->first(['245'], 'a'), $streamed[2999]->first(['245'], 'a'));
+        // And MARCXML, record by record.
+        $xmlpath = make_request_directory() . '/grande.xml';
+        file_put_contents($xmlpath, marcxml::write(array_slice($whole, 0, 50)));
+        $fromxml = iterator_to_array(marcxml::stream($xmlpath), false);
+        $this->assertCount(50, $fromxml);
+        $this->assertSame('z49', $fromxml[49]->control_value('001'));
+    }
 }

@@ -42,13 +42,16 @@ final class preview {
      * The figures and the first books of some records, as the importers receive them.
      *
      * @param iterable $records Each with description and items.
-     * @return array records, items, places, nocode, books.
+     * @return array records, items, places, nocode, books, badisbn (the ISBNs that are not ones).
      */
     public static function of(iterable $records): array {
-        $look = ['records' => 0, 'items' => 0, 'places' => 0, 'nocode' => 0, 'books' => []];
+        $look = ['records' => 0, 'items' => 0, 'places' => 0, 'nocode' => 0, 'books' => [], 'badisbn' => []];
         $places = [];
         foreach ($records as $record) {
             $look['records']++;
+            if (($record['badisbn'] ?? '') !== '') {
+                $look['badisbn'][] = (string) $record['badisbn'];
+            }
             foreach ($record['items'] ?? [] as $item) {
                 $look['items']++;
                 $look['nocode'] += trim((string) ($item['barcode'] ?? '')) === '' ? 1 : 0;

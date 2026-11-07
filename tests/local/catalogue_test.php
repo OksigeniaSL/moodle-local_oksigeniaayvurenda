@@ -119,7 +119,8 @@ final class catalogue_test extends \advanced_testcase {
         $free = catalogue::search($w->central, 'montes', 0, true);
         $this->assertSame(1, $free['total']);
         $this->assertSame('El faro dormido', $free['cards'][0]['title']);
-        $this->assertSame(0, catalogue::search($w->central, 'faros', 0, true)['total']);
+        // A plural finds the singular too: the free one here is «El faro dormido».
+        $this->assertSame(['El faro dormido'], array_column(catalogue::search($w->central, 'faros', 0, true)['cards'], 'title'));
         $this->assertSame(1, catalogue::search($w->classroom, 'faros', 0, true)['total']);
         $this->assertSame(0, catalogue::corner($w->central, '5', 0, true)['total']);
     }
@@ -236,5 +237,22 @@ final class catalogue_test extends \advanced_testcase {
         $this->assertSame(0, catalogue::search($w->central, 'volcan')['total']);
         $this->setAdminUser();
         $this->assertSame(1, catalogue::search($w->central, 'volcan')['total']);
+    }
+
+    /**
+     * What a child writes: a plural finds the singular, and «un libro de…» finds what follows.
+     */
+    public function test_child_search(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        cataloguer::create_record($entityid, ['record' => ['title' => 'El dragón antiguo']], time());
+        cataloguer::create_record($entityid, ['record' => ['title' => 'La pirata y el pez']], time());
+        $this->assertSame(1, catalogue::search($library, 'dragones')['total']);
+        $this->assertSame(1, catalogue::search($library, 'un libro de dragones')['total']);
+        $this->assertSame(1, catalogue::search($library, 'piratas')['total']);
+        $this->assertSame(1, catalogue::search($library, 'peces')['total']);
+        $this->assertSame(0, catalogue::search($library, 'caballos')['total']);
     }
 }

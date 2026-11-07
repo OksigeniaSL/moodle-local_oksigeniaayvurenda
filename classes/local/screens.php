@@ -177,8 +177,15 @@ final class screens {
             'hassuggestions' => (bool) $suggestions,
             'didyoumean' => self::str('didyoumean'),
             // The memory speaks when it found nothing; otherwise it keeps quiet.
+            // Sure there is nothing only when there is nothing close either.
             'memory' => $corner === '' && $found['total'] === 0 && $query !== ''
-                ? characters::say((int) $library->entityid, 'memory', 'memorynothing', ['query' => $query], 'piensa') : null,
+                ? characters::say(
+                    (int) $library->entityid,
+                    'memory',
+                    $suggestions ? 'memorynear' : 'memorynothing',
+                    ['query' => $query],
+                    'piensa'
+                ) : null,
             'askforit' => self::ask_for_it($library, $query, (int) $found['total']),
             'tryother' => $found['total'] === 0 && !$suggestions && ($corner !== '' || $query === '' ||
                 !characters::of((int) $library->entityid)['memory']['enabled']) ? self::str('tryother') : '',

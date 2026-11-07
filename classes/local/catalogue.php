@@ -127,12 +127,22 @@ final class catalogue {
             $conditions[] = 'r.isbn = :isbn';
             $params['isbn'] = $isbn;
         }
-        foreach ($isbn === null ? $words : [] as $i => $word) {
-            $escaped = $DB->sql_like_escape($word);
-            $conditions[] = '(' . $DB->sql_like('r.searchtext', ':start' . $i) . ' OR ' .
-                $DB->sql_like('r.searchtext', ':inner' . $i) . ')';
-            $params['start' . $i] = $escaped . '%';
-            $params['inner' . $i] = '% ' . $escaped . '%';
+        // What a child writes: «un libro de dragones» is «dragones», and «dragones» finds «dragón».
+        foreach ($isbn === null ? text::meaningful($words) : [] as $i => $word) {
+            $starts = [$word];
+            $stem = text::stem($word);
+            if ($stem !== null) {
+                $starts[] = $stem;
+            }
+            $either = [];
+            foreach ($starts as $j => $start) {
+                $escaped = $DB->sql_like_escape($start);
+                $either[] = $DB->sql_like('r.searchtext', ':start' . $i . '_' . $j);
+                $either[] = $DB->sql_like('r.searchtext', ':inner' . $i . '_' . $j);
+                $params['start' . $i . '_' . $j] = $escaped . '%';
+                $params['inner' . $i . '_' . $j] = '% ' . $escaped . '%';
+            }
+            $conditions[] = '(' . implode(' OR ', $either) . ')';
         }
         // The textbooks only a bank has stay out of the reading catalogue; in the bank itself they are found.
         $only = bank::is($library) ? [] : bank::only((int) $library->entityid);
@@ -153,11 +163,12 @@ final class catalogue {
                               OR EXISTS (SELECT 1 FROM {" . self::T . "digital} ld
                                           WHERE ld.recordid = r.id AND ld.kind <> 'voice'))";
         }
-        if (preg_match('/^\d$/', $corner)) {
+        if (self::is_corner($corner)) {
+            [$incorner, $cornerparams] = self::class_condition('fa.code', $corner, 'fcorner');
             $conditions[] = "r.id IN (SELECT fra.recordid FROM {" . self::T . "recauth} fra
                 JOIN {" . self::T . "authority} fa ON fa.id = fra.authorityid
-               WHERE fa.entityid = :fentityid AND fa.kind = 'class' AND " . $DB->sql_like('fa.code', ':fcorner') . ")";
-            $params += ['fentityid' => $library->entityid, 'fcorner' => $corner . '%'];
+               WHERE fa.entityid = :fentityid AND fa.kind = 'class' AND $incorner)";
+            $params += ['fentityid' => $library->entityid] + $cornerparams;
         }
         if ($subject) {
             $conditions[] = 'r.id IN (SELECT sra.recordid FROM {' . self::T . 'recauth} sra WHERE sra.authorityid = :fsubject)';
@@ -298,7 +309,7 @@ final class catalogue {
         }
         $labels = $DB->get_records_select_menu(
             self::T . 'authority',
-            "entityid = :entityid AND kind = 'class' AND " . $DB->sql_length('code') . ' = 1',
+            "entityid = :entityid AND kind = 'class' AND " . $DB->sql_length('code') . ' <= 3',
             ['entityid' => $library->entityid],
             '',
             'code, label'
@@ -310,7 +321,11 @@ final class catalogue {
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $library->entityid]), true) ?: [];
         $udc = ($entity['classification'] ?? 'udc') === 'udc';
         $corners = [];
+        $letters = 0;
         foreach ($counts as $code => $count) {
+            // Figures in their order and colour; letters after them, coloured in turn.
+            $digit = ctype_digit((string) $code);
+            $place = $digit ? (int) $code : 10 + $letters++;
             $label = isset($labels[$code]) ? self::tidy_label((string) $labels[$code]) : null;
             if (($udc || $label === null) && get_string_manager()->string_exists('udc' . $code, 'local_oksigeniaayvurenda')) {
                 $label = get_string('udc' . $code, 'local_oksigeniaayvurenda');
@@ -319,8 +334,8 @@ final class catalogue {
             $mine = (array) ($own[$code] ?? []);
             $corners[] = ['code' => (string) $code, 'label' => trim((string) ($mine['label'] ?? '')) !== '' ? trim($mine['label'])
                 : $default, 'default' => $default, 'count' => (int) $count, 'hidden' => !empty($mine['hidden']),
-                'order' => (int) ($mine['order'] ?? ((int) $code + 1) * 10),
-                'colour' => self::CORNER_COLOURS[((int) $code) % count(self::CORNER_COLOURS)]];
+                'order' => (int) ($mine['order'] ?? ($place + 1) * 10),
+                'colour' => self::CORNER_COLOURS[$place % count(self::CORNER_COLOURS)]];
         }
         usort($corners, fn($a, $b) => [$a['order'], $a['code']] <=> [$b['order'], $b['code']]);
         return $all ? $corners : array_values(array_filter($corners, fn($corner) => !$corner['hidden']));
@@ -359,12 +374,13 @@ final class catalogue {
      */
     public static function corner(\stdClass $library, string $code, int $page = 0, bool $onlyfree = false): array {
         global $DB;
+        [$incorner, $cornerparams] = self::class_condition('a.code', $code, 'code');
         $sql = "FROM {" . self::T . "record} r
                WHERE r.id IN (SELECT ra.recordid
                                 FROM {" . self::T . "recauth} ra
                                 JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
-                               WHERE a.entityid = :entityid AND a.kind = 'class' AND " . $DB->sql_like('a.code', ':code') . ")";
-        $params = ['entityid' => $library->entityid, 'code' => $DB->sql_like_escape($code) . '%'];
+                               WHERE a.entityid = :entityid AND a.kind = 'class' AND $incorner)";
+        $params = ['entityid' => $library->entityid] + $cornerparams;
         if ($onlyfree) {
             $sql .= ' AND ' . self::free_condition();
             $params['freelibrary'] = $library->id;
@@ -376,7 +392,9 @@ final class catalogue {
             $page * self::PERPAGE,
             self::PERPAGE
         );
-        return ['total' => $total, 'cards' => self::cards(array_values($records), $library)];
+        // As a search gives it, so that the page knows there is more than one page of it.
+        return ['total' => $total, 'reachable' => $total, 'cards' => self::cards(array_values($records), $library),
+            'suggestions' => [], 'facets' => ['corners' => [], 'subjects' => []]];
     }
 
     /**
@@ -484,8 +502,8 @@ final class catalogue {
                                            FROM {" . self::T . "recauth} ra
                                            JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
                                           WHERE a.entityid = :entityid AND a.kind = 'class' AND " .
-                $DB->sql_like('a.code', ':code') . ')';
-            $params += ['entityid' => $library->entityid, 'code' => $DB->sql_like_escape($corner) . '%'];
+                self::class_condition('a.code', $corner, 'code')[0] . ')';
+            $params += ['entityid' => $library->entityid] + self::class_condition('a.code', $corner, 'code')[1];
         }
         $latest = $DB->get_records_sql(
             'SELECT i.recordid, MAX(COALESCE(i.timeacquired, i.timecreated)) AS acquired
@@ -794,7 +812,47 @@ final class catalogue {
      * @return string|null
      */
     public static function top_class(string $code): ?string {
-        return preg_match('/^\s*(\d)/', $code, $matches) ? $matches[1] : null;
+        // A number, or a number after a letter or two («J 821», children's books in the UDC): its first figure.
+        if (preg_match('/^\s*(?:[A-Za-z]{1,3}\s+)?(\d)/', $code, $matches)) {
+            return $matches[1];
+        }
+        // Letters alone (N for novels, P for poetry, C for comics), as many school and public libraries sort.
+        return preg_match('/^\s*([A-Za-z]{1,3})(?=$|[\s.\-\/])/', $code, $matches) ? strtoupper($matches[1]) : null;
+    }
+
+    /**
+     * Whether a corner is one: a figure or up to three letters.
+     *
+     * @param string $corner
+     * @return bool
+     */
+    public static function is_corner(string $corner): bool {
+        return (bool) preg_match('/^(\d+|[A-Z]{1,3})$/', $corner);
+    }
+
+    /**
+     * The SQL that says a class code is in a corner, as top_class() reads it: «8» takes 821 and «J 821»; «N» takes N and
+     * «N DUN», not NA.
+     *
+     * @param string $field The class code, as alias.code.
+     * @param string $corner
+     * @param string $name Prefix of the parameters.
+     * @return array SQL and its parameters.
+     */
+    public static function class_condition(string $field, string $corner, string $name): array {
+        global $DB;
+        $corner = strtoupper(trim($corner));
+        $escaped = $DB->sql_like_escape($corner);
+        $patterns = ctype_digit($corner)
+            ? [$escaped . '%', '_ ' . $escaped . '%', '__ ' . $escaped . '%', '___ ' . $escaped . '%']
+            : [$escaped, $escaped . ' %', $escaped . '-%', $escaped . '.%', $escaped . '/%'];
+        $sql = [];
+        $params = [];
+        foreach ($patterns as $i => $pattern) {
+            $sql[] = $DB->sql_like($field, ':' . $name . $i, false);
+            $params[$name . $i] = $pattern;
+        }
+        return ['(' . implode(' OR ', $sql) . ')', $params];
     }
 
     /**

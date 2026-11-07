@@ -71,6 +71,29 @@ final class csvlist {
         string $system = 'csv',
         bool $partly = true
     ): array {
+        // New readers take the next card codes: one list at a time per centre, as the platform entries do.
+        $lock = \local_oksigeniaayvurenda\local\cataloguer::lock('readers', $entityid);
+        try {
+            return self::load_now($entityid, $readers, $type, $now, $system, $partly);
+        } finally {
+            if ($lock) {
+                $lock->release();
+            }
+        }
+    }
+
+    /**
+     * Loads the readers of a list, the centre's codes already held.
+     *
+     * @param int $entityid
+     * @param array[] $readers
+     * @param string $type
+     * @param int|null $now
+     * @param string $system
+     * @param bool $partly
+     * @return array
+     */
+    private static function load_now(int $entityid, array $readers, string $type, ?int $now, string $system, bool $partly): array {
         global $DB;
         $now = $now ?? time();
         $stats = ['created' => 0, 'updated' => 0, 'linked' => 0, 'total' => 0, 'overlimit' => 0, 'ids' => []];

@@ -348,6 +348,10 @@ final class stacks {
         } else if (isset($filter['corner']) && preg_match('/^\d$/', (string) $filter['corner'])) {
             $where .= ' AND ' . $DB->sql_like('i.shelfkey', ':corner');
             $params['corner'] = '1' . $filter['corner'] . '%';
+        } else if (isset($filter['corner']) && preg_match('/^[A-Z]{1,3}$/', (string) $filter['corner'])) {
+            // A corner of letters (N, P): the copies whose first line is just those letters.
+            $where .= ' AND ' . $DB->sql_like('i.shelfkey', ':corner');
+            $params['corner'] = $DB->sql_like_escape(shelf_order::prefix((string) $filter['corner'])) . '00%';
         }
         return [$where, $params];
     }

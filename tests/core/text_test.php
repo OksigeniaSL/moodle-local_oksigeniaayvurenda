@@ -51,6 +51,8 @@ final class text_test extends \basic_testcase {
      * Without accents, in lower case, with single spaces and no punctuation.
      */
     public function test_normalise(): void {
+        // Letters a reader writes another way.
+        $this->assertSame('strasse oeuvres lodz aero', text::normalise('Straße, Œuvres; Łódź — Ærø'));
         $this->assertSame('arbol de la nandu', text::normalise('  Árbol, de la ÑANDÚ! '));
         $this->assertSame('el ultimo dragon 2', text::normalise('El último dragón (2)'));
     }
@@ -81,5 +83,20 @@ final class text_test extends \basic_testcase {
         $this->assertSame(text::phonetic('cielo'), text::phonetic('sielo'));
         $this->assertSame('chokolate', text::phonetic('chocolate'));
         $this->assertNotSame(text::phonetic('casa'), text::phonetic('cosa'));
+    }
+
+    /**
+     * A query without its empty words, and the start of a plural that finds the singular.
+     */
+    public function test_meaningful_and_stem(): void {
+        $this->assertSame(['dragones'], text::meaningful(text::words('Un libro de dragones')));
+        $this->assertSame(['de'], text::meaningful(['de']));
+        $this->assertSame('dragon', text::stem('dragones'));
+        $this->assertSame('pirata', text::stem('piratas'));
+        $this->assertSame('luz', text::stem('luces'));
+        $this->assertSame('oso', text::stem('osos'));
+        $this->assertNull(text::stem('gas'));
+        $this->assertNull(text::stem('mapa'));
+        $this->assertNull(text::stem('1980s'));
     }
 }

@@ -23,7 +23,7 @@
     {
         "fileurl": "#", "heading": "El faro dormido", "marks": true, "spread": true, "readprev": "Anterior", "readnext": "Siguiente",
         "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande", "readmark": "Marcar aquí",
-        "readprogress": "Cuánto llevas", "readloading": "Abriendo el libro…", "readfullscreen": "Pantalla completa",
+        "readprogress": "Cuánto llevas", "readloading": "Abriendo el libro…", "readfailed": "Este libro no se ha podido abrir aquí.", "readfullscreen": "Pantalla completa",
         "readfullscreenexit": "Salir de pantalla completa"
     }
 }}
@@ -35,7 +35,7 @@
 </div>
 <div class="ayv-read-book">
     <button type="button" class="ayv-page-turn" id="ayv-prev" aria-label="{{readprev}}">{{> local_oksigeniaayvurenda/icon_prev}}</button>
-    <div id="ayv-epub" class="ayv-epub" data-url="{{fileurl}}" data-title="{{heading}}" data-spread="{{#spread}}auto{{/spread}}{{^spread}}none{{/spread}}"><p class="ayv-empty">{{readloading}}</p></div>
+    <div id="ayv-epub" class="ayv-epub" data-url="{{fileurl}}" data-title="{{heading}}" data-spread="{{#spread}}auto{{/spread}}{{^spread}}none{{/spread}}" data-failed="{{readfailed}}"><p class="ayv-empty">{{readloading}}</p></div>
     <button type="button" class="ayv-page-turn" id="ayv-next" aria-label="{{readnext}}">{{> local_oksigeniaayvurenda/icon_next}}</button>
 </div>
 <div class="ayv-read-foot">

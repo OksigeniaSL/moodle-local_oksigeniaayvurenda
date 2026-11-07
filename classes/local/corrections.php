@@ -85,6 +85,7 @@ final class corrections {
         foreach (['author', 'subject'] as $kind) {
             self::links($record, $kind, (string) ($form[$kind . 's'] ?? ''), $now);
         }
+        $record = (object) cataloguer::fit((array) $record);
         $record->searchtext = self::words($record);
         $DB->update_record(self::T . 'record', $record);
         $transaction->allow_commit();

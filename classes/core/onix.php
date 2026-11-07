@@ -179,7 +179,7 @@ final class onix {
                 'subtitle' => describer::clean($subtitle),
                 'responsibility' => null,
                 'isbn' => $isbn,
-                'edition' => self::text($product, 'EditionNumber') !== '' ? self::text($product, 'EditionNumber') . '.ª ed.' : null,
+                'edition' => self::edition(self::text($product, 'EditionStatement'), self::text($product, 'EditionNumber'), $lang),
                 'pubplace' => describer::clean(self::text($product, 'CityOfPublication')),
                 'pubyear' => preg_match('/^(\d{4})/', $date, $m) ? $m[1] : null,
                 'lang' => preg_match('/^[a-z]{3}$/', $lang) ? $lang : null,
@@ -243,5 +243,40 @@ final class onix {
             }
         }
         return false;
+    }
+
+    /**
+     * The edition as a catalogue writes it, in the language of the book (as the cataloguing rules ask): the publisher's
+     * own statement when it gives one, else its number.
+     *
+     * @param string $statement EditionStatement.
+     * @param string $number EditionNumber.
+     * @param string $lang The book's language, three letters.
+     * @return string|null
+     */
+    private static function edition(string $statement, string $number, string $lang): ?string {
+        if (trim($statement) !== '') {
+            return describer::clean(trim($statement));
+        }
+        if (!ctype_digit($number) || (int) $number < 1) {
+            return null;
+        }
+        $n = (int) $number;
+        $english = match (true) {
+            $n % 100 >= 11 && $n % 100 <= 13 => 'th',
+            $n % 10 === 1 => 'st',
+            $n % 10 === 2 => 'nd',
+            $n % 10 === 3 => 'rd',
+            default => 'th',
+        };
+        return match ($lang) {
+            'spa', 'por', 'glg' => $n . '.ª ed.',
+            'cat' => $n . 'a ed.',
+            'ita' => $n . 'ª ed.',
+            'fre', 'fra' => $n . ($n === 1 ? 're' : 'e') . ' éd.',
+            'ger', 'deu' => $n . '. Aufl.',
+            'eng' => $n . $english . ' ed.',
+            default => $n . ' ed.',
+        };
     }
 }

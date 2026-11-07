@@ -182,9 +182,10 @@ final class reports {
         global $DB;
         // A library under another (a classroom, a department) counts its own; the central one, the whole centre.
         $summary = year_change::summary($year, !empty($library->parentid) ? (int) $library->id : null);
+        // When they came, not when they were brought into the catalogue.
         $acquired = $DB->count_records_select(
             self::T . 'item',
-            'libraryid = :libraryid AND timecreated >= :a AND timecreated < :b',
+            'libraryid = :libraryid AND timeacquired >= :a AND timeacquired < :b',
             ['libraryid' => $library->id, 'a' => $year->timestart, 'b' => $year->timeend]
         );
         // The books read here without going home.

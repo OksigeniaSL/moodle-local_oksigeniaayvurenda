@@ -80,35 +80,88 @@ final class iso2709 {
         $set = $set === charset::AUTO ? charset::guess($data) : $set;
         $records = [];
         foreach (explode(self::END, $data) as $raw) {
-            $raw = ltrim($raw, "\r\n");
-            if (strlen($raw) < 25) {
-                continue;
+            $record = self::parse($raw, $set);
+            if ($record) {
+                $records[] = $record;
             }
-            $leader = substr($raw, 0, 24);
-            $base = (int) substr($leader, 12, 5);
-            $record = new record($leader);
-            $directory = substr($raw, 24, max(0, $base - 25));
-            for ($i = 0; $i + 12 <= strlen($directory); $i += 12) {
-                $tag = substr($directory, $i, 3);
-                $body = substr($raw, $base + (int) substr($directory, $i + 7, 5), (int) substr($directory, $i + 3, 4));
-                $body = rtrim($body, self::FIELD);
-                $body = charset::to_utf8($body, $set);
-                if ($tag < '010') {
-                    $record->control($tag, $body);
-                    continue;
-                }
-                $parts = explode(self::SUB, $body);
-                $indicators = array_shift($parts) . '  ';
-                $subfields = [];
-                foreach ($parts as $part) {
-                    if ($part !== '') {
-                        $subfields[] = [substr($part, 0, 1), substr($part, 1)];
-                    }
-                }
-                $record->data($tag, $indicators[0], $indicators[1], $subfields);
-            }
-            $records[] = $record;
         }
         return $records;
+    }
+
+    /**
+     * The records of a file on disk, one at a time: a university's catalogue of hundreds of megabytes is never in memory
+     * at once.
+     *
+     * @param string $path
+     * @param string $set How its letters are written: one of charset::SETS; guessed from its first megabytes.
+     * @return \Generator Of record.
+     */
+    public static function stream(string $path, string $set = charset::AUTO): \Generator {
+        $handle = fopen($path, 'rb');
+        if (!$handle) {
+            return;
+        }
+        try {
+            if ($set === charset::AUTO) {
+                $set = charset::guess((string) fread($handle, 4 * 1024 * 1024));
+                rewind($handle);
+            }
+            $rest = '';
+            while (!feof($handle)) {
+                $rest .= (string) fread($handle, 1024 * 1024);
+                $parts = explode(self::END, $rest);
+                $rest = (string) array_pop($parts);
+                foreach ($parts as $raw) {
+                    $record = self::parse($raw, $set);
+                    if ($record) {
+                        yield $record;
+                    }
+                }
+            }
+            $record = self::parse($rest, $set);
+            if ($record) {
+                yield $record;
+            }
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * One record, from its bytes up to its end mark.
+     *
+     * @param string $raw
+     * @param string $set
+     * @return record|null
+     */
+    private static function parse(string $raw, string $set): ?record {
+        $raw = ltrim($raw, "\r\n");
+        if (strlen($raw) < 25) {
+            return null;
+        }
+        $leader = substr($raw, 0, 24);
+        $base = (int) substr($leader, 12, 5);
+        $record = new record($leader);
+        $directory = substr($raw, 24, max(0, $base - 25));
+        for ($i = 0; $i + 12 <= strlen($directory); $i += 12) {
+            $tag = substr($directory, $i, 3);
+            $body = substr($raw, $base + (int) substr($directory, $i + 7, 5), (int) substr($directory, $i + 3, 4));
+            $body = rtrim($body, self::FIELD);
+            $body = charset::to_utf8($body, $set);
+            if ($tag < '010') {
+                $record->control($tag, $body);
+                continue;
+            }
+            $parts = explode(self::SUB, $body);
+            $indicators = array_shift($parts) . '  ';
+            $subfields = [];
+            foreach ($parts as $part) {
+                if ($part !== '') {
+                    $subfields[] = [substr($part, 0, 1), substr($part, 1)];
+                }
+            }
+            $record->data($tag, $indicators[0], $indicators[1], $subfields);
+        }
+        return $record;
     }
 }

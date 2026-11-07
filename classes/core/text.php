@@ -30,6 +30,10 @@ namespace local_oksigeniaayvurenda\core;
  * Part of the core: plain PHP, with no call to Moodle.
  */
 final class text {
+    /** @var string[] Letters with no accent to take away that a reader writes otherwise (Straße, œuvre, Łódź). */
+    public const LETTERS = ['ß' => 'ss', 'æ' => 'ae', 'œ' => 'oe', 'ø' => 'o', 'ł' => 'l', 'đ' => 'd', 'ð' => 'd', 'þ' => 'th',
+        'ı' => 'i'];
+
     /** @var string[] Accented Latin letters and their plain form, for systems without intl. */
     private const ACCENTS = ['á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'ã' => 'a', 'é' => 'e', 'è' => 'e', 'ë' => 'e',
         'ê' => 'e', 'ẽ' => 'e', 'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'ĩ' => 'i', 'ó' => 'o', 'ò' => 'o', 'ö' => 'o',
@@ -61,7 +65,7 @@ final class text {
             // Without the intl extension, at least the accents of the Latin alphabet.
             $text = strtr($text, self::ACCENTS);
         }
-        $text = mb_strtolower($text, 'UTF-8');
+        $text = strtr(mb_strtolower($text, 'UTF-8'), self::LETTERS);
         $text = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $text);
         return trim($text);
     }
@@ -149,5 +153,42 @@ final class text {
             }
         }
         return true;
+    }
+
+    /** @var string[] Words that say nothing of the book sought («un libro de dragones»), in the languages of the plugin. */
+    private const EMPTY = ['a', 'al', 'de', 'del', 'el', 'la', 'las', 'lo', 'los', 'un', 'una', 'unos', 'unas', 'y', 'o', 'en',
+        'con', 'para', 'por', 'sobre', 'que', 'libro', 'libros', 'quiero', 'busco', 'me', 'mi', 'an', 'the', 'of', 'and', 'or',
+        'in', 'on', 'about', 'for', 'with', 'book', 'books', 'i', 'want'];
+
+    /**
+     * The words of a query that say what is sought: without «un», «libro», «de»… unless nothing else is left.
+     *
+     * @param string[] $words Normalised.
+     * @return string[]
+     */
+    public static function meaningful(array $words): array {
+        $kept = array_values(array_filter($words, fn($w) => !in_array($w, self::EMPTY, true)));
+        return $kept ?: $words;
+    }
+
+    /**
+     * Another start of a normalised word that finds its singular too: «dragones» → «dragon», «piratas» → «pirata»,
+     * «luces» → «luz». Null when there is none.
+     *
+     * @param string $word
+     * @return string|null
+     */
+    public static function stem(string $word): ?string {
+        $length = mb_strlen($word);
+        if ($length < 4 || preg_match('/\d/', $word)) {
+            return null;
+        }
+        if ($length >= 5 && str_ends_with($word, 'ces')) {
+            return mb_substr($word, 0, -3) . 'z';
+        }
+        if ($length >= 5 && str_ends_with($word, 'es')) {
+            return mb_substr($word, 0, -2);
+        }
+        return str_ends_with($word, 's') ? mb_substr($word, 0, -1) : null;
     }
 }

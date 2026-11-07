@@ -53,7 +53,7 @@ $here = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/sta
     $params))->out(false);
 $count = fn(int $n) => $str($n === 1 ? 'onebook' : 'books', $n);
 
-$corner = preg_match('/^\d$/', $corner) ? $corner : '';
+$corner = catalogue::is_corner(strtoupper($corner)) ? strtoupper($corner) : '';
 $filter = [];
 $where = [];
 $heading = $str('stackstitle');

@@ -61,6 +61,10 @@ final class csv_list {
      * @return array{columns: string[], rows: array[]} The first row and the rest.
      */
     public static function read(string $data): array {
+        // Excel's «Unicode text» is UTF-16, with its mark at the start.
+        if (str_starts_with($data, "\xFF\xFE") || str_starts_with($data, "\xFE\xFF")) {
+            $data = mb_convert_encoding(substr($data, 2), 'UTF-8', str_starts_with($data, "\xFF\xFE") ? 'UTF-16LE' : 'UTF-16BE');
+        }
         $data = preg_replace('/^\xEF\xBB\xBF/', '', $data);
         if (!mb_check_encoding($data, 'UTF-8')) {
             // Spreadsheets on Windows still save in Latin 1.

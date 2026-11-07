@@ -68,8 +68,8 @@ final class reports_test extends \advanced_testcase {
 
         $summary = reports::year($library, $year);
         $this->assertSame(4, $summary['loans']);
-        // The five practice books, made today, and the two added.
-        $this->assertSame(7, $summary['acquired']);
+        // The two added today; the five made without a date of arrival are not known to have come this year.
+        $this->assertSame(2, $summary['acquired']);
         $this->assertCount(4, $summary['top']);
     }
 

@@ -52,7 +52,11 @@ final class files {
         if (\local_oksigeniaayvurenda\core\onix::is($head)) {
             return 'onix';
         }
-        if (str_contains($head, 'MARC21/slim') || preg_match('/<(\w+:)?collection\b/', $head)) {
+        // MARCXML: its namespace, a collection, or one record on its own without a namespace.
+        if (
+            str_contains($head, 'MARC21/slim') || preg_match('/<(\w+:)?collection\b/', $head)
+            || (preg_match('/<(\w+:)?record\b/', $head) && preg_match('/<(\w+:)?(leader|datafield)\b/', $head))
+        ) {
             return 'marcxml';
         }
         if (str_contains($head, '<Fichero')) {
@@ -112,14 +116,13 @@ final class files {
      * @return \Generator Key, description and items of each record.
      */
     public static function marc(string $path, string $kind, string $set = 'auto'): \Generator {
-        $data = (string) file_get_contents($path);
         // ONIX: a publisher's products, already as records.
         if ($kind === 'onix') {
-            yield from \local_oksigeniaayvurenda\core\onix::records($data);
+            yield from \local_oksigeniaayvurenda\core\onix::records((string) file_get_contents($path));
             return;
         }
-        $records = $kind === 'marcxml' ? marcxml::read($data) : iso2709::read($data, $set);
-        unset($data);
+        // Read a record at a time from the file: a big catalogue never sits whole in memory.
+        $records = $kind === 'marcxml' ? marcxml::stream($path) : iso2709::stream($path, $set);
         foreach ($records as $record) {
             yield ['key' => holdings::id($record), 'description' => describer::describe($record),
                 'items' => holdings::items($record)];

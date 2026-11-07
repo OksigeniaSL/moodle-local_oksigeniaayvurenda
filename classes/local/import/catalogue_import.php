@@ -60,8 +60,12 @@ final class catalogue_import {
     /** @var array<string, int> Records already brought from this system, by their key. */
     private array $sources = [];
 
+    /** @var array[] By key: [source id, fingerprint of what the program sent, fingerprint of the record here then]. */
+    private array $tracked = [];
+
     /** @var array<string, int> What was done. */
-    private array $stats = ['records' => 0, 'found' => 0, 'items' => 0, 'kept' => 0, 'newcodes' => 0, 'untitled' => 0];
+    private array $stats = ['records' => 0, 'found' => 0, 'items' => 0, 'kept' => 0, 'newcodes' => 0, 'untitled' => 0,
+        'updated' => 0];
 
     /** @var array[] Copies whose code was another record's: [the code printed, the new one]. */
     private array $relabelled = [];
@@ -96,8 +100,19 @@ final class catalogue_import {
         $letter = !empty($settings['controlletter']);
         $batch = 0;
         $transaction = $DB->start_delegated_transaction();
+        $oldused = [];
         foreach ($records as $record) {
             $key = (string) ($record['key'] ?? '');
+            // A key that changed (a spreadsheet's book now with its year): the one of before still finds its record, once:
+            // a second edition of it is another book.
+            $old = (string) ($record['oldkey'] ?? '');
+            if (
+                $key !== '' && !isset($this->sources[$key]) && $old !== '' && isset($this->sources[$old])
+                && !isset($oldused[$old])
+            ) {
+                $key = $old;
+                $oldused[$old] = true;
+            }
             $description = $record['description'];
             $isbn = (string) ($description['record']['isbn'] ?? '');
             // A record with nothing that names it (no 001, no 035, no ISBN: made by hand, or an old book) is known by what it
@@ -126,6 +141,27 @@ final class catalogue_import {
                     $room -= $code !== '' && ($this->codes[$code] ?? 0) === $recordid ? 1 : 0;
                 }
             }
+            // What the program says of the book now: changed there and not touched here since, the record takes it, as with
+            // Abies; changed here too, what was done here stays.
+            $hash = sha1((string) json_encode([$description['record'] ?? [], $description['authorities'] ?? []]));
+            if ($recordid && $key !== '' && isset($this->tracked[$key])) {
+                [$sourceid, $was, $own] = $this->tracked[$key];
+                if ($was !== $hash) {
+                    $mine = cataloguer::own_hash($recordid);
+                    $renewed = false;
+                    if ($was !== null && $own !== null && $mine === $own) {
+                        cataloguer::renew_record($recordid, $entityid, $description, $now);
+                        $this->stats['updated']++;
+                        $renewed = true;
+                        $mine = cataloguer::own_hash($recordid);
+                    }
+                    // Renewed, or first seen with a fingerprint (brought before there were any): from now on it is followed.
+                    if ($renewed || $was === null) {
+                        $DB->update_record(self::T . 'source', (object) ['id' => $sourceid, 'hash' => $hash, 'localhash' => $mine]);
+                        $this->tracked[$key] = [$sourceid, $hash, $mine];
+                    }
+                }
+            }
             if ($recordid) {
                 $this->stats['found']++;
             } else {
@@ -140,10 +176,12 @@ final class catalogue_import {
                 }
             }
             if ($key !== '' && !isset($this->sources[$key])) {
-                $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => $this->system,
+                $own = cataloguer::own_hash($recordid);
+                $sourceid = (int) $DB->insert_record(self::T . 'source', ['entityid' => $entityid, 'origin' => $this->system,
                     'tablename' => 'record', 'externalid' => \core_text::substr($key, 0, 255), 'localid' => $recordid,
-                    'timecreated' => $now]);
+                    'hash' => $hash, 'localhash' => $own, 'timecreated' => $now]);
                 $this->sources[$key] = $recordid;
+                $this->tracked[$key] = [$sourceid, $hash, $own];
             }
             foreach ($record['items'] ?? [] as $item) {
                 // A copy with no code, or with another record's (relabelled the time before), is one this record already has.
@@ -206,8 +244,10 @@ final class catalogue_import {
             fn($l) => trim((string) $l) !== '' ? \core_text::substr(trim((string) $l), 0, 100) : null,
             array_pad($item['callnumber'] ?? [], 3, '')
         );
+        // When the file does not say when the copy came, it is not known (as with Abies): not «today», which would make a
+        // whole catalogue this year's acquisitions.
         $acquired = !empty($item['acquired']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $item['acquired'], $d)
-            ? make_timestamp((int) $d[1], (int) $d[2], (int) $d[3]) : $now;
+            ? make_timestamp((int) $d[1], (int) $d[2], (int) $d[3]) : null;
         $DB->insert_record(self::T . 'item', [
             'entityid' => $this->library->entityid,
             'libraryid' => $this->library->id,
@@ -303,8 +343,17 @@ final class catalogue_import {
             $this->isbns[$row->isbn] = $this->isbns[$row->isbn] ?? (int) $row->id;
         }
         $rows->close();
-        $this->sources = array_map('intval', $DB->get_records_menu(self::T . 'source', ['entityid' => $entityid,
-            'origin' => $this->system, 'tablename' => 'record'], '', 'externalid, localid'));
+        foreach (
+            $DB->get_records(
+                self::T . 'source',
+                ['entityid' => $entityid, 'origin' => $this->system, 'tablename' => 'record'],
+                '',
+                'id, externalid, localid, hash, localhash'
+            ) as $source
+        ) {
+            $this->sources[$source->externalid] = (int) $source->localid;
+            $this->tracked[$source->externalid] = [(int) $source->id, $source->hash, $source->localhash];
+        }
     }
 
     /**
@@ -318,7 +367,7 @@ final class catalogue_import {
 
     /**
      * Whether a record of the catalogue is the book a description of the file says: the same ISBN when both have one,
-     * else most of the words of their titles.
+     * else the same first author, or most of the words of their titles (a title corrected in its program is still it).
      *
      * @param int $recordid
      * @param array $description
@@ -333,6 +382,22 @@ final class catalogue_import {
         $isbn = (string) ($description['record']['isbn'] ?? '');
         if ($isbn !== '' && (string) $record->isbn !== '') {
             return $isbn === (string) $record->isbn;
+        }
+        $author = \local_oksigeniaayvurenda\core\text::normalise((string) ($description['authorities']['author'][0] ?? ''));
+        if ($author !== '') {
+            $first = $DB->get_records_sql(
+                "SELECT a.id, a.label
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'author'
+                  WHERE ra.recordid = :recordid
+               ORDER BY ra.sortorder, ra.id",
+                ['recordid' => $recordid],
+                0,
+                1
+            );
+            if ($first && \local_oksigeniaayvurenda\core\text::normalise((string) reset($first)->label) === $author) {
+                return true;
+            }
         }
         $a = \local_oksigeniaayvurenda\core\text::words((string) ($description['record']['title'] ?? ''));
         $b = \local_oksigeniaayvurenda\core\text::words((string) $record->title);

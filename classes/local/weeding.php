@@ -54,8 +54,10 @@ final class weeding {
             $params['place'] = (int) $filters['place'];
         }
         // The last loan of each copy, apart: joined to every copy it made large libraries slow.
-        $lastloans = $DB->get_records_sql_menu('SELECT itemid, MAX(timeloaned) FROM {' . self::T . 'loan}
-            WHERE libraryid = :libraryid GROUP BY itemid', ['libraryid' => $library->id]);
+        // Wherever it was lent (a box of it in a classroom counts): by the copy, not by the library of the loan.
+        $lastloans = $DB->get_records_sql_menu('SELECT l.itemid, MAX(l.timeloaned) FROM {' . self::T . 'loan} l
+            JOIN {' . self::T . 'item} i ON i.id = l.itemid
+            WHERE i.libraryid = :libraryid GROUP BY l.itemid', ['libraryid' => $library->id]);
         $rows = $DB->get_recordset_sql(
             'SELECT i.id, i.recordid, i.locationid, i.barcode, i.status, i.itemcondition, i.timeacquired, i.callnumber1,
                     i.callnumber2, i.callnumber3, r.title, r.pubyear

@@ -81,4 +81,25 @@ final class weeding_test extends \advanced_testcase {
         $this->assertSame(2, weeding::records($library)[0]['copies']);
         $this->assertSame(1, weeding::candidates($library, $filters, $now)['total'], 'only the lost one is left');
     }
+
+    /**
+     * A copy lent in another library of the centre (in a box for a classroom) has been used: it is not «unused».
+     */
+    public function test_used_elsewhere(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $classroom = $gen->create_library(['entityid' => $library->entityid, 'kind' => 'classroom']);
+        $now = time();
+        $long = $now - 10 * YEARSECS;
+        $record = $gen->create_record(['entityid' => $library->entityid, 'pubyear' => '2020']);
+        $used = $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => $long]);
+        $idle = $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => $long]);
+        $reader = $gen->create_reader(['entityid' => $library->entityid]);
+        $gen->create_loan(['libraryid' => $classroom->id, 'itemid' => $used->id, 'readerid' => $reader->id,
+            'timeloaned' => $now - YEARSECS, 'timereturned' => $now - YEARSECS + WEEKSECS]);
+        $found = weeding::candidates($library, ['unused' => 5], $now);
+        $this->assertSame([(int) $idle->id], array_column($found['rows'], 'id'));
+    }
 }

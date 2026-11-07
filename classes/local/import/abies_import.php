@@ -348,6 +348,7 @@ final class abies_import {
             if ($data['title'] === '') {
                 $data['title'] = '?';
             }
+            $data = \local_oksigeniaayvurenda\local\cataloguer::fit($data);
             $this->docs[$doc['id']] = ['title' => $data['title'], 'isbn' => $mapped['record']['isbn']];
             // Each author once in each role, in the order they came.
             $rows = [];

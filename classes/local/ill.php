@@ -266,7 +266,8 @@ final class ill {
         $record = $DB->get_record(self::T . 'record', ['id' => $item->recordid], 'title, isbn');
         $until = (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $answer['loanid']]);
         return (int) $DB->insert_record(self::T . 'ill', ['libraryid' => $library->id, 'direction' => 'out', 'partner' => $partner,
-            'title' => (string) $record->title, 'isbn' => $record->isbn ?: null, 'readerid' => $readerid, 'itemid' => $item->id,
+            'title' => \core_text::substr((string) $record->title, 0, 255), 'isbn' => $record->isbn ?: null,
+            'readerid' => $readerid, 'itemid' => $item->id,
             'loanid' => $answer['loanid'], 'status' => 'sent', 'timedue' => $until,
             'createdby' => $userid, 'timecreated' => $now, 'timemodified' => $now]);
     }

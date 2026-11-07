@@ -61,6 +61,48 @@ final class marcxml {
     }
 
     /**
+     * The records of a file on disk, one at a time, without the whole document in memory.
+     *
+     * @param string $path
+     * @return \Generator Of record.
+     * @throws \InvalidArgumentException When it is not XML.
+     */
+    public static function stream(string $path): \Generator {
+        $reader = new \XMLReader();
+        // No network and no entities: what comes from a catalogue is data.
+        if (!$reader->open($path, null, LIBXML_NONET | LIBXML_NOCDATA)) {
+            throw new \InvalidArgumentException('Not an XML document');
+        }
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $doc = new \DOMDocument();
+            $any = false;
+            $more = $reader->read();
+            while ($more) {
+                if ($reader->nodeType === \XMLReader::ELEMENT && $reader->localName === 'record') {
+                    $expanded = $reader->expand();
+                    $node = $expanded ? $doc->importNode($expanded, true) : null;
+                    // A record of a catalogue's own answer (SRU) holds the MARC one: then it is gone into.
+                    if ($node instanceof \DOMElement && (self::children($node, 'leader') || self::children($node, 'datafield'))) {
+                        $any = true;
+                        yield self::record($node);
+                        $more = $reader->next();
+                        continue;
+                    }
+                }
+                $more = $reader->read();
+            }
+            if (!$any && libxml_get_errors()) {
+                throw new \InvalidArgumentException('Not an XML document');
+            }
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+            $reader->close();
+        }
+    }
+
+    /**
      * Records as a MARCXML collection.
      *
      * @param record[] $records

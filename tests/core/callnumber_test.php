@@ -38,6 +38,8 @@ final class callnumber_test extends \basic_testcase {
         $this->assertSame(['', 'OLM', 'nub'], callnumber::propose('', 'Bruno Olmo', 'La nube de tinta'));
         $this->assertSame(['', 'ACE', 'arb'], callnumber::propose('', 'Ácebo, Lía', 'Árbol'));
         $this->assertSame(['N', '', 'el'], callnumber::propose(' N ', '', 'El'));
+        // A word said twice is two words.
+        $this->assertSame(['', '', 'yoy'], callnumber::propose('', '', 'Yo, yo'));
     }
 
     /**

@@ -249,6 +249,41 @@ final class cataloguer {
             }
         }
         plans::check($entityid, 'copies', $count);
+        // Two people adding at once (two desks the day a box comes) must not take the same code.
+        $lock = self::lock('copies', $entityid);
+        try {
+            return self::add_now($library, $entityid, $recordid, $description, $copy, $barcodes, $count, $now);
+        } finally {
+            if ($lock) {
+                $lock->release();
+            }
+        }
+    }
+
+    /**
+     * Adds the copies, the centre's codes already held.
+     *
+     * @param \stdClass $library
+     * @param int $entityid
+     * @param int $recordid
+     * @param array $description
+     * @param array $copy
+     * @param string[] $barcodes
+     * @param int $count
+     * @param int $now
+     * @return array
+     */
+    private static function add_now(
+        \stdClass $library,
+        int $entityid,
+        int $recordid,
+        array $description,
+        array $copy,
+        array $barcodes,
+        int $count,
+        int $now
+    ): array {
+        global $DB;
         $transaction = $DB->start_delegated_transaction();
         $newrecord = false;
         if (!$recordid) {
@@ -421,13 +456,94 @@ final class cataloguer {
      */
     public static function create_record(int $entityid, array $description, int $now): int {
         global $DB;
+        [$record, $links] = self::row($entityid, $description, $now);
+        $recordid = $DB->insert_record(self::T . 'record', $record + ['entityid' => $entityid, 'timecreated' => $now,
+            'timemodified' => $now]);
+        self::link($recordid, $links);
+        return $recordid;
+    }
+
+    /**
+     * A record brought again from its program, changed there: its fields and authorities as the program says now.
+     * What was added here (a cover) stays.
+     *
+     * @param int $recordid
+     * @param int $entityid
+     * @param array $description
+     * @param int $now
+     */
+    public static function renew_record(int $recordid, int $entityid, array $description, int $now): void {
+        global $DB;
+        [$record, $links] = self::row($entityid, $description, $now);
+        $old = (string) $DB->get_field(self::T . 'record', 'extra', ['id' => $recordid, 'entityid' => $entityid], MUST_EXIST);
+        $record['extra'] = json_encode(array_merge(json_decode($old, true) ?: [], json_decode($record['extra'], true) ?: [])
+            ?: new \stdClass());
+        $DB->update_record(self::T . 'record', (object) (['id' => $recordid, 'timemodified' => $now] + $record));
+        $DB->delete_records(self::T . 'recauth', ['recordid' => $recordid]);
+        self::link($recordid, $links);
+    }
+
+    /**
+     * A fingerprint of a record as it is here, fields and authorities: to know, when its program sends it again, whether
+     * someone changed it here meanwhile.
+     *
+     * @param int $recordid
+     * @return string
+     */
+    public static function own_hash(int $recordid): string {
+        global $DB;
         $fields = ['doctype', 'title', 'subtitle', 'responsibility', 'isbn', 'edition', 'pubplace', 'pubyear', 'lang',
             'extent', 'summary', 'notes'];
-        $record = ['entityid' => $entityid, 'timecreated' => $now, 'timemodified' => $now];
+        $row = (array) $DB->get_record(self::T . 'record', ['id' => $recordid], implode(', ', $fields));
+        $links = $DB->get_records_sql(
+            "SELECT ra.id, a.kind, a.label
+               FROM {" . self::T . "recauth} ra
+               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
+              WHERE ra.recordid = :recordid
+           ORDER BY ra.sortorder, ra.id",
+            ['recordid' => $recordid]
+        );
+        return sha1(json_encode([
+            array_map(fn($f) => isset($row[$f]) ? (string) $row[$f] : null, $fields),
+            array_map(fn($l) => [$l->kind, $l->label], array_values($links)),
+        ]));
+    }
+
+    /**
+     * Writes the links of a record to its authorities, each once.
+     *
+     * @param int $recordid
+     * @param array[] $links
+     */
+    private static function link(int $recordid, array $links): void {
+        global $DB;
+        $seen = [];
+        foreach ($links as $link) {
+            if (isset($seen[$link['authorityid']])) {
+                continue;
+            }
+            $seen[$link['authorityid']] = true;
+            $DB->insert_record(self::T . 'recauth', $link + ['recordid' => $recordid]);
+        }
+    }
+
+    /**
+     * The fields of a record and its links to authorities, from a description.
+     *
+     * @param int $entityid
+     * @param array $description
+     * @param int $now
+     * @return array [the record's fields, its links].
+     */
+    private static function row(int $entityid, array $description, int $now): array {
+        $fields = ['doctype', 'title', 'subtitle', 'responsibility', 'isbn', 'edition', 'pubplace', 'pubyear', 'lang',
+            'extent', 'summary', 'notes'];
+        $record = [];
         foreach ($fields as $field) {
             $value = $description['record'][$field] ?? null;
-            $record[$field] = $value === null || $value === '' ? null : \core_text::substr((string) $value, 0, 1333);
+            $record[$field] = $value === null || $value === '' ? null : (string) $value;
         }
+        $record = self::fit($record);
         $record['doctype'] = $record['doctype'] ?? 'book';
         $record['title'] = $record['title'] ?? '?';
         $record['pubyear'] = $record['pubyear'] !== null ? \core_text::substr($record['pubyear'], 0, 20) : null;
@@ -447,16 +563,7 @@ final class cataloguer {
             }
         }
         $record['searchtext'] = text::normalise(implode(' ', array_filter($words)));
-        $recordid = $DB->insert_record(self::T . 'record', $record);
-        $seen = [];
-        foreach ($links as $link) {
-            if (isset($seen[$link['authorityid']])) {
-                continue;
-            }
-            $seen[$link['authorityid']] = true;
-            $DB->insert_record(self::T . 'recauth', $link + ['recordid' => $recordid]);
-        }
-        return $recordid;
+        return [$record, $links];
     }
 
     /**
@@ -507,5 +614,35 @@ final class cataloguer {
     private static function line(string $value): ?string {
         $value = trim($value);
         return $value === '' ? null : \core_text::substr($value, 0, 100);
+    }
+
+    /**
+     * The centre's lock for its new codes (copies or readers), held a few seconds at most; false if it could not be had
+     * (then the unique index still says no to a repeated code).
+     *
+     * @param string $what copies or readers.
+     * @param int $entityid
+     * @return \core\lock\lock|false
+     */
+    public static function lock(string $what, int $entityid) {
+        return \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock($what . '_' . $entityid, 15);
+    }
+
+    /**
+     * A record's fields cut to what the database keeps of each: a long edition statement or physical description from
+     * another program must not stop a whole import.
+     *
+     * @param array $record
+     * @return array
+     */
+    public static function fit(array $record): array {
+        $lengths = ['doctype' => 30, 'title' => 1333, 'subtitle' => 1333, 'responsibility' => 1333, 'isbn' => 13,
+            'edition' => 255, 'pubplace' => 255, 'pubyear' => 20, 'lang' => 3, 'extent' => 255];
+        foreach ($lengths as $field => $most) {
+            if (isset($record[$field]) && is_string($record[$field]) && \core_text::strlen($record[$field]) > $most) {
+                $record[$field] = \core_text::substr($record[$field], 0, $most);
+            }
+        }
+        return $record;
     }
 }

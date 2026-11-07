@@ -80,7 +80,8 @@ $data = [
 foreach (
     ['readthroughproxy', 'readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readmarks', 'readdownload',
         'readopenlink',
-        'readnodownload', 'backtorecord', 'readloading', 'readprogress', 'readfullscreen', 'readfullscreenexit'] as $key
+        'readnodownload', 'backtorecord', 'readloading', 'readfailed', 'readprogress', 'readfullscreen',
+        'readfullscreenexit'] as $key
 ) {
     $data[$key] = $str($key);
 }

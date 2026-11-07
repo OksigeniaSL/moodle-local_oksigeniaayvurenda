@@ -261,7 +261,7 @@ final class copies {
             [$in, $params] = $DB->get_in_or_equal(array_keys($records), SQL_PARAMS_NAMED);
             $authorities = [];
             $rows = $DB->get_recordset_sql(
-                'SELECT ra.id, ra.recordid, a.kind, a.label
+                'SELECT ra.id, ra.recordid, a.kind, a.label, a.code
                    FROM {' . self::T . 'recauth} ra
                    JOIN {' . self::T . 'authority} a ON a.id = ra.authorityid
                   WHERE ra.recordid ' . $in . '
@@ -269,7 +269,9 @@ final class copies {
                 $params
             );
             foreach ($rows as $row) {
-                $authorities[$row->recordid][$row->kind][] = $row->label;
+                // A class goes by its number (080 and 082 of MARC are numbers), its name only when it has none.
+                $authorities[$row->recordid][$row->kind][] = $row->kind === 'class' && trim((string) $row->code) !== ''
+                    ? (string) $row->code : $row->label;
             }
             $rows->close();
             $items = [];

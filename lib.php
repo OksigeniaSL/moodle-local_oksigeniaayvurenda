@@ -89,7 +89,15 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         if (!$entityid) {
             return false;
         }
-        if (!$anyone || !$library || empty(\local_oksigeniaayvurenda\local\window::settings($library)['open'])) {
+        // A portrait is the centre's: open to anyone where one of its libraries has its window open (the public visit).
+        $open = false;
+        if ($anyone) {
+            $windows = $library ? [$library] : $DB->get_records('local_oksigeniaayvurenda_library', ['entityid' => $entityid]);
+            foreach ($windows as $window) {
+                $open = $open || !empty(\local_oksigeniaayvurenda\local\window::settings($window)['open']);
+            }
+        }
+        if (!$open) {
             require_login(null, false);
             \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:view', $entityid);
         }

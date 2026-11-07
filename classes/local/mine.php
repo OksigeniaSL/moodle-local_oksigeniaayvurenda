@@ -55,12 +55,16 @@ final class mine {
             if (access::closed((int) $reader->entityid) && !access::is_staff((int) $reader->entityid, $userid)) {
                 continue;
             }
-            $library = $DB->get_record(
-                self::T . 'library',
-                ['entityid' => $reader->entityid, 'parentid' => null],
-                '*',
-                IGNORE_MULTIPLE
-            ) ?: $DB->get_record(self::T . 'library', ['entityid' => $reader->entityid], '*', IGNORE_MULTIPLE);
+            // The centre's own library: a top one, not the bank of textbooks, the first made; the same one every time.
+            $library = $DB->get_records_sql(
+                "SELECT * FROM {" . self::T . "library}
+                  WHERE entityid = :entityid
+               ORDER BY CASE WHEN parentid IS NULL THEN 0 ELSE 1 END, CASE WHEN kind = :bank THEN 1 ELSE 0 END, id",
+                ['entityid' => $reader->entityid, 'bank' => bank::KIND],
+                0,
+                1
+            );
+            $library = $library ? reset($library) : false;
             if (!$library) {
                 continue;
             }

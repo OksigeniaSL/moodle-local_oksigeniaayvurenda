@@ -143,7 +143,8 @@ if (data_submitted() && confirm_sesskey()) {
                         . (!empty($stats['untitled']) ? $str(
                             $stats['untitled'] === 1 ? 'importuntitledone' : 'importuntitled',
                             $stats['untitled']
-                        ) : '') . ' ' . ($importer->relabelled() ? $str('importrelabelled', implode(
+                        ) : '') . ' ' . (!empty($stats['updated']) ? $str('importupdated', $stats['updated']) : '')
+                        . ' ' . ($importer->relabelled() ? $str('importrelabelled', implode(
                             ', ',
                             array_map(fn($copy) => $copy[0] . ' → ' . $copy[1], $importer->relabelled())
                         )) : '')),
@@ -220,7 +221,12 @@ if ($pending) {
             'copieslabel' => $book['copies'] > 1 ? $str('importbookcopies', $book['copies']) : ''], $look['books']);
         $review['more'] = $look['records'] > count($look['books'])
             ? $str('importshelfmore', screens::number($look['records'] - count($look['books']))) : '';
-        $review['safe'] = $str('importsafe') . (empty($look['nocode']) ? '' : ' ' . $str('importnocodehint'));
+        $review['safe'] = $str('importsafe') . (empty($look['nocode']) ? '' : ' ' . $str('importnocodehint'))
+            . (empty($look['badisbn']) ? '' : ' ' . $str(
+                count($look['badisbn']) === 1 ? 'importbadisbnone' : 'importbadisbn',
+                (object) ['count' => count($look['badisbn']), 'list' => implode(', ', array_slice($look['badisbn'], 0, 5))
+                . (count($look['badisbn']) > 5 ? '…' : '')]
+            ));
         $review['gowords'] = $look['records'] === 1 ? $str('importgoone') : $str('importgomany', screens::number($look['records']));
         $left = plans::left($entityid, 'copies');
         if ($left !== null && $look['items'] > $left) {

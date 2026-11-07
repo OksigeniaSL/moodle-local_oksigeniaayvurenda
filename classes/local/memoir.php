@@ -168,9 +168,10 @@ final class memoir {
                 "libraryid IN ($libraries) AND timecreated >= :a AND timecreated < :b",
                 $range
             ),
+            // When they came, not when they were brought into the catalogue: an import is not a year of buying.
             'acquired' => $DB->count_records_select(
                 self::T . 'item',
-                "libraryid IN ($libraries) AND timecreated >= :a AND timecreated < :b",
+                "libraryid IN ($libraries) AND timeacquired >= :a AND timeacquired < :b",
                 $range
             ),
             'withdrawn' => (int) $DB->count_records_sql("SELECT COUNT(1) FROM {" . self::T . "withdrawn} w

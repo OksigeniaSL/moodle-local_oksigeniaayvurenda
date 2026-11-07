@@ -49,8 +49,14 @@ final class catalogue_import_test extends \advanced_testcase {
                 'isbn' => '9798999999993'])->id]);
         $path = __DIR__ . '/../../fixtures/marc/programa.xml';
         $this->assertSame('marcxml', files::kind($path, 'programa.xml'));
+        // One record on its own, without a namespace.
+        $single = make_request_directory() . '/una.xml';
+        file_put_contents($single, '<?xml version="1.0"?><record><leader>00000nam a2200000 a 4500</leader>'
+            . '<datafield tag="245" ind1="0" ind2="0"><subfield code="a">Sola</subfield></datafield></record>');
+        $this->assertSame('marcxml', files::kind($single, 'una.xml'));
         $stats = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
-        $this->assertSame(['records' => 1, 'found' => 1, 'items' => 3, 'kept' => 0, 'newcodes' => 1, 'untitled' => 0], $stats);
+        $this->assertSame(['records' => 1, 'found' => 1, 'items' => 3, 'kept' => 0, 'newcodes' => 1, 'untitled' => 0,
+            'updated' => 0], $stats);
         $this->assertSame(2, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
         $new = $DB->get_record(self::T . 'item', ['barcode' => control_letter::append('100042')], '*', MUST_EXIST);
         $this->assertSame('N', $new->callnumber1);
@@ -60,7 +66,8 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame('Narrativa', $DB->get_field(self::T . 'authority', 'label', ['id' => $koha->locationid]));
 
         $again = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
-        $this->assertSame(['records' => 0, 'found' => 2, 'items' => 0, 'kept' => 3, 'newcodes' => 0, 'untitled' => 0], $again);
+        $this->assertSame(['records' => 0, 'found' => 2, 'items' => 0, 'kept' => 3, 'newcodes' => 0, 'untitled' => 0,
+            'updated' => 0], $again);
     }
 
     /**
@@ -124,7 +131,8 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame(2, $stats['items']);
         // Another pass repeats nothing, though these copies have no code; one more copy in the file is one more.
         $again = (new catalogue_import($library, 'csv'))->run($records);
-        $this->assertSame(['records' => 0, 'found' => 1, 'items' => 0, 'kept' => 2, 'newcodes' => 0, 'untitled' => 0], $again);
+        $this->assertSame(['records' => 0, 'found' => 1, 'items' => 0, 'kept' => 2, 'newcodes' => 0, 'untitled' => 0,
+            'updated' => 0], $again);
         file_put_contents($dir . '/libros.csv', "Título;Autor;Ejemplares\nCuentos a oscuras;Olmo Ríos, Bruno;3\n");
         $more = (new catalogue_import($library, 'csv'))->run(files::csv_records(
             $dir . '/libros.csv',
@@ -180,5 +188,30 @@ final class catalogue_import_test extends \advanced_testcase {
         // And the same file again finds both.
         $again = (new catalogue_import($library, 'marc'))->run($one('Segundo programa Zeta, otro libro', 'ZETA-B2'));
         $this->assertSame(0, $again['records']);
+    }
+
+    /**
+     * Brought again from its program: a correction made there comes in, unless the record was changed here meanwhile.
+     */
+    public function test_corrections_from_the_program(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $one = fn(string $title) => [['key' => '7', 'description' => ['record' => ['title' => $title],
+            'authorities' => ['author' => ['Olmo, Bruno']]], 'items' => [['barcode' => 'ZETA-E1', 'callnumber' => ['', '', '']]]]];
+        (new catalogue_import($library, 'marc'))->run($one('Titulo con errata Zeta'));
+        $id = (int) $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-E1']);
+        $stats = (new catalogue_import($library, 'marc'))->run($one('Título corregido Zeta'));
+        $this->assertSame(1, $stats['updated']);
+        $this->assertSame(0, $stats['records']);
+        $this->assertSame('Título corregido Zeta', $DB->get_field(self::T . 'record', 'title', ['id' => $id]));
+        $this->assertStringContainsString('corregido', $DB->get_field(self::T . 'record', 'searchtext', ['id' => $id]));
+        // The same file again changes nothing.
+        $this->assertSame(0, (new catalogue_import($library, 'marc'))->run($one('Título corregido Zeta'))['updated']);
+        // Changed here: what was done here stays.
+        $DB->set_field(self::T . 'record', 'title', 'Título de aquí Zeta', ['id' => $id]);
+        $this->assertSame(0, (new catalogue_import($library, 'marc'))->run($one('Título otra vez Zeta'))['updated']);
+        $this->assertSame('Título de aquí Zeta', $DB->get_field(self::T . 'record', 'title', ['id' => $id]));
+        $this->assertSame(1, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
     }
 }

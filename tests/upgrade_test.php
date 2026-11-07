@@ -120,4 +120,25 @@ final class upgrade_test extends \advanced_testcase {
         $this->assertTrue($dbman->field_exists('local_oksigeniaayvurenda_loan', 'copyguessed'));
         $this->assertNotEmpty($DB->get_field('local_oksigeniaayvurenda_source', 'localhash', ['localid' => $record->id]));
     }
+
+    /**
+     * The stored search text takes the letters as the search now writes them.
+     */
+    public function test_letters(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Straße']);
+        $DB->set_field('local_oksigeniaayvurenda_record', 'searchtext', 'straße œuvres lodz', ['id' => $record->id]);
+        local_oksigeniaayvurenda_upgrade_letters();
+        local_oksigeniaayvurenda_upgrade_letters();
+        $this->assertSame('strasse oeuvres lodz', $DB->get_field(
+            'local_oksigeniaayvurenda_record',
+            'searchtext',
+            ['id' => $record->id]
+        ));
+    }
 }

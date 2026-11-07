@@ -52,6 +52,17 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 $kind = $kind === 'spines' ? 'spines' : 'labels';
 $sheet = labels::chosen($library, $kind, $asked);
 $which = in_array($which, ['today', 'since', 'codes'], true) ? $which : 'today';
+// Nothing added today: the page opens on the last day something came in (an import of last week), not on «0 copies».
+if (optional_param('which', '', PARAM_ALPHA) === '' && !labels::items($library, 'today', 0, [])) {
+    $last = (int) $DB->get_field_sql(
+        'SELECT MAX(timecreated) FROM {local_oksigeniaayvurenda_item} WHERE libraryid = :libraryid',
+        ['libraryid' => $library->id]
+    );
+    if ($last) {
+        $which = 'since';
+        $sincetext = (new DateTimeImmutable('@' . $last))->setTimezone(core_date::get_user_timezone_object())->format('Y-m-d');
+    }
+}
 $here = ['library' => $library->slug, 'kind' => $kind, 'sheet' => $sheet, 'which' => $which, 'since' => $sincetext,
     'codes' => $codestext];
 // A favourite marked or unmarked, or the print moved for this sheet: kept for the library, and back to the page.

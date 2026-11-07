@@ -121,12 +121,16 @@
         }
     };
 
+    // Why the reads wait, when it is not the network: the session ran out, or the server said no.
+    var stalled = '';
+
     var showPending = function(offline) {
         if (!pending) {
             return;
         }
         pending.hidden = !queue.length;
-        pending.textContent = queue.length ? fill(offline ? str.stocktakeoffline : str.stocktakepending, queue.length) : '';
+        pending.textContent = !queue.length ? '' : fill(stalled === 'session' ? str.stocktakesession
+            : stalled ? str.stocktakeserver : offline ? str.stocktakeoffline : str.stocktakepending, queue.length);
     };
 
     var post = function(params) {
@@ -142,6 +146,14 @@
                 throw new Error(response.status);
             }
             return response.json();
+        }).then(function(answer) {
+            // Moodle says its errors with a 200 and {error, errorcode}: that is an answer, not a sent batch.
+            if (answer && answer.error) {
+                var failed = new Error(answer.error);
+                failed.server = answer.errorcode || 'error';
+                throw failed;
+            }
+            return answer;
         });
     };
 
@@ -188,6 +200,7 @@
         sending = true;
         var batch = queue.slice(0, 50);
         post({action: 'read', reads: JSON.stringify(batch)}).then(function(answer) {
+            stalled = '';
             queue = queue.slice(batch.length);
             save();
             (answer.answers || []).forEach(line);
@@ -198,10 +211,19 @@
                 flush();
             }
             return answer;
-        }).catch(function() {
+        }).catch(function(failed) {
             sending = false;
-            showPending(true);
-            setTimeout(flush, 5000);
+            // A session that ran out keeps everything here until whoever counts comes back in; another refusal waits a
+            // while; no network, a few seconds. Nothing read is thrown away.
+            var session = failed && (failed.server === 'requireloginerror' || failed.server === 'invalidsesskey');
+            stalled = session ? 'session' : (failed && failed.server ? 'server' : '');
+            showPending(!stalled);
+            if (stalled) {
+                tone('no');
+            }
+            if (!session) {
+                setTimeout(flush, stalled ? 30000 : 5000);
+            }
         });
     };
 

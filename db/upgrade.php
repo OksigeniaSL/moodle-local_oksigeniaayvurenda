@@ -607,6 +607,12 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110712, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110716) {
+        // The search text with ß, æ, œ, ø, ł and their company written as a reader writes them, as the search now asks.
+        local_oksigeniaayvurenda_upgrade_letters();
+        upgrade_plugin_savepoint(true, 2026110716, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 
@@ -631,4 +637,27 @@ function local_oksigeniaayvurenda_upgrade_origin(database_manager $dbman): void 
     if (!$dbman->index_exists($table, $index)) {
         $dbman->add_index($table, $index);
     }
+}
+
+/**
+ * The stored search text of the records, with the letters text::normalise() now writes another way. The text was already
+ * normalised, so changing those letters gives what normalising it again would. Nothing happens where it is done already.
+ */
+function local_oksigeniaayvurenda_upgrade_letters(): void {
+    global $DB;
+    $letters = ['ß' => 'ss', 'æ' => 'ae', 'œ' => 'oe', 'ø' => 'o', 'ł' => 'l', 'đ' => 'd', 'ð' => 'd', 'þ' => 'th', 'ı' => 'i'];
+    $likes = [];
+    $params = [];
+    foreach (array_keys($letters) as $i => $letter) {
+        $likes[] = $DB->sql_like('searchtext', ':l' . $i);
+        $params['l' . $i] = '%' . $letter . '%';
+    }
+    $rows = $DB->get_recordset_select('local_oksigeniaayvurenda_record', implode(' OR ', $likes), $params, 'id', 'id, searchtext');
+    foreach ($rows as $row) {
+        $text = strtr((string) $row->searchtext, $letters);
+        if ($text !== $row->searchtext) {
+            $DB->set_field('local_oksigeniaayvurenda_record', 'searchtext', $text, ['id' => $row->id]);
+        }
+    }
+    $rows->close();
 }

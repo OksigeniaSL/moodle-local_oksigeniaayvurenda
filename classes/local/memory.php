@@ -395,9 +395,10 @@ final class memory {
                JOIN {" . self::T . "record} r ON r.id = i.recordid
                JOIN {" . self::T . "recauth} ra ON ra.recordid = r.id
                JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
-              WHERE i.libraryid = :libraryid AND i.status = 'available' AND " . $DB->sql_like('a.code', ':top') . "
+              WHERE i.libraryid = :libraryid AND i.status = 'available'
+                    AND " . catalogue::class_condition('a.code', $top, 'top')[0] . "
            ORDER BY r.id",
-            ['libraryid' => $library->id, 'top' => $top . '%'],
+            ['libraryid' => $library->id] + catalogue::class_condition('a.code', $top, 'top')[1],
             0,
             400
         );

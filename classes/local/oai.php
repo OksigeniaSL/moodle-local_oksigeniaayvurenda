@@ -393,13 +393,15 @@ final class oai {
         $authorities = [];
         foreach (
             $DB->get_records_sql(
-                "SELECT ra.id, a.kind, a.label FROM {" . self::T . "recauth} ra
+                "SELECT ra.id, a.kind, a.label, a.code FROM {" . self::T . "recauth} ra
                    JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
                   WHERE ra.recordid = ? ORDER BY ra.sortorder, ra.id",
                 [$record['id']]
             ) as $one
         ) {
-            $authorities[$one->kind][] = $one->label;
+            // A class by its number, as 080 and 082 ask.
+            $authorities[$one->kind][] = $one->kind === 'class' && trim((string) $one->code) !== '' ? (string) $one->code
+                : $one->label;
         }
         $entity = (string) $DB->get_field(self::T . 'entity', 'name', ['id' => $library->entityid]);
         $marc = \local_oksigeniaayvurenda\core\marc\encoder::encode($row, $authorities, [], format_string(

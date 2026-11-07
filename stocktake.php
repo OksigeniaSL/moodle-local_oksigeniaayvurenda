@@ -188,7 +188,8 @@ $tools = shell::readers_tools($library);
 $strings = [];
 foreach (
     ['stocktakeseen', 'stocktakeagain', 'stocktakemisplaced', 'stocktakelent', 'stocktakefound', 'stocktakewithdrawn',
-        'stocktakeotherlibrary', 'stocktakeunknown', 'stocktakepending', 'stocktakeoffline', 'stocktakereturn',
+        'stocktakeotherlibrary', 'stocktakeunknown', 'stocktakepending', 'stocktakeoffline', 'stocktakesession', 'stocktakeserver',
+        'stocktakereturn',
         'stocktakeprogress', 'deskbadletter'] as $key
 ) {
     $strings[$key] = $str($key);

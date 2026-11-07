@@ -69,4 +69,44 @@ final class corners_test extends \advanced_testcase {
         $this->assertSame(1, catalogue::search($library, 'faro', 0, false, '6', 0)['total']);
         $this->assertSame(2, catalogue::search($library, 'faro', 0, false, '', (int) $subjectid)['total']);
     }
+
+    /**
+     * Libraries that sort by letters (N, P) have their corners, and «J 821» is in the corner of 8.
+     */
+    public function test_letter_corners(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $book = fn(string $title, string $class) => cataloguer::create_record($entityid, [
+            'record' => ['title' => $title],
+            'authorities' => ['class' => [$class]],
+        ], time());
+        $book('Novela del faro', 'N');
+        $book('Novela del puerto', 'N-1');
+        $book('Narraciones del faro', 'NA');
+        $book('Poemas del faro', 'P');
+        $book('Cuentos del faro', 'J 821.134.2');
+
+        $this->assertSame('8', catalogue::top_class('J 821'));
+        $this->assertSame('N', catalogue::top_class('n'));
+        $this->assertNull(catalogue::top_class('QA76.73'));
+        $corners = catalogue::corners($library);
+        $this->assertSame(['8', 'N', 'NA', 'P'], array_column($corners, 'code'));
+        $this->assertSame(['N' => 2], array_intersect_key(array_column($corners, 'count', 'code'), ['N' => 1]));
+        $this->assertCount(4, array_unique(array_column($corners, 'colour')));
+        $this->assertSame(1, catalogue::search($library, 'faro', 0, false, 'N')['total']);
+        $this->assertSame(1, catalogue::search($library, 'faro', 0, false, '8')['total']);
+        $this->assertSame(2, catalogue::corner($library, 'N')['total']);
+        // A corner says how many it has, as a search does, so that its page offers more.
+        for ($i = 0; $i < catalogue::PERPAGE; $i++) {
+            $book('Novela ' . $i, 'N');
+        }
+        $corner = catalogue::corner($library, 'N');
+        $this->assertSame(catalogue::PERPAGE + 2, $corner['reachable']);
+        $this->assertCount(catalogue::PERPAGE, $corner['cards']);
+        $this->assertEquals(['8' => 1, 'N' => 1, 'NA' => 1, 'P' => 1], catalogue::search($library, 'faro')['facets']['corners']);
+    }
 }

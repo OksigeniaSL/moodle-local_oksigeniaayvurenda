@@ -116,7 +116,8 @@ final class callnumber {
      * @return string
      */
     public static function title(string $title): string {
-        $words = text::words($title);
+        // Every word, repeats too («Yo, yo» is not «yo»).
+        $words = array_values(array_filter(explode(' ', text::normalise($title)), 'strlen'));
         while (count($words) > 1 && in_array($words[0], self::ARTICLES, true)) {
             array_shift($words);
         }

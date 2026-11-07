@@ -43,6 +43,14 @@ final class onix_test extends \basic_testcase {
         $this->assertSame('96 p.', $d['record']['extent']);
         $this->assertSame('spa', $d['record']['lang']);
         $this->assertSame('Villanube', $d['record']['pubplace']);
+        // The edition, in the language of the book.
+        $this->assertSame('2.ª ed.', $d['record']['edition']);
+        $english = str_replace(
+            ['<LanguageCode>spa</LanguageCode>', '<EditionNumber>2</EditionNumber>'],
+            ['<LanguageCode>eng</LanguageCode>', '<EditionNumber>3</EditionNumber>'],
+            $xml
+        );
+        $this->assertSame('3rd ed.', onix::records($english)[0]['description']['record']['edition']);
         $this->assertSame('Un faro que duerme.', $d['record']['summary']);
         $this->assertSame(['Editorial Brújula'], $d['authorities']['publisher']);
         $this->assertSame(['Colección Linterna'], $d['authorities']['collection']);

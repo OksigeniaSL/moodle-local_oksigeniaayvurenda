@@ -307,7 +307,13 @@
         log.insertBefore(li, log.firstChild);
     };
 
+    // A save on its way: a second Intro or a double click waits for it instead of sending the book again.
+    var inflight = null;
+
     var save = function() {
+        if (inflight) {
+            return inflight;
+        }
         if (!current) {
             return Promise.resolve();
         }
@@ -334,7 +340,17 @@
             params.barcodes = '';
         }
         var saving = current;
-        return post(params).then(function(answer) {
+        var button = book.querySelector('button[type="submit"]');
+        if (button) {
+            button.setAttribute('aria-disabled', 'true');
+        }
+        var done = function() {
+            inflight = null;
+            if (button) {
+                button.removeAttribute('aria-disabled');
+            }
+        };
+        inflight = post(params).then(function(answer) {
             if (answer.kind === 'similar') {
                 similar(saving, answer);
                 throw new Error('unsure');
@@ -350,7 +366,14 @@
                 say(error.message || str.adderror, 'no');
             }
             throw error;
+        }).then(function(answer) {
+            done();
+            return answer;
+        }, function(error) {
+            done();
+            throw error;
         });
+        return inflight;
     };
 
     // A book without an ISBN whose title (and author) the library already has: the same one, or another?
@@ -397,6 +420,10 @@
             }
             show(answer);
             return answer;
+        }).catch(function(error) {
+            // A search that fails says so, instead of «Looking up…» for ever.
+            say(error.message || str.adderror, 'no');
+            throw error;
         });
     };
 
@@ -483,7 +510,11 @@
             results.insertBefore(meant, results.firstChild);
             return null;
         });
-        return post({action: 'searchwhere'}).then(function(where) {
+        return post({action: 'searchwhere'}).catch(function(error) {
+            // The search could not even start: said, not «Searching…» for ever.
+            say(error.message || str.adderror, 'no');
+            throw error;
+        }).then(function(where) {
             var left = where.sources.slice();
             var total = left.length;
             var done = 0;

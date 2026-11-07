@@ -64,9 +64,9 @@ final class hunt {
                                            FROM {" . self::T . "recauth} ra
                                            JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
                                           WHERE a.entityid = :entityid AND a.kind = 'class' AND " .
-            $DB->sql_like('a.code', ':code') . ")";
-        $params = ['libraryid' => $library->id, 'entityid' => $library->entityid,
-            'code' => $DB->sql_like_escape($corner) . '%'];
+            catalogue::class_condition('a.code', $corner, 'code')[0] . ")";
+        $params = ['libraryid' => $library->id, 'entityid' => $library->entityid]
+            + catalogue::class_condition('a.code', $corner, 'code')[1];
         $unread = '';
         if ($readerid) {
             $unread = " AND NOT EXISTS (SELECT 1

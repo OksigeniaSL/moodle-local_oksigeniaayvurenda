@@ -467,4 +467,18 @@ final class cataloguer_test extends \advanced_testcase {
         $this->assertFalse(cataloguer::add($other, $description, ['count' => 1, 'itemtype' => 'device'])['ruled']);
         $this->assertSame([], rules::of((int) $other->id));
     }
+
+    /**
+     * A field longer than its column (an edition statement from another program) is cut, not an error.
+     */
+    public function test_long_fields(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $id = cataloguer::create_record((int) $library->entityid, ['record' => ['title' => 'Zeta larga',
+            'edition' => str_repeat('Edición revisada y aumentada, ', 20), 'extent' => str_repeat('ñ', 400)]], time());
+        $record = $DB->get_record('local_oksigeniaayvurenda_record', ['id' => $id]);
+        $this->assertSame(255, \core_text::strlen($record->edition));
+        $this->assertSame(str_repeat('ñ', 255), $record->extent);
+    }
 }
