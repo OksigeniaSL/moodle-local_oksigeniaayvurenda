@@ -39,8 +39,8 @@ final class applink_test extends \advanced_testcase {
         $library = $gen->create_library();
         $withaccount = $gen->create_reader(['entityid' => $library->entityid,
             'userid' => $this->getDataGenerator()->create_user()->id]);
-        $noaccount = $gen->create_reader(['entityid' => $library->entityid, 'firstname' => 'Nico', 'lastname' => 'Zeta',
-            'email' => 'nico.zeta@example.com']);
+        $noaccount = $gen->create_reader(['entityid' => $library->entityid, 'firstname' => 'Bruno', 'lastname' => 'Zeta',
+            'email' => 'bruno.zeta@example.com']);
         $noemail = $gen->create_reader(['entityid' => $library->entityid, 'firstname' => 'Mario']);
         $sibling = $gen->create_reader(['entityid' => $library->entityid, 'firstname' => 'Lucía',
             'email' => 'familia@example.com']);
@@ -58,7 +58,7 @@ final class applink_test extends \advanced_testcase {
             $this->assertSame('appsent', applink::send($withaccount));
             $this->assertSame('appcreated', applink::send($noaccount));
             $this->assertSame('apptaken', applink::send($sibling));
-            $this->assertSame(['nico.zeta@example.com'], array_slice(array_column($sink->get_messages(), 'to'), 1));
+            $this->assertSame(['bruno.zeta@example.com'], array_slice(array_column($sink->get_messages(), 'to'), 1));
             $sink->close();
             $noaccount = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $noaccount->id]);
             $DB->set_field('local_oksigeniaayvurenda_reader', 'userid', null, ['id' => $noaccount->id]);
@@ -71,7 +71,7 @@ final class applink_test extends \advanced_testcase {
         $userid = applink::account($noaccount);
         $user = \core_user::get_user($userid);
         $this->assertSame(
-            ['Nico', 'Zeta', 'nico.zeta@example.com', 'manual'],
+            ['Bruno', 'Zeta', 'bruno.zeta@example.com', 'manual'],
             [$user->firstname, $user->lastname, $user->email, $user->auth]
         );
         $this->assertSame($userid, (int) $DB->get_field('local_oksigeniaayvurenda_reader', 'userid', ['id' => $noaccount->id]));
@@ -100,7 +100,7 @@ final class applink_test extends \advanced_testcase {
         set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
         $mine = libraries::create_entity(['name' => 'Centro uno', 'library' => 'Uno']);
         $other = libraries::create_entity(['name' => 'Centro dos', 'library' => 'Dos']);
-        $reader = $plugin->create_reader(['entityid' => $mine->entityid, 'firstname' => 'Nico', 'email' => 'nico@example.com']);
+        $reader = $plugin->create_reader(['entityid' => $mine->entityid, 'firstname' => 'Bruno', 'email' => 'bruno@example.com']);
         $theirs = $plugin->create_reader(['entityid' => $other->entityid, 'firstname' => 'Iris', 'email' => 'iris@example.com']);
         $role = create_role('Desk', 'ayvdesk', 'Made up for the test');
         set_role_contextlevels($role, [CONTEXT_COURSECAT]);
