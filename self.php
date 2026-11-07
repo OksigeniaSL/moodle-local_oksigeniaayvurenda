@@ -68,7 +68,8 @@ $data = [
 ];
 $strings = [];
 foreach (
-    ['selfidle', 'selfnext', 'selfdue', 'selfbye', 'selfbyenoname', 'selfoffline', 'selfgonenow', 'cameratitle', 'camerahint',
+    ['selfidle', 'selfnext', 'selfdue', 'selfbye', 'selfbyenoname', 'selfstill', 'selfoffline', 'selfgonenow', 'cameratitle',
+        'camerahint',
         'cameraclose', 'cameranone', 'camerastarting', 'cameraread', 'cameranotsecure'] as $word
 ) {
     $strings[$word] = $str($word);

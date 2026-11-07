@@ -117,7 +117,7 @@
     <dialog class="ayv-modal" id="ayv-closure-new" aria-labelledby="ayv-closure-new-title">
         <div class="ayv-modal-head"><h3 id="ayv-closure-new-title" class="ayv-section-title">{{closuresadd}}</h3>
             <form method="dialog"><button class="ayv-modal-close" aria-label="{{closuresclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <form method="post" action="{{action}}#ayv-closures">
+        <form method="post" action="{{action}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="closedadd">
             <label class="ayv-field">{{closuresname}} <span class="ayv-field-hint">{{closuresnamehint}}</span> <input type="text" name="label" maxlength="60"></label>
             <label class="ayv-field">{{closuresfrom}} <input type="date" name="from" value="{{closurestoday}}" required></label>

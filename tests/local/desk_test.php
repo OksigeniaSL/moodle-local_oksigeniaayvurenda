@@ -343,6 +343,24 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * A second copy of a book the reader already has stops (the librarian may go ahead).
+     */
+    public function test_same_title(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $DB->set_field(self::T . 'rule', 'maxloans', 3, ['libraryid' => $w->library->id, 'readertype' => 'student']);
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $w->faro->recordid, 'barcode' => '100009M']);
+        $desk = new desk($w->library, (int) $w->staff->id);
+        $this->assertSame('lent', $desk->scan('100000L', (int) $w->ana->id)['kind']);
+        $second = $desk->scan('100009M', (int) $w->ana->id);
+        $this->assertSame('sametitle', $second['reason']);
+        $this->assertTrue($second['forceable']);
+        $this->assertSame('lent', $desk->scan('100009M', (int) $w->ana->id, true)['kind']);
+    }
+
+    /**
      * Two desks read the same copy at once: the one that comes second, with the copy it read still free, does not lend it
      * again.
      */

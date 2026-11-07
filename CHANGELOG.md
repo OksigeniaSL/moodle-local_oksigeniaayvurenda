@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.178.0
+
+- The desk: «Renew» on each loan of the reader's card, without the book; with a reader open, the field says whom it lends
+  to and the day's figures stay under the card; «Their record» opens in the same tab and «Close» says «Done, next»;
+  «Due today» opens today's list.
+- A name typed at the desk shows the people first; the books that also have those words are folded under them.
+- A code read twice that is not of this library says so, instead of «read it again» for ever; a second copy of a book the
+  reader already has stops (the librarian may go ahead).
+- An error page of the site is no longer taken for a lost network: that scan shows as failed and the desk goes on.
+- A centre that has just started sees, at its desk, where to begin: books, readers, labels and cards.
+- The self-loan station keeps a visit for a minute and a half, asks fifteen seconds before it ends, and any touch gives
+  more time.
+- «My shelf» and asking for another format, opened by their address, answer as pages of the library.
+- With everything of 0.177.0, which never reached a site (a template of «School year» did not pass the CI).
+
 ## 0.177.0
 
 - Closed days: each centre names the days it is closed (holidays, a local festival, a move) on «School year»; nothing

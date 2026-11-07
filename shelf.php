@@ -41,8 +41,12 @@ shell::require('local/oksigeniaayvurenda:view', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/shelf.php', ['library' => $ref]));
 
-if (!$library || !shelf::can_use($library, (int) $USER->id)) {
-    throw new required_capability_exception($context, 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+if (!$library) {
+    shell::missing(get_string('nolibrary', 'local_oksigeniaayvurenda'));
+}
+// A pupil, or a teacher who is not this class's tutor, that got here by its address: a page of the library, not Moodle's.
+if (!shelf::can_use($library, (int) $USER->id)) {
+    shell::refuse(get_string('shelfnotyours', 'local_oksigeniaayvurenda'), $library);
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $url = fn(array $params = []) => new moodle_url('/local/oksigeniaayvurenda/shelf.php', ['library' => $library->slug] + $params);

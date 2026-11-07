@@ -856,6 +856,8 @@ final class desk {
                     'local_oksigeniaayvurenda',
                     $days
                 ) : '',
+                // More time without the book here (the reader at the desk, the family on the phone), where the rules let.
+                'renewable' => $this->renewable((int) $row->id) !== null,
             ];
         }
         // Whoever keeps one library only sees what waits for the reader there.
@@ -1093,7 +1095,7 @@ final class desk {
         // textbooks of a bank, nor the books of a classroom with rules of its own.
         [$in, $params] = $DB->get_in_or_equal($this->same_rules(), SQL_PARAMS_NAMED, 'lib');
         $open = $DB->get_records_sql(
-            'SELECT l.id, l.timedue, i.itemtype
+            'SELECT l.id, l.timedue, i.itemtype, i.recordid
                FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'item} i ON i.id = l.itemid
               WHERE l.readerid = :readerid AND l.timereturned IS NULL AND l.libraryid ' . $in . '
@@ -1122,7 +1124,9 @@ final class desk {
             $force,
             $set && (int) $set->readerid !== $readerid,
             $sanction['reason'] ?? null,
-            $reader->status !== 'active'
+            $reader->status !== 'active',
+            // Two copies of one book to one reader is rarely meant (a bank's set, where a title comes once, is not here).
+            (bool) array_filter($open, fn($loan) => (int) $loan->recordid === (int) $item->recordid)
         );
         if ($decision !== policy::OK) {
             $a = (object) ['title' => $this->title($item), 'max' => $rule['maxloans'] ?? 0,

@@ -64,7 +64,8 @@ foreach (
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
         'deskbankset', 'deskbankmissing', 'deskbankdone', 'deskbankcontract',
         'desklendheld', 'deskroom', 'deskgiveback', 'deskbookfree', 'deskbookfreeone',
-        'deskshelfhint', 'deskmorebooks', 'deskforwhom', 'deskmorereaders', 'desklost', 'desklostsure'] as $key
+        'deskshelfhint', 'deskmorebooks', 'deskforwhom', 'deskmorereaders', 'desklost', 'desklostsure', 'deskfor', 'deskbooksalso',
+        'deskbadletteragain'] as $key
 ) {
     $strings[$key] = $str($key);
 }
@@ -83,14 +84,15 @@ foreach (
     if ($today[$key] > 0) {
         $inner = '<span class="ayv-today-number">' . $today[$key] . '</span><span class="ayv-today-label">' .
             s($str($label)) . '</span>';
-        if ($key === 'today' || $own) {
+        if ($own) {
             $cards .= '<li class="ayv-today-card ayv-today-' . $key . '">' . $inner . '</li>';
         } else {
             $page = ['held' => 'holds.php', 'reviews' => 'reviews.php', 'wishes' => 'wishes.php',
                 'selfposts' => 'selfloan.php', 'ill' => 'ill.php', 'formats' => 'formats.php'][$key] ?? null;
+            // What comes back today opens what is out, filtered to today.
             $url = $page ? new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug])
                 : new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug,
-                    'all' => (int) ($key === 'out')]);
+                    'all' => (int) ($key === 'out' || $key === 'today')] + ($key === 'today' ? ['span' => 'today'] : []));
             $cards .= '<li><a class="ayv-today-card ayv-today-' . $key . '" href="' . $url->out() . '">' . $inner . '</a></li>';
         }
     }
@@ -112,6 +114,34 @@ if (!$help && access::can('local/oksigeniaayvurenda:manage', $library)) {
             s($label) . '</a></p>';
     }
 }
+// A centre that has just started: where to begin, in three steps, until it has books and readers.
+$start = '';
+if (!$help && !$own) {
+    $books = $DB->record_exists('local_oksigeniaayvurenda_item', ['entityid' => $library->entityid]);
+    $people = $DB->record_exists_select(
+        'local_oksigeniaayvurenda_reader',
+        "entityid = ? AND status = 'active' AND readertype <> 'library'",
+        [$library->entityid]
+    );
+    if (!$books || !$people) {
+        $link = fn(string $page, string $label, string $cap) => access::can($cap, $library)
+            ? '<a class="ayv-button ayv-button-quiet" href="' . (new moodle_url(
+                '/local/oksigeniaayvurenda/' . $page,
+                ['library' => $library->slug]
+            ))->out() . '">' . s($str($label)) . '</a>' : '';
+        $step = fn(bool $done, string $text, string $buttons) => '<li class="ayv-start-step' . ($done ? ' ayv-start-done' : '')
+            . '"><span class="ayv-start-state">' . s($str($done ? 'deskstartdone' : 'deskstartpending')) . '</span> <span>'
+            . s($str($text)) . '</span>' . ($done ? '' : '<span class="ayv-start-go">' . $buttons . '</span>') . '</li>';
+        $start = '<section class="ayv-start" aria-labelledby="ayv-start-title"><h2 id="ayv-start-title" class="ayv-section-title">'
+            . s($str('deskstartheading')) . '</h2><ol class="ayv-start-steps">'
+            . $step($books, 'deskstartbooks', $link('import.php', 'menuimport', 'local/oksigeniaayvurenda:catalogue')
+                . $link('add.php', 'menuadd', 'local/oksigeniaayvurenda:catalogue'))
+            . $step($people, 'deskstartreaders', $link('sources.php', 'menusources', 'local/oksigeniaayvurenda:manage'))
+            . $step(false, 'deskstartlabels', $link('labels.php', 'menulabels', 'local/oksigeniaayvurenda:catalogue')
+                . $link('cardprint.php', 'menucards', 'local/oksigeniaayvurenda:desk'))
+            . '</ol></section>';
+    }
+}
 $tools = shell::readers_tools($library);
 if ($help) {
     $tools['html'] = '';
@@ -127,10 +157,10 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
     <input id="ayv-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
         autofocus maxlength="200">
 </form>
-' . $tools['html'] . '
+' . $tools['html'] . $start . '
 <div id="ayv-reader" class="ayv-reader" hidden></div>
 <ul id="ayv-today" class="ayv-today">' . $cards . '</ul>
-<ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
+<ol id="ayv-log" class="ayv-log" aria-live="polite" data-empty="' . s($str('desklogempty')) . '"></ol>
 ' . $yearlink . '
 </section>';
 shell::output($str('desktitle'), $main, $library, '', [

@@ -29,13 +29,16 @@ use local_oksigeniaayvurenda\local\shell;
 require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
-require_sesskey();
 $library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
 shell::require('local/oksigeniaayvurenda:view', $library);
 if (!$library) {
-    throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
+    shell::missing(get_string('nolibrary', 'local_oksigeniaayvurenda'));
 }
 $recordid = required_param('record', PARAM_INT);
+// Opened by its address, not from the book's page: back to the book, asking nothing.
+if (!confirm_sesskey()) {
+    redirect(new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $recordid]));
+}
 $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
     'status' => 'active'], '*', IGNORE_MULTIPLE);
 $asked = $reader ? formats::ask($library, $reader, $recordid, required_param('format', PARAM_ALPHA)) : 0;

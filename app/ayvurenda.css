@@ -504,6 +504,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 }
 
 .ayv .ayv-scan input:focus { outline: 4px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-scan-reader input { border-color: var(--green); box-shadow: 0 0 0 2px color-mix(in srgb, var(--green) 30%, transparent); }
+.ayv .ayv-scan-reader .ayv-scan-label { font-weight: 700; }
 
 .ayv .ayv-reader {
     padding: 1rem 1.25rem;
@@ -4570,3 +4572,19 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-closure-words span { color: color-mix(in srgb, currentColor 80%, transparent); }
 .ayv .ayv-closure form { margin: 0; }
 .ayv .ayv-closure-past { opacity: .65; }
+
+/* At the desk, the books that also have the words of a name, folded under the people found. */
+.ayv .ayv-line-morebooks { flex-basis: 100%; margin: .35rem 0 0; }
+.ayv .ayv-line-morebooks > summary { cursor: pointer; font-weight: 600; padding: .3rem 0; }
+.ayv .ayv-line-morebooks[open] > summary { margin-bottom: .35rem; }
+
+/* The desk of a centre that has just started: where to begin. */
+.ayv .ayv-log:empty::before { content: attr(data-empty); display: block; padding: .75rem 1rem; color: color-mix(in srgb, currentColor 75%, transparent); }
+.ayv .ayv-start { margin: 1rem 0; padding: 1rem 1.25rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.ayv .ayv-start-steps { margin: .5rem 0 0; padding: 0; list-style: none; display: grid; gap: .6rem; }
+.ayv .ayv-start-step { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .75rem; }
+.ayv .ayv-start-state { flex: 0 0 auto; padding: .1rem .55rem; border-radius: 999px; font-size: .85rem; font-weight: 700; background: color-mix(in srgb, var(--sun) 35%, transparent); }
+.ayv .ayv-start-done .ayv-start-state { background: color-mix(in srgb, var(--green) 25%, transparent); }
+.ayv .ayv-start-done > span:nth-child(2) { color: color-mix(in srgb, currentColor 75%, transparent); }
+.ayv .ayv-start-go { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ayv .ayv-self-still { margin: 1rem 0 0; padding: .6rem 1rem; border-radius: .8rem; font-weight: 700; background: color-mix(in srgb, var(--sun) 35%, transparent); }

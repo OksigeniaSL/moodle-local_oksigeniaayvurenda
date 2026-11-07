@@ -43,6 +43,8 @@
     var hand = [];
     var handbox = null;
     var label = form.querySelector('.ayv-scan-label');
+    var readername = '';
+    var lastbad = '';
     var prompt = label ? label.textContent : '';
 
     // Sounds: short, made here, the same on every machine. The scanner's own beep should be off.
@@ -111,6 +113,16 @@
         });
         return fetch(config.ajaxurl, {method: 'POST', credentials: 'same-origin', body: body})
             .then(function(response) {
+                // A gateway that does not reach the site (502 to 504) is as good as no network: the scan waits. Any other
+                // page that is not the desk's answer (an error of the site, a maintenance page) is the server answering:
+                // that scan is shown as failed and the desk goes on, never stuck behind it.
+                if (response.status >= 502 && response.status <= 504) {
+                    throw new TypeError('gateway ' + response.status);
+                }
+                var type = response.headers.get('Content-Type') || '';
+                if (!response.ok || type.indexOf('json') === -1) {
+                    throw new Error('server ' + response.status);
+                }
                 return response.json();
             })
             .then(function(answer) {
@@ -139,17 +151,16 @@
         panel.textContent = '';
         if (!reader) {
             readerid = 0;
+            readername = '';
             panel.hidden = true;
-            if (today) {
-                today.hidden = false;
-            }
+            paintHand();
             return;
         }
         readerid = reader.id;
         panel.hidden = false;
-        if (today) {
-            today.hidden = true;
-        }
+        // The field says who it lends to now; the figures of the day stay, under the card.
+        readername = reader.name;
+        paintHand();
         var head = el('div', 'ayv-reader-head');
         head.appendChild(face(reader, 'ayv-reader-face'));
         var who = el('div', 'ayv-reader-who');
@@ -158,11 +169,9 @@
             who.appendChild(el('span', 'ayv-reader-group', reader.group));
         }
         if (reader.url) {
-            // Their record opens apart, so the desk stays as it is.
+            // Their record, in this same tab: it knows its way back to the desk.
             var record = el('a', 'ayv-reader-record', str.profileview);
             record.href = reader.url;
-            record.target = '_blank';
-            record.rel = 'noopener';
             who.appendChild(record);
         }
         head.appendChild(who);
@@ -216,6 +225,19 @@
             var item = el('li', loan.late ? 'ayv-loan ayv-loan-late' : 'ayv-loan');
             item.appendChild(el('span', 'ayv-loan-title', loan.title));
             item.appendChild(el('span', 'ayv-loan-due', loan.late || loan.due));
+            // More time, without the book: the reader is here, or the family asks.
+            if (loan.renewable) {
+                item.appendChild(button(str.deskrenew, 'ayv-line-quiet ayv-loan-renew', function(b) {
+                    b.disabled = true;
+                    post({action: 'renew', loanid: loan.id}).then(function(renewed) {
+                        add(renewed);
+                        return renewed;
+                    }).catch(function() {
+                        tone('no');
+                        b.disabled = false;
+                    });
+                }));
+            }
             // A book without a label comes back with a touch.
             item.appendChild(button(str.deskgiveback, 'ayv-line-quiet ayv-loan-back', function(b) {
                 b.disabled = true;
@@ -424,45 +446,9 @@
                 }
             }));
         } else if (answer.kind === 'choose') {
-            // A book without a label, by its title: on the shelf to lend, or out to bring back.
-            (answer.books || []).forEach(function(book) {
-                var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
-                    return book.free;
-                });
-                actions.appendChild(bookChoice(book.title, [book.author, free, book.callnumber], function() {
-                    li.classList.add('ayv-line-undone');
-                    actions.textContent = '';
-                    choose({action: 'lendrecord', recordid: book.recordid, readerid: answer.readerid || readerid}, book.title);
-                }));
-            });
-            (answer.out || []).forEach(function(loan) {
-                actions.appendChild(bookChoice(loan.title, [loan.who, loan.due], function() {
-                    li.classList.add('ayv-line-undone');
-                    actions.textContent = '';
-                    choose({action: 'giveback', loanid: loan.loanid, readerid: readerid}, loan.title);
-                }));
-            });
-            // What is on the shelf: a touch and the desk asks who takes it.
-            if (answer.shelf && answer.shelf.length) {
-                if ((answer.out || []).length || (answer.readers || []).length) {
-                    actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskshelfhint));
-                }
-                answer.shelf.forEach(function(book) {
-                    var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
-                        return book.free;
-                    });
-                    actions.appendChild(bookChoice(book.title, [book.author, free, book.callnumber], function(b) {
-                        b.disabled = false;
-                        takeUp([{recordid: book.recordid, title: book.title, more: [book.author, book.callnumber]}], li);
-                    }));
-                });
-            }
-            // More than it shows: another word narrows it.
-            if (answer.more > 0) {
-                actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskmorebooks.replace('{$a}', function() {
-                    return answer.more;
-                })));
-            }
+            // Who it is first, when people were found: the books that also have those words, folded under them.
+            var people = (answer.readers || []).length > 0;
+            var hasbooks = (answer.books || []).length || (answer.out || []).length || (answer.shelf || []).length;
             (answer.readers || []).forEach(function(reader) {
                 var choice = button(reader.name + (reader.group ? ' · ' + reader.group : ''), 'ayv-line-choice', function() {
                     post({action: 'reader', readerid: reader.id}).then(function(found) {
@@ -482,6 +468,51 @@
             });
             if (answer.morereaders) {
                 actions.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskmorereaders));
+            }
+            var bookbox = actions;
+            if (people && hasbooks) {
+                bookbox = el('details', 'ayv-line-morebooks');
+                bookbox.appendChild(el('summary', '', str.deskbooksalso));
+                actions.appendChild(bookbox);
+            }
+            // A book without a label, by its title: on the shelf to lend, or out to bring back.
+            (answer.books || []).forEach(function(book) {
+                var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
+                    return book.free;
+                });
+                bookbox.appendChild(bookChoice(book.title, [book.author, free, book.callnumber], function() {
+                    li.classList.add('ayv-line-undone');
+                    actions.textContent = '';
+                    choose({action: 'lendrecord', recordid: book.recordid, readerid: answer.readerid || readerid}, book.title);
+                }));
+            });
+            (answer.out || []).forEach(function(loan) {
+                bookbox.appendChild(bookChoice(loan.title, [loan.who, loan.due], function() {
+                    li.classList.add('ayv-line-undone');
+                    actions.textContent = '';
+                    choose({action: 'giveback', loanid: loan.loanid, readerid: readerid}, loan.title);
+                }));
+            });
+            // What is on the shelf: a touch and the desk asks who takes it.
+            if (answer.shelf && answer.shelf.length) {
+                if ((answer.out || []).length || (answer.readers || []).length) {
+                    bookbox.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskshelfhint));
+                }
+                answer.shelf.forEach(function(book) {
+                    var free = book.free === 1 ? str.deskbookfreeone : str.deskbookfree.replace('{$a}', function() {
+                        return book.free;
+                    });
+                    bookbox.appendChild(bookChoice(book.title, [book.author, free, book.callnumber], function(b) {
+                        b.disabled = false;
+                        takeUp([{recordid: book.recordid, title: book.title, more: [book.author, book.callnumber]}], li);
+                    }));
+                });
+            }
+            // More than it shows: another word narrows it.
+            if (answer.more > 0) {
+                bookbox.appendChild(el('p', 'ayv-line-note ayv-line-shelf-hint', str.deskmorebooks.replace('{$a}', function() {
+                    return answer.more;
+                })));
             }
         }
         if (actions.childNodes.length) {
@@ -543,7 +574,9 @@
     var paintHand = function() {
         form.classList.toggle('ayv-scan-hand', hand.length > 0);
         if (label) {
-            label.textContent = hand.length ? str.deskforwhom : prompt;
+            label.textContent = hand.length ? str.deskforwhom
+                : (readername ? str.deskfor.replace('{$a}', function() { return readername; }) : prompt);
+            form.classList.toggle('ayv-scan-reader', !hand.length && !!readername);
         }
         if (handbox) {
             handbox.remove();
@@ -679,7 +712,7 @@
         bar.textContent = pending.length === 1 ? str.deskofflineone : (str.deskofflinemany || '').replace('{$a}', function() { return pending.length; });
     };
     var lostNetwork = function(error) {
-        return !navigator.onLine || error instanceof TypeError || error instanceof SyntaxError;
+        return !navigator.onLine || error instanceof TypeError;
     };
     var keep = function(job) {
         loadPending();
@@ -815,7 +848,9 @@
     var read = function(code) {
         if (!control(code)) {
             tone('no');
-            line({kind: 'badletter', sound: 'no', message: str.deskbadletter}, code);
+            // The same code twice is not a bad reading: it is a label of another library or program.
+            line({kind: 'badletter', sound: 'no', message: code === lastbad ? str.deskbadletteragain : str.deskbadletter}, code);
+            lastbad = code;
             return;
         }
         enqueue(code, false);

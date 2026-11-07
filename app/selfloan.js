@@ -60,8 +60,18 @@
     var done = document.getElementById('ayv-self-done');
     var camera = document.getElementById('ayv-self-camera');
     var type = document.getElementById('ayv-self-type');
-    var LONELY = 45000;
+    // A visit ends alone after a minute and a half without reading anything, so the next one does not see a first name;
+    // fifteen seconds before, the screen asks, and any touch or key gives more time.
+    var LONELY = 90000;
+    var WARN = 15000;
     var GOODBYE = 6000;
+    var warned = null;
+    var still = document.createElement('p');
+    still.className = 'ayv-self-still';
+    still.setAttribute('role', 'status');
+    still.hidden = true;
+    still.textContent = str.selfstill || '';
+    root.appendChild(still);
     var ticket = '';
     var name = '';
     var lonely = null;
@@ -141,10 +151,22 @@
 
     var wait = function() {
         clearTimeout(lonely);
+        clearTimeout(warned);
+        still.hidden = true;
         if (ticket) {
+            warned = setTimeout(function() {
+                still.hidden = false;
+            }, LONELY - WARN);
             lonely = setTimeout(end, LONELY);
         }
     };
+    ['pointerdown', 'keydown'].forEach(function(name) {
+        document.addEventListener(name, function() {
+            if (ticket) {
+                wait();
+            }
+        });
+    });
 
     var line = function(answer) {
         var li = document.createElement('li');

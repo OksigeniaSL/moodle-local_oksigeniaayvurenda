@@ -62,8 +62,12 @@ final class policy {
     /** @var string The reader left the centre, or their card is suspended. The librarian may go ahead. */
     public const INACTIVE = 'inactive';
 
+    /** @var string The reader already has another copy of this book. The librarian may go ahead. */
+    public const SAMETITLE = 'sametitle';
+
     /** @var string[] Reasons the librarian may override. */
-    public const FORCEABLE = [self::LIMIT, self::LATE, self::HELD, self::SUSPENDED, self::OWES, self::INACTIVE];
+    public const FORCEABLE = [self::LIMIT, self::LATE, self::HELD, self::SUSPENDED, self::OWES, self::INACTIVE,
+        self::SAMETITLE];
 
     /**
      * Whether a copy can be lent to a reader now.
@@ -76,6 +80,7 @@ final class policy {
      * @param bool $heldforother The copy is set aside for someone else.
      * @param string|null $sanction SUSPENDED or OWES, where the centre stops such a reader.
      * @param bool $inactive The reader left the centre or is suspended.
+     * @param bool $sametitle The reader already has another copy of this book.
      * @return string One of the constants.
      */
     public static function lend(
@@ -86,7 +91,8 @@ final class policy {
         bool $force = false,
         bool $heldforother = false,
         ?string $sanction = null,
-        bool $inactive = false
+        bool $inactive = false,
+        bool $sametitle = false
     ): string {
         if ($status !== 'available' && $status !== 'onloan' && $status !== 'held') {
             return self::UNAVAILABLE;
@@ -108,6 +114,9 @@ final class policy {
         }
         if (!$force && $lateloans > 0) {
             return self::LATE;
+        }
+        if (!$force && $sametitle) {
+            return self::SAMETITLE;
         }
         return self::OK;
     }
