@@ -36,6 +36,20 @@ require(__DIR__ . '/../../config.php');
 
 $ref = optional_param('library', '', PARAM_ALPHANUMEXT);
 require_login(null, false);
+// Opened without its library (a bookmark, an old link): the library of the reader's card, where everything is.
+if ($ref === '' && !optional_param('reader', 0, PARAM_INT)) {
+    $own = $DB->get_record_select(
+        'local_oksigeniaayvurenda_reader',
+        "userid = ? AND status = 'active'",
+        [$USER->id],
+        'id, entityid',
+        IGNORE_MULTIPLE
+    );
+    $home = $own ? \local_oksigeniaayvurenda\local\mail::main_library((int) $own->entityid) : null;
+    if ($home) {
+        redirect(new moodle_url('/local/oksigeniaayvurenda/card.php', ['library' => $home->slug]));
+    }
+}
 $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:view', $library);
@@ -146,7 +160,22 @@ foreach ($readers as $reader) {
         $herald['listen'] = \local_oksigeniaayvurenda\local\screens::listen(['herald-' . $sex . '/{lang}/heraldstage' . $stage]);
     }
     // The collector cards of the corners: pictures, so not in the classic look.
-    $cromos = $look === 'flower' || $sky ? (garden::cromos($reader, $library) ?? []) : [];
+    // A school's album: the flower's, and the sky's of a school or a high school; never an adult's at a university.
+    $album = $look === 'flower' || ($sky && in_array(
+        \local_oksigeniaayvurenda\local\skins::of((int) $reader->entityid),
+        ['school', 'secondary'],
+        true
+    ));
+    $cromos = $album ? (garden::cromos(
+        $reader,
+        $library ?? \local_oksigeniaayvurenda\local\mail::main_library((int) $reader->entityid)
+    ) ?? []) : [];
+    // Mainumby whole beside an empty album: where the skin has the characters whole, and at a public library for the young.
+    $whole = \local_oksigeniaayvurenda\local\skins::lively((int) $reader->entityid) && (!in_array(
+        \local_oksigeniaayvurenda\local\skins::of((int) $reader->entityid),
+        \local_oksigeniaayvurenda\local\skins::FIGURES_YOUNG,
+        true
+    ) || $look === 'flower');
     foreach ($cromos as &$cromo) {
         $cromo['state'] = $cromo['won'] ? $cromo['when'] : $str('cromonotyet');
         $cromo['label'] = $str($cromo['won'] ? 'cromowon' : 'cromomissing', (object) ['name' => $cromo['name'],
@@ -191,9 +220,9 @@ foreach ($readers as $reader) {
         'listennobooks' => $young ? \local_oksigeniaayvurenda\local\screens::listen(['ui/{lang}/cardnobooks']) : null,
         // Mainumby reading beside an empty album, when the herald is on and has no portrait of the centre's own.
         'nobooksfigure' => ($heraldchar = \local_oksigeniaayvurenda\local\characters::of((int) $reader->entityid)['herald'] ?? null)
-            && $heraldchar['enabled'] && empty($heraldchar['own'])
+            && $heraldchar['enabled'] && empty($heraldchar['own']) && $whole
             ? \local_oksigeniaayvurenda\local\characters::figure('herald', 'lee', $look === 'flower' ? '' : 'cielo') : null,
-        'nobookspuppet' => !empty($heraldchar['enabled']) && empty($heraldchar['own'])
+        'nobookspuppet' => !empty($heraldchar['enabled']) && empty($heraldchar['own']) && $whole
             ? \local_oksigeniaayvurenda\local\characters::puppet('herald', 'lee', $look === 'flower' ? '' : 'cielo') : '',
         'listengarden' => $young ? \local_oksigeniaayvurenda\local\screens::listen(
             ['ui/{lang}/challengegarden', 'ui/{lang}/challengegardenhint']
@@ -243,7 +272,7 @@ if (!$cardsdata && $isdesk) {
 }
 $data = [
     'heading' => $str('cardtitle'),
-    'athome' => \local_oksigeniaayvurenda\local\screens::at_home($library),
+    'athome' => $library ? \local_oksigeniaayvurenda\local\screens::at_home($library) : null,
     'preview' => $preview,
     'practice' => $practice,
     'cards' => $cardsdata,

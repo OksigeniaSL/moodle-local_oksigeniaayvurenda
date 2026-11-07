@@ -42,6 +42,10 @@ if (!$courseid) {
     shell::require('local/oksigeniaayvurenda:desk', $library);
     $PAGE->set_context(context_system::instance());
     $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $ref]));
+    // A library of a skin without courses (public, company, mobile) has nobody to ask it for readings.
+    if (\local_oksigeniaayvurenda\local\skins::no_courses((int) $library->entityid)) {
+        shell::missing($str('readingsnocourses'), $library);
+    }
     $now = time();
     if (optional_param('fragments', 0, PARAM_BOOL)) {
         // The record of the parts given to the courses, for whoever the rights are paid to.

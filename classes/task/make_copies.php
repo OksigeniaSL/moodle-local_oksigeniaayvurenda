@@ -42,9 +42,19 @@ class make_copies extends \core\task\scheduled_task {
      */
     public function execute(): void {
         global $DB;
-        \local_oksigeniaayvurenda\local\covers::forget_drafts();
-        \local_oksigeniaayvurenda\local\relay::forget();
-        \local_oksigeniaayvurenda\local\practice::sweep();
+        // The sweeps first, each apart: one that fails leaves no centre without its copy.
+        $sweeps = [
+            'drafts of covers' => fn() => \local_oksigeniaayvurenda\local\covers::forget_drafts(),
+            'phones paired with a desk' => fn() => \local_oksigeniaayvurenda\local\relay::forget(),
+            'practice libraries' => fn() => \local_oksigeniaayvurenda\local\practice::sweep(),
+        ];
+        foreach ($sweeps as $what => $sweep) {
+            try {
+                $sweep();
+            } catch (\Throwable $e) {
+                mtrace('Ayvurenda: ' . $what . ' failed: ' . $e->getMessage());
+            }
+        }
         foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $entityid) {
             if (\local_oksigeniaayvurenda\local\practice::is((int) $entityid)) {
                 continue;
@@ -56,13 +66,18 @@ class make_copies extends \core\task\scheduled_task {
                     $file->get_filesize() . ' bytes)');
                 // And out of the server, encrypted, where the centre chose.
                 $out = \local_oksigeniaayvurenda\local\offsite::send((int) $entityid, $file);
-                \local_oksigeniaayvurenda\local\filecopy::night((int) $entityid);
                 if ($out['sent'] || $out['failed']) {
                     mtrace('Ayvurenda: sent to ' . $out['sent'] . ' places' . ($out['failed'] ? ', failed: ' .
                         implode(', ', $out['failed']) : ''));
                 }
             } catch (\Throwable $e) {
-                mtrace('Ayvurenda: entity ' . $entityid . ': ' . get_class($e));
+                mtrace('Ayvurenda: entity ' . $entityid . ': ' . get_class($e) . ': ' . $e->getMessage());
+            }
+            // The weekly copy of the files, apart: a copy that did not go out does not leave it undone.
+            try {
+                \local_oksigeniaayvurenda\local\filecopy::night((int) $entityid);
+            } catch (\Throwable $e) {
+                mtrace('Ayvurenda: files of entity ' . $entityid . ': ' . get_class($e) . ': ' . $e->getMessage());
             }
         }
         \local_oksigeniaayvurenda\local\filecopy::sweep_temp();

@@ -242,7 +242,9 @@ final class profile {
         $tutors = $DB->get_records_menu(self::T . 'tutor', ['yearid' => $year->id], '', 'groupname, userid');
         $mine = array_keys(array_filter($tutors, fn($userid) => (int) $userid === (int) $reader->userid));
         $names = tutors::candidates((int) $library->entityid);
-        $groups = array_column(readers::groups($library, $now), 'name');
+        // A library without classes (public, company, university, mobile) has no group nor tutor to give.
+        $classes = !skins::no_classes((int) $library->entityid);
+        $groups = $classes ? array_column(readers::groups($library, $now), 'name') : [];
         return [
             'firstname' => (string) $reader->firstname,
             'lastname' => (string) $reader->lastname,
@@ -253,7 +255,7 @@ final class profile {
             'groups' => $groups,
             // A group the platform brought comes back every night: it is changed there.
             'lockedgroup' => $member && !in_array((string) $member->source, ['', 'manual'], true) ? $group : '',
-            'canteach' => !empty($reader->userid) && $reader->readertype !== 'student' && $cantutor,
+            'canteach' => $classes && !empty($reader->userid) && $reader->readertype !== 'student' && $cantutor,
             'tutorof' => (string) ($mine[0] ?? ''),
             'tutorgroups' => array_map(fn($name) => ['name' => $name,
                 'who' => !empty($tutors[$name]) && (int) $tutors[$name] !== (int) $reader->userid

@@ -3840,6 +3840,9 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-late-row .ayv-person-face { flex: 0 0 auto; }
 .ayv .ayv-late-row { display: flex; align-items: center; gap: .75rem; padding: .45rem .5rem; border-top: 1px solid var(--line); }
 .ayv .ayv-late-row .ayv-weed-words { flex: 1 1 auto; }
+.ayv .ayv-late-row { flex-wrap: wrap; }
+.ayv .ayv-late-row .ayv-late-lost { flex: 0 0 auto; margin: 0; }
+@media print { .ayv .ayv-late-lost { display: none; } }
 .ayv .ayv-late-who { font-weight: 700; color: var(--ink); }
 .ayv .ayv-late-when { flex: 0 0 auto; padding: .2rem .6rem; border-radius: 999px; font-size: .88rem; font-weight: 700; background: var(--notice-bg); color: var(--ink); }
 .ayv .ayv-late-late { background: #f6d9d2; color: #8a2a17; }
@@ -4541,3 +4544,21 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-athome-when { font-size: .9em; }
 .ayv .ayv-athome-late .ayv-athome-when { color: var(--late); font-weight: 700; }
 .ayv .ayv-athome-book form { margin: 0; }
+
+/* Readers given their way in on the web: the sheet shown once, a box for each, ten to an A4 page. */
+.ayv .ayv-way-sheet { list-style: none; margin: 1rem 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .75rem; }
+.ayv .ayv-way-slip { border: 1px dashed var(--line); border-radius: .75rem; padding: .9rem 1rem; background: var(--paper, transparent); break-inside: avoid; }
+.ayv .ayv-way-library { margin: 0; font-size: .85em; color: color-mix(in srgb, currentColor 80%, transparent); }
+.ayv .ayv-way-title { margin: .15rem 0 .4rem; font-family: var(--title); font-size: 1.15rem; font-weight: 700; }
+.ayv .ayv-way-name { margin: 0 0 .5rem; }
+.ayv .ayv-way-name span { color: color-mix(in srgb, currentColor 80%, transparent); }
+.ayv .ayv-way-codes { margin: 0 0 .6rem; }
+.ayv .ayv-way-codes dt { margin: .35rem 0 0; font-size: .85em; font-weight: 400; color: color-mix(in srgb, currentColor 80%, transparent); }
+.ayv .ayv-way-codes dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.2em; font-weight: 700; letter-spacing: .02em; overflow-wrap: anywhere; }
+.ayv .ayv-way-hint { margin: 0; font-size: .85em; }
+@media print {
+    .ayv .ayv-way-print, .ayv .ayv-back, .ayv .ayv-results-title, .ayv .ayv-notice { display: none; }
+    .ayv .ayv-way-sheet { grid-template-columns: 1fr 1fr; gap: 0; margin: 0; }
+    .ayv .ayv-way-slip { border-radius: 0; min-height: 52mm; padding: 5mm 6mm; color: #000; background: #fff; font-size: 10pt; }
+    .ayv .ayv-way-codes dd { font-size: 13pt; }
+}

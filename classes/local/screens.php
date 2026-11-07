@@ -647,6 +647,23 @@ final class screens {
     }
 
     /**
+     * The picture of the home page for a centre's skin: the school's reading room only for a school; another skin, its
+     * own (a «portada-<skin>» when the art package brings one, else the header of its notices), never children reading
+     * in a university or a company.
+     *
+     * @param int $entityid
+     * @return string|null
+     */
+    public static function skin_art(int $entityid): ?string {
+        $skin = skins::of($entityid);
+        if ($skin === 'school') {
+            return self::art('portada');
+        }
+        $name = mail::PICTURES[$skin] ?? '';
+        return $name === '' ? null : (self::art('portada-' . $name) ?? self::art('correo/' . $name, 'jpg'));
+    }
+
+    /**
      * A whole number as the page's language writes it, with its thousands separator (17.378 in Spanish, 17,378 in
      * English); plain digits without the intl extension.
      *
@@ -901,7 +918,7 @@ final class screens {
             'searchlabel' => self::str('searchbutton'),
             'ideas' => $ideas,
             'hasideas' => (bool) $ideas,
-            'art' => self::art('portada'),
+            'art' => self::skin_art((int) $library->entityid),
             'emblem' => (new \moodle_url('/local/oksigeniaayvurenda/app/emblema.svg'))->out(false),
             'you' => null,
             'challenge' => null,
@@ -977,7 +994,8 @@ final class screens {
             $arrived = wishes::arrived((int) $library->entityid, (string) $member->groupname);
             $hero['wishherald'] = $arrived !== null
                 ? characters::say((int) $library->entityid, 'herald', 'heraldwish', ['title' => $arrived], 'celebra') : null;
-            $hero['classreads'] = self::cards(catalogue::class_reads(
+            // What the class reads: a school's; a group of a library without classes (a club) is not a class.
+            $hero['classreads'] = skins::no_classes((int) $library->entityid) ? [] : self::cards(catalogue::class_reads(
                 $library,
                 (string) $member->groupname,
                 (int) $album['year']->id

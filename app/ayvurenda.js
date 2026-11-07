@@ -409,6 +409,14 @@
         update();
     });
     var input = document.getElementById('ayv-q');
+    // A button that prints the page (a sheet shown once), without a script in the page.
+    document.addEventListener('click', function(event) {
+        var printer = event.target.closest ? event.target.closest('[data-ayv-print]') : null;
+        if (printer) {
+            event.preventDefault();
+            window.print();
+        }
+    });
     // A form that takes a while (a work brought from far away, a search in another catalogue) shows that it is working:
     // its button waits with the words of what it does, turning, and a line under it says how long it may take. Sent once;
     // back to it from the next page, it is as it was.

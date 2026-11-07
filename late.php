@@ -65,6 +65,10 @@ if (data_submitted() && confirm_sesskey()) {
         }
         $notice = $told ? $str('latetutortoldname', (object) ['names' => implode(' · ', $told), 'group' => $groupname])
             : $str('latenotutor', $groupname);
+    } else if ($do === 'lost') {
+        // A book its reader says is lost, from the list: as at the desk (it may leave something to pay).
+        $notice = (new \local_oksigeniaayvurenda\local\desk($library, (int) $USER->id, $now))
+            ->lose(required_param('loan', PARAM_INT))['message'];
     } else if ($do === 'remind') {
         // Remind a reader now.
         $notice = $str(\local_oksigeniaayvurenda\local\notices::remind(
@@ -159,6 +163,8 @@ foreach ($lines as $line) {
         'bookurl' => $adults ? (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
             'id' => $line['recordid']]))->out(false) : '',
         'wasdue' => $adults ? $str('latewasdue', $line['due']) : '',
+        // Only what is late can be given up as lost from here.
+        'canlose' => $line['days'] > 0 && !$all,
     ];
 }
 uasort($boxes, fn($a, $b) => [$b['oldest'], $a['group'], $a['name']] <=> [$a['oldest'], $b['group'], $b['name']]);
@@ -256,6 +262,8 @@ $data = [
         'empty' => $shown || $cards ? '' : $str($all ? 'lateallempty' : 'lateempty'),
         'action' => $url(['all' => (int) $all]),
         'sesskey' => sesskey(),
+        'lostlabel' => $str('desklost'),
+        'lostsure' => $str('desklostsure'),
 ];
 foreach (['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord'] as $key) {
     $data[$key] = $str($key);

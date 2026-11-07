@@ -281,6 +281,24 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * Two desks read the same copy at once: the one that comes second, with the copy it read still free, does not lend it
+     * again.
+     */
+    public function test_not_lent_twice(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $item = $DB->get_record(self::T . 'item', ['id' => $w->faro->id], '*', MUST_EXIST);
+        $desk = new desk($w->library, (int) $w->staff->id);
+        $this->assertSame('lent', $desk->scan('100000L', (int) $w->ana->id)['kind']);
+        // The second desk had read it before the first lent it.
+        $lend = new \ReflectionMethod(desk::class, 'lend');
+        $second = $lend->invoke(new desk($w->library, (int) $w->staff->id), $item, (int) $w->leo->id, true);
+        $this->assertSame('stop', $second['kind']);
+        $this->assertSame(1, $DB->count_records(self::T . 'loan', ['itemid' => $w->faro->id]));
+    }
+
+    /**
      * Material: the unit is named by its serial number; its state is noted as it was when it goes, changed with a tap,
      * and offered as it is now when it comes back.
      */

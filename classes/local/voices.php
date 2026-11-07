@@ -167,7 +167,7 @@ final class voices {
                 ->out(false) : '',
             $title,
             '',
-            self::received_mail($item, $title, $subject) + ['prefs' => true]
+            self::received_mail($item, $title, $subject) + ['prefs' => true, 'entityid' => (int) $item->entityid]
         );
         force_current_language($language);
         return $sent;

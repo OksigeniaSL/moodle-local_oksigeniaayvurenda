@@ -113,24 +113,49 @@ final class characters {
      * @return string '' for the flower's, or cielo.
      */
     public static function step(int $entityid): string {
+        return self::looker($entityid) === 'grown' ? 'cielo' : '';
+    }
+
+    /**
+     * Who is looking, for the characters: a reader of the centre with the flower's card (young), one with another
+     * (grown), or nobody of the centre (none: the staff, whoever comes without an account).
+     *
+     * @param int $entityid
+     * @return string young, grown or none.
+     */
+    private static function looker(int $entityid): string {
         global $DB, $USER;
         if (!$entityid || !isloggedin() || isguestuser()) {
-            return '';
+            return 'none';
         }
         $cache = \cache::make('local_oksigeniaayvurenda', 'access');
-        $key = 'step_' . $entityid . '_' . $USER->id;
-        $step = $cache->get($key);
-        if ($step === false) {
+        $key = 'looker_' . $entityid . '_' . $USER->id;
+        $looker = $cache->get($key);
+        if ($looker === false) {
             $reader = $DB->get_record(
                 'local_oksigeniaayvurenda_reader',
                 ['entityid' => $entityid, 'userid' => $USER->id, 'status' => 'active'],
                 '*',
                 IGNORE_MULTIPLE
             );
-            $step = $reader && cards::look_of($reader) !== 'flower' ? 'cielo' : '';
-            $cache->set($key, $step);
+            $looker = !$reader ? 'none' : (cards::look_of($reader) === 'flower' ? 'young' : 'grown');
+            $cache->set($key, $looker);
         }
-        return (string) $step;
+        return (string) $looker;
+    }
+
+    /**
+     * Whether the characters stand whole for whoever looks: as the skin has it (not at a university or a company); at a
+     * public library or a bookmobile, whose readers are of every age, only for the young.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function whole(int $entityid): bool {
+        if (!skins::lively($entityid)) {
+            return false;
+        }
+        return !in_array(skins::of($entityid), skins::FIGURES_YOUNG, true) || self::looker($entityid) === 'young';
     }
 
     /**
@@ -290,8 +315,9 @@ final class characters {
         }
         $sm = get_string_manager();
         $own = !empty($character['own']);
-        // At a university or academy they are a portrait and a signature: they do not stand whole nor move.
-        $pose = skins::lively($entityid) ? $pose : '';
+        // At a university or academy they are a portrait and a signature: they do not stand whole nor move; at a public
+        // library, only for the young.
+        $pose = self::whole($entityid) ? $pose : '';
         $step = $pose !== '' && !$own ? self::step($entityid) : '';
         // A character of the centre's own stands as it drew it, when it drew it whole; else, only its portrait.
         $figure = $pose === '' ? null : ($own ? self::own_figure($entityid, $role, $pose) : self::figure($role, $pose, $step));

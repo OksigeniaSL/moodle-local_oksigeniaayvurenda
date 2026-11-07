@@ -83,6 +83,7 @@ final class late {
             $group = (string) $row->groupname;
             $groups[$group][] = [
                 'name' => $name !== '' ? $name : $row->cardcode,
+                'loanid' => (int) $row->id,
                 'readerid' => (int) $row->readerid,
                 'recordid' => (int) $row->recordid,
                 'title' => $row->title,

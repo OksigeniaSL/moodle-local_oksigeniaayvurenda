@@ -329,7 +329,7 @@ final class shell {
             ? format_string($GLOBALS['SITE']->fullname, true, ['escape' => false])
             : get_string('pluginname', 'local_oksigeniaayvurenda'));
         @header('Content-Type: text/html; charset=utf-8');
-        @header('X-Frame-Options: SAMEORIGIN');
+        self::frame_header();
         $howto = self::howto_box($library, $base);
         // The skin of the library's centre: what changes in the look hangs from its class.
         $skin = skins::of($library ? (int) $library->entityid : 0);
@@ -452,6 +452,20 @@ Oksigenia Ayvurenda</button>
 <script src="' . $app . 'stacks.js?v=' . $version . '"></script>
 </body>
 </html>';
+    }
+
+    /**
+     * Who may show the page inside a frame: the platforms this session came from (LTI), as Moodle does when the site
+     * allows embedding, and otherwise only the site itself.
+     */
+    private static function frame_header(): void {
+        global $CFG;
+        $framers = ltitool::framers();
+        if ($framers) {
+            @header("Content-Security-Policy: frame-ancestors 'self' " . implode(' ', $framers));
+        } else if (empty($CFG->allowframembedding)) {
+            @header('X-Frame-Options: SAMEORIGIN');
+        }
     }
 
     /**

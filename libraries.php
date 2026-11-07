@@ -66,7 +66,7 @@ if (data_submitted() && confirm_sesskey()) {
         ]);
         $notice = $str('librariescreated', format_string($library->name, true, ['escape' => false]));
     } else if ($do === 'entity') {
-        libraries::update_entity(required_param('entity', PARAM_INT), [
+        $data = [
             'name' => required_param('name', PARAM_TEXT),
             'yearstart' => optional_param('yearstart', '09-01', PARAM_TEXT),
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
@@ -94,7 +94,15 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param_array('challengestage', [], PARAM_TEXT),
                 optional_param_array('challengeon', [], PARAM_TEXT)
             )),
-        ]);
+        ];
+        // A skin without classes does not show the stages: what a school chose stays for when it is one again.
+        if (!optional_param_array('cardstage', [], PARAM_TEXT)) {
+            unset($data['cardlooks']);
+        }
+        if (!optional_param_array('challengestage', [], PARAM_TEXT)) {
+            unset($data['challengesoff']);
+        }
+        libraries::update_entity(required_param('entity', PARAM_INT), $data);
         // The plan only goes with the form of whoever may set it.
         if (optional_param('planform', 0, PARAM_BOOL) && has_capability('local/oksigeniaayvurenda:plans', $context)) {
             $plan = ['name' => optional_param('planname', '', PARAM_TEXT), 'copies' => optional_param('plancopies', 0, PARAM_INT),
@@ -235,17 +243,18 @@ foreach (libraries::all() as $one) {
         'parents' => $options(0),
         'groups' => $groupoptions([]),
         'hasgroups' => (bool) $groups,
-        'cardlooks' => array_map(function ($stage) use ($settings, $str) {
-            $guess = \local_oksigeniaayvurenda\core\card_look::guess('student', $stage, '');
-            $chosen = $settings['cardlooks'][$stage] ?? '';
-            return ['stage' => $stage, 'options' => array_merge(
-                [['value' => '', 'label' => $str('cardlookauto', $str('cardlookopt' . $guess)), 'selected' => $chosen === '']],
-                array_map(
-                    fn($l) => ['value' => $l, 'label' => $str('cardlookopt' . $l), 'selected' => $chosen === $l],
-                    \local_oksigeniaayvurenda\core\card_look::LOOKS
-                )
-            )];
-        }, \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'cardlooks' => \local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id) ? []
+            : array_map(function ($stage) use ($settings, $str) {
+                $guess = \local_oksigeniaayvurenda\core\card_look::guess('student', $stage, '');
+                $chosen = $settings['cardlooks'][$stage] ?? '';
+                return ['stage' => $stage, 'options' => array_merge(
+                    [['value' => '', 'label' => $str('cardlookauto', $str('cardlookopt' . $guess)), 'selected' => $chosen === '']],
+                    array_map(
+                        fn($l) => ['value' => $l, 'label' => $str('cardlookopt' . $l), 'selected' => $chosen === $l],
+                        \local_oksigeniaayvurenda\core\card_look::LOOKS
+                    )
+                )];
+            }, \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
         'skins' => array_map(
             fn($s) => ['value' => $s, 'label' => $str('skin' . $s),
             'selected' => $s === \local_oksigeniaayvurenda\local\skins::of((int) $entity->id)],
@@ -264,11 +273,16 @@ foreach (libraries::all() as $one) {
         ),
         'reviewsigns' => array_map(fn($s) => ['value' => $s, 'label' => $str('reviewsign' . $s),
             'selected' => $s === ($settings['reviewsign'] ?? 'name')], \local_oksigeniaayvurenda\local\reviews::SIGNS),
-        'challengestages' => array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
-            $stage,
-            \local_oksigeniaayvurenda\local\challenges::stages_off((int) $entity->id),
-            true
-        )], \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'challengestages' => \local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id) ? []
+            : array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
+                $stage,
+                \local_oksigeniaayvurenda\local\challenges::stages_off((int) $entity->id),
+                true
+            )], \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time())),
+        'hascardlooks' => !\local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id)
+            && (bool) \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time()),
+        'haschallenges' => !\local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id)
+            && (bool) \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time()),
         'plansummary' => plans::summary((int) $entity->id),
         'staffpart' => $setsstaff ? (function () use ($entity, $str, $librarian) {
             $context = access::context((int) $entity->id);

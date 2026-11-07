@@ -632,17 +632,23 @@ final class sanctions {
         global $DB;
         $now = $now ?? time();
         $sent = 0;
-        // Only what is recent: a centre that turns this on, or a copy that returns, tells nobody about the past.
+        // Only what is recent: a copy that returns tells nobody about the past. A month, so that what a centre getting
+        // ready left untold goes when it opens.
         $rows = $DB->get_records_select(
             self::T . 'sanction',
             'timetold IS NULL AND status = :status AND timecreated > :recent',
-            ['status' => self::OPEN, 'recent' => $now - 3 * DAYSECS],
+            ['status' => self::OPEN, 'recent' => $now - 30 * DAYSECS],
             'id',
             '*',
             0,
             self::LISTED
         );
         foreach ($rows as $row) {
+            $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $row->libraryid]);
+            // Not marked while its centre is closed: it is told when it opens.
+            if ($entityid && access::closed($entityid)) {
+                continue;
+            }
             $DB->set_field(self::T . 'sanction', 'timetold', $now, ['id' => $row->id]);
             $sent += self::tell($row, $now) ? 1 : 0;
         }

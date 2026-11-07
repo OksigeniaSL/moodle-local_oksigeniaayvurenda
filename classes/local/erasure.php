@@ -204,6 +204,11 @@ final class erasure {
         foreach (['cardlook', 'stafftold', 'newbooks', 'newbookslast', 'goal', 'lastsearch'] as $name) {
             unset_user_preference('local_oksigeniaayvurenda_' . $name, $userid);
         }
+        foreach (array_keys((array) get_user_preferences(null, null, $userid)) as $name) {
+            if (str_starts_with($name, 'local_oksigeniaayvurenda_stafftold_')) {
+                unset_user_preference($name, $userid);
+            }
+        }
     }
 
     /**

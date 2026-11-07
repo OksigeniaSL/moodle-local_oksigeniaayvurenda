@@ -260,14 +260,16 @@ class provider implements
                 get_string('privacy:metadata:preference:cardlook', 'local_oksigeniaayvurenda')
             );
         }
-        $told = get_user_preferences('local_oksigeniaayvurenda_stafftold', null, $userid);
-        if ($told !== null) {
-            writer::export_user_preference(
-                'local_oksigeniaayvurenda',
-                'local_oksigeniaayvurenda_stafftold',
-                transform::datetime((int) $told),
-                get_string('privacy:metadata:preference:stafftold', 'local_oksigeniaayvurenda')
-            );
+        // When they were last told what waited, once and then for each centre (since 0.175: «…_stafftold_<centre>»).
+        foreach ((array) get_user_preferences(null, null, $userid) as $name => $told) {
+            if ($name === 'local_oksigeniaayvurenda_stafftold' || str_starts_with($name, 'local_oksigeniaayvurenda_stafftold_')) {
+                writer::export_user_preference(
+                    'local_oksigeniaayvurenda',
+                    $name,
+                    transform::datetime((int) $told),
+                    get_string('privacy:metadata:preference:stafftold', 'local_oksigeniaayvurenda')
+                );
+            }
         }
         $names = ['newbooks' => 'newbooks', 'newbookslast' => 'newbookslast', 'goal' => 'goal', 'lastsearch' => 'lastsearch'];
         foreach ($names as $name => $key) {

@@ -53,6 +53,9 @@ final class skins {
         'mobile' => ['visit' => true, 'games' => true, 'figures' => true, 'voices' => false, 'sound' => false],
     ];
 
+    /** @var string[] The skins of readers of every age, where the characters stand whole only for the young. */
+    public const FIGURES_YOUNG = ['public', 'mobile'];
+
     /**
      * @var array The skins whose scenes a skin also visits, its own first: a public library has the school's as its
      * children's room; a company, the university's hall until the art brings its own; a bookmobile, a public library's.

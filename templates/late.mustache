@@ -30,9 +30,9 @@
             "tone": "late", "open": false, "tell": "Avisar a Irene López", "remind": "", "settutor": "", "readerid": 0,
             "readerurl": "", "printurl": "#",
             "lines": [{"bybook": false, "bookurl": "", "wasdue": "", "name": "Ana Montes", "url": "#", "title": "El faro dormido", "when": "31 días de retraso",
-                "tone": "late", "cover": null, "colour": 2}]}],
+                "tone": "late", "cover": null, "colour": 2, "canlose": true, "loanid": 7}]}],
         "empty": "No hay libros con retraso.", "latesettutor": "Poner tutor", "lateseerecord": "Su ficha", "lateprint": "La lista de la clase",
-        "lateallgroups": "Todos los grupos", "printnow": "Imprimir"
+        "lateallgroups": "Todos los grupos", "printnow": "Imprimir", "lostlabel": "Perdido", "lostsure": "Sí, se ha perdido"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -71,6 +71,10 @@
             {{#bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{bookurl}}">{{title}}</a> <span class="ayv-weed-detail">{{wasdue}}</span></span>{{/bybook}}
             {{^bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{url}}">{{name}}</a> <span class="ayv-weed-detail">«{{title}}»</span></span>{{/bybook}}
             <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span>
+            {{#canlose}}<details class="ayv-profile-lost ayv-late-lost"><summary>{{lostlabel}}</summary>
+                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lost">
+                    <input type="hidden" name="loan" value="{{loanid}}"><button type="submit" class="ayv-button ayv-button-quiet">{{lostsure}}</button></form>
+            </details>{{/canlose}}
         </li>
     {{/lines}}
     </ul>

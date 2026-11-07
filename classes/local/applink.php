@@ -36,6 +36,9 @@ final class applink {
     /** @var int The days the link lasts. */
     public const DAYS = 7;
 
+    /** @var string The domain of the accounts of readers without an e-mail: reserved, Moodle never writes to it. */
+    public const NOMAIL = 'sin-correo.invalid';
+
     /**
      * Whether the app's plugin is there to make the links.
      *
@@ -138,15 +141,22 @@ final class applink {
 
     /**
      * Makes a Moodle account for a reader who has none, from the name and e-mail the library has, and links it; nothing
-     * when another account already has that e-mail (the staff link it in «Readers»).
+     * when another account already has that e-mail (the staff link it in «Readers»). Without an e-mail, only if asked:
+     * Moodle wants one, so it gets an address of the reserved «.invalid» domain, to which Moodle never writes.
      *
      * @param \stdClass $reader
+     * @param string|null $password The first one; without it, one nobody knows.
+     * @param bool $withoutemail Whether it may be made for a reader without an e-mail.
      * @return int The new account, or 0.
      */
-    public static function account(\stdClass $reader): int {
+    public static function account(\stdClass $reader, ?string $password = null, bool $withoutemail = false): int {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/user/lib.php');
         $email = self::email($reader);
+        if ($email === '' && $withoutemail && empty($reader->userid)) {
+            $username = self::username($reader);
+            $email = $username . '@' . self::NOMAIL;
+        }
         if (
             $email === '' || !empty($reader->userid) || $DB->record_exists_select(
                 'user',
@@ -156,19 +166,24 @@ final class applink {
         ) {
             return 0;
         }
-        $username = clean_param(\core_text::strtolower($email), PARAM_USERNAME);
+        $username = str_ends_with($email, '@' . self::NOMAIL) ? self::username($reader)
+            : clean_param(\core_text::strtolower($email), PARAM_USERNAME);
         if ($username === '' || $DB->record_exists('user', ['username' => $username, 'mnethostid' => $CFG->mnet_localhost_id])) {
-            $username = clean_param(\core_text::strtolower('lector' . $reader->entityid . '-' . $reader->cardcode), PARAM_USERNAME);
+            $username = self::username($reader);
         }
+        if ($DB->record_exists('user', ['username' => $username, 'mnethostid' => $CFG->mnet_localhost_id])) {
+            return 0;
+        }
+        // Moodle sends whoever lacks a first or last name to fill them in before anything: neither is left empty.
         $user = (object) [
             'username' => $username,
             'firstname' => trim((string) $reader->firstname) !== '' ? $reader->firstname : $reader->cardcode,
-            'lastname' => trim((string) $reader->lastname),
+            'lastname' => trim((string) $reader->lastname) !== '' ? $reader->lastname : $reader->cardcode,
             'email' => $email,
             'auth' => 'manual',
             'confirmed' => 1,
             'mnethostid' => $CFG->mnet_localhost_id,
-            'password' => generate_password(24),
+            'password' => $password ?? generate_password(24),
         ];
         $userid = (int) (method_exists('\core\user', 'create_user') ? \core\user::create_user($user)
             : user_create_user($user));
@@ -177,12 +192,22 @@ final class applink {
     }
 
     /**
+     * The user name of a reader without an e-mail: the centre and the card, «lector12-10023».
+     *
+     * @param \stdClass $reader
+     * @return string
+     */
+    public static function username(\stdClass $reader): string {
+        return clean_param(\core_text::strtolower('lector' . $reader->entityid . '-' . $reader->cardcode), PARAM_USERNAME);
+    }
+
+    /**
      * The reader's e-mail as the library has it, or ''.
      *
      * @param \stdClass $reader
      * @return string
      */
-    private static function email(\stdClass $reader): string {
+    public static function email(\stdClass $reader): string {
         $email = trim((string) ($reader->email ?? ''));
         return $email !== '' && validate_email($email) ? $email : '';
     }

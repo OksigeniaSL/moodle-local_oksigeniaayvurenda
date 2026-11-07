@@ -1,0 +1,61 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/entries
+
+    Readers given their way in on the web: what will happen, the button, and afterwards the sheet to print, one box for
+    each reader without an e-mail, with their user name and first password (shown once).
+
+    Example context (json):
+    {
+        "heading": "Entrar por la web", "back": "#", "backword": "Volver a", "backlabel": "2º A", "action": "#", "sesskey": "abc",
+        "go": "Darles entrada", "busy": "Dando entrada…", "ask": "3 lectores de 2º A no tienen cuenta.", "notice": "", "printlabel": "Imprimir",
+        "hassheets": true,
+        "sheets": [{"title": "Tu entrada a la biblioteca", "libraryname": "Biblioteca del barrio", "name": "Leo Prado",
+            "card": "10023", "userlabel": "Usuario", "username": "lector12-10023", "passwordlabel": "Contraseña provisional",
+            "password": "Faro-4821", "hint": "Entra en biblioteca.example.org con este usuario y esta contraseña."}]
+    }
+}}
+<p class="ayv-back"><a href="{{back}}">{{backword}} {{backlabel}}</a></p>
+<h1 class="ayv-results-title">{{heading}}</h1>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#ask}}
+<section class="ayv-profile-box ayv-way-ask">
+    <p>{{ask}}</p>
+    <form method="post" action="{{action}}" data-busy="{{busy}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{go}}</button></p>
+    </form>
+</section>
+{{/ask}}
+{{#hassheets}}
+<p class="ayv-book-actions ayv-way-print"><button type="button" class="ayv-button" data-ayv-print="1">{{printlabel}}</button></p>
+<ul class="ayv-way-sheet">
+    {{#sheets}}
+    <li class="ayv-way-slip">
+        <p class="ayv-way-library">{{libraryname}}</p>
+        <p class="ayv-way-title">{{title}}</p>
+        <p class="ayv-way-name">{{name}} <span>· {{card}}</span></p>
+        <dl class="ayv-way-codes">
+            <dt>{{userlabel}}</dt><dd>{{username}}</dd>
+            <dt>{{passwordlabel}}</dt><dd>{{password}}</dd>
+        </dl>
+        <p class="ayv-way-hint">{{hint}}</p>
+    </li>
+    {{/sheets}}
+</ul>
+{{/hassheets}}

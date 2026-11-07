@@ -32,7 +32,7 @@ use local_oksigeniaayvurenda\local\zones;
 require(__DIR__ . '/../../config.php');
 
 $ref = required_param('library', PARAM_ALPHANUMEXT);
-$report = optional_param('report', 'loans', PARAM_ALPHA);
+$report = optional_param('report', '', PARAM_ALPHA);
 $format = optional_param('format', '', PARAM_ALPHA);
 require_login(null, false);
 $library = catalogue::library($ref);
@@ -47,7 +47,11 @@ if (!$library) {
 if ($report === 'late') {
     redirect(new moodle_url('/local/oksigeniaayvurenda/late.php', ['library' => $library->slug]));
 }
-$report = in_array($report, reports::ALL, true) ? $report : 'loans';
+// Loans by group first where there are classes; elsewhere (a public library, a company) the most read first, and the
+// groups (a club, a workshop) last.
+$order = \local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid)
+    ? ['top', 'late', 'never', 'holdings', 'year', 'loans'] : reports::ALL;
+$report = in_array($report, reports::ALL, true) ? $report : $order[0];
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $date = fn(int $time) => zones::date($time, 'strftimedate', $library);
 $day = function (string $text, int $default) use ($library): int {
@@ -162,7 +166,7 @@ $data = [
         '/local/oksigeniaayvurenda/reports.php',
         ['library' => $library->slug, 'report' => $r]
     ))->out(false), 'label' => $str('report' . $r . 'title'),
-        'current' => $r === $report], reports::ALL),
+        'current' => $r === $report], $order),
     'action' => (new moodle_url('/local/oksigeniaayvurenda/reports.php'))->out(false),
     'library' => $library->slug,
     'report' => $report,
@@ -186,8 +190,9 @@ shell::output(
     ['search' => false, 'nav' => [['url' => $deskurl, 'label' => $str('desktitle')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/memoir.php', ['library' => $library->slug]))->out(false),
             'label' => $str('memoirnav')],
-        ['url' => (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $library->slug]))->out(false),
-            'label' => $str('readingsdemandnav')],
+        ...(\local_oksigeniaayvurenda\local\skins::no_courses((int) $library->entityid) ? [] : [['url' =>
+            (new moodle_url('/local/oksigeniaayvurenda/readings.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('readingsdemandnav')]]),
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'reports']))
             ->out(false), 'label' => $str('helpnav')]]]
 );

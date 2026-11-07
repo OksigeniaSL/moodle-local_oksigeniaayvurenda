@@ -104,10 +104,13 @@ final class garden {
      * the ones already won. Only with Gaudí's cards in the art package; without them, nothing.
      *
      * @param \stdClass $reader
-     * @param \stdClass $library Whose corners name the cards.
+     * @param \stdClass|null $library Whose corners name the cards; without one, no cards.
      * @return array[]|null code, name, art, won (bool) and when (the day it was won, or ''), in the order of the classes.
      */
-    public static function cromos(\stdClass $reader, \stdClass $library): ?array {
+    public static function cromos(\stdClass $reader, ?\stdClass $library): ?array {
+        if (!$library) {
+            return null;
+        }
         $codes = [];
         foreach (range(0, 9) as $code) {
             $art = screens::art('cromos/cromo-' . $code);

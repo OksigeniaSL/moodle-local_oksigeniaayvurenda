@@ -56,19 +56,24 @@ final class ltitool {
     ];
 
     /**
-     * This site's key for signing what it sends to the platforms, made the first time.
+     * This site's key for signing what it sends to the platforms, made the first time and kept encrypted. One that cannot
+     * be opened (the data folder is not this one) is made again: the platforms read the new one from the key set.
      *
      * @return string[] Key id and private key in PEM.
      */
     public static function keys(): array {
         $kid = (string) get_config('local_oksigeniaayvurenda', 'ltikid');
-        $private = (string) get_config('local_oksigeniaayvurenda', 'ltiprivatekey');
+        $kept = (string) get_config('local_oksigeniaayvurenda', 'ltiprivatekey');
+        $private = secrets::get('ltiprivatekey');
         if ($kid === '' || $private === '') {
             $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
             openssl_pkey_export($key, $private);
             $kid = bin2hex(random_bytes(10));
-            set_config('ltiprivatekey', $private, 'local_oksigeniaayvurenda');
+            secrets::put('ltiprivatekey', $private);
             set_config('ltikid', $kid, 'local_oksigeniaayvurenda');
+        } else if ($kept === $private) {
+            // One kept in the clear before 0.175: encrypted now, the same key.
+            secrets::put('ltiprivatekey', $private);
         }
         return [$kid, $private];
     }
@@ -595,6 +600,19 @@ final class ltitool {
      * @throws \moodle_exception When it is not registered here any more.
      */
     public static function platform_of(array $launchdata): \stdClass {
+        // Whoever arrives from a platform sees the library inside it: it may frame this session's pages.
+        $platform = self::platform_known($launchdata);
+        self::framed_by($platform);
+        return $platform;
+    }
+
+    /**
+     * The platform a launch came from.
+     *
+     * @param array $launchdata
+     * @return \stdClass
+     */
+    private static function platform_known(array $launchdata): \stdClass {
         $aud = $launchdata['aud'] ?? '';
         $clientid = is_array($aud) ? (string) ($launchdata['azp'] ?? reset($aud)) : (string) $aud;
         $platform = self::platform_by_issuer((string) ($launchdata['iss'] ?? ''), $clientid);
@@ -602,6 +620,53 @@ final class ltitool {
             throw new \moodle_exception('ltiunknown', 'local_oksigeniaayvurenda');
         }
         return $platform;
+    }
+
+    /**
+     * Notes, for this session, that the pages may be shown inside a frame of this platform (Moodle opens a tool and
+     * «Select content» in a frame; Canvas and others too).
+     *
+     * @param \stdClass $platform
+     */
+    public static function framed_by(\stdClass $platform): void {
+        global $SESSION;
+        $origins = (array) ($SESSION->local_oksigeniaayvurenda_framers ?? []);
+        foreach ([(string) $platform->issuer, (string) $platform->authloginurl] as $url) {
+            $origin = self::origin($url);
+            if ($origin !== '' && !in_array($origin, $origins, true)) {
+                $origins[] = $origin;
+            }
+        }
+        $SESSION->local_oksigeniaayvurenda_framers = array_slice($origins, -8);
+    }
+
+    /**
+     * The platforms that may frame this session's pages.
+     *
+     * @return string[] Origins.
+     */
+    public static function framers(): array {
+        global $SESSION;
+        return array_values(array_filter(
+            array_map([self::class, 'origin'], (array) ($SESSION->local_oksigeniaayvurenda_framers ?? [])),
+            fn($o) => $o !== ''
+        ));
+    }
+
+    /**
+     * The origin of an address, «https://host[:port]», or nothing if it is not one.
+     *
+     * @param string $url
+     * @return string
+     */
+    public static function origin(string $url): string {
+        $parts = parse_url($url);
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if (!in_array($scheme, ['https', 'http'], true) || !preg_match('/^[a-z0-9.-]+$/', $host)) {
+            return '';
+        }
+        return $scheme . '://' . $host . (isset($parts['port']) ? ':' . (int) $parts['port'] : '');
     }
 
     /**

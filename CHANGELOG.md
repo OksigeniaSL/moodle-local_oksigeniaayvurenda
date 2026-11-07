@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.175.0
+
+- The late notice counts its week by reader, not by book: two books late a few days apart are one message with every late
+  book, instead of a message for each on different days; a reader who stopped coming but still has books hears too, and
+  their tutor's summary lists them.
+- A centre open only to its staff tells its readers nothing, whoever sends it (the textbook bank, purchases, other formats,
+  other libraries, voices); its staff still hear.
+- What is set aside, or what a late book left, while a centre is getting ready is told when it opens, instead of being taken
+  as told and never told.
+- The nightly copies: a sweep that fails no longer leaves every centre without its copy, the weekly copy of the files runs
+  apart from sending the copy out, and the task log says why something failed.
+- Whoever is on the staff of two centres hears each day of what waits in each.
+- A reader without an account can be given their way in on the web («Darle entrada» in their record, or a whole class
+  from its page): an account with a first password they change the first time; by e-mail if the library has one, or on a
+  sheet to print, shown once. It works in any plan, with or without the app.
+- A copy read at two desks at once (or a desk and a self-loan station) is lent once.
+- Each skin has its own home picture; a library without classes offers no group nor tutor to change, no class
+  challenges nor stage cards in its settings, no «What your class reads», and no «What the courses ask» where there are
+  no courses; its reports start with the most read.
+- In a public library or a bookmobile the characters stand whole only for the young; the album's collector cards only
+  for a school's readers; Mainumby whole beside an empty album only where the characters stand whole.
+- «Lost» on each late book of «Late books».
+- The card opened without its library goes to the reader's library instead of failing.
+- LTI: the library opens inside the platform's frame (Moodle's «Select content» and embedded activities), and the site's
+  LTI private key is kept encrypted.
+
 ## 0.174.1
 
 - «Subjects» no longer falls over in a catalogue with subjects that are a number («1914»): they became integer keys and

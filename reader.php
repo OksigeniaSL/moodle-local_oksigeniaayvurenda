@@ -238,6 +238,7 @@ $data = [
     'formhastypes' => (bool) $form['types'],
     'formgroups' => array_map(fn($g) => ['name' => $g, 'selected' => $g === $form['group']], $form['groups']),
     'formlocked' => $form['lockedgroup'] !== '' ? $str('profiledatalocked', $form['lockedgroup']) : '',
+    'formhasgroups' => (bool) $form['groups'],
     'formcanteach' => $form['canteach'],
     'formtutors' => array_map(
         fn($g) => ['name' => $g['name'], 'selected' => $g['name'] === $form['tutorof'],
@@ -306,6 +307,12 @@ $data = [
     'printurl' => $limited || $reader->status !== 'active' ? '' : $link('cardprint.php', ['reader' => $id]),
     'canrecard' => !$limited,
     'profilenewcardintro' => $str('profilenewcardintro', (string) $record['cardcode']),
+    'entry' => $reader && !$limited && \local_oksigeniaayvurenda\local\entry::may($reader) ? [
+        'url' => $link('entries.php', ['reader' => $id]),
+        'hint' => $str('entryhint'),
+        'button' => $str('entrybutton'),
+        'heading' => $str('entryheading'),
+    ] : false,
     'app' => $app !== 'none' ? [
         'can' => $app !== 'noemail',
         'needsemail' => $app === 'noemail',

@@ -49,7 +49,7 @@ final class mail {
     ];
 
     /** @var string[] The picture at the top of each skin, in the art package. */
-    private const PICTURES = ['school' => 'cabecera-2', 'secondary' => 'instituto', 'university' => 'universidad',
+    public const PICTURES = ['school' => 'cabecera-2', 'secondary' => 'instituto', 'university' => 'universidad',
         'public' => 'publica', 'company' => 'empresa', 'mobile' => 'bibliobus'];
 
     /** @var string The picture at the top for a young reader of a school. */

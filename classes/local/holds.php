@@ -374,6 +374,28 @@ final class holds {
     }
 
     /**
+     * What is set aside and nobody was told yet (its centre was getting ready): told now, while it is still kept.
+     *
+     * @param int|null $now
+     * @return int How many went.
+     */
+    public static function pending(?int $now = null): int {
+        global $DB;
+        $now = $now ?? time();
+        $sent = 0;
+        $ids = $DB->get_fieldset_select(
+            self::T . 'hold',
+            'id',
+            "status = 'ready' AND timenotified IS NULL AND timeexpires > ?",
+            [$now]
+        );
+        foreach ($ids as $id) {
+            $sent += self::notify((int) $id) ? 1 : 0;
+        }
+        return $sent;
+    }
+
+    /**
      * Sends the message of a copy set aside, once, if the reader has an account and it is still set aside.
      *
      * @param int $holdid
@@ -387,12 +409,13 @@ final class holds {
         }
         $reader = $DB->get_record(self::T . 'reader', ['id' => $hold->readerid]);
         $user = $reader && $reader->userid ? \core_user::get_user($reader->userid) : null;
-        $DB->set_field(self::T . 'hold', 'timenotified', time(), ['id' => $hold->id]);
-        if (!$user || !empty($user->deleted) || !empty($user->suspended)) {
+        $library = $DB->get_record(self::T . 'library', ['id' => $hold->libraryid], '*', MUST_EXIST);
+        // A centre still getting ready says it when it opens (pending()), not never.
+        if (access::closed((int) $library->entityid)) {
             return false;
         }
-        $library = $DB->get_record(self::T . 'library', ['id' => $hold->libraryid], '*', MUST_EXIST);
-        if (access::closed((int) $library->entityid)) {
+        $DB->set_field(self::T . 'hold', 'timenotified', time(), ['id' => $hold->id]);
+        if (!$user || !empty($user->deleted) || !empty($user->suspended)) {
             return false;
         }
         // In their language and at their hour, wherever the task runs; in the tone of the centre's skin.

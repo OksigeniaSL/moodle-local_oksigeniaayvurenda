@@ -86,7 +86,13 @@ final class staffnotices {
                 $params + ['entityid' => $entity->id]
             );
             foreach ($own ?: ($theirs ?: array_keys($staff)) as $userid) {
-                $told = (int) get_user_preferences(self::PREFERENCE, 0, (int) $userid);
+                // Told of this centre: someone on the staff of two hears of each (the mark of before 0.175 still counts).
+                $mark = self::PREFERENCE . '_' . $entity->id;
+                $told = (int) get_user_preferences(
+                    $mark,
+                    get_user_preferences(self::PREFERENCE, 0, (int) $userid),
+                    (int) $userid
+                );
                 if (!self::anything_new((int) $entity->id, $told)) {
                     continue;
                 }
@@ -122,7 +128,7 @@ final class staffnotices {
                 );
                 force_current_language($language);
                 if ($sent) {
-                    set_user_preference(self::PREFERENCE, $now, (int) $userid);
+                    set_user_preference($mark, $now, (int) $userid);
                     $stats['sent']++;
                 }
             }

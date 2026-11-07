@@ -47,6 +47,7 @@ class send_notices extends \core\task\scheduled_task {
         $steps = [
             'notices of late books' => fn() => \local_oksigeniaayvurenda\local\notices::run(),
             'reservations no longer set aside' => fn() => \local_oksigeniaayvurenda\local\holds::expire(),
+            'reservations set aside nobody was told of' => fn() => \local_oksigeniaayvurenda\local\holds::pending(),
             'voices past the days the centre keeps them' => fn() => \local_oksigeniaayvurenda\local\voices::expire(),
             'voices of reviews past those days' => fn() => \local_oksigeniaayvurenda\local\reviews::expire_voices(),
             'what waits for the staff' => fn() => \local_oksigeniaayvurenda\local\staffnotices::run(),

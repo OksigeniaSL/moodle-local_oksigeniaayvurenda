@@ -137,6 +137,78 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * The week counts by reader: two books late three days apart are one message with what is late, none three days
+     * later, and one a week later with both; a reader who stopped coming but has books hears too.
+     */
+    public function test_by_reader(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, $year, $now, $readers] = $this->library();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $item = $gen->create_item(['libraryid' => $library->id, 'recordid' => $gen->create_record(['entityid' =>
+            $library->entityid, 'title' => 'Tercer libro'])->id]);
+        $gen->create_loan(['libraryid' => $library->id, 'readerid' => $readers['ana']->id, 'yearid' => $year->id,
+            'itemid' => $item->id, 'timeloaned' => $now - 10 * DAYSECS, 'timedue' => $now + 2 * DAYSECS]);
+        $sink = $this->redirectMessages();
+        notices::run($now);
+        $first = array_values(array_filter($sink->get_messages(), fn($m) => $m->eventtype === 'overdue'));
+        $this->assertCount(1, $first);
+        $this->assertStringNotContainsString('Tercer libro', $first[0]->fullmessage);
+        $sink->clear();
+        // Three days later the third is late too, but Ana heard this week.
+        notices::run($now + 3 * DAYSECS);
+        $this->assertCount(0, array_filter($sink->get_messages(), fn($m) => $m->eventtype === 'overdue'));
+        $sink->clear();
+        notices::run($now + 7 * DAYSECS);
+        $week = array_values(array_filter($sink->get_messages(), fn($m) => $m->eventtype === 'overdue'
+            && str_contains($m->fullmessage, 'faro')));
+        $this->assertCount(1, $week);
+        $this->assertStringContainsString('Tercer libro', $week[0]->fullmessage);
+        $sink->clear();
+        // Ana stopped coming, with her books still out: she hears a week later all the same.
+        $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $readers['ana']->id]);
+        notices::run($now + 14 * DAYSECS);
+        $this->assertCount(1, array_filter($sink->get_messages(), fn($m) => $m->eventtype === 'overdue'
+            && str_contains($m->fullmessage, 'faro')));
+        $sink->close();
+    }
+
+    /**
+     * A centre open only to its staff tells its readers nothing, whoever sends it, and tells its staff; what is set aside
+     * there is told when it opens, not marked as told before.
+     */
+    public function test_closed_centre(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, , , $readers] = $this->library();
+        $entityid = (int) $library->entityid;
+        access::set_closed($entityid, true);
+        $reader = \core_user::get_user($readers['ana']->userid);
+        $sink = $this->redirectMessages();
+        $this->assertFalse(notices::send('holdready', $reader, 'Asunto', 'Texto', '', '', '', ['library' => $library]));
+        $librarian = $this->getDataGenerator()->create_user();
+        $roleid = create_role('Biblioteca cerrada', 'ayvtestclosed', '');
+        assign_capability('local/oksigeniaayvurenda:desk', CAP_ALLOW, $roleid, \context_system::instance()->id);
+        role_assign($roleid, $librarian->id, \context_system::instance()->id);
+        $this->assertTrue(notices::send('stafftodo', $librarian, 'Asunto', 'Texto', '', '', '', ['library' => $library]));
+
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $item = $gen->create_item(['libraryid' => $library->id]);
+        $now = time();
+        $holdid = $DB->insert_record(self::T . 'hold', ['libraryid' => $library->id, 'recordid' => $item->recordid,
+            'readerid' => $readers['ana']->id, 'itemid' => $item->id, 'status' => 'ready', 'timecreated' => $now,
+            'timemodified' => $now, 'timeexpires' => $now + 5 * DAYSECS]);
+        $this->assertFalse(holds::notify((int) $holdid));
+        $this->assertNull($DB->get_field(self::T . 'hold', 'timenotified', ['id' => $holdid]));
+        access::set_closed($entityid, false);
+        $this->assertSame(1, holds::pending($now));
+        $this->assertNotNull($DB->get_field(self::T . 'hold', 'timenotified', ['id' => $holdid]));
+        $sink->close();
+    }
+
+    /**
      * Next year, the tutor of a group with the same name is proposed, not set.
      */
     public function test_tutor_proposed(): void {

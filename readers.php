@@ -259,6 +259,9 @@ if ($group === null) {
             ['library' => $library->slug, 'group' => $group]
         ))->out(false), 'label' => $str('printcards')] : null,
         'challenge' => $challengeview,
+        'entry' => $group !== '' && !$left && \local_oksigeniaayvurenda\local\entry::waiting($library, $group, time())
+            ? ['url' => (new moodle_url('/local/oksigeniaayvurenda/entries.php', ['library' => $library->slug,
+                'group' => $group]))->out(false), 'label' => $str('entrygroupbutton')] : null,
     ];
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/group', $data);
 }

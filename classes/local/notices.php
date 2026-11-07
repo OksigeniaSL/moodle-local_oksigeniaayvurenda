@@ -51,7 +51,8 @@ final class notices {
     }
 
     /**
-     * Notices to readers with an account: their late loans not told about for a week.
+     * Notices to readers with an account: once a week at most for each reader, with every book of theirs that is late
+     * past the centre's days of grace (a reader who stopped coming but still has books hears too).
      *
      * @param int $now
      * @return int Messages sent.
@@ -59,20 +60,29 @@ final class notices {
     private static function readers(int $now): int {
         global $DB;
         $loans = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title, rec.id AS recordid
+            "SELECT l.id, l.timedue, l.timenotified, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title,
+                    rec.id AS recordid
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
-              WHERE l.timereturned IS NULL AND l.timedue < :now AND r.userid IS NOT NULL AND r.status = 'active'
-                    AND (l.timenotified IS NULL OR l.timenotified <= :since)
+              WHERE l.timereturned IS NULL AND l.timedue < :now AND r.userid IS NOT NULL AND r.status IN ('active', 'left')
            ORDER BY l.readerid, l.timedue",
-            ['now' => $now, 'since' => $now - self::EVERY + HOURSECS]
+            ['now' => $now]
         );
+        // The week counts by person, not by book: two books late a few days apart are one message, with both.
+        $told = [];
+        foreach ($loans as $loan) {
+            $told[$loan->readerid] = max($told[$loan->readerid] ?? 0, (int) $loan->timenotified);
+        }
+        $since = $now - self::EVERY + HOURSECS;
         $byreader = [];
         $after = [];
         foreach ($loans as $loan) {
+            if ($told[$loan->readerid] > $since) {
+                continue;
+            }
             // Late once the last day is over where its centre is, which the query cannot say, and told once the days of
             // grace its centre gives are over too.
             $entityid = (int) $loan->entityid;
@@ -236,7 +246,7 @@ final class notices {
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid AND m.groupname = :groupname
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
-              WHERE l.timereturned IS NULL AND l.timedue < :today AND r.status = 'active'
+              WHERE l.timereturned IS NULL AND l.timedue < :today AND r.status IN ('active', 'left')
            ORDER BY r.lastname, r.firstname, l.timedue",
             ['yearid' => $tutor->yearid, 'groupname' => $tutor->groupname, 'today' => $today]
         );
@@ -348,6 +358,11 @@ final class notices {
         // A practice library is a rehearsal: what the guided help leaves in it waits for nobody.
         $entityid = (int) ($design['entityid'] ?? (isset($design['library']->entityid) ? $design['library']->entityid : 0));
         if ($entityid && practice::is($entityid)) {
+            return false;
+        }
+        // A centre open only to its staff tells nobody else anything yet, whoever sends it (bank, purchases, formats,
+        // other libraries, voices).
+        if ($entityid && access::closed($entityid) && !access::is_staff($entityid, (int) $user->id)) {
             return false;
         }
         $message = new \core\message\message();

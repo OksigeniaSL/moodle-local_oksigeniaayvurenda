@@ -1129,6 +1129,35 @@ final class desk {
         $due = bank::is($this->library) ? (int) $year->timeend - 1
             : ($reserve ? loan_rules::due($this->now, (int) $reserve->days, $this->tz, (int) $reserve->days > 0)
             : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz));
+        // Two desks (or a desk and a self-loan station) reading the same copy at once lend it once: the second waits for
+        // the first and finds it out.
+        $lock = \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock('lend_' . $item->id, 5);
+        if (!$lock) {
+            return $this->answer('stop', 'no', 'deskbusy', $this->title($item));
+        }
+        try {
+            if ($DB->record_exists_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$item->id])) {
+                return $this->answer('stop', 'no', 'desktakenjust', $this->title($item));
+            }
+            return $this->write_loan($item, $readerid, $year, $group ?: null, $due, $reserve);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /**
+     * Writes a loan already decided, under the lock of its copy.
+     *
+     * @param \stdClass $item
+     * @param int $readerid
+     * @param \stdClass $year
+     * @param string|null $group
+     * @param int $due
+     * @param \stdClass|null $reserve
+     * @return array As scan() answers.
+     */
+    private function write_loan(\stdClass $item, int $readerid, \stdClass $year, ?string $group, int $due, $reserve): array {
+        global $DB;
         $transaction = $DB->start_delegated_transaction();
         $loanid = $DB->insert_record(self::T . 'loan', [
             'libraryid' => $this->library->id,

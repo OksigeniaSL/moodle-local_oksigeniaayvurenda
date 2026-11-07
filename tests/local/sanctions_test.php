@@ -383,7 +383,8 @@ final class sanctions_test extends \advanced_testcase {
         $this->assertSame(0, sanctions::notify($back['at']), 'once');
 
         $late = $this->late($w, 'B2', 4);
-        $this->assertSame(0, sanctions::notify($late['at'] + 10 * DAYSECS), 'not long after');
+        // What waited untold for a month (a centre getting ready) still goes; older, never.
+        $this->assertSame(0, sanctions::notify($late['at'] + 40 * DAYSECS), 'not long after');
         $this->assertTrue($DB->record_exists_select(self::T . 'sanction', 'timetold IS NULL'));
     }
 

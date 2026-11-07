@@ -57,6 +57,30 @@ final class skins_test extends \advanced_testcase {
     }
 
     /**
+     * A skin without classes offers no group nor tutor to change, its home page is not the school's reading room, and a
+     * card opened without its library has no collector cards instead of failing.
+     */
+    public function test_without_classes(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $user = $this->getDataGenerator()->create_user();
+        $reader = $gen->create_reader(['entityid' => $entityid, 'userid' => $user->id, 'readertype' => 'teacher']);
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $reader->id]);
+        libraries::update_entity($entityid, ['skin' => 'university']);
+        $form = profile::form($library, $reader, time(), true);
+        $this->assertSame([], $form['groups']);
+        $this->assertFalse($form['canteach']);
+        $this->assertStringNotContainsString('/pix/portada.webp', (string) screens::skin_art($entityid));
+        $this->assertNull(garden::cromos($reader, null));
+        libraries::update_entity($entityid, ['skin' => 'school']);
+        $this->assertTrue(profile::form($library, $reader, time(), true)['canteach']);
+    }
+
+    /**
      * What is on comes from the skin, and the centre changes it: only what differs is kept, and a new skin brings its
      * own back. With the visit off there is no way in; with the figures on, a university's characters stand whole.
      */

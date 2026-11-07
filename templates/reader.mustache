@@ -23,7 +23,7 @@
     Context variables required for this template:
     * name, hasphoto, photo, initial, type, facts (fact), tutorof (label, url), cardcode, barcode, since, gone, drawing,
       stagename; backurl, backlabel, profileback: the way back; historyurl, historylabel: everything they took out
-    * canedit, hasaccount, formfirst, formlast, formemail, formhastypes, formtypes, formgroups, formlocked, formcanteach,
+    * canedit, hasaccount, formfirst, formlast, formemail, formhastypes, formtypes, formgroups, formlocked, formhasgroups, formcanteach,
       formtutors: what the staff can change; gonenow, stayaccount, canmatch, cantwin: whether they still come
     * loans - title, url, hascover, coverurl, colour, due, library, late; hasloans
     * holds - title, state; hasholds
@@ -49,6 +49,7 @@
         "historylabel": "Ver todo su historial (3)", "canedit": false, "gonenow": false,
         "notes": "", "staffonly": true, "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "canrecard": true, "profilenewcard": "Carné perdido", "profilenewcardintro": "Dejará de valer.", "profilenewcardgo": "Hacer otro carné", "selfclose": "Cerrar", "appheading": "La app",
         "app": {"can": true, "button": "Mandarle la app", "hint": "Le llega un correo con un enlace."},
+        "entry": {"url": "#", "heading": "Entrar por la web", "hint": "Una cuenta con una contraseña provisional.", "button": "Darle entrada"},
         "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
         "profilenothing": "Nada prestado.", "profileholds": "Reservas", "profilenoread": "Nada este curso todavía.",
         "profilepastheading": "Cursos anteriores", "profilenotes": "Notas del personal",
@@ -100,7 +101,7 @@
         {{#hasaccount}}<p class="ayv-field-hint">{{profiledataaccount}}</p>{{/hasaccount}}
         {{#formhastypes}}<label class="ayv-field">{{profiledatatype}} <select name="newtype">{{#formtypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtypes}}</select></label>{{/formhastypes}}
         {{#formlocked}}<p class="ayv-field-hint">{{formlocked}}</p>{{/formlocked}}
-        {{^formlocked}}<label class="ayv-field">{{profiledatagroup}} <select name="newgroup"><option value="">{{profiledatanogroup}}</option>{{#formgroups}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/formgroups}}</select></label>{{/formlocked}}
+        {{^formlocked}}{{#formhasgroups}}<label class="ayv-field">{{profiledatagroup}} <select name="newgroup"><option value="">{{profiledatanogroup}}</option>{{#formgroups}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/formgroups}}</select></label>{{/formhasgroups}}{{/formlocked}}
         {{#formcanteach}}<label class="ayv-field">{{profiledatatutor}} <select name="tutorof"><option value="">{{profiledatatutornone}}</option>{{#formtutors}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtutors}}</select></label>
         <p class="ayv-field-hint">{{profiledatatutorhint}}</p>{{/formcanteach}}
         <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{profilesave}}</button></p>
@@ -169,6 +170,16 @@
             </form>
         </section>
         {{/staffonly}}
+        {{#entry}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{heading}}</h2>
+            <p class="ayv-field-hint">{{hint}}</p>
+            <form method="post" action="{{url}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{button}}</button></p>
+            </form>
+        </section>
+        {{/entry}}
         {{#app}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{appheading}}</h2>

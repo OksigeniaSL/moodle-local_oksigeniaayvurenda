@@ -104,6 +104,12 @@ final class ltitool_test extends \advanced_testcase {
             'deployments' => "dep-1\n"]);
         $jwks = ltitool::jwks();
         $this->assertSame(get_config('local_oksigeniaayvurenda', 'ltikid'), $jwks['keys'][0]['kid']);
+        // The private key is kept encrypted, and one kept in the clear is encrypted the next time, the same key.
+        $this->assertStringNotContainsString('PRIVATE KEY', (string) get_config('local_oksigeniaayvurenda', 'ltiprivatekey'));
+        [, $private] = ltitool::keys();
+        set_config('ltiprivatekey', $private, 'local_oksigeniaayvurenda');
+        $this->assertSame($private, ltitool::keys()[1]);
+        $this->assertStringNotContainsString('PRIVATE KEY', (string) get_config('local_oksigeniaayvurenda', 'ltiprivatekey'));
         $this->assertNotEmpty($jwks['keys'][0]['n']);
 
         [$private, $state, $nonce] = $this->platform();
@@ -337,5 +343,21 @@ final class ltitool_test extends \advanced_testcase {
         );
         $this->assertCount(3, $history);
         $this->assertSame(1, $DB->count_records(self::T . 'member', ['readerid' => $reader->id]));
+    }
+
+    /**
+     * A session that came from a platform may be framed by it, by its origin only; nothing else is taken as an origin.
+     */
+    public function test_framers(): void {
+        global $SESSION;
+        $this->resetAfterTest();
+        unset($SESSION->local_oksigeniaayvurenda_framers);
+        $this->assertSame([], ltitool::framers());
+        ltitool::framed_by((object) ['issuer' => 'https://Aula.Example.org', 'authloginurl' =>
+            'https://aula.example.org:8443/mod/lti/auth.php?x=1']);
+        ltitool::framed_by((object) ['issuer' => 'https://aula.example.org', 'authloginurl' => 'javascript:alert(1)']);
+        $this->assertSame(['https://aula.example.org', 'https://aula.example.org:8443'], ltitool::framers());
+        $this->assertSame('', ltitool::origin('https://evil.example.org; script-src *'));
+        $this->assertSame('', ltitool::origin('ftp://example.org'));
     }
 }
