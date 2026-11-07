@@ -160,32 +160,43 @@ final class subjects {
             $bykey[self::key($subject['label'])][] = $subject;
         }
         // A letter away: compared only within a few words of the same start and length, not every one with every one.
-        $keys = array_keys($bykey);
-        $parent = array_combine($keys, $keys);
-        $find = function (string $key) use (&$parent, &$find): string {
-            return $parent[$key] === $key ? $key : ($parent[$key] = $find($parent[$key]));
+        // By position, never by the key itself: a subject that is a number («1914») would turn into an integer key, and
+        // comparing it with its own string never matched (in the classroom library the page fell over).
+        $keys = array_map('strval', array_keys($bykey));
+        $parent = $keys ? range(0, count($keys) - 1) : [];
+        $find = function (int $i) use (&$parent): int {
+            $root = $i;
+            while ($parent[$root] !== $root) {
+                $root = $parent[$root];
+            }
+            while ($parent[$i] !== $root) {
+                [$i, $parent[$i]] = [$parent[$i], $root];
+            }
+            return $root;
         };
         $buckets = [];
-        foreach ($keys as $key) {
-            if (strlen($key) >= 5) {
-                $buckets[substr($key, 0, 2)][] = $key;
+        foreach ($keys as $i => $key) {
+            // With figures, Arabic or Roman, a letter is no typo: «1914» and «1915», «siglo xx» and «siglo xi» are other
+            // subjects.
+            if (strlen($key) >= 5 && !preg_match('/\d|(^| )[ivxlcdm]{1,5}( |$)/', $key)) {
+                $buckets[substr($key, 0, 2)][] = $i;
             }
         }
         foreach ($buckets as $bucket) {
             $count = count($bucket);
-            for ($i = 0; $i < $count; $i++) {
-                for ($j = $i + 1; $j < $count; $j++) {
-                    [$a, $b] = [$bucket[$i], $bucket[$j]];
+            for ($x = 0; $x < $count; $x++) {
+                for ($y = $x + 1; $y < $count; $y++) {
+                    [$a, $b] = [$keys[$bucket[$x]], $keys[$bucket[$y]]];
                     if (abs(strlen($a) - strlen($b)) <= 1 && self::typo($a, $b)) {
-                        $parent[$find($a)] = $find($b);
+                        $parent[$find($bucket[$x])] = $find($bucket[$y]);
                     }
                 }
             }
         }
         $groups = [];
-        foreach ($bykey as $key => $subjects) {
-            foreach ($subjects as $subject) {
-                $groups[$find((string) $key)][] = $subject;
+        foreach ($keys as $i => $key) {
+            foreach ($bykey[$key] as $subject) {
+                $groups[$find($i)][] = $subject;
             }
         }
         $groups = array_values(array_filter($groups, fn($group) => count($group) > 1));

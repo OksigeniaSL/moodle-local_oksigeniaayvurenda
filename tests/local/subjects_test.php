@@ -80,6 +80,11 @@ final class subjects_test extends \advanced_testcase {
         $this->book($library, 'Dos', ['Misterio']);
         $three = $this->book($library, 'Tres', ['Mistrios']);
         $this->book($library, 'Cuatro', ['Mitología']);
+        // Subjects that are figures (the classroom library has years): never a typo of each other, and no fall.
+        $this->book($library, 'Seis', ['1914']);
+        $this->book($library, 'Siete', ['1915']);
+        $this->book($library, 'Ocho', ['Siglo XX']);
+        $this->book($library, 'Nueve', ['Siglo XI']);
         $five = $this->book($library, 'Cinco', ['Mitsério']);
         $this->assertSame(['Misterio'], array_column(subjects::suggest($entityid, 'mister'), 'label'));
         $this->assertSame(2, subjects::suggest($entityid, 'mister')[0]['count']);

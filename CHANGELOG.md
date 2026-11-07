@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.174.1
+
+- «Subjects» no longer falls over in a catalogue with subjects that are a number («1914»): they became integer keys and
+  the grouping of the alike went round for ever. Subjects with figures, Arabic or Roman, are never taken for a typo of
+  each other («1914» and «1915», «siglo XX» and «siglo XI»).
+
 ## 0.174.0
 
 - «Lost»: a book a reader has lost is given up as lost at the desk (next to «Return» in the reader's list, with a second
