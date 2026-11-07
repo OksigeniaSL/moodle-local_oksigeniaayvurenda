@@ -61,9 +61,110 @@ final class cataloguer {
             $list[] = ['id' => (int) $record->id, 'title' => $record->title, 'copies' => array_values(array_map(
                 fn($c) => ['library' => format_string($c->name, true, ['escape' => false]), 'count' => (int) $c->copies],
                 $copies
-            ))];
+            )), 'recent' => self::recent($entityid, (int) $record->id)];
         }
         return $list;
+    }
+
+    /**
+     * What was added here of a record lately, by hand (not by an import): a book passed twice by mistake says so before
+     * it becomes a copy nobody has.
+     *
+     * @param int $entityid
+     * @param int $recordid
+     * @param int|null $now
+     * @return string|null The sentence, or null when nothing was added in the last 30 days.
+     */
+    public static function recent(int $entityid, int $recordid, ?int $now = null): ?string {
+        global $DB;
+        $now = $now ?? time();
+        $items = $DB->get_records_sql(
+            'SELECT i.id, i.barcode, i.timecreated
+               FROM {' . self::T . 'item} i
+              WHERE i.recordid = :recordid AND i.entityid = :entityid AND i.timecreated > :since
+                AND NOT EXISTS (SELECT 1 FROM {' . self::T . "source} s WHERE s.tablename = 'item' AND s.localid = i.id)
+           ORDER BY i.timecreated DESC, i.id DESC",
+            ['recordid' => $recordid, 'entityid' => $entityid, 'since' => $now - 30 * DAYSECS]
+        );
+        if (!$items) {
+            return null;
+        }
+        $last = (int) reset($items)->timecreated;
+        $when = zones::date($last, '%Y%m%d', $entityid) === zones::date($now, '%Y%m%d', $entityid)
+            ? get_string('addrecenttoday', 'local_oksigeniaayvurenda', zones::date($last, 'strftimetime', $entityid))
+            : get_string('addrecentday', 'local_oksigeniaayvurenda', zones::date($last, 'strftimedayshort', $entityid));
+        $codes = implode(', ', array_slice(array_column($items, 'barcode'), 0, 4)) . (count($items) > 4 ? '…' : '');
+        return get_string(
+            count($items) === 1 ? 'addrecentone' : 'addrecentmany',
+            'local_oksigeniaayvurenda',
+            (object) ['count' => count($items), 'when' => $when, 'codes' => $codes]
+        );
+    }
+
+    /**
+     * Records of the centre with the same title and, when both say it, an author in common: a book without an ISBN typed
+     * twice would make a second record.
+     *
+     * @param int $entityid
+     * @param string $title
+     * @param string[] $authors
+     * @return array[] id, title and author, three at most.
+     */
+    public static function similar(int $entityid, string $title, array $authors): array {
+        global $DB;
+        $words = text::words($title);
+        if (!$words) {
+            return [];
+        }
+        $conditions = [];
+        $params = ['entityid' => $entityid];
+        foreach (array_slice($words, 0, 6) as $i => $word) {
+            $conditions[] = $DB->sql_like('searchtext', ':w' . $i, false, false);
+            $params['w' . $i] = '%' . $DB->sql_like_escape($word) . '%';
+        }
+        $rows = $DB->get_records_select(
+            self::T . 'record',
+            'entityid = :entityid AND ' . implode(' AND ', $conditions),
+            $params,
+            'id',
+            'id, title',
+            0,
+            50
+        );
+        $wanted = text::normalise($title);
+        $theirs = array_map(fn($author) => text::words(catalogue::display_name($author)), array_filter($authors, 'strlen'));
+        $found = [];
+        foreach ($rows as $row) {
+            if (text::normalise((string) $row->title) !== $wanted) {
+                continue;
+            }
+            $names = $DB->get_fieldset_sql(
+                'SELECT a.label FROM {' . self::T . 'recauth} ra JOIN {' . self::T . "authority} a ON a.id = ra.authorityid
+                  WHERE ra.recordid = ? AND a.kind = 'author' ORDER BY ra.sortorder, ra.id",
+                [$row->id]
+            );
+            if ($theirs && $names) {
+                $shared = false;
+                foreach ($names as $name) {
+                    $own = text::words(catalogue::display_name((string) $name));
+                    foreach ($theirs as $words) {
+                        // The surname at least: «Ana Montes» and «Montes, A.» are the same author.
+                        if (array_intersect($own, $words)) {
+                            $shared = true;
+                        }
+                    }
+                }
+                if (!$shared) {
+                    continue;
+                }
+            }
+            $found[] = ['id' => (int) $row->id, 'title' => format_string($row->title, true, ['escape' => false]),
+                'author' => $names ? catalogue::display_name((string) $names[0]) : ''];
+            if (count($found) === 3) {
+                break;
+            }
+        }
+        return $found;
     }
 
     /**

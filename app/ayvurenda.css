@@ -4346,3 +4346,65 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* The class while it is typed: a short list under its field, and the name of the number that is there. */
+.ayv .ayv-classes-holder { position: relative; }
+.ayv .ayv-classlist {
+    position: absolute;
+    z-index: 30;
+    width: max-content;
+    min-width: 16rem;
+    max-width: min(28rem, calc(100vw - 2rem));
+    max-height: 18rem;
+    margin: 0;
+    padding: .3rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 14px 34px -14px rgba(15, 58, 51, .45);
+}
+.ayv .ayv-classlist li {
+    display: flex;
+    align-items: baseline;
+    gap: .6rem;
+    padding: .45rem .65rem;
+    border-radius: 9px;
+    cursor: pointer;
+    line-height: 1.25;
+}
+.ayv .ayv-classlist li:hover,
+.ayv .ayv-classlist li[aria-selected="true"] { background: var(--notice-bg); }
+.ayv .ayv-classlist-code { min-width: 3.2rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ayv .ayv-classlist-label { flex: 1 1 auto; }
+.ayv .ayv-classlist-note { margin-left: auto; padding-left: .5rem; color: var(--muted); font-size: .82em; white-space: nowrap; }
+.ayv .ayv-class-said { display: block; color: var(--accent); font-size: .85em; }
+.ayv .ayv-class-said:empty { display: none; }
+
+/* A book that may have been passed twice, or typed twice: said before it becomes a copy nobody has. */
+.ayv .ayv-book-warn {
+    margin: .4rem 0 .6rem;
+    padding: .6rem .85rem;
+    border-radius: 10px;
+    background: var(--late-bg);
+    color: var(--ink);
+    font-weight: 600;
+}
+
+/* What was catalogued lately: a flag on what may have gone in twice. */
+.ayv .ayv-cataloged-flag {
+    display: inline-block;
+    align-self: flex-start;
+    width: max-content;
+    margin: .25rem .4rem 0 0;
+    padding: .1rem .55rem;
+    border-radius: 999px;
+    background: var(--late-bg);
+    color: var(--ink);
+    font-size: .82em;
+    font-weight: 600;
+}
+.ayv .ayv-add-cataloged { margin: .6rem 0 0; }

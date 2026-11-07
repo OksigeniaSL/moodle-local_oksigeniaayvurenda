@@ -50,6 +50,7 @@
     <p class="ayv-add-sources">{{sources}}</p>
 </form>
 {{{tools}}}
+<p class="ayv-add-cataloged"><a class="ayv-button ayv-button-quiet" href="{{catalogedurl}}">{{catalogedlabel}}</a></p>
 <p id="ayv-add-status" class="ayv-add-status" role="status" aria-live="polite"></p>
 <ul id="ayv-found" class="ayv-found" hidden></ul>
 <form id="ayv-book" class="ayv-book" hidden autocomplete="off">
@@ -77,7 +78,7 @@
         <label class="ayv-field">{{addlibrary}} <select name="target">{{#libraries}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/libraries}}</select></label>
         {{/multiple}}
         <span class="ayv-field ayv-callnumber" role="group" aria-labelledby="ayv-spine-label"><span id="ayv-spine-label">{{addspine}}</span>
-            <input type="text" name="callnumber1" maxlength="100" size="9" aria-label="{{addspine}} 1">
+            <input type="text" name="callnumber1" maxlength="100" size="9" aria-label="{{addspine}} 1" data-ayv-classes="{{classesurl}}">
             <input type="text" name="callnumber2" maxlength="100" size="4" aria-label="{{addspine}} 2">
             <input type="text" name="callnumber3" maxlength="100" size="4" aria-label="{{addspine}} 3">
             <span class="ayv-spine-note" id="ayv-spine-note"></span></span>

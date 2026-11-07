@@ -471,6 +471,173 @@
     });
 
     // On the home the search is in the page: the results come under it, and the box stays where it is.
+    // The class while it is typed: a word («biología») offers the numbers that fit, from the centre's own classes and from
+    // what the library gave to books on that subject; a number offers those that start with it, with their names. Arrows
+    // and Enter choose, Escape closes; what is typed stays if nothing is chosen.
+    Array.prototype.forEach.call(document.querySelectorAll('input[data-ayv-classes]'), function(field) {
+        if (!window.fetch) {
+            return;
+        }
+        var holder = field.parentNode;
+        holder.classList.add('ayv-classes-holder');
+        var list = document.createElement('ul');
+        var said = document.createElement('span');
+        var id = 'ayv-classes-' + Math.random().toString(36).slice(2, 8);
+        list.className = 'ayv-classlist';
+        list.id = id;
+        list.setAttribute('role', 'listbox');
+        list.hidden = true;
+        said.className = 'ayv-class-said';
+        said.setAttribute('aria-live', 'polite');
+        holder.appendChild(list);
+        holder.appendChild(said);
+        field.setAttribute('role', 'combobox');
+        field.setAttribute('aria-autocomplete', 'list');
+        field.setAttribute('aria-expanded', 'false');
+        field.setAttribute('aria-controls', id);
+        var items = [];
+        var active = -1;
+        var timer = null;
+        var asked = 0;
+        var names = {};
+        var close = function() {
+            list.hidden = true;
+            field.setAttribute('aria-expanded', 'false');
+            field.removeAttribute('aria-activedescendant');
+            active = -1;
+        };
+        var name = function() {
+            var code = field.value.trim();
+            said.textContent = names[code] ? names[code] : '';
+        };
+        var mark = function(index) {
+            active = index;
+            Array.prototype.forEach.call(list.children, function(li, i) {
+                li.setAttribute('aria-selected', i === index ? 'true' : 'false');
+            });
+            if (index >= 0) {
+                field.setAttribute('aria-activedescendant', id + '-' + index);
+                list.children[index].scrollIntoView({block: 'nearest'});
+            }
+        };
+        var choose = function(index) {
+            var item = items[index];
+            if (!item) {
+                return;
+            }
+            field.value = item.code;
+            names[item.code] = item.label;
+            close();
+            name();
+            field.dispatchEvent(new Event('change', {bubbles: true}));
+            field.focus();
+        };
+        var show = function(found) {
+            items = found;
+            list.textContent = '';
+            found.forEach(function(item, i) {
+                names[item.code] = item.label;
+                var li = document.createElement('li');
+                li.id = id + '-' + i;
+                li.setAttribute('role', 'option');
+                li.setAttribute('aria-selected', 'false');
+                var code = document.createElement('b');
+                code.className = 'ayv-classlist-code';
+                code.textContent = item.code;
+                var label = document.createElement('span');
+                label.className = 'ayv-classlist-label';
+                label.textContent = item.label;
+                li.appendChild(code);
+                li.appendChild(label);
+                if (item.note) {
+                    var note = document.createElement('span');
+                    note.className = 'ayv-classlist-note';
+                    note.textContent = item.note;
+                    li.appendChild(note);
+                }
+                // A press, not a click: the field would lose the focus first and close the list.
+                li.addEventListener('mousedown', function(event) {
+                    event.preventDefault();
+                    choose(i);
+                });
+                list.appendChild(li);
+            });
+            list.style.left = field.offsetLeft + 'px';
+            list.style.top = (field.offsetTop + field.offsetHeight + 4) + 'px';
+            list.hidden = !found.length;
+            field.setAttribute('aria-expanded', found.length ? 'true' : 'false');
+            mark(-1);
+            name();
+        };
+        // Open: the list for what is typed. Closed: only the name of the number that is there.
+        var ask = function(open) {
+            var typed = field.value.trim();
+            if (typed.length < (/^\d/.test(typed) ? 1 : 3) || (!open && !/^\d/.test(typed))) {
+                close();
+                name();
+                return;
+            }
+            var mine = ++asked;
+            var body = new URLSearchParams({action: 'classes', q: typed});
+            fetch(field.getAttribute('data-ayv-classes'), {method: 'POST', body: body, credentials: 'same-origin'})
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(answer) {
+                    if (mine !== asked) {
+                        return answer;
+                    }
+                    if (open && document.activeElement === field) {
+                        show(answer.classes || []);
+                    } else {
+                        (answer.classes || []).forEach(function(item) {
+                            names[item.code] = item.label;
+                        });
+                        name();
+                    }
+                    return answer;
+                })
+                .catch(function() {
+                    close();
+                });
+        };
+        field.addEventListener('input', function() {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(function() {
+                ask(true);
+            }, 220);
+        });
+        field.addEventListener('keydown', function(event) {
+            if (list.hidden) {
+                return;
+            }
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                var step = event.key === 'ArrowDown' ? 1 : -1;
+                mark((active + step + items.length) % items.length);
+            } else if (event.key === 'Enter' && active >= 0) {
+                event.preventDefault();
+                choose(active);
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                close();
+            }
+        });
+        field.addEventListener('blur', function() {
+            window.setTimeout(close, 120);
+            name();
+        });
+        // Filled by the page (a proposal, the book before): its name too, when it is known.
+        field.addEventListener('ayv:filled', function() {
+            close();
+            ask(false);
+        });
+        if (field.value.trim() !== '') {
+            ask(false);
+        }
+    });
+
     var main = document.getElementById('ayv-live') || document.getElementById('ayv-main');
     if (!input || !main || !window.fetch || !config.library) {
         return;

@@ -65,6 +65,17 @@ $names = \local_oksigeniaayvurenda\local\practice::is($entityid) ? [$str('practi
     : array_map(fn($s) => lookup::PRESETS[$s]['name'], array_filter(lookup::sources($entityid), fn($s) => lookup::source($s)));
 $data = [
     'heading' => $str('addtitle'),
+    'classesurl' => (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php', ['library' => $library->slug,
+        'sesskey' => sesskey()]))->out(false),
+    // What was added today, to look back over it.
+    'catalogedurl' => (new moodle_url('/local/oksigeniaayvurenda/catalogued.php', ['library' => $library->slug,
+        'span' => 'today']))->out(false),
+    'catalogedlabel' => $str('catalogedtodaylink', \local_oksigeniaayvurenda\local\screens::number(
+        \local_oksigeniaayvurenda\local\catalogued::count($library, \local_oksigeniaayvurenda\local\catalogued::starts(
+            (int) $library->entityid,
+            time()
+        )['today'])
+    )),
     'prompt' => $str('addprompt'),
     'libraries' => $libraries,
     'multiple' => count($libraries) > 1,
@@ -86,7 +97,7 @@ foreach (
         'addaddcopy', 'addotheredition', 'addspineproposed', 'addspinebefore', 'addsaved', 'addundo', 'addundone',
         'addcantundo', 'adderror', 'addnocover', 'addbadletter', 'addsearching', 'addsearchfound', 'addsearchnone',
         'addsearchprogress', 'addsearchspelled', 'addsearchmeant', 'addand',
-        'addsearchbyhand', 'addbyhand'] as $key
+        'addsearchbyhand', 'addbyhand', 'addunsure', 'addsimilarsame', 'addsimilarother'] as $key
 ) {
     $strings[$key] = $str($key);
 }

@@ -191,6 +191,8 @@ if ($correct) {
         }
         $data['copies'][$n]['fix']['action'] = $PAGE->url->out(false);
         $data['copies'][$n]['fix']['sesskey'] = sesskey();
+        $data['copies'][$n]['fix']['classesurl'] = (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php', [
+            'library' => $library->slug, 'sesskey' => sesskey()]))->out(false);
     }
 }
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [

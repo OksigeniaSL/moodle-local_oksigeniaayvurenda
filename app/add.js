@@ -207,26 +207,37 @@
                 return fill(str.addexistingcopies, {count: c.count, library: c.library});
             }).join(', ');
             existing.appendChild(el('p', '', fill(str.addexisting, copies)));
+            // Added a moment ago (or these days): maybe the same book passed twice. Nothing is chosen until someone says,
+            // and the next book waits.
+            var recent = answer.existing[0].recent;
+            if (recent) {
+                existing.appendChild(el('p', 'ayv-book-warn', recent));
+                current.unsure = true;
+            }
             var add = el('button', 'ayv-line-button', str.addaddcopy);
             var other = el('button', 'ayv-line-button', str.addotheredition);
             add.type = other.type = 'button';
-            add.setAttribute('aria-pressed', 'true');
+            add.setAttribute('aria-pressed', recent ? 'false' : 'true');
             other.setAttribute('aria-pressed', 'false');
             add.addEventListener('click', function() {
                 current.recordid = answer.existing[0].id;
                 current.newrecord = false;
+                current.unsure = false;
                 add.setAttribute('aria-pressed', 'true');
                 other.setAttribute('aria-pressed', 'false');
                 manual.hidden = true;
                 input.focus();
+                next();
             });
             other.addEventListener('click', function() {
                 current.recordid = 0;
                 current.newrecord = true;
+                current.unsure = false;
                 other.setAttribute('aria-pressed', 'true');
                 add.setAttribute('aria-pressed', 'false');
                 manual.hidden = answer.found;
                 input.focus();
+                next();
             });
             existing.appendChild(add);
             existing.appendChild(other);
@@ -237,10 +248,12 @@
         field('callnumber1').value = answer.spine[0] || (answer.spinebefore ? '' : keep);
         field('callnumber2').value = answer.spine[1] || '';
         field('callnumber3').value = answer.spine[2] || '';
+        field('callnumber1').dispatchEvent(new Event('ayv:filled'));
         $('ayv-spine-note').textContent = answer.spinebefore ? str.addspinebefore : str.addspineproposed;
         field('count').value = 1;
         field('barcodes').value = '';
-        say('', answer.found || answer.existing.length ? 'ok' : 'look');
+        say('', answer.existing.length && answer.existing[0].recent ? 'look'
+            : (answer.found || answer.existing.length ? 'ok' : 'look'));
         if (!manual.hidden) {
             field('title').focus();
         } else {
@@ -298,13 +311,18 @@
         if (!current) {
             return Promise.resolve();
         }
+        if (current.unsure) {
+            say(str.addunsure, 'no');
+            return Promise.reject(new Error('unsure'));
+        }
         var manual = !$('ayv-book-manual').hidden;
         if (manual && !field('title').value.trim()) {
             say(str.adderror, 'no');
             field('title').focus();
             return Promise.reject(new Error('title'));
         }
-        var params = {action: 'save', isbn: current.isbn, recordid: current.recordid, pick: current.pick};
+        var params = {action: 'save', isbn: current.isbn, recordid: current.recordid, pick: current.pick,
+            confirmnew: current.confirmnew ? 1 : 0};
         ['callnumber1', 'callnumber2', 'callnumber3', 'locationid', 'itemtype', 'count', 'barcodes',
             'title', 'subtitle', 'author', 'publisher', 'year', 'pages'].forEach(function(name) {
             params[name] = field(name).value;
@@ -317,6 +335,10 @@
         }
         var saving = current;
         return post(params).then(function(answer) {
+            if (answer.kind === 'similar') {
+                similar(saving, answer);
+                throw new Error('unsure');
+            }
             if (current === saving) {
                 close();
             }
@@ -324,9 +346,46 @@
             tone('ok');
             return answer;
         }).catch(function(error) {
-            say(error.message || str.adderror, 'no');
+            if (error.message !== 'unsure') {
+                say(error.message || str.adderror, 'no');
+            }
             throw error;
         });
+    };
+
+    // A book without an ISBN whose title (and author) the library already has: the same one, or another?
+    var similar = function(saving, answer) {
+        saving.unsure = true;
+        say(answer.message, 'look');
+        var box = $('ayv-book-existing');
+        box.textContent = '';
+        box.hidden = false;
+        box.appendChild(el('p', 'ayv-book-warn', answer.message));
+        var same = el('button', 'ayv-line-button', str.addsimilarsame);
+        var other = el('button', 'ayv-line-button', str.addsimilarother);
+        same.type = other.type = 'button';
+        var go = function() {
+            saving.unsure = false;
+            box.hidden = true;
+            save().catch(function() {
+                return null;
+            }).then(function() {
+                next();
+                return null;
+            });
+        };
+        same.addEventListener('click', function() {
+            saving.recordid = answer.records[0].id;
+            saving.newrecord = false;
+            go();
+        });
+        other.addEventListener('click', function() {
+            saving.confirmnew = true;
+            go();
+        });
+        box.appendChild(same);
+        box.appendChild(other);
+        same.focus();
     };
 
     var lookup = function(code) {
@@ -497,6 +556,8 @@
                 : Promise.resolve();
             return waiting.then(function() {
                 return search(code);
+            }, function(error) {
+                hold(code, error);
             });
         }
         if (what === 'label') {
@@ -528,11 +589,25 @@
         var before = current && !(!$('ayv-book-manual').hidden && !field('title').value.trim()) ? save() : Promise.resolve();
         return before.then(function() {
             return lookup(code);
+        }, function(error) {
+            hold(code, error);
         });
+    };
+
+    // The next book waits while the one on screen needs an answer: it is not lost.
+    var hold = function(code, error) {
+        if (error && error.message === 'unsure') {
+            queue.unshift(code);
+        }
     };
 
     var next = function() {
         if (busy || !queue.length) {
+            return;
+        }
+        // Waiting for an answer about the book on screen; the labels stuck on it may still be read.
+        if (current && current.unsure && kind(queue[0]) !== 'label') {
+            say(str.addunsure, 'no');
             return;
         }
         busy = true;
@@ -580,7 +655,10 @@
         }
     });
 
-    $('ayv-book-cancel').addEventListener('click', close);
+    $('ayv-book-cancel').addEventListener('click', function() {
+        close();
+        next();
+    });
     if (window.AYVCamera) {
         window.AYVCamera.wire(config, function(code) {
             queue.push(code);

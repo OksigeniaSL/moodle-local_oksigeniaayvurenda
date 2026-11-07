@@ -197,6 +197,26 @@ switch ($action) {
         if (trim((string) ($description['record']['title'] ?? '')) === '') {
             throw new moodle_exception('addnotitle', 'local_oksigeniaayvurenda');
         }
+        // A new record without an ISBN whose title (and author) the centre already has: the same book typed twice, unless
+        // the person says it is another.
+        $noisbn = trim((string) ($description['record']['isbn'] ?? '')) === '';
+        if (!$recordid && $noisbn && !optional_param('confirmnew', 0, PARAM_BOOL)) {
+            $similar = cataloguer::similar(
+                $entityid,
+                (string) $description['record']['title'],
+                (array) ($description['authorities']['author'] ?? [])
+            );
+            if ($similar) {
+                echo json_encode(
+                    ['kind' => 'similar', 'records' => $similar, 'message' => $str(
+                        'addsimilar',
+                        $similar[0]['title'] . ($similar[0]['author'] !== '' ? ', ' . $similar[0]['author'] : '')
+                    )],
+                    JSON_UNESCAPED_UNICODE
+                );
+                die();
+            }
+        }
         try {
             $added = cataloguer::add($target, $description, [
                 'count' => optional_param('count', 1, PARAM_INT),
@@ -230,6 +250,15 @@ switch ($action) {
                 'id' => $added['recordid']]))->out(false),
         ];
         catalogue::purge($entityid);
+        break;
+    case 'classes':
+        // The class while it is typed: the numbers that fit a word, or those that start with a number.
+        $answer = ['kind' => 'classes', 'classes' => array_map(
+            fn($class) => $class + ['note' => $class['used']
+            ? $str($class['used'] === 1 ? 'classusedone' : 'classused', $class['used'])
+            : ($class['count'] ? $str($class['count'] === 1 ? 'classbooksone' : 'classbooks', $class['count']) : '')],
+            \local_oksigeniaayvurenda\local\classify::suggest($library, required_param('q', PARAM_TEXT))
+        )];
         break;
     case 'undo':
         $itemids = array_filter(array_map('intval', explode(',', required_param('itemids', PARAM_SEQUENCE))));

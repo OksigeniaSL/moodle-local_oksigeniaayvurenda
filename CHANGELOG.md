@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.169.0
+
+- The class while it is typed: a word in the first box of the call number («biology») brings the numbers that fit, with
+  their names and how many books have them, first those the library gave before to books on that subject; a number brings
+  those that start with it. In «Add books» and in the correction of a copy.
+- «Catalogued lately»: the copies added by hand today, this week, this fortnight or this month, the latest first and day by
+  day, with what may have gone in twice; from «More» and from «Add books».
+- A book added a moment ago that is passed again in «Add books» asks whether it is another copy, and the next book waits
+  for the answer; a book without an ISBN typed by hand asks when the catalogue has its title and author.
+- «How do I…?» says how to lend by the ISBN, find the class of a book, see what was catalogued and wait some days before
+  the late notice.
+
 ## 0.168.0
 
 - The desk reads the ISBN of the back cover as if it were the book's label: with a reader open it goes out, or comes back if
