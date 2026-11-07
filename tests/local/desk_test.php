@@ -247,6 +247,40 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * A book a reader lost: the loan ends as lost and the copy is lost; «Undo» opens the loan again; lost again and then
+     * passed at the desk, it is back on the shelf, or goes straight to the reader who is there.
+     */
+    public function test_lost_and_found(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $desk = new desk($w->library, (int) $w->staff->id);
+        $lent = $desk->scan('100000L', (int) $w->ana->id);
+        $lost = $desk->lose((int) $lent['loanid'], (int) $w->ana->id);
+        $this->assertSame('lost', $lost['kind']);
+        $this->assertSame('lost', $DB->get_field(self::T . 'item', 'status', ['id' => $w->faro->id]));
+        $this->assertSame('lost', $DB->get_field(self::T . 'loan', 'conditionin', ['id' => $lent['loanid']]));
+        $this->assertSame([], $lost['reader']['loans']);
+        $this->assertSame('stop', $desk->lose((int) $lent['loanid'])['kind']);
+
+        $desk->undo((int) $lent['loanid'], 'lost');
+        $this->assertNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $lent['loanid']]));
+        $this->assertSame('onloan', $DB->get_field(self::T . 'item', 'status', ['id' => $w->faro->id]));
+
+        $desk->lose((int) $lent['loanid']);
+        $found = $desk->scan('100000L');
+        $this->assertSame('returned', $found['kind']);
+        $this->assertStringContainsString('turned up', $found['message']);
+        $this->assertSame('available', $DB->get_field(self::T . 'item', 'status', ['id' => $w->faro->id]));
+        $this->assertNull($DB->get_field(self::T . 'loan', 'conditionin', ['id' => $lent['loanid']]));
+
+        // Lost again; it turns up while Leo is at the desk: it goes to him.
+        $again = $desk->scan('100000L', (int) $w->ana->id);
+        $desk->lose((int) $again['loanid']);
+        $this->assertSame('lent', $desk->scan('100000L', (int) $w->leo->id)['kind']);
+    }
+
+    /**
      * Material: the unit is named by its serial number; its state is noted as it was when it goes, changed with a tap,
      * and offered as it is now when it comes back.
      */

@@ -55,6 +55,7 @@
     <p class="ayv-subjects">{{label}} {{#looks}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}" {{#current}}aria-current="true"{{/current}}>{{label}}</a> {{/looks}}</p></div>{{/preview}}
 {{^hascards}}<p class="ayv-empty">{{none}}</p>
 {{#practice}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/practice}}{{/hascards}}
+{{#athome}}{{> local_oksigeniaayvurenda/athome}}{{/athome}}
 {{#cards}}
 {{#sanctionline}}<p class="ayv-notice ayv-sanction-line">{{sanctionline}}</p>{{/sanctionline}}
 <section class="ayv-mycard">

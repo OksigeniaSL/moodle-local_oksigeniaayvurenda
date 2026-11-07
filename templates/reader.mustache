@@ -131,6 +131,10 @@
                         <span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
                         <span class="ayv-profile-booktext"><b>{{title}}</b><span>{{due}} · {{library}}</span>{{#late}}<span class="ayv-profile-latetag">{{late}}</span>{{/late}}</span>
                     </a>
+                    {{#canlose}}<details class="ayv-profile-lost"><summary>{{lostlabel}}</summary>
+                        <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lost">
+                            <input type="hidden" name="loan" value="{{loanid}}"><button type="submit" class="ayv-button ayv-button-quiet">{{lostsure}}</button></form>
+                    </details>{{/canlose}}
                 </li>
                 {{/loans}}
             </ul>

@@ -1,0 +1,41 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/athome
+
+    What the reader has at home: each book with the day it comes back, late in red, and «Renew» where they may.
+
+    Example context (json):
+    {
+        "heading": "Tienes en casa", "action": "#", "sesskey": "abc", "returnurl": "#",
+        "books": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg",
+            "colour": 2, "when": "Vuelve el 16/11/26", "late": false, "renew": {"loan": 3, "label": "Ampliar hasta el 23/11/26"} }]
+    }
+}}
+<section class="ayv-section ayv-athome" aria-labelledby="ayv-athome-title">
+    <h2 id="ayv-athome-title" class="ayv-section-title">{{heading}}</h2>
+    <ul class="ayv-athome-books">
+        {{#books}}
+        <li class="ayv-athome-book{{#late}} ayv-athome-late{{/late}}">
+            <a class="ayv-athome-link" href="{{url}}"><span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
+                <span class="ayv-athome-text"><b>{{title}}</b><span class="ayv-athome-when">{{when}}</span></span></a>
+            {{#renew}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="loan" value="{{loan}}">
+                <input type="hidden" name="returnurl" value="{{returnurl}}"><button type="submit" class="ayv-button ayv-button-quiet">{{label}}</button></form>{{/renew}}
+        </li>
+        {{/books}}
+    </ul>
+</section>

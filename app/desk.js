@@ -221,6 +221,16 @@
                 b.disabled = true;
                 choose({action: 'giveback', loanid: loan.id, readerid: reader.id}, loan.title);
             }));
+            // Lost: a second touch says it is so (a slip of the finger must not cost a reader a book).
+            item.appendChild(button(str.desklost, 'ayv-line-quiet ayv-loan-lost', function(b) {
+                if (!b.classList.contains('ayv-loan-lost-sure')) {
+                    b.classList.add('ayv-loan-lost-sure');
+                    b.textContent = str.desklostsure;
+                    return;
+                }
+                b.disabled = true;
+                choose({action: 'lost', loanid: loan.id, readerid: reader.id}, loan.title);
+            }));
             list.appendChild(item);
         });
         panel.appendChild(list);
@@ -314,6 +324,9 @@
                 });
             }));
         };
+        if (answer.kind === 'lost' && answer.loanid) {
+            undo('lost');
+        }
         if (answer.kind === 'lent' && answer.loanid) {
             if (answer.material) {
                 actions.appendChild(states(answer));

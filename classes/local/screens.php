@@ -94,6 +94,7 @@ final class screens {
             // Not «add»: Mustache would find the method of its helpers by that name when there is none.
             'addbooks' => $addbooks,
             'mycard' => self::mycard($library),
+            'athome' => self::at_home($library),
             'hero' => $hero,
             'classblock' => $hero['classreads'] ? ['cards' => $hero['classreads']] : null,
             'eldersblock' => $hero['young'] ? self::elders($library) : null,
@@ -1049,6 +1050,68 @@ final class screens {
             'count' => (int) $row->readers], 'celebra');
         return $said ? $said + ['url' => self::url('record.php', $library, ['id' => $row->recordid]),
             'cover' => covers::url((int) $row->recordid), 'label' => self::str('memorygo')] : null;
+    }
+
+    /**
+     * What the reader looking has at home from this centre: each book with its cover and the day it comes back, late in
+     * red, and «Renew» where the library lets them do it themselves. Not the textbooks of a bank, lent for the year.
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return array|null heading and books; null for whoever is not a reader here or has nothing at home.
+     */
+    public static function at_home(\stdClass $library, ?int $now = null): ?array {
+        global $DB, $USER, $PAGE;
+        $now = $now ?? time();
+        if (!isloggedin() || isguestuser()) {
+            return null;
+        }
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+            'status' => 'active'], 'id', IGNORE_MULTIPLE);
+        if (!$reader) {
+            return null;
+        }
+        $rows = $DB->get_records_sql(
+            "SELECT l.id, l.timedue, l.libraryid, r.id AS recordid, r.title
+               FROM {local_oksigeniaayvurenda_loan} l
+               JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+               JOIN {local_oksigeniaayvurenda_record} r ON r.id = i.recordid
+              WHERE l.readerid = :readerid AND l.timereturned IS NULL
+           ORDER BY l.timedue, l.id",
+            ['readerid' => $reader->id]
+        );
+        $covers = covers::urls(array_map(fn($row) => (int) $row->recordid, $rows));
+        $back = $PAGE->has_set_url() ? $PAGE->url->out(false) : self::url('index.php', $library);
+        $books = [];
+        foreach ($rows as $row) {
+            $where = (int) $row->libraryid === (int) $library->id ? $library
+                : $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $row->libraryid]);
+            if (!$where || bank::is($where)) {
+                continue;
+            }
+            $until = renewals::until($where, (int) $reader->id, (int) $row->id, (int) $USER->id, $now);
+            $late = (int) $row->timedue < zones::today((int) $library->entityid, $now);
+            $day = zones::date((int) $row->timedue, 'strftimedateshort', $library);
+            $books[] = [
+                'title' => format_string($row->title, true, ['escape' => false]),
+                'url' => self::url('record.php', $where, ['id' => $row->recordid]),
+                'hascover' => isset($covers[$row->recordid]),
+                'coverurl' => $covers[$row->recordid] ?? '',
+                'colour' => (int) $row->recordid % 6,
+                'when' => self::str($late ? 'athomelate' : 'athomedue', $day),
+                'late' => $late,
+                'renew' => $until ? ['loan' => (int) $row->id, 'label' => self::str(
+                    'athomerenew',
+                    zones::date($until, 'strftimedateshort', $library)
+                )] : null,
+            ];
+        }
+        if (!$books) {
+            return null;
+        }
+        return ['heading' => self::str('athomeheading'), 'books' => $books,
+            'action' => (new \moodle_url('/local/oksigeniaayvurenda/renew.php'))->out(false), 'sesskey' => sesskey(),
+            'returnurl' => $back];
     }
 
     /**

@@ -4517,3 +4517,27 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-dup-text { display: grid; gap: .15rem; min-width: 0; overflow-wrap: anywhere; }
 .ayv .ayv-dup-facts { color: var(--ink); opacity: .8; font-size: .9em; }
 .ayv .ayv-dup-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: .6rem 0 0; }
+
+/* Lost, from the reader's record: a second step before it is so. */
+.ayv .ayv-profile-lost { margin: .2rem 0 0 4.2rem; font-size: .9em; }
+.ayv .ayv-profile-lost summary { color: var(--accent); cursor: pointer; font-weight: 600; }
+.ayv .ayv-profile-lost form { margin: .4rem 0 0; }
+.ayv .ayv-loan-lost-sure { border-color: var(--danger); color: var(--danger); }
+
+/* Lost, from the reader's record: a second step before it is so. */
+.ayv .ayv-profile-lost { margin: .2rem 0 0 4.2rem; font-size: .9em; }
+.ayv .ayv-profile-lost summary { color: var(--accent); cursor: pointer; font-weight: 600; }
+.ayv .ayv-profile-lost form { margin: .4rem 0 0; }
+.ayv .ayv-loan-lost-sure { border-color: var(--danger); color: var(--danger); }
+
+/* What the reader has at home, with the day it comes back. */
+.ayv .ayv-athome-books { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: .6rem;
+    margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-athome-book { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem;
+    padding: .6rem .8rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 4px rgba(15, 58, 51, .08); }
+.ayv .ayv-athome-link { display: flex; align-items: center; gap: .7rem; min-width: 0; color: var(--ink); text-decoration: none; }
+.ayv .ayv-athome-link .ayv-cover { flex: none; width: 44px; height: 66px; }
+.ayv .ayv-athome-text { display: grid; gap: .1rem; min-width: 0; }
+.ayv .ayv-athome-when { font-size: .9em; }
+.ayv .ayv-athome-late .ayv-athome-when { color: var(--late); font-weight: 700; }
+.ayv .ayv-athome-book form { margin: 0; }

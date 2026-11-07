@@ -110,6 +110,9 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
         profile::set_gone($library, $id, $gone);
         $notice = $str($gone ? 'profileleavedone' : 'profilebackdone');
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
+    } else if (optional_param('do', '', PARAM_ALPHA) === 'lost') {
+        // A book the reader lost, from their record: as at the desk.
+        $notice = (new desk($library, (int) $USER->id, $now, $own))->lose(required_param('loan', PARAM_INT))['message'];
     } else if (optional_param('do', '', PARAM_ALPHA) === 'newcard') {
         $notice = $str('profilenewcarddone', profile::new_card($library, $id));
     } else if (optional_param('do', '', PARAM_ALPHA) === 'lift') {
@@ -253,7 +256,10 @@ $data = [
     'drawing' => $drawing,
     'stagename' => $stagename,
     'loans' => array_map(fn($l) => $book($l) + ['due' => $str('profiledue', $day($l['due'])), 'library' => $l['library'],
-        'late' => $l['late'] ? $str($l['late'] === 1 ? 'profilelateone' : 'profilelate', $l['late']) : ''], $record['loans']),
+        'late' => $l['late'] ? $str($l['late'] === 1 ? 'profilelateone' : 'profilelate', $l['late']) : '',
+        'loanid' => $l['loanid'], 'canlose' => !$limited], $record['loans']),
+    'lostlabel' => $str('desklost'),
+    'lostsure' => $str('desklostsure'),
     'hasloans' => (bool) $record['loans'],
     'holds' => array_map(fn($h) => ['title' => $h['title'], 'state' => $h['ready'] ? $str('profileholdready', $h['until'])
         : $str('profileholdwaiting')], $record['holds']),

@@ -167,6 +167,13 @@ final class desk {
                     $item->status = 'available';
                 }
             }
+            // A copy given up for lost turns up: back on the shelf, or straight to the reader who is at the desk.
+            if (!$open && $item->status === 'lost') {
+                $this->found($item);
+                if (!$readerid) {
+                    return $this->answer('returned', 'ok', 'deskfound', $this->title($item), ['loanid' => 0]);
+                }
+            }
             if ($open || $item->status === 'onloan') {
                 return $this->give_back($item, $open, $readerid);
             }
@@ -653,6 +660,58 @@ final class desk {
     }
 
     /**
+     * A book a reader has lost: the loan ends as lost, the copy is lost (to replace it, in what the library lacks), and
+     * what a late book costs at this centre is counted as if it came back today. «Undo» opens the loan again.
+     *
+     * @param int $loanid
+     * @param int $readerid The reader open at the desk, 0 if none.
+     * @return array As scan() answers.
+     */
+    public function lose(int $loanid, int $readerid = 0): array {
+        global $DB;
+        $loan = $this->loan($loanid);
+        if ($loan->timereturned !== null) {
+            return $this->answer('stop', 'no', 'deskalreadyback');
+        }
+        $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
+        $transaction = $DB->start_delegated_transaction();
+        $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => $this->now,
+            'returnstaffid' => $this->staffid ?: null, 'conditionin' => 'lost', 'timemodified' => $this->now]);
+        $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'lost', 'timemodified' => $this->now]);
+        $days = loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz);
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
+        $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
+        $transaction->allow_commit();
+        \local_oksigeniaayvurenda\event\book_lost::fire((int) $this->library->entityid, (int) $loan->id);
+        $extra = ['loanid' => (int) $loan->id, 'readerid' => (int) $loan->readerid, 'sanction' => $sanction];
+        if ($readerid) {
+            $extra['reader'] = $this->reader_panel($readerid);
+        }
+        return $this->answer('lost', 'look', 'desklostdone', (object) ['title' => $this->title($item),
+            'name' => $this->reader((int) $loan->readerid)['name']], $extra);
+    }
+
+    /**
+     * A copy given up for lost is here again: on the shelf, its last loan no longer says it was lost, and whoever waits
+     * for its book gets it set aside.
+     *
+     * @param \stdClass $item
+     */
+    private function found(\stdClass $item): void {
+        global $DB;
+        $DB->set_field_select(
+            self::T . 'loan',
+            'conditionin',
+            null,
+            "itemid = :itemid AND conditionin = 'lost'",
+            ['itemid' => $item->id]
+        );
+        $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'available', 'timemodified' => $this->now]);
+        $item->status = 'available';
+        holds::place($item, $this->now);
+    }
+
+    /**
      * Readers whose name has every word typed.
      *
      * @param string $text
@@ -956,6 +1015,11 @@ final class desk {
             sanctions::undo_return((int) $loan->id);
             $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => null, 'returnstaffid' => null,
                 'returnnote' => null, 'timemodified' => $this->now]);
+            $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
+        } else if ($what === 'lost' && $loan->conditionin === 'lost') {
+            sanctions::undo_return((int) $loan->id);
+            $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => null, 'returnstaffid' => null,
+                'conditionin' => null, 'timemodified' => $this->now]);
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         } else if ($what === 'renewed' && $previousdue > 0 && $loan->renewals > 0) {
             $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $previousdue,

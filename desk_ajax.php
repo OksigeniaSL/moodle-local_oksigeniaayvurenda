@@ -71,6 +71,9 @@ switch ($action) {
             optional_param('force', false, PARAM_BOOL)
         );
         break;
+    case 'lost':
+        $answer = $desk->lose(required_param('loanid', PARAM_INT), optional_param('readerid', 0, PARAM_INT));
+        break;
     case 'giveback':
         $answer = $desk->give_back_loan(required_param('loanid', PARAM_INT), optional_param('readerid', 0, PARAM_INT));
         break;

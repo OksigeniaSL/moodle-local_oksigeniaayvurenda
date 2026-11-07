@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.174.0
+
+- «Lost»: a book a reader has lost is given up as lost at the desk (next to «Return» in the reader's list, with a second
+  touch) or from their record; the loan ends as lost, the copy is lost, what a late book costs at the centre counts as if it
+  came back that day, and «Undo» opens the loan again. A lost copy that turns up and is passed at the desk goes back on the
+  shelf, or straight to the reader who is there.
+- «At home»: the reader sees on the library's home page and on their card the books they have out, with the day each one
+  comes back, the late ones in red, and «Renew» where the library lets them.
+
 ## 0.173.0
 
 - Dates for a date field keep the zero of the day: «Reports» came with «From» and «To» empty from the 1st to the 9th of

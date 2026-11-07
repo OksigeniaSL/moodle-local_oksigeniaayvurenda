@@ -243,6 +243,7 @@ if (!$cardsdata && $isdesk) {
 }
 $data = [
     'heading' => $str('cardtitle'),
+    'athome' => \local_oksigeniaayvurenda\local\screens::at_home($library),
     'preview' => $preview,
     'practice' => $practice,
     'cards' => $cardsdata,

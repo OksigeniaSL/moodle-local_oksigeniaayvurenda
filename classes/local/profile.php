@@ -456,9 +456,9 @@ final class profile {
            ORDER BY l.timedue, l.id",
             ['readerid' => $readerid, 'entityid' => $library->entityid]
         );
-        return array_values(array_map(fn($r) => ['recordid' => (int) $r->recordid, 'title' => $r->title,
-            'libraryid' => (int) $r->libraryid, 'library' => format_string($r->library, true, ['escape' => false]),
-                'due' => (int) $r->timedue,
+        return array_values(array_map(fn($r) => ['loanid' => (int) $r->id, 'recordid' => (int) $r->recordid,
+            'title' => $r->title, 'libraryid' => (int) $r->libraryid,
+            'library' => format_string($r->library, true, ['escape' => false]), 'due' => (int) $r->timedue,
             'late' => max(0, (int) floor(($now - (int) $r->timedue) / DAYSECS))], $rows));
     }
 
