@@ -111,4 +111,24 @@ final class csvlist_test extends \advanced_testcase {
         );
         $this->assertSame([(int) $staff->id], array_map('intval', $linked));
     }
+
+    /**
+     * A school office's list: «Curso» is the group, and a group named for teachers or staff says their kind.
+     */
+    public function test_curso_and_kind_of_group(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $entityid = (int) $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library()->entityid;
+        $read = \local_oksigeniaayvurenda\core\readers\csv_list::read("Nombre,Apellidos,Curso\nAna,Prado,3º Primaria Z\n"
+            . "Fermín,Lago,Profesores Z\nRosa,Valle,Personal de cocina\n");
+        $map = \local_oksigeniaayvurenda\core\readers\csv_list::guess($read['columns']);
+        $this->assertSame('group', $map[2]);
+        $people = \local_oksigeniaayvurenda\core\readers\csv_list::readers($read['rows'], $map);
+        csvlist::load($entityid, $people);
+        $kind = fn(string $first) => $DB->get_field('local_oksigeniaayvurenda_reader', 'readertype', ['entityid' => $entityid,
+            'firstname' => $first]);
+        $this->assertSame('student', $kind('Ana'));
+        $this->assertSame('teacher', $kind('Fermín'));
+        $this->assertSame('staff', $kind('Rosa'));
+    }
 }

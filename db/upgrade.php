@@ -585,6 +585,28 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110402, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110712) {
+        // Readers who came through a platform (LTI) get their origin noted, so the night of the cohorts stops taking
+        // them away: those whose account signs in by LTI and whose reader has no origin yet.
+        $now = time();
+        $rows = $DB->get_recordset_sql(
+            "SELECT r.id, r.entityid, r.userid
+               FROM {local_oksigeniaayvurenda_reader} r
+               JOIN {user} u ON u.id = r.userid AND u.auth = 'lti'
+              WHERE NOT EXISTS (SELECT 1 FROM {local_oksigeniaayvurenda_source} s
+                                 WHERE s.tablename = 'reader' AND s.localid = r.id)"
+        );
+        foreach ($rows as $row) {
+            $key = ['entityid' => $row->entityid, 'origin' => 'lti', 'tablename' => 'reader',
+                'externalid' => 'user:' . $row->userid];
+            if (!$DB->record_exists('local_oksigeniaayvurenda_source', $key)) {
+                $DB->insert_record('local_oksigeniaayvurenda_source', $key + ['localid' => $row->id, 'timecreated' => $now]);
+            }
+        }
+        $rows->close();
+        upgrade_plugin_savepoint(true, 2026110712, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

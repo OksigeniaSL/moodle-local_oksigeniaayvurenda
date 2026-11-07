@@ -4047,6 +4047,7 @@ $string['todayselfposts'] = 'Self-loan posts stopped';
 $string['todaytoday'] = 'Due back today';
 $string['todaywishes'] = 'What classes ask for';
 $string['tryother'] = 'Try another word, or ask at the desk.';
+$string['tutorgone'] = '{$a} (no longer a reader)';
 $string['tutornocandidates'] = 'There are no teachers or staff with an account among the readers yet. Choose where they come from in «Where readers come from».';
 $string['tutornone'] = 'No tutor';
 $string['tutorproposed'] = 'Proposed: last year\'s';

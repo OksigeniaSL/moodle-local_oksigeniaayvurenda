@@ -61,7 +61,9 @@ final class cifra_test extends \advanced_testcase {
         };
         $now = strtotime('2026-10-24 12:00:00 UTC');
         $stats = cifra::sync($entityid, $now);
-        $this->assertSame(['GET http://cifra-puente.invalid:8080/ejemplo/v1/alumnos?page=1&per_page=100'], $asked);
+        // To an empty page: an API that gives fewer than asked is read whole.
+        $this->assertSame(['GET http://cifra-puente.invalid:8080/ejemplo/v1/alumnos?page=1&per_page=100',
+            'GET http://cifra-puente.invalid:8080/ejemplo/v1/alumnos?page=2&per_page=100'], $asked);
         $this->assertSame(['created' => 4, 'updated' => 0, 'linked' => 1, 'total' => 4, 'overlimit' => 0, 'left' => 0], $stats);
         $this->assertSame('teacher', $DB->get_field(self::T . 'reader', 'readertype', ['userid' => $user->id]));
         $bruno = $DB->get_record(self::T . 'reader', ['entityid' => $entityid, 'firstname' => 'Bruno'], '*', MUST_EXIST);
@@ -100,5 +102,29 @@ final class cifra_test extends \advanced_testcase {
         cifra::$fetcher = fn() => json_encode(['error' => 'invalid_client']);
         $this->expectException(\moodle_exception::class);
         cifra::people((int) $library->entityid);
+    }
+
+    /**
+     * An API that pages by fewer than it was asked for is read to its end, not stopped at the first page.
+     */
+    public function test_short_pages(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $entityid = (int) $gen->create_library()->entityid;
+        cifra::save($entityid, ['enabled' => 1, 'url' => 'http://cifra-puente.invalid:8080/', 'mode' => 'key',
+            'example' => 1, 'key' => 'made-up-key']);
+        $people = [];
+        for ($i = 1; $i <= 120; $i++) {
+            $people[] = ['id' => 9000 + $i, 'nombre' => 'Ana', 'apellidos' => 'Prado ' . $i, 'tipo' => 'alumno'];
+        }
+        $pages = 0;
+        cifra::$fetcher = function (string $method, string $url) use ($people, &$pages) {
+            $pages++;
+            preg_match('/page=(\d+)/', $url, $m);
+            return json_encode(array_slice($people, ((int) $m[1] - 1) * 50, 50));
+        };
+        $read = (new \ReflectionMethod(cifra::class, 'people'))->invoke(null, $entityid);
+        $this->assertCount(120, $read);
+        $this->assertSame(4, $pages);
     }
 }

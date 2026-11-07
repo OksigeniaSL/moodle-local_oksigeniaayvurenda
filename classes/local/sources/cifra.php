@@ -133,14 +133,21 @@ final class cifra {
                 throw new \moodle_exception('cifrabadanswer', 'local_oksigeniaayvurenda');
             }
             $list = isset($list['data']) && is_array($list['data']) ? $list['data'] : $list;
+            $before = count($people);
             foreach ($list as $person) {
                 if (isset($person['id'])) {
                     $people[(string) $person['id']] = $person;
                 }
             }
-            if (count($list) < 100) {
+            // To the end: an empty page, or one with nobody new (an API that pages by fewer than asked is read whole;
+            // stopping at the first short page left the rest of the centre out, and the night took them away).
+            if (!$list || count($people) === $before) {
                 break;
             }
+        }
+        if ($page > 200) {
+            // A list that never ends is not the whole centre: nobody is taken away from what was read.
+            throw new \moodle_exception('cifrabadanswer', 'local_oksigeniaayvurenda');
         }
         return array_values($people);
     }

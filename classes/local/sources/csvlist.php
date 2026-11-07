@@ -41,6 +41,10 @@ final class csvlist {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
+    /** @var array<string, string> Words in the name of a group that say the kind of its readers. */
+    private const GROUP_KINDS = ['profesor' => 'teacher', 'docente' => 'teacher', 'teacher' => 'teacher', 'claustro' => 'teacher',
+        'faculty' => 'teacher', 'personal' => 'staff', 'staff' => 'staff', 'familia' => 'family', 'family' => 'family'];
+
     /** @var array<string, string> Words of the kind of reader, without accents or case. */
     private const TYPES = ['st' => 'student', 't' => 'teacher', 's' => 'staff',
         'alumno' => 'student', 'alumna' => 'student', 'student' => 'student', 'estudiante' => 'student',
@@ -149,7 +153,9 @@ final class csvlist {
                 }
                 $room--;
             }
-            $kind = self::TYPES[text::normalise($person['type'] ?? '')] ?? $type;
+            // The kind the list says; else, a group that names it («Profesores», «Personal», «Familias»); else, the one chosen.
+            $kind = self::TYPES[text::normalise($person['type'] ?? '')] ?? self::kind_of_group((string) ($person['group'] ?? ''))
+                ?? $type;
             // An account gives the name: the library does not keep a copy of it.
             $data = ['readertype' => $kind, 'status' => 'active', 'timemodified' => $now,
                 'userid' => $userid ?: null,
@@ -310,5 +316,22 @@ final class csvlist {
             $DB->update_record(self::T . 'member', $row);
         }
         return $row;
+    }
+
+    /**
+     * The kind of readers a group's name says, if it says one: «Profesores Z» are teachers.
+     *
+     * @param string $group
+     * @return string|null
+     */
+    private static function kind_of_group(string $group): ?string {
+        foreach (text::words($group) as $word) {
+            foreach (self::GROUP_KINDS as $start => $kind) {
+                if (str_starts_with($word, $start)) {
+                    return $kind;
+                }
+            }
+        }
+        return null;
     }
 }

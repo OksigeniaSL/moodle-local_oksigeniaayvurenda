@@ -551,6 +551,13 @@ final class ltitool {
                 if ($reader->status !== 'active') {
                     $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'active',
                         'timemodified' => $now]);
+                    // Back through a platform, and from no other origin: the night of the groups does not take it away.
+                    if (
+                        !$DB->record_exists(self::T . 'source', ['tablename' => 'reader', 'localid' => $reader->id])
+                        && !$DB->record_exists(self::T . 'member', ['readerid' => $reader->id, 'source' => 'cohort'])
+                    ) {
+                        self::from_lti($entityid, (int) $reader->id, $userid, $now);
+                    }
                 }
                 return (int) $reader->id;
             }
@@ -560,13 +567,32 @@ final class ltitool {
                 cataloguer::below_first_code($entityid, 'card')
             );
             $code = card_codes::next($codes, 1, !empty($settings['controlletter']))[0];
-            return (int) $DB->insert_record(self::T . 'reader', (object) ['entityid' => $entityid, 'userid' => $userid,
+            $readerid = (int) $DB->insert_record(self::T . 'reader', (object) ['entityid' => $entityid, 'userid' => $userid,
                 'cardcode' => $code, 'readertype' => $type, 'status' => 'active', 'timecreated' => $now,
                 'timemodified' => $now]);
+            self::from_lti($entityid, $readerid, $userid, $now);
+            return $readerid;
         } finally {
             if ($lock) {
                 $lock->release();
             }
+        }
+    }
+
+    /**
+     * Notes that a reader came from a platform: their origin is LTI, so a sync of groups or cohorts, which did not bring
+     * them, never takes them away.
+     *
+     * @param int $entityid
+     * @param int $readerid
+     * @param int $userid
+     * @param int $now
+     */
+    public static function from_lti(int $entityid, int $readerid, int $userid, int $now): void {
+        global $DB;
+        $key = ['entityid' => $entityid, 'origin' => 'lti', 'tablename' => 'reader', 'externalid' => 'user:' . $userid];
+        if (!$DB->record_exists(self::T . 'source', $key)) {
+            $DB->insert_record(self::T . 'source', $key + ['localid' => $readerid, 'timecreated' => $now]);
         }
     }
 

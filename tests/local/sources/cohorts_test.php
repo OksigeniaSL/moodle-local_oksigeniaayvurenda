@@ -16,6 +16,7 @@
 
 namespace local_oksigeniaayvurenda\local\sources;
 
+use local_oksigeniaayvurenda\local\ltitool;
 use local_oksigeniaayvurenda\local\readers;
 
 /**
@@ -116,6 +117,21 @@ final class cohorts_test extends \advanced_testcase {
 
         cohort_add_member($w->a->id, $w->leo->id);
         $this->assertSame(1, cohorts::sync((int) $w->library->entityid)['back']);
+    }
+
+    /**
+     * Someone who came through a platform (LTI) is in no cohort, and the night of the cohorts does not take them away.
+     */
+    public function test_lti_reader_stays(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        cohorts::sync((int) $w->library->entityid);
+        $student = $this->getDataGenerator()->create_user(['firstname' => 'Eva', 'lastname' => 'Plataforma']);
+        $readerid = ltitool::reader((int) $w->library->entityid, (int) $student->id, 'student');
+        $stats = cohorts::sync((int) $w->library->entityid);
+        $this->assertSame(0, $stats['left']);
+        $this->assertSame('active', $DB->get_field(self::T . 'reader', 'status', ['id' => $readerid]));
     }
 
     /**

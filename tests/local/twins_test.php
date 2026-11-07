@@ -82,4 +82,22 @@ final class twins_test extends \advanced_testcase {
         $this->expectException(\moodle_exception::class);
         twins::join($entityid, (int) $one->id, (int) $student->id);
     }
+
+    /**
+     * Every table where a row belongs to a reader is moved when two readers are joined: none is forgotten (the loans
+     * between libraries were, and the reader who left kept them).
+     */
+    public function test_every_table_of_a_reader(): void {
+        global $CFG;
+        $xml = file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/db/install.xml');
+        preg_match_all('/<TABLE NAME="local_oksigeniaayvurenda_(\w+)"(.*?)<\/TABLE>/s', $xml, $tables, PREG_SET_ORDER);
+        $withreader = [];
+        foreach ($tables as [, $name, $body]) {
+            if (str_contains($body, 'NAME="readerid"')) {
+                $withreader[] = $name;
+            }
+        }
+        // The groups of each year and the reviews are joined by their own rules.
+        $this->assertSame([], array_values(array_diff($withreader, array_merge(twins::OWNED, ['member', 'review']))));
+    }
 }

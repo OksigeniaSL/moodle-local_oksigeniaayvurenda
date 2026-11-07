@@ -49,8 +49,13 @@ if (data_submitted() && confirm_sesskey()) {
     $picked = optional_param_array('tutor', [], PARAM_INT);
     $names = optional_param_array('group', [], PARAM_TEXT);
     $candidates = tutors::candidates((int) $library->entityid);
+    $saved = $DB->get_records_menu('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id], '', 'groupname, userid');
     foreach ($names as $index => $group) {
         $userid = (int) ($picked[$index] ?? 0);
+        // What did not change is not touched: a tutor who is no longer a reader stays until someone chooses another.
+        if ($userid === (int) ($saved[$group] ?? 0)) {
+            continue;
+        }
         if ($userid === 0 || isset($candidates[$userid])) {
             tutors::set((int) $year->id, $group, $userid);
         }
@@ -65,6 +70,12 @@ foreach (tutors::groups((int) $library->entityid, (int) $year->id) as $index => 
     $options = [['value' => 0, 'label' => $str('tutornone'), 'selected' => !$row['userid']]];
     foreach ($candidates as $userid => $name) {
         $options[] = ['value' => $userid, 'label' => $name, 'selected' => $userid === $row['userid']];
+    }
+    // The tutor it has, even if they are no longer among the readers who can be chosen: said, and kept.
+    if ($row['userid'] && !isset($candidates[$row['userid']])) {
+        $user = core_user::get_user((int) $row['userid']);
+        $options[] = ['value' => (int) $row['userid'], 'selected' => true,
+            'label' => $str('tutorgone', $user ? fullname($user) : '')];
     }
     $all++;
     $with += $row['userid'] ? 1 : 0;

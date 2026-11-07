@@ -43,12 +43,16 @@ final class tutors {
      */
     public static function groups(int $entityid, int $yearid): array {
         global $DB;
+        // The groups of readers who are here: a group renamed, or of readers gone, is no group to give a tutor.
+        $here = 'JOIN {' . self::T . "reader} r ON r.id = m.readerid AND r.status = 'active'";
         $stages = $DB->get_records_sql_menu(
-            'SELECT m.groupname, MAX(m.stage) FROM {' . self::T . 'member} m WHERE m.yearid = :yearid GROUP BY m.groupname',
+            'SELECT m.groupname, MAX(m.stage) FROM {' . self::T . 'member} m ' . $here
+                . ' WHERE m.yearid = :yearid GROUP BY m.groupname',
             ['yearid' => $yearid]
         );
         $names = $DB->get_fieldset_sql(
-            'SELECT DISTINCT m.groupname FROM {' . self::T . 'member} m WHERE m.yearid = :yearid ORDER BY m.groupname',
+            'SELECT DISTINCT m.groupname FROM {' . self::T . 'member} m ' . $here
+                . ' WHERE m.yearid = :yearid ORDER BY m.groupname',
             ['yearid' => $yearid]
         );
         usort($names, fn($a, $b) => group_order::compare((string) $a, (string) $b));

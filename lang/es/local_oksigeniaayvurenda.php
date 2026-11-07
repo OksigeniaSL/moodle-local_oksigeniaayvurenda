@@ -4047,6 +4047,7 @@ $string['todayselfposts'] = 'Puestos de autopréstamo parados';
 $string['todaytoday'] = 'Vuelven hoy';
 $string['todaywishes'] = 'Lo que piden las clases';
 $string['tryother'] = 'Prueba con otra palabra o pregunta en el mostrador.';
+$string['tutorgone'] = '{$a} (ya no es lector)';
 $string['tutornocandidates'] = 'Todavía no hay profesores ni personal con cuenta entre los lectores. Elige de dónde salen en «De dónde salen los lectores».';
 $string['tutornone'] = 'Sin tutor';
 $string['tutorproposed'] = 'Propuesto: el del curso pasado';

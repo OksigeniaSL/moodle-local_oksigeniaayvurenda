@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.179.0
+
+- Readers who came through a platform (LTI) have their origin noted, and the night of the cohorts no longer takes them
+  away (they left and came back every day); an upgrade step notes it for those already there.
+- Cifra is read to its last page, however many people its pages bring.
+- Joining two readers moves their loans between libraries too; a test checks every table that belongs to a reader.
+- «Tutors»: saving does not take away a tutor who is no longer a reader (they show as such until another is chosen),
+  and the groups listed are those of readers who are here.
+- The reader's card at the desk: «Renew», «Return» and «Lost» of one size, together at the end of each row.
+
 ## 0.178.0
 
 - The desk: «Renew» on each loan of the reader's card, without the book; with a reader open, the field says whom it lends

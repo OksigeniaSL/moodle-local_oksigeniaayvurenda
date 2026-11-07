@@ -42,7 +42,9 @@ final class csv_list {
         'firstname' => ['nombre', 'name', 'first name', 'firstname', 'given name', 'nom'],
         'lastname' => ['apellidos', 'apellido', 'surname', 'last name', 'lastname', 'family name', 'cognoms', 'primer apellido'],
         'fullname' => ['nombre completo', 'alumno', 'alumna', 'lector', 'full name', 'nombre y apellidos', 'apellidos y nombre'],
-        'group' => ['sort1', 'grupo', 'group', 'clase', 'class', 'unidad', 'aula', 'curso y grupo', 'grup'],
+        // «Curso» is the class in the lists of a school office in Spain and much of Latin America («Curso: 3º A»).
+        'group' => ['sort1', 'grupo', 'group', 'clase', 'class', 'unidad', 'aula', 'curso y grupo', 'grup', 'curso', 'curso-grupo',
+            'nivel y grupo', 'course', 'grade', 'form', 'homeroom', 'year group', 'section', 'turma', 'classe'],
         'stage' => ['etapa', 'stage', 'nivel', 'level', 'ensenanza', 'enseñanza', 'estudios'],
         'cardcode' => ['cardnumber', 'carne', 'carnet', 'codigo', 'card', 'card code', 'barcode', 'codigo de lector',
             'numero de lector'],
