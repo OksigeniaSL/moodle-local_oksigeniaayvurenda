@@ -50,7 +50,7 @@ final class catalogue_import_test extends \advanced_testcase {
         $path = __DIR__ . '/../../fixtures/marc/programa.xml';
         $this->assertSame('marcxml', files::kind($path, 'programa.xml'));
         $stats = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
-        $this->assertSame(['records' => 1, 'found' => 1, 'items' => 3, 'kept' => 0, 'newcodes' => 1], $stats);
+        $this->assertSame(['records' => 1, 'found' => 1, 'items' => 3, 'kept' => 0, 'newcodes' => 1, 'untitled' => 0], $stats);
         $this->assertSame(2, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
         $new = $DB->get_record(self::T . 'item', ['barcode' => control_letter::append('100042')], '*', MUST_EXIST);
         $this->assertSame('N', $new->callnumber1);
@@ -60,7 +60,7 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame('Narrativa', $DB->get_field(self::T . 'authority', 'label', ['id' => $koha->locationid]));
 
         $again = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
-        $this->assertSame(['records' => 0, 'found' => 2, 'items' => 0, 'kept' => 3, 'newcodes' => 0], $again);
+        $this->assertSame(['records' => 0, 'found' => 2, 'items' => 0, 'kept' => 3, 'newcodes' => 0, 'untitled' => 0], $again);
     }
 
     /**
@@ -124,7 +124,7 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame(2, $stats['items']);
         // Another pass repeats nothing, though these copies have no code; one more copy in the file is one more.
         $again = (new catalogue_import($library, 'csv'))->run($records);
-        $this->assertSame(['records' => 0, 'found' => 1, 'items' => 0, 'kept' => 2, 'newcodes' => 0], $again);
+        $this->assertSame(['records' => 0, 'found' => 1, 'items' => 0, 'kept' => 2, 'newcodes' => 0, 'untitled' => 0], $again);
         file_put_contents($dir . '/libros.csv', "Título;Autor;Ejemplares\nCuentos a oscuras;Olmo Ríos, Bruno;3\n");
         $more = (new catalogue_import($library, 'csv'))->run(files::csv_records(
             $dir . '/libros.csv',
@@ -132,5 +132,53 @@ final class catalogue_import_test extends \advanced_testcase {
         ));
         $this->assertSame([1, 2], [$more['items'], $more['kept']]);
         $this->assertSame('Cuentos a oscuras', $DB->get_field(self::T . 'record', 'title', ['entityid' => $library->entityid]));
+    }
+
+    /**
+     * Records with nothing that names them come in once however many times they are imported; a copy whose code is
+     * another record\'s gets a new one, to be relabelled; a record with no title at all is counted, not lost in silence.
+     */
+    public function test_unnamed_duplicated_and_untitled(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $record = fn(string $title, string $code) => ['key' => '', 'description' => ['record' => ['title' => $title],
+            'authorities' => ['author' => ['Prado, Luis']]], 'items' => [['barcode' => $code, 'callnumber' => ['N', 'PRA', '']]]];
+        $records = [$record('Sin número Zeta', 'ZETA-C1'), $record('Repetido dos Zeta', 'ZETA-C1'),
+            ['key' => '', 'description' => ['record' => ['title' => '']], 'items' => []]];
+        $first = new catalogue_import($library, 'marc');
+        $stats = $first->run($records);
+        $this->assertSame(2, $stats['records']);
+        $this->assertSame(2, $stats['items']);
+        $this->assertSame(1, $stats['untitled']);
+        $this->assertCount(1, $first->relabelled());
+        $this->assertSame('ZETA-C1', $first->relabelled()[0][0]);
+        $again = (new catalogue_import($library, 'marc'))->run($records);
+        $this->assertSame(0, $again['records']);
+        $this->assertSame(0, $again['items']);
+        $this->assertSame(2, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+        $this->assertSame(2, $DB->count_records(self::T . 'item', ['libraryid' => $library->id]));
+    }
+
+    /**
+     * Two programs that number their records alike: the second one\'s book is not hung on the first one\'s record.
+     */
+    public function test_same_number_another_book(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $one = fn(string $title, string $code) => [['key' => '1', 'description' => ['record' => ['title' => $title],
+            'authorities' => []], 'items' => [['barcode' => $code, 'callnumber' => ['', '', '']]]]];
+        (new catalogue_import($library, 'marc'))->run($one('Primer programa Zeta', 'ZETA-B1'));
+        $stats = (new catalogue_import($library, 'marc'))->run($one('Segundo programa Zeta, otro libro', 'ZETA-B2'));
+        $this->assertSame(1, $stats['records']);
+        $this->assertSame(2, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+        $this->assertNotEquals(
+            $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-B1']),
+            $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-B2'])
+        );
+        // And the same file again finds both.
+        $again = (new catalogue_import($library, 'marc'))->run($one('Segundo programa Zeta, otro libro', 'ZETA-B2'));
+        $this->assertSame(0, $again['records']);
     }
 }

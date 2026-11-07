@@ -55,7 +55,8 @@ final class describer {
         $isbns = [];
         foreach ($record->values(['020'], 'a') as $raw) {
             // The qualifier goes: «978-84-204-8285-5 (rústica)».
-            $normal = isbn::normalise(preg_replace('/\s.*$/', '', trim($raw)));
+            $normal = isbn::normalise(preg_match('/^[0-9Xx\-]+/', preg_replace('/\s.*$/', '', trim($raw)), $isbnpart)
+                ? $isbnpart[0] : '');
             if ($normal !== null && !in_array($normal, $isbns, true)) {
                 $isbns[] = $normal;
             }
@@ -75,7 +76,7 @@ final class describer {
         return [
             'record' => [
                 'doctype' => self::doctype($record->leader),
-                'title' => self::clean(self::first($record, ['245'], 'a')) ?? '',
+                'title' => self::title($record),
                 'subtitle' => self::clean(self::first($record, ['245'], 'b')),
                 'responsibility' => self::clean(self::first($record, ['245'], 'c')),
                 'isbn' => $isbn,
@@ -140,6 +141,28 @@ final class describer {
     }
 
     /**
+     * The title: 245 $a with the number and name of its part ($n, $p: «Harry Potter. Vol. 3, El prisionero de Azkaban»),
+     * so the volumes of a work are told apart; without $a, the 245 $b, the uniform title (240) or the added title (730).
+     *
+     * @param record $record
+     * @return string
+     */
+    private static function title(record $record): string {
+        $main = self::first($record, ['245'], 'a');
+        $parts = array_merge($record->values(['245'], 'n'), $record->values(['245'], 'p'));
+        if ($main !== null && trim($main) !== '') {
+            return self::clean(trim($main . ' ' . implode(' ', array_map('trim', $parts)))) ?? '';
+        }
+        foreach ([['245', 'b'], ['240', 'a'], ['730', 'a']] as [$tag, $code]) {
+            $other = self::clean(self::first($record, [$tag], $code));
+            if ($other !== null && $other !== '') {
+                return $other;
+            }
+        }
+        return '';
+    }
+
+    /**
      * Whether a record is UNIMARC (France, Portugal, Italy and much of Europe): its title is in 200, and there is no 245.
      *
      * @param record $record
@@ -158,7 +181,8 @@ final class describer {
     private static function unimarc(record $record): array {
         $isbns = [];
         foreach ($record->values(['010'], 'a') as $raw) {
-            $normal = isbn::normalise(preg_replace('/\s.*$/', '', trim($raw)));
+            $normal = isbn::normalise(preg_match('/^[0-9Xx\-]+/', preg_replace('/\s.*$/', '', trim($raw)), $isbnpart)
+                ? $isbnpart[0] : '');
             if ($normal !== null && !in_array($normal, $isbns, true)) {
                 $isbns[] = $normal;
             }

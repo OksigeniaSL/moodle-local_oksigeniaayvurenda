@@ -33,6 +33,8 @@ final class corners_test extends \advanced_testcase {
      */
     public function test_corners_and_narrowing(): void {
         $this->resetAfterTest();
+        // At the desk: these records have no copies, and a reader finds only what can be borrowed or read.
+        $this->setAdminUser();
         /** @var \local_oksigeniaayvurenda_generator $gen */
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = $gen->create_library();

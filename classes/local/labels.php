@@ -154,7 +154,8 @@ final class labels {
         $fields = 'i.id, i.barcode, i.callnumber1, i.callnumber2, i.callnumber3, i.serial, r.title';
         $from = '{' . self::T . 'item} i JOIN {' . self::T . 'record} r ON r.id = i.recordid';
         if ($which === 'codes') {
-            $codes = array_values(array_unique(array_filter(array_map('trim', $codes), 'strlen')));
+            // Codes are kept in capitals: one typed in small letters is the same code.
+            $codes = array_values(array_unique(array_filter(array_map(fn($c) => strtoupper(trim($c)), $codes), 'strlen')));
             if (!$codes) {
                 return [];
             }

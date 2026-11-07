@@ -76,6 +76,8 @@ final class catalogue_test extends \advanced_testcase {
     public function test_search_keeps_the_best_of_many(): void {
         global $DB;
         $this->resetAfterTest();
+        // At the desk: records without copies are found (a reader finds only what can be borrowed or read).
+        $this->setAdminUser();
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = $gen->create_library();
         $now = time();
@@ -220,5 +222,19 @@ final class catalogue_test extends \advanced_testcase {
             $this->assertSame(1, $found['total'], $typed);
         }
         $this->assertSame(0, catalogue::search($library, '9780306406157')['total']);
+    }
+
+    /**
+     * A record whose only copy was withdrawn is no longer found by a reader; the staff still find it.
+     */
+    public function test_withdrawn_records(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $DB->set_field(self::T . 'item', 'status', 'withdrawn', ['recordid' => $w->records[1]->id]);
+        $this->setUser($this->getDataGenerator()->create_user());
+        $this->assertSame(0, catalogue::search($w->central, 'volcan')['total']);
+        $this->setAdminUser();
+        $this->assertSame(1, catalogue::search($w->central, 'volcan')['total']);
     }
 }

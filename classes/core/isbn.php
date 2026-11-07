@@ -39,8 +39,10 @@ final class isbn {
      */
     public static function normalise(string $raw): ?string {
         $clean = strtoupper(preg_replace('/[^0-9Xx]/', '', $raw));
+        // Thirteen figures are an ISBN only with the prefix of books (978, 979): any other EAN-13 is another product.
         if (strlen($clean) === 13 && ctype_digit($clean)) {
-            return self::checksum13(substr($clean, 0, 12)) === $clean[12] ? $clean : null;
+            return in_array(substr($clean, 0, 3), ['978', '979'], true) && self::checksum13(substr($clean, 0, 12)) === $clean[12]
+                ? $clean : null;
         }
         if (strlen($clean) === 10 && ctype_digit(substr($clean, 0, 9))) {
             if (self::checksum10(substr($clean, 0, 9)) !== $clean[9]) {

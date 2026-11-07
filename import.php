@@ -139,7 +139,14 @@ if (data_submitted() && confirm_sesskey()) {
                     'figures' => [$figure($stats['records'], 'importnewrecords'), $figure($stats['items'], 'importnewitems')],
                     'again' => $stats['found'] || $stats['kept'] ? $str('importagain', (object) ['records' => $stats['found'],
                         'items' => $stats['kept']]) : '',
-                    'newcodes' => $stats['newcodes'] ? $str('importnewcodes', $stats['newcodes']) : '',
+                    'newcodes' => trim(($stats['newcodes'] ? $str('importnewcodes', $stats['newcodes']) : '') . ' '
+                        . (!empty($stats['untitled']) ? $str(
+                            $stats['untitled'] === 1 ? 'importuntitledone' : 'importuntitled',
+                            $stats['untitled']
+                        ) : '') . ' ' . ($importer->relabelled() ? $str('importrelabelled', implode(
+                            ', ',
+                            array_map(fn($copy) => $copy[0] . ' → ' . $copy[1], $importer->relabelled())
+                        )) : '')),
                 ];
             }
             $data['done']['said'] = characters::say($entityid, 'memory', 'importmemory', [], 'celebra');

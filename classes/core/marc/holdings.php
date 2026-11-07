@@ -51,7 +51,11 @@ final class holdings {
         $items = [];
         foreach ($record->data_fields('852') as $field) {
             $sub = self::subfields($field);
-            $items[] = self::item($sub['p'] ?? '', $sub['h'] ?? '', $sub['c'] ?? '', '', '', $sub['z'] ?? '');
+            // The call number is split in two by the standard: the class in $h and the part of the copy (author, title) in
+            // $i, as Alma, Sierra, Symphony and Voyager export it; with its prefix ($k) and suffix ($m) when they come.
+            $call = trim(implode(' ', array_filter(array_map('trim', [$sub['k'] ?? '', $sub['h'] ?? '', $sub['i'] ?? '',
+                $sub['m'] ?? '']), fn($v) => $v !== '')));
+            $items[] = self::item($sub['p'] ?? '', $call, $sub['c'] ?? '', '', '', $sub['z'] ?? '');
         }
         foreach ($record->data_fields('952') as $field) {
             $sub = self::subfields($field);

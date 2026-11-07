@@ -145,4 +145,20 @@ final class marc_test extends \basic_testcase {
         $this->assertSame('2015?', describer::clean('[2015?]'));
         $this->assertNull(describer::clean(' / '));
     }
+
+    /**
+     * The volumes of a work are told apart by the number and name of their part; without a title in $a, another one.
+     */
+    public function test_title_with_its_part(): void {
+        $record = new record();
+        $record->data('245', '1', '0', [['a', 'Harry Potter.'], ['n', 'Vol. 3,'], ['p', 'El prisionero de Azkaban.']]);
+        $this->assertSame('Harry Potter. Vol. 3, El prisionero de Azkaban', describer::describe($record)['record']['title']);
+        $qualified = new record();
+        $qualified->data('020', ' ', ' ', [['a', '9788420482859(tapa flexible)']]);
+        $qualified->data('245', '0', '0', [['a', 'Con calificador']]);
+        $this->assertSame('9788420482859', describer::describe($qualified)['record']['isbn']);
+        $other = new record();
+        $other->data('245', '0', '0', [['b', 'cuentos del valle']]);
+        $this->assertSame('cuentos del valle', describer::describe($other)['record']['title']);
+    }
 }

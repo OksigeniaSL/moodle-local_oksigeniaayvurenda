@@ -50,6 +50,10 @@ final class charset_test extends \basic_testcase {
         $this->assertSame('marc8', charset::guess("Garc\xE2ia M\xE2arquez, Pe\xE4na"));
         $this->assertSame('cp1252', charset::guess("Garc\xEDa M\xE1rquez, Pe\xF1a"));
         $this->assertSame('iso5426', charset::guess("L'\xC2ecole d'\xC2et\xC2e, fa\xCBcade"));
+        // German and Portuguese in Windows-1252, whose ä and ã look like MARC-8 marks.
+        $this->assertSame('cp1252', charset::guess("M\xE4rchen aus den W\xE4ldern, B\xE4r, K\xE4the, M\xFCnchen"));
+        $this->assertSame('cp1252', charset::guess("N\xE3o h\xE1 cora\xE7\xE3o sem irm\xE3o, S\xE3o Paulo"));
+        $this->assertSame('marc8', charset::guess("Cien a\xE4nos de soledad, Garc\xE2ia M\xE2arquez, Espa\xE4na"));
     }
 
     /**
@@ -63,5 +67,12 @@ final class charset_test extends \basic_testcase {
         $this->assertSame('Cien años de soledad', iso2709::read($raw)[0]->first(['245'], 'a'));
         $this->assertSame('Cien años de soledad', iso2709::read($raw, 'marc8')[0]->first(['245'], 'a'));
         $this->assertStringNotContainsString('años', (string) iso2709::read($raw, 'cp1252')[0]->first(['245'], 'a'));
+    }
+
+    /**
+     * UNIMARC says its character set in field 100, positions 26 to 29: «0103» after a real 100 is ISO 5426.
+     */
+    public function test_unimarc_says_it(): void {
+        $this->assertSame('iso5426', charset::guess("\x1fa20051012d2005    u  y0spay0103    ba\x1e Caf\xC2e"));
     }
 }

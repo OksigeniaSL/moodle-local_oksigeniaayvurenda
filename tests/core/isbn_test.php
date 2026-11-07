@@ -32,6 +32,8 @@ final class isbn_test extends \basic_testcase {
      */
     public function test_normalise(): void {
         $this->assertSame('9780306406157', isbn::normalise('0-306-40615-2'));
+        // An EAN-13 of something that is not a book is no ISBN.
+        $this->assertNull(isbn::normalise('5012345678900'));
         $this->assertSame('9780306406157', isbn::normalise('978-0-306-40615-7'));
         $this->assertSame('9780306406157', isbn::normalise(' 9780306406157 '));
         $this->assertSame('9780804429573', isbn::normalise('0-8044-2957-X'));

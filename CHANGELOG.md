@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.182.0
+
+- Bringing a catalogue in:
+  - the volumes of a work keep their number and name (245 $n and $p), and a record without 245 $a takes another title;
+  - an 852 split in $h and $i keeps its whole call number;
+  - UNIMARC's field 100 says its character set again;
+  - German and Portuguese in Windows-1252 are no longer read as MARC-8;
+  - a record with nothing that names it (no 001, 035 or ISBN) does not come in twice;
+  - two programs that number their records alike no longer hang one's book on the other's record;
+  - a copy whose code is another record's gets a new one, listed to be relabelled;
+  - records with no title at all are counted and said.
+- A record whose copies were all withdrawn or lost, with nothing to read online, is no longer in its readers' catalogue.
+- An ISBN-13 needs the prefix of books (978, 979); an ISBN with its qualifier stuck to it («…(tapa flexible)») is read.
+- Labels by codes find codes typed in small letters.
+
 ## 0.181.0
 
 - Closed days cost nothing: a late book pays, or keeps its reader without loans, only for the days the library was open.

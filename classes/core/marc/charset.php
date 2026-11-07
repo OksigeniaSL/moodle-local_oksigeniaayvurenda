@@ -94,7 +94,9 @@ final class charset {
             return 'utf8';
         }
         // UNIMARC says it in its field 100 ($a, positions 26 to 29): 03 is ISO 5426.
-        if (preg_match('/\x1fa\d{8}[a-z ]{9}[a-z]{3}[0-9a-z ]{2}(\d{2})(\d{2})/', $data, $found)) {
+        // (Positions: 0-7 the date it was entered, 8 the type of date, 9-16 two dates, 17-19 audience, 20 publication,
+        // 21 modified, 22-24 language of cataloguing, 25 transliteration, 26-29 the character sets.)
+        if (preg_match('/\x1fa\d{8}[a-z][0-9 u]{8}[a-z ]{3}[a-z ][0-9a-z ][a-z]{3}[a-z ](\d{2})(\d{2})/', $data, $found)) {
             if (in_array('03', [$found[1], $found[2]], true)) {
                 return 'iso5426';
             }
@@ -107,8 +109,14 @@ final class charset {
         // hardly ever use.
         $marc8 = preg_match_all('/[\xE2\xE3\xE4][A-Za-z]/', $data);
         $iso5426 = preg_match_all('/[\xC1-\xC4\xC8\xCB][a-z]/', $data);
-        $cp1252 = preg_match_all('/[\xE0\xE7\xE9\xEA\xED\xF1\xF3\xF4\xFA\xFB\xFC]/', $data);
-        if ($marc8 > $cp1252 && $marc8 >= $iso5426) {
+        $cp1252 = preg_match_all('/[\xDF\xE0\xE1\xE7-\xEA\xED\xF1\xF3-\xF6\xF9-\xFC]/', $data);
+        // And what MARC-8 cannot be: its marks always go before a letter, hardly ever two on one letter, and a tilde only
+        // over n or a vowel. German and Portuguese in Windows-1252 (Mädchen, Bär, coração, «é» alone) break that at once,
+        // though their â, ã and ä look like MARC-8 marks before a letter.
+        $marks = preg_match_all('/[\xE0-\xFE]/', $data);
+        $odd = preg_match_all('/[\xE0-\xFE](?![A-Za-z\xE0-\xFE])/', $data) + preg_match_all('/[\xE0-\xFE][\xE0-\xFE]/', $data)
+            + preg_match_all('/\xE4[^nNaAoOuUeEiIyY\xE0-\xFE]/', $data);
+        if ($marc8 > $cp1252 && $marc8 >= $iso5426 && $odd * 4 <= $marks) {
             return 'marc8';
         }
         return $iso5426 > $cp1252 ? 'iso5426' : 'cp1252';

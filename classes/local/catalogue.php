@@ -145,6 +145,14 @@ final class catalogue {
             $conditions[] = self::free_condition();
             $params['freelibrary'] = $library->id;
         }
+        // A record whose copies were all withdrawn or lost, and with nothing to read online, is no longer in the catalogue
+        // for its readers (the staff still find it, to correct it or to see its record of weeding).
+        if (!access::can('local/oksigeniaayvurenda:desk', $library)) {
+            $conditions[] = "(EXISTS (SELECT 1 FROM {" . self::T . "item} li
+                                      WHERE li.recordid = r.id AND li.status NOT IN ('withdrawn', 'lost'))
+                              OR EXISTS (SELECT 1 FROM {" . self::T . "digital} ld
+                                          WHERE ld.recordid = r.id AND ld.kind <> 'voice'))";
+        }
         if (preg_match('/^\d$/', $corner)) {
             $conditions[] = "r.id IN (SELECT fra.recordid FROM {" . self::T . "recauth} fra
                 JOIN {" . self::T . "authority} fa ON fa.id = fra.authorityid

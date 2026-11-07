@@ -96,4 +96,13 @@ final class holdings_test extends \basic_testcase {
         $this->assertSame('77', $item['regnumber']);
         $this->assertSame('2024-05-02', $item['acquired']);
     }
+
+    /**
+     * An 852 split as the standard has it, the class in $h and the part of the copy in $i: the whole call number.
+     */
+    public function test_852_with_its_parts(): void {
+        $record = new record();
+        $record->data('852', ' ', ' ', [['h', '821.134.2'], ['i', 'GAR cie'], ['p', 'B77']]);
+        $this->assertSame(['821.134.2', 'GAR', 'cie'], holdings::items($record)[0]['callnumber']);
+    }
 }
