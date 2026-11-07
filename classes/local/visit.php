@@ -118,6 +118,7 @@ final class visit {
         return ['url' => (new \moodle_url('/local/oksigeniaayvurenda/visit.php', ['library' => $library->slug]))->out(false),
             'label' => get_string('visitenter', 'local_oksigeniaayvurenda'),
             'hint' => get_string('visitenterhint', 'local_oksigeniaayvurenda'),
+            'enter' => get_string('visitgo', 'local_oksigeniaayvurenda'),
             'day' => $hall['layers'][0]['day'], 'night' => $hall['layers'][0]['night'],
             'position' => round($hall['focus'] / self::SIZE[0] * 100)];
     }

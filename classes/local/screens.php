@@ -120,6 +120,7 @@ final class screens {
             'hasrecent' => (bool) $recent,
             'herald' => $recent ? self::herald_new($library, $hero) : null,
             'weekbook' => self::week_book($library),
+            'board' => self::board($library, $recent),
             'empty' => !$corners && !$recent ? self::str('emptycatalogue') : '',
         ];
     }
@@ -1052,6 +1053,7 @@ final class screens {
                     : self::url('search.php', $library, ['q' => $remembers['query']]),
                 'label' => self::str($book ? 'memorygo' : 'memorysearchagain'),
                 'cover' => $book ? covers::url($book) : null,
+                'listen' => null,
             ];
         }
         if ($member && (string) $member->groupname !== '') {
@@ -1061,6 +1063,11 @@ final class screens {
                 $hero['challenge']['listen'] = self::listen(
                     ['ui/{lang}/challengeheading', 'ui/{lang}/challenge' . $challenge->kind]
                 );
+                // On the board the flower's card holds the challenge: one «Listen» reads both, one after the other.
+                if (!empty($hero['you']['listen'])) {
+                    $hero['you']['listen'] = self::listen(['herald-' . $hero['heraldsex'] . '/{lang}/heraldstage'
+                        . $album['flower']['stage'], 'ui/{lang}/challengeheading', 'ui/{lang}/challenge' . $challenge->kind]);
+                }
             }
             // The book the class chose as its reward is here: the herald tells.
             $arrived = wishes::arrived((int) $library->entityid, (string) $member->groupname);
@@ -1092,6 +1099,28 @@ final class screens {
     }
 
     /**
+     * The words of the home's board: whose each card is, and the first covers of what just arrived.
+     *
+     * @param \stdClass $library
+     * @param array $recent The cards of what just arrived.
+     * @return array
+     */
+    private static function board(\stdClass $library, array $recent): array {
+        $cast = characters::of((int) $library->entityid);
+        $covers = array_values(array_filter($recent, fn($card) => !empty($card['cover'])));
+        return [
+            'heraldtitle' => self::str('boardherald', $cast['herald']['name'] ?? ''),
+            'memorytitle' => self::str('boardmemory', $cast['memory']['name'] ?? ''),
+            'allnew' => self::str('boardallnew'),
+            'challengedone' => self::str('boardchallengedone'),
+            'covers' => array_map(
+                fn($card) => ['url' => $card['url'], 'cover' => $card['cover'], 'title' => $card['title']],
+                array_slice($covers, 0, 3)
+            ),
+        ];
+    }
+
+    /**
      * The herald announcing new books, with its voice for a young reader.
      *
      * @param \stdClass $library
@@ -1099,7 +1128,8 @@ final class screens {
      * @return array|null
      */
     private static function herald_new(\stdClass $library, array $hero): ?array {
-        $said = characters::say((int) $library->entityid, 'herald', 'heraldnew');
+        // Whole, waving: on the home's board it is the one figure of the left column.
+        $said = characters::say((int) $library->entityid, 'herald', 'heraldnew', [], 'saluda');
         if ($said && $hero['young']) {
             $said['listen'] = self::listen(['herald-' . $hero['heraldsex'] . '/{lang}/heraldnew']);
         }

@@ -75,20 +75,7 @@
 {{/hero}}
 {{#athome}}{{> local_oksigeniaayvurenda/athome}}{{/athome}}
 <div id="ayv-live">
-<div class="ayv-duo">
-    {{#herald}}{{#hasrecent}}<div class="ayv-duo-card">{{> local_oksigeniaayvurenda/bubble}}
-        <a class="ayv-duo-go" href="#ayv-recent">{{recentheading}}</a></div>{{/hasrecent}}{{/herald}}
-    {{#hero.you}}<div class="ayv-duo-card ayv-duo-you">
-        {{#drawing}}<span class="ayv-duo-drawing">{{{drawing}}}</span>{{/drawing}}
-        <span class="ayv-duo-words"><span class="ayv-duo-title">{{title}}</span> <span>{{text}}</span>{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</span>
-        <a class="ayv-button" href="{{url}}">{{label}}</a></div>{{/hero.you}}
-    {{#hero.wishherald}}<div class="ayv-duo-card">{{> local_oksigeniaayvurenda/bubble}}</div>{{/hero.wishherald}}
-    {{#weekbook}}<div class="ayv-duo-card ayv-duo-memory">{{> local_oksigeniaayvurenda/bubble}}
-        <p class="ayv-duo-memory-go">{{#cover}}<img class="ayv-duo-memory-cover" src="{{cover}}" alt="" loading="lazy">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p></div>{{/weekbook}}
-    {{#hero.remembers}}<div class="ayv-duo-card ayv-duo-memory">{{> local_oksigeniaayvurenda/bubble}}
-        <p class="ayv-duo-memory-go">{{#cover}}<img class="ayv-duo-memory-cover" src="{{cover}}" alt="" loading="lazy">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p></div>{{/hero.remembers}}
-    {{#hero.challenge}}<div class="ayv-duo-card ayv-challenge-card">{{> local_oksigeniaayvurenda/challenge}}</div>{{/hero.challenge}}
-</div>
+{{> local_oksigeniaayvurenda/home_board}}
 <p class="ayv-staff ayv-staff-row">
     {{#desk}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/desk}}
     {{#toread}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/toread}}
@@ -97,11 +84,11 @@
     {{^hero.you}}{{#mycard}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/mycard}}{{/hero.you}}
     {{#addbooks}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>
     <a class="ayv-button ayv-button-quiet" href="{{freeurl}}">{{freelabel}}</a>{{/addbooks}}
-    {{#spring}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a>{{/spring}}
-    {{#window}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/window}}
+    {{^visitcard}}{{#spring}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a>{{/spring}}
+    {{#window}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/window}}{{/visitcard}}
     {{#voices}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/voices}}
 </p>
-{{#visitcard}}{{> local_oksigeniaayvurenda/visit_card}}{{/visitcard}}
+{{#visitcard}}{{> local_oksigeniaayvurenda/visit_board}}{{/visitcard}}
 {{#hascorners}}
 <section class="ayv-section" aria-labelledby="ayv-corners">
     <h2 id="ayv-corners" class="ayv-section-title">{{cornersheading}}</h2>

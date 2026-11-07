@@ -242,6 +242,52 @@
             fold.open = false;
         });
     }
+    // On a phone, the search waits behind a magnifier and opens over the header's bar; the cross or Esc closes it.
+    var top = document.querySelector('.ayv-top');
+    var lens = document.querySelector('.ayv-search-toggle');
+    if (top && lens) {
+        var field = document.getElementById('ayv-q');
+        var shut = function() {
+            top.classList.remove('ayv-searching');
+            lens.setAttribute('aria-expanded', 'false');
+            lens.focus();
+        };
+        lens.addEventListener('click', function() {
+            // Without a search in the header (the home has its own), the magnifier takes the focus to the page's field.
+            if (!top.querySelector('.ayv-search')) {
+                if (field) {
+                    field.scrollIntoView({block: 'center'});
+                    field.focus();
+                }
+                return;
+            }
+            top.classList.add('ayv-searching');
+            lens.setAttribute('aria-expanded', 'true');
+            if (field) {
+                field.focus();
+            }
+        });
+        var cross = document.querySelector('.ayv-search-close');
+        if (cross) {
+            cross.addEventListener('click', shut);
+        }
+        if (field) {
+            field.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && window.getComputedStyle(lens).display !== 'none') {
+                    shut();
+                }
+            });
+        }
+    }
+    // The phone's «More» sheet closes with a tap outside it, on the dimmed page.
+    var phonemore = document.getElementById('ayv-phonemore');
+    if (phonemore) {
+        phonemore.addEventListener('click', function(event) {
+            if (event.target === phonemore && phonemore.close) {
+                phonemore.close();
+            }
+        });
+    }
     // A field that leaves only the lines with its words, and opens the groups that hold them (late books by a name).
     var plain = function(text) {
         return String(text).toLowerCase().normalize ? String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')

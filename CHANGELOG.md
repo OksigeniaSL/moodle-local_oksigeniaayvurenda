@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.193.0
+
+- The reader's home as one board, from Gaudí's mock-up (dis-pase-04): on the left, the herald once and whole, with three
+  covers of what just arrived and the book of the week on a plate; on the right, what the memory recommends with its cover,
+  and the reader's flower with «My card» and the class's challenge inside; one «Listen» per card, by its title. The visit,
+  as a card with «Enter» and the other two ways in (Ayvu rande and the window) beside the hall.
+- The header on a phone, from Gaudí's mock-up (dis-pase-21): a bar with the emblem, the name and a magnifier; the search
+  opens over the bar, with the keyboard, a cross and Esc, and starts open on the results; a reader has four tabs, the fourth
+  «More», a sheet from below with the rest and the way out, closed with a tap outside it.
+
 ## 0.192.0
 
 - 0.191.0 did not get installed (the CI's HTML validator refused `role="switch"` on a button): it comes inside this one,
@@ -28,6 +38,7 @@
     is a day and a month from lists;
   - Gaudí's review of 0.191.0: the shelf places without the repeated drawing, the corners' hint once, characters
     «spoken of as» she or he, and the flower's row a point bigger.
+  - a «How do I…?» task to put the library on everyone's dashboard (UXL-17).
 
 ## 0.191.0
 

@@ -201,6 +201,7 @@ final class shell {
             self::bare($title, $main, $library, $options, $app, $version, $lang);
             return;
         }
+        global $OUTPUT;
         $str = fn(string $key, $a = null) => s(get_string($key, 'local_oksigeniaayvurenda', $a));
         $home = $library ? $base . 'index.php?library=' . rawurlencode($library->slug) : $base . 'index.php';
         // Someone without an account goes home to the library's door, when it has its window open.
@@ -209,6 +210,7 @@ final class shell {
             $home = $base . 'public.php?library=' . rawurlencode($library->slug);
         }
         $search = '';
+        $lens = '';
         // Without an account, the search of a catalogue shown to anyone is the window's; with none shown, there is none.
         $searchpage = $outsider && $library ? (window::catalogue_open($library) ? 'public.php' : '') : 'search.php';
         if ($library && $searchpage !== '' && ($options['search'] ?? true)) {
@@ -220,7 +222,14 @@ final class shell {
     <a class="ayv-search-clear" href="' . s($home) . '" aria-label="' .
                 $str('searchclear') . '"' . ($query === '' ? ' hidden' : '') . '>×</a>
     <button type="submit">' . $str('searchbutton') . '</button>
+    <button type="button" class="ayv-search-close" aria-label="' . $str('searchclose') . '">×</button>
 </form>';
+        }
+        // The magnifier of a phone, always in the same place: where the page has its own search (the home), it goes there.
+        if ($library && $searchpage !== '' && (($options['search'] ?? true) || !empty($options['lens']))) {
+            $lens = '<button type="button" class="ayv-search-toggle" aria-expanded="false" aria-controls="ayv-q">'
+                . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_search', [])
+                . '<span class="ayv-sr">' . $str('searchlabel') . '</span></button>';
         }
         $config = json_encode(($options['config'] ?? []) + [
             'library' => $library ? $library->slug : '',
@@ -292,7 +301,25 @@ final class shell {
             . ($out ? s($out['label']) : ($mine ? s(get_string('myhome'))
                 : $str('backto', format_string($SITE->shortname, true, ['escape' => false]))))
             . ' <span aria-hidden="true">→</span></a>';
-        $nav = '<nav class="ayv-navs" aria-label="' . $str('menulabel') . '">' . $nav . '</nav>';
+        // On a phone, a reader sees four tabs: the first three doors and «More», a sheet from below with the rest and
+        // the way out (Gaudí's mock-up of 7 November 2026). The staff keep their own «More».
+        $readermore = !in_array('more', array_column($doors, 'key'), true);
+        if ($readermore) {
+            $rest = '';
+            foreach (array_slice($doors, 3) as $door) {
+                $rest .= '<li><a class="ayv-more-link" href="' . s($door['url']) . '"'
+                    . ($door['current'] ? ' aria-current="page"' : '') . '>' . s($door['label']) . '</a></li>';
+            }
+            $rest .= '<li><a class="ayv-more-link" href="' . s($out ? $out['url'] : $CFG->wwwroot . ($mine ? '/my/' : '/'))
+                . '">' . ($out ? s($out['label']) : ($mine ? s(get_string('myhome'))
+                : $str('backto', format_string($SITE->shortname, true, ['escape' => false])))) . '</a></li>';
+            $nav .= '<button type="button" class="ayv-nav ayv-nav-phonemore" data-ayv-open="ayv-phonemore" aria-haspopup="dialog">'
+                . $str('menumore') . '</button>';
+            $sheet .= '<dialog class="ayv-modal ayv-phonemore" id="ayv-phonemore" aria-label="' . $str('menumore') . '">'
+                . '<ul class="ayv-phonemore-list">' . $rest . '</ul></dialog>';
+        }
+        $nav = '<nav class="ayv-navs' . ($readermore ? ' ayv-navs-reader' : '') . '" aria-label="' . $str('menulabel') . '">'
+            . $nav . '</nav>';
         // An administrator who logged in as someone else sees it on every page, as in the rest of Moodle.
         $as = '';
         if (\core\session\manager::is_loggedinas()) {
@@ -375,11 +402,11 @@ final class shell {
 <body class="ayv ayv-skin-' . $skin . ($library && characters::young((int) $library->entityid) ? ' ayv-young' : '')
         . ($howto !== '' ? ' ayv-has-howto' : '') . '">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
-' . $as . '<header class="ayv-top">
+' . $as . '<header class="ayv-top' . ($query !== '' ? ' ayv-searching' : '') . '">
 <a class="ayv-brand" href="' . s($home) . '"><img class="ayv-brand-light" src="' . $app . 'emblema.svg" alt="" width="44"
     height="44"><img class="ayv-brand-dark" src="' . $app . 'emblema-oscuro.svg" alt="" width="44" height="44">
     <span class="ayv-brand-name">' . s($name) . '</span></a>
-' . $search . $nav . '
+' . $search . $lens . $nav . '
 </header>
 <main id="ayv-main" class="ayv-main" tabindex="-1">
 ' . $main . '

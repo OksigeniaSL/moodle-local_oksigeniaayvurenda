@@ -52,5 +52,5 @@ if (
     die();
 }
 $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', screens::home($library));
-// The home has its own search, at the top.
-shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);
+// The home has its own search, at the top: the phone's magnifier takes the focus there.
+shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false, 'lens' => true]);

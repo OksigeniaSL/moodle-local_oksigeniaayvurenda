@@ -4753,3 +4753,209 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-start-go { display: flex; flex-wrap: wrap; gap: .4rem; }
 .ayv .ayv-self-still { margin: 1rem 0 0; padding: .6rem 1rem; border-radius: .8rem; font-weight: 700; background: color-mix(in srgb, var(--sun) 35%, transparent); }
 .ayv .ayv-reader-holds .ayv-loan { justify-content: space-between; }
+
+/* The reader's home as one board (Gaudí's mock-up of 7 November 2026): the herald once, whole, with what just arrived and
+   the book of the week on the left; what the memory recommends and the reader's flower, with the class's challenge, on the
+   right. One «Listen» per card, by its title. */
+.ayv .ayv-board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.4rem; align-items: start; margin: 1.4rem 0; }
+.ayv .ayv-board-col { display: grid; gap: 1.4rem; min-width: 0; }
+.ayv .ayv-board-card {
+    position: relative;
+    padding: 1.4rem 1.5rem;
+    border-radius: 24px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--ayv-shadow, 0 10px 28px -14px rgba(15, 58, 51, .32));
+}
+.ayv .ayv-board-card p { margin: 0; }
+.ayv .ayv-board-words { display: grid; gap: .5rem; align-content: start; min-width: 0; }
+.ayv .ayv-board-title { margin: 0; padding-right: 7.5rem; font: 600 1.35rem/1.2 var(--title); color: var(--ink); }
+.ayv .ayv-board-listen { position: absolute; top: 1.3rem; right: 1.3rem; }
+.ayv .ayv-board-who img { display: block; width: 100%; height: auto; filter: drop-shadow(0 8px 14px rgba(15, 58, 51, .18)); }
+.ayv .ayv-board-herald { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .5rem 1.4rem; align-items: start; }
+.ayv .ayv-board-herald > .ayv-board-who { align-self: center; }
+.ayv .ayv-board-covers { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: .4rem !important; }
+.ayv .ayv-board-covers img {
+    display: block;
+    width: 3.6rem;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 4px 8px 8px 4px;
+    box-shadow: 0 6px 12px -6px rgba(15, 58, 51, .5);
+}
+.ayv .ayv-board-all { margin-left: .3rem; font-weight: 700; }
+.ayv .ayv-board-week {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 1.1rem;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 18px;
+    background: var(--paper2);
+}
+.ayv .ayv-board-week img {
+    display: block;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 4px 10px 10px 4px;
+    box-shadow: 0 10px 18px -8px rgba(15, 58, 51, .55);
+}
+.ayv .ayv-board-week div { display: grid; gap: .7rem; }
+.ayv .ayv-board-week p:first-child { font: 600 1.15rem/1.35 var(--title); }
+.ayv .ayv-board-memory { display: grid; grid-template-columns: minmax(0, 1fr) 7rem; gap: 0 1rem; align-items: end; }
+.ayv .ayv-board-book { display: flex; gap: .9rem; align-items: center; margin-top: .4rem !important; }
+.ayv .ayv-board-book img {
+    width: 4.5rem;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 3px 8px 8px 3px;
+    box-shadow: 0 8px 14px -7px rgba(15, 58, 51, .5);
+}
+.ayv .ayv-board-you { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: .3rem 1.1rem; align-items: center; }
+.ayv .ayv-board-flower { display: grid; place-items: center; width: 6rem; height: 6rem; border-radius: 50%; background: var(--paper2); }
+.ayv .ayv-board-flower svg { width: 4.5rem; height: 4.5rem; }
+.ayv .ayv-board-challenge { grid-column: 1 / -1; margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed var(--line); }
+.ayv .ayv-board-challenge .ayv-challenge { margin: 0; padding: 0; background: none; box-shadow: none; }
+@media (max-width: 56rem) {
+    .ayv .ayv-board { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 40rem) {
+    .ayv .ayv-board-card { padding: 1.1rem; }
+    .ayv .ayv-board-title { padding-right: 0; font-size: 1.2rem; }
+    .ayv .ayv-board-listen { position: static; }
+    .ayv .ayv-board-herald { grid-template-columns: 5.5rem minmax(0, 1fr); gap: .3rem .9rem; }
+    .ayv .ayv-board-herald { grid-template-columns: 4.5rem minmax(0, 1fr); }
+    .ayv .ayv-board-week { grid-template-columns: 5.5rem minmax(0, 1fr); gap: .8rem; padding: .75rem; }
+    .ayv .ayv-board-week img { width: 5.5rem; }
+    .ayv .ayv-board-memory { grid-template-columns: minmax(0, 1fr) 4.5rem; }
+    .ayv .ayv-board-you { grid-template-columns: 4rem minmax(0, 1fr); }
+    .ayv .ayv-board-flower { width: 4rem; height: 4rem; }
+    .ayv .ayv-board-flower svg { width: 3rem; height: 3rem; }
+}
+
+/* The visit as a card of the reader's home: words, «Enter» and the two other ways in; the hall on the right. */
+.ayv .ayv-visit-home {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 29rem);
+    margin: 1.4rem 0;
+    overflow: hidden;
+    border-radius: 24px;
+    background: var(--surface);
+    box-shadow: var(--ayv-shadow, 0 10px 28px -14px rgba(15, 58, 51, .32));
+}
+.ayv .ayv-visit-home-text { display: grid; gap: .6rem; align-content: center; padding: 1.6rem 1.75rem; }
+.ayv .ayv-visit-home-text p { margin: 0; }
+.ayv .ayv-visit-home-title { margin: 0; font: 600 1.6rem/1.2 var(--title); color: var(--ink); }
+.ayv .ayv-visit-home-chips { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .3rem !important; }
+.ayv .ayv-visit-home-picture { display: block; height: 16.25rem; }
+.ayv .ayv-visit-home-picture img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 56rem) {
+    .ayv .ayv-visit-home { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-visit-home-picture { order: -1; height: 12.5rem; }
+}
+
+/* The header on a phone (Gaudí's mock-up of 7 November 2026): a bar with the emblem, the name and a magnifier; the search
+   opens over the bar; a reader has four tabs, the fourth «More», a sheet from below with the rest and the way out. */
+.ayv .ayv-search-toggle,
+.ayv .ayv-search-close,
+.ayv .ayv-nav-phonemore { display: none; }
+@media (max-width: 30rem) {
+    .ayv .ayv-top { position: relative; }
+    .ayv .ayv-search-toggle {
+        display: inline-grid;
+        place-items: center;
+        flex: none;
+        width: 44px;
+        height: 44px;
+        margin-left: auto;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: var(--paper2);
+        color: var(--accent);
+        cursor: pointer;
+    }
+    .ayv .ayv-top .ayv-search { display: none; }
+    .ayv .ayv-top.ayv-searching .ayv-search {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .5rem .75rem;
+        background: var(--paper);
+    }
+    .ayv .ayv-top.ayv-searching .ayv-search input[type="search"] { flex: 1 1 auto; width: 0; min-width: 0; }
+    .ayv .ayv-top.ayv-searching .ayv-brand,
+    .ayv .ayv-top.ayv-searching .ayv-search-toggle { visibility: hidden; }
+    /* One cross on a phone, the one that closes: the field is emptied by hand. */
+    .ayv .ayv-top .ayv-search-clear { display: none; }
+    .ayv .ayv-top.ayv-searching .ayv-search-close {
+        display: inline-grid;
+        place-items: center;
+        flex: none;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--ink);
+        font-size: 1.4rem;
+        cursor: pointer;
+    }
+    .ayv .ayv-navs-reader { flex-wrap: nowrap; justify-content: space-between; width: 100%; margin-left: 0; gap: 0; }
+    .ayv .ayv-navs-reader .ayv-nav { padding: 0 .55rem; white-space: nowrap; }
+    .ayv .ayv-navs-reader > a:nth-of-type(n+4) { display: none; }
+    .ayv .ayv-navs-reader .ayv-nav-phonemore { display: inline-flex; }
+    .ayv .ayv-phonemore[open] {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: .75rem 1rem 1.25rem;
+        border-radius: 22px 22px 0 0;
+    }
+}
+.ayv .ayv-phonemore-list { margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-phonemore-list li + li { border-top: 1px solid var(--line); }
+.ayv .ayv-phonemore-list a { display: flex; align-items: center; min-height: 48px; font-weight: 700; text-decoration: none; }
+@media (max-width: 22.5rem) {
+    .ayv .ayv-navs-reader .ayv-nav { font-size: .875rem; }
+}
+
+/* Gaudí's review of 0.193.0. On the board, the challenge met is a line, not Mainumby a second time, and the flower's
+   «Listen» reads the challenge too. */
+.ayv .ayv-board-challenge .ayv-bubble,
+.ayv .ayv-board-challenge .ayv-listen { display: none; }
+.ayv .ayv-board-done { margin: .5rem 0 0; font-weight: 700; color: var(--accent); }
+@media (max-width: 30rem) {
+    /* «Search» inside the field's pill; the cross that closes, outside it. */
+    .ayv .ayv-top.ayv-searching .ayv-search input[type="search"] { padding-right: 6.4rem; }
+    .ayv .ayv-top.ayv-searching .ayv-search button[type="submit"] {
+        position: absolute;
+        top: 50%;
+        right: calc(.75rem + 44px + .4rem + 4px);
+        min-height: 40px;
+        transform: translateY(-50%);
+    }
+}
+@media (max-width: 40rem) {
+    /* Mainumby at 96 px, up beside its title; its words and the covers the whole width below. */
+    .ayv .ayv-board-herald { grid-template-columns: 6rem minmax(0, 1fr); align-items: center; }
+    .ayv .ayv-board-herald > .ayv-board-words { display: contents; }
+    .ayv .ayv-board-herald > .ayv-board-who { grid-row: 1; align-self: center; }
+    .ayv .ayv-board-herald .ayv-board-title { grid-row: 1; grid-column: 2; }
+    .ayv .ayv-board-herald .ayv-board-listen,
+    .ayv .ayv-board-herald .ayv-board-words > p { grid-column: 1 / -1; }
+}

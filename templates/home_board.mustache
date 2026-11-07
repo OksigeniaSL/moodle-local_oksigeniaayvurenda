@@ -1,0 +1,84 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/home_board
+
+    The reader's home as one board (Gaudí's mock-up of 7 November 2026, dis-pase-04): on the left, what the herald tells,
+    once and whole (what just arrived, the book of the week); on the right, what the memory recommends and the reader's
+    flower with their class's challenge inside. One «Listen» per card, by its title. The characters stand still.
+
+    Example context (json):
+    {
+        "board": {"heraldtitle": "Lo que cuenta Mainumby", "memorytitle": "La memoria te recomienda", "allnew": "Verlos todos",
+            "covers": [{"url": "#", "cover": "https://example.org/c.jpg", "title": "El faro"}]},
+        "herald": {"name": "Mainumby", "text": "Acaban de llegar doce libros.", "figure": "https://example.org/m.webp",
+            "initial": "M", "role": "herald", "portrait": "https://example.org/p.webp", "listen": null},
+        "hasrecent": true,
+        "weekbook": {"text": "El libro de la semana es «Una abuela en la barca».", "cover": "https://example.org/a.jpg",
+            "url": "#", "label": "Ver el libro"},
+        "hero": {"remembers": null, "you": null, "challenge": null, "wishherald": null}
+    }
+}}
+<div class="ayv-board">
+    <div class="ayv-board-col">
+    {{#herald}}{{#hasrecent}}
+    <section class="ayv-board-card ayv-board-herald" aria-labelledby="ayv-board-herald">
+        <span class="ayv-board-who" aria-hidden="true">{{#figure}}<img src="{{figure}}" alt="" width="200" height="200">{{/figure}}{{^figure}}<span class="ayv-bubble-portrait ayv-bubble-{{role}}">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>{{/figure}}</span>
+        <div class="ayv-board-words">
+            <h2 class="ayv-board-title" id="ayv-board-herald">{{board.heraldtitle}}</h2>{{#listen}}<span class="ayv-board-listen">{{> local_oksigeniaayvurenda/listen}}</span>{{/listen}}
+            <p>{{text}}</p>
+            <p class="ayv-board-covers">{{#board.covers}}<a href="{{url}}"><img src="{{cover}}" alt="{{title}}" loading="lazy" width="56" height="84"></a>{{/board.covers}}
+                <a class="ayv-board-all" href="#ayv-recent">{{board.allnew}}</a></p>
+        </div>
+        {{#weekbook}}
+        <div class="ayv-board-week">
+            {{#cover}}<img src="{{cover}}" alt="" loading="lazy" width="120" height="180">{{/cover}}
+            <div><p>{{text}}</p><p><a class="ayv-button" href="{{url}}">{{label}}</a></p></div>
+        </div>
+        {{/weekbook}}
+    </section>
+    {{/hasrecent}}{{/herald}}
+    {{^hasrecent}}{{#weekbook}}<div class="ayv-board-card">{{> local_oksigeniaayvurenda/bubble}}
+        <p class="ayv-duo-memory-go">{{#cover}}<img class="ayv-duo-memory-cover" src="{{cover}}" alt="" loading="lazy">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p></div>{{/weekbook}}{{/hasrecent}}
+    {{#hero.wishherald}}<div class="ayv-board-card">{{> local_oksigeniaayvurenda/bubble}}</div>{{/hero.wishherald}}
+    </div>
+    <div class="ayv-board-col">
+    {{#hero.remembers}}
+    <section class="ayv-board-card ayv-board-memory" aria-labelledby="ayv-board-memory">
+        <div class="ayv-board-words">
+            <h2 class="ayv-board-title" id="ayv-board-memory">{{board.memorytitle}}</h2>{{#listen}}<span class="ayv-board-listen">{{> local_oksigeniaayvurenda/listen}}</span>{{/listen}}
+            <p>{{text}}</p>
+            <p class="ayv-board-book">{{#cover}}<img src="{{cover}}" alt="" loading="lazy" width="72" height="108">{{/cover}}<a class="ayv-button" href="{{url}}">{{label}}</a></p>
+        </div>
+        <span class="ayv-board-who" aria-hidden="true">{{#figure}}<img src="{{figure}}" alt="" width="112" height="112">{{/figure}}{{^figure}}<span class="ayv-bubble-portrait ayv-bubble-{{role}}">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>{{/figure}}</span>
+    </section>
+    {{/hero.remembers}}
+    {{#hero.you}}
+    <section class="ayv-board-card ayv-board-you" aria-labelledby="ayv-board-you">
+        {{#drawing}}<span class="ayv-board-flower">{{{drawing}}}</span>{{/drawing}}
+        <div class="ayv-board-words">
+            <h2 class="ayv-board-title" id="ayv-board-you">{{title}}</h2>{{#listen}}<span class="ayv-board-listen">{{> local_oksigeniaayvurenda/listen}}</span>{{/listen}}
+            <p>{{text}}</p>
+            <p><a class="ayv-button" href="{{url}}">{{label}}</a></p>
+        </div>
+        {{#hero.challenge}}<div class="ayv-board-challenge">{{> local_oksigeniaayvurenda/challenge}}
+            {{#complete}}<p class="ayv-board-done">{{board.challengedone}}</p>{{/complete}}</div>{{/hero.challenge}}
+    </section>
+    {{/hero.you}}
+    {{^hero.you}}{{#hero.challenge}}<div class="ayv-board-card ayv-challenge-card">{{> local_oksigeniaayvurenda/challenge}}</div>{{/hero.challenge}}{{/hero.you}}
+    </div>
+</div>
