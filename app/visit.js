@@ -38,7 +38,8 @@
         }
     };
     window.AYVVisit = {
-        say: function(url) {
+        // One line, and another after it if given (which line of the label to look at, after «before» or «after»).
+        say: function(url, next) {
             if (!on || !url || !window.Audio) {
                 return;
             }
@@ -50,6 +51,9 @@
             duck(true);
             voice.addEventListener('ended', function() {
                 duck(false);
+                if (next) {
+                    window.AYVVisit.say(next);
+                }
             });
             voice.play().catch(function() {
                 duck(false);

@@ -72,7 +72,7 @@
         "sortdonehint": "Son las novedades.", "sortagain": "Otras novedades",
         "hunt": {"target": 7, "heading": "El libro escondido", "name": "Memoria", "clue": "He escondido un libro.",
             "figure": "https://example.com/memoria-piensa.webp", "puppet": "", "cheer": "https://example.com/memoria-celebra.webp",
-            "cheerpuppet": "", "huntcover": "https://example.com/cover.jpg", "huntlines": [{"line": "82-3"}, {"line": "MON"}],
+            "cheerpuppet": "", "huntcover": "https://example.com/cover.jpg", "foundcover": "https://example.com/cover.jpg", "huntlines": [{"line": "82-3"}, {"line": "MON"}],
             "huntplace": "#d63a2f", "labelsr": "El tejuelo del libro escondido: 82-3 MON", "title": "El dragón que leía",
             "found": "¡Lo has encontrado! Está en Rojo.", "foundhint": "Búscalo allí.", "recordurl": "#", "againurl": "#",
             "messages": "{}", "voices": "{}",
@@ -213,6 +213,8 @@
             {{#cheer}}
             <span class="ayv-figure ayv-hunt-who"><img class="ayv-bubble-figure" src="{{cheer}}" alt="" width="170" height="170"{{#cheerpuppet}} data-puppet="{{cheerpuppet}}"{{/cheerpuppet}}></span>
             {{/cheer}}
+            {{! The book found, with its cover, as on the lectern of the shelves: finding it shows it (D9). }}
+            {{#foundcover}}<img class="ayv-hunt-found-cover" src="{{foundcover}}" alt="" width="120" height="180">{{/foundcover}}
             <div>
                 <p class="ayv-hunt-found-title" tabindex="-1">{{found}}</p>
                 <p><strong>{{title}}</strong></p>
@@ -261,7 +263,9 @@
                 {{#doors}}
                 <li><button type="button" class="ayv-sort-door ayv-cover-{{colour}}" data-corner="{{code}}">
                     {{#art}}<img class="ayv-sort-door-img" src="{{art}}" alt="">{{/art}}
-                    <span class="ayv-sort-door-label">{{label}}</span>
+                    {{! Its number, as the real shelf's sign shows it: the game is matching the label's first digit with it. }}
+                    <span class="ayv-sort-door-num" aria-hidden="true">{{code}}</span>
+                    <span class="ayv-sort-door-label"><span class="ayv-sr">{{code}} · </span>{{label}}</span>
                 </button></li>
                 {{/doors}}
             </ul>

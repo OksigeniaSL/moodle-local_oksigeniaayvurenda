@@ -40,6 +40,33 @@ final class challenges_test extends \advanced_testcase {
         $this->assertSame(3, challenges::term($year, 299));
         $this->assertSame(3, challenges::term($year, 1000));
         $this->assertSame([100, 200], challenges::bounds($year, 2));
+
+        // A year of twelve months: the terms are thirds of its ten months of classes, so the third one is not the summer.
+        $year = (object) ['timestart' => 0, 'timeend' => 365 * DAYSECS];
+        $ends = challenges::ends($year);
+        $this->assertSame(3, challenges::term($year, $ends[1] + DAYSECS));
+        $this->assertLessThan(320 * DAYSECS, $ends[2]);
+    }
+
+    /**
+     * A centre sets when its terms end, as day and month; going back forgets them.
+     */
+    public function test_set_ends(): void {
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $start = (new \DateTimeImmutable('2026-09-01 00:00:00', zones::of($entityid)))->getTimestamp();
+        $year = (object) ['entityid' => $entityid, 'timestart' => $start,
+            'timeend' => (new \DateTimeImmutable('2027-09-01 00:00:00', zones::of($entityid)))->getTimestamp()];
+        $this->assertTrue(challenges::set_ends($entityid, ['2026-12-22', '2027-03-26', '2027-06-18']));
+        $ends = challenges::ends($year);
+        $day = fn(int $time) => (new \DateTimeImmutable('@' . $time))->setTimezone(zones::of($entityid))->format('Y-m-d');
+        $this->assertSame('2026-12-22', $day($ends[0]));
+        $this->assertSame('2027-06-18', $day($ends[2]));
+        $this->assertSame(2, challenges::term($year, $ends[0] + DAYSECS));
+        $this->assertFalse(challenges::set_ends($entityid, ['2026-02-31', '', '']));
+        $this->assertTrue(challenges::set_ends($entityid, []));
+        $this->assertNotSame($ends, challenges::ends($year));
     }
 
     /**
@@ -111,7 +138,8 @@ final class challenges_test extends \advanced_testcase {
         $lend($book('5'), $other);
         challenges::choose($entityid, '4.º A', 'corners', $now);
         $corners = challenges::of($entityid, '4.º A', $now);
-        $this->assertSame([6, 2], [$corners->target, $corners->done]);
+        // As many corners as the library shows, six at most and three at least (here the catalogue has two: three).
+        $this->assertSame([max(3, min(6, garden::corners_shown($entityid))), 2], [$corners->target, $corners->done]);
         challenges::choose($entityid, '4.º A', 'off', $now);
         $this->assertNull(challenges::of($entityid, '4.º A', $now));
     }

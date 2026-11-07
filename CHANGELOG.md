@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.194.0
+
+- Play and the visit (audit batch 10, first part):
+  - the hidden book never has a twin with the same label on its shelf (the next turn's book is taken), and if two
+    labels still match the memory says so; the gap of a book that is out is not counted as a miss; the magnifier shows
+    only the label (a tried spine, its title), and the spines of the game have no title tooltip;
+  - after «before» or «after», the memory says in her voice which line of the label to look at, and that line lights up
+    on the clue (new voices in the art package 0.1.49); the book found shows its cover;
+  - «Shelve the new books» starts every day with other books, and each door shows its number, as the shelf's sign;
+  - the class challenge of corners and the flower's «Explore» ask for the corners the library shows (between three and
+    six, and between two and seven), not a fixed number a classroom may not have;
+  - the terms of the class challenges: thirds of the ten months of classes from the start of the year (the third one
+    was the summer), or the three end days each centre sets in «Academic year»; the herald celebrates a challenge met
+    for two weeks, not every day until the next term;
+  - a young reader sees the class's island on their card, as the tutor does in «My class»;
+  - the app's card shows a young reader's flower.
+- A class named twice in the catalogue no longer warns when the corners are listed.
+
 ## 0.193.0
 
 - The reader's home as one board, from Gaudí's mock-up (dis-pase-04): on the left, the herald once and whole, with three

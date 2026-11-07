@@ -92,7 +92,10 @@ final class shelve {
         if (count($kept) < 3) {
             return [];
         }
-        $at = ($turn * self::BOOKS) % count($kept);
+        // Each day starts somewhere else in the list (the same four for the whole class that day), and «Other new books»
+        // goes on from there (D6).
+        $day = (int) sprintf('%u', crc32(date('Ymd') . ':' . $library->id)) % max(1, intdiv(count($kept), self::BOOKS));
+        $at = (($turn + $day) * self::BOOKS) % count($kept);
         $chosen = array_slice(array_merge(array_slice($kept, $at), array_slice($kept, 0, $at)), 0, self::BOOKS);
         [$cin, $cparams] = $DB->get_in_or_equal($chosen, SQL_PARAMS_NAMED);
         $titles = $DB->get_records_select_menu(self::T . 'record', 'id ' . $cin, $cparams, '', 'id, title');

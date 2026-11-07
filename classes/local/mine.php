@@ -124,6 +124,7 @@ final class mine {
                 'name' => format_string($library->name, true, ['escape' => false]),
                 'slug' => (string) $library->slug,
                 'cardcode' => (string) $reader->cardcode,
+                'readerid' => (int) $reader->id,
                 'home' => $url('index.php', $library),
                 'card' => $url('card.php', $library),
                 'spring' => $url('ayvurande.php', $library),

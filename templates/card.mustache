@@ -34,7 +34,7 @@
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
                    "sky": false, "haschoices": false, "choosefirst": false, "choices": [], "mine": false,
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": [],
-                   "hasclassgarden": false, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
+                   "hasclassgarden": false, "classisland": null, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
                    "hascromos": true, "cromosheading": "Tus cromos", "cromoscount": "1 de 2",
                    "cromos": [{"name": "Ciencias", "art": "app/emblema.svg", "won": true, "state": "3 de octubre",
                                "label": "Ciencias: lo conseguiste el 3 de octubre"},
@@ -112,9 +112,10 @@
     {{#hasclassgarden}}
     <h2 class="ayv-section-title">{{classgardenheading}}</h2>
     <p class="ayv-field-hint">{{classgardenhint}}{{#listengarden}} {{> local_oksigeniaayvurenda/listen}}{{/listengarden}}</p>
-    <ul class="ayv-garden">
+    {{#classisland}}<figure class="ayv-island ayv-card-island" role="img" aria-label="{{islandlabel}}">{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/classisland}}
+    {{^classisland}}<ul class="ayv-garden">
     {{#classgarden}}<li>{{{svg}}}<span>{{label}}</span></li>{{/classgarden}}
-    </ul>
+    </ul>{{/classisland}}
     {{/hasclassgarden}}
     {{#haspast}}
     <h2 class="ayv-section-title">{{pastheading}}</h2>

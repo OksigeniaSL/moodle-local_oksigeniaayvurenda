@@ -37,16 +37,75 @@ final class challenges {
     /** @var array Kinds of challenge and their target; «everyone» is the size of the group. */
     public const KINDS = ['corners' => 6, 'notes' => 20, 'everyone' => 0];
 
+    /** @var int How long the herald celebrates a challenge met: two weeks. */
+    private const CHEER = 14 * DAYSECS;
+
+    /** @var int The months of classes a school year has, everywhere near enough: the terms are thirds of them. */
+    private const CLASSMONTHS = 10;
+
     /**
-     * The term a moment falls in, of a school year: its thirds.
+     * When each term of a school year ends: the days the centre set in «Academic year», or else thirds of its ten months
+     * of classes from the start (the third one is not the summer, D4).
+     *
+     * @param \stdClass $year
+     * @return int[] Three moments, in order.
+     */
+    public static function ends(\stdClass $year): array {
+        global $DB;
+        $start = (int) $year->timestart;
+        $settings = !empty($year->entityid) ? (json_decode((string) $DB->get_field(
+            self::T . 'entity',
+            'settings',
+            ['id' => $year->entityid]
+        ), true) ?: []) : [];
+        $set = array_values(array_filter(
+            (array) ($settings['termends'] ?? []),
+            fn($d) => preg_match('/^\d{2}-\d{2}$/', (string) $d)
+        ));
+        if (count($set) === 3) {
+            $zone = zones::of((int) $year->entityid);
+            $ends = [];
+            $after = $start;
+            foreach ($set as $monthday) {
+                // The first such day after the start (or after the term before), at the end of that day.
+                $first = (new \DateTimeImmutable('@' . $after))->setTimezone($zone)->format('Y');
+                foreach ([$first, (string) ((int) $first + 1)] as $y) {
+                    $m = (int) substr($monthday, 0, 2);
+                    $d = (int) substr($monthday, 3, 2);
+                    if (!checkdate($m, $d, (int) $y)) {
+                        continue;
+                    }
+                    $at = (new \DateTimeImmutable(sprintf('%s-%02d-%02d 23:59:59', $y, $m, $d), $zone))->getTimestamp();
+                    if ($at > $after) {
+                        $ends[] = $at;
+                        $after = $at;
+                        break;
+                    }
+                }
+            }
+            if (count($ends) === 3 && $ends[2] <= (int) $year->timeend + YEARSECS) {
+                return $ends;
+            }
+        }
+        $span = (int) round(min(max(1, (int) $year->timeend - $start), self::CLASSMONTHS * 30.44 * DAYSECS));
+        return [$start + intdiv($span, 3), $start + intdiv(2 * $span, 3), $start + $span];
+    }
+
+    /**
+     * The term a moment falls in, of a school year.
      *
      * @param \stdClass $year
      * @param int $time
      * @return int 1, 2 or 3.
      */
     public static function term(\stdClass $year, int $time): int {
-        $span = max(1, (int) $year->timeend - (int) $year->timestart);
-        return max(1, min(3, 1 + intdiv(3 * max(0, $time - (int) $year->timestart), $span)));
+        $ends = self::ends($year);
+        foreach ($ends as $i => $end) {
+            if ($time <= $end) {
+                return $i + 1;
+            }
+        }
+        return 3;
     }
 
     /**
@@ -57,8 +116,39 @@ final class challenges {
      * @return int[] start and end.
      */
     public static function bounds(\stdClass $year, int $term): array {
-        $span = (int) $year->timeend - (int) $year->timestart;
-        return [(int) $year->timestart + intdiv($span * ($term - 1), 3), (int) $year->timestart + intdiv($span * $term, 3)];
+        $ends = self::ends($year);
+        $term = max(1, min(3, $term));
+        $start = $term === 1 ? (int) $year->timestart : $ends[$term - 2];
+        return [$start, $term === 3 ? max($ends[2], (int) $year->timeend) : $ends[$term - 1]];
+    }
+
+    /**
+     * Sets when each term ends, as month and day, or forgets them with an empty list.
+     *
+     * @param int $entityid
+     * @param string[] $days Three 'Y-m-d' or 'm-d', in order; empty to go back to thirds.
+     * @return bool Whether they were kept.
+     */
+    public static function set_ends(int $entityid, array $days): bool {
+        global $DB;
+        $monthdays = [];
+        foreach ($days as $day) {
+            if (!preg_match('/(\d{2})-(\d{2})$/', trim((string) $day), $m) || !checkdate((int) $m[1], (int) $m[2], 2028)) {
+                return false;
+            }
+            $monthdays[] = $m[1] . '-' . $m[2];
+        }
+        if ($monthdays && count($monthdays) !== 3) {
+            return false;
+        }
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        if ($monthdays) {
+            $settings['termends'] = $monthdays;
+        } else {
+            unset($settings['termends']);
+        }
+        $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        return true;
     }
 
     /**
@@ -96,6 +186,10 @@ final class challenges {
             ['yearid' => $year->id, 'groupname' => $group]
         );
         $target = self::KINDS[$kind] ?: count($members);
+        // Corners: as many as the library shows, six at most and three at least; a classroom's four can be met (D16).
+        if ($kind === 'corners') {
+            $target = max(3, min($target, garden::corners_shown($entityid)));
+        }
         $done = $members ? self::progress($kind, array_map('intval', $members), $start, min($end, $now)) : 0;
         $challenge = (object) ['yearid' => (int) $year->id, 'group' => $group, 'term' => $term, 'kind' => $kind,
             'target' => $target, 'done' => min($done, $target), 'complete' => $target > 0 && $done >= $target,
@@ -103,6 +197,7 @@ final class challenges {
         // A challenge met is kept, with when: it is the class's garden.
         if ($challenge->complete) {
             $challenge->id = self::keep($challenge, $row, $now);
+            $challenge->timecompleted = $row && $row->timecompleted ? (int) $row->timecompleted : $now;
         }
         return $challenge;
     }
@@ -281,7 +376,8 @@ final class challenges {
             'left' => $left,
             'complete' => $challenge->complete,
             'listen' => null,
-            'herald' => $challenge->complete
+            // The herald celebrates for two weeks, not every day until the next term (D5).
+            'herald' => $challenge->complete && time() - (int) ($challenge->timecompleted ?? time()) <= self::CHEER
                 ? characters::say($entityid, 'herald', 'challengeherald', ['group' => $challenge->group], 'celebra') : null,
         ];
     }

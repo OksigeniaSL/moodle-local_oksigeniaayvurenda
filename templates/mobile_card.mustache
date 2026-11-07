@@ -23,7 +23,7 @@
     {
         "hascards": true, "notreader": "No eres lector", "hint": "Enséñalo en el mostrador",
         "fullname": "Lucía Garza Marín",
-        "cards": [{"where": "Biblioteca", "cardcode": "10000H",
+        "cards": [{"where": "Biblioteca", "cardcode": "10000H", "flowerimg": "https://example.org/flor.svg",
             "barcodeimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
             "qrimg": "data:image/gif;base64,R0lGODlhAQABAAAAACw="}]
     }
@@ -33,6 +33,7 @@
 {{#hascards}}<p style="text-align: center;">{{hint}}</p>{{/hascards}}
 {{#cards}}
     <div style="margin: 0 0 16px; padding: 20px 16px; border-radius: 16px; background: #fff; color: #1e2b2a; text-align: center;">
+        {{#flowerimg}}<img src="{{flowerimg}}" alt="" style="display: block; width: 96px; height: 96px; margin: 0 auto 8px;">{{/flowerimg}}
         <p style="margin: 0; font-size: 1.25em; font-weight: 700;">{{fullname}}</p>
         <p style="margin: 2px 0 12px;">{{where}}</p>
         {{#qrimg}}<img src="{{qrimg}}" alt="{{cardcode}}" style="display: block; width: 240px; max-width: 100%; height: auto; margin: 0 auto 12px;">{{/qrimg}}

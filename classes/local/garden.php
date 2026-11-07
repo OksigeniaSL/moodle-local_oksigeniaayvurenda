@@ -46,8 +46,21 @@ final class garden {
         $counts = flower::counts(self::loans((int) $reader->id, (int) $year->id));
         // A review the library published counts on the path of telling, as a note at the desk does.
         $counts['tell'] += reviews::told((int) $reader->id, $year);
-        $levels = flower::levels($counts);
+        // The path of exploring asks for the corners the library shows, not seven a classroom may not have.
+        $explore = flower::explore_steps(self::corners_shown((int) $reader->entityid));
+        $levels = flower::levels($counts, ['explore' => $explore]);
         return ['levels' => $levels, 'stage' => flower::stage($levels)];
+    }
+
+    /**
+     * How many corners the centre's main library shows: what «Explore» and the challenge of corners can ask for.
+     *
+     * @param int $entityid
+     * @return int
+     */
+    public static function corners_shown(int $entityid): int {
+        $library = mail::main_library($entityid);
+        return $library ? count(catalogue::corners($library)) : 7;
     }
 
     /**

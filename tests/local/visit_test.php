@@ -127,8 +127,10 @@ final class visit_test extends \advanced_testcase {
             $record = $gen->create_record(['entityid' => $library->entityid, 'title' => $title]);
             $DB->insert_record('local_oksigeniaayvurenda_recauth', ['recordid' => $record->id,
                 'authorityid' => $classes[$code], 'sortorder' => 0]);
+            // Each its own label (the last word's first letters): two books with the same label cannot be told apart.
+            $third = \core_text::strtolower(substr(strrchr(' ' . $title, ' '), 1, 3));
             $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => $now - $days * DAYSECS,
-                'callnumber1' => $code, 'callnumber2' => 'AUT', 'callnumber3' => \core_text::strtolower(substr($title, 0, 3))]);
+                'callnumber1' => $code, 'callnumber2' => 'AUT', 'callnumber3' => $third]);
             $books[$title] = (int) $record->id;
         }
         catalogue::save_corners($library, ['8' => ['label' => 'Cuentos', 'order' => 1], '5' => ['label' => '', 'order' => 2]]);

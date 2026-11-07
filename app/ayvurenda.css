@@ -4959,3 +4959,43 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     .ayv .ayv-board-herald .ayv-board-listen,
     .ayv .ayv-board-herald .ayv-board-words > p { grid-column: 1 / -1; }
 }
+
+/* The number of each door of «Shelve the new books», as on the shelf's sign (D7). */
+.ayv .ayv-sort-door-num {
+    position: absolute;
+    top: .55rem;
+    left: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    min-width: 2.2rem;
+    height: 2.2rem;
+    padding: 0 .4rem;
+    border-radius: 999px;
+    background: #fbf6ec;
+    color: #0f3a33;
+    font: 700 1.15rem/1 var(--title);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+    transform: translateX(-50%);
+}
+
+/* The line of the clue's label to look at, lit after a miss (D8). */
+.ayv .ayv-hunt-card .ayv-where-label > span.ayv-line-lit { border-radius: 4px; background: var(--sun); color: #1e2b2a; box-shadow: 0 0 0 3px var(--sun); }
+
+/* The cover of the book found, as on the lectern. */
+.ayv .ayv-hunt-found-cover {
+    flex: none;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 4px 10px 10px 4px;
+    box-shadow: 0 10px 18px -8px rgba(15, 58, 51, .55);
+    transform: rotate(-2deg);
+}
+@media (max-height: 640px) {
+    .ayv .ayv-hunt-found-cover { width: 5rem; }
+}
+
+/* The class's island on a young reader's card (D10), drawn, a little smaller than in «My class». */
+.ayv .ayv-card-island { max-width: 28rem; margin: .5rem 0 1rem; }

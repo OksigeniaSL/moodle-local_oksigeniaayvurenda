@@ -132,6 +132,17 @@ final class hunt {
         if (!$target || $target['out'] || !$target['lines']) {
             return null;
         }
+        // A twin on the shelf, with the very same label, makes the game a guess: not this book, then (D2).
+        foreach ($spines as $spine) {
+            if ($spine['id'] !== $recordid && !$spine['out'] && $spine['lines'] === $target['lines']) {
+                return null;
+            }
+        }
+        // In the game the spines keep their title for the screen reader, not in a tooltip to match with the cover (D15).
+        foreach ($spines as &$spine) {
+            $spine['notip'] = true;
+        }
+        unset($spine);
         return ['target' => $recordid, 'title' => $target['title'], 'cover' => $young ? $target['cover'] : null,
             'lines' => $target['lines'], 'place' => $target['place'], 'young' => $young,
             'spines' => screens::spines($spines)];
@@ -152,11 +163,18 @@ final class hunt {
             self::T . 'reader',
             ['entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active']
         ) : null;
-        $recordid = self::target($library, $corner, $reader ? (int) $reader->id : 0, $turn);
-        if (!$recordid) {
-            return null;
-        }
         $young = $reader && cards::look_of($reader) === 'flower';
-        return self::game($library, $recordid, $young, $public);
+        // The day's book, or the next turns' when it has a twin on its shelf: still the same for the same day and reader.
+        for ($try = 0; $try < 5; $try++) {
+            $recordid = self::target($library, $corner, $reader ? (int) $reader->id : 0, $turn + $try);
+            if (!$recordid) {
+                return null;
+            }
+            $game = self::game($library, $recordid, $young, $public);
+            if ($game) {
+                return $game;
+            }
+        }
+        return null;
     }
 }

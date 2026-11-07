@@ -139,14 +139,20 @@ class mobile {
      * @return array
      */
     public static function mobile_card_view(array $args): array {
-        global $OUTPUT, $USER;
+        global $DB, $OUTPUT, $USER;
         $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
         $cards = [];
         foreach (mine::summary((int) $USER->id) as $library) {
             if ($library['cardcode'] !== '') {
                 // Not «library» nor «name»: the page's own would stand in for what is missing in a list.
-                $cards[] = ['where' => $library['name'], 'cardcode' => $library['cardcode'], 'fullname' => fullname($USER)]
-                    + self::codes($library['cardcode'], 8);
+                // A young reader's card in the app shows its flower too, as on the web (jue-carne D13).
+                $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $library['readerid'] ?? 0]);
+                $flower = $reader && \local_oksigeniaayvurenda\local\cards::look_of($reader) === 'flower'
+                    ? \local_oksigeniaayvurenda\local\cards::flower_url(
+                        \local_oksigeniaayvurenda\local\garden::album($reader)['flower']['stage']
+                    ) : '';
+                $cards[] = ['where' => $library['name'], 'cardcode' => $library['cardcode'], 'fullname' => fullname($USER),
+                    'flowerimg' => $flower] + self::codes($library['cardcode'], 8);
             }
         }
         $data = ['cards' => $cards, 'hascards' => (bool) $cards, 'notreader' => $str('mobilenotreader'),

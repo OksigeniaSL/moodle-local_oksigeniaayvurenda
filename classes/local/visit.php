@@ -637,6 +637,7 @@ final class visit {
             'cheerpuppet' => $cheer ? characters::puppet('memory', 'celebra', $step) : '',
             // Not «cover», «lines» nor «placecolour»: a spine without its own would take the hidden book's.
             'huntcover' => $game['cover'],
+            'foundcover' => covers::url((int) $game['target']),
             'huntlines' => $game['lines'],
             'huntplace' => $placecolour,
             'labelsr' => $str('huntlabel', $label),
@@ -649,11 +650,12 @@ final class visit {
             'againurl' => $url('visit.php', ['room' => $room, 'hunt' => $turn + 1]) . '#busca',
             'voices' => self::voices($library, 'memory', ['clue' => $game['young'] ? 'huntclueyoung' : 'huntclue',
                 'before' => 'huntbefore', 'after' => 'huntafter', 'gap' => 'huntgap', 'glow' => 'huntglow',
-                'found' => 'huntfound']),
+                'found' => 'huntfound', 'look1' => 'huntlook1', 'look2' => 'huntlook2', 'look3' => 'huntlook3']),
             'messages' => json_encode(
                 ['before' => $str('huntbefore'), 'after' => $str('huntafter'),
                 'line1' => $str('huntline1', '{line}'), 'line2' => $str('huntline2', '{line}'),
-                'line3' => $str('huntline3', '{line}'), 'gap' => $str('huntgap'), 'glow' => $str('huntglow')],
+                'line3' => $str('huntline3', '{line}'), 'gap' => $str('huntgap'), 'glow' => $str('huntglow'),
+                'same' => $str('huntsame')],
                 JSON_UNESCAPED_UNICODE
             ),
         ];

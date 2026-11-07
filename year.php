@@ -70,6 +70,11 @@ if (data_submitted() && confirm_sesskey()) {
         $day = optional_param('clear', 0, PARAM_BOOL) ? '' : optional_param('returnby', '', PARAM_RAW_TRIMMED);
         $ok = \local_oksigeniaayvurenda\local\closures::set_return_by($entityid, $day);
         $notice = $str(!$ok ? 'yearbadday' : ($day === '' ? 'returnbygone' : 'returnbysaved'));
+    } else if ($action === 'terms') {
+        $days = optional_param('clear', 0, PARAM_BOOL) ? [] : [optional_param('term1', '', PARAM_RAW_TRIMMED),
+            optional_param('term2', '', PARAM_RAW_TRIMMED), optional_param('term3', '', PARAM_RAW_TRIMMED)];
+        $ok = \local_oksigeniaayvurenda\local\challenges::set_ends($entityid, $days);
+        $notice = $str(!$ok ? 'yearbadday' : 'termssaved');
     } else if ($action === 'remindall') {
         // Everyone with a book of a reading library out is told, with the date to have it back, and each class's tutor.
         $classes = !\local_oksigeniaayvurenda\local\skins::no_classes($entityid);
@@ -93,6 +98,11 @@ if (data_submitted() && confirm_sesskey()) {
 }
 $status = year_change::status($entityid);
 // The date to have everything back, while it is to come and six weeks away at most.
+// The ends of the terms of the year running, as the class challenges count them.
+$termyear = \local_oksigeniaayvurenda\local\years::around($entityid, time());
+$termends = $termyear ? \local_oksigeniaayvurenda\local\challenges::ends($termyear) : [];
+$entitysettings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
+    ?: [];
 $soon = $status['returnby'] && time() <= $status['returnby'] && time() >= $status['returnby'] - 6 * WEEKSECS;
 $year = $status['year'];
 $url = fn(string $page, array $params = []) => (new moodle_url(
@@ -186,6 +196,16 @@ $data = [
         'label' => $str('returnbylabel'),
         'save' => $str('returnbysave'),
         'clear' => $str('returnbyclear'),
+    ],
+    // When each term ends, for the class challenges: where there are classes, any country's calendar (D4).
+    'terms' => \local_oksigeniaayvurenda\local\skins::no_classes($entityid) || !$termyear ? null : [
+        'heading' => $str('termsheading'),
+        'intro' => $str('termsintro'),
+        'save' => $str('returnbysave'),
+        'clear' => $str('termsclear'),
+        'has' => !empty($entitysettings['termends']),
+        'ends' => array_map(fn($end, $i) => ['name' => 'term' . ($i + 1), 'label' => $str('termsend', $i + 1),
+            'value' => zones::date($end, '%Y-%m-%d', $library)], $termends, array_keys($termends)),
     ],
     'cards' => $cards,
     'startintro' => $str('yearstartintro'),

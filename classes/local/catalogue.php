@@ -307,13 +307,19 @@ final class catalogue {
             ksort($counts);
             $cache->set($key, $counts);
         }
-        $labels = $DB->get_records_select_menu(
-            self::T . 'authority',
-            "entityid = :entityid AND kind = 'class' AND " . $DB->sql_length('code') . ' <= 3',
-            ['entityid' => $library->entityid],
-            '',
-            'code, label'
-        );
+        // A class may stand twice (two imports named it alike): one label for each code, the first.
+        $labels = [];
+        foreach (
+            $DB->get_records_select(
+                self::T . 'authority',
+                "entityid = :entityid AND kind = 'class' AND " . $DB->sql_length('code') . ' <= 3',
+                ['entityid' => $library->entityid],
+                'id',
+                'id, code, label'
+            ) as $row
+        ) {
+            $labels[(string) $row->code] = $labels[(string) $row->code] ?? $row->label;
+        }
         // Each library may name its corners its own way, order them and hide some.
         $own = (array) ((json_decode((string) ($library->settings ?? ''), true) ?: [])['corners'] ?? []);
         // With the UDC, the plugin's short names («Ciencias naturales»): a program's are long and in capitals

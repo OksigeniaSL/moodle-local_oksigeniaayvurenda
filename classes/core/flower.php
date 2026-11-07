@@ -50,15 +50,29 @@ final class flower {
      * The level of each path.
      *
      * @param array $counts What the reader did by each path this year.
+     * @param array $steps Thresholds of some path other than the usual ones (explore, by the corners shown).
      * @return array<string, int> Path => 0 to 3.
      */
-    public static function levels(array $counts): array {
+    public static function levels(array $counts, array $steps = []): array {
         $levels = [];
-        foreach (self::THRESHOLDS as $path => $steps) {
+        foreach (self::THRESHOLDS as $path => $theirs) {
+            $theirs = $steps[$path] ?? $theirs;
             $count = (int) ($counts[$path] ?? 0);
-            $levels[$path] = count(array_filter($steps, fn($step) => $count >= $step));
+            $levels[$path] = count(array_filter($theirs, fn($step) => $count >= $step));
         }
         return $levels;
+    }
+
+    /**
+     * The steps of «Explore» for a library that shows some corners: two, half of them, and all of them (at most seven,
+     * at least two), so that its last mark can be lit where there are only three corners (jue-carne D5).
+     *
+     * @param int $corners
+     * @return int[]
+     */
+    public static function explore_steps(int $corners): array {
+        $n = max(2, min(7, $corners));
+        return [2, max(2, (int) ceil($n / 2)), $n];
     }
 
     /**

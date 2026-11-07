@@ -141,12 +141,22 @@ foreach ($readers as $reader) {
     }
     // The class garden: what the class met this school year, a flower (or a full sky) for each; nothing in classic.
     $classgarden = [];
+    $classisland = null;
     if ($group !== '' && ($look === 'flower' || $sky)) {
-        foreach (\local_oksigeniaayvurenda\local\challenges::garden((int) $reader->entityid, $group) as $planted) {
+        $plantedall = \local_oksigeniaayvurenda\local\challenges::garden((int) $reader->entityid, $group);
+        foreach ($plantedall as $planted) {
             $label = $str('challengeplanted', $planted['term']) . ' · ' . $str('challengekind' . $planted['kind']);
             $classgarden[] = ['label' => $label, 'svg' => $sky ? cards::sky_svg(3, [], $label, 56, $sober)
                 : cards::flower_svg(3, [], $label, 56)];
         }
+        // A young reader sees the class's island grow, the same one the tutor sees, drawn (D10).
+        $layers = $look === 'flower' && $plantedall ? \local_oksigeniaayvurenda\local\screens::island(
+            count($plantedall),
+            in_array('everyone', array_column($plantedall, 'kind'), true),
+            false
+        ) : null;
+        $classisland = $layers ? ['islandlayers' => array_map(fn($u) => ['layer' => $u], $layers),
+            'islandlabel' => $str('islandlabel', count($plantedall))] : null;
     }
     $herald = $look === 'flower' || $sky ? \local_oksigeniaayvurenda\local\characters::say(
         (int) $reader->entityid,
@@ -241,6 +251,7 @@ foreach ($readers as $reader) {
         'past' => $past,
         'haspast' => (bool) $past,
         'classgarden' => $classgarden,
+        'classisland' => $classisland,
         'hasclassgarden' => (bool) $classgarden,
         'classgardenheading' => $str('challengegarden'),
         'classgardenhint' => $str('challengegardenhint'),

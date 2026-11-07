@@ -56,9 +56,9 @@
         voices = {};
     }
     // The memory says it too, with the visit's sound on.
-    var speak = function(key) {
+    var speak = function(key, then) {
         if (window.AYVVisit) {
-            window.AYVVisit.say(voices[key]);
+            window.AYVVisit.say(voices[key], then ? voices[then] : null);
         }
     };
 
@@ -77,23 +77,45 @@
         }, 30);
     };
 
+    var nudge = function(slot) {
+        if (!reduce && slot) {
+            slot.classList.remove('ayv-hunt-no');
+            // Restart the nudge.
+            void slot.offsetWidth;
+            slot.classList.add('ayv-hunt-no');
+        }
+    };
     var miss = function(spine) {
-        misses++;
         var slot = spine.closest('.ayv-spine-slot');
-        var parts = [];
-        var heard = 'gap';
+        // The gap of a book that is out says so, and is not a try: a small child touching the bird three times has not
+        // looked at any label yet.
         if (slot && slot.classList.contains('ayv-spine-gap')) {
-            parts.push(messages.gap);
-        } else {
-            heard = spines.indexOf(spine) < spines.indexOf(mine) ? 'before' : 'after';
-            parts.push(spines.indexOf(spine) < spines.indexOf(mine) ? messages.before : messages.after);
-            var theirs = lines(spine), ours = lines(mine);
-            for (var i = 0; i < Math.min(3, ours.length); i++) {
-                if ((theirs[i] || '') !== ours[i]) {
-                    parts.push((messages['line' + (i + 1)] || '').replace('{line}', ours[i]));
-                    break;
-                }
+            tell(messages.gap);
+            speak('gap');
+            nudge(slot);
+            return;
+        }
+        misses++;
+        spine.setAttribute('data-tried', '1');
+        var parts = [];
+        var heard = spines.indexOf(spine) < spines.indexOf(mine) ? 'before' : 'after';
+        parts.push(spines.indexOf(spine) < spines.indexOf(mine) ? messages.before : messages.after);
+        var theirs = lines(spine), ours = lines(mine), told = false, look = null;
+        for (var i = 0; i < Math.min(3, ours.length); i++) {
+            if ((theirs[i] || '') !== ours[i]) {
+                parts.push((messages['line' + (i + 1)] || '').replace('{line}', ours[i]));
+                told = true;
+                look = 'look' + (i + 1);
+                // The line to look at lights up on the clue's label: the hint that works without reading (D8).
+                dialog.querySelectorAll('.ayv-hunt-card .ayv-where-label > span').forEach(function(span, at) {
+                    span.classList.toggle('ayv-line-lit', at === i);
+                });
+                break;
             }
+        }
+        if (!told && messages.same) {
+            // The very same label: on a real shelf they would stand together; then it is the other one beside it.
+            parts.push(messages.same);
         }
         if (misses >= 3) {
             mine.closest('.ayv-spine-slot').classList.add('ayv-hunt-glow');
@@ -101,13 +123,8 @@
             heard = 'glow';
         }
         tell(parts.filter(Boolean).join(' '));
-        speak(heard);
-        if (!reduce && slot) {
-            slot.classList.remove('ayv-hunt-no');
-            // Restart the nudge.
-            void slot.offsetWidth;
-            slot.classList.add('ayv-hunt-no');
-        }
+        speak(heard, misses >= 3 ? null : look);
+        nudge(slot);
     };
 
     var found = function() {
@@ -138,9 +155,11 @@
             span.textContent = line;
             label.appendChild(span);
         });
+        // Only the label: the title would let one match titles with the cover instead of reading the label. A spine already
+        // tried gives its title, as a consolation.
         var title = document.createElement('span');
         title.className = 'ayv-hunt-lens-title';
-        title.textContent = spine.getAttribute('data-title') || '';
+        title.textContent = spine.getAttribute('data-tried') ? spine.getAttribute('data-title') || '' : '';
         lens.textContent = '';
         lens.appendChild(label);
         lens.appendChild(title);
