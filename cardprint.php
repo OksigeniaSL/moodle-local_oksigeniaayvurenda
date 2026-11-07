@@ -40,7 +40,13 @@ $how = optional_param('how', 'press', PARAM_ALPHA);
 require_login(null, false);
 $library = catalogue::library($ref);
 shell::require('local/oksigeniaayvurenda:desk', $library);
-shell::no_practice($library);
+// The practice library shows this page only inside its guided help, and nothing is kept or made there.
+if (
+    !optional_param('help', 0, PARAM_BOOL) || data_submitted() || optional_param('test', 0, PARAM_BOOL)
+        || optional_param('file', 0, PARAM_INT)
+) {
+    shell::no_practice($library);
+}
 $PAGE->set_context(context_system::instance());
 $who = $readerid ? 'reader' : ($group !== '' ? 'group' : ($stage !== '' ? 'stage' : ($type !== '' ? 'type' : 'all')));
 $how = in_array($how, cardprint::FORMATS, true) ? $how : 'press';
@@ -297,5 +303,8 @@ shell::output(
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/cardprint', $data),
     $library,
     '',
-    ['search' => false]
+    ['search' => false, 'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
+        '/local/oksigeniaayvurenda/help.php',
+        ['library' => $library->slug, 'piece' => 'cardprint']
+    ))->out(false), 'label' => get_string('helpnav', 'local_oksigeniaayvurenda')]]]
 );

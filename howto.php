@@ -35,6 +35,9 @@ require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:view', $library);
+// The printed guides are the staff's: a reader who asks how to reserve is not sent to the desk's guide.
+$staffguides = access::can('local/oksigeniaayvurenda:desk', $library)
+    || access::can('local/oksigeniaayvurenda:catalogue', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/howto.php', ['library' => $ref] + ($query !== '' ? ['q' => $query] : [])));
 
@@ -93,10 +96,12 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
         ['library' => $library->slug, 'q' => $t['title']]
     ))->out(false)], $all),
     'hasall' => (bool) $all,
+    'hasguides' => $staffguides,
     // The printed guides live on Ayvurenda's website, in the language of whoever reads them (Spanish, or else English).
     'guidesheading' => $str('howtoguides'),
     'guidesintro' => $str('howtoguidesintro'),
-    'guides' => array_map(fn($g) => ['title' => $str('howtoguide' . $g), 'what' => $str('howtoguide' . $g . 'what'),
+    'guides' => !$staffguides ? [] : array_map(fn($g) => ['title' => $str('howtoguide' . $g),
+        'what' => $str('howtoguide' . $g . 'what'),
         'isstart' => $g === 'empezar', 'isdesk' => $g === 'mostrador', 'isreaders' => $g === 'lectores',
         'url' => 'https://ayvurenda.com/guias/guia-' . $g . '-' . (str_starts_with(current_language(), 'es') ? 'es' : 'en')
             . '.pdf'], ['empezar', 'mostrador', 'lectores']),

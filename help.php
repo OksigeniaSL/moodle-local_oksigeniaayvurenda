@@ -35,12 +35,21 @@ $auto = optional_param('auto', 0, PARAM_BOOL);
 require_login(null, false);
 $context = context_system::instance();
 $pieces = \local_oksigeniaayvurenda\local\howto::PIECES;
-if (!isset($pieces[$piece])) {
-    throw new moodle_exception('invalidparameter', 'debug');
-}
 // The help plays on the practice library; the library given, whose header it wears, must be one of theirs.
 $theirs = $ref !== '' ? catalogue::library($ref) : null;
+if (!isset($pieces[$piece])) {
+    $PAGE->set_context($context);
+    $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $ref]));
+    shell::missing(get_string('helpnosuch', 'local_oksigeniaayvurenda'), $theirs);
+}
 shell::require('local/oksigeniaayvurenda:' . $pieces[$piece]['capability'], $theirs);
+// A help about classes where there are none, or the flower where the skin has none, would end in «not found».
+if ($theirs && !\local_oksigeniaayvurenda\local\howto::playable($piece, $theirs)) {
+    $PAGE->set_context($context);
+    $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $ref, 'piece' => $piece]));
+    $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+    shell::refuse($str('helpnotplayable'), $theirs, $str('helpnav'));
+}
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $ref, 'piece' => $piece]));
 
@@ -64,7 +73,8 @@ for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
     $file = sprintf('/voz/%s/%s/%02d%s.mp3', $piece, substr(current_language(), 0, 2), $i, $tone !== '' ? '-' . $tone : '');
     $voices[] = $art && is_readable($art . $file) ? (new moodle_url('/local/oksigeniaayvurendaarte' . $file))->out(false) : null;
 }
-$back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' =>
+// A record's help ends in the catalogue: the practice book is nobody's to go back to.
+$back = new moodle_url('/local/oksigeniaayvurenda/' . ($piece === 'record' ? 'search.php' : $pieces[$piece]['page']), ['library' =>
     in_array($piece, ['bankround', 'bank'], true) && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::bank_slug()
         : $library->slug]);
 // The help's title, intro and end in the words of its skin, as its steps.
@@ -72,7 +82,7 @@ $say = fn(string $key) => \local_oksigeniaayvurenda\local\skins::say((int) $prac
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <h1 id="ayv-help-title" class="ayv-results-title">' . s($say('helptitle' . $piece)) . '</h1>
 <div class="ayv-help-stage" id="ayv-help-stage">
-    <iframe id="ayv-help-frame" title="' . s($str('helpframe')) . '" tabindex="-1"></iframe>
+    <iframe id="ayv-help-frame" title="' . s($str('helpframe')) . '"></iframe>
     <div class="ayv-help-pointer" id="ayv-help-pointer" aria-hidden="true"></div>
     <div class="ayv-help-ring" id="ayv-help-ring" aria-hidden="true" hidden></div>
     <div class="ayv-help-start" id="ayv-help-start">
@@ -107,11 +117,16 @@ shell::output($say('helptitle' . $piece), $main, $library, '', [
                     'local_oksigeniaayvurenda_reader',
                     'id',
                     ['entityid' => $practice->entityid, 'cardcode' => $code(practice::READERS[0][0])]
-                )] : []) + ($piece === 'stacks' ? ['all' => 1] : [])
+                )] : []) + ($piece === 'stacks' ? ['all' => 1] : []) + ($piece === 'record' ? ['id' => $DB->get_field(
+                    'local_oksigeniaayvurenda_item',
+                    'recordid',
+                    ['libraryid' => $practice->id, 'barcode' => $code(practice::BOOKS[0][0])]
+                )] : [])
         ))->out(false),
         'steps' => $steps,
         'voices' => $voices,
         'now' => $str('helpnow'),
+        'stuck' => $str('helpstuck'),
         'codes' => [
             'ana' => $code(practice::READERS[0][0]),
             'noa' => $code(practice::READERS[2][0]),
@@ -121,6 +136,8 @@ shell::output($say('helptitle' . $piece), $main, $library, '', [
             'isbn2' => practice::ISBNS[1][0],
             'wish' => $str('practicewishmine'),
             'me' => (string) $USER->id,
+            // A word of their own name, which the search of who keeps a library finds.
+            'myname' => (string) (preg_split('/\s+/u', trim($USER->firstname . ' ' . $USER->lastname))[0] ?? ''),
             'post' => $str('practicepost'),
             'vendor' => $str('practicevendor'),
             'buy' => $str('practicebuy'),

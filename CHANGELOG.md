@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.190.0
+
+- Helps (audit batch 8):
+  - «How do I…?» answers by how much of the question a task covers, not by how many words it has: «lend a book» is the
+    desk, not the textbook bank; the words every task has only break a tie; the very word counts more than its
+    beginning, above all in the title; a question that holds a whole title asks for that task; one word that only the
+    steps share is no answer; and words that say nothing («what do I») find nothing, while an acronym in capitals (QR)
+    is still a question;
+  - new tasks for what the libraries asked and found nothing: correct a record or a copy, open the library when it is
+    ready, read codes with the camera or a phone, the centre's settings, the readers' voices, link readers with their
+    accounts, readers from a list, the guides and helps, a lost book, the password, and who has a book; more words for
+    who keeps a library, late notices, repeated readers, a book the desk does not know and new books;
+  - readers asking get readers' tasks (reserve, keep a book longer, my card, a review, a voice, another format), and
+    the staff do not get them; the printed guides are offered only to the staff;
+  - every guided help with its task links to it (the bank's campaign, the voices, readers from a list), «Print cards»
+    goes to its own page, and «If a book comes back late» has its guided help beside it in «Rules»;
+  - a guided help is offered only where its skin can play it, and help.php says so in its own page instead of ending in
+    «not found» (or in an error page, for a help that does not exist);
+  - inside a guided help's frame, no page shows its own help, its row of links or «How do I…?»: every link and form
+    of the frame keeps the help on;
+  - «Skip to the end» taps the button «Now you» waits for, and that button takes the keyboard focus (the frame is no
+    longer out of the tab order);
+  - a help that stops (a tap that leads nowhere for 20 s, something not found) says so in words, and «Start» prepares
+    the practice library again and starts;
+  - the help of who keeps a library searches whoever practises, gives them the library with «Now you» and shows
+    «Remove»; the labels help types its codes one per line; the practice's self-loan post has another name than the
+    one the help creates; the card's last step speaks of «Print cards» as it is now (with its voices);
+  - two new guided helps, with their voices in Spanish and English: printing cards (whose, the design, the logo, where,
+    the back, prepare), which lets the practice library into «Print cards» only inside the help and with nothing kept
+    or made, and correcting a record and its copies, with its «How does it work?» on the record for who catalogues;
+  - «Apártalo» on the desk's button, as in its line; the Abies Web card among the readers' sources only in Spanish or
+    where something already came from it.
+- Ages (the rest of batch 7): the book reader's arrows say «Previous» and «Next» under their icon (on a phone, the icon
+  alone, with its name for screen readers), and a young reader of a school reads the pages a little bigger.
+
 ## 0.189.0
 
 - Ages and skins (audit batch 7):

@@ -424,7 +424,7 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.type('textarea[name="codes"]', c.faro + ' ' + c.ladrona);
+            return h.type('textarea[name="codes"]', c.faro + '\n' + c.ladrona);
         }).then(function() {
             return h.say(2);
         }).then(function() {
@@ -516,6 +516,67 @@ window.AYVHelpPieces = {
         });
     },
     // Who keeps a library: what it is for, a name looked for, and how it is given and taken away.
+    cardprint: function(h) {
+        'use strict';
+        // The boxes of the page, in their order: whose, the design, where, the back.
+        var box = function(n, inside) {
+            return function(doc) {
+                var boxes = doc.querySelectorAll('.ayv-cards-step');
+                return boxes.length > n ? boxes[n].querySelector(inside) : null;
+            };
+        };
+        return h.point(box(0, 'h2')).then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-cards-designs');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-cards-logo');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point(box(2, '.ayv-mine-tiles'));
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.point(box(3, 'h2'));
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.point('.ayv-cards-go button[type="submit"]');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
+    record: function(h) {
+        'use strict';
+        return h.point('[data-ayv-open="ayv-fix-record"]').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.tap('[data-ayv-open="ayv-fix-record"]');
+        }).then(function() {
+            return h.point('#ayv-fix-record input[name="title"]');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('#ayv-fix-record textarea[name="subjects"]');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.you(3, '#ayv-fix-record .ayv-fix-form button[type="submit"]');
+        }).then(function() {
+            return h.point('[data-ayv-open^="ayv-fix-copy-"]');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.tap('[data-ayv-open^="ayv-fix-copy-"]');
+        }).then(function() {
+            return h.point('dialog[open] button[type="submit"][class*="quiet"]');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
     bank: function(h) {
         'use strict';
         return h.point('.ayv-bankset').then(function() {
@@ -795,14 +856,20 @@ window.AYVHelpPieces = {
     },
     keepers: function(h) {
         'use strict';
+        // Whoever practises is the reader with an account in the practice library: they give it to themselves.
+        var c = h.codes;
         return h.point('.ayv-keepers h2').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.type('input[name="q"]', 'Ana');
+            return h.type('.ayv-window-search input[name="q"]', c.myname);
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.say(2);
+            return h.go('.ayv-window-search button[type="submit"]');
+        }).then(function() {
+            return h.you(2, 'button[name="do"][value="add"]');
+        }).then(function() {
+            return h.point('button[name="do"][value="remove"]');
         }).then(function() {
             return h.say(3);
         });

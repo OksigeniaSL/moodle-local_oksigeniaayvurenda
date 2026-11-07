@@ -46,8 +46,29 @@ final class howto_test extends \advanced_testcase {
         $this->assertSame('duplicates', $first('merge repeated records', $admin));
         $this->assertSame('platforms', $first('open it from canvas', $admin));
         $this->assertSame('sanctions', $first('fines for overdue books', $admin));
+        // What the libraries asked and found nothing, or the wrong thing (the audit of 7 November).
+        $this->assertSame('twins', $first('repeated reader', $admin));
+        $this->assertSame('keepers', $first('give permission to a teacher', $admin));
+        $this->assertSame('record', $first('correct the summary of a book', $admin));
+        $this->assertSame('record', $first('change the cover', $admin));
+        $this->assertSame('scanner', $first('read codes with the phone', $admin));
+        $this->assertSame('closed', $first('pupils cannot see the library', $admin));
+        $this->assertSame('voices', $first('approve the recordings', $admin));
+        $this->assertSame('match', $first('link readers with their accounts', $admin));
+        $this->assertSame('lost', $first('a reader has lost a book', $admin));
+        $this->assertSame('password', $first('I forgot my password', $admin));
+        $this->assertSame('helpme', $first('is there a manual?', $admin));
+        // An acronym alone is still a question.
+        $this->assertContains('scanner', array_column(howto::find('QR', $library, $admin), 'key'));
+        $this->assertSame('cards', $first('print the cards', $admin));
+        $this->assertStringContainsString('cardprint.php', howto::find('print the cards', $library, $admin)[0]['url']);
+        // Words alone that say nothing: no answer, not every task.
+        $this->assertSame([], howto::find('what do I', $library, $admin));
         $this->assertSame([], howto::find('xyzzy', $library, $admin));
-        $this->assertCount(count(howto::TASKS), howto::find('', $library, $admin));
+        // The staff do not get what a reader does from home.
+        $readers = array_filter(array_keys(howto::TASKS), fn($k) => str_starts_with($k, 'reader')
+            && !in_array($k, ['readers', 'readerslist'], true));
+        $this->assertCount(count(howto::TASKS) - count($readers), howto::find('', $library, $admin));
         $this->assertNotNull(howto::find('labels', $library, $admin)[0]['help']);
 
         // Without the site's AI, nothing changes: no answer in words, and the guide is there as text.
@@ -66,7 +87,8 @@ final class howto_test extends \advanced_testcase {
         // A teacher who only sees the library: only what is theirs.
         $teacher = $this->getDataGenerator()->create_user();
         $keys = array_column(howto::find('', $library, (int) $teacher->id), 'key');
-        $this->assertSame(['myclass', 'stacks'], $keys);
+        $this->assertSame(array_merge(['myclass', 'stacks'], array_values($readers)), $keys);
+        $this->assertSame('readerhold', howto::find('reserve a book that is out', $library, (int) $teacher->id)[0]['key']);
     }
 
     /**

@@ -46,7 +46,7 @@ final class howto {
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
         'labelsheets' => ['labels.php', 'catalogue', ''],
-        'cards' => ['readers.php', 'desk', 'card'],
+        'cards' => ['cardprint.php', 'desk', 'cardprint'],
         'readers' => ['readers.php', 'desk', 'readers'],
         'profile' => ['readers.php', 'desk', ''],
         'applink' => ['readers.php', 'desk', ''],
@@ -76,7 +76,7 @@ final class howto {
         'ill' => ['ill.php', 'desk', 'ill'],
         'bank' => ['bank.php', 'desk', 'bank'],
         'activity' => ['activity.php', 'manage', ''],
-        'bankround' => ['libraries.php', 'desk', ''],
+        'bankround' => ['libraries.php', 'desk', 'bankround'],
         'import' => ['import.php', 'manage', 'import'],
         'year' => ['year.php', 'manage', ''],
         'returnby' => ['year.php', 'manage', ''],
@@ -91,6 +91,23 @@ final class howto {
         'keepers' => ['keepers.php', 'manage', 'keepers'],
         'characters' => ['characters.php', 'manage', ''],
         'window' => ['public.php', 'manage', ''],
+        'record' => ['search.php', 'catalogue', 'record'],
+        'closed' => ['libraries.php', 'manage', ''],
+        'scanner' => ['phone.php', 'desk', ''],
+        'settings' => ['libraries.php', 'manage', ''],
+        'voices' => ['voices.php', 'desk', 'voices'],
+        'match' => ['match.php', 'manage', ''],
+        'readerslist' => ['readerslist.php', 'manage', 'readerslist'],
+        'helpme' => ['howto.php', 'desk', ''],
+        'lost' => ['desk.php', 'desk', ''],
+        'whohas' => ['late.php', 'desk', ''],
+        'readerhold' => ['search.php', 'view', ''],
+        'readerrenew' => ['card.php', 'view', ''],
+        'readercard' => ['card.php', 'view', ''],
+        'readerreview' => ['search.php', 'view', ''],
+        'readervoice' => ['search.php', 'view', ''],
+        'readerformat' => ['search.php', 'view', ''],
+        'password' => ['readers.php', 'desk', ''],
     ];
 
     /** @var string[] The tasks that need classes, or courses, to mean anything. */
@@ -102,6 +119,8 @@ final class howto {
         'desk' => ['capability' => 'desk', 'page' => 'desk.php', 'steps' => 10],
         'add' => ['capability' => 'catalogue', 'page' => 'add.php', 'steps' => 6],
         'card' => ['capability' => 'desk', 'page' => 'card.php', 'steps' => 7],
+        'cardprint' => ['capability' => 'desk', 'page' => 'cardprint.php', 'steps' => 6],
+        'record' => ['capability' => 'catalogue', 'page' => 'record.php', 'steps' => 6],
         'labels' => ['capability' => 'catalogue', 'page' => 'labels.php', 'steps' => 6],
         'reports' => ['capability' => 'desk', 'page' => 'reports.php', 'steps' => 5],
         'reviews' => ['capability' => 'desk', 'page' => 'reviews.php', 'steps' => 6],
@@ -143,12 +162,21 @@ final class howto {
      * @return array[] key, title, steps, url, help (address or null).
      */
     public static function find(string $query, \stdClass $library, int $userid): array {
-        $words = array_values(array_filter(
-            preg_split('/[^\p{L}\p{N}]+/u', text::normalise($query)) ?: [],
-            fn($w) => \core_text::strlen($w) >= 3 && !in_array($w, self::QUIET, true)
-        ));
+        $all = preg_split('/[^\p{L}\p{N}]+/u', text::normalise($query)) ?: [];
+        $words = array_values(array_filter($all, fn($w) => \core_text::strlen($w) >= 3 && !in_array($w, self::QUIET, true)));
+        if (!$words && trim($query) !== '') {
+            // Only short words: an acronym in capitals (QR, IA) is still a question; «what do I» alone finds nothing.
+            preg_match_all('/(?<![\p{L}\p{N}])\p{Lu}{2}(?![\p{L}\p{N}])/u', $query, $caps);
+            $words = array_values(array_map(fn($w) => text::normalise($w), $caps[0]));
+            if (!$words) {
+                return [];
+            }
+        }
         $found = [];
         $noclasses = skins::no_classes((int) $library->entityid);
+        // What a reader does is answered to readers; the staff have their own way of doing it.
+        $staff = access::can('local/oksigeniaayvurenda:desk', $library, $userid)
+            || access::can('local/oksigeniaayvurenda:catalogue', $library, $userid);
         $nocourses = skins::no_courses((int) $library->entityid);
         foreach (self::TASKS as $key => [$page, $capability, $piece]) {
             if (!access::can('local/oksigeniaayvurenda:' . $capability, $library, $userid)) {
@@ -156,6 +184,9 @@ final class howto {
             }
             $needs = self::ONLY_WITH[$key] ?? '';
             if (($needs === 'classes' && $noclasses) || ($needs === 'courses' && $nocourses)) {
+                continue;
+            }
+            if ($staff && str_starts_with($key, 'reader') && $key !== 'readers' && $key !== 'readerslist') {
                 continue;
             }
             $task = self::task($key, $library);
@@ -267,6 +298,32 @@ final class howto {
     }
 
     /**
+     * Whether a guided help can be played in a library: not one about classes where there are none, nor the card's flower
+     * where the skin has no flower.
+     *
+     * @param string $piece
+     * @param \stdClass $library
+     * @return bool
+     */
+    public static function playable(string $piece, \stdClass $library): bool {
+        if (!isset(self::PIECES[$piece])) {
+            return false;
+        }
+        $entityid = (int) $library->entityid;
+        // The help of the card is about its flower and its sky, which not every skin has.
+        if ($piece === 'card' && !in_array(skins::of($entityid), ['school', 'secondary'], true)) {
+            return false;
+        }
+        foreach (self::TASKS as $key => [, , $theirs]) {
+            $needs = $theirs === $piece ? (self::ONLY_WITH[$key] ?? '') : '';
+            if (($needs === 'classes' && skins::no_classes($entityid)) || ($needs === 'courses' && skins::no_courses($entityid))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * One task, in the reader's language.
      *
      * @param string $key
@@ -275,7 +332,6 @@ final class howto {
      */
     public static function task(string $key, \stdClass $library): array {
         [$page, , $piece] = self::TASKS[$key];
-        $skin = skins::of((int) $library->entityid);
         $str = fn(string $k) => get_string($k, 'local_oksigeniaayvurenda');
         return [
             'key' => $key,
@@ -284,33 +340,89 @@ final class howto {
             'words' => $str('howto' . $key . 'words'),
             'url' => (new \moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false),
             // The help of the card is about its flower and its sky, which not every skin has.
-            'help' => $piece !== '' && ($piece !== 'card' || in_array($skin, ['school', 'secondary'], true))
+            'help' => $piece !== '' && self::playable($piece, $library)
                 ? (new \moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug,
                 'piece' => $piece]))->out(false) : null,
         ];
     }
 
+    /** @var string[] Words nearly every task has: they decide nothing unless the question has no other. */
+    private const COMMON = ['libro', 'libros', 'lector', 'lectores', 'mostrador', 'biblioteca', 'bibliotecas', 'book', 'books',
+        'reader', 'readers', 'desk', 'library', 'libraries'];
+
     /**
-     * How well a task answers some words: its own words count most, then its title, then its steps.
+     * How well a task answers some words. Each word of the question counts once, by the best place it is found in the
+     * task (its own words, then its title, then its steps): the task that covers most of the question wins, not the
+     * one with most words; all of the question in its title is a bonus; and the words every task has count only when
+     * the question has nothing else.
      *
      * @param string[] $words Normalised.
      * @param array $task
      * @return int
      */
     private static function score(array $words, array $task): int {
+        $telling = array_values(array_filter($words, fn($w) => !in_array($w, self::COMMON, true)));
+        $common = $telling ? array_values(array_diff($words, $telling)) : [];
+        $words = $telling ?: $words;
         $fields = [3 => $task['words'], 2 => $task['title'], 1 => implode(' ', $task['steps'])];
-        $score = 0;
-        foreach ($words as $word) {
-            $stem = \core_text::substr($word, 0, 5);
-            foreach ($fields as $weight => $field) {
-                foreach (preg_split('/[^\p{L}\p{N}]+/u', text::normalise($field)) ?: [] as $their) {
-                    if ($their !== '' && (str_starts_with($their, $word) || str_starts_with($their, $stem))) {
-                        $score += $weight;
-                        break;
-                    }
+        $split = array_map(fn($field) => preg_split('/[^\p{L}\p{N}]+/u', text::normalise($field)) ?: [], $fields);
+        // Where a word is found best: 3 in the task's own words, 2 in its title, 1 in its steps, 0 nowhere.
+        $best = function (string $word) use ($split): int {
+            foreach ($split as $weight => $theirs) {
+                if (self::in($word, $theirs)) {
+                    return $weight;
                 }
             }
+            return 0;
+        };
+        $matched = 0;
+        $own = false;
+        $weights = 0;
+        $intitle = 0;
+        foreach ($words as $word) {
+            $weight = $best($word);
+            if ($weight) {
+                $own = $own || $weight === 3;
+                $matched++;
+                $weights += $weight;
+                $intitle += self::in($word, $split[2]) ? 1 : 0;
+                // The very word, not only its beginning, breaks a tie: «labels» is the labels', not «no label».
+                $weights += in_array($word, $split[2], true) ? 2 : (in_array($word, $split[3], true) ? 1 : 0);
+            }
         }
-        return $score;
+        // One word that only the steps share is chance: an answer needs one of the task's own words, or two words.
+        if (!$matched || ($matched < 2 && !$own)) {
+            return 0;
+        }
+        // The words every task has only break a tie: «repeated reader» is about readers more than about topics.
+        foreach ($common as $word) {
+            $weights += $best($word);
+        }
+        // A whole question of two words or more in the title is that task; one word in a title says less. And a
+        // question that holds the whole title («lend a book») is asking for that task.
+        $titlewords = array_filter($split[2], fn($w) => \core_text::strlen($w) >= 3 && !in_array($w, self::QUIET, true));
+        $asked = array_merge($words, $common);
+        $whole = $titlewords && !array_filter($titlewords, fn($w) => !self::in($w, $asked) && !array_filter(
+            $asked,
+            fn($a) => str_starts_with($a, \core_text::substr($w, 0, 5))
+        ));
+        return 10 * $matched + $weights + (count($words) > 1 && $intitle === count($words) ? 5 : 0) + ($whole ? 5 : 0);
+    }
+
+    /**
+     * Whether a word, or its first five letters, starts one of some words.
+     *
+     * @param string $word
+     * @param string[] $theirs
+     * @return bool
+     */
+    private static function in(string $word, array $theirs): bool {
+        $stem = \core_text::substr($word, 0, 5);
+        foreach ($theirs as $their) {
+            if ($their !== '' && (str_starts_with($their, $word) || str_starts_with($their, $stem))) {
+                return true;
+            }
+        }
+        return false;
     }
 }

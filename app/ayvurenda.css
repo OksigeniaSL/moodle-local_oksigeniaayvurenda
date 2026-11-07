@@ -39,6 +39,8 @@
     line-height: 1.5;
     -webkit-text-size-adjust: 100%;
 }
+/* A young reader of a school reads a little bigger (the age guide: 14 pt from six to eight). */
+.ayv.ayv-skin-school.ayv-young { font-size: 1.125rem; }
 
 /* Moodle 5.3 dark mode: the shell marks <html data-bs-theme="dark"> as Moodle does. Fills keep the brand colours with
    light text on them; text, borders and surfaces turn around. */
@@ -1477,9 +1479,12 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     color: var(--ink);
     box-shadow: 0 1px 2px rgba(0, 0, 0, .08), 0 10px 28px rgba(0, 0, 0, .1);
 }
+/* The icon with its word under it, as a child of six reads it; on a phone, the icon alone, with its name for readers. */
 .ayv .ayv-page-turn {
-    flex: 0 0 44px;
+    flex: 0 0 72px;
     display: flex;
+    flex-direction: column;
+    gap: .25rem;
     align-items: center;
     justify-content: center;
     padding: 0;
@@ -1491,6 +1496,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 }
 .ayv .ayv-page-turn:hover, .ayv .ayv-page-turn:focus-visible { background: var(--paper2); }
 .ayv .ayv-page-turn .ayv-icon { width: 24px; height: 24px; margin: 0; }
+.ayv .ayv-page-turn-word { font-size: .8125rem; font-weight: 600; line-height: 1.2; }
 /* Two facing pages where there is room, with the fold between them. */
 @media (min-width: 1000px) {
     .ayv .ayv-epub[data-spread="auto"] {
@@ -1499,11 +1505,19 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
             transparent calc(50% + 12px));
     }
 }
-.ayv .ayv-read-foot { display: flex; align-items: center; gap: 1rem; margin: .75rem 48px; }
+.ayv .ayv-read-foot { display: flex; align-items: center; gap: 1rem; margin: .75rem 76px; }
 .ayv .ayv-read-foot progress { flex: 1 1 auto; height: 6px; accent-color: var(--accent); }
 @media (max-width: 480px) {
     .ayv .ayv-epub { padding: 1rem; }
     .ayv .ayv-page-turn { flex-basis: 32px; }
+    .ayv .ayv-page-turn-word {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
     .ayv .ayv-read-foot { margin: .75rem 0; }
 }
 

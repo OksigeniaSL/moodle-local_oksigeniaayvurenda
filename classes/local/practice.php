@@ -444,7 +444,7 @@ final class practice {
                 'cardcode' => control_letter::append((string) self::TWIN), 'readertype' => 'student',
                 'firstname' => self::READERS[1][1], 'lastname' => self::READERS[1][2], 'status' => 'active',
                 'timecreated' => $now, 'timemodified' => $now]);
-        } else if ($piece === 'tutors') {
+        } else if ($piece === 'tutors' || $piece === 'keepers') {
             // Whoever is practising, the only one the list can offer: nobody else of the site comes in here.
             $DB->insert_record(self::T . 'reader', ['entityid' => $library->entityid, 'userid' => $userid,
                 'cardcode' => control_letter::append((string) self::TWIN), 'readertype' => 'teacher',

@@ -205,4 +205,9 @@ if ($correct) {
 }
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/record', $data), $library, '', [
     'scripts' => array_merge(!empty($data['reviews']['write']) ? ['draw', 'speak'] : [], $data['beside'] ? ['stacks'] : []),
+    // Who corrects records has the help of correcting them.
+    'nav' => $correct && !optional_param('help', 0, PARAM_BOOL) ? [['url' => (new moodle_url(
+        '/local/oksigeniaayvurenda/help.php',
+        ['library' => $library->slug, 'piece' => 'record']
+    ))->out(false), 'label' => get_string('helpnav', 'local_oksigeniaayvurenda')]] : [],
 ]);

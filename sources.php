@@ -125,6 +125,10 @@ $cards = [
         'state' => $cifraon ? $str($cifra['enabled'] ? 'sourcestatenight' : 'sourcestatelinked') : ''],
     ['key' => 'abies', 'state' => $brought('abies'), 'url' => $page('import.php'), 'sheet' => ''],
 ];
+// Abies is a program of Spanish schools: its card, in Spanish, or where something already came from it.
+if (!str_starts_with(current_language(), 'es') && $brought('abies') === '') {
+    $cards = array_values(array_filter($cards, fn($card) => $card['key'] !== 'abies'));
+}
 if (\local_oksigeniaayvurenda\local\skins::no_courses($entityid)) {
     // What a school's programs and platforms bring: not for a town's library.
     $school = ['oneroster', 'onerosterapi', 'courses', 'lti', 'cifra'];

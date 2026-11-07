@@ -36,6 +36,8 @@
         return;
     }
     var skipping = false;
+    // The button «Now you» is waiting on, while it waits: «Skip to the end» taps it.
+    var waiting = null;
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var sleep = function(ms) {
@@ -86,6 +88,18 @@
     };
     var find = function(selector) {
         return typeof selector === 'function' ? selector(doc()) : doc().querySelector(selector);
+    };
+    // The next page in the frame, or an error if none comes (a button that did not go anywhere).
+    var loadOf = function() {
+        return new Promise(function(resolve, reject) {
+            var timer = setTimeout(function() {
+                reject(new Error('no page after the tap'));
+            }, 20000);
+            frame.addEventListener('load', function() {
+                clearTimeout(timer);
+                resolve();
+            }, {once: true});
+        });
     };
     var wait = function(selector, timeout) {
         var until = Date.now() + (timeout || 15000);
@@ -200,9 +214,7 @@
         go: function(selector) {
             return h.point(selector).then(function(element) {
                 pointer.classList.add('ayv-help-pointer-tap');
-                var loaded = new Promise(function(resolve) {
-                    frame.addEventListener('load', resolve, {once: true});
-                });
+                var loaded = loadOf();
                 return sleep(250).then(function() {
                     pointer.classList.remove('ayv-help-pointer-tap');
                     element.click();
@@ -220,9 +232,7 @@
                 var win = frame.contentWindow;
                 var transfer = new win.DataTransfer();
                 transfer.items.add(new win.File([text], name, {type: 'text/csv'}));
-                var loaded = new Promise(function(resolve) {
-                    frame.addEventListener('load', resolve, {once: true});
-                });
+                var loaded = loadOf();
                 input.files = transfer.files;
                 input.dispatchEvent(new win.Event('change', {bubbles: true}));
                 return loaded;
@@ -250,9 +260,17 @@
                 pointer.classList.remove('ayv-help-pointer-on');
                 return new Promise(function(resolve) {
                     element.addEventListener('click', function() {
+                        waiting = null;
                         ring.hidden = true;
                         resolve(sleep(700));
                     }, {once: true});
+                    waiting = element;
+                    // With the keyboard, Enter taps it: the focus goes to it.
+                    try {
+                        element.focus({preventScroll: true});
+                    } catch (e) {
+                        // A button that cannot take the focus is still tapped by the mouse.
+                    }
                     if (config.auto || skipping) {
                         setTimeout(function() {
                             element.click();
@@ -273,7 +291,58 @@
         });
     };
 
+    // Every page the help walks through stays in help mode: its links and forms keep help=1, so that no page inside
+    // the frame shows its own help or «How do I…?».
+    var keephelp = function() {
+        var inner = frame.contentDocument;
+        if (!inner) {
+            return;
+        }
+        var mark = function(address) {
+            if (!address || address.charAt(0) === '#') {
+                return null;
+            }
+            try {
+                var url = new URL(address, inner.baseURI);
+                if (url.origin !== window.location.origin || url.pathname.indexOf('/local/oksigeniaayvurenda/') < 0) {
+                    return null;
+                }
+                url.searchParams.set('help', '1');
+                return url.href;
+            } catch (e) {
+                return null;
+            }
+        };
+        inner.querySelectorAll('a[href]').forEach(function(link) {
+            var marked = mark(link.getAttribute('href'));
+            if (marked) {
+                link.setAttribute('href', marked);
+            }
+        });
+        inner.querySelectorAll('form').forEach(function(form) {
+            if (form.querySelector('input[name="help"]')) {
+                return;
+            }
+            var input = inner.createElement('input');
+            input.type = 'hidden';
+            input.name = 'help';
+            input.value = '1';
+            form.appendChild(input);
+        });
+    };
+    frame.addEventListener('load', keephelp);
+
     var run = function() {
+        // After a stop, the practice library is not as the help expects: the page prepares it again and starts.
+        if (document.body.getAttribute('data-help') === 'failed') {
+            try {
+                window.sessionStorage.setItem('ayv-help-go', '1');
+            } catch (e) {
+                // Without storage, the page comes back and waits for «Start».
+            }
+            window.location.reload();
+            return null;
+        }
         start.hidden = true;
         done.hidden = true;
         skipping = false;
@@ -288,18 +357,34 @@
             document.body.setAttribute('data-help', 'done');
             return null;
         }).catch(function(error) {
-            caption.textContent = error.message;
+            // In words, with the way to start again; what failed, for whoever looks into it.
+            window.console.warn('ayvurenda help:', error.message);
+            caption.textContent = config.stuck || error.message;
+            ring.hidden = true;
+            pointer.classList.remove('ayv-help-pointer-on');
+            start.hidden = false;
             document.body.setAttribute('data-help', 'failed');
         });
     };
 
     document.getElementById('ayv-help-go').addEventListener('click', run);
+    try {
+        if (window.sessionStorage.getItem('ayv-help-go')) {
+            window.sessionStorage.removeItem('ayv-help-go');
+            run();
+        }
+    } catch (e) {
+        // Nothing stored: the help waits for «Start».
+    }
     document.getElementById('ayv-help-again').addEventListener('click', function() {
         window.location.reload();
     });
     document.getElementById('ayv-help-skip').addEventListener('click', function() {
         skipping = true;
         hush();
+        if (waiting) {
+            waiting.click();
+        }
     });
     var voiceButton = document.getElementById('ayv-help-voice');
     if (voiceButton) {

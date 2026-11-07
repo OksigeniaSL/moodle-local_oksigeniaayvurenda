@@ -303,7 +303,8 @@ final class shell {
         }
         $as .= self::site_notice();
         // What only this page needs (back to a course, its guided help), in a small row, without what the header has.
-        $links = $options['nav'] ?? [];
+        // Inside a guided help's frame, none: a help within the help, or a way out of the screen it explains.
+        $links = optional_param('help', 0, PARAM_BOOL) ? [] : ($options['nav'] ?? []);
         if (isset($links['url'])) {
             $links = [$links];
         }
@@ -371,7 +372,8 @@ final class shell {
         // A page printed on US Letter says so to the print dialog, which otherwise starts on the A4 of the stylesheet.
         ? "\n<style>@media print { @page { size: letter; margin: 0; } }</style>" : '') . '
 </head>
-<body class="ayv ayv-skin-' . $skin . ($howto !== '' ? ' ayv-has-howto' : '') . '">
+<body class="ayv ayv-skin-' . $skin . ($library && characters::young((int) $library->entityid) ? ' ayv-young' : '')
+        . ($howto !== '' ? ' ayv-has-howto' : '') . '">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>
 ' . $as . '<header class="ayv-top">
 <a class="ayv-brand" href="' . s($home) . '"><img class="ayv-brand-light" src="' . $app . 'emblema.svg" alt="" width="44"

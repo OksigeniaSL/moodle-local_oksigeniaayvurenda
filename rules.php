@@ -198,6 +198,12 @@ $data = [
     'newform' => $form('new', ['readertype' => '*', 'itemtype' => '*', 'loandays' => 14, 'maxloans' => 1, 'renewals' => 1,
         'renewdays' => 7]),
     'latesentence' => $latesentence,
+    // Its own guided help, beside it: the screen's «How does it work?» shows the loan rules.
+    'latehelp' => optional_param('help', 0, PARAM_BOOL) ? '' : (new moodle_url(
+        '/local/oksigeniaayvurenda/help.php',
+        ['library' => $library->slug, 'piece' => 'sanctions']
+    ))->out(false),
+    'latehelplabel' => $str('helpnav'),
     'latefacts' => array_map(fn($fact) => ['fact' => $fact], $latefacts),
     'latereport' => $late['mode'] !== sanction_rules::NONE || $latestate['pending']
         ? (new moodle_url('/local/oksigeniaayvurenda/sanctions.php', ['library' => $library->slug]))->out(false) : '',

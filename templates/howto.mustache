@@ -26,7 +26,7 @@
         "query": "prestar", "label": "¿Qué quieres hacer?", "placeholder": "Por ejemplo", "search": "Buscar",
         "searched": true, "hasfound": true, "none": "No lo encuentro.", "allheading": "Todas las tareas",
         "found": [{"title": "Prestar un libro", "steps": [{"step": "Abre el mostrador"}], "url": "#", "help": "#"}],
-        "hasall": true, "all": [{"title": "Prestar un libro", "url": "#"}], "go": "Ir a la pantalla", "helplabel": "Ayuda guiada",
+        "hasall": true, "hasguides": true, "all": [{"title": "Prestar un libro", "url": "#"}], "go": "Ir a la pantalla", "helplabel": "Ayuda guiada",
         "guidesheading": "Guías para imprimir", "guidesintro": "En PDF.", "guides": [{"title": "El mostrador", "url": "#", "what": "Prestar y devolver", "isstart": false, "isdesk": true, "isreaders": false}],
         "ai": null
     }
@@ -69,6 +69,8 @@
 <h2 class="ayv-section-title">{{allheading}}</h2>
 <p class="ayv-subjects">{{#all}}<a class="ayv-chip" href="{{url}}">{{title}}</a> {{/all}}</p>
 {{/hasall}}
+{{#hasguides}}
 <h2 class="ayv-section-title">{{guidesheading}}</h2>
 <p>{{guidesintro}}</p>
 <ul class="ayv-imp-next ayv-howto-guides">{{#guides}}<li><a href="{{url}}">{{#isstart}}{{> local_oksigeniaayvurenda/icon_library}}{{/isstart}}{{#isdesk}}{{> local_oksigeniaayvurenda/icon_scan_line}}{{/isdesk}}{{#isreaders}}{{> local_oksigeniaayvurenda/icon_users}}{{/isreaders}}<b>{{title}}</b><span>{{what}}</span></a></li>{{/guides}}</ul>
+{{/hasguides}}
