@@ -64,7 +64,7 @@ final class menu {
             'menupeople' => [['cardprint.php', 'menucards', $d], ['sources.php', 'menusources', $m],
                 ['twins.php', 'menutwins', $m], ['tutors.php', 'menututors', $m]],
             'menucataloguing' => [['add.php', 'menuadd', $c], ['catalogued.php', 'menucataloged', $c],
-                ['import.php', 'menuimport', $c], ['free.php', 'menufree', $c],
+                ['subjects.php', 'menusubjects', $c], ['import.php', 'menuimport', $c], ['free.php', 'menufree', $c],
                 ['material.php', 'menumaterial', $c], ['purchases.php', 'menupurchases', $c]],
             'menushelves' => [['stacks.php', 'stacksnav', $d], ['labels.php', 'menulabels', $c],
                 ['posters.php', 'menuposters', $c], ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c]],

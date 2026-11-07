@@ -260,6 +260,17 @@ switch ($action) {
             \local_oksigeniaayvurenda\local\classify::suggest($library, required_param('q', PARAM_TEXT))
         )];
         break;
+    case 'subjects':
+        // The subjects the centre uses that start like what is typed, the most used first.
+        $answer = ['kind' => 'subjects', 'subjects' => array_map(
+            fn($subject) => ['label' => $subject['label'],
+            'note' => $subject['count'] === 1 ? $str('subjectsbookone') : $str(
+                'subjectsbooks',
+                \local_oksigeniaayvurenda\local\screens::number($subject['count'])
+            )],
+            \local_oksigeniaayvurenda\local\subjects::suggest($entityid, required_param('q', PARAM_TEXT))
+        )];
+        break;
     case 'undo':
         $itemids = array_filter(array_map('intval', explode(',', required_param('itemids', PARAM_SEQUENCE))));
         $done = cataloguer::undo(

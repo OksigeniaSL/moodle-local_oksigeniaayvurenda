@@ -4468,3 +4468,38 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-lab-sheettools { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; }
 .ayv .ayv-lab-fav { gap: .4rem; }
 .ayv .ayv-lab-fav-on { background: var(--notice-bg); }
+
+/* The subjects of a record as chips, with what the centre uses offered while typing. */
+.ayv .ayv-chipbox { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .4rem; border: 1px solid var(--line);
+    border-radius: 12px; background: var(--surface); }
+.ayv .ayv-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-chipitem { display: inline-flex; align-items: center; gap: .2rem; padding: .2rem .25rem .2rem .7rem; border-radius: 999px;
+    background: var(--notice-bg); color: var(--ink); font-weight: 600; }
+.ayv .ayv-chipremove { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0;
+    border: 0; border-radius: 999px; background: transparent; color: var(--ink); font-size: 1.1rem; cursor: pointer; }
+.ayv .ayv-chipremove:hover, .ayv .ayv-chipremove:focus-visible { background: var(--chip-hover); }
+.ayv .ayv-chipfield { flex: 1 1 10rem; min-width: 8rem; }
+.ayv .ayv-chipbox .ayv-chipinput { width: 100%; min-height: 36px; padding: .3rem .4rem; border: 0; border-radius: 0;
+    box-shadow: none; background: transparent; color: var(--ink); font: inherit; }
+.ayv .ayv-chipbox .ayv-chipinput:focus { outline: none; box-shadow: none; }
+.ayv .ayv-chipbox:focus-within { outline: 3px solid var(--sun); outline-offset: 1px; }
+
+/* The subjects of the catalogue: those that look like one, and every one with its books. */
+.ayv .ayv-subject-groups, .ayv .ayv-subject-list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-subject-group { padding: .8rem 1rem; border-radius: var(--radius); background: var(--surface);
+    box-shadow: 0 1px 4px rgba(15, 58, 51, .08); }
+.ayv .ayv-subject-group form { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem; }
+.ayv .ayv-subject-choice { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.ayv .ayv-subject-option { display: inline-flex; align-items: center; gap: .45rem; padding: .35rem .8rem; border: 1px solid var(--line);
+    border-radius: 999px; cursor: pointer; }
+.ayv .ayv-subject-option:has(input:checked) { border-color: var(--accent); background: var(--notice-bg); }
+.ayv .ayv-subject-count { color: var(--muted); font-size: .85em; }
+.ayv .ayv-subject-option .ayv-subject-count { color: var(--ink); }
+.ayv .ayv-subject-filter { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .6rem; margin: 0 0 1rem; }
+.ayv .ayv-subject-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .5rem; }
+.ayv .ayv-subject-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem; padding: .55rem .8rem;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.ayv .ayv-subject-name { font-weight: 700; }
+.ayv .ayv-subject-rename { flex: 1 0 100%; font-size: .9em; }
+.ayv .ayv-subject-rename summary { color: var(--accent); cursor: pointer; font-weight: 600; }
+.ayv .ayv-subject-rename form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem; margin-top: .4rem; }

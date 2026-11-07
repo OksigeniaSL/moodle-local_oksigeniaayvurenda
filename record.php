@@ -165,6 +165,12 @@ if ($correct) {
         'notice' => $fixnotice,
         'error' => $fixerror,
         'form' => $form,
+        // The subjects as chips, with what the centre already uses offered while typing.
+        'subjectsurl' => (new moodle_url('/local/oksigeniaayvurenda/add_ajax.php', ['library' => $library->slug,
+            'sesskey' => sesskey()]))->out(false),
+        'subjectsadd' => get_string('subjectsadd', 'local_oksigeniaayvurenda'),
+        'subjectsremove' => get_string('subjectsremove', 'local_oksigeniaayvurenda'),
+        'subjectshint' => get_string('subjectshint', 'local_oksigeniaayvurenda'),
     ];
     foreach (
         ['correctrecord', 'correctcopy', 'correctsave', 'correcttitle', 'correctsubtitle', 'correctauthors', 'correctsubjects',

@@ -1,0 +1,88 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/subjects
+
+    The subjects of a centre: those that look like one, to join with a touch, and every one with its books, to look for
+    and rename.
+
+    Example context (json):
+    {
+        "heading": "Temas", "intro": "2.884 temas en el catálogo.", "notice": "", "action": "#", "sesskey": "abc",
+        "query": "", "library": "demo-1", "hasgroups": true, "hasrows": true, "pager": null,
+        "groups": [{"n": 0, "subjects": [{"id": 1, "label": "Misterio", "count": "120 libros", "first": true, "url": "#"},
+            {"id": 2, "label": "misterios", "count": "3 libros", "first": false, "url": "#"}]}],
+        "rows": [{"id": 1, "label": "Misterio", "count": "120", "url": "#"}],
+        "subjectsalike": "Parecidos", "subjectsalikehint": "Elige con cuál se quedan.", "subjectsjoin": "Juntar",
+        "subjectskeep": "Se queda", "subjectsallheading": "Todos los temas", "subjectsfilter": "Buscar un tema",
+        "subjectsfilterbutton": "Buscar", "subjectsrename": "Cambiar el nombre", "subjectsrenamesave": "Guardar",
+        "subjectsnone": "Ningún tema.", "subjectsnamecol": "Tema", "subjectssee": "Ver sus libros"
+    }
+}}
+<section class="ayv-subjects">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-readers-sum">{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#hasgroups}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{subjectsalike}}</h2>
+    <p class="ayv-field-hint">{{subjectsalikehint}}</p>
+    <ul class="ayv-subject-groups">
+        {{#groups}}
+        <li class="ayv-subject-group">
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="join">
+                <fieldset class="ayv-subject-choice"><legend class="ayv-sr">{{subjectskeep}}</legend>
+                    {{#subjects}}<label class="ayv-subject-option"><input type="radio" name="keep" value="{{id}}"{{#first}} checked{{/first}}>
+                        <input type="hidden" name="ids[]" value="{{id}}"><span><b>{{label}}</b> <span class="ayv-subject-count">{{count}}</span></span></label>{{/subjects}}
+                </fieldset>
+                <button type="submit" class="ayv-button">{{subjectsjoin}}</button>
+            </form>
+        </li>
+        {{/groups}}
+    </ul>
+</section>
+{{/hasgroups}}
+<section class="ayv-section">
+    <h2 class="ayv-section-title">{{subjectsallheading}}</h2>
+    <form method="get" action="{{action}}" class="ayv-subject-filter" role="search">
+        <input type="hidden" name="library" value="{{library}}">
+        <label class="ayv-field ayv-dig-field">{{subjectsfilter}} <input type="search" name="q" value="{{query}}"></label>
+        <button type="submit" class="ayv-button ayv-button-quiet">{{subjectsfilterbutton}}</button>
+    </form>
+    {{^hasrows}}<p class="ayv-empty">{{subjectsnone}}</p>{{/hasrows}}
+    {{#hasrows}}
+    <ul class="ayv-subject-list">
+        {{#rows}}
+        <li class="ayv-subject-row">
+            <a class="ayv-subject-name" href="{{url}}" title="{{subjectssee}}">{{label}}</a>
+            <span class="ayv-subject-count">{{count}}</span>
+            <details class="ayv-subject-rename"><summary>{{subjectsrename}}</summary>
+                <form method="post" action="{{action}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="rename">
+                    <input type="hidden" name="id" value="{{id}}">
+                    <label class="ayv-field ayv-dig-field"><span class="ayv-sr">{{subjectsnamecol}}</span> <input type="text" name="label" value="{{label}}" required></label>
+                    <button type="submit" class="ayv-button">{{subjectsrenamesave}}</button>
+                </form>
+            </details>
+        </li>
+        {{/rows}}
+    </ul>
+    {{/hasrows}}
+    {{#pager}}{{> local_oksigeniaayvurenda/readers_pager}}{{/pager}}
+</section>
+</section>

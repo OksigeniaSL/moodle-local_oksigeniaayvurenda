@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.171.0
+
+- The subjects of a centre are one vocabulary: a subject typed, imported or brought by a catalogue that the centre has with
+  other capitals, accents or number is that one («misterios» is «Misterio»).
+- Correcting a record, its subjects are chips: what the centre already uses comes up while typing, the most used first and
+  with a letter wrong too.
+- «Subjects», from «More»: those that look like one (written another way, or a typo apart) to join with a touch, choosing
+  which stays; every subject with its books, to look for and rename (renamed as another, they become one).
+
 ## 0.170.0
 
 - «How does it work?»: the guided help of every page is a button that says what it does, first in its row, instead of a

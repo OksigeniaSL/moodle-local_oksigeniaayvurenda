@@ -638,6 +638,201 @@
         }
     });
 
+    // The subjects of a record as chips: what the centre already uses comes up while typing (the most used first, and
+    // with a letter wrong too), Enter or a comma adds what is typed, the cross or Backspace takes one away. The field
+    // underneath keeps one a line, as it is sent.
+    Array.prototype.forEach.call(document.querySelectorAll('textarea[data-ayv-subjects]'), function(area) {
+        if (!window.fetch) {
+            return;
+        }
+        var fold = function(text) {
+            return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+        };
+        var box = document.createElement('div');
+        var chips = document.createElement('ul');
+        var holder = document.createElement('span');
+        var field = document.createElement('input');
+        var list = document.createElement('ul');
+        var id = 'ayv-subjects-' + Math.random().toString(36).slice(2, 8);
+        box.className = 'ayv-chipbox';
+        chips.className = 'ayv-chips';
+        holder.className = 'ayv-classes-holder ayv-chipfield';
+        field.type = 'text';
+        field.className = 'ayv-chipinput';
+        field.setAttribute('aria-label', area.getAttribute('data-add'));
+        field.placeholder = area.getAttribute('data-add');
+        field.setAttribute('role', 'combobox');
+        field.setAttribute('aria-autocomplete', 'list');
+        field.setAttribute('aria-expanded', 'false');
+        field.setAttribute('aria-controls', id);
+        list.className = 'ayv-classlist';
+        list.id = id;
+        list.setAttribute('role', 'listbox');
+        list.hidden = true;
+        holder.appendChild(field);
+        holder.appendChild(list);
+        box.appendChild(chips);
+        box.appendChild(holder);
+        area.hidden = true;
+        area.parentNode.insertBefore(box, area.nextSibling);
+        var values = area.value.split(/\r?\n/).map(function(line) {
+            return line.trim();
+        }).filter(Boolean);
+        var items = [];
+        var active = -1;
+        var timer = null;
+        var asked = 0;
+        var sync = function() {
+            area.value = values.join('\n');
+        };
+        var paint = function() {
+            chips.textContent = '';
+            values.forEach(function(value, i) {
+                var li = document.createElement('li');
+                li.className = 'ayv-chipitem';
+                li.appendChild(document.createTextNode(value));
+                var cross = document.createElement('button');
+                cross.type = 'button';
+                cross.className = 'ayv-chipremove';
+                cross.setAttribute('aria-label', area.getAttribute('data-remove').replace('{$a}', function() {
+                    return value;
+                }));
+                cross.textContent = '×';
+                cross.addEventListener('click', function() {
+                    values.splice(i, 1);
+                    sync();
+                    paint();
+                    field.focus();
+                });
+                li.appendChild(cross);
+                chips.appendChild(li);
+            });
+        };
+        var close = function() {
+            list.hidden = true;
+            field.setAttribute('aria-expanded', 'false');
+            field.removeAttribute('aria-activedescendant');
+            active = -1;
+        };
+        var add = function(text) {
+            text = text.trim();
+            if (text === '') {
+                return;
+            }
+            // The form the centre already has wins over what was typed («misterio» is «Misterio»).
+            items.forEach(function(item) {
+                if (fold(item.label) === fold(text)) {
+                    text = item.label;
+                }
+            });
+            if (!values.some(function(value) {
+                return fold(value) === fold(text);
+            })) {
+                values.push(text);
+            }
+            field.value = '';
+            sync();
+            paint();
+            close();
+        };
+        var mark = function(index) {
+            active = index;
+            Array.prototype.forEach.call(list.children, function(li, i) {
+                li.setAttribute('aria-selected', i === index ? 'true' : 'false');
+            });
+            if (index >= 0) {
+                field.setAttribute('aria-activedescendant', id + '-' + index);
+            }
+        };
+        var show = function(found) {
+            items = found.filter(function(item) {
+                return !values.some(function(value) {
+                    return fold(value) === fold(item.label);
+                });
+            });
+            list.textContent = '';
+            items.forEach(function(item, i) {
+                var li = document.createElement('li');
+                li.id = id + '-' + i;
+                li.setAttribute('role', 'option');
+                li.setAttribute('aria-selected', 'false');
+                var label = document.createElement('span');
+                label.className = 'ayv-classlist-label';
+                label.textContent = item.label;
+                var note = document.createElement('span');
+                note.className = 'ayv-classlist-note';
+                note.textContent = item.note || '';
+                li.appendChild(label);
+                li.appendChild(note);
+                li.addEventListener('mousedown', function(event) {
+                    event.preventDefault();
+                    add(item.label);
+                });
+                list.appendChild(li);
+            });
+            list.style.left = '0px';
+            list.style.top = (field.offsetTop + field.offsetHeight + 4) + 'px';
+            list.hidden = !items.length;
+            field.setAttribute('aria-expanded', items.length ? 'true' : 'false');
+            mark(-1);
+        };
+        field.addEventListener('input', function() {
+            window.clearTimeout(timer);
+            if (field.value.indexOf(',') >= 0) {
+                field.value.split(',').slice(0, -1).forEach(add);
+                return;
+            }
+            timer = window.setTimeout(function() {
+                var typed = field.value.trim();
+                if (typed.length < 2) {
+                    close();
+                    return;
+                }
+                var mine = ++asked;
+                fetch(area.getAttribute('data-ayv-subjects'), {method: 'POST', credentials: 'same-origin',
+                    body: new URLSearchParams({action: 'subjects', q: typed})})
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(answer) {
+                        if (mine === asked && document.activeElement === field) {
+                            show(answer.subjects || []);
+                        }
+                        return answer;
+                    })
+                    .catch(close);
+            }, 200);
+        });
+        field.addEventListener('keydown', function(event) {
+            if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && !list.hidden) {
+                event.preventDefault();
+                mark((active + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length);
+            } else if (event.key === 'Enter') {
+                // Enter adds; it never sends the form from here.
+                event.preventDefault();
+                add(active >= 0 && items[active] ? items[active].label : field.value);
+            } else if (event.key === 'Escape' && !list.hidden) {
+                event.preventDefault();
+                event.stopPropagation();
+                close();
+            } else if (event.key === 'Backspace' && field.value === '' && values.length) {
+                values.pop();
+                sync();
+                paint();
+            }
+        });
+        field.addEventListener('blur', function() {
+            window.setTimeout(close, 120);
+        });
+        // What was left typed goes too when the form is sent.
+        if (area.form) {
+            area.form.addEventListener('submit', function() {
+                add(field.value);
+            });
+        }
+        paint();
+    });
+
     var main = document.getElementById('ayv-live') || document.getElementById('ayv-main');
     if (!input || !main || !window.fetch || !config.library) {
         return;

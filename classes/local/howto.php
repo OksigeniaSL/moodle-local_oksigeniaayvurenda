@@ -40,6 +40,7 @@ final class howto {
         'add' => ['add.php', 'catalogue', 'add'],
         'classify' => ['add.php', 'catalogue', ''],
         'catalogued' => ['catalogued.php', 'catalogue', ''],
+        'subjects' => ['subjects.php', 'catalogue', ''],
         'material' => ['material.php', 'catalogue', 'material'],
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],

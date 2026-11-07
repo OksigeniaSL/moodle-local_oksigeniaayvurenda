@@ -236,8 +236,9 @@
                 <label class="ayv-field ayv-dig-field">{{correcttitle}} <input type="text" name="title" value="{{title}}" required></label>
                 <label class="ayv-field ayv-dig-field">{{correctsubtitle}} <input type="text" name="subtitle" value="{{subtitle}}"></label>
                 <label class="ayv-field ayv-dig-field">{{correctauthors}} <textarea name="authors" rows="3">{{authors}}</textarea></label>
-                <label class="ayv-field ayv-dig-field">{{correctsubjects}} <textarea name="subjects" rows="3">{{subjects}}</textarea></label>
                 <p class="ayv-field-hint">{{correctlines}}</p>
+                <label class="ayv-field ayv-dig-field">{{correctsubjects}} <textarea name="subjects" rows="3" data-ayv-subjects="{{subjectsurl}}" data-add="{{subjectsadd}}" data-remove="{{subjectsremove}}">{{subjects}}</textarea></label>
+                <p class="ayv-field-hint">{{subjectshint}}</p>
                 <div class="ayv-fix-two">
                 <label class="ayv-field ayv-dig-field">{{correctisbn}} <input type="text" name="isbn" value="{{isbn}}"></label>
                 <label class="ayv-field ayv-dig-field">{{correctedition}} <input type="text" name="edition" value="{{edition}}"></label>

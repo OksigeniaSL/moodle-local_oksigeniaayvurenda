@@ -137,7 +137,7 @@ final class corrections {
      * @param \stdClass $record
      * @return string
      */
-    private static function words(\stdClass $record): string {
+    public static function words(\stdClass $record): string {
         global $DB;
         $labels = $DB->get_fieldset_sql(
             'SELECT a.label

@@ -471,6 +471,13 @@ final class cataloguer {
     public static function authority(int $entityid, string $kind, string $label, int $now): int {
         global $DB;
         $label = \core_text::substr(trim($label), 0, 1333);
+        // A subject the centre has with other capitals, accents or number («misterios» for «Misterio») is that one.
+        if ($kind === 'subject') {
+            $found = subjects::find($entityid, $label);
+            if ($found) {
+                return $found;
+            }
+        }
         $field = $kind === 'class' ? 'code' : 'label';
         $id = $DB->get_field_select(
             self::T . 'authority',
@@ -482,9 +489,13 @@ final class cataloguer {
         if ($id) {
             return (int) $id;
         }
-        return (int) $DB->insert_record(self::T . 'authority', ['entityid' => $entityid, 'kind' => $kind,
+        $id = (int) $DB->insert_record(self::T . 'authority', ['entityid' => $entityid, 'kind' => $kind,
             'code' => $kind === 'class' ? \core_text::substr($label, 0, 100) : null, 'label' => $label,
             'timecreated' => $now, 'timemodified' => $now]);
+        if ($kind === 'subject') {
+            subjects::made($entityid, $label, $id);
+        }
+        return $id;
     }
 
     /**
