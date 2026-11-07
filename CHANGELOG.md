@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.189.0
+
+- Ages and skins (audit batch 7):
+  - the card and the characters guess the age as other countries name their groups (Grade 2, Year 7, Klasse 3, CE2,
+    6ème, Transición, 4º Básico…), by the first number of the group, and «Grado en» is a university degree;
+  - what is not recognised is the lively sky in a school, the sober one where readers are grown-ups or of every age;
+  - a reader's age band, said by the staff in «Change their data» when the group does not tell it (a new field, with
+    its upgrade step and its privacy line), above the stage's choice;
+  - a young reader of a public library or a bookmobile reads the school's words (the ones its voices say), and a reader
+    past the flower in a school reads the secondary school's words where there are some;
+  - a university speaks with the plain words of grown-ups where it has none of its own, not the school's; the help's
+    title, intro and end speak in the skin too; «How do I…?» without «course», stages or families where there are none;
+  - neutral words where school words leaked into other skins (a reader, the staff, the year);
+  - the reader's small targets at 44 px (the way out to Moodle, the credits, the subnav, the search filters, volume);
+  - the card's look choice comes first until the reader has chosen it;
+  - a reader of the flower is not told how many books each corner has;
+  - the herald speaks of what grew, not of what is missing (with its voices in the art package 0.1.47).
+
 ## 0.188.0
 
 - The guided help «Sets and classes» of a textbook bank (a set, its titles, adding one, a new set, by class, a class), with

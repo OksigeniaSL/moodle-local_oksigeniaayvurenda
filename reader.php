@@ -101,6 +101,7 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
             'lastname' => optional_param('lastname', '', PARAM_TEXT),
             'email' => optional_param('email', '', PARAM_RAW_TRIMMED),
             'type' => optional_param('newtype', '', PARAM_ALPHA),
+            'band' => optional_param('newband', '', PARAM_ALPHA),
             'group' => optional_param('newgroup', '', PARAM_TEXT),
             'tutorof' => optional_param('tutorof', '', PARAM_TEXT),
         ], $now, access::can('local/oksigeniaayvurenda:manage', $library)));
@@ -236,6 +237,12 @@ $data = [
         $form['types']
     ),
     'formhastypes' => (bool) $form['types'],
+    'formhasbands' => $form['bandable'],
+    'formbands' => array_map(
+        fn($b) => ['value' => $b, 'label' => $str($b === '' ? 'profilebandauto' : 'cardlookopt' . $b),
+            'selected' => $b === $form['band']],
+        array_merge([''], \local_oksigeniaayvurenda\local\cards::BANDS)
+    ),
     'formgroups' => array_map(fn($g) => ['name' => $g, 'selected' => $g === $form['group']], $form['groups']),
     'formlocked' => $form['lockedgroup'] !== '' ? $str('profiledatalocked', $form['lockedgroup']) : '',
     'formhasgroups' => (bool) $form['groups'],
@@ -328,7 +335,8 @@ foreach (
         'sanctionchargenote', 'sanctionchargego', 'profileneeds', 'profileneedslabel', 'profileneedshint',
         'profileneedsasks', 'readererase', 'readererasehint', 'readererasego', 'readererasetitle', 'readererasegoes',
         'readererasestays', 'readererasecheck', 'readererasekeep', 'profiledata', 'profiledatafirst', 'profiledatalast',
-        'profiledataemail', 'profiledatatype', 'profiledatagroup', 'profiledatanogroup', 'profiledataaccount', 'profiledatatutor',
+        'profiledataemail', 'profiledatatype', 'profiledataband', 'profiledatagroup', 'profiledatanogroup', 'profiledataaccount',
+        'profiledatatutor',
         'profiledatatutornone', 'profiledatatutorhint', 'profileback', 'profileleaveheading', 'profileleavehint', 'profileleavego',
         'profilebackheading', 'profilebackhint', 'profilebackgo', 'profilematch', 'profiletwin', 'appaddemail',
         'profileprint'] as $key

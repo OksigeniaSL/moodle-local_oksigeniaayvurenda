@@ -150,6 +150,7 @@
         <FIELD NAME="email" TYPE="char" LENGTH="254" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="active" SEQUENCE="false" COMMENT="active, suspended, left or deleted"/>
         <FIELD NAME="accessneeds" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Needs accessible formats: sees the items made for that, and nothing says why"/>
+        <FIELD NAME="band" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The age band the centre says, when the group does not: flower, sky or skysober"/>
         <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

@@ -32,7 +32,7 @@
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Casi flor", "yearname": "2026-2027",
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "detail": "Última visita: el martes"}],
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
-                   "sky": false, "haschoices": false, "choices": [], "mine": false,
+                   "sky": false, "haschoices": false, "choosefirst": false, "choices": [], "mine": false,
                    "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": [],
                    "hasclassgarden": false, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
                    "hascromos": true, "cromosheading": "Tus cromos", "cromoscount": "1 de 2",
@@ -67,6 +67,8 @@
             <p class="ayv-card-stage">{{#stage}}{{stage}} · {{/stage}}{{yearname}}</p>
         </div>
     </div>
+    {{! Who has never chosen sees the choice first: an adult need not go through the whole game to put it aside. }}
+    {{#choosefirst}}<div class="ayv-mine-first">{{> local_oksigeniaayvurenda/card_lookchoice}}</div>{{/choosefirst}}
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
     <div class="ayv-card-code">
         {{#barcode}}<div class="ayv-card-barcode">{{{barcode}}}</div>{{/barcode}}
@@ -151,21 +153,7 @@
                 <p class="ayv-field-hint">{{newbookshint}}</p>
                 <button type="submit" name="newbooks" value="{{#newbookson}}0{{/newbookson}}{{^newbookson}}1{{/newbookson}}" class="ayv-switch" role="switch" aria-checked="{{#newbookson}}true{{/newbookson}}{{^newbookson}}false{{/newbookson}}" aria-label="{{newbookslabel}}"><span></span></button>
             </form>
-            {{#haschoices}}
-            <form method="post" action="{{action}}#ayv-mine" class="ayv-mine-box ayv-mine-look">
-                <input type="hidden" name="sesskey" value="{{sesskey}}">
-                <h3 class="ayv-mine-title">{{lookheading}}</h3>
-                <div class="ayv-mine-tiles">
-                {{#choices}}
-                    <button type="submit" name="look" value="{{value}}" class="ayv-mine-tile" aria-pressed="{{#checked}}true{{/checked}}{{^checked}}false{{/checked}}">
-                        <span class="ayv-mine-tile-art">{{#art}}<img src="{{art}}" alt="">{{/art}}{{#isclassic}}{{> local_oksigeniaayvurenda/icon_list}}{{/isclassic}}{{#isnone}}{{> local_oksigeniaayvurenda/icon_id_card}}{{/isnone}}</span>
-                        <span class="ayv-mine-tile-words"><b>{{title}}</b><span>{{hint}}</span></span>
-                        {{#checked}}<span class="ayv-mine-tile-on">{{> local_oksigeniaayvurenda/icon_check}}</span>{{/checked}}
-                    </button>
-                {{/choices}}
-                </div>
-            </form>
-            {{/haschoices}}
+            {{^choosefirst}}{{#haschoices}}{{> local_oksigeniaayvurenda/card_lookchoice}}{{/haschoices}}{{/choosefirst}}
         </div>
     </section>
     {{/mine}}

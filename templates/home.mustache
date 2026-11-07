@@ -111,7 +111,7 @@
         <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
             {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}
             <span class="ayv-corner-label">{{label}}</span>
-            <span class="ayv-corner-count">{{countlabel}}</span>
+            {{#countlabel}}<span class="ayv-corner-count">{{countlabel}}</span>{{/countlabel}}
         </a></li>
     {{/corners}}
     </ul>

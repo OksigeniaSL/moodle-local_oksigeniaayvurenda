@@ -78,7 +78,10 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
     'library' => $library->slug,
     'query' => $query,
     'label' => $str($accepted ? 'howtoailabel' : 'howtolabel'),
-    'placeholder' => $str($accepted ? 'howtoaiplaceholder' : 'howtoplaceholder'),
+    'placeholder' => \local_oksigeniaayvurenda\local\skins::say(
+        (int) $library->entityid,
+        $accepted ? 'howtoaiplaceholder' : 'howtoplaceholder'
+    ),
     'search' => $str($accepted ? 'howtoaigo' : 'howtosearch'),
     'searched' => $query !== '',
     'found' => array_map($card, $found),

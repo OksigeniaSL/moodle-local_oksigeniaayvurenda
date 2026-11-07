@@ -252,7 +252,8 @@ if ($group === null) {
         'heading' => $left ? $str('readersleft') : ($type !== ''
             ? \local_oksigeniaayvurenda\local\skins::say($entityid, 'readerstype' . $type)
             : ($group !== '' ? $group : $str('readersnogroup'))),
-        'intro' => $left ? $str('readerslefthint') : ($type === 'student' ? $str('readersstudentshint') : ''),
+        'intro' => $left ? $str('readerslefthint') : ($type === 'student'
+            ? \local_oksigeniaayvurenda\local\skins::say((int) $library->entityid, 'readersstudentshint') : ''),
         'find' => $paged ? ['action' => (new moodle_url('/local/oksigeniaayvurenda/readers.php'))->out(false),
             'library' => $library->slug, 'findlabel' => $str('readersfind'), 'findhint' => $str('readersfindhint'),
             'findgo' => $str('readersfindgo')] : null,

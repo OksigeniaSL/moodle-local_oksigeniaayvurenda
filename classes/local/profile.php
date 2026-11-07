@@ -259,6 +259,9 @@ final class profile {
             'email' => (string) $reader->email,
             'type' => (string) $reader->readertype,
             'types' => in_array($reader->readertype, readers::KINDS, true) ? readers::KINDS : [],
+            // A pupil's age band, when the group's name does not tell it (a public library, a grade of another country).
+            'band' => (string) ($reader->band ?? ''),
+            'bandable' => $reader->readertype === 'student',
             'group' => $group,
             'groups' => $groups,
             // A group the platform brought comes back every night: it is changed there.
@@ -305,6 +308,9 @@ final class profile {
         $type = (string) ($form['type'] ?? '');
         if (in_array($type, readers::KINDS, true) && in_array($reader->readertype, readers::KINDS, true)) {
             $row->readertype = $type;
+        }
+        if (array_key_exists('band', $form) && in_array((string) $form['band'], array_merge([''], cards::BANDS), true)) {
+            $row->band = $form['band'] !== '' ? (string) $form['band'] : null;
         }
         $form = $form + ['group' => '', 'tutorof' => ''];
         $transaction = $DB->start_delegated_transaction();

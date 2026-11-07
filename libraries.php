@@ -244,8 +244,13 @@ foreach (libraries::all() as $one) {
         'groups' => $groupoptions([]),
         'hasgroups' => (bool) $groups,
         'cardlooks' => \local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id) ? []
-            : array_map(function ($stage) use ($settings, $str) {
-                $guess = \local_oksigeniaayvurenda\core\card_look::guess('student', $stage, '');
+            : array_map(function ($stage) use ($settings, $str, $entity) {
+                $guess = \local_oksigeniaayvurenda\core\card_look::guess(
+                    'student',
+                    $stage,
+                    '',
+                    \local_oksigeniaayvurenda\local\skins::unknown_look((int) $entity->id)
+                );
                 $chosen = $settings['cardlooks'][$stage] ?? '';
                 return ['stage' => $stage, 'options' => array_merge(
                     [['value' => '', 'label' => $str('cardlookauto', $str('cardlookopt' . $guess)), 'selected' => $chosen === '']],

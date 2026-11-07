@@ -229,7 +229,11 @@ final class cardprint {
         $map = array_fill_keys(self::DESIGNS, []);
         $stages = array_map('strval', array_keys(self::stages($library, $now)));
         foreach ($stages as $stage) {
-            $look = card_look::resolve(card_look::guess('student', $stage, ''), $settings['cardlooks'][$stage] ?? null, null);
+            $look = card_look::resolve(
+                card_look::guess('student', $stage, '', skins::unknown_look($entityid)),
+                $settings['cardlooks'][$stage] ?? null,
+                null
+            );
             $map[self::design($skin, $look, $stage, $chosen)][] = $stage;
         }
         $rest = $stages ? self::ADULTS : self::EVERYONE;

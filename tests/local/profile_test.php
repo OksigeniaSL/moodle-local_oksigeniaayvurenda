@@ -253,4 +253,41 @@ final class profile_test extends \advanced_testcase {
         $this->assertSame('loved', $all[1]['note']);
         $this->assertSame(['El faro'], array_column(profile::history($w->library, $id, 0, true), 'title'));
     }
+
+    /**
+     * A pupil whose group does not say their age: the centre says their band, which comes before the guess and the
+     * stage's choice; staff have none; where readers are grown-ups, what is not recognised is the sober sky.
+     */
+    public function test_band(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $pupil = $gen->create_reader(['entityid' => $entityid, 'readertype' => 'student', 'firstname' => 'Zeta',
+            'lastname' => 'Azul']);
+        $this->assertSame('sky', cards::look_of($pupil), 'a school: nothing recognised is the lively sky');
+        $form = ['firstname' => 'Zeta', 'lastname' => 'Azul', 'email' => '', 'type' => 'student', 'group' => ''];
+        profile::change($library, (int) $pupil->id, ['band' => 'flower'] + $form, time(), false);
+        $pupil = $DB->get_record(self::T . 'reader', ['id' => $pupil->id]);
+        $this->assertSame('flower', $pupil->band);
+        $this->assertSame('flower', cards::look_of($pupil));
+        profile::change($library, (int) $pupil->id, ['band' => 'nonsense'] + $form, time(), false);
+        $this->assertSame('flower', $DB->get_field(self::T . 'reader', 'band', ['id' => $pupil->id]));
+        profile::change($library, (int) $pupil->id, ['band' => ''] + $form, time(), false);
+        $pupil = $DB->get_record(self::T . 'reader', ['id' => $pupil->id]);
+        $this->assertNull($pupil->band);
+        libraries::update_entity($entityid, ['skin' => 'public']);
+        $this->assertSame('skysober', cards::look_of($pupil), 'a public library: grown-ups unless the centre says');
+        $this->assertTrue(profile::form($library, $pupil, time(), false)['bandable']);
+
+        // In a public library, a young reader reads the school's words (the ones its voices say); a grown-up, the library's.
+        $user = $this->getDataGenerator()->create_user();
+        $DB->update_record(self::T . 'reader', (object) ['id' => $pupil->id, 'userid' => $user->id, 'band' => 'flower']);
+        $this->setUser($user);
+        $this->assertSame('homequestion', skins::words($entityid, 'homequestion'));
+        $this->setAdminUser();
+        $this->assertSame('homequestionsecondary', skins::words($entityid, 'homequestion'));
+    }
 }

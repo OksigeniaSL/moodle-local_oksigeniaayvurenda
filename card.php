@@ -104,11 +104,9 @@ foreach ($readers as $reader) {
     $entity = format_string($entityrow->name, true, ['escape' => false]);
     $esettings = json_decode((string) $entityrow->settings, true) ?: [];
     $stagename = $member ? (string) $member->stage : '';
-    $look = in_array($previewlook, card_look::LOOKS, true) ? $previewlook : card_look::resolve(
-        card_look::guess($reader->readertype, $stagename, $group),
-        $esettings['cardlooks'][$stagename] ?? null,
-        $previewid ? null : $own
-    );
+    [$guess, $centre] = \local_oksigeniaayvurenda\local\cards::base($reader, $stagename, $group, $esettings);
+    $look = in_array($previewlook, card_look::LOOKS, true) ? $previewlook
+        : card_look::resolve($guess, $centre, $previewid ? null : $own);
     $sky = $look === 'sky' || $look === 'skysober';
     $sober = $look === 'skysober';
     $stage = $album['flower']['stage'];
@@ -231,6 +229,8 @@ foreach ($readers as $reader) {
         'pastheading' => $str($sky ? 'cardpastsky' : 'cardpast'),
         'choices' => $choices,
         'haschoices' => (bool) $choices,
+        // Whoever has never chosen how to see their card sees the choice above it, not after the whole game.
+        'choosefirst' => (bool) $choices && ($own === null || $own === ''),
         'mine' => $mine,
         'sky' => $sky,
         'books' => $album['books'],

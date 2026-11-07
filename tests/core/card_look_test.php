@@ -39,7 +39,23 @@ final class card_look_test extends \basic_testcase {
         $this->assertSame('skysober', card_look::guess('student', 'ESO', '3º ESO B'));
         $this->assertSame('skysober', card_look::guess('student', 'Bachillerato', '1º Bachillerato A'));
         $this->assertSame('skysober', card_look::guess('student', 'Grado en Historia', ''));
-        $this->assertSame('sky', card_look::guess('student', 'Year', 'Year 5 Blue'));
+        $this->assertSame('flower', card_look::guess('student', 'Year', 'Year 5 Blue'));
+        // As other countries call their grades.
+        $this->assertSame('flower', card_look::guess('student', 'Grado', '2º grado A'));
+        $this->assertSame('sky', card_look::guess('student', 'Grado', 'Grado 8'));
+        $this->assertSame('skysober', card_look::guess('student', '', 'Grado 11'));
+        $this->assertSame('flower', card_look::guess('student', '', 'Grade 2'));
+        $this->assertSame('flower', card_look::guess('student', '', 'CE2'));
+        $this->assertSame('sky', card_look::guess('student', '', '6ème B'));
+        $this->assertSame('flower', card_look::guess('student', '', 'Klasse 2a'));
+        $this->assertSame('flower', card_look::guess('student', '', '4º Básico'));
+        $this->assertSame('flower', card_look::guess('student', '', 'Transición B'));
+        $this->assertSame('flower', card_look::guess('student', '', 'Cuentacuentos 4 años'));
+        $this->assertSame('skysober', card_look::guess('student', '', '4º ESO A2'));
+        $this->assertSame('skysober', card_look::guess('student', '', 'Club de lectura de mayores'));
+        // What it does not recognise: what the library gives for that.
+        $this->assertSame('sky', card_look::guess('student', '', 'Grupo azul'));
+        $this->assertSame('skysober', card_look::guess('student', '', 'Departamento de ventas', 'skysober'));
         $this->assertSame('none', card_look::guess('teacher', '', ''));
         $this->assertSame('none', card_look::guess('family', 'Primaria', ''));
 

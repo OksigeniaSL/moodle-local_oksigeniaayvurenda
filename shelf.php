@@ -123,8 +123,16 @@ if (in_array($done, ['lent', 'back'], true)) {
         $undo = ['loan' => (int) $loan->id, 'what' => $done === 'lent' ? 'lent' : 'returned'];
     }
 } else if ($done === 'lotback') {
-    $notice = $str('shelflotback', (object) ['home' => optional_param('home', 0, PARAM_INT),
-        'pending' => optional_param('pending', 0, PARAM_INT)]);
+    $notice = \local_oksigeniaayvurenda\local\skins::say(
+        (int) $library->entityid,
+        'shelflotback',
+        (object) ['home' => optional_param('home', 0, PARAM_INT),
+        'pending' => optional_param(
+            'pending',
+            0,
+            PARAM_INT
+        )]
+    );
 } else if ($done === 'undone') {
     $notice = $str('shelfundone');
 } else if ($done === 'notlent') {

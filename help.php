@@ -67,20 +67,22 @@ for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
 $back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' =>
     in_array($piece, ['bankround', 'bank'], true) && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::bank_slug()
         : $library->slug]);
+// The help's title, intro and end in the words of its skin, as its steps.
+$say = fn(string $key) => \local_oksigeniaayvurenda\local\skins::say((int) $practice->entityid, $key);
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
-<h1 id="ayv-help-title" class="ayv-results-title">' . s($str('helptitle' . $piece)) . '</h1>
+<h1 id="ayv-help-title" class="ayv-results-title">' . s($say('helptitle' . $piece)) . '</h1>
 <div class="ayv-help-stage" id="ayv-help-stage">
     <iframe id="ayv-help-frame" title="' . s($str('helpframe')) . '" tabindex="-1"></iframe>
     <div class="ayv-help-pointer" id="ayv-help-pointer" aria-hidden="true"></div>
     <div class="ayv-help-ring" id="ayv-help-ring" aria-hidden="true" hidden></div>
     <div class="ayv-help-start" id="ayv-help-start">
-        <p>' . s($str('helpintro' . $piece)) . '</p>
+        <p>' . s($say('helpintro' . $piece)) . '</p>
         <button type="button" class="ayv-button" id="ayv-help-go">' . s($str('helpstart')) . '</button>
     </div>
     <div class="ayv-help-done" id="ayv-help-done" hidden>
         <img src="' . (new moodle_url('/local/oksigeniaayvurenda/app/emblema.svg'))->out() . '" alt="" width="96" height="96">
         <p class="ayv-help-done-title">' . s($str('helpdone')) . '</p>
-        <p>' . s($str('helpdone' . $piece)) . '</p>
+        <p>' . s($say('helpdone' . $piece)) . '</p>
         <p class="ayv-help-actions"><button type="button" class="ayv-button ayv-button-quiet" id="ayv-help-again">' .
             s($str('helpagain')) . '</button>
         <a class="ayv-button" href="' . $back->out() . '">' . s($str('helpback' . $piece)) . '</a></p>
@@ -91,7 +93,7 @@ $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
     '</button>' . (array_filter($voices) ? ' <button type="button" class="ayv-toggle" id="ayv-help-voice" aria-pressed="true">' .
     s($str('helpvoice')) . '</button>' : '') . '</p>
 </section>';
-shell::output($str('helptitle' . $piece), $main, $library, '', [
+shell::output($say('helptitle' . $piece), $main, $library, '', [
     'search' => false,
     'scripts' => ['help-pieces', 'help'],
     'nav' => [['url' => $back->out(false), 'label' => $str('helpback' . $piece)]],

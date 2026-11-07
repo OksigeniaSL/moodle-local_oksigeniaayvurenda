@@ -42,10 +42,12 @@ final class screens {
     public static function home(\stdClass $library): array {
         global $USER;
         $corners = [];
+        // A reader of the flower is not told how many books each corner has: a number of seven hundred says nothing at six.
+        $young = characters::young((int) $library->entityid);
         foreach (catalogue::corners($library) as $corner) {
             $corners[] = $corner + [
                 'url' => self::url('search.php', $library, ['corner' => $corner['code']]),
-                'countlabel' => self::str($corner['count'] === 1 ? 'onebook' : 'books', $corner['count']),
+                'countlabel' => $young ? '' : self::str($corner['count'] === 1 ? 'onebook' : 'books', $corner['count']),
                 'art' => self::art('rincon-' . preg_replace('/[^a-z0-9]/', '', \core_text::strtolower((string) $corner['code']))),
             ];
         }
@@ -909,7 +911,7 @@ final class screens {
                 'speakrecord' => self::str('reviewspeakrecord'),
                 'speakstop' => self::str('reviewspeakstop'),
                 'speakagain' => self::str('reviewspeakagain'),
-                'speakhint' => self::str('reviewspeakhint'),
+                'speakhint' => self::said($library, 'reviewspeakhint'),
                 'speaknomic' => self::str('reviewspeaknomic'),
                 'myvoice' => $mine ? reviews::voice((int) $mine->id) : null,
                 'myvoicelabel' => self::str('reviewvoicemine'),
@@ -1008,9 +1010,10 @@ final class screens {
         ), true) ?: [];
         $stagename = $member ? (string) $member->stage : '';
         $group = $member ? (string) $member->groupname : '';
+        [$guess, $centre] = cards::base($reader, $stagename, $group, $settings);
         $look = \local_oksigeniaayvurenda\core\card_look::resolve(
-            \local_oksigeniaayvurenda\core\card_look::guess($reader->readertype, $stagename, $group),
-            $settings['cardlooks'][$stagename] ?? null,
+            $guess,
+            $centre,
             get_user_preferences('local_oksigeniaayvurenda_cardlook') ?: null
         );
         $stage = $album['flower']['stage'];

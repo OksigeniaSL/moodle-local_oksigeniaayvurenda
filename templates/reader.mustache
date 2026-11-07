@@ -23,7 +23,8 @@
     Context variables required for this template:
     * name, hasphoto, photo, initial, type, facts (fact), tutorof (label, url), cardcode, barcode, since, gone, drawing,
       stagename; backurl, backlabel, profileback: the way back; historyurl, historylabel: everything they took out
-    * canedit, hasaccount, formfirst, formlast, formemail, formhastypes, formtypes, formgroups, formlocked, formhasgroups, formcanteach,
+    * canedit, hasaccount, formfirst, formlast, formemail, formhastypes, formtypes, formhasbands, formbands, formgroups, formlocked,
+    * formhasgroups, formcanteach,
       formtutors: what the staff can change; gonenow, stayaccount, canmatch, cantwin: whether they still come
     * loans - title, url, hascover, coverurl, colour, due, library, late; hasloans
     * holds - title, state; hasholds
@@ -100,6 +101,7 @@
         {{/hasaccount}}
         {{#hasaccount}}<p class="ayv-field-hint">{{profiledataaccount}}</p>{{/hasaccount}}
         {{#formhastypes}}<label class="ayv-field">{{profiledatatype}} <select name="newtype">{{#formtypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtypes}}</select></label>{{/formhastypes}}
+        {{#formhasbands}}<label class="ayv-field">{{profiledataband}} <select name="newband">{{#formbands}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formbands}}</select></label>{{/formhasbands}}
         {{#formlocked}}<p class="ayv-field-hint">{{formlocked}}</p>{{/formlocked}}
         {{^formlocked}}{{#formhasgroups}}<label class="ayv-field">{{profiledatagroup}} <select name="newgroup"><option value="">{{profiledatanogroup}}</option>{{#formgroups}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/formgroups}}</select></label>{{/formhasgroups}}{{/formlocked}}
         {{#formcanteach}}<label class="ayv-field">{{profiledatatutor}} <select name="tutorof"><option value="">{{profiledatatutornone}}</option>{{#formtutors}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtutors}}</select></label>

@@ -37,35 +37,56 @@ final class card_look {
     /** @var string[] What a reader may choose for themselves (not with the flower). */
     public const OWN = ['sky', 'classic', 'none'];
 
+    /** @var string Words of the youngest, whatever the country calls them (Infantil and Primaria, nursery and
+     * kindergarten, reception, the French cycles, the Colombian jardín and transición, a public library's children). */
+    private const YOUNG = 'infantil|primaria|preescolar|kinder|kindergarten|nursery|primary|elementary|inf|pri|ei|ep|reception|'
+        . 'jardin|prejardin|transicion|parvulario|maternelle|elementaire|grundschule|cp|ce1|ce2|cm1|cm2|bebeteca|cuentacuentos';
+
+    /** @var string Words of a grade counted by its number (Grado 2, Grade 7, Year 10, Klasse 3a, 4.º Básico). */
+    private const NUMBERED = 'grado|grade|grades|year|yr|klasse|class|classe|clase|curso|basico|basica|ano|anno|ciclo basico';
+
+    /** @var string Words of adults. */
+    private const ADULT = 'bachillerato|bachiller|bac|fp|ciclo formativo|formativo|cfgm|cfgs|universidad|university|facultad|'
+        . 'master|adultos|adults|adultas|mayores|senior|seniors|senioren|empleados|staff';
+
     /**
-     * The look by what the centre calls the stage and the group; teachers, staff and families, none.
+     * The look by what the centre calls the stage and the group; teachers, staff and families, none. What it does not
+     * recognise gets the look given for that ($unknown): the lively sky in a school, the sober one where readers are
+     * grown-ups.
      *
      * @param string $readertype
      * @param string $stage
      * @param string $group
+     * @param string $unknown
      * @return string
      */
-    public static function guess(string $readertype, string $stage, string $group): string {
+    public static function guess(string $readertype, string $stage, string $group, string $unknown = 'sky'): string {
         if ($readertype !== 'student') {
             return 'none';
         }
         $words = ' ' . text::normalise($stage . ' ' . $group) . ' ';
-        if (preg_match('/ (infantil|primaria|preescolar|kinder|kindergarten|nursery|primary|elementary|inf|pri|ei|ep) /', $words)) {
+        // The first number of the group or the stage is its grade (the letter of «4º ESO A2» is not).
+        $number = preg_match('/\d+/', $group . ' ' . $stage, $matches) ? (int) $matches[0] : null;
+        if (preg_match('/ (' . self::YOUNG . ') /', $words)) {
             return 'flower';
         }
-        if (preg_match('/ (eso|secundaria|secondary|sec) /', $words)) {
+        if (preg_match('/ (eso|secundaria|secondary|sec|middle) /', $words)) {
             // First and second of secondary are twelve to fourteen.
-            return preg_match('/(^|\D)([12])(\D|$)/', $group . ' ' . $stage, $matches) ? 'sky' : 'skysober';
+            return in_array($number, [1, 2], true) ? 'sky' : 'skysober';
         }
-        if (
-            preg_match(
-                '/ (bachillerato|bachiller|bac|fp|ciclo|grado|universidad|university|facultad|master|adultos|adults) /',
-                $words
-            )
-        ) {
+        // A university degree («Grado en Historia») and the grown-ups.
+        if (preg_match('/ grado en /', $words) || preg_match('/ (' . self::ADULT . ') /', $words)) {
             return 'skysober';
         }
-        return 'sky';
+        // Collège in France: sixième to quatrième, twelve to fourteen; troisième, fifteen.
+        if (preg_match('/ ([3-6])eme /', $words, $french)) {
+            return (int) $french[1] === 3 ? 'skysober' : 'sky';
+        }
+        // A grade by its number, as most of the world counts: up to sixth, the flower; seventh to ninth, the lively sky.
+        if ($number !== null && preg_match('/ (' . self::NUMBERED . ') /', $words)) {
+            return $number <= 6 ? 'flower' : ($number <= 9 ? 'sky' : 'skysober');
+        }
+        return in_array($unknown, self::LOOKS, true) ? $unknown : 'sky';
     }
 
     /**

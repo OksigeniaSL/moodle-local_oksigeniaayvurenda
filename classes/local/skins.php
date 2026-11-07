@@ -68,6 +68,8 @@ final class skins {
         'public' => ['public', 'lay', 'secondary'],
         'company' => ['company', 'lay', 'university'],
         'mobile' => ['mobile', 'public', 'lay', 'secondary'],
+        // A university has its own words for many things; for the rest, the plain ones of grown-ups, not the school's.
+        'university' => ['university', 'lay'],
     ];
 
     /** @var string[] The skins with no classes nor tutors: each reader is told about their own books. */
@@ -168,6 +170,19 @@ final class skins {
      */
     public static function words(int $entityid, string $key): string {
         $skin = self::of($entityid);
+        // A young reader of a library of every age (public, mobile) reads the school's words, which are the ones its
+        // voices say; the grown-ups, the library's.
+        if (in_array($skin, self::FIGURES_YOUNG, true) && characters::young($entityid)) {
+            return $key;
+        }
+        // In a school with secondary, a reader past the flower reads the secondary school's words where there are some:
+        // a fourteen-year-old is not spoken to as an infant.
+        if (
+            $skin === self::SKINS[0] && characters::step($entityid) === 'cielo'
+                && get_string_manager()->string_exists($key . 'secondary', 'local_oksigeniaayvurenda')
+        ) {
+            return $key . 'secondary';
+        }
         foreach (self::TONES[$skin] ?? [$skin] as $tone) {
             if ($tone !== self::SKINS[0] && get_string_manager()->string_exists($key . $tone, 'local_oksigeniaayvurenda')) {
                 return $key . $tone;
@@ -236,5 +251,16 @@ final class skins {
      */
     public static function forget(int $entityid): void {
         \cache::make('local_oksigeniaayvurenda', 'access')->delete_many(['skin_' . $entityid, 'play_' . $entityid]);
+    }
+
+    /**
+     * The card of a reader whose group does not say their age: the lively sky in a school or a secondary school, the
+     * sober one where readers are grown-ups or of every age (a little one in the children's room is recognised by it).
+     *
+     * @param int $entityid
+     * @return string
+     */
+    public static function unknown_look(int $entityid): string {
+        return in_array(self::of($entityid), ['school', 'secondary'], true) ? 'sky' : 'skysober';
     }
 }

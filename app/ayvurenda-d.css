@@ -211,7 +211,7 @@ html[data-bs-theme="dark"] .ayv .ayv-epub {
 .ayv .ayv-facets { display: grid; gap: .55rem; margin: 0 0 1.75rem; padding: .9rem 1.1rem; border-radius: 18px; background: var(--surface); box-shadow: var(--ayv-shadow); }
 .ayv .ayv-facet { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0; }
 .ayv .ayv-facet-label { flex: 0 0 7rem; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ayv-muted); }
-.ayv .ayv-facet .ayv-chip { min-height: 36px; padding: .2rem .75rem; background: var(--paper2); box-shadow: none; }
+.ayv .ayv-facet .ayv-chip { min-height: 44px; padding: .2rem .75rem; background: var(--paper2); box-shadow: none; }
 .ayv .ayv-facet .ayv-chip:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .ayv .ayv-chip-count { margin-left: .4rem; padding: 0 .45rem; border-radius: 999px; background: var(--surface); color: var(--ayv-muted);
     font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; }

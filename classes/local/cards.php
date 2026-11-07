@@ -56,13 +56,37 @@ final class cards {
             ['id' => $reader->entityid]
         ), true) ?: [];
         $stage = $member ? (string) $member->stage : '';
-        $own = $reader->userid ? get_user_preferences('local_oksigeniaayvurenda_cardlook', null, (int) $reader->userid) : null;
+        $own = !empty($reader->userid)
+            ? get_user_preferences('local_oksigeniaayvurenda_cardlook', null, (int) $reader->userid) : null;
         $group = $member ? (string) $member->groupname : '';
-        return \local_oksigeniaayvurenda\core\card_look::resolve(
-            \local_oksigeniaayvurenda\core\card_look::guess($reader->readertype, $stage, $group),
-            $settings['cardlooks'][$stage] ?? null,
-            $own ?: null
-        );
+        [$guess, $centre] = self::base($reader, $stage, $group, $settings);
+        return \local_oksigeniaayvurenda\core\card_look::resolve($guess, $centre, $own ?: null);
+    }
+
+    /** @var string[] The age bands a centre can give a reader. */
+    public const BANDS = ['flower', 'sky', 'skysober'];
+
+    /**
+     * Where a reader's look starts: their age band when the centre said it (above the stage's choice), else what their
+     * stage and group say and the centre's choice for the stage.
+     *
+     * @param \stdClass $reader With readertype, entityid and, if known, band.
+     * @param string $stage
+     * @param string $group
+     * @param array $settings The centre's settings.
+     * @return array [the guess, the centre's choice or null].
+     */
+    public static function base(\stdClass $reader, string $stage, string $group, array $settings): array {
+        $band = (string) ($reader->band ?? '');
+        if ($reader->readertype === 'student' && in_array($band, self::BANDS, true)) {
+            return [$band, null];
+        }
+        return [\local_oksigeniaayvurenda\core\card_look::guess(
+            $reader->readertype,
+            $stage,
+            $group,
+            skins::unknown_look((int) $reader->entityid)
+        ), $settings['cardlooks'][$stage] ?? null];
     }
 
     /**

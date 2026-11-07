@@ -56,6 +56,7 @@ class provider implements
             'userid' => 'privacy:metadata:reader:userid',
             'cardcode' => 'privacy:metadata:reader:cardcode',
             'readertype' => 'privacy:metadata:reader:readertype',
+            'band' => 'privacy:metadata:reader:band',
             'firstname' => 'privacy:metadata:reader:firstname',
             'lastname' => 'privacy:metadata:reader:lastname',
             'email' => 'privacy:metadata:reader:email',
@@ -434,6 +435,7 @@ class provider implements
                 (object) [
                     'cardcode' => $reader->cardcode,
                     'readertype' => $reader->readertype,
+                    'band' => $reader->band ?? null,
                     'firstname' => $reader->firstname,
                     'lastname' => $reader->lastname,
                     'email' => $reader->email,

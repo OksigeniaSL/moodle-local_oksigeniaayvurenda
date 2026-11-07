@@ -122,7 +122,7 @@ if ($id) {
         'sesskey' => sesskey(),
         'count' => $str('lotcount', count($copies)),
         'copies' => array_map(fn($c) => $c + ['state' => $c['home'] ? $str('lothome') : ($c['status'] === 'onloan'
-            ? $str('lotlent') : '')], $copies),
+            ? \local_oksigeniaayvurenda\local\skins::say((int) $library->entityid, 'lotlent') : '')], $copies),
         'pending' => $lot->status === 'back' ? array_map(fn($p) => ['line' => $p['who'] !== ''
             ? $str('lotpendingwho', (object) $p) : $p['title']], lots::pending($lot)) : [],
     ];
@@ -154,7 +154,11 @@ $row = fn(array $e) => [
     'state' => $str('lotstate' . $e['lot']->status, (object) ['due' => $date($e['lot']->timedue) ?: '—',
         'late' => $e['lot']->status === 'out' && $e['lot']->timedue && $e['lot']->timedue < $now]),
     'late' => $e['lot']->status === 'out' && $e['lot']->timedue && $e['lot']->timedue < $now,
-    'counts' => $str('lotcounts', (object) ['copies' => $e['copies'], 'lent' => $e['lent'], 'missing' => $e['missing']]),
+    'counts' => \local_oksigeniaayvurenda\local\skins::say(
+        (int) $library->entityid,
+        'lotcounts',
+        (object) ['copies' => $e['copies'], 'lent' => $e['lent'], 'missing' => $e['missing']]
+    ),
     'other' => format_string($others[$e['lot']->libraryid === $library->id ? $e['lot']->tolibraryid : $e['lot']->libraryid]
         ?? '', true, ['escape' => false]),
 ];

@@ -95,7 +95,7 @@ final class howto {
 
     /** @var string[] The tasks that need classes, or courses, to mean anything. */
     private const ONLY_WITH = ['myclass' => 'classes', 'wishes' => 'classes', 'tutors' => 'classes', 'bank' => 'classes',
-        'bankround' => 'classes', 'readings' => 'courses', 'roster' => 'courses'];
+        'bankround' => 'classes', 'readings' => 'courses', 'roster' => 'courses', 'shareclass' => 'courses'];
 
     /** @var array[] Each guided help: the permission it needs, the screen it plays on and how many steps it says. */
     public const PIECES = [
@@ -279,7 +279,7 @@ final class howto {
         $str = fn(string $k) => get_string($k, 'local_oksigeniaayvurenda');
         return [
             'key' => $key,
-            'title' => $str('howto' . $key),
+            'title' => skins::say((int) $library->entityid, 'howto' . $key),
             'steps' => array_map('trim', explode('|', skins::say((int) $library->entityid, 'howto' . $key . 'steps'))),
             'words' => $str('howto' . $key . 'words'),
             'url' => (new \moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false),

@@ -117,6 +117,16 @@ final class characters {
     }
 
     /**
+     * Whether whoever is looking is a young reader of the centre, with the flower's card.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function young(int $entityid): bool {
+        return self::looker($entityid) === 'young';
+    }
+
+    /**
      * Who is looking, for the characters: a reader of the centre with the flower's card (young), one with another
      * (grown), or nobody of the centre (none: the staff, whoever comes without an account).
      *
