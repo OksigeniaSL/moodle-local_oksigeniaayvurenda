@@ -51,6 +51,21 @@ if (data_submitted() && confirm_sesskey()) {
     if ($action === 'sync') {
         $stats = cohorts::sync($entityid, null, true);
         $notice = $str('yearsynced', (object) $stats) . plans::left_out($stats);
+    } else if ($action === 'closedadd') {
+        $ok = \local_oksigeniaayvurenda\local\closures::add(
+            $entityid,
+            optional_param('from', '', PARAM_RAW_TRIMMED),
+            optional_param('to', '', PARAM_RAW_TRIMMED),
+            optional_param('label', '', PARAM_TEXT)
+        );
+        $notice = $str($ok ? 'closuresadded' : 'closuresbad', \local_oksigeniaayvurenda\local\closures::LONGEST);
+    } else if ($action === 'closedremove') {
+        \local_oksigeniaayvurenda\local\closures::remove(
+            $entityid,
+            optional_param('from', '', PARAM_RAW_TRIMMED),
+            optional_param('to', '', PARAM_RAW_TRIMMED)
+        );
+        $notice = $str('closuresremoved');
     } else if ($action === 'start') {
         $ok = year_change::set_start($entityid, optional_param('month', 0, PARAM_INT), optional_param('day', 0, PARAM_INT));
         $notice = $str($ok ? 'sourcessaved' : 'yearbadday');
@@ -100,8 +115,37 @@ $months = [];
 for ($m = 1; $m <= 12; $m++) {
     $months[] = ['value' => $m, 'label' => userdate(make_timestamp(2001, $m, 15, 12), '%B'), 'selected' => $m === $month];
 }
+// The days the centre is closed: what is to come first, and what passed, faded.
+$today = zones::date(time(), '%Y-%m-%d', $library);
+$closures = array_map(function ($range) use ($library, $str, $today) {
+    $day = fn(string $d) => zones::date(
+        (new DateTimeImmutable($d . ' 12:00', zones::of($library)))->getTimestamp(),
+        'strftimedate',
+        $library
+    );
+    return $range + [
+        'name' => $range['label'] !== '' ? $range['label'] : $str('closuresnoname'),
+        'when' => $range['from'] === $range['to'] ? $day($range['from'])
+            : $str('closuresrange', (object) ['from' => $day($range['from']), 'to' => $day($range['to'])]),
+        'past' => $range['to'] < $today,
+    ];
+}, \local_oksigeniaayvurenda\local\closures::of($entityid));
 $data = [
     'heading' => $str('yearheading', $year->name),
+    'closures' => $closures,
+    'hasclosures' => (bool) $closures,
+    'closuresheading' => $str('closuresheading'),
+    'closuresintro' => $str('closuresintro'),
+    'closuresnone' => $str('closuresnone'),
+    'closuresadd' => $str('closuresadd'),
+    'closuresremove' => $str('closuresremove'),
+    'closuresname' => $str('closuresname'),
+    'closuresnamehint' => $str('closuresnamehint'),
+    'closuresfrom' => $str('closuresfrom'),
+    'closuresto' => $str('closuresto'),
+    'closuressave' => $str('closuressave'),
+    'closuresclose' => $str('offsiteclose'),
+    'closurestoday' => $today,
     'dates' => $str('yeardates', (object) ['start' => $date((int) $year->timestart),
         'end' => $date((int) $year->timeend - DAYSECS)]),
     'notice' => $notice,

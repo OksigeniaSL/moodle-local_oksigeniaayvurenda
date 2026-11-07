@@ -57,6 +57,9 @@ final class selfloan {
     /** @var int Seconds in which reading a book just taken again is a double read, not giving it back. */
     public const DOUBLE = 300;
 
+    /** @var int Seconds a book taken at a post is still «yours» there when read again with no card (to see that it went). */
+    public const DOUBLE_ALONE = 900;
+
     /** @var int Days of what a post did that are gone over. */
     public const DAYS = 7;
 
@@ -285,6 +288,18 @@ final class selfloan {
             if ($open && $holder && (int) $open->readerid === $holder && $now - (int) $open->timeloaned < self::DOUBLE) {
                 $due = self::date((int) $open->timedue, $library);
                 return self::say('look', 'selfalready', (object) ['title' => $title, 'due' => $due]);
+            }
+            // Read again at this same post soon after, with no card: whoever took it is checking it went, not returning it.
+            if (
+                $open && !$holder && (int) ($open->postid ?? 0) === (int) $post->id
+                && $now - (int) $open->timeloaned < self::DOUBLE_ALONE
+            ) {
+                $due = self::date((int) $open->timedue, $library);
+                return self::say('look', 'selfalready', (object) ['title' => $title, 'due' => $due]);
+            }
+            // A loan noted by its title, without knowing which copy went: the desk sorts out which one this is.
+            if ($open && !empty($open->copyguessed)) {
+                return self::say('no', 'selfasks', $title);
             }
             if (!self::settings($library)['returns']) {
                 return self::say('no', 'selfnoreturn', $title);

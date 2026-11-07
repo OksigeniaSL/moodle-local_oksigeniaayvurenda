@@ -206,8 +206,90 @@ final class notices {
             'prefs' => true,
         ]);
         force_current_language($language);
+        // A young reader does not read these: their family hears it too.
+        if ($reader && cards::look_of($reader, $now) === 'flower') {
+            self::tell_family($user, $list, $entityid);
+        }
         [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
         $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
+        return $told;
+    }
+
+    /**
+     * Tells the family of a young reader which books are late, where the site keeps its families (Oksigenia Family):
+     * through their account, or to their e-mail if they have none.
+     *
+     * @param \stdClass $child The reader's account.
+     * @param \stdClass[] $list Their late loans (title, timedue, recordid, library, slug).
+     * @param int $entityid
+     * @return int How many adults were told.
+     */
+    public static function tell_family(\stdClass $child, array $list, int $entityid): int {
+        global $DB;
+        if (!class_exists('\\local_oksigeniafamily\\api') || !$list || practice::is($entityid) || access::closed($entityid)) {
+            return 0;
+        }
+        $library = $DB->get_record(self::T . 'library', ['slug' => $list[0]->slug]);
+        $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $list[0]->slug]))->out(false);
+        $told = 0;
+        $seen = [];
+        foreach (\local_oksigeniafamily\api::adults_of_child((int) $child->id) as $adult) {
+            $user = $adult->userid ? \core_user::get_user((int) $adult->userid) : null;
+            if ($user && (!empty($user->deleted) || !empty($user->suspended))) {
+                continue;
+            }
+            $email = trim((string) $adult->email);
+            if (!$user && !validate_email($email)) {
+                continue;
+            }
+            // One message each, even if they are in the family twice.
+            $key = $user ? 'u' . $user->id : 'e' . \core_text::strtolower($email);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $language = force_current_language((string) ($user->lang ?? ''));
+            $one = count($list) === 1;
+            $lines = [];
+            $rows = [];
+            foreach ($list as $loan) {
+                $due = zones::date((int) $loan->timedue, 'strftimedateshort', $entityid);
+                $lines[] = get_string('noticereaderline', 'local_oksigeniaayvurenda', (object) ['title' => $loan->title,
+                    'due' => $due]);
+                $rows[] = ['line' => get_string('noticereaderdue', 'local_oksigeniaayvurenda', $due), 'urgent' => true]
+                    + mail::book((int) $loan->recordid, $loan->title);
+            }
+            $a = (object) ['child' => $child->firstname, 'books' => implode("\n", $lines),
+                'library' => format_string($list[0]->library, true, ['escape' => false])];
+            $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda', $a);
+            $subject = $str($one ? 'noticefamilysubject' : 'noticefamilysubjectmany');
+            $hello = get_string('mailhello', 'local_oksigeniaayvurenda', $adult->firstname);
+            $design = [
+                'library' => $library,
+                'entityid' => $entityid,
+                'hello' => $hello,
+                'heading' => $subject,
+                'lead' => [$str($one ? 'noticefamilylead' : 'noticefamilyleadmany')],
+                'books' => $rows,
+                'button' => ['url' => $url, 'text' => get_string('noticereaderbutton', 'local_oksigeniaayvurenda')],
+                'after' => [$str($one ? 'noticefamilyafter' : 'noticefamilyaftermany')],
+                'why' => get_string('mailwhyfamily', 'local_oksigeniaayvurenda'),
+            ];
+            $text = $hello . "\n\n" . $str($one ? 'noticefamilylead' : 'noticefamilyleadmany') . "\n" . $a->books . "\n\n"
+                . $str($one ? 'noticefamilyafter' : 'noticefamilyaftermany');
+            if ($user) {
+                $sent = self::send('overdue', $user, $subject, $text, $url, $a->library, $a->library, $design + ['prefs' => true]);
+            } else {
+                $to = clone \core_user::get_noreply_user();
+                $to->email = $email;
+                $to->firstname = (string) $adult->firstname;
+                $to->lastname = (string) $adult->lastname;
+                $to->mailformat = 1;
+                $sent = (bool) email_to_user($to, mail::from($a->library), $subject, $text, mail::html($design));
+            }
+            force_current_language($language);
+            $told += $sent ? 1 : 0;
+        }
         return $told;
     }
 

@@ -74,21 +74,25 @@ final class loan_rules {
     }
 
     /**
-     * The due moment: the end of the day the given days later, moved to the next Monday when it falls on a weekend.
+     * The due moment: the end of the day the given days later, moved to the next open day when it falls on a weekend
+     * or on a day the centre is closed.
      *
      * @param int $from
      * @param int $days
      * @param \DateTimeZone $tz
      * @param bool $skipweekend
+     * @param array $closed The centre's closed days, 'Y-m-d' => true.
      * @return int
      */
-    public static function due(int $from, int $days, \DateTimeZone $tz, bool $skipweekend = true): int {
+    public static function due(int $from, int $days, \DateTimeZone $tz, bool $skipweekend = true, array $closed = []): int {
         $date = (new \DateTimeImmutable('@' . $from))->setTimezone($tz)->modify('+' . $days . ' days');
-        if ($skipweekend) {
-            $weekday = (int) $date->format('N');
-            if ($weekday >= 6) {
-                $date = $date->modify('+' . (8 - $weekday) . ' days');
+        // A year of holidays at most: past it, the day as it fell.
+        for ($i = 0; $i < 366; $i++) {
+            $weekend = $skipweekend && (int) $date->format('N') >= 6;
+            if (!$weekend && !isset($closed[$date->format('Y-m-d')])) {
+                break;
             }
+            $date = $date->modify('+1 day');
         }
         return $date->setTime(23, 59, 59)->getTimestamp();
     }
@@ -111,10 +115,11 @@ final class loan_rules {
      * @param int $now
      * @param array $rule
      * @param \DateTimeZone $tz
+     * @param array $closed The centre's closed days, 'Y-m-d' => true.
      * @return int
      */
-    public static function renewed_due(int $currentdue, int $now, array $rule, \DateTimeZone $tz): int {
-        return self::due(max($currentdue, $now), (int) $rule['renewdays'], $tz);
+    public static function renewed_due(int $currentdue, int $now, array $rule, \DateTimeZone $tz, array $closed = []): int {
+        return self::due(max($currentdue, $now), (int) $rule['renewdays'], $tz, true, $closed);
     }
 
     /**

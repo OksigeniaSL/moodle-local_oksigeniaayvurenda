@@ -175,6 +175,37 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * A young reader's family hears of the late books too, through their account or to their e-mail, once each.
+     */
+    public function test_family(): void {
+        global $CFG, $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        if (!class_exists('\\local_oksigeniafamily\\api')) {
+            require_once($CFG->dirroot . '/local/oksigeniaayvurenda/tests/fixtures/family_api.php');
+        }
+        [$library, $year, $now, $readers] = $this->library();
+        $ana = $DB->get_record(self::T . 'reader', ['id' => $readers['ana']->id]);
+        $this->assertSame('flower', cards::look_of($ana, $now));
+        $mother = $this->getDataGenerator()->create_user(['firstname' => 'Rosa']);
+        $family = \local_oksigeniafamily\api::create_family();
+        \local_oksigeniafamily\api::add_adult($family, ['firstname' => 'Rosa', 'email' => $mother->email,
+            'userid' => (int) $mother->id]);
+        \local_oksigeniafamily\api::add_adult($family, ['firstname' => 'Iván', 'email' => 'ivan.familia@example.org']);
+        \local_oksigeniafamily\api::add_child($family, (int) $ana->userid);
+        $messages = $this->redirectMessages();
+        $emails = $this->redirectEmails();
+        notices::run($now);
+        $tomother = array_values(array_filter($messages->get_messages(), fn($m) => (int) $m->useridto === (int) $mother->id));
+        $this->assertCount(1, $tomother);
+        $this->assertStringContainsString('El faro dormido', $tomother[0]->fullmessage);
+        $toivan = array_values(array_filter($emails->get_messages(), fn($m) => $m->to === 'ivan.familia@example.org'));
+        $this->assertCount(1, $toivan);
+        $messages->close();
+        $emails->close();
+    }
+
+    /**
      * The textbooks of the bank are not late reading: they have the bank's own reminders, and never the late notice.
      */
     public function test_bank_books_apart(): void {

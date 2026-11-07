@@ -71,6 +71,16 @@ final class loan_rules_test extends \basic_testcase {
             (new \DateTimeImmutable('2026-10-24 23:59:59', $tz))->getTimestamp(),
             loan_rules::due($monday, 5, $tz, false)
         );
+        // Closed from Monday 26 to Wednesday 28: it falls due on Thursday 29; and a closed Monday after a weekend, Tuesday.
+        $closed = ['2026-10-26' => true, '2026-10-27' => true, '2026-10-28' => true];
+        $this->assertSame(
+            (new \DateTimeImmutable('2026-10-29 23:59:59', $tz))->getTimestamp(),
+            loan_rules::due($monday, 5, $tz, true, $closed)
+        );
+        $this->assertSame(
+            (new \DateTimeImmutable('2026-10-27 23:59:59', $tz))->getTimestamp(),
+            loan_rules::due($monday, 5, $tz, true, ['2026-10-26' => true])
+        );
     }
 
     /**

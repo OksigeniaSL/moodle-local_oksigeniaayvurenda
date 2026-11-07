@@ -251,7 +251,13 @@ final class holds {
         $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $item->libraryid]);
         $days = self::settings($entityid)['days'];
         $DB->update_record(self::T . 'hold', (object) ['id' => $first->id, 'status' => 'ready', 'itemid' => $item->id,
-            'timeready' => $now, 'timeexpires' => loan_rules::due($now, $days, zones::of($entityid)),
+            'timeready' => $now, 'timeexpires' => loan_rules::due(
+                $now,
+                $days,
+                zones::of($entityid),
+                true,
+                closures::days($entityid, $now)
+            ),
             'timenotified' => null, 'timemodified' => $now]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'held', 'timemodified' => $now]);
         // The message waits a little: an «Undo» at the desk right after takes it back before it goes.
@@ -517,6 +523,10 @@ final class holds {
             ]
         );
         force_current_language($language);
+        // Taken as told when it went; one that did not go (the mail failed) is tried again in the next morning.
+        if (!$sent) {
+            $DB->set_field(self::T . 'hold', 'timenotified', null, ['id' => $hold->id]);
+        }
         return $sent;
     }
 

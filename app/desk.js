@@ -419,7 +419,8 @@
                     // A book chosen by its title goes the same way, now despite the reason.
                     choose({action: 'lendrecord', recordid: answer.recordid, readerid: answer.readerid || readerid, force: 1}, '');
                 } else {
-                    enqueue(answer.code, true);
+                    // To the reader of this line, not to whoever is open now (the next child in the queue).
+                    enqueue(answer.code, true, answer.readerid || 0);
                 }
             }));
         } else if (answer.kind === 'choose') {
@@ -682,7 +683,7 @@
     };
     var keep = function(job) {
         loadPending();
-        pending.push({code: job.code, force: job.force, readerid: readerid, forwhom: job.forwhom,
+        pending.push({code: job.code, force: job.force, readerid: job.readerid || readerid, forwhom: job.forwhom,
             at: job.at || Math.floor(Date.now() / 1000)});
         keepPending();
         tone('look');
@@ -690,6 +691,9 @@
     };
     var replayed = function() {
         var reader = pending[0].readerid || 0;
+        // The reader each scan was kept with: when it changes between two (the librarian closed one, opened another by
+        // name), that one counts; else the reader the server opened with a card read meanwhile.
+        var kept = reader;
         var passed = 0;
         var step = function() {
             loadPending();
@@ -704,6 +708,10 @@
                 return null;
             }
             var job = pending[0];
+            if ((job.readerid || 0) !== kept) {
+                kept = job.readerid || 0;
+                reader = kept;
+            }
             return post({action: 'scan', code: job.code, readerid: reader, force: job.force ? 1 : 0, forwhom: job.forwhom ? 1 : 0,
                 at: job.at})
                 .then(function(answer) {
@@ -776,7 +784,8 @@
             next();
             return;
         }
-        post({action: 'scan', code: job.code, readerid: readerid, force: job.force ? 1 : 0, forwhom: job.forwhom ? 1 : 0})
+        post({action: 'scan', code: job.code, readerid: job.readerid || readerid, force: job.force ? 1 : 0,
+            forwhom: job.forwhom ? 1 : 0})
             .then(function(answer) {
                 add(answer, job.code);
                 return answer;
@@ -798,8 +807,8 @@
             });
     };
 
-    var enqueue = function(code, force) {
-        queue.push({code: code, force: !!force});
+    var enqueue = function(code, force, forreader) {
+        queue.push({code: code, force: !!force, readerid: forreader || 0});
         next();
     };
 

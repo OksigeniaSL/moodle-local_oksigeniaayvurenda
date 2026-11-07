@@ -281,6 +281,68 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * What changed since is not undone: a return undone, or a returned loan renewed, after another reader took the copy;
+     * a loan undone after the book came back; a renewal undone with a date that was not this loan's.
+     */
+    public function test_what_changed_is_not_undone(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $desk = new desk($w->library, (int) $w->staff->id);
+        $ana = $desk->scan('100000L', (int) $w->ana->id);
+        $this->assertSame('returned', $desk->scan('100000L')['kind']);
+        $leo = $desk->scan('100000L', (int) $w->leo->id);
+        $this->assertSame('lent', $leo['kind']);
+        $this->assertSame('stop', $desk->undo((int) $ana['loanid'], 'returned')['kind']);
+        $this->assertSame('stop', $desk->renew((int) $ana['loanid'])['kind']);
+        $this->assertNull($desk->renewable((int) $ana['loanid']));
+        $this->assertSame(1, $DB->count_records_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$w->faro->id]));
+        $this->assertSame('returned', $desk->scan('100000L')['kind']);
+        $this->assertSame('stop', $desk->undo((int) $leo['loanid'], 'lent')['kind']);
+        $this->assertTrue($DB->record_exists(self::T . 'loan', ['id' => $leo['loanid']]));
+
+        $isla = $desk->scan('100001C', (int) $w->ana->id);
+        $this->assertSame('lent', $isla['kind']);
+        $renewed = $desk->renew((int) $isla['loanid']);
+        $this->assertSame('renewed', $renewed['kind']);
+        $this->assertSame('stop', $desk->undo((int) $isla['loanid'], 'renewed', 1)['kind']);
+        $this->assertSame('undone', $desk->undo((int) $isla['loanid'], 'renewed', (int) $renewed['previousdue'])['kind']);
+    }
+
+    /**
+     * The limit counts what is out under the same rules: not the textbooks of the bank; a reader who left, or whose card
+     * is on hold, is stopped (the librarian may go ahead); and a copy of a classroom lent at the central desk is the
+     * classroom's loan.
+     */
+    public function test_limit_inactive_and_library(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $bank = $gen->create_library(['entityid' => $w->library->entityid, 'kind' => bank::KIND]);
+        $textbook = $gen->create_item(['libraryid' => $bank->id, 'barcode' => 'BANK1']);
+        $gen->create_loan(['libraryid' => $bank->id, 'itemid' => $textbook->id, 'readerid' => $w->ana->id,
+            'yearid' => $w->year->id, 'timedue' => time() + 200 * DAYSECS]);
+        $desk = new desk($w->library, (int) $w->staff->id);
+        $this->assertSame('lent', $desk->scan('100000L', (int) $w->ana->id)['kind']);
+
+        $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $w->leo->id]);
+        $stopped = $desk->scan('100001C', (int) $w->leo->id);
+        $this->assertSame('inactive', $stopped['reason']);
+        $this->assertTrue($stopped['forceable']);
+        $this->assertSame('lent', $desk->scan('100001C', (int) $w->leo->id, true)['kind']);
+
+        $classroom = $gen->create_library(['entityid' => $w->library->entityid, 'kind' => 'classroom',
+            'parentid' => $w->library->id]);
+        $gen->create_item(['libraryid' => $classroom->id, 'barcode' => 'AULA1']);
+        $DB->set_field(self::T . 'reader', 'status', 'active', ['id' => $w->leo->id]);
+        $DB->delete_records(self::T . 'loan', ['readerid' => $w->leo->id]);
+        $lent = $desk->scan('AULA1', (int) $w->leo->id);
+        $this->assertSame('lent', $lent['kind']);
+        $this->assertEquals($classroom->id, $DB->get_field(self::T . 'loan', 'libraryid', ['id' => $lent['loanid']]));
+    }
+
+    /**
      * Two desks read the same copy at once: the one that comes second, with the copy it read still free, does not lend it
      * again.
      */

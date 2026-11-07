@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.177.0
+
+- Closed days: each centre names the days it is closed (holidays, a local festival, a move) on «School year»; nothing
+  lent or set aside falls due on them, it moves to the next open day, as weekends already did.
+- The family of a young reader hears of their late books too, where the site keeps its families (Oksigenia Family):
+  through their account, or by e-mail.
+- A «set aside for you» that could not be sent is tried again the next morning instead of being taken as told.
+- At the desk: a return undone, or a returned loan renewed, after another reader took the copy, is refused (it made two
+  open loans); so is undoing a loan of a book that came back, or a renewal with a date that was not its own.
+- The limit of loans counts what is out under the same rules: not the textbooks of a bank, nor the books of a classroom
+  with rules of its own.
+- A reader who left the centre, or whose card is on hold, is stopped at the desk; the librarian may go ahead.
+- A copy of another library of the centre lent at this desk is that library's loan.
+- «Lend anyway» on a red line lends to the reader of that line, not to whoever is open now; scans kept without a network
+  go to the reader each was kept with.
+- The self-loan station and SIP machines leave to the desk a copy whose loan was noted by its title; a book read again at
+  the same station soon after being taken, with no card, is still «yours» and is not returned.
+
 ## 0.176.0
 
 - The nightly notices go at eight in the morning of each centre's own zone, not of the server's: the task runs every hour

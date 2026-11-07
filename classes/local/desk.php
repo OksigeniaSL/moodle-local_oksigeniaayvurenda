@@ -67,6 +67,9 @@ final class desk {
     /** @var bool Whether the last search of readers found more than it shows. */
     private bool $morereaders = false;
 
+    /** @var array|null The centre's closed days, once read. */
+    private ?array $closeddays = null;
+
     /**
      * The desk of a library.
      *
@@ -920,11 +923,14 @@ final class desk {
             return $this->answer('stop', 'no', 'desknorenewreserve', $this->title($item), ['readerid' => (int) $reader->id]);
         }
         $previous = (int) $loan->timedue;
+        if ($loan->timereturned !== null && !$this->free_again($loan)) {
+            return $this->answer('stop', 'no', 'desktakenafter', $this->title($item), ['readerid' => (int) $reader->id]);
+        }
         if ($loan->timereturned !== null) {
             // Renewing right after the copy came back: it goes out again with the same loan.
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         }
-        $due = loan_rules::renewed_due($previous, $this->now, $rule, $this->tz);
+        $due = loan_rules::renewed_due($previous, $this->now, $rule, $this->tz, $this->closed());
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $due, 'timereturned' => null,
             'returnstaffid' => null, 'renewals' => $loan->renewals + 1, 'timemodified' => $this->now]);
         $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
@@ -946,11 +952,11 @@ final class desk {
         $rule = $this->rule($reader->readertype, $item->itemtype);
         if (
             !loan_rules::can_renew($rule, (int) $loan->renewals) || holds::blocks_renewal($item)
-            || reserves::active((int) $item->id, $this->now)
+            || reserves::active((int) $item->id, $this->now) || ($loan->timereturned !== null && !$this->free_again($loan))
         ) {
             return null;
         }
-        return loan_rules::renewed_due((int) $loan->timedue, $this->now, $rule, $this->tz);
+        return loan_rules::renewed_due((int) $loan->timedue, $this->now, $rule, $this->tz, $this->closed());
     }
 
     /**
@@ -999,6 +1005,17 @@ final class desk {
         global $DB;
         $loan = $this->loan($loanid);
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
+        // What changed since cannot be undone: a book that came back, one another reader took after, a date that was not
+        // this loan's.
+        $stale = ($what === 'lent' && $loan->timereturned !== null)
+            || ($what === 'returned' && ($loan->timereturned === null || !$this->free_again($loan)))
+            || ($what === 'lost' && $loan->conditionin !== 'lost')
+            || ($what === 'renewed' && ($loan->renewals < 1 || $previousdue <= (int) $loan->timeloaned
+                || $previousdue >= (int) $loan->timedue));
+        if ($stale) {
+            return $this->answer('stop', 'no', $what === 'returned' && $loan->timereturned !== null ? 'desktakenafter'
+                : 'deskundonotnow', $this->title($item), ['readerid' => (int) $loan->readerid]);
+        }
         $transaction = $DB->start_delegated_transaction();
         if ($what === 'lent' && $loan->timereturned === null) {
             // A loan that fulfilled a reservation leaves the copy set aside again; any other, back to the shelf, or to
@@ -1072,12 +1089,16 @@ final class desk {
             return $this->answer('unknown', 'no', 'deskotherreader');
         }
         $rule = $this->rule($reader->readertype, $item->itemtype);
+        // What counts against the limit (and what is late) is what is out of the libraries under the same rules: not the
+        // textbooks of a bank, nor the books of a classroom with rules of its own.
+        [$in, $params] = $DB->get_in_or_equal($this->same_rules(), SQL_PARAMS_NAMED, 'lib');
         $open = $DB->get_records_sql(
             'SELECT l.id, l.timedue, i.itemtype
                FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'item} i ON i.id = l.itemid
-              WHERE l.readerid = :readerid AND l.timereturned IS NULL',
-            ['readerid' => $readerid]
+              WHERE l.readerid = :readerid AND l.timereturned IS NULL AND l.libraryid ' . $in . '
+                    AND ' . bank::reading('l.libraryid'),
+            ['readerid' => $readerid] + $params
         );
         $samerule = 0;
         $late = 0;
@@ -1100,7 +1121,8 @@ final class desk {
             $late,
             $force,
             $set && (int) $set->readerid !== $readerid,
-            $sanction['reason'] ?? null
+            $sanction['reason'] ?? null,
+            $reader->status !== 'active'
         );
         if ($decision !== policy::OK) {
             $a = (object) ['title' => $this->title($item), 'max' => $rule['maxloans'] ?? 0,
@@ -1127,8 +1149,8 @@ final class desk {
         // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today).
         $reserve = reserves::active((int) $item->id, $this->now);
         $due = bank::is($this->library) ? (int) $year->timeend - 1
-            : ($reserve ? loan_rules::due($this->now, (int) $reserve->days, $this->tz, (int) $reserve->days > 0)
-            : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz));
+            : ($reserve ? loan_rules::due($this->now, (int) $reserve->days, $this->tz, (int) $reserve->days > 0, $this->closed())
+            : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz, true, $this->closed()));
         // Two desks (or a desk and a self-loan station) reading the same copy at once lend it once: the second waits for
         // the first and finds it out.
         $lock = \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock('lend_' . $item->id, 5);
@@ -1160,7 +1182,8 @@ final class desk {
         global $DB;
         $transaction = $DB->start_delegated_transaction();
         $loanid = $DB->insert_record(self::T . 'loan', [
-            'libraryid' => $this->library->id,
+            // The loan is of the copy's library, wherever the desk is: its lists, figures and challenges see it there.
+            'libraryid' => (int) ($item->libraryid ?? $this->library->id) ?: $this->library->id,
             'itemid' => $item->id,
             'readerid' => $readerid,
             'yearid' => $year->id,
@@ -1287,6 +1310,36 @@ final class desk {
     }
 
     /**
+     * The libraries of the centre that lend under the same rules as this one: those whose rules come from the same
+     * library up their chain (or all that have none, under the default ones).
+     *
+     * @return int[]
+     */
+    private function same_rules(): array {
+        global $DB;
+        $libraries = $DB->get_records(self::T . 'library', ['entityid' => $this->library->entityid], '', 'id, parentid');
+        $ruled = array_flip(array_map('intval', $DB->get_fieldset_sql(
+            'SELECT DISTINCT r.libraryid FROM {' . self::T . 'rule} r JOIN {' . self::T . 'library} b ON b.id = r.libraryid
+              WHERE b.entityid = ?',
+            [$this->library->entityid]
+        )));
+        $source = function (int $id) use ($libraries, $ruled): int {
+            $seen = [];
+            while ($id && isset($libraries[$id]) && !isset($seen[$id])) {
+                if (isset($ruled[$id])) {
+                    return $id;
+                }
+                $seen[$id] = true;
+                $id = (int) $libraries[$id]->parentid;
+            }
+            return 0;
+        };
+        $mine = $source((int) $this->library->id);
+        $same = array_values(array_filter(array_keys($libraries), fn($id) => $source((int) $id) === $mine));
+        return $same ?: [(int) $this->library->id];
+    }
+
+    /**
      * A reader's name, group this year and type.
      *
      * @param int $readerid
@@ -1336,7 +1389,33 @@ final class desk {
     }
 
     /**
-     * A loan of this library's entity.
+     * Whether a copy that came back with this loan can go out with it again (undo the return, renew it): nobody took it
+     * after, and it is on the shelf or set aside, as the self-loan station asks.
+     *
+     * @param \stdClass $loan
+     * @return bool
+     */
+    private function free_again(\stdClass $loan): bool {
+        global $DB;
+        return in_array($DB->get_field(self::T . 'item', 'status', ['id' => $loan->itemid]), ['available', 'held'], true)
+            && !$DB->record_exists_select(
+                self::T . 'loan',
+                'itemid = ? AND id <> ? AND (timereturned IS NULL OR timeloaned >= ?)',
+                [$loan->itemid, $loan->id, $loan->timeloaned]
+            );
+    }
+
+    /**
+     * The days the centre is closed, from today on (nothing falls due on them).
+     *
+     * @return array 'Y-m-d' => true.
+     */
+    private function closed(): array {
+        return $this->closeddays ??= closures::days((int) $this->library->entityid, $this->now);
+    }
+
+    /**
+     * A loan of the centre (of this library, for whoever only keeps it).
      *
      * @param int $loanid
      * @return \stdClass

@@ -300,6 +300,10 @@ final class sip {
             return ['ok' => false, 'title' => $title, 'message' => $str('selfmaterial', $title)];
         }
         $open = $DB->record_exists_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$item->id]);
+        // A loan noted by its title, without knowing which copy went: the desk sorts out which one this is.
+        if ($DB->record_exists_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL AND copyguessed = 1', [$item->id])) {
+            return ['ok' => false, 'title' => $title, 'message' => $str('selfasks', $title)];
+        }
         if (!$open) {
             // A pad reads a pile twice, and a machine that got no answer in time sends it again: it did come back.
             $again = $DB->record_exists_select(

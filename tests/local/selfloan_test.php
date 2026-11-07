@@ -129,6 +129,30 @@ final class selfloan_test extends \advanced_testcase {
     }
 
     /**
+     * A book read again at the same post soon after it was taken, with no card, is still «yours»; later, it comes back.
+     * A copy whose loan was noted by its title goes to the desk.
+     */
+    public function test_read_again_and_guessed(): void {
+        global $DB;
+        $w = $this->world();
+        selfloan::save_settings($w->library, ['returns' => 1] + selfloan::settings($w->library));
+        $card = $this->read($w, $w->ana->cardcode);
+        $this->assertSame('ok', $this->read($w, $w->faro->barcode, $card['ticket'])['sound']);
+        $w->now += 400;
+        $again = $this->read($w, $w->faro->barcode);
+        $this->assertSame('look', $again['sound']);
+        $this->assertSame(1, $DB->count_records_select(self::T . 'loan', 'timereturned IS NULL'));
+        $w->now += selfloan::DOUBLE_ALONE;
+        $this->assertSame('ok', $this->read($w, $w->faro->barcode)['sound']);
+        $this->assertSame(0, $DB->count_records_select(self::T . 'loan', 'timereturned IS NULL'));
+
+        $loan = $w->gen->create_loan(['libraryid' => $w->library->id, 'itemid' => $w->isla->id, 'readerid' => $w->leo->id]);
+        $DB->set_field(self::T . 'loan', 'copyguessed', 1, ['id' => $loan->id]);
+        $this->assertSame('no', $this->read($w, $w->isla->barcode)['sound']);
+        $this->assertNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $loan->id]));
+    }
+
+    /**
      * What the screen is told, whatever happens, never has anyone's surname, nor another person's name.
      */
     public function test_it_says_nothing_of_anyone(): void {
@@ -138,6 +162,7 @@ final class selfloan_test extends \advanced_testcase {
         $this->read($w, $w->faro->barcode, $ana['ticket']);
         // Leo has it set aside; Ana has another.
         $seen = [$ana, $this->read($w, $w->leo->cardcode)];
+        $w->now += selfloan::DOUBLE_ALONE;
         $seen[] = $this->read($w, $w->faro->barcode);
         $DB->insert_record(self::T . 'hold', ['libraryid' => $w->library->id, 'recordid' => $w->faro->recordid,
             'readerid' => $w->leo->id, 'status' => 'waiting', 'timecreated' => $w->now, 'timemodified' => $w->now]);
@@ -145,6 +170,7 @@ final class selfloan_test extends \advanced_testcase {
         $DB->set_field(self::T . 'item', 'status', 'available', ['id' => $w->faro->id]);
         $ana = $this->read($w, $w->ana->cardcode);
         $this->read($w, $w->faro->barcode, $ana['ticket']);
+        $w->now += selfloan::DOUBLE_ALONE;
         $seen[] = $held = $this->read($w, $w->faro->barcode);
         $this->assertSame('look', $held['sound'], 'someone waits for it');
         $DB->set_field(self::T . 'item', 'status', 'held', ['id' => $w->faro->id]);
@@ -176,6 +202,8 @@ final class selfloan_test extends \advanced_testcase {
         $this->assertSame('look', $this->read($w, $w->faro->barcode, $card['ticket'])['sound'], 'read twice in a row');
         $this->assertSame(1, $DB->count_records_select(self::T . 'loan', 'timereturned IS NULL'));
 
+        // A while later: read again right away with no card, it would only say it is hers.
+        $w->now += selfloan::DOUBLE_ALONE;
         selfloan::save_settings($w->library, ['stages' => [], 'returns' => false]);
         $this->assertSame('no', $this->read($w, $w->faro->barcode)['sound']);
         $this->assertSame(1, $DB->count_records_select(self::T . 'loan', 'timereturned IS NULL'));
@@ -263,7 +291,7 @@ final class selfloan_test extends \advanced_testcase {
         $card = $this->read($w, $w->ana->cardcode);
         $this->read($w, $w->faro->barcode, $card['ticket']);
         $this->read($w, $w->isla->barcode, $card['ticket']);
-        $w->now += 400;
+        $w->now += selfloan::DOUBLE_ALONE;
         $this->read($w, $w->isla->barcode);
         $rows = selfloan::recent($w->library, $w->now);
         $this->assertCount(3, $rows);
@@ -285,7 +313,7 @@ final class selfloan_test extends \advanced_testcase {
 
         // The mapa: back at the post, and undone while nothing else has happened to it; not if it was lost meanwhile.
         $this->read($w, $w->mapa->barcode, $this->read($w, $w->ana->cardcode)['ticket']);
-        $w->now += 400;
+        $w->now += selfloan::DOUBLE_ALONE;
         $this->read($w, $w->mapa->barcode);
         $mapa = (int) $DB->get_field(self::T . 'loan', 'id', ['itemid' => $w->mapa->id]);
         $DB->set_field(self::T . 'item', 'status', 'lost', ['id' => $w->mapa->id]);

@@ -48,7 +48,12 @@
         "months": [{"value": 9, "label": "septiembre", "selected": true}],
         "daylabel": "Día",
         "monthlabel": "Mes",
-        "save": "Guardar"
+        "save": "Guardar",
+        "hasclosures": true, "closuresheading": "Días cerrados", "closuresintro": "Nada vence en un día cerrado.",
+        "closuresnone": "Ningún día cerrado.", "closuresadd": "Añadir días cerrados", "closuresremove": "Quitar",
+        "closuresname": "Nombre", "closuresnamehint": "Navidad, Semana Santa", "closuresfrom": "Desde", "closuresto": "Hasta",
+        "closuressave": "Guardar", "closuresclose": "Cerrar", "closurestoday": "2026-11-07",
+        "closures": [{"name": "Navidad", "when": "del 23 de diciembre al 7 de enero", "from": "2026-12-23", "to": "2027-01-07", "past": false}]
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -90,6 +95,37 @@
     </ul>
 </section>
 {{/last}}
+<section class="ayv-section" id="ayv-closures">
+    <h2 class="ayv-section-title">{{closuresheading}}</h2>
+    <p>{{closuresintro}}</p>
+    {{#hasclosures}}
+    <ul class="ayv-closures">
+        {{#closures}}
+        <li class="ayv-closure{{#past}} ayv-closure-past{{/past}}">
+            <span class="ayv-closure-words"><b>{{name}}</b> <span>{{when}}</span></span>
+            <form method="post" action="{{action}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="closedremove">
+                <input type="hidden" name="from" value="{{from}}"><input type="hidden" name="to" value="{{to}}">
+                <button type="submit" class="ayv-button ayv-button-quiet">{{closuresremove}}</button>
+            </form>
+        </li>
+        {{/closures}}
+    </ul>
+    {{/hasclosures}}
+    {{^hasclosures}}<p class="ayv-empty">{{closuresnone}}</p>{{/hasclosures}}
+    <p class="ayv-book-actions"><button type="button" class="ayv-button" data-ayv-open="ayv-closure-new">{{closuresadd}}</button></p>
+    <dialog class="ayv-modal" id="ayv-closure-new" aria-labelledby="ayv-closure-new-title">
+        <div class="ayv-modal-head"><h3 id="ayv-closure-new-title" class="ayv-section-title">{{closuresadd}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{closuresclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{action}}#ayv-closures">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="closedadd">
+            <label class="ayv-field">{{closuresname}} <span class="ayv-field-hint">{{closuresnamehint}}</span> <input type="text" name="label" maxlength="60"></label>
+            <label class="ayv-field">{{closuresfrom}} <input type="date" name="from" value="{{closurestoday}}" required></label>
+            <label class="ayv-field">{{closuresto}} <input type="date" name="to" value="{{closurestoday}}" required></label>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{closuressave}}</button></p>
+        </form>
+    </dialog>
+</section>
 <section class="ayv-section">
     <h2 class="ayv-section-title">{{startheading}}</h2>
     <form method="post" action="{{action}}" class="ayv-inline-form">
