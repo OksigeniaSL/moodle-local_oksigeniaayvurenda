@@ -170,13 +170,18 @@ final class challenges {
             return null;
         }
         $term = self::term($year, $now);
-        $row = $DB->get_record(self::T . 'challenge', ['yearid' => $year->id, 'groupname' => $group, 'term' => $term]);
+        $row = self::last((int) $year->id, $group, $term);
         if ($row && $row->kind === 'off') {
             return null;
         }
         $kinds = array_keys(self::KINDS);
         $kind = $row ? $row->kind : $kinds[($term - 1) % count($kinds)];
         [$start, $end] = self::bounds($year, $term);
+        // Another one after the first was met counts from the day it started, not from the start of the term.
+        $seq = $row ? max(1, (int) $row->seq) : 1;
+        if ($seq > 1) {
+            $start = max($start, (int) $row->timecreated);
+        }
         // Those of the class who are here: one who stopped coming keeps their row (the year's history) but is no one to
         // wait for, or «Everyone» would miss one for ever.
         $members = $DB->get_fieldset_sql(
@@ -193,7 +198,7 @@ final class challenges {
         $done = $members ? self::progress($kind, array_map('intval', $members), $start, min($end, $now)) : 0;
         $challenge = (object) ['yearid' => (int) $year->id, 'group' => $group, 'term' => $term, 'kind' => $kind,
             'target' => $target, 'done' => min($done, $target), 'complete' => $target > 0 && $done >= $target,
-            'chosen' => (bool) $row, 'id' => $row ? (int) $row->id : 0];
+            'chosen' => (bool) $row, 'id' => $row ? (int) $row->id : 0, 'seq' => $seq];
         // A challenge met is kept, with when: it is the class's garden.
         if ($challenge->complete) {
             $challenge->id = self::keep($challenge, $row, $now);
@@ -315,8 +320,8 @@ final class challenges {
             return (int) $row->id;
         }
         return (int) $DB->insert_record(self::T . 'challenge', (object) ['yearid' => $challenge->yearid,
-            'groupname' => $challenge->group, 'term' => $challenge->term, 'kind' => $challenge->kind,
-            'timecompleted' => $now, 'timecreated' => $now, 'timemodified' => $now]);
+            'groupname' => $challenge->group, 'term' => $challenge->term, 'seq' => $challenge->seq ?? 1,
+            'kind' => $challenge->kind, 'timecompleted' => $now, 'timecreated' => $now, 'timemodified' => $now]);
     }
 
     /**
@@ -335,8 +340,19 @@ final class challenges {
         $now = $now ?? time();
         $year = years::around($entityid, $now);
         $term = self::term($year, $now);
-        $row = $DB->get_record(self::T . 'challenge', ['yearid' => $year->id, 'groupname' => $group, 'term' => $term]);
+        $row = self::last((int) $year->id, $group, $term);
         if ($row && $row->timecompleted) {
+            // Met: the class may play another one this term, counted from today (JV-D5); «none» leaves it as it is.
+            if ($kind !== 'off') {
+                $DB->insert_record(self::T . 'challenge', (object) ['yearid' => $year->id, 'groupname' => $group,
+                    'term' => $term, 'seq' => (int) $row->seq + 1, 'kind' => $kind, 'timecreated' => $now,
+                    'timemodified' => $now]);
+            }
+            return;
+        }
+        if ($row && (int) $row->seq > 1 && $kind === 'off') {
+            // No other one after all: the class is back to the one it met.
+            $DB->delete_records(self::T . 'challenge', ['id' => $row->id]);
             return;
         }
         if ($row) {
@@ -344,7 +360,58 @@ final class challenges {
             return;
         }
         $DB->insert_record(self::T . 'challenge', (object) ['yearid' => $year->id, 'groupname' => $group, 'term' => $term,
-            'kind' => $kind, 'timecreated' => $now, 'timemodified' => $now]);
+            'seq' => 1, 'kind' => $kind, 'timecreated' => $now, 'timemodified' => $now]);
+    }
+
+    /**
+     * The last challenge of a group in a term: the first one, or another one played after it was met.
+     *
+     * @param int $yearid
+     * @param string $group
+     * @param int $term
+     * @return \stdClass|null
+     */
+    private static function last(int $yearid, string $group, int $term): ?\stdClass {
+        global $DB;
+        $rows = $DB->get_records(
+            self::T . 'challenge',
+            ['yearid' => $yearid, 'groupname' => $group, 'term' => $term],
+            'seq DESC',
+            '*',
+            0,
+            1
+        );
+        return $rows ? reset($rows) : null;
+    }
+
+    /**
+     * What the staff choose from: the kinds, or, once the challenge is met, another one for the term.
+     *
+     * @param \stdClass|null $challenge As of() gives it.
+     * @return array kinds (value, label, checked), again, choose, choosehint and save.
+     */
+    public static function choices(?\stdClass $challenge): array {
+        $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');
+        $all = array_keys(self::KINDS);
+        $again = $challenge && $challenge->complete;
+        $kinds = [];
+        if ($again) {
+            // The next in turn after the one met, ready.
+            $next = $all[((int) array_search($challenge->kind, $all, true) + 1) % count($all)];
+            foreach ($all as $kind) {
+                $kinds[] = ['value' => $kind, 'label' => $str('challengekind' . $kind), 'checked' => $kind === $next];
+            }
+        } else {
+            $followup = $challenge && ($challenge->seq ?? 1) > 1;
+            foreach (array_merge($all, ['off']) as $kind) {
+                $kinds[] = ['value' => $kind, 'checked' => $challenge ? $challenge->kind === $kind : $kind === 'off',
+                    'label' => $str('challengekind' . $kind . ($kind === 'off' && $followup ? 'again' : ''))];
+            }
+        }
+        return ['kinds' => $kinds, 'again' => $again,
+            'choose' => $str($again ? 'challengeagain' : 'challengechoose'),
+            'choosehint' => $str($again ? 'challengeagainhint' : 'challengechoosehint'),
+            'save' => $str($again ? 'challengeagainsave' : 'challengesave')];
     }
 
     /**
@@ -379,6 +446,8 @@ final class challenges {
             // The herald celebrates for two weeks, not every day until the next term (D5).
             'herald' => $challenge->complete && time() - (int) ($challenge->timecompleted ?? time()) <= self::CHEER
                 ? characters::say($entityid, 'herald', 'challengeherald', ['group' => $challenge->group], 'celebra') : null,
+            'meton' => $challenge->complete && time() - (int) ($challenge->timecompleted ?? time()) > self::CHEER
+                ? $str('challengemeton', zones::date((int) $challenge->timecompleted, 'strftimedate', $entityid)) : '',
         ];
     }
 
@@ -397,7 +466,7 @@ final class challenges {
         }
         $year = years::around($entityid, $now ?? time());
         $rows = $DB->get_records_select(self::T . 'challenge', 'yearid = :yearid AND groupname = :groupname
-            AND timecompleted IS NOT NULL', ['yearid' => $year->id, 'groupname' => $group], 'term');
+            AND timecompleted IS NOT NULL', ['yearid' => $year->id, 'groupname' => $group], 'term, seq');
         return array_values(array_map(fn($r) => ['term' => (int) $r->term, 'kind' => $r->kind,
             'time' => (int) $r->timecompleted], $rows));
     }

@@ -38,12 +38,13 @@
     * visitplaces, visitsound, visitvolume, visitpanleft, visitpanright, visitclose, searchlabel, searchplaceholder, searchbutton
     Example context (json):
     {
-        "name": "vestibulo", "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "depth": 0.35,
+        "name": "vestibulo", "title": "Vestíbulo", "width": 2400, "height": 1350, "focus": 1200, "mapleft": 389, "depth": 0.35,
         "sound": "https://example.com/vestibulo.mp3", "door": "https://example.com/puerta.mp3", "touch": "",
         "back": [{"day": "https://example.com/fondo.webp", "night": "https://example.com/fondo-noche.webp", "depth": 0}],
         "front": [{"day": "https://example.com/frente.webp", "night": "https://example.com/frente-noche.webp", "depth": 1}],
         "haszones": true,
         "zones": [{"id": "z0", "url": "#", "label": "Lengua y literatura", "points": "100,100 300,100 300,600 100,600",
+            "tipx": 200, "tipy": 100, "cy": 350, "enters": true}], "leaves": [], "places": [{"id": "z0", "url": "#", "label": "Lengua y literatura", "points": "100,100 300,100 300,600 100,600",
             "tipx": 200, "tipy": 100, "cy": 350, "enters": true}],
         "surfaces": [
             {"directory": true, "pulse": false, "book": false, "width": 600, "height": 720, "fontsize": 40, "ink": "--visit-ink: #3a2a1c;",
@@ -90,7 +91,7 @@
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
     }
 }}
-<section class="ayv-visit" data-night="{{night}}"{{#young}} data-young="1"{{/young}} data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
+<section class="ayv-visit" data-night="{{night}}"{{#young}} data-young="1"{{/young}} data-room="{{name}}" data-focus="{{focus}}"{{#mapleft}} data-mapleft="{{mapleft}}"{{/mapleft}} data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}
@@ -174,15 +175,18 @@
     {{#hasplaces}}
     <nav class="ayv-visit-places" aria-label="{{visitplaces}}">
         <ul>
-            {{#zones}}
+            {{#places}}
             <li><a class="ayv-visit-place" href="{{url}}" data-zone="{{id}}" data-tip="{{tipx}} {{tipy}} {{cy}}"{{#enters}} data-enters="1"{{/enters}}>{{label}}</a></li>
-            {{/zones}}
+            {{/places}}
             {{#hunt}}
             <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-hunt" hidden>{{> local_oksigeniaayvurenda/icon_search}} {{huntplay}}</button></li>
             {{/hunt}}
             {{#sort}}
             <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-sort" hidden>{{sortplay}}</button></li>
             {{/sort}}
+            {{#leaves}}
+            <li><a class="ayv-visit-place" href="{{url}}" data-zone="{{id}}" data-tip="{{tipx}} {{tipy}} {{cy}}"{{#enters}} data-enters="1"{{/enters}}>{{label}}</a></li>
+            {{/leaves}}
         </ul>
     </nav>
     {{/hasplaces}}

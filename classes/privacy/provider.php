@@ -263,6 +263,15 @@ class provider implements
         }
         // When they were last told what waited, once and then for each centre (since 0.175: «…_stafftold_<centre>»).
         foreach ((array) get_user_preferences(null, null, $userid) as $name => $told) {
+            // The news of each centre (since 0.195: «…_newbooks_<centre>»).
+            if (str_starts_with($name, 'local_oksigeniaayvurenda_newbooks_')) {
+                writer::export_user_preference(
+                    'local_oksigeniaayvurenda',
+                    $name,
+                    $told,
+                    get_string('privacy:metadata:preference:newbooks', 'local_oksigeniaayvurenda')
+                );
+            }
             if ($name === 'local_oksigeniaayvurenda_stafftold' || str_starts_with($name, 'local_oksigeniaayvurenda_stafftold_')) {
                 writer::export_user_preference(
                     'local_oksigeniaayvurenda',

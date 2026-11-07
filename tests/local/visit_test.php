@@ -190,6 +190,8 @@ final class visit_test extends \advanced_testcase {
         $room = visit::page($library, 'literatura', false, $art);
         $this->assertSame('Cuentos', $room['title']);
         $this->assertSame(['stacks', 'exit'], array_column($room['zones'], 'kind'));
+        // Under the scene, the way out comes last (DIS-KIMI-03).
+        $this->assertSame([['stacks'], ['exit']], [array_column($room['places'], 'kind'), array_column($room['leaves'], 'kind')]);
         $this->assertStringContainsString('corner=8', $room['zones'][0]['url']);
         $this->assertSame(get_string('visitbackhall', 'local_oksigeniaayvurenda'), $room['zones'][1]['label']);
         $this->assertStringContainsString('visit.php?library=' . $library->slug, $room['zones'][1]['url']);

@@ -67,7 +67,7 @@ $saved = '';
 if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', 'look', PARAM_ALPHA);
     if ($do === 'newbooks') {
-        newsletter::subscribe((int) $USER->id, optional_param('newbooks', 0, PARAM_BOOL));
+        newsletter::subscribe((int) $USER->id, optional_param('newbooks', 0, PARAM_BOOL), (int) $reader->entityid);
     } else if ($do === 'goal') {
         // A number written, or one of those offered.
         $wanted = optional_param('goalother', 0, PARAM_INT) ?: optional_param('goal', 0, PARAM_INT);
@@ -217,7 +217,7 @@ foreach ($readers as $reader) {
                 fn($n) => ['number' => $n, 'on' => $n === $goal],
                 array_values(array_unique(array_filter(array_merge([5, 10, 15, 20, 30, 50], [$goal]), fn($n) => $n > 0)))
             ),
-            'newbookson' => newsletter::subscribed((int) $USER->id)];
+            'newbookson' => newsletter::subscribed((int) $USER->id, (int) $reader->entityid)];
     }
     $cardsdata[] = $card + [
         'sanctionline' => \local_oksigeniaayvurenda\local\sanctions::for_reader((int) $reader->entityid, (int) $reader->id, time()),

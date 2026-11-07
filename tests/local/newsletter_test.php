@@ -79,8 +79,9 @@ final class newsletter_test extends \advanced_testcase {
         $gen->create_item(['libraryid' => $bank->id, 'recordid' => $textbook->id]);
         $sink = $this->redirectMessages();
         $this->assertSame(['subscribers' => 0, 'sent' => 0], newsletter::run($now));
-        newsletter::subscribe((int) $user->id, true);
-        $this->assertTrue(newsletter::subscribed((int) $user->id));
+        newsletter::subscribe((int) $user->id, true, $entityid);
+        $this->assertTrue(newsletter::subscribed((int) $user->id, $entityid));
+        $this->assertFalse(newsletter::subscribed((int) $user->id, $entityid + 1));
         $this->assertSame(['subscribers' => 1, 'sent' => 1], newsletter::run($now));
         $messages = $sink->get_messages();
         $this->assertCount(1, $messages);
@@ -94,8 +95,38 @@ final class newsletter_test extends \advanced_testcase {
         access::set_closed($entityid, true);
         $gen->create_item(['libraryid' => $library->id, 'recordid' => $novel->id]);
         $this->assertSame(0, newsletter::run($now + 9 * DAYSECS)['sent']);
-        newsletter::subscribe((int) $user->id, false);
+        newsletter::subscribe((int) $user->id, false, $entityid);
         $this->assertSame(['subscribers' => 0, 'sent' => 0], newsletter::run($now + 30 * DAYSECS));
+    }
+
+    /**
+     * With a card in two centres, the news of each are asked for in each; one signed up for all before keeps both until
+     * leaving one (D14).
+     */
+    public function test_by_centre(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $one = $gen->create_library();
+        $two = $gen->create_library();
+        $user = $this->getDataGenerator()->create_user();
+        $gen->create_reader(['entityid' => $one->entityid, 'userid' => $user->id]);
+        $gen->create_reader(['entityid' => $two->entityid, 'userid' => $user->id]);
+        $now = time();
+        foreach ([$one, $two] as $library) {
+            $gen->create_item(['libraryid' => $library->id,
+                'recordid' => $gen->create_record(['entityid' => $library->entityid, 'title' => 'El faro dormido'])->id]);
+        }
+        $sink = $this->redirectMessages();
+        newsletter::subscribe((int) $user->id, true, (int) $one->entityid);
+        $this->assertSame(['subscribers' => 1, 'sent' => 1], newsletter::run($now));
+        $this->assertCount(1, $sink->get_messages());
+        // Signed up the old way, for every centre: leaving the second keeps the first.
+        set_user_preference(newsletter::PREF, 1, $user->id);
+        $this->assertTrue(newsletter::subscribed((int) $user->id, (int) $two->entityid));
+        newsletter::subscribe((int) $user->id, false, (int) $two->entityid);
+        $this->assertTrue(newsletter::subscribed((int) $user->id, (int) $one->entityid));
+        $this->assertFalse(newsletter::subscribed((int) $user->id, (int) $two->entityid));
+        $this->assertNull(get_user_preferences(newsletter::PREF, null, $user->id));
     }
 
     /**
@@ -116,9 +147,12 @@ final class newsletter_test extends \advanced_testcase {
         $textbook = $gen->create_record(['entityid' => $entityid, 'title' => 'Matemáticas 1']);
         $copy = $gen->create_item(['libraryid' => $library->id, 'recordid' => $novel->id]);
         $bankcopy = $gen->create_item(['libraryid' => $bank->id, 'recordid' => $textbook->id]);
-        foreach ([[$library, $copy], [$library, $copy], [$bank, $bankcopy]] as [$where, $item]) {
+        // The novel finished once and left half read once, a textbook brought back, and the novel out again: one finished.
+        $loans = [[$library, $copy, ''], [$library, $copy, 'unfinished'], [$bank, $bankcopy, ''], [$library, $copy, null]];
+        foreach ($loans as [$where, $item, $note]) {
             $gen->create_loan(['libraryid' => $where->id, 'itemid' => $item->id, 'readerid' => $reader->id,
-                'yearid' => $year->id, 'timeloaned' => time() - DAYSECS]);
+                'yearid' => $year->id, 'timeloaned' => time() - DAYSECS] + ($note === null ? []
+                : ['timereturned' => time() - HOURSECS, 'returnnote' => $note === '' ? null : $note]));
         }
         $this->assertSame(0, goals::of((int) $user->id, (int) $year->id));
         goals::set((int) $user->id, (int) $year->id, 20);

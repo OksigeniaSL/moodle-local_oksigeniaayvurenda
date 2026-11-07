@@ -25,8 +25,9 @@
 namespace local_oksigeniaayvurenda\local;
 
 /**
- * A reader's own goal for the school year: how many books they mean to read. Only they see it; it counts the books
- * they took home from the library that year (not the textbooks), and nothing is won or lost by it.
+ * A reader's own goal for the school year: how many books they mean to finish. Only they see it; it counts the books
+ * they brought back that year without saying they left them half read (not the textbooks), as the flower's «Stay» does,
+ * and nothing is won or lost by it. A counter of loans would invite taking thin books and leaving them (jue-carne D10).
  */
 final class goals {
     /** @var string Prefix of the plugin tables. */
@@ -35,8 +36,8 @@ final class goals {
     /** @var string The user preference: the goal of each school year, by its id. */
     public const PREF = 'local_oksigeniaayvurenda_goal';
 
-    /** @var int The most books a goal can be. */
-    public const MOST = 365;
+    /** @var int The most books a goal can be: not one a day. */
+    public const MOST = 100;
 
     /**
      * A user's goal for a school year; 0 without one.
@@ -67,7 +68,7 @@ final class goals {
     }
 
     /**
-     * How many books a reader took home in a school year, as the goal counts them.
+     * How many books a reader finished in a school year, as the goal counts them: brought back, and not half read.
      *
      * @param int $readerid
      * @param int $yearid
@@ -79,8 +80,9 @@ final class goals {
             "SELECT COUNT(DISTINCT i.recordid)
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
-              WHERE l.readerid = :readerid AND l.yearid = :yearid AND " . bank::reading('l.libraryid'),
-            ['readerid' => $readerid, 'yearid' => $yearid]
+              WHERE l.readerid = :readerid AND l.yearid = :yearid AND l.timereturned IS NOT NULL
+                    AND (l.returnnote IS NULL OR l.returnnote <> :unfinished) AND " . bank::reading('l.libraryid'),
+            ['readerid' => $readerid, 'yearid' => $yearid, 'unfinished' => 'unfinished']
         );
     }
 }

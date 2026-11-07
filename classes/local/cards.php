@@ -131,8 +131,9 @@ final class cards {
     public static function printed(\stdClass $reader, string $name, string $group, string $library, string $skin): array {
         global $CFG;
         $code = (string) $reader->cardcode;
-        // Only the school and the secondary school draw; each reader's look says what.
-        $look = in_array($skin, ['school', 'secondary'], true) ? self::look_of($reader) : 'none';
+        // The school, the secondary school and the libraries of every age draw; each reader's look says what (a grown-up
+        // reader of a public library has the sober card).
+        $look = in_array($skin, ['school', 'secondary', 'public', 'mobile'], true) ? self::look_of($reader) : 'none';
         $art = match ($look) {
             'flower' => screens::art('carne/impreso/semilla') ?? self::flower_url(null),
             'sky' => screens::art('carne/impreso/luna-nueva'),

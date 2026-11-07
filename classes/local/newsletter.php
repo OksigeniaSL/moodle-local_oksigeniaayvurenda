@@ -42,24 +42,53 @@ final class newsletter {
     private const LISTED = 8;
 
     /**
-     * Whether a user signed up.
+     * Whether a user signed up for a centre's news (or for every centre's, as before 0.195).
      *
      * @param int $userid
+     * @param int $entityid The centre; 0 only for the old sign-up for all.
      * @return bool
      */
-    public static function subscribed(int $userid): bool {
-        return (bool) get_user_preferences(self::PREF, false, $userid);
+    public static function subscribed(int $userid, int $entityid = 0): bool {
+        // Before 0.195 one asked for every centre at once.
+        if (get_user_preferences(self::PREF, false, $userid)) {
+            return true;
+        }
+        return $entityid > 0 && (bool) get_user_preferences(self::PREF . '_' . $entityid, false, $userid);
     }
 
     /**
-     * Signs a user up, or off.
+     * Signs a user up for a centre's news, or off: someone with a card in two centres chooses in each (D14).
      *
      * @param int $userid
      * @param bool $on
+     * @param int $entityid The centre; 0 for every centre, as before 0.195.
      */
-    public static function subscribe(int $userid, bool $on): void {
-        set_user_preference(self::PREF, $on ? 1 : null, $userid);
-        if (!$on) {
+    public static function subscribe(int $userid, bool $on, int $entityid = 0): void {
+        global $DB;
+        if ($entityid > 0) {
+            // Signed up before for every centre: each of them keeps it, and only this one changes.
+            if (get_user_preferences(self::PREF, false, $userid)) {
+                $centres = $DB->get_fieldset_select(
+                    self::T . 'reader',
+                    'entityid',
+                    'userid = :userid AND status = :status',
+                    ['userid' => $userid, 'status' => 'active']
+                );
+                foreach (array_unique(array_map('intval', $centres)) as $centre) {
+                    set_user_preference(self::PREF . '_' . $centre, 1, $userid);
+                }
+                unset_user_preference(self::PREF, $userid);
+            }
+            set_user_preference(self::PREF . '_' . $entityid, $on ? 1 : null, $userid);
+        } else {
+            set_user_preference(self::PREF, $on ? 1 : null, $userid);
+        }
+        $any = $DB->record_exists_select(
+            'user_preferences',
+            'userid = :userid AND value = :value AND (name = :name OR ' . $DB->sql_like('name', ':centre') . ')',
+            ['userid' => $userid, 'value' => '1', 'name' => self::PREF, 'centre' => $DB->sql_like_escape(self::PREF . '_') . '%']
+        );
+        if (!$any) {
             unset_user_preference(self::LAST, $userid);
         }
     }
@@ -76,12 +105,12 @@ final class newsletter {
         global $DB;
         $now = $now ?? time();
         $stats = ['subscribers' => 0, 'sent' => 0];
-        $userids = $DB->get_fieldset_select(
+        $userids = array_unique(array_map('intval', $DB->get_fieldset_select(
             'user_preferences',
             'userid',
-            'name = :name AND value = :value',
-            ['name' => self::PREF, 'value' => '1']
-        );
+            'value = :value AND (name = :name OR ' . $DB->sql_like('name', ':centre') . ')',
+            ['value' => '1', 'name' => self::PREF, 'centre' => $DB->sql_like_escape(self::PREF . '_') . '%']
+        )));
         foreach ($userids as $userid) {
             $stats['subscribers']++;
             $last = (int) get_user_preferences(self::LAST, 0, $userid);
@@ -97,7 +126,10 @@ final class newsletter {
             $since = $last ? $last + 1 : $now - WEEKSECS;
             foreach ($DB->get_records(self::T . 'reader', ['userid' => $userid, 'status' => 'active']) as $reader) {
                 $entityid = (int) $reader->entityid;
-                if (access::closed($entityid) || ($centres !== null && !in_array($entityid, $centres, true))) {
+                if (
+                    access::closed($entityid) || ($centres !== null && !in_array($entityid, $centres, true))
+                        || !self::subscribed((int) $userid, $entityid)
+                ) {
                     continue;
                 }
                 $news = self::news($entityid, $since);

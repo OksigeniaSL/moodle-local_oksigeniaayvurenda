@@ -83,6 +83,8 @@
     var W = parseFloat(visit.getAttribute('data-width')) || 2400;
     var H = parseFloat(visit.getAttribute('data-height')) || 1350;
     var focus = parseFloat(visit.getAttribute('data-focus')) || W / 2;
+    // Where the room's map starts, if it has one: a phone opens with it in sight, with as much of the rest as fits.
+    var mapleft = parseFloat(visit.getAttribute('data-mapleft'));
     var frame = visit.querySelector('.ayv-visit-frame');
     var view = visit.querySelector('.ayv-visit-view');
     var room = visit.querySelector('.ayv-visit-room');
@@ -148,7 +150,11 @@
     };
     fit();
     if (narrow) {
-        view.scrollLeft = Math.max(0, focus * k - view.clientWidth / 2);
+        var start = focus * k - view.clientWidth / 2;
+        if (!isNaN(mapleft)) {
+            start = Math.min(start, mapleft * k - 12);
+        }
+        view.scrollLeft = Math.max(0, start);
     }
     if (window.ResizeObserver) {
         new window.ResizeObserver(fit).observe(frame);

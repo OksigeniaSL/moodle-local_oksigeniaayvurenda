@@ -623,6 +623,24 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110722, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110728) {
+        // Another challenge in the same term once one is met: each one of the term has its number.
+        $table = new xmldb_table('local_oksigeniaayvurenda_challenge');
+        $field = new xmldb_field('seq', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '1', 'term');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $old = new xmldb_index('yeargroupterm', XMLDB_INDEX_UNIQUE, ['yearid', 'groupname', 'term']);
+        if ($dbman->index_exists($table, $old)) {
+            $dbman->drop_index($table, $old);
+        }
+        $index = new xmldb_index('yeargrouptermseq', XMLDB_INDEX_UNIQUE, ['yearid', 'groupname', 'term', 'seq']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        upgrade_plugin_savepoint(true, 2026110728, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

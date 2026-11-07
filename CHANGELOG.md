@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.195.0
+
+- Play and the visit (audit batch 10, second part):
+  - once a class meets its challenge, the tutor (in «My class») and the staff (on the group's page) can start another
+    one in the same term, counted from that day; the garden keeps both, and «No other challenge» goes back to the one
+    met; after its two weeks of celebration, the challenge says the day it was met;
+  - the reader's own goal counts the books finished (brought back, not half read), as the flower's «Stay» does, up to
+    100 a year; its words say «finish», and in the secondary and university skins it is met in their own words;
+  - the card in the app shows the moon of the stage too, and the printed card of a public or mobile library draws the
+    seed or the new moon for the readers who have them;
+  - the news of each centre are asked for in that centre: someone with a card in two centres chooses in each, and a
+    sign-up for all from before keeps both until leaving one;
+  - the visit on a phone opens with the room's map in sight, its arrows sit at the top corners instead of on the door,
+    and the list under the scene ends with the way out.
+
 ## 0.194.0
 
 - Play and the visit (audit batch 10, first part):

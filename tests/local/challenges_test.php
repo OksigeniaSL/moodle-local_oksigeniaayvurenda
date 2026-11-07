@@ -126,9 +126,11 @@ final class challenges_test extends \advanced_testcase {
         $this->assertTrue($challenge->complete);
         challenges::of($entityid, '3.º B', $now);
         $this->assertCount(1, challenges::garden($entityid, '3.º B', $now));
-        // Met, it is kept: choosing another does not undo it.
+        // Met, it is kept: choosing another starts a new one this term, and the one met stays in the garden.
         challenges::choose($entityid, '3.º B', 'corners', $now);
-        $this->assertSame('everyone', challenges::of($entityid, '3.º B', $now)->kind);
+        $next = challenges::of($entityid, '3.º B', $now);
+        $this->assertSame(['corners', 2], [$next->kind, $next->seq]);
+        $this->assertCount(1, challenges::garden($entityid, '3.º B', $now));
 
         // Another class: corners by the first digit (8, 8 and 5: two), and off.
         $other = $generator->create_reader(['entityid' => $entityid]);
@@ -142,6 +144,44 @@ final class challenges_test extends \advanced_testcase {
         $this->assertSame([max(3, min(6, garden::corners_shown($entityid))), 2], [$corners->target, $corners->done]);
         challenges::choose($entityid, '4.º A', 'off', $now);
         $this->assertNull(challenges::of($entityid, '4.º A', $now));
+    }
+
+    /**
+     * Once met, another challenge in the same term: it counts from the day it started, the garden keeps both, and turning
+     * it off goes back to the one met (JV-D5).
+     */
+    public function test_another_challenge(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $year = years::around($entityid, $now);
+        [$start] = challenges::bounds($year, challenges::term($year, $now));
+        $reader = $generator->create_reader(['entityid' => $entityid]);
+        $generator->create_member(['readerid' => $reader->id, 'yearid' => $year->id, 'groupname' => '2.º B']);
+        $record = $generator->create_record(['entityid' => $entityid]);
+        $item = $generator->create_item(['libraryid' => $library->id, 'recordid' => $record->id]);
+        $generator->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id,
+            'timeloaned' => max($start, $now - 120)]);
+        challenges::choose($entityid, '2.º B', 'everyone', $now - 60);
+        $met = challenges::of($entityid, '2.º B', $now);
+        $this->assertTrue($met->complete);
+        $this->assertSame(1, $met->seq);
+        $this->assertTrue(challenges::choices($met)['again']);
+        // Another one: «Everyone» again, counted from now, so the loan of before does not count.
+        challenges::choose($entityid, '2.º B', 'everyone', $now);
+        $next = challenges::of($entityid, '2.º B', $now + 1);
+        $this->assertSame([2, false, 0], [$next->seq, $next->complete, $next->done]);
+        $this->assertCount(1, challenges::garden($entityid, '2.º B', $now));
+        $this->assertSame(
+            get_string('challengekindoffagain', 'local_oksigeniaayvurenda'),
+            array_column(challenges::choices($next)['kinds'], 'label', 'value')['off']
+        );
+        // Turned off: back to the one met.
+        challenges::choose($entityid, '2.º B', 'off', $now + 2);
+        $back = challenges::of($entityid, '2.º B', $now + 3);
+        $this->assertSame([1, true], [$back->seq, $back->complete]);
     }
 
     /**

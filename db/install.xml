@@ -589,6 +589,7 @@
         <FIELD NAME="yearid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="groupname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="term" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="1, 2 or 3: the thirds of the school year"/>
+        <FIELD NAME="seq" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="1 for the term's first; once one is met, the class may play another: 2, 3..."/>
         <FIELD NAME="kind" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="corners, notes, everyone, or off"/>
         <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -599,7 +600,7 @@
         <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="yeargroupterm" UNIQUE="true" FIELDS="yearid, groupname, term"/>
+        <INDEX NAME="yeargrouptermseq" UNIQUE="true" FIELDS="yearid, groupname, term, seq"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_review" COMMENT="What a reader tells about a book: one line, published once the library approves it">

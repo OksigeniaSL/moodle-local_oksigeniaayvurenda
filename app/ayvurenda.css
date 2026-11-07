@@ -2961,8 +2961,9 @@ html[data-bs-theme="dark"] .ayv.ayv-embed {
 .ayv .ayv-visit-pose { display: block; width: 100%; height: 100%; object-fit: contain; }
 .ayv .ayv-visit-tip { position: absolute; z-index: 3; padding: .3rem .75rem; border-radius: 999px; background: var(--night); color: #fbf6ec; font-weight: 700; font-size: .95rem; white-space: nowrap; transform: translate(-50%, -100%); pointer-events: none; box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .5); }
 html[data-bs-theme="dark"] .ayv .ayv-visit-tip { background: #f6ead2; color: #0f3a33; }
-.ayv .ayv-visit-pan { top: 50%; transform: translateY(-50%); }
-.ayv .ayv-visit-pan:hover { transform: translateY(-50%) scale(1.06); }
+/* At the top corners, the wall: in the middle they covered the door and the map (DIS-KIMI-03). */
+.ayv .ayv-visit-pan { top: .6rem; }
+.ayv .ayv-visit-pan:hover { transform: scale(1.06); }
 .ayv .ayv-visit-pan-left { left: .6rem; }
 .ayv .ayv-visit-pan-right { right: .6rem; }
 .ayv .ayv-visit-say { position: absolute; z-index: 4; box-sizing: border-box; width: min(23rem, calc(100% - 1rem)); padding: .9rem 2.8rem 1rem 1rem; border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 0 16px 34px -14px rgba(15, 58, 51, .6), inset 0 0 0 1px var(--line); }

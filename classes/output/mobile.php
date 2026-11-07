@@ -145,12 +145,16 @@ class mobile {
         foreach (mine::summary((int) $USER->id) as $library) {
             if ($library['cardcode'] !== '') {
                 // Not «library» nor «name»: the page's own would stand in for what is missing in a list.
-                // A young reader's card in the app shows its flower too, as on the web (jue-carne D13).
+                // The card in the app shows its flower or its moon too, as on the web; a sober card, neither (D13).
                 $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $library['readerid'] ?? 0]);
-                $flower = $reader && \local_oksigeniaayvurenda\local\cards::look_of($reader) === 'flower'
-                    ? \local_oksigeniaayvurenda\local\cards::flower_url(
-                        \local_oksigeniaayvurenda\local\garden::album($reader)['flower']['stage']
-                    ) : '';
+                $look = $reader ? \local_oksigeniaayvurenda\local\cards::look_of($reader) : 'none';
+                $flower = '';
+                if ($look === 'flower' || $look === 'sky') {
+                    $stage = (int) \local_oksigeniaayvurenda\local\garden::album($reader)['flower']['stage'];
+                    $flower = $look === 'flower' ? \local_oksigeniaayvurenda\local\cards::flower_url($stage)
+                        : (new \moodle_url('/local/oksigeniaayvurenda/app/cielo/'
+                            . \local_oksigeniaayvurenda\local\cards::SKY[$stage] . '.svg'))->out(false);
+                }
                 $cards[] = ['where' => $library['name'], 'cardcode' => $library['cardcode'], 'fullname' => fullname($USER),
                     'flowerimg' => $flower] + self::codes($library['cardcode'], 8);
             }

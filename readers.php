@@ -207,11 +207,7 @@ if ($group === null) {
     $challengeview = null;
     if ($group !== '') {
         $challenge = \local_oksigeniaayvurenda\local\challenges::of((int) $library->entityid, $group);
-        $kinds = [];
-        foreach (array_merge(array_keys(\local_oksigeniaayvurenda\local\challenges::KINDS), ['off']) as $kind) {
-            $kinds[] = ['value' => $kind, 'label' => $str('challengekind' . $kind),
-                'checked' => $challenge ? $challenge->kind === $kind : $kind === 'off'];
-        }
+        $choices = \local_oksigeniaayvurenda\local\challenges::choices($challenge);
         $garden = array_map(
             fn($p) => ['label' => $str('challengeplanted', $p['term']) . ' · ' . $str('challengekind' . $p['kind'])],
             \local_oksigeniaayvurenda\local\challenges::garden((int) $library->entityid, $group)
@@ -225,11 +221,11 @@ if ($group === null) {
             'offstage' => $off !== null ? $str('classoff', $off) : '',
             'current' => $challenge ? \local_oksigeniaayvurenda\local\challenges::view($challenge, (int) $library->entityid, true)
                 : null,
-            'locked' => ($challenge && $challenge->complete) || $off !== null,
-            'kinds' => $kinds,
-            'choose' => $str('challengechoose'),
-            'choosehint' => $str('challengechoosehint'),
-            'save' => $str('challengesave'),
+            'locked' => $off !== null,
+            'kinds' => $choices['kinds'],
+            'choose' => $choices['choose'],
+            'choosehint' => $choices['choosehint'],
+            'save' => $choices['save'],
             'action' => $PAGE->url->out(false),
             'sesskey' => sesskey(),
             'garden' => $garden,

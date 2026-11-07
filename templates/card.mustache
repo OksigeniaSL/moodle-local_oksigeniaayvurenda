@@ -141,7 +141,7 @@
                         <div class="ayv-mine-presets" role="group" aria-label="{{goallabel}}">
                         {{#presets}}<button type="submit" name="goal" value="{{number}}" class="ayv-mine-preset" aria-pressed="{{#on}}true{{/on}}{{^on}}false{{/on}}">{{number}}</button>{{/presets}}
                         <label class="ayv-mine-other"><span class="ayv-sr">{{goalother}}</span>
-                            <input type="number" name="goalother" min="1" max="365" step="1" placeholder="{{goalother}}" data-ayv-submit></label>
+                            <input type="number" name="goalother" min="1" max="100" step="1" placeholder="{{goalother}}" data-ayv-submit></label>
                         {{#hasgoal}}<button type="submit" name="goal" value="0" class="ayv-mine-off">{{goaloff}}</button>{{/hasgoal}}
                         </div>
                     </form>

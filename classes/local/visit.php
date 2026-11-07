@@ -281,6 +281,7 @@ final class visit {
             : $url('stacks.php', ['corner' => $corner]);
         $title = $name === $hallname ? $str('visithall') : ($corners[$scene['corner']]['label'] ?? $str('visit'));
         $zones = [];
+        $mapleft = '';
         $surfaces = [];
         foreach ($scene['zones'] as $zone) {
             $kind = $zone['kind'];
@@ -322,6 +323,8 @@ final class visit {
                     : $str('visitback', $corners[$back['corner']]['label'] ?? $str('visit'))) : $str('visitexit');
             } else if ($kind === 'directory') {
                 $surfaces[] = self::directory($zone, array_slice(array_values($corners), 0, $zone['rows']), $goes);
+                // Where the map of the room starts: a phone opens with it in sight (DIS-KIMI-03).
+                $mapleft = (int) round(min(array_column($zone['quad'], 0)));
                 continue;
             } else if ($kind === 'pulse') {
                 $surfaces[] = self::pulse($zone, $library);
@@ -364,6 +367,10 @@ final class visit {
             'front' => $front,
             'depth' => $depth,
             'zones' => $zones,
+            // The list under the scene: the places and the games first, the way out last (DIS-KIMI-03).
+            'places' => array_values(array_filter($zones, fn($z) => $z['kind'] !== 'exit')),
+            'leaves' => array_values(array_filter($zones, fn($z) => $z['kind'] === 'exit')),
+            'mapleft' => $mapleft,
             'haszones' => (bool) $zones,
             'surfaces' => $surfaces,
             'characters' => self::characters(

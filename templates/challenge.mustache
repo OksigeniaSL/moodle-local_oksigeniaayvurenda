@@ -22,6 +22,7 @@
     * marks - one per step (lit)
     * complete - whether it is met
     * herald - what the herald says when it is met (see local_oksigeniaayvurenda/bubble)
+    * meton - the day it was met, once the herald has celebrated
     Example context (json):
     {
         "heading": "El reto de tu clase",
@@ -30,7 +31,8 @@
         "progresslabel": "2 de 3",
         "left": "",
         "complete": false,
-        "herald": null
+        "herald": null,
+        "meton": ""
     }
 }}
 <div class="ayv-challenge{{#complete}} ayv-challenge-done{{/complete}}">
@@ -39,4 +41,5 @@
     <span class="ayv-challenge-marks" role="img" aria-label="{{progresslabel}}">{{#marks}}<span class="ayv-mark{{#lit}} ayv-mark-lit{{/lit}}"></span>{{/marks}}</span>
     {{#left}}<span class="ayv-field-hint">{{left}}</span>{{/left}}
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
+    {{#meton}}<span class="ayv-field-hint">{{meton}}</span>{{/meton}}
 </div>

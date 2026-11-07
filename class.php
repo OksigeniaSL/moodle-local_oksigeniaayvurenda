@@ -100,11 +100,8 @@ $data = [];
 foreach ($groups as $i => $group) {
     $challenge = challenges::of($entityid, $group, $now);
     $off = challenges::stage_off($entityid, (int) $year->id, $group);
-    $kinds = [];
-    foreach (array_merge(array_keys(challenges::KINDS), ['off']) as $kind) {
-        $kinds[] = ['value' => $kind, 'label' => $str('challengekind' . $kind),
-            'checked' => $challenge ? $challenge->kind === $kind : $kind === 'off'];
-    }
+    // Once met, the tutor may start another one this term (JV-D5).
+    $choices = challenges::choices($challenge);
     $planted = challenges::garden($entityid, $group, $now);
     $garden = array_map(
         fn($p) => ['label' => $str('challengeplanted', $p['term']) . ' · ' . $str('challengekind' . $p['kind'])],
@@ -130,8 +127,11 @@ foreach ($groups as $i => $group) {
         'group' => $group,
         'offstage' => $off !== null ? $str('classoff', $off) : '',
         'current' => $challenge ? challenges::view($challenge, $entityid, true) : null,
-        'canchoose' => $off === null && !($challenge && $challenge->complete),
-        'kinds' => $kinds,
+        'canchoose' => $off === null,
+        'kinds' => $choices['kinds'],
+        'choose' => $choices['choose'],
+        'choosehint' => $choices['choosehint'],
+        'save' => $choices['save'],
         'garden' => $garden,
         'hasgarden' => (bool) $garden,
         // The garden drawn, when the art package brings the island.
