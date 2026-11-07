@@ -68,6 +68,10 @@ final class school_year_test extends \basic_testcase {
         $start = 1_000_000_000;
         $end = $start + 365 * 86400;
         $this->assertSame('start', school_year::moment($start, $start, $end));
+        // With the last day of class said, the end comes weeks before it, not weeks before the year's end.
+        $last = $end - 70 * 86400;
+        $this->assertSame('', school_year::moment($last - 46 * 86400, $start, $end, $last));
+        $this->assertSame('end', school_year::moment($last - 45 * 86400, $start, $end, $last));
         $this->assertSame('start', school_year::moment($start + 59 * 86400, $start, $end));
         $this->assertSame('', school_year::moment($start + 60 * 86400, $start, $end));
         $this->assertSame('', school_year::moment($end - 46 * 86400, $start, $end));

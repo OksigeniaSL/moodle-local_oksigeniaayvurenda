@@ -67,4 +67,54 @@ final class closures_test extends \advanced_testcase {
         closures::remove($entityid, '2026-12-23', '2027-01-07');
         $this->assertSame(['2026-11-01', '2026-12-08'], array_column(closures::of($entityid), 'from'));
     }
+
+    /**
+     * The last day of class: nothing a reading library lends falls due after it nor is given more time past it, the end of
+     * the year comes weeks before it, and the reminder to bring books back goes as the library's, not the bank's.
+     */
+    public function test_last_day(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $span = \local_oksigeniaayvurenda\core\school_year::around($now, '09-01', zones::of($entityid));
+        $year = $gen->create_year(['entityid' => $entityid] + $span);
+        $this->assertNull(closures::last_day($entityid, $now));
+        $this->assertFalse(closures::set_last_day($entityid, '2027-02-30'));
+        $day = zones::date(min($now + 3 * DAYSECS, (int) $year->timeend - 2 * DAYSECS), '%Y-%m-%d', $entityid);
+        $this->assertTrue(closures::set_last_day($entityid, $day));
+        $last = closures::last_day($entityid, $now);
+        $this->assertSame((new \DateTimeImmutable($day . ' 23:59:59', zones::of($entityid)))->getTimestamp(), $last);
+        $this->assertSame('end', \local_oksigeniaayvurenda\core\school_year::moment(
+            $now,
+            (int) $year->timestart,
+            (int) $year->timeend,
+            $last
+        ));
+
+        $user = $this->getDataGenerator()->create_user();
+        $reader = $gen->create_reader(['entityid' => $entityid, 'cardcode' => '10000H', 'userid' => $user->id]);
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'Zeta del último día']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'barcode' => '500001K']);
+        $desk = new desk($library, 2, $now);
+        $desk->scan('10000H');
+        $this->assertSame('lent', $desk->scan('500001K', (int) $reader->id)['kind']);
+        $loan = $DB->get_record('local_oksigeniaayvurenda_loan', ['readerid' => $reader->id], '*', MUST_EXIST);
+        $this->assertSame($last, (int) $loan->timedue);
+        $this->assertNull($desk->renewable((int) $loan->id));
+
+        // The reminder of the end of the course, as the library's.
+        $sink = $this->redirectMessages();
+        $this->assertSame(1, bankround::remind_readers($library, $now));
+        $messages = $sink->get_messages();
+        $this->assertCount(1, $messages);
+        $this->assertSame('yearreturn', $messages[0]->eventtype);
+        $this->assertSame(get_string('yearreturnsubject', 'local_oksigeniaayvurenda'), $messages[0]->subject);
+
+        $this->assertTrue(closures::set_last_day($entityid, ''));
+        $this->assertNull(closures::last_day($entityid, $now));
+    }
 }

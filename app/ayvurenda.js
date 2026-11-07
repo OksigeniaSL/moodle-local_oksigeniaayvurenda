@@ -919,7 +919,8 @@
     // A button that undoes something asks once more in its own place: the first touch says what it will do, a second does it.
     document.addEventListener('click', function(event) {
         var button = event.target.closest ? event.target.closest('[data-ayv-twice]') : null;
-        if (!button || button.getAttribute('data-ayv-armed') === '1') {
+        // A guided help presses for the person, who is watching: it does not ask twice.
+        if (!button || button.getAttribute('data-ayv-armed') === '1' || !event.isTrusted) {
             return;
         }
         event.preventDefault();

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.185.0
+
+- The end of the course for a reading library (where there are classes), in «Academic year»:
+  - the centre says its last day of class: nothing lent falls due after it, and no more time is given past it;
+  - the end of the year shows six weeks before that day, not in the summer;
+  - «Tell everyone who has books»: each reader gets their books and the date, and each tutor their class, as the library's
+    notice (a new message, «Library books to bring back at the end of the year»), not the bank's;
+  - «How do I…?» answers how to get the books back in June.
+
 ## 0.184.0
 
 - The bank of textbooks, from the audit:

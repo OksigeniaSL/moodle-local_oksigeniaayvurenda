@@ -20,7 +20,8 @@
 
     Context variables required for this template:
     * heading, dates, notice - texts
-    * ending - text, url and label when the year is ending with books out
+    * ending - text, url, label, remind and remindsure when the year is ending with books out
+    * lastday - heading, intro, text, value, has, label, save, clear, where the centre has classes
     * cards - number, label, url, late
     * left - readers who left with books (name, group, bookslabel)
     * last - last year in numbers: heading, total, groups (group, line, share)
@@ -32,6 +33,8 @@
         "dates": "Del 1 de septiembre de 2026 al 31 de agosto de 2027.",
         "notice": "",
         "ending": null,
+        "lastday": {"heading": "Último día de clase", "intro": "Nada de lo que se presta vence después.", "text": "19 de junio de 2027",
+            "value": "2027-06-19", "has": true, "label": "Fecha", "save": "Guardar", "clear": "Quitar la fecha"},
         "cards": [{"number": 30, "label": "grupos, 2000 lectores", "url": "#", "late": false}],
         "startintro": "Basta con mover las cohortes en Moodle.",
         "action": "#",
@@ -59,7 +62,9 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{dates}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{#ending}}<p class="ayv-notice">{{text}} <a href="{{url}}">{{label}}</a></p>{{/ending}}
+{{#ending}}<div class="ayv-notice"><p>{{text}} <a href="{{url}}">{{label}}</a></p>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="remindall">
+        <button type="submit" class="ayv-button" data-ayv-twice="{{remindsure}}">{{remind}}</button></form></div>{{/ending}}
 <ul class="ayv-today">
 {{#cards}}
     <li><a class="ayv-today-card {{#late}}ayv-today-late{{/late}}" href="{{url}}"><span class="ayv-today-number">{{number}}</span>
@@ -126,6 +131,19 @@
         </form>
     </dialog>
 </section>
+{{#lastday}}
+<section class="ayv-section" id="ayv-lastday">
+    <h2 class="ayv-section-title">{{heading}}</h2>
+    <p>{{intro}}</p>
+    <form method="post" action="{{action}}" class="ayv-inline-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lastday">
+        <label class="ayv-field">{{label}} <input type="date" name="lastday" value="{{value}}" required></label>
+        <button type="submit" class="ayv-button">{{save}}</button>
+        {{#has}}<button type="submit" class="ayv-button ayv-button-quiet" name="clear" value="1" formnovalidate>{{clear}}</button>{{/has}}
+    </form>
+    {{^has}}<p class="ayv-field-hint">{{text}}</p>{{/has}}
+</section>
+{{/lastday}}
 <section class="ayv-section">
     <h2 class="ayv-section-title">{{startheading}}</h2>
     <form method="post" action="{{action}}" class="ayv-inline-form">

@@ -152,6 +152,48 @@ final class closures {
     }
 
     /**
+     * The centre's last day of class this year, at its end, when it has said it and it falls in the year: nothing a reading
+     * library lends falls due after it, and the end of the year begins weeks before it.
+     *
+     * @param int $entityid
+     * @param int|null $now
+     * @return int|null
+     */
+    public static function last_day(int $entityid, ?int $now = null): ?int {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $day = (string) ($settings['lastday'] ?? '');
+        if (!self::day($day)) {
+            return null;
+        }
+        $end = (new \DateTimeImmutable($day . ' 23:59:59', zones::of($entityid)))->getTimestamp();
+        $year = years::around($entityid, $now ?? time());
+        return $end >= (int) $year->timestart && $end < (int) $year->timeend ? $end : null;
+    }
+
+    /**
+     * Says the last day of class, or forgets it with an empty text.
+     *
+     * @param int $entityid
+     * @param string $day 'Y-m-d' or ''.
+     * @return bool Whether it was kept (a day that exists, or nothing).
+     */
+    public static function set_last_day(int $entityid, string $day): bool {
+        global $DB;
+        if ($day !== '' && !self::day($day)) {
+            return false;
+        }
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        if ($day === '') {
+            unset($settings['lastday']);
+        } else {
+            $settings['lastday'] = $day;
+        }
+        $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        return true;
+    }
+
+    /**
      * Whether a text is a day that exists, 'Y-m-d'.
      *
      * @param string $day

@@ -301,7 +301,10 @@ final class bankround {
      */
     public static function remind_readers(\stdClass $library, int $now): int {
         global $DB;
-        $deadline = (int) self::state($library, $now)['deadline'];
+        // A bank's round has its date; a reading library's end of course, the centre's last day of class.
+        $k = bank::is($library) ? 'bankreturn' : 'yearreturn';
+        $deadline = bank::is($library) ? (int) self::state($library, $now)['deadline']
+            : (int) closures::last_day((int) $library->entityid, $now);
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false);
         $name = format_string($library->name, true, ['escape' => false]);
         // Whoever was already told this time is not told again if the task is tried a second time.
@@ -323,18 +326,18 @@ final class bankround {
                 ['libraryid' => $library->id, 'readerid' => $reader->id]
             );
             $when = $deadline ? zones::date($deadline, 'strftimedateshort', $library) : '';
-            $lead = $when ? $str('bankreturnlead', $when) : $str('bankreturnleadnodate');
+            $lead = $when ? $str($k . 'lead', $when) : $str($k . 'leadnodate');
             $rows = [];
             $lines = [];
             foreach ($loans as $loan) {
                 $rows[] = ['line' => $loan->barcode] + mail::book((int) $loan->recordid, $loan->title);
                 $lines[] = '- ' . $loan->title . ' (' . $loan->barcode . ')';
             }
-            $subject = $str('bankreturnsubject');
+            $subject = $str($k . 'subject');
             $hello = get_string('mailhello', self::COMPONENT, $user->firstname);
             if (
                 notices::send(
-                    'bankreturn',
+                    $k,
                     $user,
                     $subject,
                     $hello . "\n\n" . $lead . "\n" . implode("\n", $lines) . "\n\n" . $name,
@@ -347,7 +350,7 @@ final class bankround {
                     'heading' => $subject,
                     'lead' => [$lead],
                     'books' => $rows,
-                    'after' => [$str('bankreturnafter')],
+                    'after' => [$str($k . 'after')],
                     'why' => $str('mailwhyreader'),
                     'prefs' => true,
                     ]
@@ -372,7 +375,10 @@ final class bankround {
     public static function remind_tutors(\stdClass $library, int $now): int {
         global $DB;
         $year = years::around((int) $library->entityid, $now);
-        $deadline = (int) self::state($library, $now)['deadline'];
+        // A bank's round has its date; a reading library's end of course, the centre's last day of class.
+        $k = bank::is($library) ? 'bankreturn' : 'yearreturn';
+        $deadline = bank::is($library) ? (int) self::state($library, $now)['deadline']
+            : (int) closures::last_day((int) $library->entityid, $now);
         $main = mail::main_library((int) $library->entityid) ?? $library;
         // Whoever was already told this time is not told again if the task is tried a second time.
         $told = array_map('strval', (array) (self::state($library, $now)['tutorstold'] ?? []));
@@ -395,15 +401,15 @@ final class bankround {
                     count($p['held'])
                 )], $held);
                 $when = $deadline ? zones::date($deadline, 'strftimedateshort', $library) : '';
-                $lead = $when ? $str('bankreturntutorlead', $when) : $str('bankreturntutorleadnodate');
-                $subject = $str('bankreturntutorsubject', $class['group']);
+                $lead = $when ? $str($k . 'tutorlead', $when) : $str($k . 'tutorleadnodate');
+                $subject = $str($k . 'tutorsubject', $class['group']);
                 $url = (new \moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => $main->slug,
                     'group' => $class['group']]))->out(false);
                 $lines = array_map(fn($p) => '- ' . $p['name'] . ': ' . $p['line'], $people);
                 $name = format_string($library->name, true, ['escape' => false]);
                 if (
                     notices::send(
-                        'bankreturn',
+                        $k,
                         $user,
                         $subject,
                         get_string('mailhello', self::COMPONENT, $user->firstname) . "\n\n" . $lead . "\n" . implode("\n", $lines),
@@ -416,7 +422,7 @@ final class bankround {
                         'heading' => $subject,
                         'lead' => [$lead],
                         'people' => $people,
-                        'after' => [$str('bankreturntutorafter')],
+                        'after' => [$str($k . 'tutorafter')],
                         'why' => $str('mailwhytutor'),
                         'prefs' => true,
                         ]

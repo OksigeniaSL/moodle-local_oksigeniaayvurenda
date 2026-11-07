@@ -66,6 +66,26 @@ if (data_submitted() && confirm_sesskey()) {
             optional_param('to', '', PARAM_RAW_TRIMMED)
         );
         $notice = $str('closuresremoved');
+    } else if ($action === 'lastday') {
+        $day = optional_param('clear', 0, PARAM_BOOL) ? '' : optional_param('lastday', '', PARAM_RAW_TRIMMED);
+        $ok = \local_oksigeniaayvurenda\local\closures::set_last_day($entityid, $day);
+        $notice = $str(!$ok ? 'yearbadday' : ($day === '' ? 'lastdaygone' : 'lastdaysaved'));
+    } else if ($action === 'remindall') {
+        // The end of the course: everyone with a book of a reading library out is told, and each class's tutor.
+        $classes = !\local_oksigeniaayvurenda\local\skins::no_classes($entityid);
+        foreach (catalogue::libraries() as $one) {
+            if (
+                (int) $one->entityid !== $entityid || \local_oksigeniaayvurenda\local\bank::is($one)
+                    || !\local_oksigeniaayvurenda\local\bankround::holders($one)
+            ) {
+                continue;
+            }
+            \local_oksigeniaayvurenda\local\bankround::queue_reminder($one, 'readers', time());
+            if ($classes) {
+                \local_oksigeniaayvurenda\local\bankround::queue_reminder($one, 'tutors', time());
+            }
+        }
+        $notice = $str('bankroundremindqueued');
     } else if ($action === 'start') {
         $ok = year_change::set_start($entityid, optional_param('month', 0, PARAM_INT), optional_param('day', 0, PARAM_INT));
         $notice = $str($ok ? 'sourcessaved' : 'yearbadday');
@@ -150,7 +170,19 @@ $data = [
         'end' => $date((int) $year->timeend - DAYSECS)]),
     'notice' => $notice,
     'ending' => $status['moment'] === 'end' && $status['out'] ? ['text' => $str('yearending', $status['out']),
-        'url' => $url('late.php', ['all' => 1]), 'label' => $str('lateall')] : null,
+        'url' => $url('late.php', ['all' => 1]), 'label' => $str('lateall'), 'remind' => $str('yearremindall'),
+        'remindsure' => $str('yearremindsure')] : null,
+    // Where there are classes, the last day of class: nothing lent falls due after it.
+    'lastday' => \local_oksigeniaayvurenda\local\skins::no_classes($entityid) ? null : [
+        'heading' => $str('lastdayheading'),
+        'intro' => $str('lastdayintro'),
+        'text' => $status['lastday'] ? $date((int) $status['lastday']) : $str('lastdaynone'),
+        'value' => $status['lastday'] ? zones::date((int) $status['lastday'], '%Y-%m-%d', $library) : '',
+        'has' => (bool) $status['lastday'],
+        'label' => $str('lastdaylabel'),
+        'save' => $str('lastdaysave'),
+        'clear' => $str('lastdayclear'),
+    ],
     'cards' => $cards,
     'startintro' => $str('yearstartintro'),
     'action' => $PAGE->url->out(false),
