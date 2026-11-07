@@ -157,19 +157,20 @@
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="needs">
                 <span class="ayv-profile-switch-words"><b id="ayv-needs-label">{{profileneedslabel}}</b>
                     <span class="ayv-field-hint">{{profileneedshint}}</span></span>
-                <button type="submit" name="needs" value="{{#needs}}0{{/needs}}{{^needs}}1{{/needs}}" class="ayv-switch" role="switch" aria-checked="{{#needs}}true{{/needs}}{{^needs}}false{{/needs}}" aria-labelledby="ayv-needs-label"><span></span></button>
+                <button type="submit" name="needs" value="{{#needs}}0{{/needs}}{{^needs}}1{{/needs}}" class="ayv-switch" aria-pressed="{{#needs}}true{{/needs}}{{^needs}}false{{/needs}}" aria-labelledby="ayv-needs-label"><span></span></button>
             </form>
             {{#asks.0}}<h3 class="ayv-profile-sub">{{profileneedsasks}}</h3>
             <ul class="ayv-profile-holds">{{#asks}}<li><b>{{title}}</b> <span>{{format}} · {{state}}</span></li>{{/asks}}</ul>{{/asks.0}}
         </section>
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profilenotes}}</h2>
-            <form method="post" action="{{action}}">
+            {{! The notes keep themselves on leaving the field; the button stays only where the script does not run. }}
+            <form method="post" action="{{action}}" data-ayv-autosave="{{profilesaved}}">
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notes">
                 <label class="ayv-sr" for="ayv-profile-notes">{{profilenotes}}</label>
                 <textarea id="ayv-profile-notes" name="notes" rows="4" maxlength="1000">{{notes}}</textarea>
-                <p class="ayv-field-hint">{{profilenoteshint}}</p>
-                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
+                <p class="ayv-field-hint">{{profilenoteshint}} <span class="ayv-autosaved" role="status" aria-live="polite"></span></p>
+                <p class="ayv-book-actions ayv-autosave-button"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
             </form>
         </section>
         {{/staffonly}}

@@ -491,6 +491,8 @@ final class screens {
         if (!$box['notice'] && !$box['mine'] && !$box['canask'] && !$box['staff']) {
             return null;
         }
+        // The box is named by what it holds: «You have it» is not a part called «Tell me when it comes back».
+        $box['boxlabel'] = ($box['minekind'] ?? '') === 'loan' ? self::str('holdboxmine') : self::str('holdask');
         foreach (['holdask', 'holdaskhint', 'holdcancelmine', 'holdfor', 'holdforhint', 'holdforgo', 'holdslink'] as $key) {
             $box[$key] = self::str($key);
         }
@@ -912,6 +914,7 @@ final class screens {
                 'drawclear' => self::str('drawclear'),
                 // The recorder: for whoever would rather say it, when the centre's plan brings voices.
                 'canspeak' => plans::allows((int) $library->entityid, 'voices'),
+                'young' => characters::young((int) $library->entityid),
                 'speakopen' => self::str('reviewspeakopen'),
                 'speakrecord' => self::str('reviewspeakrecord'),
                 'speakstop' => self::str('reviewspeakstop'),

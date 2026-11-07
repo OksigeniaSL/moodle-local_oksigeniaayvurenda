@@ -37,7 +37,7 @@
         "never": null,
         "summary": "120 préstamos.",
         "hasrows": true,
-        "rows": [{"label": "3º A", "value": 40, "note": "18 de 25 lectores", "share": 100, "part": ""}],
+        "rows": [{"label": "3º A", "url": "https://example.org/readers.php", "value": 40, "note": "18 de 25 lectores", "share": 100, "part": ""}],
         "empty": "",
         "csv": "#",
         "reportfrom": "Desde", "reportto": "Hasta", "reportunlent": "Sin prestar desde hace (años)",
@@ -73,7 +73,7 @@
 <ul class="ayv-people ayv-report">
 {{#rows}}
     <li class="ayv-person">
-        <span class="ayv-person-name">{{#part}}<span class="ayv-report-part">{{part}}</span> {{/part}}{{label}}</span>
+        <span class="ayv-person-name">{{#part}}<span class="ayv-report-part">{{part}}</span> {{/part}}{{#url}}<a href="{{url}}">{{label}}</a>{{/url}}{{^url}}{{label}}{{/url}}</span>
         <span class="ayv-report-value">{{value}}</span>
         <span class="ayv-report-note">{{note}}</span>
         {{#share}}<span class="ayv-share" aria-hidden="true"><span style="width: {{share}}%"></span></span>{{/share}}

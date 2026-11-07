@@ -66,9 +66,17 @@ if (data_submitted() && confirm_sesskey()) {
         ]);
         $notice = $str('librariescreated', format_string($library->name, true, ['escape' => false]));
     } else if ($do === 'entity') {
+        // The start of the year as a day and a month chosen from lists, not a format to know («09-01»).
+        $monthday = optional_param('startmonth', 0, PARAM_INT)
+            ? sprintf(
+                '%02d-%02d',
+                max(1, min(12, optional_param('startmonth', 9, PARAM_INT))),
+                max(1, min(31, optional_param('startday', 1, PARAM_INT)))
+            )
+            : optional_param('yearstart', '09-01', PARAM_TEXT);
         $data = [
             'name' => required_param('name', PARAM_TEXT),
-            'yearstart' => optional_param('yearstart', '09-01', PARAM_TEXT),
+            'yearstart' => $monthday,
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
             'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
             'copyfrom' => optional_param('copyfrom', '', PARAM_ALPHANUM),
@@ -233,6 +241,10 @@ foreach (libraries::all() as $one) {
         'name' => format_string($entity->name, true, ['escape' => false]),
         'rawname' => $entity->name,
         'yearstart' => $entity->yearstart,
+        'startdays' => array_map(fn($d) => ['value' => $d, 'label' => $d,
+            'selected' => $d === (int) substr((string) $entity->yearstart, 3, 2)], range(1, 31)),
+        'startmonths' => array_map(fn($m) => ['value' => $m, 'label' => userdate(make_timestamp(2001, $m, 15, 12), '%B'),
+            'selected' => $m === (int) substr((string) $entity->yearstart, 0, 2)], range(1, 12)),
         'classifications' => $classifications((string) ($settings['classification'] ?? 'udc')),
         'controlletter' => !empty($settings['controlletter']),
         'copyfrom' => (string) ($settings['copyfrom'] ?? ''),
@@ -330,6 +342,7 @@ $data = [
 ];
 foreach (
     ['librariesfirst', 'librariesfirsthint', 'librariesentityname', 'librarieslibraryname', 'librariesyearstart',
+        'yearday', 'yearmonth',
         'librariesyearstarthint', 'librariesclassification', 'librariescontrolletter', 'librariescopyfrom',
         'librariescopyfromhint', 'librariescardfrom', 'librariescardfromhint', 'librariescreate', 'librariesadd',
         'librariesname', 'librarieskind', 'librariesparent', 'librariesnoparent', 'librariesslug', 'librariesslughint',

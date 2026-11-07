@@ -59,7 +59,7 @@
         "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?",
             "figure": "https://example.com/memoria-saluda.webp", "puppet": "", "size": 520, "left": 400, "top": 500,
             "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "", "playid": "", "voice": "https://example.com/hola.mp3" }],
-        "young": false,
+        "young": false, "night": "day",
         "sort": {"heading": "Las novedades", "name": "Mainumby", "intro": "Han llegado libros nuevos.",
             "figure": "https://example.com/mainumby-saluda.webp", "puppet": "", "cheer": null, "cheerpuppet": "",
             "againurl": "#", "messages": "{}", "voices": "{}",
@@ -90,7 +90,7 @@
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar"
     }
 }}
-<section class="ayv-visit"{{#young}} data-young="1"{{/young}} data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
+<section class="ayv-visit" data-night="{{night}}"{{#young}} data-young="1"{{/young}} data-room="{{name}}" data-focus="{{focus}}" data-width="{{width}}" data-height="{{height}}"{{#sound}} data-sound="{{sound}}"{{/sound}}{{#door}} data-door="{{door}}"{{/door}}{{#touch}} data-touch="{{touch}}"{{/touch}}>
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}

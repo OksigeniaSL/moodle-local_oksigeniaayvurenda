@@ -242,13 +242,86 @@
             fold.open = false;
         });
     }
+    // A field that leaves only the lines with its words, and opens the groups that hold them (late books by a name).
+    var plain = function(text) {
+        return String(text).toLowerCase().normalize ? String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            : String(text).toLowerCase();
+    };
+    document.querySelectorAll('input[data-ayv-filter]').forEach(function(field) {
+        var rows = document.querySelectorAll(field.getAttribute('data-ayv-filter'));
+        var groups = document.querySelectorAll(field.getAttribute('data-ayv-filter-groups') || '.ayv-none');
+        var opened = Array.prototype.map.call(groups, function(group) {
+            return group.open;
+        });
+        field.addEventListener('input', function() {
+            var words = plain(field.value).split(/\s+/).filter(Boolean);
+            Array.prototype.forEach.call(rows, function(row) {
+                var text = plain(row.textContent);
+                row.hidden = words.length > 0 && !words.every(function(word) {
+                    return text.indexOf(word) >= 0;
+                });
+            });
+            Array.prototype.forEach.call(groups, function(group, i) {
+                var shown = group.querySelectorAll(field.getAttribute('data-ayv-filter') + ':not([hidden])').length;
+                group.hidden = words.length > 0 && !shown;
+                group.open = words.length > 0 ? shown > 0 : opened[i];
+            });
+        });
+    });
+    // A form that keeps itself when the field is left: the page is sent in the background and says «Saved» a moment.
+    document.querySelectorAll('form[data-ayv-autosave]').forEach(function(form) {
+        var field = form.querySelector('textarea, input[type="text"]');
+        var said = form.querySelector('.ayv-autosaved');
+        var button = form.querySelector('.ayv-autosave-button');
+        if (!field || !window.fetch || !window.FormData) {
+            return;
+        }
+        if (button) {
+            button.hidden = true;
+        }
+        var kept = field.value;
+        field.addEventListener('blur', function() {
+            if (field.value === kept) {
+                return;
+            }
+            var sent = field.value;
+            window.fetch(form.action, {method: 'POST', body: new window.FormData(form), credentials: 'same-origin'})
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error(String(response.status));
+                    }
+                    kept = sent;
+                    if (said) {
+                        said.textContent = form.getAttribute('data-ayv-autosave');
+                        window.setTimeout(function() {
+                            said.textContent = '';
+                        }, 3000);
+                    }
+                    return null;
+                }).catch(function() {
+                    // Not kept: the button comes back, so nothing is lost.
+                    if (button) {
+                        button.hidden = false;
+                    }
+                });
+        });
+    });
     document.querySelectorAll('[data-ayv-open]').forEach(function(button) {
         var sheet = document.getElementById(button.getAttribute('data-ayv-open'));
-        if (!sheet || !sheet.showModal) {
+        if (!sheet) {
             return;
         }
         button.addEventListener('click', function() {
-            sheet.showModal();
+            // A browser without modal windows (an old board, an old iPad) shows it in the page, with the focus inside.
+            if (sheet.showModal) {
+                sheet.showModal();
+            } else {
+                sheet.setAttribute('open', '');
+                var first = sheet.querySelector('input, select, textarea, button');
+                if (first) {
+                    first.focus();
+                }
+            }
         });
     });
     // A sheet named in the address (from «More»: the centre's settings) opens with the page.

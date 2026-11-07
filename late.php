@@ -269,7 +269,7 @@ $data = [
         'lostlabel' => $str('desklost'),
         'lostsure' => $str('desklostsure'),
 ];
-foreach (['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord'] as $key) {
+foreach (['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord', 'latefind'] as $key) {
     $data[$key] = $str($key);
 }
 $deskurl = (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);

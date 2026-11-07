@@ -31,6 +31,13 @@ namespace local_oksigeniaayvurenda\local;
  * off. They speak little and never hold anything up.
  */
 final class characters {
+    /**
+     * @var bool Whether the puppets move: off since 7 November 2026. They turned pieces cut out of a drawing made whole,
+     * which the common norm forbids (shared/animacion-de-personajes.md); each character stands in its pose, drawn whole,
+     * until Gaudí's kit brings them back by one of the norm's ways.
+     */
+    public const MOVING = false;
+
     /** @var string[] The two trades. */
     public const ROLES = ['memory', 'herald'];
 
@@ -192,6 +199,9 @@ final class characters {
      * @return string JSON: image, atlas, rig, anim and gesture.
      */
     public static function puppet(string $role, string $pose, string $step = ''): string {
+        if (!self::MOVING) {
+            return '';
+        }
         $name = $role === 'herald' ? 'mainumby' : 'memoria';
         // The puppet goes with the drawing it brings to life: the sky's drawing without its puppet stays still.
         if ($step === 'cielo' && screens::art('personajes/' . $name . '-cielo-' . $pose)) {
@@ -283,6 +293,9 @@ final class characters {
      * @return string JSON: image, atlas, rig, anim and gesture.
      */
     public static function own_puppet(int $entityid, string $role, string $pose): string {
+        if (!self::MOVING) {
+            return '';
+        }
         $parts = ['image' => images::url('portrait', $entityid, $role . '-marioneta')];
         foreach (self::PUPPET as $part) {
             $parts[$part] = images::url('portrait', $entityid, $role . '-marioneta.' . $part);

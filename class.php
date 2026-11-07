@@ -60,6 +60,16 @@ if ($asked !== '' && !in_array($asked, $groups, true) && has_capability('local/o
     $groups = [$asked];
 }
 
+// A pupil who reaches this page by its address (a tutor shared it) is not told about tutors: their class is on the home.
+if (
+    !$groups && !has_capability('local/oksigeniaayvurenda:desk', $context) && $DB->record_exists(
+        'local_oksigeniaayvurenda_reader',
+        ['entityid' => $entityid, 'userid' => $USER->id, 'status' => 'active', 'readertype' => 'student']
+    )
+) {
+    redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug], 'ayv-class'));
+}
+
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $group = required_param('group', PARAM_TEXT);

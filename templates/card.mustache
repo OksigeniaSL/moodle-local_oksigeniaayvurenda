@@ -67,14 +67,15 @@
             <p class="ayv-card-stage">{{#stage}}{{stage}} · {{/stage}}{{yearname}}</p>
         </div>
     </div>
-    {{! Who has never chosen sees the choice first: an adult need not go through the whole game to put it aside. }}
-    {{#choosefirst}}<div class="ayv-mine-first">{{> local_oksigeniaayvurenda/card_lookchoice}}</div>{{/choosefirst}}
-    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
+    {{! The code next to the card, before anything else: on a phone it is what the desk asks for. }}
     <div class="ayv-card-code">
         {{#barcode}}<div class="ayv-card-barcode">{{{barcode}}}</div>{{/barcode}}
         {{#qr}}<img class="ayv-card-qr" src="{{qr}}" alt="{{code}}" width="120" height="120">{{/qr}}
         <p class="ayv-card-hint">{{showcode}}</p>
     </div>
+    {{! Who has never chosen sees the choice first: an adult need not go through the whole game to put it aside. }}
+    {{#choosefirst}}<div class="ayv-mine-first">{{> local_oksigeniaayvurenda/card_lookchoice}}</div>{{/choosefirst}}
+    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
     {{#haspaths}}
     <h2 class="ayv-section-title">{{pathsheading}}</h2>
     {{#listenpaths}}<p class="ayv-listen-row">{{> local_oksigeniaayvurenda/listen}}</p>{{/listenpaths}}
@@ -151,7 +152,7 @@
                 <span class="ayv-mine-news-icon">{{> local_oksigeniaayvurenda/icon_bell}}</span>
                 <h3 class="ayv-mine-title">{{newbookstitle}}</h3>
                 <p class="ayv-field-hint">{{newbookshint}}</p>
-                <button type="submit" name="newbooks" value="{{#newbookson}}0{{/newbookson}}{{^newbookson}}1{{/newbookson}}" class="ayv-switch" role="switch" aria-checked="{{#newbookson}}true{{/newbookson}}{{^newbookson}}false{{/newbookson}}" aria-label="{{newbookslabel}}"><span></span></button>
+                <button type="submit" name="newbooks" value="{{#newbookson}}0{{/newbookson}}{{^newbookson}}1{{/newbookson}}" class="ayv-switch" aria-pressed="{{#newbookson}}true{{/newbookson}}{{^newbookson}}false{{/newbookson}}" aria-label="{{newbookslabel}}"><span></span></button>
             </form>
             {{^choosefirst}}{{#haschoices}}{{> local_oksigeniaayvurenda/card_lookchoice}}{{/haschoices}}{{/choosefirst}}
         </div>

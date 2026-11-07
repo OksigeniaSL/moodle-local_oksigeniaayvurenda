@@ -139,7 +139,7 @@
         <div><b>{{faceslabel}}</b><p class="ayv-field-hint">{{faceshint}}</p></div>
         {{#canset}}<form method="post" action="{{pageurl}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="faces">
-            <button type="submit" name="backs" value="{{#backson}}0{{/backson}}{{^backson}}1{{/backson}}" class="ayv-switch" role="switch" aria-checked="{{#backson}}true{{/backson}}{{^backson}}false{{/backson}}" aria-label="{{faceslabel}}"><span></span></button>
+            <button type="submit" name="backs" value="{{#backson}}0{{/backson}}{{^backson}}1{{/backson}}" class="ayv-switch" aria-pressed="{{#backson}}true{{/backson}}{{^backson}}false{{/backson}}" aria-label="{{faceslabel}}"><span></span></button>
         </form>{{/canset}}
     </div>
     {{/faces}}

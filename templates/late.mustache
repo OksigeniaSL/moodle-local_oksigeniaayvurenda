@@ -60,6 +60,9 @@
 </ul>
 {{/hascards}}
 {{#hasgroups}}
+{{! A name or a title, typed, leaves only its lines and opens their groups: thirty folded groups are no way to find one. }}
+<p class="ayv-late-find"><label class="ayv-field ayv-field-wide">{{latefind}}
+    <input type="search" data-ayv-filter=".ayv-late-row" data-ayv-filter-groups=".ayv-late-group" autocomplete="off"></label></p>
 {{#groups}}
 <details class="ayv-late-group"{{#open}} open{{/open}}>
     <summary><span class="ayv-late-name">{{heading}}</span> <span class="ayv-late-summary ayv-late-summary-{{tone}}">{{summary}}</span></summary>

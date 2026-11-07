@@ -101,6 +101,7 @@ final class howto {
         'helpme' => ['howto.php', 'desk', ''],
         'lost' => ['desk.php', 'desk', ''],
         'whohas' => ['late.php', 'desk', ''],
+        'dashboard' => ['libraries.php', 'manage', ''],
         'readerhold' => ['search.php', 'view', ''],
         'readerrenew' => ['card.php', 'view', ''],
         'readercard' => ['card.php', 'view', ''],

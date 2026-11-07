@@ -103,10 +103,13 @@
         return null;
     };
 
-    // By day, or by night when the page is dark: the library with its lamps lit. A site without Moodle's colour modes
-    // says nothing, and then the painting follows the visitor's system.
+    // By day, or by night at the library's own hour: the library with its lamps lit. Without the hour (an older page),
+    // the page's colour mode decides, as before.
+    // «light=night» or «light=day» in the address shows the other one, to look at it at any hour.
+    var asked = window.URLSearchParams ? new window.URLSearchParams(window.location.search).get('light') : null;
+    var hour = asked === 'night' || asked === 'day' ? asked : visit.getAttribute('data-night');
     var theme = document.documentElement.getAttribute('data-bs-theme');
-    var night = theme ? theme === 'dark'
+    var night = hour ? hour === 'night' : theme ? theme === 'dark'
         : !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     visit.classList.toggle('ayv-visit-night', night);
     Array.prototype.forEach.call(visit.querySelectorAll('.ayv-visit-layer'), function(img) {
@@ -124,8 +127,14 @@
     };
     var fit = function() {
         var width = frame.clientWidth;
-        narrow = width / W * H < 320;
-        var height = narrow ? Math.max(320, Math.min(560, window.innerHeight * 0.62)) : width / W * H;
+        var natural = width / W * H;
+        // On a classroom board (1280 x 600) the room must fit the screen's height too, not only its width: when it would
+        // go past the bottom, it takes the height there is and slides sideways, as on a phone.
+        var top = frame.getBoundingClientRect().top + (window.pageYOffset || 0);
+        var space = Math.max(320, window.innerHeight - top - 16);
+        var tall = natural > space && space < natural * 0.92;
+        narrow = natural < 320 || tall;
+        var height = natural < 320 ? Math.max(320, Math.min(560, window.innerHeight * 0.62)) : tall ? space : natural;
         k = height / H;
         room.style.width = Math.round(W * k) + 'px';
         room.style.height = Math.round(height) + 'px';

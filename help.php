@@ -101,7 +101,8 @@ $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <p class="ayv-help-caption" id="ayv-help-caption" role="status" aria-live="polite"></p>
 <p class="ayv-help-actions"><button type="button" class="ayv-toggle" id="ayv-help-skip">' . s($str('helpskip')) .
     '</button>' . (array_filter($voices) ? ' <button type="button" class="ayv-toggle" id="ayv-help-voice" aria-pressed="true">' .
-    s($str('helpvoice')) . '</button>' : '') . '</p>
+    s($str('helpvoice')) . '</button> <label class="ayv-visit-volume" id="ayv-help-volume"><span class="ayv-sr">' .
+    s($str('visitvolume')) . '</span><input type="range" min="0" max="100" step="5" value="25"></label>' : '') . '</p>
 </section>';
 shell::output($say('helptitle' . $piece), $main, $library, '', [
     'search' => false,

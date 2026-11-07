@@ -125,6 +125,11 @@ if ($do !== '' && data_submitted() && confirm_sesskey()) {
     redirect(new moodle_url($PAGE->url, ['reviewed' => $done], 'ayv-reviews'));
 }
 $data = screens::record($found, $library);
+// Back to the results it came from, as a reader expects (DIS-KIMI-08): only a search of this same library.
+$came = (string) get_local_referer(false);
+$data['backresults'] = $came !== '' && str_contains($came, '/local/oksigeniaayvurenda/search.php')
+    && str_contains($came, 'library=' . rawurlencode($library->slug)) ? $came : '';
+$data['backresultslabel'] = get_string('recordbackresults', 'local_oksigeniaayvurenda');
 // A book without a cover that someone looks at asks for it, once, in the background.
 \local_oksigeniaayvurenda\local\covers::seek((int) $found['record']->id);
 $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));

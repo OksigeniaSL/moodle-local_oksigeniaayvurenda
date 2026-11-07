@@ -378,6 +378,8 @@ final class visit {
             // A reader of the flower hears the visit unless they turned the sound off, where the centre has it so.
             'young' => skins::on($entityid, 'sound') && self::young($library, $public),
             'hasplaces' => $zones || $hunt || $sort,
+            // Night by the library's own clock (from nine at night to seven in the morning), not by the visitor's screen.
+            'night' => self::night($entityid) ? 'night' : 'day',
             'focus' => $scene['focus'],
             'sound' => $scene['sound'],
             'door' => $scene['door'],
@@ -813,5 +815,17 @@ final class visit {
         }
         $points = array_map(fn($p) => self::point($p), array_values($shape));
         return in_array(null, $points, true) ? null : $points;
+    }
+
+    /**
+     * Whether it is night at the centre: from nine in the evening to seven in the morning, in its own zone.
+     *
+     * @param int $entityid
+     * @param int|null $now
+     * @return bool
+     */
+    public static function night(int $entityid, ?int $now = null): bool {
+        $hour = (int) (new \DateTimeImmutable('@' . ($now ?? time())))->setTimezone(zones::of($entityid))->format('G');
+        return $hour >= 21 || $hour < 7;
     }
 }

@@ -53,11 +53,12 @@
         },
         "hold": {"action": "https://example.org/local/oksigeniaayvurenda/hold.php", "sesskey": "abc", "library": "demo-1", "recordid": 1, "holdid": 0, "notice": "",
                  "mine": "", "ahead": "", "canask": true, "staff": false, "holdsurl": "#",
-                 "holdask": "Avísame cuando vuelva", "holdaskhint": "Ahora están todos prestados.",
+                 "holdask": "Avísame cuando vuelva", "boxlabel": "Avísame cuando vuelva", "holdaskhint": "Ahora están todos prestados.",
                  "holdcancelmine": "Ya no lo quiero", "holdfor": "Reservar para un lector",
                  "holdforhint": "El carné o el nombre", "holdforgo": "Reservar", "holdslink": "Todas las reservas"}
     }
 }}
+{{#backresults}}<p class="ayv-back"><a href="{{backresults}}"><span aria-hidden="true">←</span> {{backresultslabel}}</a></p>{{/backresults}}
 <article class="ayv-record">
     <div class="ayv-record-cover">
         {{#card}}
@@ -77,7 +78,7 @@
         </p>
         {{#lend}}<p class="ayv-record-lend"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/lend}}
         {{#hold}}
-        <section class="ayv-hold" aria-label="{{holdask}}">
+        <section class="ayv-hold" aria-label="{{boxlabel}}">
             {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
             {{#mine}}
             <p class="ayv-hold-mine">{{mine}}{{#ahead}} {{ahead}}{{/ahead}}</p>
@@ -130,53 +131,6 @@
         <h2 class="ayv-section-title">{{subjectsheading}}</h2>
         <p class="ayv-subjects">{{#subjects}}<a class="ayv-chip" href="{{url}}">{{label}}</a> {{/subjects}}</p>
         {{/hassubjects}}
-        {{#reviews}}{{#show}}
-        <section class="ayv-reviews" id="ayv-reviews" aria-labelledby="ayv-reviews-title">
-            <h2 id="ayv-reviews-title" class="ayv-section-title">{{heading}}</h2>
-            {{#done}}<p class="ayv-notice" role="status">{{done}}</p>{{/done}}
-            {{#haslist}}<ul class="ayv-review-list">{{#list}}<li class="ayv-review">{{#drawing}}<img class="ayv-review-drawing" src="{{drawing}}" alt="{{drawingalt}}" loading="lazy">{{/drawing}}
-                {{#voice}}<audio class="ayv-review-voice" controls preload="none" src="{{voice}}" aria-label="{{voicelabel}}"></audio>{{/voice}}
-                {{#text}}<p class="ayv-review-text">«{{text}}»</p>{{/text}}
-                <p class="ayv-review-who">{{who}}</p></li>{{/list}}</ul>{{/haslist}}
-            {{^haslist}}<p class="ayv-empty">{{none}}</p>{{/haslist}}
-            {{#write}}<form class="ayv-review-form" method="post" action="{{action}}#ayv-reviews" enctype="multipart/form-data">
-                <input type="hidden" name="sesskey" value="{{sesskey}}">
-                <label class="ayv-field ayv-field-wide"><span class="ayv-review-ask">{{label}}</span> <span class="ayv-field-hint">{{hint}}</span>
-                    <textarea name="text" maxlength="{{max}}" rows="3" required>{{text}}</textarea></label>
-                {{#mydrawing}}<img class="ayv-review-drawing" src="{{mydrawing}}" alt="{{mydrawingalt}}">{{/mydrawing}}
-                {{#myvoice}}<audio class="ayv-review-voice" controls preload="none" src="{{myvoice}}" aria-label="{{myvoicelabel}}"></audio>{{/myvoice}}
-                {{! The other ways of saying it, side by side under the words, not one under another. }}
-                <p class="ayv-review-ways"><button type="button" class="ayv-chip" data-ayv-draw-open>{{drawopen}}</button>
-                    {{#canspeak}}<button type="button" class="ayv-chip" data-ayv-speak-open>{{> local_oksigeniaayvurenda/icon_mic}} {{speakopen}}</button>{{/canspeak}}</p>
-                {{#canspeak}}
-                <div class="ayv-speak" data-ayv-speak hidden data-nomic="{{speaknomic}}" data-stop="{{speakstop}}" data-record="{{speakrecord}}">
-                    <p class="ayv-field-hint">{{speakhint}}</p>
-                    <p class="ayv-book-actions"><button type="button" class="ayv-button" data-speak-record>{{> local_oksigeniaayvurenda/icon_mic}} <span>{{speakrecord}}</span></button>
-                        <span class="ayv-speak-time" aria-live="polite"></span>
-                        <button type="button" class="ayv-button ayv-button-quiet" data-speak-again hidden>{{speakagain}}</button></p>
-                    <audio class="ayv-review-voice" controls hidden></audio>
-                    <input type="file" name="voice" accept="audio/*" hidden>
-                </div>
-                {{/canspeak}}
-                <div class="ayv-draw" data-ayv-draw hidden>
-                    <canvas class="ayv-draw-canvas" width="800" height="500" role="img" aria-label="{{drawcanvas}}"></canvas>
-                    <div class="ayv-draw-tools" role="group" aria-label="{{drawtools}}">
-                        {{#drawcolours}}<button type="button" class="ayv-draw-colour" data-colour="{{value}}" style="--ayv-pencil: {{value}}" aria-label="{{label}}" aria-pressed="{{pressed}}"></button>{{/drawcolours}}
-                        <button type="button" class="ayv-toggle" data-size="6" aria-pressed="true">{{drawthin}}</button>
-                        <button type="button" class="ayv-toggle" data-size="18" aria-pressed="false">{{drawthick}}</button>
-                        <button type="button" class="ayv-toggle" data-erase aria-pressed="false">{{draweraser}}</button>
-                        <button type="button" class="ayv-button ayv-button-quiet" data-undo>{{drawundo}}</button>
-                        <button type="button" class="ayv-button ayv-button-quiet" data-clear>{{drawclear}}</button>
-                    </div>
-                    <input type="hidden" name="drawing" value="">
-                </div>
-                {{#canrecommend}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="forlittle" value="1" {{#recommended}}checked{{/recommended}}> {{recommend}}</label>{{/canrecommend}}
-                {{#hasmine}}<p class="ayv-field-hint">{{state}}</p>{{/hasmine}}
-                <p class="ayv-book-actions ayv-review-send">{{#hasmine}}<button type="submit" class="ayv-button ayv-button-quiet" name="review" value="remove" formnovalidate>{{remove}}</button>{{/hasmine}}
-                    <button type="submit" class="ayv-button" name="review" value="send">{{send}}</button></p>
-            </form>{{/write}}
-        </section>
-        {{/show}}{{/reviews}}
         {{#hasfacts}}
         <dl class="ayv-facts">
             {{#facts}}<div><dt>{{label}}</dt><dd>{{value}}</dd></div>{{/facts}}
@@ -305,6 +259,58 @@
             </div>
         </section>
         {{/where}}
+        {{! What readers say comes after where the book is and how to find it: first the book, then the talk. }}
+        {{#reviews}}{{#show}}
+        <section class="ayv-reviews" id="ayv-reviews" aria-labelledby="ayv-reviews-title">
+            <h2 id="ayv-reviews-title" class="ayv-section-title">{{heading}}</h2>
+            {{#done}}<p class="ayv-notice" role="status">{{done}}</p>{{/done}}
+            {{#haslist}}<ul class="ayv-review-list">{{#list}}<li class="ayv-review">{{#drawing}}<img class="ayv-review-drawing" src="{{drawing}}" alt="{{drawingalt}}" loading="lazy">{{/drawing}}
+                {{#voice}}<audio class="ayv-review-voice" controls preload="none" src="{{voice}}" aria-label="{{voicelabel}}"></audio>{{/voice}}
+                {{#text}}<p class="ayv-review-text">«{{text}}»</p>{{/text}}
+                <p class="ayv-review-who">{{who}}</p></li>{{/list}}</ul>{{/haslist}}
+            {{^haslist}}<p class="ayv-empty">{{none}}</p>{{/haslist}}
+            {{#write}}<form class="ayv-review-form" method="post" action="{{action}}#ayv-reviews" enctype="multipart/form-data">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                {{! A child of six draws or speaks first, and writes if they want to. }}
+                {{#young}}<p class="ayv-review-ask">{{label}}</p>
+                <p class="ayv-review-ways"><button type="button" class="ayv-chip" data-ayv-draw-open>{{drawopen}}</button>
+                    {{#canspeak}}<button type="button" class="ayv-chip" data-ayv-speak-open>{{> local_oksigeniaayvurenda/icon_mic}} {{speakopen}}</button>{{/canspeak}}</p>{{/young}}
+                <label class="ayv-field ayv-field-wide">{{^young}}<span class="ayv-review-ask">{{label}}</span>{{/young}} <span class="ayv-field-hint">{{hint}}</span>
+                    <textarea name="text" maxlength="{{max}}" rows="3"{{^young}} required{{/young}}>{{text}}</textarea></label>
+                {{#mydrawing}}<img class="ayv-review-drawing" src="{{mydrawing}}" alt="{{mydrawingalt}}">{{/mydrawing}}
+                {{#myvoice}}<audio class="ayv-review-voice" controls preload="none" src="{{myvoice}}" aria-label="{{myvoicelabel}}"></audio>{{/myvoice}}
+                {{! The other ways of saying it, side by side under the words, not one under another. }}
+                {{^young}}<p class="ayv-review-ways"><button type="button" class="ayv-chip" data-ayv-draw-open>{{drawopen}}</button>
+                    {{#canspeak}}<button type="button" class="ayv-chip" data-ayv-speak-open>{{> local_oksigeniaayvurenda/icon_mic}} {{speakopen}}</button>{{/canspeak}}</p>{{/young}}
+                {{#canspeak}}
+                <div class="ayv-speak" data-ayv-speak hidden data-nomic="{{speaknomic}}" data-stop="{{speakstop}}" data-record="{{speakrecord}}">
+                    <p class="ayv-field-hint">{{speakhint}}</p>
+                    <p class="ayv-book-actions"><button type="button" class="ayv-button" data-speak-record>{{> local_oksigeniaayvurenda/icon_mic}} <span>{{speakrecord}}</span></button>
+                        <span class="ayv-speak-time" aria-live="polite"></span>
+                        <button type="button" class="ayv-button ayv-button-quiet" data-speak-again hidden>{{speakagain}}</button></p>
+                    <audio class="ayv-review-voice" controls hidden></audio>
+                    <input type="file" name="voice" accept="audio/*" hidden>
+                </div>
+                {{/canspeak}}
+                <div class="ayv-draw" data-ayv-draw hidden>
+                    <canvas class="ayv-draw-canvas" width="800" height="500" role="img" aria-label="{{drawcanvas}}"></canvas>
+                    <div class="ayv-draw-tools" role="group" aria-label="{{drawtools}}">
+                        {{#drawcolours}}<button type="button" class="ayv-draw-colour" data-colour="{{value}}" style="--ayv-pencil: {{value}}" aria-label="{{label}}" aria-pressed="{{pressed}}"></button>{{/drawcolours}}
+                        <button type="button" class="ayv-toggle" data-size="6" aria-pressed="true">{{drawthin}}</button>
+                        <button type="button" class="ayv-toggle" data-size="18" aria-pressed="false">{{drawthick}}</button>
+                        <button type="button" class="ayv-toggle" data-erase aria-pressed="false">{{draweraser}}</button>
+                        <button type="button" class="ayv-button ayv-button-quiet" data-undo>{{drawundo}}</button>
+                        <button type="button" class="ayv-button ayv-button-quiet" data-clear>{{drawclear}}</button>
+                    </div>
+                    <input type="hidden" name="drawing" value="">
+                </div>
+                {{#canrecommend}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="forlittle" value="1" {{#recommended}}checked{{/recommended}}> {{recommend}}</label>{{/canrecommend}}
+                {{#hasmine}}<p class="ayv-field-hint">{{state}}</p>{{/hasmine}}
+                <p class="ayv-book-actions ayv-review-send">{{#hasmine}}<button type="submit" class="ayv-button ayv-button-quiet" name="review" value="remove" formnovalidate>{{remove}}</button>{{/hasmine}}
+                    <button type="submit" class="ayv-button" name="review" value="send">{{send}}</button></p>
+            </form>{{/write}}
+        </section>
+        {{/show}}{{/reviews}}
         {{#beside}}
         <section class="ayv-beside" aria-labelledby="ayv-beside-title">
             <h2 id="ayv-beside-title" class="ayv-section-title">{{heading}}</h2>

@@ -106,6 +106,13 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-sitenotice { margin: 0; padding: .55rem 1rem; background: #0f3a33; color: #fbf6ec; text-align: center; font-weight: 600; }
 
 /* The header: emblem and name, the search, the way back. */
+/* What gets the focus, or an anchor, stops below the fixed header, never under it (WCAG 2.4.11). */
+html:has(body.ayv) { scroll-padding-top: 7rem; }
+.ayv :focus { scroll-margin-top: 7rem; }
+/* Fixed only where there is room for it: a short window keeps all its height for the page. */
+@media (max-height: 30rem) {
+    .ayv .ayv-top { position: relative; }
+}
 .ayv .ayv-top {
     position: sticky;
     top: 0;
@@ -476,8 +483,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     .ayv .ayv-record-title { font-size: 1.6rem; }
 }
 
+/* Less motion takes away what moves, not what fades: a colour or an opacity changing is not motion. */
 @media (prefers-reduced-motion: reduce) {
-    .ayv *, .ayv *::before, .ayv *::after { transition: none !important; }
+    .ayv *, .ayv *::before, .ayv *::after {
+        transition-property: opacity, color, background-color, border-color, outline-color !important;
+    }
     .ayv .ayv-corner:hover, .ayv .ayv-card-link:hover .ayv-cover { transform: none; }
 }
 
@@ -970,6 +980,12 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-phone-waiting { font-weight: 700; color: var(--accent); }
 
+/* On a phone the desk is already a phone: «Read with the phone» goes, and the camera leads (UXP-15). */
+@media (max-width: 30rem) {
+    .ayv #ayv-phone-pair,
+    .ayv #ayv-phone-panel { display: none; }
+    .ayv #ayv-camera-open { background: var(--green); color: #fbf6ec; }
+}
 /* On the phone it is wide, to tap with a thumb; on a computer, the size of its words. */
 .ayv .ayv-phone-open { min-height: 64px; padding: 0 2rem; font-size: 1.2rem; }
 @media (max-width: 40rem) {
@@ -1075,6 +1091,14 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-path-name { font-weight: 700; }
 
 .ayv .ayv-path-hint { font-size: .9rem; opacity: .85; }
+/* A young reader of a school reads nothing under 14 px: hints, small labels and the cards' little words (UXL-15). */
+.ayv.ayv-skin-school.ayv-young .ayv-field-hint,
+.ayv.ayv-skin-school.ayv-young .ayv-facet-label,
+.ayv.ayv-skin-school.ayv-young .ayv-cromo-when,
+.ayv.ayv-skin-school.ayv-young .ayv-chip-count { font-size: .875rem; }
+/* A young reader reads the flower's row a point bigger (Gaudí, 7 November). */
+.ayv.ayv-young .ayv-path-hint { font-size: 1rem; }
+.ayv.ayv-young .ayv-path-detail { font-size: 1.1rem; }
 
 .ayv .ayv-path-marks { display: block; line-height: 0; }
 .ayv .ayv-path-marks svg { width: auto; height: 30px; }
@@ -1548,6 +1572,10 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
     background: var(--paper);
 }
 .ayv .ayv-read-stage.is-reading .ayv-epub { height: calc(100vh - 9rem); height: calc(100dvh - 9rem); }
+/* A page of a book only where it fits: narrow or zoomed in (200 %), the page takes the whole width (WCAG 1.4.4, 1.4.10). */
+@media (max-width: 48rem), (max-height: 36rem) {
+    .ayv .ayv-epub { flex: 1 1 auto; aspect-ratio: auto; width: 100%; height: 70vh; }
+}
 .ayv .ayv-voice-grid.is-reading { align-content: start; }
 .ayv .ayv-voice-grid.is-reading .ayv-epub { height: calc(100vh - 11rem); height: calc(100dvh - 11rem); }
 
@@ -2426,7 +2454,7 @@ html[data-bs-theme="dark"] .ayv .ayv-bookcase {
     background: var(--bg);
     text-decoration: none;
     box-shadow: inset 2px 0 0 rgba(255, 255, 255, .2), inset -3px 0 0 rgba(0, 0, 0, .18), 0 1px 0 rgba(0, 0, 0, .25);
-    transition: transform .18s ease;
+    transition: transform .18s ease, box-shadow .18s ease;
     overflow: hidden;
 }
 html[data-bs-theme="dark"] .ayv .ayv-spine { background: var(--bgd); }
@@ -2501,7 +2529,10 @@ html[data-bs-theme="dark"] .ayv .ayv-spine { background: var(--bgd); }
 .ayv .ayv-spine-label > span { display: block; white-space: nowrap; overflow: hidden; }
 .ayv .ayv-spine-label-place { border-top: 4px solid var(--place); }
 .ayv .ayv-spine-room { position: absolute; z-index: 1; top: 12px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 1.5px #fffdf7; }
-.ayv a.ayv-spine:hover,
+/* Raised by the mouse, not by a finger: on a touch screen a tapped spine would stay up after the lectern closes. */
+@media (hover: hover) {
+    .ayv a.ayv-spine:hover { transform: translateY(-12px); }
+}
 .ayv a.ayv-spine:focus-visible { transform: translateY(-12px); }
 .ayv a.ayv-spine:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; border-radius: 3px; }
 .ayv .ayv-spine-open .ayv-spine { transform: translateY(-12px); box-shadow: 0 0 0 3px var(--sun), 0 10px 16px -8px rgba(0, 0, 0, .5); }
@@ -2660,12 +2691,11 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     --place: var(--green2);
     position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    gap: 0 .75rem;
-    align-items: end;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .2rem;
+    align-content: center;
     min-height: 4.5rem;
-    padding: .75rem 1rem;
+    padding: .75rem 1rem .75rem 1.4rem;
     border-radius: 16px;
     background: var(--surface);
     color: var(--ink);
@@ -2674,29 +2704,10 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     transition: transform .15s ease;
 }
 .ayv .ayv-place:hover { transform: translateY(-2px); }
-/* Three books on a plank, one leaning, in the colour of the place: a shelf, not a bar chart. */
-.ayv .ayv-place-books {
-    grid-row: 1 / 3;
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 2.6rem;
-    padding: 0 6px;
-    border-bottom: 4px solid var(--ayv-wood2, #b8915f);
-    border-radius: 0 0 3px 3px;
-}
-.ayv .ayv-place-books span {
-    width: 11px;
-    border-radius: 2px;
-    background: var(--place);
-    box-shadow: inset 0 5px 0 rgba(255, 255, 255, .35), inset 0 -4px 0 rgba(0, 0, 0, .14);
-}
-.ayv .ayv-place-books span:nth-child(1) { height: 76%; }
-.ayv .ayv-place-books span:nth-child(2) { height: 100%; opacity: .82; }
-.ayv .ayv-place-books span:nth-child(3) { height: 84%; opacity: .92; margin-left: 4px; transform: rotate(14deg); transform-origin: bottom left; }
-.ayv .ayv-place-books span:nth-child(n+4) { display: none; }
-.ayv .ayv-place-label { font: 600 1.05rem/1.25 var(--title); overflow-wrap: anywhere; }
-.ayv .ayv-place-count { font-size: .85rem; color: var(--ayv-muted, #5f6b67); }
+/* A place says its name and how many books it has, big, with its colour down the side: the same drawing eight times
+   said nothing (Gaudí, 7 November). */
+.ayv .ayv-place-label { font: 600 1.2rem/1.2 var(--title); overflow-wrap: anywhere; }
+.ayv .ayv-place-count { font-size: .95rem; font-weight: 600; color: var(--ayv-muted, #5f6b67); }
 .ayv .ayv-nav-stacks svg { width: 20px; height: 20px; }
 .ayv .ayv-nav-stacks { gap: .4rem; }
 @media (max-width: 40rem) {
@@ -2726,6 +2737,7 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
 }
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-spine { transition: none; }
+    .ayv .ayv-lectern { animation: none; }
     .ayv .ayv-lectern-turn { animation: none; }
     .ayv .ayv-lectern-in { animation: ayv-lectern-in .2s ease both; }
 }
@@ -2921,7 +2933,6 @@ html[data-bs-theme="dark"] .ayv.ayv-embed {
 .ayv .ayv-visit-zones a { cursor: pointer; }
 .ayv .ayv-visit-zones polygon { fill: transparent; stroke: transparent; stroke-width: 7; stroke-linejoin: round; transition: fill .25s ease, stroke .25s ease; }
 .ayv .ayv-visit-zones.ayv-visit-hint polygon { fill: rgba(255, 233, 184, .12); stroke: rgba(255, 233, 184, .6); transition-duration: .5s; }
-.ayv .ayv-visit-zones a:hover polygon,
 .ayv .ayv-visit-zones a.ayv-visit-lit polygon { fill: rgba(255, 233, 184, .18); stroke: rgba(255, 233, 184, .9); filter: drop-shadow(0 0 14px rgba(255, 214, 140, .95)); }
 .ayv .ayv-visit-surface { position: absolute; top: 0; left: 0; box-sizing: border-box; transform-origin: 0 0; }
 .ayv .ayv-visit-board ul,
@@ -2967,8 +2978,12 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-tip { background: #f6ead2; color: #0f
 /* The game is the moment of the room: it leads, with its magnifier; the ways out stay quiet. */
 .ayv button.ayv-visit-play { gap: .4rem; background: var(--green); color: #fbf6ec; box-shadow: none; }
 .ayv button.ayv-visit-play:hover { background: var(--night); color: #fbf6ec; }
-.ayv .ayv-visit-place:hover,
 .ayv .ayv-visit-place.ayv-visit-lit { background: var(--accent); color: var(--paper); }
+/* What the mouse lights up, only where there is a mouse: on a board or a tablet a tap would leave it lit (bug-front-06). */
+@media (hover: hover) {
+    .ayv .ayv-visit-zones a:hover polygon { fill: rgba(255, 233, 184, .18); stroke: rgba(255, 233, 184, .9); filter: drop-shadow(0 0 14px rgba(255, 214, 140, .95)); }
+    .ayv .ayv-visit-place:hover { background: var(--accent); color: var(--paper); }
+    }
 .ayv .ayv-visit-place:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-visit-room,
@@ -2994,7 +3009,16 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 }
 /* Find the hidden book (0.69.0): the memory and her clue (the label big, and the cover for the young), the room's shelf,
    a nudge for a spine that is not it, a glow after three, and the book that comes out when found. */
-.ayv .ayv-hunt { width: min(46rem, calc(100vw - 1rem)); }
+.ayv .ayv-hunt { width: min(46rem, calc(100vw - 1rem)); max-height: calc(100vh - 2rem); }
+/* On a classroom board or a zoomed Chromebook (under 640 px high), the game fits without scrolling inside its window:
+   a smaller figure and cover, the magnifier line without its reserved height, the shelf right after the clue. */
+@media (max-height: 640px) {
+    .ayv .ayv-hunt .ayv-hunt-who .ayv-bubble-figure { width: 80px; height: 80px; }
+    .ayv .ayv-hunt .ayv-hunt-cover { width: 48px; height: 72px; }
+    .ayv .ayv-hunt .ayv-hunt-lens { min-height: 0; margin-top: .25rem; }
+    .ayv .ayv-hunt .ayv-where-label { font-size: 1.2rem; }
+    .ayv .ayv-hunt-clue p { margin-bottom: .4rem; }
+}
 .ayv .ayv-hunt-ask,
 .ayv .ayv-hunt-found { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; }
 .ayv .ayv-hunt-ask[hidden],
@@ -3040,7 +3064,6 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 .ayv .ayv-sort-doors { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: .6rem; margin: 0; padding: 0; list-style: none; }
 .ayv .ayv-sort-door { position: relative; display: flex; flex-direction: column; justify-content: flex-end; width: 100%; min-height: 7rem; padding: 0; border: 0; border-radius: 48px 48px 10px 10px; overflow: hidden; font: inherit; text-align: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .12), 0 6px 14px -8px rgba(15, 58, 51, .5); transition: transform .15s ease; }
 .ayv .ayv-sort-door::after { content: none; }
-.ayv .ayv-sort-door:hover { transform: translateY(-2px); }
 .ayv .ayv-sort-door:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
 .ayv .ayv-sort-door-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .ayv .ayv-sort-door-label { position: relative; padding: .45rem .5rem; background: rgba(15, 30, 27, .72); color: #fbf6ec; font-weight: 700; font-size: .9rem; line-height: 1.2; }
@@ -3362,8 +3385,10 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-mine-news .ayv-field-hint { grid-column: 1 / -1; margin: .25rem 0 .5rem; }
 .ayv .ayv-switch { position: relative; grid-column: 1 / -1; justify-self: start; width: 3.6rem; height: 2.1rem; padding: 0; border: 0; border-radius: 999px; background: var(--line); cursor: pointer; transition: background .15s ease; }
 .ayv .ayv-switch span { position: absolute; top: .25rem; left: .25rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .15s ease; }
-.ayv .ayv-switch[aria-checked="true"] { background: var(--green2); }
-.ayv .ayv-switch[aria-checked="true"] span { transform: translateX(1.5rem); }
+.ayv .ayv-switch[aria-checked="true"],
+.ayv .ayv-switch[aria-pressed="true"] { background: var(--green2); }
+.ayv .ayv-switch[aria-checked="true"] span,
+.ayv .ayv-switch[aria-pressed="true"] span { transform: translateX(1.5rem); }
 .ayv .ayv-switch:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 .ayv .ayv-mine-look { grid-column: 1 / -1; }
 .ayv .ayv-cards-print { display: grid; gap: 1rem; }
@@ -4355,7 +4380,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-lab-side { display: grid; gap: .6rem; padding: 1rem; border-radius: 16px; background: var(--surface); box-shadow: var(--ayv-shadow); min-width: 0; }
 .ayv .ayv-lab-side .ayv-field-hint { margin: 0; }
 .ayv .ayv-lab-map { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 3px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
-.ayv .ayv-lab-cell { min-height: 22px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); cursor: pointer; }
+.ayv .ayv-lab-cell { min-width: 24px; min-height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); cursor: pointer; }
 .ayv .ayv-lab-cell:hover, .ayv .ayv-lab-cell:focus-visible { border-color: var(--accent); }
 .ayv .ayv-lab-cell-used { background: var(--paper2); opacity: .55; }
 .ayv .ayv-lab-cell-first { background: var(--accent); border-color: var(--accent); }

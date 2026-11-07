@@ -211,7 +211,8 @@
                             }, 300);
                             hint.textContent = String(str.cameraread || '').replace('{$a}', function() { return code; });
                             if (navigator.vibrate) {
-                                navigator.vibrate(40);
+                                // A tap, as a keyboard does: 40 ms feels like a warning.
+                                navigator.vibrate(8);
                             }
                             options.onCode(code);
                             if (!options.keep) {

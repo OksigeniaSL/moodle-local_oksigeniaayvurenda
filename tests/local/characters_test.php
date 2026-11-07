@@ -105,7 +105,8 @@ final class characters_test extends \advanced_testcase {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
         $whole = $dir && is_readable($dir . '/pix/marionetas/memoria.anim.json');
         $puppet = characters::puppet('memory', 'senala');
-        if (!$whole) {
+        // While the puppets do not move (the norm of 7 November), there is none, and the pose drawn whole stays.
+        if (!characters::MOVING || !$whole) {
             $this->assertSame('', $puppet);
             return;
         }
@@ -208,9 +209,14 @@ final class characters_test extends \advanced_testcase {
         $this->assertTrue(characters::of($entityid)['herald']['own']);
         $said = characters::say($entityid, 'herald', 'heraldnew', [], 'saluda');
         $this->assertStringContainsString('/herald-saluda.png', $said['figure']);
-        $puppet = json_decode($said['puppet'], true);
-        $this->assertSame('arrive', $puppet['gesture']);
-        $this->assertStringContainsString('/herald-marioneta.atlas.json', $puppet['atlas']);
+        // Its puppet is kept, but does not move while the puppets are still (the norm of 7 November).
+        if (characters::MOVING) {
+            $puppet = json_decode($said['puppet'], true);
+            $this->assertSame('arrive', $puppet['gesture']);
+            $this->assertStringContainsString('/herald-marioneta.atlas.json', $puppet['atlas']);
+        } else {
+            $this->assertSame('', $said['puppet']);
+        }
         $this->assertStringContainsString('/herald.png', characters::of($entityid)['herald']['portrait']);
         characters::remove_pack($entityid, 'herald');
         $this->assertFalse(characters::of($entityid)['herald']['own']);

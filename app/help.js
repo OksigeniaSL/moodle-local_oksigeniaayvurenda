@@ -61,6 +61,15 @@
             playing.dispatchEvent(new Event('ended'));
         }
     };
+    // How loud the voices are: the device's own level, a quarter until someone sets it.
+    var level = function() {
+        try {
+            var kept = parseFloat(window.localStorage.getItem('ayv-volume'));
+            return isNaN(kept) ? 0.25 : Math.max(0, Math.min(1, kept));
+        } catch (e) {
+            return 0.25;
+        }
+    };
     var speak = function(index) {
         var url = voices[index];
         if (!url || muted || skipping) {
@@ -68,6 +77,7 @@
         }
         return new Promise(function(resolve) {
             var audio = new Audio(url);
+            audio.volume = level();
             playing = audio;
             audio.addEventListener('ended', function() {
                 if (playing === audio) {
@@ -172,7 +182,15 @@
                             input.value += code[i++];
                             setTimeout(next, skipping ? 0 : 45);
                         } else {
-                            input.form.requestSubmit();
+                            // An old Safari has no requestSubmit: its button does the same.
+                            if (input.form.requestSubmit) {
+                                input.form.requestSubmit();
+                            } else {
+                                var send = input.form.querySelector('button[type="submit"], input[type="submit"]');
+                                if (send) {
+                                    send.click();
+                                }
+                            }
                             resolve();
                         }
                     };
@@ -387,6 +405,21 @@
             waiting.click();
         }
     });
+    // Its own volume, low to start with and kept for the device, shared with the visit and «Listen» (a board in a class).
+    var slider = document.querySelector('#ayv-help-volume input');
+    if (slider) {
+        slider.value = String(Math.round(level() * 100));
+        slider.addEventListener('input', function() {
+            try {
+                window.localStorage.setItem('ayv-volume', String(Number(slider.value) / 100));
+            } catch (e) {
+                // Without storage, it holds for this page.
+            }
+            if (playing) {
+                playing.volume = Number(slider.value) / 100;
+            }
+        });
+    }
     var voiceButton = document.getElementById('ayv-help-voice');
     if (voiceButton) {
         voiceButton.setAttribute('aria-pressed', muted ? 'false' : 'true');

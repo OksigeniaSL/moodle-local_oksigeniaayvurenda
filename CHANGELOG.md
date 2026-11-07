@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.192.0
+
+- 0.191.0 did not get installed (the CI's HTML validator refused `role="switch"` on a button): it comes inside this one,
+  with the switches as `aria-pressed`.
+- The characters do not move any more: their puppets turned pieces cut out of a drawing made whole, which the common
+  rule on animating characters forbids; each one stands in its pose, drawn whole, everywhere (`characters::MOVING`), until
+  they come back by one of the rule's ways.
+- Design, dark mode and accessibility (audit batch 9, second part):
+  - focus and anchors stop below the fixed header, and the header is not fixed in short windows (WCAG 2.4.11);
+  - the book reader takes the whole width when narrow or zoomed to 200 %; the label map's cells are 24 px at least;
+  - the visit fits a classroom board's height (1280 x 600), sliding sideways when needed, and the hidden-book game fits
+    low screens; at night by the library's own hour, not the screen's mode (`light=night` or `day` to look at the other);
+  - what the mouse lights up in the visit, only where there is a mouse; windows open in the page on browsers without
+    modal dialogs; the guided help sends its forms on an old Safari;
+  - less motion keeps fades and colour changes, and the lectern's sheet no longer rises on a phone; a tapped spine does
+    not stay up; the camera vibrates 8 ms;
+  - the guided helps have their own volume, a quarter to start and remembered for the device, as the visit;
+  - the record: back to the results it came from, reviews after the copies and where the book is, a young reader draws
+    or speaks first and writes if they want, and the hold box is «Your loan» when the reader has the book;
+  - the card's code right after the card on a phone; a young reader of a school reads nothing under 14 px;
+  - «My class» opened by a pupil goes to their class on the home page;
+  - «Readers» puts the search first with the strong button; the staff notes keep themselves on leaving the field;
+    «Late» has a field that finds a name or a title and opens its group; the loans report says its days and each group
+    opens its readers; «One reader borrowed», not «1 readers»;
+  - on a phone, the desk hides «Read with the phone» and the camera leads; the start of the year in the centre settings
+    is a day and a month from lists;
+  - Gaudí's review of 0.191.0: the shelf places without the repeated drawing, the corners' hint once, characters
+    «spoken of as» she or he, and the flower's row a point bigger.
+
 ## 0.191.0
 
 - Design, dark mode and accessibility (audit batch 9, first part):

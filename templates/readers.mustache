@@ -20,20 +20,21 @@
         {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
         <p class="ayv-readers-sum">{{summary}}</p>
     </div>
-    {{#bring}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/bring}}
+    {{#bring}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/bring}}
 </header>
-{{#match}}
-<p class="ayv-readers-band"><span class="ayv-readers-bandtext"><b>{{line}}</b> {{hint}}</span>
-    <a class="ayv-button ayv-button-quiet" href="{{url}}">{{go}}</a></p>
-{{/match}}
+{{! Finding a reader is what is done every day: first, and the strong button; bringing them is once in a while. }}
 {{#hasreadersatall}}
 <form class="ayv-readers-find" role="search" method="get" action="{{action}}">
     <input type="hidden" name="library" value="{{library}}">
     <label for="ayv-readers-q" class="ayv-sr">{{findlabel}}</label>
     <input id="ayv-readers-q" type="search" name="q" value="{{query}}" placeholder="{{findhint}}" maxlength="100" autocomplete="off">
-    <button type="submit" class="ayv-button ayv-button-quiet">{{findgo}}</button>
+    <button type="submit" class="ayv-button">{{findgo}}</button>
 </form>
 {{/hasreadersatall}}
+{{#match}}
+<p class="ayv-readers-band"><span class="ayv-readers-bandtext"><b>{{line}}</b> {{hint}}</span>
+    <a class="ayv-button ayv-button-quiet" href="{{url}}">{{go}}</a></p>
+{{/match}}
 {{#said}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/said}}
 {{#found}}
 <section class="ayv-readers-found">

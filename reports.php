@@ -74,12 +74,22 @@ switch ($report) {
         $max = max(array_merge([1], array_column($found['rows'], 'value')));
         foreach ($found['rows'] as $row) {
             $rows[] = ['label' => $row['label'] !== '' ? $row['label'] : $str('readersnogroup'), 'value' => $row['value'],
-                'note' => $row['members'] ? $str('reportreadersof', (object) $row) : $str('reportreadersonly', $row['readers']),
+                'url' => $row['label'] !== '' ? (new moodle_url(
+                    '/local/oksigeniaayvurenda/readers.php',
+                    ['library' => $library->slug, 'group' => $row['label']]
+                ))->out(false) : '',
+                // One reader is «a reader», not «1 readers».
+                'note' => $row['members']
+                    ? $str((int) $row['readers'] === 1 ? 'reportreadersofone' : 'reportreadersof', (object) $row)
+                    : $str((int) $row['readers'] === 1 ? 'reportreadersonlyone' : 'reportreadersonly', $row['readers']),
                 'share' => round(100 * $row['value'] / $max),
                 'csv' => [$row['label'], $row['value'], $row['readers'], $row['members']]];
         }
         $columns[] = $str('reportmembers');
-        $summary = $str('reportloanstotal', $found['total']);
+        // It says which days it counts, and each group opens its readers.
+        $summary = $str('reportloansspan', (object) ['loans' => \local_oksigeniaayvurenda\local\screens::number(
+            (int) $found['total']
+        ), 'from' => $date($from), 'to' => $date(min($to, time()))]);
         break;
     case 'top':
         $found = reports::top($library, $from, $to);
@@ -131,7 +141,7 @@ switch ($report) {
         $max = max(array_merge([1], array_column($found['groups'], 'loans')));
         foreach ($found['groups'] as $row) {
             $rows[] = ['label' => $row['group'], 'value' => $row['loans'], 'note' => $str(
-                'reportreadersof',
+                (int) $row['borrowers'] === 1 ? 'reportreadersofone' : 'reportreadersof',
                 (object) ['readers' => $row['borrowers'], 'members' => $row['members']]
             ),
                 'share' => round(100 * $row['loans'] / $max),
