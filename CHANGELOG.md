@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.196.0
+
+- The memory's idea of the day, to taste and with a door to the new (Enrique, 7 November 2026): after a book loved, first
+  what three or more other readers who loved it loved too (each loved by two of them at least, so that no one's reading
+  can be guessed); one day in three (one in two when the flower's «Explore» has stood still for a month), a book of a
+  corner the reader has never been to that shares an author or a topic with one they loved: «Something different today».
+- What the library shows on the personal area, for the block 0.2.0 (`\local_oksigeniaayvurenda\local\dashboard`): with
+  nothing at home, the memory's idea with its book on a plate, or the book of the week, or the covers of what just came;
+  with books at home, each with its cover and when it goes back in words («Back on Thursday», «It was due back on
+  Monday»), what is set aside and «Renew»; to a pupil, the class challenge; to a grown reader, their own goal; to a
+  teacher, the readings of their courses against their students; to whoever lends, what waits at the desk, as numbers.
+  In the words of each centre's skin; the round portraits come in the art package 0.1.50.
+
 ## 0.195.0
 
 - Play and the visit (audit batch 10, second part):

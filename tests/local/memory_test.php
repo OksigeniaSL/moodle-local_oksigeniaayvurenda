@@ -118,6 +118,68 @@ final class memory_test extends \advanced_testcase {
     }
 
     /**
+     * Loved: first what three or more readers who loved the same book loved too, each loved by two of them at least
+     * (Enrique, 7 November 2026); with fewer, nothing of theirs, and the book by the same author.
+     */
+    public function test_loved_by_others(): void {
+        $this->resetAfterTest();
+        $this->gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $this->library = $this->gen->create_library();
+        $reader = $this->gen->create_reader(['entityid' => $this->library->entityid]);
+        $faro = $this->book('El faro dormido', 'Montes, Ana', '821');
+        $isla = $this->book('La isla de los faros', 'Montes, Ana', '821');
+        $mar = $this->book('El mar de dentro', 'Lago, Óscar', '821');
+        $this->took($reader, $faro, 'loved', 2);
+        $others = [];
+        foreach ([0, 1] as $i) {
+            $others[$i] = $this->gen->create_reader(['entityid' => $this->library->entityid]);
+            $this->took($others[$i], $faro, 'loved', 10);
+            $this->took($others[$i], $mar, 'more', 8);
+        }
+        // Two others loved it: too few, nobody's reading can show. The book by the same author.
+        $said = memory::remembers($this->library, $reader);
+        $this->assertSame((int) $isla->id, $said['recordid']);
+        // A third: what they loved too.
+        $others[2] = $this->gen->create_reader(['entityid' => $this->library->entityid]);
+        $this->took($others[2], $faro, 'loved', 6);
+        $said = memory::remembers($this->library, $reader);
+        $this->assertSame(['others', (int) $mar->id], [$said['kind'], $said['recordid']]);
+        $this->assertStringContainsString('El mar de dentro', $said['say']['text']);
+    }
+
+    /**
+     * A door to the new on some days: a book of a corner the reader has not been to that shares the author of one they
+     * loved; the same all day, and never a corner they already read from.
+     */
+    public function test_door(): void {
+        $this->resetAfterTest();
+        $this->gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $this->library = $this->gen->create_library();
+        $reader = $this->gen->create_reader(['entityid' => $this->library->entityid]);
+        $faro = $this->book('El faro dormido', 'Montes, Ana', '821');
+        $this->book('La isla de los faros', 'Montes, Ana', '821');
+        $luz = $this->book('Cómo funciona un faro', 'Montes, Ana', '62');
+        $this->took($reader, $faro, 'loved', 2);
+        $kinds = [];
+        for ($day = 0; $day < 21; $day++) {
+            $said = memory::remembers($this->library, $reader, time() + $day * DAYSECS);
+            $kinds[$said['kind']] = true;
+            if ($said['kind'] === 'door') {
+                $this->assertSame((int) $luz->id, $said['recordid']);
+                $this->assertStringContainsString('Cómo funciona un faro', $said['say']['text']);
+                $this->assertSame($said, memory::remembers($this->library, $reader, time() + $day * DAYSECS + 60));
+            }
+        }
+        $this->assertArrayHasKey('door', $kinds, 'about one day in three');
+        $this->assertArrayHasKey('loved', $kinds, 'and the other days, like what they loved');
+        // Once they have been to that corner, no door there.
+        $this->took($reader, $luz, null, 1);
+        for ($day = 0; $day < 21; $day++) {
+            $this->assertNotSame('door', memory::remembers($this->library, $reader, time() + $day * DAYSECS)['kind'] ?? '');
+        }
+    }
+
+    /**
      * What else the readers of a book took: only when three of them took it, each book taken by two at least.
      */
     public function test_also(): void {

@@ -48,7 +48,7 @@ final class memory {
      * @param \stdClass $library
      * @param \stdClass $reader
      * @param int|null $now
-     * @return array|null kind (unfinished, loved, more, searched, corner), say (what the memory says, as
+     * @return array|null kind (unfinished, door, others, loved, more, searched, corner), say (what the memory says, as
      *     characters::say gives it), recordid (the book, if there is one), query (the search, if it is that).
      */
     public static function remembers(\stdClass $library, \stdClass $reader, ?int $now = null): ?array {
@@ -71,8 +71,8 @@ final class memory {
             0,
             10
         );
+        // Left half read, and not taken again since: it is still on its shelf. That first, every day.
         foreach ($notes as $note) {
-            // Left half read, and not taken again since: it is still on its shelf.
             if ($note->returnnote === 'unfinished' && $read[$note->recordid] <= (int) $note->timereturned) {
                 if (self::free($library, [(int) $note->recordid])) {
                     return self::say(
@@ -85,7 +85,36 @@ final class memory {
                     );
                 }
             }
+        }
+        // A door to the new, one day in three (one in two when the flower's «Explore» has stood still): a book of a
+        // corner the reader has not been to, with a foot in what they liked (Enrique, 7 November 2026).
+        if (self::door_day($entityid, (int) $reader->id, $now)) {
+            $door = self::door($library, $notes, $read, (int) $reader->id, $now);
+            if ($door) {
+                return self::say(
+                    $library,
+                    'door',
+                    'memorydoor',
+                    ['from' => $door->from, 'title' => $door->title, 'corner' => $door->corner],
+                    (int) $door->id,
+                    'senala'
+                );
+            }
+        }
+        foreach ($notes as $note) {
             if ($note->returnnote === 'loved' || $note->returnnote === 'more') {
+                // What others who loved the same book loved too, where enough did that no one can be guessed.
+                $theirs = self::loved_too($library, (int) $note->recordid, $read, (int) $reader->id, $now);
+                if ($theirs) {
+                    return self::say(
+                        $library,
+                        'others',
+                        'memorylovedothers',
+                        ['from' => $note->title, 'title' => $theirs->title],
+                        (int) $theirs->id,
+                        'senala'
+                    );
+                }
                 $like = self::like($library, (int) $note->recordid, $read, (int) $reader->id, $now);
                 if ($like) {
                     return self::say(
@@ -418,6 +447,184 @@ final class memory {
         }
         [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
         return array_values($DB->get_records_select(self::T . 'record', "id $in", $params, 'id', 'id, title'));
+    }
+
+    /**
+     * What readers who loved a book (brought it back saying they loved it or wanted more) loved too, free here and not
+     * read by this reader: only when at least AMONG readers loved it, and each book loved by two of them at least, so
+     * that in a class nobody's reading can be guessed.
+     *
+     * @param \stdClass $library
+     * @param int $recordid
+     * @param array $read
+     * @param int $readerid
+     * @param int $now
+     * @return \stdClass|null With id and title.
+     */
+    private static function loved_too(\stdClass $library, int $recordid, array $read, int $readerid, int $now): ?\stdClass {
+        global $DB;
+        $params = ['recordid' => $recordid, 'entityid' => $library->entityid, 'reader' => $readerid];
+        $loved = "l.returnnote IN ('loved', 'more')";
+        $readers = (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT l.readerid)
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+              WHERE i.recordid = :recordid AND i.entityid = :entityid AND l.readerid <> :reader AND $loved",
+            $params
+        );
+        if ($readers < self::AMONG) {
+            return null;
+        }
+        $rows = $DB->get_records_sql(
+            "SELECT i2.recordid, COUNT(DISTINCT l2.readerid) AS readers
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "loan} l2 ON l2.readerid = l.readerid
+               JOIN {" . self::T . "item} i2 ON i2.id = l2.itemid
+              WHERE i.recordid = :recordid AND i.entityid = :entityid AND l.readerid <> :reader AND $loved
+                    AND l2.returnnote IN ('loved', 'more') AND i2.recordid <> :other
+           GROUP BY i2.recordid
+             HAVING COUNT(DISTINCT l2.readerid) >= 2
+           ORDER BY COUNT(DISTINCT l2.readerid) DESC, i2.recordid",
+            $params + ['other' => $recordid],
+            0,
+            40
+        );
+        $ids = array_values(array_diff(array_map('intval', array_keys($rows)), array_keys($read)));
+        $free = self::free($library, $ids);
+        // The most loved of those free here; among equals, one a day.
+        $best = [];
+        $most = 0;
+        foreach ($ids as $id) {
+            if (!in_array($id, $free, true)) {
+                continue;
+            }
+            $count = (int) $rows[$id]->readers;
+            if ($count > $most) {
+                [$best, $most] = [[$id], $count];
+            } else if ($count === $most) {
+                $best[] = $id;
+            }
+        }
+        return self::pick(self::titles($best), $readerid, $now);
+    }
+
+    /**
+     * Whether today the memory opens a door to the new for this reader: one day in three, or one in two when the
+     * flower's «Explore» has not moved for a month (no corner new to them this school year in thirty days).
+     *
+     * @param int $entityid
+     * @param int $readerid
+     * @param int $now
+     * @return bool
+     */
+    private static function door_day(int $entityid, int $readerid, int $now): bool {
+        global $DB;
+        $year = years::around($entityid, $now);
+        $codes = $DB->get_records_sql(
+            "SELECT l.id, l.timeloaned, a.code
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
+               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+              WHERE l.readerid = :readerid AND l.timeloaned >= :start AND " . bank::reading('l.libraryid') . "
+           ORDER BY l.timeloaned",
+            ['readerid' => $readerid, 'start' => (int) $year->timestart]
+        );
+        $first = [];
+        foreach ($codes as $row) {
+            $top = catalogue::top_class((string) $row->code);
+            if ($top !== null && !isset($first[$top])) {
+                $first[$top] = (int) $row->timeloaned;
+            }
+        }
+        $still = $first && max($first) < $now - 30 * DAYSECS;
+        return crc32('door-' . $readerid . '-' . date('Ymd', $now)) % ($still ? 2 : 3) === 0;
+    }
+
+    /**
+     * A door to the new: a book free here, unread, of a corner the reader has not taken anything from, that shares an
+     * author or a topic with a book they loved, wanted more of or, failing that, finished lately. From the novels of
+     * dinosaurs to a book of science about fossils.
+     *
+     * @param \stdClass $library
+     * @param array $notes The reader's latest returns with a note.
+     * @param array $read
+     * @param int $readerid
+     * @param int $now
+     * @return \stdClass|null With id, title, from (the book it starts from) and corner (its name).
+     */
+    private static function door(\stdClass $library, array $notes, array $read, int $readerid, int $now): ?\stdClass {
+        global $DB;
+        $from = array_values(array_filter($notes, fn($n) => $n->returnnote === 'loved' || $n->returnnote === 'more'));
+        if (!$from) {
+            $from = array_values(array_filter($notes, fn($n) => $n->returnnote !== 'unfinished'));
+        }
+        if (!$from) {
+            return null;
+        }
+        // The corners the reader has been to, ever.
+        $been = [];
+        if ($read) {
+            [$in, $params] = $DB->get_in_or_equal(array_keys($read), SQL_PARAMS_NAMED);
+            foreach (
+                $DB->get_fieldset_sql(
+                    "SELECT DISTINCT a.code
+                       FROM {" . self::T . "recauth} ra
+                       JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+                      WHERE ra.recordid $in",
+                    $params
+                ) as $code
+            ) {
+                $top = catalogue::top_class((string) $code);
+                if ($top !== null) {
+                    $been[$top] = true;
+                }
+            }
+        }
+        $corners = [];
+        foreach (catalogue::corners($library) as $known) {
+            $corners[(string) $known['code']] = $known['label'];
+        }
+        foreach (array_slice($from, 0, 5) as $note) {
+            $ids = $DB->get_fieldset_sql(
+                "SELECT DISTINCT ra2.recordid
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind IN ('author', 'subject')
+                   JOIN {" . self::T . "recauth} ra2 ON ra2.authorityid = ra.authorityid
+                  WHERE ra.recordid = :recordid AND ra2.recordid <> :other",
+                ['recordid' => $note->recordid, 'other' => $note->recordid]
+            );
+            $ids = array_values(array_diff(array_map('intval', $ids), array_keys($read)));
+            $ids = self::free($library, array_slice($ids, 0, 500));
+            if (!$ids) {
+                continue;
+            }
+            // Each by its corner; only the corners the library shows and the reader has not been to.
+            [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+            $classes = $DB->get_records_sql(
+                "SELECT ra.recordid, MIN(a.code) AS code
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+                  WHERE ra.recordid $in
+               GROUP BY ra.recordid",
+                $params
+            );
+            $new = [];
+            foreach ($classes as $row) {
+                $top = catalogue::top_class((string) $row->code);
+                if ($top !== null && isset($corners[$top]) && !isset($been[$top])) {
+                    $new[(int) $row->recordid] = $corners[$top];
+                }
+            }
+            $book = self::pick(self::titles(array_keys($new)), $readerid, $now);
+            if ($book) {
+                $book->from = $note->title;
+                $book->corner = $new[(int) $book->id];
+                return $book;
+            }
+        }
+        return null;
     }
 
     /**
