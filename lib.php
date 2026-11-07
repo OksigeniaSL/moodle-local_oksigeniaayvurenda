@@ -226,11 +226,16 @@ function local_oksigeniaayvurenda_extend_navigation_course(navigation_node $navi
     if ((int) $course->id === (int) SITEID) {
         return;
     }
+    $list = \local_oksigeniaayvurenda\local\readings::of_course((int) $course->id);
+    // A pupil of the course sees its readings even before the night makes them a reader (on a shared site, being in the
+    // course is what they have), unless its library is still getting ready.
+    $pupil = $list && is_enrolled($context, null, '', true) && !\local_oksigeniaayvurenda\local\access::closed(
+        (int) $DB->get_field('local_oksigeniaayvurenda_library', 'entityid', ['id' => $list->libraryid])
+    );
     // Nobody's course shows it while every library they could reach is still getting ready for its readers.
-    if (!\local_oksigeniaayvurenda\local\access::sees_any()) {
+    if (!$pupil && !\local_oksigeniaayvurenda\local\access::sees_any()) {
         return;
     }
-    $list = \local_oksigeniaayvurenda\local\readings::of_course((int) $course->id);
     if (has_capability('moodle/course:update', $context)) {
         if (!$list && !$DB->record_exists_select('local_oksigeniaayvurenda_library', 'kind <> :bank', ['bank' => 'bank'])) {
             return;

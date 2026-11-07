@@ -135,6 +135,27 @@ final class cohorts_test extends \advanced_testcase {
     }
 
     /**
+     * The only editing teacher of a chosen course tutors its group, where it has no tutor; one already set is kept.
+     */
+    public function test_course_teacher_tutors(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $dg = $this->getDataGenerator();
+        $library = $dg->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $course = $dg->create_course(['fullname' => 'Lengua 2º B']);
+        $teacher = $dg->create_user();
+        $student = $dg->create_user();
+        $dg->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $dg->enrol_user($student->id, $course->id, 'student');
+        courses::save($entityid, [$course->id => ['stage' => 'Secundaria', 'group' => true]]);
+        cohorts::sync($entityid);
+        $year = \local_oksigeniaayvurenda\local\years::around($entityid, time());
+        $this->assertEquals($teacher->id, $DB->get_field('local_oksigeniaayvurenda_tutor', 'userid', ['yearid' => $year->id,
+            'groupname' => 'Lengua 2º B']));
+    }
+
+    /**
      * The options list every cohort, the chosen ones as they were saved and a guessed stage for the others.
      */
     public function test_options(): void {

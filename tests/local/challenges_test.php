@@ -88,6 +88,12 @@ final class challenges_test extends \advanced_testcase {
         $this->assertNotSame('', $view['left']);
         $this->assertSame([], challenges::garden($entityid, '3.º B', $now));
 
+        // The third stops coming: «Everyone» is the two who are here, and it is met.
+        $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $readers[2]->id]);
+        $this->assertTrue(challenges::of($entityid, '3.º B', $now)->complete);
+        $DB->delete_records(self::T . 'challenge', ['groupname' => '3.º B']);
+        challenges::choose($entityid, '3.º B', 'everyone', $now);
+        $DB->set_field(self::T . 'reader', 'status', 'active', ['id' => $readers[2]->id]);
         $lend($book('5'), $readers[2]);
         $challenge = challenges::of($entityid, '3.º B', $now);
         $this->assertTrue($challenge->complete);

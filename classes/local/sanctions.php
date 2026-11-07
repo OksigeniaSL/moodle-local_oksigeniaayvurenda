@@ -155,9 +155,15 @@ final class sanctions {
             if (!$days) {
                 return null;
             }
-            // Today does not count: from tomorrow, so many days, ending at the end of the last one.
-            $until = (new \DateTimeImmutable('@' . $now))->setTimezone(zones::of($library))->setTime(0, 0)
-                ->modify('+' . ($days + 1) . ' days')->getTimestamp();
+            // Today does not count: from tomorrow, so many open days (a day the library is closed is no day without
+            // books), ending at the end of the last one.
+            $closed = closures::days((int) $library->entityid, $now);
+            $day = (new \DateTimeImmutable('@' . $now))->setTimezone(zones::of($library))->setTime(0, 0);
+            for ($left = $days, $i = 0; $left > 0 && $i < 400; $i++) {
+                $day = $day->modify('+1 day');
+                $left -= isset($closed[$day->format('Y-m-d')]) ? 0 : 1;
+            }
+            $until = $day->modify('+1 day')->getTimestamp();
             $row += ['kind' => self::KIND_DAYS, 'timeuntil' => $until];
         } else {
             $cents = sanction_rules::cents($settings, $dayslate);

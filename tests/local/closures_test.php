@@ -56,6 +56,14 @@ final class closures_test extends \advanced_testcase {
         $due = \local_oksigeniaayvurenda\core\loan_rules::due($lent, 14, zones::of($entityid), true, $days);
         $this->assertSame('2027-01-08', zones::date($due, '%Y-%m-%d', $entityid));
 
+        // Due on 22 December, back on 10 January: nineteen days late, three of them open (8, 9 and 10 January).
+        $tz = zones::of($entityid);
+        $due = (new \DateTimeImmutable('2026-12-22 23:59:59', $tz))->getTimestamp();
+        $back = (new \DateTimeImmutable('2027-01-10 10:00', $tz))->getTimestamp();
+        $this->assertSame(19, \local_oksigeniaayvurenda\core\loan_rules::days_late($due, $back, $tz));
+        $this->assertSame(16, closures::between($entityid, $due, $back));
+        $this->assertSame(0, closures::between($entityid, $back, $back));
+
         closures::remove($entityid, '2026-12-23', '2027-01-07');
         $this->assertSame(['2026-11-01', '2026-12-08'], array_column(closures::of($entityid), 'from'));
     }

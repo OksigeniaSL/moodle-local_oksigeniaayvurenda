@@ -681,7 +681,9 @@ final class desk {
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timereturned' => $this->now,
             'returnstaffid' => $this->staffid ?: null, 'conditionin' => 'lost', 'timemodified' => $this->now]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'lost', 'timemodified' => $this->now]);
-        $days = loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz);
+        // The days the library was closed are not days the reader could have brought it back: they cost nothing.
+        $days = max(0, loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz)
+            - closures::between((int) $this->library->entityid, (int) $loan->timedue, $this->now));
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
         $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
         $transaction->allow_commit();
@@ -1239,7 +1241,9 @@ final class desk {
         // A copy of a box that already went back goes home now.
         lots::come_home($item, $this->now);
         $hold = holds::place($item, $this->now);
-        $days = loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz);
+        // The days the library was closed are not days the reader could have brought it back: they cost nothing.
+        $days = max(0, loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz)
+            - closures::between((int) $this->library->entityid, (int) $loan->timedue, $this->now));
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
         $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
         $transaction->allow_commit();

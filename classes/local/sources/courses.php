@@ -114,10 +114,11 @@ final class courses {
     }
 
     /**
-     * The people of the chosen courses: students with their group, teachers as teachers.
+     * The people of the chosen courses: students with their group, teachers as teachers; the only editing teacher of a
+     * course is the one proposed as tutor of its groups (tutorof).
      *
      * @param int $entityid
-     * @return array User id => type, group, stage.
+     * @return array User id => type, group, stage, and tutorof (groups) for a course's only editing teacher.
      */
     public static function people(int $entityid): array {
         global $DB;
@@ -143,8 +144,16 @@ final class courses {
                ORDER BY ra.userid, ra.id",
                 ['courseid' => $course->id, 'contextid' => $context->id]
             );
+            $editors = [];
+            $classes = [];
             foreach ($rows as $row) {
+                if ($row->archetype === 'editingteacher') {
+                    $editors[(int) $row->userid] = true;
+                }
                 if (isset($people[$row->userid])) {
+                    if ($row->archetype === 'student' && $people[$row->userid]['group'] !== '') {
+                        $classes[$people[$row->userid]['group']] = true;
+                    }
                     continue;
                 }
                 $student = $row->archetype === 'student';
@@ -158,8 +167,18 @@ final class courses {
                 }
                 $people[(int) $row->userid] = ['cohortid' => 0, 'type' => $student ? 'student' : 'teacher',
                     'group' => $group, 'stage' => $student ? $config['stage'] : ''];
+                if ($group !== '') {
+                    $classes[$group] = true;
+                }
             }
             $rows->close();
+            // One editing teacher in the course: theirs are its groups, so «My class» reaches whoever brought them.
+            if (count($editors) === 1 && $classes) {
+                $teacher = (int) array_key_first($editors);
+                if (isset($people[$teacher])) {
+                    $people[$teacher]['tutorof'] = array_merge($people[$teacher]['tutorof'] ?? [], array_keys($classes));
+                }
+            }
         }
         return $people;
     }

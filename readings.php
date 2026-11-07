@@ -170,8 +170,13 @@ $library = $list ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => 
 if (!$library) {
     shell::missing($str('readingsnolibrary'));
 }
-// Seeing a list asks for seeing its library (a centre getting ready shows only that it opens soon).
-shell::require('local/oksigeniaayvurenda:view', $library);
+// Seeing a list asks for seeing its library (a centre getting ready shows only that it opens soon), or for being in
+// the course: its pupils see it before the night makes them readers.
+$pupil = $list && is_enrolled($context, null, '', true)
+    && !\local_oksigeniaayvurenda\local\access::closed((int) $library->entityid);
+if (!$pupil) {
+    shell::require('local/oksigeniaayvurenda:view', $library);
+}
 // The list for a reference manager.
 $export = optional_param('export', '', PARAM_ALPHA);
 if (in_array($export, ['ris', 'bibtex', 'csl'], true) && ($list = readings::of_course((int) $course->id))) {

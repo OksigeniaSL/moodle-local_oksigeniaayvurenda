@@ -87,10 +87,12 @@ final class challenges {
         $kinds = array_keys(self::KINDS);
         $kind = $row ? $row->kind : $kinds[($term - 1) % count($kinds)];
         [$start, $end] = self::bounds($year, $term);
-        $members = $DB->get_fieldset_select(
-            self::T . 'member',
-            'readerid',
-            'yearid = :yearid AND groupname = :groupname',
+        // Those of the class who are here: one who stopped coming keeps their row (the year's history) but is no one to
+        // wait for, or «Everyone» would miss one for ever.
+        $members = $DB->get_fieldset_sql(
+            'SELECT m.readerid FROM {' . self::T . 'member} m
+               JOIN {' . self::T . "reader} r ON r.id = m.readerid AND r.status = 'active'
+              WHERE m.yearid = :yearid AND m.groupname = :groupname",
             ['yearid' => $year->id, 'groupname' => $group]
         );
         $target = self::KINDS[$kind] ?: count($members);

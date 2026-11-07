@@ -80,6 +80,37 @@ final class closures {
     }
 
     /**
+     * How many closed days there were after the day a book was due, up to today (the days late that do not count).
+     *
+     * @param int $entityid
+     * @param int $due
+     * @param int $now
+     * @return int
+     */
+    public static function between(int $entityid, int $due, int $now): int {
+        $tz = zones::of($entityid);
+        $after = (new \DateTimeImmutable('@' . $due))->setTimezone($tz)->format('Y-m-d');
+        $until = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->format('Y-m-d');
+        if ($until <= $after) {
+            return 0;
+        }
+        $days = [];
+        foreach (self::of($entityid) as $range) {
+            if ($range['to'] <= $after || $range['from'] > $until) {
+                continue;
+            }
+            $day = new \DateTimeImmutable(max($range['from'], $after), $tz);
+            for ($i = 0; $i <= self::LONGEST && $day->format('Y-m-d') <= min($range['to'], $until); $i++) {
+                if ($day->format('Y-m-d') > $after) {
+                    $days[$day->format('Y-m-d')] = true;
+                }
+                $day = $day->modify('+1 day');
+            }
+        }
+        return count($days);
+    }
+
+    /**
      * Adds a range: the dates in either order, at most LONGEST days, and at most MOST ranges kept (the past go first).
      *
      * @param int $entityid

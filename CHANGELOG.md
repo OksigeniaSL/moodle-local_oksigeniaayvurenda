@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.181.0
+
+- Closed days cost nothing: a late book pays, or keeps its reader without loans, only for the days the library was open.
+- The class challenge «Everyone» counts the readers who are here, not one who stopped coming.
+- A cohort renamed during the year takes its tutor with it; a reader erased leaves no group of this year behind.
+- The pupils of a course see its readings before the night makes them readers (on a shared site, being in the course is
+  what they have).
+- The only editing teacher of a chosen course becomes the tutor of its groups where they have none, so «My class» reaches
+  whoever brought them.
+
 ## 0.180.0
 
 - Whoever looks after one library (a classroom's, a department's) sees what it has out and who has it («Lent», in its

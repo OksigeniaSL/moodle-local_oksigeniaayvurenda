@@ -156,6 +156,9 @@ final class cohorts {
             if ($people[$userid]['stage'] === '' && $person['stage'] !== '') {
                 $people[$userid]['stage'] = $person['stage'];
             }
+            if (!empty($person['tutorof'])) {
+                $people[$userid]['tutorof'] = $person['tutorof'];
+            }
         }
 
         // Someone erased at their request does not come back with a cohort that still has them.
@@ -191,6 +194,7 @@ final class cohorts {
         $room = plans::left($entityid, 'readers');
         // All at once: a question per reader, every night, adds up.
         $members = self::members($entityid, (int) $year->id);
+        $moves = [];
         foreach ($people as $userid => $person) {
             $reader = $byuser[$userid] ?? null;
             if ($room !== null && ($reader === null || $reader->status !== 'active')) {
@@ -224,9 +228,39 @@ final class cohorts {
                 }
             }
             if ($person['group'] !== '') {
-                self::member($readerid, (int) $year->id, $person['group'], $person['stage'], $now, $members[$readerid] ?? null);
+                $was = self::member(
+                    $readerid,
+                    (int) $year->id,
+                    $person['group'],
+                    $person['stage'],
+                    $now,
+                    $members[$readerid] ?? null
+                );
+                if ($was !== '') {
+                    $moves[$was][$person['group']] = ($moves[$was][$person['group']] ?? 0) + 1;
+                }
             }
             $stats['total']++;
+        }
+        // The only teacher of a course is proposed as tutor of its groups, where nobody tutors them this year.
+        foreach ($people as $userid => $person) {
+            foreach (array_unique($person['tutorof'] ?? []) as $group) {
+                if (!$DB->record_exists(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => $group])) {
+                    \local_oksigeniaayvurenda\local\tutors::set((int) $year->id, (string) $group, (int) $userid);
+                }
+            }
+        }
+        // A cohort renamed during the year: its whole group went to one new name, and its tutor goes with it (when the
+        // new name has none), or the weekly summary would go to a group nobody is in.
+        foreach ($moves as $old => $to) {
+            $new = (string) array_key_first($to);
+            if (
+                count($to) === 1
+                && !$DB->record_exists(self::T . 'member', ['yearid' => $year->id, 'groupname' => $old])
+                && !$DB->record_exists(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => $new])
+            ) {
+                $DB->set_field(self::T . 'tutor', 'groupname', $new, ['yearid' => $year->id, 'groupname' => $old]);
+            }
         }
         // Readers who came from a list, a management program or Abies leave when their origin says so, not here.
         $elsewhere = array_flip($DB->get_fieldset_select(
@@ -299,8 +333,16 @@ final class cohorts {
      * @param string $stage
      * @param int $now
      * @param \stdClass|null $existing What the reader has this year, if anything.
+     * @return string The group it was in this year, if it changed; else ''.
      */
-    private static function member(int $readerid, int $yearid, string $group, string $stage, int $now, ?\stdClass $existing): void {
+    private static function member(
+        int $readerid,
+        int $yearid,
+        string $group,
+        string $stage,
+        int $now,
+        ?\stdClass $existing
+    ): string {
         global $DB;
         if (!$existing) {
             $DB->insert_record(self::T . 'member', ['readerid' => $readerid, 'yearid' => $yearid, 'groupname' => $group,
@@ -308,7 +350,9 @@ final class cohorts {
         } else if ($existing->groupname !== $group || (string) $existing->stage !== $stage) {
             $DB->update_record(self::T . 'member', (object) ['id' => $existing->id, 'groupname' => $group,
                 'stage' => $stage !== '' ? $stage : null, 'source' => 'cohort']);
+            return $existing->groupname !== $group ? (string) $existing->groupname : '';
         }
+        return '';
     }
 
     /**
