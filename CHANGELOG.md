@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.187.0
+
+- Linking readers with their accounts: «None of these» is remembered. The reader is not offered those accounts again and
+  goes with those the site does not have, still a reader with their card. Nothing is checked by default: what is left
+  unmarked stays in doubt for another day.
+- «Marcarlos como antiguos lectores», which marks everyone the site does not have at once, asks with a second touch.
+
 ## 0.186.0
 
 - The last day of class of 0.185.0 becomes a date to have everything back, for any library and any calendar (the long

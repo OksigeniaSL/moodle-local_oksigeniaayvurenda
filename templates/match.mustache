@@ -22,7 +22,7 @@
     * heading, intro, notice - texts
     * action, sesskey - the forms
     * sure - pairs that match by themselves (reader, readergroup, account, accountgroup)
-    * doubt - readers with candidate accounts (readerid, name, group, options of userid, name, group)
+    * doubt - readers with candidate accounts (readerid, name, group, options of userid, name, group); doubthint
     * the words of each pile and button
 
     Example context (json):
@@ -40,12 +40,12 @@
         "hasdoubt": true,
         "doubtheading": "Dudosos: 1",
         "doubt": [{"readerid": 5, "name": "Leo Prado Valle", "group": "", "options": [{"userid": 7, "name": "Leo Prado", "group": "3º A"}]}],
-        "nobody": "Ninguno de estos",
+        "nobody": "Ninguno de estos", "doubthint": "Lo que no marques sigue aquí.",
         "doubtbutton": "Guardar los elegidos",
         "hasnone": true,
         "noneheading": "No están en Moodle: 1",
         "noneintro": "Siguen siendo lectores sin cuenta.",
-        "nonebutton": "Marcarlos como antiguos lectores",
+        "nonebutton": "Marcarlos como antiguos lectores", "nonesure": "¿A todos? Toca otra vez",
         "empty": "",
         "skipped": ""
     }
@@ -74,6 +74,7 @@
 {{#hasdoubt}}
 <section class="ayv-section">
     <h2 class="ayv-section-title">{{doubtheading}}</h2>
+    <p>{{doubthint}}</p>
     <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="do" value="doubt">
         <ul class="ayv-sources">
@@ -85,7 +86,7 @@
                     <label class="ayv-field ayv-field-check"><input type="radio" name="pick[{{readerid}}]" value="{{userid}}">
                         {{name}} {{#group}}· {{group}}{{/group}}</label>
                 {{/options}}
-                    <label class="ayv-field ayv-field-check"><input type="radio" name="pick[{{readerid}}]" value="0" checked>
+                    <label class="ayv-field ayv-field-check"><input type="radio" name="pick[{{readerid}}]" value="0">
                         {{nobody}}</label>
                 </span>
             </li>
@@ -101,7 +102,7 @@
     <p>{{noneintro}}</p>
     <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="do" value="none">
-        <p class="ayv-more"><button type="submit" class="ayv-button ayv-button-quiet">{{nonebutton}}</button></p>
+        <p class="ayv-more"><button type="submit" class="ayv-button ayv-button-quiet" data-ayv-twice="{{nonesure}}">{{nonebutton}}</button></p>
     </form>
 </section>
 {{/hasnone}}

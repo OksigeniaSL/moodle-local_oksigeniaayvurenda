@@ -118,6 +118,13 @@ final class matching_test extends \advanced_testcase {
         matching::leave((int) $library->entityid, $piles['none']);
         $this->assertSame('left', $DB->get_field(self::T . 'reader', 'status', ['id' => $piles['none'][0]]));
         $this->assertSame(1, count(matching::piles((int) $library->entityid)['doubt']));
+
+        // None of these, said: the reader is not offered that account again and goes with those the site does not have.
+        matching::keep_apart((int) $library->entityid, $profeabies, [(int) $profe->id]);
+        $after = matching::piles((int) $library->entityid);
+        $this->assertArrayNotHasKey($profeabies, $after['doubt']);
+        $this->assertContains($profeabies, $after['none']);
+        $this->assertNull($DB->get_field(self::T . 'reader', 'userid', ['id' => $profeabies]));
     }
 
     /**

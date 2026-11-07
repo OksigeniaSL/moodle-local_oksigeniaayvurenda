@@ -58,6 +58,10 @@ if (data_submitted() && confirm_sesskey()) {
             if ($userid > 0 && in_array($userid, $piles['doubt'][$readerid] ?? [], true)) {
                 matching::link($entityid, (int) $readerid, (int) $userid);
                 $done++;
+            } else if ($userid === 0 && isset($piles['doubt'][$readerid])) {
+                // None of these, said: not offered again; one left without a choice stays in doubt.
+                matching::keep_apart($entityid, (int) $readerid, $piles['doubt'][$readerid]);
+                $done++;
             }
         }
     } else if ($action === 'none') {
@@ -96,6 +100,7 @@ $data = [
     'more' => count($piles['sure']) > count($sure) ? $str('matchmore', count($piles['sure']) - count($sure)) : '',
     'surebutton' => $str('matchsurebutton', count($piles['sure'])),
     'doubtheading' => $str('matchdoubt', count($piles['doubt'])),
+    'doubthint' => $str('matchdoubthint'),
     'doubt' => $doubt,
     'hasdoubt' => (bool) $piles['doubt'],
     'nobody' => $str('matchnobody'),
@@ -104,6 +109,7 @@ $data = [
     'noneintro' => $str('matchnoneintro'),
     'hasnone' => (bool) $piles['none'],
     'nonebutton' => $str('matchnonebutton'),
+    'nonesure' => $str('matchnonesure', count($piles['none'])),
     'empty' => !$piles['sure'] && !$piles['doubt'] && !$piles['none'] ? $str('matchempty') : '',
 ];
 $readersurl = (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false);

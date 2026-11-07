@@ -46,7 +46,58 @@ final class matching {
         $readers = self::unlinked($entityid);
         $accounts = self::accounts($entityid);
         $piles = matcher::piles(array_values($readers), array_values($accounts));
+        // What someone already said is not the same person is not offered again; a reader left with no candidate is one
+        // the site does not have.
+        $apart = self::apart_pairs($entityid);
+        if ($apart) {
+            foreach ($piles[matcher::SURE] as $readerid => $userid) {
+                if (isset($apart[$readerid . '-' . $userid])) {
+                    unset($piles[matcher::SURE][$readerid]);
+                    $piles[matcher::NONE][] = $readerid;
+                }
+            }
+            foreach ($piles[matcher::DOUBT] as $readerid => $candidates) {
+                $left = array_values(array_filter($candidates, fn($userid) => !isset($apart[$readerid . '-' . $userid])));
+                if ($left) {
+                    $piles[matcher::DOUBT][$readerid] = $left;
+                } else {
+                    unset($piles[matcher::DOUBT][$readerid]);
+                    $piles[matcher::NONE][] = $readerid;
+                }
+            }
+        }
         return $piles + ['readers' => $readers, 'accounts' => $accounts];
+    }
+
+    /**
+     * Notes that a reader is none of the accounts offered: they are not offered again, and the reader goes with those
+     * the site does not have (still a reader, with their card and history).
+     *
+     * @param int $entityid
+     * @param int $readerid
+     * @param int[] $userids
+     */
+    public static function keep_apart(int $entityid, int $readerid, array $userids): void {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $pairs = (array) ($settings['readersapart'] ?? []);
+        foreach ($userids as $userid) {
+            $pairs[] = $readerid . '-' . (int) $userid;
+        }
+        $settings['readersapart'] = array_slice(array_values(array_unique($pairs)), -5000);
+        $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+    }
+
+    /**
+     * The pairs of reader and account someone said are not the same person.
+     *
+     * @param int $entityid
+     * @return array "reader-user" => true.
+     */
+    private static function apart_pairs(int $entityid): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        return array_fill_keys(array_map('strval', (array) ($settings['readersapart'] ?? [])), true);
     }
 
     /**
