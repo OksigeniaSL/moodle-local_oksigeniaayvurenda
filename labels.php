@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\core\label_sheets;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\labels;
@@ -34,7 +35,8 @@ $kind = optional_param('kind', 'labels', PARAM_ALPHA);
 $which = optional_param('which', 'today', PARAM_ALPHA);
 $sincetext = optional_param('since', '', PARAM_TEXT);
 $codestext = optional_param('codes', '', PARAM_TEXT);
-$sheet = optional_param('sheet', $kind === 'spines' ? '5x13' : '3x8', PARAM_ALPHANUMEXT);
+$asked = optional_param('sheet', '', PARAM_ALPHANUMEXT);
+$test = optional_param('test', 0, PARAM_BOOL);
 $start = optional_param('start', 1, PARAM_INT);
 require_login(null, false);
 $library = catalogue::library($ref);
@@ -48,7 +50,22 @@ if (!$library) {
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $kind = $kind === 'spines' ? 'spines' : 'labels';
-$sheet = isset(labels::SHEETS[$sheet]) ? $sheet : '3x8';
+$sheet = labels::chosen($library, $kind, $asked);
+$which = in_array($which, ['today', 'since', 'codes'], true) ? $which : 'today';
+$here = ['library' => $library->slug, 'kind' => $kind, 'sheet' => $sheet, 'which' => $which, 'since' => $sincetext,
+    'codes' => $codestext];
+// A favourite marked or unmarked, or the print moved for this sheet: kept for the library, and back to the page.
+if (data_submitted() && confirm_sesskey()) {
+    $do = optional_param('do', '', PARAM_ALPHA);
+    if ($do === 'fav') {
+        labels::favourite($library, $kind, $sheet);
+    } else if ($do === 'nudge') {
+        labels::nudge($library, $sheet, optional_param('x', 0, PARAM_FLOAT), optional_param('y', 0, PARAM_FLOAT));
+    }
+    redirect(new moodle_url('/local/oksigeniaayvurenda/labels.php', $here));
+}
+$own = labels::own($library);
+[$nudgex, $nudgey] = $own['nudge'][$sheet] ?? [0.0, 0.0];
 $since = 0;
 if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $sincetext, $parts)) {
     $since = (int) make_timestamp((int) $parts[1], (int) $parts[2], (int) $parts[3]);
@@ -62,7 +79,24 @@ $items = labels::items(
 // One more than fit says there are more.
 $toomany = count($items) > labels::LIMIT;
 $items = array_slice($items, 0, labels::LIMIT);
-$format = labels::SHEETS[$sheet];
+$format = label_sheets::placed($sheet);
+$mm = fn(float $value) => format_float($value, 2, true, true);
+$name = fn(string $key) => $str('labelsmodel', (object) ['name' => label_sheets::MODELS[$key]['brand'] . ' '
+    . label_sheets::MODELS[$key]['ref'], 'size' => $mm(label_sheets::MODELS[$key]['w']) . ' × '
+    . $mm(label_sheets::MODELS[$key]['h']), 'per' => label_sheets::MODELS[$key]['cols'] * label_sheets::MODELS[$key]['rows']])
+    . (label_sheets::MODELS[$key]['also'] !== '' ? ' · ' . label_sheets::MODELS[$key]['also'] : '');
+// The favourites of this kind first, then every sheet by its brand (and the US Letter ones apart).
+$option = fn(string $key) => ['value' => $key, 'label' => $name($key), 'selected' => $key === $sheet];
+$groups = [];
+if ($own['favs'][$kind]) {
+    $groups[] = ['label' => $str('labelsfavs'), 'options' => array_map($option, $own['favs'][$kind])];
+}
+foreach (label_sheets::MODELS as $key => $model) {
+    $group = $model['brand'] . ($model['paper'] === 'letter' ? ' · ' . $str('labelsletter') : '');
+    $groups[$group] ??= ['label' => $group, 'options' => []];
+    $groups[$group]['options'][] = $option($key);
+}
+$isfav = in_array($sheet, $own['favs'][$kind], true);
 $data = [
     'heading' => $str($kind === 'spines' ? 'spinestitle' : 'labelstitle'),
     'action' => $PAGE->url->out_omit_querystring(),
@@ -80,32 +114,52 @@ $data = [
     'istoday' => !in_array($which, ['since', 'codes'], true),
     'issince' => $which === 'since',
     'iscodes' => $which === 'codes',
-    'cols' => $format['columns'],
+    'cols' => $format['cols'],
     'cells' => array_map(fn($n) => ['n' => $n, 'used' => $n < $start, 'first' => $n === $start,
-        'label' => $str('labelsstartat', $n)], range(1, $format['columns'] * $format['rows'])),
+        'label' => $str('labelsstartat', $n)], range(1, $format['per'])),
     'codes' => $codestext,
-    'sheets' => array_map(fn($s) => ['value' => $s, 'label' => $str('labelssheet', (object) labels::SHEETS[$s]),
-        'selected' => $s === $sheet], array_keys(labels::SHEETS)),
+    'sheetgroups' => array_values($groups),
+    'sheet' => $sheet,
+    'sesskey' => sesskey(),
+    'which' => $which,
+    'isfav' => $isfav,
+    'favbutton' => $str($isfav ? 'labelsunfav' : 'labelsfav'),
+    'nudgex' => $nudgex,
+    'nudgey' => $nudgey,
+    'nudged' => $nudgex || $nudgey ? $str('labelsnudged', implode($str('labelsand'), array_filter([
+        $nudgex ? $str($nudgex > 0 ? 'labelsnudgeright' : 'labelsnudgeleft', $mm(abs($nudgex))) : '',
+        $nudgey ? $str($nudgey > 0 ? 'labelsnudgedown' : 'labelsnudgeup', $mm(abs($nudgey))) : '',
+    ]))) : '',
+    'testurl' => (new moodle_url('/local/oksigeniaayvurenda/labels.php', $here + ['test' => 1]))->out(false),
+    'test' => (bool) $test,
     'start' => $start,
     'count' => $str('labelscount', count($items)),
     'toomany' => $toomany ? $str('labelstoomany', labels::LIMIT) : '',
-    'pages' => labels::sheets($items, $sheet, $start),
-    'haspages' => (bool) $items,
+    'pages' => $test ? [['labels' => array_map(fn($n) => ['blank' => true, 'testnumber' => $n], range(1, $format['per']))]]
+        : labels::sheets($items, $sheet, $start),
+    'haspages' => $test || (bool) $items,
     'empty' => $str('labelsempty'),
     'spines' => $kind === 'spines',
+    'letter' => $format['paper'] === 'letter',
     'style' => sprintf(
-        '--cols: %d; --rows: %d; --w: %smm; --h: %smm; --top: %smm; --left: %smm;',
-        $format['columns'],
+        '--cols: %d; --rows: %d; --w: %smm; --h: %smm; --top: %smm; --left: %smm; --gx: %smm; --gy: %smm; --dx: %smm; '
+            . '--dy: %smm;',
+        $format['cols'],
         $format['rows'],
-        $format['width'],
-        $format['height'],
+        $format['w'],
+        $format['h'],
         $format['top'],
-        $format['left']
+        $format['left'],
+        $format['gx'],
+        $format['gy'],
+        $nudgex,
+        $nudgey
     ),
 ];
 foreach (
     ['labelskind', 'labelswhich', 'labelssince', 'labelscodes', 'labelssheetlabel', 'labelsstart', 'labelsshow',
-        'printnow', 'labelsmaphint'] as $key
+        'printnow', 'labelsmaphint', 'labelsnudge', 'labelsnudgetitle', 'labelsnudgehint', 'labelsnudgex', 'labelsnudgey',
+        'labelstest', 'labelstesthint', 'sourcessave', 'offsiteclose'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -113,6 +167,7 @@ $url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page,
 shell::output($data['heading'], $OUTPUT->render_from_template('local_oksigeniaayvurenda/labels', $data), $library, '', [
     'search' => false,
     'scripts' => ['labels'],
+    'paper' => $format['paper'],
     'nav' => [['url' => $url('add.php'), 'label' => $str('addnav')], ['url' => $url('desk.php'), 'label' => $str('desktitle')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'labels']))
             ->out(false), 'label' => $str('helpnav')]],

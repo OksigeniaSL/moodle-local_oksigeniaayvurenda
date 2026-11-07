@@ -178,7 +178,8 @@ final class shell {
      * @param array $options search (false to leave the search out), scripts (more scripts of app/), config (more data
      *     for the scripts), nav (links in the header: a list of url and label), index (true to let search engines list
      *     the page), feed (the address of an OPDS catalogue to announce), share (title, description, image and url
-     *     for the preview a link shows where it is shared: messaging apps, social networks, a school's website).
+     *     for the preview a link shows where it is shared: messaging apps, social networks, a school's website), paper
+     *     (letter for a page printed on US Letter).
      */
     public static function output(
         string $title,
@@ -252,14 +253,19 @@ final class shell {
         foreach ($doors as $door) {
             $on = $door['current'] ? ' ayv-nav-on' : '';
             if ($door['key'] === 'more') {
-                $nav .= '<button type="button" class="ayv-nav ayv-nav-more' . $on . '" data-ayv-open="ayv-more"'
-                    . ' aria-haspopup="dialog">' . s($door['label']) . '</button>';
+                $badge = !empty($door['count']) ? ' <span class="ayv-badge" aria-hidden="true">' . (int) $door['count']
+                    . '</span><span class="ayv-sr">' . $str('menuwaiting', (int) $door['count']) . '</span>' : '';
+                $nav .= '<button type="button" class="ayv-nav ayv-nav-more' . $on . ($badge ? ' ayv-nav-waiting' : '')
+                    . '" data-ayv-open="ayv-more" aria-haspopup="dialog">' . s($door['label']) . $badge . '</button>';
                 $parts = '';
                 foreach ($door['groups'] as $group) {
                     $items = '';
                     foreach ($group['links'] as $link) {
                         $items .= '<li><a class="ayv-more-link" href="' . s($link['url']) . '"'
-                            . ($link['current'] ? ' aria-current="page"' : '') . '>' . s($link['label']) . '</a></li>';
+                            . ($link['current'] ? ' aria-current="page"' : '') . '>' . s($link['label'])
+                            . (!empty($link['count']) ? ' <span class="ayv-badge" aria-hidden="true">' . (int) $link['count']
+                            . '</span><span class="ayv-sr">' . $str('menuwaiting', (int) $link['count']) . '</span>' : '')
+                            . '</a></li>';
                     }
                     $parts .= '<section class="ayv-more-group"><h4>' . s($group['title']) . '</h4><ul>' . $items
                         . '</ul></section>';
@@ -299,14 +305,23 @@ final class shell {
         }
         $covered = menu::covered($doors);
         $row = '';
+        $how = '';
         foreach ($links as $link) {
             $page = basename((string) parse_url($link['url'], PHP_URL_PATH));
             $inside = str_contains($link['url'], '/local/oksigeniaayvurenda/');
+            // The guided help of the page is a button that says what it does, first: a plain «Help» went unseen.
+            if ($inside && $page === 'help.php') {
+                $how = '<a class="ayv-button ayv-howbutton" href="' . s($link['url']) . '">'
+                    . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_play', []) . '<span>'
+                    . s(get_string('helpnav', 'local_oksigeniaayvurenda')) . '</span></a>';
+                continue;
+            }
             if ($inside && in_array($page, $covered, true)) {
                 continue;
             }
             $row .= '<a class="ayv-subnav-link" href="' . s($link['url']) . '">' . s($link['label']) . '</a>';
         }
+        $row = $how . $row;
         // The sheet of «More» goes in the page, not in the header (a dialog inside the header is not centred).
         $main = $sheet . ($row !== '' ? '<nav class="ayv-subnav" aria-label="' . $str('menuthispage') . '">' . $row . '</nav>' : '')
             . $main;
@@ -348,7 +363,9 @@ final class shell {
     };
     resolve();
     query.addEventListener(\'change\', resolve);
-})();</script>
+})();</script>' . (($options['paper'] ?? '') === 'letter'
+        // A page printed on US Letter says so to the print dialog, which otherwise starts on the A4 of the stylesheet.
+        ? "\n<style>@media print { @page { size: letter; margin: 0; } }</style>" : '') . '
 </head>
 <body class="ayv ayv-skin-' . $skin . ($howto !== '' ? ' ayv-has-howto' : '') . '">
 <a class="ayv-skip" href="#ayv-main">' . $str('skip') . '</a>

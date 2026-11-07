@@ -336,7 +336,8 @@ final class screens {
                 'classroom' => \local_oksigeniaayvurenda\core\links::classroom($address),
                 'classroomlabel' => self::str('recordshareclassroom'),
                 'teams' => \local_oksigeniaayvurenda\core\links::teams($address, (string) $record->title),
-                'teamslabel' => self::str('recordshareteams')] : null,
+                'teamslabel' => self::str('recordshareteams'),
+                'moodle' => self::moodle_courses($library, (int) $record->id)] : null,
             'title' => $record->title,
             'subtitle' => $record->subtitle,
             'authors' => $authors,
@@ -475,6 +476,45 @@ final class screens {
             $box[$key] = self::str($key);
         }
         return $box;
+    }
+
+    /**
+     * The courses of this Moodle where whoever looks can put the book in the readings: those they can change, whose
+     * library is of the same centre.
+     *
+     * @param \stdClass $library
+     * @param int $recordid
+     * @return array|null courses (id, name, listed), the address and the words of the sheet; null when there is none.
+     */
+    private static function moodle_courses(\stdClass $library, int $recordid): ?array {
+        global $DB;
+        if (!isloggedin() || isguestuser() || onlylibrary::on()) {
+            return null;
+        }
+        $courses = [];
+        foreach (enrol_get_my_courses(['category'], 'fullname ASC', 60) as $course) {
+            if ((int) $course->id === SITEID || !has_capability('moodle/course:update', \context_course::instance($course->id))) {
+                continue;
+            }
+            $list = readings::of_course((int) $course->id);
+            $its = $list ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $list->libraryid])
+                : readings::library_for($course);
+            if (!$its || (int) $its->entityid !== (int) $library->entityid) {
+                continue;
+            }
+            $courses[] = ['id' => (int) $course->id, 'name' => format_string($course->fullname, true, ['escape' => false]),
+                'listed' => $list && $DB->record_exists('local_oksigeniaayvurenda_readingitem', ['listid' => $list->id,
+                    'recordid' => $recordid]),
+                'url' => (new \moodle_url('/local/oksigeniaayvurenda/readings.php', ['course' => $course->id]))->out(false)];
+        }
+        if (!$courses) {
+            return null;
+        }
+        return ['courses' => $courses, 'action' => (new \moodle_url('/local/oksigeniaayvurenda/readings.php'))->out(false),
+            'sesskey' => sesskey(), 'recordid' => $recordid, 'label' => self::str('recordsharemoodle'),
+            'title' => self::str('recordsharemoodletitle'), 'hint' => self::str('recordsharemoodlehint'),
+            'required' => self::str('readingsrequired'), 'addlabel' => self::str('recordsharemoodleadd'),
+            'listedlabel' => self::str('recordsharemoodlelisted'), 'close' => self::str('offsiteclose')];
     }
 
     /**

@@ -1247,6 +1247,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 /* Labels and spine labels on A4 sheets: the measures come from the sheet chosen. */
 .ayv .ayv-labelsheet { display: grid; grid-template-columns: repeat(var(--cols), var(--w)); grid-auto-rows: var(--h);
+    column-gap: var(--gx, 0); row-gap: var(--gy, 0);
     align-content: start; width: 210mm; min-height: 297mm; padding: var(--top) 0 0 var(--left); margin: 0 auto 1rem;
     background: #fff; color: #1e2b2a; box-shadow: 0 1px 6px rgba(0, 0, 0, .15); }
 
@@ -1265,13 +1266,22 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-label-barcode svg { width: 100%; height: 100%; }
 
 .ayv .ayv-spine-lines { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;
-    font-family: var(--title); font-weight: 600; font-size: 10pt; line-height: 1.15; }
+    font-family: var(--title); font-weight: 600; font-size: clamp(5.5pt, calc(var(--h, 30mm) * .24), 10pt); line-height: 1.1; }
 
-.ayv .ayv-spine-lines span:first-child { font-size: 11pt; }
+/* The class line a point bigger; on a small sheet (US spine labels, 12.7 mm) everything shrinks with the label. */
+.ayv .ayv-spine-lines span:first-child { font-size: clamp(6pt, calc(var(--h, 30mm) * .27), 11pt); }
+.ayv .ayv-labelsheet-spines .ayv-label { padding: min(2mm, calc(var(--h, 30mm) * .06)) 2mm; }
 
 @media print {
-    .ayv .ayv-labelsheet { margin: 0; box-shadow: none; break-after: page; }
+    /* A hair under the page, as the cards: exactly a page tall, the browser leaves the last row on a second one. */
+    .ayv .ayv-labelsheet { height: calc(297mm - .5mm); min-height: 0; margin: 0; box-shadow: none; break-after: page; }
+    .ayv .ayv-labelsheet-letter { height: calc(279.4mm - .5mm); }
+    .ayv .ayv-labelsheet:last-of-type { break-after: auto; }
     .ayv .ayv-label { outline: none; }
+    .ayv .ayv-labelsheet-test .ayv-label { outline: .3mm solid #000; }
+    /* Only the sheet goes to the paper: the row of the page's links (the guided help), «How do I…?», «Logged in as»
+       and the notice of the site would push the labels down and every one would come out shifted. */
+    .ayv .ayv-subnav, .ayv .ayv-howto-dock, .ayv .ayv-loggedinas, .ayv .ayv-sitenotice { display: none !important; }
 }
 
 /* What a character says. */
@@ -3700,7 +3710,10 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-more-link[aria-current="page"] { background: var(--notice-bg); color: var(--accent); }
 /* Room for the floating «How do I…?» at the end of every page, so it never covers the last control. */
 
-.ayv .ayv-subnav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: 0 0 1rem; font-size: .92rem; }
+.ayv .ayv-subnav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin: 0 0 1rem; font-size: .92rem; }
+/* «How does it work?»: the guided help of the page, a button that says what it does (a plain «Help» went unseen). */
+.ayv .ayv-howbutton { gap: .5rem; min-height: 44px; padding: .45rem 1.1rem .45rem .85rem; text-decoration: none; }
+.ayv .ayv-howbutton .ayv-icon { width: 22px; height: 22px; flex: none; }
 .ayv .ayv-subnav-link { font-weight: 700; color: var(--accent); }
 
 /* Copies out of the server. */
@@ -4408,3 +4421,50 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     font-weight: 600;
 }
 .ayv .ayv-add-cataloged { margin: .6rem 0 0; }
+
+/* Passing a book to a Moodle course: each course with its button. */
+.ayv .ayv-passon-courses { margin: 1rem 0 0; padding: 0; list-style: none; display: grid; gap: .6rem; }
+.ayv .ayv-passon-course {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    padding: .7rem .9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+.ayv .ayv-passon-name { font-weight: 700; }
+.ayv .ayv-passon-form { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin: 0; }
+
+/* What waits to be looked at: a number on its link and on «More», as phones do. */
+.ayv .ayv-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: .3rem;
+    padding: 0 .38rem;
+    border-radius: 999px;
+    /* A fixed red that keeps white legible in light and in dark (the coral of the house does not). */
+    background: #b23a24;
+    color: #fff;
+    font-size: .76rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    vertical-align: .12em;
+}
+
+/* A sheet on US Letter, and the test sheet: each label with its outline and its number, to hold against the light. */
+.ayv .ayv-labelsheet-letter { width: 215.9mm; min-height: 279.4mm; page: ayv-letter; }
+/* The library's nudge for its printer moves every label, not the page: a sheet without margins can go up or left too. */
+.ayv .ayv-labelsheet .ayv-label { translate: var(--dx, 0) var(--dy, 0); }
+.ayv .ayv-labelsheet { overflow: hidden; }
+.ayv .ayv-labelsheet-test .ayv-label { outline: .3mm solid #1e2b2a; outline-offset: -.15mm; align-items: center;
+    justify-content: center; }
+.ayv .ayv-label-number { font: 700 11pt/1 var(--text); color: #1e2b2a; }
+.ayv .ayv-lab-sheettools { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0; }
+.ayv .ayv-lab-fav { gap: .4rem; }
+.ayv .ayv-lab-fav-on { background: var(--notice-bg); }

@@ -58,4 +58,43 @@ final class labels_test extends \advanced_testcase {
         $this->assertCount(1, labels::sheets($listed, '5x13', 1));
         $this->assertNotNull($old);
     }
+
+    /**
+     * Every sheet fits its paper and says how many labels it has; the old keys still lead to their sheet; a library marks
+     * its favourites of each kind, the first of them is the one the page starts with, and the print moves within its
+     * limits only for that sheet.
+     */
+    public function test_sheets_favourites_and_nudge(): void {
+        $this->resetAfterTest();
+        foreach (\local_oksigeniaayvurenda\core\label_sheets::MODELS as $key => $model) {
+            $this->assertTrue(\local_oksigeniaayvurenda\core\label_sheets::fits($key), $key);
+        }
+        $sheets = \local_oksigeniaayvurenda\core\label_sheets::class;
+        $this->assertSame(40, $sheets::placed('apli-01286')['per']);
+        $this->assertSame(21, $sheets::placed('apli-01276')['per']);
+        $this->assertSame('apli-01273', $sheets::key('3x8'));
+        $this->assertSame('avery-3666', $sheets::key('nada', 'spines'));
+
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $this->assertSame('avery-3666', labels::chosen($library, 'spines', ''));
+        $this->assertTrue(labels::favourite($library, 'spines', 'apli-01286'));
+        $this->assertTrue(labels::favourite($library, 'labels', 'apli-01276'));
+        $this->assertSame('apli-01286', labels::chosen($library, 'spines', ''));
+        $this->assertSame('apli-01276', labels::chosen($library, 'labels', ''));
+        $this->assertSame('apli-01273', labels::chosen($library, 'labels', '3x8'));
+        $this->assertFalse(labels::favourite($library, 'spines', 'apli-01286'));
+        $this->assertSame([], labels::own($library)['favs']['spines']);
+        $this->assertFalse(labels::favourite($library, 'labels', 'otra-cosa'));
+
+        labels::nudge($library, 'apli-01276', 1.5, -40);
+        $this->assertSame([1.5, -10.0], labels::own($library)['nudge']['apli-01276']);
+        $placed = $sheets::placed('apli-01276', 1.5, -10);
+        $this->assertEquals(1.5, $placed['left']);
+        labels::nudge($library, 'apli-01276', 0, 0);
+        $this->assertArrayNotHasKey('apli-01276', labels::own($library)['nudge']);
+        // Another library of the same centre keeps its own.
+        $other = $gen->create_library(['entityid' => $library->entityid]);
+        $this->assertSame([], labels::own($other)['favs']['labels']);
+    }
 }

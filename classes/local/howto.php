@@ -43,6 +43,7 @@ final class howto {
         'material' => ['material.php', 'catalogue', 'material'],
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
+        'labelsheets' => ['labels.php', 'catalogue', ''],
         'cards' => ['readers.php', 'desk', 'card'],
         'readers' => ['readers.php', 'desk', 'readers'],
         'profile' => ['readers.php', 'desk', ''],

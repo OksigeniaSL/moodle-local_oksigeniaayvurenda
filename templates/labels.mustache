@@ -36,7 +36,12 @@
         "whiches": [{"value": "today", "label": "Lo dado de alta hoy", "selected": true}],
         "since": "",
         "codes": "",
-        "sheets": [{"value": "3x8", "label": "3 × 8", "selected": true}],
+        "sheetgroups": [{"label": "Apli", "options": [{"value": "apli-01286", "label": "Apli 01286 · 52,5 × 29,7 mm · 40 por hoja", "selected": true}]}],
+        "sheet": "apli-01286", "sesskey": "abc", "which": "today", "isfav": false, "favbutton": "Marcar como favorita",
+        "nudgex": 0, "nudgey": 0, "nudged": "", "testurl": "#", "test": false, "letter": false,
+        "labelsnudge": "Ajustar la impresión", "labelsnudgetitle": "Ajustar la impresión", "labelsnudgehint": "Mueve la impresión.",
+        "labelsnudgex": "A la derecha (mm)", "labelsnudgey": "Hacia abajo (mm)", "labelstest": "Hoja de prueba",
+        "labelstesthint": "Imprímela en papel normal.", "sourcessave": "Guardar", "offsiteclose": "Cerrar",
         "start": 1,
         "count": "2 ejemplares",
         "haspages": true,
@@ -72,19 +77,44 @@
             <p class="ayv-lab-go"{{#istoday}} hidden{{/istoday}}><button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button></p>
         </div>
         <div class="ayv-lab-side">
-            <label class="ayv-field ayv-dig-field">{{labelssheetlabel}} <select name="sheet">{{#sheets}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/sheets}}</select></label>
+            <label class="ayv-field ayv-dig-field">{{labelssheetlabel}} <select name="sheet">{{#sheetgroups}}<optgroup label="{{label}}">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</optgroup>{{/sheetgroups}}</select></label>
+            <p class="ayv-lab-sheettools">
+                <button type="submit" form="ayv-lab-fav" class="ayv-button ayv-button-quiet ayv-lab-fav{{#isfav}} ayv-lab-fav-on{{/isfav}}" aria-pressed="{{#isfav}}true{{/isfav}}{{^isfav}}false{{/isfav}}"><span aria-hidden="true">{{#isfav}}★{{/isfav}}{{^isfav}}☆{{/isfav}}</span> {{favbutton}}</button>
+                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-lab-nudge">{{labelsnudge}}</button></p>
+            {{#nudged}}<p class="ayv-field-hint">{{nudged}}</p>{{/nudged}}
             <p class="ayv-field-hint">{{labelsmaphint}}</p>
             <div class="ayv-lab-map" style="--cols: {{cols}}" role="group" aria-label="{{labelsstart}}">{{#cells}}<button type="button" class="ayv-lab-cell{{#used}} ayv-lab-cell-used{{/used}}{{#first}} ayv-lab-cell-first{{/first}}" data-start="{{n}}" aria-label="{{label}}"{{#first}} aria-current="true"{{/first}}></button>{{/cells}}</div>
         </div>
     </form>
+    <form id="ayv-lab-fav" method="post" action="{{action}}" hidden><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="do" value="fav"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="kind" value="{{kind}}">
+        <input type="hidden" name="sheet" value="{{sheet}}"><input type="hidden" name="which" value="{{which}}"><input type="hidden" name="since" value="{{since}}">
+        <input type="hidden" name="codes" value="{{codes}}"></form>
+    <dialog class="ayv-modal" id="ayv-lab-nudge" aria-labelledby="ayv-lab-nudge-title">
+        <div class="ayv-modal-head"><h3 id="ayv-lab-nudge-title" class="ayv-section-title">{{labelsnudgetitle}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p class="ayv-field-hint">{{labelstesthint}}</p>
+        <p><a class="ayv-button ayv-button-quiet" href="{{testurl}}">{{labelstest}}</a></p>
+        <form method="post" action="{{action}}" class="ayv-rule-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="do" value="nudge"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="kind" value="{{kind}}">
+            <input type="hidden" name="sheet" value="{{sheet}}"><input type="hidden" name="which" value="{{which}}"><input type="hidden" name="since" value="{{since}}">
+            <input type="hidden" name="codes" value="{{codes}}">
+            <p class="ayv-field-hint">{{labelsnudgehint}}</p>
+            <div class="ayv-rule-numbers">
+                <label class="ayv-field ayv-dig-field">{{labelsnudgex}} <input type="number" name="x" min="-10" max="10" step="0.5" value="{{nudgex}}"></label>
+                <label class="ayv-field ayv-dig-field">{{labelsnudgey}} <input type="number" name="y" min="-10" max="10" step="0.5" value="{{nudgey}}"></label>
+            </div>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+        </form>
+    </dialog>
     <p class="ayv-lab-count"><span>{{count}}</span>{{#haspages}} <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button>{{/haspages}}</p>
+    {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
+    {{^haspages}}<div class="ayv-nothing"><p>{{empty}}</p></div>{{/haspages}}
 </div>
-{{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
-{{^haspages}}<div class="ayv-nothing"><p>{{empty}}</p></div>{{/haspages}}
 {{#pages}}
-<div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}" style="{{style}}">
+<div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}{{#letter}} ayv-labelsheet-letter{{/letter}}{{#test}} ayv-labelsheet-test{{/test}}" style="{{style}}">
 {{#labels}}
-    <div class="ayv-label{{#blank}} ayv-label-empty{{/blank}}">
+    <div class="ayv-label{{#blank}} ayv-label-empty{{/blank}}">{{#testnumber}}<span class="ayv-label-number">{{testnumber}}</span>{{/testnumber}}
         {{^blank}}
         {{#spines}}<div class="ayv-spine-lines">{{#callnumber}}<span>{{.}}</span>{{/callnumber}}</div>{{/spines}}
         {{^spines}}

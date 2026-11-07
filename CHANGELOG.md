@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.170.0
+
+- «How does it work?»: the guided help of every page is a button that says what it does, first in its row, instead of a
+  link that said «Help»; the same words in «How do I…?» and in the titles of the guided help.
+- Pass a book to a class: besides Google Classroom and Microsoft Teams, a Moodle course of whoever looks, where it goes into
+  the course's readings, required or not.
+- What waits to be looked at (reviews, voices, what the classes asked for, other formats, books to buy, stopped self-loan
+  posts, late loans from other libraries) shows as a number on its link and on «More», as phones do; never for a practice
+  library.
+- Labels: the sheets by brand and reference (Apli 01286 and 01276 and fourteen more of Apli, Avery and Avery Zweckform, and
+  US Letter), the favourites of each library first, for codes and spine labels apart; the print moved for the library's
+  printer, sheet by sheet, with a test sheet to hold against the light. Spine labels on small sheets shrink their text.
+- Printing labels: only the sheets go to the paper. The row of the page's links and the notice of a long list pushed the
+  first sheet down, and every label came out shifted.
+
 ## 0.169.0
 
 - The class while it is typed: a word in the first box of the call number («biology») brings the numbers that fit, with

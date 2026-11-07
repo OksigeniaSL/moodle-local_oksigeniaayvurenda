@@ -143,6 +143,9 @@ final class menu {
             $door('readers', 'readers.php', 'readers'), $door('reports', 'reports.php', 'reportsnav')];
         $groups = [];
         $inmore = false;
+        // What waits for someone to look at it, as a number on its link and on «More», as phones do.
+        $waiting = self::waiting($library, $userid);
+        $total = 0;
         foreach (self::groups() as $title => $links) {
             $shown = [];
             foreach ($links as [$page, $label, $capability]) {
@@ -156,7 +159,10 @@ final class menu {
                     continue;
                 }
                 if (access::can($capability, $library, $userid)) {
-                    $shown[] = ['url' => $url($page), 'label' => skins::say($entityid, $label), 'current' => $here === $page];
+                    $count = $waiting[$page] ?? 0;
+                    $total += $count;
+                    $shown[] = ['url' => $url($page), 'label' => skins::say($entityid, $label), 'current' => $here === $page,
+                        'count' => $count];
                     $inmore = $inmore || ($here === $page && !self::in_doors($here));
                 }
             }
@@ -168,8 +174,35 @@ final class menu {
             array_unshift($groups, ['title' => $str('classnav'), 'links' => [['url' => $url('class.php'),
                 'label' => $str('classnav'), 'current' => $here === 'class.php']]]);
         }
-        $doors[] = ['key' => 'more', 'url' => '', 'label' => $str('menumore'), 'current' => $inmore, 'groups' => $groups];
+        $doors[] = ['key' => 'more', 'url' => '', 'label' => $str('menumore'), 'current' => $inmore, 'groups' => $groups,
+            'count' => $total];
         return $doors;
+    }
+
+    /**
+     * What waits for the staff of a library to look at it: reviews and voices to approve, books the classes asked for,
+     * readers who asked for another format or to buy a book, stopped self-loan posts and loans from other libraries that
+     * are late.
+     *
+     * @param \stdClass $library
+     * @param int $userid
+     * @return int[] page => how many.
+     */
+    public static function waiting(\stdClass $library, int $userid): array {
+        $entityid = (int) $library->entityid;
+        // A practice library is a rehearsal: what its guided help leaves waits for nobody.
+        if (practice::is($entityid)) {
+            return [];
+        }
+        return array_filter([
+            'reviews.php' => reviews::waiting($entityid),
+            'wishes.php' => wishes::waiting($entityid),
+            'voices.php' => count(voices::pending($library, $userid)),
+            'formats.php' => formats::waiting($library),
+            'selfloan.php' => selfloan::stopped($library),
+            'ill.php' => ill::overdue($library),
+            'purchases.php' => purchases::counts($library)['asked'] ?? 0,
+        ]);
     }
 
     /**

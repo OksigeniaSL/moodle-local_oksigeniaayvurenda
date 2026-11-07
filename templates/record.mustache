@@ -187,8 +187,24 @@
             {{#cite}}<a class="ayv-button ayv-button-quiet" href="{{citeurl}}" download>{{citelabel}}</a>{{/cite}}
             {{#formatask}}{{^open}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-format-sheet">{{button}}</button>{{/open}}{{/formatask}}
             {{#passon}}<span class="ayv-passon"><span>{{heading}}</span> <a class="ayv-button ayv-button-quiet" href="{{classroom}}" target="_blank" rel="noopener">{{classroomlabel}}</a>
-                <a class="ayv-button ayv-button-quiet" href="{{teams}}" target="_blank" rel="noopener">{{teamslabel}}</a></span>{{/passon}}
+                <a class="ayv-button ayv-button-quiet" href="{{teams}}" target="_blank" rel="noopener">{{teamslabel}}</a>
+                {{#moodle}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-passon-moodle">{{label}}</button>{{/moodle}}</span>{{/passon}}
         </div>
+        {{#passon}}{{#moodle}}
+        <dialog class="ayv-modal" id="ayv-passon-moodle" aria-labelledby="ayv-passon-moodle-title">
+            <div class="ayv-modal-head"><h3 id="ayv-passon-moodle-title" class="ayv-section-title">{{title}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <p class="ayv-field-hint">{{hint}}</p>
+            <ul class="ayv-passon-courses">
+                {{#courses}}<li class="ayv-passon-course"><span class="ayv-passon-name">{{name}}</span>
+                    {{#listed}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{listedlabel}}</a>{{/listed}}
+                    {{^listed}}<form method="post" action="{{action}}" class="ayv-passon-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <input type="hidden" name="course" value="{{id}}"><input type="hidden" name="do" value="add"><input type="hidden" name="record" value="{{recordid}}">
+                        <label class="ayv-field-check"><input type="checkbox" name="required" value="1"> {{required}}</label>
+                        <button type="submit" class="ayv-button">{{addlabel}}</button></form>{{/listed}}</li>{{/courses}}
+            </ul>
+        </dialog>
+        {{/moodle}}{{/passon}}
         {{#formatask}}
         {{#line}}<p class="ayv-notice" id="ayv-format" role="status">{{line}}</p>{{/line}}
         {{^open}}
