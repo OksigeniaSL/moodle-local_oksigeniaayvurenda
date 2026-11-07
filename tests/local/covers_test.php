@@ -45,4 +45,49 @@ final class covers_test extends \advanced_testcase {
         $this->assertSame(covers::HEIGHT, getimagesizefromstring($prepared)[1]);
         $this->assertNull(covers::prepare('not a picture'));
     }
+
+    /**
+     * A book without a cover asks for it once, in the background, and is not asked again for a while; a book with no ISBN,
+     * or with a cover, is not asked.
+     */
+    public function test_seek_and_find(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $book = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Zeta con ISBN', 'isbn' => '9780306406157']);
+        $plain = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Zeta sin ISBN']);
+        $this->assertFalse(covers::seek((int) $plain->id));
+        $this->assertTrue(covers::seek((int) $book->id));
+        $this->assertFalse(covers::seek((int) $book->id));
+        $this->assertCount(1, \core\task\manager::get_adhoc_tasks('\\local_oksigeniaayvurenda\\task\\find_cover'));
+
+        // A picture with something in it: what Open Library gives when it has no cover is tiny.
+        $image = imagecreatetruecolor(200, 300);
+        for ($i = 0; $i < 400; $i++) {
+            imagesetpixel($image, $i % 200, ($i * 7) % 300, imagecolorallocate($image, $i % 255, ($i * 3) % 255, ($i * 5) % 255));
+        }
+        ob_start();
+        imagejpeg($image, null, 85);
+        $jpeg = (string) ob_get_clean();
+        $this->assertGreaterThan(1000, strlen($jpeg));
+        $asked = [];
+        lookup::$fetcher = function (string $url) use (&$asked, $jpeg) {
+            $asked[] = $url;
+            return $jpeg;
+        };
+        try {
+            $this->assertTrue(covers::find((int) $book->id));
+            $this->assertNotNull(covers::url((int) $book->id));
+            // With its cover, nothing more is asked.
+            $this->assertFalse(covers::find((int) $book->id));
+            $this->assertCount(1, $asked);
+            $this->assertStringContainsString('9780306406157', $asked[0]);
+        } finally {
+            lookup::$fetcher = null;
+        }
+        $extra = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_record', 'extra', ['id' => $book->id]), true);
+        $this->assertArrayHasKey('coverasked', $extra);
+    }
 }

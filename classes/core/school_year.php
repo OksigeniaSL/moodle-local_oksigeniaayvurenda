@@ -70,14 +70,13 @@ final class school_year {
      * @param int $time
      * @param int $timestart
      * @param int $timeend
-     * @param int|null $lastday The last day of class, when the centre says it: the end comes weeks before it, not in summer.
      * @return string 'start', 'end' or ''.
      */
-    public static function moment(int $time, int $timestart, int $timeend, ?int $lastday = null): string {
+    public static function moment(int $time, int $timestart, int $timeend): string {
         if ($time < $timestart + self::START_DAYS * 86400) {
             return 'start';
         }
-        if ($time >= min($timeend, $lastday ?? $timeend) - self::END_DAYS * 86400) {
+        if ($time >= $timeend - self::END_DAYS * 86400) {
             return 'end';
         }
         return '';

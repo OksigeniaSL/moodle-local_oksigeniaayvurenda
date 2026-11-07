@@ -69,10 +69,11 @@ final class closures_test extends \advanced_testcase {
     }
 
     /**
-     * The last day of class: nothing a reading library lends falls due after it nor is given more time past it, the end of
-     * the year comes weeks before it, and the reminder to bring books back goes as the library's, not the bank's.
+     * The date to have everything back: nothing a reading library lends falls due after it nor is given more time past it
+     * while it is to come, whatever the calendar; the reminder goes as the library's, with that date; once it has passed,
+     * lending goes on as always.
      */
-    public function test_last_day(): void {
+    public function test_return_by(): void {
         global $DB;
         $this->resetAfterTest();
         /** @var \local_oksigeniaayvurenda_generator $gen */
@@ -80,41 +81,37 @@ final class closures_test extends \advanced_testcase {
         $library = $gen->create_library();
         $entityid = (int) $library->entityid;
         $now = time();
-        $span = \local_oksigeniaayvurenda\core\school_year::around($now, '09-01', zones::of($entityid));
-        $year = $gen->create_year(['entityid' => $entityid] + $span);
-        $this->assertNull(closures::last_day($entityid, $now));
-        $this->assertFalse(closures::set_last_day($entityid, '2027-02-30'));
-        $day = zones::date(min($now + 3 * DAYSECS, (int) $year->timeend - 2 * DAYSECS), '%Y-%m-%d', $entityid);
-        $this->assertTrue(closures::set_last_day($entityid, $day));
-        $last = closures::last_day($entityid, $now);
-        $this->assertSame((new \DateTimeImmutable($day . ' 23:59:59', zones::of($entityid)))->getTimestamp(), $last);
-        $this->assertSame('end', \local_oksigeniaayvurenda\core\school_year::moment(
-            $now,
-            (int) $year->timestart,
-            (int) $year->timeend,
-            $last
-        ));
+        $this->assertNull(closures::return_by($entityid));
+        $this->assertFalse(closures::set_return_by($entityid, '2027-02-30'));
+        $day = zones::date($now + 3 * DAYSECS, '%Y-%m-%d', $entityid);
+        $this->assertTrue(closures::set_return_by($entityid, $day));
+        $by = closures::return_by($entityid);
+        $this->assertSame((new \DateTimeImmutable($day . ' 23:59:59', zones::of($entityid)))->getTimestamp(), $by);
 
         $user = $this->getDataGenerator()->create_user();
         $reader = $gen->create_reader(['entityid' => $entityid, 'cardcode' => '10000H', 'userid' => $user->id]);
-        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'Zeta del último día']);
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'Zeta de la fecha']);
         $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'barcode' => '500001K']);
         $desk = new desk($library, 2, $now);
         $desk->scan('10000H');
         $this->assertSame('lent', $desk->scan('500001K', (int) $reader->id)['kind']);
         $loan = $DB->get_record('local_oksigeniaayvurenda_loan', ['readerid' => $reader->id], '*', MUST_EXIST);
-        $this->assertSame($last, (int) $loan->timedue);
+        $this->assertSame($by, (int) $loan->timedue);
         $this->assertNull($desk->renewable((int) $loan->id));
 
-        // The reminder of the end of the course, as the library's.
+        // The reminder, as the library's, with the date.
         $sink = $this->redirectMessages();
         $this->assertSame(1, bankround::remind_readers($library, $now));
         $messages = $sink->get_messages();
         $this->assertCount(1, $messages);
         $this->assertSame('yearreturn', $messages[0]->eventtype);
-        $this->assertSame(get_string('yearreturnsubject', 'local_oksigeniaayvurenda'), $messages[0]->subject);
+        $this->assertStringContainsString(zones::date($by, 'strftimedateshort', $library), $messages[0]->fullmessage);
 
-        $this->assertTrue(closures::set_last_day($entityid, ''));
-        $this->assertNull(closures::last_day($entityid, $now));
+        // Once the date has passed, it caps nothing: a later desk lends by the rules.
+        $later = new desk($library, 2, $by + DAYSECS);
+        $this->assertNotNull($later->renewable((int) $loan->id));
+
+        $this->assertTrue(closures::set_return_by($entityid, ''));
+        $this->assertNull(closures::return_by($entityid));
     }
 }

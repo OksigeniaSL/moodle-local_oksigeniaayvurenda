@@ -66,12 +66,12 @@ if (data_submitted() && confirm_sesskey()) {
             optional_param('to', '', PARAM_RAW_TRIMMED)
         );
         $notice = $str('closuresremoved');
-    } else if ($action === 'lastday') {
-        $day = optional_param('clear', 0, PARAM_BOOL) ? '' : optional_param('lastday', '', PARAM_RAW_TRIMMED);
-        $ok = \local_oksigeniaayvurenda\local\closures::set_last_day($entityid, $day);
-        $notice = $str(!$ok ? 'yearbadday' : ($day === '' ? 'lastdaygone' : 'lastdaysaved'));
+    } else if ($action === 'returnby') {
+        $day = optional_param('clear', 0, PARAM_BOOL) ? '' : optional_param('returnby', '', PARAM_RAW_TRIMMED);
+        $ok = \local_oksigeniaayvurenda\local\closures::set_return_by($entityid, $day);
+        $notice = $str(!$ok ? 'yearbadday' : ($day === '' ? 'returnbygone' : 'returnbysaved'));
     } else if ($action === 'remindall') {
-        // The end of the course: everyone with a book of a reading library out is told, and each class's tutor.
+        // Everyone with a book of a reading library out is told, with the date to have it back, and each class's tutor.
         $classes = !\local_oksigeniaayvurenda\local\skins::no_classes($entityid);
         foreach (catalogue::libraries() as $one) {
             if (
@@ -92,6 +92,8 @@ if (data_submitted() && confirm_sesskey()) {
     }
 }
 $status = year_change::status($entityid);
+// The date to have everything back, while it is to come and six weeks away at most.
+$soon = $status['returnby'] && time() <= $status['returnby'] && time() >= $status['returnby'] - 6 * WEEKSECS;
 $year = $status['year'];
 $url = fn(string $page, array $params = []) => (new moodle_url(
     '/local/oksigeniaayvurenda/' . $page,
@@ -169,19 +171,21 @@ $data = [
     'dates' => $str('yeardates', (object) ['start' => $date((int) $year->timestart),
         'end' => $date((int) $year->timeend - DAYSECS)]),
     'notice' => $notice,
-    'ending' => $status['moment'] === 'end' && $status['out'] ? ['text' => $str('yearending', $status['out']),
-        'url' => $url('late.php', ['all' => 1]), 'label' => $str('lateall'), 'remind' => $str('yearremindall'),
-        'remindsure' => $str('yearremindsure')] : null,
-    // Where there are classes, the last day of class: nothing lent falls due after it.
-    'lastday' => \local_oksigeniaayvurenda\local\skins::no_classes($entityid) ? null : [
-        'heading' => $str('lastdayheading'),
-        'intro' => $str('lastdayintro'),
-        'text' => $status['lastday'] ? $date((int) $status['lastday']) : $str('lastdaynone'),
-        'value' => $status['lastday'] ? zones::date((int) $status['lastday'], '%Y-%m-%d', $library) : '',
-        'has' => (bool) $status['lastday'],
-        'label' => $str('lastdaylabel'),
-        'save' => $str('lastdaysave'),
-        'clear' => $str('lastdayclear'),
+    // Weeks before the date to have everything back, or the end of the year without one: what is out, and telling everyone.
+    'ending' => $status['out'] && ($soon || $status['moment'] === 'end') ? ['text' => $soon
+        ? $str('returnbyending', (object) ['date' => $date((int) $status['returnby']), 'out' => $status['out']])
+        : $str('yearending', $status['out']), 'url' => $url('late.php', ['all' => 1]), 'label' => $str('lateall'),
+        'remind' => $str('yearremindall'), 'remindsure' => $str('yearremindsure')] : null,
+    // The date by which everything lent has to be back: any library, any calendar.
+    'returnby' => [
+        'heading' => $str('returnbyheading'),
+        'intro' => $str('returnbyintro'),
+        'text' => $status['returnby'] ? $date((int) $status['returnby']) : $str('returnbynone'),
+        'value' => $status['returnby'] ? zones::date((int) $status['returnby'], '%Y-%m-%d', $library) : '',
+        'has' => (bool) $status['returnby'],
+        'label' => $str('returnbylabel'),
+        'save' => $str('returnbysave'),
+        'clear' => $str('returnbyclear'),
     ],
     'cards' => $cards,
     'startintro' => $str('yearstartintro'),

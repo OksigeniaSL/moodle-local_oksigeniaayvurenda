@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.186.0
+
+- The last day of class of 0.185.0 becomes a date to have everything back, for any library and any calendar (the long
+  holidays of each country, a stocktake, a move): until then nothing falls due or is renewed past it; six weeks before,
+  «Academic year» and the desk say what is out and let everyone be told; once it has passed, lending goes on as always.
+  The notices and «How do I…?» no longer speak of the end of the course nor of June.
+- Linking readers with their accounts, and pairing with a platform: with given names and surnames apart, a candidate has to
+  be able to be the same person (the given names one inside the other, the surnames of one all among the other's, a letter
+  changed in a long one). A shared first name and one surname in another place, or another first name, is no candidate.
+- A book with an ISBN and no cover (made by hand, or imported) asks for its cover once, in the background, when it is lent,
+  comes back or its record is opened, and not again for six months: one question per book, as Open Library asks, never a
+  sweep of the catalogue.
+
 ## 0.185.0
 
 - The end of the course for a reading library (where there are classes), in «Academic year»:

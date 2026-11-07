@@ -55,13 +55,8 @@ final class year_change {
         return [
             'year' => $year,
             'previous' => $previous,
-            'moment' => school_year::moment(
-                $now,
-                (int) $year->timestart,
-                (int) $year->timeend,
-                closures::last_day($entityid, $now)
-            ),
-            'lastday' => closures::last_day($entityid, $now),
+            'moment' => school_year::moment($now, (int) $year->timestart, (int) $year->timeend),
+            'returnby' => closures::return_by($entityid),
             'groups' => count($groups),
             'members' => $DB->count_records(self::T . 'member', ['yearid' => $year->id]),
             'tutors' => $tutors,

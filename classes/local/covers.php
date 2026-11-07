@@ -274,4 +274,50 @@ final class covers {
         imagejpeg($image, null, 82);
         return (string) ob_get_clean();
     }
+
+    /** @var int How long a book that was asked for its cover in vain waits to be asked again. */
+    private const ASK_AGAIN = 180 * DAYSECS;
+
+    /**
+     * A book whose cover would help (it is lent, comes back, is looked at): if it has an ISBN and no cover, and it was not
+     * asked lately, it is asked for once in the background. One question per book, as Open Library asks, never a sweep of
+     * the catalogue: the books that move get their covers.
+     *
+     * @param int $recordid
+     * @param int|null $now
+     * @return bool Whether it was queued.
+     */
+    public static function seek(int $recordid, ?int $now = null): bool {
+        global $DB;
+        $now = $now ?? time();
+        $record = $DB->get_record('local_oksigeniaayvurenda_record', ['id' => $recordid], 'id, entityid, isbn, extra');
+        if (!$record || trim((string) $record->isbn) === '' || practice::is((int) $record->entityid)) {
+            return false;
+        }
+        $extra = json_decode((string) $record->extra, true) ?: [];
+        if ((int) ($extra['coverasked'] ?? 0) > $now - self::ASK_AGAIN || self::url($recordid) !== null) {
+            return false;
+        }
+        $extra['coverasked'] = $now;
+        $DB->set_field('local_oksigeniaayvurenda_record', 'extra', json_encode($extra), ['id' => $recordid]);
+        $task = new \local_oksigeniaayvurenda\task\find_cover();
+        $task->set_custom_data(['recordid' => $recordid]);
+        \core\task\manager::queue_adhoc_task($task, true);
+        return true;
+    }
+
+    /**
+     * Asks Open Library for the cover of a book by its ISBN, once, if it still has none.
+     *
+     * @param int $recordid
+     * @return bool Whether it has a cover now.
+     */
+    public static function find(int $recordid): bool {
+        global $DB;
+        $isbn = trim((string) $DB->get_field('local_oksigeniaayvurenda_record', 'isbn', ['id' => $recordid]));
+        if ($isbn === '' || self::url($recordid) !== null) {
+            return false;
+        }
+        return self::fetch($recordid, \local_oksigeniaayvurenda\core\sources\openlibrary::cover_url($isbn), 'openlibrary');
+    }
 }

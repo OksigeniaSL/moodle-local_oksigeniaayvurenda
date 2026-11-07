@@ -98,10 +98,12 @@ final class pairing {
         $types = array_flip(array_map(fn($p) => (string) ($p['type'] ?? 'student'), $people));
         $skipped = 0;
         $names = [];
+        $parts = [];
         $users = array_filter(array_map(fn($r) => (int) $r->userid, $rows));
         if ($users) {
             foreach ($DB->get_records_list('user', 'id', $users) as $user) {
                 $names[(int) $user->id] = fullname($user);
+                $parts[(int) $user->id] = ['first' => (string) $user->firstname, 'last' => (string) $user->lastname];
             }
         }
         foreach ($rows as $row) {
@@ -113,7 +115,11 @@ final class pairing {
                 continue;
             }
             $name = $row->userid ? ($names[(int) $row->userid] ?? '') : trim($row->firstname . ' ' . $row->lastname);
-            $readers[(int) $row->id] = ['id' => (int) $row->id, 'name' => $name, 'group' => '', 'type' => $row->readertype];
+            // The given names and the surnames apart, so that a candidate has to be able to be the same person.
+            $apart = $row->userid ? ($parts[(int) $row->userid] ?? ['first' => '', 'last' => ''])
+                : ['first' => (string) $row->firstname, 'last' => (string) $row->lastname];
+            $readers[(int) $row->id] = ['id' => (int) $row->id, 'name' => $name, 'group' => '', 'type' => $row->readertype]
+                + $apart;
         }
         $year = years::around($entityid, time());
         foreach ($DB->get_records(self::T . 'member', ['yearid' => $year->id], '', 'id, readerid, groupname') as $member) {
@@ -136,7 +142,8 @@ final class pairing {
         foreach (array_keys($types) as $type) {
             $these = array_values(array_filter($readers, fn($r) => $r['type'] === $type));
             $those = array_values(array_map(
-                fn($c) => ['id' => $c['id'], 'name' => $c['name'], 'group' => $c['group']],
+                fn($c) => ['id' => $c['id'], 'name' => $c['name'], 'group' => $c['group'],
+                    'first' => (string) ($c['person']['firstname'] ?? ''), 'last' => (string) ($c['person']['lastname'] ?? '')],
                 array_filter($candidates, fn($c) => $c['type'] === $type)
             ));
             $found = matcher::piles($these, $those);

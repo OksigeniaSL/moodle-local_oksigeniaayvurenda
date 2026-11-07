@@ -105,6 +105,13 @@ if (!$help && access::can('local/oksigeniaayvurenda:manage', $library)) {
     $label = '';
     if ($status['moment'] === 'start' && ($status['notutor'] || $status['left'])) {
         $label = $str('yearbegin', $status['year']->name);
+    } else if (
+        $status['out'] && $status['returnby'] && time() <= $status['returnby']
+        && time() >= $status['returnby'] - 6 * WEEKSECS
+    ) {
+        // The date to have everything back is weeks away.
+        $label = $str('returnbyending', (object) ['out' => $status['out'],
+            'date' => \local_oksigeniaayvurenda\local\zones::date((int) $status['returnby'], 'strftimedate', $library)]);
     } else if ($status['moment'] === 'end' && $status['out']) {
         $label = $str('yearending', $status['out']);
     }

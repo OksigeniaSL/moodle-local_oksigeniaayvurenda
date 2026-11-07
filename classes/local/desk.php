@@ -948,9 +948,9 @@ final class desk {
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         }
         $due = $this->capped(loan_rules::renewed_due($previous, $this->now, $rule, $this->tz, $this->closed()));
-        // At the end of the course there is no more time to give: the last day of class is the last.
+        // No more time past the date to have everything back.
         if ($due <= $previous && $loan->timereturned === null) {
-            return $this->answer('stop', 'no', 'desknorenewlastday', $this->date($due), ['readerid' => (int) $reader->id]);
+            return $this->answer('stop', 'no', 'desknorenewreturnby', $this->date($due), ['readerid' => (int) $reader->id]);
         }
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $due, 'timereturned' => null,
             'returnstaffid' => null, 'renewals' => $loan->renewals + 1, 'timemodified' => $this->now]);
@@ -982,8 +982,8 @@ final class desk {
     }
 
     /**
-     * A date a reading library gives, no later than the centre's last day of class when it has said it (and it has not
-     * passed): what goes home at the end of the course comes back before the summer.
+     * A date a reading library gives, no later than the centre's date to have everything back when it has set one and it
+     * has not passed (a bank keeps its own round).
      *
      * @param int $due
      * @return int
@@ -992,7 +992,7 @@ final class desk {
         if (bank::is($this->library)) {
             return $due;
         }
-        $last = closures::last_day((int) $this->library->entityid, $this->now);
+        $last = closures::return_by((int) $this->library->entityid);
         return $last !== null && $this->now <= $last && $due > $last ? $last : $due;
     }
 
@@ -1238,6 +1238,8 @@ final class desk {
         $fulfilled = holds::after_loan($item, $readerid, (int) $loanid, $this->now);
         $material = $this->material($item, (int) $loanid, 'out');
         $transaction->allow_commit();
+        // A book without a cover that moves asks for it, once, in the background.
+        covers::seek((int) $item->recordid, $this->now);
         $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
         $message = $fulfilled ? 'desklentheld' : ($reserve ? 'desklentreserve' : 'desklent');
         if ($reserve) {
@@ -1280,6 +1282,7 @@ final class desk {
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
         $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
         $transaction->allow_commit();
+        covers::seek((int) $item->recordid, $this->now);
         $owner = $this->reader((int) $loan->readerid);
         $rule = $reader ? $this->rule($reader->readertype, $item->itemtype) : null;
         $a = (object) ['title' => $this->title($item), 'name' => $owner['name'], 'days' => $days];

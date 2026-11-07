@@ -125,6 +125,8 @@ if ($do !== '' && data_submitted() && confirm_sesskey()) {
     redirect(new moodle_url($PAGE->url, ['reviewed' => $done], 'ayv-reviews'));
 }
 $data = screens::record($found, $library);
+// A book without a cover that someone looks at asks for it, once, in the background.
+\local_oksigeniaayvurenda\local\covers::seek((int) $found['record']->id);
 $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);

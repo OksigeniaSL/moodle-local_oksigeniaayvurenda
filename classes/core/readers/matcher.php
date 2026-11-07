@@ -51,8 +51,9 @@ final class matcher {
     /**
      * The three piles.
      *
-     * @param array[] $readers Each with id and name (and group, optional).
-     * @param array[] $accounts Each with id and name (and group, optional).
+     * @param array[] $readers Each with id and name (and group, optional; and first and last, the given names and the
+     *     surnames apart, when they are known).
+     * @param array[] $accounts Each with id and name (and group, first and last, optional).
      * @return array{sure: array, doubt: array, none: array} sure: reader id => account id; doubt: reader id => list of
      *     account ids, best first; none: list of reader ids.
      */
@@ -62,12 +63,14 @@ final class matcher {
         $byword = [];
         $words = [];
         $groups = [];
+        $parts = [];
         foreach ($accounts as $account) {
             $set = self::words((string) $account['name']);
             if (!$set) {
                 continue;
             }
             $words[$account['id']] = $set;
+            $parts[$account['id']] = self::parts($account);
             $groups[$account['id']] = text::normalise((string) ($account['group'] ?? ''));
             $exact[self::ordered((string) $account['name'])][] = $account['id'];
             $sameset[self::key($set)][] = $account['id'];
@@ -91,6 +94,17 @@ final class matcher {
             $candidates = self::close($set, $words, $byword);
             foreach ($set ? ($sameset[self::key($set)] ?? []) : [] as $account) {
                 $candidates[$account] = 98;
+            }
+            // With given names and surnames apart, a candidate has to be able to be the same person: the given names one
+            // inside the other (María José and María), and the surnames of one all among the other's (a surname less, or
+            // a letter changed). Sharing a first name and one surname in another place is two people.
+            $mine = self::parts($reader);
+            if ($mine !== null) {
+                $candidates = array_filter(
+                    $candidates,
+                    fn($account) => $parts[$account] === null || self::compatible($mine, $parts[$account]),
+                    ARRAY_FILTER_USE_KEY
+                );
             }
             foreach ($same as $account) {
                 $candidates[$account] = 99;
@@ -176,5 +190,50 @@ final class matcher {
      */
     private static function key(array $set): string {
         return implode(' ', $set);
+    }
+
+    /**
+     * The given names and the surnames of a person apart, as words; null when they are not known apart.
+     *
+     * @param array $person With first and last.
+     * @return array|null first, last.
+     */
+    private static function parts(array $person): ?array {
+        if (!array_key_exists('first', $person) || !array_key_exists('last', $person)) {
+            return null;
+        }
+        $first = text::words((string) $person['first']);
+        $last = text::words((string) $person['last']);
+        return $first || $last ? ['first' => $first, 'last' => $last] : null;
+    }
+
+    /**
+     * Whether two people could be the same: the given names of one all among the other's, and the surnames too, a letter
+     * changed at most in a long surname.
+     *
+     * @param array $a first, last.
+     * @param array $b first, last.
+     * @return bool
+     */
+    private static function compatible(array $a, array $b): bool {
+        $inside = function (array $few, array $many, bool $loose): bool {
+            foreach ($few as $word) {
+                $found = false;
+                foreach ($many as $other) {
+                    if ($word === $other || ($loose && strlen($word) >= 4 && levenshtein($word, $other) <= 1)) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        $within = fn(array $x, array $y, bool $loose) => !$x || !$y
+            || (count($x) <= count($y) ? $inside($x, $y, $loose) : $inside($y, $x, $loose));
+        // Given names exactly (Adrián and Adriana, Mario and María, are two people); surnames with a letter of slack.
+        return $within($a['first'], $b['first'], false) && $within($a['last'], $b['last'], true);
     }
 }

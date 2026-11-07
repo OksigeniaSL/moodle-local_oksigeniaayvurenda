@@ -59,4 +59,35 @@ final class matcher_test extends \basic_testcase {
         $this->assertSame([16], $piles['doubt'][7]);
         $this->assertSame([3], $piles['none']);
     }
+
+    /**
+     * With given names and surnames apart, only who could be the same person is a candidate: never a shared first name and
+     * one surname in another place, never a different first name; a surname less or a compound first name still are.
+     */
+    public function test_given_names_and_surnames(): void {
+        $p = fn(int $id, string $first, string $last) => ['id' => $id, 'name' => $first . ' ' . $last, 'first' => $first,
+            'last' => $last];
+        $accounts = [
+            $p(1, 'Hugo', 'Díaz Afonso'),
+            $p(2, 'Carla', 'González Trujillo'),
+            $p(3, 'Adrián', 'Rivero Díaz'),
+            $p(4, 'Thiago', 'Herrera'),
+            $p(5, 'Noa', 'Castro Medina'),
+            $p(6, 'María', 'Olmos Lago'),
+            $p(7, 'Lucía', 'Rodríguez Mesa'),
+        ];
+        $readers = [
+            $p(10, 'Hugo', 'Afonso Bencomo'),
+            $p(11, 'Carla', 'Alonso González'),
+            $p(12, 'Adriana', 'Báez Díaz'),
+            $p(13, 'Thiago', 'Brito Herrera'),
+            $p(14, 'Mario', 'Castro Noda'),
+            $p(15, 'María José', 'Olmo Lago'),
+            $p(16, 'Manuel', 'Díaz Afonso'),
+            $p(17, 'Lucía', 'Mesa Rodríguez'),
+        ];
+        $piles = matcher::piles($readers, $accounts);
+        $this->assertSame([13 => [4], 15 => [6], 17 => [7]], $piles[matcher::DOUBT]);
+        $this->assertSame([10, 11, 12, 14, 16], $piles[matcher::NONE]);
+    }
 }

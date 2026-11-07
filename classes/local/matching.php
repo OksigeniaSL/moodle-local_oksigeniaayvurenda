@@ -121,7 +121,8 @@ final class matching {
         );
         $readers = [];
         foreach ($rows as $row) {
-            $readers[$row->id] = ['id' => (int) $row->id, 'name' => trim($row->firstname . ' ' . $row->lastname), 'group' => ''];
+            $readers[$row->id] = ['id' => (int) $row->id, 'name' => trim($row->firstname . ' ' . $row->lastname), 'group' => '',
+                'first' => (string) $row->firstname, 'last' => (string) $row->lastname];
         }
         // Their group this year, when they have one: an older export's groups are last year's, and the accounts are in
         // this year's, so a different one says nothing against the same name.
@@ -193,7 +194,8 @@ final class matching {
         foreach ($rows as $row) {
             if (!isset($accounts[$row->id])) {
                 $accounts[$row->id] = ['id' => (int) $row->id, 'name' => trim($row->firstname . ' ' . $row->lastname),
-                    'group' => (string) ($row->groupname ?? '')];
+                    'group' => (string) ($row->groupname ?? ''), 'first' => (string) $row->firstname,
+                    'last' => (string) $row->lastname];
             }
         }
         $rows->close();

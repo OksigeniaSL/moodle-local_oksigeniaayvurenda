@@ -152,42 +152,38 @@ final class closures {
     }
 
     /**
-     * The centre's last day of class this year, at its end, when it has said it and it falls in the year: nothing a reading
-     * library lends falls due after it, and the end of the year begins weeks before it.
+     * The date by which everything lent has to be back, at the end of that day, when the centre has set one: before a
+     * school's long holidays, whatever its country's calendar, an inventory, a move. Until then nothing falls due after it;
+     * once it has passed, lending goes on as always.
      *
      * @param int $entityid
-     * @param int|null $now
      * @return int|null
      */
-    public static function last_day(int $entityid, ?int $now = null): ?int {
+    public static function return_by(int $entityid): ?int {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $day = (string) ($settings['lastday'] ?? '');
-        if (!self::day($day)) {
-            return null;
-        }
-        $end = (new \DateTimeImmutable($day . ' 23:59:59', zones::of($entityid)))->getTimestamp();
-        $year = years::around($entityid, $now ?? time());
-        return $end >= (int) $year->timestart && $end < (int) $year->timeend ? $end : null;
+        $day = (string) ($settings['returnby'] ?? ($settings['lastday'] ?? ''));
+        return self::day($day) ? (new \DateTimeImmutable($day . ' 23:59:59', zones::of($entityid)))->getTimestamp() : null;
     }
 
     /**
-     * Says the last day of class, or forgets it with an empty text.
+     * Sets the date by which everything lent has to be back, or forgets it with an empty text.
      *
      * @param int $entityid
      * @param string $day 'Y-m-d' or ''.
      * @return bool Whether it was kept (a day that exists, or nothing).
      */
-    public static function set_last_day(int $entityid, string $day): bool {
+    public static function set_return_by(int $entityid, string $day): bool {
         global $DB;
         if ($day !== '' && !self::day($day)) {
             return false;
         }
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        unset($settings['lastday']);
         if ($day === '') {
-            unset($settings['lastday']);
+            unset($settings['returnby']);
         } else {
-            $settings['lastday'] = $day;
+            $settings['returnby'] = $day;
         }
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
         return true;

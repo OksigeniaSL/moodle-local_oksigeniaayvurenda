@@ -301,10 +301,10 @@ final class bankround {
      */
     public static function remind_readers(\stdClass $library, int $now): int {
         global $DB;
-        // A bank's round has its date; a reading library's end of course, the centre's last day of class.
+        // A bank's round has its date; a reading library, the centre's date to have everything back, while it is to come.
         $k = bank::is($library) ? 'bankreturn' : 'yearreturn';
-        $deadline = bank::is($library) ? (int) self::state($library, $now)['deadline']
-            : (int) closures::last_day((int) $library->entityid, $now);
+        $returnby = (int) closures::return_by((int) $library->entityid);
+        $deadline = bank::is($library) ? (int) self::state($library, $now)['deadline'] : ($returnby > $now ? $returnby : 0);
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false);
         $name = format_string($library->name, true, ['escape' => false]);
         // Whoever was already told this time is not told again if the task is tried a second time.
@@ -375,10 +375,10 @@ final class bankround {
     public static function remind_tutors(\stdClass $library, int $now): int {
         global $DB;
         $year = years::around((int) $library->entityid, $now);
-        // A bank's round has its date; a reading library's end of course, the centre's last day of class.
+        // A bank's round has its date; a reading library, the centre's date to have everything back, while it is to come.
         $k = bank::is($library) ? 'bankreturn' : 'yearreturn';
-        $deadline = bank::is($library) ? (int) self::state($library, $now)['deadline']
-            : (int) closures::last_day((int) $library->entityid, $now);
+        $returnby = (int) closures::return_by((int) $library->entityid);
+        $deadline = bank::is($library) ? (int) self::state($library, $now)['deadline'] : ($returnby > $now ? $returnby : 0);
         $main = mail::main_library((int) $library->entityid) ?? $library;
         // Whoever was already told this time is not told again if the task is tried a second time.
         $told = array_map('strval', (array) (self::state($library, $now)['tutorstold'] ?? []));
