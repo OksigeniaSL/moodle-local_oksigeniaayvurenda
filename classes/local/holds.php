@@ -357,38 +357,101 @@ final class holds {
      * Copies set aside past their date: the reservation expires and the copy goes to the next, or back to the shelf.
      *
      * @param int|null $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return int How many expired.
      */
-    public static function expire(?int $now = null): int {
+    public static function expire(?int $now = null, ?array $centres = null): int {
         global $DB;
         $now = $now ?? time();
         $late = $DB->get_records_select(self::T . 'hold', "status = 'ready' AND timeexpires < :now", ['now' => $now]);
+        if ($centres !== null) {
+            // What expires is closed, and told, in its centre's morning.
+            $of = $DB->get_records_menu(self::T . 'library', null, '', 'id, entityid');
+            $late = array_filter($late, fn($hold) => in_array((int) ($of[$hold->libraryid] ?? 0), $centres, true));
+        }
         foreach ($late as $hold) {
             $DB->update_record(self::T . 'hold', (object) ['id' => $hold->id, 'status' => 'expired', 'timeclosed' => $now,
                 'timemodified' => $now]);
             if ($hold->itemid) {
                 self::release((int) $hold->itemid, $now);
             }
+            // Whoever was told it was set aside hears it is not any more, and how to ask again.
+            if ($hold->timenotified) {
+                self::tell_expired($hold);
+            }
         }
         return count($late);
+    }
+
+    /**
+     * Tells a reader that what was set aside for them is not kept any more.
+     *
+     * @param \stdClass $hold
+     * @return bool Whether it went.
+     */
+    public static function tell_expired(\stdClass $hold): bool {
+        global $DB;
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $hold->readerid]);
+        $user = $reader && $reader->userid ? \core_user::get_user($reader->userid) : null;
+        $library = $DB->get_record(self::T . 'library', ['id' => $hold->libraryid]);
+        if (!$user || !empty($user->deleted) || !empty($user->suspended) || !$library) {
+            return false;
+        }
+        $language = force_current_language((string) $user->lang);
+        $a = (object) [
+            'title' => (string) $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]),
+            'library' => format_string($library->name, true, ['escape' => false]),
+            'until' => zones::date((int) $hold->timeexpires, 'strftimedateshort', $library),
+        ];
+        $str = fn(string $key) => get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda', $a);
+        $url = (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $hold->recordid]))
+            ->out(false);
+        $sent = notices::send(
+            'holdready',
+            $user,
+            $str('holdexpiredsubject'),
+            $str('holdexpiredbody'),
+            $url,
+            $a->title,
+            $a->library,
+            [
+                'library' => $library,
+                'young' => mail::young($reader),
+                'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),
+                'heading' => $str('holdexpiredheading'),
+                'lead' => [$str('holdexpiredlead')],
+                'book' => mail::book((int) $hold->recordid, $a->title, catalogue::authors_of((int) $hold->recordid)),
+                'button' => ['url' => $url, 'text' => get_string('holdexpiredbutton', 'local_oksigeniaayvurenda')],
+                'sign' => mail::sign((int) $library->entityid, $reader, true, $library),
+                'why' => get_string('mailwhyreader', 'local_oksigeniaayvurenda'),
+                'prefs' => true,
+            ]
+        );
+        force_current_language($language);
+        return $sent;
     }
 
     /**
      * What is set aside and nobody was told yet (its centre was getting ready): told now, while it is still kept.
      *
      * @param int|null $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return int How many went.
      */
-    public static function pending(?int $now = null): int {
+    public static function pending(?int $now = null, ?array $centres = null): int {
         global $DB;
         $now = $now ?? time();
         $sent = 0;
-        $ids = $DB->get_fieldset_select(
+        $rows = $DB->get_records_select_menu(
             self::T . 'hold',
-            'id',
             "status = 'ready' AND timenotified IS NULL AND timeexpires > ?",
-            [$now]
+            [$now],
+            'id',
+            'id, libraryid'
         );
+        $of = $centres !== null ? $DB->get_records_menu(self::T . 'library', null, '', 'id, entityid') : [];
+        $ids = array_keys(array_filter($rows, fn($libraryid) => $centres === null
+            || in_array((int) ($of[$libraryid] ?? 0), $centres, true)));
         foreach ($ids as $id) {
             $sent += self::notify((int) $id) ? 1 : 0;
         }

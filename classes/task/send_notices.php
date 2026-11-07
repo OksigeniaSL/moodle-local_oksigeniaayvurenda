@@ -43,17 +43,38 @@ class send_notices extends \core\task\scheduled_task {
      */
     public function execute(): void {
         global $DB;
+        // It runs every hour; each centre is told in its own morning (8 in its zone), once a day: not at dawn in America
+        // because the server is in Europe. The late books and what waits for the staff, on weekdays; what expires, every
+        // day (a library open on Saturday does not keep a book set aside until Monday).
+        $now = time();
+        $week = \local_oksigeniaayvurenda\local\zones::mornings($now);
+        $every = \local_oksigeniaayvurenda\local\zones::mornings($now, false);
+        mtrace('Ayvurenda: centres whose morning it is: ' . json_encode(['weekdays' => $week, 'every day' => $every]));
         // Each step apart: one that fails does not stop the others, nor the other centres' notices.
         $steps = [
-            'notices of late books' => fn() => \local_oksigeniaayvurenda\local\notices::run(),
-            'reservations no longer set aside' => fn() => \local_oksigeniaayvurenda\local\holds::expire(),
-            'reservations set aside nobody was told of' => fn() => \local_oksigeniaayvurenda\local\holds::pending(),
             'voices past the days the centre keeps them' => fn() => \local_oksigeniaayvurenda\local\voices::expire(),
             'voices of reviews past those days' => fn() => \local_oksigeniaayvurenda\local\reviews::expire_voices(),
-            'what waits for the staff' => fn() => \local_oksigeniaayvurenda\local\staffnotices::run(),
-            'readers told what a late book left' => fn() => \local_oksigeniaayvurenda\local\sanctions::notify(),
-            'the library\'s news to whoever signed up' => fn() => \local_oksigeniaayvurenda\local\newsletter::run(),
         ];
+        if ($week) {
+            $steps += [
+                'notices of late books' => fn() => \local_oksigeniaayvurenda\local\notices::run($now, $week),
+                'what waits for the staff' => fn() => \local_oksigeniaayvurenda\local\staffnotices::run($now, $week),
+            ];
+        }
+        if ($every) {
+            $steps += [
+                'reservations no longer set aside' => fn() => \local_oksigeniaayvurenda\local\holds::expire($now, $every),
+                'reservations set aside nobody was told of' => fn() => \local_oksigeniaayvurenda\local\holds::pending(
+                    $now,
+                    $every
+                ),
+                'readers told what a late book left' => fn() => \local_oksigeniaayvurenda\local\sanctions::notify($now, $every),
+                'the library\'s news to whoever signed up' => fn() => \local_oksigeniaayvurenda\local\newsletter::run(
+                    $now,
+                    $every
+                ),
+            ];
+        }
         foreach ($steps as $what => $step) {
             try {
                 mtrace('Ayvurenda: ' . $what . ': ' . json_encode($step()));
@@ -64,5 +85,7 @@ class send_notices extends \core\task\scheduled_task {
                 mtrace('Ayvurenda: ' . $what . ' failed: ' . $e->getMessage());
             }
         }
+        \local_oksigeniaayvurenda\local\zones::mornings_done($week, $now);
+        \local_oksigeniaayvurenda\local\zones::mornings_done($every, $now, false);
     }
 }

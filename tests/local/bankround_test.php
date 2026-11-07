@@ -142,6 +142,9 @@ final class bankround_test extends \advanced_testcase {
         $this->assertStringContainsString('/local/oksigeniaayvurenda/index.php?library=', $messages[0]->contexturl);
         $this->assertSame(1, bankround::state($w->bank)['readerssent']);
         $sink->clear();
+        // The task tried again (it failed further on): whoever was told is not told twice.
+        $this->assertSame(1, bankround::remind_readers($w->bank, $w->now));
+        $this->assertCount(0, $sink->get_messages());
 
         $tutor = $this->getDataGenerator()->create_user();
         $DB->insert_record(self::T . 'tutor', ['yearid' => $w->year->id, 'groupname' => '1º A', 'userid' => $tutor->id,
@@ -156,6 +159,8 @@ final class bankround_test extends \advanced_testcase {
         $this->assertTrue(bankround::queue_reminder($w->bank, 'readers', $w->now));
         $this->assertFalse(bankround::queue_reminder($w->bank, 'readers', $w->now + HOURSECS));
         $this->assertTrue(bankround::queue_reminder($w->bank, 'readers', $w->now + 2 * DAYSECS));
+        // A new round starts with nobody told.
+        $this->assertSame([], bankround::state($w->bank)['readerstold']);
         $this->assertFalse(bankround::queue_reminder($w->bank, 'nobody', $w->now));
     }
 }

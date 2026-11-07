@@ -182,7 +182,8 @@ final class voices {
      */
     public static function email_family(\stdClass $item, string $email): bool {
         global $DB;
-        if (!validate_email($email)) {
+        // Nobody is written to from someone's practice library.
+        if (!validate_email($email) || practice::is((int) $item->entityid)) {
             return false;
         }
         $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);

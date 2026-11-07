@@ -88,6 +88,57 @@ final class zones {
     }
 
     /**
+     * The centres whose morning it is, for what the night leaves to tell: from 8 to 20 in the centre's zone, once a day
+     * (a cron that missed eight o'clock tells at nine); the notices of late books, only on weekdays. Practice libraries
+     * tell nobody.
+     *
+     * @param int $now
+     * @param bool $weekdays Only from Monday to Friday.
+     * @return int[]
+     */
+    public static function mornings(int $now, bool $weekdays = true): array {
+        global $DB;
+        $centres = [];
+        foreach ($DB->get_fieldset_select('local_oksigeniaayvurenda_entity', 'id', '1 = 1') as $id) {
+            $id = (int) $id;
+            $local = (new \DateTimeImmutable('@' . $now))->setTimezone(self::of($id));
+            $hour = (int) $local->format('G');
+            if (($weekdays && (int) $local->format('N') > 5) || $hour < 8 || $hour >= 20 || practice::is($id)) {
+                continue;
+            }
+            if ((string) get_config('local_oksigeniaayvurenda', self::morning_key($id, $weekdays)) !== $local->format('Ymd')) {
+                $centres[] = $id;
+            }
+        }
+        return $centres;
+    }
+
+    /**
+     * Notes that these centres were told this morning.
+     *
+     * @param int[] $centres
+     * @param int $now
+     * @param bool $weekdays Those of the weekdays.
+     */
+    public static function mornings_done(array $centres, int $now, bool $weekdays = true): void {
+        foreach ($centres as $id) {
+            $local = (new \DateTimeImmutable('@' . $now))->setTimezone(self::of((int) $id));
+            set_config(self::morning_key((int) $id, $weekdays), $local->format('Ymd'), 'local_oksigeniaayvurenda');
+        }
+    }
+
+    /**
+     * Where a centre's last morning is noted.
+     *
+     * @param int $id
+     * @param bool $weekdays
+     * @return string
+     */
+    private static function morning_key(int $id, bool $weekdays): string {
+        return ($weekdays ? 'morning_' : 'everymorning_') . $id;
+    }
+
+    /**
      * A date in a centre's zone.
      *
      * @param int $time

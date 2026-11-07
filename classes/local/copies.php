@@ -163,6 +163,10 @@ final class copies {
         $zip->addFile($dir . '/koha-catalogo.mrc', 'koha/catalogo.mrc');
         $zip->addFile($dir . '/koha-lectores.csv', 'koha/lectores.csv');
         $zip->addFile($dir . '/koha-prestamos.koc', 'koha/prestamos.koc');
+        // The names of every reader with an account, also those who left: the library keeps them in the account only,
+        // and a recovered copy would bring them back nameless.
+        $counts['accounts'] = self::accounts($entityid, $dir . '/cuentas.csv');
+        $zip->addFile($dir . '/cuentas.csv', 'cuentas.csv');
         $zip->addFromString('koha/LEEME.txt', get_string('copykoha', 'local_oksigeniaayvurenda'));
         $zip->addFromString('LEEME.txt', get_string('copyreadme', 'local_oksigeniaayvurenda', (object) [
             'entity' => format_string($entity->name, true, ['escape' => false]),
@@ -312,6 +316,41 @@ final class copies {
         fclose($xml);
         fclose($dc);
         fclose($ris);
+        return $count;
+    }
+
+    /**
+     * The names of every reader of a centre who has an account, whatever their state.
+     *
+     * @param int $entityid
+     * @param string $path Where to write them.
+     * @return int Rows written.
+     */
+    private static function accounts(int $entityid, string $path): int {
+        global $DB;
+        $out = fopen($path, 'w');
+        fputcsv($out, ['cardcode', 'firstname', 'lastname', 'email', 'status'], ',', '"', '');
+        $count = 0;
+        $rows = $DB->get_recordset_sql(
+            'SELECT r.id, r.cardcode, r.status, u.firstname, u.lastname, u.email
+               FROM {' . self::T . "reader} r
+               JOIN {user} u ON u.id = r.userid
+              WHERE r.entityid = :entityid AND r.status <> 'deleted'
+           ORDER BY r.id",
+            ['entityid' => $entityid]
+        );
+        foreach ($rows as $row) {
+            fputcsv(
+                $out,
+                spreadsheet::row([$row->cardcode, $row->firstname, $row->lastname, $row->email, $row->status]),
+                ',',
+                '"',
+                ''
+            );
+            $count++;
+        }
+        $rows->close();
+        fclose($out);
         return $count;
     }
 

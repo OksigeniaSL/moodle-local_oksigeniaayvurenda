@@ -442,13 +442,24 @@ final class recover {
     }
 
     /**
-     * The names of the readers who had an account, from the list for Koha that the copy carries.
+     * The names of the readers who had an account: from the list of accounts of the copy (since 0.176, also those who
+     * left), and from the list for Koha in an older copy.
      *
      * @param \ZipArchive $zip
      * @return array[] Card => first name, last name, email.
      */
     private static function names(\ZipArchive $zip): array {
         $names = [];
+        foreach (self::csv($zip, 'cuentas.csv') as $row) {
+            $names[(string) $row['cardcode']] = [
+                (string) $row['firstname'],
+                (string) $row['lastname'],
+                (string) $row['email'] ?: null,
+            ];
+        }
+        if ($names) {
+            return $names;
+        }
         foreach (self::csv($zip, 'koha/lectores.csv') as $row) {
             $names[(string) $row['cardnumber']] = [
                 (string) $row['firstname'],

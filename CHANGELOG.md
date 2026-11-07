@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.176.0
+
+- The nightly notices go at eight in the morning of each centre's own zone, not of the server's: the task runs every hour
+  and tells each centre once a day (late books and what waits for the staff on weekdays; what expires every day, Saturday
+  too).
+- A reservation that was set aside and not collected tells its reader it is no longer kept, and how to ask again.
+- The textbooks of the bank stay out of the late notices: they have the bank's own reminders, which no longer reach
+  anybody twice if the task is tried again, and the page says while they are on their way.
+- Every notice comes from the library by its name, so a site with several libraries tells them apart in the inbox.
+- To a young reader, the late notice keeps what it may cost in the plain text too; at a public library or a bookmobile
+  its subject speaks in the same voice; at a university or a company the herald does not speak.
+- The copy of the files that did not reach its place goes again the next night, and the old one is kept until the new
+  one exists; two nights without a copy out are told, and then every week, and «Make a copy now» counts no night.
+- A recovered copy brings back the names of readers with an account who had left.
+- The weekly news counts from the last letter, however long ago.
+- The images of the notices have a name; a family's voice link is not sent from a practice library.
+- The card of a reader opened again shows its album (0.175.0 broke it; it never reached a site).
+
 ## 0.175.0
 
 - The late notice counts its week by reader, not by book: two books late a few days apart are one message with every late

@@ -294,7 +294,9 @@ final class mail {
     }
 
     /**
-     * Who a notice comes from: the library, on a site that is only a library; else, the site's no-reply.
+     * Who a notice comes from: the library, by its name, through the site's no-reply address (Moodle adds «via» and the
+     * site); without a name, the site's no-reply. A site with several libraries (a university, a town, a shared service)
+     * so tells them apart in the inbox.
      *
      * @param string $name
      * @return \stdClass
@@ -302,7 +304,7 @@ final class mail {
     public static function from(string $name = ''): \stdClass {
         // A copy: the one Moodle hands out is the same for the whole request, and the next message is someone else's.
         $from = clone \core_user::get_noreply_user();
-        if ($name !== '' && onlylibrary::on()) {
+        if ($name !== '') {
             $from->firstname = $name;
             $from->lastname = '';
         }

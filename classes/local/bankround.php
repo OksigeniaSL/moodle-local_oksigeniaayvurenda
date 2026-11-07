@@ -258,10 +258,11 @@ final class bankround {
         $deadline = (int) self::state($library)['deadline'];
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false);
         $name = format_string($library->name, true, ['escape' => false]);
-        $sent = 0;
+        // Whoever was already told this time is not told again if the task is tried a second time.
+        $told = array_map('intval', (array) (self::state($library)['readerstold'] ?? []));
         foreach (self::holders($library) as $reader) {
             $user = $reader->userid ? \core_user::get_user((int) $reader->userid) : null;
-            if (!$user || $user->deleted || $user->suspended) {
+            if (!$user || $user->deleted || $user->suspended || in_array((int) $reader->id, $told, true)) {
                 continue;
             }
             $language = force_current_language((string) $user->lang);
@@ -306,12 +307,12 @@ final class bankround {
                     ]
                 )
             ) {
-                $sent++;
+                $told[] = (int) $reader->id;
+                self::save_state($library, ['readerstold' => $told, 'readerssent' => count($told)]);
             }
             force_current_language($language);
         }
-        self::save_state($library, ['readerssent' => $sent]);
-        return $sent;
+        return count($told);
     }
 
     /**
@@ -327,7 +328,8 @@ final class bankround {
         $year = years::around((int) $library->entityid, $now);
         $deadline = (int) self::state($library)['deadline'];
         $main = mail::main_library((int) $library->entityid) ?? $library;
-        $sent = 0;
+        // Whoever was already told this time is not told again if the task is tried a second time.
+        $told = array_map('strval', (array) (self::state($library)['tutorstold'] ?? []));
         foreach (bank::classes($library, $now) as $class) {
             if (!$class['out']) {
                 continue;
@@ -336,7 +338,8 @@ final class bankround {
             $held = array_values(array_filter(bank::roll($library, $class['group'], $now), fn($p) => $p['held']));
             foreach ($tutors as $tutor) {
                 $user = \core_user::get_user((int) $tutor->userid);
-                if (!$user || $user->deleted || $user->suspended) {
+                $mark = $tutor->userid . '|' . $class['group'];
+                if (!$user || $user->deleted || $user->suspended || in_array($mark, $told, true)) {
                     continue;
                 }
                 $language = force_current_language((string) $user->lang);
@@ -373,13 +376,13 @@ final class bankround {
                         ]
                     )
                 ) {
-                    $sent++;
+                    $told[] = $mark;
+                    self::save_state($library, ['tutorstold' => $told, 'tutorssent' => count($told)]);
                 }
                 force_current_language($language);
             }
         }
-        self::save_state($library, ['tutorssent' => $sent]);
-        return $sent;
+        return count($told);
     }
 
     /**
@@ -396,8 +399,9 @@ final class bankround {
         }
         $task = new \local_oksigeniaayvurenda\task\bank_reminder();
         $task->set_custom_data(['library' => (int) $library->id, 'who' => $who]);
-        \core\task\manager::queue_adhoc_task($task);
-        self::save_state($library, [$who => $now, $who . 'sent' => 0]);
+        // A new round: nobody told yet.
+        self::save_state($library, [$who => $now, $who . 'sent' => 0, $who . 'told' => []]);
+        \core\task\manager::queue_adhoc_task($task, true);
         return true;
     }
 }

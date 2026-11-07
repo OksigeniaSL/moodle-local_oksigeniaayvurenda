@@ -164,4 +164,25 @@ final class zones_test extends \advanced_testcase {
         $this->assertSame('20260901', zones::date($time, '%Y%m%d', $library));
         $this->assertStringNotContainsString(' 01 ', ' ' . zones::date($time, 'strftimedate', $library) . ' ');
     }
+
+    /**
+     * Each centre is told in its own morning: at 8:30 in Madrid it is 2:30 in Bogotá, so not yet; at 8:30 in Bogotá it
+     * is; once a day, and not on Saturday.
+     */
+    public function test_mornings(): void {
+        $w = $this->world();
+        $madrid = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        libraries::update_entity((int) $madrid->entityid, ['timezone' => 'Europe/Madrid']);
+        $monday = $this->bogota('2026-11-09 02:30');
+        $this->assertNotContains($w->entityid, zones::mornings($monday));
+        $this->assertContains((int) $madrid->entityid, zones::mornings($monday));
+        $eight = $this->bogota('2026-11-09 08:30');
+        $this->assertContains($w->entityid, zones::mornings($eight));
+        zones::mornings_done([$w->entityid], $eight);
+        $this->assertNotContains($w->entityid, zones::mornings($this->bogota('2026-11-09 09:30')));
+        $this->assertContains($w->entityid, zones::mornings($this->bogota('2026-11-10 08:30')));
+        $this->assertNotContains($w->entityid, zones::mornings($this->bogota('2026-11-14 08:30')));
+        // What expires goes every day, Saturday too.
+        $this->assertContains($w->entityid, zones::mornings($this->bogota('2026-11-14 08:30'), false));
+    }
 }

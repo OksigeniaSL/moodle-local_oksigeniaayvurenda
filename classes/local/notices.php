@@ -43,11 +43,12 @@ final class notices {
      * Sends what is due.
      *
      * @param int|null $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return array{readers: int, tutors: int}
      */
-    public static function run(?int $now = null): array {
+    public static function run(?int $now = null, ?array $centres = null): array {
         $now = $now ?? time();
-        return ['readers' => self::readers($now), 'tutors' => self::tutors($now)];
+        return ['readers' => self::readers($now, $centres), 'tutors' => self::tutors($now, $centres)];
     }
 
     /**
@@ -55,9 +56,10 @@ final class notices {
      * past the centre's days of grace (a reader who stopped coming but still has books hears too).
      *
      * @param int $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return int Messages sent.
      */
-    private static function readers(int $now): int {
+    private static function readers(int $now, ?array $centres = null): int {
         global $DB;
         $loans = $DB->get_records_sql(
             "SELECT l.id, l.timedue, l.timenotified, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title,
@@ -68,6 +70,7 @@ final class notices {
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
               WHERE l.timereturned IS NULL AND l.timedue < :now AND r.userid IS NOT NULL AND r.status IN ('active', 'left')
+                    AND " . bank::reading('l.libraryid') . "
            ORDER BY l.readerid, l.timedue",
             ['now' => $now]
         );
@@ -80,7 +83,7 @@ final class notices {
         $byreader = [];
         $after = [];
         foreach ($loans as $loan) {
-            if ($told[$loan->readerid] > $since) {
+            if ($told[$loan->readerid] > $since || ($centres !== null && !in_array((int) $loan->entityid, $centres, true))) {
                 continue;
             }
             // Late once the last day is over where its centre is, which the query cannot say, and told once the days of
@@ -165,7 +168,8 @@ final class notices {
         $one = count($list) === 1;
         // To a young reader (the card with the flower), the herald tells it her way: the book misses its shelf.
         $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
-        $young = $herald['enabled'] && $reader && cards::look_of($reader, $now) === 'flower'
+        // Not where the characters are a portrait and a signature (a university, a company): there, no voice of theirs.
+        $young = $herald['enabled'] && skins::lively($entityid) && $reader && cards::look_of($reader, $now) === 'flower'
             ? characters::say($entityid, 'herald', $one ? 'heraldoverdueone' : 'heraldoverdue', ['reader' => $user->firstname,
                 'books' => $a->books]) : null;
         $heading = $subject;
@@ -174,8 +178,13 @@ final class notices {
         $warning = $reader ? sanctions::warning($entityid, $reader, $now) : '';
         $body .= $warning !== '' ? ' ' . $warning : '';
         if ($young) {
-            $body = $young['text'];
+            // What a late book costs is said to the young too, in the plain text as in the message.
+            $body = $young['text'] . ($warning !== '' ? ' ' . $warning : '');
             $heading = $str($one ? 'heraldoverdueheading' : 'heraldoverdueheadingmany');
+            // Where readers are of every age, the subject in the same voice as the message.
+            if (in_array(skins::of($entityid), skins::FIGURES_YOUNG, true)) {
+                $subject = $heading;
+            }
             $after = '';
         } else if ($herald['enabled'] && $herald['signs']) {
             $body .= "\n\n" . characters::say($entityid, 'herald', 'heraldsign')['text'];
@@ -206,9 +215,10 @@ final class notices {
      * Summaries to tutors: who in their group has books late, without titles, once a week.
      *
      * @param int $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return int Messages sent.
      */
-    private static function tutors(int $now): int {
+    private static function tutors(int $now, ?array $centres = null): int {
         global $DB;
         $tutors = $DB->get_records_sql(
             "SELECT t.id, t.yearid, t.groupname, t.userid, y.entityid
@@ -219,7 +229,8 @@ final class notices {
         );
         $sent = 0;
         foreach ($tutors as $tutor) {
-            if (access::closed((int) $tutor->entityid)) {
+            $entityid = (int) $tutor->entityid;
+            if (($centres !== null && !in_array($entityid, $centres, true)) || access::closed($entityid)) {
                 continue;
             }
             $sent += self::tell_tutor($tutor, $now, true) ? 1 : 0;
@@ -247,6 +258,7 @@ final class notices {
                JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid AND m.groupname = :groupname
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
               WHERE l.timereturned IS NULL AND l.timedue < :today AND r.status IN ('active', 'left')
+                    AND " . bank::reading('l.libraryid') . "
            ORDER BY r.lastname, r.firstname, l.timedue",
             ['yearid' => $tutor->yearid, 'groupname' => $tutor->groupname, 'today' => $today]
         );

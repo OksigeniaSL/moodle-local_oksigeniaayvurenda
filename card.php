@@ -161,12 +161,12 @@ foreach ($readers as $reader) {
     }
     // The collector cards of the corners: pictures, so not in the classic look.
     // A school's album: the flower's, and the sky's of a school or a high school; never an adult's at a university.
-    $album = $look === 'flower' || ($sky && in_array(
+    $collects = $look === 'flower' || ($sky && in_array(
         \local_oksigeniaayvurenda\local\skins::of((int) $reader->entityid),
         ['school', 'secondary'],
         true
     ));
-    $cromos = $album ? (garden::cromos(
+    $cromos = $collects ? (garden::cromos(
         $reader,
         $library ?? \local_oksigeniaayvurenda\local\mail::main_library((int) $reader->entityid)
     ) ?? []) : [];

@@ -175,6 +175,21 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * The textbooks of the bank are not late reading: they have the bank's own reminders, and never the late notice.
+     */
+    public function test_bank_books_apart(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, $year, $now, $readers] = $this->library();
+        $DB->set_field(self::T . 'library', 'kind', bank::KIND, ['id' => $library->id]);
+        $sink = $this->redirectMessages();
+        notices::run($now);
+        $this->assertCount(0, array_filter($sink->get_messages(), fn($m) => $m->eventtype === 'overdue'));
+        $sink->close();
+    }
+
+    /**
      * A centre open only to its staff tells its readers nothing, whoever sends it, and tells its staff; what is set aside
      * there is told when it opens, not marked as told before.
      */

@@ -179,4 +179,31 @@ final class holds_test extends \advanced_testcase {
         $this->assertEquals($w->user->id, $messages[0]->useridto);
         $this->assertNotEmpty($DB->get_field(self::T . 'hold', 'timenotified', ['id' => $hold->id]));
     }
+
+    /**
+     * What was set aside and not collected: whoever was told it was ready hears it is not kept any more; whoever was
+     * never told (a centre getting ready) hears nothing.
+     */
+    public function test_expired_told(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Hugo']);
+        $reader = $gen->create_reader(['entityid' => $library->entityid, 'userid' => $user->id]);
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'El faro dormido']);
+        $now = time();
+        $hold = fn(?int $told) => $DB->insert_record(self::T . 'hold', ['libraryid' => $library->id, 'recordid' => $record->id,
+            'readerid' => $reader->id, 'status' => 'ready', 'timecreated' => $now - 9 * DAYSECS, 'timemodified' => $now,
+            'timeready' => $now - 8 * DAYSECS, 'timeexpires' => $now - DAYSECS, 'timenotified' => $told]);
+        $hold($now - 8 * DAYSECS);
+        $hold(null);
+        $sink = $this->redirectMessages();
+        $this->assertSame(2, holds::expire($now));
+        $messages = $sink->get_messages();
+        $sink->close();
+        $this->assertCount(1, $messages);
+        $this->assertStringContainsString('El faro dormido', $messages[0]->subject);
+    }
 }

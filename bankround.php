@@ -73,6 +73,18 @@ if (data_submitted() && confirm_sesskey()) {
 $number = fn(int $n) => screens::number($n);
 $short = get_string('strftimedateshort', 'langconfig');
 $state = bankround::state($library);
+// The last reminder: when, and how many went; while the task is still sending it, that it is on its way.
+$last = function (string $who) use ($state, $str, $number, $short, $library, $now): string {
+    if (!$state[$who]) {
+        return '';
+    }
+    $when = zones::date((int) $state[$who], $short, $library);
+    $going = !(int) $state[$who . 'sent'] && (int) $state[$who] > $now - HOURSECS && \core\task\manager::get_adhoc_tasks(
+        '\\local_oksigeniaayvurenda\\task\\bank_reminder'
+    );
+    return $going ? $str('bankroundremindgoing', $when)
+        : $str('bankroundremindlast', (object) ['when' => $when, 'sent' => $number((int) $state[$who . 'sent'])]);
+};
 $data = [
     'heading' => $str('bankroundheading', format_string($library->name, true, ['escape' => false])),
     'notice' => $notice,
@@ -112,16 +124,10 @@ if ($mode === 'collect') {
         'remindreaders' => $str('bankroundremindreaders'),
         'remindreadershint' => $str('bankroundremindreadershint', (object) ['with' => $number($c['holders'] - $c['noaccount']),
             'without' => $number($c['noaccount'])]),
-        'remindreaderslast' => $state['readers'] ? $str('bankroundremindlast', (object) [
-            'when' => zones::date((int) $state['readers'], $short, $library),
-            'sent' => $number((int) $state['readerssent']),
-        ]) : '',
+        'remindreaderslast' => $last('readers'),
         'remindtutors' => $str('bankroundremindtutors'),
         'remindtutorshint' => $str('bankroundremindtutorshint'),
-        'remindtutorslast' => $state['tutors'] ? $str('bankroundremindlast', (object) [
-            'when' => zones::date((int) $state['tutors'], $short, $library),
-            'sent' => $number((int) $state['tutorssent']),
-        ]) : '',
+        'remindtutorslast' => $last('tutors'),
         'canreaders' => (int) $state['readers'] <= $now - DAYSECS,
         'cantutors' => (int) $state['tutors'] <= $now - DAYSECS,
         'classesheading' => $str('bankroundclasses'),

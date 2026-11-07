@@ -37,11 +37,12 @@ $tasks = [
     [
         'classname' => '\local_oksigeniaayvurenda\task\send_notices',
         'blocking' => 0,
+        // Every hour: each centre is told at its own eight o'clock (zones::mornings).
         'minute' => '30',
-        'hour' => '8',
+        'hour' => '*',
         'day' => '*',
         'month' => '*',
-        'dayofweek' => '1-5',
+        'dayofweek' => '*',
     ],
     [
         'classname' => '\local_oksigeniaayvurenda\task\make_copies',

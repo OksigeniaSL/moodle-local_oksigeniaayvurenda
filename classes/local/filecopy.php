@@ -126,8 +126,16 @@ final class filecopy {
         ]));
         $zip->close();
         $context = \context_system::instance();
-        $fs->delete_area_files($context->id, 'local_oksigeniaayvurenda', self::AREA, $entityid);
-        return $fs->create_file_from_pathname([
+        // The new one first, the old one after: a disk that fills half way does not leave the centre without any.
+        $old = $fs->get_area_files($context->id, 'local_oksigeniaayvurenda', self::AREA, $entityid, 'id', false);
+        foreach ($old as $key => $file) {
+            // One made this same second has the same name: it is the one replaced.
+            if ($file->get_filename() === self::name($entityid, $now)) {
+                $file->delete();
+                unset($old[$key]);
+            }
+        }
+        $new = $fs->create_file_from_pathname([
             'contextid' => $context->id,
             'component' => 'local_oksigeniaayvurenda',
             'filearea' => self::AREA,
@@ -137,6 +145,12 @@ final class filecopy {
             'timecreated' => $now,
             'timemodified' => $now,
         ], $path);
+        foreach ($old as $file) {
+            if ((int) $file->get_id() !== (int) $new->get_id()) {
+                $file->delete();
+            }
+        }
+        return $new;
     }
 
     /**
@@ -224,7 +238,10 @@ final class filecopy {
         $latest = self::latest($entityid);
         $settings = offsite::settings($entityid);
         $out = plans::allows($entityid, 'offsite') && $settings['recipient'] !== '' && ($settings['places'] || $settings['pull']);
-        if ($out && (!$latest || (int) $latest->get_timecreated() <= $now - (self::EVERY - 1) * DAYSECS)) {
+        // One that did not reach every place (a NAS off that night) is made and sent again the next night, not a week later.
+        $missed = $settings['places'] && $latest && (!empty($settings['lastfiles']['failed'])
+            || (int) ($settings['lastfiles']['time'] ?? 0) < (int) $latest->get_timecreated());
+        if ($out && (!$latest || $missed || (int) $latest->get_timecreated() <= $now - (self::EVERY - 1) * DAYSECS)) {
             self::queue($entityid);
         } else if (!$out && $latest && (int) $latest->get_timecreated() <= $now - self::KEEP * DAYSECS) {
             $latest->delete();

@@ -72,7 +72,7 @@ if (data_submitted() && confirm_sesskey() && $manage) {
     }
     if ($do === 'make') {
         $file = copies::make($entityid, null, true);
-        $out = offsite::send($entityid, $file);
+        $out = offsite::send($entityid, $file, null, true);
         $notice = $str('copymade') . ($out['sent'] ? ' ' . $str(
             $out['sent'] === 1 ? 'offsitesentnowone' : 'offsitesentnow',
             $out['sent']

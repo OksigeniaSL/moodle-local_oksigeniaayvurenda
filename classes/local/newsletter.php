@@ -69,9 +69,10 @@ final class newsletter {
      * textbook banks, nor a centre open only to its staff).
      *
      * @param int|null $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return array subscribers, sent.
      */
-    public static function run(?int $now = null): array {
+    public static function run(?int $now = null, ?array $centres = null): array {
         global $DB;
         $now = $now ?? time();
         $stats = ['subscribers' => 0, 'sent' => 0];
@@ -92,10 +93,11 @@ final class newsletter {
                 continue;
             }
             $sent = false;
-            $since = max($last, $now - WEEKSECS);
+            // Since the last letter, however long ago (a week without news is not lost); the first time, a week.
+            $since = $last ? $last + 1 : $now - WEEKSECS;
             foreach ($DB->get_records(self::T . 'reader', ['userid' => $userid, 'status' => 'active']) as $reader) {
                 $entityid = (int) $reader->entityid;
-                if (access::closed($entityid)) {
+                if (access::closed($entityid) || ($centres !== null && !in_array($entityid, $centres, true))) {
                     continue;
                 }
                 $news = self::news($entityid, $since);

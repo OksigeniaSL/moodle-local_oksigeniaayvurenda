@@ -626,32 +626,38 @@ final class sanctions {
      * Tells the readers what came back late has left, and what the staff wrote down.
      *
      * @param int|null $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return int Messages sent.
      */
-    public static function notify(?int $now = null): int {
+    public static function notify(?int $now = null, ?array $centres = null): int {
         global $DB;
         $now = $now ?? time();
         $sent = 0;
         // Only what is recent: a copy that returns tells nobody about the past. A month, so that what a centre getting
         // ready left untold goes when it opens.
-        $rows = $DB->get_records_select(
-            self::T . 'sanction',
-            'timetold IS NULL AND status = :status AND timecreated > :recent',
-            ['status' => self::OPEN, 'recent' => $now - 30 * DAYSECS],
-            'id',
-            '*',
-            0,
-            self::LISTED
-        );
-        foreach ($rows as $row) {
-            $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $row->libraryid]);
-            // Not marked while its centre is closed: it is told when it opens.
-            if ($entityid && access::closed($entityid)) {
-                continue;
+        // Page after page, so that a busy night of one centre does not leave the others waiting for tomorrow.
+        $after = 0;
+        do {
+            $rows = $DB->get_records_select(
+                self::T . 'sanction',
+                'timetold IS NULL AND status = :status AND timecreated > :recent AND id > :after',
+                ['status' => self::OPEN, 'recent' => $now - 30 * DAYSECS, 'after' => $after],
+                'id',
+                '*',
+                0,
+                self::LISTED
+            );
+            foreach ($rows as $row) {
+                $after = (int) $row->id;
+                $entityid = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $row->libraryid]);
+                // Not marked while its centre is closed (it is told when it opens), nor before its morning.
+                if (($entityid && access::closed($entityid)) || ($centres !== null && !in_array($entityid, $centres, true))) {
+                    continue;
+                }
+                $DB->set_field(self::T . 'sanction', 'timetold', $now, ['id' => $row->id]);
+                $sent += self::tell($row, $now) ? 1 : 0;
             }
-            $DB->set_field(self::T . 'sanction', 'timetold', $now, ['id' => $row->id]);
-            $sent += self::tell($row, $now) ? 1 : 0;
-        }
+        } while (count($rows) === self::LISTED);
         return $sent;
     }
 

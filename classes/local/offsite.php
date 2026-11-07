@@ -361,9 +361,11 @@ final class offsite {
      * @param int $entityid
      * @param \stored_file $copy
      * @param int|null $now
+     * @param bool $byhand Made with «Make a copy now»: one that goes out clears the nights that failed; one that fails
+     *     counts no night.
      * @return array sent (places that have it), failed (labels of those that did not).
      */
-    public static function send(int $entityid, \stored_file $copy, ?int $now = null): array {
+    public static function send(int $entityid, \stored_file $copy, ?int $now = null, bool $byhand = false): array {
         $now = $now ?? time();
         $settings = self::settings($entityid);
         if ($settings['recipient'] === '' || !$settings['places'] || !plans::allows($entityid, 'offsite')) {
@@ -382,9 +384,10 @@ final class offsite {
                 $failed[] = $place['label'];
             }
         }
-        $failures = $failed ? $settings['failures'] + 1 : 0;
+        // Nights that failed, in a row: told the second, and again every week while it lasts.
+        $failures = !$failed ? 0 : ($byhand ? $settings['failures'] : $settings['failures'] + 1);
         self::change($entityid, ['last' => ['time' => $now, 'sent' => $sent, 'failed' => $failed], 'failures' => $failures]);
-        if ($failures === 2) {
+        if ($failed && !$byhand && $failures >= 2 && $failures % 7 === 2) {
             self::tell($entityid, $failed);
         }
         return ['sent' => $sent, 'failed' => $failed];

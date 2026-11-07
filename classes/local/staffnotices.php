@@ -35,15 +35,16 @@ final class staffnotices {
      * Tells the staff of each centre what waits for them.
      *
      * @param int|null $now
+     * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
      * @return array centres and sent.
      */
-    public static function run(?int $now = null): array {
+    public static function run(?int $now = null, ?array $centres = null): array {
         global $DB;
         $now = $now ?? time();
         $stats = ['centres' => 0, 'sent' => 0];
         foreach ($DB->get_records(self::T . 'entity', null, 'id') as $entity) {
             // A practice library is a rehearsal: what its guided help leaves waiting is nobody's work.
-            if (practice::is((int) $entity->id)) {
+            if (practice::is((int) $entity->id) || ($centres !== null && !in_array((int) $entity->id, $centres, true))) {
                 continue;
             }
             // Its staff, in its own category when it has one.
