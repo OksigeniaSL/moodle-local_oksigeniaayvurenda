@@ -202,6 +202,11 @@ final class desk {
         if ($reader) {
             return $this->answer('reader', 'ok', null, null, ['reader' => $this->reader_panel((int) $reader->id)]);
         }
+        // The number on the back cover, for a book without a label of its own or whose label does not read.
+        $isbn = self::cover_isbn($code);
+        if ($isbn !== null) {
+            return $this->by_isbn($isbn, $code, $readerid, $force);
+        }
         // Not a code: with a reader open, the title of a book without a label (or whose label does not read); without
         // one, the name of a reader who came without the card, or the title of a book that comes back.
         $words = (bool) preg_match('/\p{L}{3,}/u', $code);
@@ -267,6 +272,125 @@ final class desk {
         }
         $unknown = !$words ? 'deskunknown' : ($readerid ? 'deskunknownbook' : 'deskunknownwords');
         return $this->answer('unknown', 'no', $unknown, $code);
+    }
+
+    /**
+     * The ISBN-13 of what a scanner reads on a back cover or someone types: an EAN of a book (978 or 979, also with the
+     * price add-on of 2 or 5 digits after it), or an ISBN-10 or 13 with or without hyphens. Null for anything else.
+     *
+     * @param string $code
+     * @return string|null
+     */
+    public static function cover_isbn(string $code): ?string {
+        if (!preg_match('/^[0-9][0-9 -]*[0-9Xx]$/', $code)) {
+            return null;
+        }
+        $digits = strtoupper(preg_replace('/[ -]/', '', $code));
+        if (in_array(strlen($digits), [15, 18], true) && ctype_digit($digits)) {
+            $digits = substr($digits, 0, 13);
+        }
+        if (strlen($digits) === 13 && !in_array(substr($digits, 0, 3), ['978', '979'], true)) {
+            return null;
+        }
+        if (strlen($digits) !== 13 && strlen($digits) !== 10) {
+            return null;
+        }
+        return \local_oksigeniaayvurenda\core\isbn::normalise($digits);
+    }
+
+    /**
+     * A book read by its ISBN, as if it were its copy: with a reader open, it comes back if they have it and goes out if
+     * not; without one, it comes back when only one is out, stays in the hand when only the shelf has it, and the desk
+     * offers both lists when it is not clear. Which copy went is not known when the record has more than one: the loan
+     * says so, as when a book is lent by its title.
+     *
+     * @param string $isbn ISBN-13.
+     * @param string $code As it was read.
+     * @param int $readerid
+     * @param bool $force
+     * @return array As scan() answers.
+     */
+    private function by_isbn(string $isbn, string $code, int $readerid, bool $force): array {
+        global $DB;
+        $records = $DB->get_fieldset_select(self::T . 'record', 'id', 'entityid = :entityid AND isbn = :isbn', [
+            'entityid' => $this->library->entityid, 'isbn' => $isbn]);
+        if (!$records) {
+            return $this->answer('unknown', 'no', 'deskunknownisbn', $code);
+        }
+        [$in, $params] = $DB->get_in_or_equal(array_map('intval', $records), SQL_PARAMS_NAMED);
+        $params['libraryid'] = $this->library->id;
+        $loans = $DB->get_records_sql(
+            "SELECT l.id, l.readerid, l.timedue, r.title
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL AND i.recordid $in
+           ORDER BY l.timeloaned, l.id",
+            $params
+        );
+        $loans = array_filter($loans, fn($loan) => $this->allowed((int) $loan->readerid));
+        $free = $DB->get_records_sql(
+            "SELECT i.id, i.recordid
+               FROM {" . self::T . "item} i
+              WHERE i.recordid $in AND i.libraryid = :libraryid AND i.status = 'available'
+                AND NOT EXISTS (SELECT 1 FROM {" . self::T . "loan} l WHERE l.itemid = i.id AND l.timereturned IS NULL)
+           ORDER BY i.barcode, i.id",
+            $params
+        );
+        $title = format_string(
+            (string) $DB->get_field(self::T . 'record', 'title', ['id' => reset($records)]),
+            true,
+            ['escape' => false]
+        );
+        if ($readerid) {
+            $theirs = array_filter($loans, fn($loan) => (int) $loan->readerid === $readerid);
+            if ($theirs) {
+                return $this->give_back_loan((int) reset($theirs)->id, $readerid);
+            }
+            if ($free) {
+                return $this->lend_record((int) reset($free)->recordid, $readerid, $force);
+            }
+        } else {
+            if (count($loans) === 1 && !$free) {
+                return $this->give_back_loan((int) reset($loans)->id);
+            }
+            if ($loans) {
+                $shelf = [];
+                foreach (array_unique(array_map(fn($item) => (int) $item->recordid, $free)) as $recordid) {
+                    $shelf[] = $this->shelf_book($recordid);
+                }
+                $out = array_values(array_map(fn($loan) => $this->out_choice($loan), $loans));
+                return $this->answer('choose', 'look', $shelf ? 'deskisbnboth' : 'deskchooseout', $title, [
+                    'out' => $out, 'shelf' => array_values(array_filter($shelf)), 'more' => 0, 'readers' => [],
+                    'morereaders' => 0]);
+            }
+            if ($free) {
+                $item = $DB->get_record(self::T . 'item', ['id' => reset($free)->id], '*', MUST_EXIST);
+                return $this->answer('needreader', 'look', 'deskneedreader', $this->title($item), ['itemid' => (int) $item->id,
+                    'room' => true, 'title' => $this->title($item)]);
+            }
+        }
+        $here = $DB->count_records_sql("SELECT COUNT(1) FROM {" . self::T . "item} i WHERE i.recordid $in
+            AND i.libraryid = :libraryid", $params);
+        return $here ? $this->answer('stop', 'no', 'desknocopy', $title)
+            : $this->answer('unknown', 'no', 'deskisbnnothere', $title);
+    }
+
+    /**
+     * A loan out, as the desk offers it to bring back.
+     *
+     * @param \stdClass $row id, readerid, timedue and title; intitle if it was found by words.
+     * @return array loanid, title, who, due and intitle.
+     */
+    private function out_choice(\stdClass $row): array {
+        $who = $this->reader((int) $row->readerid);
+        return [
+            'loanid' => (int) $row->id,
+            'title' => format_string($row->title, true, ['escape' => false]),
+            'who' => $who['name'] . ($who['group'] !== '' ? ' · ' . $who['group'] : ''),
+            'due' => $this->date((int) $row->timedue),
+            'intitle' => $row->intitle ?? true,
+        ];
     }
 
     /**
@@ -394,14 +518,7 @@ final class desk {
             if (!$this->allowed((int) $row->readerid)) {
                 continue;
             }
-            $who = $this->reader((int) $row->readerid);
-            $out[] = [
-                'loanid' => (int) $row->id,
-                'title' => format_string($row->title, true, ['escape' => false]),
-                'who' => $who['name'] . ($who['group'] !== '' ? ' · ' . $who['group'] : ''),
-                'due' => $this->date((int) $row->timedue),
-                'intitle' => $row->intitle,
-            ];
+            $out[] = $this->out_choice($row);
         }
         return $out;
     }

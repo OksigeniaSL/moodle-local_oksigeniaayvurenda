@@ -41,6 +41,7 @@
         "sanctionsdayshint": "No se suman.", "sanctionsfieldcents": "Por cada día", "amount": "0.10",
         "sanctionsfieldmaxcents": "Como mucho", "maxamount": "5.00", "sanctionsfieldblock": "Avisa si debe", "block": "5.00",
         "sanctionsfieldcurrency": "Moneda", "currencies": [{"code": "EUR", "name": "Euro", "chosen": true}],
+        "sanctionsfieldnotice": "Días hasta el primer aviso", "noticeafter": 1, "sanctionsnoticehint": "Con 1, al día siguiente.",
         "sanctionsfinehint": "Solo se apunta.", "sanctionsfieldgrace": "Días que no cuentan", "grace": 0, "hasstages": true,
         "holdsstages": "Etapas", "holdsallstages": "Todas", "allstages": true, "stages": [{"name": "Primaria", "chosen": false}],
         "adults": true, "sanctionsadults": "También el personal"
@@ -85,6 +86,10 @@
                     {{#modes}}<label class="ayv-sanction-mode"><input type="radio" name="mode" value="{{value}}" {{#checked}}checked{{/checked}}><span><b>{{label}}</b>{{hint}}</span></label>{{/modes}}
                 </div>
             </fieldset>
+            <div class="ayv-rule-numbers">
+                <label class="ayv-field ayv-dig-field">{{sanctionsfieldnotice}} <input type="number" name="noticeafter" min="1" max="30" value="{{noticeafter}}"></label>
+            </div>
+            <p class="ayv-field-hint">{{sanctionsnoticehint}}</p>
             <div data-ayv-when="mode=days">
                 <div class="ayv-rule-numbers">
                     <label class="ayv-field ayv-dig-field">{{sanctionsfieldperday}} <input type="number" name="perday" min="1" max="30" value="{{perday}}"></label>

@@ -65,6 +65,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPH
         // With all the stages marked, no stage is chosen: every one.
         'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
         'adults' => optional_param('adults', 0, PARAM_BOOL),
+        'noticeafter' => optional_param('noticeafter', 1, PARAM_INT),
     ]);
     $notice = $str('sanctionssaved');
 } else if (data_submitted() && confirm_sesskey()) {
@@ -171,7 +172,8 @@ $latesentence = $late['mode'] === sanction_rules::DAYS
     ? $str('sanctionssentencedays', (object) ['days' => $counted($late['perday']), 'max' => $counted($late['maxdays'])])
     : ($late['mode'] === sanction_rules::FINE ? $str('sanctionssentencefine', (object) ['amount' => $money($late['cents']),
     'max' => $money($late['maxcents']), 'block' => $money($late['block'])]) : $str('sanctionssentencenone'));
-$latefacts = [];
+// When the first notice goes: the next day, or after the days of grace the library gives.
+$latefacts = [$late['noticeafter'] === 1 ? $str('sanctionsnoticenext') : $str('sanctionsnoticeafter', $late['noticeafter'])];
 if ($late['mode'] !== sanction_rules::NONE) {
     if ($late['grace']) {
         $latefacts[] = $late['grace'] === 1 ? $str('sanctionsgraceone') : $str('sanctionsgrace', $late['grace']);
@@ -220,13 +222,15 @@ $data = [
     'allstages' => !$late['stages'],
     'stages' => array_map(fn($name) => ['name' => $name, 'chosen' => in_array($name, $late['stages'], true)], $stages),
     'adults' => $late['adults'],
+    'noticeafter' => $late['noticeafter'],
 ];
 foreach (
     ['rulesreader', 'rulesitem', 'rulesdaysplain', 'rulesmaxplain', 'rulesrenewals', 'rulesrenewdays', 'rulesremoveone',
         'rulesnew', 'sourcessave', 'rulesroomonlyfield', 'rulesnolimit', 'ruleschange', 'rulesprecedence', 'offsiteclose',
         'sanctionsheading', 'menusanctions', 'sanctionsmodelegend', 'sanctionsfieldperday', 'sanctionsfieldmaxdays',
         'sanctionsdayshint', 'sanctionsfieldcents', 'sanctionsfieldmaxcents', 'sanctionsfieldblock', 'sanctionsfieldcurrency',
-        'sanctionsfinehint', 'sanctionsfieldgrace', 'holdsstages', 'holdsallstages', 'sanctionsadults', 'sanctionscentre'] as $key
+        'sanctionsfinehint', 'sanctionsfieldgrace', 'holdsstages', 'holdsallstages', 'sanctionsadults', 'sanctionscentre',
+        'sanctionsfieldnotice', 'sanctionsnoticehint'] as $key
 ) {
     $data[$key] = $str($key);
 }

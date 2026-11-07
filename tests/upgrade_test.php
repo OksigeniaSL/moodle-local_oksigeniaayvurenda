@@ -71,4 +71,53 @@ final class upgrade_test extends \advanced_testcase {
         $this->assertTrue(xmldb_local_oksigeniaayvurenda_upgrade(2026103135));
         $this->assertSame('puente-interno', get_config('local_oksigeniaayvurenda', 'internalhosts'));
     }
+
+    /**
+     * A site at the 0.149.0, whose sources still had their origin as «system», upgrades to the end in one go: the step that
+     * takes Abies as the starting point used the new name before the step that gave it (app.ayvurenda.com, 7 November).
+     */
+    public function test_from_0149(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        require_once($CFG->libdir . '/upgradelib.php');
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        $dbman = $DB->get_manager();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Desde Abies']);
+        $now = time();
+        $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $library->entityid, 'origin' => 'abies',
+            'tablename' => 'record', 'externalid' => '1001', 'localid' => $record->id, 'hash' => sha1('x'),
+            'timecreated' => $now, 'timemodified' => $now]);
+
+        // The table as the 0.149.0 left it.
+        $table = new \xmldb_table('local_oksigeniaayvurenda_source');
+        $dbman->drop_index($table, new \xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'origin', 'tablename',
+            'externalid']));
+        $dbman->rename_field($table, new \xmldb_field(
+            'origin',
+            XMLDB_TYPE_CHAR,
+            '30',
+            null,
+            XMLDB_NOTNULL,
+            null,
+            null,
+            'entityid'
+        ), 'system');
+        $dbman->add_index($table, new \xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'system', 'tablename',
+            'externalid']));
+        $dbman->drop_field($table, new \xmldb_field('localhash'));
+        $dbman->drop_field(new \xmldb_table('local_oksigeniaayvurenda_loan'), new \xmldb_field('copyguessed'));
+        $this->assertTrue($dbman->field_exists('local_oksigeniaayvurenda_source', 'system'));
+
+        set_config('version', 2026110316, 'local_oksigeniaayvurenda');
+        $this->assertTrue(xmldb_local_oksigeniaayvurenda_upgrade(2026110316));
+        $this->assertFalse($dbman->field_exists('local_oksigeniaayvurenda_source', 'system'));
+        $this->assertTrue($dbman->field_exists('local_oksigeniaayvurenda_source', 'origin'));
+        $this->assertTrue($dbman->index_exists($table, new \xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'origin',
+            'tablename', 'externalid'])));
+        $this->assertTrue($dbman->field_exists('local_oksigeniaayvurenda_loan', 'copyguessed'));
+        $this->assertNotEmpty($DB->get_field('local_oksigeniaayvurenda_source', 'localhash', ['localid' => $record->id]));
+    }
 }

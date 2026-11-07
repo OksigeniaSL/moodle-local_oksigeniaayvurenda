@@ -62,4 +62,31 @@ final class staffnotices_test extends \advanced_testcase {
         reviews::write($entityid, (int) $item->recordid, (int) $other->id, 'A mí también.', $now + DAYSECS);
         $this->assertSame(1, staffnotices::run($now + DAYSECS + 60)['sent']);
     }
+
+    /**
+     * What the guided help leaves waiting in someone's practice library tells nobody, by the daily notice or by any other.
+     */
+    public function test_practice_tells_nobody(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $librarian = $this->getDataGenerator()->create_user();
+        $roleid = create_role('Biblioteca de prueba', 'ayvtestdesk', '');
+        assign_capability('local/oksigeniaayvurenda:desk', CAP_ALLOW, $roleid, \context_system::instance()->id);
+        role_assign($roleid, $librarian->id, \context_system::instance()->id);
+        $this->setUser($librarian);
+        $library = practice::library();
+        $entityid = (int) $library->entityid;
+        $item = $generator->create_item(['libraryid' => $library->id]);
+        $reader = $generator->create_reader(['entityid' => $entityid, 'userid' => $librarian->id]);
+        $generator->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id]);
+        $sink = $this->redirectMessages();
+        reviews::write($entityid, (int) $item->recordid, (int) $reader->id, 'De práctica.', time() - 60);
+        $this->assertSame(0, staffnotices::run()['sent']);
+        $this->assertFalse(notices::send('stafftodo', $librarian, 'Asunto', 'Texto', '', '', '', ['library' => $library]));
+        $this->assertFalse(notices::send('stafftodo', $librarian, 'Asunto', 'Texto', '', '', '', ['entityid' => $entityid]));
+        $this->assertCount(0, $sink->get_messages());
+        $this->assertFalse((bool) $DB->count_records('notifications'));
+    }
 }

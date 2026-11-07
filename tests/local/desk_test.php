@@ -184,6 +184,69 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * The ISBN of the back cover works as a copy: without a reader it stays in the hand, with one it goes and comes back;
+     * when it is not clear which copy, the desk offers both lists; an ISBN not in the catalogue says so.
+     */
+    public function test_isbn(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $record = $gen->create_record(['entityid' => $w->library->entityid, 'title' => 'El gran Gatsby',
+            'isbn' => '9780743273565']);
+        $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id, 'barcode' => '200000A']);
+        $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id, 'barcode' => '200001B']);
+        $desk = new desk($w->library, (int) $w->staff->id);
+
+        foreach (['9780743273565', '0743273567', '978-0-7432-7356-5', '978074327356551299'] as $read) {
+            $hand = $desk->scan($read);
+            $this->assertSame('needreader', $hand['kind'], $read);
+            $this->assertSame('El gran Gatsby', $hand['title']);
+        }
+        $lent = $desk->scan('9780743273565', (int) $w->ana->id);
+        $this->assertSame('lent', $lent['kind']);
+        $this->assertEquals(1, $DB->get_field(self::T . 'loan', 'copyguessed', ['id' => $lent['loanid']]));
+
+        // One out and one on the shelf: which one is in the hand is asked.
+        $both = $desk->scan('9780743273565');
+        $this->assertSame('choose', $both['kind']);
+        $this->assertCount(1, $both['out']);
+        $this->assertCount(1, $both['shelf']);
+
+        // Ana brings it back by its ISBN.
+        $this->assertSame('returned', $desk->scan('9780743273565', (int) $w->ana->id)['kind']);
+
+        // Both out: the desk asks which comes back; only one out: it comes back at once.
+        $desk->scan('9780743273565', (int) $w->ana->id);
+        $desk->scan('9780743273565', (int) $w->leo->id);
+        $two = $desk->scan('9780743273565');
+        $this->assertSame('choose', $two['kind']);
+        $this->assertCount(2, $two['out']);
+        $this->assertSame([], $two['shelf']);
+        $this->assertSame('returned', $desk->give_back_loan($two['out'][0]['loanid'])['kind']);
+        $this->assertSame('returned', $desk->give_back_loan($two['out'][1]['loanid'])['kind']);
+        $solo = $gen->create_record(['entityid' => $w->library->entityid, 'title' => 'Solo', 'isbn' => '9781861972712']);
+        $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $solo->id, 'barcode' => '200002C']);
+        $this->assertSame(0, (int) $DB->get_field(self::T . 'loan', 'copyguessed', ['id' => $desk->scan(
+            '9781861972712',
+            (int) $w->leo->id
+        )['loanid']]));
+        $this->assertSame('returned', $desk->scan('9781861972712')['kind']);
+
+        // Not in the catalogue, and not a book number at all.
+        $unknown = $desk->scan('9780306406157');
+        $this->assertSame('unknown', $unknown['kind']);
+        $this->assertStringContainsString('9780306406157', $unknown['message']);
+        $this->assertSame(
+            get_string('deskunknown', 'local_oksigeniaayvurenda', '8412345678901'),
+            $desk->scan('8412345678901')['message']
+        );
+        $this->assertNull(desk::cover_isbn('100000L'));
+        $this->assertSame('9780743273565', desk::cover_isbn('0-7432-7356-7'));
+    }
+
+    /**
      * Material: the unit is named by its serial number; its state is noted as it was when it goes, changed with a tap,
      * and offered as it is now when it comes back.
      */

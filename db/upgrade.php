@@ -557,6 +557,9 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+        // The code of today reads the origin of a source by its new name: a site coming from before 2026110319 has the old
+        // one still (app.ayvurenda.com, from 0.149.0, stopped here on 7 November 2026).
+        local_oksigeniaayvurenda_upgrade_origin($dbman);
         \local_oksigeniaayvurenda\local\import\abies_import::settle();
         upgrade_plugin_savepoint(true, 2026110319, 'local', 'oksigeniaayvurenda');
     }
@@ -573,19 +576,7 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
 
     if ($oldversion < 2026110402) {
         // Two words MySQL 8 reserves, and Moodle does not quote its columns.
-        $table = new xmldb_table('local_oksigeniaayvurenda_source');
-        $index = new xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'system', 'tablename', 'externalid']);
-        if ($dbman->index_exists($table, $index)) {
-            $dbman->drop_index($table, $index);
-        }
-        $field = new xmldb_field('system', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null, 'entityid');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->rename_field($table, $field, 'origin');
-        }
-        $index = new xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'origin', 'tablename', 'externalid']);
-        if (!$dbman->index_exists($table, $index)) {
-            $dbman->add_index($table, $index);
-        }
+        local_oksigeniaayvurenda_upgrade_origin($dbman);
         $table = new xmldb_table('local_oksigeniaayvurenda_bankset');
         $field = new xmldb_field('groups', XMLDB_TYPE_TEXT, null, null, null, null, null, 'name');
         if ($dbman->field_exists($table, $field)) {
@@ -595,4 +586,27 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
     }
 
     return true;
+}
+
+/**
+ * The origin of a source under its name of today, `origin`, with its unique index: `system` is a word MySQL 8 reserves.
+ * Nothing happens where it is done already.
+ *
+ * @param database_manager $dbman
+ */
+function local_oksigeniaayvurenda_upgrade_origin(database_manager $dbman): void {
+    $table = new xmldb_table('local_oksigeniaayvurenda_source');
+    $old = new xmldb_field('system', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null, 'entityid');
+    if (!$dbman->field_exists($table, $old)) {
+        return;
+    }
+    $index = new xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'system', 'tablename', 'externalid']);
+    if ($dbman->index_exists($table, $index)) {
+        $dbman->drop_index($table, $index);
+    }
+    $dbman->rename_field($table, $old, 'origin');
+    $index = new xmldb_index('external', XMLDB_INDEX_UNIQUE, ['entityid', 'origin', 'tablename', 'externalid']);
+    if (!$dbman->index_exists($table, $index)) {
+        $dbman->add_index($table, $index);
+    }
 }

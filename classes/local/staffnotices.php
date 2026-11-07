@@ -42,6 +42,10 @@ final class staffnotices {
         $now = $now ?? time();
         $stats = ['centres' => 0, 'sent' => 0];
         foreach ($DB->get_records(self::T . 'entity', null, 'id') as $entity) {
+            // A practice library is a rehearsal: what its guided help leaves waiting is nobody's work.
+            if (practice::is((int) $entity->id)) {
+                continue;
+            }
             // Its staff, in its own category when it has one.
             $context = access::context((int) $entity->id);
             $staff = get_users_by_capability($context, 'local/oksigeniaayvurenda:desk', 'u.id');

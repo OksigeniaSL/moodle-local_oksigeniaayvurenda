@@ -71,9 +71,13 @@ final class notices {
             ['now' => $now, 'since' => $now - self::EVERY + HOURSECS]
         );
         $byreader = [];
+        $after = [];
         foreach ($loans as $loan) {
-            // Late once the last day is over where its centre is, which the query cannot say.
-            if ((int) $loan->timedue < zones::today((int) $loan->entityid, $now)) {
+            // Late once the last day is over where its centre is, which the query cannot say, and told once the days of
+            // grace its centre gives are over too.
+            $entityid = (int) $loan->entityid;
+            $after[$entityid] = $after[$entityid] ?? sanctions::settings($entityid)['noticeafter'];
+            if (loan_rules::days_late((int) $loan->timedue, $now, zones::of($entityid)) >= $after[$entityid]) {
                 $byreader[$loan->readerid][] = $loan;
             }
         }
@@ -208,7 +212,7 @@ final class notices {
             if (access::closed((int) $tutor->entityid)) {
                 continue;
             }
-            $sent += self::tell_tutor($tutor, $now) ? 1 : 0;
+            $sent += self::tell_tutor($tutor, $now, true) ? 1 : 0;
         }
         return $sent;
     }
@@ -218,9 +222,10 @@ final class notices {
      *
      * @param \stdClass $tutor With id, yearid, groupname, userid and entityid.
      * @param int $now
+     * @param bool $patient The nightly summary: only the books past the centre's days of grace before a notice.
      * @return bool Whether a message went.
      */
-    public static function tell_tutor(\stdClass $tutor, int $now): bool {
+    public static function tell_tutor(\stdClass $tutor, int $now, bool $patient = false): bool {
         global $DB;
         $entityid = (int) $DB->get_field(self::T . 'year', 'entityid', ['id' => $tutor->yearid]);
         $tz = zones::of($entityid);
@@ -235,6 +240,10 @@ final class notices {
            ORDER BY r.lastname, r.firstname, l.timedue",
             ['yearid' => $tutor->yearid, 'groupname' => $tutor->groupname, 'today' => $today]
         );
+        if ($patient) {
+            $after = sanctions::settings($entityid)['noticeafter'];
+            $late = array_filter($late, fn($loan) => loan_rules::days_late((int) $loan->timedue, $now, $tz) >= $after);
+        }
         if (!$late) {
             return false;
         }
@@ -334,6 +343,11 @@ final class notices {
     ): bool {
         // While every centre is getting ready, only its staff hear from the library.
         if (access::shut_for((int) $user->id)) {
+            return false;
+        }
+        // A practice library is a rehearsal: what the guided help leaves in it waits for nobody.
+        $entityid = (int) ($design['entityid'] ?? (isset($design['library']->entityid) ? $design['library']->entityid : 0));
+        if ($entityid && practice::is($entityid)) {
             return false;
         }
         $message = new \core\message\message();

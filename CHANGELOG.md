@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.168.0
+
+- The desk reads the ISBN of the back cover as if it were the book's label: with a reader open it goes out, or comes back if
+  they have it; without one it stays in the hand, or comes back when only one is out; when it is not clear, the desk offers
+  what is out and what is on the shelf. An ISBN that is not in the catalogue says so.
+- Late notices can wait: «Days before the first notice», in the rules of what a late book leaves, for the whole centre (1,
+  the next day, as before; 7, a week of grace). It counts for the reader's notice and the tutor's summary; the desk says it
+  from the first day, and the staff can still tell now.
+- A practice library tells nobody of what the guided help leaves waiting in it.
+- A site coming straight from 0.149.0 or before upgrades in one go: the origin of an import is renamed before the step
+  that reads it.
+
 ## 0.167.0
 
 - Print cards: «The design» shows the flower, the sky and the sober one with who gets each, and each centre chooses one for

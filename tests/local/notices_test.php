@@ -106,6 +106,37 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * A week of grace: nobody hears of a book three days late; Noa's ten days go to the tutor; once Ana's oldest book is
+     * a week late, she hears of it, and only of it. The staff's «Tell the tutor now» does not wait.
+     */
+    public function test_days_before_the_notice(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, $year, $now, , $tutor] = $this->library();
+        sanctions::save_settings((int) $library->entityid, ['noticeafter' => 7]);
+        $this->assertSame(7, sanctions::settings((int) $library->entityid)['noticeafter']);
+        $sink = $this->redirectMessages();
+        $this->assertSame(['readers' => 0, 'tutors' => 1], notices::run($now));
+        $tutormessage = $sink->get_messages()[0];
+        $this->assertStringContainsString('Noa Sin Cuenta', $tutormessage->fullmessage);
+        $this->assertStringNotContainsString('Ana Inventada', $tutormessage->fullmessage);
+        $sink->clear();
+
+        $this->assertSame(['readers' => 1, 'tutors' => 0], notices::run($now + 4 * DAYSECS));
+        $message = $sink->get_messages()[0];
+        $this->assertStringContainsString('El faro dormido', $message->fullmessage);
+        $this->assertStringNotContainsString('La nube de tinta', $message->fullmessage);
+        $sink->clear();
+
+        $row = $DB->get_record(self::T . 'tutor', ['yearid' => $year->id, 'groupname' => '3º A'], '*', MUST_EXIST);
+        $row->entityid = $library->entityid;
+        $this->assertTrue(notices::tell_tutor($row, $now));
+        $this->assertStringContainsString('Ana Inventada', $sink->get_messages()[0]->fullmessage);
+        $sink->close();
+    }
+
+    /**
      * Next year, the tutor of a group with the same name is proposed, not set.
      */
     public function test_tutor_proposed(): void {

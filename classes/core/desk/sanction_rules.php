@@ -43,13 +43,15 @@ final class sanction_rules {
 
     /** @var array The settings of a centre that has said nothing. Money is in hundredths. */
     public const DEFAULTS = ['mode' => self::NONE, 'grace' => 0, 'perday' => 1, 'maxdays' => 30, 'cents' => 10,
-        'maxcents' => 500, 'block' => 500, 'currency' => 'EUR', 'stages' => [], 'adults' => true];
+        'maxcents' => 500, 'block' => 500, 'currency' => 'EUR', 'stages' => [], 'adults' => true,
+        'noticeafter' => 1];
 
     /**
      * The settings, within reason, with the defaults where something is missing.
      *
      * @param array $settings
-     * @return array mode, grace, perday, maxdays, cents, maxcents, block, currency, stages, adults.
+     * @return array mode, grace, perday, maxdays, cents, maxcents, block, currency, stages, adults, and noticeafter: the days
+     *     after the due date when the first notice goes (1, the next day; 7, a week of grace), whatever the mode.
      */
     public static function settings(array $settings): array {
         $settings += self::DEFAULTS;
@@ -66,6 +68,7 @@ final class sanction_rules {
             'currency' => preg_match('/^[A-Z]{3}$/', $currency) ? $currency : self::DEFAULTS['currency'],
             'stages' => array_values(array_filter(array_map('strval', (array) $settings['stages']), fn($s) => trim($s) !== '')),
             'adults' => !empty($settings['adults']),
+            'noticeafter' => $between($settings['noticeafter'], 1, 30),
         ];
     }
 
