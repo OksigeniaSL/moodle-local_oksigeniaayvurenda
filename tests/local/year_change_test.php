@@ -73,7 +73,10 @@ final class year_change_test extends \advanced_testcase {
         $this->assertSame(5, $last['loans']);
         $this->assertSame(3, $last['borrowers']);
         $this->assertSame(3, $last['members']);
-        $this->assertSame(['group' => '3º A', 'members' => 2, 'borrowers' => 2, 'loans' => 4], $last['groups'][0]);
+        $this->assertSame(
+            ['group' => '3º A', 'stage' => 'Primaria', 'members' => 2, 'borrowers' => 2, 'loans' => 4],
+            $last['groups'][0]
+        );
     }
 
     /**

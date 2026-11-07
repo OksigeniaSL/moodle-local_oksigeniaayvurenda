@@ -970,7 +970,11 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 .ayv .ayv-phone-waiting { font-weight: 700; color: var(--accent); }
 
-.ayv .ayv-phone-open { min-height: 64px; width: 100%; font-size: 1.2rem; }
+/* On the phone it is wide, to tap with a thumb; on a computer, the size of its words. */
+.ayv .ayv-phone-open { min-height: 64px; padding: 0 2rem; font-size: 1.2rem; }
+@media (max-width: 40rem) {
+    .ayv .ayv-phone-open { width: 100%; }
+}
 
 .ayv-camera { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 1rem; padding: 1rem; background: #0b1513; color: #fbf6ec; }
@@ -1001,6 +1005,8 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-help-stage { position: relative; border-radius: var(--radius); overflow: hidden; box-shadow: 0 0 0 2px var(--green2); }
 
 .ayv .ayv-help-stage iframe { display: block; width: 100%; height: min(640px, 72vh); border: 0; background: var(--paper); }
+/* Before it starts, the stage is the size of its card: an empty frame of 550 px says nothing. */
+.ayv .ayv-help-waiting iframe { height: 16rem; }
 
 .ayv .ayv-help-pointer { position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%;
     background: rgba(240, 180, 60, .55); box-shadow: 0 0 0 3px #f0b43c; opacity: 0; pointer-events: none;
@@ -1071,6 +1077,7 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-path-hint { font-size: .9rem; opacity: .85; }
 
 .ayv .ayv-path-marks { display: block; line-height: 0; }
+.ayv .ayv-path-marks svg { width: auto; height: 30px; }
 
 .ayv .ayv-album, .ayv .ayv-garden { list-style: none; margin: 0; padding: 0; display: grid;
     grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: .9rem; }
@@ -1316,6 +1323,10 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 .ayv .ayv-character p { margin: 0; }
 
 .ayv .ayv-character-preview { font-weight: 700; margin-top: .5rem !important; }
+.ayv .ayv-character-form { display: grid; gap: .6rem; }
+.ayv .ayv-character-drop { min-height: 0; padding: 1rem; }
+.ayv .ayv-character-drop .ayv-imp-droptitle { font-size: 1.1rem; }
+.ayv .ayv-character-zip summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 
 /* Reports. */
 .ayv .ayv-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; }
@@ -1655,6 +1666,46 @@ html[data-bs-theme="dark"] .ayv .ayv-brand-dark { display: inline-block; }
 
 /* Narrowing a search: the corners and the topics of its results, as chips with how many. */
 .ayv .ayv-facets { display: grid; gap: .4rem; margin: .5rem 0 1rem; }
+.ayv .ayv-facets-fold > summary { display: none; list-style: none; cursor: pointer; }
+/* «My class» before the library gives a class: the island still empty, and where to go meanwhile. */
+.ayv .ayv-class-nobody { display: grid; gap: 1rem; justify-items: center; text-align: center; }
+/* The corners, in their real order: the drawing, the name above its field, hide, and the arrows to move it. */
+.ayv .ayv-corners-list { display: grid; gap: .75rem; margin: 1rem 0; padding: 0; list-style: none; }
+.ayv .ayv-corner-row {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    padding: .85rem 1rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+}
+.ayv .ayv-corner-row-off .ayv-corner-row-art { opacity: .4; filter: grayscale(1); }
+.ayv .ayv-corner-row-art {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    font: 700 1.1rem var(--title);
+}
+.ayv .ayv-corner-row-art img { width: 100%; height: 100%; object-fit: cover; }
+.ayv .ayv-corner-row-words { display: grid; gap: .35rem; min-width: 0; }
+.ayv .ayv-corner-row-move { display: grid; gap: .35rem; }
+.ayv .ayv-corner-row-move .ayv-button { min-width: 44px; min-height: 44px; padding: 0; justify-content: center; }
+@media (max-width: 30rem) {
+    .ayv .ayv-corner-row { grid-template-columns: 3rem minmax(0, 1fr) auto; gap: .6rem; padding: .75rem; }
+    .ayv .ayv-corner-row-art { width: 3rem; height: 3rem; }
+}
+.ayv .ayv-class-nobody-island { width: min(100%, 26rem); height: auto; opacity: .85; }
+.ayv .ayv-nothing .ayv-bubble { text-align: start; }
+.ayv .ayv-facets-fold > summary::-webkit-details-marker { display: none; }
+@media (max-width: 40rem) {
+    .ayv .ayv-facets-fold > summary { display: inline-flex; margin: 0 0 .75rem; }
+    .ayv .ayv-facets-fold[open] > summary { margin-bottom: .5rem; }
+}
 .ayv .ayv-facet { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0; }
 .ayv .ayv-facet-label { font-weight: 700; font-size: .95rem; margin-right: .25rem; }
 .ayv .ayv-chip-count { margin-left: .35em; font-size: .8rem; font-weight: 400; }
@@ -1889,6 +1940,7 @@ html[data-bs-theme="dark"] { scrollbar-color: rgba(143, 211, 193, .35) transpare
 .ayv .ayv-featured-name { font-family: var(--title); font-weight: 700; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.05; }
 .ayv .ayv-featured-motto { font-size: 1.15rem; opacity: .95; }
 .ayv .ayv-featured .ayv-button { margin-top: .75rem; background: var(--surface); color: var(--accent); }
+html[data-bs-theme="dark"] .ayv .ayv-featured .ayv-button { background: var(--paper); color: var(--ink); }
 .ayv .ayv-featured-img { width: 100%; height: 100%; max-height: 22rem; object-fit: cover; border-radius: 20px; }
 .ayv .ayv-featured-picture { background: var(--surface); color: var(--accent); box-shadow: 0 18px 40px -24px rgba(15, 58, 51, .45); }
 .ayv .ayv-featured-picture::before { display: none; }
@@ -2622,13 +2674,27 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     transition: transform .15s ease;
 }
 .ayv .ayv-place:hover { transform: translateY(-2px); }
-.ayv .ayv-place-books { grid-row: 1 / 3; display: flex; align-items: flex-end; gap: 2px; height: 2.6rem; padding-bottom: 3px; border-bottom: 3px solid var(--ayv-wood2, #b8915f); }
-.ayv .ayv-place-books span { width: 7px; border-radius: 2px 2px 0 0; background: var(--place); }
-.ayv .ayv-place-books span:nth-child(1) { height: 70%; opacity: .95; }
-.ayv .ayv-place-books span:nth-child(2) { height: 92%; opacity: .7; }
-.ayv .ayv-place-books span:nth-child(3) { height: 80%; opacity: .85; }
-.ayv .ayv-place-books span:nth-child(4) { height: 100%; opacity: .6; }
-.ayv .ayv-place-books span:nth-child(5) { height: 64%; opacity: .8; }
+/* Three books on a plank, one leaning, in the colour of the place: a shelf, not a bar chart. */
+.ayv .ayv-place-books {
+    grid-row: 1 / 3;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 2.6rem;
+    padding: 0 6px;
+    border-bottom: 4px solid var(--ayv-wood2, #b8915f);
+    border-radius: 0 0 3px 3px;
+}
+.ayv .ayv-place-books span {
+    width: 11px;
+    border-radius: 2px;
+    background: var(--place);
+    box-shadow: inset 0 5px 0 rgba(255, 255, 255, .35), inset 0 -4px 0 rgba(0, 0, 0, .14);
+}
+.ayv .ayv-place-books span:nth-child(1) { height: 76%; }
+.ayv .ayv-place-books span:nth-child(2) { height: 100%; opacity: .82; }
+.ayv .ayv-place-books span:nth-child(3) { height: 84%; opacity: .92; margin-left: 4px; transform: rotate(14deg); transform-origin: bottom left; }
+.ayv .ayv-place-books span:nth-child(n+4) { display: none; }
 .ayv .ayv-place-label { font: 600 1.05rem/1.25 var(--title); overflow-wrap: anywhere; }
 .ayv .ayv-place-count { font-size: .85rem; color: var(--ayv-muted, #5f6b67); }
 .ayv .ayv-nav-stacks svg { width: 20px; height: 20px; }
@@ -2686,8 +2752,11 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     overflow: hidden;
 }
 .ayv .ayv-cromo-name { max-width: 100%; font: 600 .85rem/1.1 var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ayv .ayv-cromo-when { font-size: .72rem; }
+.ayv .ayv-cromo-when { font-size: .8rem; }
 .ayv .ayv-cromo-missing img { filter: grayscale(1); opacity: .35; }
+/* In dark, the stickers not won step back, with a dotted frame, so that the won ones lead. */
+html[data-bs-theme="dark"] .ayv .ayv-cromo-missing img { opacity: .18; filter: grayscale(1) brightness(.6); }
+html[data-bs-theme="dark"] .ayv .ayv-cromo-missing { outline: 2px dashed var(--line); outline-offset: -2px; }
 .ayv .ayv-cromo-missing .ayv-cromo-band { color: var(--ayv-muted, #5f6b67); }
 html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3bdb9; }
 
@@ -2725,18 +2794,11 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 }
 .ayv .ayv-door-search input::placeholder { color: #5f6b67; }
 .ayv .ayv-door-search .ayv-button { flex: none; }
-.ayv .ayv-pulse { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
-.ayv .ayv-pulse li {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .45rem .95rem;
-    border-radius: 999px;
-    background: var(--surface);
-    font-weight: 700;
-    box-shadow: inset 0 0 0 1.5px var(--ayv-ring, rgba(15, 58, 51, .10));
-}
-.ayv .ayv-pulse li::before { content: ""; flex: none; width: .55rem; height: .55rem; border-radius: 50%; background: var(--coral); animation: ayv-pulse 2.4s ease-in-out infinite; }
+/* The pulse is a line that reads, not three buttons: its facts with «·» between, and the coral dot only before the first. */
+.ayv .ayv-pulse { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
+.ayv .ayv-pulse li { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-pulse li + li::before { content: "·"; }
+.ayv .ayv-pulse li:first-child::before { content: ""; flex: none; width: .55rem; height: .55rem; border-radius: 50%; background: var(--coral); animation: ayv-pulse 2.4s ease-in-out infinite; }
 @keyframes ayv-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(226, 101, 76, .45); } 50% { box-shadow: 0 0 0 6px rgba(226, 101, 76, 0); } }
 .ayv .ayv-window-corners { margin-top: 1rem; }
 @media (max-width: 40rem) {
@@ -2745,7 +2807,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
     .ayv .ayv-door-art .ayv-door-in { grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .ayv .ayv-pulse li::before { animation: none; }
+    .ayv .ayv-pulse li:first-child::before { animation: none; }
 }
 
 /* Where is it? (0.62.0): the label of a book, big, with what each line says (in the order of Gaudí's figure, «the label
@@ -2775,7 +2837,22 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-why-order { margin: 0; font-size: .9rem; color: var(--ayv-muted, #5f6b67); }
 
 /* The shelf for another website (0.63.0): one plank of the newest books, in a frame; the rest of the row hidden. */
-.ayv.ayv-embed { min-height: 0; padding: .5rem .75rem; background: transparent; }
+/* In another website's page, its own paper and ink whatever the colour mode: a frame does not know the page's mode. */
+.ayv.ayv-embed,
+html[data-bs-theme="dark"] .ayv.ayv-embed {
+    --ink: #1e2b2a;
+    --paper: #fbf6ec;
+    --paper2: #f2eadb;
+    --line: rgba(30, 43, 42, .14);
+    --accent: #17574c;
+    --surface: #fff;
+    --muted: #5f6b67;
+    min-height: 0;
+    padding: .5rem .75rem;
+    background: var(--paper);
+    color: var(--ink);
+    color-scheme: light;
+}
 .ayv .ayv-embed-head { display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; margin: 0 0 .25rem; }
 .ayv .ayv-embed-name { margin: 0; font: 600 1.15rem/1.2 var(--title); }
 .ayv .ayv-embed-name a { color: var(--ink); text-decoration: none; }
@@ -2824,6 +2901,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
 .ayv .ayv-visit-title { margin: 0; font: 600 1.7rem/1.2 var(--title); }
 .ayv .ayv-visit-sound[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
 /* How loud, beside it: one for the whole device. */
+.ayv .ayv-visit-audio { display: inline-flex; align-items: center; gap: .5rem; }
 .ayv .ayv-visit-volume { display: inline-flex; align-items: center; min-height: 44px; }
 .ayv .ayv-visit-volume input { width: 7.5rem; height: 44px; accent-color: var(--accent); }
 /* On or off at a glance: filled with the speaker's waves, or only its outline with the speaker crossed out. */
@@ -2886,6 +2964,9 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-tip { background: #f6ead2; color: #0f
 .ayv .ayv-visit-places ul { display: flex; flex-wrap: wrap; gap: .5rem; margin: .9rem 0 0; padding: 0; list-style: none; }
 .ayv .ayv-visit-place { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); font-weight: 700; text-decoration: none; }
 .ayv button.ayv-visit-place { border: 0; background: none; font: inherit; font-weight: 700; cursor: pointer; }
+/* The game is the moment of the room: it leads, with its magnifier; the ways out stay quiet. */
+.ayv button.ayv-visit-play { gap: .4rem; background: var(--green); color: #fbf6ec; box-shadow: none; }
+.ayv button.ayv-visit-play:hover { background: var(--night); color: #fbf6ec; }
 .ayv .ayv-visit-place:hover,
 .ayv .ayv-visit-place.ayv-visit-lit { background: var(--accent); color: var(--paper); }
 .ayv .ayv-visit-place:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
@@ -3687,6 +3768,7 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-dig-what { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .75rem; padding: 1rem; border-radius: 14px; background: var(--paper); }
 .ayv .ayv-dig-sheet-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem; margin: .25rem 0 0; }
 .ayv .ayv-button-danger { background: transparent; color: var(--danger); border-color: currentColor; }
+html[data-bs-theme="dark"] .ayv .ayv-button-danger { color: var(--late); }
 @media (max-width: 36rem) {
     .ayv .ayv-dig-what { grid-template-columns: minmax(0, 1fr); }
     .ayv .ayv-dig-head { grid-template-columns: minmax(0, 1fr); }
@@ -3866,6 +3948,9 @@ html[data-bs-theme="dark"] .ayv .ayv-mine { --bar: var(--accent); }
 .ayv .ayv-late-summary { font-size: .92rem; }
 .ayv .ayv-late-summary-late { color: #8a2a17; font-weight: 700; }
 .ayv .ayv-late-summary-near { color: #8a4a00; font-weight: 700; }
+/* In dark, the red and the orange that read on the dark green (4.5:1 or more). */
+html[data-bs-theme="dark"] .ayv .ayv-late-summary-late { color: var(--late); }
+html[data-bs-theme="dark"] .ayv .ayv-late-summary-near { color: #f2b35c; }
 .ayv .ayv-late-group .ayv-weed-list { padding: 0 .9rem .25rem; }
 .ayv .ayv-late-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: .75rem; margin: 0; padding: 0; list-style: none; }
 .ayv .ayv-late-card { display: flex; align-items: flex-start; gap: .9rem; padding: .9rem 1rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 0 var(--line); }
@@ -4300,8 +4385,24 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-tut-stage { margin: 0 0 1.25rem; }
 .ayv .ayv-tut-rows { grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); }
 .ayv .ayv-tut-none { border-color: var(--sun); }
-.ayv .ayv-tut-save { position: sticky; bottom: .75rem; display: flex; justify-content: flex-end; margin: 0; pointer-events: none; }
-.ayv .ayv-tut-save .ayv-button { pointer-events: auto; box-shadow: var(--ayv-shadow); }
+/* A bar the width of the page, not a button floating over the last cards: what scrolls goes behind it. */
+.ayv .ayv-profile-switch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.ayv .ayv-profile-switch .ayv-switch { grid-column: auto; flex: none; }
+.ayv .ayv-profile-switch-words { display: grid; gap: .25rem; }
+.ayv .ayv-review-ways { display: flex; flex-wrap: wrap; gap: .5rem; margin: .25rem 0 0; }
+.ayv .ayv-review-send { justify-content: flex-end; }
+.ayv .ayv-memoir-stage { margin: 1.25rem 0 .5rem; font: 600 1.05rem/1.3 var(--title); color: var(--ayv-muted, #5f6b67); }
+.ayv .ayv-tut-save {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    margin: 1rem 0 0;
+    padding: .75rem 0;
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+}
 /* Platforms: one touch first; by hand, inside. */
 .ayv .ayv-lti-card { margin: 1rem 0; padding: 1.1rem 1.25rem; border-radius: 16px; background: var(--surface); box-shadow: var(--ayv-shadow); }
 .ayv .ayv-lti-url { display: flex; align-items: center; gap: .5rem; margin: 0; }

@@ -21,7 +21,7 @@
     Example context (json):
     {
         "heading": "Ayvu rande", "motto": "La fuente de las palabras", "intro": "Las voces de la biblioteca.",
-        "hasrecords": true, "empty": "Todavía no hay voces.", "nexturl": "", "prevurl": "", "windownext": "Más",
+        "hasrecords": true, "empty": "Todavía no hay voces.", "quiet": null, "searchurl": "#", "searchlabel": "Buscar un libro", "nexturl": "", "prevurl": "", "windownext": "Más",
         "windowprev": "Antes", "infourl": "#", "voiceinfo": "Cómo se tratan las voces",
         "records": [{"title": "El faro dormido", "url": "#", "cover": "https://example.org/c.jpg", "hascover": false, "colour": 3,
             "voices": [{"label": "Capítulo 1 · La mamá de Ana", "audio": "https://example.org/v.webm"}]}]
@@ -30,7 +30,10 @@
 <section class="ayv-spring">
 <h1 class="ayv-results-title">{{heading}} <span class="ayv-spring-motto">{{motto}}</span></h1>
 <p>{{intro}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
-{{^hasrecords}}<p class="ayv-empty">{{empty}}</p>{{/hasrecords}}
+{{^hasrecords}}<div class="ayv-nothing ayv-spring-quiet">
+    {{#quiet}}{{> local_oksigeniaayvurenda/bubble}}{{/quiet}}{{^quiet}}<p>{{empty}}</p>{{/quiet}}
+    <p><a class="ayv-button" href="{{searchurl}}">{{searchlabel}}</a></p>
+</div>{{/hasrecords}}
 {{#hasrecords}}
 <ul class="ayv-window-list">
 {{#records}}

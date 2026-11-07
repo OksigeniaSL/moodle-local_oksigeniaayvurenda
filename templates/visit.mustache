@@ -94,10 +94,12 @@
     <div class="ayv-visit-bar">
         <h1 class="ayv-visit-title">{{title}}</h1>
         {{#sound}}
+        <span class="ayv-visit-audio">
         <button type="button" class="ayv-button ayv-button-quiet ayv-visit-sound" aria-pressed="false" hidden>
             <span class="ayv-visit-sound-on">{{> local_oksigeniaayvurenda/icon_volume}}</span><span class="ayv-visit-sound-off">{{> local_oksigeniaayvurenda/icon_volume_off}}</span> {{visitsound}}
         </button>
         <label class="ayv-visit-volume" hidden><span class="ayv-sr">{{visitvolume}}</span><input type="range" min="0" max="100" step="5" value="25"></label>
+        </span>
         {{/sound}}
     </div>
     <div class="ayv-visit-frame" hidden>
@@ -176,7 +178,7 @@
             <li><a class="ayv-visit-place" href="{{url}}" data-zone="{{id}}" data-tip="{{tipx}} {{tipy}} {{cy}}"{{#enters}} data-enters="1"{{/enters}}>{{label}}</a></li>
             {{/zones}}
             {{#hunt}}
-            <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-hunt" hidden>{{huntplay}}</button></li>
+            <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-hunt" hidden>{{> local_oksigeniaayvurenda/icon_search}} {{huntplay}}</button></li>
             {{/hunt}}
             {{#sort}}
             <li><button type="button" class="ayv-visit-place ayv-visit-play" data-open="ayv-sort" hidden>{{sortplay}}</button></li>

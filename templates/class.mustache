@@ -22,7 +22,7 @@
 
     Example context (json):
     {
-        "heading": "Mi clase", "intro": "El reto, el jardín y lo que leen.", "notice": "", "none": "",
+        "heading": "Mi clase", "intro": "El reto, el jardín y lo que leen.", "notice": "", "none": "", "nobody": false,
         "action": "#", "sesskey": "abc", "choose": "El reto de este trimestre", "choosehint": "Cooperativo y anónimo.",
         "save": "Guardar", "gardenheading": "El jardín de la clase", "gardenempty": "Todavía no hay nada plantado.",
         "readsheading": "Lo que lee tu clase", "readshint": "Nunca quién.", "readsempty": "Todavía nada.",
@@ -41,7 +41,15 @@
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{#none}}<p class="ayv-empty">{{none}}</p>{{/none}}
+{{#nobody}}
+<div class="ayv-nothing ayv-class-nobody">
+    {{#islandbase}}<img class="ayv-class-nobody-island" src="{{islandbase}}" alt="" width="640" height="360">{{/islandbase}}
+    {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
+    {{^herald}}<p>{{none}}</p>{{/herald}}
+    <p class="ayv-book-actions"><a class="ayv-button" href="{{readsurl}}">{{readslabel}}</a>
+        <a class="ayv-button ayv-button-quiet" href="{{stacksurl}}">{{stackslabel}}</a></p>
+</div>
+{{/nobody}}
 {{#groups}}
 <section class="ayv-section ayv-book ayv-myclass" aria-labelledby="ayv-class-{{index}}">
     <h2 id="ayv-class-{{index}}" class="ayv-section-title">{{group}}</h2>

@@ -345,6 +345,7 @@
         }
         start.hidden = true;
         done.hidden = true;
+        stage.classList.remove('ayv-help-waiting');
         skipping = false;
         return load().then(function() {
             return piece(h);

@@ -79,6 +79,15 @@ $bars = fn(array $rows, string $name, string $whole) => array_map(fn($r) => [
     'value' => $str('memoircameof', (object) ['came' => $num($r['borrowers']), 'of' => $num($r[$whole])]),
     'loans' => $loans($r['loans']),
 ], $rows);
+// The groups under their stage, in the school's order: 31 cards in a row read as a list of names.
+$bystage = [];
+foreach ($report['groups'] as $row) {
+    $bystage[$row['stage'] ?? ''][] = $row;
+}
+$groupstages = [];
+foreach ($bystage as $stage => $rows) {
+    $groupstages[] = ['stage' => (string) $stage, 'groups' => $bars($rows, 'group', 'members')];
+}
 // The corners, against the one most books went out from.
 $most = max(array_merge([1], array_column($report['corners'], 'loans')));
 $corners = [];
@@ -118,6 +127,7 @@ $data = [
     'hasstages' => (bool) $report['stages'],
     'barsnote' => $str('memoirbarsnote'),
     'groups' => $bars($report['groups'], 'group', 'members'),
+    'groupstages' => $groupstages,
     'hasgroups' => (bool) $report['groups'],
     'top' => $top,
     'hastop' => (bool) $top,

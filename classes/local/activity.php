@@ -157,15 +157,22 @@ final class activity {
             }
             $day = userdate($event->timecreated, get_string('strftimedaydate', 'langconfig'));
             $days[$day] = $days[$day] ?? ['day' => $day, 'lines' => []];
+            // Who did it, only when it changes from the line above: the same name forty times says nothing.
+            $who = self::who($event, $users);
+            $above = $days[$day]['lines'] ? $days[$day]['last'] : null;
+            $days[$day]['last'] = $who;
             $days[$day]['lines'][] = [
                 'time' => userdate($event->timecreated, get_string('strftimetime', 'langconfig')),
                 'name' => $event->get_name(),
                 'about' => $about,
                 'detail' => self::detail($event),
-                'who' => self::who($event, $users),
+                'who' => $who === $above ? '' : $who,
             ];
         }
-        return array_values($days);
+        return array_values(array_map(function ($day) {
+            unset($day['last']);
+            return $day;
+        }, $days));
     }
 
     /**

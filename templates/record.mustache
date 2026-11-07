@@ -144,10 +144,11 @@
                 <label class="ayv-field ayv-field-wide"><span class="ayv-review-ask">{{label}}</span> <span class="ayv-field-hint">{{hint}}</span>
                     <textarea name="text" maxlength="{{max}}" rows="3" required>{{text}}</textarea></label>
                 {{#mydrawing}}<img class="ayv-review-drawing" src="{{mydrawing}}" alt="{{mydrawingalt}}">{{/mydrawing}}
-                <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-draw-open>{{drawopen}}</button></p>
                 {{#myvoice}}<audio class="ayv-review-voice" controls preload="none" src="{{myvoice}}" aria-label="{{myvoicelabel}}"></audio>{{/myvoice}}
+                {{! The other ways of saying it, side by side under the words, not one under another. }}
+                <p class="ayv-review-ways"><button type="button" class="ayv-chip" data-ayv-draw-open>{{drawopen}}</button>
+                    {{#canspeak}}<button type="button" class="ayv-chip" data-ayv-speak-open>{{> local_oksigeniaayvurenda/icon_mic}} {{speakopen}}</button>{{/canspeak}}</p>
                 {{#canspeak}}
-                <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-speak-open>{{> local_oksigeniaayvurenda/icon_mic}} {{speakopen}}</button></p>
                 <div class="ayv-speak" data-ayv-speak hidden data-nomic="{{speaknomic}}" data-stop="{{speakstop}}" data-record="{{speakrecord}}">
                     <p class="ayv-field-hint">{{speakhint}}</p>
                     <p class="ayv-book-actions"><button type="button" class="ayv-button" data-speak-record>{{> local_oksigeniaayvurenda/icon_mic}} <span>{{speakrecord}}</span></button>
@@ -171,8 +172,8 @@
                 </div>
                 {{#canrecommend}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="forlittle" value="1" {{#recommended}}checked{{/recommended}}> {{recommend}}</label>{{/canrecommend}}
                 {{#hasmine}}<p class="ayv-field-hint">{{state}}</p>{{/hasmine}}
-                <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="review" value="send">{{send}}</button>
-                    {{#hasmine}}<button type="submit" class="ayv-button ayv-button-quiet" name="review" value="remove" formnovalidate>{{remove}}</button>{{/hasmine}}</p>
+                <p class="ayv-book-actions ayv-review-send">{{#hasmine}}<button type="submit" class="ayv-button ayv-button-quiet" name="review" value="remove" formnovalidate>{{remove}}</button>{{/hasmine}}
+                    <button type="submit" class="ayv-button" name="review" value="send">{{send}}</button></p>
             </form>{{/write}}
         </section>
         {{/show}}{{/reviews}}

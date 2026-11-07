@@ -69,6 +69,16 @@ $data = [
     'records' => $records,
     'hasrecords' => (bool) $records,
     'empty' => $str('ayvurandeempty'),
+    // With no voices yet: the memory reading, and a real button to find a book to give a voice to.
+    'quiet' => $records ? null : \local_oksigeniaayvurenda\local\characters::say(
+        (int) $library->entityid,
+        'memory',
+        'ayvurandequiet',
+        [],
+        'lee'
+    ),
+    'searchurl' => $url('search.php'),
+    'searchlabel' => $str('ayvurandesearch'),
     'nexturl' => $found['more'] ? $url('ayvurande.php', ['page' => $page + 1]) : '',
     'prevurl' => $page > 0 ? $url('ayvurande.php', ['page' => $page - 1]) : '',
     'windownext' => $str('windownext'),

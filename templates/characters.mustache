@@ -29,43 +29,58 @@
         "heading": "Los personajes",
         "intro": "Dos personajes con oficios distintos.",
         "notice": "",
-        "action": "#",
+        "action": "https://example.org/characters.php",
         "sesskey": "abc",
         "roles": [{"role": "memory", "title": "La memoria", "job": "Se le pregunta.", "enabled": true, "name": "Memoria",
                    "female": true, "male": false, "herald": false, "signs": false, "own": false,
                    "preview": {"initial": "M", "role": "memory", "name": "Memoria", "text": "He buscado por toda la biblioteca."} }],
         "characterenabled": "Que aparezca", "charactername": "Nombre", "charactersex": "Sexo",
         "charactersexf": "Femenino", "charactersexm": "Masculino", "charactersigns": "Firma los avisos",
-        "characterpreview": "Así habla:", "sourcessave": "Guardar"
+        "characterpreview": "Así habla:", "sourcessave": "Guardar", "characterdrop": "Suelta aquí su retrato o su zip",
+        "characterdropor": "o elígelo", "characterdrophint": "Una imagen es su retrato.", "characterzipwhat": "Qué lleva el zip",
+        "characterpackhint": "Sus posturas.", "characterportraithint": "Cuadrada.", "characternoportrait": "Volver al de serie",
+        "characternopack": "Quitar el propio"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<form method="post" action="{{action}}" enctype="multipart/form-data">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <div class="ayv-characters">
-    {{#roles}}
-        <section class="ayv-character">
-            <h2 class="ayv-section-title">{{title}}</h2>
-            <p>{{job}}</p>
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}enabled" value="1" {{#enabled}}checked{{/enabled}}> {{characterenabled}}</label>
-            <label class="ayv-field">{{charactername}} <input type="text" name="{{role}}name" value="{{name}}" maxlength="60"></label>
-            <span class="ayv-field" role="radiogroup" aria-label="{{charactersex}}">{{charactersex}}
-                <label class="ayv-field-check"><input type="radio" name="{{role}}sex" value="f" {{#female}}checked{{/female}}> {{charactersexf}}</label>
-                <label class="ayv-field-check"><input type="radio" name="{{role}}sex" value="m" {{#male}}checked{{/male}}> {{charactersexm}}</label>
-            </span>
-            {{#herald}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}signs" value="1" {{#signs}}checked{{/signs}}> {{charactersigns}}</label>{{/herald}}
-            <label class="ayv-field ayv-field-wide">{{characterportrait}} <span class="ayv-field-hint">{{characterportraithint}}</span>
-                <input type="file" name="{{role}}portrait" accept="image/png,image/jpeg,image/webp,image/gif"></label>
-            {{#own}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}noportrait" value="1"> {{characternoportrait}}</label>{{/own}}
-            <label class="ayv-field ayv-field-wide">{{characterpack}} <span class="ayv-field-hint">{{characterpackhint}}</span>
-                <input type="file" name="{{role}}pack" accept=".zip,application/zip"></label>
-            {{#own}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}nopack" value="1"> {{characternopack}}</label>{{/own}}
+<div class="ayv-characters">
+{{#roles}}
+    <section class="ayv-character" aria-labelledby="ayv-character-{{role}}">
+        <h2 class="ayv-section-title" id="ayv-character-{{role}}">{{title}}</h2>
+        <p class="ayv-field-hint">{{job}}</p>
+        <div class="ayv-character-face">
             <p class="ayv-character-preview">{{characterpreview}}</p>
             {{#preview}}{{> local_oksigeniaayvurenda/bubble}}{{/preview}}
-        </section>
-    {{/roles}}
-    </div>
-    <p class="ayv-more"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
-</form>
+        </div>
+        <form method="post" action="{{action}}#ayv-character-{{role}}" class="ayv-character-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}"><input type="hidden" name="do" value="save">
+            <label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}enabled" value="1" {{#enabled}}checked{{/enabled}}> {{characterenabled}}</label>
+            <label class="ayv-field ayv-field-wide">{{charactername}} <input type="text" name="{{role}}name" value="{{name}}" maxlength="60"></label>
+            <fieldset class="ayv-dig-set"><legend>{{charactersex}}</legend><div class="ayv-segmented">
+                <label><input type="radio" name="{{role}}sex" value="f" {{#female}}checked{{/female}}><span>{{charactersexf}}</span></label>
+                <label><input type="radio" name="{{role}}sex" value="m" {{#male}}checked{{/male}}><span>{{charactersexm}}</span></label>
+            </div></fieldset>
+            {{#herald}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}signs" value="1" {{#signs}}checked{{/signs}}> {{charactersigns}}</label>{{/herald}}
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+        </form>
+        <form method="post" action="{{action}}#ayv-character-{{role}}" enctype="multipart/form-data" class="ayv-character-upload">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}"><input type="hidden" name="do" value="upload">
+            <label class="ayv-imp-drop ayv-character-drop" data-ayv-drop>
+                <span class="ayv-imp-droptitle">{{characterdrop}}</span>
+                <span class="ayv-imp-dropor">{{characterdropor}}</span>
+                <input type="file" name="{{role}}file" required accept="image/png,image/jpeg,image/webp,image/gif,.zip,application/zip">
+                <span class="ayv-imp-dropformats">{{characterdrophint}}</span>
+            </label>
+            <noscript><p><button type="submit" class="ayv-button ayv-button-quiet">{{sourcessave}}</button></p></noscript>
+        </form>
+        <details class="ayv-character-zip"><summary>{{characterzipwhat}}</summary><p class="ayv-field-hint">{{characterportraithint}}</p><p class="ayv-field-hint">{{characterpackhint}}</p></details>
+        {{#own}}<form method="post" action="{{action}}#ayv-character-{{role}}" class="ayv-book-actions">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}">
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="noportrait">{{characternoportrait}}</button>
+            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="nopack">{{characternopack}}</button>
+        </form>{{/own}}
+    </section>
+{{/roles}}
+</div>

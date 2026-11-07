@@ -92,7 +92,7 @@
     {{#cromos}}
         <li class="ayv-cromo{{^won}} ayv-cromo-missing{{/won}}">
             <img src="{{art}}" alt="" loading="lazy" width="600" height="840">
-            <span class="ayv-cromo-band" aria-hidden="true"><span class="ayv-cromo-name">{{name}}</span><span class="ayv-cromo-when">{{state}}</span></span>
+            <span class="ayv-cromo-band" aria-hidden="true"><span class="ayv-cromo-name">{{name}}</span>{{#state}}<span class="ayv-cromo-when">{{state}}</span>{{/state}}</span>
             <span class="ayv-sr">{{label}}</span>
         </li>
     {{/cromos}}

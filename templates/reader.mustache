@@ -152,11 +152,12 @@
         {{#staffonly}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profileneeds}}</h2>
-            <form method="post" action="{{action}}">
+            {{! A switch that keeps itself on a tap, as in «For you»: the only form left in the record was this one. }}
+            <form method="post" action="{{action}}" class="ayv-profile-switch">
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="needs">
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="needs" value="1" {{#needs}}checked{{/needs}}> {{profileneedslabel}}</label>
-                <p class="ayv-field-hint">{{profileneedshint}}</p>
-                <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
+                <span class="ayv-profile-switch-words"><b id="ayv-needs-label">{{profileneedslabel}}</b>
+                    <span class="ayv-field-hint">{{profileneedshint}}</span></span>
+                <button type="submit" name="needs" value="{{#needs}}0{{/needs}}{{^needs}}1{{/needs}}" class="ayv-switch" role="switch" aria-checked="{{#needs}}true{{/needs}}{{^needs}}false{{/needs}}" aria-labelledby="ayv-needs-label"><span></span></button>
             </form>
             {{#asks.0}}<h3 class="ayv-profile-sub">{{profileneedsasks}}</h3>
             <ul class="ayv-profile-holds">{{#asks}}<li><b>{{title}}</b> <span>{{format}} · {{state}}</span></li>{{/asks}}</ul>{{/asks.0}}

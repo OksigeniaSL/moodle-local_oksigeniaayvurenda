@@ -139,8 +139,8 @@ $scope = $stocktake->locationid ? (string) $DB->get_field(
 ) : $str('stocktakeall');
 $nav = [['url' => $url(), 'label' => $str('stocktakelist')]];
 if ($view === 'results' || $stocktake->status !== 'open') {
-    // A page shows a few hundred of each list; the whole list of the missing is in the download.
-    $shown = 300;
+    // Fifty of each list at a time, and «See 50 more»; the whole list of the missing is in the download.
+    $shown = max(50, min(5000, optional_param('show', 50, PARAM_INT)));
     $results = stocktake::results($stocktake, $shown);
     $data = [
         'heading' => $stocktake->name,
@@ -156,13 +156,16 @@ if ($view === 'results' || $stocktake->status !== 'open') {
     ];
     foreach (['missing', 'misplaced', 'lent', 'found'] as $kind) {
         $data['sections'][] = [
-            'heading' => $str('stocktake' . $kind . 'heading', $counts[$kind]),
+            'heading' => $str('stocktake' . $kind . 'heading', screens::number((int) $counts[$kind])),
+            'anchor' => 'ayv-stock-' . $kind,
             'hint' => $str('stocktake' . $kind . 'hint'),
             'byplace' => $kind === 'missing' && count($results['missingbyplace']) > 1 ? implode(' · ', array_map(
-                fn($p) => ($p['label'] !== '' ? $p['label'] : $str('stocktakenoplace')) . ': ' . $p['count'],
+                fn($p) => ($p['label'] !== '' ? $p['label'] : $str('stocktakenoplace')) . ': ' . screens::number((int) $p['count']),
                 $results['missingbyplace']
             )) : '',
-            'more' => $counts[$kind] > $shown ? $str('stocktakemore', $counts[$kind] - $shown) : '',
+            'more' => $counts[$kind] > $shown ? $str('stocktakemore', screens::number((int) $counts[$kind] - $shown)) : '',
+            'moreurl' => $counts[$kind] > $shown ? $url(['id' => $id, 'view' => 'results', 'show' => $shown + 50]) . '#ayv-stock-'
+                . $kind : '',
             'copies' => $results[$kind],
             'hascopies' => (bool) $results[$kind],
             'empty' => $str('stocktakenone'),
@@ -174,7 +177,7 @@ if ($view === 'results' || $stocktake->status !== 'open') {
     $data['unknown'] = $results['unknown'] ? $str('stocktakeunknownlist', implode(', ', $results['unknown'])) : '';
     foreach (
         ['stocktakeback', 'stocktakelose', 'stocktakerecover', 'stocktakeclose', 'stocktakedownload',
-            'stocktakecolwhere'] as $key
+            'stocktakecolwhere', 'stocktakeseemore'] as $key
     ) {
         $data[$key] = $str($key);
     }

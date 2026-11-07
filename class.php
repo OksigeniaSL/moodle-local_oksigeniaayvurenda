@@ -146,9 +146,25 @@ foreach ($groups as $i => $group) {
 
 shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/class', [
     'heading' => $str('classtitle'),
-    'intro' => $str('classintro'),
+    // The rules of the challenge only where there is a class; without one, the empty island and where to go.
+    'intro' => $groups ? $str('classintro') : '',
     'notice' => $notice,
     'none' => $groups ? '' : $str('classnone'),
+    'nobody' => $groups ? null : [
+        'herald' => \local_oksigeniaayvurenda\local\characters::say(
+            (int) $library->entityid,
+            'herald',
+            'classnoneherald',
+            [],
+            'lee'
+        ),
+        'islandbase' => \local_oksigeniaayvurenda\local\screens::art('isla/base'),
+        'readsurl' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false)
+            . '#ayv-recent',
+        'readslabel' => $str('classnonereads'),
+        'stacksurl' => (new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library' => $library->slug]))->out(false),
+        'stackslabel' => $str('classnonestacks'),
+    ],
     'groups' => $data,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),

@@ -236,6 +236,12 @@
     });
     // Sheets: a form over the page, opened by its button. They close with their cross, Escape or a click outside the
     // sheet (not in its margin, which is still the dialog: what was typed is not lost by a near miss).
+    // The search's filters, folded on a phone unless one is on: the books come first.
+    if (window.matchMedia && window.matchMedia('(max-width: 40rem)').matches) {
+        document.querySelectorAll('details[data-ayv-fold=""]').forEach(function(fold) {
+            fold.open = false;
+        });
+    }
     document.querySelectorAll('[data-ayv-open]').forEach(function(button) {
         var sheet = document.getElementById(button.getAttribute('data-ayv-open'));
         if (!sheet || !sheet.showModal) {

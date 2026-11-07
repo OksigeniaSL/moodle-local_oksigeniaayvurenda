@@ -44,34 +44,43 @@ $entityid = (int) $library->entityid;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
-    $chosen = [];
-    foreach (characters::ROLES as $role) {
-        $chosen[$role] = [
-            'enabled' => optional_param($role . 'enabled', 0, PARAM_BOOL),
-            'name' => optional_param($role . 'name', '', PARAM_TEXT),
-            'sex' => optional_param($role . 'sex', 'f', PARAM_ALPHA),
-            'signs' => optional_param($role . 'signs', 0, PARAM_BOOL),
-        ];
-    }
-    characters::save($entityid, $chosen);
-    $notice = $str('sourcessaved');
-    // A portrait of the centre's own (its mascot, the person the library is named after), or back to the default.
-    foreach (characters::ROLES as $role) {
-        if (optional_param($role . 'noportrait', 0, PARAM_BOOL)) {
-            \local_oksigeniaayvurenda\local\images::remove('portrait', $entityid, $role);
-        }
-        if (\local_oksigeniaayvurenda\local\images::store_upload($role . 'portrait', 'portrait', $entityid, $role) === false) {
-            $notice = $str('librarieslookbadimage');
-        }
-        // The character whole, in a zip: its portrait, its poses and its puppet; or back to Ayvurenda's.
-        if (optional_param($role . 'nopack', 0, PARAM_BOOL)) {
-            characters::remove_pack($entityid, $role);
-        }
-        $upload = $_FILES[$role . 'pack'] ?? null;
-        if ($upload && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-            $kept = $upload['error'] === UPLOAD_ERR_OK && is_uploaded_file($upload['tmp_name'])
-                ? characters::store_pack($entityid, $role, $upload['tmp_name']) : null;
-            $notice = $kept ? $str('characterpackkept', $kept) : $str('characterpackbad');
+    // Each character has its own card: what is sent is only that one's, and the other keeps what it had.
+    $only = optional_param('only', '', PARAM_ALPHA);
+    $do = optional_param('do', 'save', PARAM_ALPHA);
+    if (in_array($only, characters::ROLES, true)) {
+        if ($do === 'save') {
+            $chosen = [];
+            foreach (characters::of($entityid) as $role => $character) {
+                $chosen[$role] = $role !== $only ? ['enabled' => $character['enabled'], 'name' => $character['name'],
+                    'sex' => $character['sex'], 'signs' => $character['signs']] : [
+                    'enabled' => optional_param($role . 'enabled', 0, PARAM_BOOL),
+                    'name' => optional_param($role . 'name', '', PARAM_TEXT),
+                    'sex' => optional_param($role . 'sex', 'f', PARAM_ALPHA),
+                    'signs' => optional_param($role . 'signs', 0, PARAM_BOOL),
+                ];
+            }
+            characters::save($entityid, $chosen);
+            $notice = $str('sourcessaved');
+        } else if ($do === 'noportrait') {
+            \local_oksigeniaayvurenda\local\images::remove('portrait', $entityid, $only);
+            $notice = $str('sourcessaved');
+        } else if ($do === 'nopack') {
+            characters::remove_pack($entityid, $only);
+            $notice = $str('sourcessaved');
+        } else if ($do === 'upload') {
+            // One place to drop it: a picture is its portrait; a zip, the whole character with its poses and puppet.
+            $upload = $_FILES[$only . 'file'] ?? null;
+            $ok = $upload && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK && is_uploaded_file($upload['tmp_name']);
+            $zip = $ok && (string) file_get_contents($upload['tmp_name'], false, null, 0, 2) === 'PK';
+            if (!$ok) {
+                $notice = $str('characterpackbad');
+            } else if ($zip) {
+                $kept = characters::store_pack($entityid, $only, $upload['tmp_name']);
+                $notice = $kept ? $str('characterpackkept', $kept) : $str('characterpackbad');
+            } else {
+                $stored = \local_oksigeniaayvurenda\local\images::store_upload($only . 'file', 'portrait', $entityid, $only);
+                $notice = $stored === false ? $str('librarieslookbadimage') : $str('sourcessaved');
+            }
         }
     }
 }
@@ -105,8 +114,8 @@ $data = [
 ];
 foreach (
     ['characterenabled', 'charactername', 'charactersex', 'charactersexf', 'charactersexm', 'charactersigns',
-        'characterpreview', 'sourcessave', 'characterportrait', 'characterportraithint', 'characternoportrait',
-        'characterpack', 'characterpackhint', 'characternopack'] as $key
+        'characterpreview', 'sourcessave', 'characterportraithint', 'characternoportrait', 'characterpackhint',
+        'characternopack', 'characterdrop', 'characterdropor', 'characterdrophint', 'characterzipwhat'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -51,7 +51,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library'
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $here = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library' => $library->slug] +
     $params))->out(false);
-$count = fn(int $n) => $str($n === 1 ? 'onebook' : 'books', $n);
+$count = fn(int $n) => $str($n === 1 ? 'onebook' : 'books', \local_oksigeniaayvurenda\local\screens::number($n));
 
 $corner = catalogue::is_corner(strtoupper($corner)) ? strtoupper($corner) : '';
 $filter = [];

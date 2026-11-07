@@ -47,7 +47,10 @@ final class screens {
         foreach (catalogue::corners($library) as $corner) {
             $corners[] = $corner + [
                 'url' => self::url('search.php', $library, ['corner' => $corner['code']]),
-                'countlabel' => $young ? '' : self::str($corner['count'] === 1 ? 'onebook' : 'books', $corner['count']),
+                'countlabel' => $young ? '' : self::str(
+                    $corner['count'] === 1 ? 'onebook' : 'books',
+                    self::number((int) $corner['count'])
+                ),
                 'art' => self::art('rincon-' . preg_replace('/[^a-z0-9]/', '', \core_text::strtolower((string) $corner['code']))),
             ];
         }
@@ -263,9 +266,11 @@ final class screens {
         if (!$corners && !$subjects) {
             return null;
         }
+        // On a phone, folded under «Refine · n»: the books come first, unless a filter is on.
         return ['corners' => $corners, 'hascorners' => (bool) $corners, 'subjects' => $subjects,
             'hassubjects' => (bool) $subjects, 'cornerslabel' => self::str('facetcorners'),
-            'subjectslabel' => self::str('facetsubjects')];
+            'subjectslabel' => self::str('facetsubjects'), 'refinelabel' => self::str('facetsrefine'),
+            'chips' => count($corners) + count($subjects), 'chosen' => $corner !== '' || $subject > 0];
     }
 
     /**

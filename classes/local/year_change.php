@@ -122,8 +122,9 @@ final class year_change {
         global $DB;
         // One library's (a classroom's, a department's), or the whole centre's.
         $here = $libraryid ? ' AND libraryid = ' . (int) $libraryid : '';
-        $members = $DB->get_records_sql_menu(
-            'SELECT groupname, COUNT(1) FROM {' . self::T . 'member} WHERE yearid = :yearid AND groupname IS NOT NULL
+        $members = $DB->get_records_sql(
+            'SELECT groupname, COUNT(1) AS members, MIN(stage) AS stage FROM {' . self::T . 'member}
+              WHERE yearid = :yearid AND groupname IS NOT NULL
            GROUP BY groupname',
             ['yearid' => $year->id]
         );
@@ -133,8 +134,9 @@ final class year_change {
             ['yearid' => $year->id]
         );
         $groups = [];
-        foreach ($members as $group => $count) {
-            $groups[$group] = ['group' => $group, 'members' => (int) $count, 'borrowers' => 0, 'loans' => 0];
+        foreach ($members as $group => $row) {
+            $groups[$group] = ['group' => (string) $group, 'stage' => (string) ($row->stage ?? ''),
+                'members' => (int) $row->members, 'borrowers' => 0, 'loans' => 0];
         }
         $total = ['loans' => 0, 'borrowers' => 0];
         foreach ($loans as $row) {
@@ -149,12 +151,19 @@ final class year_change {
                 . $here,
             ['yearid' => $year->id]
         );
-        ksort($groups, SORT_NATURAL);
+        // As a school lists them: by stage, then year, then the letter.
+        uasort($groups, fn($a, $b) => \local_oksigeniaayvurenda\core\group_order::compare(
+            $a['group'],
+            $b['group'],
+            $a['stage'] !== '' ? $a['stage'] : null,
+            $b['stage'] !== '' ? $b['stage'] : null
+        ));
         if ($libraryid) {
             // Of one library, the groups that read there.
             $groups = array_filter($groups, fn($g) => $g['loans'] > 0);
         }
-        return $total + ['name' => $year->name, 'members' => (int) array_sum($members), 'groups' => array_values($groups)];
+        return $total + ['name' => $year->name, 'members' => (int) array_sum(array_column($groups, 'members')),
+            'groups' => array_values($groups)];
     }
 
     /**

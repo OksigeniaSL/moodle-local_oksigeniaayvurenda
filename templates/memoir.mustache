@@ -44,6 +44,7 @@
         "stages": [{"label": "Primaria", "width": 75, "value": "150 de 200 · 75 %", "loans": "900 préstamos"}],
         "hasstages": true, "barsnote": "La barra: la parte de sus lectores que vino.",
         "groups": [{"label": "3º A", "width": 80, "value": "20 de 25 · 80 %", "loans": "130 préstamos"}],
+        "groupstages": [{"stage": "Primaria", "groups": [{"label": "3º A", "width": 80, "value": "20 de 25", "loans": "130 préstamos"}]}],
         "hasgroups": true,
         "top": [{"label": "El faro dormido", "value": "14 préstamos", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2}],
         "hastop": true,
@@ -112,6 +113,8 @@
 {{/hasstages}}
 {{#hasgroups}}
 <h2 class="ayv-memoir-heading">{{memoirgroups}}</h2>
+{{#groupstages}}
+{{#stage}}<h3 class="ayv-memoir-stage">{{stage}}</h3>{{/stage}}
 <ul class="ayv-memoir-groups">
     {{#groups}}
     <li class="ayv-memoir-group">
@@ -122,6 +125,7 @@
     </li>
     {{/groups}}
 </ul>
+{{/groupstages}}
 {{/hasgroups}}
 
 {{#hastop}}

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.191.0
+
+- Design, dark mode and accessibility (audit batch 9, first part):
+  - in dark mode, late books, «Erase this reader…» and the featured library's «Enter» read at 4.5:1 or more, and the
+    shelf embedded in another website keeps its own paper and ink whatever the mode;
+  - the characters, a card each: how it speaks on top, its name, its sex as two buttons, «Save» in the card, and one place
+    to drop a picture (its portrait) or a zip (the whole character), with what each holds folded under it;
+  - the corners in their real order, with their drawing, the name above its field and arrows to move them (no more
+    numbers to invent), and a page that says where corners come from when there are none;
+  - «My class» without a class: the island still empty, Mainumby reading and two ways on; the challenge rules only where
+    there is a class;
+  - the search on a phone folds its filters under «Refine · n», unless one is on, so that the books come first;
+  - the tutors' «Save» as a bar the width of the page; the course memoir's groups in the school's order, under their
+    stage; a stocktake with thousands in its counts and fifty at a time with «See 50 more»;
+  - the card: the flower's marks say their level in words, stickers not won lose «not yet» and step back in dark;
+  - Ayvu rande without voices: the memory reading and «Find a book to give a voice to», without the coral microphone;
+  - the public door for the staff: the pulse as a line of text, and «By corners» over the second grid;
+  - the review's other ways (a drawing, a voice) as chips in one row, «Send» on the right; «Accessible formats» on the
+    reader's record as a switch that saves on a tap; the visit's game leads with a magnifier and «Sound» sits with its
+    volume; «Who did what» names who did it only when it changes; the phone page's button the size of its words on a
+    computer; the shelf places as three books on a plank; a guided help's stage the size of its card until it starts;
+  - book counts with thousands on the home page, the door and the shelves.
+
 ## 0.190.0
 
 - Helps (audit batch 8):

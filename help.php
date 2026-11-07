@@ -81,7 +81,7 @@ $back = new moodle_url('/local/oksigeniaayvurenda/' . ($piece === 'record' ? 'se
 $say = fn(string $key) => \local_oksigeniaayvurenda\local\skins::say((int) $practice->entityid, $key);
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <h1 id="ayv-help-title" class="ayv-results-title">' . s($say('helptitle' . $piece)) . '</h1>
-<div class="ayv-help-stage" id="ayv-help-stage">
+<div class="ayv-help-stage ayv-help-waiting" id="ayv-help-stage">
     <iframe id="ayv-help-frame" title="' . s($str('helpframe')) . '"></iframe>
     <div class="ayv-help-pointer" id="ayv-help-pointer" aria-hidden="true"></div>
     <div class="ayv-help-ring" id="ayv-help-ring" aria-hidden="true" hidden></div>

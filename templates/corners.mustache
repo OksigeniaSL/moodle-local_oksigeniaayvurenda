@@ -20,29 +20,45 @@
 
     Example context (json):
     {
-        "heading": "Los rincones", "intro": "Ponles nombre.", "notice": "", "action": "#", "sesskey": "abc", "homeurl": "#",
+        "heading": "Los rincones", "intro": "Ponles nombre.", "notice": "", "action": "https://example.org/corners.php",
+        "sesskey": "abc", "homeurl": "#", "hascorners": true, "importurl": "#",
         "corners": [{"code": "8", "label": "Cuentos y poemas", "default": "Lengua y literatura", "count": 120,
-            "countlabel": "120 libros", "order": 10, "hidden": false, "colour": 2}],
-        "cornersname": "Nombre", "cornersorder": "Orden", "cornershide": "Ocultarlo", "cornerssave": "Guardar",
-        "cornersback": "Volver"
+            "countlabel": "120 libros", "order": 10, "hidden": false, "colour": 2, "art": "https://example.org/r.webp",
+            "first": true, "last": true, "position": "1 de 1"}],
+        "cornersname": "Nombre", "cornershide": "Ocultarlo", "cornerssave": "Guardar", "cornersback": "Volver",
+        "cornersup": "Subir", "cornersdown": "Bajar", "cornersblank": "En blanco, el de la clasificación.",
+        "cornersnone": "Sin rincones", "cornersimport": "Importar un catálogo"
     }
 }}
 <section class="ayv-corners-edit">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#hascorners}}
 <form method="post" action="{{action}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <ul class="ayv-window-list">
+    <ol class="ayv-corners-list">
     {{#corners}}
-        <li class="ayv-book">
-            <p class="ayv-field-hint">{{code}} · {{default}} · {{countlabel}}</p>
-            <label class="ayv-field ayv-field-wide">{{cornersname}} <input type="text" name="label[{{code}}]" value="{{label}}" maxlength="80"></label>
-            <label class="ayv-field">{{cornersorder}} <input type="number" name="order[{{code}}]" value="{{order}}" min="0" max="999"></label>
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="hidden[{{code}}]" value="1" {{#hidden}}checked{{/hidden}}> {{cornershide}}</label>
+        <li class="ayv-corner-row{{#hidden}} ayv-corner-row-off{{/hidden}}" id="ayv-corner-{{code}}">
+            <span class="ayv-corner-row-art ayv-cover-{{colour}}" aria-hidden="true">{{#art}}<img src="{{art}}" alt="" loading="lazy">{{/art}}{{^art}}{{code}}{{/art}}</span>
+            <div class="ayv-corner-row-words">
+                <label class="ayv-field ayv-field-wide">{{cornersname}}
+                    <input type="text" name="label[{{code}}]" value="{{label}}" maxlength="80" placeholder="{{default}}" aria-describedby="ayv-corner-{{code}}-what"></label>
+                <p class="ayv-field-hint" id="ayv-corner-{{code}}-what">{{code}} · {{default}} · {{countlabel}} · {{position}}. {{cornersblank}}</p>
+                <input type="hidden" name="order[{{code}}]" value="{{order}}">
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="hidden[{{code}}]" value="1" {{#hidden}}checked{{/hidden}}> {{cornershide}}</label>
+            </div>
+            <span class="ayv-corner-row-move">
+                <button type="submit" class="ayv-button ayv-button-quiet" name="move" value="up:{{code}}" formaction="{{action}}#ayv-corner-{{code}}" aria-label="{{cornersup}}: {{label}}"{{#first}} disabled{{/first}}>▲</button>
+                <button type="submit" class="ayv-button ayv-button-quiet" name="move" value="down:{{code}}" formaction="{{action}}#ayv-corner-{{code}}" aria-label="{{cornersdown}}: {{label}}"{{#last}} disabled{{/last}}>▼</button>
+            </span>
         </li>
     {{/corners}}
-    </ul>
+    </ol>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{cornerssave}}</button> <a href="{{homeurl}}">{{cornersback}}</a></p>
 </form>
+{{/hascorners}}
+{{^hascorners}}
+<div class="ayv-nothing"><p>{{cornersnone}}</p><p><a class="ayv-button" href="{{importurl}}">{{cornersimport}}</a></p></div>
+{{/hascorners}}
 </section>

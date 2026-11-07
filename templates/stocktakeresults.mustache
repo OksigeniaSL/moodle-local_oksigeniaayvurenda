@@ -22,7 +22,7 @@
     {
         "heading": "Inventario de junio", "scope": "Toda la biblioteca", "notice": "", "progress": "Leídos: 590 de 600",
         "open": true, "readurl": "#", "action": "#", "sesskey": "abc", "downloadurl": "#", "unknown": "",
-        "sections": [{"heading": "Faltan: 1", "hint": "Deberían estar.", "byplace": "", "more": "", "hascopies": true, "empty": "Ninguno",
+        "sections": [{"heading": "Faltan: 1", "anchor": "ayv-stock-missing", "moreurl": "", "hint": "Deberían estar.", "byplace": "", "more": "", "hascopies": true, "empty": "Ninguno",
             "lose": true, "recover": false, "download": true,
             "copies": [{"id": 1, "title": "El faro dormido", "barcode": "100000L", "callnumber": "N MON far",
                         "where": "Narrativa", "readat": ""}]}],
@@ -36,7 +36,7 @@
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#open}}<p class="ayv-more"><a class="ayv-button" href="{{readurl}}">{{stocktakeback}}</a></p>{{/open}}
 {{#sections}}
-<h2 class="ayv-section-title">{{heading}}</h2>
+<h2 class="ayv-section-title" id="{{anchor}}">{{heading}}</h2>
 <p class="ayv-field-hint">{{hint}}</p>
 {{#byplace}}<p class="ayv-stock-scope">{{byplace}}</p>{{/byplace}}
 {{^hascopies}}<p class="ayv-empty">{{empty}}</p>{{/hascopies}}
@@ -48,6 +48,7 @@
 {{/copies}}
 </ul>
 {{#more}}<p class="ayv-field-hint">{{more}}</p>{{/more}}
+{{#moreurl}}<p><a class="ayv-button ayv-button-quiet" href="{{moreurl}}">{{stocktakeseemore}}</a></p>{{/moreurl}}
 {{#download}}<p><a href="{{downloadurl}}">{{stocktakedownload}}</a></p>{{/download}}
 {{#lose}}
 <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">

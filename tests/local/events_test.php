@@ -498,7 +498,9 @@ final class events_test extends \advanced_testcase {
         $detail = get_string('eventruleschangeddetail', 'local_oksigeniaayvurenda', (object) ['count' => 3]);
         $this->assertSame($detail, $lines[0]['detail']);
         $this->assertSame('Ana Inventada', $lines[1]['about']);
-        $this->assertSame(fullname(get_admin()), $lines[1]['who']);
+        // Who did it, once: the second line by the same person does not repeat the name.
+        $this->assertSame(fullname(get_admin()), $lines[0]['who']);
+        $this->assertSame('', $lines[1]['who']);
 
         $views = activity::events($this->entity, 'views', 0);
         $this->assertCount(1, $views['events']);

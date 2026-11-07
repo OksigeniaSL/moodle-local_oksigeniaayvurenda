@@ -126,8 +126,10 @@ foreach ($readers as $reader) {
         $marks = $look === 'flower' ? cards::path_svg($path, $level, $levellabel)
             : ($sky ? cards::sky_path_svg($path, $level, $levellabel, $sober) : '');
         // The classic look says what the path means, concretely, without counts.
+        // The flower's marks say their level in words too: three small drawings are hard to read at a glance.
         $paths[] = ['label' => $name, 'hint' => $str('path' . $path . 'hint'), 'level' => $level, 'marks' => $marks,
-            'detail' => $classic[$path] ?? ''];
+            'detail' => $classic[$path] ?? ($look === 'flower'
+                ? $str('pathlevelof', (object) ['level' => $level, 'of' => 3]) : '')];
     }
     $past = [];
     foreach ($look === 'flower' || $sky ? $album['past'] : [] as $p) {
@@ -175,7 +177,8 @@ foreach ($readers as $reader) {
         true
     ) || $look === 'flower');
     foreach ($cromos as &$cromo) {
-        $cromo['state'] = $cromo['won'] ? $cromo['when'] : $str('cromonotyet');
+        // A grey sticker already says it is not won: only the won ones carry their date.
+        $cromo['state'] = $cromo['won'] ? $cromo['when'] : '';
         $cromo['label'] = $str($cromo['won'] ? 'cromowon' : 'cromomissing', (object) ['name' => $cromo['name'],
             'when' => $cromo['when']]);
     }

@@ -45,12 +45,38 @@ if (data_submitted() && confirm_sesskey()) {
     $labels = optional_param_array('label', [], PARAM_TEXT);
     $orders = optional_param_array('order', [], PARAM_INT);
     $hidden = optional_param_array('hidden', [], PARAM_BOOL);
+    // The order is the place in the list: an arrow moves a corner one place, and the places are written 10, 20 and on.
+    $move = optional_param('move', '', PARAM_RAW_TRIMMED);
+    $codes = array_keys($labels);
+    usort($codes, fn($a, $b) => [$orders[$a] ?? 0, array_search($a, array_keys($labels))]
+        <=> [$orders[$b] ?? 0, array_search($b, array_keys($labels))]);
+    if (preg_match('/^(up|down):(.+)$/', $move, $m) && ($at = array_search($m[2], array_map('strval', $codes), true)) !== false) {
+        $to = $m[1] === 'up' ? $at - 1 : $at + 1;
+        if ($to >= 0 && $to < count($codes)) {
+            [$codes[$at], $codes[$to]] = [$codes[$to], $codes[$at]];
+        }
+    }
     $corners = [];
-    foreach ($labels as $code => $label) {
-        $corners[$code] = ['label' => $label, 'order' => $orders[$code] ?? 0, 'hidden' => !empty($hidden[$code])];
+    foreach ($codes as $i => $code) {
+        $corners[$code] = ['label' => $labels[$code], 'order' => 10 * ($i + 1), 'hidden' => !empty($hidden[$code])];
     }
     catalogue::save_corners($library, $corners);
-    $notice = $str('cornerssaved');
+    $notice = $move !== '' ? '' : $str('cornerssaved');
+}
+// Each corner with its drawing, its place in the list and whether it can go up or down.
+$list = array_values(catalogue::corners($library, true));
+$rows = [];
+foreach ($list as $i => $corner) {
+    $rows[] = $corner + [
+        'countlabel' => $str($corner['count'] === 1 ? 'onebook' : 'books', \local_oksigeniaayvurenda\local\screens::number(
+            (int) $corner['count']
+        )),
+        'art' => \local_oksigeniaayvurenda\local\screens::art('rincon-'
+            . preg_replace('/[^a-z0-9]/', '', core_text::strtolower((string) $corner['code']))),
+        'first' => $i === 0,
+        'last' => $i === count($list) - 1,
+        'position' => $str('cornersposition', (object) ['at' => $i + 1, 'of' => count($list)]),
+    ];
 }
 $data = [
     'heading' => $str('cornerstitle'),
@@ -58,13 +84,15 @@ $data = [
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'corners' => array_map(fn($corner) => $corner + ['countlabel' => $str(
-        $corner['count'] === 1 ? 'onebook' : 'books',
-        $corner['count']
-    )], catalogue::corners($library, true)),
+    'corners' => $rows,
+    'hascorners' => (bool) $rows,
+    'importurl' => (new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false),
     'homeurl' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
 ];
-foreach (['cornersname', 'cornersorder', 'cornershide', 'cornerssave', 'cornersback'] as $key) {
+foreach (
+    ['cornersname', 'cornershide', 'cornerssave', 'cornersback', 'cornersup', 'cornersdown', 'cornersblank',
+        'cornersnone', 'cornersimport'] as $key
+) {
     $data[$key] = $str($key);
 }
 shell::output(
