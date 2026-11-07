@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.196.1
+
+- The personal area's block, after Gaudí's review: whoever lends at several desks gets one section with a row for each
+  library (its name, what waits, in red with books late, and «Desk»); the buttons «Go to the library» and «My card» come
+  once, at the end, and each library's name links to it; a class challenge met says «Met!» by its count. A university or
+  a company looks like one whatever the reader's card.
+
 ## 0.196.0
 
 - The memory's idea of the day, to taste and with a door to the new (Enrique, 7 November 2026): after a book loved, first

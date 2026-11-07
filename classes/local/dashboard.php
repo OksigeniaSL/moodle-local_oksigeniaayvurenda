@@ -49,7 +49,8 @@ final class dashboard {
      *
      * @param int $userid
      * @param int|null $now
-     * @return array|null centres (each with its skin, sections and links) and many.
+     * @return array|null desk (one library with its numbers, or several a row each), centres (each with its skin,
+     *     name and sections) and the ways in, once: home, golabel, gofirst, card, cardlabel, leaf, star and skin.
      */
     public static function for_user(int $userid, ?int $now = null): ?array {
         global $DB;
@@ -85,10 +86,43 @@ final class dashboard {
         if (!$centres) {
             return null;
         }
-        foreach ($centres as &$centre) {
-            $centre['showname'] = count($centres) > 1;
+        // The desks of all the libraries someone lends in, together: one with its numbers, several a row each (Gaudí).
+        $desks = array_merge(...array_map(fn($c) => $c['desks'], $centres));
+        $desk = null;
+        if (count($desks) === 1) {
+            $desk = ['heading' => $centres[0]['deskheading'], 'one' => $desks[0], 'many' => [], 'hasmany' => false,
+                'skin' => $centres[0]['skin']];
+        } else if ($desks) {
+            $desk = ['heading' => $centres[0]['deskheading'], 'one' => null, 'many' => array_map(fn($d) => [
+                'name' => $d['name'], 'home' => $d['home'], 'desk' => $d['desk'], 'desklabel' => $d['desklabel'],
+                'late' => (bool) array_filter(array_column($d['rows'], 'late')),
+                'summary' => $d['rows'] ? implode(' · ', array_map(fn($r) => $r['number'] . ' ' . $r['label'], $d['rows']))
+                    : $d['uptodate'],
+            ], $desks), 'hasmany' => true, 'skin' => $centres[0]['skin']];
         }
-        return ['centres' => $centres];
+        $shown = array_values(array_filter($centres, fn($c) => (bool) $c['sections']));
+        foreach ($shown as &$centre) {
+            $centre['showname'] = count($shown) > 1 || ($desk && $desk['hasmany']);
+            foreach ($centre['sections'] as &$section) {
+                // Whoever keeps a desk has it to look at: the idea of the day only where there is room.
+                $section['extra'] = $desk && !empty($section['tell']) && empty($section['news']);
+            }
+        }
+        unset($centre, $section);
+        // The ways in, once, at the end: the library where they read, else the first.
+        $first = array_values(array_filter($centres, fn($c) => $c['card'] !== ''))[0] ?? $centres[0];
+        return [
+            'desk' => $desk,
+            'centres' => $shown,
+            'skin' => $first['skin'],
+            'home' => $first['home'],
+            'golabel' => $first['golabel'],
+            'gofirst' => $desk === null,
+            'card' => $first['card'],
+            'cardlabel' => $first['cardlabel'],
+            'leaf' => $first['skin'] === 'school',
+            'star' => $first['skin'] === 'secondary',
+        ];
     }
 
     /**
@@ -111,9 +145,6 @@ final class dashboard {
         ))->out(false);
         $desks = self::desks($entityid, $userid, $now, $say, $url);
         $sections = [];
-        if ($desks) {
-            $sections[] = ['desk' => ['heading' => $say('dashdesk'), 'libraries' => $desks, 'many' => count($desks) > 1]];
-        }
         if ($reader) {
             $books = self::books($library, $reader, $userid, $now, $skin, $say, $url);
             if ($books) {
@@ -121,8 +152,7 @@ final class dashboard {
             } else {
                 $tell = self::tell($library, $reader, $now, $skin, $say, $url);
                 if ($tell) {
-                    // Whoever keeps the desk has it to look at: the idea of the day only where there is room.
-                    $sections[] = ['tell' => $tell, 'extra' => (bool) $desks];
+                    $sections[] = ['tell' => $tell];
                 }
             }
             $readings = self::readings($library, $userid, $say, $url);
@@ -138,24 +168,23 @@ final class dashboard {
             // Nothing of their own here and no desk: what came last, so that the way in is worth taking.
             $tell = self::news($library, $skin, $say, $url);
             if ($tell) {
-                $sections[] = ['tell' => $tell, 'extra' => false];
+                $sections[] = ['tell' => $tell, 'news' => true];
             }
         }
         foreach ($sections as $i => &$section) {
             $section['first'] = $i === 0;
-            $section['extra'] = $section['extra'] ?? false;
+            $section['extra'] = false;
         }
         return [
             'name' => format_string($library->name, true, ['escape' => false]),
             'skin' => $skin,
             'sections' => $sections,
+            'desks' => $desks,
+            'deskheading' => $say('dashdesk'),
             'home' => $url('index.php', $library),
             'golabel' => $say('dashgo'),
-            'gofirst' => !$desks,
             'card' => $reader ? $url('card.php', $library) : '',
             'cardlabel' => $say('mycard'),
-            'leaf' => $skin === 'school',
-            'star' => $skin === 'secondary',
         ];
     }
 
@@ -170,8 +199,8 @@ final class dashboard {
      */
     private static function skin(int $entityid, string $look, bool $reads): string {
         $skin = skins::of($entityid);
-        if ($skin === 'company') {
-            return 'company';
+        if ($skin === 'company' || $skin === 'university') {
+            return $skin;
         }
         if (!$reads) {
             return in_array($skin, ['school', 'secondary', 'university'], true) ? $skin : 'university';
@@ -502,6 +531,7 @@ final class dashboard {
             'count' => $say('dashof', (object) ['done' => $challenge->done, 'target' => $challenge->target]),
             'marks' => array_map(fn($m) => ['on' => (bool) $m['lit']], $view['marks']),
             'stars' => $skin === 'secondary',
+            'met' => $challenge->complete ? $say('dashmet') : '',
             'text' => $view['text'],
             'meton' => $view['meton'] ?? '',
         ]];
@@ -535,6 +565,7 @@ final class dashboard {
             'count' => $say('dashof', (object) ['done' => $done, 'target' => $goal]),
             'bar' => array_map(fn($i) => ['on' => $i < $lit], range(0, $steps - 1)),
             'steps' => $steps,
+            'met' => $done >= $goal ? $say('dashgoalmet') : '',
             'text' => $say('dashgoalhint'),
         ]];
     }
@@ -671,6 +702,7 @@ final class dashboard {
                 }
             }
             $out[] = ['name' => format_string($library->name, true, ['escape' => false]), 'rows' => $rows,
+                'home' => $url('index.php', $library),
                 'uptodate' => $rows ? '' : $say('dashdeskclear'), 'desk' => $url('desk.php', $library),
                 'desklabel' => $say('dashdeskgo')];
         }

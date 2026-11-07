@@ -82,12 +82,8 @@ final class dashboard_test extends \advanced_testcase {
         $item = $gen->create_item(['libraryid' => $library->id, 'recordid' => $short->id]);
         $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id,
             'timedue' => $now - 3 * DAYSECS]);
-        $this->assertEmpty(array_filter(array_column(
-            dashboard::for_user((int) $teacher->id, $now)['centres'][0]['sections'],
-            'desk'
-        )));
-        $admin = dashboard::for_user((int) get_admin()->id, $now)['centres'][0];
-        $desk = array_values(array_filter(array_column($admin['sections'], 'desk')))[0]['libraries'][0];
+        $this->assertNull(dashboard::for_user((int) $teacher->id, $now)['desk']);
+        $desk = dashboard::for_user((int) get_admin()->id, $now)['desk']['one'];
         $this->assertSame([1], array_column($desk['rows'], 'number'));
         $this->assertTrue($desk['rows'][0]['late']);
         // The teacher's own book, late, in words.
