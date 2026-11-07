@@ -149,7 +149,7 @@ foreach ($stats as $table => $counts) {
 if ($importer->out_then()) {
     cli_heading('Out in the export, come in as returned on its day, and not seen here since: look whether they are back');
     foreach ($importer->out_then() as [$code, $title, $card, $when]) {
-        cli_writeln($code . "\t" . userdate($when, '%Y-%m-%d') . "\t" . $card . "\t" . $title);
+        cli_writeln($code . "\t" . userdate($when, '%Y-%m-%d', 99, false) . "\t" . $card . "\t" . $title);
     }
 }
 if ($importer->relabelled()) {

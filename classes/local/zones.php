@@ -96,11 +96,10 @@ final class zones {
      * @return string
      */
     public static function date(int $time, string $format, $where): string {
-        return userdate(
-            $time,
-            strpos($format, 'strftime') === 0 ? get_string($format, 'langconfig') : $format,
-            self::name($where)
-        );
+        // The language pack's formats lose the zero of the day («3 de noviembre»); a format of its own keeps it, or
+        // «2026-09-01» would be «2026-09-1», which no date field reads.
+        $pack = strpos($format, 'strftime') === 0;
+        return userdate($time, $pack ? get_string($format, 'langconfig') : $format, self::name($where), $pack);
     }
 
     /**

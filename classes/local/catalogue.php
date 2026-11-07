@@ -120,7 +120,14 @@ final class catalogue {
         }
         $conditions = [];
         $params = ['entityid' => $library->entityid];
-        foreach ($words as $i => $word) {
+        // An ISBN (from the back cover, with or without hyphens, in 10 or 13) finds its book, which no word of the title
+        // would.
+        $isbn = desk::cover_isbn(trim($query));
+        if ($isbn !== null) {
+            $conditions[] = 'r.isbn = :isbn';
+            $params['isbn'] = $isbn;
+        }
+        foreach ($isbn === null ? $words : [] as $i => $word) {
             $escaped = $DB->sql_like_escape($word);
             $conditions[] = '(' . $DB->sql_like('r.searchtext', ':start' . $i) . ' OR ' .
                 $DB->sql_like('r.searchtext', ':inner' . $i) . ')';

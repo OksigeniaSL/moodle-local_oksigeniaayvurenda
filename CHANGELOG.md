@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.173.0
+
+- Dates for a date field keep the zero of the day: «Reports» came with «From» and «To» empty from the 1st to the 9th of
+  every month (and «From» always, since a year starts on a 1st), and so did other date fields and the dates of some CSV.
+- The copy a centre takes with it has the readings of the courses with their books, the course reserves, the fragments,
+  who keeps each library and the LTI platforms; what it leaves out on purpose (voices and their consents, the keys of
+  self-loan stations, a phone paired with a desk, where each person goes in a digital book) is written down, and a test
+  fails if a new table is in neither list.
+- The catalogue search finds a book by its ISBN, with or without hyphens, in 10 or 13 figures.
+- The app no longer says «Done: it is reserved» when the hold was refused (the limit reached, a copy free, already asked
+  for): it shows why.
+- Two global functions of the page of copies have the plugin's prefix, and the plugin says it is beta.
+
 ## 0.172.0
 
 - «Repeated records», from «More»: the records that share an ISBN, and those with the same title and author when one lacks

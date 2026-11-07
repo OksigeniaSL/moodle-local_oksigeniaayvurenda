@@ -1399,6 +1399,7 @@ $string['holdcancel'] = 'Anular';
 $string['holdcancelask'] = '¿Lo dejas? Pasará al siguiente que lo espera.';
 $string['holdcancelled'] = 'Reserva anulada.';
 $string['holdcancelmine'] = 'Ya no lo quiero';
+$string['holdfailed'] = '{$a}';
 $string['holdfor'] = 'Reservar para un lector';
 $string['holdforgo'] = 'Reservar';
 $string['holdforhint'] = 'el número del carné o el nombre';

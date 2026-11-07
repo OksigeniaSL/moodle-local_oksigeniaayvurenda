@@ -1399,6 +1399,7 @@ $string['holdcancel'] = 'Cancel';
 $string['holdcancelask'] = 'Let it go? Whoever is next will get it.';
 $string['holdcancelled'] = 'Reservation cancelled.';
 $string['holdcancelmine'] = 'I do not want it any more';
+$string['holdfailed'] = '{$a}';
 $string['holdfor'] = 'Reserve for a reader';
 $string['holdforgo'] = 'Reserve';
 $string['holdforhint'] = 'card number or name';

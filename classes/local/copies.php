@@ -51,8 +51,8 @@ final class copies {
     /** @var string The end of the name of a copy made by hand. */
     private const HAND = '-a-mano';
 
-    /** @var string[] Tables of an entity, and how to find its rows. */
-    private const TABLES = [
+    /** @var string[] Tables of an entity, and how to find its rows. Every table of the plugin is here or in LEFT_OUT. */
+    public const TABLES = [
         'entity' => 'id = :entityid',
         'library' => 'entityid = :entityid',
         'year' => 'entityid = :entityid',
@@ -93,6 +93,25 @@ final class copies {
             JOIN {local_oksigeniaayvurenda_library} l ON l.id = s.libraryid WHERE l.entityid = :entityid)',
         'tutor' => 'yearid IN (SELECT id FROM {local_oksigeniaayvurenda_year} WHERE entityid = :entityid)',
         'source' => 'entityid = :entityid',
+        // The readings of the courses and what hangs from them: years of work of whoever teaches.
+        'readinglist' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'readingitem' => 'listid IN (SELECT r.id FROM {local_oksigeniaayvurenda_readinglist} r
+            JOIN {local_oksigeniaayvurenda_library} l ON l.id = r.libraryid WHERE l.entityid = :entityid)',
+        'reserve' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'fragment' => "digitalid IN (SELECT id FROM {local_oksigeniaayvurenda_digital} WHERE entityid = :entityid
+            AND kind <> 'voice')",
+        'keeper' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'ltiplatform' => 'entityid = :entityid',
+        'lticontext' => 'platformid IN (SELECT id FROM {local_oksigeniaayvurenda_ltiplatform} WHERE entityid = :entityid)',
+    ];
+
+    /** @var string[] The tables a copy leaves out on purpose, and why. */
+    public const LEFT_OUT = [
+        'voiceconsent' => 'voices never leave the site, nor who may record',
+        'voiceinvite' => 'voices never leave the site, nor who was asked to record',
+        'selfpost' => 'the key of a self-loan station opens it without an account',
+        'relay' => 'a phone paired with a desk for a few minutes',
+        'digitalread' => 'where each person goes in a digital book, by Moodle account',
     ];
 
     /**

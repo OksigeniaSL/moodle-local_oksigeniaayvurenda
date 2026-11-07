@@ -111,7 +111,7 @@ final class zones_test extends \advanced_testcase {
         $this->setTimezone('Asia/Tokyo');
         \core\session\manager::set_user(get_admin());
         $this->assertSame(
-            userdate($due, '%Y-%m-%d', 'America/Bogota'),
+            userdate($due, '%Y-%m-%d', 'America/Bogota', false),
             zones::date($due, '%Y-%m-%d', $w->library)
         );
     }
@@ -150,5 +150,18 @@ final class zones_test extends \advanced_testcase {
         $year = years::around($w->entityid, $this->bogota('2026-11-02 10:00'));
         $start = (new \DateTimeImmutable('@' . $year->timestart))->setTimezone(new \DateTimeZone('America/Bogota'));
         $this->assertSame('00:00', $start->format('H:i'));
+    }
+
+    /**
+     * A date as a date field reads it keeps the zero of a day from 1 to 9 (the reports started empty every 1st of a month);
+     * a date in words still drops it.
+     */
+    public function test_iso_keeps_the_zero(): void {
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $time = make_timestamp(2026, 9, 1, 12);
+        $this->assertSame('2026-09-01', zones::date($time, '%Y-%m-%d', $library));
+        $this->assertSame('20260901', zones::date($time, '%Y%m%d', $library));
+        $this->assertStringNotContainsString(' 01 ', ' ' . zones::date($time, 'strftimedate', $library) . ' ');
     }
 }

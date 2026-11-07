@@ -162,8 +162,9 @@ $data = [
     'empty' => $str('copiesempty'),
     'download' => $str('copydownload'),
     'make' => $manage ? ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('copymake')] : null,
-    'filecopy' => $manage ? copies_files($entityid, $str) : null,
-    'offsite' => $manage && plans::allows($entityid, 'offsite') ? copies_offsite($entityid, $secret, $pullurl, $str) : null,
+    'filecopy' => $manage ? local_oksigeniaayvurenda_copies_files($entityid, $str) : null,
+    'offsite' => $manage && plans::allows($entityid, 'offsite')
+        ? local_oksigeniaayvurenda_copies_offsite($entityid, $secret, $pullurl, $str) : null,
     'offsitenote' => $manage && !plans::allows($entityid, 'offsite') ? $str('offsitenotinplan') : '',
     'offsiteclear' => $manage && !plans::allows($entityid, 'offsite') && offsite::has_any($entityid) ? [
         'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'label' => $str('offsiteclearall')] : null,
@@ -176,7 +177,7 @@ $data = [
  * @param callable $str
  * @return array
  */
-function copies_files(int $entityid, callable $str): array {
+function local_oksigeniaayvurenda_copies_files(int $entityid, callable $str): array {
     global $PAGE;
     $latest = \local_oksigeniaayvurenda\local\filecopy::latest($entityid);
     $last = offsite::settings($entityid)['lastfiles'];
@@ -208,7 +209,7 @@ function copies_files(int $entityid, callable $str): array {
  * @param callable $str
  * @return array
  */
-function copies_offsite(int $entityid, string $secret, string $pullurl, callable $str): array {
+function local_oksigeniaayvurenda_copies_offsite(int $entityid, string $secret, string $pullurl, callable $str): array {
     global $PAGE;
     $settings = offsite::settings($entityid);
     $day = fn(int $time) => userdate($time, get_string('strftimedate', 'langconfig'));

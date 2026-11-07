@@ -68,14 +68,26 @@ final class ask_hold extends external_api {
         $now = time();
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $where->entityid, 'userid' => $USER->id,
             'status' => 'active'], 'id', IGNORE_MULTIPLE);
+        // A refusal is an exception, as in renew_loan: the app says «Done» for any answer that is not one, and the reader
+        // went away sure the book was kept for them.
         if (!$reader || !holds::online($where, (int) $reader->id, $now)) {
-            return ['ok' => false, 'message' => get_string('holdnotallowed', 'local_oksigeniaayvurenda')];
+            throw new \moodle_exception(
+                'holdfailed',
+                'local_oksigeniaayvurenda',
+                '',
+                get_string('holdnotallowed', 'local_oksigeniaayvurenda')
+            );
         }
         $result = holds::add($where, $recordid, (int) $reader->id, (int) $USER->id, $now);
-        return ['ok' => $result['ok'], 'message' => get_string(
-            $result['ok'] ? 'holdadded' : 'hold' . $result['reason'],
-            'local_oksigeniaayvurenda'
-        )];
+        if (!$result['ok']) {
+            throw new \moodle_exception(
+                'holdfailed',
+                'local_oksigeniaayvurenda',
+                '',
+                get_string('hold' . $result['reason'], 'local_oksigeniaayvurenda')
+            );
+        }
+        return ['ok' => true, 'message' => get_string('holdadded', 'local_oksigeniaayvurenda')];
     }
 
     /**

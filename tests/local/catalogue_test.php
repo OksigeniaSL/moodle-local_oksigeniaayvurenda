@@ -204,4 +204,21 @@ final class catalogue_test extends \advanced_testcase {
         $this->assertSame('Ana Montes', catalogue::display_name('Montes, Ana'));
         $this->assertSame('Ediciones Colibrí', catalogue::display_name('Ediciones Colibrí'));
     }
+
+    /**
+     * An ISBN typed or read in the search box finds its book, with hyphens or without, in 10 or 13 figures.
+     */
+    public function test_search_by_isbn(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'El gran Gatsby', 'isbn' => '9780743273565',
+            'searchtext' => 'el gran gatsby']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id]);
+        foreach (['9780743273565', '978-0-7432-7356-5', '0743273567'] as $typed) {
+            $found = catalogue::search($library, $typed);
+            $this->assertSame(1, $found['total'], $typed);
+        }
+        $this->assertSame(0, catalogue::search($library, '9780306406157')['total']);
+    }
 }

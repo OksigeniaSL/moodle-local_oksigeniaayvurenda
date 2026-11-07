@@ -82,7 +82,7 @@ if ($options['due'] !== '') {
     }
 }
 $plan = $loans->plan($loans->lines((string) file_get_contents($options['file'])));
-$when = fn($line) => $line['date'] ? userdate($line['date'], '%Y-%m-%d') : '?' . $line['rawdate'];
+$when = fn($line) => $line['date'] ? userdate($line['date'], '%Y-%m-%d', 99, false) : '?' . $line['rawdate'];
 $who = function (array $line): string {
     $text = '[' . $line['readerhow'] . '] ' . $line['reader'];
     foreach ($line['readers'] as $c) {

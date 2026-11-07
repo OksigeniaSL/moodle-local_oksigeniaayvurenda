@@ -605,17 +605,17 @@ final class sanctions {
                 $names[$id] = $desk ? $desk->reader($id) : ['name' => '', 'cardcode' => ''];
             }
             $out[] = spreadsheet::row([
-                userdate((int) $row->timecreated, '%Y-%m-%d', $zone),
+                userdate((int) $row->timecreated, '%Y-%m-%d', $zone, false),
                 $names[$id]['name'],
                 $names[$id]['cardcode'],
                 $row->kind,
                 (string) ($row->title ?? $row->note ?? ''),
                 (int) $row->dayslate,
-                $row->timeuntil ? userdate((int) $row->timeuntil - 1, '%Y-%m-%d', $zone) : '',
+                $row->timeuntil ? userdate((int) $row->timeuntil - 1, '%Y-%m-%d', $zone, false) : '',
                 $row->cents !== null ? number_format((int) $row->cents / 100, 2, '.', '') : '',
                 $row->cents !== null ? $currency : '',
                 $row->status,
-                $row->timeclosed ? userdate((int) $row->timeclosed, '%Y-%m-%d', $zone) : '',
+                $row->timeclosed ? userdate((int) $row->timeclosed, '%Y-%m-%d', $zone, false) : '',
             ]);
         }
         $rows->close();

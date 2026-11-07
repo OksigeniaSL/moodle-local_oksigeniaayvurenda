@@ -111,9 +111,14 @@ final class mobile_test extends \advanced_testcase {
         $this->assertStringContainsString('local_oksigeniaayvurenda_ask_hold', $html);
         $answer = \local_oksigeniaayvurenda\external\ask_hold::execute($library->slug, (int) $record->id);
         $this->assertTrue($answer['ok']);
-        $answer = \local_oksigeniaayvurenda\external\ask_hold::execute($library->slug, (int) $record->id);
-        $this->assertFalse($answer['ok']);
-        $this->assertSame(get_string('holdhas', 'local_oksigeniaayvurenda'), $answer['message']);
+        // A second time it is refused, and the app shows why instead of «Done».
+        try {
+            \local_oksigeniaayvurenda\external\ask_hold::execute($library->slug, (int) $record->id);
+            $this->fail('a refused hold must throw');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('holdfailed', $e->errorcode);
+            $this->assertStringContainsString(get_string('holdhas', 'local_oksigeniaayvurenda'), $e->getMessage());
+        }
         $html = mobile::mobile_record_view(['library' => $library->slug, 'id' => $record->id])['templates'][0]['html'];
         $this->assertStringContainsString(get_string('holdminewaiting', 'local_oksigeniaayvurenda'), $html);
         // Let go of it from the app: the page asks for it again.
