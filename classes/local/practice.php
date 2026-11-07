@@ -365,7 +365,7 @@ final class practice {
         }
         $readers = $DB->get_records_menu(self::T . 'reader', ['entityid' => $library->entityid], '', 'cardcode, id');
         $year = years::around((int) $library->entityid, $now);
-        if ($piece === 'bankround') {
+        if ($piece === 'bankround' || $piece === 'bank') {
             self::bank($library, $readers, $year, $now);
         }
         if ($piece === 'weed') {

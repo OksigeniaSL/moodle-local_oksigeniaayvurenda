@@ -33,7 +33,7 @@
         "heading": "Banco de libros", "intro": "Un lote por curso.", "notice": "", "action": "#", "slug": "banco",
         "sesskey": "x", "hassets": true, "hasgroups": true,
         "sets": [{"id": 1, "name": "1.º de ESO", "pupils": "52 alumnos", "chips": [{"chip": "1.º ESO A"}], "haschips": true,
-            "titles": [{"recordid": 7, "title": "Matemáticas 1", "counts": "48 prestados · 2 libres", "isshort": true, "mend": "Para reponer: 1 roto"}],
+            "nopupils": false, "titles": [{"recordid": 7, "title": "Matemáticas 1", "counts": "48 prestados · 2 libres", "isshort": true, "mend": "Para reponer: 1 roto"}],
             "hastitles": true, "groupoptions": [{"value": "1.º ESO A", "label": "1.º ESO A", "checked": true}],
             "searching": false, "query": "", "found": []}],
         "groupoptions": [{"value": "1.º ESO A", "label": "1.º ESO A", "checked": false}],
@@ -41,7 +41,8 @@
         "bankgroups": "Para qué grupos", "banknogroups": "No hay grupos este curso.", "banksave": "Guardar",
         "bankremovesure": "¿Quitar el lote? Toca otra vez", "bankremove": "Quitar el lote", "bankaddtitle": "Añadir un título", "bankfind": "Título o ISBN",
         "bankfindbutton": "Buscar", "bankadd": "Añadir", "banknotitles": "Sin títulos todavía.",
-        "bankremovetitle": "Quitar", "bankedit": "Cambiar el lote", "banknothing": "No hay nada con esas palabras."
+        "bankremovetitle": "Quitar", "bankedit": "Cambiar el lote", "banknothing": "No hay nada con esas palabras.",
+        "banknopupils": "Ninguno de sus grupos tiene alumnos este curso."
     }
 }}
 <section class="ayv-bank">
@@ -91,8 +92,9 @@
     {{^found}}<li class="ayv-empty">{{banknothing}}</li>{{/found}}
     </ul>
     {{/searching}}
-    <details class="ayv-bank-edit">
+    <details class="ayv-bank-edit"{{#nopupils}} open{{/nopupils}}>
         <summary>{{bankedit}}</summary>
+        {{#nopupils}}<p class="ayv-notice">{{banknopupils}}</p>{{/nopupils}}
         <form method="post" action="{{action}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{id}}">
             <label class="ayv-field">{{bankname}} <input type="text" name="name" value="{{name}}" maxlength="100" required></label>

@@ -114,5 +114,8 @@ shell::output(
     '',
     ['search' => false, 'nav' => [['url' => $desk, 'label' => $str('desktitle')], ['url' =>
         (new moodle_url('/local/oksigeniaayvurenda/bankround.php', ['library' => $library->slug]))->out(false),
-        'label' => $str('bankroundnav')]]]
+        'label' => $str('bankroundnav')], ['url' => (new moodle_url(
+            '/local/oksigeniaayvurenda/help.php',
+            ['library' => $library->slug, 'piece' => 'bank']
+        ))->out(false), 'label' => $str('helpnav')]]]
 );

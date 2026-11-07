@@ -516,6 +516,36 @@ window.AYVHelpPieces = {
         });
     },
     // Who keeps a library: what it is for, a name looked for, and how it is given and taken away.
+    bank: function(h) {
+        'use strict';
+        return h.point('.ayv-bankset').then(function() {
+            return h.say(0);
+        }).then(function() {
+            return h.point('.ayv-bankset .ayv-holds-row');
+        }).then(function() {
+            return h.say(1);
+        }).then(function() {
+            return h.point('.ayv-bankset .ayv-window-search');
+        }).then(function() {
+            return h.say(2);
+        }).then(function() {
+            return h.point('form.ayv-book');
+        }).then(function() {
+            return h.say(3);
+        }).then(function() {
+            return h.go('a[href*="roll.php"]');
+        }).then(function() {
+            return h.point('.ayv-roll-class');
+        }).then(function() {
+            return h.say(4);
+        }).then(function() {
+            return h.go('.ayv-roll-class');
+        }).then(function() {
+            return h.point('.ayv-roll-pupil');
+        }).then(function() {
+            return h.say(5);
+        });
+    },
     bankround: function(h) {
         'use strict';
         return h.point('.ayv-camp-number').then(function() {

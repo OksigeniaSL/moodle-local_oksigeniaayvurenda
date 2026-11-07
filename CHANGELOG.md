@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.188.0
+
+- The guided help «Sets and classes» of a textbook bank (a set, its titles, adding one, a new set, by class, a class), with
+  its voices in the art package 0.1.46, opened from «Sets», «By class» and the bank's desk.
+- A new year: a set none of whose groups has pupils opens its change with this year's groups to tick, and the handout links
+  to the sets.
+
 ## 0.187.0
 
 - Linking readers with their accounts: «None of these» is remembered. The reader is not offered those accounts again and

@@ -65,7 +65,8 @@ for ($i = 1; $i <= $pieces[$piece]['steps']; $i++) {
     $voices[] = $art && is_readable($art . $file) ? (new moodle_url('/local/oksigeniaayvurendaarte' . $file))->out(false) : null;
 }
 $back = new moodle_url('/local/oksigeniaayvurenda/' . $pieces[$piece]['page'], ['library' =>
-    $piece === 'bankround' && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::bank_slug() : $library->slug]);
+    in_array($piece, ['bankround', 'bank'], true) && !\local_oksigeniaayvurenda\local\bank::is($library) ? practice::bank_slug()
+        : $library->slug]);
 $main = '<section class="ayv-help" aria-labelledby="ayv-help-title">
 <h1 id="ayv-help-title" class="ayv-results-title">' . s($str('helptitle' . $piece)) . '</h1>
 <div class="ayv-help-stage" id="ayv-help-stage">
@@ -99,7 +100,7 @@ shell::output($str('helptitle' . $piece), $main, $library, '', [
         'auto' => $auto,
         'frame' => (new moodle_url(
             '/local/oksigeniaayvurenda/' . $pieces[$piece]['page'],
-            ['library' => $piece === 'bankround' ? practice::bank_slug() : $practice->slug, 'help' => 1]
+            ['library' => in_array($piece, ['bankround', 'bank'], true) ? practice::bank_slug() : $practice->slug, 'help' => 1]
                 + ($piece === 'bankround' ? ['mode' => 'collect'] : []) + ($piece === 'card' ? ['reader' => $DB->get_field(
                     'local_oksigeniaayvurenda_reader',
                     'id',

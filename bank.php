@@ -86,6 +86,9 @@ foreach (bank::needs($library, time()) as $need) {
         'id' => $need['id'],
         'name' => $need['name'],
         'pupils' => $str('bankpupils', $need['pupils']),
+        // A set none of whose groups has pupils this year (a new year, groups named by promotion): its change is open, with
+        // this year's groups to tick.
+        'nopupils' => $set['groups'] && !$need['pupils'],
         'chips' => array_map(fn($g) => ['chip' => $g], $set['groups']),
         'haschips' => (bool) $set['groups'],
         'titles' => array_map(fn($t) => $t + ['counts' => $counts($t),
@@ -116,7 +119,7 @@ $data = [
 foreach (
     ['banknone', 'banknewset', 'bankname', 'bankgroups', 'banknogroups', 'banksave', 'bankremove', 'bankremovesure',
         'bankaddtitle', 'bankfind', 'bankfindbutton', 'bankadd', 'banknotitles', 'bankremovetitle', 'bankedit',
-        'banknothing'] as $key
+        'banknothing', 'banknopupils'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -130,5 +133,8 @@ shell::output(
         (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug]))->out(false),
         'label' => $str('bankrollnav')], ['url' =>
         (new moodle_url('/local/oksigeniaayvurenda/bankround.php', ['library' => $library->slug]))->out(false),
-        'label' => $str('bankroundnav')]]]
+        'label' => $str('bankroundnav')], ['url' => (new moodle_url(
+            '/local/oksigeniaayvurenda/help.php',
+            ['library' => $library->slug, 'piece' => 'bank']
+        ))->out(false), 'label' => $str('helpnav')]]]
 );

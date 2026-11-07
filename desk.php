@@ -185,7 +185,8 @@ shell::output($str('desktitle'), $main, $library, '', [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/bank.php', ['library' => $library->slug]))->out(false),
             'label' => $str('banknav')],
     ] : [], [
-        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug,
+            'piece' => \local_oksigeniaayvurenda\local\bank::is($library) ? 'bank' : 'desk']))
             ->out(false), 'label' => $str('helpnav')],
     ]) : array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false),
@@ -200,7 +201,8 @@ shell::output($str('desktitle'), $main, $library, '', [
             'label' => $str('copiesnav')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/reports.php', ['library' => $library->slug]))->out(false),
             'label' => $str('reportsnav')],
-        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug,
+            'piece' => \local_oksigeniaayvurenda\local\bank::is($library) ? 'bank' : 'desk']))
             ->out(false), 'label' => $str('helpnav')],
     ], access::can('local/oksigeniaayvurenda:catalogue', $library) ? [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/add.php', ['library' => $library->slug]))->out(false),
