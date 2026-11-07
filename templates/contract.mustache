@@ -43,7 +43,7 @@
     {{#hascopies}}
     <table class="ayv-contract-table">
         <thead><tr><th scope="col">{{contracttitlecol}}</th><th scope="col">{{contractcodecol}}</th><th scope="col">{{contractstatecol}}</th><th scope="col">{{contractdatecol}}</th></tr></thead>
-        <tbody>{{#copies}}<tr><td>{{title}}</td><td>{{barcode}}</td><td>{{condition}}</td><td>{{date}}</td></tr>{{/copies}}</tbody>
+        <tbody>{{#copies}}<tr><td>{{title}}</td><td data-label="{{contractcodecol}}">{{barcode}}</td><td data-label="{{contractstatecol}}">{{condition}}</td><td data-label="{{contractdatecol}}">{{date}}</td></tr>{{/copies}}</tbody>
     </table>
     {{/hascopies}}
     {{^hascopies}}<p class="ayv-empty">{{contractnone}}</p>{{/hascopies}}

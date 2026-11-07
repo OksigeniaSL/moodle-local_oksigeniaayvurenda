@@ -31,8 +31,9 @@ final class bankround {
     /** @var string The plugin. */
     private const COMPONENT = 'local_oksigeniaayvurenda';
 
-    /** @var int How long before the end of the year collecting begins. */
-    private const LEAD = 8 * WEEKSECS;
+    /** @var int How long before the end of the academic year collecting begins when no date is set: classes end weeks
+     * before the year does (in June, for a year that ends on 1 September). */
+    private const LEAD = 12 * WEEKSECS;
 
     /** @var string What a loan says when the book did not come back. */
     public const LOST = 'lost';
@@ -57,21 +58,42 @@ final class bankround {
      */
     private static function since(\stdClass $library, int $now): int {
         $year = years::around((int) $library->entityid, $now);
-        $deadline = (int) self::state($library)['deadline'];
-        return min((int) $year->timeend, $deadline ?: (int) $year->timeend) - self::LEAD;
+        $deadline = (int) self::state($library, $now)['deadline'];
+        return max((int) $year->timestart, min((int) $year->timeend, $deadline ?: (int) $year->timeend) - self::LEAD);
+    }
+
+    /**
+     * Until when a textbook is lent: the date of this year's collecting when it is set, else the end of the year.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @return int
+     */
+    public static function due(\stdClass $library, int $now): int {
+        $year = years::around((int) $library->entityid, $now);
+        $deadline = (int) self::state($library, $now)['deadline'];
+        return $deadline > $now && $deadline < (int) $year->timeend ? $deadline : (int) $year->timeend - 1;
     }
 
     /**
      * What is kept about the round: its date and when the reminders went.
      *
      * @param \stdClass $library
+     * @param int|null $now
      * @return array deadline, readers (when the reminder to readers went), tutors, readerssent, tutorssent.
      */
-    public static function state(\stdClass $library): array {
+    public static function state(\stdClass $library, ?int $now = null): array {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'library', 'settings', ['id' => $library->id]), true) ?: [];
-        return (array) ($settings['bankround'] ?? []) + ['deadline' => 0, 'readers' => 0, 'tutors' => 0, 'readerssent' => 0,
-            'tutorssent' => 0];
+        $empty = ['deadline' => 0, 'readers' => 0, 'tutors' => 0, 'readerssent' => 0, 'tutorssent' => 0];
+        $state = (array) ($settings['bankround'] ?? []);
+        // A round is of its year: in September, last June's date, reminders and counts are gone.
+        $year = years::around((int) $library->entityid, $now ?? time());
+        $of = (int) ($state['yearid'] ?? 0);
+        if ($of ? $of !== (int) $year->id : (int) ($state['deadline'] ?? 0) && (int) $state['deadline'] < (int) $year->timestart) {
+            return $empty;
+        }
+        return $state + $empty;
     }
 
     /**
@@ -79,11 +101,13 @@ final class bankround {
      *
      * @param \stdClass $library
      * @param array $changes
+     * @param int|null $now
      */
-    public static function save_state(\stdClass $library, array $changes): void {
+    public static function save_state(\stdClass $library, array $changes, ?int $now = null): void {
         global $DB;
         $settings = json_decode((string) $DB->get_field(self::T . 'library', 'settings', ['id' => $library->id]), true) ?: [];
-        $settings['bankround'] = $changes + self::state($library);
+        $year = years::around((int) $library->entityid, $now ?? time());
+        $settings['bankround'] = $changes + ['yearid' => (int) $year->id] + self::state($library, $now);
         $DB->set_field(self::T . 'library', 'settings', json_encode($settings), ['id' => $library->id]);
     }
 
@@ -148,12 +172,29 @@ final class bankround {
             $groupsofsets = array_merge($groupsofsets, $set['groups']);
         }
         $thisyear = $DB->get_fieldset_select(self::T . 'member', 'DISTINCT groupname', 'yearid = ?', [$year->id]);
+        // Groups without a set: only those of the stages the bank serves (a bank for secondary does not list primary).
+        $stages = [];
+        if ($groupsofsets) {
+            [$in, $params] = $DB->get_in_or_equal(array_values(array_unique($groupsofsets)), SQL_PARAMS_NAMED);
+            $stages = array_filter($DB->get_fieldset_sql(
+                "SELECT DISTINCT stage FROM {" . self::T . "member} WHERE yearid = :yearid AND groupname $in",
+                ['yearid' => $year->id] + $params
+            ), fn($stage) => (string) $stage !== '');
+        }
+        $served = $thisyear;
+        if ($stages) {
+            [$in, $params] = $DB->get_in_or_equal(array_values($stages), SQL_PARAMS_NAMED);
+            $served = $DB->get_fieldset_sql(
+                "SELECT DISTINCT groupname FROM {" . self::T . "member} WHERE yearid = :yearid AND stage $in",
+                ['yearid' => $year->id] + $params
+            );
+        }
         return [
             'waiting' => array_sum(array_column($classes, 'waiting')),
             'short' => $short,
             'sets' => $sets,
             'classes' => array_values(array_filter($classes, fn($c) => $c['pupils'] > 0)),
-            'nosets' => array_values(array_diff(array_map('strval', $thisyear), $groupsofsets)),
+            'nosets' => array_values(array_diff(array_map('strval', $served), $groupsofsets)),
             'empty' => array_values(array_diff($groupsofsets, array_map('strval', $thisyear))),
         ];
     }
@@ -227,7 +268,7 @@ final class bankround {
         global $DB;
         $year = years::around((int) $library->entityid, $now);
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.timereturned, l.groupname, i.barcode, rec.title, r.firstname, r.lastname
+            "SELECT l.id, l.timereturned, l.groupname, i.barcode, rec.title, r.firstname, r.lastname, r.userid
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
@@ -236,11 +277,16 @@ final class bankround {
            ORDER BY l.groupname, r.lastname, rec.title",
             ['libraryid' => $library->id, 'lost' => self::LOST, 'start' => (int) $year->timestart]
         );
+        // A reader with an account has the account's name, not one of their own.
+        $users = $DB->get_records_list('user', 'id', array_values(array_unique(array_filter(array_map(
+            fn($r) => (int) $r->userid,
+            $rows
+        )))));
         return array_values(array_map(fn($r) => [
             'loanid' => (int) $r->id,
             'title' => $r->title,
             'barcode' => $r->barcode,
-            'name' => trim($r->firstname . ' ' . $r->lastname),
+            'name' => isset($users[$r->userid]) ? fullname($users[$r->userid]) : trim($r->firstname . ' ' . $r->lastname),
             'group' => (string) $r->groupname,
             'when' => (int) $r->timereturned,
         ], $rows));
@@ -255,11 +301,11 @@ final class bankround {
      */
     public static function remind_readers(\stdClass $library, int $now): int {
         global $DB;
-        $deadline = (int) self::state($library)['deadline'];
+        $deadline = (int) self::state($library, $now)['deadline'];
         $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false);
         $name = format_string($library->name, true, ['escape' => false]);
         // Whoever was already told this time is not told again if the task is tried a second time.
-        $told = array_map('intval', (array) (self::state($library)['readerstold'] ?? []));
+        $told = array_map('intval', (array) (self::state($library, $now)['readerstold'] ?? []));
         foreach (self::holders($library) as $reader) {
             $user = $reader->userid ? \core_user::get_user((int) $reader->userid) : null;
             if (!$user || $user->deleted || $user->suspended || in_array((int) $reader->id, $told, true)) {
@@ -308,7 +354,7 @@ final class bankround {
                 )
             ) {
                 $told[] = (int) $reader->id;
-                self::save_state($library, ['readerstold' => $told, 'readerssent' => count($told)]);
+                self::save_state($library, ['readerstold' => $told, 'readerssent' => count($told)], $now);
             }
             force_current_language($language);
         }
@@ -326,10 +372,10 @@ final class bankround {
     public static function remind_tutors(\stdClass $library, int $now): int {
         global $DB;
         $year = years::around((int) $library->entityid, $now);
-        $deadline = (int) self::state($library)['deadline'];
+        $deadline = (int) self::state($library, $now)['deadline'];
         $main = mail::main_library((int) $library->entityid) ?? $library;
         // Whoever was already told this time is not told again if the task is tried a second time.
-        $told = array_map('strval', (array) (self::state($library)['tutorstold'] ?? []));
+        $told = array_map('strval', (array) (self::state($library, $now)['tutorstold'] ?? []));
         foreach (bank::classes($library, $now) as $class) {
             if (!$class['out']) {
                 continue;
@@ -377,7 +423,7 @@ final class bankround {
                     )
                 ) {
                     $told[] = $mark;
-                    self::save_state($library, ['tutorstold' => $told, 'tutorssent' => count($told)]);
+                    self::save_state($library, ['tutorstold' => $told, 'tutorssent' => count($told)], $now);
                 }
                 force_current_language($language);
             }
@@ -394,13 +440,13 @@ final class bankround {
      * @return bool False if it already went in the last day.
      */
     public static function queue_reminder(\stdClass $library, string $who, int $now): bool {
-        if (!in_array($who, ['readers', 'tutors'], true) || (int) self::state($library)[$who] > $now - DAYSECS) {
+        if (!in_array($who, ['readers', 'tutors'], true) || (int) self::state($library, $now)[$who] > $now - DAYSECS) {
             return false;
         }
         $task = new \local_oksigeniaayvurenda\task\bank_reminder();
         $task->set_custom_data(['library' => (int) $library->id, 'who' => $who]);
         // A new round: nobody told yet.
-        self::save_state($library, [$who => $now, $who . 'sent' => 0, $who . 'told' => []]);
+        self::save_state($library, [$who => $now, $who . 'sent' => 0, $who . 'told' => []], $now);
         \core\task\manager::queue_adhoc_task($task, true);
         return true;
     }

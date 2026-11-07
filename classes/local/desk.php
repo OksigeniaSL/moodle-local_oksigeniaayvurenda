@@ -42,6 +42,19 @@ final class desk {
     /** @var string[] The states of material, the usual one first. */
     public const CONDITIONS = ['good', 'worn', 'missingpart', 'broken'];
 
+    /**
+     * The words of a state: a book is torn and missing pages, not «does not work».
+     *
+     * @param string $condition One of CONDITIONS.
+     * @param bool $book Whether it is a book (a textbook) rather than material.
+     * @return string
+     */
+    public static function condition_label(string $condition, bool $book): string {
+        $condition = in_array($condition, self::CONDITIONS, true) ? $condition : 'good';
+        $book = $book && in_array($condition, ['missingpart', 'broken'], true);
+        return get_string('condition' . ($book ? 'book' : '') . $condition, 'local_oksigeniaayvurenda');
+    }
+
     /** @var array The rule when a library has none, nor has the library it hangs from. */
     private const DEFAULT_RULE = ['readertype' => '*', 'itemtype' => '*', 'loandays' => 14, 'maxloans' => 0,
         'renewals' => 1, 'renewdays' => 7];
@@ -1154,7 +1167,7 @@ final class desk {
         );
         // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today).
         $reserve = reserves::active((int) $item->id, $this->now);
-        $due = bank::is($this->library) ? (int) $year->timeend - 1
+        $due = bank::is($this->library) ? bankround::due($this->library, $this->now)
             : ($reserve ? loan_rules::due($this->now, (int) $reserve->days, $this->tz, (int) $reserve->days > 0, $this->closed())
             : loan_rules::due($this->now, (int) $rule['loandays'], $this->tz, true, $this->closed()));
         // Two desks (or a desk and a self-loan station) reading the same copy at once lend it once: the second waits for
@@ -1526,7 +1539,7 @@ final class desk {
         $DB->set_field(self::T . 'loan', 'condition' . $when, $current, ['id' => $loanid]);
         $conditions = [];
         foreach (self::CONDITIONS as $condition) {
-            $conditions[] = ['value' => $condition, 'label' => get_string('condition' . $condition, 'local_oksigeniaayvurenda')];
+            $conditions[] = ['value' => $condition, 'label' => self::condition_label($condition, bank::is($this->library))];
         }
         return ['conditions' => $conditions, 'current' => $current, 'when' => $when];
     }

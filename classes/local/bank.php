@@ -272,12 +272,13 @@ final class bank {
     public static function roll(\stdClass $library, string $group, int $now): array {
         global $DB;
         $year = years::around((int) $library->entityid, $now);
-        $fields = 'r.id, r.firstname, r.lastname, r.cardcode, r.userid';
+        $fields = 'r.id, r.firstname, r.lastname, r.cardcode, r.userid, r.status';
+        // The pupils of the class who still come; one who no longer does is listed only for the books still with them.
         $members = $DB->get_records_sql(
             "SELECT $fields
                FROM {" . self::T . "reader} r
                JOIN {" . self::T . "member} m ON m.readerid = r.id
-              WHERE m.yearid = :yearid AND m.groupname = :groupname AND r.entityid = :entityid",
+              WHERE m.yearid = :yearid AND m.groupname = :groupname AND r.entityid = :entityid AND r.status = 'active'",
             ['yearid' => $year->id, 'groupname' => $group, 'entityid' => $library->entityid]
         );
         $holders = $DB->get_records_sql(
@@ -322,6 +323,7 @@ final class bank {
                 trim($who->lastname . ' ' . $who->firstname) ?: $name
             ), 'card' => (string) $reader->cardcode,
                 'member' => $member,
+                'left' => $reader->status === 'left',
                 'held' => array_map(fn($l) => ['loanid' => (int) $l->id, 'title' => $l->title, 'barcode' => $l->barcode,
                     'condition' => (string) ($l->conditionout ?: 'good'), 'due' => (int) $l->timedue], $held),
                 // Only a pupil of the class this year waits for its set.
@@ -349,23 +351,35 @@ final class bank {
         global $DB;
         $year = years::around((int) $library->entityid, $now);
         $out = [];
+        // The free copies of a title are shared by the sets that ask for it: each set takes what it can, in turn.
+        $left = [];
         foreach (self::sets($library) as $set) {
             $pupils = 0;
+            $in = '';
+            $inparams = [];
             if ($set['groups']) {
-                [$in, $params] = $DB->get_in_or_equal($set['groups'], SQL_PARAMS_NAMED);
+                [$in, $inparams] = $DB->get_in_or_equal($set['groups'], SQL_PARAMS_NAMED);
                 $pupils = (int) $DB->count_records_sql(
                     "SELECT COUNT(DISTINCT m.readerid)
                        FROM {" . self::T . "member} m
                        JOIN {" . self::T . "reader} r ON r.id = m.readerid AND r.status = 'active'
                       WHERE m.yearid = :yearid AND m.groupname $in",
-                    ['yearid' => $year->id] + $params
+                    ['yearid' => $year->id] + $inparams
                 );
             }
             $titles = [];
             foreach ($set['titles'] as $title) {
+                // Out with this set's pupils, not with any pupil of the bank.
+                $lent = $in === '' ? 0 : (int) $DB->count_records_sql(
+                    "SELECT COUNT(1)
+                       FROM {" . self::T . "loan} l
+                       JOIN {" . self::T . "item} i ON i.id = l.itemid
+                      WHERE l.libraryid = :libraryid AND i.recordid = :recordid AND l.timereturned IS NULL
+                            AND l.readerid IN (SELECT m.readerid FROM {" . self::T . "member} m
+                                                WHERE m.yearid = :yearid AND m.groupname $in)",
+                    ['libraryid' => $library->id, 'recordid' => $title['recordid'], 'yearid' => $year->id] + $inparams
+                );
                 $params = ['libraryid' => $library->id, 'recordid' => $title['recordid']];
-                $lent = $DB->count_records_select(self::T . 'item', "libraryid = :libraryid AND recordid = :recordid AND
-                    status = 'onloan'", $params);
                 $free = $DB->count_records_select(self::T . 'item', "libraryid = :libraryid AND recordid = :recordid AND
                     status = 'available' AND (itemcondition IS NULL OR " . $DB->sql_compare_text('itemcondition') .
                     " <> 'broken')", $params);
@@ -378,7 +392,10 @@ final class bank {
                 );
                 $lost = $DB->count_records_select(self::T . 'item', "libraryid = :libraryid AND recordid = :recordid AND
                     status = 'lost'", $params);
-                $titles[] = $title + ['out' => $lent, 'free' => $free, 'short' => max(0, $pupils - $lent - $free),
+                $pool = $left[$title['recordid']] ?? $free;
+                $waiting = max(0, $pupils - $lent);
+                $left[$title['recordid']] = max(0, $pool - $waiting);
+                $titles[] = $title + ['out' => $lent, 'free' => $free, 'short' => max(0, $waiting - $pool),
                     'broken' => $broken, 'lost' => $lost];
             }
             $out[] = ['id' => $set['id'], 'name' => $set['name'], 'pupils' => $pupils, 'titles' => $titles];

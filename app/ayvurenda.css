@@ -2967,6 +2967,18 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
 .ayv .ayv-contract-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-variant-numeric: tabular-nums; }
 .ayv .ayv-contract-table th,
 .ayv .ayv-contract-table td { padding: .45rem .5rem; border-bottom: 1px solid var(--line); text-align: left; }
+/* On a phone, each copy is a block with its words; the table stays for the paper. */
+@media screen and (max-width: 600px) {
+    .ayv .ayv-contract-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .ayv .ayv-contract-table,
+    .ayv .ayv-contract-table tbody,
+    .ayv .ayv-contract-table tr,
+    .ayv .ayv-contract-table td { display: block; width: 100%; }
+    .ayv .ayv-contract-table tr { padding: .5rem 0; border-bottom: 1px solid var(--line); }
+    .ayv .ayv-contract-table td { padding: .1rem 0; border: 0; overflow-wrap: anywhere; }
+    .ayv .ayv-contract-table td:first-child { font-weight: 600; }
+    .ayv .ayv-contract-table td[data-label]::before { content: attr(data-label) ": "; color: var(--accent); }
+}
 .ayv .ayv-contract-signs { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.5rem; }
 .ayv .ayv-contract-signs p { min-height: 5rem; padding-top: .5rem; border-top: 1px solid var(--ink); }
 /* A set of the bank: the titles that are short, marked. */
@@ -4179,7 +4191,10 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-camp-classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr)); gap: .75rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
 .ayv .ayv-camp-class { display: flex; flex-direction: column; gap: .2rem; height: 100%; padding: .85rem 1rem; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); color: inherit; text-decoration: none; }
 .ayv .ayv-camp-links { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: .35rem; font-size: .92rem; }
-.ayv .ayv-camp-done { opacity: .72; }
+/* A button that waits for its second touch says so in red. */
+.ayv .ayv-armed { color: #fff; background: var(--danger); border-color: var(--danger); }
+/* Served: a quieter card, without fading its words. */
+.ayv .ayv-camp-done { background: var(--paper2); box-shadow: none; }
 .ayv .ayv-camp-lost { margin: .5rem 0 1.5rem; padding: 0; list-style: none; }
 .ayv .ayv-camp-lostrow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
 .ayv .ayv-camp-lostrow form { margin: 0; }

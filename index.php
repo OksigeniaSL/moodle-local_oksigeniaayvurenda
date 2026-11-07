@@ -42,6 +42,15 @@ if (!$library) {
     shell::output(get_string('pluginname', 'local_oksigeniaayvurenda'), $html);
     die();
 }
+// A bank of textbooks is not a library to visit: its pupil sees the books lent for the year, and until when.
+if (
+    \local_oksigeniaayvurenda\local\bank::is($library) && !access::can('local/oksigeniaayvurenda:desk', $library)
+        && !access::keeps($library)
+) {
+    $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/bank_mine', screens::bank_mine($library));
+    shell::output(get_string('bankminetitle', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);
+    die();
+}
 $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', screens::home($library));
 // The home has its own search, at the top.
 shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);

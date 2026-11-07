@@ -22,6 +22,7 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\bank;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\shell;
@@ -31,7 +32,10 @@ require(__DIR__ . '/../../config.php');
 $ref = required_param('library', PARAM_ALPHANUMEXT);
 require_login(null, false);
 $library = catalogue::library($ref);
-shell::require('local/oksigeniaayvurenda:desk', $library);
+// Whoever keeps a bank (a teacher who coordinates it) runs it all: its desk, its classes, its round and its sets.
+if (!($library && bank::is($library) && access::keeps($library))) {
+    shell::require('local/oksigeniaayvurenda:desk', $library);
+}
 $group = trim(optional_param('group', '', PARAM_TEXT));
 $show = optional_param('show', 'all', PARAM_ALPHA);
 $show = in_array($show, ['all', 'waiting', 'holding'], true) ? $show : 'all';
@@ -70,6 +74,8 @@ if ($group === '') {
     $kept = array_values(array_filter($roll, fn($p) => $show === 'all' || ($show === 'waiting' ? $p['missing'] : $p['held'])));
     $data += [
         'group' => $group,
+        // Lost only when books come back (the collecting, or the list of who has books): not on every line all year.
+        'canlose' => $show === 'holding' || \local_oksigeniaayvurenda\local\bankround::moment($library, $now) === 'collect',
         'back' => $url([]),
         'action' => $url(['group' => $group, 'show' => $show]),
         'filters' => array_map(
@@ -82,8 +88,10 @@ if ($group === '') {
             'name' => $p['name'],
             'card' => $p['card'] !== '' ? $str('bankrollcard', $p['card']) : '',
             'gone' => !$p['member'],
+            'gonetext' => $str($p['left'] ? 'bankrollleft' : 'bankrollgone'),
             'held' => array_map(fn($h) => ['loanid' => $h['loanid'], 'title' => $h['title'], 'barcode' => $h['barcode'],
-                'condition' => $h['condition'] !== 'good' ? $str('condition' . $h['condition']) : ''], $p['held']),
+                'condition' => $h['condition'] !== 'good'
+                    ? \local_oksigeniaayvurenda\local\desk::condition_label($h['condition'], true) : ''], $p['held']),
             'hasheld' => (bool) $p['held'],
             'missing' => array_map(fn($t) => ['title' => $t], $p['missing']),
             'hasmissing' => (bool) $p['missing'],
@@ -94,7 +102,7 @@ if ($group === '') {
 }
 foreach (
     ['bankrollnone', 'bankrollhas', 'bankrollmissing', 'bankrollgone', 'bankrollcomplete', 'bankrollempty', 'bankrollback',
-        'bankrollprint', 'bankrolllost'] as $key
+        'bankrollprint', 'bankrolllost', 'bankrolllostsure'] as $key
 ) {
     $data[$key] = $str($key);
 }

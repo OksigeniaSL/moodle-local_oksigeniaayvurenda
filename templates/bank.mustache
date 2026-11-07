@@ -39,7 +39,7 @@
         "groupoptions": [{"value": "1.º ESO A", "label": "1.º ESO A", "checked": false}],
         "banknone": "Todavía no hay ningún lote.", "banknewset": "Un lote nuevo", "bankname": "Nombre",
         "bankgroups": "Para qué grupos", "banknogroups": "No hay grupos este curso.", "banksave": "Guardar",
-        "bankremove": "Quitar el lote", "bankaddtitle": "Añadir un título", "bankfind": "Título o ISBN",
+        "bankremovesure": "¿Quitar el lote? Toca otra vez", "bankremove": "Quitar el lote", "bankaddtitle": "Añadir un título", "bankfind": "Título o ISBN",
         "bankfindbutton": "Buscar", "bankadd": "Añadir", "banknotitles": "Sin títulos todavía.",
         "bankremovetitle": "Quitar", "bankedit": "Cambiar el lote", "banknothing": "No hay nada con esas palabras."
     }
@@ -71,7 +71,7 @@
     </ul>
     {{/hastitles}}
     {{^hastitles}}<p class="ayv-empty">{{banknotitles}}</p>{{/hastitles}}
-    <form class="ayv-window-search" role="search" method="get" action="{{action}}">
+    <form class="ayv-window-search" role="search" aria-label="{{bankaddtitle}}: {{name}}" method="get" action="{{action}}">
         <input type="hidden" name="library" value="{{slug}}"><input type="hidden" name="set" value="{{id}}">
         <label class="ayv-field ayv-field-wide">{{bankaddtitle}} <input type="search" name="q" value="{{query}}" maxlength="200" placeholder="{{bankfind}}"></label>
         <button type="submit" class="ayv-button">{{bankfindbutton}}</button>
@@ -98,7 +98,7 @@
             <label class="ayv-field">{{bankname}} <input type="text" name="name" value="{{name}}" maxlength="100" required></label>
             <fieldset class="ayv-fieldset"><legend>{{bankgroups}}</legend><div class="ayv-choices">{{#groupoptions}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="groups[]" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/groupoptions}}</div></fieldset>
             <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="saveset">{{banksave}}</button>
-                <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="removeset">{{bankremove}}</button></p>
+                <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="removeset" data-ayv-twice="{{bankremovesure}}">{{bankremove}}</button></p>
         </form>
     </details>
 </article>

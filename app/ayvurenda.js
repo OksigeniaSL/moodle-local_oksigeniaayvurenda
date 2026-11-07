@@ -915,4 +915,22 @@
             show(query);
         }, 300);
     });
+
+    // A button that undoes something asks once more in its own place: the first touch says what it will do, a second does it.
+    document.addEventListener('click', function(event) {
+        var button = event.target.closest ? event.target.closest('[data-ayv-twice]') : null;
+        if (!button || button.getAttribute('data-ayv-armed') === '1') {
+            return;
+        }
+        event.preventDefault();
+        var before = button.textContent;
+        button.setAttribute('data-ayv-armed', '1');
+        button.classList.add('ayv-armed');
+        button.textContent = button.getAttribute('data-ayv-twice');
+        window.setTimeout(function() {
+            button.removeAttribute('data-ayv-armed');
+            button.classList.remove('ayv-armed');
+            button.textContent = before;
+        }, 5000);
+    });
 })();

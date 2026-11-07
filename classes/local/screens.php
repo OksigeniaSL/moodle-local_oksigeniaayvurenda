@@ -307,6 +307,10 @@ final class screens {
                 'where' => $copy['here'] ? self::str('here') : $copy['library'],
             ];
         }
+        // A reader does not need sixty lines of a textbook: past a dozen in one library, one line says how many are free.
+        if (!access::can('local/oksigeniaayvurenda:desk', $library)) {
+            $copies = self::summed_copies($copies);
+        }
         $card = self::cards([$found['card']], $library)[0];
         // To cite the book in a reference manager: for whoever is past the flower, and never for material.
         global $DB, $USER;
@@ -573,7 +577,9 @@ final class screens {
             ? ['url' => self::url('digital.php', $library, ['record' => $recordid]), 'label' => self::str('digitalmanage')] : null;
         // Readers of the centre and the library staff may give the book a voice, when the centre's plan brings voices.
         $known = $viewer['who'] !== 'nobody';
-        $voice = $known && plans::allows((int) $library->entityid, 'voices') ? ['url' => self::url(
+        // A textbook only a bank has is not a book to give a voice to.
+        $textbook = in_array($recordid, bank::only((int) $library->entityid), true);
+        $voice = $known && !$textbook && plans::allows((int) $library->entityid, 'voices') ? ['url' => self::url(
             'voice.php',
             $library,
             ['record' => $recordid]
@@ -587,13 +593,59 @@ final class screens {
     }
 
     /**
+     * What a pupil sees of a bank of textbooks: the books lent to them for the year, how they were given and until when.
+     * Not a library to visit.
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return array
+     */
+    public static function bank_mine(\stdClass $library, ?int $now = null): array {
+        global $DB, $USER;
+        $now = $now ?? time();
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $short = get_string('strftimedate', 'langconfig');
+        $reader = $DB->get_records('local_oksigeniaayvurenda_reader', ['entityid' => $library->entityid, 'userid' => $USER->id,
+            'status' => 'active'], 'id', 'id', 0, 1);
+        $books = [];
+        if ($reader) {
+            $rows = $DB->get_records_sql(
+                "SELECT l.id, l.timedue, l.conditionout, i.barcode, r.title
+                   FROM {local_oksigeniaayvurenda_loan} l
+                   JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+                   JOIN {local_oksigeniaayvurenda_record} r ON r.id = i.recordid
+                  WHERE l.libraryid = :libraryid AND l.readerid = :readerid AND l.timereturned IS NULL
+               ORDER BY r.title, l.id",
+                ['libraryid' => $library->id, 'readerid' => (int) reset($reader)->id]
+            );
+            foreach ($rows as $row) {
+                $books[] = ['title' => format_string($row->title, true, ['escape' => false]), 'code' => $row->barcode,
+                    'condition' => desk::condition_label((string) ($row->conditionout ?: 'good'), true),
+                    'due' => zones::date((int) $row->timedue, $short, $library)];
+            }
+        }
+        $due = $books ? zones::date((int) bankround::due($library, $now), $short, $library) : '';
+        return [
+            'heading' => $str('bankminetitle'),
+            'name' => format_string($library->name, true, ['escape' => false]),
+            'intro' => $books ? $str('bankmineintro', $due) : $str('bankmineempty'),
+            'books' => $books,
+            'hasbooks' => (bool) $books,
+            'conditionlabel' => $str('bankminecondition'),
+            'duelabel' => $str('bankminedue'),
+        ];
+    }
+
+    /**
      * The choice of a library, when there are several.
      *
      * @return array
      */
     public static function choose(): array {
         global $USER;
-        $all = catalogue::visible();
+        // A bank of textbooks is not a library to choose to visit, except for whoever works at it.
+        $all = array_values(array_filter(catalogue::visible(), fn($library) => !bank::is($library)
+            || access::can('local/oksigeniaayvurenda:desk', $library) || access::keeps($library)));
         $featured = libraries::featured($all, isloggedin() && !isguestuser() ? (int) $USER->id : 0);
         $card = function (\stdClass $library) {
             $look = libraries::look($library);
@@ -815,8 +867,10 @@ final class screens {
                 'voicelabel' => self::str('reviewvoiceof', $r['who'])],
             reviews::published($recordid, (int) $library->entityid, (int) ($USER->id ?? 0))
         );
+        // A textbook only a bank has is not reviewed.
+        $textbook = in_array($recordid, bank::only((int) $library->entityid), true);
         return [
-            'show' => $list || $canwrite,
+            'show' => !$textbook && ($list || $canwrite),
             'heading' => self::str('reviewsheading'),
             'none' => self::str('reviewsnone'),
             'list' => $list,
@@ -1227,5 +1281,30 @@ final class screens {
      */
     private static function said(\stdClass $library, string $key, $a = null): string {
         return get_string(skins::words((int) $library->entityid, $key), 'local_oksigeniaayvurenda', $a);
+    }
+
+    /**
+     * The copies of a record, with each library that has more than a dozen in one line: how many are free of how many.
+     *
+     * @param array[] $copies As the record gives them.
+     * @return array[]
+     */
+    private static function summed_copies(array $copies): array {
+        $by = [];
+        foreach ($copies as $copy) {
+            $by[(string) $copy['where']][] = $copy;
+        }
+        $out = [];
+        foreach ($by as $where => $group) {
+            if (count($group) <= 12) {
+                array_push($out, ...$group);
+                continue;
+            }
+            $free = count(array_filter($group, fn($c) => $c['state'] === 'free'));
+            $out[] = ['id' => 0, 'state' => $free ? 'free' : 'out', 'here' => false, 'where' => $where,
+                'location' => '', 'fix' => false, 'statelabel' => self::str('copiesfreeof', (object) ['free' => $free,
+                'total' => count($group)])];
+        }
+        return $out;
     }
 }

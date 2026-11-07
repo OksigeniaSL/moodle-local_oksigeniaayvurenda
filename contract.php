@@ -75,7 +75,8 @@ foreach ($readers as $index => $oneid) {
         'who' => $str('contractwho', (object) ['name' => $contract['name'], 'group' => $contract['group'],
             'year' => $contract['year']]),
         'copies' => array_map(fn($c) => ['title' => $c['title'], 'barcode' => $c['barcode'],
-            'condition' => $str('condition' . $c['condition']), 'date' => zones::date(
+            'condition' => \local_oksigeniaayvurenda\local\desk::condition_label((string) $c['condition'], true),
+            'date' => zones::date(
                 $c['date'],
                 'strftimedateshort',
                 $library

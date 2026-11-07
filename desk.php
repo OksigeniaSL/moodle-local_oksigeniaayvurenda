@@ -166,12 +166,21 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,
     'scripts' => ['camera', 'desk'],
-    'nav' => $help ? [] : ($own ? [
+    'nav' => $help ? [] : ($own ? array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
             'label' => $str('deskcatalogue')],
+    ], \local_oksigeniaayvurenda\local\bank::is($library) ? [
+        // Whoever keeps a bank runs its classes, its round and its sets too.
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/roll.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('bankrollnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/bankround.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('bankroundnav')],
+        ['url' => (new moodle_url('/local/oksigeniaayvurenda/bank.php', ['library' => $library->slug]))->out(false),
+            'label' => $str('banknav')],
+    ] : [], [
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/help.php', ['library' => $library->slug, 'piece' => 'desk']))
             ->out(false), 'label' => $str('helpnav')],
-    ] : array_merge([
+    ]) : array_merge([
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false),
             'label' => $str('readers')],
         ['url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),

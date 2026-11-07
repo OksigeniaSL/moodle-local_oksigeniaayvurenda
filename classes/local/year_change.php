@@ -82,8 +82,10 @@ final class year_change {
         global $DB;
         $rows = $DB->get_records_sql(
             "SELECT r.id, r.firstname, r.lastname, r.cardcode, u.firstname AS ufirstname, u.lastname AS ulastname,
-                    (SELECT MAX(m.groupname) FROM {" . self::T . "member} m
-                      WHERE m.readerid = r.id AND m.yearid = :previous) AS groupname,
+                    COALESCE((SELECT MAX(m.groupname) FROM {" . self::T . "member} m
+                               WHERE m.readerid = r.id AND m.yearid = :previous),
+                             (SELECT MAX(c.groupname) FROM {" . self::T . "member} c
+                               WHERE c.readerid = r.id AND c.yearid = :current2)) AS groupname,
                     (SELECT COUNT(1) FROM {" . self::T . "loan} l
                       WHERE l.readerid = r.id AND l.timereturned IS NULL) AS books
                FROM {" . self::T . "reader} r
@@ -95,7 +97,8 @@ final class year_change {
                          AND NOT EXISTS (SELECT 1 FROM {" . self::T . "member} n
                                           WHERE n.readerid = r.id AND n.yearid = :current)))
            ORDER BY groupname, r.lastname, r.firstname",
-            ['previous' => $previous->id, 'previous2' => $previous->id, 'current' => $year->id, 'entityid' => $entityid]
+            ['previous' => $previous->id, 'previous2' => $previous->id, 'current' => $year->id, 'current2' => $year->id,
+                'entityid' => $entityid]
         );
         $list = [];
         foreach ($rows as $row) {

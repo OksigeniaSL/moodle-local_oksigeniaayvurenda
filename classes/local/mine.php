@@ -102,6 +102,9 @@ final class mine {
                     'textbook' => bank::is($where),
                 ];
             }
+            // The textbooks lent for the year are not a list to read every day: one line says how many, unless one is late.
+            $textbooks = count(array_filter($loans, fn($loan) => $loan['textbook'] && !$loan['late']));
+            $loans = array_values(array_filter($loans, fn($loan) => !$loan['textbook'] || $loan['late']));
             $holds = array_map(
                 fn($hold) => $hold + ['url' => $url('record.php', $library, ['id' => $hold['recordid']])],
                 holds::of_reader((int) $reader->id, $now)
@@ -125,6 +128,11 @@ final class mine {
                 'card' => $url('card.php', $library),
                 'spring' => $url('ayvurande.php', $library),
                 'loans' => $loans,
+                'textbooks' => $textbooks ? get_string(
+                    $textbooks === 1 ? 'minetextbooksone' : 'minetextbooks',
+                    'local_oksigeniaayvurenda',
+                    $textbooks
+                ) : '',
                 'holds' => $holds,
                 'notice' => sanctions::for_reader((int) $reader->entityid, (int) $reader->id, $now),
             ];

@@ -25,16 +25,16 @@
     * heading, intro, isclass, hasclasses, group, back, haspupils
     * classes - group, url, pupils, waiting, holding
     * filters - url, label, current, count
-    * pupils - name, card, gone, held (title, barcode, condition), hasheld, missing (title), hasmissing, complete
+    * pupils - name, card, gone, gonetext, held (title, barcode, condition), hasheld, missing (title), hasmissing, complete
     * bankrollnone, bankrollhas, bankrollmissing, bankrollgone, bankrollcomplete, bankrollempty, bankrollback, bankrollprint
 
     Example context (json):
     {
-        "notice": "", "sesskey": "x", "action": "#", "bankrolllost": "No lo trae: perdido",
+        "notice": "", "sesskey": "x", "action": "#", "bankrolllost": "No lo trae: perdido", "bankrolllostsure": "¿no lo trae? Toca otra vez", "canlose": true,
         "heading": "Por clases en el Banco de libros", "intro": "En septiembre, en junio.", "isclass": true,
         "hasclasses": false, "classes": [], "group": "1º ESO A", "back": "#", "haspupils": true,
         "filters": [{"url": "#", "label": "Todos", "current": true, "count": 2}],
-        "pupils": [{"name": "Ana Inventada", "card": "Carné 10000H", "gone": false,
+        "pupils": [{"name": "Ana Inventada", "card": "Carné 10000H", "gone": false, "gonetext": "",
             "held": [{"loanid": 1, "title": "Matemáticas 1", "barcode": "500001K", "condition": ""}], "hasheld": true,
             "missing": [{"title": "Lengua 1"}], "hasmissing": true, "complete": false}],
         "bankrollnone": "Sin clases.", "bankrollhas": "Tiene", "bankrollmissing": "Le falta",
@@ -73,11 +73,11 @@
         {{#pupils}}
         <li class="ayv-roll-pupil">
             <p class="ayv-roll-name">{{name}} {{#card}}<span class="ayv-roll-card">{{card}}</span>{{/card}}</p>
-            {{#gone}}<p class="ayv-roll-gone">{{bankrollgone}}</p>{{/gone}}
+            {{#gone}}<p class="ayv-roll-gone">{{gonetext}}</p>{{/gone}}
             {{#complete}}<p class="ayv-roll-complete">{{bankrollcomplete}}</p>{{/complete}}
             {{#hasheld}}
             <p class="ayv-roll-label">{{bankrollhas}}</p>
-            <ul class="ayv-roll-books">{{#held}}<li class="ayv-roll-book">{{title}} <span class="ayv-roll-code">{{barcode}}</span>{{#condition}} · {{condition}}{{/condition}} <form class="ayv-roll-lost" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lost"><input type="hidden" name="loan" value="{{loanid}}"><button type="submit">{{bankrolllost}}</button></form></li>{{/held}}</ul>
+            <ul class="ayv-roll-books">{{#held}}<li class="ayv-roll-book">{{title}} <span class="ayv-roll-code">{{barcode}}</span>{{#condition}} · {{condition}}{{/condition}} {{#canlose}}<form class="ayv-roll-lost" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lost"><input type="hidden" name="loan" value="{{loanid}}"><button type="submit" data-ayv-twice="{{name}}: {{bankrolllostsure}}">{{bankrolllost}}</button></form>{{/canlose}}</li>{{/held}}</ul>
             {{/hasheld}}
             {{#hasmissing}}
             <p class="ayv-roll-label">{{bankrollmissing}}</p>

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.184.0
+
+- The bank of textbooks, from the audit:
+  - the round is of its year: in September, last June's date, reminders and counts are gone;
+  - collecting begins in June when no date is set, and textbooks are lent until the round's date when it is set;
+  - a pupil who no longer comes is not waited for, and is listed only for the books still with them («Ya no viene»);
+  - a book given up for lost says whose it is when the pupil has an account;
+  - each set counts what its own pupils have, and the free copies are shared between the sets that ask for a title;
+  - a textbook is «Roto» or «Le faltan páginas», not «No funciona»;
+  - the contract fits a phone; a served class is quieter without faded text; each set's search has its name;
+  - «No lo trae: perdido» only when books come back, and it and «Quitar el lote» ask with a second touch;
+  - groups without a set only from the stages the bank serves;
+  - whoever keeps a bank runs its classes, its round and its sets, with their links at its desk;
+  - a pupil opening the bank sees their textbooks, their state and until when, not a library to visit, and the bank is
+    not in a reader's choice of libraries;
+  - a textbook only a bank has is not given a voice nor reviewed, and a reader sees a library's many copies in one line;
+  - the block and the app say «and your N textbooks» in one line instead of listing them all year (block 0.1.7);
+  - who left with books says their group of this year when they had none the year before.
+
 ## 0.183.0
 
 - With 0.182.0, which was never installed (a test that picked one of two top libraries at random failed in the CI).
