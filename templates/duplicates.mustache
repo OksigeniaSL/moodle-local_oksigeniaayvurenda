@@ -1,0 +1,64 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/duplicates
+
+    Records that look like the same book, side by side: which one stays, join, or not the same.
+
+    Example context (json):
+    {
+        "heading": "Fichas repetidas", "intro": "3 libros con más de una ficha.", "notice": "", "action": "#",
+        "sesskey": "abc", "pager": null, "duplicateskeep": "Se queda esta", "duplicatesjoin": "Juntarlas",
+        "duplicatesapart": "No son el mismo libro", "duplicatesjoinhint": "Los ejemplares pasan a la que se queda.",
+        "groups": [{"n": 0, "records": [{"id": 1, "title": "El faro dormido", "subtitle": "", "authors": "Ana Montes",
+            "facts": "Vicens Vives · 2025 · 9788420481449", "copies": "3 ejemplares", "out": "1 prestado",
+            "origin": "Del programa anterior", "summary": "Con resumen", "url": "#", "hascover": true,
+            "coverurl": "https://example.com/portada.jpg", "colour": 1, "first": true}]}]
+    }
+}}
+<section class="ayv-duplicates">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-readers-sum">{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<ul class="ayv-dup-groups">
+    {{#groups}}
+    <li class="ayv-dup-group">
+        <form method="post" action="{{action}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <fieldset class="ayv-dup-records"><legend class="ayv-sr">{{duplicateskeep}}</legend>
+                {{#records}}
+                <label class="ayv-dup-record">
+                    <input type="hidden" name="ids[]" value="{{id}}">
+                    <span class="ayv-dup-pick"><input type="radio" name="keep" value="{{id}}"{{#first}} checked{{/first}}> {{duplicateskeep}}</span>
+                    <span class="ayv-dup-body">
+                        <span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
+                        <span class="ayv-dup-text"><a href="{{url}}"><b>{{title}}</b></a>{{#subtitle}}<span>{{subtitle}}</span>{{/subtitle}}
+                            {{#authors}}<span>{{authors}}</span>{{/authors}}{{#facts}}<span class="ayv-dup-facts">{{facts}}</span>{{/facts}}
+                            <span class="ayv-dup-facts">{{copies}}{{#out}} · {{out}}{{/out}}{{#summary}} · {{summary}}{{/summary}} · {{origin}}</span></span>
+                    </span>
+                </label>
+                {{/records}}
+            </fieldset>
+            <p class="ayv-field-hint">{{duplicatesjoinhint}}</p>
+            <p class="ayv-dup-actions"><button type="submit" name="do" value="join" class="ayv-button">{{duplicatesjoin}}</button>
+                <button type="submit" name="do" value="apart" class="ayv-button ayv-button-quiet">{{duplicatesapart}}</button></p>
+        </form>
+    </li>
+    {{/groups}}
+</ul>
+{{#pager}}{{> local_oksigeniaayvurenda/readers_pager}}{{/pager}}
+</section>

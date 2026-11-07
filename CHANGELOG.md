@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.172.0
+
+- «Repeated records», from «More»: the records that share an ISBN, and those with the same title and author when one lacks
+  the ISBN, side by side with their copies, summary and origin. Joining them leaves one with every copy, loan, hold, review,
+  reading and subject, and with what it lacked (the summary, the cover); a new import of the program they came from updates
+  that one. «Not the same book» stops offering them.
+
 ## 0.171.0
 
 - The subjects of a centre are one vocabulary: a subject typed, imported or brought by a catalogue that the centre has with

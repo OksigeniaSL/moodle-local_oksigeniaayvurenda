@@ -41,6 +41,7 @@ final class howto {
         'classify' => ['add.php', 'catalogue', ''],
         'catalogued' => ['catalogued.php', 'catalogue', ''],
         'subjects' => ['subjects.php', 'catalogue', ''],
+        'duplicates' => ['duplicates.php', 'catalogue', ''],
         'material' => ['material.php', 'catalogue', 'material'],
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
