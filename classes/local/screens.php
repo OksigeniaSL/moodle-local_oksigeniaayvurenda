@@ -184,14 +184,12 @@ final class screens {
             'didyoumean' => self::str('didyoumean'),
             // The memory speaks when it found nothing; otherwise it keeps quiet.
             // Sure there is nothing only when there is nothing close either.
-            'memory' => $corner === '' && $found['total'] === 0 && $query !== ''
-                ? characters::say(
-                    (int) $library->entityid,
-                    'memory',
-                    $suggestions ? 'memorynear' : 'memorynothing',
-                    ['query' => $query],
-                    'piensa'
-                ) : null,
+            'memory' => $corner === '' && $query !== '' ? self::nothing_found(
+                $library,
+                $query,
+                (int) $found['total'],
+                (bool) $suggestions
+            ) : null,
             'askforit' => self::ask_for_it($library, $query, (int) $found['total']),
             'tryother' => $found['total'] === 0 && !$suggestions && ($corner !== '' || $query === '' ||
                 !characters::of((int) $library->entityid)['memory']['enabled']) ? self::str('tryother') : '',
@@ -1059,8 +1057,22 @@ final class screens {
                 'text' => skins::say((int) $library->entityid, 'homeclassictext'), 'drawing' => ''];
         }
         $hero['you'] += ['url' => self::url('card.php', $library), 'label' => self::str('mycard'), 'listen' => null];
-        // What the memory has to tell this reader today: a book, or what they were looking for.
+        // What the memory has to tell this reader today: a book, or what they were looking for. A new reader who has
+        // taken nothing yet is welcomed instead (jue-humor H40-H43).
         $remembers = memory::remembers($library, $reader);
+        $loans = $DB->record_exists('local_oksigeniaayvurenda_loan', ['readerid' => $reader->id]);
+        $welcome = !$loans && (int) $reader->timecreated > time() - 14 * DAYSECS ? characters::say(
+            (int) $library->entityid,
+            'memory',
+            'memoryfirstday',
+            ['reader' => format_string($reader->firstname ?: fullname($USER), true, ['escape' => false])],
+            'saluda'
+        ) : null;
+        if ($welcome) {
+            $hero['remembers'] = $welcome + ['url' => self::url('search.php', $library), 'label' => self::str('memorysearch'),
+                'cover' => null, 'listen' => null];
+            $remembers = null;
+        }
         if ($remembers) {
             $book = $remembers['recordid'];
             $hero['remembers'] = $remembers['say'] + [
@@ -1286,6 +1298,39 @@ final class screens {
             }
         }
         return $cards;
+    }
+
+    /**
+     * What a character says on a search: with nothing found, a line of the bag of the reader's age (jue-humor); when
+     * the search is the name of a character, that character answers; «nothing» found nothing; «book» found too many.
+     *
+     * @param \stdClass $library
+     * @param string $query
+     * @param int $total
+     * @param bool $near Whether there are words close to it to suggest.
+     * @return array|null What is said, as characters::say gives it.
+     */
+    private static function nothing_found(\stdClass $library, string $query, int $total, bool $near): ?array {
+        global $USER;
+        $entityid = (int) $library->entityid;
+        $said = \local_oksigeniaayvurenda\core\text::normalise($query);
+        $grown = characters::band($entityid) === '';
+        foreach (characters::of($entityid) as $role => $character) {
+            if ($character['enabled'] && $said === \local_oksigeniaayvurenda\core\text::normalise($character['name'])) {
+                return characters::say($entityid, $role, $role === 'herald' ? 'heraldself' : 'memoryself', [], 'celebra');
+            }
+        }
+        if ($total > 500 && in_array($said, ['libro', 'libros', 'book', 'books'], true)) {
+            return characters::say($entityid, 'memory', 'memorytoomany', ['total' => self::number($total)], 'piensa');
+        }
+        if ($total > 0) {
+            return null;
+        }
+        if ($grown && in_array($said, ['nada', 'nothing'], true)) {
+            return characters::say($entityid, 'memory', 'memorynothingnada', ['query' => $query], 'piensa');
+        }
+        $key = $near ? 'memorynear' : characters::bag($entityid, 'memorynothing', (string) $USER->id);
+        return characters::say($entityid, 'memory', $key, ['query' => $query], 'piensa');
     }
 
     /**

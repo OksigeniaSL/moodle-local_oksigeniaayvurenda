@@ -500,8 +500,15 @@ final class visit {
         if ($pulse['new']) {
             $lines[] = ['text' => $str($pulse['new'] === 1 ? 'windowpulsenewone' : 'windowpulsenew', $pulse['new'])];
         }
+        // By night, the books sleeping out in houses with lamps (jue-humor H52).
+        if (self::night((int) $library->entityid) && ($out = self::out_now($library))) {
+            $lines[] = ['text' => $str('visitpulsenight', $out)];
+        }
         if (!$lines) {
-            $lines[] = ['text' => $str('visitpulsequiet')];
+            // Nothing out yet today: the herald watches the door (jue-humor H54).
+            $herald = characters::of((int) $library->entityid)['herald'] ?? null;
+            $lines[] = ['text' => $herald && $herald['enabled'] ? $str('visitpulsequiet2', $herald['name'])
+                : $str('visitpulsequiet')];
         }
         return ['directory' => false, 'pulse' => true, 'book' => false, 'width' => round($w), 'height' => round($h),
             'transform' => homography::css($w, $h, $zone['quad']),
@@ -584,10 +591,21 @@ final class visit {
                 $news = get_string($pulse['new'] ? ($pulse['new'] === 1 ? 'windowpulsenewone' : 'windowpulsenew')
                     : 'visitpulsequiet', 'local_oksigeniaayvurenda', $pulse['new']);
             }
-            $said = characters::say((int) $library->entityid, $role, 'visit' . $role, ['news' => $news], $one['pose']);
+            // By the library's night the memory speaks low and the hummingbird sleeps on its book (jue-humor H49-H50).
+            $night = self::night((int) $library->entityid);
+            $pose = $night && $role === 'herald' && characters::figure('herald', 'duerme') ? 'duerme' : $one['pose'];
+            $said = characters::say(
+                (int) $library->entityid,
+                $role,
+                'visit' . $role . ($night ? 'night' : ''),
+                ['news' => $news],
+                $pose
+            );
             if (!$said || empty($said['figure'])) {
                 continue;
             }
+            // The third tap in a row says something else (jue-humor H55-H56).
+            $again = characters::say((int) $library->entityid, $role, 'visit' . $role . 'again', [], $pose);
             // In the hall, the memory has for a reader what the home page has: today's idea, with the way to it.
             $remember = null;
             if ($role === 'memory' && $reader && $scene['corner'] === '') {
@@ -606,9 +624,10 @@ final class visit {
                 'search' => $role === 'memory' ? ['action' => $public ? $url('public.php') : $url('search.php'),
                     'slug' => $library->slug] : null,
                 'remember' => $remember,
+                'again' => (string) ($again['text'] ?? ''),
                 // Her greeting's voice, only when she says the greeting.
                 'voice' => $role === 'memory' && !$remember ? (json_decode(
-                    self::voices($library, 'memory', ['hello' => 'hello']),
+                    self::voices($library, 'memory', ['hello' => $night ? 'hellonight' : 'hello']),
                     true
                 )['hello'] ?? '') : '',
                 'play' => $role === 'herald' && $game !== '' ? get_string(
@@ -618,6 +637,21 @@ final class visit {
                 'playid' => $game];
         }
         return $out;
+    }
+
+    /**
+     * How many books of a library are out now.
+     *
+     * @param \stdClass $library
+     * @return int
+     */
+    private static function out_now(\stdClass $library): int {
+        global $DB;
+        return $DB->count_records_select(
+            self::T . 'loan',
+            'libraryid = :libraryid AND timereturned IS NULL',
+            ['libraryid' => $library->id]
+        );
     }
 
     /**

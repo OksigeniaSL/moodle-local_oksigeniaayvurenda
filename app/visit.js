@@ -469,7 +469,17 @@
             }
             open = {say: say, button: button};
             say.hidden = false;
-            window.AYVVisit.say(say.getAttribute('data-voice'));
+            // The third tap in a row says something else, once (jue-humor H55-H56).
+            var count = (parseInt(store('sessionStorage', 'ayv-visit-tap-' + say.getAttribute('data-role')) || '0', 10) || 0) + 1;
+            store('sessionStorage', 'ayv-visit-tap-' + say.getAttribute('data-role'), String(count));
+            var said = say.querySelector('.ayv-visit-said');
+            if (said && say.getAttribute('data-again') && count === 3) {
+                said.setAttribute('data-first', said.textContent);
+                said.textContent = say.getAttribute('data-again');
+            } else if (said && said.hasAttribute('data-first')) {
+                said.textContent = said.getAttribute('data-first');
+            }
+            window.AYVVisit.say(count === 3 && say.getAttribute('data-again') ? null : say.getAttribute('data-voice'));
             button.setAttribute('aria-expanded', 'true');
             var box = frame.getBoundingClientRect(), who = button.getBoundingClientRect();
             var x = who.left - box.left + who.width / 2 - say.offsetWidth / 2;

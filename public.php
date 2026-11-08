@@ -133,7 +133,7 @@ if ($recordid) {
     if (!$found) {
         // A shared link or a poster's code of a book no longer here: the memory says so, with the way to the door
         // (jue-humor D2), as a page of the library with an account does.
-        shell::missing($str('recordnotfound'), $library, [$here(), $str('windowbackdoor')]);
+        shell::missing($str('recordnotfound'), $library, [$here(), $str('windowbackdoor')], 'notheresaidbook');
     }
     $data = screens::record($found, $library);
     $data['card'] = $public([$found['card']])[0];

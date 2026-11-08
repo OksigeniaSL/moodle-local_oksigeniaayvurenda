@@ -108,6 +108,7 @@ final class shell {
      * @param string $figure Gaudí's drawing of the memory in a pose, or ''.
      * @param string $puppet Its puppet for that pose (JSON), or ''.
      * @param array|null $back Another way back than the library's home: its address and its words.
+     * @param string $line What the memory says, under the title.
      */
     private static function refuse_page(
         string $title,
@@ -115,7 +116,8 @@ final class shell {
         ?\stdClass $library,
         string $figure = '',
         string $puppet = '',
-        ?array $back = null
+        ?array $back = null,
+        string $line = ''
     ): void {
         global $PAGE;
         // It can come before the page set its own context: every page of the library is on the site's.
@@ -127,7 +129,8 @@ final class shell {
             ($figure !== '' ? '<div class="ayv-posed"><span class="ayv-figure"><img class="ayv-posed-figure" src="' . s($figure) .
             '" alt="" width="512" height="512"' . ($puppet !== '' ? ' data-puppet="' . s($puppet) . '"' : '') .
             '></span><div>' : '') .
-            '<h1 class="ayv-results-title">' . s($title) . '</h1><p>' . s($why) . '</p><p><a class="ayv-button" href="' .
+            '<h1 class="ayv-results-title">' . s($title) . '</h1>' . ($line !== '' ? '<p class="ayv-posed-line">' . s($line) .
+            '</p>' : '') . '<p>' . s($why) . '</p><p><a class="ayv-button" href="' .
             s($home) . '">' . s($back[1] ?? get_string('staffonlyback', 'local_oksigeniaayvurenda')) . '</a></p>' .
             ($figure !== '' ? '</div></div>' : ''),
             $library,
@@ -144,8 +147,14 @@ final class shell {
      * @param string $why
      * @param \stdClass|null $library
      * @param array|null $back Another way back than the library's home: its address and its words.
+     * @param string $key The memory's line: notheresaid, or one of its own (a shared book no longer here).
      */
-    public static function missing(string $why, ?\stdClass $library = null, ?array $back = null): void {
+    public static function missing(
+        string $why,
+        ?\stdClass $library = null,
+        ?array $back = null,
+        string $key = 'notheresaid'
+    ): void {
         http_response_code(404);
         $memory = $library ? (characters::of((int) $library->entityid)['memory'] ?? null) : null;
         $alive = $memory && $memory['enabled'] && empty($memory['own']);
@@ -157,7 +166,9 @@ final class shell {
             $library,
             (string) $figure,
             $alive ? characters::puppet('memory', 'senala', $step) : '',
-            $back
+            $back,
+            // The memory's line in the words of whoever looks: a gap is said one way to a child, another to a grown-up.
+            $alive ? (string) (characters::say((int) $library->entityid, 'memory', $key, [], 'senala')['text'] ?? '') : ''
         );
     }
 

@@ -42,7 +42,7 @@ final class characters {
     public const ROLES = ['memory', 'herald'];
 
     /** @var string[] How a character stands, drawn whole. */
-    public const POSES = ['saluda', 'senala', 'celebra', 'lee', 'piensa'];
+    public const POSES = ['saluda', 'senala', 'celebra', 'lee', 'piensa', 'duerme'];
 
     /** @var string[] What a puppet is made of besides its picture. */
     private const PUPPET = ['atlas', 'rig', 'anim'];
@@ -121,6 +121,58 @@ final class characters {
      */
     public static function step(int $entityid): string {
         return self::looker($entityid) === 'grown' ? 'cielo' : '';
+    }
+
+    /**
+     * The band of age of whoever looks, for the lines written for it: Infantil (inf) or Primaria (pri) for a reader of
+     * the flower, by the stage of their group; nothing for everyone else, whose words follow the skin.
+     *
+     * @param int $entityid
+     * @return string inf, pri or ''.
+     */
+    public static function band(int $entityid): string {
+        global $DB, $USER;
+        if (self::looker($entityid) !== 'young') {
+            return '';
+        }
+        $stage = (string) $DB->get_field_sql(
+            "SELECT m.stage
+               FROM {local_oksigeniaayvurenda_member} m
+               JOIN {local_oksigeniaayvurenda_reader} r ON r.id = m.readerid
+              WHERE r.entityid = :entityid AND r.userid = :userid AND r.status = 'active' AND m.yearid = :yearid",
+            ['entityid' => $entityid, 'userid' => $USER->id, 'yearid' => years::around($entityid, time())->id],
+            IGNORE_MULTIPLE
+        );
+        return preg_match('/infantil|preescolar|kinder|nursery|\bei\b/i', $stage) ? 'inf' : 'pri';
+    }
+
+    /**
+     * One line of a bag, the same all day for the same seed (a reader, a loan): the line in the words of the skin and,
+     * where they are written, the numbered ones of the band of whoever looks (key, band and 1, 2…) or of the tone of the
+     * skin (key, tone and 2, 3…). So that what is funny does not tire, and nobody gets the same one twice a day.
+     *
+     * @param int $entityid
+     * @param string $key
+     * @param string $seed
+     * @return string The key to say.
+     */
+    public static function bag(int $entityid, string $key, string $seed): string {
+        $sm = get_string_manager();
+        $resolved = skins::words($entityid, $key);
+        $band = self::band($entityid);
+        $suffixes = $band !== '' ? [$band] : array_values(array_unique(array_filter([
+            substr($resolved, strlen($key)),
+            in_array(skins::of($entityid), ['public', 'mobile'], true) ? 'lay' : '',
+        ])));
+        $options = [$resolved];
+        foreach ($suffixes as $suffix) {
+            for ($i = 1; $i <= 12; $i++) {
+                if ($sm->string_exists($key . $suffix . $i, 'local_oksigeniaayvurenda')) {
+                    $options[] = $key . $suffix . $i;
+                }
+            }
+        }
+        return $options[crc32($seed . '-' . date('Ymd')) % count($options)];
     }
 
     /**

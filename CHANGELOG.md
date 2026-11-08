@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.198.0
+
+- The lines of humour, first part (from the audit, with Gaudí): written for each age, a bag of them the same all day for
+  each reader (`characters::bag`, `characters::band`):
+  - a search with nothing found, by age (the glasses for Infantil, under the rug for Primaria, dry for secondary,
+    short for grown-ups), and three Easter eggs: the name of a character (who answers), «nothing», and «book» with
+    too many;
+  - a page not found, with the memory's line by age; a shared book no longer in the catalogue, its own;
+  - the herald's word as a book comes home, by the age of whoever brings it and the nights it slept out; «Undone» now
+    and then says that nothing happened here;
+  - the visit by the library's night: the memory speaks low, the hummingbird sleeps on its book (Gaudí's new pose, art
+    0.1.51) and says so with its eyes shut, and the board counts the books sleeping out; with nothing out, the herald
+    watches the door; the third tap in a row on a character says something else;
+  - a new reader with nothing taken yet is welcomed by the memory; the empty album of Infantil, as a plate before
+    dinner; the staff's reservations with nothing waiting, in the university's words.
+
 ## 0.197.0
 
 - Play and the visit (audit batch 10, with Gaudí):

@@ -1083,7 +1083,8 @@ final class desk {
         return $this->answer(
             'undone',
             'look',
-            'deskundone',
+            // Undone: now and then, that nothing happened here (jue-humor H24).
+            (int) $loan->id % 2 ? 'deskundone2' : 'deskundone',
             $this->title($item),
             ['loanid' => (int) $loan->id, 'reader' => $this->reader_panel((int) $loan->readerid)]
         );
@@ -1299,8 +1300,7 @@ final class desk {
         }
         // The herald, in a corner, a word as each book comes home: never in the way, and never at a sober centre.
         // Nor when the book has just cost the reader something.
-        $extra['herald'] = $sanction ? null
-            : $this->herald_word($hold ? 'deskheraldheld' : 'deskheraldback' . (1 + ((int) $loan->id % 4)));
+        $extra['herald'] = $sanction ? null : ($hold ? $this->herald_word('deskheraldheld') : $this->herald_back($loan));
         if ($hold) {
             // Set it aside: the other sound, and who it is for.
             $a->for = $this->who((int) $hold->readerid);
@@ -1607,16 +1607,40 @@ final class desk {
      * What the herald says in the desk's corner, if she is on and the centre's skin is lively.
      *
      * @param string $key
+     * @param array $a What the line takes (the nights a book slept out).
      * @return array|null name, text, initial, portrait.
      */
-    private function herald_word(string $key): ?array {
+    private function herald_word(string $key, array $a = []): ?array {
         $entityid = (int) $this->library->entityid;
         if (bank::is($this->library) || !skins::lively($entityid)) {
             return null;
         }
-        $said = characters::say($entityid, 'herald', $key);
+        $said = characters::say($entityid, 'herald', $key, $a);
         return $said ? ['name' => $said['name'], 'text' => $said['text'], 'initial' => $said['initial'],
             'portrait' => $said['portrait']] : null;
+    }
+
+    /**
+     * The herald's word as a book comes home, for the age of whoever brings it: a bag of lines, with the nights it slept
+     * out (jue-humor H17-H23).
+     *
+     * @param \stdClass $loan
+     * @return array|null
+     */
+    private function herald_back(\stdClass $loan): ?array {
+        global $DB;
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
+        $look = $reader ? cards::look_of($reader, $this->now) : 'none';
+        $nights = max(0, intdiv($this->now - (int) $loan->timeloaned, DAYSECS));
+        if ($look === 'flower') {
+            $keys = ['deskheraldback1', 'deskheraldback2', 'deskheraldback3', 'deskheraldback4',
+                $nights ? 'deskheraldback5' : 'deskheraldback6', 'deskheraldback7'];
+        } else if ($look === 'sky') {
+            $keys = $nights ? ['deskheraldbacksecondary1', 'deskheraldbacksecondary2'] : ['deskheraldbacksecondary1'];
+        } else {
+            $keys = $nights ? ['deskheraldbacklay1', 'deskheraldbacklay2'] : ['deskheraldbacklay2'];
+        }
+        return $this->herald_word($keys[crc32((string) $loan->id) % count($keys)], ['nights' => $nights]);
     }
 
     /**

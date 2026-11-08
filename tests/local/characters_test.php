@@ -181,6 +181,52 @@ final class characters_test extends \advanced_testcase {
     }
 
     /**
+     * The bag of lines by age (jue-humor): Infantil and Primaria have their own, a reader past the flower gets the
+     * secondary school's, each a line of its bag and the same all day for the same seed.
+     */
+    public function test_bag(): void {
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $year = $gen->create_year(['entityid' => $entityid]);
+        $people = [];
+        foreach (
+            ['inf' => ['Infantil', '2º Infantil A'], 'pri' => ['Primaria', '3º Primaria A'],
+                'eso' => ['ESO', '2º ESO B']] as $who => [$stage, $group]
+        ) {
+            $user = $this->getDataGenerator()->create_user();
+            $reader = $gen->create_reader(['entityid' => $entityid, 'userid' => $user->id, 'readertype' => 'student']);
+            $gen->create_member(['readerid' => $reader->id, 'yearid' => $year->id, 'stage' => $stage, 'groupname' => $group]);
+            $people[$who] = $user;
+        }
+        $this->setUser($people['inf']);
+        $this->assertSame('inf', characters::band($entityid));
+        $this->assertContains(characters::bag($entityid, 'memorynothing', 'x'), ['memorynothing', 'memorynothinginf1']);
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
+        $this->setUser($people['pri']);
+        $this->assertSame('pri', characters::band($entityid));
+        $seen = [];
+        foreach (range(1, 40) as $seed) {
+            $seen[characters::bag($entityid, 'memorynothing', (string) $seed)] = true;
+        }
+        $this->assertEqualsCanonicalizing(['memorynothing', 'memorynothingpri1', 'memorynothingpri2'], array_keys($seen));
+        $this->assertSame(characters::bag($entityid, 'memorynothing', '7'), characters::bag($entityid, 'memorynothing', '7'));
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
+        $this->setUser($people['eso']);
+        $this->assertSame('', characters::band($entityid));
+        $seen = [];
+        foreach (range(1, 40) as $seed) {
+            $seen[characters::bag($entityid, 'memorynothing', (string) $seed)] = true;
+        }
+        $this->assertEqualsCanonicalizing(
+            ['memorynothingsecondary', 'memorynothingsecondary2', 'memorynothingsecondary3'],
+            array_keys($seen)
+        );
+    }
+
+    /**
      * A centre gives its own character whole, in a zip: it then stands in its own poses and moves as its own puppet;
      * taken away, Ayvurenda's comes back. What is not a piece with its name is not read.
      */
