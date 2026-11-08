@@ -1163,7 +1163,7 @@ final class screens {
             'challengedone' => self::str('boardchallengedone'),
             'covers' => array_map(
                 fn($card) => ['url' => $card['url'], 'cover' => $card['cover'], 'title' => $card['title']],
-                array_slice($covers, 0, 3)
+                array_slice($covers, 0, 6)
             ),
             'agenda' => self::week_agenda($library),
         ];

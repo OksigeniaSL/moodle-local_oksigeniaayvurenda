@@ -22,6 +22,28 @@
 (function() {
     'use strict';
     var config = window.AYV || {};
+    // A cover that does not load (a file gone, a cache on the way) is never a blank (Enrique, 8 November): the card shows
+    // its drawn cover with the title, and the small covers of the board go away.
+    var covers = '.ayv-cover-img, .ayv-board-covers img, .ayv-board-book img';
+    var lostCover = function(img) {
+        var box = img.closest('.ayv-cover');
+        if (box) {
+            box.classList.remove('ayv-cover-photo');
+            img.remove();
+            return;
+        }
+        (img.closest('.ayv-board-covers a') || img).remove();
+    };
+    document.addEventListener('error', function(e) {
+        if (e.target && e.target.tagName === 'IMG' && e.target.matches(covers)) {
+            lostCover(e.target);
+        }
+    }, true);
+    document.querySelectorAll(covers).forEach(function(img) {
+        if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) {
+            lostCover(img);
+        }
+    });
     // The credits, from the footer, in a small window; it closes with its button, Escape or outside it.
     var credits = document.getElementById('ayv-credits');
     if (credits && credits.showModal) {

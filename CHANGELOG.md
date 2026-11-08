@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.215.0 (2026-11-08)
+
+- A cover that does not load is never a blank (Enrique, 8 November): the card shows its drawn cover with the title, as a
+  book without a picture; the small covers of the board go away.
+- The reader's home board (Gaudí and Enrique): the herald's card spreads what it says over its height, and on a wide
+  screen brings six new arrivals in two rows, bigger; three on smaller screens.
+
 ## 0.214.0 (2026-11-08)
 
 - 0.213.0 did not reach the sites: on PHP 8.1 (Moodle 4.5) the corners of a search with a genre came in another order.

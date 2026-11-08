@@ -868,6 +868,8 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-pick form { grid-column: 2; grid-row: 1 / span 2; }
 
 .ayv .ayv-cover-photo { padding: 0; background: var(--paper2); }
+/* The drawn cover's title waits under a picture, for when the picture does not load (app/ayvurenda.js). */
+.ayv .ayv-cover-photo .ayv-cover-title { display: none; }
 
 .ayv .ayv-cover-photo::after { content: none; }
 
@@ -4928,7 +4930,16 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-board-title { margin: 0; padding-right: 7.5rem; font: 600 1.35rem/1.2 var(--title); color: var(--ink); }
 .ayv .ayv-board-listen { position: absolute; top: 1.3rem; right: 1.3rem; }
 .ayv .ayv-board-who img { display: block; width: 100%; height: auto; filter: drop-shadow(0 8px 14px rgba(15, 58, 51, .18)); }
-.ayv .ayv-board-herald { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .5rem 1.4rem; align-items: start; align-content: center; }
+.ayv .ayv-board-herald { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .5rem 1.4rem; align-items: start; align-content: space-evenly; }
+/* Stretched beside a taller column (Gaudí, 8 November): the new arrivals as big as the room allows, the herald above
+   and the week's book below, spread in its height rather than bunched in the middle. */
+@media (min-width: 72rem) {
+    .ayv .ayv-board-herald .ayv-board-covers img { width: 6.2rem; }
+}
+/* Six new arrivals in two rows where the card is wide and tall; three on smaller screens (Enrique, 8 November). */
+@media (max-width: 71.99rem) {
+    .ayv .ayv-board-covers a:nth-of-type(n+4):not(.ayv-board-all) { display: none; }
+}
 .ayv .ayv-board-herald > .ayv-board-who { align-self: center; }
 .ayv .ayv-board-covers { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: .4rem !important; }
 .ayv .ayv-board-covers img {
