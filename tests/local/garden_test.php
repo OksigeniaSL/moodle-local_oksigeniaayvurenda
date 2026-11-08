@@ -156,6 +156,12 @@ final class garden_test extends \advanced_testcase {
         } else {
             // The library has books of two corners, both won; nothing of corners it has not.
             $this->assertSame(['5' => true, '8' => true], array_column($cromos, 'won', 'code'));
+            // A reader of the sky gets the sky's card where the package brings one.
+            $sky = array_column(garden::cromos($reader, $library, true), 'art', 'code');
+            $this->assertStringContainsString(
+                screens::art('cromos/cielo/cromo-8') === null ? 'cromos/cromo-8' : 'cromos/cielo/cromo-8',
+                $sky['8']
+            );
         }
     }
 }

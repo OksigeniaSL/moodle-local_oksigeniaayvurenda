@@ -130,19 +130,21 @@ final class garden {
     /**
      * The album's collector cards: one for each corner of the library, won with the first book taken home from it, in
      * any school year, and kept for good. Only the corners the library shows (a card nobody could win is no game) and
-     * the ones already won. Only with Gaudí's cards in the art package; without them, nothing.
+     * the ones already won. Only with Gaudí's cards in the art package; without them, nothing. A reader of the sky gets
+     * the sky's card of a corner when the package brings it, and the flower's when not.
      *
      * @param \stdClass $reader
      * @param \stdClass|null $library Whose corners name the cards; without one, no cards.
+     * @param bool $sky Whether the reader's card is the sky.
      * @return array[]|null code, name, art, won (bool) and when (the day it was won, or ''), in the order of the classes.
      */
-    public static function cromos(\stdClass $reader, ?\stdClass $library): ?array {
+    public static function cromos(\stdClass $reader, ?\stdClass $library, bool $sky = false): ?array {
         if (!$library) {
             return null;
         }
         $codes = [];
         foreach (range(0, 9) as $code) {
-            $art = screens::art('cromos/cromo-' . $code);
+            $art = ($sky ? screens::art('cromos/cielo/cromo-' . $code) : null) ?? screens::art('cromos/cromo-' . $code);
             if ($art !== null) {
                 $codes[(string) $code] = $art;
             }

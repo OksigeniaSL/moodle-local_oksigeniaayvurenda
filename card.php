@@ -203,7 +203,8 @@ foreach ($readers as $reader) {
     ));
     $cromos = $collects ? (garden::cromos(
         $reader,
-        $library ?? \local_oksigeniaayvurenda\local\mail::main_library((int) $reader->entityid)
+        $library ?? \local_oksigeniaayvurenda\local\mail::main_library((int) $reader->entityid),
+        $sky
     ) ?? []) : [];
     // Mainumby whole beside an empty album: where the skin has the characters whole, and at a public library for the young.
     $whole = \local_oksigeniaayvurenda\local\skins::lively((int) $reader->entityid) && (!in_array(

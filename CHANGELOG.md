@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.211.0 (2026-11-08)
+
+- The album's collector cards of a reader of the sky are the sky's, Gaudí's night cards with a moon (art package
+  0.1.54), and the flower's where the package has none; corner 4, for a library whose corner 4 holds languages, as the
+  Dewey 400. The art package 0.1.54 also brings the home picture of each skin, which the home page already looked for.
+
 ## 0.210.0 (2026-11-08)
 
 - Other catalogues can gather and search the library's (audit, IOB-M2; Enrique, 8 November):
