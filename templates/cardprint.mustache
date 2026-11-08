@@ -163,7 +163,7 @@
 </div>
 {{#nobody}}<p class="ayv-empty">{{nobody}}</p>{{/nobody}}
 {{#cando}}
-<form method="post" action="{{pageurl}}" class="ayv-cards-go" data-busy="{{makebusy}}">
+<form method="post" action="{{pageurl}}" class="ayv-cards-go" data-busy="{{makebusy}}" data-busyhint="{{makebusyhint}}">
     <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="make">
     <button type="submit" class="ayv-button">{{makelabel}}</button>
     {{#makehint}}<p class="ayv-field-hint">{{makehint}}</p>{{/makehint}}

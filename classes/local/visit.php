@@ -279,6 +279,12 @@ final class visit {
         $home = $public ? $url('public.php') : $url('index.php');
         $goes = fn(string $corner) => isset($rooms[$corner]) ? $url('visit.php', ['room' => $rooms[$corner]])
             : $url('stacks.php', ['corner' => $corner]);
+        // The herald's round: each day in one room only, the same for everyone (Gaudí, JV-I1); finding it is the news.
+        $round = $rooms ? array_values($rooms)[crc32(zones::date(time(), '%Y%m%d', $library) . '-' . $library->id) %
+            count($rooms)] : '';
+        // In the hall, a feather of it on the row of that room; not for the sky, who look for it.
+        $feather = $round !== '' && self::young($library, $public) ? (string) screens::art('visita/pluma-mainumby', 'svg') : '';
+        $feathercorner = $feather !== '' ? (string) array_search($round, $rooms, true) : '';
         $title = $name === $hallname ? $str('visithall') : ($corners[$scene['corner']]['label'] ?? $str('visit'));
         $zones = [];
         $mapleft = '';
@@ -322,7 +328,13 @@ final class visit {
                 $label = $back ? ($back['name'] === $hallname ? $str('visitbackhall')
                     : $str('visitback', $corners[$back['corner']]['label'] ?? $str('visit'))) : $str('visitexit');
             } else if ($kind === 'directory') {
-                $surfaces[] = self::directory($zone, array_slice(array_values($corners), 0, $zone['rows']), $goes);
+                $surfaces[] = self::directory(
+                    $zone,
+                    array_slice(array_values($corners), 0, $zone['rows']),
+                    $goes,
+                    $feathercorner,
+                    $feather
+                );
                 // Where the map of the room starts: a phone opens with it in sight (DIS-KIMI-03).
                 $mapleft = (int) round(min(array_column($zone['quad'], 0)));
                 continue;
@@ -379,7 +391,8 @@ final class visit {
                 $depth,
                 $public,
                 $url,
-                $hunt ? 'ayv-hunt' : ($sort ? 'ayv-sort' : '')
+                $hunt ? 'ayv-hunt' : ($sort ? 'ayv-sort' : ''),
+                $round
             ),
             'hunt' => $hunt,
             'sort' => $sort,
@@ -462,14 +475,24 @@ final class visit {
      * @param array $zone
      * @param array[] $corners
      * @param callable $goes Where a corner leads.
+     * @param string $feathercorner The corner whose room the herald is in today, when its feather is shown.
+     * @param string $feather The feather's address.
      * @return array
      */
-    private static function directory(array $zone, array $corners, callable $goes): array {
+    private static function directory(
+        array $zone,
+        array $corners,
+        callable $goes,
+        string $feathercorner = '',
+        string $feather = ''
+    ): array {
         [$w, $h] = self::box($zone['quad']);
         $rows = [];
         foreach ($corners as $corner) {
             $link = $goes($corner['code']);
             $rows[] = ['label' => $corner['label'], 'url' => $link, 'colour' => $corner['colour'],
+                'feather' => $feathercorner !== '' && (string) $corner['code'] === $feathercorner ? $feather : '',
+                'feathertext' => get_string('visitroundhere', 'local_oksigeniaayvurenda'),
                 'enters' => str_contains($link, '/visit.php')];
         }
         return ['directory' => true, 'pulse' => false, 'book' => false, 'width' => round($w), 'height' => round($h),
@@ -556,6 +579,7 @@ final class visit {
      * @param bool $public
      * @param callable $url
      * @param string $game The room's game, which the herald offers ('' for none): the id of its window.
+     * @param string $round The room the herald's round takes it to today ('' for every room).
      * @return array[]
      */
     private static function characters(
@@ -564,7 +588,8 @@ final class visit {
         float $depth,
         bool $public,
         callable $url,
-        string $game
+        string $game,
+        string $round = ''
     ): array {
         global $DB, $USER;
         $out = [];
@@ -576,6 +601,10 @@ final class visit {
             IGNORE_MULTIPLE
         ) : null;
         foreach ($scene['characters'] as $role => $one) {
+            // In a room, the herald is only where its round takes it today.
+            if ($role === 'herald' && $scene['corner'] !== '' && $round !== '' && $scene['name'] !== $round) {
+                continue;
+            }
             // The art's hummingbird perches on the furniture; a centre's own character stands on the floor, like a person.
             $standing = $one['standing'] ?? null;
             if ($standing && characters::own_figure((int) $library->entityid, $role, $standing['pose'])) {

@@ -156,6 +156,12 @@ foreach (
 ) {
     $data[$key] = $str($key);
 }
+// Where the skin has its figures, the herald carries the long work, and hummingbirds are small (jue-humor H15).
+$carrier = \local_oksigeniaayvurenda\local\skins::lively((int) $library->entityid)
+    ? (\local_oksigeniaayvurenda\local\characters::of((int) $library->entityid)['herald'] ?? null) : null;
+if ($carrier && $carrier['enabled']) {
+    $data['freeworksbringinghint'] = $str('freeworksbringinghintlively', $carrier['name']);
+}
 shell::output(
     $str('freeworks'),
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/free', $data),

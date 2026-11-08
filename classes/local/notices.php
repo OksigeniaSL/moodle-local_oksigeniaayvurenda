@@ -168,14 +168,34 @@ final class notices {
         $one = count($list) === 1;
         // To a young reader (the card with the flower), the herald tells it her way: the book misses its shelf.
         $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
+        // Where a late book costs something, it is said before it does; and with nothing to pay, a day in two the
+        // message says it another way, by the reader's age and the library (jue-humor H26-H29).
+        $warning = $reader ? sanctions::warning($entityid, $reader, $now) : '';
+        $other = $one && $reader && $warning === '' && crc32($reader->id . '-' . date('Ymd', $now)) % 2;
+        $look = $reader ? cards::look_of($reader, $now) : 'none';
+        $late = (object) ['title' => $list[0]->title, 'due' => zones::date((int) $list[0]->timedue, 'strftimedateshort', $entityid),
+            'days' => max(1, intdiv($now - (int) $list[0]->timedue, DAYSECS)), 'reader' => $user->firstname];
+        if ($other && $look !== 'flower') {
+            $skin = skins::of($entityid);
+            $waiting = $DB->record_exists(self::T . 'hold', ['recordid' => $list[0]->recordid, 'status' => 'waiting']);
+            $key = match (true) {
+                $look === 'sky' && in_array($skin, ['school', 'secondary'], true) => 'noticereaderbodysecondary2',
+                $skin === 'university' && $waiting => 'noticereaderbodyuniversity2',
+                in_array($skin, ['public', 'mobile'], true) => 'noticereaderbodylay2',
+                default => '',
+            };
+            $body = $key !== '' ? get_string($key, 'local_oksigeniaayvurenda', $late) : $body;
+        }
         // Not where the characters are a portrait and a signature (a university, a company): there, no voice of theirs.
         $young = $herald['enabled'] && skins::lively($entityid) && $reader && cards::look_of($reader, $now) === 'flower'
-            ? characters::say($entityid, 'herald', $one ? 'heraldoverdueone' : 'heraldoverdue', ['reader' => $user->firstname,
-                'books' => $a->books]) : null;
+            ? characters::say(
+                $entityid,
+                'herald',
+                $one ? ($other ? 'heraldoverdueone2' : 'heraldoverdueone') : 'heraldoverdue',
+                ['reader' => $user->firstname, 'books' => $a->books, 'title' => $late->title, 'days' => $late->days]
+            ) : null;
         $heading = $subject;
         $after = $str('noticereaderafter');
-        // Where a late book costs something, it is said before it does.
-        $warning = $reader ? sanctions::warning($entityid, $reader, $now) : '';
         $body .= $warning !== '' ? ' ' . $warning : '';
         if ($young) {
             // What a late book costs is said to the young too, in the plain text as in the message.

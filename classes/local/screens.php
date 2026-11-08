@@ -361,6 +361,7 @@ final class screens {
             'authors' => $authors,
             'facts' => $facts,
             'hasfacts' => (bool) $facts,
+            'oldline' => self::old_line($library, (string) $record->pubyear),
             'subjects' => $subjects,
             'hassubjects' => (bool) $subjects,
             'subjectsheading' => self::str('subjects'),
@@ -1156,6 +1157,17 @@ final class screens {
      */
     private static function herald_new(\stdClass $library, array $hero): ?array {
         // Whole, waving: on the home's board it is the one figure of the left column.
+        if (
+            self::swap_day((int) $library->entityid) && ($swap = characters::say(
+                (int) $library->entityid,
+                'memory',
+                'memorynewswap',
+                [],
+                'senala'
+            ))
+        ) {
+            return $swap;
+        }
         $said = characters::say((int) $library->entityid, 'herald', 'heraldnew', [], 'saluda');
         if ($said && $hero['young']) {
             $said['listen'] = self::listen(['herald-' . $hero['heraldsex'] . '/{lang}/heraldnew']);
@@ -1329,8 +1341,50 @@ final class screens {
         if ($grown && in_array($said, ['nada', 'nothing'], true)) {
             return characters::say($entityid, 'memory', 'memorynothingnada', ['query' => $query], 'piensa');
         }
+        if (!$near && !$grown && self::swap_day($entityid)) {
+            // The day they swap jobs, the herald does the memory's (jue-humor H46).
+            $swap = characters::say($entityid, 'herald', 'heraldnothingswap', ['query' => $query], 'piensa');
+            if ($swap) {
+                return $swap;
+            }
+        }
         $key = $near ? 'memorynear' : characters::bag($entityid, 'memorynothing', (string) $USER->id);
         return characters::say($entityid, 'memory', $key, ['query' => $query], 'piensa');
+    }
+
+    /**
+     * The day the two characters swap jobs: the first of April, and in Spanish the 28th of December too, in the
+     * centre's own day. Nothing false is said: only who says it changes.
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    private static function swap_day(int $entityid): bool {
+        $day = zones::date(time(), '%m-%d', $entityid);
+        return $day === '04-01' || ($day === '12-28' && substr(current_language(), 0, 2) === 'es');
+    }
+
+    /**
+     * A line for a very old book: more than fifty years for the young and the sky, a century for grown-ups (jue-humor
+     * H34-H36). Nothing for a year that is not a year («c. 1920», «[s.a.]», «19--»).
+     *
+     * @param \stdClass $library
+     * @param string $pubyear
+     * @return string
+     */
+    private static function old_line(\stdClass $library, string $pubyear): string {
+        $entityid = (int) $library->entityid;
+        if (!preg_match('/^\s*\[?(\d{4})\]?\.?\s*$/', $pubyear, $m)) {
+            return '';
+        }
+        $year = (int) $m[1];
+        $age = (int) date('Y') - $year;
+        $young = characters::band($entityid) !== '';
+        $sky = characters::step($entityid) === 'cielo' && in_array(skins::of($entityid), ['school', 'secondary'], true);
+        if ($year < 1000 || $age > 1000 || $age <= ($young || $sky ? 50 : 100)) {
+            return '';
+        }
+        return skins::say($entityid, $young ? 'recordoldpri' : 'recordold', $year);
     }
 
     /**

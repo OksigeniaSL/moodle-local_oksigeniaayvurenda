@@ -280,6 +280,7 @@ $data = [
     'cando' => $count > 0,
     'makelabel' => $count === 1 ? $str('cardprintmakeone') : $str('cardprintmake', screens::number($count)),
     'makebusy' => $str('cardprintbusy'),
+    'makebusyhint' => $str('cardprintbusyhint'),
     'makehint' => $count > cardprint::NOW ? $str('cardprintlong') : '',
     'doneword' => in_array(true, array_column($ready, 'fresh'), true) ? $str('cardprintdone') : '',
     'nobody' => $who === 'pick' ? $str('cardprintpick') : ($count ? '' : $str('readersnone')),

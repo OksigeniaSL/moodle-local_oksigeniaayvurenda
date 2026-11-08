@@ -163,6 +163,31 @@ foreach ($readers as $reader) {
         'herald',
         ($sky ? 'heraldsky' : 'heraldstage') . $stage
     ) : null;
+    // The day of the year of their first loan here, a year or more ago: the herald remembers it (jue-humor H31-H33).
+    $first = $DB->get_record_sql(
+        "SELECT l.timeloaned, r.title
+           FROM {local_oksigeniaayvurenda_loan} l
+           JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+           JOIN {local_oksigeniaayvurenda_record} r ON r.id = i.recordid
+          WHERE l.readerid = :readerid
+       ORDER BY l.timeloaned, l.id",
+        ['readerid' => $reader->id],
+        IGNORE_MULTIPLE
+    );
+    $zone = \local_oksigeniaayvurenda\local\zones::of((int) $reader->entityid);
+    $day = fn(int $time) => (new \DateTimeImmutable('@' . $time))->setTimezone($zone);
+    if (
+        $first && !$previewid && $day((int) $first->timeloaned)->format('m-d') === $day(time())->format('m-d')
+            && ($years = (int) $day(time())->format('Y') - (int) $day((int) $first->timeloaned)->format('Y')) >= 1
+    ) {
+        $herald = \local_oksigeniaayvurenda\local\characters::say(
+            (int) $reader->entityid,
+            'herald',
+            $sky || $look !== 'flower' ? 'heraldfirstloandaysecondary' : 'heraldfirstloanday',
+            ['title' => format_string($first->title, true, ['escape' => false]), 'years' => $years],
+            'celebra'
+        ) ?? $herald;
+    }
     // The young (the flower) hear what they may not read yet: the herald, the paths, the garden and the empty album.
     $young = $look === 'flower';
     $sex = (\local_oksigeniaayvurenda\local\characters::of((int) $reader->entityid)['herald']['sex'] ?? 'm') === 'f' ? 'f' : 'm';

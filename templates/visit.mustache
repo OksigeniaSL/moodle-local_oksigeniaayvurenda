@@ -123,7 +123,7 @@
                     {{#directory}}
                     <ul>
                         {{#rows}}
-                        <li style="height: {{rowheight}}px"><a href="{{url}}"{{#enters}} data-enters="1"{{/enters}}><span class="ayv-visit-dot ayv-cover-{{colour}}" aria-hidden="true"></span>{{label}}</a></li>
+                        <li style="height: {{rowheight}}px"><a href="{{url}}"{{#enters}} data-enters="1"{{/enters}}><span class="ayv-visit-dot ayv-cover-{{colour}}" aria-hidden="true"></span>{{label}}{{#feather}} <img class="ayv-visit-feather" src="{{feather}}" alt="" width="20" height="20"><span class="ayv-sr">{{feathertext}}</span>{{/feather}}</a></li>
                         {{/rows}}
                     </ul>
                     {{/directory}}

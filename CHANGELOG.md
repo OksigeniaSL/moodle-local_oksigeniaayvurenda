@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.199.0
+
+- The lines of humour, second part:
+  - a book late with nothing to pay: a day in two, another way to say it, by age and library (the herald to the young;
+    the shelf has noticed, to the secondary school; someone is waiting, at a university; a visit fixes it, at a public
+    library);
+  - a year from a reader's first loan, the herald of the card remembers it, with the book;
+  - a very old book says so on its record (fifty years for the young and the sky, a century for grown-ups);
+  - on the first of April (and the 28th of December in Spanish) the two characters swap jobs: the memory brings the
+    news, and the herald searches;
+  - while a free work is brought, the herald carries it, and hummingbirds are small; while the cards are made, cutting
+    them out is still yours.
+- The herald's round (with Gaudí): each day it is in one room of the visit only, the same for everyone; in the hall, a
+  feather of it (Gaudí's, art 0.1.51) on the board's row of that room, for the young; the sky looks for it.
+
 ## 0.198.0
 
 - The lines of humour, first part (from the audit, with Gaudí): written for each age, a bag of them the same all day for

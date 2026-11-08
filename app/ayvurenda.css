@@ -5024,3 +5024,6 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-hold-later { margin-top: .6rem; }
 .ayv .ayv-hold-later > summary { cursor: pointer; font-weight: 700; color: var(--green); }
 .ayv .ayv-hold-later-choices { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* The herald's feather on the hall's board: the room it is in today (Gaudí's, 20 px). */
+.ayv .ayv-visit-feather { display: inline-block; width: 1em; height: 1em; margin-left: .3em; vertical-align: -.1em; }
