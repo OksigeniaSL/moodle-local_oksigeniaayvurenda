@@ -47,7 +47,7 @@ if (!$library) {
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 // In words, when the site has its own AI: first its policy, accepted once; then each question is answered as it is asked,
 // from the guide only. The links to a task are plain pages: they ask nothing of the AI.
-$ai = howto::ai_ready();
+$ai = howto::may_ask($library) && howto::ai_ready();
 $answer = null;
 $failed = false;
 if ($ai && data_submitted() && confirm_sesskey()) {
@@ -118,7 +118,8 @@ shell::output($str('howtotitle'), $OUTPUT->render_from_template('local_oksigenia
         'policyread' => $str('howtoaipolicyread'),
         'accept' => $str($query !== '' ? 'howtoaiaccept' : 'howtoaiacceptonly'),
         'ask' => $str('howtoai'),
-        'answer' => $answer !== null ? nl2br(s($answer['text'])) : '',
+        // As Markdown, which an AI writes even when asked not to; Moodle turns it into clean HTML (ia-bibliotecarios 2).
+        'answer' => $answer !== null ? format_text($answer['text'], FORMAT_MARKDOWN, ['context' => $context]) : '',
         'answerlabel' => $str('howtoaianswer'),
         'failed' => $failed ? $str('howtoaifailed') : '',
     ] : null,

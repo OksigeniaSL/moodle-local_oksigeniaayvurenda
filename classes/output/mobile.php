@@ -29,6 +29,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\mail;
 use local_oksigeniaayvurenda\local\mine;
+use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\renewals;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\skins;
@@ -58,13 +59,14 @@ class mobile {
      * @return array
      */
     public static function mobile_init(array $args): array {
-        global $CFG;
+        global $CFG, $USER;
         return [
             'templates' => [],
             'javascript' => (string) file_get_contents($CFG->dirroot . '/local/oksigeniaayvurenda/app/mobile-links.js'),
             'otherdata' => '',
-            // No «Library» in the app's menu for whoever has no library to go to yet (one still closed to its readers).
-            'disabled' => !access::sees_any(),
+            // No «Library» in the app's menu for whoever has no library to go to yet (one still closed to its readers),
+            // nor where the plan of their library has no app: the official app too (int-app-oficial 7).
+            'disabled' => !access::sees_any() || !plans::app_allowed((int) $USER->id),
         ];
     }
 
@@ -87,7 +89,7 @@ class mobile {
             // What is worked out here replaces what the summary gave (its lists of loans and holds), so it goes first.
             $libraries[] = [
                 'memoryline' => $library['remembers']['text'] ?? '',
-                'memoryportrait' => $library['remembers']['portrait'] ?? '',
+                'memoryportrait' => self::portrait((string) ($library['remembers']['portrait'] ?? '')),
                 'memoryrecord' => $library['remembers']['recordid'] ?? 0,
                 'memorykey' => 'm' . $index,
                 'memorybook' => !empty($library['remembers']['recordid']),
@@ -105,9 +107,28 @@ class mobile {
                 'qkey' => 'q' . $index,
             ] + self::codes($code) + $library;
         }
+        // Whoever runs a library without a reader's card of it: the way to its desk and to the library, not «not a reader»
+        // (int-app-oficial 5).
+        $doors = [];
+        if (!$libraries) {
+            foreach (access::entities('local/oksigeniaayvurenda:desk', (int) $USER->id) as $entityid) {
+                $main = mail::main_library($entityid);
+                if ($main) {
+                    $go = fn(string $script) => (new \moodle_url(
+                        '/local/oksigeniaayvurenda/' . $script,
+                        ['library' => $main->slug]
+                    ))->out(false);
+                    $doors[] = ['name' => format_string($main->name, true, ['escape' => false]), 'desk' => $go('desk.php'),
+                        'home' => $go('index.php'), 'deskdoor' => $str('mobilestaffdesk'),
+                        'homedoor' => $str('mobilestaffhome')];
+                }
+            }
+        }
         $data = [
             'libraries' => $libraries,
             'haslibraries' => (bool) $libraries,
+            'staffdoors' => $doors,
+            'hasstaffdoors' => (bool) $doors,
             'notreader' => $str('mobilenotreader'),
             'loansheading' => $str('mobileloans'),
             'holdsheading' => $str('mobileholds'),
@@ -199,19 +220,34 @@ class mobile {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $library = self::library($args);
         $query = trim(\core_text::substr(clean_param((string) ($args['q'] ?? ''), PARAM_TEXT), 0, 200));
+        // Page after page, all of them on the same list: «See more» brings the next one under the others, up to five
+        // (int-app-oficial 4).
+        $pages = max(0, min(4, (int) ($args['page'] ?? 0)));
         $cards = [];
+        $total = 0;
         if ($library && $query !== '') {
-            $cards = screens::cards(array_slice(catalogue::search($library, $query)['cards'], 0, 30), $library);
+            for ($page = 0; $page <= $pages; $page++) {
+                $found = catalogue::search($library, $query, $page);
+                $total = (int) $found['reachable'];
+                $cards = array_merge($cards, screens::cards($found['cards'], $library));
+                if (count($found['cards']) < catalogue::PERPAGE) {
+                    break;
+                }
+            }
         }
         $data = [
             'library' => $library ? $library->slug : '',
             'name' => $library ? format_string($library->name, true, ['escape' => false]) : '',
             'cards' => array_map(
                 fn($c) => ['id' => $c['id'], 'title' => $c['title'], 'authors' => $c['authors'],
-                'statelabel' => $c['statelabel'], 'free' => $c['state'] === 'free', 'location' => $c['location'] ?? ''],
+                'statelabel' => $c['statelabel'], 'free' => $c['state'] === 'free', 'location' => $c['location'] ?? '',
+                'thumb' => self::cover((int) $c['id'], 60 * 1024)],
                 $cards
             ),
             'hascards' => (bool) $cards,
+            'total' => $cards ? $str($total === 1 ? 'mobilesearchone' : 'mobilesearchtotal', $total) : '',
+            'more' => count($cards) < $total && $pages < 4 ? $str('mobilesearchmore') : '',
+            'nextpage' => $pages + 1,
             'searched' => $query !== '',
             'cannot' => !$library,
             'notreader' => $library ? '' : self::not_here(),
@@ -322,12 +358,41 @@ class mobile {
     }
 
     /**
+     * A character's portrait for the app: inside the page when it is one of the centre's own.
+     *
+     * @param string $url
+     * @return string The address as it was, a data address, or '' when it cannot be carried.
+     */
+    private static function portrait(string $url): string {
+        // A centre's own portrait is a file that asks for a session the app does not carry: it goes inside the page, as
+        // a cover does (int-app-oficial 6). The art package's are public files and go as they are.
+        if (!preg_match('#/pluginfile\.php/(\d+)/local_oksigeniaayvurenda/portrait/(\d+)/(.+)$#', $url, $m)) {
+            return $url;
+        }
+        $path = explode('/', rawurldecode(strtok($m[3], '?')));
+        $name = (string) array_pop($path);
+        $file = get_file_storage()->get_file(
+            (int) $m[1],
+            'local_oksigeniaayvurenda',
+            'portrait',
+            (int) $m[2],
+            $path ? '/' . implode('/', $path) . '/' : '/',
+            $name
+        );
+        if (!$file || $file->get_filesize() > 200 * 1024 || !str_starts_with($file->get_mimetype(), 'image/')) {
+            return '';
+        }
+        return 'data:' . $file->get_mimetype() . ';base64,' . base64_encode($file->get_content());
+    }
+
+    /**
      * A book's cover inside the page, so the app shows it without asking the site for it with its key.
      *
      * @param int $recordid
+     * @param int $most Bytes it may have: a list of them carries smaller ones.
      * @return string A data address, or '' when it has none (or it is too big to carry).
      */
-    private static function cover(int $recordid): string {
+    private static function cover(int $recordid, int $most = 200 * 1024): string {
         $file = get_file_storage()->get_file(
             \context_system::instance()->id,
             'local_oksigeniaayvurenda',
@@ -336,7 +401,7 @@ class mobile {
             '/',
             'cover.jpg'
         );
-        if (!$file || $file->get_filesize() > 200 * 1024) {
+        if (!$file || $file->get_filesize() > $most) {
             return '';
         }
         return 'data:image/jpeg;base64,' . base64_encode($file->get_content());

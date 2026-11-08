@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.207.0
+
+- «How do I…?» with the site's AI (audit, ia-bibliotecarios): only the staff ask it, never a reader; it gets the tasks
+  the question finds, whole, and the rest by their title; the question goes between marks, as a question; it is asked in
+  the library's context, so a shared site counts each centre's; what the AI thought aloud is dropped, and its Markdown
+  is shown as clean text.
+- The app (audit, int-aty-pixel and int-app-oficial):
+  - A reservation in another library of the centre (a classroom's) opens there, is the reader's in the main library
+    too («Your reservation is at…», with «I don't want it any more»), and is never made twice.
+  - What a notice opens, and a book or a search opened from the library, comes fresh, not the app's copy of twenty
+    minutes before.
+  - A grown-up of a family who is neither reader nor staff goes by the plan of their children's centres, and a child's
+    card in Aty shows nothing of a centre whose plan has no app; the official app's «Library» follows the plan too.
+  - The date on a chip of Aty's home is the centre's day, in any time zone.
+  - The staff without a reader's card find the way to their desk and their library instead of «not a reader yet».
+  - A centre's own portrait of the memory reaches the app.
+  - Enter searches; the results say how many there are, bring more with «See more» and show their covers.
+
 ## 0.206.0
 
 - Privacy of the youngest (audit, priv-menores):

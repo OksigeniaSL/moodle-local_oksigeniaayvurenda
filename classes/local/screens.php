@@ -468,9 +468,19 @@ final class screens {
             $box['minekind'] = 'loan';
             $box['mineuntil'] = (int) $loan->timedue;
         } else if ($reader) {
-            $mine = holds::open((int) $library->id, $recordid, (int) $reader->id);
+            // Theirs here, or in another library of the centre: one reservation is enough (int-aty-pixel 1).
+            $mine = holds::open((int) $library->id, $recordid, (int) $reader->id)
+                ?? holds::open_anywhere($recordid, (int) $reader->id);
             if ($mine) {
                 $box['holdid'] = (int) $mine->id;
+                $box['elsewhere'] = (int) $mine->libraryid !== (int) $library->id ? self::str(
+                    'holdelsewhere',
+                    format_string((string) $DB->get_field(
+                        'local_oksigeniaayvurenda_library',
+                        'name',
+                        ['id' => $mine->libraryid]
+                    ), true, ['escape' => false])
+                ) : '';
                 $box['minekind'] = $mine->status === 'ready' ? 'ready' : 'waiting';
                 $box['mineuntil'] = (int) $mine->timeexpires;
                 $paused = (int) ($mine->timesuspended ?? 0) > $now;

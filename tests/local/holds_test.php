@@ -67,6 +67,34 @@ final class holds_test extends \advanced_testcase {
     }
 
     /**
+     * A reservation in a classroom's library of the centre is the reader's in the main one too: it says where, it is
+     * not made twice, and it opens where it waits (int-aty-pixel 1).
+     */
+    public function test_one_reservation_per_centre(): void {
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $classroom = $gen->create_library(['entityid' => $w->library->entityid, 'slug' => 'aula-5a', 'kind' => 'classroom']);
+        $copy = $gen->create_item(['libraryid' => $classroom->id, 'recordid' => $w->record->id, 'status' => 'onloan']);
+        $now = time();
+        $there = holds::add($classroom, (int) $w->record->id, (int) $w->hugo->id, null, $now);
+        $this->assertTrue($there['ok']);
+        $this->assertSame((int) $there['hold']->id, (int) holds::open_anywhere((int) $w->record->id, (int) $w->hugo->id)->id);
+        $this->assertNull(holds::open((int) $w->library->id, (int) $w->record->id, (int) $w->hugo->id));
+        $again = holds::add($w->library, (int) $w->record->id, (int) $w->hugo->id, null, $now);
+        $this->assertSame([false, 'has'], [$again['ok'], $again['reason']]);
+        $mine = holds::of_reader((int) $w->hugo->id, $now);
+        $this->assertSame('aula-5a', $mine[0]['slug']);
+        $this->assertSame((int) $classroom->id, $mine[0]['libraryid']);
+        $this->assertSame((int) $there['hold']->id, (int) holds::of_centre(
+            (int) $there['hold']->id,
+            (int) $w->library->entityid
+        )->id);
+        $this->assertNull(holds::of_centre((int) $there['hold']->id, (int) $gen->create_library()->entityid));
+        unset($copy);
+    }
+
+    /**
      * «Not yet»: Hugo puts his reservation off; the copy that comes back goes to Marta, who waited behind him; one set
      * aside put off goes to the next or to the shelf; back in the queue, Hugo has his place again (MER-03).
      */

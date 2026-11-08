@@ -17,7 +17,9 @@ class AyvurendaLinks extends that.CoreContentLinksHandlerBase {
             action: (siteId) => that.CoreNavigatorService.navigateToSitePath(
                 'siteplugins/content/local_oksigeniaayvurenda/' + method + '/' + that.Md5.hashAsciiStr(JSON.stringify(args)),
                 {
-                    params: {title: that.TranslateService.instant('plugin.local_oksigeniaayvurenda.mobilelibrary'), args},
+                    // What a notice opens is fresh, never the app's copy of up to twenty minutes ago (int-aty-pixel 2).
+                    params: {title: that.TranslateService.instant('plugin.local_oksigeniaayvurenda.mobilelibrary'), args,
+                        preSets: {getFromCache: false}},
                     siteId,
                 }
             ),

@@ -130,7 +130,46 @@ final class holds {
     }
 
     /**
-     * The open reservation of a reader for a book in a library, if any.
+     * A reader's open reservation of a book in any library of their centre: one is enough (int-aty-pixel 1).
+     *
+     * @param int $recordid
+     * @param int $readerid
+     * @return \stdClass|null
+     */
+    public static function open_anywhere(int $recordid, int $readerid): ?\stdClass {
+        global $DB;
+        [$in, $params] = $DB->get_in_or_equal(self::OPEN, SQL_PARAMS_NAMED);
+        $hold = $DB->get_record_select(
+            self::T . 'hold',
+            "recordid = :recordid AND readerid = :readerid AND status $in",
+            $params + ['recordid' => $recordid, 'readerid' => $readerid],
+            '*',
+            IGNORE_MULTIPLE
+        );
+        return $hold ?: null;
+    }
+
+    /**
+     * A reservation of any library of a centre, or null.
+     *
+     * @param int $holdid
+     * @param int $entityid
+     * @return \stdClass|null
+     */
+    public static function of_centre(int $holdid, int $entityid): ?\stdClass {
+        global $DB;
+        $hold = $DB->get_record_sql(
+            "SELECT h.*
+               FROM {" . self::T . "hold} h
+               JOIN {" . self::T . "library} b ON b.id = h.libraryid
+              WHERE h.id = :id AND b.entityid = :entityid",
+            ['id' => $holdid, 'entityid' => $entityid]
+        );
+        return $hold ?: null;
+    }
+
+    /**
+     * A reader's open reservation of a book here.
      *
      * @param int $libraryid
      * @param int $recordid
@@ -186,7 +225,7 @@ final class holds {
         }
         [$in, $params] = $DB->get_in_or_equal(array_keys($items), SQL_PARAMS_NAMED);
         if (
-            self::open((int) $library->id, $recordid, $readerid) || $DB->record_exists_select(
+            self::open_anywhere($recordid, $readerid) || $DB->record_exists_select(
                 self::T . 'loan',
                 "readerid = :readerid AND timereturned IS NULL AND itemid $in",
                 $params + ['readerid' => $readerid]
@@ -541,9 +580,10 @@ final class holds {
         global $DB;
         $entityid = (int) $DB->get_field(self::T . 'reader', 'entityid', ['id' => $readerid]);
         $rows = $DB->get_records_sql(
-            "SELECT h.*, r.title
+            "SELECT h.*, r.title, b.slug
                FROM {" . self::T . "hold} h
                JOIN {" . self::T . "record} r ON r.id = h.recordid
+               JOIN {" . self::T . "library} b ON b.id = h.libraryid
               WHERE h.readerid = :readerid AND h.status IN ('waiting', 'ready')
            ORDER BY h.status DESC, h.timecreated, h.id",
             ['readerid' => $readerid]
@@ -553,6 +593,9 @@ final class holds {
             $list[] = [
                 'id' => (int) $row->id,
                 'recordid' => (int) $row->recordid,
+                // The library it waits at: its record opens there, where the hold is (int-aty-pixel 1).
+                'libraryid' => (int) $row->libraryid,
+                'slug' => (string) $row->slug,
                 'title' => $row->title,
                 'ready' => $row->status === 'ready',
                 'until' => $row->status === 'ready' ? zones::date((int) $row->timeexpires, 'strftimedateshort', $entityid) : '',

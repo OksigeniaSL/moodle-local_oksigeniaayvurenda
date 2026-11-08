@@ -155,6 +155,11 @@ final class twins {
             $DB->delete_records(self::T . 'member', ['readerid' => $goneid, 'yearid' => $member->yearid]);
         }
         $DB->set_field(self::T . 'member', 'readerid', $keepid, ['readerid' => $goneid]);
+        // What each kept of a year whose loans no longer say who: one per year, the one who stays keeps theirs.
+        foreach ($DB->get_records(self::T . 'keepsake', ['readerid' => $keepid], '', 'id, yearid') as $kept) {
+            $DB->delete_records(self::T . 'keepsake', ['readerid' => $goneid, 'yearid' => $kept->yearid]);
+        }
+        $DB->set_field(self::T . 'keepsake', 'readerid', $keepid, ['readerid' => $goneid]);
         // One review per reader and book: where both told about the same book, the one that stays keeps theirs.
         reviews::move($goneid, $keepid);
         foreach (self::OWNED as $table) {

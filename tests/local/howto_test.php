@@ -28,6 +28,45 @@ namespace local_oksigeniaayvurenda\local;
 #[\PHPUnit\Framework\Attributes\CoversClass(howto::class)]
 final class howto_test extends \advanced_testcase {
     /**
+     * The site's AI answers the staff only, from the tasks the question finds, in the library's context; what it
+     * thought aloud stays out, and the tasks it named are kept (ia-bibliotecarios 1 to 5).
+     */
+    public function test_ask(): void {
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $response = $this->createMock(\core_ai\aiactions\responses\response_generate_text::class);
+        $response->method('get_success')->willReturn(true);
+        $response->method('get_response_data')->willReturn(['generatedcontent' =>
+            "<think>Let me see.</think>1. Open the **desk**.\n2. Read the card.\nTASKS: lend, nonsense"]);
+        $contexts = [];
+        $manager = $this->createMock(\core_ai\manager::class);
+        $manager->method('is_action_available')->willReturn(true);
+        $manager->method('process_action')->willReturnCallback(function ($action) use ($response, &$contexts) {
+            $contexts[] = (new \ReflectionProperty($action, 'contextid'))->getValue($action);
+            return $response;
+        });
+        \core\di::set(\core_ai\manager::class, $manager);
+
+        // A reader of the library does not ask.
+        $this->setUser($this->getDataGenerator()->create_user());
+        $this->assertFalse(howto::may_ask($library));
+        $this->assertNull(howto::ask('How do I lend a book?', $library, 0));
+        $this->assertSame([], $contexts);
+
+        $this->setAdminUser();
+        $said = howto::ask('How do I lend a book?', $library, (int) get_admin()->id);
+        $this->assertSame("1. Open the **desk**.\n2. Read the card.", $said['text']);
+        $this->assertSame(['lend'], $said['tasks']);
+        $this->assertSame([access::context($library)->id], $contexts);
+        // Only the tasks the question finds go whole.
+        $all = howto::guide($library, (int) get_admin()->id);
+        $near = howto::guide($library, (int) get_admin()->id, 'How do I lend a book?');
+        $this->assertLessThan(strlen($all) / 2, strlen($near));
+        $this->assertStringContainsString('[lend]', $near);
+        $this->assertStringContainsString('[weed]', $near);
+    }
+
+    /**
      * Questions in the staff's own words find their task first; nobody sees a task they cannot do.
      */
     public function test_find(): void {

@@ -106,7 +106,7 @@ final class mine {
             $textbooks = count(array_filter($loans, fn($loan) => $loan['textbook'] && !$loan['late']));
             $loans = array_values(array_filter($loans, fn($loan) => !$loan['textbook'] || $loan['late']));
             $holds = array_map(
-                fn($hold) => $hold + ['url' => $url('record.php', $library, ['id' => $hold['recordid']])],
+                fn($hold) => $hold + ['url' => $url('record.php', (object) ['slug' => $hold['slug']], ['id' => $hold['recordid']])],
                 holds::of_reader((int) $reader->id, $now)
             );
             $remembers = memory::remembers($library, $reader, $now);
@@ -125,6 +125,7 @@ final class mine {
                 'slug' => (string) $library->slug,
                 'cardcode' => (string) $reader->cardcode,
                 'readerid' => (int) $reader->id,
+                'entityid' => (int) $reader->entityid,
                 'home' => $url('index.php', $library),
                 'card' => $url('card.php', $library),
                 'spring' => $url('ayvurande.php', $library),
@@ -189,7 +190,8 @@ final class mine {
                 if (!$loan['textbook']) {
                     // Late says so in words: a colour alone does not reach everyone, and a library's own may be close to it.
                     $items[] = ['title' => $loan['title'], 'detail' => $loan['late'] ? $str('mobilelate', $loan['due'])
-                        : $library['name'], 'date' => $loan['timedue'], 'urgent' => $loan['late'],
+                        : $library['name'], 'date' => self::noon((int) $loan['timedue'], $library['entityid']),
+                        'urgent' => $loan['late'],
                         'method' => 'mobile_record_view',
                         'args' => ['library' => $loan['where'], 'id' => $loan['recordid']]];
                 }
@@ -197,8 +199,9 @@ final class mine {
             foreach ($library['holds'] as $hold) {
                 if ($hold['ready']) {
                     $items[] = ['title' => $hold['title'], 'detail' => $str('mobileready', $hold['until']),
-                        'date' => $hold['expires'], 'urgent' => false, 'method' => 'mobile_record_view',
-                        'args' => ['library' => $library['slug'], 'id' => $hold['recordid']]];
+                        'date' => self::noon((int) $hold['expires'], $library['entityid']), 'urgent' => false,
+                        'method' => 'mobile_record_view',
+                        'args' => ['library' => $hold['slug'], 'id' => $hold['recordid']]];
                 }
             }
         }
@@ -237,6 +240,10 @@ final class mine {
                 '*',
                 IGNORE_MULTIPLE
             );
+            // A centre whose plan has no app shows nothing in it, not even of a child (int-aty-pixel 3).
+            if (access::apart() && $reader && !plans::allows((int) $reader->entityid, 'app')) {
+                continue;
+            }
             $young = $reader && cards::look_of($reader, $now) === 'flower';
             $row = function (array $book, string $detail, int $date, bool $late, string $where) use ($young, $str) {
                 return ['title' => $young ? $book['title'] : $str('mobilechildbook'), 'detail' => $detail, 'date' => $date,
@@ -248,7 +255,7 @@ final class mine {
                     $items[] = $row(
                         $loan,
                         $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $loan['due']),
-                        (int) $loan['timedue'],
+                        self::noon((int) $loan['timedue'], $library['entityid']),
                         (bool) $loan['late'],
                         (string) $loan['where']
                     );
@@ -259,9 +266,9 @@ final class mine {
                     $items[] = $row(
                         $hold,
                         $str('mobilechildready', $hold['until']),
-                        (int) $hold['expires'],
+                        self::noon((int) $hold['expires'], $library['entityid']),
                         false,
-                        (string) $library['slug']
+                        (string) $hold['slug']
                     );
                 }
             }
@@ -271,5 +278,20 @@ final class mine {
         }
         usort($items, fn($a, $b) => [$b['urgent'], $a['date']] <=> [$a['urgent'], $b['date']]);
         return [['heading' => $str('mobilechildheading'), 'items' => array_slice($items, 0, self::HOME_ROWS)]];
+    }
+
+    /**
+     * The noon of a moment's day at the centre: the app draws a chip's date in the phone's own zone, and noon falls on the
+     * same day in any of them, as the line beside it says (int-aty-pixel 4).
+     *
+     * @param int $time
+     * @param int $entityid
+     * @return int
+     */
+    private static function noon(int $time, int $entityid): int {
+        if (!$time) {
+            return 0;
+        }
+        return (new \DateTimeImmutable('@' . $time))->setTimezone(zones::of($entityid))->setTime(12, 0)->getTimestamp();
     }
 }

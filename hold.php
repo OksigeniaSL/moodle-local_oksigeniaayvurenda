@@ -74,9 +74,13 @@ if ($action === 'ask') {
     }
 } else if ($action === 'later' || $action === 'resume') {
     // Not yet: their own reservation put off for a week, two or a month, or back in the queue (MER-03).
-    $hold = $DB->get_record('local_oksigeniaayvurenda_hold', ['id' => required_param('hold', PARAM_INT),
-        'libraryid' => $library->id], '*', MUST_EXIST);
-    if (!$isdesk && (!$mine || (int) $hold->readerid !== (int) $mine->id)) {
+    // One's own, in any library of the centre (it may wait at a classroom's); the desk, only its own library's.
+    $hold = holds::of_centre(required_param('hold', PARAM_INT), (int) $library->entityid);
+    if (!$hold) {
+        shell::missing(get_string('holdnotyours', 'local_oksigeniaayvurenda'), $library);
+    }
+    $ownhold = $mine && (int) $hold->readerid === (int) $mine->id;
+    if (!$ownhold && !($isdesk && (int) $hold->libraryid === (int) $library->id)) {
         shell::refuse(get_string('holdnotyours', 'local_oksigeniaayvurenda'), $library);
     }
     if ($action === 'later') {
@@ -89,9 +93,13 @@ if ($action === 'ask') {
     }
     $recordid = (int) $hold->recordid;
 } else if ($action === 'cancel') {
-    $hold = $DB->get_record('local_oksigeniaayvurenda_hold', ['id' => required_param('hold', PARAM_INT),
-        'libraryid' => $library->id], '*', MUST_EXIST);
-    if (!$isdesk && (!$mine || (int) $hold->readerid !== (int) $mine->id)) {
+    // One's own, in any library of the centre (it may wait at a classroom's); the desk, only its own library's.
+    $hold = holds::of_centre(required_param('hold', PARAM_INT), (int) $library->entityid);
+    if (!$hold) {
+        shell::missing(get_string('holdnotyours', 'local_oksigeniaayvurenda'), $library);
+    }
+    $ownhold = $mine && (int) $hold->readerid === (int) $mine->id;
+    if (!$ownhold && !($isdesk && (int) $hold->libraryid === (int) $library->id)) {
         shell::refuse(get_string('holdnotyours', 'local_oksigeniaayvurenda'), $library);
     }
     holds::cancel((int) $hold->id, $now);

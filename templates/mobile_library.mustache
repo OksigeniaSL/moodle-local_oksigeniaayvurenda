@@ -21,6 +21,8 @@
     Example context (json):
     {
         "haslibraries": true, "notreader": "No eres lector", "loansheading": "Tus libros", "holdsheading": "Te esperan",
+        "hasstaffdoors": false, "staffdoors": [{"name": "Biblioteca", "desk": "https://example.org/d", "home": "https://example.org/b",
+            "deskdoor": "Ir al mostrador", "homedoor": "Abrir la biblioteca"}],
         "cardheading": "Tu carné", "cardhint": "Enséñalo en el mostrador", "none": "No tienes libros prestados.",
         "golibrary": "Ir a la biblioteca", "gospring": "Ayvu rande", "searchheading": "Buscar",
         "searchplaceholder": "Título, autor o tema", "searchbutton": "Buscar", "renew": "Ampliar",
@@ -33,24 +35,31 @@
     }
 }}
 <div class="local-oksigeniaayvurenda-mobile">
-{{^haslibraries}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{notreader}}</ion-label></ion-item></ion-list>{{/haslibraries}}
+{{^haslibraries}}{{^hasstaffdoors}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{notreader}}</ion-label></ion-item></ion-list>{{/hasstaffdoors}}{{/haslibraries}}
+{{#staffdoors}}
+    <ion-list>
+        <ion-list-header><ion-label><h2>{{name}}</h2></ion-label></ion-list-header>
+        <ion-item button detail="true" core-link inApp="true" href="{{desk}}"><ion-label>{{deskdoor}}</ion-label></ion-item>
+        <ion-item button detail="true" core-link inApp="true" href="{{home}}"><ion-label>{{homedoor}}</ion-label></ion-item>
+    </ion-list>
+{{/staffdoors}}
 {{#libraries}}
     <ion-list>
         <ion-list-header><ion-label><h2>{{name}}</h2></ion-label></ion-list-header>
         <div class="ion-padding-horizontal" style="display: flex; gap: 8px; align-items: center; padding-top: 4px; padding-bottom: 8px;">
-            <ion-input fill="outline" mode="md" style="flex: 1 1 auto; min-height: 48px;" [(ngModel)]="CONTENT_OTHERDATA.{{qkey}}" placeholder="{{searchplaceholder}}" aria-label="{{searchheading}}"></ion-input>
-            <ion-button class="ion-no-margin" style="height: 48px;" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{qkey}} }">{{searchbutton}}</ion-button>
+            <ion-input fill="outline" mode="md" style="flex: 1 1 auto; min-height: 48px;" [(ngModel)]="CONTENT_OTHERDATA.{{qkey}}" placeholder="{{searchplaceholder}}" aria-label="{{searchheading}}" enterkeyhint="search" (keyup.enter)="openContent('{{searchheading}}', {library: '{{slug}}', q: CONTENT_OTHERDATA.{{qkey}} }, 'local_oksigeniaayvurenda', 'mobile_search_view')"></ion-input>
+            <ion-button class="ion-no-margin" style="height: 48px;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{qkey}} }">{{searchbutton}}</ion-button>
         </div>
         {{#notice}}<ion-item lines="none"><ion-label class="ion-text-wrap" color="danger">{{notice}}</ion-label></ion-item>{{/notice}}
-        {{#memoryline}}<ion-item lines="none" button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" {{#memorybook}}method="mobile_record_view" title="{{name}}" [args]="{library: '{{slug}}', id: {{memoryrecord}} }"{{/memorybook}}{{^memorybook}}method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{memorykey}} }"{{/memorybook}}>{{#memoryportrait}}<img slot="start" src="{{memoryportrait}}" alt="" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top;">{{/memoryportrait}}<ion-label class="ion-text-wrap"><p>{{memoryline}}</p></ion-label></ion-item>{{/memoryline}}
+        {{#memoryline}}<ion-item lines="none" button detail="true" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" {{#memorybook}}method="mobile_record_view" title="{{name}}" [args]="{library: '{{slug}}', id: {{memoryrecord}} }"{{/memorybook}}{{^memorybook}}method="mobile_search_view" title="{{name}}" [args]="{library: '{{slug}}', q: CONTENT_OTHERDATA.{{memorykey}} }"{{/memorybook}}>{{#memoryportrait}}<img slot="start" src="{{memoryportrait}}" alt="" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top;">{{/memoryportrait}}<ion-label class="ion-text-wrap"><p>{{memoryline}}</p></ion-label></ion-item>{{/memoryline}}
         <ion-item-divider><ion-label>{{loansheading}}</ion-label></ion-item-divider>
         {{^hasloans}}{{^textbooks}}<ion-item><ion-label class="ion-text-wrap">{{none}}</ion-label></ion-item>{{/textbooks}}{{/hasloans}}
-        {{#loans}}<ion-item button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }"{{#canrenew}} lines="none"{{/canrenew}}><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p{{#late}} class="text-danger"{{/late}}>{{when}}</p></ion-label></ion-item>
+        {{#loans}}<ion-item button detail="true" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }"{{#canrenew}} lines="none"{{/canrenew}}><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p{{#late}} class="text-danger"{{/late}}>{{when}}</p></ion-label></ion-item>
         {{#canrenew}}<ion-item><ion-button slot="end" size="small" fill="outline" core-site-plugins-call-ws name="local_oksigeniaayvurenda_renew_loan" [params]="{loan: {{loanid}} }" [preSets]="{getFromCache: 0, saveToCache: 0}" successMessage="{{renewtoast}}" refreshOnSuccess="true">{{renew}}</ion-button></ion-item>{{/canrenew}}{{/loans}}
         {{#textbooks}}<ion-item><ion-label class="ion-text-wrap">{{textbooks}}</ion-label></ion-item>{{/textbooks}}
         {{#hasholds}}
         <ion-item-divider><ion-label>{{holdsheading}}</ion-label></ion-item-divider>
-        {{#holds}}<ion-item button detail="true" core-site-plugins-new-content component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{slug}}', id: {{recordid}} }"><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p>{{when}}</p></ion-label></ion-item>{{/holds}}
+        {{#holds}}<ion-item button detail="true" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{slug}}', id: {{recordid}} }"><ion-label class="ion-text-wrap"><h3>{{title}}</h3><p>{{when}}</p></ion-label></ion-item>{{/holds}}
         {{/hasholds}}
         <ion-item-divider><ion-label>{{cardheading}}</ion-label></ion-item-divider>
         <ion-item><ion-label class="ion-text-wrap"><p>{{cardhint}}</p><h2><strong>{{cardcode}}</strong></h2></ion-label></ion-item>

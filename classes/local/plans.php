@@ -298,6 +298,18 @@ final class plans {
             $DB->get_fieldset_select(self::T . 'reader', 'DISTINCT entityid', "userid = ? AND status = 'active'", [$userid]),
             access::entities('local/oksigeniaayvurenda:desk', $userid)
         );
+        // A grown-up of a family who is neither reader nor staff goes by the centres of their children
+        // (int-aty-pixel 3): the app is in the plan of the library they come to.
+        if (!$centres && class_exists('\\local_oksigeniafamily\\api')) {
+            foreach (\local_oksigeniafamily\api::children_of_user($userid) as $child) {
+                $centres = array_merge($centres, $DB->get_fieldset_select(
+                    self::T . 'reader',
+                    'DISTINCT entityid',
+                    "userid = ? AND status = 'active'",
+                    [$child]
+                ));
+            }
+        }
         foreach ($centres as $entityid) {
             if (self::allows((int) $entityid, 'app')) {
                 return true;

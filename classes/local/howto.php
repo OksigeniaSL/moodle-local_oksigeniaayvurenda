@@ -227,18 +227,40 @@ final class howto {
      *
      * @param \stdClass $library
      * @param int $userid
+     * @param string $question What is asked: the tasks it finds go whole, the rest by their title.
      * @return string
      */
-    public static function guide(\stdClass $library, int $userid): string {
+    public static function guide(\stdClass $library, int $userid, string $question = ''): string {
+        // The tasks the search found, whole; the others, by their title only: a shorter prompt answers better, costs a
+        // tenth and keeps a tenth in the site's record of what was asked (ia-bibliotecarios 3).
+        $near = $question !== '' ? array_column(self::find($question, $library, $userid), 'key') : [];
         $text = '';
         foreach (self::find('', $library, $userid) as $task) {
             $text .= '## [' . $task['key'] . '] ' . $task['title'] . "\n";
-            foreach ($task['steps'] as $i => $step) {
-                $text .= ($i + 1) . '. ' . $step . "\n";
+            if (!$near || in_array($task['key'], $near, true)) {
+                foreach ($task['steps'] as $i => $step) {
+                    $text .= ($i + 1) . '. ' . $step . "\n";
+                }
             }
             $text .= "\n";
         }
         return $text;
+    }
+
+    /**
+     * Whether someone may ask the site's AI: the staff of the library, for whom the guide is written; never a reader,
+     * who would be accepting the site's AI policy and sending what they write to its provider (ia-bibliotecarios 1).
+     *
+     * @param \stdClass $library
+     * @return bool
+     */
+    public static function may_ask(\stdClass $library): bool {
+        foreach (['desk', 'catalogue', 'manage'] as $what) {
+            if (access::can('local/oksigeniaayvurenda:' . $what, $library)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -251,13 +273,17 @@ final class howto {
      */
     public static function ask(string $question, \stdClass $library, int $userid): ?array {
         $question = \core_text::substr(trim($question), 0, 300);
-        if ($question === '' || !self::ai_ready()) {
+        if ($question === '' || !self::may_ask($library) || !self::ai_ready()) {
             return null;
         }
-        $prompt = get_string('howtoaiprompt', 'local_oksigeniaayvurenda', (object) ['guide' => self::guide($library, $userid),
-            'question' => $question]);
+        // The question goes between marks, as a question and never as instructions (ia-bibliotecarios 5).
+        $prompt = get_string('howtoaiprompt', 'local_oksigeniaayvurenda', (object) [
+            'guide' => self::guide($library, $userid, $question),
+            'question' => str_replace(['<pregunta>', '</pregunta>', '<question>', '</question>'], '', $question),
+        ]);
         try {
-            $action = new \core_ai\aiactions\generate_text(\context_system::instance()->id, $userid, $prompt);
+            // In the library's context, which on a shared site is its centre's: the site counts what each centre asks.
+            $action = new \core_ai\aiactions\generate_text(access::context($library)->id, $userid, $prompt);
             $response = \core\di::get(\core_ai\manager::class)->process_action($action);
         } catch (\Throwable $e) {
             return null;
@@ -276,6 +302,8 @@ final class howto {
      */
     public static function reply(string $said): ?array {
         $tasks = [];
+        // What some models think aloud before answering is not part of the answer.
+        $said = (string) preg_replace('#<think>.*?</think>#s', '', $said);
         $text = preg_replace_callback('/^[\s*_#]*(?:TAREAS|TASKS)[\s*_]*:(.*)$/mi', function ($line) use (&$tasks) {
             preg_match_all('/[a-z]+/', $line[1], $keys);
             $tasks = array_values(array_intersect($keys[0], array_keys(self::TASKS)));
