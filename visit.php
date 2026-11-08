@@ -58,7 +58,7 @@ if (!$data) {
 foreach (
     ['visitplaces', 'visitsound', 'visitvolume', 'visitpanleft', 'visitpanright', 'visitclose', 'searchlabel', 'searchplaceholder',
         'searchbutton', 'huntplay', 'huntshelf', 'huntrecord', 'huntagain', 'huntlens', 'sortplay', 'sortwhich', 'sortdone',
-        'sortdonehint', 'sortagain'] as $key
+        'sortdonehint', 'sortagain', 'visitloading', 'visitloadingnight'] as $key
 ) {
     $data[$key] = $str($key);
 }

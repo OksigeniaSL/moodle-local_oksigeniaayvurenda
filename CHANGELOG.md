@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.203.0
+
+- The curious things of each catalogue, worked out once a day: with nothing of the reader's own to tell, the memory
+  tells its longest title, a title of one word or a title that is a question, and takes the reader to it (never to
+  Infantil); the blackboard of the visit and the pulse of the door say the year of the oldest book still in service
+  (not in a company).
+- While the first layer of the visit comes, a line under it: «Opening the doors…», or «Lighting the lamps…» by night.
+- On the shelves: at the end of the last one, a sign for the flower («The library ends here. For now.») and for the
+  sky's in a school, with the way to ask for a book where the library takes requests; on the lectern, the thickest book
+  of the stretch, when its pages are counted.
+- In the app, nothing on loan in the words of whoever looks.
+
 ## 0.202.0
 
 - The last lines of humour: the practice library says what it is on top of each of its pages (break away: it goes the

@@ -48,7 +48,8 @@ final class spine {
      * @param string $extent The extent («120 p. : il. ; 24 cm», or only «144» as Abies writes it).
      * @param string $dimensions The dimensions, when they come apart («20cm», «21 x 15 cm»).
      * @param int $seed Something fixed of the record (its id), for books that do not say their size.
-     * @return array cm (height), pages, width (pixels) and known (whether the height came from the record).
+     * @return array cm (height), pages, width (pixels), known (whether the height came from the record) and counted
+     *     (whether the pages did).
      */
     public static function size(string $extent, string $dimensions, int $seed): array {
         $cm = null;
@@ -66,12 +67,13 @@ final class spine {
         }
         $known = $cm !== null && $cm > 5;
         $cm = $known ? max(self::MIN_CM, min(self::MAX_CM, $cm)) : self::MIN_CM + abs($seed * 7919) % 7;
-        if ($pages <= 0 || $pages > 3000) {
+        $counted = $pages > 0 && $pages <= 3000;
+        if (!$counted) {
             $pages = 48 + abs($seed * 104729) % 240;
         }
         $millimetres = 2 + $pages * 0.075;
         $width = (int) round(max(self::MIN_PX, min(self::MAX_PX, 20 + $millimetres * 0.9)));
-        return ['cm' => round($cm, 1), 'pages' => $pages, 'width' => $width, 'known' => $known];
+        return ['cm' => round($cm, 1), 'pages' => $pages, 'width' => $width, 'known' => $known, 'counted' => $counted];
     }
 
     /**

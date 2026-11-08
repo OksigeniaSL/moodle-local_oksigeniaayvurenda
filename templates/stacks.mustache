@@ -23,7 +23,7 @@
     * map - true for the places and corners; then places (id, label, countlabel, url, colour, hascolour), corners
       (label, countlabel, url, colour, art), allurl and posters (url and label of the printable posters, for the staff)
     * shelf - true for a stretch of shelf; then spines (see spine), prevurl, nexturl, mapurl, empty, bookcase, bookend,
-      bird
+      bird, and end (the sign at the end of the last shelf, or nothing) with endurl and endask (where to ask for a book)
     * strings: stacksplaces, stackscorners, stacksall, stacksprev, stacksnext, stacksmap, stackslectern, stacksrecord,
       stackswhere, stackslabel, stacksputback, stackswalk, whyask, whyorder
     Example context (json):
@@ -34,6 +34,7 @@
         "corners": [{"label": "Lengua y literatura", "countlabel": "900 libros", "url": "#", "colour": 2, "art": null}],
         "allurl": "#", "spines": [], "prevurl": "", "nexturl": "", "mapurl": "#", "empty": "Aquí no hay libros.",
         "bookcase": "Libros de la estantería, en orden", "bookend": null, "bird": null, "posters": null,
+        "end": "", "endurl": "", "endask": "",
         "stacksplaces": "Los sitios de la biblioteca", "stackscorners": "Por rincones",
         "stacksall": "Toda la biblioteca, de principio a fin", "stacksprev": "Hacia atrás", "stacksnext": "Seguir",
         "stacksmap": "Todos los sitios", "stackslectern": "El libro, fuera de la balda", "stacksrecord": "Ver la ficha",
@@ -94,6 +95,7 @@
     {{/spines}}
     </ul>
 </div>
+{{#end}}<p class="ayv-stacks-end">{{end}}{{#endurl}} <a href="{{endurl}}">{{endask}}</a>{{/endurl}}</p>{{/end}}
 {{/spines.0}}
 {{^spines.0}}<p class="ayv-stacks-empty">{{empty}}</p>{{/spines.0}}
 <div class="ayv-stacks-walk">

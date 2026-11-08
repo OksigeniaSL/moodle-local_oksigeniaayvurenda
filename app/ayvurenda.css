@@ -2683,6 +2683,7 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
 .ayv .ayv-stacks-back { margin: .5rem 0 0; }
 .ayv .ayv-stacks-back a { display: inline-flex; gap: .25rem; align-items: center; }
 .ayv .ayv-stacks-walk { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.ayv .ayv-stacks-end { width: fit-content; max-width: 100%; margin: .7rem 0 0 auto; padding: .45rem .95rem; border: 1px solid var(--line); border-radius: 8px; background: var(--paper2); color: var(--ink); font-style: italic; box-shadow: 0 6px 14px -10px rgba(15, 58, 51, .5); }
 .ayv .ayv-stacks-walk .ayv-button { display: inline-flex; gap: .35rem; align-items: center; }
 .ayv .ayv-stacks-next { margin-left: auto; }
 .ayv .ayv-stacks-all { margin: 1.5rem 0; }
@@ -2922,6 +2923,7 @@ html[data-bs-theme="dark"] .ayv.ayv-embed {
 .ayv .ayv-visit-sound[aria-pressed="true"] .ayv-visit-sound-off,
 .ayv .ayv-visit-sound[aria-pressed="false"] .ayv-visit-sound-on { display: none; }
 .ayv .ayv-visit-frame { position: relative; border-radius: 18px; overflow: hidden; background: var(--paper2); box-shadow: 0 14px 34px -18px rgba(15, 58, 51, .55); }
+.ayv .ayv-visit-loading { position: absolute; z-index: 4; inset: 42% 0 auto; margin: 0; padding: 0 1rem; text-align: center; color: var(--soft); font-size: 1.15rem; font-style: italic; pointer-events: none; }
 .ayv .ayv-visit-view { position: relative; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
 .ayv .ayv-visit-view::-webkit-scrollbar { display: none; }
 .ayv .ayv-visit-room { position: relative; overflow: hidden; transition: transform .42s cubic-bezier(.5, 0, .75, 0), opacity .42s ease-in; }

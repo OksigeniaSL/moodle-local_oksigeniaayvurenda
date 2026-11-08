@@ -511,6 +511,7 @@ final class stacks {
                 'cm' => $size['cm'],
                 'width' => $size['width'],
                 'pages' => $size['pages'],
+                'counted' => $size['counted'],
                 'background' => $colour['background'],
                 'dark' => $colour['dark'],
                 'ink' => $colour['ink'],

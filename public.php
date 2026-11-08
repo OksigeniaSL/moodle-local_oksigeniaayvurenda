@@ -206,6 +206,9 @@ if ($catalogue && $query !== '') {
     if ($pulse['new']) {
         $data['pulse'][] = ['text' => $str($pulse['new'] === 1 ? 'windowpulsenewone' : 'windowpulsenew', $pulse['new'])];
     }
+    if ($oldest = window::oldest($library)) {
+        $data['pulse'][] = ['text' => $str('windowpulseoldest', $oldest)];
+    }
     $count = fn(int $n) => $str($n === 1 ? 'onebook' : 'books', \local_oksigeniaayvurenda\local\screens::number($n));
     $stacksurl = fn(array $params) => (new moodle_url('/local/oksigeniaayvurenda/stacks.php', ['library' => $library->slug] +
         $params))->out(false);

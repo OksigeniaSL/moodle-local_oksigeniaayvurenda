@@ -48,7 +48,7 @@ final class memory {
      * @param \stdClass $library
      * @param \stdClass $reader
      * @param int|null $now
-     * @return array|null kind (unfinished, door, others, loved, more, searched, corner), say (what the memory says, as
+     * @return array|null kind (unfinished, door, others, loved, more, searched, corner, curious), say (what the memory says, as
      *     characters::say gives it), recordid (the book, if there is one), query (the search, if it is that).
      */
     public static function remembers(\stdClass $library, \stdClass $reader, ?int $now = null): ?array {
@@ -161,7 +161,38 @@ final class memory {
                 }
             }
         }
-        return null;
+        return self::curious($library, (int) $reader->id, $now);
+    }
+
+    /**
+     * With nothing of the reader's own to tell, something curious of the catalogue: its longest title, a title of one
+     * word, a title that is a question (jue-humor H38 to H39c). One a day, not the same for everyone; never to the
+     * youngest, who do not read yet.
+     *
+     * @param \stdClass $library
+     * @param int $readerid
+     * @param int $now
+     * @return array|null As remembers.
+     */
+    private static function curious(\stdClass $library, int $readerid, int $now): ?array {
+        if (characters::band((int) $library->entityid) === 'inf') {
+            return null;
+        }
+        $found = curiosities::of($library, $now);
+        $kinds = array_values(array_intersect(['long', 'short', 'question'], array_keys($found)));
+        if (!$kinds) {
+            return null;
+        }
+        $kind = $kinds[(intdiv($now, DAYSECS) + $readerid) % count($kinds)];
+        $book = $found[$kind];
+        return self::say(
+            $library,
+            'curious',
+            'memorycurious' . $kind,
+            ['title' => $book['title'], 'words' => $book['words'] ?? 0],
+            $book['id'],
+            'senala'
+        );
     }
 
     /**

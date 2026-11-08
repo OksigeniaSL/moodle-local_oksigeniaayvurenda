@@ -136,6 +136,20 @@ final class window {
     }
 
     /**
+     * The year of the oldest book of the house still in service, for the pulse; 0 when there is none old enough, and in a
+     * company, whose blackboard keeps to business.
+     *
+     * @param \stdClass $library
+     * @return int
+     */
+    public static function oldest(\stdClass $library): int {
+        if (skins::of((int) $library->entityid) === 'company') {
+            return 0;
+        }
+        return (int) (curiosities::of($library)['oldest']['year'] ?? 0);
+    }
+
+    /**
      * Saves the window's settings.
      *
      * @param \stdClass $library

@@ -27,6 +27,7 @@
     * lines - the lines of its label; joined - the same, joined with |; whyjoined - what each line says, joined with |
     * placecolour - the colour of its place, when the place is a colour
     * cover, state, statetext - for the lectern; awaytext - what the gap of a book that is out says
+    * said - what the memory says of it on the lectern, if anything
     Example context (json):
     {
         "id": 7, "url": "#", "title": "El dragón que leía", "shown": "El dragón que leía", "authors": "Ana Montes",
@@ -40,7 +41,7 @@
 <a class="ayv-spine ayv-spine-{{ink}}{{#small}} ayv-spine-small{{/small}}{{#topdown}} ayv-spine-topdown{{/topdown}}{{#upside}} ayv-spine-upside{{/upside}} {{band}}" href="{{url}}"{{^notip}} title="{{title}}"{{/notip}}
         style="--bg: {{background}}; --bgd: {{dark}}{{#placecolour}}; --place: {{placecolour}}{{/placecolour}}"
         data-id="{{id}}" data-title="{{title}}" data-authors="{{authors}}" data-call="{{callnumber}}" data-lines="{{joined}}" data-whys="{{whyjoined}}"
-        data-place="{{place}}" data-state="{{state}}" data-statetext="{{statetext}}"{{#cover}} data-cover="{{cover}}"{{/cover}}{{#here}} aria-current="true"{{/here}}>
+        data-place="{{place}}" data-state="{{state}}" data-statetext="{{statetext}}"{{#said}} data-said="{{said}}"{{/said}}{{#cover}} data-cover="{{cover}}"{{/cover}}{{#here}} aria-current="true"{{/here}}>
         <span class="ayv-sr">{{label}}</span>
         {{#out}}
         <span class="ayv-spine-bird" aria-hidden="true"></span>

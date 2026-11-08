@@ -106,6 +106,8 @@
                 opened = 0;
             }
             said = opened === 3 ? wrap.dataset.gapagain : '';
+        } else if (spine.dataset.said) {
+            said = spine.dataset.said;
         }
         if (said) {
             var line = document.createElement('p');

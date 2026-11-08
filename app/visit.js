@@ -128,6 +128,28 @@
     var night = hour ? hour === 'night' : theme ? theme === 'dark'
         : !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     visit.classList.toggle('ayv-visit-night', night);
+    // While the first layer comes, after a moment and only then, a line under the painting: the doors opening, or the
+    // lamps being lit by night.
+    var loading = visit.querySelector('.ayv-visit-loading');
+    var first = visit.querySelector('.ayv-visit-layer');
+    if (loading && first) {
+        if (night && loading.dataset.night) {
+            loading.textContent = loading.dataset.night;
+        }
+        var shown = window.setTimeout(function() {
+            loading.hidden = false;
+        }, 400);
+        var loaded = function() {
+            window.clearTimeout(shown);
+            loading.hidden = true;
+        };
+        first.addEventListener('load', function() {
+            if (first.naturalWidth > 1) {
+                loaded();
+            }
+        });
+        first.addEventListener('error', loaded);
+    }
     Array.prototype.forEach.call(visit.querySelectorAll('.ayv-visit-layer'), function(img) {
         img.src = img.getAttribute(night ? 'data-night' : 'data-day');
     });

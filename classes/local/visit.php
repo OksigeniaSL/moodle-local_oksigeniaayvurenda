@@ -553,6 +553,10 @@ final class visit {
             $lines[] = ['text' => $herald && $herald['enabled'] ? $str('visitpulsequiet2', $herald['name'])
                 : $str('visitpulsequiet')];
         }
+        // The oldest book of the house still in service (jue-humor H37); a company keeps its blackboard to business.
+        if ($oldest = window::oldest($library)) {
+            $lines[] = ['text' => $str('windowpulseoldest', $oldest)];
+        }
         return ['directory' => false, 'pulse' => true, 'book' => false, 'width' => round($w), 'height' => round($h),
             'transform' => homography::css($w, $h, $zone['quad']),
             'heading' => $str(skins::words((int) $library->entityid, 'visitpulse')), 'lines' => $lines,

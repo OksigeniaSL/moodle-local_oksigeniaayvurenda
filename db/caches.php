@@ -72,4 +72,10 @@ $definitions = [
         'simplekeys' => true,
         'ttl' => 3600,
     ],
+    // The curious things of each library's catalogue, once a day: the longest title, the oldest book.
+    'curiosities' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 2 * DAYSECS,
+    ],
 ];

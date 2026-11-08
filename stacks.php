@@ -24,8 +24,10 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\characters;
 use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\skins;
 use local_oksigeniaayvurenda\local\stacks;
 
 require(__DIR__ . '/../../config.php');
@@ -94,6 +96,9 @@ $data = [
     'gapagain' => \local_oksigeniaayvurenda\local\characters::band((int) $library->entityid) !== '' ? $str('stacksgapagain') : '',
     'prevurl' => '',
     'nexturl' => '',
+    'end' => '',
+    'endurl' => '',
+    'endask' => '',
     'posters' => !$public && access::can('local/oksigeniaayvurenda:catalogue', $library) ? ['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/posters.php',
         ['library' => $library->slug]
@@ -106,11 +111,49 @@ if ($shelf) {
     // down, the same all day, and the memory owns up to it on the lectern (jue-humor H48).
     $upside = \local_oksigeniaayvurenda\local\zones::date(time(), '%m-%d', $library) === '04-01' && $data['spines']
         ? crc32('04-01-' . $library->id . '-' . $heading) % count($data['spines']) : -1;
+    // Whoever looks: a reader of the flower, or one of the sky's in a school (the twelve to fourteen of jue-humor).
+    $entityid = (int) $library->entityid;
+    $young = characters::band($entityid) !== '';
+    $teen = !$young && characters::step($entityid) === 'cielo' && in_array(skins::of($entityid), ['school', 'secondary'], true);
+    // The thickest book of this stretch, when its pages are counted and they are many: the memory says so on the
+    // lectern, as a fact (jue-humor H39d).
+    $fattest = -1;
+    if ($teen) {
+        foreach ($data['spines'] as $i => $spine) {
+            if (
+                empty($spine['out']) && !empty($spine['counted']) && $spine['pages'] >= 300
+                    && ($fattest < 0 || $spine['pages'] > $data['spines'][$fattest]['pages'])
+            ) {
+                $fattest = $i;
+            }
+        }
+    }
     foreach ($data['spines'] as $i => &$spine) {
         $spine['here'] = $at && $spine['id'] === $at;
         $spine['upside'] = $i === $upside && empty($spine['out']);
+        $spine['said'] = $i === $fattest ? $str('stacksfattest', screens::number($spine['pages'])) : '';
     }
     unset($spine);
+    // At the end of the last shelf, a sign: to the flower, that the library ends here, for now; to the sky's in a school,
+    // that what is missing can be asked for. Grown-ups walk on without one (jue-humor H60).
+    if ($all && $stretch['next'] === '' && $data['spines'] && ($young || $teen)) {
+        $data['end'] = $str($young ? 'stacksend' : 'stacksendsecondary');
+        if ($teen) {
+            $reader = $DB->get_record(
+                'local_oksigeniaayvurenda_reader',
+                ['entityid' => $entityid, 'userid' => $USER->id, 'status' => 'active'],
+                '*',
+                IGNORE_MULTIPLE
+            );
+            if (\local_oksigeniaayvurenda\local\purchases::may_ask($library, $reader ?: null, time())) {
+                $data['endurl'] = (new moodle_url(
+                    '/local/oksigeniaayvurenda/suggest.php',
+                    ['library' => $library->slug]
+                ))->out(false);
+                $data['endask'] = $str('stacksendask');
+            }
+        }
+    }
     $data['prevurl'] = $stretch['prev'] !== '' ? $here($where + ($all ? ['all' => 1] : []) + ['before' => $stretch['prev']]) : '';
     $data['nexturl'] = $stretch['next'] !== '' ? $here($where + ($all ? ['all' => 1] : []) + ['after' => $stretch['next']]) : '';
 } else {

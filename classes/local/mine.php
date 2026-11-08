@@ -136,9 +136,27 @@ final class mine {
                 ) : '',
                 'holds' => $holds,
                 'notice' => sanctions::for_reader((int) $reader->entityid, (int) $reader->id, $now),
+                'none' => self::none((int) $reader->entityid),
             ];
         }
         return $out;
+    }
+
+    /**
+     * What the app says when someone has nothing on loan: to the flower's readers, that the shelves are full and waiting;
+     * to the sky's in a school, the same with a smile; to grown-ups, the plain fact (jue-humor H58).
+     *
+     * @param int $entityid
+     * @return string
+     */
+    private static function none(int $entityid): string {
+        $key = 'mobilenone';
+        if (characters::young($entityid)) {
+            $key = 'mobilenoneyoung';
+        } else if (characters::step($entityid) === 'cielo' && in_array(skins::of($entityid), ['school', 'secondary'], true)) {
+            $key = 'mobilenonesecondary';
+        }
+        return get_string($key, 'local_oksigeniaayvurenda');
     }
 
     /**
