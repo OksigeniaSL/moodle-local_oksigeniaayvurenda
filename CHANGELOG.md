@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.222.0 (2026-11-08)
+
+- The library's block on the dashboard tells at the desk (Enrique, 8 November: «Doesn't it tell anything?»): what is
+  late, set aside and asked for, and also what comes back this week and what is out now, each leading to its list, with
+  what the desk did today («Today: 3 loans · 2 returns»). «All up to date» only when nothing is out.
+- Whoever keeps a desk sees the idea of the day too: in a narrow column it was hidden and left its box empty.
+- High roles see life too, not only management (Enrique, 8 November; now a common rule): whoever runs the library
+  without a card there gets the memory's idea of the day (a curious thing of the catalogue, the book of the week or what
+  came last), and whoever runs or keeps it, «This week at the library»: books lent, how many readers came (from five),
+  new titles of the month and the corner most read, added up and without names. It needs the block 0.2.3.
+
 ## 0.221.0 (2026-11-08)
 
 - The story reader, as Gaudí drew it (`tale.php`): a story to read at home opens on its cover («Read it aloud, slowly.

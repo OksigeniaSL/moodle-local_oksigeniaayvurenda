@@ -84,8 +84,18 @@ final class dashboard_test extends \advanced_testcase {
             'timedue' => $now - 3 * DAYSECS]);
         $this->assertNull(dashboard::for_user((int) $teacher->id, $now)['desk']);
         $desk = dashboard::for_user((int) get_admin()->id, $now)['desk']['one'];
-        $this->assertSame([1], array_column($desk['rows'], 'number'));
-        $this->assertTrue($desk['rows'][0]['late']);
+        // The late one first, then what is out now; and what the desk did today, even with nothing waiting.
+        $this->assertSame(['1', '1'], array_column($desk['rows'], 'number'));
+        $this->assertSame([true, false], array_column($desk['rows'], 'late'));
+        $this->assertStringContainsString('all=1', $desk['rows'][1]['url']);
+        $this->assertSame(get_string('dashdesktoday', 'local_oksigeniaayvurenda', get_string(
+            'dashdesklenttodayone',
+            'local_oksigeniaayvurenda',
+            1
+        )), $desk['uptodate']);
+        // Whoever keeps the desk without a card there is told little things too (Enrique, 8 November).
+        $admin = dashboard::for_user((int) get_admin()->id, $now);
+        $this->assertNotEmpty($admin['centres'][0]['sections'][0]['tell'] ?? null, 'something to tell the admin');
         // The teacher's own book, late, in words.
         $books = array_values(array_filter(array_column(
             dashboard::for_user((int) $teacher->id, $now)['centres'][0]['sections'],

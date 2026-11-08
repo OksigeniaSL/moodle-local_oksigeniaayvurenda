@@ -165,9 +165,20 @@ final class memory {
     }
 
     /**
-     * With nothing of the reader's own to tell, something curious of the catalogue: its longest title, a title of one
-     * word, a title that is a question (jue-humor H38 to H39c). One a day, not the same for everyone; never to the
-     * youngest, who do not read yet.
+     * A curious thing of the catalogue for someone without a card there, as the memory says it to readers: for whoever
+     * runs the library, who has a right to know little things too (Enrique, 8 November).
+     *
+     * @param \stdClass $library
+     * @param int $seed What makes it change from one person to another, and each day: their account.
+     * @param int|null $now
+     * @return array|null As remembers.
+     */
+    public static function curiosity(\stdClass $library, int $seed, ?int $now = null): ?array {
+        return self::curious($library, $seed, $now ?? time());
+    }
+
+    /**
+     * A curious thing of the catalogue, said by the memory: the longest title, one of a single word, one that asks.
      *
      * @param \stdClass $library
      * @param int $readerid

@@ -104,8 +104,9 @@ final class dashboard {
         foreach ($shown as &$centre) {
             $centre['showname'] = count($shown) > 1 || ($desk && $desk['hasmany']);
             foreach ($centre['sections'] as &$section) {
-                // Whoever keeps a desk has it to look at: the idea of the day only where there is room.
-                $section['extra'] = $desk && !empty($section['tell']) && empty($section['news']);
+                // The idea of the day shows also to whoever keeps a desk: hidden in a narrow column it left its box
+                // empty (Enrique, 8 November: «¿No cuenta nada?»).
+                $section['extra'] = false;
             }
         }
         unset($centre, $section);
@@ -150,7 +151,7 @@ final class dashboard {
             if ($books) {
                 $sections[] = ['books' => $books];
             } else {
-                $tell = self::tell($library, $reader, $now, $skin, $say, $url);
+                $tell = self::tell($library, $reader, $userid, $now, $skin, $say, $url);
                 if ($tell) {
                     $sections[] = ['tell' => $tell];
                 }
@@ -164,11 +165,23 @@ final class dashboard {
                     $sections[] = $own;
                 }
             }
-        } else if (!$desks) {
-            // Nothing of their own here and no desk: what came last, so that the way in is worth taking.
-            $tell = self::news($library, $skin, $say, $url);
+        } else {
+            // Without a card here, also whoever runs the library has a right to know little things (Enrique, 8
+            // November): a curious thing of the catalogue, the book of the week, or what came last.
+            $tell = self::tell($library, null, $userid, $now, $skin, $say, $url);
             if ($tell) {
-                $sections[] = ['tell' => $tell, 'news' => true];
+                $sections[] = ['tell' => $tell, 'news' => !empty($tell['shelf'])];
+            }
+        }
+        // Whoever runs or keeps the library, with or without a card: that things happen in it this week, added up and
+        // without names (Enrique, 8 November: seeing that things happen gives confidence in the product and in whoever
+        // keeps it up to date).
+        // Only where the block knows how to show it (from its 0.2.3): an older one would draw an empty box.
+        $shows = (int) get_config('block_oksigeniaayvurenda', 'version') >= 2026110801;
+        if ($shows && ($desks || access::can('local/oksigeniaayvurenda:manage', $library, $userid))) {
+            $pulse = self::pulse($library, $now, $say, $url);
+            if ($pulse) {
+                $sections[] = ['pulse' => $pulse];
             }
         }
         foreach ($sections as $i => &$section) {
@@ -381,7 +394,8 @@ final class dashboard {
      * what just came.
      *
      * @param \stdClass $library
-     * @param \stdClass $reader
+     * @param \stdClass|null $reader Without a card there (whoever runs the library), a curious thing of the catalogue.
+     * @param int $userid
      * @param int $now
      * @param string $skin
      * @param \Closure $say
@@ -390,13 +404,14 @@ final class dashboard {
      */
     private static function tell(
         \stdClass $library,
-        \stdClass $reader,
+        ?\stdClass $reader,
+        int $userid,
         int $now,
         string $skin,
         \Closure $say,
         \Closure $url
     ): ?array {
-        $remembers = memory::remembers($library, $reader, $now);
+        $remembers = $reader ? memory::remembers($library, $reader, $now) : memory::curiosity($library, $userid, $now);
         if ($remembers) {
             $said = $remembers['say'];
             $book = (int) $remembers['recordid'];
@@ -647,6 +662,54 @@ final class dashboard {
     }
 
     /**
+     * The library this week, for whoever runs it: the books lent, how many readers came (only from several, so that
+     * no one is singled out), the new titles of the month and the corner most read. Nothing if nothing happened.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @param \Closure $say
+     * @param \Closure $url
+     * @return array|null heading, rows (number, label, url) and line.
+     */
+    private static function pulse(\stdClass $library, int $now, \Closure $say, \Closure $url): ?array {
+        global $DB;
+        $entityid = (int) $library->entityid;
+        if (practice::is($entityid)) {
+            return null;
+        }
+        $since = $now - WEEKSECS;
+        $where = "b.entityid = :entityid AND l.timeloaned >= :since AND " . bank::reading('l.libraryid');
+        $params = ['entityid' => $entityid, 'since' => $since];
+        $lent = $DB->count_records_sql("SELECT COUNT(1) FROM {" . self::T . "loan} l JOIN {" . self::T . "library} b
+            ON b.id = l.libraryid WHERE $where", $params);
+        $readers = $DB->count_records_sql("SELECT COUNT(DISTINCT l.readerid) FROM {" . self::T . "loan} l
+            JOIN {" . self::T . "library} b ON b.id = l.libraryid WHERE $where", $params);
+        $new = (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT i.recordid) FROM {" . self::T . "item} i JOIN {" . self::T . "library} b ON b.id = i.libraryid
+              WHERE b.entityid = :entityid AND COALESCE(i.timeacquired, i.timecreated) >= :month AND i.status <> 'withdrawn'
+                    AND " . bank::reading('i.libraryid'),
+            ['entityid' => $entityid, 'month' => $now - 30 * DAYSECS]
+        );
+        $rows = [];
+        foreach (
+            [['n' => $lent, 'key' => 'dashpulselent', 'page' => 'reports.php'],
+                ['n' => $readers >= anonymity::FEW ? $readers : 0, 'key' => 'dashpulsereaders', 'page' => 'reports.php'],
+                ['n' => $new, 'key' => 'dashpulsenew', 'page' => 'catalogued.php']] as $row
+        ) {
+            if ($row['n']) {
+                $rows[] = ['number' => screens::number($row['n']), 'label' => $say($row['key'] . ($row['n'] === 1 ? 'one' : '')),
+                    'url' => $url($row['page'], $library), 'late' => false];
+            }
+        }
+        if (!$rows) {
+            return null;
+        }
+        $corner = window::pulse($library, $now)['corner'];
+        return ['heading' => $say('dashpulse'), 'rows' => $rows,
+            'line' => $corner !== '' ? $say('dashpulsecorner', $corner) : ''];
+    }
+
+    /**
      * What waits at the desks someone keeps in a centre: books set aside for their readers, books late and what readers
      * and classes asked for. All at nothing says so.
      *
@@ -676,11 +739,22 @@ final class dashboard {
                 continue;
             }
             $ready = $DB->count_records(self::T . 'hold', ['libraryid' => $library->id, 'status' => 'ready']);
+            $today = zones::today($library, $now);
             $late = $DB->count_records_select(
                 self::T . 'loan',
                 'libraryid = :libraryid AND timereturned IS NULL AND timedue < :today',
-                ['libraryid' => $library->id, 'today' => zones::today($library, $now)]
+                ['libraryid' => $library->id, 'today' => $today]
             );
+            // What there is out, what comes back this week, and what the desk did today: the desk tells, even with
+            // nothing waiting (Enrique, 8 November: «¿No cuenta nada?»).
+            $outnow = $DB->count_records_select(self::T . 'loan', 'libraryid = ? AND timereturned IS NULL', [$library->id]);
+            $week = $DB->count_records_select(
+                self::T . 'loan',
+                'libraryid = ? AND timereturned IS NULL AND timedue >= ? AND timedue < ?',
+                [$library->id, $today, $today + 7 * DAYSECS]
+            );
+            $lenttoday = $DB->count_records_select(self::T . 'loan', 'libraryid = ? AND timeloaned >= ?', [$library->id, $today]);
+            $backtoday = $DB->count_records_select(self::T . 'loan', 'libraryid = ? AND timereturned >= ?', [$library->id, $today]);
             $waiting = menu::waiting($library, $userid);
             $asked = (int) ($waiting['wishes.php'] ?? 0) + (int) ($waiting['purchases.php'] ?? 0)
                 + (int) ($waiting['formats.php'] ?? 0);
@@ -691,19 +765,26 @@ final class dashboard {
             $rows = [];
             foreach (
                 [
-                    ['n' => $ready, 'key' => 'dashdeskready', 'page' => 'holds.php', 'late' => false],
-                    ['n' => $late, 'key' => 'dashdesklate', 'page' => 'late.php', 'late' => true],
-                    ['n' => $asked, 'key' => 'dashdeskasks', 'page' => $askpage, 'late' => false],
+                    ['n' => $late, 'key' => 'dashdesklate', 'page' => 'late.php', 'late' => true, 'params' => []],
+                    ['n' => $ready, 'key' => 'dashdeskready', 'page' => 'holds.php', 'late' => false, 'params' => []],
+                    ['n' => $asked, 'key' => 'dashdeskasks', 'page' => $askpage, 'late' => false, 'params' => []],
+                    ['n' => $week, 'key' => 'dashdeskweek', 'page' => 'late.php', 'late' => false,
+                        'params' => ['all' => 1, 'span' => 'week']],
+                    ['n' => $outnow, 'key' => 'dashdeskout', 'page' => 'late.php', 'late' => false, 'params' => ['all' => 1]],
                 ] as $row
             ) {
                 if ($row['n']) {
-                    $rows[] = ['number' => $row['n'], 'label' => $say($row['key'] . ($row['n'] === 1 ? 'one' : '')),
-                        'url' => $url($row['page'], $library), 'late' => $row['late']];
+                    $rows[] = ['number' => screens::number($row['n']),
+                        'label' => $say($row['key'] . ($row['n'] === 1 ? 'one' : '')),
+                        'url' => $url($row['page'], $library, $row['params']), 'late' => $row['late']];
                 }
             }
+            $did = array_filter([$lenttoday ? $say('dashdesklenttoday' . ($lenttoday === 1 ? 'one' : ''), $lenttoday) : '',
+                $backtoday ? $say('dashdeskbacktoday' . ($backtoday === 1 ? 'one' : ''), $backtoday) : '']);
+            $todayline = $did ? $say('dashdesktoday', implode(' · ', $did)) : $say('dashdesktodaynone');
             $out[] = ['name' => format_string($library->name, true, ['escape' => false]), 'rows' => $rows,
                 'home' => $url('index.php', $library),
-                'uptodate' => $rows ? '' : $say('dashdeskclear'), 'desk' => $url('desk.php', $library),
+                'uptodate' => $rows ? $todayline : $say('dashdeskclear'), 'desk' => $url('desk.php', $library),
                 'desklabel' => $say('dashdeskgo')];
         }
         return $out;
