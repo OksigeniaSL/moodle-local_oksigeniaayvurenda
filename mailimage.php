@@ -40,4 +40,5 @@ if (!$file) {
     http_response_code(404);
     die;
 }
+@header('X-Content-Type-Options: nosniff');
 send_stored_file($file, 30 * DAYSECS, 0, false, ['cacheability' => 'public']);

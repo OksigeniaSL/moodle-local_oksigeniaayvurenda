@@ -174,6 +174,8 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
     ) {
         $forcedownload = true;
     }
+    // What it is, as the library says, never guessed by the browser from what is inside (seg-salida 3).
+    @header('X-Content-Type-Options: nosniff');
     send_stored_file(
         $file,
         in_array($filearea, ['cover', 'libraryimage', 'portrait'], true) ? WEEKSECS : 0,

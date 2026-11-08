@@ -29,6 +29,9 @@ namespace local_oksigeniaayvurenda\local;
  * the emblem, the name of the library and the search, the screen, and a way back to the site.
  */
 final class shell {
+    /** @var string|null The nonce of this page's own scripts. */
+    private static ?string $nonce = null;
+
     /**
      * Lets in only who may do what a page does. Someone not logged in, or in as a guest, goes to log in and comes back;
      * someone logged in without the capability gets a page of the library saying so, with the way back, instead of
@@ -380,6 +383,7 @@ final class shell {
             : get_string('pluginname', 'local_oksigeniaayvurenda'));
         @header('Content-Type: text/html; charset=utf-8');
         self::frame_header();
+        self::guard();
         $howto = self::howto_box($library, $base);
         // The skin of the library's centre: what changes in the look hangs from its class.
         $skin = skins::of($library ? (int) $library->entityid : 0);
@@ -404,7 +408,7 @@ final class shell {
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">
-<script>(function() {
+<script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
     var resolve = function() {
         if (root.getAttribute(\'data-colourmode\') === \'auto\') {
@@ -435,10 +439,10 @@ Oksigenia Ayvurenda</button>
 ' . self::made_with($library) . (onlylibrary::way_out() ? '' : '<a class="ayv-exit" href="' . $CFG->wwwroot . '/">' .
         $str('backto', format_string($SITE->shortname, true, ['escape' => false])) . '</a>') . '</footer>
 ' . self::credits() . '
-<script>window.AYV = ' . $config . ';</script>
+<script nonce="' . self::nonce() . '">window.AYV = ' . $config . ';</script>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
 <script src="' . $app . 'marcapaginas.js?v=' . $version . '"></script>
-<script>ayvBookmark({root: document.getElementById(\'ayv-main\'), minWidth: 1000});</script>
+<script nonce="' . self::nonce() . '">ayvBookmark({root: document.getElementById(\'ayv-main\'), minWidth: 1000});</script>
 ' . $scripts . self::access() . '
 </body>
 </html>';
@@ -485,6 +489,7 @@ Oksigenia Ayvurenda</button>
         // Another website frames it: no X-Frame-Options, and any page may.
         @header('Content-Type: text/html; charset=utf-8');
         @header('Content-Security-Policy: frame-ancestors *');
+        self::guard();
         echo '<!DOCTYPE html>
 <html lang="' . s(str_replace('_', '-', current_language())) . '">
 <head>
@@ -494,7 +499,7 @@ Oksigenia Ayvurenda</button>
 <base target="_blank">
 <title>' . s(format_string($library->name, true, ['escape' => false])) . '</title>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
-<script>if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
+<script nonce="' . self::nonce() . '">if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
     document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');
 }</script>
 </head>
@@ -503,6 +508,31 @@ Oksigenia Ayvurenda</button>
 <script src="' . $app . 'stacks.js?v=' . $version . '"></script>
 </body>
 </html>';
+    }
+
+    /**
+     * The nonce of this page: only the scripts the library writes into it carry it, so a script that slipped into the
+     * page through some text would not run.
+     *
+     * @return string
+     */
+    public static function nonce(): string {
+        return self::$nonce ??= base64_encode(random_bytes(16));
+    }
+
+    /**
+     * What a browser is told to refuse on a page of the library (seg-salida 3): scripts that are neither the library's
+     * files nor written by it with this page's nonce, plugins and another base; and guessing a type. A page that set its
+     * own rules for scripts (the reader of e-books) keeps them.
+     */
+    private static function guard(): void {
+        @header('X-Content-Type-Options: nosniff');
+        foreach (headers_list() as $header) {
+            if (stripos($header, 'content-security-policy:') === 0 && stripos($header, 'script-src') !== false) {
+                return;
+            }
+        }
+        @header("Content-Security-Policy: script-src 'self' 'nonce-" . self::nonce() . "'; object-src 'none'; base-uri 'self'");
     }
 
     /**
@@ -531,6 +561,7 @@ Oksigenia Ayvurenda</button>
         $app = $CFG->wwwroot . '/local/oksigeniaayvurenda/app/';
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: DENY');
+        self::guard();
         echo '<!DOCTYPE html>
 <html lang="' . s(str_replace('_', '-', current_language())) . '">
 <head>
@@ -540,7 +571,7 @@ Oksigenia Ayvurenda</button>
 <title>' . s($title) . '</title>
 <link rel="icon" href="' . $app . 'emblema.svg" type="image/svg+xml">
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
-<script>if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
+<script nonce="' . self::nonce() . '">if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
     document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');
 }</script>
 </head>
@@ -666,7 +697,9 @@ Oksigenia Ayvurenda</button>
             return '';
         }
         try {
-            return (string) $panel::get_footer_html();
+            // Its scripts, trusted as the library's own, carry this page's nonce.
+            return (string) preg_replace('/<script\b(?![^>]*\bnonce=)/i', '<script nonce="' . self::nonce() . '"', (string)
+                $panel::get_footer_html());
         } catch (\Throwable $e) {
             // Accessibility never stops the library.
             debugging('Ayvurenda could not add the panel of Oksigenia Access: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -744,6 +777,7 @@ Oksigenia Ayvurenda</button>
         @header('Content-Type: text/html; charset=utf-8');
         @header('X-Frame-Options: SAMEORIGIN');
         @header('Cache-Control: no-store');
+        self::guard();
         echo '<!DOCTYPE html>
 <html lang="' . s($lang) . '"' . self::colour_mode() . '>
 <head>
@@ -754,7 +788,7 @@ Oksigenia Ayvurenda</button>
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
-<script>(function() {
+<script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement;
     if (root.getAttribute(\'data-colourmode\') === \'auto\') {
         root.setAttribute(\'data-bs-theme\', window.matchMedia(\'(prefers-color-scheme: dark)\').matches ? \'dark\' : \'light\');
@@ -765,7 +799,7 @@ Oksigenia Ayvurenda</button>
 <main id="ayv-main" class="ayv-main" tabindex="-1">
 ' . $main . '
 </main>
-<script>window.AYV = ' . $config . ';</script>
+<script nonce="' . self::nonce() . '">window.AYV = ' . $config . ';</script>
 ' . $scripts . '</body>
 </html>';
     }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.205.0
+
+- Every page of the library tells the browser to run only the library's own scripts: its files and what it writes with
+  the page's nonce (`Content-Security-Policy`, with no plugins and no other base), and never to guess a type
+  (`X-Content-Type-Options: nosniff`, also on every file it serves). The print buttons no longer carry a script in the
+  page. The reader of e-books keeps its own rules.
+
 ## 0.204.0
 
 - What is reached without an account, tightened (audit, seg-anon and seg-cripto):
@@ -19,6 +26,8 @@
     after.
   - «It is read here; the library does not offer it for download», which is what is true.
   - A RIS file is named by its citation key, not by the title as typed.
+- On a phone, the way out is in «More» and no longer a tab too: with few doors (someone without an account) it pushed
+  «More» off the screen.
 
 ## 0.203.0
 

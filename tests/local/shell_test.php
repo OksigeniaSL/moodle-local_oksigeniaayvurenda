@@ -41,4 +41,29 @@ final class shell_test extends \advanced_testcase {
         $this->assertStringContainsString('Demo abierta: &lt;b&gt;todo&lt;/b&gt; se borra cada noche.', $html);
         $this->assertStringNotContainsString('<b>', $html);
     }
+
+    /**
+     * Every script the page writes carries its nonce, the same all through the page; one that slipped in with a text
+     * would not (seg-salida 3).
+     */
+    public function test_scripts_carry_the_nonce(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $PAGE->set_url(new \moodle_url('/local/oksigeniaayvurenda/index.php'));
+        $nonce = shell::nonce();
+        $this->assertSame($nonce, shell::nonce());
+        $this->assertMatchesRegularExpression('#^[A-Za-z0-9+/]{22}==$#', $nonce);
+        foreach ([[], ['bare' => true, 'scripts' => ['selfloan']]] as $options) {
+            ob_start();
+            shell::output('Prueba', '<p>Algo</p>', $library, '', $options);
+            $html = ob_get_clean();
+            preg_match_all('/<script\b[^>]*>/', $html, $tags);
+            $this->assertNotEmpty($tags[0]);
+            foreach ($tags[0] as $tag) {
+                $this->assertTrue(str_contains($tag, ' src="') || str_contains($tag, 'nonce="' . $nonce . '"'), $tag);
+            }
+        }
+    }
 }
