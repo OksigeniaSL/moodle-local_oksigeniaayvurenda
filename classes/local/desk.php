@@ -1250,8 +1250,18 @@ final class desk {
                 ['escape' => false]
             );
         }
-        return $this->answer('lent', 'ok', $message, $a, ['loanid' => (int) $loanid, 'readerid' => $readerid,
-            'reader' => $this->reader_panel($readerid), 'material' => $material]);
+        $extra = ['loanid' => (int) $loanid, 'readerid' => $readerid, 'reader' => $this->reader_panel($readerid),
+            'material' => $material];
+        // The hundredth loan of the day at this desk: the herald says the desk would like a glass of water (H25).
+        $today = $DB->count_records_select(
+            self::T . 'loan',
+            'libraryid = :libraryid AND timeloaned >= :start',
+            ['libraryid' => $this->library->id, 'start' => zones::today($this->library, $this->now)]
+        );
+        if ($today === 100) {
+            $extra['herald'] = $this->herald_word('deskheraldhundred');
+        }
+        return $this->answer('lent', 'ok', $message, $a, $extra);
     }
 
     /**

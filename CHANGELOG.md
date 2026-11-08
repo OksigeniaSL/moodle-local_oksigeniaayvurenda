@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.202.0
+
+- The last lines of humour: the practice library says what it is on top of each of its pages (break away: it goes the
+  next night); the herald marks the hundredth loan of the day at a desk; on the first of April one spine of the shelves
+  stands upside down and the memory owns up to it on the lectern; a gap opened a third time, the hummingbird says it is
+  still keeping the spot.
+
 ## 0.201.0
 
 - The voices of the lines of humour that carry no name nor search, for the youngest, who may not read yet (art 0.1.53):

@@ -342,6 +342,11 @@ final class shell {
                 . s(get_string('logout')) . '</a></p>';
         }
         $as .= self::site_notice();
+        // A practice library says what it is: everything may be broken here, and it goes the next night (jue-humor H44).
+        if ($library && practice::is((int) $library->entityid)) {
+            $as .= '<p class="ayv-sitenotice ayv-practice-said" role="note">'
+                . s(get_string('practicesaid', 'local_oksigeniaayvurenda')) . '</p>';
+        }
         // What only this page needs (back to a course, its guided help), in a small row, without what the header has.
         // Inside a guided help's frame, none: a help within the help, or a way out of the screen it explains.
         $links = optional_param('help', 0, PARAM_BOOL) ? [] : ($options['nav'] ?? []);

@@ -92,6 +92,27 @@
         var state = lectern.querySelector('.ayv-lectern-state');
         state.textContent = spine.dataset.statetext || '';
         state.className = 'ayv-lectern-state ayv-state ayv-state-' + (spine.dataset.state || 'free');
+        // What the memory owns up to on the first of April, and the hummingbird of a gap opened for the third time.
+        var wrap = shelf.closest('.ayv-bookcase-wrap') || shelf;
+        var said = '';
+        if (spine.classList.contains('ayv-spine-upside')) {
+            said = wrap.dataset.upside || '';
+        } else if (spine.closest('.ayv-spine-gap') && wrap.dataset.gapagain) {
+            var opened = 0;
+            try {
+                opened = (parseInt(window.sessionStorage.getItem('ayv-gap-opened') || '0', 10) || 0) + 1;
+                window.sessionStorage.setItem('ayv-gap-opened', String(opened));
+            } catch (e) {
+                opened = 0;
+            }
+            said = opened === 3 ? wrap.dataset.gapagain : '';
+        }
+        if (said) {
+            var line = document.createElement('p');
+            line.className = 'ayv-lectern-said';
+            line.textContent = said;
+            state.parentNode.insertBefore(line, state.nextSibling);
+        }
         var place = lectern.querySelector('.ayv-lectern-place');
         text(place, spine.dataset.place);
         place.parentNode.hidden = !spine.dataset.place;

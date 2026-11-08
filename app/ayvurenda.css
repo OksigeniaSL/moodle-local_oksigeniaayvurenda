@@ -5131,3 +5131,7 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
 .ayv .ayv-visit-knob { fill: var(--visit-ink, #7a4b26); }
 .ayv .ayv-visit-night .ayv-visit-hand { stroke: var(--visit-ink-night, #3a2410); }
 .ayv .ayv-visit-night .ayv-visit-knob { fill: var(--visit-ink-night, #3a2410); }
+
+/* The first of April: one spine upside down, and what is said on the lectern. */
+.ayv .ayv-spine-upside { transform: rotate(180deg); }
+.ayv .ayv-lectern-said { margin: .3rem 0 0; font-style: italic; color: var(--muted, #5f6b67); }

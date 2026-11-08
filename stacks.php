@@ -89,6 +89,9 @@ $data = [
     'bookcase' => $str('stacksbookcase', $heading),
     'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
     'bird' => screens::art('estanteria/mainumby', 'svg'),
+    // What the memory and the hummingbird of the gap say on the lectern, now and then (jue-humor H48, H59).
+    'upsidesaid' => $str('stacksupside'),
+    'gapagain' => \local_oksigeniaayvurenda\local\characters::band((int) $library->entityid) !== '' ? $str('stacksgapagain') : '',
     'prevurl' => '',
     'nexturl' => '',
     'posters' => !$public && access::can('local/oksigeniaayvurenda:catalogue', $library) ? ['url' => (new moodle_url(
@@ -99,9 +102,13 @@ $data = [
 if ($shelf) {
     $stretch = stacks::page($library, $filter, $after, $before, $at);
     $data['spines'] = screens::spines($public ? screens::public_spines($stretch['spines'], $library) : $stretch['spines']);
-    // Coming from a record: that book, marked and in sight.
-    foreach ($data['spines'] as &$spine) {
+    // Coming from a record: that book, marked and in sight. On the first of April, one spine of the library stands upside
+    // down, the same all day, and the memory owns up to it on the lectern (jue-humor H48).
+    $upside = \local_oksigeniaayvurenda\local\zones::date(time(), '%m-%d', $library) === '04-01' && $data['spines']
+        ? crc32('04-01-' . $library->id . '-' . $heading) % count($data['spines']) : -1;
+    foreach ($data['spines'] as $i => &$spine) {
         $spine['here'] = $at && $spine['id'] === $at;
+        $spine['upside'] = $i === $upside && empty($spine['out']);
     }
     unset($spine);
     $data['prevurl'] = $stretch['prev'] !== '' ? $here($where + ($all ? ['all' => 1] : []) + ['before' => $stretch['prev']]) : '';

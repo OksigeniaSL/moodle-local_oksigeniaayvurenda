@@ -87,7 +87,7 @@
     {{#nexturl}}<a class="ayv-button ayv-button-quiet ayv-stacks-next" href="{{nexturl}}" rel="next">{{stacksnext}} {{> local_oksigeniaayvurenda/icon_next}}</a>{{/nexturl}}
 </nav>
 {{#spines.0}}
-<div class="ayv-bookcase-wrap"{{#bird}} style="--ayv-bird: url('{{bird}}')"{{/bird}}>
+<div class="ayv-bookcase-wrap"{{#bird}} style="--ayv-bird: url('{{bird}}')"{{/bird}} data-upside="{{upsidesaid}}"{{#gapagain}} data-gapagain="{{gapagain}}"{{/gapagain}}>
     <ul class="ayv-bookcase{{#bookend}} ayv-bookcase-art{{/bookend}}" aria-label="{{bookcase}}">
     {{#spines}}
         <li class="ayv-spine-slot{{#out}} ayv-spine-gap{{/out}}{{#here}} ayv-spine-here{{/here}}" style="--cm: {{cm}}; --w: {{width}}px">{{> local_oksigeniaayvurenda/spine}}</li>
