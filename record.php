@@ -76,6 +76,13 @@ if ($correct && $fix !== '' && data_submitted() && confirm_sesskey()) {
     $fixnotice = $failed ? '' : get_string('correctsaved', 'local_oksigeniaayvurenda');
     $found = catalogue::record($id, $library);
 }
+// Whoever catalogues recommends the book in the organisation's channel (Oksigenia Marandu): once per book, and whoever
+// reviews the channel sees it before it goes out.
+$channel = $correct && \local_oksigeniaayvurenda\local\channel::ready();
+if ($channel && optional_param('channel', 0, PARAM_BOOL) && data_submitted() && confirm_sesskey()) {
+    $posted = \local_oksigeniaayvurenda\local\channel::post_book($library, $id);
+    redirect(new moodle_url($PAGE->url, ['channelsent' => $posted ? 1 : 2]));
+}
 // A reader who took the book home tells what they thought, or takes it back.
 $do = optional_param('review', '', PARAM_ALPHA);
 if ($do !== '' && data_submitted() && confirm_sesskey()) {
@@ -161,6 +168,14 @@ $data['memoryalso'] = $said ? [
     'heading' => get_string('memoryalsoheading', 'local_oksigeniaayvurenda'),
     'said' => $said,
     'cards' => array_values(screens::cards(catalogue::cards_of($also, $library), $library)),
+] : null;
+$sent = optional_param('channelsent', 0, PARAM_INT);
+$data['channel'] = $channel ? [
+    'action' => $PAGE->url->out(false),
+    'sesskey' => sesskey(),
+    'label' => get_string('channelrecommend', 'local_oksigeniaayvurenda'),
+    'hint' => get_string('channelrecommendhint', 'local_oksigeniaayvurenda'),
+    'done' => $sent ? get_string($sent === 1 ? 'channelsent' : 'channelnotsent', 'local_oksigeniaayvurenda') : '',
 ] : null;
 if ($correct) {
     $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda');

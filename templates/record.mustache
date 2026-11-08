@@ -194,6 +194,10 @@
         </dialog>
         {{/open}}
         {{/formatask}}
+        {{#channel}}
+        {{#done}}<p class="ayv-notice" role="status">{{done}}</p>{{/done}}
+        <form method="post" action="{{action}}" class="ayv-record-channel"><input type="hidden" name="sesskey" value="{{sesskey}}"><button type="submit" class="ayv-button ayv-button-quiet" name="channel" value="1">{{label}}</button> <span class="ayv-field-hint">{{hint}}</span></form>
+        {{/channel}}
         {{#correct}}
         {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
         {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}

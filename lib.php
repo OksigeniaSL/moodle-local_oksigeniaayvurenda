@@ -229,6 +229,16 @@ function local_oksigeniaayvurenda_oksigeniaaty_child_cards(int $adultuserid, int
 }
 
 /**
+ * What the library posts in the organisation's channel through Oksigenia Marandu: a book it recommends and the big
+ * numbers of its year. An empty array leaves to the site whether each goes after review (by default) or by itself.
+ *
+ * @return array[] The kinds of post, each with its options.
+ */
+function local_oksigeniaayvurenda_oksigeniamarandu_posts(): array {
+    return ['book' => [], 'big_number' => []];
+}
+
+/**
  * The library's card in «Your work» (Oksigenia Tembiapo, block_oksigeniatembiapo): for whoever lends, keeps a library or
  * manages, its door, a line of numbers and what has to be solved; nothing for anyone else.
  *

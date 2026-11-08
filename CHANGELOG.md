@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.219.0 (2026-11-08)
+
+- The library in the organisation's Telegram channel, through Oksigenia Marandu (Marandu's request, with Enrique's OK):
+  whoever catalogues recommends a book from its record («Recommend it in the channel»), once per book, with its cover,
+  author, age and a short summary; and each morning of the centre, the books lent in the year go to the channel when
+  they pass a round number (1,000, 2,000, 5,000, 10,000…), each milestone once: small numbers look bad. Never anything
+  of a reader. Marandu sends each post to whoever reviews the channel first, unless the site says otherwise, and draws
+  its card. Only where the site has Marandu with its channel ready, and not on a site shared by centres.
+
 ## 0.218.0 (2026-11-08)
 
 - «Your work» (Oksigenia Tembiapo, version 2 of its contract): each alert with a deadline says it (`due`), so the block

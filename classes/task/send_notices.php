@@ -73,6 +73,10 @@ class send_notices extends \core\task\scheduled_task {
                     $now,
                     $every
                 ),
+                'the big numbers of the year to the channel' => fn() => \local_oksigeniaayvurenda\local\channel::numbers(
+                    $now,
+                    $every
+                ),
             ];
         }
         foreach ($steps as $what => $step) {
