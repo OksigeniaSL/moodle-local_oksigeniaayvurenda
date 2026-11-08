@@ -51,6 +51,26 @@ final class reviews {
     public const SIGNS = ['name', 'initial', 'none'];
 
     /**
+     * @var string[] How a review is signed when the centre has not said, by its skin: what tells a child to everyone is not
+     * on until the centre turns it on (priv-menores 6); a public library has whole families; grown-ups sign their name.
+     */
+    public const SKINSIGN = ['school' => 'initial', 'secondary' => 'initial', 'university' => 'name', 'public' => 'none',
+        'company' => 'name', 'mobile' => 'none'];
+
+    /**
+     * How a centre's reviews are signed: what it chose, or its skin's own.
+     *
+     * @param int $entityid
+     * @return string name, initial or none.
+     */
+    public static function sign(int $entityid): string {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        return in_array($settings['reviewsign'] ?? '', self::SIGNS, true) ? $settings['reviewsign']
+            : (self::SKINSIGN[skins::of($entityid)] ?? 'initial');
+    }
+
+    /**
      * Whether a reader may tell about a book: they took it home some time.
      *
      * @param int $recordid
@@ -357,8 +377,7 @@ final class reviews {
      */
     public static function published(int $recordid, int $entityid, int $viewerid = 0): array {
         global $DB;
-        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $sign = in_array($settings['reviewsign'] ?? '', self::SIGNS, true) ? $settings['reviewsign'] : 'name';
+        $sign = self::sign($entityid);
         $rows = $DB->get_records(self::T . 'review', ['recordid' => $recordid, 'entityid' => $entityid,
             'status' => 'published'], 'timedecided DESC, id DESC', '*', 0, 20);
         $list = [];
@@ -382,8 +401,7 @@ final class reviews {
      */
     public static function for_little(int $entityid, int $limit = 6): array {
         global $DB;
-        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        $sign = in_array($settings['reviewsign'] ?? '', self::SIGNS, true) ? $settings['reviewsign'] : 'name';
+        $sign = self::sign($entityid);
         $rows = $DB->get_records_sql('SELECT v.id, v.recordid, v.readerid, v.text, r.title
                FROM {' . self::T . 'review} v
                JOIN {' . self::T . 'record} r ON r.id = v.recordid

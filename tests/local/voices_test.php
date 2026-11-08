@@ -114,6 +114,32 @@ final class voices_test extends \advanced_testcase {
     }
 
     /**
+     * Who needs their family to share their voice: up to fourteen, by the age band or the stage, whatever kind of reader
+     * they are; from fifteen on and grown-ups, nobody else decides (priv-menores 7).
+     */
+    public function test_minor(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $year = years::around($entityid, time());
+        $reader = fn(array $data) => $gen->create_reader(['entityid' => $entityid] + $data);
+        $this->assertTrue(voices::minor($reader(['band' => 'flower'])));
+        $this->assertTrue(voices::minor($reader(['band' => 'sky'])));
+        $this->assertFalse(voices::minor($reader(['band' => 'skysober'])), 'fifteen and older: their own say');
+        $this->assertFalse(voices::minor($reader(['readertype' => 'teacher'])));
+        // A child brought to a public library as a family's reader counts by the stage they were given.
+        $child = $reader(['readertype' => 'family']);
+        $gen->create_member(['readerid' => $child->id, 'yearid' => $year->id, 'groupname' => 'Sala infantil',
+            'stage' => 'Infantil']);
+        $this->assertTrue(voices::minor($child));
+        $grown = $reader([]);
+        $gen->create_member(['readerid' => $grown->id, 'yearid' => $year->id, 'groupname' => '2.º Bachillerato A',
+            'stage' => 'Bachillerato']);
+        $this->assertFalse(voices::minor($grown));
+    }
+
+    /**
      * A family invited for a student keeps their voice to that class, signed as they wrote it and as the tutor left it;
      * the centre says what families may choose. Whoever records gets a message with a link that deletes the voice
      * without asking; without a term, old voices stay. While recording, the book's text is there if it may be opened.

@@ -651,6 +651,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110732, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110805) {
+        // What a reader won in a year whose loans no longer say who took them (priv-menores 4).
+        $table = new xmldb_table('local_oksigeniaayvurenda_keepsake');
+        if (!$dbman->table_exists($table)) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_keepsake');
+        }
+        upgrade_plugin_savepoint(true, 2026110805, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

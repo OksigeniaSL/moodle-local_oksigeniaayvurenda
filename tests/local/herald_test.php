@@ -32,7 +32,8 @@ namespace local_oksigeniaayvurenda\local;
 #[\PHPUnit\Framework\Attributes\CoversClass(notices::class)]
 final class herald_test extends \advanced_testcase {
     /**
-     * The book most readers took this week, from two readers on; never one taken by a single reader.
+     * The book most readers took this week, from anonymity::FEW readers on, with «several» rather than the number below
+     * anonymity::SAY.
      */
     public function test_week_book(): void {
         $this->resetAfterTest();
@@ -46,12 +47,15 @@ final class herald_test extends \advanced_testcase {
             $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id,
                 'timeloaned' => $now - DAYSECS]);
         };
-        $lend();
+        for ($i = 1; $i < anonymity::FEW; $i++) {
+            $lend();
+        }
         $this->assertNull(screens::week_book($library));
         $lend();
         $said = screens::week_book($library);
         $this->assertStringContainsString('El faro dormido', $said['text']);
-        $this->assertStringContainsString('2', $said['text']);
+        $this->assertStringContainsString('several', $said['text']);
+        $this->assertStringNotContainsString((string) anonymity::FEW, $said['text']);
         $this->assertStringContainsString('record.php', $said['url']);
     }
 

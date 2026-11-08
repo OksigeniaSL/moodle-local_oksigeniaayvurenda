@@ -34,7 +34,8 @@ final class recover {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] What comes back, parents first; a tutor is an account, and a digital file is not in the copy. */
-    private const TABLES = ['library', 'year', 'authority', 'record', 'recauth', 'item', 'reader', 'member', 'loan', 'hold',
+    private const TABLES = ['library', 'year', 'authority', 'record', 'recauth', 'item', 'reader', 'member', 'keepsake', 'loan',
+        'hold',
         'stocktake', 'lot', 'lotitem', 'withdrawal', 'withdrawn', 'stockread', 'rule', 'challenge', 'review', 'wish', 'roomread',
         'bankset', 'banktitle', 'digital', 'source', 'purchaseorder', 'purchase', 'purchasewho', 'budget', 'ill', 'sanction',
         'formatask'];

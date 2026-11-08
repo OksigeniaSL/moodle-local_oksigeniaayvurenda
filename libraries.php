@@ -86,7 +86,8 @@ if (data_submitted() && confirm_sesskey()) {
                 optional_param_array('cardstage', [], PARAM_TEXT),
                 optional_param_array('cardlook', [], PARAM_ALPHA)
             ) ?: [],
-            'reviewsign' => optional_param('reviewsign', 'name', PARAM_ALPHA),
+            'reviewsign' => optional_param('reviewsign', '', PARAM_ALPHA),
+            'historyyears' => optional_param('historyyears', -1, PARAM_INT),
             'skin' => optional_param('skin', 'school', PARAM_ALPHA),
             'photos' => optional_param('photos', 0, PARAM_BOOL),
             'timezone' => optional_param('timezone', '', PARAM_TIMEZONE),
@@ -288,8 +289,18 @@ foreach (libraries::all() as $one) {
             array_keys(\local_oksigeniaayvurenda\local\skins::play((int) $entity->id)),
             \local_oksigeniaayvurenda\local\skins::play((int) $entity->id)
         ),
-        'reviewsigns' => array_map(fn($s) => ['value' => $s, 'label' => $str('reviewsign' . $s),
-            'selected' => $s === ($settings['reviewsign'] ?? 'name')], \local_oksigeniaayvurenda\local\reviews::SIGNS),
+        'historyyears' => array_map(
+            fn($n) => ['value' => $n, 'label' => $str(
+                \local_oksigeniaayvurenda\local\skins::words((int) $entity->id, 'historyyears' . $n)
+            ),
+            'selected' => $n === \local_oksigeniaayvurenda\local\forgetting::years((int) $entity->id)],
+            \local_oksigeniaayvurenda\local\forgetting::CHOICES
+        ),
+        'reviewsigns' => array_map(
+            fn($s) => ['value' => $s, 'label' => $str('reviewsign' . $s),
+            'selected' => $s === \local_oksigeniaayvurenda\local\reviews::sign((int) $entity->id)],
+            \local_oksigeniaayvurenda\local\reviews::SIGNS
+        ),
         'challengestages' => \local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id) ? []
             : array_map(fn($stage) => ['stage' => $stage, 'on' => !in_array(
                 $stage,
@@ -351,7 +362,8 @@ foreach (
         'librarieslookhint', 'librariescolour', 'librariesmotto', 'librariesmottohint', 'librariesimage',
         'librariesimagehint', 'librariesnoimage', 'librariesfeatured', 'librariesscenes', 'librariesnoscene',
         'librariesenter', 'librariesseat', 'librariesclose', 'librariesdata', 'librariescentre', 'librarieschallenges',
-        'librarieschallengeshint', 'librariesreviewsign', 'librariesskin', 'librariesskinhint', 'librariesplay',
+        'librarieschallengeshint', 'librariesreviewsign', 'librarieshistory', 'librarieshistoryhint', 'librariesskin',
+        'librariesskinhint', 'librariesplay',
         'librariesplayhint', 'librariesphotos', 'librariesphotoshint', 'librarieszone', 'librarieszonehint',
         'librarieslinks', 'librarieslinkshint', 'librariescatalogues', 'librariescatalogueshint',
         'librariesproxy', 'librariesproxyhint', 'librariesresolver', 'librariesresolverhint', 'librariesplan',

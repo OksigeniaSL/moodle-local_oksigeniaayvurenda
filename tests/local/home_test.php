@@ -42,7 +42,7 @@ final class home_test extends \advanced_testcase {
         $entityid = (int) $library->entityid;
         $year = years::around($entityid, time());
         $readers = [];
-        foreach (['3.º B', '3.º B', '3.º B', '4.º A'] as $i => $group) {
+        foreach (['3.º B', '3.º B', '3.º B', '3.º B', '3.º B', '4.º A'] as $i => $group) {
             $readers[$i] = $generator->create_reader(['entityid' => $entityid]);
             $generator->create_member(['readerid' => $readers[$i]->id, 'yearid' => $year->id, 'groupname' => $group]);
         }
@@ -60,10 +60,12 @@ final class home_test extends \advanced_testcase {
         $isla = $book('La isla', $sea);
         $lend = fn($item, $reader, $ago) => $generator->create_loan(['libraryid' => $library->id, 'itemid' => $item->id,
             'readerid' => $reader->id, 'timeloaned' => time() - $ago, 'timereturned' => time() - $ago + DAYSECS]);
-        $lend($faro, $readers[0], 3 * DAYSECS);
-        $lend($faro, $readers[1], 2 * DAYSECS);
+        // Five of 3.º B took the lighthouse: enough for it to say so, never who (anonymity::FEW).
+        foreach ([0, 1, 2, 3, 4] as $i) {
+            $lend($faro, $readers[$i], 3 * DAYSECS);
+        }
         $lend($isla, $readers[2], DAYSECS);
-        $lend($isla, $readers[3], DAYSECS);
+        $lend($isla, $readers[5], DAYSECS);
 
         $reads = catalogue::class_reads($library, '3.º B', (int) $year->id);
         $this->assertSame(['El faro'], array_column($reads, 'title'));

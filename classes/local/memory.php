@@ -37,7 +37,7 @@ final class memory {
     private const SEARCHED = 30 * DAYSECS;
 
     /** @var int Readers of a book there must be before she tells what else they took. */
-    public const AMONG = 3;
+    public const AMONG = anonymity::FEW;
 
     /** @var string The preference that keeps someone's last search. */
     public const PREF = 'local_oksigeniaayvurenda_lastsearch';
@@ -197,7 +197,7 @@ final class memory {
 
     /**
      * What else the readers of a book took, the most taken first: only when at least AMONG readers took it, and each
-     * one taken by two of them at least.
+     * one taken by anonymity::PAIR of them at least.
      *
      * @param \stdClass $library
      * @param int $recordid
@@ -229,7 +229,7 @@ final class memory {
               WHERE i1.recordid = :recordid AND i1.entityid = :entityid AND i2.recordid <> :other
                     AND " . bank::reading('l1.libraryid') . " AND " . bank::reading('l2.libraryid') . "
            GROUP BY i2.recordid
-             HAVING COUNT(DISTINCT l2.readerid) >= 2
+             HAVING COUNT(DISTINCT l2.readerid) >= " . anonymity::PAIR . "
            ORDER BY COUNT(DISTINCT l2.readerid) DESC, i2.recordid",
             $params + ['other' => $recordid],
             0,
@@ -482,7 +482,7 @@ final class memory {
 
     /**
      * What readers who loved a book (brought it back saying they loved it or wanted more) loved too, free here and not
-     * read by this reader: only when at least AMONG readers loved it, and each book loved by two of them at least, so
+     * read by this reader: only when at least AMONG readers loved it, and each book loved by anonymity::PAIR of them, so
      * that in a class nobody's reading can be guessed.
      *
      * @param \stdClass $library
@@ -515,7 +515,7 @@ final class memory {
               WHERE i.recordid = :recordid AND i.entityid = :entityid AND l.readerid <> :reader AND $loved
                     AND l2.returnnote IN ('loved', 'more') AND i2.recordid <> :other
            GROUP BY i2.recordid
-             HAVING COUNT(DISTINCT l2.readerid) >= 2
+             HAVING COUNT(DISTINCT l2.readerid) >= " . anonymity::PAIR . "
            ORDER BY COUNT(DISTINCT l2.readerid) DESC, i2.recordid",
             $params + ['other' => $recordid],
             0,

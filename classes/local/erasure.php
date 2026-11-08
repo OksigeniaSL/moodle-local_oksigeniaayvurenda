@@ -114,6 +114,7 @@ final class erasure {
         ]);
         $DB->set_field(self::T . 'loan', 'returnnote', null, ['readerid' => $readerid]);
         $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $readerid]);
+        $DB->delete_records(self::T . 'keepsake', ['readerid' => $readerid]);
         // Their group of the year under way goes (it would keep a group nobody is in); those of past years stay, as figures.
         if ($was) {
             $year = years::around((int) $was->entityid, $now);

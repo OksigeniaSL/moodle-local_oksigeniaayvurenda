@@ -118,8 +118,8 @@ final class memory_test extends \advanced_testcase {
     }
 
     /**
-     * Loved: first what three or more readers who loved the same book loved too, each loved by two of them at least
-     * (Enrique, 7 November 2026); with fewer, nothing of theirs, and the book by the same author.
+     * Loved: first what anonymity::FEW or more readers who loved the same book loved too, each loved by anonymity::PAIR
+     * of them at least (Enrique, 7 November 2026); with fewer, nothing of theirs, and the book by the same author.
      */
     public function test_loved_by_others(): void {
         $this->resetAfterTest();
@@ -131,17 +131,19 @@ final class memory_test extends \advanced_testcase {
         $mar = $this->book('El mar de dentro', 'Lago, Óscar', '821');
         $this->took($reader, $faro, 'loved', 2);
         $others = [];
-        foreach ([0, 1] as $i) {
+        foreach ([0, 1, 2, 3] as $i) {
             $others[$i] = $this->gen->create_reader(['entityid' => $this->library->entityid]);
             $this->took($others[$i], $faro, 'loved', 10);
-            $this->took($others[$i], $mar, 'more', 8);
+            if ($i < 3) {
+                $this->took($others[$i], $mar, 'more', 8);
+            }
         }
-        // Two others loved it: too few, nobody's reading can show. The book by the same author.
+        // Four others loved it: too few, nobody's reading can show. The book by the same author.
         $said = memory::remembers($this->library, $reader);
         $this->assertSame((int) $isla->id, $said['recordid']);
-        // A third: what they loved too.
-        $others[2] = $this->gen->create_reader(['entityid' => $this->library->entityid]);
-        $this->took($others[2], $faro, 'loved', 6);
+        // A fifth: what they loved too.
+        $others[4] = $this->gen->create_reader(['entityid' => $this->library->entityid]);
+        $this->took($others[4], $faro, 'loved', 6);
         $said = memory::remembers($this->library, $reader);
         $this->assertSame(['others', (int) $mar->id], [$said['kind'], $said['recordid']]);
         $this->assertStringContainsString('El mar de dentro', $said['say']['text']);
@@ -180,7 +182,8 @@ final class memory_test extends \advanced_testcase {
     }
 
     /**
-     * What else the readers of a book took: only when three of them took it, each book taken by two at least.
+     * What else the readers of a book took: only when anonymity::FEW of them took it, each book taken by anonymity::PAIR
+     * of them at least.
      */
     public function test_also(): void {
         $this->resetAfterTest();
@@ -190,16 +193,18 @@ final class memory_test extends \advanced_testcase {
         $isla = $this->book('La isla de los faros', 'Montes, Ana', '821');
         $nube = $this->book('La nube', 'Lago, Óscar', '821');
         $readers = [];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $readers[$i] = $this->gen->create_reader(['entityid' => $this->library->entityid]);
         }
-        $this->took($readers[0], $faro, null, 9);
-        $this->took($readers[1], $faro, null, 8);
-        $this->took($readers[0], $isla, null, 5);
-        $this->took($readers[1], $isla, null, 4);
-        $this->took($readers[2], $nube, null, 3);
-        $this->assertSame([], memory::also($this->library, (int) $faro->id), 'two readers are too few');
-        $this->took($readers[2], $faro, null, 2);
+        foreach ([0, 1, 2, 3] as $i) {
+            $this->took($readers[$i], $faro, null, 9);
+        }
+        foreach ([0, 1, 2] as $i) {
+            $this->took($readers[$i], $isla, null, 5);
+        }
+        $this->took($readers[4], $nube, null, 3);
+        $this->assertSame([], memory::also($this->library, (int) $faro->id), 'four readers are too few');
+        $this->took($readers[4], $faro, null, 2);
         $this->assertSame([(int) $isla->id], memory::also($this->library, (int) $faro->id), 'la nube: only one of them');
     }
 }

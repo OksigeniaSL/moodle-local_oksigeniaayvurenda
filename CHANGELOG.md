@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.206.0
+
+- Privacy of the youngest (audit, priv-menores):
+  - Loans given back more school years ago than the centre keeps (two, unless it says otherwise in «Centre settings»)
+    stop saying who took them: each reader's year goes to a stand-in of its own, in the same group and stage, so the
+    figures of that year stay; the notes at the desk, and the reservations, sanctions, formats asked and reading places
+    of then, go. What the reader won stays with them (the flower of each year in the album, the corners' cards), never
+    the books. Every night, a little.
+  - What readers see of each other («What your class reads», the book of the week, «Also taken») needs five readers
+    behind it, and a pair of books three; below ten, the book of the week says «several», never the number.
+  - Reviews are signed with the first name and the initial in a school, with no name in a public or mobile library,
+    with the name where readers are grown-ups, until the centre chooses.
+  - Whether the family decides who hears a voice goes by age (up to fourteen, by the age band or the stage), whatever
+    kind of reader; the texts say so.
+  - The privacy description says that asking for accessible formats may reveal a disability, and who sees it.
+
 ## 0.205.0
 
 - Every page of the library tells the browser to run only the library's own scripts: its files and what it writes with

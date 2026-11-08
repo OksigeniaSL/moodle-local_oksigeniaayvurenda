@@ -57,13 +57,20 @@ final class reviews_test extends \advanced_testcase {
 
         reviews::decide($id, $entityid, true, (int) get_admin()->id, $now);
         $this->assertSame(0, reviews::waiting($entityid));
+        // A school signs with the first name and the initial until it chooses otherwise: what tells a child to everyone
+        // is not on by itself (priv-menores 6).
         $published = reviews::published($recordid, $entityid);
-        $this->assertSame('Leo, 3.º A', $published[0]['who']);
+        $this->assertSame('Leo I.', $published[0]['who']);
         $this->assertStringStartsWith('Me gustó el final.', $published[0]['text']);
         $this->assertSame(1, reviews::told((int) $reader->id, $year));
+        libraries::update_entity($entityid, ['reviewsign' => 'name']);
+        $this->assertSame('Leo, 3.º A', reviews::published($recordid, $entityid)[0]['who']);
+        // The skin's own is not kept as a choice: a new skin brings its own.
         libraries::update_entity($entityid, ['reviewsign' => 'initial']);
         $this->assertSame('Leo I.', reviews::published($recordid, $entityid)[0]['who']);
-        libraries::update_entity($entityid, ['reviewsign' => 'none']);
+        libraries::update_entity($entityid, ['skin' => 'public']);
+        $this->assertSame('none', reviews::sign($entityid));
+        libraries::update_entity($entityid, ['skin' => 'school', 'reviewsign' => 'none']);
         $this->assertSame(
             get_string('reviewbyagroup', 'local_oksigeniaayvurenda', '3.º A'),
             reviews::published($recordid, $entityid)[0]['who']

@@ -404,7 +404,7 @@ final class catalogue {
     }
 
     /**
-     * What a class reads: books that two readers or more of a group lent lately, never who.
+     * What a class reads: books that several readers of a group lent lately (anonymity::FEW at least), never who.
      *
      * @param \stdClass $library
      * @param string $group
@@ -424,9 +424,10 @@ final class catalogue {
               WHERE i.entityid = :entityid AND m.groupname = :groupname AND l.timeloaned > :since
                 AND ' . bank::reading('l.libraryid') . '
            GROUP BY i.recordid
-             HAVING COUNT(DISTINCT l.readerid) >= 2
+             HAVING COUNT(DISTINCT l.readerid) >= :few
            ORDER BY readers DESC, i.recordid DESC',
-            ['yearid' => $yearid, 'entityid' => $library->entityid, 'groupname' => $group, 'since' => $now - 120 * DAYSECS],
+            ['yearid' => $yearid, 'entityid' => $library->entityid, 'groupname' => $group, 'since' => $now - 120 * DAYSECS,
+                'few' => anonymity::FEW],
             0,
             $limit
         );

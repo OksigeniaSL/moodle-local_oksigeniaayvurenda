@@ -458,9 +458,6 @@ final class libraries {
                 }
             }
         }
-        if (isset($data['reviewsign'])) {
-            $settings['reviewsign'] = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : 'name';
-        }
         if (array_key_exists('photos', $data)) {
             $settings['photos'] = !empty($data['photos']);
         }
@@ -484,6 +481,23 @@ final class libraries {
         $before = $settings['skin'] ?? skins::SKINS[0];
         if (isset($data['skin'])) {
             $settings['skin'] = in_array($data['skin'], skins::SKINS, true) ? $data['skin'] : skins::SKINS[0];
+        }
+        // How many school years a loan keeps its reader (forgetting); two, unless the centre says otherwise.
+        if (isset($data['historyyears']) && in_array((int) $data['historyyears'], forgetting::CHOICES, true)) {
+            if ((int) $data['historyyears'] === forgetting::KEEP) {
+                unset($settings['historyyears']);
+            } else {
+                $settings['historyyears'] = (int) $data['historyyears'];
+            }
+        }
+        // How a review is signed: only what differs from the skin's own is kept, so a new skin brings its own.
+        if (isset($data['reviewsign'])) {
+            $sign = in_array($data['reviewsign'], reviews::SIGNS, true) ? $data['reviewsign'] : '';
+            if ($sign === '' || $sign === reviews::SKINSIGN[$settings['skin'] ?? skins::SKINS[0]]) {
+                unset($settings['reviewsign']);
+            } else {
+                $settings['reviewsign'] = $sign;
+            }
         }
         // What is on: only what differs from the skin is kept; a new skin starts with its own.
         if (($settings['skin'] ?? skins::SKINS[0]) !== $before) {

@@ -1194,9 +1194,9 @@ final class screens {
                JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
               WHERE l.libraryid = :libraryid AND l.timeloaned >= :since
            GROUP BY i.recordid
-             HAVING COUNT(DISTINCT l.readerid) >= 2
+             HAVING COUNT(DISTINCT l.readerid) >= :few
            ORDER BY COUNT(DISTINCT l.readerid) DESC, i.recordid",
-            ['libraryid' => $library->id, 'since' => ($now ?? time()) - WEEKSECS],
+            ['libraryid' => $library->id, 'since' => ($now ?? time()) - WEEKSECS, 'few' => anonymity::FEW],
             0,
             1
         );
@@ -1205,8 +1205,14 @@ final class screens {
             return null;
         }
         $title = (string) $DB->get_field('local_oksigeniaayvurenda_record', 'title', ['id' => $row->recordid]);
-        $said = characters::say((int) $library->entityid, 'herald', 'heraldweek', ['title' => $title,
-            'count' => (int) $row->readers], 'celebra');
+        // How many, only from SAY on: «several» says it without the number that tells a small group who.
+        $said = characters::say(
+            (int) $library->entityid,
+            'herald',
+            (int) $row->readers < anonymity::SAY ? 'heraldweekseveral' : 'heraldweek',
+            ['title' => $title, 'count' => (int) $row->readers],
+            'celebra'
+        );
         return $said ? $said + ['url' => self::url('record.php', $library, ['id' => $row->recordid]),
             'cover' => covers::url((int) $row->recordid), 'label' => self::str('memorygo')] : null;
     }

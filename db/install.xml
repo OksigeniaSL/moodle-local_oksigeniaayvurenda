@@ -990,5 +990,23 @@
         <INDEX NAME="readerrecord" UNIQUE="false" FIELDS="readerid, recordid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_keepsake" COMMENT="What a reader won in a school year whose loans no longer say who took them: the flower and the corners, never the books">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="yearid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="flower" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="JSON: the levels of each path and the stage"/>
+        <FIELD NAME="corners" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="JSON: each corner first taken from that year, with the moment"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="readeryear" UNIQUE="true" FIELDS="readerid, yearid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

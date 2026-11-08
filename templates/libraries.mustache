@@ -37,6 +37,7 @@
                 "staffassign": "#"},
             "skins": [{"value": "school", "label": "Colegio", "selected": true}],
             "reviewsigns": [{"value": "name", "label": "Nombre y grupo", "selected": true}],
+            "historyyears": [{"value": 2, "label": "Dos cursos", "selected": true}],
             "kinds": [{"value": "classroom", "label": "De aula", "selected": true}],
             "parents": [{"value": 1, "label": "Biblioteca central", "selected": false}],
             "libraries": [{"id": 1, "name": "Biblioteca central", "rawname": "Biblioteca central", "url": "#",
@@ -189,6 +190,7 @@
             <label class="ayv-field ayv-field-check"><input type="checkbox" name="photos" value="1" {{#photos}}checked{{/photos}}> {{librariesphotos}}</label>
             <p class="ayv-field-hint">{{librariesphotoshint}}</p>
             <label class="ayv-field">{{librariesreviewsign}} <select name="reviewsign">{{#reviewsigns}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/reviewsigns}}</select></label>
+            <label class="ayv-field">{{librarieshistory}} <span class="ayv-field-hint">{{librarieshistoryhint}}</span> <select name="historyyears">{{#historyyears}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/historyyears}}</select></label>
             {{#haschallenges}}<fieldset class="ayv-fieldset"><legend>{{librarieschallenges}}</legend>
                 <p class="ayv-field-hint">{{librarieschallengeshint}}</p>
                 <div class="ayv-choices">{{#challengestages}}<label class="ayv-field ayv-field-check"><input type="hidden" name="challengestage[]" value="{{stage}}"><input type="checkbox" name="challengeon[]" value="{{stage}}" {{#on}}checked{{/on}}> {{stage}}</label>{{/challengestages}}</div>

@@ -95,6 +95,20 @@ final class garden {
            ORDER BY y.timestart DESC',
             ['readerid' => $reader->id, 'yearid' => $year->id]
         );
+        // The years whose loans no longer say who took them keep their flower in the album (forgetting).
+        $kept = $DB->get_records_sql(
+            'SELECT y.id, y.name, y.timestart, y.timeend, k.flower
+               FROM {' . self::T . 'keepsake} k
+               JOIN {' . self::T . 'year} y ON y.id = k.yearid
+              WHERE k.readerid = :readerid AND y.id <> :yearid',
+            ['readerid' => $reader->id, 'yearid' => $year->id]
+        );
+        foreach ($kept as $id => $other) {
+            if (!isset($years[$id])) {
+                $years[$id] = $other;
+            }
+        }
+        uasort($years, fn($a, $b) => (int) $b->timestart <=> (int) $a->timestart);
         foreach ($years as $other) {
             // The class garden of that year stays in the album: what their group then met together.
             $group = (string) $DB->get_field_select(
@@ -106,7 +120,9 @@ final class garden {
             );
             $met = $group === '' ? 0 : $DB->count_records_select(self::T . 'challenge', 'yearid = :yearid AND
                 groupname = :groupname AND timecompleted IS NOT NULL', ['yearid' => $other->id, 'groupname' => $group]);
-            $past[] = ['year' => $other->name, 'group' => $group, 'met' => $met] + self::flower($reader, $other);
+            $flower = isset($kept[$other->id]) ? json_decode((string) $kept[$other->id]->flower, true) : null;
+            $past[] = ['year' => $other->name, 'group' => $group, 'met' => $met]
+                + (is_array($flower) && isset($flower['levels'], $flower['stage']) ? $flower : self::flower($reader, $other));
         }
         return ['year' => $year, 'flower' => self::flower($reader, $year), 'books' => array_values($books), 'past' => $past];
     }
@@ -164,9 +180,10 @@ final class garden {
      * the class, as the catalogue's corners.
      *
      * @param \stdClass $reader
+     * @param int|null $yearid Only that school year's, and nothing kept from before.
      * @return int[] Corner => the moment of its first loan.
      */
-    public static function corners_won(\stdClass $reader): array {
+    public static function corners_won(\stdClass $reader, ?int $yearid = null): array {
         global $DB;
         $rows = $DB->get_recordset_sql(
             "SELECT l.id, l.timeloaned,
@@ -176,10 +193,22 @@ final class garden {
                       WHERE ra.recordid = i.recordid) AS class
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
-              WHERE l.readerid = :readerid AND " . bank::reading('l.libraryid'),
-            ['readerid' => $reader->id]
+              WHERE l.readerid = :readerid AND " . bank::reading('l.libraryid')
+                . ($yearid ? ' AND l.yearid = :yearid' : ''),
+            ['readerid' => $reader->id, 'yearid' => (int) $yearid]
         );
         $won = [];
+        // What was won in years whose loans no longer say who took them, kept with the reader (forgetting).
+        if (!$yearid) {
+            foreach ($DB->get_fieldset_select(self::T . 'keepsake', 'corners', 'readerid = ?', [$reader->id]) as $kept) {
+                foreach ((array) json_decode((string) $kept, true) as $corner => $when) {
+                    $corner = (string) $corner;
+                    if (!isset($won[$corner]) || (int) $when < $won[$corner]) {
+                        $won[$corner] = (int) $when;
+                    }
+                }
+            }
+        }
         foreach ($rows as $row) {
             $first = $row->class !== null ? \core_text::substr(trim($row->class), 0, 1) : '';
             if ($first !== '' && ctype_digit($first) && (!isset($won[$first]) || $row->timeloaned < $won[$first])) {

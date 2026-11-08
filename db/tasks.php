@@ -45,6 +45,16 @@ $tasks = [
         'dayofweek' => '*',
     ],
     [
+        // The loans of long ago stop saying who took them, a little each night.
+        'classname' => '\local_oksigeniaayvurenda\task\forget_history',
+        'blocking' => 0,
+        'minute' => '23',
+        'hour' => '4',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
+    [
         'classname' => '\local_oksigeniaayvurenda\task\make_copies',
         'blocking' => 0,
         'minute' => '47',

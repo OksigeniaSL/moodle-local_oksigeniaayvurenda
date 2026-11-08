@@ -405,8 +405,43 @@ final class voices {
         if (!$item->readerid) {
             return true;
         }
-        $type = $DB->get_field(self::T . 'reader', 'readertype', ['id' => $item->readerid]);
-        return $type !== 'student' || self::has_permission((int) $item->readerid);
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $item->readerid]);
+        return !$reader || !self::minor($reader) || self::has_permission((int) $item->readerid);
+    }
+
+    /**
+     * Whether a reader is young enough for their family to decide who hears their voice: up to fourteen, as their age
+     * band says (the one the centre gave them, or what their stage and group tell), whatever kind of reader they are
+     * (priv-menores 7). From fifteen on, and grown-ups, decide for themselves.
+     *
+     * @param \stdClass $reader
+     * @param int|null $now
+     * @return bool
+     */
+    public static function minor(\stdClass $reader, ?int $now = null): bool {
+        global $DB;
+        $band = (string) ($reader->band ?? '');
+        if (in_array($band, cards::BANDS, true)) {
+            return $band !== 'skysober';
+        }
+        $year = years::around((int) $reader->entityid, $now ?? time());
+        $member = $DB->get_record(
+            self::T . 'member',
+            ['readerid' => $reader->id, 'yearid' => $year->id],
+            'id, groupname, stage',
+            IGNORE_MULTIPLE
+        );
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $reader->entityid]), true) ?: [];
+        // A child who comes to a public library as a reader of their own counts by their stage, not by their type.
+        $student = $reader->readertype === 'student' || ($member && (string) $member->stage !== '');
+        $as = $student ? (object) ['readertype' => 'student', 'entityid' => $reader->entityid, 'band' => null] : $reader;
+        [$guess] = cards::base(
+            $as,
+            $member ? (string) $member->stage : '',
+            $member ? (string) $member->groupname : '',
+            $settings
+        );
+        return in_array($guess, ['flower', 'sky'], true);
     }
 
     /**
