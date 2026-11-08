@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.218.0 (2026-11-08)
+
+- «Your work» (Oksigenia Tembiapo, version 2 of its contract): each alert with a deadline says it (`due`), so the block
+  can put the whole centre's alerts in one list, the oldest first in each level: the oldest book missed, the end of
+  today for what is due today, the oldest interlibrary loan past its date. And the plugin has its icon, `pix/icon.svg`:
+  the small emblem of the brand, as it is (Gaudí's delivery of 24 October, `emblema-pequeno.svg`).
+
 ## 0.217.0 (2026-11-08)
 
 - Stories to read at home (the families' library, first part; Enrique, 8 November): at a library's open door, without an

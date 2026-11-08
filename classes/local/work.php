@@ -38,7 +38,8 @@ final class work {
      *
      * @param int $userid
      * @param int|null $now
-     * @return array[] Each with key, title, url, status, alerts (text, url, level) and actions (label, url).
+     * @return array[] Each with key, title, url, status, alerts (text, url, level and, when it has one, due: its deadline)
+     *     and actions (label, url). The icon is the plugin's own, pix/icon.svg.
      */
     public static function cards(int $userid, ?int $now = null): array {
         if ($userid <= 0 || isguestuser($userid)) {
@@ -134,17 +135,24 @@ final class work {
             );
             $late += $n;
             $today += $t;
+            // The deadline of an alert, for the block to order them inside each level: the oldest one missed.
+            $since = fn(int $before, int $from = 0) => (int) $DB->get_field_sql(
+                "SELECT MIN(timedue) FROM {" . self::T . "loan}
+                  WHERE libraryid = ? AND timereturned IS NULL AND timedue < ? AND timedue >= ?",
+                [$library->id, $before, $from]
+            );
             $ready += $DB->count_records(self::T . 'hold', ['libraryid' => $library->id, 'status' => 'ready']);
             if ($o) {
                 $alerts[] = ['text' => $count($o, 'workold'), 'url' => $url('late.php', $library, ['span' => 'old']),
-                    'level' => 'urgent'];
+                    'level' => 'urgent', 'due' => $since($start - self::OLD * DAYSECS)];
             }
             if ($n - $o > 0) {
-                $alerts[] = ['text' => $count($n - $o, 'worklate'), 'url' => $url('late.php', $library), 'level' => 'today'];
+                $alerts[] = ['text' => $count($n - $o, 'worklate'), 'url' => $url('late.php', $library), 'level' => 'today',
+                    'due' => $since($start, $start - self::OLD * DAYSECS)];
             }
             if ($t) {
                 $alerts[] = ['text' => $count($t, 'worktoday'), 'url' => $url('late.php', $library, ['all' => 1,
-                    'span' => 'today']), 'level' => 'today'];
+                    'span' => 'today']), 'level' => 'today', 'due' => $start + DAYSECS - 1];
             }
             $stopped = selfloan::stopped($library);
             if ($stopped) {
@@ -153,7 +161,12 @@ final class work {
             }
             $ill = ill::overdue($library, $now);
             if ($ill) {
-                $alerts[] = ['text' => $count($ill, 'workill'), 'url' => $url('ill.php', $library), 'level' => 'today'];
+                $alerts[] = ['text' => $count($ill, 'workill'), 'url' => $url('ill.php', $library), 'level' => 'today',
+                    'due' => (int) $DB->get_field_sql(
+                        "SELECT MIN(timedue) FROM {" . self::T . "ill} WHERE libraryid = ? AND direction = 'in'
+                            AND status IN ('arrived', 'lent', 'back') AND timedue IS NOT NULL AND timedue < ?",
+                        [$library->id, $now]
+                    )];
             }
             if ($one['manages']) {
                 $waiting = menu::waiting($library, $userid);

@@ -62,6 +62,11 @@ final class work_test extends \advanced_testcase {
         );
         $this->assertStringContainsString('span=old', $card['alerts'][0]['url']);
         $this->assertStringContainsString('span=today', $card['alerts'][2]['url']);
+        $this->assertSame(
+            [$start - 40 * DAYSECS, $start - 3 * DAYSECS, $start + DAYSECS - 1],
+            array_column($card['alerts'], 'due'),
+            'each deadline: the oldest missed, or the end of today'
+        );
         $this->assertCount(2, $card['actions']);
 
         // A reader runs nothing: no card, and nothing «all is well».
