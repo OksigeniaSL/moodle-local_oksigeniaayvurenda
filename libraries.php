@@ -322,12 +322,19 @@ foreach (libraries::all() as $one) {
         'planform' => $setsplans ? (function () use ($entity, $str) {
             $plan = plans::of((int) $entity->id);
             $terms = \local_oksigeniaayvurenda\local\signup::terms((int) $entity->id);
+            $links = [];
+            foreach (['terms', 'privacy', 'dpa'] as $key) {
+                if (!empty($terms[$key])) {
+                    $links[] = ['termsurl' => (string) $terms[$key], 'termslabel' => $str('librariesterms' . $key)];
+                }
+            }
             return ['readersopen' => !access::closed((int) $entity->id),
                 'termsline' => $terms ? $str('librariesterms', \local_oksigeniaayvurenda\local\zones::date(
                     (int) $terms['time'],
                     'strftimedate',
                     (int) $entity->id
                 )) : '',
+                'termslinks' => $links,
                 'plannamenow' => $plan['name'], 'plancopiesnow' => $plan['copies'], 'planreadersnow' => $plan['readers'],
                 'planpresets' => array_map(
                     fn($key) => ['value' => $key, 'label' => $str('planpreset' . $key)],

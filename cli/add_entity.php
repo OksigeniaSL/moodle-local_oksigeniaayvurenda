@@ -31,7 +31,7 @@ use local_oksigeniaayvurenda\local\signup;
 
 [$options] = cli_get_params([
     'name' => '', 'library' => '', 'plan' => '', 'email' => '', 'firstname' => '', 'lastname' => '', 'lang' => '',
-    'role' => '', 'accepted' => '', 'terms' => '', 'privacy' => '', 'yes' => false, 'help' => false,
+    'role' => '', 'accepted' => '', 'terms' => '', 'privacy' => '', 'dpa' => '', 'yes' => false, 'help' => false,
 ], ['h' => 'help']);
 if ($options['help'] || $options['name'] === '' || $options['email'] === '' || $options['plan'] === '') {
     cli_writeln("Signs a centre up: the centre, its first library and its category, its plan, an account for whoever runs it\n"
@@ -43,8 +43,9 @@ if ($options['help'] || $options['name'] === '' || $options['email'] === '' || $
         . "--email=…         Whoever runs it.\n"
         . "--firstname=… --lastname=… --lang=es|en   For a new account.\n"
         . "--role=shortname  The role to give (ayvurendamanager if not given).\n"
-        . "--accepted=YYYY-MM-DD  When it accepted the terms and the privacy policy (now if not given).\n"
-        . "--terms=URL --privacy=URL  Where they are (ayvurenda.com's if not given).\n"
+        . "--accepted=YYYY-MM-DD  When it accepted the terms, the privacy policy and the data processing agreement\n"
+        . "                  (now if not given).\n"
+        . "--terms=URL --privacy=URL --dpa=URL  Where they are (ayvurenda.com's, in the language of --lang, if not given).\n"
         . "--yes             Do it.");
     exit($options['help'] ? 0 : 1);
 }

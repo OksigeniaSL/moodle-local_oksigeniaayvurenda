@@ -198,7 +198,7 @@
             {{#planform}}
             <fieldset class="ayv-fieldset"><legend>{{librariesplan}}</legend>
                 <p class="ayv-field-hint">{{librariesplanhint}}</p>
-                {{#termsline}}<p class="ayv-field-hint">{{termsline}}</p>{{/termsline}}
+                {{#termsline}}<p class="ayv-field-hint ayv-terms-line">{{termsline}} {{#termslinks}}<a href="{{termsurl}}">{{termslabel}}</a> {{/termslinks}}</p>{{/termsline}}
                 <input type="hidden" name="planform" value="1">
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="readersopen" value="1" {{#readersopen}}checked{{/readersopen}}> {{librariesreadersopen}}</label>
                 <p class="ayv-field-hint">{{librariesreadersopenhint}}</p>

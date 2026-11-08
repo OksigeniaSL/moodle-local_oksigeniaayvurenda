@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.216.0 (2026-11-08)
+
+- Portuguese (audit, MD-04; Enrique, 8 November): the whole library in Brazilian Portuguese (`pt_br`) and in European
+  Portuguese (`pt`), translated by machine from the Spanish with a glossary for each, every string checked to keep its
+  placeholders, tags and line breaks. Where a voice of the help has no Portuguese recording, the step goes without voice.
+- The library's card in «Your work» (Oksigenia Tembiapo, `block_oksigeniatembiapo`; Nuryana, with Enrique's OK): for
+  whoever lends, keeps a library or manages, `local_oksigeniaayvurenda_oksigenia_work()` gives one card per centre, with
+  the desk as its door, a line of numbers (out on loan, late, set aside) and what has to be solved, the urgent first:
+  books more than a month late, a self-checkout point that stopped, copies that have not left the server; late, due
+  today, interlibrary loans past their date, requests and class requests, reviews and voices to look at. Each alert
+  leads to where it is solved. Kept five minutes for each person; nothing for anyone else.
+- The terms a centre accepts on signing up (audit, DIA-12): its terms of service, privacy policy and data processing
+  agreement, now on ayvurenda.com, in the language of whoever runs it (`--dpa` in `cli/add_entity.php`); «Centre
+  settings» links the three beside the date.
+- The caches of the curious things and of SIP2 machines have their names on the caches page.
+
 ## 0.215.0 (2026-11-08)
 
 - A cover that does not load is never a blank (Enrique, 8 November): the card shows its drawn cover with the title, as a

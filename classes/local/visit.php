@@ -646,7 +646,11 @@ final class visit {
             }
             // By the library's night the memory speaks low and the hummingbird sleeps on its book (jue-humor H49-H50).
             $night = self::night((int) $library->entityid);
-            $pose = $night && $role === 'herald' && characters::figure('herald', 'duerme') ? 'duerme' : $one['pose'];
+            // Only if the one standing has a sleeping drawing: a centre's own character without it stays awake.
+            $own = !empty(characters::of((int) $library->entityid)[$role]['own']);
+            $sleeps = $own ? characters::own_figure((int) $library->entityid, $role, 'duerme')
+                : characters::figure($role, 'duerme');
+            $pose = $night && $role === 'herald' && $sleeps ? 'duerme' : $one['pose'];
             $said = characters::say(
                 (int) $library->entityid,
                 $role,

@@ -63,7 +63,7 @@ actualiza desde cualquiera anterior.
 
 ## Desarrollo
 
-Código, comentarios y mensajes de commit en inglés; los textos, en los paquetes de idioma (`lang/en`, `lang/es`). Las
+Código, comentarios y mensajes de commit en inglés; los textos, en los paquetes de idioma (`lang/en`, `lang/es`, y `lang/pt_br` y `lang/pt`, traducidos a máquina del español y revisados). Las
 pruebas pasan con `moodle-plugin-ci` en GitHub Actions en Moodle 4.5 y 5.3 (PostgreSQL), en 5.3 también con MariaDB
 11.4, y en `main`, para ver lo que viene. Más en [CONTRIBUTING.md](CONTRIBUTING.md).
 

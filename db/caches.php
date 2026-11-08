@@ -72,6 +72,12 @@ $definitions = [
         'simplekeys' => true,
         'ttl' => 3600,
     ],
+    // Each person's card in «Your work» on the dashboard, for a few minutes: it is asked on every load of the page.
+    'work' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 300,
+    ],
     // The curious things of each library's catalogue, once a day: the longest title, the oldest book.
     'curiosities' => [
         'mode' => cache_store::MODE_APPLICATION,

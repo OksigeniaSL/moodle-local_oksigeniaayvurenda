@@ -86,14 +86,18 @@ final class signup {
             ?: $DB->get_records(self::T . 'library', ['entityid' => $entity->id], 'id', 'id, slug', 0, 1);
         $library = reset($library);
 
-        // When it accepted the terms and the privacy policy: the first time is the one that counts.
+        // When it accepted the terms of service, the privacy policy and the data processing agreement, ayvurenda.com's in
+        // the language of whoever runs it unless others are given: the first time is the one that counts.
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entity->id]), true) ?: [];
         if (empty($settings['terms'])) {
             $accepted = trim((string) ($data['accepted'] ?? ''));
+            $english = ($data['lang'] ?? '') === 'en';
+            $site = 'https://ayvurenda.com/' . ($english ? 'en/' : '');
             $settings['terms'] = [
                 'time' => $accepted !== '' && strtotime($accepted) ? (int) strtotime($accepted) : $now,
-                'terms' => trim((string) ($data['terms'] ?? '')) ?: 'https://ayvurenda.com/aviso-legal/',
-                'privacy' => trim((string) ($data['privacy'] ?? '')) ?: 'https://ayvurenda.com/privacidad/',
+                'terms' => trim((string) ($data['terms'] ?? '')) ?: $site . ($english ? 'terms/' : 'condiciones/'),
+                'privacy' => trim((string) ($data['privacy'] ?? '')) ?: $site . ($english ? 'privacy/' : 'privacidad/'),
+                'dpa' => trim((string) ($data['dpa'] ?? '')) ?: $site . ($english ? 'data-processing/' : 'encargo/'),
             ];
             $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entity->id]);
         }

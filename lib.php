@@ -229,6 +229,17 @@ function local_oksigeniaayvurenda_oksigeniaaty_child_cards(int $adultuserid, int
 }
 
 /**
+ * The library's card in «Your work» (Oksigenia Tembiapo, block_oksigeniatembiapo): for whoever lends, keeps a library or
+ * manages, its door, a line of numbers and what has to be solved; nothing for anyone else.
+ *
+ * @param int $userid
+ * @return array A list of cards: key, title, url, status, alerts (text, url, level) and actions (label, url).
+ */
+function local_oksigeniaayvurenda_oksigenia_work(int $userid): array {
+    return \local_oksigeniaayvurenda\local\work::cards($userid);
+}
+
+/**
  * «Readings» in a course's menu: for whoever can change the course, always (to make its list); for the rest, when the
  * course has some.
  *

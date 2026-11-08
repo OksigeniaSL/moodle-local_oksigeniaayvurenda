@@ -55,8 +55,12 @@ final class signup_test extends \advanced_testcase {
         $this->assertSame('small', plans::of($first['entity'])['preset'] ?? $this->preset($first['entity']));
         $this->assertSame(strtotime('2026-11-03'), signup::terms($first['entity'])['time']);
         $this->assertSame('https://ayvurenda.com/privacidad/', signup::terms($first['entity'])['privacy']);
+        $this->assertSame('https://ayvurenda.com/condiciones/', signup::terms($first['entity'])['terms']);
+        $this->assertSame('https://ayvurenda.com/encargo/', signup::terms($first['entity'])['dpa']);
 
-        $other = signup::centre(['name' => 'Fundación Monte Claro', 'plan' => 'free', 'email' => 'otra@example.org']);
+        $other = signup::centre(['name' => 'Fundación Monte Claro', 'plan' => 'free', 'email' => 'otra@example.org',
+            'lang' => 'en']);
+        $this->assertSame('https://ayvurenda.com/en/data-processing/', signup::terms($other['entity'])['dpa'], 'in English');
         $sink->clear();
         $this->assertTrue(access::can('local/oksigeniaayvurenda:manage', $first['entity'], $first['userid']));
         $this->assertFalse(access::can('local/oksigeniaayvurenda:manage', $other['entity'], $first['userid']));
