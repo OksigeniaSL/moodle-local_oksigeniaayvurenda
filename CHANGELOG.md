@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.213.0 (2026-11-08)
+
+- 0.212.0 did not reach the sites: the validator of the CI does not take a form inside a span, on the genre cards of
+  «Corners». It is all in here.
+- The library's challenges with their own dates (audit, MD-03 and MER-05; Enrique, 8 November): the summer, the book
+  week, for a public library as for a school between June and September.
+  - «Library challenges» (in «More»), for whoever manages the centre: a card each, with its name, dates, for whom,
+    how many books, and how it goes (who joined, who made it, the books of all of them); made and changed in its
+    window, taken away with two taps.
+  - On the reader's card, each challenge they can play: «Join in», and then a card of stamps, one for each book they
+    take home in its days. Only the desk counts, and never the textbook bank; nothing they declare. No ranking.
+  - Erasing a reader, joining two readers, the copies, recovering a copy and forgetting old years know the new tables.
+- On the card, «What comes to the library» signs up for the centre of the page: it signed up for every centre at
+  once, and could not then be turned off in one.
+
 ## 0.212.0 (2026-11-08)
 
 - Genres of the stories (audit, MER-01; Enrique, 8 November): a library splits its stories into corners of its own,

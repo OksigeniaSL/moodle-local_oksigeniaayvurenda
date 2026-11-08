@@ -70,7 +70,7 @@ final class menu {
             'menushelves' => [['stacks.php', 'stacksnav', $d], ['labels.php', 'menulabels', $c],
                 ['posters.php', 'menuposters', $c], ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c]],
             'menureview' => [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
-                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d]],
+                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d], ['quests.php', 'menuquests', $m]],
             'menureports' => [['memoir.php', 'menumemoir', $d], ['activity.php', 'menuactivity', $m]],
             'menusettings' => [['centre', 'librariesentity', $m], ['copies.php', 'menucopies', $m],
                 ['rules.php', 'menurules', $m],

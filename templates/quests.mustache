@@ -1,0 +1,99 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/quests
+
+    The library's challenges with their own dates: a card each, with how it goes, and its window.
+
+    Example context (json):
+    {
+        "heading": "Retos de la biblioteca", "intro": "Un reto con fechas.", "notice": "", "problem": "",
+        "action": "https://example.org/quests.php", "sesskey": "abc", "hasquests": true, "hasstages": true, "maxgoal": 50,
+        "newstart": "2026-11-08", "newend": "2026-12-08",
+        "stages": [{"name": "Primaria", "on": false}],
+        "quests": [{"id": 1, "name": "Verano lector", "text": "Seis libros este verano.", "when": "Del 1 de julio al 31 de agosto",
+            "for": "Primaria", "goal": 6, "goalline": "6 libros", "state": "En marcha", "stateclass": "on", "readers": "12",
+            "done": "3", "books": "48", "startvalue": "2027-07-01", "endvalue": "2027-08-31",
+            "stages": [{"name": "Primaria", "on": true}], "removesure": "Verano lector: toca otra vez para quitarlo."}],
+        "questsnone": "Aún no hay retos.", "questsnew": "Nuevo reto", "questname": "Nombre", "questnamehint": "Como Verano lector",
+        "questtext": "Una frase", "questtexthint": "Opcional", "queststart": "Empieza", "questend": "Acaba", "questgoal": "Libros",
+        "questfor": "Para quién", "questforhint": "Ninguna, todos", "questsave": "Guardar", "questclose": "Cerrar",
+        "questedit": "Cambiar", "questremove": "Quitar", "questreaders": "apuntados", "questdone": "lo consiguieron",
+        "questbooks": "libros"
+    }
+}}
+<section class="ayv-quests">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#problem}}<p class="ayv-notice ayv-notice-error" role="alert">{{problem}}</p>{{/problem}}
+<ul class="ayv-quest-cards">
+{{#quests}}
+    <li class="ayv-quest-card" id="ayv-quest-{{id}}">
+        <div class="ayv-quest-card-head">
+            <h2 class="ayv-quest-card-name">{{name}}</h2>
+            <span class="ayv-quest-state ayv-quest-state-{{stateclass}}">{{state}}</span>
+        </div>
+        <p class="ayv-field-hint">{{when}} · {{for}} · {{goalline}}</p>
+        {{#text}}<p>{{text}}</p>{{/text}}
+        <dl class="ayv-quest-figures">
+            <div><dt>{{questreaders}}</dt><dd>{{readers}}</dd></div>
+            <div><dt>{{questdone}}</dt><dd>{{done}}</dd></div>
+            <div><dt>{{questbooks}}</dt><dd>{{books}}</dd></div>
+        </dl>
+        <div class="ayv-quest-card-do">
+            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-quest-edit-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{questedit}}</button>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remove" data-ayv-twice="{{removesure}}">{{questremove}}</button></form>
+        </div>
+        <dialog class="ayv-modal ayv-entity-edit" id="ayv-quest-edit-{{id}}" aria-labelledby="ayv-quest-edit-{{id}}-title">
+            <div class="ayv-modal-head"><h3 id="ayv-quest-edit-{{id}}-title" class="ayv-section-title">{{name}}</h3>
+                <form method="dialog"><button class="ayv-modal-close" aria-label="{{questclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+            <form method="post" action="{{action}}#ayv-quest-{{id}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}">
+                <label class="ayv-field">{{questname}} <input type="text" name="name" value="{{name}}" maxlength="120" required></label>
+                <label class="ayv-field">{{questtext}} <span class="ayv-field-hint">{{questtexthint}}</span> <input type="text" name="text" value="{{text}}" maxlength="255"></label>
+                <div class="ayv-quest-dates">
+                    <label class="ayv-field">{{queststart}} <input type="date" name="start" value="{{startvalue}}" required></label>
+                    <label class="ayv-field">{{questend}} <input type="date" name="end" value="{{endvalue}}" required></label>
+                    <label class="ayv-field">{{questgoal}} <input type="number" name="goal" value="{{goal}}" min="1" max="{{maxgoal}}" required></label>
+                </div>
+                {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{questfor}}</legend><p class="ayv-field-hint">{{questforhint}}</p><div class="ayv-choices">{{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{name}}" {{#on}}checked{{/on}}> {{name}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
+                <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{questsave}}</button></p>
+            </form>
+        </dialog>
+    </li>
+{{/quests}}
+{{^hasquests}}<li class="ayv-quest-card ayv-quest-card-none"><p>{{questsnone}}</p></li>{{/hasquests}}
+    <li class="ayv-libcard ayv-libcard-new ayv-quest-card-new"><button type="button" data-ayv-open="ayv-quest-new">{{> local_oksigeniaayvurenda/icon_plus}} <span>{{questsnew}}</span></button></li>
+</ul>
+<dialog class="ayv-modal ayv-entity-edit" id="ayv-quest-new" aria-labelledby="ayv-quest-new-title">
+    <div class="ayv-modal-head"><h3 id="ayv-quest-new-title" class="ayv-section-title">{{questsnew}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{questclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <label class="ayv-field">{{questname}} <span class="ayv-field-hint">{{questnamehint}}</span> <input type="text" name="name" maxlength="120" required></label>
+        <label class="ayv-field">{{questtext}} <span class="ayv-field-hint">{{questtexthint}}</span> <input type="text" name="text" maxlength="255"></label>
+        <div class="ayv-quest-dates">
+            <label class="ayv-field">{{queststart}} <input type="date" name="start" value="{{newstart}}" required></label>
+            <label class="ayv-field">{{questend}} <input type="date" name="end" value="{{newend}}" required></label>
+            <label class="ayv-field">{{questgoal}} <input type="number" name="goal" value="6" min="1" max="{{maxgoal}}" required></label>
+        </div>
+        {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{questfor}}</legend><p class="ayv-field-hint">{{questforhint}}</p><div class="ayv-choices">{{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{name}}"> {{name}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{questsave}}</button></p>
+    </form>
+</dialog>
+</section>

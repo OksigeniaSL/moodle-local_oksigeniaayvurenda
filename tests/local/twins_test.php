@@ -97,7 +97,11 @@ final class twins_test extends \advanced_testcase {
                 $withreader[] = $name;
             }
         }
-        // The groups of each year, the reviews and what was kept of each year are joined by their own rules.
-        $this->assertSame([], array_values(array_diff($withreader, array_merge(twins::OWNED, ['member', 'review', 'keepsake']))));
+        // The groups of each year, the reviews, what was kept of each year and the library's challenges joined are joined
+        // by their own rules.
+        $this->assertSame([], array_values(array_diff(
+            $withreader,
+            array_merge(twins::OWNED, ['member', 'review', 'keepsake', 'questreader'])
+        )));
     }
 }

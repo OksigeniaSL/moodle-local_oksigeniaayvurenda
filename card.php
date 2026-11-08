@@ -67,7 +67,21 @@ $saved = '';
 if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', 'look', PARAM_ALPHA);
     if ($do === 'newbooks') {
-        newsletter::subscribe((int) $USER->id, optional_param('newbooks', 0, PARAM_BOOL), (int) $reader->entityid);
+        // The centre of this page: someone with a card in two centres chooses in each.
+        newsletter::subscribe((int) $USER->id, optional_param('newbooks', 0, PARAM_BOOL), (int) ($library->entityid ?? 0));
+    } else if ($do === 'quest') {
+        // Joining a challenge of the library, as the reader of its centre.
+        $questid = required_param('quest', PARAM_INT);
+        $centre = $DB->get_field_sql(
+            'SELECT b.entityid FROM {local_oksigeniaayvurenda_quest} q
+               JOIN {local_oksigeniaayvurenda_library} b ON b.id = q.libraryid WHERE q.id = ?',
+            [$questid]
+        );
+        $joiner = $centre ? $DB->get_record('local_oksigeniaayvurenda_reader', ['userid' => $USER->id, 'status' => 'active',
+            'entityid' => $centre], '*', IGNORE_MULTIPLE) : null;
+        if ($joiner) {
+            \local_oksigeniaayvurenda\local\quests::join($questid, $joiner, time());
+        }
     } else if ($do === 'goal') {
         // A number written, or one of those offered.
         $wanted = optional_param('goalother', 0, PARAM_INT) ?: optional_param('goal', 0, PARAM_INT);
@@ -245,7 +259,30 @@ foreach ($readers as $reader) {
             ),
             'newbookson' => newsletter::subscribed((int) $USER->id, (int) $reader->entityid)];
     }
+    // The library's challenges with their own dates: a card of stamps, one for each book taken home in its days.
+    $longdate = 'strftimedate';
+    $questcards = [];
+    foreach (\local_oksigeniaayvurenda\local\quests::open($reader, time()) as $quest) {
+        $stamps = empty($quest->joinedid) ? 0 : \local_oksigeniaayvurenda\local\quests::stamps($quest, (int) $reader->id, time());
+        \local_oksigeniaayvurenda\local\quests::note_done($quest, $stamps, time());
+        $goal = (int) $quest->goal;
+        $reached = !empty($quest->joinedid) && $stamps >= $goal;
+        $questcards[] = ['id' => (int) $quest->id, 'name' => format_string($quest->name, true, ['escape' => false]),
+            'text' => (string) $quest->text,
+            'when' => $str('questwhen', (object) [
+                'from' => \local_oksigeniaayvurenda\local\zones::date((int) $quest->timestart, $longdate, $reader->entityid),
+                'to' => \local_oksigeniaayvurenda\local\zones::date((int) $quest->timeend, $longdate, $reader->entityid)]),
+            'joined' => !empty($quest->joinedid), 'canjoin' => empty($quest->joinedid) && !$previewid
+                && (int) $quest->timeend >= time(),
+            'reached' => $reached,
+            'stamps' => array_map(fn($n) => ['on' => $n <= $stamps], range(1, $goal)),
+            'stampslabel' => $str('queststamps', (object) ['done' => min($stamps, $goal), 'goal' => $goal]),
+            'line' => $reached ? $str('questreached')
+                : ($goal - $stamps === 1 ? $str('questtogoone') : $str('questtogo', $goal - $stamps))];
+    }
     $cardsdata[] = $card + [
+        'quests' => $questcards,
+        'hasquests' => (bool) $questcards,
         'sanctionline' => \local_oksigeniaayvurenda\local\sanctions::for_reader((int) $reader->entityid, (int) $reader->id, time()),
         'herald' => $herald,
         'paths' => $paths,
@@ -335,6 +372,8 @@ $data = [
     'showbigclose' => $str('cardshowbigclose'),
     'saved' => $saved,
     'mineheading' => $str('mineheading'),
+    'questsheading' => $str('questsheading'),
+    'questjoin' => $str('questjoin'),
     'goaltitle' => $str('goaltitle'),
     'goallabel' => $str('goallabel'),
     'goalhint' => $str('goalhint'),

@@ -22,7 +22,8 @@ namespace local_oksigeniaayvurenda\local;
  * year go to a stand-in of their own for that year, with no name nor account, in the same group and stage: the figures
  * of that year (how many came, by group and by stage) stay as they were, and nobody can join two years of one person.
  * What the reader won that year (their flower, the corners of their album) is kept with them, without the books; the
- * notes at the desk go, and so do the reservations, sanctions, accessible formats asked and reading places of then.
+ * notes at the desk go, and so do the reservations, sanctions, accessible formats asked, reading places and the
+ * library's challenges joined then.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -149,6 +150,12 @@ final class forgetting {
         $DB->delete_records_select(
             self::T . 'formatask',
             "status <> 'waiting' AND timecreated < :since AND entityid = :entityid",
+            $old
+        );
+        $DB->delete_records_select(
+            self::T . 'questreader',
+            "questid IN (SELECT q.id FROM {" . self::T . "quest} q JOIN {" . self::T . "library} qb ON qb.id = q.libraryid
+                          WHERE qb.entityid = :entityid AND q.timeend < :since)",
             $old
         );
         $DB->delete_records_select(

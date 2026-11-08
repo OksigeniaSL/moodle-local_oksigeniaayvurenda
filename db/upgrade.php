@@ -660,6 +660,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110805, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110812) {
+        // The library's challenges with their own dates, and who joins them (decision of 8 November, point 6).
+        foreach (['local_oksigeniaayvurenda_quest', 'local_oksigeniaayvurenda_questreader'] as $name) {
+            if (!$dbman->table_exists(new xmldb_table($name))) {
+                $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', $name);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110812, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

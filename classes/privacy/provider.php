@@ -115,6 +115,12 @@ class provider implements
             'corners' => 'privacy:metadata:keepsake:corners',
             'timecreated' => 'privacy:metadata:keepsake:timecreated',
         ], 'privacy:metadata:keepsake');
+        $collection->add_database_table(self::T . 'questreader', [
+            'questid' => 'privacy:metadata:questreader:questid',
+            'readerid' => 'privacy:metadata:questreader:readerid',
+            'timejoined' => 'privacy:metadata:questreader:timejoined',
+            'timedone' => 'privacy:metadata:questreader:timedone',
+        ], 'privacy:metadata:questreader');
         $collection->add_database_table(self::T . 'sanction', [
             'readerid' => 'privacy:metadata:sanction:readerid',
             'kind' => 'privacy:metadata:sanction:kind',
@@ -663,6 +669,7 @@ class provider implements
         $DB->delete_records(self::T . 'sanction');
         $DB->delete_records(self::T . 'formatask');
         $DB->delete_records(self::T . 'keepsake');
+        $DB->delete_records(self::T . 'questreader');
         $DB->execute('UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE direction = 'in'");
         $DB->set_field_select(self::T . 'ill', 'createdby', null, 'createdby IS NOT NULL');
         $DB->set_field_select(self::T . 'purchase', 'note', null, "source = 'reader'");

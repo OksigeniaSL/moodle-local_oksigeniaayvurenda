@@ -1770,6 +1770,60 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-genre-proposal-words .ayv-field-hint { overflow-wrap: anywhere; }
 .ayv .ayv-genre-from { margin: 1.5rem 0; }
 .ayv .ayv-genre-from summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+/* The library's challenges: for the staff, a card each with its state and figures; on the reader's card, a card of
+   stamps, one for each book taken home in its days. */
+.ayv .ayv-quest-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 1rem; margin: 1.2rem 0;
+    padding: 0; list-style: none; }
+.ayv .ayv-quest-card {
+    display: grid;
+    gap: .5rem;
+    align-content: start;
+    padding: 1.1rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+}
+.ayv .ayv-quest-card p { margin: 0; }
+.ayv .ayv-quest-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem 1rem; }
+.ayv .ayv-quest-card-name { margin: 0; font: 600 1.2rem/1.25 var(--title); }
+.ayv .ayv-quest-state { padding: .15rem .6rem; border-radius: 999px; font-size: .85rem; font-weight: 700; background: var(--paper2); }
+.ayv .ayv-quest-state-on { background: var(--accent); color: var(--paper); }
+.ayv .ayv-quest-figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin: .4rem 0; }
+.ayv .ayv-quest-figures div { display: grid; gap: .1rem; padding: .5rem .6rem; border-radius: 12px; background: var(--paper); }
+.ayv .ayv-quest-figures dt { order: 2; font-size: .85rem; font-weight: 400; }
+.ayv .ayv-quest-figures dd { order: 1; margin: 0; font: 600 1.4rem/1 var(--title); color: var(--accent); }
+.ayv .ayv-quest-card-do { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ayv .ayv-quest-card-do form { margin: 0; }
+.ayv .ayv-quest-card-new { display: flex; padding: 0; }
+.ayv .ayv-quest-card-new button { min-height: 12rem; }
+.ayv .ayv-quest-dates { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .75rem; }
+.ayv .ayv-card-quests { margin: 2rem 0 1rem; }
+.ayv .ayv-quest-plays { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; margin: .8rem 0;
+    padding: 0; list-style: none; }
+.ayv .ayv-quest-play {
+    display: grid;
+    gap: .5rem;
+    align-content: start;
+    padding: 1.1rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+}
+.ayv .ayv-quest-play p { margin: 0; }
+.ayv .ayv-quest-play-reached { outline: 3px solid var(--accent); outline-offset: -3px; }
+.ayv .ayv-stamps { display: flex; flex-wrap: wrap; gap: .45rem; margin: .3rem 0; padding: 0; list-style: none; }
+.ayv .ayv-stamp {
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 2px dashed var(--line);
+    border-radius: 50%;
+}
+.ayv .ayv-stamp-on {
+    border: 0;
+    background: var(--accent);
+    box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 6px var(--accent);
+}
+.ayv .ayv-quest-line { font-weight: 700; color: var(--accent); }
 .ayv .ayv-class-nobody-island { width: min(100%, 26rem); height: auto; opacity: .85; }
 .ayv .ayv-nothing .ayv-bubble { text-align: start; }
 .ayv .ayv-facets-fold > summary::-webkit-details-marker { display: none; }

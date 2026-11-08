@@ -604,6 +604,41 @@
         <INDEX NAME="yeargrouptermseq" UNIQUE="true" FIELDS="yearid, groupname, term, seq"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_quest" COMMENT="A challenge of a library with its own dates (the summer, the book week): readers join it from their card, and each loan of the centre in its days is a stamp">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="120" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="text" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The start of its first day, in the centre's zone"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The end of its last day, in the centre's zone"/>
+        <FIELD NAME="goal" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Books to take home"/>
+        <FIELD NAME="stages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of the stages it is for; null for everyone"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_questreader" COMMENT="A reader who joined a challenge of the library, and when they reached its goal">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="questid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timejoined" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timedone" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the reader was first seen with the goal reached"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="questid" TYPE="foreign" FIELDS="questid" REFTABLE="local_oksigeniaayvurenda_quest" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="questreader" UNIQUE="true" FIELDS="questid, readerid"/>
+      </INDEXES>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_review" COMMENT="What a reader tells about a book: one line, published once the library approves it">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

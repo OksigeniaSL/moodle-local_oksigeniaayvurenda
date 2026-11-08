@@ -38,7 +38,7 @@ final class recover {
         'hold',
         'stocktake', 'lot', 'lotitem', 'withdrawal', 'withdrawn', 'stockread', 'rule', 'challenge', 'review', 'wish', 'roomread',
         'bankset', 'banktitle', 'digital', 'source', 'purchaseorder', 'purchase', 'purchasewho', 'budget', 'ill', 'sanction',
-        'formatask'];
+        'formatask', 'quest', 'questreader'];
 
     /** @var string Where a recovered centre keeps which of its ids were which, for its files to come after. */
     private const MAPAREA = 'recovermap';

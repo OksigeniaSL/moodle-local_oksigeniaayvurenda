@@ -63,6 +63,8 @@ final class copies {
         'reader' => 'entityid = :entityid',
         'member' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',
         'keepsake' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',
+        'quest' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
+        'questreader' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',
         'loan' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'hold' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'stocktake' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',

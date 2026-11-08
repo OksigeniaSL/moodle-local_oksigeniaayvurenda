@@ -119,6 +119,25 @@
     </ul>
     {{/hasbooks}}
     {{^hasbooks}}<div class="ayv-posed">{{#nobooksfigure}}<span class="ayv-figure"><img class="ayv-posed-figure" src="{{nobooksfigure}}" alt="" width="512" height="512"{{#nobookspuppet}} data-puppet="{{nobookspuppet}}"{{/nobookspuppet}}></span>{{/nobooksfigure}}<p class="ayv-empty">{{nobooks}}{{#listennobooks}} {{> local_oksigeniaayvurenda/listen}}{{/listennobooks}}</p></div>{{/hasbooks}}
+    {{#hasquests}}
+    <section class="ayv-card-quests" id="ayv-quests-{{code}}" aria-labelledby="ayv-quests-title-{{code}}">
+        <h2 class="ayv-section-title" id="ayv-quests-title-{{code}}">{{questsheading}}</h2>
+        <ul class="ayv-quest-plays">
+        {{#quests}}
+            <li class="ayv-quest-play{{#reached}} ayv-quest-play-reached{{/reached}}">
+                <h3 class="ayv-quest-card-name">{{name}}</h3>
+                <p class="ayv-field-hint">{{when}}</p>
+                {{#text}}<p>{{text}}</p>{{/text}}
+                {{#joined}}
+                <ol class="ayv-stamps" aria-label="{{stampslabel}}">{{#stamps}}<li class="ayv-stamp{{#on}} ayv-stamp-on{{/on}}"></li>{{/stamps}}</ol>
+                <p class="ayv-quest-line">{{line}}</p>
+                {{/joined}}
+                {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button">{{questjoin}}</button></form>{{/canjoin}}
+            </li>
+        {{/quests}}
+        </ul>
+    </section>
+    {{/hasquests}}
     {{#hasclassgarden}}
     <h2 class="ayv-section-title">{{classgardenheading}}</h2>
     <p class="ayv-field-hint">{{classgardenhint}}{{#listengarden}} {{> local_oksigeniaayvurenda/listen}}{{/listengarden}}</p>

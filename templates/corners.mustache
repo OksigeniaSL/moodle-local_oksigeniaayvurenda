@@ -86,10 +86,10 @@
                 {{#topics}}<p class="ayv-field-hint">{{topics}}</p>{{/topics}}
                 {{#prefixes}}<p class="ayv-field-hint">{{prefixes}}</p>{{/prefixes}}
             </div>
-            <span class="ayv-genre-card-do">
+            <div class="ayv-genre-card-do">
                 <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-genre-edit-{{code}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{genresedit}}</button>
                 <form method="post" action="{{action}}#ayv-genres-title"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="code" value="{{code}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="genredrop" data-ayv-twice="{{dropsure}}">{{genresdrop}}</button></form>
-            </span>
+            </div>
             <dialog class="ayv-modal ayv-entity-edit" id="ayv-genre-edit-{{code}}" aria-labelledby="ayv-genre-edit-{{code}}-title">
                 <div class="ayv-modal-head"><h3 id="ayv-genre-edit-{{code}}-title" class="ayv-section-title">{{label}}</h3>
                     <form method="dialog"><button class="ayv-modal-close" aria-label="{{genresclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>

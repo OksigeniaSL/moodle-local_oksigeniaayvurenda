@@ -160,6 +160,11 @@ final class twins {
             $DB->delete_records(self::T . 'keepsake', ['readerid' => $goneid, 'yearid' => $kept->yearid]);
         }
         $DB->set_field(self::T . 'keepsake', 'readerid', $keepid, ['readerid' => $goneid]);
+        // A challenge both had joined stays once, with the one who stays.
+        foreach ($DB->get_records(self::T . 'questreader', ['readerid' => $keepid], '', 'id, questid') as $joined) {
+            $DB->delete_records(self::T . 'questreader', ['readerid' => $goneid, 'questid' => $joined->questid]);
+        }
+        $DB->set_field(self::T . 'questreader', 'readerid', $keepid, ['readerid' => $goneid]);
         // One review per reader and book: where both told about the same book, the one that stays keeps theirs.
         reviews::move($goneid, $keepid);
         foreach (self::OWNED as $table) {
