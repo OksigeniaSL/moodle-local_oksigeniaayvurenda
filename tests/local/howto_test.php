@@ -32,6 +32,11 @@ final class howto_test extends \advanced_testcase {
      * thought aloud stays out, and the tasks it named are kept (ia-bibliotecarios 1 to 5).
      */
     public function test_ask(): void {
+        // Moodle 4.5 asks its providers whether an action is available with a static method, which a test cannot stand in
+        // for; the way is the same, and it is tested on 5.x.
+        if ((new \ReflectionMethod(\core_ai\manager::class, 'is_action_available'))->isStatic()) {
+            $this->markTestSkipped('Moodle 4.5: the availability of an AI action cannot be stood in for.');
+        }
         $this->resetAfterTest();
         $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $response = $this->createMock(\core_ai\aiactions\responses\response_generate_text::class);

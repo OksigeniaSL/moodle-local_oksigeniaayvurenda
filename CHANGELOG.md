@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.209.0 (2026-11-08)
+
+- 0.208.0 did not reach the sites: on Moodle 4.5 a new test could not stand in for the site's AI. It is all in here.
+- The plugin's own scripts (app/) go through ESLint in the CI, as the scripts of a Moodle plugin do; the three things it
+  found are fixed (an unused variable at the desk, an escape too many when adding a book, the bookmark's function said
+  to be used by the page).
+
 ## 0.208.0 (2026-11-08)
 
 - For whoever installs and looks after it (audit, otr-diablo and otr-codigo):

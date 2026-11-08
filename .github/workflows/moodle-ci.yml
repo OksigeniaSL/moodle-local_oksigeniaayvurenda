@@ -46,6 +46,17 @@ jobs:
             echo "include=[$low,$b502,$high]" >> "$GITHUB_OUTPUT"
           fi
 
+  # The plugin's own scripts in app/, which the grunt step of moodle-plugin-ci does not look at (it reads amd/ only).
+  scripts:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: ESLint on app/
+        run: npm install --no-save --silent eslint@9 @eslint/js@9 globals@15 && npx eslint -c .github/eslint.config.mjs app
+
   # The SIP2 bridge, plain Python on a computer of the library: its own tests.
   bridge:
     runs-on: ubuntu-22.04

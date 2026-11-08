@@ -33,7 +33,6 @@
     var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // The loan just made, to stamp its date on the reader's card.
     var stamped = 0;
-    var today = document.getElementById('ayv-today');
     if (!form || !input || !log || !panel || !window.fetch) {
         return;
     }

@@ -14,6 +14,7 @@
  *
  * GPL v3 or later, with the plugin.
  */
+/* exported ayvBookmark */
 function ayvBookmark(options) {
     const root = options.root || document.body;
     const wide = window.matchMedia(`(min-width: ${options.minWidth || 1000}px)`);

@@ -127,7 +127,7 @@
         if (/^\d{13}$/.test(digits)) {
             return 'bad';
         }
-        return /^[0-9A-Z][0-9A-Z.\-]*$/.test(digits) ? 'label' : 'bad';
+        return /^[0-9A-Z][0-9A-Z.-]*$/.test(digits) ? 'label' : 'bad';
     };
 
     var letterok = function(code) {
