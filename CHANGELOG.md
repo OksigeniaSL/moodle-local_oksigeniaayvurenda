@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.217.0 (2026-11-08)
+
+- Stories to read at home (the families' library, first part; Enrique, 8 November): at a library's open door, without an
+  account, the stories it offers to read together, by age (0 to 2, 3 to 5, 6 to 8 and 9 to 12), with a word of the
+  memory for each age. A grown-up reads them with the child: there is no «Listen» (Enrique: «that it is mum or dad who
+  reads them stories, not all AI voices»). The address takes the child's age (`public.php?library=…&tales=1&age=4`), so
+  that admissions (Oksigenia Eguahe) can send a family there; the door offers it when the library has some. Whoever
+  catalogues marks a digital form for the public «To read at home» and its ages.
+- Every tale is looked at before it is offered (Enrique, 8 November): only what a person of the library marks shows, and
+  changing a digital form now leaves its trace in «Who did what», with the ages to read it at home.
+- For admissions and other plugins of the site, `api::libraries()` (each library with whether its door is open and
+  whether it offers tales) and `api::tales_url($slug, $age)`, which never gives the address of a closed door.
+- Since 0.216.0, a centre's own character no longer leaves the visit at night: the hummingbird of the art sleeps on its book, and a
+  character without a sleeping drawing stays awake (the tests found it on a clock where it was night).
+
 ## 0.216.0 (2026-11-08)
 
 - Portuguese (audit, MD-04; Enrique, 8 November): the whole library in Brazilian Portuguese (`pt_br`) and in European

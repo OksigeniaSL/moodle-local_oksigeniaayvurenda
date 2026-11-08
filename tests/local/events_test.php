@@ -468,6 +468,9 @@ final class events_test extends \advanced_testcase {
         });
         $this->assertSame('link', $event->other['kind']);
         $this->assertStringNotContainsString('platero', strtolower(json_encode($event->get_data())));
+        $changed = $this->tells('digital_changed', fn() => digital::update($id, $this->library, ['licence' => 'cc-by',
+            'audience' => ['public'], 'homeages' => [3]]), $id);
+        $this->assertSame('3', $changed->other['homeages']);
         $this->tells('digital_removed', fn() => digital::delete($id, $this->library), $id);
     }
 

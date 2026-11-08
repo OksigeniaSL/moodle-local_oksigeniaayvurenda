@@ -678,6 +678,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110813, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110816) {
+        // Tales to read at home, by age: which ages a digital form suits (the families' library, part 1).
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $field = new xmldb_field('homeages', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'accessformat');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110816, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

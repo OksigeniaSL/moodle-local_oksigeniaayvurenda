@@ -171,8 +171,14 @@ final class digital {
     public static function update(int $id, \stdClass $library, array $data, ?int $now = null): void {
         global $DB;
         $item = self::get($id, $library);
-        $DB->update_record(self::T . 'digital', (object) (['id' => $item->id, 'timemodified' => $now ?? time()] +
-            self::fields($data)));
+        $fields = self::fields($data);
+        $DB->update_record(self::T . 'digital', (object) (['id' => $item->id, 'timemodified' => $now ?? time()] + $fields));
+        // Who marked a tale to read at home, and when: a person looked at it (Enrique: tales are looked at first).
+        \local_oksigeniaayvurenda\event\digital_changed::fire(
+            (int) $library->entityid,
+            (int) $item->id,
+            ['homeages' => (string) $fields['homeages']] + ($fields['homeages'] ? ['what' => 'home'] : [])
+        );
     }
 
     /**
@@ -426,6 +432,8 @@ final class digital {
             'stages' => $stages ? json_encode($stages) : null,
             'download' => (int) digital_rules::can_download($licence, !empty($data['download'])),
             'accessformat' => (int) $accessible,
+            // To read at home with the little ones, for these ages: only what the public may see.
+            'homeages' => window::ages_of(in_array('public', $audience, true) ? (array) ($data['homeages'] ?? []) : []),
         ];
     }
 }

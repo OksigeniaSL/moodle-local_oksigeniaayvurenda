@@ -28,6 +28,7 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\window;
 use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
@@ -54,6 +55,7 @@ $fields = fn() => [
     'stages' => optional_param_array('stages', [], PARAM_TEXT),
     'download' => optional_param('download', 0, PARAM_BOOL),
     'accessible' => optional_param('accessible', 0, PARAM_BOOL),
+    'homeages' => optional_param_array('homeages', [], PARAM_INT),
 ];
 // Only for the students of a course, until a date, with the part of the work it is.
 $fragment = function (int $id) use ($str, $library, $recordid) {
@@ -123,6 +125,10 @@ $audiences = fn(array $chosen) => array_map(fn($a) => ['value' => $a, 'label' =>
 ),
     'checked' => in_array($a, $chosen, true)], digital_rules::AUDIENCES);
 $stagelist = fn(array $chosen) => array_map(fn($s) => ['value' => $s, 'checked' => in_array($s, $chosen, true)], $stages);
+// The ages a tale to read at home suits.
+$agelabel = fn(int $age) => $str('talesage' . $age);
+$homeages = fn(?string $chosen) => array_map(fn($age) => ['value' => $age, 'label' => $agelabel($age),
+    'checked' => in_array($age, array_map('intval', explode(',', (string) $chosen)), true)], window::AGES);
 $courses = \local_oksigeniaayvurenda\local\fragments::courses($library, $recordid);
 $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time())->timeend - 1;
 $courselist = fn(int $chosen) => array_values(array_map(fn($id, $name) => ['id' => $id, 'name' => $name,
@@ -161,6 +167,11 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
         'audiences' => $audiences(digital::audience($item)),
         'stages' => $stagelist($chosenstages),
         'download' => (bool) $item->download,
+        'homeages' => $homeages($item->homeages),
+        'homechip' => $item->homeages ? $str('digitalhomechip', implode(', ', array_map(
+            fn($age) => $agelabel((int) $age),
+            explode(',', (string) $item->homeages)
+        ))) : '',
     ];
 }
 $covers = \local_oksigeniaayvurenda\local\covers::urls([$recordid]);
@@ -181,6 +192,7 @@ $data = [
     'licences' => $licences('rights'),
     'audiences' => $audiences(['staff']),
     'stages' => $stagelist([]),
+    'newhomeages' => $homeages(null),
     'hasstages' => (bool) $stages,
     'hasproxy' => $hasproxy,
     'hascourses' => (bool) $courses,
@@ -195,7 +207,7 @@ foreach (
         'digitaltitlefield', 'digitallicence',
         'digitallicencehint', 'digitalaudience', 'digitalstages', 'digitaldownload', 'digitalsave', 'digitaldelete',
         'digitalread', 'digitalnone', 'backtorecord', 'digitalchange', 'digitaladdhint', 'fragmentcourse', 'fragmentnone',
-        'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint'] as $key
+        'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint', 'digitalhome', 'digitalhomehint'] as $key
 ) {
     $data[$key] = $str($key);
 }

@@ -37,6 +37,9 @@ final class window {
     /** @var int Works on a page of the window and of its catalogue. */
     public const PAGE = 30;
 
+    /** @var int[] The age bands of the tales to read at home, by the age each starts at. */
+    public const AGES = [0, 3, 6, 9];
+
     /** @var array Someone without an account, as digital::viewer() gives it. */
     public const ANYONE = ['who' => 'nobody', 'stage' => null, 'userid' => 0, 'readerid' => 0];
 
@@ -184,6 +187,49 @@ final class window {
     }
 
     /**
+     * The age band of a child: 0 (up to 2), 3 (3 to 5), 6 (6 to 8) or 9 (9 to 12 and older).
+     *
+     * @param int $age
+     * @return int
+     */
+    public static function band(int $age): int {
+        $band = 0;
+        foreach (self::AGES as $from) {
+            if ($age >= $from) {
+                $band = $from;
+            }
+        }
+        return $band;
+    }
+
+    /**
+     * The age bands chosen in a form, as they are kept: «0,3», or null.
+     *
+     * @param array $chosen
+     * @return string|null
+     */
+    public static function ages_of(array $chosen): ?string {
+        $ages = array_values(array_intersect(self::AGES, array_map('intval', $chosen)));
+        return $ages ? implode(',', $ages) : null;
+    }
+
+    /**
+     * The age bands that have something to read at home in the window, to offer only those.
+     *
+     * @param \stdClass $library
+     * @return int[]
+     */
+    public static function tale_ages(\stdClass $library): array {
+        $ages = [];
+        foreach (self::AGES as $age) {
+            if (self::records($library, '', 0, $age)['total']) {
+                $ages[] = $age;
+            }
+        }
+        return $ages;
+    }
+
+    /**
      * Whether a digital form is in the window of some library of its entity.
      *
      * @param \stdClass $item
@@ -259,15 +305,21 @@ final class window {
      * @param \stdClass $library
      * @param string $query Words of the title or the authors.
      * @param int $page
+     * @param int|null $age Only what the library offers to read at home at this age, without voices.
      * @return array records (id, title, subtitle, authors, lang, summary, cover, updated, items), and more.
      */
-    public static function records(\stdClass $library, string $query = '', int $page = 0): array {
+    public static function records(\stdClass $library, string $query = '', int $page = 0, ?int $age = null): array {
         global $DB;
-        $voices = self::settings($library)['voices'];
+        // Tales to read at home are read together, not listened to: no voices there (Enrique, 8 November).
+        $voices = self::settings($library)['voices'] && $age === null;
         $params = ['entityid' => $library->entityid, 'public' => '%,public,%'];
         $where = "d.entityid = :entityid AND d.status = 'published'
             AND " . $DB->sql_like($DB->sql_concat("','", 'd.audience', "','"), ':public')
             . ($voices ? '' : " AND d.kind <> 'voice'");
+        if ($age !== null) {
+            $where .= ' AND ' . $DB->sql_like($DB->sql_concat("','", 'd.homeages', "','"), ':age');
+            $params['age'] = '%,' . self::band($age) . ',%';
+        }
         foreach (array_slice(text::words(text::normalise($query)), 0, 6) as $n => $word) {
             $where .= ' AND ' . $DB->sql_like('r.searchtext', ':w' . $n, false);
             $params['w' . $n] = '%' . $DB->sql_like_escape($word) . '%';

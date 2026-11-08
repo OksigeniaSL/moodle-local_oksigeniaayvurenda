@@ -1860,6 +1860,26 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-agenda-new button { min-height: 4.5rem; flex-direction: row; }
 .ayv .ayv-board-agenda-list,
 .ayv .ayv-door-agenda { display: grid; gap: .5rem; margin: .6rem 0 .9rem; padding: 0; list-style: none; }
+/* Tales to read at home (the families' library, part 1): the door's card, the ages and the tales, phone first. */
+.ayv .ayv-tales-door { display: flex; align-items: center; gap: .9rem; margin: 0 0 1.5rem; padding: 1rem 1.2rem; border-radius: 18px; background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: 0 10px 26px -16px rgba(15, 58, 51, .55), inset 0 0 0 1px var(--line); }
+.ayv .ayv-tales-door > span { display: grid; gap: .15rem; }
+.ayv .ayv-tales-door b { font: 600 1.15rem/1.25 var(--title); }
+.ayv .ayv-tales-door svg { flex: none; width: 28px; height: 28px; color: var(--accent); }
+.ayv .ayv-tales-door:hover, .ayv .ayv-tales-door:focus-visible { box-shadow: 0 12px 28px -14px rgba(15, 58, 51, .6), inset 0 0 0 2px var(--accent); }
+.ayv .ayv-tales { display: grid; gap: 1rem; }
+.ayv .ayv-tales-kicker { margin: 0; color: var(--accent); font-weight: 700; letter-spacing: .02em; }
+.ayv .ayv-tales-intro { margin: 0; font-size: 1.05rem; }
+.ayv .ayv-tales-ages ul { display: flex; flex-wrap: wrap; gap: .5rem; margin: .4rem 0 0; padding: 0; list-style: none; }
+.ayv .ayv-tales-agelegend { margin: 0; font-weight: 600; }
+.ayv .ayv-tales-age { display: inline-flex; align-items: center; min-height: 44px; padding: .45rem 1rem; border-radius: 999px; background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); }
+.ayv .ayv-tales-age-on { background: var(--accent); color: var(--paper); box-shadow: none; }
+.ayv .ayv-tales-age-none:not(.ayv-tales-age-on) { box-shadow: none; outline: 1px dashed var(--line); outline-offset: -1px; }
+.ayv .ayv-tales-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-tale { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 1rem; align-items: start; padding: 1rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+.ayv .ayv-tale-cover { width: 6rem; aspect-ratio: 2 / 3; }
+.ayv .ayv-tale-words { display: grid; gap: .35rem; align-content: start; }
+.ayv .ayv-tale-title { font: 600 1.1rem/1.25 var(--title); }
+.ayv .ayv-tale-reads { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; }
 .ayv .ayv-board-agenda-list li,
 .ayv .ayv-door-agenda li { display: grid; gap: .1rem; }
 .ayv .ayv-class-nobody-island { width: min(100%, 26rem); height: auto; opacity: .85; }

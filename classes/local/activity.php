@@ -38,7 +38,7 @@ final class activity {
             'offsite_pull_stopped', 'copy_downloaded', 'copy_recovered', 'report_exported'],
         'books' => ['copies_withdrawn', 'copy_restored', 'stocktake_applied', 'catalogue_imported', 'catalogue_corrected',
             'addition_undone',
-            'digital_added', 'digital_removed', 'textbook_lost', 'book_lost', 'format_asked', 'format_answered'],
+            'digital_added', 'digital_changed', 'digital_removed', 'textbook_lost', 'book_lost', 'format_asked', 'format_answered'],
         'centre' => ['plan_changed', 'skin_changed', 'centre_closed', 'centre_opened', 'centre_created', 'centre_removed',
             'library_deleted', 'window_changed', 'rules_changed', 'hold_settings_changed', 'voice_settings_changed',
             'purchase_ordered', 'budget_changed', 'self_post_created', 'self_post_removed', 'self_post_undone',

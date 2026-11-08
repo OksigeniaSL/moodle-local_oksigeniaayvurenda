@@ -164,6 +164,48 @@ final class api {
     }
 
     /**
+     * The libraries of the site that another plugin may offer to people outside (admissions linking a family to the
+     * tales to read at home): never a practice library nor a textbook bank. Whether its door is open says whether it can
+     * be linked; a closed centre's door is never open.
+     *
+     * @return array[] Each with slug, name, entityid, open (its door is open to anyone) and tales (it offers tales to read
+     *     at home).
+     */
+    public static function libraries(): array {
+        $out = [];
+        foreach (catalogue::libraries() as $library) {
+            if ($library->kind === bank::KIND || practice::is((int) $library->entityid)) {
+                continue;
+            }
+            $open = (bool) window::settings($library)['open'];
+            $out[] = [
+                'slug' => (string) $library->slug,
+                'name' => format_string($library->name, true, ['escape' => false]),
+                'entityid' => (int) $library->entityid,
+                'open' => $open,
+                'tales' => $open && (bool) window::tale_ages($library),
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * The address of a library's tales to read at home, for a child of an age, to link to from outside the library.
+     *
+     * @param string $slug The library, as libraries() gives it.
+     * @param int|null $age The child's age in years; null to let the family choose.
+     * @return \moodle_url|null Null when there is no such library or its door is not open.
+     */
+    public static function tales_url(string $slug, ?int $age = null): ?\moodle_url {
+        $library = catalogue::library($slug);
+        if (!$library || $library->kind === bank::KIND || !window::settings($library)['open']) {
+            return null;
+        }
+        return new \moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug, 'tales' => 1]
+            + ($age !== null && $age >= 0 ? ['age' => $age] : []));
+    }
+
+    /**
      * What is coming at the libraries: the activities of their agenda from a moment on, the soonest first; for the
      * screens of a centre, a newsletter, a block. Never a practice library nor a centre still closed to its readers.
      *

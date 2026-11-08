@@ -25,12 +25,12 @@
     Context variables required for this template:
     * heading, eyebrow, authors, hascover, coverurl, colour, intro, notice, action, sesskey, hasitems, recordurl, close
     * items - id, title, rawtitle, format, formatkey, licencelabel, audiencechips, onlyline, readurl, licences,
-      audiences, stages, download, courses, pages, until
-    * licences, audiences, stages, hasstages, hascourses, courses, until
+      audiences, stages, download, courses, pages, until, homeages, homechip
+    * licences, audiences, stages, hasstages, hascourses, courses, until, newhomeages
     * digitaladd, digitaladdhint, digitalfile, digitalurl, digitalurlhint, digitaltitlefield, digitallicence,
       digitallicencehint, digitalaudience, digitalstages, digitaldownload, digitalsave, digitaldelete, digitalread,
       digitalchange, digitalnone, fragmentcourse, fragmentnone, fragmentpages, fragmentpageshint, fragmentuntil,
-      fragmenthint
+      fragmenthint, digitalhome, digitalhomehint
 
     Example context (json):
     {
@@ -42,11 +42,14 @@
             "readurl": "#", "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
             "audiences": [{"value": "students", "label": "Alumnos", "checked": true}],
             "stages": [{"value": "Primaria", "checked": false}], "download": false,
-            "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "pp. 45-60", "until": "2027-06-30"}],
+            "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "pp. 45-60", "until": "2027-06-30",
+            "homeages": [{"value": 3, "label": "3 a 5", "checked": true}], "homechip": "En casa: 3 a 5"}],
         "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
         "audiences": [{"value": "staff", "label": "Personal", "checked": true}],
         "stages": [{"value": "Primaria", "checked": false}],
         "courses": [{"id": 3, "name": "Lengua 2.º", "selected": false}],
+        "newhomeages": [{"value": 3, "label": "3 a 5", "checked": false}],
+        "digitalhome": "Para leer en casa", "digitalhomehint": "Sale en «Cuentos para leer en casa».",
         "digitaladd": "Añadir una forma digital", "digitaladdhint": "EPUB, PDF, audio, vídeo o un enlace",
         "digitalfile": "Un fichero", "digitalurl": "O un enlace", "digitalurlhint": "a donde está",
         "digitaltitlefield": "Título", "digitallicence": "Licencia", "digitallicencehint": "La licencia manda",
@@ -75,7 +78,7 @@
         <span class="ayv-dig-format ayv-dig-format-{{formatkey}}">{{format}}</span>
         <h2 class="ayv-dig-title">{{title}}</h2>
         <p class="ayv-dig-licence">{{licencelabel}}</p>
-        <ul class="ayv-dig-chips">{{#accessible}}<li class="ayv-dig-chip-access">{{digitalaccessiblechip}}</li>{{/accessible}}{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}</ul>
+        <ul class="ayv-dig-chips">{{#accessible}}<li class="ayv-dig-chip-access">{{digitalaccessiblechip}}</li>{{/accessible}}{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}{{#homechip}}<li class="ayv-dig-chip-home">{{homechip}}</li>{{/homechip}}</ul>
         {{#onlyline}}<p class="ayv-dig-only">{{onlyline}}{{#pages}} · {{pages}}{{/pages}}</p>{{/onlyline}}
         {{#proxied}}<p class="ayv-dig-only">{{digitalsubscribedline}}</p>{{/proxied}}
         <p class="ayv-dig-actions"><a class="ayv-button" href="{{readurl}}">{{digitalread}}</a>
@@ -91,6 +94,8 @@
                     {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
                 {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
                     {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
+                <fieldset class="ayv-dig-set"><legend>{{digitalhome}}</legend><p class="ayv-field-hint">{{digitalhomehint}}</p><div class="ayv-segmented">
+                    {{#homeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/homeages}}</div></fieldset>
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1" {{#accessible}}checked{{/accessible}}> {{digitalaccessible}}</label>
                 {{#canproxy}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="subscribed" value="1" {{#subscribed}}checked{{/subscribed}}> {{digitalsubscribed}}</label>{{/canproxy}}
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
@@ -124,6 +129,8 @@
             {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
         {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
             {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}"><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
+        <fieldset class="ayv-dig-set"><legend>{{digitalhome}}</legend><p class="ayv-field-hint">{{digitalhomehint}}</p><div class="ayv-segmented">
+            {{#newhomeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}"><span>{{label}}</span></label>{{/newhomeages}}</div></fieldset>
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1"> {{digitalaccessible}}</label>
         <p class="ayv-field-hint">{{digitalaccessiblehint}}</p>

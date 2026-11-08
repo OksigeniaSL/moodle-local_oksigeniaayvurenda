@@ -185,6 +185,61 @@ if ($recordid) {
     die;
 }
 
+// Tales to read at home, by age (the families' library, part 1; docs/24): what the library offers to read together,
+// for anyone, also for a family that has not joined the centre yet. Read aloud by a grown-up, never «Listen».
+if (optional_param('tales', 0, PARAM_BOOL)) {
+    $age = optional_param('age', -1, PARAM_INT);
+    $band = $age >= 0 ? window::band($age) : null;
+    $found = $band !== null ? window::records($library, '', $page, $band) : ['records' => [], 'more' => false];
+    $tales = [];
+    foreach ($found['records'] as $record) {
+        $tales[] = [
+            'title' => $record['title'],
+            'authors' => implode(', ', $record['authors']),
+            'cover' => (string) $record['cover'],
+            'hascover' => (bool) $record['cover'],
+            'colour' => $record['id'] % 6,
+            'reads' => array_map(fn($item) => [
+                'url' => (new moodle_url('/local/oksigeniaayvurenda/read.php', ['library' => $library->slug, 'id' => $item->id]))
+                    ->out(false),
+                'label' => count($record['items']) > 1 && $item->title !== '' && $item->title !== null ? $item->title
+                    : $str('talesread'),
+            ], $record['items']),
+        ];
+    }
+    $with = window::tale_ages($library);
+    $data = $shared + [
+        'heading' => $str('talesheading'),
+        'intro' => $str('talesintro'),
+        'agelegend' => $str('talesagechoose'),
+        'ages' => array_map(fn($from) => ['label' => $str('talesage' . $from), 'url' => $here(['tales' => 1, 'age' => $from]),
+            'current' => $band === $from, 'some' => in_array($from, $with, true)], window::AGES),
+        'memory' => \local_oksigeniaayvurenda\local\characters::say(
+            (int) $library->entityid,
+            'memory',
+            $band === null ? 'talesmemorychoose' : 'talesmemory' . $band,
+            [],
+            $band === null ? 'saluda' : 'lee'
+        ),
+        'tales' => $tales,
+        'hastales' => (bool) $tales,
+        'chosen' => $band !== null,
+        'empty' => $str('talesempty'),
+        'emptystaff' => $manage ? $str('talesemptystaff') : '',
+        'back' => ['url' => $here(), 'label' => $str('windowbackdoor')],
+        'nexturl' => $found['more'] ? $here(['tales' => 1, 'age' => $band, 'page' => $page + 1]) : '',
+        'prevurl' => $band !== null && $page > 0 ? $here(['tales' => 1, 'age' => $band, 'page' => $page - 1]) : '',
+    ];
+    $talesurl = $here(['tales' => 1] + ($band !== null ? ['age' => $band] : []));
+    shell::output($str('talesheading'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/tales', $data), $library, '', [
+        'search' => false,
+        'index' => $settings['open'] && $settings['index'],
+        'share' => $settings['open'] ? ['title' => $str('talesheading') . ' · ' . $data['door']['name'], 'url' => $talesurl,
+            'image' => $data['door']['image'], 'description' => $str('talesintro')] : null,
+    ]);
+    die;
+}
+
 $data = $shared + [
     'heading' => $str('windowheading'),
     'text' => $settings['text'],
@@ -286,6 +341,9 @@ $data += [
             time() + 30 * DAYSECS
         ), 0, 4)),
     'agendaheading' => $str('agendasoon'),
+    // Tales to read at home, when the library offers some.
+    'tales' => window::tale_ages($library) ? ['url' => $here(['tales' => 1]), 'title' => $str('talesheading'),
+        'hint' => $str('talesdoorhint')] : null,
     'digitalheading' => $str('windowdigital'),
     'shelfprev' => $str('shelfprev'),
     'shelfnext' => $str('shelfnext'),

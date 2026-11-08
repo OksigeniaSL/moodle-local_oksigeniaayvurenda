@@ -1,0 +1,68 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/tales
+
+    Tales to read at home, by age, at a library's open door: the ages to choose from, the memory with a word for that
+    age, and the tales the library offers to read together, each with its way to open it. No «Listen»: a grown-up reads.
+
+    Example context (json):
+    {
+        "door": {"name": "Biblioteca del barrio", "motto": "", "colour": "#1f6f5c", "image": null, "kicker": "Biblioteca"},
+        "heading": "Cuentos para leer en casa", "intro": "Para leerlos juntos, en voz alta.",
+        "agelegend": "¿Cuántos años tiene?", "chosen": true,
+        "ages": [{"label": "0 a 2 años", "url": "https://example.org/public.php?tales=1&age=0", "current": false, "some": true},
+            {"label": "3 a 5 años", "url": "https://example.org/public.php?tales=1&age=3", "current": true, "some": true}],
+        "memory": {"role": "memory", "name": "Memoria", "text": "Les encanta que se repita.", "initial": "M", "portrait": null,
+            "figure": null, "listen": null},
+        "tales": [{"title": "La luna que no quería dormir", "authors": "Ana Ruiz", "cover": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "hascover": false,
+            "colour": 2, "reads": [{"url": "https://example.org/read.php?id=1", "label": "Leer juntos"}]}],
+        "hastales": true, "empty": "Todavía no hay cuentos para esta edad.", "emptystaff": "",
+        "back": {"url": "https://example.org/public.php", "label": "Volver a la puerta"}, "nexturl": "", "prevurl": "",
+        "windownext": "Más", "windowprev": "Antes"
+    }
+}}
+<section class="ayv-tales">
+    <p class="ayv-back"><a href="{{back.url}}">{{back.label}}</a></p>
+    <p class="ayv-tales-kicker">{{door.name}}</p>
+    <h1 class="ayv-results-title">{{heading}}</h1>
+    <p class="ayv-tales-intro">{{intro}}</p>
+    {{#memory}}<div class="ayv-tales-memory">{{> local_oksigeniaayvurenda/bubble}}</div>{{/memory}}
+    <nav class="ayv-tales-ages" aria-label="{{agelegend}}">
+        <p class="ayv-tales-agelegend">{{agelegend}}</p>
+        <ul>{{#ages}}<li><a class="ayv-tales-age{{#current}} ayv-tales-age-on{{/current}}{{^some}} ayv-tales-age-none{{/some}}" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a></li>{{/ages}}</ul>
+    </nav>
+    {{#chosen}}
+    {{#hastales}}
+    <ul class="ayv-tales-list">
+    {{#tales}}
+        <li class="ayv-tale">
+            <span class="ayv-tale-cover ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{cover}}" alt="" loading="lazy">{{/hascover}}<span class="ayv-cover-title">{{title}}</span></span>
+            <span class="ayv-tale-words">
+                <b class="ayv-tale-title">{{title}}</b>
+                {{#authors}}<span class="ayv-field-hint">{{authors}}</span>{{/authors}}
+                <span class="ayv-tale-reads">{{#reads}}<a class="ayv-button" href="{{url}}">{{> local_oksigeniaayvurenda/icon_book}} {{label}}</a>{{/reads}}</span>
+            </span>
+        </li>
+    {{/tales}}
+    </ul>
+    {{/hastales}}
+    {{^hastales}}<div class="ayv-nothing"><p>{{empty}}</p>{{#emptystaff}}<p class="ayv-field-hint">{{emptystaff}}</p>{{/emptystaff}}</div>{{/hastales}}
+    <p class="ayv-book-actions">{{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}">{{windowprev}}</a>{{/prevurl}}
+        {{#nexturl}}<a class="ayv-button ayv-button-quiet" href="{{nexturl}}">{{windownext}}</a>{{/nexturl}}</p>
+    {{/chosen}}
+</section>
