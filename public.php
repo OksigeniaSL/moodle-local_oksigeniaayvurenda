@@ -277,6 +277,15 @@ $data += [
     'stacksplaces' => $str('stacksplaces'),
     'stackscorners' => $str('stackscorners'),
     'recentheading' => $str('windowrecent'),
+    // What is coming at the library, for anyone at the door: the next four activities in a month.
+    'agenda' => array_map(fn($a) => ['when' => \local_oksigeniaayvurenda\local\agenda::when($a, $library),
+        'title' => format_string($a->title, true, ['escape' => false]), 'place' => (string) $a->place,
+        'audience' => (string) $a->audience], array_slice(\local_oksigeniaayvurenda\local\agenda::between(
+            (int) $library->entityid,
+            time(),
+            time() + 30 * DAYSECS
+        ), 0, 4)),
+    'agendaheading' => $str('agendasoon'),
     'digitalheading' => $str('windowdigital'),
     'shelfprev' => $str('shelfprev'),
     'shelfnext' => $str('shelfnext'),

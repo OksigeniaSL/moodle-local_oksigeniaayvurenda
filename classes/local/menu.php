@@ -39,6 +39,7 @@ final class menu {
         'stacks' => ['stacks.php', 'visit.php', 'shelf.php'],
         'card' => ['card.php'],
         'class' => ['class.php'],
+        'agenda' => ['agenda.php'],
         'readers' => ['readers.php', 'reader.php', 'history.php', 'cardprint.php', 'print.php', 'readerslist.php', 'oneroster.php',
             'pair.php', 'match.php', 'twins.php', 'tutors.php', 'sources.php', 'connector.php'],
         'reports' => ['reports.php', 'memoir.php', 'readings.php', 'late.php', 'activity.php', 'sanctions.php'],
@@ -70,7 +71,8 @@ final class menu {
             'menushelves' => [['stacks.php', 'stacksnav', $d], ['labels.php', 'menulabels', $c],
                 ['posters.php', 'menuposters', $c], ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c]],
             'menureview' => [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
-                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d], ['quests.php', 'menuquests', $m]],
+                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d], ['quests.php', 'menuquests', $m],
+                ['agenda.php', 'agendatitle', $d]],
             'menureports' => [['memoir.php', 'menumemoir', $d], ['activity.php', 'menuactivity', $m]],
             'menusettings' => [['centre', 'librariesentity', $m], ['copies.php', 'menucopies', $m],
                 ['rules.php', 'menurules', $m],
@@ -127,6 +129,10 @@ final class menu {
             }
             if (challenges::tutored((int) $library->entityid, $userid)) {
                 $doors[] = $door('class', 'class.php', 'classnav');
+            }
+            // The agenda, when something is coming.
+            if (agenda::between((int) $library->entityid, time(), time() + 60 * DAYSECS)) {
+                $doors[] = $door('agenda', 'agenda.php', 'agendatitle');
             }
             // Whoever keeps a library of this centre has its desk.
             foreach (keepers::libraries($userid) as $kept) {

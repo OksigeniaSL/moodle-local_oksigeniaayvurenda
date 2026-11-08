@@ -55,6 +55,13 @@
     {{^hasrecent}}{{#weekbook}}<div class="ayv-board-card">{{> local_oksigeniaayvurenda/bubble}}
         <p class="ayv-duo-memory-go">{{#cover}}<img class="ayv-duo-memory-cover" src="{{cover}}" alt="" loading="lazy">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p></div>{{/weekbook}}{{/hasrecent}}
     {{#hero.wishherald}}<div class="ayv-board-card">{{> local_oksigeniaayvurenda/bubble}}</div>{{/hero.wishherald}}
+    {{#board.agenda}}
+    <section class="ayv-board-card ayv-board-agenda" aria-labelledby="ayv-board-agenda">
+        <h2 class="ayv-board-title" id="ayv-board-agenda">{{title}}</h2>
+        <ul class="ayv-board-agenda-list">{{#items}}<li><span class="ayv-field-hint">{{when}}</span> <b>{{title}}</b></li>{{/items}}</ul>
+        <p><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>
+    </section>
+    {{/board.agenda}}
     </div>
     <div class="ayv-board-col">
     {{#hero.remembers}}

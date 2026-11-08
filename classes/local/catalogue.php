@@ -273,7 +273,7 @@ final class catalogue {
             }
         }
         $corners = array_filter(array_map('count', $corners));
-        ksort($corners);
+        ksort($corners, SORT_STRING);
         $subjects = array_map(fn($s) => ['label' => $s['label'], 'count' => count($s['records'])], $subjects);
         uasort($subjects, fn($a, $b) => [$b['count'], $a['label']] <=> [$a['count'], $b['label']]);
         // A topic every result shares tells nothing: it is not offered.
@@ -339,7 +339,7 @@ final class catalogue {
                 }
             }
             $counts = array_filter(array_map('count', $records));
-            ksort($counts);
+            ksort($counts, SORT_STRING);
             $cache->set($key, $counts);
         }
         // A class may stand twice (two imports named it alike): one label for each code, the first.

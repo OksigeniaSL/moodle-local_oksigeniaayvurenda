@@ -74,21 +74,29 @@ final class loan_rules {
     }
 
     /**
-     * The due moment: the end of the day the given days later, moved to the next open day when it falls on a weekend
-     * or on a day the centre is closed.
+     * The due moment: the end of the day the given days later, moved to the next open day when it falls on a day the
+     * libraries close every week or on a day the centre is closed.
      *
      * @param int $from
      * @param int $days
      * @param \DateTimeZone $tz
-     * @param bool $skipweekend
+     * @param bool $skipweekend Whether the days they close every week are skipped.
      * @param array $closed The centre's closed days, 'Y-m-d' => true.
+     * @param int[] $rest The days they close every week, by their ISO number: Saturday and Sunday unless the centre says.
      * @return int
      */
-    public static function due(int $from, int $days, \DateTimeZone $tz, bool $skipweekend = true, array $closed = []): int {
+    public static function due(
+        int $from,
+        int $days,
+        \DateTimeZone $tz,
+        bool $skipweekend = true,
+        array $closed = [],
+        array $rest = [6, 7]
+    ): int {
         $date = (new \DateTimeImmutable('@' . $from))->setTimezone($tz)->modify('+' . $days . ' days');
         // A year of holidays at most: past it, the day as it fell.
         for ($i = 0; $i < 366; $i++) {
-            $weekend = $skipweekend && (int) $date->format('N') >= 6;
+            $weekend = $skipweekend && in_array((int) $date->format('N'), $rest, true);
             if (!$weekend && !isset($closed[$date->format('Y-m-d')])) {
                 break;
             }
@@ -116,10 +124,18 @@ final class loan_rules {
      * @param array $rule
      * @param \DateTimeZone $tz
      * @param array $closed The centre's closed days, 'Y-m-d' => true.
+     * @param int[] $rest The days the libraries close every week, by their ISO number.
      * @return int
      */
-    public static function renewed_due(int $currentdue, int $now, array $rule, \DateTimeZone $tz, array $closed = []): int {
-        return self::due(max($currentdue, $now), (int) $rule['renewdays'], $tz, true, $closed);
+    public static function renewed_due(
+        int $currentdue,
+        int $now,
+        array $rule,
+        \DateTimeZone $tz,
+        array $closed = [],
+        array $rest = [6, 7]
+    ): int {
+        return self::due(max($currentdue, $now), (int) $rule['renewdays'], $tz, true, $closed, $rest);
     }
 
     /**

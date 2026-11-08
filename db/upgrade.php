@@ -670,6 +670,14 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110812, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110813) {
+        // The library's agenda (decision of 8 November, point 6).
+        if (!$dbman->table_exists(new xmldb_table('local_oksigeniaayvurenda_activity'))) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_activity');
+        }
+        upgrade_plugin_savepoint(true, 2026110813, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

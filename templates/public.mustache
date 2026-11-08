@@ -145,6 +145,12 @@
     {{/corners.0}}
 </section>
 {{/hasdoors}}
+{{#agenda.0}}
+<section class="ayv-section" aria-labelledby="ayv-window-agenda">
+    <h2 id="ayv-window-agenda" class="ayv-section-title">{{agendaheading}}</h2>
+    <ul class="ayv-door-agenda">{{#agenda}}<li><span class="ayv-field-hint">{{when}}</span> <b>{{title}}</b>{{#place}} <span class="ayv-field-hint">· {{place}}</span>{{/place}}{{#audience}} <span class="ayv-field-hint">· {{audience}}</span>{{/audience}}</li>{{/agenda}}</ul>
+</section>
+{{/agenda.0}}
 {{#hascards}}
 <section class="ayv-section" aria-labelledby="ayv-window-recent">
     <h2 id="ayv-window-recent" class="ayv-section-title">{{recentheading}}</h2>

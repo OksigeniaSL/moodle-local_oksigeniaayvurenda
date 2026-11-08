@@ -478,6 +478,28 @@ final class libraries {
         if (array_key_exists('timezone', $data)) {
             $settings['timezone'] = zones::known((string) $data['timezone']) ? (string) $data['timezone'] : '';
         }
+        // The centre's week: the day it starts (0, as Moodle says for the site or its language) and the days the
+        // libraries close every week (Saturday and Sunday unless it says).
+        if (array_key_exists('weekstart', $data)) {
+            $start = (int) $data['weekstart'];
+            if ($start >= 1 && $start <= 7) {
+                $settings['weekstart'] = $start;
+            } else {
+                unset($settings['weekstart']);
+            }
+        }
+        if (array_key_exists('restdays', $data)) {
+            $rest = array_values(array_unique(array_filter(
+                array_map('intval', (array) $data['restdays']),
+                fn($day) => $day >= 1 && $day <= 7
+            )));
+            sort($rest);
+            if ($rest === zones::REST) {
+                unset($settings['restdays']);
+            } else {
+                $settings['restdays'] = $rest;
+            }
+        }
         $before = $settings['skin'] ?? skins::SKINS[0];
         if (isset($data['skin'])) {
             $settings['skin'] = in_array($data['skin'], skins::SKINS, true) ? $data['skin'] : skins::SKINS[0];

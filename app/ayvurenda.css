@@ -1824,6 +1824,42 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 6px var(--accent);
 }
 .ayv .ayv-quest-line { font-weight: 700; color: var(--accent); }
+/* The agenda: each activity with its day on a calendar leaf; this week on the home's board; what is coming at the door. */
+.ayv .ayv-agenda-list { display: grid; gap: .8rem; margin: 1.2rem 0; padding: 0; list-style: none; }
+.ayv .ayv-agenda-item {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+}
+.ayv .ayv-agenda-none { grid-template-columns: 1fr; }
+.ayv .ayv-agenda-item p { margin: 0; }
+.ayv .ayv-agenda-leaf {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    padding: .35rem 0 .5rem;
+    border-radius: 12px;
+    background: var(--paper2);
+    border-top: 6px solid var(--accent);
+    line-height: 1;
+}
+.ayv .ayv-agenda-leaf b { font: 600 1.9rem/1.1 var(--title); }
+.ayv .ayv-agenda-leaf span { font-size: .8rem; font-weight: 700; letter-spacing: .06em; }
+.ayv .ayv-agenda-words { display: grid; gap: .35rem; min-width: 0; }
+.ayv .ayv-agenda-title { margin: 0; font: 600 1.2rem/1.25 var(--title); }
+.ayv .ayv-agenda-when { font-weight: 700; color: var(--accent); }
+.ayv .ayv-agenda-words .ayv-field-hint span + span::before { content: " · "; }
+.ayv .ayv-agenda-new { display: flex; min-height: 0; padding: 0; }
+.ayv .ayv-agenda-new button { min-height: 4.5rem; flex-direction: row; }
+.ayv .ayv-board-agenda-list,
+.ayv .ayv-door-agenda { display: grid; gap: .5rem; margin: .6rem 0 .9rem; padding: 0; list-style: none; }
+.ayv .ayv-board-agenda-list li,
+.ayv .ayv-door-agenda li { display: grid; gap: .1rem; }
 .ayv .ayv-class-nobody-island { width: min(100%, 26rem); height: auto; opacity: .85; }
 .ayv .ayv-nothing .ayv-bubble { text-align: start; }
 .ayv .ayv-facets-fold > summary::-webkit-details-marker { display: none; }

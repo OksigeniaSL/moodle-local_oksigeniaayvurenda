@@ -39,8 +39,8 @@ final class catalogued {
     public const PAGE = 120;
 
     /**
-     * When each span starts where the centre is: today at midnight, Monday, the 1st or the 16th (the half of the month we
-     * are in), the first of the month.
+     * When each span starts where the centre is: today at midnight, the first day of its week, the 1st or the 16th (the
+     * half of the month we are in), the first of the month.
      *
      * @param int $entityid
      * @param int $now
@@ -50,7 +50,7 @@ final class catalogued {
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone(zones::of($entityid))->setTime(0, 0);
         return [
             'today' => $today->getTimestamp(),
-            'week' => $today->modify('-' . ((int) $today->format('N') - 1) . ' days')->getTimestamp(),
+            'week' => zones::week_start($entityid, $now),
             'fortnight' => $today->setDate(
                 (int) $today->format('Y'),
                 (int) $today->format('n'),

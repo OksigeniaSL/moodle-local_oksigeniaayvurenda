@@ -1,0 +1,109 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/agenda
+
+    The library's agenda: what is coming, each activity with its day on a leaf; the staff's windows to add and change.
+
+    Example context (json):
+    {
+        "heading": "Agenda", "intro": "Lo que viene.", "notice": "", "problem": "", "action": "https://example.org/agenda.php",
+        "sesskey": "abc", "hasactivities": true, "manage": true, "newday": "2026-11-09",
+        "activities": [{"id": 1, "title": "Cuentacuentos", "when": "sábado, 14 de noviembre de 2026, 11:00", "day": "14",
+            "month": "NOV", "place": "Sala infantil", "audience": "De 4 a 8 años", "text": "Con Mainumby.",
+            "seats": "20 plazas", "library": "", "canedit": true, "dayvalue": "2026-11-14", "timevalue": "11:00",
+            "enddayvalue": "", "endtimevalue": "", "seatsvalue": 20, "removesure": "Cuentacuentos: toca otra vez."}],
+        "agendanone": "Nada en la agenda.", "agendanew": "Nueva actividad", "agendaactivity": "Actividad",
+        "agendaday": "Día", "agendatime": "Hora", "agendaendday": "Hasta el día", "agendaendtime": "Hasta la hora",
+        "agendaendhint": "Si dura.", "agendaplace": "Dónde", "agendaaudience": "Para quién", "agendaaudiencehint": "Como familias",
+        "agendatext": "Una frase", "agendaseatslabel": "Plazas", "agendaseatshint": "Si se cuentan", "agendasave": "Guardar",
+        "agendaclose": "Cerrar", "agendaedit": "Cambiar", "agendaremove": "Quitar"
+    }
+}}
+<section class="ayv-agenda">
+<h1 class="ayv-results-title">{{heading}}</h1>
+<p>{{intro}}</p>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+{{#problem}}<p class="ayv-notice ayv-notice-error" role="alert">{{problem}}</p>{{/problem}}
+<ul class="ayv-agenda-list">
+{{#activities}}
+    <li class="ayv-agenda-item" id="ayv-activity-{{id}}">
+        <span class="ayv-agenda-leaf" aria-hidden="true"><b>{{day}}</b><span>{{month}}</span></span>
+        <div class="ayv-agenda-words">
+            <h2 class="ayv-agenda-title">{{title}}</h2>
+            <p class="ayv-agenda-when">{{when}}</p>
+            <p class="ayv-field-hint">{{#place}}<span>{{place}}</span>{{/place}}{{#audience}}<span>{{audience}}</span>{{/audience}}{{#seats}}<span>{{seats}}</span>{{/seats}}{{#library}}<span>{{library}}</span>{{/library}}</p>
+            {{#text}}<p>{{text}}</p>{{/text}}
+            {{#canedit}}
+            <div class="ayv-quest-card-do">
+                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-activity-edit-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{agendaedit}}</button>
+                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remove" data-ayv-twice="{{removesure}}">{{agendaremove}}</button></form>
+            </div>
+            <dialog class="ayv-modal ayv-entity-edit" id="ayv-activity-edit-{{id}}" aria-labelledby="ayv-activity-edit-{{id}}-title">
+                <div class="ayv-modal-head"><h3 id="ayv-activity-edit-{{id}}-title" class="ayv-section-title">{{title}}</h3>
+                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{agendaclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                <form method="post" action="{{action}}#ayv-activity-{{id}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}">
+                    <label class="ayv-field">{{agendaactivity}} <input type="text" name="title" value="{{title}}" maxlength="160" required></label>
+                    <div class="ayv-quest-dates">
+                        <label class="ayv-field">{{agendaday}} <input type="date" name="day" value="{{dayvalue}}" required></label>
+                        <label class="ayv-field">{{agendatime}} <input type="time" name="time" value="{{timevalue}}"></label>
+                    </div>
+                    <p class="ayv-field-hint">{{agendaendhint}}</p>
+                    <div class="ayv-quest-dates">
+                        <label class="ayv-field">{{agendaendday}} <input type="date" name="endday" value="{{enddayvalue}}"></label>
+                        <label class="ayv-field">{{agendaendtime}} <input type="time" name="endtime" value="{{endtimevalue}}"></label>
+                    </div>
+                    <label class="ayv-field">{{agendaplace}} <input type="text" name="place" value="{{place}}" maxlength="160"></label>
+                    <label class="ayv-field">{{agendaaudience}} <span class="ayv-field-hint">{{agendaaudiencehint}}</span> <input type="text" name="audience" value="{{audience}}" maxlength="160"></label>
+                    <label class="ayv-field">{{agendatext}} <textarea name="text" rows="3" maxlength="600">{{text}}</textarea></label>
+                    <label class="ayv-field">{{agendaseatslabel}} <span class="ayv-field-hint">{{agendaseatshint}}</span> <input type="number" name="seats" value="{{seatsvalue}}" min="0" max="9999"></label>
+                    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{agendasave}}</button></p>
+                </form>
+            </dialog>
+            {{/canedit}}
+        </div>
+    </li>
+{{/activities}}
+{{^hasactivities}}<li class="ayv-agenda-item ayv-agenda-none"><p>{{agendanone}}</p></li>{{/hasactivities}}
+{{#manage}}<li class="ayv-libcard ayv-libcard-new ayv-agenda-new"><button type="button" data-ayv-open="ayv-activity-new">{{> local_oksigeniaayvurenda/icon_plus}} <span>{{agendanew}}</span></button></li>{{/manage}}
+</ul>
+{{#manage}}
+<dialog class="ayv-modal ayv-entity-edit" id="ayv-activity-new" aria-labelledby="ayv-activity-new-title">
+    <div class="ayv-modal-head"><h3 id="ayv-activity-new-title" class="ayv-section-title">{{agendanew}}</h3>
+        <form method="dialog"><button class="ayv-modal-close" aria-label="{{agendaclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+    <form method="post" action="{{action}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <label class="ayv-field">{{agendaactivity}} <input type="text" name="title" maxlength="160" required></label>
+        <div class="ayv-quest-dates">
+            <label class="ayv-field">{{agendaday}} <input type="date" name="day" value="{{newday}}" required></label>
+            <label class="ayv-field">{{agendatime}} <input type="time" name="time"></label>
+        </div>
+        <p class="ayv-field-hint">{{agendaendhint}}</p>
+        <div class="ayv-quest-dates">
+            <label class="ayv-field">{{agendaendday}} <input type="date" name="endday"></label>
+            <label class="ayv-field">{{agendaendtime}} <input type="time" name="endtime"></label>
+        </div>
+        <label class="ayv-field">{{agendaplace}} <input type="text" name="place" maxlength="160"></label>
+        <label class="ayv-field">{{agendaaudience}} <span class="ayv-field-hint">{{agendaaudiencehint}}</span> <input type="text" name="audience" maxlength="160"></label>
+        <label class="ayv-field">{{agendatext}} <textarea name="text" rows="3" maxlength="600"></textarea></label>
+        <label class="ayv-field">{{agendaseatslabel}} <span class="ayv-field-hint">{{agendaseatshint}}</span> <input type="number" name="seats" min="0" max="9999"></label>
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{agendasave}}</button></p>
+    </form>
+</dialog>
+{{/manage}}
+</section>

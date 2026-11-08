@@ -79,9 +79,9 @@ foreach ($posters as $i => $poster) {
     }
     $hidden = null;
     if ($clue) {
-        // The week's book: the one hidden for nobody in particular on its Monday, so the same until the next one.
-        $monday = (new \DateTimeImmutable('now', \local_oksigeniaayvurenda\local\zones::of($library)))
-            ->modify('monday this week')->setTime(12, 0)->getTimestamp();
+        // The week's book: the one hidden for nobody in particular on the first day of the centre's week, so the same
+        // until the next one.
+        $monday = \local_oksigeniaayvurenda\local\zones::week_start($library, time()) + 12 * HOURSECS;
         $recordid = \local_oksigeniaayvurenda\local\hunt::target(
             $library,
             (string) ($poster['params']['corner'] ?? ''),

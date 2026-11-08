@@ -93,7 +93,7 @@ final class zones {
      * tell nobody.
      *
      * @param int $now
-     * @param bool $weekdays Only from Monday to Friday.
+     * @param bool $weekdays Only on the days the centre's libraries open (not Saturday or Sunday, unless it says others).
      * @return int[]
      */
     public static function mornings(int $now, bool $weekdays = true): array {
@@ -103,7 +103,10 @@ final class zones {
             $id = (int) $id;
             $local = (new \DateTimeImmutable('@' . $now))->setTimezone(self::of($id));
             $hour = (int) $local->format('G');
-            if (($weekdays && (int) $local->format('N') > 5) || $hour < 8 || $hour >= 20 || practice::is($id)) {
+            if (
+                ($weekdays && in_array((int) $local->format('N'), self::rest_days($id), true)) || $hour < 8 || $hour >= 20
+                    || practice::is($id)
+            ) {
                 continue;
             }
             if ((string) get_config('local_oksigeniaayvurenda', self::morning_key($id, $weekdays)) !== $local->format('Ymd')) {
@@ -136,6 +139,68 @@ final class zones {
      */
     private static function morning_key(int $id, bool $weekdays): string {
         return ($weekdays ? 'morning_' : 'everymorning_') . $id;
+    }
+
+    /** @var int[] The days a library closes every week, unless its centre says: Saturday and Sunday (ISO 6 and 7). */
+    public const REST = [6, 7];
+
+    /**
+     * The days a centre's libraries close every week, by their ISO number (1 Monday, 7 Sunday): Saturday and Sunday,
+     * unless the centre says others (Friday and Saturday, only Sunday…).
+     *
+     * @param \stdClass|int $where
+     * @return int[]
+     */
+    public static function rest_days($where): array {
+        $settings = self::settings($where);
+        if (!isset($settings['restdays']) || !is_array($settings['restdays'])) {
+            return self::REST;
+        }
+        return array_values(array_unique(array_filter(
+            array_map('intval', $settings['restdays']),
+            fn($day) => $day >= 1 && $day <= 7
+        )));
+    }
+
+    /**
+     * The day a centre's week starts, by its ISO number: the centre's own, or what Moodle says for the site or its
+     * language (Sunday in American English, Monday in Spain or Latin America).
+     *
+     * @param \stdClass|int $where
+     * @return int 1 Monday to 7 Sunday.
+     */
+    public static function first_weekday($where): int {
+        $own = (int) (self::settings($where)['weekstart'] ?? 0);
+        if ($own >= 1 && $own <= 7) {
+            return $own;
+        }
+        $moodle = (int) \core_calendar\type_factory::get_calendar_instance()->get_starting_weekday();
+        return $moodle === 0 ? 7 : $moodle;
+    }
+
+    /**
+     * The moment this week began where a centre is: midnight of its first day.
+     *
+     * @param \stdClass|int $where
+     * @param int $now
+     * @return int
+     */
+    public static function week_start($where, int $now): int {
+        $today = (new \DateTimeImmutable('@' . $now))->setTimezone(self::of($where))->setTime(0, 0);
+        $back = ((int) $today->format('N') - self::first_weekday($where) + 7) % 7;
+        return $today->modify('-' . $back . ' days')->getTimestamp();
+    }
+
+    /**
+     * The settings of a centre.
+     *
+     * @param \stdClass|int $where A centre's id, or a library or a centre with entityid or id.
+     * @return array
+     */
+    private static function settings($where): array {
+        global $DB;
+        $entityid = is_object($where) ? (int) ($where->entityid ?? $where->id) : (int) $where;
+        return json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
     }
 
     /**

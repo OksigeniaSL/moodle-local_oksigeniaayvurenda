@@ -295,7 +295,8 @@ final class holds {
                 $days,
                 zones::of($entityid),
                 true,
-                closures::days($entityid, $now)
+                closures::days($entityid, $now),
+                zones::rest_days($entityid)
             ),
             'timenotified' => null, 'timemodified' => $now]);
         $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'held', 'timemodified' => $now]);

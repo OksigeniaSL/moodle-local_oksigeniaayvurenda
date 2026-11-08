@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.214.0 (2026-11-08)
+
+- 0.213.0 did not reach the sites: on PHP 8.1 (Moodle 4.5) the corners of a search with a genre came in another order.
+  They are sorted as text now, the same everywhere. It is all in here.
+- The library's agenda (audit, MD-05 and MER-07; Enrique, 8 November): the storytelling, the book club, the author who
+  comes. «Agenda» lists what is coming, each activity with its day on a calendar leaf, when (an hour, until an hour, or
+  over days), where, for whom, a line and its places; whoever manages the centre adds, changes and takes away in its
+  window. This week's, on the reader's home board; the next ones, at the open door; «Agenda» in the reader's menu when
+  something is coming. For the centre's screens, `api::activities()`, beside `api::new_books()`.
+- Each centre's week (Enrique: «the English start on Sunday, we Latins on Monday, and don't mention the Sabbath»): in
+  «Academic year», the day its week starts (by default, what Moodle says for the site or its language) and the days its
+  libraries close every week (Saturday and Sunday unless it says others, like Friday and Saturday). Nothing falls due on
+  those days, and the notices of late books wait; «this week» in «What was catalogued» and the clue of the week start on
+  the centre's first day.
+
 ## 0.213.0 (2026-11-08)
 
 - 0.212.0 did not reach the sites: the validator of the CI does not take a form inside a span, on the genre cards of

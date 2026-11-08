@@ -1165,7 +1165,25 @@ final class screens {
                 fn($card) => ['url' => $card['url'], 'cover' => $card['cover'], 'title' => $card['title']],
                 array_slice($covers, 0, 3)
             ),
+            'agenda' => self::week_agenda($library),
         ];
+    }
+
+    /**
+     * This week in the library, for the home's board: the next three activities of the agenda in seven days.
+     *
+     * @param \stdClass $library
+     * @return array|null title, items (when, title), url and label; null with nothing on.
+     */
+    private static function week_agenda(\stdClass $library): ?array {
+        $now = time();
+        $items = [];
+        foreach (array_slice(agenda::between((int) $library->entityid, $now, $now + WEEKSECS), 0, 3) as $activity) {
+            $items[] = ['when' => agenda::when($activity, $library),
+                'title' => format_string($activity->title, true, ['escape' => false])];
+        }
+        return $items ? ['title' => self::str('agendaweek'), 'items' => $items,
+            'url' => self::url('agenda.php', $library), 'label' => self::str('agendaall')] : null;
     }
 
     /**

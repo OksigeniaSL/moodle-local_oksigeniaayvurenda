@@ -947,7 +947,14 @@ final class desk {
             // Renewing right after the copy came back: it goes out again with the same loan.
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         }
-        $due = $this->capped(loan_rules::renewed_due($previous, $this->now, $rule, $this->tz, $this->closed()));
+        $due = $this->capped(loan_rules::renewed_due(
+            $previous,
+            $this->now,
+            $rule,
+            $this->tz,
+            $this->closed(),
+            zones::rest_days($this->library)
+        ));
         // No more time past the date to have everything back.
         if ($due <= $previous && $loan->timereturned === null) {
             return $this->answer('stop', 'no', 'desknorenewreturnby', $this->date($due), ['readerid' => (int) $reader->id]);
@@ -977,7 +984,14 @@ final class desk {
         ) {
             return null;
         }
-        $due = $this->capped(loan_rules::renewed_due((int) $loan->timedue, $this->now, $rule, $this->tz, $this->closed()));
+        $due = $this->capped(loan_rules::renewed_due(
+            (int) $loan->timedue,
+            $this->now,
+            $rule,
+            $this->tz,
+            $this->closed(),
+            zones::rest_days($this->library)
+        ));
         return $due > (int) $loan->timedue ? $due : null;
     }
 
@@ -1189,8 +1203,22 @@ final class desk {
         // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today).
         $reserve = reserves::active((int) $item->id, $this->now);
         $due = bank::is($this->library) ? bankround::due($this->library, $this->now)
-            : ($reserve ? loan_rules::due($this->now, (int) $reserve->days, $this->tz, (int) $reserve->days > 0, $this->closed())
-            : $this->capped(loan_rules::due($this->now, (int) $rule['loandays'], $this->tz, true, $this->closed())));
+            : ($reserve ? loan_rules::due(
+                $this->now,
+                (int) $reserve->days,
+                $this->tz,
+                (int) $reserve->days > 0,
+                $this->closed(),
+                zones::rest_days($this->library)
+            )
+            : $this->capped(loan_rules::due(
+                $this->now,
+                (int) $rule['loandays'],
+                $this->tz,
+                true,
+                $this->closed(),
+                zones::rest_days($this->library)
+            )));
         // Two desks (or a desk and a self-loan station) reading the same copy at once lend it once: the second waits for
         // the first and finds it out.
         $lock = \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock('lend_' . $item->id, 5);

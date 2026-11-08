@@ -66,6 +66,12 @@ if (data_submitted() && confirm_sesskey()) {
             optional_param('to', '', PARAM_RAW_TRIMMED)
         );
         $notice = $str('closuresremoved');
+    } else if ($action === 'week') {
+        \local_oksigeniaayvurenda\local\libraries::update_entity($entityid, [
+            'weekstart' => optional_param('weekstart', 0, PARAM_INT),
+            'restdays' => optional_param_array('restdays', [], PARAM_INT),
+        ]);
+        $notice = $str('weeksaved');
     } else if ($action === 'returnby') {
         $day = optional_param('clear', 0, PARAM_BOOL) ? '' : optional_param('returnby', '', PARAM_RAW_TRIMMED);
         $ok = \local_oksigeniaayvurenda\local\closures::set_return_by($entityid, $day);
@@ -162,6 +168,29 @@ $closures = array_map(function ($range) use ($library, $str, $today) {
         'past' => $range['to'] < $today,
     ];
 }, \local_oksigeniaayvurenda\local\closures::of($entityid));
+// The centre's week: the day it starts, and the days the libraries close every week (due dates, notices, «this week»),
+// the days in the order of its week (Monday 1 to Sunday 7, as ISO numbers them).
+$calendar = \core_calendar\type_factory::get_calendar_instance();
+$weekdays = $calendar->get_weekdays();
+$dayname = fn(int $iso) => (string) $weekdays[$iso % 7]['fullname'];
+$moodlestart = (int) $calendar->get_starting_weekday() ?: 7;
+$ownstart = (int) ((json_decode(
+    (string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]),
+    true
+) ?: [])['weekstart'] ?? 0);
+$rest = zones::rest_days($library);
+$first = zones::first_weekday($library);
+$week = ['heading' => $str('weekheading'), 'intro' => $str('weekintro'), 'startlabel' => $str('weekstart'),
+    'restlabel' => $str('weekrest'), 'save' => $str('weeksave'),
+    'starts' => array_merge(
+        [['value' => 0, 'label' => $str('weekstartmoodle', $dayname($moodlestart)), 'selected' => $ownstart === 0]],
+        array_map(fn($iso) => ['value' => $iso, 'label' => $dayname($iso), 'selected' => $ownstart === $iso], range(1, 7))
+    ),
+    'days' => array_map(
+        fn($i) => ['value' => ($first - 1 + $i) % 7 + 1, 'label' => $dayname(($first - 1 + $i) % 7 + 1),
+            'on' => in_array(($first - 1 + $i) % 7 + 1, $rest, true)],
+        range(0, 6)
+    )];
 $data = [
     'heading' => $str('yearheading', $year->name),
     'closures' => $closures,
@@ -186,6 +215,8 @@ $data = [
         ? $str('returnbyending', (object) ['date' => $date((int) $status['returnby']), 'out' => $status['out']])
         : $str('yearending', $status['out']), 'url' => $url('late.php', ['all' => 1]), 'label' => $str('lateall'),
         'remind' => $str('yearremindall'), 'remindsure' => $str('yearremindsure')] : null,
+    // The centre's week: the day it starts, and the days the libraries close every week (due dates, notices, «this week»).
+    'week' => $week,
     // The date by which everything lent has to be back: any library, any calendar.
     'returnby' => [
         'heading' => $str('returnbyheading'),

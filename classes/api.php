@@ -162,4 +162,56 @@ final class api {
         }
         return $books;
     }
+
+    /**
+     * What is coming at the libraries: the activities of their agenda from a moment on, the soonest first; for the
+     * screens of a centre, a newsletter, a block. Never a practice library nor a centre still closed to its readers.
+     *
+     * Each activity: id; title, place, audience and text (plain text, to be escaped when shown; '' when not said);
+     * timestart and timeend (null if it does not say until when); when (when it is, in words, in the centre's zone and the
+     * current language: «sábado, 14 de noviembre de 2026, 11:00»); seats (0 when not counted); library and libraryid;
+     * entityid; url (the agenda of its library, which asks to sign in).
+     *
+     * @param int $from Only what has not ended by this time.
+     * @param int $until Only what starts up to this time.
+     * @param int|null $entityid Only the libraries of this centre; null, those of every centre on the site.
+     * @param int $limit How many, from 1 to 50.
+     * @return array[]
+     */
+    public static function activities(int $from, int $until, ?int $entityid = null, int $limit = 20): array {
+        global $DB;
+        $limit = max(1, min(50, $limit));
+        $entities = $DB->get_fieldset_select(self::T . 'entity', 'id', $entityid ? 'id = :id' : '1 = 1', ['id' => $entityid]);
+        $found = [];
+        foreach ($entities as $id) {
+            if (access::closed((int) $id) || practice::is((int) $id)) {
+                continue;
+            }
+            foreach (local\agenda::between((int) $id, $from, $until) as $activity) {
+                $found[] = $activity;
+            }
+        }
+        usort($found, fn($a, $b) => [(int) $a->timestart, (int) $a->id] <=> [(int) $b->timestart, (int) $b->id]);
+        $activities = [];
+        foreach (array_slice($found, 0, $limit) as $activity) {
+            $centre = (int) $DB->get_field(self::T . 'library', 'entityid', ['id' => $activity->libraryid]);
+            $activities[] = [
+                'id' => (int) $activity->id,
+                'title' => (string) $activity->title,
+                'place' => (string) $activity->place,
+                'audience' => (string) $activity->audience,
+                'text' => (string) $activity->text,
+                'timestart' => (int) $activity->timestart,
+                'timeend' => $activity->timeend !== null ? (int) $activity->timeend : null,
+                'when' => local\agenda::when($activity, $centre),
+                'seats' => (int) $activity->seats,
+                'library' => (string) $activity->libraryname,
+                'libraryid' => (int) $activity->libraryid,
+                'entityid' => $centre,
+                'url' => (new \moodle_url('/local/oksigeniaayvurenda/agenda.php', ['library' => $activity->libraryslug]))
+                    ->out(false),
+            ];
+        }
+        return $activities;
+    }
 }

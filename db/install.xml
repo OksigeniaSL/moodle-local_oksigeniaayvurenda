@@ -639,6 +639,28 @@
         <INDEX NAME="questreader" UNIQUE="true" FIELDS="questid, readerid"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_activity" COMMENT="An activity of the library's agenda: the storytelling, the book club, the author who comes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="title" TYPE="char" LENGTH="160" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Its day and hour, in the centre's zone; midnight for a day without an hour"/>
+        <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Until when, if it says"/>
+        <FIELD NAME="place" TYPE="char" LENGTH="160" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="audience" TYPE="char" LENGTH="160" NOTNULL="false" SEQUENCE="false" COMMENT="For whom, in the library's words"/>
+        <FIELD NAME="text" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="seats" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="Places, if they are counted"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="timestart" UNIQUE="false" FIELDS="timestart"/>
+      </INDEXES>
+    </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_review" COMMENT="What a reader tells about a book: one line, published once the library approves it">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
