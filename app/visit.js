@@ -489,7 +489,8 @@
             } else if (said && said.hasAttribute('data-first')) {
                 said.textContent = said.getAttribute('data-first');
             }
-            window.AYVVisit.say(count === 3 && say.getAttribute('data-again') ? null : say.getAttribute('data-voice'));
+            window.AYVVisit.say(count === 3 && say.getAttribute('data-again') ? say.getAttribute('data-againvoice')
+                : say.getAttribute('data-voice'));
             button.setAttribute('aria-expanded', 'true');
             var box = frame.getBoundingClientRect(), who = button.getBoundingClientRect();
             var x = who.left - box.left + who.width / 2 - say.offsetWidth / 2;

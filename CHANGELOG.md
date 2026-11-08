@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.201.0
+
+- The voices of the lines of humour that carry no name nor search, for the youngest, who may not read yet (art 0.1.53):
+  the memory by night in the visit, the third tap on the memory and on the herald (each herald with its voice), the
+  memory's glasses on a search with nothing found for Infantil, «Looking for me?» of the memory and of the herald, and
+  the empty album of Infantil.
+
 ## 0.200.0
 
 - From the audit's ideas, with Gaudí:

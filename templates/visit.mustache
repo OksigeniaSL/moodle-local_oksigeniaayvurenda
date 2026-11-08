@@ -164,7 +164,7 @@
         <button type="button" class="ayv-shelf-go ayv-visit-pan ayv-visit-pan-right" aria-label="{{visitpanright}}" hidden>{{> local_oksigeniaayvurenda/icon_next}}</button>
         <span class="ayv-visit-tip" aria-hidden="true" hidden></span>
         {{#characters}}
-        <div class="ayv-visit-say" id="ayv-visit-say-{{role}}" data-role="{{role}}"{{#voice}} data-voice="{{voice}}"{{/voice}}{{#again}} data-again="{{again}}"{{/again}} hidden>
+        <div class="ayv-visit-say" id="ayv-visit-say-{{role}}" data-role="{{role}}"{{#voice}} data-voice="{{voice}}"{{/voice}}{{#again}} data-again="{{again}}"{{/again}}{{#againvoice}} data-againvoice="{{againvoice}}"{{/againvoice}} hidden>
             <p><strong>{{name}}</strong> <span class="ayv-visit-said">{{text}}</span></p>
             {{#remember}}<p class="ayv-visit-offer"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/remember}}
             {{#search}}

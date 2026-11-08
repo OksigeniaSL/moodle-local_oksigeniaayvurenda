@@ -1327,9 +1327,22 @@ final class screens {
         $entityid = (int) $library->entityid;
         $said = \local_oksigeniaayvurenda\core\text::normalise($query);
         $grown = characters::band($entityid) === '';
+        // The voices of the youngest, who may not read yet (the rest is read).
+        $voice = function (?array $said, string $who, string $clip) use ($entityid, $grown): ?array {
+            if ($said && !$grown) {
+                $folder = $who === 'memory' ? 'memoria'
+                    : ((characters::of($entityid)['herald']['sex'] ?? 'm') === 'f' ? 'herald-f' : 'herald-m');
+                $said['listen'] = self::listen(['juegos/' . $folder . '/{lang}/' . $clip]);
+            }
+            return $said;
+        };
         foreach (characters::of($entityid) as $role => $character) {
             if ($character['enabled'] && $said === \local_oksigeniaayvurenda\core\text::normalise($character['name'])) {
-                return characters::say($entityid, $role, $role === 'herald' ? 'heraldself' : 'memoryself', [], 'celebra');
+                return $voice(
+                    characters::say($entityid, $role, $role === 'herald' ? 'heraldself' : 'memoryself', [], 'celebra'),
+                    $role,
+                    'self'
+                );
             }
         }
         if ($total > 500 && in_array($said, ['libro', 'libros', 'book', 'books'], true)) {
@@ -1349,7 +1362,8 @@ final class screens {
             }
         }
         $key = $near ? 'memorynear' : characters::bag($entityid, 'memorynothing', (string) $USER->id);
-        return characters::say($entityid, 'memory', $key, ['query' => $query], 'piensa');
+        $said = characters::say($entityid, 'memory', $key, ['query' => $query], 'piensa');
+        return $key === 'memorynothinginf1' ? $voice($said, 'memory', 'nothinginf1') : $said;
     }
 
     /**

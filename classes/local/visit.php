@@ -674,6 +674,7 @@ final class visit {
                     'slug' => $library->slug] : null,
                 'remember' => $remember,
                 'again' => (string) ($again['text'] ?? ''),
+                'againvoice' => (string) (json_decode(self::voices($library, $role, ['again' => 'again']), true)['again'] ?? ''),
                 // Her greeting's voice, only when she says the greeting.
                 'voice' => $role === 'memory' && !$remember ? (json_decode(
                     self::voices($library, 'memory', ['hello' => $night ? 'hellonight' : 'hello']),
