@@ -60,7 +60,7 @@ final class garden {
      */
     public static function corners_shown(int $entityid): int {
         $library = mail::main_library($entityid);
-        return $library ? count(catalogue::corners($library)) : 7;
+        return $library ? count(catalogue::corners($library, false, false)) : 7;
     }
 
     /**

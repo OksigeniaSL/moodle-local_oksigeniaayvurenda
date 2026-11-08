@@ -51,7 +51,7 @@ final class shelve {
     public static function books(\stdClass $library, int $turn): array {
         global $DB;
         $corners = [];
-        foreach (catalogue::corners($library) as $corner) {
+        foreach (catalogue::corners($library, false, false) as $corner) {
             $corners[$corner['code']] = $corner;
         }
         if (count($corners) < 2) {

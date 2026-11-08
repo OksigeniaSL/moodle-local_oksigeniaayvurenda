@@ -25,6 +25,7 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\genres;
 use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
@@ -41,7 +42,41 @@ if (!$library) {
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';
-if (data_submitted() && confirm_sesskey()) {
+$do = optional_param('do', '', PARAM_ALPHA);
+$commas = fn(string $text): array => array_values(array_filter(array_map('trim', explode(',', $text)), 'strlen'));
+if ($do !== '' && data_submitted() && confirm_sesskey() && !\local_oksigeniaayvurenda\local\bank::is($library)) {
+    // The genres of the stories: one made or changed, one taken away, a proposal taken, or where they take books from.
+    $genres = genres::of($library);
+    if ($do === 'genre') {
+        $code = optional_param('code', '', PARAM_ALPHANUM);
+        $genre = ['code' => $code, 'label' => optional_param('label', '', PARAM_TEXT),
+            'topics' => $commas(optional_param('topics', '', PARAM_TEXT)),
+            'prefixes' => $commas(optional_param('prefixes', '', PARAM_TEXT))];
+        $at = array_search($code, array_column($genres, 'code'), true);
+        if ($at === false) {
+            $genres[] = $genre;
+        } else {
+            $genres[$at] = $genre + ['kind' => $genres[$at]['kind']];
+        }
+    } else if ($do === 'genredrop') {
+        $code = optional_param('code', '', PARAM_ALPHANUM);
+        $genres = array_values(array_filter($genres, fn($genre) => $genre['code'] !== $code));
+    } else if ($do === 'propose' || $do === 'proposeall') {
+        $key = optional_param('key', '', PARAM_ALPHA);
+        foreach (genres::proposals($library) as $proposal) {
+            if ($do === 'proposeall' || $proposal['key'] === $key) {
+                $genres[] = ['label' => $proposal['label'], 'kind' => $proposal['key'], 'topics' => $proposal['topics'],
+                    'prefixes' => []];
+            }
+        }
+    }
+    $from = $do === 'genresfrom' ? array_map('strval', optional_param_array('from', [], PARAM_ALPHANUM)) : null;
+    if (count($genres) > genres::MAX) {
+        $notice = $str('genresfull', genres::MAX);
+    }
+    genres::save($library, $genres, $from ?: null);
+    $notice = $notice ?: $str('genressaved');
+} else if (data_submitted() && confirm_sesskey()) {
     $labels = optional_param_array('label', [], PARAM_TEXT);
     $orders = optional_param_array('order', [], PARAM_INT);
     $hidden = optional_param_array('hidden', [], PARAM_BOOL);
@@ -61,18 +96,32 @@ if (data_submitted() && confirm_sesskey()) {
         $corners[$code] = ['label' => $labels[$code], 'order' => 10 * ($i + 1), 'hidden' => !empty($hidden[$code])];
     }
     catalogue::save_corners($library, $corners);
+    // A genre's name is the genre's: renamed here, it is renamed there.
+    $genres = genres::of($library);
+    foreach ($genres as &$genre) {
+        if (trim((string) ($labels[$genre['code']] ?? '')) !== '') {
+            $genre['label'] = trim($labels[$genre['code']]);
+        }
+    }
+    unset($genre);
+    if ($genres) {
+        genres::save($library, $genres);
+    }
     $notice = $move !== '' ? '' : $str('cornerssaved');
 }
 // Each corner with its drawing, its place in the list and whether it can go up or down.
 $list = array_values(catalogue::corners($library, true));
 $rows = [];
 foreach ($list as $i => $corner) {
+    $isgenre = !empty($corner['genre']);
     $rows[] = $corner + [
+        'mark' => $isgenre ? core_text::strtoupper(core_text::substr($corner['label'], 0, 1)) : (string) $corner['code'],
+        'what' => $isgenre ? $str('genrekind') : $corner['code'] . ' · ' . $corner['default'],
         'countlabel' => $str($corner['count'] === 1 ? 'onebook' : 'books', \local_oksigeniaayvurenda\local\screens::number(
             (int) $corner['count']
         )),
-        'art' => \local_oksigeniaayvurenda\local\screens::art('rincon-'
-            . preg_replace('/[^a-z0-9]/', '', core_text::strtolower((string) $corner['code']))),
+        'art' => \local_oksigeniaayvurenda\local\screens::art($isgenre ? 'genero-' . ($corner['kind'] ?: 'none')
+            : 'rincon-' . preg_replace('/[^a-z0-9]/', '', core_text::strtolower((string) $corner['code']))),
         'first' => $i === 0,
         'last' => $i === count($list) - 1,
         'position' => $str('cornersposition', (object) ['at' => $i + 1, 'of' => count($list)]),
@@ -87,6 +136,8 @@ $data = [
     'corners' => $rows,
     'hascorners' => (bool) $rows,
     'importurl' => (new moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false),
+    'genres' => \local_oksigeniaayvurenda\local\bank::is($library) ? null
+        : local_oksigeniaayvurenda_corners_genres($library, $list, $str),
     'homeurl' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
 ];
 foreach (
@@ -102,3 +153,58 @@ shell::output(
     '',
     ['search' => false]
 );
+
+/**
+ * The genres of the stories, for the page: each with what makes it and its window to change it, the proposals and where
+ * they take books from.
+ *
+ * @param stdClass $library
+ * @param array[] $corners The library's corners, hidden ones too.
+ * @param callable $str
+ * @return array
+ */
+function local_oksigeniaayvurenda_corners_genres(stdClass $library, array $corners, callable $str): array {
+    $counts = array_column($corners, 'count', 'code');
+    $list = [];
+    foreach (genres::of($library) as $genre) {
+        $count = (int) ($counts[$genre['code']] ?? 0);
+        $list[] = ['code' => $genre['code'], 'label' => $genre['label'], 'colour' => $genre['colour'],
+            'mark' => core_text::strtoupper(core_text::substr($genre['label'], 0, 1)),
+            'art' => $genre['kind'] ? \local_oksigeniaayvurenda\local\screens::art('genero-' . $genre['kind']) : null,
+            'countlabel' => $str($count === 1 ? 'onebook' : 'books', \local_oksigeniaayvurenda\local\screens::number($count)),
+            'topics' => $genre['topics'] ? $str('genrestopicsof', implode(', ', $genre['topics'])) : '',
+            'prefixes' => $genre['prefixes'] ? $str('genresprefixesof', implode(', ', $genre['prefixes'])) : '',
+            'topicsvalue' => implode(', ', $genre['topics']), 'prefixesvalue' => implode(', ', $genre['prefixes']),
+            'dropsure' => $genre['label'] . ': ' . $str('genresdropsure')];
+    }
+    $proposals = [];
+    foreach (count($list) < genres::MAX ? genres::proposals($library) : [] as $proposal) {
+        $proposals[] = ['key' => $proposal['key'], 'label' => $proposal['label'],
+            'topics' => implode(', ', array_slice($proposal['topics'], 0, 6)),
+            'countlabel' => $str(
+                $proposal['count'] === 1 ? 'onebook' : 'books',
+                \local_oksigeniaayvurenda\local\screens::number((int) $proposal['count'])
+            )];
+    }
+    $from = array_flip(genres::from($library));
+    $fromcorners = [];
+    foreach ($corners as $corner) {
+        if (empty($corner['genre'])) {
+            $fromcorners[] = ['code' => $corner['code'], 'label' => $corner['code'] . ' · ' . $corner['label'],
+                'checked' => isset($from[(string) $corner['code']])];
+        }
+    }
+    $topics = genres::story_topics($library);
+    $data = ['list' => $list, 'haslist' => (bool) $list, 'proposals' => $proposals, 'hasproposals' => (bool) $proposals,
+        'many' => count($proposals) > 1, 'from' => $fromcorners, 'hasfrom' => (bool) $fromcorners,
+        'canadd' => count($list) < genres::MAX,
+        'topicshint' => $topics ? $str('genrestopicshint', implode(', ', $topics)) : $str('genrestopicshintnone')];
+    foreach (
+        ['genresheading', 'genresintro', 'genresnone', 'genresadd', 'genresedit', 'genresdrop', 'genresname',
+            'genrestopics', 'genresprefixes', 'genresprefixeshint', 'genressave', 'genresclose', 'genresproposals',
+            'genresproposalshint', 'genrespropose', 'genresproposeall', 'genresfrom', 'genresfromhint'] as $key
+    ) {
+        $data[$key] = $str($key);
+    }
+    return $data;
+}

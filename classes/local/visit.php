@@ -276,7 +276,7 @@ final class visit {
             ['library' => $library->slug] + $params
         ))->out(false);
         $corners = [];
-        foreach (catalogue::corners($library) as $known) {
+        foreach (catalogue::corners($library, false, false) as $known) {
             $corners[$known['code']] = $known;
         }
         if ($scene['corner'] !== '' && !isset($corners[$scene['corner']])) {
@@ -862,7 +862,7 @@ final class visit {
         }
         unset($book);
         $doors = [];
-        foreach (catalogue::corners($library) as $corner) {
+        foreach (catalogue::corners($library, false, false) as $corner) {
             $doors[] = ['code' => $corner['code'], 'label' => $corner['label'], 'colour' => $corner['colour'],
                 'art' => screens::art('rincon-' . $corner['code'])];
         }

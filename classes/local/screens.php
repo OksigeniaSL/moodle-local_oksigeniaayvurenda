@@ -51,8 +51,18 @@ final class screens {
                     $corner['count'] === 1 ? 'onebook' : 'books',
                     self::number((int) $corner['count'])
                 ),
-                'art' => self::art('rincon-' . preg_replace('/[^a-z0-9]/', '', \core_text::strtolower((string) $corner['code']))),
+                'art' => !empty($corner['genre']) ? ($corner['kind'] ? self::art('genero-' . $corner['kind']) : null)
+                    : self::art('rincon-' . preg_replace('/[^a-z0-9]/', '', \core_text::strtolower((string) $corner['code']))),
             ];
+        }
+        // A genre has no drawing yet: where the others have theirs, its initial in its place, so the tiles stay even.
+        if (array_filter(array_column($corners, 'art'))) {
+            foreach ($corners as &$corner) {
+                if (!empty($corner['genre']) && !$corner['art']) {
+                    $corner['mark'] = \core_text::strtoupper(\core_text::substr($corner['label'], 0, 1));
+                }
+            }
+            unset($corner);
         }
         $recent = self::cards(catalogue::recent($library), $library);
         $hero = self::hero($library);

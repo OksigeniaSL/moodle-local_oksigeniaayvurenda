@@ -230,7 +230,7 @@ if ($catalogue && $query !== '') {
             'countlabel' => $count($place['count']), 'url' => $stacksurl(['place' => $place['id']]),
             'colour' => $place['colour'], 'hascolour' => $place['colour'] !== null];
     }
-    foreach (catalogue::corners($library) as $corner) {
+    foreach (catalogue::corners($library, false, false) as $corner) {
         $data['corners'][] = ['label' => $corner['label'], 'countlabel' => $count($corner['count']),
             'url' => $stacksurl(['corner' => $corner['code']]), 'colour' => $corner['colour'],
             'art' => screens::art('rincon-' . $corner['code'])];

@@ -52,7 +52,7 @@ foreach (stacks::places($library) as $place) {
 }
 if (!$posters || $clue) {
     $posters = [];
-    foreach (catalogue::corners($library) as $corner) {
+    foreach (catalogue::corners($library, false, false) as $corner) {
         $posters[] = ['name' => $corner['label'], 'colour' => null, 'params' => ['corner' => $corner['code']]];
     }
 }

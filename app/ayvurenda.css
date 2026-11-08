@@ -1727,6 +1727,49 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     .ayv .ayv-corner-row { grid-template-columns: 3rem minmax(0, 1fr) auto; gap: .6rem; padding: .75rem; }
     .ayv .ayv-corner-row-art { width: 3rem; height: 3rem; }
 }
+/* The genres of the stories: a card each (its colour, name, books and what makes it), the new one dashed, the proposals
+   in a list with their button, and where they take books from folded. */
+.ayv .ayv-genres { margin: 2.5rem 0 1rem; }
+.ayv .ayv-genre-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .75rem; margin: 1rem 0;
+    padding: 0; list-style: none; }
+.ayv .ayv-genre-card {
+    display: grid;
+    grid-template-columns: 3.25rem minmax(0, 1fr);
+    gap: .35rem .85rem;
+    align-items: start;
+    padding: .9rem 1rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+}
+.ayv .ayv-genre-card .ayv-corner-row-art { width: 3.25rem; height: 3.25rem; }
+.ayv .ayv-genre-card-words { display: grid; gap: .2rem; min-width: 0; }
+.ayv .ayv-genre-card-words p { margin: 0; overflow-wrap: anywhere; }
+.ayv .ayv-genre-card-name { margin: 0; font: 600 1.15rem var(--title); }
+.ayv .ayv-genre-card-name .ayv-field-hint { font: 400 .9rem var(--text); }
+.ayv .ayv-genre-card-do { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; }
+.ayv .ayv-genre-card-do form { margin: 0; }
+.ayv .ayv-genre-card-none { grid-template-columns: 1fr; }
+.ayv .ayv-genre-card-none p { margin: 0; }
+.ayv .ayv-genre-card-new { display: flex; padding: 0; }
+.ayv .ayv-genre-card-new button { min-height: 7rem; }
+.ayv .ayv-genre-proposals { margin: 1.5rem 0; }
+.ayv .ayv-genre-proposal-list { display: grid; gap: .5rem; margin: .75rem 0; padding: 0; list-style: none; }
+.ayv .ayv-genre-proposal form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    margin: 0;
+    padding: .6rem .9rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+.ayv .ayv-genre-proposal-words { display: grid; gap: .1rem; min-width: 0; flex: 1 1 14rem; }
+.ayv .ayv-genre-proposal-words .ayv-field-hint { overflow-wrap: anywhere; }
+.ayv .ayv-genre-from { margin: 1.5rem 0; }
+.ayv .ayv-genre-from summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 .ayv .ayv-class-nobody-island { width: min(100%, 26rem); height: auto; opacity: .85; }
 .ayv .ayv-nothing .ayv-bubble { text-align: start; }
 .ayv .ayv-facets-fold > summary::-webkit-details-marker { display: none; }
@@ -1837,6 +1880,20 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-bubble-img, .ayv .ayv-hero-memory img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .ayv .ayv-bubble-portrait:has(img), .ayv .ayv-hero-memory:has(img) { background: var(--paper); overflow: hidden; }
 .ayv .ayv-corner-img { width: 100%; aspect-ratio: 1; object-fit: contain; margin-bottom: .5rem; border-radius: 12px; }
+/* A genre among drawn corners: its initial, as big as a drawing, on its own colour. */
+.ayv .ayv-corner-genre { padding: .55rem .55rem .9rem; }
+.ayv .ayv-corner-mark {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
+    margin-bottom: .7rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .1);
+    font: 600 4.5rem/1 var(--title);
+}
+.ayv .ayv-corner-genre .ayv-corner-label,
+.ayv .ayv-corner-genre .ayv-corner-count { padding: 0 .4rem; }
 .ayv .ayv-wood { position: relative; padding-bottom: 1.1rem; }
 .ayv .ayv-wood::after {
     content: "";
@@ -4763,8 +4820,11 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 /* The reader's home as one board (Gaudí's mock-up of 7 November 2026): the herald once, whole, with what just arrived and
    the book of the week on the left; what the memory recommends and the reader's flower, with the class's challenge, on the
    right. One «Listen» per card, by its title. */
-.ayv .ayv-board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.4rem; align-items: start; margin: 1.4rem 0; }
-.ayv .ayv-board-col { display: grid; gap: 1.4rem; min-width: 0; }
+.ayv .ayv-board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.4rem; align-items: stretch; margin: 1.4rem 0; }
+/* The two columns end together: the last card of the shorter one grows, with what it says in the middle, so no hole is
+   left beside the other (Enrique, 8 November: a card on one side, two on the other). */
+.ayv .ayv-board-col { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
+.ayv .ayv-board-col > :last-child { flex: 1 1 auto; }
 .ayv .ayv-board-card {
     position: relative;
     padding: 1.4rem 1.5rem;
@@ -4778,12 +4838,12 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-board-title { margin: 0; padding-right: 7.5rem; font: 600 1.35rem/1.2 var(--title); color: var(--ink); }
 .ayv .ayv-board-listen { position: absolute; top: 1.3rem; right: 1.3rem; }
 .ayv .ayv-board-who img { display: block; width: 100%; height: auto; filter: drop-shadow(0 8px 14px rgba(15, 58, 51, .18)); }
-.ayv .ayv-board-herald { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .5rem 1.4rem; align-items: start; }
+.ayv .ayv-board-herald { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .5rem 1.4rem; align-items: start; align-content: center; }
 .ayv .ayv-board-herald > .ayv-board-who { align-self: center; }
 .ayv .ayv-board-covers { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: .4rem !important; }
 .ayv .ayv-board-covers img {
     display: block;
-    width: 3.6rem;
+    width: 5.6rem;
     height: auto;
     aspect-ratio: 2 / 3;
     object-fit: cover;
@@ -4832,6 +4892,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     .ayv .ayv-board { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 40rem) {
+    .ayv .ayv-board-covers img { width: 4.2rem; }
     .ayv .ayv-board-card { padding: 1.1rem; }
     .ayv .ayv-board-title { padding-right: 0; font-size: 1.2rem; }
     .ayv .ayv-board-listen { position: static; }

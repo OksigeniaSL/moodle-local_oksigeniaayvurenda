@@ -70,7 +70,7 @@ if ($place >= 0) {
     }
 } else if ($corner !== '') {
     $filter = $where = ['corner' => $corner];
-    foreach (catalogue::corners($library, true) as $known) {
+    foreach (catalogue::corners($library, true, false) as $known) {
         if ($known['code'] === $corner) {
             $heading = $known['label'];
         }
@@ -171,7 +171,7 @@ if ($shelf) {
     if (count($data['places']) < 2) {
         $data['places'] = [];
     }
-    foreach (catalogue::corners($library) as $known) {
+    foreach (catalogue::corners($library, false, false) as $known) {
         $data['corners'][] = [
             'label' => $known['label'],
             'countlabel' => $count($known['count']),

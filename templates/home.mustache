@@ -95,8 +95,9 @@
     {{#cornersedit}}<p class="ayv-staff"><a href="{{url}}">{{label}}</a></p>{{/cornersedit}}
     <ul class="ayv-corners ayv-corners-even" style="--ayv-cols: {{cornercols}}">
     {{#corners}}
-        <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
+        <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}{{#mark}} ayv-corner-genre{{/mark}}" href="{{url}}">
             {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}
+            {{#mark}}<span class="ayv-corner-mark" aria-hidden="true">{{mark}}</span>{{/mark}}
             <span class="ayv-corner-label">{{label}}</span>
             {{#countlabel}}<span class="ayv-corner-count">{{countlabel}}</span>{{/countlabel}}
         </a></li>

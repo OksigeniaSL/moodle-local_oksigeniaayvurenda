@@ -448,7 +448,7 @@ final class stacks {
         }
         // The corners by their first digit, to say which one a label's class opens.
         $corners = [];
-        foreach (catalogue::corners($library, true) as $corner) {
+        foreach (catalogue::corners($library, true, false) as $corner) {
             $corners[$corner['code']] = $corner['label'];
         }
         $placeids = array_filter(array_map(fn($c) => (int) $c[0]->locationid, $copies));

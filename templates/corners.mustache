@@ -24,7 +24,19 @@
         "sesskey": "abc", "homeurl": "#", "hascorners": true, "importurl": "#",
         "corners": [{"code": "8", "label": "Cuentos y poemas", "default": "Lengua y literatura", "count": 120,
             "countlabel": "120 libros", "order": 10, "hidden": false, "colour": 2, "art": "https://example.org/r.webp",
-            "first": true, "last": true, "position": "1 de 1"}],
+            "first": true, "last": true, "position": "1 de 1", "mark": "8", "what": "8 · Lengua y literatura"}],
+        "genres": {"genresheading": "Géneros de la narrativa", "genresintro": "Reparte la narrativa.", "haslist": true,
+            "list": [{"code": "g1", "label": "Misterio", "colour": 3, "mark": "M", "countlabel": "537 libros",
+                "topics": "Temas: Misterio, Detectives", "prefixes": "", "topicsvalue": "Misterio, Detectives",
+                "prefixesvalue": "", "dropsure": "Misterio: toca otra vez para quitarlo."}],
+            "genresnone": "Aún no hay géneros.", "canadd": true, "genresadd": "Añadir un género", "genresedit": "Cambiar",
+            "genresdrop": "Quitar", "genresname": "Nombre", "genrestopics": "Temas", "topicshint": "Separados por comas.",
+            "genresprefixes": "Principio del tejuelo", "genresprefixeshint": "Como N MIS.", "genressave": "Guardar",
+            "genresclose": "Cerrar", "hasproposals": true, "many": true, "genresproposals": "Géneros que tiene tu catálogo",
+            "genresproposalshint": "De los temas.", "genrespropose": "Añadir", "genresproposeall": "Añadirlos todos",
+            "proposals": [{"key": "fantasy", "label": "Fantasía", "topics": "Fantasía, Magia", "countlabel": "453 libros"}],
+            "hasfrom": true, "genresfrom": "De dónde toman los libros", "genresfromhint": "Solo de estos rincones.",
+            "from": [{"code": "8", "label": "8 · Lengua y literatura", "checked": true}]},
         "cornersname": "Nombre", "cornershide": "Ocultarlo", "cornerssave": "Guardar", "cornersback": "Volver",
         "cornersup": "Subir", "cornersdown": "Bajar", "cornersblank": "En blanco, el de la clasificación.",
         "cornersnone": "Sin rincones", "cornersimport": "Importar un catálogo"
@@ -40,11 +52,11 @@
     <ol class="ayv-corners-list">
     {{#corners}}
         <li class="ayv-corner-row{{#hidden}} ayv-corner-row-off{{/hidden}}" id="ayv-corner-{{code}}">
-            <span class="ayv-corner-row-art ayv-cover-{{colour}}" aria-hidden="true">{{#art}}<img src="{{art}}" alt="" loading="lazy">{{/art}}{{^art}}{{code}}{{/art}}</span>
+            <span class="ayv-corner-row-art ayv-cover-{{colour}}" aria-hidden="true">{{#art}}<img src="{{art}}" alt="" loading="lazy">{{/art}}{{^art}}{{mark}}{{/art}}</span>
             <div class="ayv-corner-row-words">
                 <label class="ayv-field ayv-field-wide">{{cornersname}}
                     <input type="text" name="label[{{code}}]" value="{{label}}" maxlength="80" placeholder="{{default}}" aria-describedby="ayv-corner-{{code}}-what"></label>
-                <p class="ayv-field-hint" id="ayv-corner-{{code}}-what">{{code}} · {{default}} · {{countlabel}} · {{position}}</p>
+                <p class="ayv-field-hint" id="ayv-corner-{{code}}-what">{{what}} · {{countlabel}} · {{position}}</p>
                 <input type="hidden" name="order[{{code}}]" value="{{order}}">
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="hidden[{{code}}]" value="1" {{#hidden}}checked{{/hidden}}> {{cornershide}}</label>
             </div>
@@ -61,4 +73,77 @@
 {{^hascorners}}
 <div class="ayv-nothing"><p>{{cornersnone}}</p><p><a class="ayv-button" href="{{importurl}}">{{cornersimport}}</a></p></div>
 {{/hascorners}}
+{{#hascorners}}{{#genres}}
+<section class="ayv-genres" aria-labelledby="ayv-genres-title">
+    <h2 class="ayv-section-title" id="ayv-genres-title">{{genresheading}}</h2>
+    <p>{{genresintro}}</p>
+    <ul class="ayv-genre-cards">
+    {{#list}}
+        <li class="ayv-genre-card" id="ayv-genre-{{code}}">
+            <span class="ayv-corner-row-art ayv-cover-{{colour}}" aria-hidden="true">{{#art}}<img src="{{art}}" alt="" loading="lazy">{{/art}}{{^art}}{{mark}}{{/art}}</span>
+            <div class="ayv-genre-card-words">
+                <h3 class="ayv-genre-card-name">{{label}} <span class="ayv-field-hint">{{countlabel}}</span></h3>
+                {{#topics}}<p class="ayv-field-hint">{{topics}}</p>{{/topics}}
+                {{#prefixes}}<p class="ayv-field-hint">{{prefixes}}</p>{{/prefixes}}
+            </div>
+            <span class="ayv-genre-card-do">
+                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-genre-edit-{{code}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{genresedit}}</button>
+                <form method="post" action="{{action}}#ayv-genres-title"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="code" value="{{code}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="genredrop" data-ayv-twice="{{dropsure}}">{{genresdrop}}</button></form>
+            </span>
+            <dialog class="ayv-modal ayv-entity-edit" id="ayv-genre-edit-{{code}}" aria-labelledby="ayv-genre-edit-{{code}}-title">
+                <div class="ayv-modal-head"><h3 id="ayv-genre-edit-{{code}}-title" class="ayv-section-title">{{label}}</h3>
+                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{genresclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+                <form method="post" action="{{action}}#ayv-genres-title">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="code" value="{{code}}">
+                    <label class="ayv-field">{{genresname}} <input type="text" name="label" value="{{label}}" maxlength="60" required></label>
+                    <label class="ayv-field">{{genrestopics}} <span class="ayv-field-hint">{{topicshint}}</span> <textarea name="topics" rows="3">{{topicsvalue}}</textarea></label>
+                    <label class="ayv-field">{{genresprefixes}} <span class="ayv-field-hint">{{genresprefixeshint}}</span> <input type="text" name="prefixes" value="{{prefixesvalue}}" maxlength="200"></label>
+                    <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="genre">{{genressave}}</button></p>
+                </form>
+            </dialog>
+        </li>
+    {{/list}}
+    {{^haslist}}<li class="ayv-genre-card ayv-genre-card-none"><p>{{genresnone}}</p></li>{{/haslist}}
+    {{#canadd}}<li class="ayv-libcard ayv-libcard-new ayv-genre-card-new"><button type="button" data-ayv-open="ayv-genre-new">{{> local_oksigeniaayvurenda/icon_plus}} <span>{{genresadd}}</span></button></li>{{/canadd}}
+    </ul>
+    {{#canadd}}
+    <dialog class="ayv-modal ayv-entity-edit" id="ayv-genre-new" aria-labelledby="ayv-genre-new-title">
+        <div class="ayv-modal-head"><h3 id="ayv-genre-new-title" class="ayv-section-title">{{genresadd}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{genresclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <form method="post" action="{{action}}#ayv-genres-title">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <label class="ayv-field">{{genresname}} <input type="text" name="label" maxlength="60" required></label>
+            <label class="ayv-field">{{genrestopics}} <span class="ayv-field-hint">{{topicshint}}</span> <textarea name="topics" rows="3"></textarea></label>
+            <label class="ayv-field">{{genresprefixes}} <span class="ayv-field-hint">{{genresprefixeshint}}</span> <input type="text" name="prefixes" maxlength="200"></label>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="genre">{{genressave}}</button></p>
+        </form>
+    </dialog>
+    {{/canadd}}
+    {{#hasproposals}}
+    <div class="ayv-genre-proposals">
+        <h3 class="ayv-section-title">{{genresproposals}}</h3>
+        <p class="ayv-field-hint">{{genresproposalshint}}</p>
+        <ul class="ayv-genre-proposal-list">
+        {{#proposals}}
+            <li class="ayv-genre-proposal"><form method="post" action="{{action}}#ayv-genres-title"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="key" value="{{key}}">
+                <span class="ayv-genre-proposal-words"><b>{{label}}</b> <span class="ayv-field-hint">{{countlabel}} · {{topics}}</span></span>
+                <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="propose">{{> local_oksigeniaayvurenda/icon_plus}} {{genrespropose}}</button></form></li>
+        {{/proposals}}
+        </ul>
+        {{#many}}<form method="post" action="{{action}}#ayv-genres-title"><input type="hidden" name="sesskey" value="{{sesskey}}"><p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="proposeall">{{genresproposeall}}</button></p></form>{{/many}}
+    </div>
+    {{/hasproposals}}
+    {{#hasfrom}}
+    <details class="ayv-genre-from">
+        <summary>{{genresfrom}}</summary>
+        <form method="post" action="{{action}}#ayv-genres-title">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <p class="ayv-field-hint">{{genresfromhint}}</p>
+            <div class="ayv-choices">{{#from}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="from[]" value="{{code}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/from}}</div>
+            <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="genresfrom">{{genressave}}</button></p>
+        </form>
+    </details>
+    {{/hasfrom}}
+</section>
+{{/genres}}{{/hascorners}}
 </section>

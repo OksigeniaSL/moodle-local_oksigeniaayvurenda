@@ -163,12 +163,10 @@ final class catalogue {
                               OR EXISTS (SELECT 1 FROM {" . self::T . "digital} ld
                                           WHERE ld.recordid = r.id AND ld.kind <> 'voice'))";
         }
-        if (self::is_corner($corner)) {
-            [$incorner, $cornerparams] = self::class_condition('fa.code', $corner, 'fcorner');
-            $conditions[] = "r.id IN (SELECT fra.recordid FROM {" . self::T . "recauth} fra
-                JOIN {" . self::T . "authority} fa ON fa.id = fra.authorityid
-               WHERE fa.entityid = :fentityid AND fa.kind = 'class' AND $incorner)";
-            $params += ['fentityid' => $library->entityid] + $cornerparams;
+        $incorner = self::corner_condition($library, $corner, 'r.id', 'fc');
+        if ($incorner) {
+            $conditions[] = $incorner[0];
+            $params += $incorner[1];
         }
         if ($subject) {
             $conditions[] = 'r.id IN (SELECT sra.recordid FROM {' . self::T . 'recauth} sra WHERE sra.authorityid = :fsubject)';
@@ -224,16 +222,17 @@ final class catalogue {
         $slice = array_column(array_slice($scored, $page * self::PERPAGE, self::PERPAGE), 2);
         $suggestions = $total === 0 ? (new suggester(self::vocabulary((int) $library->entityid)))->suggest($query) : [];
         return ['total' => $all, 'reachable' => $total, 'cards' => self::cards($slice, $library), 'suggestions' => $suggestions,
-            'facets' => self::facets(array_map(fn($row) => (int) $row[2]->id, $scored))];
+            'facets' => self::facets($library, array_map(fn($row) => (int) $row[2]->id, $scored))];
     }
 
     /**
      * What the results of a search have: how many in each corner, and the topics most of them share.
      *
+     * @param \stdClass $library
      * @param int[] $ids
      * @return array corners (code => count), subjects (id => label, count; the most shared first, eight at most).
      */
-    private static function facets(array $ids): array {
+    private static function facets(\stdClass $library, array $ids): array {
         global $DB;
         $corners = [];
         $subjects = [];
@@ -259,7 +258,21 @@ final class catalogue {
             }
             $rows->close();
         }
-        $corners = array_map('count', $corners);
+        // A book of a genre is in the genre, and no longer in the corner of stories it comes from.
+        $ingenre = [];
+        foreach (genres::of($library) ? genres::records($library) : [] as $code => $records) {
+            $found = array_intersect_key(array_flip($ids), $records);
+            if ($found) {
+                $corners[$code] = $found;
+                $ingenre += $found;
+            }
+        }
+        foreach ($ingenre ? genres::from($library) : [] as $from) {
+            if (isset($corners[$from])) {
+                $corners[$from] = array_diff_key($corners[$from], $ingenre);
+            }
+        }
+        $corners = array_filter(array_map('count', $corners));
         ksort($corners);
         $subjects = array_map(fn($s) => ['label' => $s['label'], 'count' => count($s['records'])], $subjects);
         uasort($subjects, fn($a, $b) => [$b['count'], $a['label']] <=> [$a['count'], $b['label']]);
@@ -273,16 +286,21 @@ final class catalogue {
      *
      * @param \stdClass $library
      * @param bool $all Also the ones the library hides, for its page of corners.
-     * @return array[] Each with code, label, default, count, hidden, order and colour, in the library's order.
+     * @param bool $genres With the library's genres (genres::of), which take their books from the corners of stories;
+     *     false for what follows the classification on the shelves (the shelves, their posters, the visit's games).
+     * @return array[] Each with code, label, default, count, hidden, order and colour, in the library's order; a genre
+     *     also with genre (true), kind and sub (its place among the genres).
      */
-    public static function corners(\stdClass $library, bool $all = false): array {
+    public static function corners(\stdClass $library, bool $all = false, bool $genres = true): array {
         global $DB;
         // How many records each corner has: counted over every class of the catalogue (thousands of rows), so kept a
         // while for the centre, apart for a bank (where textbooks count) and for reading.
         $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
         // A library under another (a classroom, a department) counts the books it has; the central one, the centre's.
         $mine = !empty($library->parentid) && !bank::is($library);
-        $key = $library->entityid . '_' . (bank::is($library) ? 'bank' : 'reading') . ($mine ? '_' . $library->id : '');
+        $genres = bank::is($library) || !$genres ? [] : genres::of($library);
+        $key = $library->entityid . '_' . (bank::is($library) ? 'bank' : 'reading') . ($mine ? '_' . $library->id : '')
+            . ($genres ? '_' . $library->id . '_' . md5(json_encode([$genres, genres::from($library)])) : '');
         $counts = $cache->get($key);
         if ($counts === false) {
             $rows = $DB->get_recordset_sql(
@@ -303,7 +321,24 @@ final class catalogue {
                 }
             }
             $rows->close();
-            $counts = array_map('count', $records);
+            // A book of a genre is in the genre, and no longer in the corner of stories it comes from.
+            $ingenre = [];
+            foreach ($genres ? genres::records($library) : [] as $code => $ids) {
+                if ($mine) {
+                    $ids = array_intersect_key($ids, array_replace([], ...array_values($records)));
+                }
+                $ids = array_diff_key($ids, $only);
+                if ($ids) {
+                    $records[$code] = $ids;
+                    $ingenre += $ids;
+                }
+            }
+            foreach ($ingenre ? genres::from($library) : [] as $from) {
+                if (isset($records[$from])) {
+                    $records[$from] = array_diff_key($records[$from], $ingenre);
+                }
+            }
+            $counts = array_filter(array_map('count', $records));
             ksort($counts);
             $cache->set($key, $counts);
         }
@@ -328,7 +363,19 @@ final class catalogue {
         $udc = ($entity['classification'] ?? 'udc') === 'udc';
         $corners = [];
         $letters = 0;
+        $named = array_column($genres, null, 'code');
+        // The genres, just before the first corner of stories they come from, in the library's order.
+        $before = null;
+        foreach (genres::from($library) as $from) {
+            if (isset($counts[$from])) {
+                $before = $from;
+                break;
+            }
+        }
         foreach ($counts as $code => $count) {
+            if (isset($named[$code])) {
+                continue;
+            }
             // Figures in their order and colour; letters after them, coloured in turn.
             $digit = ctype_digit((string) $code);
             $place = $digit ? (int) $code : 10 + $letters++;
@@ -343,7 +390,24 @@ final class catalogue {
                 'order' => (int) ($mine['order'] ?? ($place + 1) * 10),
                 'colour' => self::CORNER_COLOURS[$place % count(self::CORNER_COLOURS)]];
         }
-        usort($corners, fn($a, $b) => [$a['order'], $a['code']] <=> [$b['order'], $b['code']]);
+        $start = 1000;
+        foreach ($corners as $corner) {
+            if ((string) $corner['code'] === (string) $before) {
+                $start = $corner['order'] - 1;
+            }
+        }
+        foreach ($genres as $i => $genre) {
+            if (empty($counts[$genre['code']])) {
+                continue;
+            }
+            $mine = (array) ($own[$genre['code']] ?? []);
+            $corners[] = ['code' => $genre['code'], 'kind' => $genre['kind'], 'label' => $genre['label'],
+                'default' => $genre['label'],
+                'count' => (int) $counts[$genre['code']], 'hidden' => !empty($mine['hidden']),
+                'order' => (int) ($mine['order'] ?? $start), 'colour' => $genre['colour'], 'genre' => true, 'sub' => $i];
+        }
+        usort($corners, fn($a, $b) => [$a['order'], empty($a['genre']), $a['sub'] ?? 0, $a['code']]
+            <=> [$b['order'], empty($b['genre']), $b['sub'] ?? 0, $b['code']]);
         return $all ? $corners : array_values(array_filter($corners, fn($corner) => !$corner['hidden']));
     }
 
@@ -358,7 +422,7 @@ final class catalogue {
         $settings = json_decode((string) $DB->get_field(self::T . 'library', 'settings', ['id' => $library->id]), true) ?: [];
         $settings['corners'] = [];
         foreach ($corners as $code => $corner) {
-            if (!preg_match('/^\d$/', (string) $code)) {
+            if (!self::is_corner((string) $code) && !genres::is_code((string) $code)) {
                 continue;
             }
             $settings['corners'][(string) $code] = ['label' => \core_text::substr(trim((string) ($corner['label'] ?? '')), 0, 80),
@@ -380,12 +444,9 @@ final class catalogue {
      */
     public static function corner(\stdClass $library, string $code, int $page = 0, bool $onlyfree = false): array {
         global $DB;
-        [$incorner, $cornerparams] = self::class_condition('a.code', $code, 'code');
+        [$incorner, $cornerparams] = self::corner_condition($library, $code, 'r.id', 'code') ?? ['1 = 0', []];
         $sql = "FROM {" . self::T . "record} r
-               WHERE r.id IN (SELECT ra.recordid
-                                FROM {" . self::T . "recauth} ra
-                                JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
-                               WHERE a.entityid = :entityid AND a.kind = 'class' AND $incorner)";
+               WHERE r.entityid = :entityid AND $incorner";
         $params = ['entityid' => $library->entityid] + $cornerparams;
         if ($onlyfree) {
             $sql .= ' AND ' . self::free_condition();
@@ -836,6 +897,43 @@ final class catalogue {
      */
     public static function is_corner(string $corner): bool {
         return (bool) preg_match('/^(\d+|[A-Z]{1,3})$/', $corner);
+    }
+
+    /**
+     * The SQL that says a record is in a corner of the library: a genre of its own, or a top class (without the books its
+     * genres took, when it is a corner of stories they take from).
+     *
+     * @param \stdClass $library
+     * @param string $corner
+     * @param string $field The record's id, as r.id.
+     * @param string $name Prefix of the parameters.
+     * @return array|null SQL and its parameters; null if it is not a corner.
+     */
+    public static function corner_condition(\stdClass $library, string $corner, string $field, string $name): ?array {
+        global $DB;
+        if (genres::is_code($corner)) {
+            foreach (bank::is($library) ? [] : genres::of($library) as $genre) {
+                if ($genre['code'] === $corner) {
+                    return genres::condition($library, $genre, $field, $name . 'g');
+                }
+            }
+            return null;
+        }
+        if (!self::is_corner($corner)) {
+            return null;
+        }
+        [$incorner, $params] = self::class_condition($name . 'a.code', $corner, $name . 'c');
+        $sql = "$field IN (SELECT {$name}r.recordid FROM {" . self::T . "recauth} {$name}r
+                             JOIN {" . self::T . "authority} {$name}a ON {$name}a.id = {$name}r.authorityid
+                            WHERE {$name}a.entityid = :{$name}e AND {$name}a.kind = 'class' AND $incorner)";
+        $params[$name . 'e'] = $library->entityid;
+        $upper = strtoupper(trim($corner));
+        if (!bank::is($library) && genres::of($library) && in_array($upper, genres::from($library), true)) {
+            [$ingenre, $genreparams] = genres::any_condition($library, $field, $name . 'x');
+            $sql .= " AND NOT $ingenre";
+            $params += $genreparams;
+        }
+        return [$sql, $params];
     }
 
     /**

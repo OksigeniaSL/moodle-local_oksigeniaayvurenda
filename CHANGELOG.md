@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.212.0 (2026-11-08)
+
+- Genres of the stories (audit, MER-01; Enrique, 8 November): a library splits its stories into corners of its own,
+  Mystery, Fantasy, Humour…, as many school libraries sort their shelves. A genre takes the books with its topics (any
+  form of them: «Mysteries» and «mystery» are one) or whose shelf mark starts as the library says (N MIS), only from the
+  corners of stories (the 8 and the letters, unless it says otherwise); the corner they come from keeps the rest. The
+  classification, the shelves and the labels do not change.
+  - On «Corners»: the genres your catalogue has, proposed from the topics of its stories with how many books each would
+    take, to add one by one or all at once; each genre in a card, changed in its window; where they take books from.
+  - In the catalogue: the genres as corners on the home page (with the initial where the others have a drawing, until
+    Gaudí draws them), their own page, and in the search to narrow it.
+- The reader's home board ends its two columns together: the last card of the shorter one grows, with what it says in
+  the middle, instead of leaving a hole beside the other; the new arrivals' covers, half as big again.
+
 ## 0.211.0 (2026-11-08)
 
 - The album's collector cards of a reader of the sky are the sky's, Gaudí's night cards with a moon (art package
