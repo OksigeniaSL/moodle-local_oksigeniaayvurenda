@@ -5027,3 +5027,107 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 
 /* The herald's feather on the hall's board: the room it is in today (Gaudí's, 20 px). */
 .ayv .ayv-visit-feather { display: inline-block; width: 1em; height: 1em; margin-left: .3em; vertical-align: -.1em; }
+
+/* The card at the desk: the codes big, black on white whatever the mode, so that any gun reads them. */
+.ayv dialog.ayv-card-big { width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; margin: 0; padding: 1.5rem;
+    border: 0; background: #fff; color: #111; text-align: center; }
+.ayv dialog.ayv-card-big[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
+.ayv dialog.ayv-card-big::backdrop { background: #fff; }
+.ayv .ayv-card-big .ayv-modal-close { position: absolute; top: 1rem; right: 1rem; }
+.ayv .ayv-card-big-name { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.ayv .ayv-card-big-bars { width: min(92vw, 40rem); }
+.ayv .ayv-card-big-bars svg { display: block; width: 100%; height: auto; min-height: 6rem; }
+.ayv .ayv-card-big-qr { width: min(60vmin, 20rem); height: auto; image-rendering: pixelated; }
+.ayv .ayv-card-big-code { margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: .15em; }
+.ayv .ayv-card-big .ayv-field-hint { color: #444; }
+
+/* The hummingbird crossing the card of a child who brought back their last book, and its feather by the name. */
+.ayv #ayv-reader { position: relative; overflow: hidden; }
+/* It flies along the top edge of the card, small, and out the other side: it never stops over a button (Gaudí). */
+.ayv .ayv-desk-cross { position: absolute; z-index: 2; top: .2rem; left: -5rem; height: 3rem; width: auto; pointer-events: none;
+    transition: left 1.2s ease-in-out; }
+.ayv .ayv-desk-cross.ayv-desk-cross-go { left: calc(100% + 5rem); }
+.ayv .ayv-desk-feather { width: 1.1em; height: 1.1em; margin-left: .35em; vertical-align: -.15em; }
+
+/* «The neighbour» on the lectern: three labels to choose from. */
+.ayv .ayv-neighbour { margin-top: .6rem; }
+.ayv .ayv-neighbour > summary { cursor: pointer; font-weight: 700; color: var(--green); }
+.ayv .ayv-neighbour-choices { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .5rem; }
+.ayv .ayv-neighbour-pick { padding: .3rem; border: 2px solid var(--line, #d9cfbd); border-radius: 10px; background: var(--paper);
+    cursor: pointer; }
+.ayv .ayv-neighbour-pick.ayv-neighbour-yes { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 87, 76, .2); }
+.ayv .ayv-neighbour-pick.ayv-neighbour-no { border-color: var(--coral, #e2654c); }
+.ayv .ayv-neighbour-say { margin: .4rem 0 0; font-weight: 700; }
+
+/* The clue of the week, an A5 by corner (Gaudí): the words on top, the memory thinking below on the left, and the
+   label as the hero, on the right half and nearly all its height, as the real label of a spine: white, with its border
+   and the line of the class apart. To be read from the library's door. */
+.ayv .ayv-poster-clue { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 3mm 6mm;
+    align-items: stretch; min-height: 0; }
+.ayv .ayv-poster-clue-say { grid-column: 1 / -1; }
+.ayv .ayv-poster-figure { grid-column: 1; grid-row: 2; align-self: end; justify-self: center; width: auto; height: 56mm; }
+.ayv .ayv-poster-bigl { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; margin: 0; padding: 3mm; border: 1mm solid #1e2b2a; border-radius: 2.5mm; background: #fff;
+    font: 700 54pt/.98 var(--text); color: #1e2b2a; overflow-wrap: anywhere; text-align: center; overflow: hidden; }
+.ayv .ayv-poster-bigl span { display: block; width: 100%; }
+.ayv .ayv-poster-bigl span:first-child { padding-bottom: 1.5mm; margin-bottom: 1.5mm; border-bottom: .8mm solid #1e2b2a; }
+.ayv .ayv-poster-bigl-l { font-size: 46pt; }
+.ayv .ayv-poster-bigl-m { font-size: 34pt; }
+.ayv .ayv-poster-bigl-s { font-size: 26pt; }
+
+/* The desk's stamps (Gaudí, dis-efectos 07): the date of the loan just made on the card, «Returned» on the line. They
+   fall big and blurred and set sharp, a little askew, in uneven ink. The card that comes lands on the desk. */
+.ayv .ayv-loan-stamp,
+.ayv .ayv-line-stamp { display: inline-block; margin-left: .6rem; padding: .05rem .45rem; border: 2px solid currentColor;
+    border-radius: 4px; font: 700 .78rem/1.25 var(--text); letter-spacing: .05em; text-transform: uppercase;
+    transform: rotate(-6deg); opacity: .88; }
+.ayv .ayv-loan-stamp { color: #b5523d; }
+.ayv .ayv-line-stamp { color: #1d7349; }
+.ayv .ayv-stamp-new { animation: ayv-stamp .5s cubic-bezier(.2, .8, .2, 1) both; }
+.ayv #ayv-reader.ayv-card-land { animation: ayv-card-land .45s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes ayv-stamp {
+    from { transform: scale(1.9) rotate(-6deg); opacity: 0; filter: blur(2px); }
+    60% { transform: scale(.95) rotate(-6deg); opacity: .95; filter: none; }
+    to { transform: scale(1) rotate(-6deg); opacity: .88; }
+}
+@keyframes ayv-card-land {
+    from { transform: translate(24px, -28px) rotate(3deg); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-stamp-new,
+    .ayv #ayv-reader.ayv-card-land { animation: none; }
+}
+html[data-bs-theme="dark"] .ayv .ayv-loan-stamp { color: #ff9f8a; }
+html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
+
+/* The door into the library one visits (Gaudí, dis-efectos 09): two leaves of wood over the hall, unseen until the way in
+   is taken; then shut for a moment, they turn on their hinges, a warm light comes through and the hall comes closer. */
+.ayv .ayv-visit-card-picture,
+.ayv .ayv-visit-home-picture { position: relative; overflow: hidden; perspective: 900px; }
+.ayv .ayv-hinge { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.ayv .ayv-hinge-leaf { position: absolute; top: 0; bottom: 0; width: 50%; opacity: 0;
+    background: linear-gradient(90deg, #5b3d26, #7a5334 45%, #5b3d26), #6b4a2f;
+    box-shadow: inset 0 0 0 6px rgba(0, 0, 0, .18), inset 0 0 0 14px rgba(255, 255, 255, .05);
+    transition: transform .9s cubic-bezier(.5, 0, .3, 1), opacity .1s linear; }
+.ayv .ayv-hinge-left { left: 0; transform-origin: left center; }
+.ayv .ayv-hinge-right { right: 0; transform-origin: right center; }
+.ayv .ayv-hinge-light { position: absolute; top: 0; bottom: 0; left: 50%; width: 30%; opacity: 0;
+    background: radial-gradient(ellipse at center, rgba(255, 214, 140, .85), rgba(255, 214, 140, 0) 70%);
+    mix-blend-mode: screen; transform: translateX(-50%) scaleX(.05); transition: transform .9s ease-out, opacity .3s ease; }
+.ayv .ayv-hinge-shut .ayv-hinge-leaf { opacity: 1; }
+.ayv .ayv-hinge-open .ayv-hinge-left { transform: rotateY(-108deg); }
+.ayv .ayv-hinge-open .ayv-hinge-right { transform: rotateY(108deg); }
+.ayv .ayv-hinge-open .ayv-hinge-light { opacity: 1; transform: translateX(-50%) scaleX(2.4); }
+.ayv .ayv-hinge-open img { transform: scale(1.06); transition: transform .9s ease-in; }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-hinge { display: none; }
+}
+
+/* The hall's clock: the hands over the painted face, in the painting's ink by day and by night (Gaudí). */
+.ayv .ayv-visit-clockface { pointer-events: none; }
+.ayv .ayv-visit-clock { display: block; width: 100%; height: 100%; overflow: visible; }
+.ayv .ayv-visit-hand { stroke: var(--visit-ink, #7a4b26); stroke-linecap: round; }
+.ayv .ayv-visit-knob { fill: var(--visit-ink, #7a4b26); }
+.ayv .ayv-visit-night .ayv-visit-hand { stroke: var(--visit-ink-night, #3a2410); }
+.ayv .ayv-visit-night .ayv-visit-knob { fill: var(--visit-ink-night, #3a2410); }

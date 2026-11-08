@@ -31,11 +31,12 @@
     <div class="ayv-visit-home-text">
         <h2 class="ayv-visit-home-title" id="ayv-visit-home-title">{{label}}</h2>
         <p>{{hint}}</p>
-        <p><a class="ayv-button" href="{{url}}">{{enter}}</a></p>
+        <p><a class="ayv-button" href="{{url}}" data-ayv-hinge="ayv-visit-home-picture">{{enter}}</a></p>
         <p class="ayv-visit-home-chips">{{#spring}}<a class="ayv-chip" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a>{{/spring}}
             {{#window}}<a class="ayv-chip" href="{{url}}">{{label}}</a>{{/window}}</p>
     </div>
-    <a class="ayv-visit-home-picture" href="{{url}}" tabindex="-1" aria-hidden="true">
+    <a class="ayv-visit-home-picture" href="{{url}}" tabindex="-1" aria-hidden="true" data-ayv-hinge>
+        <span class="ayv-hinge" aria-hidden="true"><span class="ayv-hinge-leaf ayv-hinge-left"></span><span class="ayv-hinge-leaf ayv-hinge-right"></span><span class="ayv-hinge-light"></span></span>
         <img class="ayv-visit-card-day" src="{{day}}" alt="" loading="lazy" style="object-position: {{position}}% 70%">
         <img class="ayv-visit-card-night" src="{{night}}" alt="" loading="lazy" style="object-position: {{position}}% 70%">
     </a>

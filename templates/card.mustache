@@ -72,6 +72,16 @@
         {{#barcode}}<div class="ayv-card-barcode">{{{barcode}}}</div>{{/barcode}}
         {{#qr}}<img class="ayv-card-qr" src="{{qr}}" alt="{{code}}" width="120" height="120">{{/qr}}
         <p class="ayv-card-hint">{{showcode}}</p>
+        {{! At the desk, the codes big on the whole screen for half a minute (DIS-KIMI-17). }}
+        <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-cardbig="ayv-card-big-{{code}}">{{showbig}}</button></p>
+        <dialog class="ayv-card-big" id="ayv-card-big-{{code}}" aria-label="{{showbig}}">
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{showbigclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form>
+            <p class="ayv-card-big-name">{{name}}</p>
+            {{#barcode}}<div class="ayv-card-big-bars">{{{barcode}}}</div>{{/barcode}}
+            {{#qr}}<img class="ayv-card-big-qr" src="{{qr}}" alt="{{code}}" width="320" height="320">{{/qr}}
+            <p class="ayv-card-big-code">{{code}}</p>
+            <p class="ayv-field-hint">{{showbighint}}</p>
+        </dialog>
     </div>
     {{! Who has never chosen sees the choice first: an adult need not go through the whole game to put it aside. }}
     {{#choosefirst}}<div class="ayv-mine-first">{{> local_oksigeniaayvurenda/card_lookchoice}}</div>{{/choosefirst}}

@@ -352,6 +352,80 @@
                 });
         });
     });
+    // The way into the library one visits opens as a door: the leaves turn on their hinges, the hall's light comes
+    // through, and then the page goes in (Gaudí, dis-efectos 09). Not with «reduce motion», nor with a key held down.
+    var stillpage = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('[data-ayv-hinge]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            var holder = link.getAttribute('data-ayv-hinge') ?
+                document.querySelector('.' + link.getAttribute('data-ayv-hinge')) : link;
+            var door = holder && holder.querySelector('.ayv-hinge');
+            if (stillpage || !door || e.ctrlKey || e.metaKey || e.shiftKey || e.button > 0) {
+                return;
+            }
+            e.preventDefault();
+            holder.classList.add('ayv-hinge-shut');
+            door.getBoundingClientRect();
+            holder.classList.add('ayv-hinge-open');
+            window.setTimeout(function() {
+                window.location.href = link.href;
+            }, 950);
+        });
+    });
+    // Coming back with the browser's arrow, the door is not left open.
+    window.addEventListener('pageshow', function() {
+        document.querySelectorAll('.ayv-hinge-open').forEach(function(holder) {
+            holder.classList.remove('ayv-hinge-open', 'ayv-hinge-shut');
+        });
+    });
+
+    // The card at the desk: its codes big on the whole screen, the screen kept awake, closed by itself in half a minute
+    // (DIS-KIMI-17). The reader turns the phone to the reader's gun and nothing else is needed.
+    document.querySelectorAll('[data-ayv-cardbig]').forEach(function(button) {
+        var big = document.getElementById(button.getAttribute('data-ayv-cardbig'));
+        if (!big || !big.showModal) {
+            button.hidden = true;
+            return;
+        }
+        var timer = null, lock = null;
+        big.addEventListener('close', function() {
+            window.clearTimeout(timer);
+            if (lock) {
+                lock.release().catch(function() {
+                    // Already let go.
+                });
+                lock = null;
+            }
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(function() {
+                    // Not in full screen after all.
+                });
+            }
+        });
+        big.addEventListener('click', function(e) {
+            if (e.target === big) {
+                big.close();
+            }
+        });
+        button.addEventListener('click', function() {
+            big.showModal();
+            if (big.requestFullscreen) {
+                big.requestFullscreen().catch(function() {
+                    // The dialog is big enough without it.
+                });
+            }
+            if (navigator.wakeLock) {
+                navigator.wakeLock.request('screen').then(function(held) {
+                    lock = held;
+                }).catch(function() {
+                    // The screen may sleep; the codes stay.
+                });
+            }
+            timer = window.setTimeout(function() {
+                big.close();
+            }, 30000);
+        });
+    });
     document.querySelectorAll('[data-ayv-open]').forEach(function(button) {
         var sheet = document.getElementById(button.getAttribute('data-ayv-open'));
         if (!sheet) {

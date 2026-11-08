@@ -60,7 +60,7 @@ foreach (
     ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'profileview', 'deskoffline', 'deskofflineone',
         'deskofflinemany', 'deskbackonline', 'noteloved', 'noteunfinished',
         'notemore',
-        'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint',
+        'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint', 'deskstampback',
         'deskconditionout', 'deskconditionin', 'deskholds', 'deskholdready', 'deskholdwaiting', 'deskkeepheld',
         'deskbankset', 'deskbankmissing', 'deskbankdone', 'deskbankcontract',
         'desklendheld', 'deskroom', 'deskgiveback', 'deskbookfree', 'deskbookfreeone',

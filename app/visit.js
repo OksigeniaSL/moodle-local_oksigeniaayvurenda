@@ -79,6 +79,16 @@
         },
     };
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // The hall's clock keeps the library's time: its hands move on, a minute at a time, from the time the page brought.
+    Array.prototype.forEach.call(visit.querySelectorAll('.ayv-visit-clock'), function(clock) {
+        var hour = parseFloat(clock.getAttribute('data-hour')) || 0, minute = parseFloat(clock.getAttribute('data-minute')) || 0;
+        var since = Date.now();
+        window.setInterval(function() {
+            var gone = Math.floor((Date.now() - since) / 60000);
+            clock.querySelector('.ayv-visit-hand-hour').setAttribute('transform', 'rotate(' + (hour + gone * 0.5) + ')');
+            clock.querySelector('.ayv-visit-hand-minute').setAttribute('transform', 'rotate(' + (minute + gone * 6) + ')');
+        }, 20000);
+    });
     var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     var W = parseFloat(visit.getAttribute('data-width')) || 2400;
     var H = parseFloat(visit.getAttribute('data-height')) || 1350;

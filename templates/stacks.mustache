@@ -122,6 +122,13 @@
                     <ul class="ayv-why-list"></ul>
                     <p class="ayv-why-order">{{whyorder}}</p>
                 </details>
+                {{! «The neighbour»: which goes on its right? Three labels, one true; ordering learnt without a lesson (JV-I3). }}
+                <details class="ayv-neighbour" hidden data-yes="{{stacksneighbouryes}}" data-further="{{stacksneighbourfurther}}"
+                    data-before="{{stacksneighbourbefore}}">
+                    <summary>{{stacksneighbour}}</summary>
+                    <div class="ayv-neighbour-choices"></div>
+                    <p class="ayv-neighbour-say" aria-live="polite"></p>
+                </details>
             </div>
             <p class="ayv-lectern-actions">
                 <a class="ayv-button ayv-lectern-record" href="#">{{> local_oksigeniaayvurenda/icon_book}} {{stacksrecord}}</a>

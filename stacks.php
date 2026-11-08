@@ -133,7 +133,8 @@ if ($shelf) {
 }
 foreach (
     ['stacksplaces', 'stackscorners', 'stacksall', 'stacksprev', 'stacksnext', 'stacksmap', 'stackslectern', 'stacksrecord',
-        'stackswhere', 'stackslabel', 'stacksputback', 'stackswalk', 'whyask', 'whyorder'] as $key
+        'stackswhere', 'stackslabel', 'stacksputback', 'stackswalk', 'whyask', 'whyorder', 'stacksneighbour',
+        'stacksneighbouryes', 'stacksneighbourfurther', 'stacksneighbourbefore'] as $key
 ) {
     $data[$key] = $str($key);
 }

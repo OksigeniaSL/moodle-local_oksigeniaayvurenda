@@ -29,6 +29,10 @@
     var input = document.getElementById('ayv-code');
     var log = document.getElementById('ayv-log');
     var panel = document.getElementById('ayv-reader');
+    // Nothing moves with «reduce motion»: not the card landing, not the stamps, not the hummingbird.
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // The loan just made, to stamp its date on the reader's card.
+    var stamped = 0;
     var today = document.getElementById('ayv-today');
     if (!form || !input || !log || !panel || !window.fetch) {
         return;
@@ -156,6 +160,12 @@
             paintHand();
             return;
         }
+        // A card that comes to the desk lands on it; the same one painted again stays where it is (Gaudí, dis-efectos 07).
+        if (reader.id !== readerid && !still) {
+            panel.classList.remove('ayv-card-land');
+            panel.getBoundingClientRect();
+            panel.classList.add('ayv-card-land');
+        }
         readerid = reader.id;
         panel.hidden = false;
         // The field says who it lends to now; the figures of the day stay, under the card.
@@ -225,6 +235,11 @@
             var item = el('li', loan.late ? 'ayv-loan ayv-loan-late' : 'ayv-loan');
             item.appendChild(el('span', 'ayv-loan-title', loan.title));
             item.appendChild(el('span', 'ayv-loan-due', loan.late || loan.due));
+            // The book just lent gets its date stamped: it falls big and blurred and sets sharp.
+            if (stamped && loan.id === stamped && !loan.late) {
+                item.appendChild(el('span', 'ayv-loan-stamp' + (still ? '' : ' ayv-stamp-new'), loan.due));
+                stamped = 0;
+            }
             // More time, without the book: the reader is here, or the family asks.
             if (loan.renewable) {
                 item.appendChild(button(str.deskrenew, 'ayv-line-quiet ayv-loan-renew', function(b) {
@@ -314,6 +329,10 @@
     var line = function(answer, code) {
         var li = el('li', 'ayv-line ayv-line-' + answer.kind + ' ayv-sound-' + (answer.sound || 'ok'));
         li.appendChild(el('p', 'ayv-line-text', answer.message));
+        // Back home: the green stamp «Returned» on the line (Gaudí, dis-efectos 07).
+        if (answer.kind === 'returned' && str.deskstampback) {
+            li.appendChild(el('span', 'ayv-line-stamp' + (still ? '' : ' ayv-stamp-new'), str.deskstampback));
+        }
         if (answer.sanction) {
             var left = el('p', 'ayv-line-note ayv-sanction-left', answer.sanction.text);
             li.appendChild(left);
@@ -558,6 +577,7 @@
             return;
         }
         if (answer.reader && (!readerid || answer.reader.id === readerid)) {
+            stamped = answer.kind === 'lent' ? answer.loanid : 0;
             showReader(answer.reader);
         }
         line(answer, code);
@@ -567,6 +587,37 @@
         }
         if (answer.herald) {
             heraldSays(answer.herald);
+            if (answer.herald.cross && answer.kind === 'returned' && answer.reader && answer.reader.loans &&
+                    !answer.reader.loans.length) {
+                cross(answer.herald.cross);
+            }
+        }
+    };
+
+    // The hummingbird crosses the card of a child who has just brought back their last book, once, and leaves a feather
+    // by their name that goes by itself (Gaudí). Nothing with «reduce motion».
+    var cross = function(what) {
+        if (still || !what.figure || panel.hidden) {
+            return;
+        }
+        var bird = el('img', 'ayv-desk-cross');
+        bird.src = what.figure;
+        bird.alt = '';
+        panel.appendChild(bird);
+        bird.getBoundingClientRect();
+        bird.classList.add('ayv-desk-cross-go');
+        window.setTimeout(function() {
+            bird.remove();
+        }, 1300);
+        var name = panel.querySelector('.ayv-reader-name');
+        if (what.feather && name) {
+            var feather = el('img', 'ayv-desk-feather');
+            feather.src = what.feather;
+            feather.alt = '';
+            name.appendChild(feather);
+            window.setTimeout(function() {
+                feather.remove();
+            }, 4000);
         }
     };
 

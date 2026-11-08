@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.200.0
+
+- From the audit's ideas, with Gaudí:
+  - «Show it big» on the card: the codes on the whole screen, black on white, the screen kept awake, closed by itself in
+    half a minute;
+  - at the desk, a child who brings back their last book sees the hummingbird cross their card once and leave a feather
+    by their name (nothing with «reduce motion»);
+  - «The neighbour» on the lectern of the shelves: which of three labels goes on its right; the wrong ones say which
+    way they go (no game with twin labels);
+  - the clue of the week, an A5 by corner from the posters page: the words on top, the memory thinking and the label as
+    the hero, as the real label of a spine, of a book hidden on the real shelf, the same all week, to find it and take
+    it to the desk;
+  - the desk's stamps: the date of the loan just made falls on the card and sets sharp, «Returned» is stamped green on
+    the line, and the reader's card lands on the desk;
+  - the way into the library one visits opens as a door, on its hinges, with the hall's light;
+  - the hall's clock keeps the library's own time (Gaudí painted the face without its hands, art 0.1.52);
+  - the hummingbird crossing a child's card flies along its top edge and out, never stopping over a button.
+- 0.199.0 did not get installed (a test of the late notice depended on the day); it goes inside this one.
+
 ## 0.199.0
 
 - The lines of humour, second part:

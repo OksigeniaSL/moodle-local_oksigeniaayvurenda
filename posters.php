@@ -40,6 +40,8 @@ if (!$library) {
     shell::missing(get_string('librarynotfound', 'local_oksigeniaayvurenda'));
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+// The clue of the week: for each corner, the label of a book the memory hid on the real shelf, the same all week (JV-I2).
+$clue = optional_param('clue', 0, PARAM_BOOL);
 
 // The places of the room; a library that has none is laid out by its corners.
 $posters = [];
@@ -48,7 +50,8 @@ foreach (stacks::places($library) as $place) {
         $posters[] = ['name' => $place['label'], 'colour' => $place['colour'], 'params' => ['place' => $place['id']]];
     }
 }
-if (!$posters) {
+if (!$posters || $clue) {
+    $posters = [];
     foreach (catalogue::corners($library) as $corner) {
         $posters[] = ['name' => $corner['label'], 'colour' => null, 'params' => ['corner' => $corner['code']]];
     }
@@ -74,7 +77,45 @@ foreach ($posters as $i => $poster) {
         $l -= 0.03;
         $colour = spine::hex(spine::from_oklch($l, $c, $h));
     }
+    $hidden = null;
+    if ($clue) {
+        // The week's book: the one hidden for nobody in particular on its Monday, so the same until the next one.
+        $monday = (new \DateTimeImmutable('now', \local_oksigeniaayvurenda\local\zones::of($library)))
+            ->modify('monday this week')->setTime(12, 0)->getTimestamp();
+        $recordid = \local_oksigeniaayvurenda\local\hunt::target(
+            $library,
+            (string) ($poster['params']['corner'] ?? ''),
+            0,
+            0,
+            $monday
+        );
+        $item = $recordid ? $DB->get_record_select(
+            'local_oksigeniaayvurenda_item',
+            "recordid = :recordid AND libraryid = :libraryid AND status = 'available'",
+            ['recordid' => $recordid, 'libraryid' => $library->id],
+            'id, callnumber1, callnumber2, callnumber3',
+            IGNORE_MULTIPLE
+        ) : null;
+        if (!$item) {
+            continue;
+        }
+        $memory = \local_oksigeniaayvurenda\local\characters::say(
+            (int) $library->entityid,
+            'memory',
+            'postersclueask',
+            [],
+            'piensa'
+        );
+        $hidden = ['lines' => array_map(fn($l) => ['line' => $l], array_values(array_filter(
+            [(string) $item->callnumber1, (string) $item->callnumber2, (string) $item->callnumber3],
+            fn($l) => trim($l) !== ''
+        ))), 'figure' => (string) ($memory['figure'] ?? ''), 'say' => (string) ($memory['text'] ?? $str('postersclueask'))];
+        // As big as the longest line lets it be in half the card: to be read from the library's door (Gaudí).
+        $longest = max(array_map(fn($l) => \core_text::strlen($l['line']), $hidden['lines']) ?: [1]);
+        $hidden['size'] = $longest <= 3 ? 'xl' : ($longest <= 5 ? 'l' : ($longest <= 8 ? 'm' : 's'));
+    }
     $cards[] = [
+        'clue' => $hidden,
         'name' => $poster['name'],
         'colour' => $colour,
         'ink' => spine::contrast(spine::rgb($colour), [251, 246, 236]) >= spine::contrast(spine::rgb($colour), [30, 43, 42])
@@ -84,8 +125,14 @@ foreach ($posters as $i => $poster) {
     ];
 }
 $data = [
-    'heading' => $str('posterstitle'),
-    'hint' => $str('postershint'),
+    'heading' => $str($clue ? 'postersclue' : 'posterstitle'),
+    'hint' => $str($clue ? 'posterscluehint' : 'postershint'),
+    'other' => (new moodle_url(
+        '/local/oksigeniaayvurenda/posters.php',
+        ['library' => $library->slug] + ($clue ? [] : ['clue' => 1])
+    ))->out(false),
+    'otherlabel' => $str($clue ? 'posterstitle' : 'postersclue'),
+    'cluetitle' => $str('postersclue'),
     'library' => format_string($library->name, true, ['escape' => false]),
     'scan' => $str('postersscan'),
     'printnow' => $str('printnow'),

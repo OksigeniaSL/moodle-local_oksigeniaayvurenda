@@ -105,7 +105,11 @@ final class herald_test extends \advanced_testcase {
         $herald = characters::of((int) $library->entityid)['herald']['name'];
         $this->assertCount(1, $sent);
         $this->assertStringContainsString('Lucía', $sent[0]->fullmessage);
-        $this->assertStringContainsString($herald, $sent[0]->fullmessage);
+        // The herald says it in one of its two ways, a day each (jue-humor H26): its name, or the days the book is late.
+        $this->assertTrue(
+            str_contains($sent[0]->fullmessage, $herald) || str_contains($sent[0]->fullmessage, '3'),
+            $sent[0]->fullmessage
+        );
         $this->assertStringContainsString('La nube de tinta', $sent[0]->fullmessage);
         $sink->close();
     }

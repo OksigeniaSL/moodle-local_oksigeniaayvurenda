@@ -118,7 +118,7 @@
                 </svg>
                 {{/haszones}}
                 {{#surfaces}}
-                <div class="ayv-visit-surface{{#directory}} ayv-visit-board{{/directory}}{{#pulse}} ayv-visit-chalk{{/pulse}}{{#book}} ayv-visit-book{{/book}}" data-depth="{{depth}}"
+                <div class="ayv-visit-surface{{#directory}} ayv-visit-board{{/directory}}{{#pulse}} ayv-visit-chalk{{/pulse}}{{#book}} ayv-visit-book{{/book}}{{#clock}} ayv-visit-clockface{{/clock}}" data-depth="{{depth}}"
                     style="width: {{width}}px; height: {{height}}px; font-size: {{fontsize}}px; transform: {{transform}};{{#ink}} {{ink}}{{/ink}}">
                     {{#directory}}
                     <ul>
@@ -131,6 +131,13 @@
                     <p class="ayv-visit-chalk-title">{{heading}}</p>
                     <ul>{{#lines}}<li>{{text}}</li>{{/lines}}</ul>
                     {{/pulse}}
+                    {{#clock}}
+                    <svg class="ayv-visit-clock" viewBox="-{{r}} -{{r}} {{width}} {{height}}" aria-hidden="true" data-hour="{{hourangle}}" data-minute="{{minuteangle}}">
+                        <line class="ayv-visit-hand ayv-visit-hand-hour" x1="0" y1="0" x2="0" y2="-{{hourlen}}" stroke-width="{{handwidth}}" transform="rotate({{hourangle}})"></line>
+                        <line class="ayv-visit-hand ayv-visit-hand-minute" x1="0" y1="0" x2="0" y2="-{{minutelen}}" stroke-width="{{handwidth}}" transform="rotate({{minuteangle}})"></line>
+                        <circle class="ayv-visit-knob" cx="0" cy="0" r="{{knob}}"></circle>
+                    </svg>
+                    {{/clock}}
                     {{#book}}
                     <a class="ayv-cover ayv-cover-{{colour}}{{#cover}} ayv-cover-photo{{/cover}}" href="{{url}}">
                         {{#cover}}<img class="ayv-cover-img" src="{{cover}}" alt="">{{/cover}}

@@ -33,7 +33,8 @@
 <div class="ayv-print-head">
     <h1 class="ayv-results-title">{{heading}}</h1>
     <p>{{hint}}</p>
-    {{#hassheets}}<p><button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/hassheets}}
+    <p class="ayv-book-actions">{{#hassheets}}<button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button>{{/hassheets}}
+        <a class="ayv-button ayv-button-quiet" href="{{other}}">{{otherlabel}}</a></p>
     {{^hassheets}}<p class="ayv-empty">{{empty}}</p>{{/hassheets}}
 </div>
 {{#sheets}}
@@ -41,9 +42,17 @@
     {{#posters}}
     <section class="ayv-poster" style="--place: {{colour}}; --place-ink: {{ink}}" aria-label="{{name}}">
         <div class="ayv-poster-band">
-            <p class="ayv-poster-library">{{library}}</p>
+            <p class="ayv-poster-library">{{library}}{{#clue}} · {{cluetitle}}{{/clue}}</p>
             <h2 class="ayv-poster-name">{{name}}</h2>
         </div>
+        {{#clue}}
+        <div class="ayv-poster-body ayv-poster-clue">
+            <p class="ayv-poster-scan ayv-poster-clue-say">{{say}}</p>
+            {{#figure}}<img class="ayv-poster-figure" src="{{figure}}" alt="" width="200" height="200">{{/figure}}
+            <p class="ayv-poster-bigl ayv-poster-bigl-{{size}}">{{#lines}}<span>{{line}}</span>{{/lines}}</p>
+        </div>
+        {{/clue}}
+        {{^clue}}
         <div class="ayv-poster-body">
             {{{qr}}}
             <div class="ayv-poster-text">
@@ -51,6 +60,7 @@
                 <p class="ayv-poster-brand"><img src="{{emblem}}" alt="" width="28" height="28"> Ayvurenda</p>
             </div>
         </div>
+        {{/clue}}
     </section>
     {{/posters}}
 </div>

@@ -122,6 +122,7 @@
         why.addEventListener('toggle', function () {
             fit(lectern, slot);
         });
+        neighbour(lectern, shelf, spine);
         lectern.querySelector('.ayv-lectern-record').href = spine.href;
         lectern.querySelector('.ayv-lectern-close').addEventListener('click', function () {
             close(shelf, true);
@@ -139,6 +140,61 @@
         if (box.bottom > window.innerHeight || box.top < 0) {
             lectern.scrollIntoView({block: 'nearest', behavior: reduce ? 'auto' : 'smooth'});
         }
+    }
+
+    // «The neighbour»: three labels, one of them the book that stands on its right; the others say which way they go.
+    function neighbour(lectern, shelf, spine) {
+        var box = lectern.querySelector('.ayv-neighbour');
+        var all = Array.prototype.slice.call(shelf.querySelectorAll('.ayv-spine-slot:not(.ayv-spine-gap) .ayv-spine'));
+        var at = all.indexOf(spine);
+        var next = all[at + 1];
+        // No game with a twin: a neighbour with the very label of the book, or a decoy with the neighbour's, cannot be told.
+        var others = all.filter(function (one, i) {
+            return i !== at && i !== at + 1 && one.dataset.lines && next && one.dataset.lines !== next.dataset.lines;
+        });
+        if (!box || at < 0 || !next || !next.dataset.lines || next.dataset.lines === spine.dataset.lines || others.length < 2) {
+            return;
+        }
+        var picks = [next];
+        while (picks.length < 3) {
+            var one = others.splice(Math.floor(Math.random() * others.length), 1)[0];
+            picks.push(one);
+        }
+        picks.sort(function () {
+            return Math.random() - 0.5;
+        });
+        var say = box.querySelector('.ayv-neighbour-say');
+        picks.forEach(function (pick) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'ayv-neighbour-pick';
+            var label = document.createElement('span');
+            label.className = 'ayv-where-label';
+            pick.dataset.lines.split('|').forEach(function (line) {
+                var part = document.createElement('span');
+                part.textContent = line;
+                label.appendChild(part);
+            });
+            button.setAttribute('aria-label', pick.dataset.lines.split('|').join(' '));
+            button.appendChild(label);
+            button.addEventListener('click', function () {
+                box.querySelectorAll('.ayv-neighbour-pick').forEach(function (b) {
+                    b.classList.remove('ayv-neighbour-no');
+                });
+                if (pick === next) {
+                    button.classList.add('ayv-neighbour-yes');
+                    say.textContent = box.dataset.yes;
+                } else {
+                    button.classList.add('ayv-neighbour-no');
+                    say.textContent = all.indexOf(pick) > at ? box.dataset.further : box.dataset.before;
+                }
+            });
+            box.querySelector('.ayv-neighbour-choices').appendChild(button);
+        });
+        box.hidden = false;
+        box.addEventListener('toggle', function () {
+            fit(lectern, shelf.querySelector('.ayv-spine-open') || spine.closest('.ayv-spine-slot'));
+        });
     }
 
     // The lectern takes whole rows, so the planks after it still meet their books.

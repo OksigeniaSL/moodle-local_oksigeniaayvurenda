@@ -49,7 +49,7 @@ final class visit {
         'public' => 'publica', 'company' => 'empresa', 'mobile' => 'bibliobus'];
 
     /** @var string[] What a place of a scene may be. */
-    private const KINDS = ['room', 'corner', 'directory', 'new', 'pulse', 'voices', 'stacks', 'exit'];
+    private const KINDS = ['room', 'corner', 'directory', 'new', 'pulse', 'voices', 'stacks', 'exit', 'clock'];
 
     /** @var string[] The poses the characters may take in a scene, and the gestures of the puppets that mean them. */
     private const POSES = ['saluda' => 'saluda', 'senala' => 'senala', 'celebra' => 'celebra', 'lee' => 'lee',
@@ -198,6 +198,23 @@ final class visit {
                 if (!$clean['quad']) {
                     continue;
                 }
+            } else if ($kind === 'clock') {
+                // A clock painted without hands: its centre and radius in the master's pixels, and the hands' lengths.
+                $centre = array_map('floatval', array_slice((array) ($zone['center'] ?? []), 0, 2));
+                $clean['center'] = count($centre) === 2 ? [max(0, min(self::SIZE[0], $centre[0])),
+                    max(0, min(self::SIZE[1], $centre[1]))] : null;
+                $clean['radius'] = max(5.0, min(400.0, (float) ($zone['radius'] ?? 0)));
+                $clean['layer'] = (string) ($zone['layer'] ?? '');
+                $hands = (array) ($zone['hands'] ?? []);
+                $clean['hands'] = ['hour' => max(1.0, min($clean['radius'], (float) ($hands['hour'] ?? $clean['radius'] * .6))),
+                    'minute' => max(1.0, min($clean['radius'], (float) ($hands['minute'] ?? $clean['radius'] * .85))),
+                    'width' => max(1.0, min(30.0, (float) ($hands['width'] ?? 6)))];
+                foreach (['ink', 'inknight'] as $ink) {
+                    $clean[$ink] = preg_match('/^#[0-9a-f]{6}$/i', (string) ($zone[$ink] ?? '')) ? $zone[$ink] : '';
+                }
+                if (!$clean['center']) {
+                    continue;
+                }
             } else if ($kind === 'new') {
                 $clean['slots'] = array_values(array_filter(array_map(
                     fn($q) => self::quad($q),
@@ -340,6 +357,9 @@ final class visit {
                 continue;
             } else if ($kind === 'pulse') {
                 $surfaces[] = self::pulse($zone, $library);
+                continue;
+            } else if ($kind === 'clock') {
+                $surfaces[] = self::clock($zone, $library, $scene);
                 continue;
             } else if ($kind === 'new') {
                 array_push($surfaces, ...self::stand($zone, $library, $scene['corner'], $public, $url));
@@ -666,6 +686,32 @@ final class visit {
                 'playid' => $game];
         }
         return $out;
+    }
+
+    /**
+     * The hall's clock with the library's own time: two hands over the painted face, on the layer it is painted on
+     * (KIMI-19, Gaudí). The page keeps them turning.
+     *
+     * @param array $zone
+     * @param \stdClass $library
+     * @param array $scene
+     * @return array
+     */
+    private static function clock(array $zone, \stdClass $library, array $scene): array {
+        $r = $zone['radius'];
+        [$x, $y] = $zone['center'];
+        $depth = 0.0;
+        foreach ($scene['layers'] as $layer) {
+            $depth = $layer['name'] === $zone['layer'] ? $layer['depth'] : $depth;
+        }
+        $hour = (int) zones::date(time(), '%H', $library);
+        $minute = (int) zones::date(time(), '%M', $library);
+        return ['directory' => false, 'pulse' => false, 'book' => false, 'clock' => true, 'depth' => $depth,
+            'width' => round(2 * $r, 1), 'height' => round(2 * $r, 1), 'r' => round($r, 1), 'fontsize' => 10,
+            'transform' => 'translate(' . round($x - $r, 1) . 'px, ' . round($y - $r, 1) . 'px)',
+            'ink' => self::ink($zone), 'hourangle' => ($hour % 12) * 30 + $minute * .5, 'minuteangle' => $minute * 6,
+            'hourlen' => round($zone['hands']['hour'], 1), 'minutelen' => round($zone['hands']['minute'], 1),
+            'handwidth' => round($zone['hands']['width'], 1), 'knob' => round($zone['hands']['width'] * .9, 1)];
     }
 
     /**
