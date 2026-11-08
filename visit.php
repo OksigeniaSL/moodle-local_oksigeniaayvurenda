@@ -30,7 +30,7 @@ use local_oksigeniaayvurenda\local\window;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $room = optional_param('room', '', PARAM_ALPHANUMEXT);
 $library = catalogue::library($ref);
 // Without a room, the hall of the centre's skin.

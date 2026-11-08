@@ -32,7 +32,7 @@ use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $id = required_param('id', PARAM_INT);
 $start = max(0, optional_param('from', 0, PARAM_INT));
 require_login(null, false);

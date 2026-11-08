@@ -511,6 +511,24 @@ Oksigenia Ayvurenda</button>
     }
 
     /**
+     * The library a page is about, from its address. An address without it, cut or typed by hand, goes to the only
+     * library whoever looks has, or to the home that lets them choose: never to Moodle's error page (DIA-11).
+     *
+     * @return string Its short name.
+     */
+    public static function library_ref(): string {
+        $ref = optional_param('library', '', PARAM_ALPHANUMEXT);
+        if ($ref !== '') {
+            return $ref;
+        }
+        $only = isloggedin() && !isguestuser() ? catalogue::library('') : null;
+        if ($only) {
+            return (string) $only->slug;
+        }
+        redirect(new \moodle_url('/local/oksigeniaayvurenda/index.php'));
+    }
+
+    /**
      * The nonce of this page: only the scripts the library writes into it carry it, so a script that slipped into the
      * page through some text would not run.
      *

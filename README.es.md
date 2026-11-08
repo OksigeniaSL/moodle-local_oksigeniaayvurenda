@@ -19,8 +19,47 @@ Crece en versiones pequeñas, cada una probada antes de publicarse; lo que trae 
 
 ## Instalación
 
-1. Copia el plugin en `local/oksigeniaayvurenda` de tu Moodle (de 4.5 a 5.3).
+**Lo que necesita.** Moodle de 4.5 a 5.3, con el PHP y la base de datos que pide el propio Moodle (se prueba en
+PostgreSQL y MariaDB, y funciona en MySQL 8), y el cron de Moodle cada minuto: el trabajo de noche de la biblioteca va
+por él.
+
+1. Copia el plugin en `local/oksigeniaayvurenda` (o en `public/local/oksigeniaayvurenda` si tu Moodle tiene la carpeta `public`), o instala
+   el zip desde *Administración del sitio > Extensiones > Instalar complementos*.
 2. Entra en *Administración del sitio > Notificaciones* para terminar la instalación.
+3. Abre `/local/oksigeniaayvurenda/libraries.php`: crea el centro y su primera biblioteca. Desde ahí, la biblioteca te
+   lleva a traer su catálogo (MARC 21 o UNIMARC de cualquier programa, una hoja de cálculo o ISBN a ISBN) y sus
+   lectores (cohortes o cursos de Moodle, una lista, OneRoster, LTI 1.3 desde otra plataforma).
+
+**Quién hace qué.** Cinco permisos, dados en el sistema o, en un sitio que comparten varios centros, en la categoría de
+cada centro: `view` (los lectores), `desk` (prestar y devolver), `catalogue` (dar de alta y corregir libros), `manage`
+(los ajustes del centro, sus copias y sus lectores) y `plans` (los planes de un servicio alojado; nadie lo tiene de
+serie).
+
+**Cada noche** (tareas programadas): los lectores al día desde donde vienen (`sync_readers`), los avisos de retraso y de
+reservas a las ocho de la hora de cada centro (`send_notices`, cada hora), la copia diaria (`make_copies`) y los
+préstamos de cursos antiguos que dejan de decir quién se los llevó (`forget_history`).
+
+**La copia diaria** va en formatos abiertos (MARC 21, Dublin Core, RIS, CSV y una carpeta lista para Koha), para que el
+centro la baje, y puede salir además del servidor cifrada con la llave del propio centro (WebDAV, S3 o Google Drive). Un
+centro se recupera desde ella, con sus ficheros, en cualquier Moodle con este plugin.
+
+**Ajustes** (*Administración del sitio > Extensiones > Extensiones locales > Oksigenia Ayvurenda*): las direcciones de la
+red del propio sitio a las que puede llegar un conector o una copia fuera del servidor (`internalhosts`,
+`offsitehosts`), un puente Z39.50 para los catálogos que solo hablan Z39.50, un cliente de Google para las copias en
+Drive, un sitio que es solo una biblioteca y una categoría por centro para un sitio que comparten varios.
+
+**Opcional.** El bloque `block_oksigeniaayvurenda` enseña a cada lector su biblioteca en su área personal. Las
+ilustraciones, los dibujos y las voces de los personajes, la visita y el carné ilustrado van en un paquete de arte aparte
+del servicio alojado: sin él, la biblioteca mantiene su aspecto dibujado y todo funciona. La app de Moodle enseña la
+biblioteca (préstamos, reservas, búsqueda y el carné) cuando el sitio tiene encendido el servicio móvil.
+
+**Por consola** (`cli/`): una biblioteca inventada para probarla (`demo.php`), importaciones (`import_catalogue.php`,
+`import_abies.php`), dar de alta o quitar un centro (`add_entity.php`, `centre.php`, `remove_entity.php`), los préstamos
+apuntados en papel (`paper_loans.php`) y los ficheros de un centro recuperado (`recover_files.php`). Cada uno dice cómo
+con `--help`.
+
+**Actualizar** es poner la carpeta nueva en lugar de la vieja y entrar en la página de notificaciones; cada versión se
+actualiza desde cualquiera anterior.
 
 ## Desarrollo
 

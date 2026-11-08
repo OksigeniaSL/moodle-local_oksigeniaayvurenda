@@ -41,7 +41,7 @@ define('NO_MOODLE_COOKIES', !empty($_GET['embed']));
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- the window is for everyone; managing it checks the capability.
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $query = trim(optional_param('q', '', PARAM_TEXT));
 $page = max(0, optional_param('page', 0, PARAM_INT));
 $recordid = optional_param('record', 0, PARAM_INT);

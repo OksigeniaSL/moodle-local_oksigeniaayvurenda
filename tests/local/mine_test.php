@@ -102,7 +102,12 @@ final class mine_test extends \advanced_testcase {
             get_string('strftimedateshort', 'langconfig')
         )), $cards[0]['items'][0]['detail']);
         $this->assertSame(format_string($library->name), $cards[0]['items'][1]['detail']);
-        $this->assertSame($now + 5 * DAYSECS, $cards[0]['items'][1]['date']);
+        // The chip's date is the noon of the due day at the centre: the same day in any phone's zone (int-aty-pixel 4).
+        $this->assertSame(
+            (new \DateTimeImmutable('@' . ($now + 5 * DAYSECS)))->setTimezone(zones::of((int) $library->entityid))
+                ->setTime(12, 0)->getTimestamp(),
+            $cards[0]['items'][1]['date']
+        );
         $this->assertSame(['library' => $library->slug, 'id' => $faro], $cards[0]['items'][1]['args']);
         $this->assertSame('mobile_record_view', $cards[0]['items'][1]['method']);
 

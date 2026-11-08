@@ -29,7 +29,7 @@ use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $query = core_text::substr(trim(optional_param('q', '', PARAM_TEXT)), 0, 200);
 $corner = optional_param('corner', '', PARAM_ALPHANUM);
 $page = max(0, optional_param('page', 0, PARAM_INT));

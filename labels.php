@@ -30,7 +30,7 @@ use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $kind = optional_param('kind', 'labels', PARAM_ALPHA);
 $which = optional_param('which', 'today', PARAM_ALPHA);
 $sincetext = optional_param('since', '', PARAM_TEXT);

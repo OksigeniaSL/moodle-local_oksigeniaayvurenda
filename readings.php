@@ -36,7 +36,7 @@ $courseid = optional_param('course', 0, PARAM_INT);
 
 if (!$courseid) {
     // The library's side: what the courses ask of it.
-    $ref = required_param('library', PARAM_ALPHANUMEXT);
+    $ref = \local_oksigeniaayvurenda\local\shell::library_ref();
     require_login(null, false);
     $library = catalogue::library($ref);
     shell::require('local/oksigeniaayvurenda:desk', $library);

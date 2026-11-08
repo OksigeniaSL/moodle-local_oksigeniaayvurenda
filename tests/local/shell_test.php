@@ -43,6 +43,26 @@ final class shell_test extends \advanced_testcase {
     }
 
     /**
+     * The library of a page from its address; without it, the only library whoever looks has; else the home, never
+     * Moodle's error (DIA-11).
+     */
+    public function test_library_ref(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $one = $gen->create_library(['slug' => 'sola']);
+        $this->setAdminUser();
+        $_GET['library'] = 'otra';
+        $this->assertSame('otra', shell::library_ref());
+        unset($_GET['library']);
+        $this->assertSame('sola', shell::library_ref());
+        $gen->create_library(['slug' => 'segunda']);
+        \cache::make('local_oksigeniaayvurenda', 'access')->purge();
+        $this->expectException(\moodle_exception::class);
+        shell::library_ref();
+        unset($one);
+    }
+
+    /**
      * Every script the page writes carries its nonce, the same all through the page; one that slipped in with a text
      * would not (seg-salida 3).
      */

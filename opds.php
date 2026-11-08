@@ -30,7 +30,7 @@ define('NO_MOODLE_COOKIES', true);
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- an open public window is for everyone.
 require(__DIR__ . '/../../config.php');
 
-$library = window::open(required_param('library', PARAM_ALPHANUMEXT));
+$library = window::open(\local_oksigeniaayvurenda\local\shell::library_ref());
 if (!$library) {
     http_response_code(404);
     die;

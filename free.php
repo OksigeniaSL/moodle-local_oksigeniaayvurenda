@@ -31,7 +31,7 @@ use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $query = trim(optional_param('q', '', PARAM_TEXT));
 $bookid = optional_param('book', 0, PARAM_INT);
 // Where from: Project Gutenberg (EPUB) or Wikisource (read there, by a link).

@@ -30,7 +30,7 @@ use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $stage = optional_param('stage', '', PARAM_TEXT);
 $group = optional_param('group', '', PARAM_TEXT);
 $readerid = optional_param('reader', 0, PARAM_INT);

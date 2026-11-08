@@ -31,7 +31,7 @@ use local_oksigeniaayvurenda\local\window;
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- what is in an open window is read without an account; the rest logs in.
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $id = required_param('id', PARAM_INT);
 $context = context_system::instance();
 $PAGE->set_context($context);

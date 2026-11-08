@@ -32,7 +32,7 @@ require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
 require_sesskey();
-$library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
+$library = catalogue::library(\local_oksigeniaayvurenda\local\shell::library_ref());
 shell::require('local/oksigeniaayvurenda:view', $library);
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');

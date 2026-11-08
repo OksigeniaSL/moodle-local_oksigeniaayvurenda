@@ -1,7 +1,17 @@
 # Changelog
 
-## 0.207.0
+## 0.208.0 (2026-11-08)
 
+- For whoever installs and looks after it (audit, otr-diablo and otr-codigo):
+  - A page whose address lost its library goes to the only library whoever looks has, or to the home that lets them
+    choose; never to Moodle's error page.
+  - The README says what it needs, who does what, what runs every night, the daily copy, the settings, what is optional
+    and the command line, in English and in Spanish.
+  - Every version in this changelog carries its date.
+  - The CI tests Moodle 5.2 on every push and the whole supported range, 5.0 and 5.1 too, once a week; the SIP2 bridge
+    has its own job; and each task of the night is run as the cron runs it.
+
+## 0.207.0 (2026-11-08)
 - «How do I…?» with the site's AI (audit, ia-bibliotecarios): only the staff ask it, never a reader; it gets the tasks
   the question finds, whole, and the rest by their title; the question goes between marks, as a question; it is asked in
   the library's context, so a shared site counts each centre's; what the AI thought aloud is dropped, and its Markdown
@@ -18,8 +28,7 @@
   - A centre's own portrait of the memory reaches the app.
   - Enter searches; the results say how many there are, bring more with «See more» and show their covers.
 
-## 0.206.0
-
+## 0.206.0 (2026-11-08)
 - Privacy of the youngest (audit, priv-menores):
   - Loans given back more school years ago than the centre keeps (two, unless it says otherwise in «Centre settings»)
     stop saying who took them: each reader's year goes to a stand-in of its own, in the same group and stage, so the
@@ -34,15 +43,13 @@
     kind of reader; the texts say so.
   - The privacy description says that asking for accessible formats may reveal a disability, and who sees it.
 
-## 0.205.0
-
+## 0.205.0 (2026-11-08)
 - Every page of the library tells the browser to run only the library's own scripts: its files and what it writes with
   the page's nonce (`Content-Security-Policy`, with no plugins and no other base), and never to guess a type
   (`X-Content-Type-Options: nosniff`, also on every file it serves). The print buttons no longer carry a script in the
   page. The reader of e-books keeps its own rules.
 
-## 0.204.0
-
+## 0.204.0 (2026-11-08)
 - What is reached without an account, tightened (audit, seg-anon and seg-cripto):
   - The address of a self-loan post carries its key after a «#», which never leaves the browser: the page sends it by
     POST and the post keeps it in a cookie of its own, so it is in no log of the server nor of a proxy. Addresses of
@@ -63,8 +70,7 @@
 - On a phone, the way out is in «More» and no longer a tab too: with few doors (someone without an account) it pushed
   «More» off the screen.
 
-## 0.203.0
-
+## 0.203.0 (2026-11-08)
 - The curious things of each catalogue, worked out once a day: with nothing of the reader's own to tell, the memory
   tells its longest title, a title of one word or a title that is a question, and takes the reader to it (never to
   Infantil); the blackboard of the visit and the pulse of the door say the year of the oldest book still in service
@@ -75,22 +81,19 @@
   of the stretch, when its pages are counted.
 - In the app, nothing on loan in the words of whoever looks.
 
-## 0.202.0
-
+## 0.202.0 (2026-11-08)
 - The last lines of humour: the practice library says what it is on top of each of its pages (break away: it goes the
   next night); the herald marks the hundredth loan of the day at a desk; on the first of April one spine of the shelves
   stands upside down and the memory owns up to it on the lectern; a gap opened a third time, the hummingbird says it is
   still keeping the spot.
 
-## 0.201.0
-
+## 0.201.0 (2026-11-08)
 - The voices of the lines of humour that carry no name nor search, for the youngest, who may not read yet (art 0.1.53):
   the memory by night in the visit, the third tap on the memory and on the herald (each herald with its voice), the
   memory's glasses on a search with nothing found for Infantil, «Looking for me?» of the memory and of the herald, and
   the empty album of Infantil.
 
-## 0.200.0
-
+## 0.200.0 (2026-11-08)
 - From the audit's ideas, with Gaudí:
   - «Show it big» on the card: the codes on the whole screen, black on white, the screen kept awake, closed by itself in
     half a minute;
@@ -108,8 +111,7 @@
   - the hummingbird crossing a child's card flies along its top edge and out, never stopping over a button.
 - 0.199.0 did not get installed (a test of the late notice depended on the day); it goes inside this one.
 
-## 0.199.0
-
+## 0.199.0 (2026-11-08)
 - The lines of humour, second part:
   - a book late with nothing to pay: a day in two, another way to say it, by age and library (the herald to the young;
     the shelf has noticed, to the secondary school; someone is waiting, at a university; a visit fixes it, at a public
@@ -123,8 +125,7 @@
 - The herald's round (with Gaudí): each day it is in one room of the visit only, the same for everyone; in the hall, a
   feather of it (Gaudí's, art 0.1.51) on the board's row of that room, for the young; the sky looks for it.
 
-## 0.198.0
-
+## 0.198.0 (2026-11-08)
 - The lines of humour, first part (from the audit, with Gaudí): written for each age, a bag of them the same all day for
   each reader (`characters::bag`, `characters::band`):
   - a search with nothing found, by age (the glasses for Infantil, under the rug for Primaria, dry for secondary,
@@ -139,8 +140,7 @@
   - a new reader with nothing taken yet is welcomed by the memory; the empty album of Infantil, as a plate before
     dinner; the staff's reservations with nothing waiting, in the university's words.
 
-## 0.197.0
-
+## 0.197.0 (2026-11-08)
 - Play and the visit (audit batch 10, with Gaudí):
   - the hidden book by age: a shorter shelf for the youngest; for a reader past the flower, the memory gives the title
     and the author, the label is folded under «See its label», the spines carry no title (as seen from the aisle), and
@@ -153,15 +153,13 @@
   (MER-03).
 - A shared link to a book no longer in the public catalogue shows the memory and the way back to the door.
 
-## 0.196.1
-
+## 0.196.1 (2026-11-07)
 - The personal area's block, after Gaudí's review: whoever lends at several desks gets one section with a row for each
   library (its name, what waits, in red with books late, and «Desk»); the buttons «Go to the library» and «My card» come
   once, at the end, and each library's name links to it; a class challenge met says «Met!» by its count. A university or
   a company looks like one whatever the reader's card.
 
-## 0.196.0
-
+## 0.196.0 (2026-11-07)
 - The memory's idea of the day, to taste and with a door to the new (Enrique, 7 November 2026): after a book loved, first
   what three or more other readers who loved it loved too (each loved by two of them at least, so that no one's reading
   can be guessed); one day in three (one in two when the flower's «Explore» has stood still for a month), a book of a
@@ -173,8 +171,7 @@
   teacher, the readings of their courses against their students; to whoever lends, what waits at the desk, as numbers.
   In the words of each centre's skin; the round portraits come in the art package 0.1.50.
 
-## 0.195.0
-
+## 0.195.0 (2026-11-07)
 - Play and the visit (audit batch 10, second part):
   - once a class meets its challenge, the tutor (in «My class») and the staff (on the group's page) can start another
     one in the same term, counted from that day; the garden keeps both, and «No other challenge» goes back to the one
@@ -188,8 +185,7 @@
   - the visit on a phone opens with the room's map in sight, its arrows sit at the top corners instead of on the door,
     and the list under the scene ends with the way out.
 
-## 0.194.0
-
+## 0.194.0 (2026-11-07)
 - Play and the visit (audit batch 10, first part):
   - the hidden book never has a twin with the same label on its shelf (the next turn's book is taken), and if two
     labels still match the memory says so; the gap of a book that is out is not counted as a miss; the magnifier shows
@@ -206,8 +202,7 @@
   - the app's card shows a young reader's flower.
 - A class named twice in the catalogue no longer warns when the corners are listed.
 
-## 0.193.0
-
+## 0.193.0 (2026-11-07)
 - The reader's home as one board, from Gaudí's mock-up (dis-pase-04): on the left, the herald once and whole, with three
   covers of what just arrived and the book of the week on a plate; on the right, what the memory recommends with its cover,
   and the reader's flower with «My card» and the class's challenge inside; one «Listen» per card, by its title. The visit,
@@ -216,8 +211,7 @@
   opens over the bar, with the keyboard, a cross and Esc, and starts open on the results; a reader has four tabs, the fourth
   «More», a sheet from below with the rest and the way out, closed with a tap outside it.
 
-## 0.192.0
-
+## 0.192.0 (2026-11-07)
 - 0.191.0 did not get installed (the CI's HTML validator refused `role="switch"` on a button): it comes inside this one,
   with the switches as `aria-pressed`.
 - The characters do not move any more: their puppets turned pieces cut out of a drawing made whole, which the common
@@ -246,8 +240,7 @@
     «spoken of as» she or he, and the flower's row a point bigger.
   - a «How do I…?» task to put the library on everyone's dashboard (UXL-17).
 
-## 0.191.0
-
+## 0.191.0 (2026-11-07)
 - Design, dark mode and accessibility (audit batch 9, first part):
   - in dark mode, late books, «Erase this reader…» and the featured library's «Enter» read at 4.5:1 or more, and the
     shelf embedded in another website keeps its own paper and ink whatever the mode;
@@ -269,8 +262,7 @@
     computer; the shelf places as three books on a plank; a guided help's stage the size of its card until it starts;
   - book counts with thousands on the home page, the door and the shelves.
 
-## 0.190.0
-
+## 0.190.0 (2026-11-07)
 - Helps (audit batch 8):
   - «How do I…?» answers by how much of the question a task covers, not by how many words it has: «lend a book» is the
     desk, not the textbook bank; the words every task has only break a tie; the very word counts more than its
@@ -304,8 +296,7 @@
 - Ages (the rest of batch 7): the book reader's arrows say «Previous» and «Next» under their icon (on a phone, the icon
   alone, with its name for screen readers), and a young reader of a school reads the pages a little bigger.
 
-## 0.189.0
-
+## 0.189.0 (2026-11-07)
 - Ages and skins (audit batch 7):
   - the card and the characters guess the age as other countries name their groups (Grade 2, Year 7, Klasse 3, CE2,
     6ème, Transición, 4º Básico…), by the first number of the group, and «Grado en» is a university degree;
@@ -322,22 +313,19 @@
   - a reader of the flower is not told how many books each corner has;
   - the herald speaks of what grew, not of what is missing (with its voices in the art package 0.1.47).
 
-## 0.188.0
-
+## 0.188.0 (2026-11-07)
 - The guided help «Sets and classes» of a textbook bank (a set, its titles, adding one, a new set, by class, a class), with
   its voices in the art package 0.1.46, opened from «Sets», «By class» and the bank's desk.
 - A new year: a set none of whose groups has pupils opens its change with this year's groups to tick, and the handout links
   to the sets.
 
-## 0.187.0
-
+## 0.187.0 (2026-11-07)
 - Linking readers with their accounts: «None of these» is remembered. The reader is not offered those accounts again and
   goes with those the site does not have, still a reader with their card. Nothing is checked by default: what is left
   unmarked stays in doubt for another day.
 - «Marcarlos como antiguos lectores», which marks everyone the site does not have at once, asks with a second touch.
 
-## 0.186.0
-
+## 0.186.0 (2026-11-07)
 - The last day of class of 0.185.0 becomes a date to have everything back, for any library and any calendar (the long
   holidays of each country, a stocktake, a move): until then nothing falls due or is renewed past it; six weeks before,
   «Academic year» and the desk say what is out and let everyone be told; once it has passed, lending goes on as always.
@@ -349,8 +337,7 @@
   comes back or its record is opened, and not again for six months: one question per book, as Open Library asks, never a
   sweep of the catalogue.
 
-## 0.185.0
-
+## 0.185.0 (2026-11-07)
 - The end of the course for a reading library (where there are classes), in «Academic year»:
   - the centre says its last day of class: nothing lent falls due after it, and no more time is given past it;
   - the end of the year shows six weeks before that day, not in the summer;
@@ -358,8 +345,7 @@
     notice (a new message, «Library books to bring back at the end of the year»), not the bank's;
   - «How do I…?» answers how to get the books back in June.
 
-## 0.184.0
-
+## 0.184.0 (2026-11-07)
 - The bank of textbooks, from the audit:
   - the round is of its year: in September, last June's date, reminders and counts are gone;
   - collecting begins in June when no date is set, and textbooks are lent until the round's date when it is set;
@@ -377,8 +363,7 @@
   - the block and the app say «and your N textbooks» in one line instead of listing them all year (block 0.1.7);
   - who left with books says their group of this year when they had none the year before.
 
-## 0.183.0
-
+## 0.183.0 (2026-11-07)
 - With 0.182.0, which was never installed (a test that picked one of two top libraries at random failed in the CI).
 - Corners for libraries that sort by letters (N, P, C…), on their own after the figures, coloured in turn, in the
   catalogue, the search, the shelves, the hidden-book game and the memory; «J 821» is in the corner of 8.
@@ -410,8 +395,7 @@
   (as with Abies); a record with the same first author is the same book even if its title was corrected.
 - A MARC or MARCXML file is read a record at a time from the disk: a big catalogue no longer sits whole in memory.
 
-## 0.182.0
-
+## 0.182.0 (2026-11-07)
 - Bringing a catalogue in:
   - the volumes of a work keep their number and name (245 $n and $p), and a record without 245 $a takes another title;
   - an 852 split in $h and $i keeps its whole call number;
@@ -425,8 +409,7 @@
 - An ISBN-13 needs the prefix of books (978, 979); an ISBN with its qualifier stuck to it («…(tapa flexible)») is read.
 - Labels by codes find codes typed in small letters.
 
-## 0.181.0
-
+## 0.181.0 (2026-11-07)
 - Closed days cost nothing: a late book pays, or keeps its reader without loans, only for the days the library was open.
 - The class challenge «Everyone» counts the readers who are here, not one who stopped coming.
 - A cohort renamed during the year takes its tutor with it; a reader erased leaves no group of this year behind.
@@ -435,8 +418,7 @@
 - The only editing teacher of a chosen course becomes the tutor of its groups where they have none, so «My class» reaches
   whoever brought them.
 
-## 0.180.0
-
+## 0.180.0 (2026-11-07)
 - Whoever looks after one library (a classroom's, a department's) sees what it has out and who has it («Lent», in its
   header and from the desk's figures), and a page that is not for them says what they can do instead of sending them to
   ask for a permission.
@@ -449,8 +431,7 @@
 - Words that talked like a platform: «Other platforms», «Site groups (cohorts)», «Site courses», «Download the sheet».
 - A name alone in a list the first time and twice the next keeps the reader of before, by their group.
 
-## 0.179.0
-
+## 0.179.0 (2026-11-07)
 - Readers who came through a platform (LTI) have their origin noted, and the night of the cohorts no longer takes them
   away (they left and came back every day); an upgrade step notes it for those already there.
 - Cifra is read to its last page, however many people its pages bring.
@@ -461,8 +442,7 @@
 - A list of readers takes «Curso» (and course, grade, form, homeroom…) as the group, and a group named for teachers,
   staff or families says the kind of its readers.
 
-## 0.178.0
-
+## 0.178.0 (2026-11-07)
 - The desk: «Renew» on each loan of the reader's card, without the book; with a reader open, the field says whom it lends
   to and the day's figures stay under the card; «Their record» opens in the same tab and «Close» says «Done, next»;
   «Due today» opens today's list.
@@ -476,8 +456,7 @@
 - «My shelf» and asking for another format, opened by their address, answer as pages of the library.
 - With everything of 0.177.0, which never reached a site (a template of «School year» did not pass the CI).
 
-## 0.177.0
-
+## 0.177.0 (2026-11-07)
 - Closed days: each centre names the days it is closed (holidays, a local festival, a move) on «School year»; nothing
   lent or set aside falls due on them, it moves to the next open day, as weekends already did.
 - The family of a young reader hears of their late books too, where the site keeps its families (Oksigenia Family):
@@ -494,8 +473,7 @@
 - The self-loan station and SIP machines leave to the desk a copy whose loan was noted by its title; a book read again at
   the same station soon after being taken, with no card, is still «yours» and is not returned.
 
-## 0.176.0
-
+## 0.176.0 (2026-11-07)
 - The nightly notices go at eight in the morning of each centre's own zone, not of the server's: the task runs every hour
   and tells each centre once a day (late books and what waits for the staff on weekdays; what expires every day, Saturday
   too).
@@ -512,8 +490,7 @@
 - The images of the notices have a name; a family's voice link is not sent from a practice library.
 - The card of a reader opened again shows its album (0.175.0 broke it; it never reached a site).
 
-## 0.175.0
-
+## 0.175.0 (2026-11-07)
 - The late notice counts its week by reader, not by book: two books late a few days apart are one message with every late
   book, instead of a message for each on different days; a reader who stopped coming but still has books hears too, and
   their tutor's summary lists them.
@@ -538,14 +515,12 @@
 - LTI: the library opens inside the platform's frame (Moodle's «Select content» and embedded activities), and the site's
   LTI private key is kept encrypted.
 
-## 0.174.1
-
+## 0.174.1 (2026-11-07)
 - «Subjects» no longer falls over in a catalogue with subjects that are a number («1914»): they became integer keys and
   the grouping of the alike went round for ever. Subjects with figures, Arabic or Roman, are never taken for a typo of
   each other («1914» and «1915», «siglo XX» and «siglo XI»).
 
-## 0.174.0
-
+## 0.174.0 (2026-11-07)
 - «Lost»: a book a reader has lost is given up as lost at the desk (next to «Return» in the reader's list, with a second
   touch) or from their record; the loan ends as lost, the copy is lost, what a late book costs at the centre counts as if it
   came back that day, and «Undo» opens the loan again. A lost copy that turns up and is passed at the desk goes back on the
@@ -553,8 +528,7 @@
 - «At home»: the reader sees on the library's home page and on their card the books they have out, with the day each one
   comes back, the late ones in red, and «Renew» where the library lets them.
 
-## 0.173.0
-
+## 0.173.0 (2026-11-07)
 - Dates for a date field keep the zero of the day: «Reports» came with «From» and «To» empty from the 1st to the 9th of
   every month (and «From» always, since a year starts on a 1st), and so did other date fields and the dates of some CSV.
 - The copy a centre takes with it has the readings of the courses with their books, the course reserves, the fragments,
@@ -566,15 +540,13 @@
   for): it shows why.
 - Two global functions of the page of copies have the plugin's prefix, and the plugin says it is beta.
 
-## 0.172.0
-
+## 0.172.0 (2026-11-07)
 - «Repeated records», from «More»: the records that share an ISBN, and those with the same title and author when one lacks
   the ISBN, side by side with their copies, summary and origin. Joining them leaves one with every copy, loan, hold, review,
   reading and subject, and with what it lacked (the summary, the cover); a new import of the program they came from updates
   that one. «Not the same book» stops offering them.
 
-## 0.171.0
-
+## 0.171.0 (2026-11-07)
 - The subjects of a centre are one vocabulary: a subject typed, imported or brought by a catalogue that the centre has with
   other capitals, accents or number is that one («misterios» is «Misterio»).
 - Correcting a record, its subjects are chips: what the centre already uses comes up while typing, the most used first and
@@ -582,8 +554,7 @@
 - «Subjects», from «More»: those that look like one (written another way, or a typo apart) to join with a touch, choosing
   which stays; every subject with its books, to look for and rename (renamed as another, they become one).
 
-## 0.170.0
-
+## 0.170.0 (2026-11-07)
 - «How does it work?»: the guided help of every page is a button that says what it does, first in its row, instead of a
   link that said «Help»; the same words in «How do I…?» and in the titles of the guided help.
 - Pass a book to a class: besides Google Classroom and Microsoft Teams, a Moodle course of whoever looks, where it goes into
@@ -597,8 +568,7 @@
 - Printing labels: only the sheets go to the paper. The row of the page's links and the notice of a long list pushed the
   first sheet down, and every label came out shifted.
 
-## 0.169.0
-
+## 0.169.0 (2026-11-07)
 - The class while it is typed: a word in the first box of the call number («biology») brings the numbers that fit, with
   their names and how many books have them, first those the library gave before to books on that subject; a number brings
   those that start with it. In «Add books» and in the correction of a copy.
@@ -609,8 +579,7 @@
 - «How do I…?» says how to lend by the ISBN, find the class of a book, see what was catalogued and wait some days before
   the late notice.
 
-## 0.168.0
-
+## 0.168.0 (2026-11-07)
 - The desk reads the ISBN of the back cover as if it were the book's label: with a reader open it goes out, or comes back if
   they have it; without one it stays in the hand, or comes back when only one is out; when it is not clear, the desk offers
   what is out and what is on the shelf. An ISBN that is not in the catalogue says so.
@@ -621,36 +590,30 @@
 - A site coming straight from 0.149.0 or before upgrades in one go: the origin of an import is renamed before the step
   that reads it.
 
-## 0.167.0
-
+## 0.167.0 (2026-11-04)
 - Print cards: «The design» shows the flower, the sky and the sober one with who gets each, and each centre chooses one for
   everyone or one for each stage, whatever its kind, without changing the card each reader sees on screen.
 - The logo of the centre goes at the top right of every printed card, on a white plate.
 - The stages come in the order of the school, not of the alphabet.
 
-## 0.166.1
-
+## 0.166.1 (2026-11-04)
 - Print cards: when they are ready the page says so and offers them, instead of leaving the button turning.
 
-## 0.166.0
-
+## 0.166.0 (2026-11-04)
 - Books out: what is already late has its own filter, the first of the row, in red when there is any.
 - Print cards speaks of readers, not of a centre, where the library is not a school.
 
-## 0.165.0
-
+## 0.165.0 (2026-11-04)
 - Print cards: with a stage chosen, the list of classes has only its classes, and with everyone they go under their stages;
   what is ready can be removed; and sheets can be chosen by model (Avery, Apli), to correct with the test sheet.
 - Books out: by default the closest date first, with filters for today, three days, this week and this fortnight; the cards can
   be sorted by date, class or name, and what has little time left says so, in colour.
 
-## 0.164.0
-
+## 0.164.0 (2026-11-04)
 - Print cards: teachers and staff have their own choice, and «Everyone» leaves out students without a class this year, who are
   printed one by one. A long word on a card, such as an e-mail, makes the text smaller instead of splitting.
 
-## 0.163.0
-
+## 0.163.0 (2026-11-04)
 - «Print cards»: of everyone, a stage, a class or one reader (from their record), with their photo or their bichito and the
   design of their stage: the flower, the sky, or the sober one for adults and for whoever chose it. For a print shop, an
   actual-size PDF with each face on its page, with bleed and trim box; on pre-cut sheets of ten, with a test sheet to fit any
@@ -658,13 +621,11 @@
   by. Many cards are prepared apart, and what is made deletes itself after seven days.
 - The back of the card says the library's address and a few lines of its own.
 
-## 0.162.0
-
+## 0.162.0 (2026-11-04)
 - «For you» on the card is no longer a form: the goal of the year is a ring with numbers to tap, the news a switch, and how
   the card looks three tiles. Each saves itself, with no «Save» button.
 
-## 0.161.0
-
+## 0.161.0 (2026-11-04)
 - A search of the catalogues when adding a book shows how it goes, catalogue by catalogue, and what is found can be chosen
   while the others answer; writing it by hand is there from the first moment.
 - A title or an author written wrong is searched as it may have been meant, by the words of the catalogue itself or,
@@ -673,22 +634,19 @@
 - The list of books out shows the reader's face, and with few readers, a card for each one instead of groups to open.
 - The row of the call number no longer has two bands across it.
 
-## 0.160.0
-
+## 0.160.0 (2026-11-04)
 - The menu is on every page of the staff, also on the list of libraries.
 - «More» fits without scrolling on a computer, and is in the order people look for things: lending, readers, catalogue,
   labels and stocktake, what to review, reports and settings.
 - The library's copies are now «Backups», in the settings, and say that they make themselves.
 
-## 0.159.0
-
+## 0.159.0 (2026-11-04)
 - At the desk and in «Readers», a name typed wrong finds who it may have meant: written by ear, a letter out, two letters
   swapped, a foreign surname. They are offered to choose: a guess never opens a reader or lends by itself.
 - At the desk, so does a title typed wrong.
 - A list of readers that does not fit says that there are more.
 
-## 0.158.0
-
+## 0.158.0 (2026-11-04)
 - Readers without a group are no longer one long list: teachers, staff and students each have their own place, with a
   search. Those who stopped coming have theirs too.
 - A reader's record has a way back to the list it was opened from, and says which group a teacher tutors.
@@ -700,8 +658,7 @@
 - «How do I…?» with the site's AI answers as soon as you ask, with no second button, and brings the screen and the guided
   help of the tasks it used.
 
-## 0.157.0
-
+## 0.157.0 (2026-11-04)
 - The desk starts wherever the person in front of it starts. A book found by its title with no reader open is a button:
   a touch puts it in the desk's hand, the field asks who it is for, and the reader who opens takes it, by card or by name.
   The same for a book scanned before its card, and for several books before one card.
@@ -710,16 +667,14 @@
   list it came from comes back.
 - With a reader open, the list of books says who takes the one you touch.
 
-## 0.156.0
-
+## 0.156.0 (2026-11-04)
 - A record or a copy can be corrected after it was catalogued, from its own page: title, authors, subjects, ISBN and
   the rest; a copy's code, spine label, location and notes. What was entered by mistake and has nothing behind it can
   be taken out; what was lent stays, and is withdrawn as always.
 - The desk without a network in two tabs no longer passes each scan twice, which brought back what it had just lent; and
   a kept scan whose answer was lost is not passed again.
 
-## 0.155.0
-
+## 0.155.0 (2026-11-03)
 - MySQL 8: the columns `source.system` and `bankset.groups`, words it reserves, are now `origin` and `groupnames`. Older
   copies still come back.
 - PostgreSQL: the desk and the people who keep a library find names with accents by a word typed without them.
@@ -727,8 +682,7 @@
   need to know; the title stays in the message.
 - The reader of EPUB books lets a book ask nothing of other sites, which would tell them who is reading it.
 
-## 0.154.1
-
+## 0.154.1 (2026-11-03)
 - Erasing a reader is final everywhere: no list, program or cohort that still has them brings them back the next night
   (a fingerprint stays, as with Abies); the staff no longer finds their record, card or desk panel; and what their
   account left in the library (their place in a book, the phone's code, their choices) goes too.
@@ -737,8 +691,7 @@
 - A copy that cannot be written whole, on a full disk, is an error and not a short copy that looks fine.
 - With centres apart, a centre that loses its category closes instead of opening to the whole site.
 
-## 0.154.0
-
+## 0.154.0 (2026-11-03)
 - A copy comes back whole: a text ending in a backslash no longer swallows its row and the next, and the screen says when a
   copy has fewer rows than it declares. Older copies still read.
 - A source that stops bringing many readers at once no longer leaves them as gone: a deleted cohort, an empty answer or
@@ -748,14 +701,12 @@
 - A cell in quotes with several lines no longer makes rubbish records from a CSV.
 - «I no longer want it» is gone from a book the reader has on loan, where it led to an error.
 
-## 0.153.2
-
+## 0.153.2 (2026-11-03)
 - Loans written on paper find the readers with an account by the account's name (the library keeps no copy of it);
   before, only those without an account were found. The same name once with an account and once without (a reader from
   an old program not matched yet) is the one with the account; matching later brings the two together, loans and all.
 
-## 0.153.1
-
+## 0.153.1 (2026-11-03)
 - At the desk with no reader open, a title also brings up the books on the shelf (with their author, how many and their
   call number), saying that lending one needs the reader first; before, it only looked among the loans out and, with
   none, answered «I do not know». When nothing has the words, it says no reader and no book has them.
@@ -764,8 +715,7 @@
 - `cli/centre.php --match-sure`: links the readers without an account that are sure to theirs, as «Readers» does with
   one touch, and says how many are left doubtful and how many have no account here.
 
-## 0.153.0
-
+## 0.153.0 (2026-11-03)
 - A book without a label, by its title, at the desk: with the reader open, a word of the title or the author brings up
   the books on the shelf (those with it in their title first, each with its author, how many are on the shelf and its
   call number) and a touch lends one; with no reader open, it brings up the loans out of it and who has them, and a
@@ -775,8 +725,7 @@
   back is taken as the one (as with the loans written on paper).
 - «How do I…?»: lending or taking back a book without a label.
 
-## 0.152.0
-
+## 0.152.0 (2026-11-03)
 - Loans written on paper while the desk could not be used (`cli/paper_loans.php`): a list saved as CSV, with who, what,
   what happened and when, is first read and explained line by line (its reader and its book, sure, close with a slip of
   a letter, or doubtful with the candidates), and with `--apply` done in date order as the desk would have done it on
@@ -791,8 +740,7 @@
 - An old export brought in as returned lists the loans it had out whose copy has not moved here since, to look on the
   shelf whether they really came back.
 
-## 0.151.0
-
+## 0.151.0 (2026-11-03)
 - Importing a newer Abies export over a library already in use keeps what the library did since: a record, copy, reader
   or loan changed here is left as it is (the rest is brought up to date), one deleted here does not come back, and a
   reader erased at their request does not come back either (only a fingerprint of their Abies id stays).
@@ -806,27 +754,23 @@
   kept printing labels after the copy that came, new copy codes start after its last label, in the desk, in imports
   and for the copies the Abies import relabels.
 
-## 0.150.3
-
+## 0.150.3 (2026-11-03)
 - Matching readers who came without an account (from Abies, from a list) compares their group only when it is this
   year's: an export from an earlier year brings last year's groups, and the same name in this year's class is sure, not
   a doubt. A different group this year is still worth a look.
 
-## 0.150.2
-
+## 0.150.2 (2026-11-03)
 - Readers from a cohort for a whole stage (not a class) take their class from the group of a chosen course, keeping the
   kind and stage of the cohort; before, the cohort hid the course's group and they had no class.
 - `cli/centre.php --cohorts`: a cohort ending in * is every cohort whose id number or name starts so («ESO *»), each with
   its own stage guessed from its name; for a site with a cohort for each class.
 
-## 0.150.1
-
+## 0.150.1 (2026-11-03)
 - In a site with one centre, «Library manager» (the librarian's work and the centre's settings: rules, readers,
   characters, matching readers) can be given on the site, the centre's place; with a category for each centre it is
   still given only in that category. Turning that setting on or off moves it.
 
-## 0.150.0
-
+## 0.150.0 (2026-11-03)
 - A centre open only to its staff while it gets ready now shows nothing to anybody else: no «Library» in the site's
   menu, no «Readings» in the courses, no «Library» in the app's menu (its init says disabled), and no message from the
   library while every centre of the site is getting ready, except to their staff.
@@ -837,16 +781,14 @@
   two characters (and the herald's own drawings) and the cohorts its readers come from; `--list` says which centres
   there are.
 
-## 0.149.0
-
+## 0.149.0 (2026-11-02)
 - «How do I…?» links the printed guides on Ayvurenda's website (starting the library, the desk and the readers), in the
   reader's language.
 - What making the guides showed, in a library without classes: late books are listed by reader, and each row now says
   the book and when it was due (it said the reader's name again); the readers' page offers «Print cards» for everyone; the
   sheet of cards is «Readers' cards», not «Cards of No group»; a reader's profile says «Reader», not «Student».
 
-## 0.148.0
-
+## 0.148.0 (2026-11-02)
 - Readers from the OneRoster REST API of a management program (1.1 or 1.2), from «Where the readers come from»: OAuth 2
   with client credentials, or the OAuth 1.0a signature of 1.1; it is tried first without changing anything, the centre
   chooses its school and whether the families come, and after the first time by hand the night keeps them up to date,
@@ -855,40 +797,34 @@
   now with «&».
 - Late books say «1 día» («1 day»), not «1 días».
 
-## 0.147.0
-
+## 0.147.0 (2026-11-02)
 - ONIX for Books, the format of publishers and distributors (and of services such as DILVE): a message in 3.0 or 2.1,
   with reference names or the short tags of 3.0, comes in as records without copies, which are added at the desk; loading
   it again repeats nothing. The import screen says it.
 
-## 0.146.0
-
+## 0.146.0 (2026-11-02)
 - COinS on each book's page: Zotero, Mendeley and the other reference managers take the book with one click from the
   browser.
 - A course's reading list also in CSL-JSON, the format of the Citation Style Language that the citation styles read.
 
-## 0.145.0
-
+## 0.145.0 (2026-11-02)
 - The OAI-PMH repository also gives its records in MARC 21 (MARCXML, prefix «marc21»), as the daily copy writes them, with
   where each digital form is read (856); valid against MARC21slim.xsd. A resumption token goes on in the format asked.
 
-## 0.144.0
-
+## 0.144.0 (2026-11-02)
 - A catalogue from the exports of LibraryThing, Goodreads, Calibre and Libib: their columns are understood (the ISBN-13
   before the ISBN-10, the pages, the year, the tags, Calibre's description in HTML), their ISBNs come clean («="…"», «[…]»,
   several in a cell), their authors are split as each writes them («Mary GrandPré, Jim Kay», «A & B»), more authors go
   with the rest, and what Goodreads keeps on the «to-read» shelf does not come in.
 
-## 0.143.0
-
+## 0.143.0 (2026-11-02)
 - UNIMARC, the format of France, Portugal, Italy and much of Europe: its records are read as well as MARC 21's, in an
   import from any program (with its holdings in 995, already read) and from the catalogues.
 - Two more catalogues for adding books: the Bibliothèque nationale de France (by SRU, in UNIMARC) and Portugal's National
   Library (PORBASE, through the bridge, which gets a route for ISO 5426). Portugal and Brazil are now two regions.
 - A character the bridge could not map comes as itself, not as «<U+00BA>».
 
-## 0.142.1
-
+## 0.142.1 (2026-11-02)
 - The copies made by hand are kept apart (the last two) and never push out the last seven nightly ones; the list says
   which are made by hand.
 - The lines for the library's computer fetch both copies already, the day's and the week's of the files, and the Linux
@@ -896,16 +832,14 @@
 - «Copias» stops offering «Connect Google Drive» once Drive is one of its places (seen in the real test in dev, where a
   copy reached Drive and opened with the centre's key).
 
-## 0.142.0
-
+## 0.142.0 (2026-11-02)
 - Erasing a reader at their request, for whoever manages the centre, from the reader's record: everything that says who
   they are goes (name, card, e-mail, notes, reviews with their drawings and voices, their voices, reservations, fines,
   asks, the invitations to their family and the key their origin knew them by); the loans stay as anonymous numbers. On a
   site shared by centres their account goes too, when it has nothing else there. Not while they have books out. Moodle's
   privacy requests do the same with each reader of an account.
 
-## 0.141.0
-
+## 0.141.0 (2026-11-02)
 - The world's libraries for adding books: besides the Library of Congress, Open Library and Spain's, the national
   libraries and shared catalogues of Germany, Switzerland, Austria, Sweden, Finland, Norway, Denmark, Italy, Quebec,
   Wales, Victoria (Australia), Brazil, Colombia, Peru and Catalonia, each asked in its own way and tried with real
@@ -915,8 +849,7 @@
   asks the German ones), or of the language of the site.
 - A search by words stops asking after 20 seconds: a catalogue that does not answer must not hold the desk.
 
-## 0.140.0
-
+## 0.140.0 (2026-11-02)
 - A centre signed up from the command line, for the hosted service: `cli/add_entity.php` creates the centre, its first
   library and its category, sets its plan, gives whoever runs it an account and the role «Library manager» in that
   category, mails them how to get in, and notes when the centre accepted the terms and the privacy policy. Run again,
@@ -924,8 +857,7 @@
 - The role «Library manager» (`ayvurendamanager`): the librarian's permissions and the centre's settings, only in the
   category of a centre.
 
-## 0.139.0
-
+## 0.139.0 (2026-11-02)
 - A book with no ISBN, by its words: type its title or its author in «Add books» and what other catalogues have comes up,
   the ones with most of the words first; choose the one in your hands and it comes in as that catalogue described it,
   or write it by hand. Each catalogue is asked in its own way (CQL «all», «=», or Alma's index).
@@ -933,50 +865,42 @@
   Spain's research council (CSIC, by SRU). A catalogue in MARC-8 sends each accent apart from its letter: it comes in
   as one character.
 
-## 0.138.0
-
+## 0.138.0 (2026-11-02)
 - Accessible formats. A reader can be marked as needing them, with no reason given; an item of the digital collection
   can be an accessible format, seen only by those readers and never public. Any reader asks for a book in another format
   (large print, audio, braille, a text that can be read aloud) from its page; the staff see the asks in «Otros formatos»,
   with a card on the desk, answer with an accessible item or some other way, and the reader is told.
 
-## 0.137.1
-
+## 0.137.1 (2026-11-02)
 - Copies in Google Drive with no client of the library's own: a Moodle that already has Google's OAuth 2 service uses it.
   When that project has the Drive API off, «Copias» says so.
 
-## 0.137.0
-
+## 0.137.0 (2026-11-02)
 - Links that open from home: in a centre's settings, the prefix of its proxy and its link resolver. A link marked as
   subscribed goes through the proxy, a pasted DOI becomes its permanent address, and a book's page asks the resolver for
   its full text. This is no proxy: whoever opens it goes through the institution's, with its own login.
 - To pass a book to a class: on its page, for whoever teaches, in Google Classroom or Microsoft Teams.
 
-## 0.136.0
-
+## 0.136.0 (2026-11-02)
 - Taking a centre away with `--accounts` also takes its staff, who have no reader's card, when they have nothing else.
 - The copies out of the server can also go to a centre's own Google Drive: it connects its account from «Copies», with the
   narrowest permission Google has (only what this creates), and they go there encrypted with its own key. Taking the place
   away gives the permission back; what is already there stays. Needs the site's client at Google, in the plugin's settings.
 
-## 0.135.0
-
+## 0.135.0 (2026-11-02)
 - Each centre has its own time zone, in its settings; none chosen, the site's. Its day ends at its own midnight: due dates,
   what is late, days without lending, reservations, notices, the school year, reports and the dates shown for them all go
   by it, for whoever looks. A book back at 18:30 on its last day in Bogotá is not late because it is tomorrow in Madrid.
   Moments, such as when a copy was made or who did what, stay in the zone of whoever reads them.
 
-## 0.134.2
-
+## 0.134.2 (2026-11-02)
 - A new centre on a shared site starts without the app, as the free plan does; a plan saved before this has none either.
 
-## 0.134.1
-
+## 0.134.1 (2026-11-02)
 - The app of the hosted service (Oksigenia Aty) as a feature of a plan: in the paid ones, not in the free one. A plugin in
   someone's own Moodle, and the official app of Moodle, do not ask.
 
-## 0.134.0
-
+## 0.134.0 (2026-11-02)
 - SIP2, for self-loan machines, return boxes and RFID pads: a small bridge (`sip2-bridge/`, Python with nothing added, GPL)
   that runs in the library, speaks SIP2 to the machines on its network and HTTPS to the library, with the address of a
   self-loan post. A machine is one more post: the same rules, limits and record, and what it does can be undone.
@@ -995,8 +919,7 @@ What an independent review found in this and in 0.133.0:
 - Paid amounts survive undoing a return; a reader who owes is not melted away when matching; a blank amount keeps what it
   was; the date of a stretch of days is the site's for everyone; privacy exports everything, with no cap.
 
-## 0.133.0
-
+## 0.133.0 (2026-11-02)
 - If a book comes back late, a centre can now choose what it leaves, in the lending rules: only the warning (still the
   default), days without lending, or a fine, with days of grace, a ceiling, its currency, and which stages and adults it
   applies to. It is worked out as the book comes back.

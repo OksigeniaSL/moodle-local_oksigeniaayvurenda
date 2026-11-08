@@ -29,7 +29,7 @@ use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 require_login(null, false);
 $library = catalogue::library($ref);
 // Whoever keeps a bank (a teacher who coordinates it) runs it all: its desk, its classes, its round and its sets.

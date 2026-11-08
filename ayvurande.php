@@ -30,7 +30,7 @@ use local_oksigeniaayvurenda\local\voices;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $page = max(0, optional_param('page', 0, PARAM_INT));
 require_login(null, false);
 $library = catalogue::library($ref);

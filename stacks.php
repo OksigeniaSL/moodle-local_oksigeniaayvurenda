@@ -32,7 +32,7 @@ use local_oksigeniaayvurenda\local\stacks;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $place = optional_param('place', -1, PARAM_INT);
 $corner = optional_param('corner', '', PARAM_ALPHANUM);
 $all = optional_param('all', 0, PARAM_BOOL);

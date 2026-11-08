@@ -31,7 +31,7 @@ use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $span = optional_param('span', 'week', PARAM_ALPHA);
 $span = in_array($span, catalogued::SPANS, true) ? $span : 'week';
 $from = max(0, optional_param('from', 0, PARAM_INT));

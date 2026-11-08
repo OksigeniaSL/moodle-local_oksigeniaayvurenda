@@ -29,7 +29,7 @@ use local_oksigeniaayvurenda\local\shell;
 require(__DIR__ . '/../../config.php');
 
 require_login(null, false);
-$library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
+$library = catalogue::library(\local_oksigeniaayvurenda\local\shell::library_ref());
 shell::require('local/oksigeniaayvurenda:view', $library);
 if (!$library) {
     shell::missing(get_string('nolibrary', 'local_oksigeniaayvurenda'));

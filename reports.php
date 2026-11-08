@@ -31,7 +31,7 @@ use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $report = optional_param('report', '', PARAM_ALPHA);
 $format = optional_param('format', '', PARAM_ALPHA);
 require_login(null, false);

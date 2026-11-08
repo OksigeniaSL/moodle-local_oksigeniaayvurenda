@@ -1,9 +1,9 @@
 # Moodle Plugin CI — the suite that Moodle Marketplace reviewers expect (validate, lint, codechecker, phpdoc,
 # savepoints, mustache, grunt) plus the plugin's PHPUnit and Behat tests.
 #
-# Pushes and pull requests run a short matrix (the lowest and the highest supported branch); tags or a manual run
-# go through every branch that still gets security fixes, plus main. main tracks the next Moodle release and is
-# allowed to fail, so upstream breakage shows up early.
+# Pushes and pull requests run a short matrix (the lowest supported branch, 5.2 and the highest); once a week, tags or
+# a manual run go through every branch of the supported range, 5.0 and 5.1 too, plus main. main tracks the next Moodle
+# release and is allowed to fail, so upstream breakage shows up early.
 #
 # Reference template: https://github.com/moodlehq/moodle-plugin-ci
 name: Moodle Plugin CI
@@ -17,6 +17,9 @@ on:
   pull_request:
     paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.gitignore', 'provenance/**']
   workflow_dispatch:
+  # Every Monday, the whole range: what a centre on 5.0 or 5.1 runs is tested too, a few minutes a week.
+  schedule:
+    - cron: '17 5 * * 1'
 
 # A new push cancels the run of the one before it on the same branch, which nobody needs any more.
 concurrency:
@@ -32,14 +35,24 @@ jobs:
       - id: pick
         run: |
           low='{"moodle-branch":"MOODLE_405_STABLE","php":"8.1","node":"20"}'
+          b500='{"moodle-branch":"MOODLE_500_STABLE","php":"8.2","node":"22"}'
+          b501='{"moodle-branch":"MOODLE_501_STABLE","php":"8.3","node":"22"}'
           b502='{"moodle-branch":"MOODLE_502_STABLE","php":"8.3","node":"22"}'
           high='{"moodle-branch":"MOODLE_503_STABLE","php":"8.3","node":"22","pg":"17"}'
           next='{"moodle-branch":"main","php":"8.4","node":"22","pg":"17","experimental":true}'
-          if [[ "$GITHUB_REF" == refs/tags/* || "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
-            echo "include=[$low,$b502,$high,$next]" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF" == refs/tags/* || "$GITHUB_EVENT_NAME" == workflow_dispatch || "$GITHUB_EVENT_NAME" == schedule ]]; then
+            echo "include=[$low,$b500,$b501,$b502,$high,$next]" >> "$GITHUB_OUTPUT"
           else
-            echo "include=[$low,$high]" >> "$GITHUB_OUTPUT"
+            echo "include=[$low,$b502,$high]" >> "$GITHUB_OUTPUT"
           fi
+
+  # The SIP2 bridge, plain Python on a computer of the library: its own tests.
+  bridge:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bridge tests
+        run: cd sip2-bridge && python3 -I -B test_bridge.py
 
   test:
     needs: matrix

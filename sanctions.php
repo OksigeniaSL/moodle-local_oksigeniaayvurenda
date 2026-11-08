@@ -33,7 +33,7 @@ use local_oksigeniaayvurenda\local\skins;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $tab = optional_param('tab', 'now', PARAM_ALPHA) === 'closed' ? 'closed' : 'now';
 require_login(null, false);
 $library = catalogue::library($ref);

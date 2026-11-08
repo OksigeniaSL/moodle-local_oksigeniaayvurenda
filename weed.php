@@ -31,7 +31,7 @@ use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $recordid = optional_param('record', 0, PARAM_INT);
 require_login(null, false);
 $library = catalogue::library($ref);

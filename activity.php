@@ -28,7 +28,7 @@ use local_oksigeniaayvurenda\local\shell;
 
 require(__DIR__ . '/../../config.php');
 
-$ref = required_param('library', PARAM_ALPHANUMEXT);
+$ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $kind = optional_param('kind', '', PARAM_ALPHA);
 $kind = isset(activity::KINDS[$kind]) ? $kind : '';
 $from = max(0, optional_param('from', 0, PARAM_INT));
