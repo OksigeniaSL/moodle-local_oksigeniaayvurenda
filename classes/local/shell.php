@@ -805,6 +805,12 @@ document.addEventListener(\'error\', function(e) {
         foreach ($options['scripts'] ?? [] as $script) {
             $scripts .= '<script src="' . $app . $script . '.js?v=' . $version . '"></script>' . "\n";
         }
+        $sheets = '';
+        foreach ((array) ($options['styles'] ?? []) as $sheet) {
+            if (preg_match('/^[a-z0-9-]+$/', (string) $sheet)) {
+                $sheets .= "\n" . '<link rel="stylesheet" href="' . $app . $sheet . '.css?v=' . $version . '">';
+            }
+        }
         $config = json_encode($options['config'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
             | JSON_UNESCAPED_UNICODE);
         @header('Content-Type: text/html; charset=utf-8');
@@ -820,7 +826,7 @@ document.addEventListener(\'error\', function(e) {
 <title>' . s($title) . '</title>
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
-<link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">' . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement;
     if (root.getAttribute(\'data-colourmode\') === \'auto\') {

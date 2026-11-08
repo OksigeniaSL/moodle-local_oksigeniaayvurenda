@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.221.0 (2026-11-08)
+
+- The story reader, as Gaudí drew it (`tale.php`): a story to read at home opens on its cover («Read it aloud, slowly.
+  If they like, let them turn the page»), then the e-book one page at a time, and «The end» with «Good night», choose
+  another story, start again and its credits («… chose it to read at home, after reading it all the way through»).
+  Big letters for reading aloud, in four sizes, smaller on a short screen; night as a lamp, dim and amber, on when the
+  system is dark and remembered; two big buttons at the thumb, the arrows, Page Up and Down, the space bar and a finger
+  to turn, Escape to go back; the screen does not go off while reading; the open book when the phone lies down or on a
+  big screen. A recording the work brings is offered quietly on the cover; never a made voice. For anyone, without an
+  account, only for what a library marked to read at home at its open door. Anything but an e-book opens in the
+  library's reader, as before.
+- Where one is (Gaudí): a picture book laid out page by page says «Page 2 of 4» with its dots; text that flows says the
+  chapter and the screen inside it («One · 2 of 4») over a thin line of how far through the whole book (its places,
+  worked out once and kept in the browser for that book). The spine's shadow between two pages side by side; on a
+  short screen, the chapter's title smaller so the text starts on its screen; the end, lying down, beside its cover.
+
 ## 0.220.0 (2026-11-08)
 
 - Stories to read at home, as Gaudí drew them (Enrique: «Lovely»): a living room drawn on the page, which turns to

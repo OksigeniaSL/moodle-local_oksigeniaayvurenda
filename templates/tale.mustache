@@ -1,0 +1,83 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/tale
+
+    A story to read at home, as Gaudí drew its reader: the bar on top (back to the stories, the title, the size of the
+    letters and night), the book in the middle (its cover, its pages from the e-book, and the end), and the two big
+    buttons at the bottom with where one is between them. app/tale.js turns the pages.
+
+    Example context (json):
+    {
+        "title": "Buenas noches, faro", "cover": "https://example.org/faro.jpg", "colour": 2,
+        "back": "https://example.org/public.php?tales=1", "audiourl": "", "credit": "Buenas noches, faro · Ana Ruiz · CC BY",
+        "chosen": "Lo eligió para leer en casa la Biblioteca del barrio, después de leerlo entero.",
+        "talereaderclose": "Cuentos", "talereadersize": "Tamaño de la letra", "talereadersmaller": "Letra más pequeña",
+        "talereaderbigger": "Letra más grande", "talereadernight": "Noche", "talereaderprev": "Página anterior",
+        "talereadernext": "Página siguiente", "talereaderstart": "Empezar", "talereaderaloud": "Léelo en voz alta, despacio.",
+        "talereaderend": "Fin", "talereaderbye": "Buenas noches", "talereaderother": "Elegir otro cuento",
+        "talereaderagain": "Volver a empezar", "talereaderloading": "Abriendo el cuento…", "talereaderfailed": "No se ha podido abrir.",
+        "talereaderaudio": "Este cuento trae su propia grabación", "talereaderlisten": "Escucharla"
+    }
+}}
+<svg class="rd-symbols" width="0" height="0" aria-hidden="true" focusable="false">
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-voice" viewBox="0 0 24 24"><path d="M4 5h16v10H10l-5 4v-4H4z"/><path d="M8.5 9.2v1.6M12 8v4M15.5 9.2v1.6"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></symbol>
+  <symbol id="i-again" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></symbol>
+  <symbol id="i-read" viewBox="0 0 24 24"><path d="M3 5.6C5.6 4.5 8.6 4.6 12 6.6c3.4-2 6.4-2.1 9-1v13c-2.6-1.1-5.6-1-9 1-3.4-2-6.4-2.1-9-1z"/><path d="M12 6.6v13"/></symbol>
+</svg>
+<div class="rd size-1" id="rd">
+    <header class="rd-bar">
+        <a class="rd-close" href="{{back}}"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-close"/></svg><span>{{talereaderclose}}</span></a>
+        <p class="rd-title">{{title}}</p>
+        <div class="rd-size" role="group" aria-label="{{talereadersize}}">
+            <button type="button" data-size="-1" aria-label="{{talereadersmaller}}">A</button><button type="button" data-size="1" aria-label="{{talereaderbigger}}">A</button>
+        </div>
+        <button type="button" class="rd-night" aria-pressed="false"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg><span>{{talereadernight}}</span></button>
+    </header>
+    <div class="rd-book">
+        <section class="rd-page is-cover" data-page="cover" aria-label="{{title}}">
+            <div class="rd-cover">{{#cover}}<img src="{{cover}}" alt="" width="360" height="537">{{/cover}}{{^cover}}<span class="ayv-cover ayv-cover-{{colour}} rd-drawn"><span class="ayv-cover-title">{{title}}</span></span>{{/cover}}</div>
+            <div class="rd-intro">
+                <h1>{{title}}</h1>
+                <p class="rd-aloud"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-voice"/></svg>{{talereaderaloud}}</p>
+                {{#audiourl}}<p class="rd-audio"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-headphones"/></svg>{{talereaderaudio}} · <a href="{{audiourl}}">{{talereaderlisten}}</a></p>{{/audiourl}}
+            </div>
+        </section>
+        <section class="rd-page rd-epub" data-page="book" aria-label="{{title}}" hidden>
+            <p class="rd-loading" role="status">{{talereaderloading}}</p>
+            <p class="rd-failed" role="alert" hidden>{{talereaderfailed}}</p>
+            <div class="rd-sheet"><div class="rd-area"></div></div>
+        </section>
+        <section class="rd-page is-end rd-end" data-page="end" aria-label="{{talereaderend}}" hidden>
+            <div class="rd-end-pic">{{#cover}}<img src="{{cover}}" alt="" width="360" height="537">{{/cover}}</div>
+            <h1>{{talereaderend}}</h1>
+            <p class="rd-bye">{{talereaderbye}}</p>
+            <p class="rd-again"><a href="{{back}}"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-read"/></svg>{{talereaderother}}</a><button type="button" class="rd-restart"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-again"/></svg>{{talereaderagain}}</button></p>
+            <p class="rd-credit">{{credit}}<br>{{chosen}}</p>
+        </section>
+    </div>
+    <nav class="rd-nav" aria-label="{{talereadernext}}">
+        <button type="button" class="rd-prev" aria-label="{{talereaderprev}}" disabled><svg class="i" aria-hidden="true" focusable="false"><use href="#i-left"/></svg></button>
+        <p class="rd-where"><span class="rd-dots" aria-hidden="true"></span><span class="rd-progress" aria-hidden="true" hidden><i></i></span><span class="rd-count" aria-live="polite"></span></p>
+        <button type="button" class="rd-next" aria-label="{{talereadernext}}"><span class="rd-next-label">{{talereaderstart}}</span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-right"/></svg></button>
+    </nav>
+</div>

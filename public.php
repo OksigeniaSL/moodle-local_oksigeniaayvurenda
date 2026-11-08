@@ -209,7 +209,11 @@ if (optional_param('tales', 0, PARAM_BOOL)) {
             'cover' => (string) $record['cover'],
             'hascover' => (bool) $record['cover'],
             'colour' => $record['id'] % 6,
-            'url' => (new moodle_url('/local/oksigeniaayvurenda/read.php', ['library' => $library->slug, 'id' => $item->id]))
+            // An e-book opens in the story reader (big letters, night, one page at a time); anything else, in the library's.
+            'url' => (new moodle_url(
+                '/local/oksigeniaayvurenda/' . ($item->format === 'epub' ? 'tale.php' : 'read.php'),
+                ['library' => $library->slug, 'id' => $item->id] + ($item->format === 'epub' ? ['age' => $bandid($band)] : [])
+            ))
                 ->out(false),
             'minutes' => $item->homeminutes ? $str('talesminutes', (int) $item->homeminutes) : '',
             'parts' => !$parts ? '' : $str(($band === 9 ? 'taleschapters' : 'talespages') . ($parts === 1 ? 'one' : ''), $parts),

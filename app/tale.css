@@ -1,0 +1,206 @@
+/* A story to read at home, as Gaudí drew its reader (8 November 2026): the page of the book, the bar on top and the two
+   big buttons at the bottom; night as a lamp, not a screen; the open book when the phone lies down. The pages come from
+   the e-book through epub.js, in .rd-area (app/tale.js); app/tale-page.css dresses them inside. */
+/* ---------- The reader: the page of the book, the bar on top and the two big buttons at the bottom ---------- */
+html, body { height: 100%; }
+body.ayv { display: flex; flex-direction: column; height: calc(var(--vh, 1vh) * 100); min-height: 0; margin: 0; overflow: hidden; }
+/* The plugin's bare page wraps it in its main. */
+.ayv .ayv-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.rd {
+    --rd-bg: #efe5d2; --rd-page: #fbf6ec; --rd-ink: #1e2b2a; --rd-muted: #4b5753; --rd-btn: #17574c; --rd-btn-ink: #fff;
+    --rd-quiet: #fff; --rd-quiet-ink: #17574c; --rd-ring: rgba(15, 58, 51, .14); --rd-dot: rgba(30, 43, 42, .22); --rd-dot-on: #17574c;
+    --rd-shadow: 0 1px 2px rgba(15, 58, 51, .08), 0 14px 30px -16px rgba(15, 58, 51, .4); --rd-pic: none; --rd-plate: #f3e6cc;
+    --rd-size: 1.75rem;
+    flex: 1; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); background: var(--rd-bg); color: var(--rd-ink);
+    transition: background-color .3s ease, color .3s ease;
+}
+/* Night: dim and warm, for the bedroom with the light off. Not the page's dark mode: a lamp, not a screen. */
+.rd.is-night {
+    --rd-bg: #0c0a07; --rd-page: #17130e; --rd-ink: #f1e2c4; --rd-muted: #b5a689; --rd-btn: #4a3b26; --rd-btn-ink: #f6d48a;
+    --rd-quiet: #221c14; --rd-quiet-ink: #f1e2c4; --rd-ring: rgba(246, 212, 138, .18); --rd-dot: rgba(241, 226, 196, .2); --rd-dot-on: #f6d48a;
+    --rd-shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 14px 30px -16px rgba(0, 0, 0, .9); --rd-pic: brightness(.78) saturate(.88); --rd-plate: #221c14;
+    color-scheme: dark;
+}
+.rd.size-0 { --rd-size: 1.5rem; } .rd.size-2 { --rd-size: 2rem; } .rd.size-3 { --rd-size: 2.375rem; }
+/* A tablet held upright: more room, bigger letters. */
+@media (min-width: 600px) and (min-height: 760px) {
+    .rd { --rd-size: 2.125rem; } .rd.size-0 { --rd-size: 1.75rem; } .rd.size-2 { --rd-size: 2.5rem; } .rd.size-3 { --rd-size: 2.875rem; }
+    .rd-page { padding-left: 32px; padding-right: 32px; }
+}
+/* A short phone: a little less picture and letter, so a page fits without scrolling. */
+@media (max-height: 700px) {
+    .rd { --rd-size: 1.5rem; } .rd.size-0 { --rd-size: 1.3125rem; } .rd.size-2 { --rd-size: 1.75rem; } .rd.size-3 { --rd-size: 2.0625rem; }
+}
+
+.rd-bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; padding-top: calc(8px + env(safe-area-inset-top)); }
+.rd-bar a, .rd-bar button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 48px; min-height: 48px; padding: 0 12px;
+    border: 0; border-radius: 999px; background: var(--rd-quiet); color: var(--rd-quiet-ink); box-shadow: inset 0 0 0 1.5px var(--rd-ring);
+    font: 700 .9375rem var(--text); text-decoration: none; cursor: pointer; touch-action: manipulation; }
+.rd-bar svg.i { width: 22px; height: 22px; }
+.rd-title { flex: 1; min-width: 0; margin: 0; font: 600 1rem/1.2 var(--title); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--rd-muted); }
+.rd-size { display: inline-flex; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--rd-ring); background: var(--rd-quiet); }
+.rd-bar .rd-size button { box-shadow: none; background: transparent; min-width: 46px; padding: 0 8px; font-family: var(--title); }
+.rd-bar .rd-size button + button { border-left: 1.5px solid var(--rd-ring); border-radius: 0 999px 999px 0; }
+.rd-bar .rd-size button:first-child { border-radius: 999px 0 0 999px; font-size: .875rem; }
+.rd-bar .rd-size button:last-child { font-size: 1.125rem; }
+.rd-bar button[aria-pressed="true"] { background: var(--rd-btn); color: var(--rd-btn-ink); box-shadow: none; }
+.rd-bar button:disabled { opacity: .4; cursor: default; }
+/* On a narrow phone, the bar keeps its icons; the words stay for screen readers. */
+@media (max-width: 400px) {
+    .rd-close span, .rd-night span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .rd-bar { gap: 6px; padding-left: 8px; padding-right: 8px; }
+}
+
+/* The page: the picture on its plate, then the words, big. */
+.rd-book { position: relative; min-height: 0; overflow: hidden; touch-action: pan-y; }
+.rd-page { position: absolute; inset: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 4px 16px 10px; opacity: 1;
+    transition: opacity .22s ease, transform .22s ease; }
+.rd-page[hidden] { display: none; }
+.rd-page.is-leaving-next { opacity: 0; transform: translateX(-24px); }
+.rd-page.is-leaving-prev { opacity: 0; transform: translateX(24px); }
+.rd-page.is-coming-next { opacity: 0; transform: translateX(24px); }
+.rd-page.is-coming-prev { opacity: 0; transform: translateX(-24px); }
+.rd-pic { margin: 0; justify-self: center; width: 100%; min-width: 0; border-radius: 20px; overflow: hidden; background: var(--rd-plate); box-shadow: var(--rd-shadow);
+    max-width: 58.6vh; max-width: calc(var(--vh, 1vh) * 58.6); aspect-ratio: 4 / 3; }
+@media (max-height: 700px) { .rd-pic { max-width: calc(var(--vh, 1vh) * 48); } }
+.rd-pic img { display: block; width: 100%; height: 100%; object-fit: cover; filter: var(--rd-pic); transition: filter .3s ease; }
+.rd-words { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; padding: 2px 4px; -webkit-overflow-scrolling: touch; }
+/* Centred with auto margins: when the words do not fit, they scroll from the first line instead of being cut. */
+.rd-words p { margin: auto 0; font: 400 var(--rd-size)/1.42 "Andika", system-ui, sans-serif; letter-spacing: .005em; }
+
+/* The cover page: the book on its plate, its title, and a word for the grown-up who reads. */
+.rd-page.is-cover { grid-template-rows: minmax(0, 1fr) auto; align-content: center; }
+.rd-cover { display: flex; align-items: center; justify-content: center; min-height: 0; padding: 10px; }
+.rd-cover img { height: 100%; max-height: 420px; width: auto; aspect-ratio: 360 / 537; border-radius: 4px 12px 12px 4px; box-shadow: 0 16px 26px -14px rgba(15, 58, 51, .7); filter: var(--rd-pic); }
+.rd-intro { display: grid; gap: 8px; text-align: center; justify-items: center; padding-bottom: 6px; }
+.rd-intro h1 { margin: 0; font: 600 clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem)/1.1 var(--title); }
+.rd-intro p { margin: 0; color: var(--rd-muted); font-size: 1.0625rem; }
+.rd-intro .rd-aloud { color: var(--rd-ink); }
+.rd-intro .rd-aloud svg.i { color: #d9952a; width: 22px; height: 22px; vertical-align: -5px; margin-right: 6px; }
+.rd.is-night .rd-intro .rd-aloud svg.i { color: #f6d48a; }
+/* A tale that brings its own recording offers it here, quietly, never as the way to read. */
+.rd-audio { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; font-size: .9375rem; color: var(--rd-muted); }
+.rd-audio button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent;
+    color: var(--rd-quiet-ink); box-shadow: inset 0 0 0 1.5px var(--rd-ring); font: 700 .9375rem var(--text); cursor: pointer; }
+.rd-audio svg.i { width: 18px; height: 18px; }
+
+/* The end. */
+.rd-page.is-end { grid-template-rows: auto; align-content: center; justify-items: center; text-align: center; gap: 10px; overflow-y: auto; }
+.rd-end-pic { width: min(220px, 52vw); }
+.rd-end-pic img { display: block; width: 100%; height: auto; border-radius: 18px; filter: var(--rd-pic); box-shadow: var(--rd-shadow); }
+.rd-end h1 { margin: 6px 0 0; font: 600 3rem/1 var(--title); }
+.rd-end .rd-bye { margin: 0; font-size: 1.375rem; }
+.rd-end .rd-again { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
+.rd-end a, .rd-end button { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px; border: 0; border-radius: 999px; text-decoration: none;
+    font: 700 1.0625rem var(--text); cursor: pointer; }
+.rd-end a { background: var(--rd-btn); color: var(--rd-btn-ink) !important; box-shadow: 0 6px 14px -8px rgba(0, 0, 0, .5); }
+.rd-end button { background: var(--rd-quiet); color: var(--rd-quiet-ink); box-shadow: inset 0 0 0 1.5px var(--rd-ring); }
+.rd-credit { margin: 12px 0 0; font-size: .8125rem; line-height: 1.45; color: var(--rd-muted); }
+
+/* The two big buttons at the bottom, within the thumb's reach, with the dots between them. */
+.rd-nav { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.rd-nav button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 64px; height: 64px; padding: 0 20px;
+    border: 0; border-radius: 999px; cursor: pointer; touch-action: manipulation; font: 700 1.0625rem var(--text); }
+.rd-nav svg.i { width: 28px; height: 28px; stroke-width: 2.4; }
+.rd-nav .rd-prev { background: var(--rd-quiet); color: var(--rd-quiet-ink); box-shadow: inset 0 0 0 1.5px var(--rd-ring); }
+.rd-nav .rd-next { background: var(--rd-btn); color: var(--rd-btn-ink); box-shadow: 0 8px 16px -8px rgba(0, 0, 0, .45); }
+.rd-nav button[disabled] { visibility: hidden; }
+.rd-where { display: grid; justify-items: center; gap: 6px; margin: 0; }
+.rd-dots { display: flex; gap: 7px; }
+.rd-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--rd-dot); transition: background-color .2s ease, transform .2s ease; }
+.rd-dots i.on { background: var(--rd-dot-on); transform: scale(1.3); }
+.rd-count { font-size: .875rem; color: var(--rd-muted); }
+
+/* Lying down or on a big screen: the book open, the picture on the left page and the words on the right. */
+@media (min-width: 760px) and (min-aspect-ratio: 5/4) {
+    .rd { --rd-size: 2.125rem; }
+    .rd.size-0 { --rd-size: 1.75rem; } .rd.size-2 { --rd-size: 2.5rem; } .rd.size-3 { --rd-size: 2.875rem; }
+    .rd-book { margin: 0 auto; width: calc(100% - 48px); max-width: 1320px; }
+    .rd-page { grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 54fr) minmax(0, 46fr); gap: 0; padding: 6px 0 10px;
+        background: transparent; }
+    .rd-page > * { background: var(--rd-page); }
+    .rd-page:not(.is-end) { filter: drop-shadow(0 18px 24px rgba(15, 58, 51, .22)); }
+    .rd.is-night .rd-page:not(.is-end) { filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .7)); }
+    .rd-pic { max-width: none; aspect-ratio: auto; height: 100%; border-radius: 22px 0 0 22px; box-shadow: none; padding: 26px 22px 26px 26px; background: var(--rd-page); }
+    .rd-pic { display: flex; align-items: center; justify-content: center; }
+    .rd-pic img { width: auto; height: auto; max-width: 100%; max-height: 100%; border-radius: 14px; }
+    .rd-words { border-radius: 0 22px 22px 0; padding: 32px 46px 32px 42px; position: relative;
+        background: linear-gradient(90deg, rgba(15, 58, 51, .10), rgba(15, 58, 51, 0) 34px), var(--rd-page); }
+    .rd.is-night .rd-words { background: linear-gradient(90deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0) 34px), var(--rd-page); }
+    .rd-page.is-cover { grid-template-rows: minmax(0, 1fr); align-content: stretch; }
+    .rd-cover { border-radius: 22px 0 0 22px; padding: 30px; }
+    .rd-cover img { max-height: 100%; }
+    .rd-intro { border-radius: 0 22px 22px 0; align-content: center; padding: 30px 40px;
+        background: linear-gradient(90deg, rgba(15, 58, 51, .10), rgba(15, 58, 51, 0) 34px), var(--rd-page); }
+    .rd.is-night .rd-intro { background: linear-gradient(90deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0) 34px), var(--rd-page); }
+    .rd-page.is-end { grid-template-columns: minmax(0, 1fr); background: transparent; }
+    .rd-page.is-end > * { background: transparent; }
+    .rd-nav { width: calc(100% - 48px); max-width: 1320px; margin: 0 auto; padding-left: 0; padding-right: 0; }
+}
+/* A phone lying down: little height, so everything a bit smaller, and still the open book. */
+@media (min-width: 760px) and (min-aspect-ratio: 5/4) and (max-height: 520px) {
+    .rd { --rd-size: 1.375rem; } .rd.size-0 { --rd-size: 1.125rem; } .rd.size-2 { --rd-size: 1.625rem; } .rd.size-3 { --rd-size: 1.875rem; }
+    .rd-bar { padding-top: calc(4px + env(safe-area-inset-top)); padding-bottom: 4px; }
+    .rd-bar a, .rd-bar button { min-height: 44px; }
+    .rd-pic { padding: 12px 10px 12px 12px; }
+    .rd-words, .rd-intro { padding: 14px 24px 14px 22px; }
+    .rd-cover { padding: 12px; }
+    .rd-intro h1 { font-size: 1.5rem; }
+    .rd-nav { padding-top: 4px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+    .rd-nav button { height: 52px; min-width: 52px; }
+}
+/* Lying down with little height: a narrower margin, so the letters keep their room. */
+@media (min-width: 760px) and (min-aspect-ratio: 5/4) and (max-height: 520px) {
+    .rd-page.rd-epub > .rd-sheet { padding: 6px 24px 4px; }
+}
+
+/* What the plugin adds around Gaudí's reader. */
+.rd-symbols { position: absolute; width: 0; height: 0; overflow: hidden; }
+.rd svg.i { width: 1.25em; height: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rd :focus-visible { outline: 3px solid #f0b43c; outline-offset: 3px; }
+/* The e-book's pages: one sheet on its paper, its letters set from app/tale.js. */
+.rd-page.rd-epub { grid-template-rows: minmax(0, 1fr); }
+/* The sheet is the paper, with its margins; epub.js draws inside it. */
+.rd-sheet { position: relative; min-height: 0; height: 100%; padding: 18px 18px 14px; border-radius: 20px; overflow: hidden; background: var(--rd-page);
+    box-shadow: var(--rd-shadow); }
+.rd-area { position: relative; height: 100%; }
+.rd-loading, .rd-failed { position: absolute; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0;
+    padding: 24px; text-align: center; color: var(--rd-muted); font-size: 1.125rem; pointer-events: none; }
+.rd-loading[hidden], .rd-failed[hidden] { display: none; }
+/* Without a picture, the drawn cover of the library. */
+.rd-cover .rd-drawn { display: flex; height: 100%; max-height: 420px; aspect-ratio: 2 / 3; padding: 1rem; font-size: 1.25rem; }
+.rd-audio a { color: var(--rd-quiet-ink); font-weight: 700; }
+@media (min-width: 760px) and (min-aspect-ratio: 5/4) {
+    .rd-page.rd-epub { grid-template-columns: minmax(0, 1fr); padding: 6px 0 10px; }
+    .rd-page.rd-epub > * { background: transparent; }
+    .rd-page.rd-epub > .rd-sheet { padding: 34px 44px 28px; border-radius: 22px; background: var(--rd-page); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .rd, .rd * { transition: none !important; }
+}
+
+/* Text that flows: a thin line of how far through the whole book, in place of the dots (Gaudí). */
+.rd-progress { display: block; width: min(220px, 50vw); height: 4px; border-radius: 999px; background: var(--rd-dot); overflow: hidden; }
+.rd-progress[hidden] { display: none; }
+.rd-progress i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--rd-dot-on); transition: width .3s ease; }
+/* Two pages side by side: the spine's shadow between them. */
+.rd-sheet.is-spread::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 46px; transform: translateX(-50%); pointer-events: none;
+    background: linear-gradient(90deg, rgba(15, 58, 51, 0), rgba(15, 58, 51, .10) 46%, rgba(15, 58, 51, .14) 50%, rgba(15, 58, 51, .10) 54%, rgba(15, 58, 51, 0)); }
+.rd.is-night .rd-sheet.is-spread::after { background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .35) 50%, rgba(0, 0, 0, 0)); }
+/* The cover takes the picture's own proportion, with its cap on height: no empty band above the drawing (Gaudí). */
+.rd-cover img, .rd-end-pic img { aspect-ratio: auto; height: auto; width: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+.rd-cover img { max-height: min(420px, 100%); }
+/* The end lying down: the cover on the left and, on the right, the end, good night, the buttons and the credits. */
+@media (min-width: 760px) and (min-aspect-ratio: 5/4) and (max-height: 520px) {
+    .rd-page.is-end { grid-template-columns: minmax(0, 36fr) minmax(0, 64fr); grid-auto-rows: min-content; align-content: center;
+        justify-items: start; text-align: left; column-gap: 28px; row-gap: 6px; padding: 8px 24px; }
+    .rd-page.is-end > .rd-end-pic { grid-column: 1; grid-row: 1 / span 4; align-self: center; justify-self: end; width: auto; height: auto; }
+    .rd-page.is-end > .rd-end-pic img { width: auto; height: auto; max-height: 190px; }
+    .rd-page.is-end > :not(.rd-end-pic) { grid-column: 2; }
+    .rd-end h1 { margin: 0; font-size: 2rem; }
+    .rd-end .rd-bye { font-size: 1.125rem; }
+    .rd-end .rd-again { justify-content: flex-start; margin-top: 2px; }
+    .rd-end a, .rd-end button { min-height: 44px; padding: 0 16px; font-size: 1rem; }
+    .rd-credit { margin-top: 4px; }
+}
