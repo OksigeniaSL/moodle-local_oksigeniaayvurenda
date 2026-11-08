@@ -357,6 +357,10 @@ if ($canask && !optional_param('help', 0, PARAM_BOOL)) {
     $nav[] = ['url' => (new moodle_url('/local/oksigeniaayvurenda/suggest.php', ['library' => $library->slug]))->out(false),
         'label' => $str('suggesttitle')];
 }
+// The second factor of their account, where the site is only a library.
+if ($security = \local_oksigeniaayvurenda\local\onlylibrary::security_url()) {
+    $nav[] = ['url' => $security, 'label' => $str('menusecurity')];
+}
 shell::output(
     $str('cardtitle'),
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/card', $data),

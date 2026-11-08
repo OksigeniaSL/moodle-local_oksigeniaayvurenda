@@ -12,7 +12,8 @@
         "applink": "https://play.google.com/store/apps/details?id=com.oksigenia.aty", "apphint": "También en el móvil.", "applabel": "Descargar", "appnew": "(pestaña nueva)", "day": "dia.webp", "night": "noche.webp",
         "open": [{"name": "Biblioteca Riosalto", "motto": "Abierta", "colour": 1, "url": "#"}], "openheading": "Abiertas a todos",
         "openhint": "Sin entrar.", "languages": [{"code": "es", "name": "Español", "current": true, "url": "#"}],
-        "languagelabel": "Idioma", "legal": "#", "legallabel": "Aviso legal y privacidad"
+        "languagelabel": "Idioma", "legal": "#", "legallabel": "Aviso legal y privacidad",
+        "providers": [{"url": "#", "name": "Google", "iconurl": "https://example.org/google.png"}], "providersheading": "O entra con"
     }
 }}
 <div class="ayv-entry">
@@ -34,6 +35,12 @@
                 <input class="ayv-entry-input" id="ayv-entry-pass" type="password" name="password" autocomplete="current-password" required {{#username}}autofocus{{/username}}>
                 <button type="submit" class="ayv-button ayv-entry-go">{{go}}</button>
             </form>
+            {{#providers.0}}
+            <section class="ayv-entry-providers" aria-label="{{providersheading}}">
+                <p class="ayv-entry-hint">{{providersheading}}</p>
+                {{#providers}}<a class="ayv-button ayv-button-quiet ayv-entry-provider" href="{{url}}">{{#iconurl}}<img src="{{iconurl}}" alt="" width="20" height="20"> {{/iconurl}}{{name}}</a>{{/providers}}
+            </section>
+            {{/providers.0}}
             <p class="ayv-entry-more"><a href="{{forgot}}">{{forgotlabel}}</a></p>
             <p class="ayv-entry-hint">{{noaccount}}</p>
             {{#applink}}<p class="ayv-entry-app">{{apphint}} <a href="{{applink}}" target="_blank" rel="noopener">{{applabel}}<span class="ayv-sr"> {{appnew}}</span></a></p>{{/applink}}

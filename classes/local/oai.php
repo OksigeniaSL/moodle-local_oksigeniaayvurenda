@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The centre's own publications in the public window, for harvesters, by OAI-PMH 2.0 with Dublin Core.
+ * A library's open window for harvesters, by OAI-PMH 2.0: its catalogue and its own digital works, in Dublin Core and MARC 21.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -25,9 +25,12 @@
 namespace local_oksigeniaayvurenda\local;
 
 /**
- * Only what the centre publishes as its own (its own licence or a Creative Commons one), meant for the public, in an
- * open window: not the public-domain works it brought, which have their own repositories, nor the voices. Each
- * record is an item of the repository, its datestamp the last change of what it publishes. No sets, no deletions kept.
+ * Two sets. «catalogue»: every book with a copy in this library, when its window shows the catalogue to anyone, so a
+ * union catalogue, a VuFind or a neighbour's Koha can gather it (IOB-M2). «digital»: what the centre publishes as its
+ * own (its own licence or a Creative Commons one), meant for the public: not the public-domain works it brought, which
+ * have their own repositories, nor the voices. Each record is one item, in one or both; its datestamp is the last change
+ * of the record or of what it publishes. Lists go on by date and number, so they hold while the catalogue changes. No
+ * deletions kept: a harvester gathers it all again now and then.
  */
 final class oai {
     /** @var string Prefix of the plugin tables. */
@@ -35,6 +38,9 @@ final class oai {
 
     /** @var int Records in a list before a resumption token. */
     public const PAGE = 100;
+
+    /** @var string[] The sets, as the protocol names them. */
+    public const SETS = ['catalogue', 'digital'];
 
     /** @var string[] Licences of what the centre publishes. */
     public const OWN = ['own', 'cc-by', 'cc-by-sa', 'cc-by-nc', 'cc-by-nc-sa', 'cc-by-nd', 'cc-by-nc-nd'];
@@ -158,21 +164,28 @@ final class oai {
     private static function verb(\XMLWriter $xml, \stdClass $library, array $args): ?array {
         $verb = $args['verb'];
         if ($verb === 'Identify') {
-            $records = self::records($library);
-            $earliest = $records ? min(array_column($records, 'datestamp')) : time();
+            $earliest = self::earliest($library);
             $xml->startElement('Identify');
             $xml->writeElement('repositoryName', format_string($library->name, true, ['escape' => false]));
             $xml->writeElement('baseURL', self::base($library));
             $xml->writeElement('protocolVersion', '2.0');
             $xml->writeElement('adminEmail', \core_user::get_support_user()->email);
-            $xml->writeElement('earliestDatestamp', gmdate('Y-m-d\TH:i:s\Z', $earliest));
+            $xml->writeElement('earliestDatestamp', gmdate('Y-m-d\TH:i:s\Z', $earliest ?? time()));
             $xml->writeElement('deletedRecord', 'no');
             $xml->writeElement('granularity', 'YYYY-MM-DDThh:mm:ssZ');
             $xml->endElement();
             return null;
         }
         if ($verb === 'ListSets') {
-            return ['noSetHierarchy', 'This repository has no sets'];
+            $xml->startElement('ListSets');
+            foreach (self::sets($library) as $set) {
+                $xml->startElement('set');
+                $xml->writeElement('setSpec', $set);
+                $xml->writeElement('setName', get_string('oaiset' . $set, 'local_oksigeniaayvurenda'));
+                $xml->endElement();
+            }
+            $xml->endElement();
+            return null;
         }
         if (isset($args['metadataPrefix']) && !isset(self::FORMATS[$args['metadataPrefix']])) {
             return ['cannotDisseminateFormat', 'Only ' . implode(' and ', array_keys(self::FORMATS))];
@@ -194,45 +207,47 @@ final class oai {
             return null;
         }
         if ($verb === 'GetRecord') {
-            $record = self::find($library, $args['identifier']);
-            if (!$record) {
+            $item = self::find($library, $args['identifier']);
+            if (!$item) {
                 return ['idDoesNotExist', 'No such item'];
             }
             $xml->startElement('GetRecord');
-            self::record($xml, $library, $record, true, $prefix);
+            self::record($xml, $library, $item, true, $prefix);
             $xml->endElement();
             return null;
         }
-        // ListIdentifiers and ListRecords: from a token, or from the start with the dates asked.
-        if (isset($args['set'])) {
-            return ['noSetHierarchy', 'This repository has no sets'];
-        }
-        $offset = 0;
+        // ListIdentifiers and ListRecords: from a token, or from the start with the dates and the set asked.
+        $after = null;
         if (isset($args['resumptionToken'])) {
             $token = self::untoken($args['resumptionToken']);
             if (!$token) {
                 return ['badResumptionToken', 'Bad or expired token'];
             }
-            [$offset, $from, $until, $prefix] = $token;
+            [$after, $from, $until, $prefix, $set] = $token;
         } else {
             $from = isset($args['from']) ? self::time($args['from'], false) : null;
             $until = isset($args['until']) ? self::time($args['until'], true) : null;
+            $set = $args['set'] ?? '';
         }
-        $records = array_values(array_filter(self::records($library), fn($r) => ($from === null || $r['datestamp'] >= $from)
-            && ($until === null || $r['datestamp'] <= $until)));
-        if (!$records || $offset >= count($records)) {
-            return $offset ? ['badResumptionToken', 'Bad or expired token'] : ['noRecordsMatch', 'Nothing matches'];
+        if ($set !== '' && !in_array($set, self::sets($library), true)) {
+            return ['noRecordsMatch', 'No such set here'];
         }
+        $items = self::items($library, $set, $from, $until, $after, self::PAGE + 1);
+        if (!$items) {
+            return $after ? ['badResumptionToken', 'Bad or expired token'] : ['noRecordsMatch', 'Nothing matches'];
+        }
+        $more = count($items) > self::PAGE;
+        $items = array_slice($items, 0, self::PAGE);
         $xml->startElement($verb);
-        foreach (array_slice($records, $offset, self::PAGE) as $record) {
-            self::record($xml, $library, $record, $verb === 'ListRecords', $prefix);
+        foreach ($items as $item) {
+            self::record($xml, $library, $item, $verb === 'ListRecords', $prefix);
         }
-        if ($offset || count($records) > self::PAGE) {
+        if ($after || $more) {
             $xml->startElement('resumptionToken');
-            $xml->writeAttribute('completeListSize', (string) count($records));
-            $xml->writeAttribute('cursor', (string) $offset);
-            if ($offset + self::PAGE < count($records)) {
-                $xml->text(self::token($offset + self::PAGE, $from, $until, $prefix));
+            $xml->writeAttribute('completeListSize', (string) self::count($library, $set, $from, $until));
+            if ($more) {
+                $last = end($items);
+                $xml->text(self::token([$last['datestamp'], $last['id']], $from, $until, $prefix, $set));
             }
             $xml->endElement();
         }
@@ -241,18 +256,27 @@ final class oai {
     }
 
     /**
-     * The records the repository offers, oldest change first.
+     * The sets this library's repository has: the catalogue when its window shows it, and its digital works.
      *
      * @param \stdClass $library
-     * @return array[] id, title, lang, summary, pubyear, datestamp, items.
+     * @return string[]
      */
-    public static function records(\stdClass $library): array {
+    public static function sets(\stdClass $library): array {
+        return window::catalogue_open($library) ? self::SETS : ['digital'];
+    }
+
+    /**
+     * The library's own digital works meant for the public, by record: when each changed last and its items.
+     *
+     * @param \stdClass $library
+     * @return array[] Record id => datestamp and items.
+     */
+    public static function digital(\stdClass $library): array {
         global $DB;
         [$in, $params] = $DB->get_in_or_equal(self::OWN, SQL_PARAMS_NAMED);
         $rows = $DB->get_records_sql(
-            "SELECT d.*, r.title AS rtitle, r.lang AS rlang, r.summary AS rsummary, r.pubyear AS rpubyear
+            "SELECT d.*
                FROM {" . self::T . "digital} d
-               JOIN {" . self::T . "record} r ON r.id = d.recordid
               WHERE d.entityid = :entityid AND d.status = 'published' AND d.kind <> 'voice' AND d.licence $in
                 AND " . $DB->sql_like($DB->sql_concat("','", 'd.audience', "','"), ':public') . "
            ORDER BY d.id",
@@ -264,13 +288,164 @@ final class oai {
                 continue;
             }
             $id = (int) $row->recordid;
-            $records[$id] = $records[$id] ?? ['id' => $id, 'title' => $row->rtitle, 'lang' => (string) $row->rlang,
-                'summary' => (string) $row->rsummary, 'pubyear' => (string) $row->rpubyear, 'datestamp' => 0, 'items' => []];
+            $records[$id] = $records[$id] ?? ['datestamp' => 0, 'items' => []];
             $records[$id]['items'][] = $row;
             $records[$id]['datestamp'] = max($records[$id]['datestamp'], (int) $row->timemodified);
         }
-        uasort($records, fn($a, $b) => [$a['datestamp'], $a['id']] <=> [$b['datestamp'], $b['id']]);
-        return array_values($records);
+        return $records;
+    }
+
+    /**
+     * The query of the repository's items: each record with its datestamp, in the set asked (both, without one).
+     *
+     * @param \stdClass $library
+     * @param string $set catalogue, digital, or '' for both.
+     * @param array $digital As digital() gives it.
+     * @return array|null The SQL (of id and datestamp, as ds) and its parameters; null when nothing can be in it.
+     */
+    private static function query(\stdClass $library, string $set, array $digital): ?array {
+        global $DB;
+        $catalogue = window::catalogue_open($library) && $set !== 'digital';
+        $ids = $set === 'catalogue' ? [] : array_keys($digital);
+        if (!$catalogue && !$ids) {
+            return null;
+        }
+        $params = ['entityid' => $library->entityid, 'libraryid' => $library->id];
+        $where = [];
+        if ($catalogue) {
+            $where[] = "(r.doctype <> 'device' AND EXISTS (SELECT 1 FROM {" . self::T . "item} i WHERE i.recordid = r.id
+                AND i.libraryid = :libraryid AND i.status <> 'withdrawn' AND i.status <> 'lost'))";
+        }
+        if ($ids) {
+            [$in, $inparams] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'dig');
+            $where[] = "r.id $in";
+            $params += $inparams;
+        }
+        // A record changes when a digital form of it changes too.
+        $sql = "SELECT r.id, CASE WHEN d.ts IS NOT NULL AND d.ts > r.timemodified THEN d.ts ELSE r.timemodified END AS ds
+                  FROM {" . self::T . "record} r
+             LEFT JOIN (SELECT recordid, MAX(timemodified) AS ts FROM {" . self::T . "digital}
+                         WHERE entityid = :dentity AND status = 'published' AND kind <> 'voice'
+                      GROUP BY recordid) d ON d.recordid = r.id
+                 WHERE r.entityid = :entityid AND (" . implode(' OR ', $where) . ")";
+        return [$sql, $params + ['dentity' => $library->entityid]];
+    }
+
+    /**
+     * A page of the repository's items, oldest change first, after one already given.
+     *
+     * @param \stdClass $library
+     * @param string $set
+     * @param int|null $from
+     * @param int|null $until
+     * @param int[]|null $after The datestamp and id of the last one given.
+     * @param int $limit
+     * @return array[] id, datestamp and sets of each.
+     */
+    private static function items(\stdClass $library, string $set, ?int $from, ?int $until, ?array $after, int $limit): array {
+        global $DB;
+        $digital = self::digital($library);
+        $query = self::query($library, $set, $digital);
+        if (!$query) {
+            return [];
+        }
+        [$sql, $params] = $query;
+        [$filter, $more] = self::window($from, $until, $after);
+        $rows = $DB->get_records_sql(
+            "SELECT x.id, x.ds FROM ($sql) x" . $filter . " ORDER BY x.ds, x.id",
+            $params + $more,
+            0,
+            $limit
+        );
+        return array_values(array_map(fn($row) => self::item($library, (int) $row->id, (int) $row->ds, $digital), $rows));
+    }
+
+    /**
+     * How many items a list has, whole.
+     *
+     * @param \stdClass $library
+     * @param string $set
+     * @param int|null $from
+     * @param int|null $until
+     * @return int
+     */
+    private static function count(\stdClass $library, string $set, ?int $from, ?int $until): int {
+        global $DB;
+        $query = self::query($library, $set, self::digital($library));
+        if (!$query) {
+            return 0;
+        }
+        [$filter, $more] = self::window($from, $until, null);
+        return (int) $DB->count_records_sql("SELECT COUNT(1) FROM ({$query[0]}) x" . $filter, $query[1] + $more);
+    }
+
+    /**
+     * The first change the repository has, if it has any.
+     *
+     * @param \stdClass $library
+     * @return int|null
+     */
+    private static function earliest(\stdClass $library): ?int {
+        global $DB;
+        $query = self::query($library, '', self::digital($library));
+        if (!$query) {
+            return null;
+        }
+        $first = $DB->get_field_sql("SELECT MIN(x.ds) FROM ({$query[0]}) x", $query[1]);
+        return $first ? (int) $first : null;
+    }
+
+    /**
+     * The conditions of dates and of where a list goes on.
+     *
+     * @param int|null $from
+     * @param int|null $until
+     * @param int[]|null $after
+     * @return array The WHERE (with its word, or '') and its parameters.
+     */
+    private static function window(?int $from, ?int $until, ?array $after): array {
+        $where = [];
+        $params = [];
+        if ($from !== null) {
+            $where[] = 'x.ds >= :fromds';
+            $params['fromds'] = $from;
+        }
+        if ($until !== null) {
+            $where[] = 'x.ds <= :untilds';
+            $params['untilds'] = $until;
+        }
+        if ($after) {
+            $where[] = '(x.ds > :afterds OR (x.ds = :afterds2 AND x.id > :afterid))';
+            $params += ['afterds' => $after[0], 'afterds2' => $after[0], 'afterid' => $after[1]];
+        }
+        return [$where ? ' WHERE ' . implode(' AND ', $where) : '', $params];
+    }
+
+    /**
+     * An item of the repository: a record, its datestamp and the sets it is in.
+     *
+     * @param \stdClass $library
+     * @param int $id
+     * @param int $datestamp
+     * @param array $digital As digital() gives it.
+     * @return array id, datestamp, sets and items (its digital forms).
+     */
+    private static function item(\stdClass $library, int $id, int $datestamp, array $digital): array {
+        global $DB;
+        $sets = [];
+        if (
+            window::catalogue_open($library) && $DB->record_exists_select(
+                self::T . 'item',
+                "recordid = ? AND libraryid = ? AND status <> 'withdrawn' AND status <> 'lost'",
+                [$id, $library->id]
+            )
+        ) {
+            $sets[] = 'catalogue';
+        }
+        if (isset($digital[$id])) {
+            $sets[] = 'digital';
+        }
+        return ['id' => $id, 'datestamp' => $datestamp, 'sets' => $sets, 'items' => $digital[$id]['items'] ?? []];
     }
 
     /**
@@ -286,34 +461,42 @@ final class oai {
     }
 
     /**
-     * The record of an identifier, if the repository offers it.
+     * The item of an identifier, if the repository offers it.
      *
      * @param \stdClass $library
      * @param string $identifier
      * @return array|null
      */
     private static function find(\stdClass $library, string $identifier): ?array {
-        foreach (self::records($library) as $record) {
-            if (self::identifier($library, $record['id']) === $identifier) {
-                return $record;
-            }
+        global $DB;
+        $prefix = self::identifier($library, 0);
+        $prefix = substr($prefix, 0, -1);
+        if (!str_starts_with($identifier, $prefix) || !ctype_digit(substr($identifier, strlen($prefix)))) {
+            return null;
         }
-        return null;
+        $id = (int) substr($identifier, strlen($prefix));
+        $digital = self::digital($library);
+        $query = self::query($library, '', $digital);
+        if (!$query) {
+            return null;
+        }
+        $row = $DB->get_record_sql("SELECT x.id, x.ds FROM ({$query[0]}) x WHERE x.id = :wanted", $query[1] + ['wanted' => $id]);
+        return $row ? self::item($library, $id, (int) $row->ds, $digital) : null;
     }
 
     /**
-     * Writes a record: its header and, for ListRecords and GetRecord, its Dublin Core.
+     * Writes a record: its header and, for ListRecords and GetRecord, its metadata.
      *
      * @param \XMLWriter $xml
      * @param \stdClass $library
-     * @param array $record
+     * @param array $item As item() gives it.
      * @param bool $metadata
      * @param string $prefix oai_dc or marc21.
      */
     private static function record(
         \XMLWriter $xml,
         \stdClass $library,
-        array $record,
+        array $item,
         bool $metadata,
         string $prefix = 'oai_dc'
     ): void {
@@ -322,19 +505,24 @@ final class oai {
             $xml->startElement('record');
         }
         $xml->startElement('header');
-        $xml->writeElement('identifier', self::identifier($library, $record['id']));
-        $xml->writeElement('datestamp', gmdate('Y-m-d\TH:i:s\Z', $record['datestamp']));
+        $xml->writeElement('identifier', self::identifier($library, $item['id']));
+        $xml->writeElement('datestamp', gmdate('Y-m-d\TH:i:s\Z', $item['datestamp']));
+        foreach ($item['sets'] as $set) {
+            $xml->writeElement('setSpec', $set);
+        }
         $xml->endElement();
         if (!$metadata) {
             return;
         }
         $xml->startElement('metadata');
         if ($prefix === 'marc21') {
-            $xml->writeRaw(self::marc($library, $record));
+            $xml->writeRaw(self::marc($library, $item));
             $xml->endElement();
             $xml->endElement();
             return;
         }
+        $record = $DB->get_record(self::T . 'record', ['id' => $item['id']], '*', MUST_EXIST);
+        $by = self::authorities($item['id']);
         $xml->startElementNs('oai_dc', 'dc', 'http://www.openarchives.org/OAI/2.0/oai_dc/');
         $xml->writeAttributeNs('xmlns', 'dc', null, 'http://purl.org/dc/elements/1.1/');
         $xml->writeAttributeNs('xmlns', 'xsi', null, 'http://www.w3.org/2001/XMLSchema-instance');
@@ -344,36 +532,50 @@ final class oai {
             null,
             'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd'
         );
-        $xml->writeElementNs('dc', 'title', null, $record['title']);
-        $authors = $DB->get_fieldset_sql(
-            "SELECT a.label FROM {" . self::T . "recauth} ra JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
-              WHERE ra.recordid = ? AND a.kind = 'author' ORDER BY ra.sortorder, ra.id",
-            [$record['id']]
-        );
-        foreach ($authors as $author) {
+        $title = trim((string) $record->title . ((string) $record->subtitle !== '' ? ': ' . $record->subtitle : ''));
+        $xml->writeElementNs('dc', 'title', null, $title);
+        foreach ($by['author'] ?? [] as $author) {
             $xml->writeElementNs('dc', 'creator', null, $author);
         }
-        if ($record['summary'] !== '') {
-            $xml->writeElementNs('dc', 'description', null, \core_text::substr(strip_tags($record['summary']), 0, 4000));
+        foreach ($by['subject'] ?? [] as $subject) {
+            $xml->writeElementNs('dc', 'subject', null, $subject);
         }
-        $xml->writeElementNs('dc', 'publisher', null, format_string($library->name, true, ['escape' => false]));
-        $xml->writeElementNs('dc', 'date', null, preg_match('/^\d{4}$/', $record['pubyear']) ? $record['pubyear']
-            : gmdate('Y-m-d', $record['datestamp']));
-        $xml->writeElementNs('dc', 'type', null, 'Text');
-        if ($record['lang'] !== '') {
-            $xml->writeElementNs('dc', 'language', null, $record['lang']);
+        if ((string) $record->summary !== '') {
+            $xml->writeElementNs('dc', 'description', null, \core_text::substr(strip_tags((string) $record->summary), 0, 4000));
         }
-        foreach ($record['items'] as $item) {
+        // What the centre publishes, it publishes; a book of the catalogue, its publisher.
+        $publishers = in_array('catalogue', $item['sets'], true) ? ($by['publisher'] ?? [])
+            : [format_string($library->name, true, ['escape' => false])];
+        foreach ($publishers as $publisher) {
+            $xml->writeElementNs('dc', 'publisher', null, $publisher);
+        }
+        $year = preg_match('/(\d{4})/', (string) $record->pubyear, $m) ? $m[1] : '';
+        $xml->writeElementNs('dc', 'date', null, $year !== '' ? $year : gmdate('Y-m-d', $item['datestamp']));
+        $xml->writeElementNs('dc', 'type', null, in_array($record->doctype, ['audio', 'video'], true)
+            ? ($record->doctype === 'audio' ? 'Sound' : 'MovingImage') : 'Text');
+        if ((string) $record->lang !== '') {
+            $xml->writeElementNs('dc', 'language', null, $record->lang);
+        }
+        if ((string) $record->isbn !== '') {
+            $xml->writeElementNs('dc', 'identifier', null, 'urn:isbn:' . $record->isbn);
+        }
+        if (in_array('catalogue', $item['sets'], true)) {
+            $xml->writeElementNs('dc', 'identifier', null, (new \moodle_url(
+                '/local/oksigeniaayvurenda/public.php',
+                ['library' => $library->slug, 'record' => $item['id']]
+            ))->out(false));
+        }
+        foreach ($item['items'] as $digital) {
             $xml->writeElementNs('dc', 'identifier', null, (new \moodle_url(
                 '/local/oksigeniaayvurenda/read.php',
-                ['library' => $library->slug, 'id' => $item->id]
+                ['library' => $library->slug, 'id' => $digital->id]
             ))->out(false));
-            $file = $item->kind === 'link' ? null : digital::file($item);
+            $file = $digital->kind === 'link' ? null : digital::file($digital);
             if ($file) {
                 $xml->writeElementNs('dc', 'format', null, $file->get_mimetype());
             }
-            $xml->writeElementNs('dc', 'rights', null, self::LICENCES[$item->licence] ??
-                get_string('licence' . str_replace('-', '', $item->licence), 'local_oksigeniaayvurenda'));
+            $xml->writeElementNs('dc', 'rights', null, self::LICENCES[$digital->licence] ??
+                get_string('licence' . str_replace('-', '', $digital->licence), 'local_oksigeniaayvurenda'));
         }
         $xml->endElement();
         $xml->endElement();
@@ -381,39 +583,68 @@ final class oai {
     }
 
     /**
-     * A record in MARCXML, as the daily copy writes it, with where each of its digital forms is read (856).
+     * The authorities of a record, by kind, in their order: a class by its number, as 080 and 082 ask.
      *
-     * @param \stdClass $library
-     * @param array $record
-     * @return string
+     * @param int $recordid
+     * @return array Kind => labels.
      */
-    private static function marc(\stdClass $library, array $record): string {
+    private static function authorities(int $recordid): array {
         global $DB;
-        $row = (array) $DB->get_record(self::T . 'record', ['id' => $record['id']], '*', MUST_EXIST);
-        $authorities = [];
+        $by = [];
         foreach (
             $DB->get_records_sql(
                 "SELECT ra.id, a.kind, a.label, a.code FROM {" . self::T . "recauth} ra
                    JOIN {" . self::T . "authority} a ON a.id = ra.authorityid
                   WHERE ra.recordid = ? ORDER BY ra.sortorder, ra.id",
-                [$record['id']]
+                [$recordid]
             ) as $one
         ) {
-            // A class by its number, as 080 and 082 ask.
-            $authorities[$one->kind][] = $one->kind === 'class' && trim((string) $one->code) !== '' ? (string) $one->code
-                : $one->label;
+            $by[$one->kind][] = $one->kind === 'class' && trim((string) $one->code) !== '' ? (string) $one->code : $one->label;
+        }
+        return $by;
+    }
+
+    /**
+     * A record in MARCXML, as the daily copy writes it: its copies in this library (852, without their codes) and where
+     * each of its digital forms is read (856).
+     *
+     * @param \stdClass $library
+     * @param array $item
+     * @return string
+     */
+    public static function marc(\stdClass $library, array $item): string {
+        global $DB;
+        $row = (array) $DB->get_record(self::T . 'record', ['id' => $item['id']], '*', MUST_EXIST);
+        $copies = [];
+        if (in_array('catalogue', $item['sets'], true)) {
+            $rows = $DB->get_records_sql(
+                "SELECT i.id, i.callnumber1, i.callnumber2, i.callnumber3, l.label AS location
+                   FROM {" . self::T . "item} i
+              LEFT JOIN {" . self::T . "authority} l ON l.id = i.locationid
+                  WHERE i.recordid = ? AND i.libraryid = ? AND i.status <> 'withdrawn' AND i.status <> 'lost'
+               ORDER BY i.id",
+                [$item['id'], $library->id]
+            );
+            foreach ($rows as $copy) {
+                $copies[] = ['barcode' => '', 'serial' => '', 'library' => format_string(
+                    $library->name,
+                    true,
+                    ['escape' => false]
+                ), 'location' => $copy->location, 'callnumber' => [$copy->callnumber1,
+                    $copy->callnumber2, $copy->callnumber3], 'regnumber' => '', 'itemtype' => '', 'acquired' => ''];
+            }
         }
         $entity = (string) $DB->get_field(self::T . 'entity', 'name', ['id' => $library->entityid]);
-        $marc = \local_oksigeniaayvurenda\core\marc\encoder::encode($row, $authorities, [], format_string(
+        $marc = \local_oksigeniaayvurenda\core\marc\encoder::encode($row, self::authorities($item['id']), $copies, format_string(
             $entity,
             true,
             ['escape' => false]
         ));
-        foreach ($record['items'] as $item) {
+        foreach ($item['items'] as $digital) {
             $marc->data('856', '4', '0', [['u', (new \moodle_url(
                 '/local/oksigeniaayvurenda/read.php',
-                ['library' => $library->slug, 'id' => $item->id]
-            ))->out(false)], ['y', $item->title !== '' && $item->title !== null ? $item->title : (string) $record['title']]]);
+                ['library' => $library->slug, 'id' => $digital->id]
+            ))->out(false)], ['y', $digital->title !== '' && $digital->title !== null ? $digital->title : (string) $row['title']]]);
         }
         $element = \local_oksigeniaayvurenda\core\marc\marcxml::element($marc);
         return str_contains(substr($element, 0, 80), 'xmlns') ? $element
@@ -440,28 +671,33 @@ final class oai {
     }
 
     /**
-     * A resumption token: where to go on, and the dates asked.
+     * A resumption token: where the list goes on (the datestamp and id of the last one given), the dates, the format and
+     * the set asked.
      *
-     * @param int $offset
+     * @param int[] $after
      * @param int|null $from
      * @param int|null $until
-     * @param string $prefix The format asked for: a token goes on in it.
+     * @param string $prefix
+     * @param string $set
      * @return string
      */
-    private static function token(int $offset, ?int $from, ?int $until, string $prefix = 'oai_dc'): string {
-        return $offset . '-' . ($from ?? '') . '-' . ($until ?? '') . '-' . $prefix;
+    private static function token(array $after, ?int $from, ?int $until, string $prefix, string $set): string {
+        return $after[0] . '_' . $after[1] . '-' . ($from ?? '') . '-' . ($until ?? '') . '-' . $prefix . '-' . $set;
     }
 
     /**
      * Reads a resumption token.
      *
      * @param string $token
-     * @return array|null offset, from, until, prefix.
+     * @return array|null after, from, until, prefix and set.
      */
     private static function untoken(string $token): ?array {
-        if (!preg_match('/^(\d+)-(\d*)-(\d*)(?:-(\w+))?$/', $token, $m) || !isset(self::FORMATS[$m[4] ?? 'oai_dc'])) {
+        if (
+            !preg_match('/^(\d+)_(\d+)-(\d*)-(\d*)-(\w+)-(\w*)$/', $token, $m) || !isset(self::FORMATS[$m[5]])
+                || ($m[6] !== '' && !in_array($m[6], self::SETS, true))
+        ) {
             return null;
         }
-        return [(int) $m[1], $m[2] === '' ? null : (int) $m[2], $m[3] === '' ? null : (int) $m[3], $m[4] ?? 'oai_dc'];
+        return [[(int) $m[1], (int) $m[2]], $m[3] === '' ? null : (int) $m[3], $m[4] === '' ? null : (int) $m[4], $m[5], $m[6]];
     }
 }

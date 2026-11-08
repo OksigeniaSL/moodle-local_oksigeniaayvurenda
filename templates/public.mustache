@@ -38,6 +38,7 @@
         "loginurl": "#", "manage": true, "sesskey": "abc", "open": true, "voices": true, "index": false, "catalogue": true,
         "publicurl": "https://example.org/w", "oaiurl": "https://example.org/oai.php/demo-1",
         "windowoai": "Dirección OAI-PMH", "windowoaihint": "Para los recolectores",
+        "sruurl": "https://example.org/sru.php/demo-1", "windowsru": "Dirección SRU", "windowsruhint": "Para otros catálogos",
         "records": [{"title": "El faro dormido", "subtitle": "", "authors": "Ana Montes", "cover": "https://example.org/c.jpg",
             "hascover": true, "colour": 2, "items": [{"label": "EPUB", "licence": "Dominio público", "action": "Leer", "url": "#",
             "download": "https://example.org/d"}]}],
@@ -89,6 +90,11 @@
     <p class="ayv-invite-link"><span>{{windowoai}}</span> <input type="text" readonly value="{{oaiurl}}" aria-label="{{windowoai}}">
         <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{oaiurl}}">{{voiceinvitecopy}}</button></p>
     <p class="ayv-field-hint">{{windowoaihint}}</p>
+    {{#sruurl}}
+    <p class="ayv-invite-link"><span>{{windowsru}}</span> <input type="text" readonly value="{{sruurl}}" aria-label="{{windowsru}}">
+        <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{sruurl}}">{{voiceinvitecopy}}</button></p>
+    <p class="ayv-field-hint">{{windowsruhint}}</p>
+    {{/sruurl}}
     {{#embedcode}}
     <p class="ayv-invite-link"><span>{{windowembed}}</span> <input type="text" readonly value="{{embedcode}}" aria-label="{{windowembed}}">
         <button type="button" class="ayv-button ayv-button-quiet" data-copy="{{embedcode}}">{{voiceinvitecopy}}</button></p>

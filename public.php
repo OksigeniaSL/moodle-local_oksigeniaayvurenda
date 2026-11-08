@@ -111,6 +111,7 @@ $shared = [
     'catalogue' => $catalogue,
     'publicurl' => $here(),
     'oaiurl' => \local_oksigeniaayvurenda\local\oai::base($library),
+    'sruurl' => $catalogue ? \local_oksigeniaayvurenda\local\sru::base($library) : '',
     'opds' => $opds,
     'loginurl' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false),
     'searchlabel' => $str($catalogue ? 'windowsearchall' : 'windowsearch'),
@@ -124,7 +125,8 @@ $shared = [
 foreach (
     ['windowsearchbutton', 'windowdownload', 'windowopds', 'windowopdshint', 'windowlogin', 'windownext',
         'windowprev', 'windowmanage', 'windowopen', 'windowopenhint', 'windowtext', 'windowtexthint', 'windowvoices',
-        'windowindex', 'windowsave', 'windowaddress', 'voiceinvitecopy', 'windowoai', 'windowoaihint', 'windowcatalogue',
+        'windowindex', 'windowsave', 'windowaddress', 'voiceinvitecopy', 'windowoai', 'windowoaihint', 'windowsru',
+        'windowsruhint', 'windowcatalogue',
         'windowcataloguehint', 'windowbackdoor', 'windowembed', 'windowembedhint'] as $key
 ) {
     $shared[$key] = $str($key);

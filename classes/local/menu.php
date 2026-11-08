@@ -183,6 +183,12 @@ final class menu {
             array_unshift($groups, ['title' => $str('classnav'), 'links' => [['url' => $url('class.php'),
                 'label' => $str('classnav'), 'current' => $here === 'class.php']]]);
         }
+        // The second factor of their account, where the site is only a library.
+        $security = onlylibrary::security_url();
+        if ($security) {
+            $groups[] = ['title' => $str('menuaccount'), 'links' => [['url' => $security, 'label' => $str('menusecurity'),
+                'current' => false]]];
+        }
         $doors[] = ['key' => 'more', 'url' => '', 'label' => $str('menumore'), 'current' => $inmore, 'groups' => $groups,
             'count' => $total];
         return $doors;

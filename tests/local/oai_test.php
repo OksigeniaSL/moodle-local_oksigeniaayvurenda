@@ -87,7 +87,77 @@ final class oai_test extends \advanced_testcase {
             'from' => gmdate('Y-m-d', time() + 10 * DAYSECS)]));
         $this->assertSame('idDoesNotExist', $error(['verb' => 'GetRecord', 'identifier' => 'oai:nowhere:1',
             'metadataPrefix' => 'oai_dc']));
-        $this->assertSame('noSetHierarchy', $error(['verb' => 'ListSets']));
+        // Only the digital works while the window does not show the catalogue.
+        $this->assertSame(['digital'], array_map(
+            fn($n) => $n->textContent,
+            iterator_to_array($ask(['verb' => 'ListSets'])->query('//o:setSpec'))
+        ));
         $this->assertSame('badResumptionToken', $error(['verb' => 'ListRecords', 'resumptionToken' => 'nonsense']));
+    }
+
+    /**
+     * With the catalogue shown to anyone, every book with a copy in the library, as the set «catalogue», for a union
+     * catalogue to gather it; in MARC 21 with its copies here (no codes); and in pages that go on by date and number,
+     * whatever changes in between (IOB-M2).
+     */
+    public function test_catalogue(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $other = $gen->create_library(['entityid' => $library->entityid, 'slug' => 'aula']);
+        $then = time() - DAYSECS;
+        for ($i = 0; $i < 101; $i++) {
+            $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Libro ' . $i,
+                'isbn' => '978000000' . sprintf('%04d', $i), 'timemodified' => $then + $i]);
+            $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'callnumber1' => '82',
+                'barcode' => 'B' . $i]);
+        }
+        $elsewhere = $gen->create_record(['entityid' => $library->entityid, 'title' => 'De otra biblioteca']);
+        $gen->create_item(['libraryid' => $other->id, 'recordid' => $elsewhere->id]);
+        $gone = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Dado de baja']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $gone->id, 'status' => 'withdrawn']);
+        $ask = function (array $args) use ($library): \DOMXPath {
+            $doc = new \DOMDocument();
+            $this->assertTrue($doc->loadXML(oai::answer($library, $args)));
+            $xpath = new \DOMXPath($doc);
+            $xpath->registerNamespace('o', 'http://www.openarchives.org/OAI/2.0/');
+            $xpath->registerNamespace('m', 'http://www.loc.gov/MARC21/slim');
+            return $xpath;
+        };
+        window::save($library, ['open' => 1]);
+        $this->assertSame('noRecordsMatch', $ask(['verb' => 'ListIdentifiers', 'metadataPrefix' => 'oai_dc', 'set' => 'catalogue'])
+            ->evaluate('string(//o:error/@code)'), 'a window that does not show its catalogue');
+        window::save($library, ['open' => 1, 'catalogue' => 1]);
+        $this->assertSame(['catalogue', 'digital'], array_map(
+            fn($n) => $n->textContent,
+            iterator_to_array($ask(['verb' => 'ListSets'])->query('//o:setSpec'))
+        ));
+        $first = $ask(['verb' => 'ListIdentifiers', 'metadataPrefix' => 'oai_dc', 'set' => 'catalogue']);
+        $this->assertSame(oai::PAGE, $first->query('//o:header')->length);
+        $this->assertSame('101', $first->evaluate('string(//o:resumptionToken/@completeListSize)'));
+        $this->assertSame('catalogue', $first->evaluate('string(//o:header[1]/o:setSpec)'));
+        $token = $first->evaluate('string(//o:resumptionToken)');
+        // A change in between does not move the list: the next page goes on where the last one stopped.
+        $DB->set_field('local_oksigeniaayvurenda_record', 'timemodified', time(), ['title' => 'Libro 0']);
+        $next = $ask(['verb' => 'ListIdentifiers', 'resumptionToken' => $token]);
+        $this->assertSame(2, $next->query('//o:header')->length, 'the last one, and Libro 0 changed now');
+        $this->assertSame('', $next->evaluate('string(//o:resumptionToken)'));
+        // In MARC 21, with its copy here and no code.
+        $id = oai::identifier($library, (int) $DB->get_field('local_oksigeniaayvurenda_record', 'id', ['title' => 'Libro 5']));
+        $marc = $ask(['verb' => 'GetRecord', 'identifier' => $id, 'metadataPrefix' => 'marc21']);
+        $this->assertSame(1, $marc->query('//m:datafield[@tag="852"]')->length);
+        $this->assertStringNotContainsString('B5', $marc->evaluate('string(//m:datafield[@tag="852"])'));
+        $dc = $ask(['verb' => 'GetRecord', 'identifier' => $id, 'metadataPrefix' => 'oai_dc']);
+        $dc->registerNamespace('dc', 'http://purl.org/dc/elements/1.1/');
+        $this->assertSame('urn:isbn:9780000000005', $dc->evaluate('string(//dc:identifier[1])'));
+        $this->assertStringContainsString('public.php', $dc->evaluate('string(//dc:identifier[2])'));
+        // Neither another library's book nor one withdrawn.
+        foreach ([$elsewhere, $gone] as $out) {
+            $this->assertSame('idDoesNotExist', $ask(['verb' => 'GetRecord', 'identifier' => oai::identifier(
+                $library,
+                (int) $out->id
+            ), 'metadataPrefix' => 'oai_dc'])->evaluate('string(//o:error/@code)'));
+        }
     }
 }

@@ -32,6 +32,22 @@ final class onlylibrary {
     private const OPEN = 12;
 
     /**
+     * Where someone sets up their second factor (an app of codes, a key), on a site that is only a library and has it on:
+     * the library is all they see, so the way to it goes through the library (Moodle has it among its preferences).
+     *
+     * @return string|null
+     */
+    public static function security_url(): ?string {
+        if (
+            !self::on() || !isloggedin() || isguestuser() || !class_exists('\\tool_mfa\\manager')
+                || !get_config('tool_mfa', 'enabled')
+        ) {
+            return null;
+        }
+        return (new \moodle_url('/admin/tool/mfa/user_preferences.php'))->out(false);
+    }
+
+    /**
      * Whether this site is only a library.
      *
      * @return bool

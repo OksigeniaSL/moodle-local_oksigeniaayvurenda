@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.210.0 (2026-11-08)
+
+- Other catalogues can gather and search the library's (audit, IOB-M2; Enrique, 8 November):
+  - The OAI-PMH repository has two sets: «catalogue», every book with a copy in the library when its window shows the
+    catalogue to anyone (in Dublin Core and in MARC 21 with its copies here, without their codes), and «digital», what
+    the centre publishes as its own. Lists go on by date and number, so a change in between does not move them.
+  - An SRU 1.2 server (`sru.php/<library>`): search by ISBN, title, author or any word, joined with «and», in MARCXML or
+    Dublin Core, a page at a time, with the protocol's diagnostics for what it does not do.
+  - The window's settings give both addresses.
+- On a site that is only a library: the buttons of the site's outside accounts (Google, Microsoft…) on its own entry, with
+  what they say when they cannot let someone in (an icon that does not load goes away); and «Security of your account», where the second factor is set up, from
+  the card and from «More».
+
 ## 0.209.0 (2026-11-08)
 
 - 0.208.0 did not reach the sites: on Moodle 4.5 a new test could not stand in for the site's AI. It is all in here.

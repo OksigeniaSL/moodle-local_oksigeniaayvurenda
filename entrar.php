@@ -42,6 +42,16 @@ $PAGE->set_pagelayout('embedded');
 
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $error = optional_param('errorcode', 0, PARAM_INT);
+// What an outside account (Google, Microsoft…) said when it could not let someone in: Moodle sends them here before
+// showing it, so it is shown here, once.
+$said = (string) ($SESSION->loginerrormsg ?? '');
+unset($SESSION->loginerrormsg);
+// The site's outside accounts, as Moodle's own entry shows them: this page is the entry of the site.
+require_once($CFG->libdir . '/authlib.php');
+$providers = \auth_plugin_base::prepare_identity_providers_for_output(
+    \auth_plugin_base::get_identity_providers(get_enabled_auth_plugins()),
+    $PAGE->get_renderer('core')
+);
 $library = onlylibrary::heading_for(optional_param('library', '', PARAM_ALPHANUMEXT), (string) ($SESSION->wantsurl ?? ''));
 $look = $library ? \local_oksigeniaayvurenda\local\libraries::look($library) : null;
 $languages = get_string_manager()->get_list_of_translations();
@@ -52,7 +62,10 @@ $data = [
     'heading' => $library ? $str('entrarheadingnamed', format_string($library->name, true, ['escape' => false]))
         : $str('entrarheading'),
     'lead' => $look && $look['motto'] !== '' ? $look['motto'] : $str('entrarlead'),
-    'error' => in_array($error, [1, 2, 3, 4], true) ? $str('entrarerror' . $error) : '',
+    'error' => in_array($error, [1, 2, 3, 4], true) ? $str('entrarerror' . $error) : $said,
+    'providers' => array_values(array_map(fn($p) => ['url' => (string) $p['url'], 'name' => (string) $p['name'],
+        'iconurl' => (string) ($p['iconurl'] ?? '')], $providers)),
+    'providersheading' => $str('entrarproviders'),
     'action' => (new moodle_url('/login/index.php'))->out(false),
     'logintoken' => \core\session\manager::get_login_token(),
     'username' => !empty($CFG->rememberusername) ? (string) get_moodle_cookie() : '',

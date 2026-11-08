@@ -591,7 +591,13 @@ Oksigenia Ayvurenda</button>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <script nonce="' . self::nonce() . '">if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
     document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');
-}</script>
+}
+document.addEventListener(\'error\', function(e) {
+    var t = e.target;
+    if (t && t.closest && t.closest(\'.ayv-entry-provider\')) {
+        t.remove();
+    }
+}, true);</script>
 </head>
 <body class="ayv ayv-entry-page">
 ' . $html . '
