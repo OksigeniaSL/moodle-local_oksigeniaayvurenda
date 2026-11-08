@@ -688,6 +688,24 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110816, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110819) {
+        // Tales to read at home, as Gaudí drew them: minutes, pages, a line for each age, for bedtime and the order.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $fields = [
+            new xmldb_field('homeminutes', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'homeages'),
+            new xmldb_field('homeparts', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'homeminutes'),
+            new xmldb_field('homelines', XMLDB_TYPE_TEXT, null, null, null, null, null, 'homeparts'),
+            new xmldb_field('homenight', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'homelines'),
+            new xmldb_field('homeorder', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'homenight'),
+        ];
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026110819, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

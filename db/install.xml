@@ -438,6 +438,11 @@
         <FIELD NAME="subscribed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a link: it opens through the centre's proxy"/>
         <FIELD NAME="accessformat" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An accessible format: only for the readers who need one, and never public"/>
         <FIELD NAME="homeages" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="To read at home with the little ones: the age bands it suits (0, 3, 6, 9), comma separated"/>
+        <FIELD NAME="homeminutes" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="To read at home: about how many minutes, read aloud slowly"/>
+        <FIELD NAME="homeparts" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="To read at home: how many pages, or chapters for the oldest band"/>
+        <FIELD NAME="homelines" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="To read at home: why it is lovely, one line for each age band it suits, as JSON"/>
+        <FIELD NAME="homenight" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="To read at home: good for before sleeping"/>
+        <FIELD NAME="homeorder" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="To read at home: where the library puts it in the list; without it, the shortest first"/>
         <FIELD NAME="licence" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="rights" SEQUENCE="false"/>
         <FIELD NAME="audience" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="staff" SEQUENCE="false" COMMENT="students, families, staff, public, separated by commas"/>
         <FIELD NAME="stages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: the stages of the students it is for; all when empty"/>

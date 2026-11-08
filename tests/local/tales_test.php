@@ -55,16 +55,31 @@ final class tales_test extends \advanced_testcase {
         $closed = digital::add_link($library, (int) $kept->id, 'https://example.org/colegio.pdf', ['licence' => 'rights',
             'audience' => ['students'], 'homeages' => [3]], $admin);
         $this->assertNull(digital::get($closed, $library)->homeages, 'not for the public: not to read at home either');
+
+        // What whoever looked at it wrote: minutes, pages, a line for each age it suits (not for others), bedtime.
+        $faro = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Buenas noches, faro']);
+        $tale = digital::add_link($library, (int) $faro->id, 'https://example.org/faro.epub', ['licence' => 'cc-by',
+            'audience' => ['public'], 'homeages' => [3], 'homeminutes' => 4, 'homeparts' => 12, 'homenight' => 1,
+            'homelines' => [3 => 'Corto y tranquilo.', 6 => 'No es de esta edad.'], 'homeorder' => 2], $admin);
+        $row = digital::get($tale, $library);
+        $this->assertSame(4, (int) $row->homeminutes);
+        $this->assertSame(12, (int) $row->homeparts);
+        $this->assertSame(1, (int) $row->homenight);
+        $this->assertSame(2, (int) $row->homeorder);
+        $this->assertSame(['3' => 'Corto y tranquilo.'], json_decode($row->homelines, true));
+        $kept = digital::get($closed, $library);
+        $this->assertNull($kept->homeminutes);
+        $this->assertSame(0, (int) $kept->homenight);
         window::save($library, ['open' => 1]);
 
         $titles = fn(int $age) => array_column(window::records($library, '', 0, $age)['records'], 'title');
-        $this->assertSame(['La luna que no quería dormir'], $titles(4));
+        $this->assertSame(['Buenas noches, faro', 'La luna que no quería dormir'], $titles(4));
         $this->assertSame(['La luna que no quería dormir'], $titles(2));
         $this->assertSame([], $titles(7));
         $this->assertSame(['El mar de los mayores'], $titles(11));
         $this->assertSame([0, 3, 9], window::tale_ages($library));
-        // The door as always shows both public tales.
-        $this->assertCount(2, window::records($library)['records']);
+        // The door as always shows every public tale.
+        $this->assertCount(3, window::records($library)['records']);
 
         // What admissions asks, without reading the library's tables.
         $mine = array_values(array_filter(\local_oksigeniaayvurenda\api::libraries(), fn($l) => $l['slug'] === $library->slug));

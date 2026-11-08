@@ -432,8 +432,35 @@ final class digital {
             'stages' => $stages ? json_encode($stages) : null,
             'download' => (int) digital_rules::can_download($licence, !empty($data['download'])),
             'accessformat' => (int) $accessible,
+        ] + self::home($data, window::ages_of(in_array('public', $audience, true) ? (array) ($data['homeages'] ?? []) : []));
+    }
+
+    /**
+     * What a tale to read at home says of itself, as whoever looked at it wrote it: its ages, about how many minutes,
+     * how many pages or chapters, why it is lovely for each age, whether it is for bedtime and where it goes in the list.
+     * Nothing of it when it is not to read at home.
+     *
+     * @param array $data
+     * @param string|null $ages The age bands, as ages_of() keeps them.
+     * @return array
+     */
+    private static function home(array $data, ?string $ages): array {
+        $number = fn($key, $max) => (int) ($data[$key] ?? 0) > 0 ? min((int) $data[$key], $max) : null;
+        $lines = [];
+        foreach ($ages ? array_map('intval', explode(',', $ages)) : [] as $age) {
+            $line = \core_text::substr(trim((string) (($data['homelines'] ?? [])[$age] ?? '')), 0, 160);
+            if ($line !== '') {
+                $lines[(string) $age] = $line;
+            }
+        }
+        return [
             // To read at home with the little ones, for these ages: only what the public may see.
-            'homeages' => window::ages_of(in_array('public', $audience, true) ? (array) ($data['homeages'] ?? []) : []),
+            'homeages' => $ages,
+            'homeminutes' => $ages ? $number('homeminutes', 999) : null,
+            'homeparts' => $ages ? $number('homeparts', 999) : null,
+            'homelines' => $lines ? json_encode($lines, JSON_UNESCAPED_UNICODE) : null,
+            'homenight' => $ages && !empty($data['homenight']) ? 1 : 0,
+            'homeorder' => $ages ? $number('homeorder', 999) : null,
         ];
     }
 }

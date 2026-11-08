@@ -17,52 +17,191 @@
 {{!
     @template local_oksigeniaayvurenda/tales
 
-    Tales to read at home, by age, at a library's open door: the ages to choose from, the memory with a word for that
-    age, and the tales the library offers to read together, each with its way to open it. No «Listen»: a grown-up reads.
+    Stories to read at home, as Gaudí drew them (8 November 2026): the room where the memory reads, with her words for
+    the age; the four ages, each with its little book; the stories the library looked at and chose for that age, each with
+    its cover, how long it takes, why it is lovely and «Read»; three tips for reading together; and the library's foot.
+    No «Listen»: a grown-up reads (Enrique). The room is drawn here, its colours from app/cuentos.css by skin and mode.
 
     Example context (json):
     {
-        "door": {"name": "Biblioteca del barrio", "motto": "", "colour": "#1f6f5c", "image": null, "kicker": "Biblioteca"},
-        "heading": "Cuentos para leer en casa", "intro": "Para leerlos juntos, en voz alta.",
-        "agelegend": "¿Cuántos años tiene?", "chosen": true,
-        "ages": [{"label": "0 a 2 años", "url": "https://example.org/public.php?tales=1&age=0", "current": false, "some": true},
-            {"label": "3 a 5 años", "url": "https://example.org/public.php?tales=1&age=3", "current": true, "some": true}],
-        "memory": {"role": "memory", "name": "Memoria", "text": "Les encanta que se repita.", "initial": "M", "portrait": null,
-            "figure": null, "listen": null},
-        "tales": [{"title": "La luna que no quería dormir", "authors": "Ana Ruiz", "cover": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "hascover": false,
-            "colour": 2, "reads": [{"url": "https://example.org/read.php?id=1", "label": "Leer juntos"}]}],
-        "hastales": true, "empty": "Todavía no hay cuentos para esta edad.", "emptystaff": "",
-        "back": {"url": "https://example.org/public.php", "label": "Volver a la puerta"}, "nexturl": "", "prevurl": "",
-        "windownext": "Más", "windowprev": "Antes"
+        "pageclass": "", "lead": "Para leer juntos, en el sofá o antes de dormir.", "heading": "Cuentos para leer en casa",
+        "figure": "https://example.org/memoria-lee.webp", "hasfigure": true,
+        "say": {"text": "Seguro que te piden otro.", "who": "Memoria", "portrait": null, "plain": false},
+        "agesaria": "Edad de quien escucha el cuento", "choosetitle": "¿Cuántos años tiene?", "unit": "años",
+        "ages": [{"id": "3-5", "url": "https://example.org/public.php?tales=1&age=3-5", "current": true, "tab": "3–5",
+            "hint": "Cuentos cortos, con muchos dibujos"}],
+        "chosen": true,
+        "list": {"heading": "Cuentos para 3 a 5 años", "count": "6 cuentos. Cada uno lo ha leído antes, entero, alguien de la biblioteca.",
+            "tales": [{"title": "Buenas noches, faro", "cover": "https://example.org/faro.jpg", "hascover": true, "colour": 2,
+                "url": "https://example.org/read.php?id=1", "minutes": "4 min", "parts": "4 páginas", "why": "Corto y tranquilo.",
+                "night": true, "audio": false}],
+            "hastales": true, "four": false, "empty": null},
+        "together": {"heading": "Para leer juntos", "tips": [{"icon": "moon", "title": "Con la luz bajita", "text": "Sin prisa."}]},
+        "foot": {"picture": "https://example.org/portada.webp", "name": "Biblioteca del barrio", "emblem": "https://example.org/e.svg",
+            "lines": ["Plaza de la Estación, 3"], "stops": [], "stopsheading": "Próximas paradas",
+            "catalogue": "https://example.org/public.php", "cataloguelabel": "Ver el catálogo de la biblioteca"},
+        "readlabel": "Leer", "nightlabel": "Para antes de dormir", "audiolabel": "Trae su propia grabación"
     }
 }}
-<section class="ayv-tales">
-    <p class="ayv-back"><a href="{{back.url}}">{{back.label}}</a></p>
-    <p class="ayv-tales-kicker">{{door.name}}</p>
-    <h1 class="ayv-results-title">{{heading}}</h1>
-    <p class="ayv-tales-intro">{{intro}}</p>
-    {{#memory}}<div class="ayv-tales-memory">{{> local_oksigeniaayvurenda/bubble}}</div>{{/memory}}
-    <nav class="ayv-tales-ages" aria-label="{{agelegend}}">
-        <p class="ayv-tales-agelegend">{{agelegend}}</p>
-        <ul>{{#ages}}<li><a class="ayv-tales-age{{#current}} ayv-tales-age-on{{/current}}{{^some}} ayv-tales-age-none{{/some}}" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a></li>{{/ages}}</ul>
-    </nav>
-    {{#chosen}}
-    {{#hastales}}
-    <ul class="ayv-tales-list">
-    {{#tales}}
-        <li class="ayv-tale">
-            <span class="ayv-tale-cover ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{cover}}" alt="" loading="lazy">{{/hascover}}<span class="ayv-cover-title">{{title}}</span></span>
-            <span class="ayv-tale-words">
-                <b class="ayv-tale-title">{{title}}</b>
-                {{#authors}}<span class="ayv-field-hint">{{authors}}</span>{{/authors}}
-                <span class="ayv-tale-reads">{{#reads}}<a class="ayv-button" href="{{url}}">{{> local_oksigeniaayvurenda/icon_book}} {{label}}</a>{{/reads}}</span>
-            </span>
-        </li>
-    {{/tales}}
-    </ul>
-    {{/hastales}}
-    {{^hastales}}<div class="ayv-nothing"><p>{{empty}}</p>{{#emptystaff}}<p class="ayv-field-hint">{{emptystaff}}</p>{{/emptystaff}}</div>{{/hastales}}
-    <p class="ayv-book-actions">{{#prevurl}}<a class="ayv-button ayv-button-quiet" href="{{prevurl}}">{{windowprev}}</a>{{/prevurl}}
-        {{#nexturl}}<a class="ayv-button ayv-button-quiet" href="{{nexturl}}">{{windownext}}</a>{{/nexturl}}</p>
-    {{/chosen}}
+<div class="tl-page{{pageclass}}">
+<svg class="tl-symbols" width="0" height="0" aria-hidden="true" focusable="false">
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.6 2.6L16 9.6"/></symbol>
+  <symbol id="i-read" viewBox="0 0 24 24"><path d="M3 5.6C5.6 4.5 8.6 4.6 12 6.6c3.4-2 6.4-2.1 9-1v13c-2.6-1.1-5.6-1-9 1-3.4-2-6.4-2.1-9-1z"/><path d="M12 6.6v13"/></symbol>
+  <symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 10V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2"/><path d="M3 12a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3z"/><path d="M5 17v2M19 17v2"/></symbol>
+  <symbol id="i-voice" viewBox="0 0 24 24"><path d="M4 5h16v10H10l-5 4v-4H4z"/><path d="M8.5 9.2v1.6M12 8v4M15.5 9.2v1.6"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2.5 20 5.5 17 8.5"/><path d="M20 5.5H9a5 5 0 0 0-5 5"/><path d="M7 21.5 4 18.5 7 15.5"/><path d="M4 18.5h11a5 5 0 0 0 5-5"/></symbol>
+  <symbol id="i-page" viewBox="0 0 24 24"><path d="M12 6.6C8.6 4.6 5.6 4.5 3 5.6v13c2.6-1.1 5.6-1 9 1"/><path d="M12 6.6c1.9-1.7 4.4-2.8 7.2-3l-1.2 12.6c-2.4.3-4.4 1.4-6 3.4z"/></symbol>
+  <symbol id="i-ask" viewBox="0 0 24 24"><path d="M4 5h16v10H10l-5 4v-4H4z"/><path d="M10.2 8.6a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1"/><path d="M12 13.4v.1"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 3h10v18l-5-4-5 4z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M3 4h12v8H8.5L4.5 15v-3H3z"/><path d="M15 9h6v8h-1.5v3l-4-3H10v-2"/></symbol>
+  <!-- A board book, a picture book, a first reader and a chapter book. -->
+  <symbol id="age-0-2" viewBox="0 0 40 40"><rect x="25" y="10" width="9" height="22" rx="3" fill="#e9dcc2"/><path d="M28 13v16M31 13v16" stroke="#cdb995" stroke-width="1"/><rect x="5" y="8" width="25" height="26" rx="6" fill="currentColor"/><rect x="5" y="8" width="6" height="26" rx="3" fill="#000" opacity=".14"/><path d="M19.5 13.5l1.9 4 4.3.5-3.2 2.9.9 4.3-3.9-2.2-3.9 2.2.9-4.3-3.2-2.9 4.3-.5z" fill="#fbf6ec" stroke="#fbf6ec" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+  <symbol id="age-3-5" viewBox="0 0 40 40"><rect x="4" y="10" width="32" height="21" rx="3.5" fill="currentColor"/><rect x="6" y="29" width="28" height="4" rx="2" fill="#e9dcc2"/><circle cx="27" cy="16.5" r="3.4" fill="#fbf6ec"/><path d="M6 27.5c4-5.5 8-7.5 12-4.5 3-2.5 7-2.5 10 1 2 2.3 4 3.5 6 3.5V29H6z" fill="#fbf6ec" opacity=".85"/></symbol>
+  <symbol id="age-6-8" viewBox="0 0 40 40"><rect x="9" y="5" width="21" height="30" rx="3" fill="currentColor"/><rect x="28" y="7" width="4" height="26" rx="1.6" fill="#e9dcc2"/><path d="M13.5 15h12M13.5 19.5h12M13.5 24h8" stroke="#fbf6ec" stroke-width="2.4" stroke-linecap="round"/><path d="M23 5v9l2.2-1.8L27.4 14V5z" fill="#e2654c"/></symbol>
+  <symbol id="age-9-12" viewBox="0 0 40 40"><rect x="10" y="3" width="17" height="34" rx="2.4" fill="currentColor"/><rect x="25.5" y="4.5" width="6" height="31" rx="1.4" fill="#e9dcc2"/><path d="M27.3 8v24M29.6 8v24" stroke="#cdb995" stroke-width="1"/><rect x="13" y="9" width="11" height="6" rx="1.2" fill="#fbf6ec" opacity=".9"/><path d="M20 37v3l1.6-1.3L23.2 40v-3" fill="#e2654c"/></symbol>
+</svg>
+<section class="tl-hero {{#hasfigure}}has-figure{{/hasfigure}}{{^hasfigure}}no-figure{{/hasfigure}}" aria-labelledby="tl-h1">
+    <div class="tl-copy">
+        <h1 id="tl-h1">{{heading}}</h1>
+        <p class="tl-lead">{{lead}}</p>
+        {{#say}}<figure class="tl-say{{#portrait}} has-portrait{{/portrait}}{{#plain}} is-plain{{/plain}}">{{#portrait}}<img class="tl-portrait" src="{{portrait}}" alt="">{{/portrait}}<blockquote><p>{{text}}</p></blockquote><figcaption class="tl-who">{{who}}</figcaption></figure>{{/say}}
+    </div>
+    <div class="tl-stage" aria-hidden="true">
+      <svg class="tl-scene" viewBox="0 0 1200 480" preserveAspectRatio="xMidYMax slice" focusable="false">
+        <defs>
+          <linearGradient id="hs-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="hs-sky1"/><stop offset="1" class="hs-sky2"/></linearGradient>
+          <radialGradient id="hs-glowg"><stop offset="0" class="hs-glow0"/><stop offset=".5" class="hs-glow1"/><stop offset="1" class="hs-glow2"/></radialGradient>
+          <filter id="hs-lift" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="3" stdDeviation="3.4" flood-color="#0b2a25" flood-opacity=".28"/></filter>
+          <filter id="hs-lift2" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.6" flood-color="#0b2a25" flood-opacity=".26"/></filter>
+          <filter id="hs-noise" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" seed="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+          <clipPath id="hs-win"><rect x="577" y="64" width="126" height="160" rx="3"/></clipPath>
+        </defs>
+        <!-- The wall, its lower band and the floor run the whole width; the room (.hs-room) moves as one piece. -->
+        <rect class="hs-wall" width="1200" height="480"/>
+        <rect class="hs-wall2" y="300" width="1200" height="122"/>
+        <rect class="hs-trim" y="294" width="1200" height="8"/>
+        <rect class="hs-floor" y="420" width="1200" height="60"/>
+        <path class="hs-boards" d="M0,442 H1200 M0,463 H1200 M120,420 v22 M380,442 v21 M690,420 v22 M980,442 v21 M1100,463 v17 M240,463 v17" stroke-width="2" fill="none"/>
+        <g class="hs-room">
+          <!-- The lamp's light on the wall and on the floor. -->
+          <circle class="hs-glow" cx="880" cy="222" r="270" fill="url(#hs-glowg)"/>
+          <ellipse class="hs-glow" cx="880" cy="436" rx="190" ry="26" fill="url(#hs-glowg)"/>
+          <!-- The window over the sofa: dusk by day, the moon by night. -->
+          <g filter="url(#hs-lift)"><rect class="hs-frame" x="565" y="52" width="150" height="184" rx="6"/></g>
+          <g clip-path="url(#hs-win)">
+            <rect x="577" y="64" width="126" height="160" fill="url(#hs-sky)"/>
+            <circle class="hs-sun" cx="630" cy="208" r="30"/>
+            <g class="hs-night">
+              <path class="hs-moon" d="M680,80 a20,20 0 1 0 0,40 a14.5,20 0 1 1 0,-40 z" transform="rotate(-24 680 100)"/>
+              <circle class="hs-star" cx="600" cy="84" r="2.2"/><circle class="hs-star" cx="626" cy="112" r="1.6"/><circle class="hs-star" cx="606" cy="140" r="1.4"/>
+              <circle class="hs-star" cx="652" cy="150" r="1.8"/><circle class="hs-star" cx="690" cy="158" r="1.3"/><circle class="hs-star" cx="646" cy="76" r="1.3"/>
+              <path class="hs-star" d="M594,120 q1,-4 5,-5 q-4,-1 -5,-5 q-1,4 -5,5 q4,1 5,5z"/>
+            </g>
+            <path class="hs-hill" d="M572,226 C598,190 632,204 656,188 C676,176 694,186 710,180 L710,228 L572,228 Z"/>
+            <path class="hs-hill2" d="M572,228 C608,212 650,224 710,204 L710,228 Z"/>
+          </g>
+          <path class="hs-bars" d="M640,64 V224 M577,144 H703" stroke-width="7" fill="none"/>
+          <g filter="url(#hs-lift2)"><rect class="hs-frame" x="553" y="232" width="174" height="12" rx="4"/></g>
+          <!-- Rug. -->
+          <ellipse class="hs-rug" cx="636" cy="446" rx="262" ry="25"/>
+          <ellipse class="hs-rug2" cx="636" cy="446" rx="214" ry="17" fill="none" stroke-width="5" stroke-dasharray="16 10"/>
+          <!-- A plant in a pot. -->
+          <g filter="url(#hs-lift)">
+            <ellipse class="hs-leaf2" cx="206" cy="330" rx="13" ry="40" transform="rotate(-26 206 330)"/>
+            <ellipse class="hs-leaf" cx="236" cy="318" rx="14" ry="48" transform="rotate(8 236 318)"/>
+            <ellipse class="hs-leaf2" cx="262" cy="340" rx="12" ry="36" transform="rotate(34 262 340)"/>
+            <ellipse class="hs-leaf" cx="218" cy="352" rx="11" ry="30" transform="rotate(-48 218 352)"/>
+          </g>
+          <g filter="url(#hs-lift)"><path class="hs-pot" d="M204,372 H268 L260,420 H212 Z"/><rect class="hs-pot" x="200" y="366" width="72" height="12" rx="4"/></g>
+          <!-- A basket of picture books by the sofa. -->
+          <g filter="url(#hs-lift2)">
+            <rect class="hs-b1" x="394" y="350" width="16" height="44" rx="2" transform="rotate(-8 402 372)"/>
+            <rect class="hs-b2" x="410" y="356" width="14" height="40" rx="2"/>
+            <rect class="hs-b4" x="424" y="346" width="18" height="48" rx="2" transform="rotate(6 433 370)"/>
+            <rect class="hs-b3" x="440" y="358" width="13" height="38" rx="2" transform="rotate(10 446 377)"/>
+          </g>
+          <g filter="url(#hs-lift)"><path class="hs-basket" d="M386,384 H462 L454,420 H394 Z"/><path class="hs-basket2" d="M390,396 H458 M392,408 H456" stroke-width="3" fill="none"/></g>
+          <!-- The sofa, with two cushions, an open book and the blanket over the arm. -->
+          <g filter="url(#hs-lift)"><rect class="hs-sofa2" x="488" y="262" width="296" height="96" rx="36"/></g>
+          <g filter="url(#hs-lift)">
+            <rect class="hs-cush1" x="520" y="282" width="70" height="60" rx="16" transform="rotate(-9 555 312)"/>
+            <rect class="hs-cush2" x="694" y="288" width="62" height="56" rx="16" transform="rotate(8 725 316)"/>
+          </g>
+          <g filter="url(#hs-lift)"><rect class="hs-sofa" x="492" y="334" width="288" height="60" rx="18"/></g>
+          <g filter="url(#hs-lift2)"><path class="hs-book" d="M604,334 Q622,322 642,330 L642,342 Q622,336 604,346 Z"/><path class="hs-book2" d="M642,330 Q662,322 680,334 L680,346 Q662,336 642,342 Z"/></g>
+          <g filter="url(#hs-lift)">
+            <rect class="hs-sofa" x="462" y="300" width="52" height="102" rx="24"/>
+            <rect class="hs-sofa" x="758" y="300" width="52" height="102" rx="24"/>
+          </g>
+          <g filter="url(#hs-lift)"><path class="hs-blanket" d="M752,300 Q784,290 814,304 L816,404 Q800,412 790,404 L786,330 Q770,322 752,328 Z"/>
+            <path class="hs-blanket2" d="M790,340 L792,400 M802,312 L806,402" stroke-width="5" fill="none" opacity=".85"/></g>
+          <rect class="hs-metal" x="482" y="400" width="10" height="18" rx="3"/><rect class="hs-metal" x="782" y="400" width="10" height="18" rx="3"/>
+          <!-- The reading lamp. -->
+          <g filter="url(#hs-lift)">
+            <ellipse class="hs-metal" cx="880" cy="416" rx="30" ry="7"/>
+            <rect class="hs-metal" x="877" y="214" width="6" height="202"/>
+            <path class="hs-shade" d="M826,218 H934 L910,166 H850 Z"/>
+            <ellipse class="hs-bulb" cx="880" cy="218" rx="50" ry="6"/>
+          </g>
+        </g>
+        <rect class="hs-grain" width="1200" height="480" filter="url(#hs-noise)"/>
+      </svg>
+        {{#hasfigure}}<img class="tl-face" src="{{figure}}" alt="" width="150" height="360">{{/hasfigure}}
+    </div>
 </section>
+<h2 class="tl-ages-title">{{choosetitle}}</h2>
+<nav class="tl-ages" aria-label="{{agesaria}}">
+{{#ages}}<a href="{{url}}" data-age="{{id}}"{{#current}} aria-current="page"{{/current}}><svg class="age-ic age-{{id}}" aria-hidden="true" focusable="false"><use href="#age-{{id}}"/></svg><span class="tl-name"><b>{{tab}}</b> <small>{{unit}}</small></span><span class="tl-hint">{{hint}}</span></a>{{/ages}}
+</nav>
+{{#chosen}}
+{{#list}}
+<section class="tl-list" aria-labelledby="tl-list-h">
+    <h2 id="tl-list-h" tabindex="-1">{{heading}}</h2>
+    {{#hastales}}
+    <p class="tl-count"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>{{count}}</span></p>
+    <div class="tl-grid{{#four}} tl-grid-four{{/four}}">
+    {{#tales}}
+        <article class="tl-tale">
+            <a class="tl-cover" href="{{url}}" tabindex="-1" aria-hidden="true">{{#hascover}}<img src="{{cover}}" alt="" width="360" height="537" loading="lazy">{{/hascover}}{{^hascover}}<span class="ayv-cover ayv-cover-{{colour}} tl-drawn"><span class="ayv-cover-title">{{title}}</span></span>{{/hascover}}<i></i></a>
+            <div class="tl-body">
+                <h3>{{title}}</h3>
+                <p class="tl-meta">{{#minutes}}<span><svg class="i" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg>{{minutes}}</span>{{/minutes}}{{#parts}}<span>{{parts}}</span>{{/parts}}</p>
+                {{#why}}<p class="tl-why">{{why}}</p>{{/why}}
+                {{#night}}<p class="tl-tagline"><span class="tl-tag"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-moon"/></svg>{{nightlabel}}</span></p>{{/night}}
+                {{#audio}}<p class="tl-audio"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-headphones"/></svg>{{audiolabel}}</p>{{/audio}}
+                <a class="tl-read" href="{{url}}"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-read"/></svg>{{readlabel}}<span class="visually-hidden"> «{{title}}»</span></a>
+            </div>
+        </article>
+    {{/tales}}
+    </div>
+    {{/hastales}}
+    {{#empty}}
+    <div class="tl-empty{{^face}} is-plain{{/face}}">{{#face}}<img src="{{face}}" alt="" width="141" height="360">{{/face}}<div><p><b>{{title}}</b> {{text}}</p>
+        <a class="tl-quiet" href="{{nexturl}}" data-age="{{nextid}}">{{nextlabel}}</a></div></div>
+    {{/empty}}
+</section>
+{{/list}}
+{{#together}}
+<section class="tl-together" aria-labelledby="tl-together-h">
+    <h2 id="tl-together-h">{{heading}}</h2>
+    <ul>{{#tips}}<li><svg class="i" aria-hidden="true" focusable="false"><use href="#i-{{icon}}"/></svg><b>{{title}}</b><span>{{text}}</span></li>{{/tips}}</ul>
+</section>
+{{/together}}
+{{/chosen}}
+{{#foot}}
+<footer class="tl-foot">
+    <div class="tl-foot-card">
+        {{#picture}}<div class="tl-foot-pic"><img src="{{picture}}" alt="" loading="lazy"></div>{{/picture}}
+        <div class="tl-foot-txt">
+            <p class="tl-foot-name">{{#emblem}}<img src="{{emblem}}" alt="">{{/emblem}}{{name}}</p>
+            {{#stops.0}}<p class="tl-stops-h">{{stopsheading}}</p><dl class="tl-stops">{{#stops}}<dt>{{when}}</dt><dd>{{where}}</dd>{{/stops}}</dl>{{/stops.0}}
+            {{#lines.0}}<ul>{{#lines}}<li>{{.}}</li>{{/lines}}</ul>{{/lines.0}}
+            <a class="tl-quiet" href="{{catalogue}}">{{cataloguelabel}} <svg class="i" aria-hidden="true" focusable="false"><use href="#i-read"/></svg></a>
+        </div>
+    </div>
+</footer>
+{{/foot}}
+</div>

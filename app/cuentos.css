@@ -1,0 +1,298 @@
+/* «Stories to read at home» (the families' library, part 1), as Gaudí drew it on 8 November 2026
+   (~/Downloads/arte-local/entregas/ayvurenda/cuentos-en-casa/): the room where the memory reads, the ages, the stories
+   and how to read together. Only on that page (shell option styles). The D layer's tokens it needs and the plugin does
+   not have, kept to the page. Chrome 93 and Firefox 98: no :has(), no container queries, no color-mix(), no dvh. */
+.ayv .tl-page {
+    --ink2: #3c4946;
+    --muted: #5f6b67;
+    --plate: #f3e6cc;
+    --ring: rgba(15, 58, 51, .10);
+    --tag: #fbeac4;
+    --tag-ink: #6b4a10;
+    --shadow: 0 1px 2px rgba(15, 58, 51, .06), 0 10px 28px -14px rgba(15, 58, 51, .32);
+    --shadow-lift: 0 2px 4px rgba(15, 58, 51, .08), 0 18px 34px -16px rgba(15, 58, 51, .42);
+    --shadow-button: 0 6px 14px -8px rgba(23, 87, 76, .7);
+    --radius: 22px;
+}
+html[data-bs-theme="dark"] .ayv .tl-page {
+    --ink2: #d3cbbb;
+    --muted: #b3bdb9;
+    --plate: #f3e9d6;
+    --ring: rgba(236, 228, 212, .12);
+    --tag: #3a3220;
+    --tag-ink: #f6d48a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 12px 30px -14px rgba(0, 0, 0, .65);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, .4), 0 18px 36px -16px rgba(0, 0, 0, .7);
+    --shadow-button: 0 6px 16px -8px rgba(0, 0, 0, .8);
+}
+.ayv .tl-page svg.i { width: 1.25em; height: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ayv .tl-page .visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.ayv .tl-say blockquote { margin: 0; }
+.ayv .tl-tagline { margin: 0; }
+.ayv .tl-symbols { position: absolute; width: 0; height: 0; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .tl-page *, .ayv .tl-page *::before, .ayv .tl-page *::after { transition: none !important; }
+}
+
+/* ---------- The head: the words on the wall and the room where the memory reads ---------- */
+.tl-hero {
+    /* The room, by skin and mode (school, public library and bookmobile share the warm one). */
+    --h-wall: #f5e9d4; --h-wall2: #eedfc4; --h-trim: #e4cfac; --h-floor: #d8b98f; --h-boards: #c8a678;
+    --h-frame: #fbf6ec; --h-sky1: #f3c99c; --h-sky2: #f9e5c4; --h-sun: #f0b43c; --h-sun-op: 1; --h-night-op: 0;
+    --h-hill: #2c7a6a; --h-hill2: #17574c; --h-glow: #ffd98a; --h-glow-op: .38;
+    --h-sofa: #2c7a6a; --h-sofa2: #17574c; --h-cush1: #e2654c; --h-cush2: #f0b43c; --h-blanket: #e2654c; --h-blanket2: #fbf6ec;
+    --h-rug: #ead2a8; --h-rug2: #e2654c; --h-pot: #c9503a; --h-leaf: #2c7a6a; --h-leaf2: #17574c; --h-basket: #b8915f; --h-basket2: #9a7548;
+    --h-b1: #e2654c; --h-b2: #f0b43c; --h-b3: #17574c; --h-b4: #8fc4b2; --h-shade: #f6cf73; --h-metal: #1e2b2a; --h-bulb: #fff3d0;
+    --h-book: #fbf6ec; --h-book2: #ead9b8; --h-star: #f6cf73; --h-moon: #fff1cf;
+    --h-title: #0f3a33; --h-text: #1e2b2a; --h-grain: multiply; --h-grain-op: .1;
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr); border-radius: 28px; overflow: hidden;
+    background: var(--h-wall); color: var(--h-text); box-shadow: var(--shadow);
+}
+html[data-bs-theme="dark"] .tl-hero,
+.ayv-skin-secondary .tl-hero {
+    --h-wall: #163d37; --h-wall2: #123530; --h-trim: #0f2e29; --h-floor: #3c3022; --h-boards: #31281c;
+    --h-frame: #d9ccb3; --h-sky1: #08241f; --h-sky2: #134238; --h-sun-op: 0; --h-night-op: 1; --h-hill: #0c2f29; --h-hill2: #0a2621;
+    --h-glow: #ffcf73; --h-glow-op: .92;
+    --h-sofa: #24675a; --h-sofa2: #174b42; --h-cush1: #c9583f; --h-cush2: #d9a133; --h-blanket: #c9583f; --h-blanket2: #e8dcc6;
+    --h-rug: #4a3c2a; --h-rug2: #b8573f; --h-pot: #a8452f; --h-leaf: #24675a; --h-leaf2: #174b42; --h-basket: #8a6a45; --h-basket2: #6b5135;
+    --h-b1: #c9583f; --h-b2: #d9a133; --h-b3: #0f3a33; --h-b4: #6fa596; --h-metal: #0b1715; --h-book: #efe4cf; --h-book2: #cdbd9e;
+    --h-title: #f6e7c8; --h-text: #ece4d4; --h-grain: overlay; --h-grain-op: .14;
+}
+/* A secondary school: the green night and the lamp's sun lead, little coral; the room is at night in both modes. */
+.ayv.ayv-skin-secondary .tl-hero { --h-cush1: #d9a133; --h-cush2: #8fc4b2; --h-blanket: #2c7a6a; --h-blanket2: #d9ccb3; --h-rug2: #d9a133; --h-pot: #8a6a45; --h-b1: #d9a133; }
+/* A university and a company: ink, green and paper; no sun in the window and a green-shaded lamp. */
+.ayv-skin-university .tl-hero, .ayv-skin-company .tl-hero {
+    --h-wall: #f3eee3; --h-wall2: #ebe4d5; --h-trim: #ddd3c0; --h-sky1: #dde9e3; --h-sky2: #f1f0e6; --h-sun-op: 0;
+    --h-hill: #6f9d90; --h-hill2: #17574c; --h-glow: #fff0c8; --h-glow-op: .3;
+    --h-sofa: #17574c; --h-sofa2: #0f3a33; --h-cush1: #efe4cf; --h-cush2: #3b4a47; --h-blanket: #efe4cf; --h-blanket2: #17574c;
+    --h-rug: #e6dccb; --h-rug2: #3b4a47; --h-pot: #b8915f; --h-b1: #3b4a47; --h-b2: #d8b98f; --h-b3: #17574c; --h-b4: #efe4cf;
+    --h-shade: #17574c;
+}
+html[data-bs-theme="dark"] .ayv-skin-university .tl-hero, html[data-bs-theme="dark"] .ayv-skin-company .tl-hero {
+    --h-wall: #172f2b; --h-wall2: #132824; --h-trim: #0f221f; --h-sky1: #08201c; --h-sky2: #10352e; --h-hill: #0c2f29; --h-hill2: #0a2621;
+    --h-glow: #ffe4a6; --h-glow-op: .7; --h-sofa: #1d5c50; --h-sofa2: #133f37; --h-cush1: #d9ccb3; --h-cush2: #26332f;
+    --h-blanket: #d9ccb3; --h-blanket2: #1d5c50; --h-rug: #2c3a35; --h-rug2: #8fa39b; --h-b1: #26332f; --h-b2: #a68a63; --h-b4: #d9ccb3;
+    --h-shade: #1f6a5c;
+}
+
+.tl-copy { position: relative; z-index: 2; display: grid; gap: 10px; padding: 20px 18px 0; }
+.tl-copy h1 { text-wrap: balance; margin: 0; font: 600 clamp(1.75rem, 1.1rem + 2.6vw, 3.1rem)/1.08 var(--title); color: var(--h-title); letter-spacing: -.005em; }
+.tl-lead { margin: 0; font-size: 1.0625rem; }
+
+/* The memory's words: a cream note with its tail towards her, cream in both modes like every plate. */
+.tl-say { position: relative; margin: 8px 0 0; padding: 14px 16px; border-radius: 20px; background: #fffaf0; color: #1e2b2a;
+    box-shadow: 0 2px 4px rgba(15, 58, 51, .10), 0 14px 26px -14px rgba(15, 58, 51, .45); display: grid; gap: 4px;
+    grid-template-columns: minmax(0, 1fr); }
+.tl-say p { margin: 0; font-size: 1.0625rem; line-height: 1.45; }
+.tl-say .tl-who { font-size: .875rem; font-weight: 700; color: #5f6b67; }
+.tl-say::after { content: ""; position: absolute; width: 22px; height: 22px; background: #fffaf0; border-radius: 0 0 0 6px;
+    transform: rotate(45deg); left: -9px; bottom: 26px; box-shadow: -6px 6px 8px -6px rgba(15, 58, 51, .22); }
+.tl-say .tl-portrait { width: 56px; height: 56px; border-radius: 50%; background: #f3e6cc; object-fit: cover; grid-row: 1 / span 2; }
+.tl-say.has-portrait { grid-template-columns: 56px minmax(0, 1fr); column-gap: 12px; align-items: center; }
+.tl-say.has-portrait::after, .tl-say.is-plain::after { display: none; }
+
+/* The room. On a phone it is a band under the words, and the memory stands on its right by the lamp. */
+.tl-stage { position: relative; height: 214px; margin-top: -30px; }
+.tl-scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tl-face { position: absolute; z-index: 3; left: 14px; bottom: 8px; height: 196px; width: auto; filter: drop-shadow(0 10px 12px rgba(15, 58, 51, .28)); }
+.has-figure .tl-say { margin-left: 96px; }
+.no-figure .tl-stage { margin-top: 0; height: 170px; }
+.no-figure .tl-face { display: none; }
+
+@media (min-width: 640px) {
+    .tl-copy { padding: 30px 30px 0; }
+    .tl-stage { height: 300px; }
+    .tl-face { height: 270px; left: 7%; }
+    .has-figure .tl-say { margin-left: calc(7% + 132px); }
+    .no-figure .tl-stage { height: 240px; }
+}
+/* On a wide screen, the words on the left and the room on the right; the memory by the window, near her words. */
+@media (min-width: 980px) {
+    .tl-hero { grid-template-columns: minmax(0, 41fr) minmax(0, 59fr); min-height: 440px; }
+    .tl-copy { padding: 44px 0 44px 48px; align-content: center; gap: 14px; }
+    /* The room behind the whole head, so wall and floor run under the words; the furniture sits on the right. */
+    .tl-stage, .no-figure .tl-stage { position: absolute; inset: 0; height: auto; margin: 0; }
+    .hs-room { transform: translate(366px, 55px) scale(.87); }
+    .tl-face { left: 43.5%; bottom: 16px; height: 80%; }
+    .has-figure .tl-say, .no-figure .tl-say { margin: 4px 0 0; }
+    .tl-say::after { left: auto; right: -9px; bottom: 30px; border-radius: 0 6px 0 0; box-shadow: 6px -6px 8px -6px rgba(15, 58, 51, .2); }
+}
+/* The scene's colours come from the variables above. */
+.hs-wall { fill: var(--h-wall); } .hs-wall2 { fill: var(--h-wall2); } .hs-trim { fill: var(--h-trim); }
+.hs-floor { fill: var(--h-floor); } .hs-boards { stroke: var(--h-boards); }
+.hs-frame { fill: var(--h-frame); } .hs-bars { stroke: var(--h-frame); }
+.hs-sky1 { stop-color: var(--h-sky1); } .hs-sky2 { stop-color: var(--h-sky2); }
+.hs-sun { fill: var(--h-sun); opacity: var(--h-sun-op); } .hs-night { opacity: var(--h-night-op); }
+.hs-star { fill: var(--h-star); } .hs-moon { fill: var(--h-moon); }
+.hs-hill { fill: var(--h-hill); } .hs-hill2 { fill: var(--h-hill2); }
+.hs-glow0 { stop-color: var(--h-glow); stop-opacity: .85; } .hs-glow1 { stop-color: var(--h-glow); stop-opacity: .28; } .hs-glow2 { stop-color: var(--h-glow); stop-opacity: 0; }
+.hs-glow { opacity: var(--h-glow-op); }
+.hs-sofa { fill: var(--h-sofa); } .hs-sofa2 { fill: var(--h-sofa2); } .hs-cush1 { fill: var(--h-cush1); } .hs-cush2 { fill: var(--h-cush2); }
+.hs-blanket { fill: var(--h-blanket); } .hs-blanket2 { stroke: var(--h-blanket2); }
+.hs-rug { fill: var(--h-rug); } .hs-rug2 { stroke: var(--h-rug2); }
+.hs-pot { fill: var(--h-pot); } .hs-leaf { fill: var(--h-leaf); } .hs-leaf2 { fill: var(--h-leaf2); }
+.hs-basket { fill: var(--h-basket); } .hs-basket2 { stroke: var(--h-basket2); }
+.hs-b1 { fill: var(--h-b1); } .hs-b2 { fill: var(--h-b2); } .hs-b3 { fill: var(--h-b3); } .hs-b4 { fill: var(--h-b4); }
+.hs-shade { fill: var(--h-shade); } .hs-metal { fill: var(--h-metal); } .hs-bulb { fill: var(--h-bulb); }
+.hs-book { fill: var(--h-book); } .hs-book2 { fill: var(--h-book2); }
+.hs-grain { mix-blend-mode: var(--h-grain); opacity: var(--h-grain-op); }
+
+/* ---------- The ages: four tabs, one touch; on arrival without an age, four big cards ---------- */
+.tl-ages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 16px 0 0; }
+.tl-ages a { position: relative; display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 76px; padding: 8px 4px 10px;
+    border-radius: 18px; background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ring), 0 4px 10px -8px rgba(15, 58, 51, .5);
+    color: var(--ink); text-decoration: none; touch-action: manipulation; transition: transform .15s ease, box-shadow .15s ease; }
+.tl-ages a:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--ring), var(--shadow-lift); }
+.tl-ages svg { width: 34px; height: 34px; }
+.tl-name { display: grid; justify-items: center; }
+.tl-ages b { font: 600 1.125rem/1.1 var(--title); }
+.tl-ages small { font-size: .8125rem; color: var(--muted); line-height: 1.2; }
+.tl-ages .tl-hint { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+/* The age being shown: the tab pulled out, on a cream plate, as a lit card also in dark mode. */
+.tl-ages a[aria-current="page"] { background: var(--plate); color: #1e2b2a; box-shadow: inset 0 -4px 0 var(--green2), var(--shadow-lift); }
+.tl-ages a[aria-current="page"] small { color: #4f5c58; }
+.is-choosing .tl-ages { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.is-choosing .tl-ages a { justify-items: start; text-align: left; align-content: start; min-height: 128px; padding: 14px 14px 16px; gap: 4px; }
+.is-choosing .tl-ages svg { width: 46px; height: 46px; margin-bottom: 2px; }
+.is-choosing .tl-name { display: block; }
+.is-choosing .tl-ages b { font-size: 1.375rem; }
+.is-choosing .tl-ages small { font-size: 1rem; color: var(--ink2); }
+.is-choosing .tl-ages .tl-hint { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal;
+    font-size: .9375rem; color: var(--muted); line-height: 1.3; }
+@media (min-width: 700px) {
+    .tl-ages { gap: 12px; margin-top: 20px; }
+    .tl-ages a { grid-auto-flow: column; justify-content: center; gap: 10px; min-height: 64px; }
+    .tl-name { display: block; }
+    .tl-ages b { font-size: 1.25rem; }
+    .is-choosing .tl-ages { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .is-choosing .tl-ages a { grid-auto-flow: row; justify-content: start; }
+}
+.age-0-2 { color: var(--coral); } .age-3-5 { color: var(--sun); } .age-6-8 { color: var(--green2); } .age-9-12 { color: var(--night); }
+html[data-bs-theme="dark"] .tl-ages a:not([aria-current]) .age-6-8 { color: #4fa08c; }
+html[data-bs-theme="dark"] .tl-ages a:not([aria-current]) .age-9-12 { color: #8fd3c1; }
+.is-choosing .tl-ages-title { display: block; }
+.tl-ages-title { display: none; margin: 26px 0 0; font: 600 1.5rem/1.2 var(--title); }
+
+/* ---------- The tales ---------- */
+.tl-list { margin-top: 26px; }
+.tl-list h2, .tl-together h2, .tl-families h2 { margin: 0; font: 600 1.5rem/1.2 var(--title); }
+.tl-list h2:focus { outline: none; }
+.tl-count { display: flex; align-items: flex-start; gap: 8px; margin: 6px 0 0; color: var(--muted); font-size: .9375rem; }
+.tl-count svg { color: var(--green2); margin-top: 1px; }
+html[data-bs-theme="dark"] .tl-count svg { color: var(--accent); }
+.tl-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 16px; }
+@media (min-width: 760px) { .tl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; } }
+@media (min-width: 1180px) { .tl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* A tale: the cover standing on its cream plate (the child can point at it), and what it is, for whom and «Read». */
+.tl-tale { display: grid; grid-template-columns: 124px minmax(0, 1fr); border-radius: var(--radius); background: var(--surface);
+    box-shadow: var(--shadow); overflow: hidden; }
+.tl-cover { position: relative; display: flex; align-items: center; justify-content: center; padding: 16px 14px 20px; background: var(--plate); }
+.tl-cover::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 14px; height: 10px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(15, 58, 51, .28), rgba(15, 58, 51, 0)); }
+.tl-cover img { position: relative; z-index: 1; display: block; width: 96px; height: auto; aspect-ratio: 360 / 537; object-fit: cover;
+    border-radius: 3px 9px 9px 3px; box-shadow: 0 10px 16px -9px rgba(15, 58, 51, .6), inset 0 0 0 1px rgba(0, 0, 0, .04); background: #fbf6ec;
+    transition: transform .2s ease; }
+.tl-cover:hover img { transform: translateY(-3px) rotate(-1deg); }
+.tl-cover i { position: absolute; z-index: 2; top: 16px; bottom: 20px; left: 14px; width: 6px; border-radius: 3px 0 0 3px; pointer-events: none;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .16), rgba(255, 255, 255, .22) 60%, rgba(255, 255, 255, 0)); }
+.tl-body { display: grid; align-content: start; gap: 6px; padding: 14px 16px 16px 14px; min-width: 0; }
+.tl-body h3 { margin: 0; font: 600 1.1875rem/1.2 var(--title); overflow-wrap: anywhere; }
+.tl-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; font-size: .875rem; color: var(--muted); }
+.tl-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.tl-meta svg.i { width: 16px; height: 16px; }
+.tl-why { margin: 0; font-size: 1rem; line-height: 1.42; color: var(--ink2); }
+.tl-tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px 2px 8px; border-radius: 999px; background: var(--tag);
+    color: var(--tag-ink); font-size: .8125rem; font-weight: 700; }
+.tl-tag svg.i { width: 15px; height: 15px; }
+.tl-audio { display: flex; align-items: center; gap: 6px; margin: 0; font-size: .8125rem; color: var(--muted); }
+.tl-audio svg.i { width: 15px; height: 15px; }
+.tl-read { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; margin-top: 6px;
+    padding: 10px 18px; border-radius: 999px; background: var(--green); color: #fff !important; text-decoration: none;
+    font-weight: 700; font-size: 1.0625rem; box-shadow: var(--shadow-button); touch-action: manipulation;
+    transition: transform .15s ease, box-shadow .15s ease; }
+.tl-read:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift); }
+.tl-read svg.i { width: 22px; height: 22px; }
+/* The small ones choose by the picture: bigger covers. */
+.is-big .tl-tale { grid-template-columns: 150px minmax(0, 1fr); }
+.is-big .tl-cover img { width: 120px; }
+@media (max-width: 380px) {
+    .tl-tale { grid-template-columns: 112px minmax(0, 1fr); }
+    .tl-cover { padding: 14px 10px 18px; }
+    .tl-cover img { width: 88px; }
+    .is-big .tl-tale { grid-template-columns: 130px minmax(0, 1fr); }
+    .is-big .tl-cover img { width: 106px; }
+    .tl-cover i { left: 10px; }
+}
+@media (min-width: 760px) {
+    .tl-tale { grid-template-columns: 150px minmax(0, 1fr); }
+    .tl-cover img { width: 112px; }
+    .is-big .tl-tale { grid-template-columns: 176px minmax(0, 1fr); }
+    .is-big .tl-cover img { width: 140px; }
+}
+
+/* No tale yet for this age. */
+.tl-empty { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 16px; align-items: center; margin-top: 16px; padding: 18px;
+    border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.tl-empty img { width: 90px; height: auto; }
+.tl-empty p { margin: 0 0 8px; }
+.tl-empty.is-plain { grid-template-columns: minmax(0, 1fr); }
+.tl-quiet { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; border-radius: 999px; background: var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--ring), 0 4px 10px -8px rgba(15, 58, 51, .5); color: var(--accent) !important; text-decoration: none; font-weight: 700; }
+
+/* ---------- Reading together: it only explains, so it is drawn as a scheme, with no box ---------- */
+.tl-together { margin-top: 36px; padding-top: 22px; border-top: 1px dashed var(--line); }
+.tl-together ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.tl-together li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 2px 12px; align-items: start; }
+.tl-together li svg.i { width: 34px; height: 34px; grid-row: 1 / span 2; color: var(--coral); stroke-width: 1.8; }
+.tl-together li:nth-child(2) svg.i { color: #d9952a; }
+.tl-together li:nth-child(3) svg.i { color: var(--green2); }
+html[data-bs-theme="dark"] .tl-together li:nth-child(2) svg.i { color: var(--sun); }
+html[data-bs-theme="dark"] .tl-together li:nth-child(3) svg.i { color: var(--accent); }
+.ayv-skin-university .tl-together li svg.i, .ayv-skin-company .tl-together li svg.i { color: var(--green2); }
+.ayv-skin-secondary .tl-together li:nth-child(1) svg.i { color: #d9952a; }
+html[data-bs-theme="dark"] .ayv-skin-secondary .tl-together li:nth-child(1) svg.i { color: var(--sun); }
+html[data-bs-theme="dark"] .ayv-skin-university .tl-together li svg.i, html[data-bs-theme="dark"] .ayv-skin-company .tl-together li svg.i { color: var(--accent); }
+.tl-together b { font-weight: 700; }
+.tl-together span { color: var(--ink2); font-size: 1rem; }
+@media (min-width: 760px) { .tl-together ul { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; } }
+
+/* ---------- The families' library, coming: a gentle word, no button ---------- */
+.tl-families { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; align-items: center; margin-top: 30px; padding: 18px;
+    border-radius: var(--radius); background: var(--paper2); }
+.tl-families svg { width: 76px; height: 76px; }
+.tl-families h2 { font-size: 1.25rem; }
+.tl-families p { margin: 4px 0 0; color: var(--ink2); }
+@media (min-width: 760px) { .tl-families { grid-template-columns: 96px minmax(0, 1fr); padding: 20px 26px; } .tl-families svg { width: 96px; height: 96px; } }
+
+/* ---------- The library's foot ---------- */
+.tl-foot { margin-top: 34px; padding-bottom: calc(26px + env(safe-area-inset-bottom)); }
+.tl-foot-card { display: grid; grid-template-columns: minmax(0, 1fr); border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
+.tl-foot-pic { height: 150px; background: #fbf6ec; }
+.tl-foot-pic img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 78% 60%; }
+.tl-foot-txt { display: grid; gap: 8px; align-content: center; padding: 18px; }
+.tl-foot-name { display: flex; align-items: center; gap: 10px; margin: 0; font: 600 1.1875rem/1.25 var(--title); }
+.tl-foot-name img { width: 30px; height: 30px; flex: none; }
+.tl-foot-name .on-dark { display: none; }
+html[data-bs-theme="dark"] .tl-foot-name .on-dark { display: block; }
+html[data-bs-theme="dark"] .tl-foot-name .on-light { display: none; }
+.tl-foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; color: var(--ink2); }
+.tl-stops { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; margin: 0; }
+.tl-stops dt { font-weight: 700; } .tl-stops dd { margin: 0; color: var(--ink2); }
+.tl-stops-h { margin: 0; font-size: .875rem; font-weight: 700; color: var(--muted); }
+.tl-foot .tl-quiet { justify-self: start; margin-top: 4px; }
+.tl-small { margin: 14px 2px 0; font-size: .8125rem; color: var(--muted); }
+@media (min-width: 760px) {
+    .tl-foot-card { grid-template-columns: minmax(0, 46fr) minmax(0, 54fr); }
+    .tl-foot-pic { height: auto; min-height: 220px; order: 2; }
+    .tl-foot-txt { padding: 24px 28px; }
+}
+
+/* A story without a picture: the plugin's drawn cover, at the size of the covers. */
+.ayv .tl-cover .tl-drawn { position: relative; z-index: 1; display: flex; width: 96px; aspect-ratio: 2 / 3; padding: .5rem; font-size: .8rem; }
+.is-big .tl-cover .tl-drawn { width: 120px; }
+@media (min-width: 760px) { .ayv .tl-cover .tl-drawn { width: 112px; } .is-big .tl-cover .tl-drawn { width: 140px; } }
+
+/* Four stories: two by two, or four in a row on a very wide screen, never one alone in its row (Gaudí). */
+@media (min-width: 1180px) { .ayv .tl-grid.tl-grid-four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1600px) { .ayv .tl-grid.tl-grid-four { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

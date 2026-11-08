@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.220.0 (2026-11-08)
+
+- Stories to read at home, as Gaudí drew them (Enrique: «Lovely»): a living room drawn on the page, which turns to
+  night in dark mode with the moon and the lamp lit; the memory reading beside her words for the age, as each skin
+  has her (whole where the little ones are, a portrait at a secondary school or a university, the library itself at a
+  company); the four ages, each with its little book; each story with its cover, minutes, pages or chapters, why it is
+  lovely for that age, «For bedtime» and «Read»; «Each one was read first, all the way through, by someone of the
+  library»; three tips for reading together for each age; and the library's foot, with its next stops on a bookmobile.
+  The address takes the age in years or as a band (`age=4`, `age=3-5`, also `edad`).
+- Whoever looks at a story writes, beside its ages, about how many minutes it takes, its pages or chapters, a line for
+  each age, whether it is for bedtime and its place in the list (without it, the shortest first).
+- A page can bring a stylesheet of its own (`styles` in `shell::output`).
+
 ## 0.219.0 (2026-11-08)
 
 - The library in the organisation's Telegram channel, through Oksigenia Marandu (Marandu's request, with Enrique's OK):

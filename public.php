@@ -185,57 +185,128 @@ if ($recordid) {
     die;
 }
 
-// Tales to read at home, by age (the families' library, part 1; docs/24): what the library offers to read together,
-// for anyone, also for a family that has not joined the centre yet. Read aloud by a grown-up, never «Listen».
+// Tales to read at home, by age (the families' library, part 1; docs/24), as Gaudí drew them: what the library looked at
+// and offers to read together, for anyone, also for a family that has not joined the centre yet. Read aloud by a
+// grown-up, never «Listen». The age comes in years (Eguahe's link, age=4) or as a band (age=3-5), also as edad.
 if (optional_param('tales', 0, PARAM_BOOL)) {
-    $age = optional_param('age', -1, PARAM_INT);
-    $band = $age >= 0 ? window::band($age) : null;
-    $found = $band !== null ? window::records($library, '', $page, $band) : ['records' => [], 'more' => false];
+    $asked = trim(optional_param('age', optional_param('edad', '', PARAM_RAW_TRIMMED), PARAM_RAW_TRIMMED));
+    $years = preg_match('/^(\d{1,2})(?:-\d{1,2})?$/', $asked, $m) ? (int) $m[1] : -1;
+    $band = $years >= 0 && $years <= 12 ? window::band($years) : null;
+    $bandid = fn(int $from) => $from . '-' . ($from === 9 ? 12 : $from + 2);
+    $entityid = (int) $library->entityid;
+    $skin = \local_oksigeniaayvurenda\local\skins::of($entityid);
+    $say = fn(string $key, $a = null) => \local_oksigeniaayvurenda\local\skins::say($entityid, $key, $a);
+    $found = $band !== null ? window::records($library, '', 0, $band) : ['records' => []];
     $tales = [];
     foreach ($found['records'] as $record) {
+        $item = reset($record['items']);
+        $lines = json_decode((string) $item->homelines, true) ?: [];
+        $parts = (int) $item->homeparts;
         $tales[] = [
+            'order' => (int) ($item->homeorder ?: 1000),
+            'length' => (int) ($item->homeminutes ?: 999),
             'title' => $record['title'],
-            'authors' => implode(', ', $record['authors']),
             'cover' => (string) $record['cover'],
             'hascover' => (bool) $record['cover'],
             'colour' => $record['id'] % 6,
-            'reads' => array_map(fn($item) => [
-                'url' => (new moodle_url('/local/oksigeniaayvurenda/read.php', ['library' => $library->slug, 'id' => $item->id]))
-                    ->out(false),
-                'label' => count($record['items']) > 1 && $item->title !== '' && $item->title !== null ? $item->title
-                    : $str('talesread'),
-            ], $record['items']),
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/read.php', ['library' => $library->slug, 'id' => $item->id]))
+                ->out(false),
+            'minutes' => $item->homeminutes ? $str('talesminutes', (int) $item->homeminutes) : '',
+            'parts' => !$parts ? '' : $str(($band === 9 ? 'taleschapters' : 'talespages') . ($parts === 1 ? 'one' : ''), $parts),
+            'why' => (string) ($lines[(string) $band] ?? ''),
+            'night' => !empty($item->homenight),
+            // Only a recording the work brings, as an audio of its own record; never a made voice.
+            'audio' => (bool) $DB->record_exists_select(
+                'local_oksigeniaayvurenda_digital',
+                "recordid = ? AND format = 'audio' AND kind <> 'voice' AND status = 'published'",
+                [$record['id']]
+            ),
         ];
     }
-    $with = window::tale_ages($library);
-    $data = $shared + [
+    // The order the library chose; without it, the shortest first.
+    usort($tales, fn($a, $b) => [$a['order'], $a['length'], $a['title']] <=> [$b['order'], $b['length'], $b['title']]);
+    $here = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug] +
+        $params))->out(false);
+    // Who speaks, by skin (Gaudí): the memory whole and reading where the little ones are; a portrait at a secondary
+    // school or a university; at a company, the library itself. A centre's own memory, as it drew her.
+    $memory = \local_oksigeniaayvurenda\local\characters::of($entityid)['memory'] ?? null;
+    $speaks = $memory && $memory['enabled'] && $skin !== 'company';
+    $whole = $speaks && in_array($skin, ['school', 'public', 'mobile'], true);
+    $own = $speaks && !empty($memory['own']);
+    $figure = !$whole ? null : ($own ? \local_oksigeniaayvurenda\local\characters::own_figure($entityid, 'memory', 'lee')
+        : (screens::art('personajes/recorte/memoria-lee') ?? \local_oksigeniaayvurenda\local\characters::figure('memory', 'lee')));
+    $portrait = !$speaks || $whole ? null : ($own ? \local_oksigeniaayvurenda\local\images::url('portrait', $entityid, 'memory')
+        : screens::art('personajes/recorte/' . ($skin === 'secondary' ? 'retrato-cielo' : 'retrato')));
+    $tips = ['0' => ['sofa', 'voice', 'repeat'], '3' => ['moon', 'page', 'voice'], '6' => ['page', 'ask', 'moon'],
+        '9' => ['bookmark', 'page', 'chat']];
+    $next = $band === null ? null : window::AGES[(array_search($band, window::AGES, true) + 1) % count(window::AGES)];
+    $stops = [];
+    if ($skin === 'mobile') {
+        $coming = \local_oksigeniaayvurenda\local\agenda::between($entityid, time(), time() + 30 * DAYSECS);
+        foreach (array_slice($coming, 0, 4) as $stop) {
+            $stops[] = ['when' => \local_oksigeniaayvurenda\local\agenda::when($stop, $library),
+                'where' => (string) ($stop->place ?: $stop->title)];
+        }
+    }
+    $data = [
+        'pageclass' => ($band === null ? ' is-choosing' : '') . ($band !== null && $band <= 3 ? ' is-big' : ''),
         'heading' => $str('talesheading'),
-        'intro' => $str('talesintro'),
-        'agelegend' => $str('talesagechoose'),
-        'ages' => array_map(fn($from) => ['label' => $str('talesage' . $from), 'url' => $here(['tales' => 1, 'age' => $from]),
-            'current' => $band === $from, 'some' => in_array($from, $with, true)], window::AGES),
-        'memory' => \local_oksigeniaayvurenda\local\characters::say(
-            (int) $library->entityid,
-            'memory',
-            $band === null ? 'talesmemorychoose' : 'talesmemory' . $band,
-            [],
-            $band === null ? 'saluda' : 'lee'
-        ),
-        'tales' => $tales,
-        'hastales' => (bool) $tales,
+        'lead' => $say('talesintro'),
+        'figure' => (string) $figure,
+        'hasfigure' => (bool) $figure,
+        'say' => ['text' => $str($band === null ? 'talesmemorychoose' : 'talesmemory' . $band),
+            'who' => $speaks ? format_string($memory['name'], true, ['escape' => false]) : $str('talesbylibrary'),
+            'portrait' => $portrait, 'plain' => !$speaks],
+        'agesaria' => $str('talesagesaria'),
+        'choosetitle' => $str('talesagechoose'),
+        'unit' => $str('talesunit'),
+        'ages' => array_map(fn($from) => ['id' => $bandid($from), 'url' => $here(['tales' => 1, 'age' => $bandid($from)]),
+            'current' => $band === $from, 'tab' => $from . '–' . ($from === 9 ? 12 : $from + 2),
+            'hint' => $str('talesagehint' . $from)], window::AGES),
         'chosen' => $band !== null,
-        'empty' => $str('talesempty'),
-        'emptystaff' => $manage ? $str('talesemptystaff') : '',
-        'back' => ['url' => $here(), 'label' => $str('windowbackdoor')],
-        'nexturl' => $found['more'] ? $here(['tales' => 1, 'age' => $band, 'page' => $page + 1]) : '',
-        'prevurl' => $band !== null && $page > 0 ? $here(['tales' => 1, 'age' => $band, 'page' => $page - 1]) : '',
+        'list' => $band === null ? null : [
+            'heading' => $str('talesfor', $str('talesage' . $band)),
+            'count' => count($tales) === 1 ? $str('talescountone') : $str('talescount', count($tales)),
+            'tales' => $tales,
+            'hastales' => (bool) $tales,
+            // Four in rows of three leave one alone (Gaudí): rows of two, or of four on a very wide screen.
+            'four' => count($tales) === 4,
+            'empty' => $tales ? null : [
+                'face' => $whole && !$own ? screens::art('personajes/recorte/memoria-piensa') : null,
+                'title' => $str('talesemptytitle'),
+                'text' => $str('talesemptytext') . ($manage ? ' ' . $str('talesemptystaff') : ''),
+                'nexturl' => $here(['tales' => 1, 'age' => $bandid($next)]),
+                'nextid' => $bandid($next),
+                'nextlabel' => $str('talesemptynext', $str('talesage' . $next)),
+            ],
+        ],
+        'together' => $band === null ? null : [
+            'heading' => $str('talestogether'),
+            'tips' => array_map(fn($n, $icon) => ['icon' => $icon, 'title' => $str('talestip' . $band . $n . 'title'),
+                'text' => $str('talestip' . $band . $n . 'text')], [1, 2, 3], $tips[(string) $band]),
+        ],
+        'foot' => [
+            'picture' => screens::skin_art($entityid),
+            'name' => $shared['door']['name'],
+            'emblem' => (new moodle_url('/local/oksigeniaayvurenda/app/emblema-pequeno.svg'))->out(false),
+            'lines' => [],
+            'stops' => $stops,
+            'stopsheading' => $str('talesstops'),
+            'catalogue' => $here(),
+            'cataloguelabel' => $str('talescatalogue'),
+        ],
+        'readlabel' => $str('talesread'),
+        'nightlabel' => $str('digitalhomenight'),
+        'audiolabel' => $str('talesaudio'),
     ];
-    $talesurl = $here(['tales' => 1] + ($band !== null ? ['age' => $band] : []));
+    $talesurl = $here(['tales' => 1] + ($band !== null ? ['age' => $bandid($band)] : []));
     shell::output($str('talesheading'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/tales', $data), $library, '', [
         'search' => false,
         'index' => $settings['open'] && $settings['index'],
-        'share' => $settings['open'] ? ['title' => $str('talesheading') . ' · ' . $data['door']['name'], 'url' => $talesurl,
-            'image' => $data['door']['image'], 'description' => $str('talesintro')] : null,
+        'styles' => ['cuentos'],
+        'scripts' => ['tales'],
+        'share' => $settings['open'] ? ['title' => $str('talesheading') . ' · ' . $shared['door']['name'], 'url' => $talesurl,
+            'image' => $shared['door']['image'], 'description' => $say('talesintro')] : null,
     ]);
     die;
 }

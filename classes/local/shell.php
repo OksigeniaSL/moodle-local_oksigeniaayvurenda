@@ -195,7 +195,8 @@ final class shell {
      * @param string $main The HTML of the screen.
      * @param \stdClass|null $library
      * @param string $query What is in the search box.
-     * @param array $options search (false to leave the search out), scripts (more scripts of app/), config (more data
+     * @param array $options search (false to leave the search out), scripts (more scripts of app/), styles (more
+     *     stylesheets of app/, by name), config (more data
      *     for the scripts), nav (links in the header: a list of url and label), index (true to let search engines list
      *     the page), feed (the address of an OPDS catalogue to announce), share (title, description, image and url
      *     for the preview a link shows where it is shared: messaging apps, social networks, a school's website), paper
@@ -389,6 +390,14 @@ final class shell {
         $skin = skins::of($library ? (int) $library->entityid : 0);
         // With the system's font there is no font to fetch.
         $sober = in_array($skin, ['university', 'company'], true);
+        // A page's own stylesheets, by name (the stories to read at home).
+        $sheets = '';
+        foreach ((array) ($options['styles'] ?? []) as $sheet) {
+            if (preg_match('/^[a-z0-9-]+$/', (string) $sheet)) {
+                $sheets .= '
+<link rel="stylesheet" href="' . $app . $sheet . '.css?v=' . $version . '">';
+            }
+        }
         echo '<!DOCTYPE html>
 <html lang="' . s($lang) . '"' . self::colour_mode() . '>
 <head>
@@ -407,7 +416,7 @@ final class shell {
     crossorigin>') . '
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
-<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">' . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
     var resolve = function() {

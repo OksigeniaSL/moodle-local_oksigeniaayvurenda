@@ -56,6 +56,11 @@ $fields = fn() => [
     'download' => optional_param('download', 0, PARAM_BOOL),
     'accessible' => optional_param('accessible', 0, PARAM_BOOL),
     'homeages' => optional_param_array('homeages', [], PARAM_INT),
+    'homeminutes' => optional_param('homeminutes', 0, PARAM_INT),
+    'homeparts' => optional_param('homeparts', 0, PARAM_INT),
+    'homelines' => optional_param_array('homelines', [], PARAM_TEXT),
+    'homenight' => optional_param('homenight', 0, PARAM_BOOL),
+    'homeorder' => optional_param('homeorder', 0, PARAM_INT),
 ];
 // Only for the students of a course, until a date, with the part of the work it is.
 $fragment = function (int $id) use ($str, $library, $recordid) {
@@ -129,6 +134,9 @@ $stagelist = fn(array $chosen) => array_map(fn($s) => ['value' => $s, 'checked' 
 $agelabel = fn(int $age) => $str('talesage' . $age);
 $homeages = fn(?string $chosen) => array_map(fn($age) => ['value' => $age, 'label' => $agelabel($age),
     'checked' => in_array($age, array_map('intval', explode(',', (string) $chosen)), true)], window::AGES);
+// Why a tale is lovely, a line for each age, as whoever looked at it wrote it.
+$homelines = fn(?string $json) => array_map(fn($age) => ['value' => $age, 'linelabel' => $str('digitalhomeline', $agelabel($age)),
+    'line' => (string) ((json_decode((string) $json, true) ?: [])[(string) $age] ?? '')], window::AGES);
 $courses = \local_oksigeniaayvurenda\local\fragments::courses($library, $recordid);
 $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time())->timeend - 1;
 $courselist = fn(int $chosen) => array_values(array_map(fn($id, $name) => ['id' => $id, 'name' => $name,
@@ -168,6 +176,11 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
         'stages' => $stagelist($chosenstages),
         'download' => (bool) $item->download,
         'homeages' => $homeages($item->homeages),
+        'homelines' => $homelines($item->homelines),
+        'homeminutes' => $item->homeminutes ? (int) $item->homeminutes : '',
+        'homeparts' => $item->homeparts ? (int) $item->homeparts : '',
+        'homenight' => !empty($item->homenight),
+        'homeorder' => $item->homeorder ? (int) $item->homeorder : '',
         'homechip' => $item->homeages ? $str('digitalhomechip', implode(', ', array_map(
             fn($age) => $agelabel((int) $age),
             explode(',', (string) $item->homeages)
@@ -193,6 +206,7 @@ $data = [
     'audiences' => $audiences(['staff']),
     'stages' => $stagelist([]),
     'newhomeages' => $homeages(null),
+    'newhomelines' => $homelines(null),
     'hasstages' => (bool) $stages,
     'hasproxy' => $hasproxy,
     'hascourses' => (bool) $courses,
@@ -207,7 +221,9 @@ foreach (
         'digitaltitlefield', 'digitallicence',
         'digitallicencehint', 'digitalaudience', 'digitalstages', 'digitaldownload', 'digitalsave', 'digitaldelete',
         'digitalread', 'digitalnone', 'backtorecord', 'digitalchange', 'digitaladdhint', 'fragmentcourse', 'fragmentnone',
-        'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint', 'digitalhome', 'digitalhomehint'] as $key
+        'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint', 'digitalhome', 'digitalhomehint',
+        'digitalhomeminutes', 'digitalhomeparts', 'digitalhomepartshint', 'digitalhomelinehint', 'digitalhomenight',
+        'digitalhomeorder', 'digitalhomeorderhint'] as $key
 ) {
     $data[$key] = $str($key);
 }

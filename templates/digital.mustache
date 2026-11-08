@@ -43,12 +43,18 @@
             "audiences": [{"value": "students", "label": "Alumnos", "checked": true}],
             "stages": [{"value": "Primaria", "checked": false}], "download": false,
             "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "pp. 45-60", "until": "2027-06-30",
-            "homeages": [{"value": 3, "label": "3 a 5", "checked": true}], "homechip": "En casa: 3 a 5"}],
+            "homeages": [{"value": 3, "label": "3 a 5", "checked": true}], "homechip": "En casa: 3 a 5",
+            "homelines": [{"value": 3, "linelabel": "Por qué es bonito, de 3 a 5", "line": "Corto y tranquilo."}],
+            "homeminutes": 4, "homeparts": 12, "homenight": true, "homeorder": ""}],
         "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
         "audiences": [{"value": "staff", "label": "Personal", "checked": true}],
         "stages": [{"value": "Primaria", "checked": false}],
         "courses": [{"id": 3, "name": "Lengua 2.º", "selected": false}],
         "newhomeages": [{"value": 3, "label": "3 a 5", "checked": false}],
+        "newhomelines": [{"value": 3, "linelabel": "Por qué es bonito, de 3 a 5", "line": ""}],
+        "digitalhomeminutes": "Minutos", "digitalhomeparts": "Páginas", "digitalhomepartshint": "o capítulos",
+        "digitalhomelinehint": "Una línea", "digitalhomenight": "Para antes de dormir", "digitalhomeorder": "Orden",
+        "digitalhomeorderhint": "Sin número, los más cortos primero",
         "digitalhome": "Para leer en casa", "digitalhomehint": "Sale en «Cuentos para leer en casa».",
         "digitaladd": "Añadir una forma digital", "digitaladdhint": "EPUB, PDF, audio, vídeo o un enlace",
         "digitalfile": "Un fichero", "digitalurl": "O un enlace", "digitalurlhint": "a donde está",
@@ -95,7 +101,14 @@
                 {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
                     {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
                 <fieldset class="ayv-dig-set"><legend>{{digitalhome}}</legend><p class="ayv-field-hint">{{digitalhomehint}}</p><div class="ayv-segmented">
-                    {{#homeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/homeages}}</div></fieldset>
+                    {{#homeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/homeages}}</div>
+                    <div class="ayv-dig-home">
+                        <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{digitalhomeminutes}} <input type="number" name="homeminutes" value="{{homeminutes}}" min="1" max="999"></label>
+                        <label class="ayv-field ayv-dig-field">{{digitalhomeparts}} <span class="ayv-field-hint">{{digitalhomepartshint}}</span> <input type="number" name="homeparts" value="{{homeparts}}" min="1" max="999"></label></div>
+                        {{#homelines}}<label class="ayv-field ayv-dig-field">{{linelabel}} <input type="text" name="homelines[{{value}}]" value="{{line}}" maxlength="160" placeholder="{{digitalhomelinehint}}"></label>{{/homelines}}
+                        <label class="ayv-field ayv-field-check"><input type="checkbox" name="homenight" value="1" {{#homenight}}checked{{/homenight}}> {{digitalhomenight}}</label>
+                        <label class="ayv-field ayv-dig-field">{{digitalhomeorder}} <span class="ayv-field-hint">{{digitalhomeorderhint}}</span> <input type="number" name="homeorder" value="{{homeorder}}" min="1" max="999"></label>
+                    </div></fieldset>
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1" {{#accessible}}checked{{/accessible}}> {{digitalaccessible}}</label>
                 {{#canproxy}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="subscribed" value="1" {{#subscribed}}checked{{/subscribed}}> {{digitalsubscribed}}</label>{{/canproxy}}
                 <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
@@ -130,7 +143,14 @@
         {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
             {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}"><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
         <fieldset class="ayv-dig-set"><legend>{{digitalhome}}</legend><p class="ayv-field-hint">{{digitalhomehint}}</p><div class="ayv-segmented">
-            {{#newhomeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}"><span>{{label}}</span></label>{{/newhomeages}}</div></fieldset>
+            {{#newhomeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}"><span>{{label}}</span></label>{{/newhomeages}}</div>
+            <div class="ayv-dig-home">
+                <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{digitalhomeminutes}} <input type="number" name="homeminutes" min="1" max="999"></label>
+                <label class="ayv-field ayv-dig-field">{{digitalhomeparts}} <span class="ayv-field-hint">{{digitalhomepartshint}}</span> <input type="number" name="homeparts" min="1" max="999"></label></div>
+                {{#newhomelines}}<label class="ayv-field ayv-dig-field">{{linelabel}} <input type="text" name="homelines[{{value}}]" maxlength="160" placeholder="{{digitalhomelinehint}}"></label>{{/newhomelines}}
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="homenight" value="1"> {{digitalhomenight}}</label>
+                <label class="ayv-field ayv-dig-field">{{digitalhomeorder}} <span class="ayv-field-hint">{{digitalhomeorderhint}}</span> <input type="number" name="homeorder" min="1" max="999"></label>
+            </div></fieldset>
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
         <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1"> {{digitalaccessible}}</label>
         <p class="ayv-field-hint">{{digitalaccessiblehint}}</p>
