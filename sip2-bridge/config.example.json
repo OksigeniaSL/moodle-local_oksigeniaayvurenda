@@ -8,7 +8,7 @@
         {
             "user": "machine1",
             "password": "the-password-the-machine-is-set-to-use",
-            "post": "https://your-library.example/local/oksigeniaayvurenda/self.php?key=the-key-of-its-post"
+            "post": "https://your-library.example/local/oksigeniaayvurenda/self.php#key=the-key-of-its-post"
         }
     ]
 }

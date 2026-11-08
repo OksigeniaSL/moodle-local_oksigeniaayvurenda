@@ -108,9 +108,9 @@ final class window_test extends \advanced_testcase {
     }
 
     /**
-     * The catalogue for anyone: only with the window open and the centre's yes; then every cover of the centre is
-     * served to anyone. What moves in the library: books out today, the busiest corner of the week, what arrived this
-     * month by when it was acquired, never by when it was typed in.
+     * The catalogue for anyone: only with the window open and the centre's yes; then the covers of its books are served to
+     * anyone, not those of a library of the centre that keeps its window shut. What moves in the library: books out today,
+     * the busiest corner of the week, what arrived this month by when it was acquired, never by when it was typed in.
      */
     public function test_catalogue_and_pulse(): void {
         global $DB;
@@ -120,6 +120,10 @@ final class window_test extends \advanced_testcase {
         $library = $gen->create_library();
         $entityid = (int) $library->entityid;
         $record = $gen->create_record(['entityid' => $entityid]);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id, 'timeacquired' => time() - 400 * DAYSECS]);
+        $classroom = $gen->create_library(['entityid' => $entityid, 'slug' => 'aula-cerrada']);
+        $theirs = $gen->create_record(['entityid' => $entityid]);
+        $gen->create_item(['libraryid' => $classroom->id, 'recordid' => $theirs->id]);
         $this->assertFalse(window::catalogue_open($library));
         window::save($library, ['open' => false, 'catalogue' => true]);
         $this->assertFalse(window::catalogue_open($library));
@@ -127,6 +131,8 @@ final class window_test extends \advanced_testcase {
         window::save($library, ['open' => true, 'catalogue' => true]);
         $this->assertTrue(window::catalogue_open($library));
         $this->assertTrue(window::shows_record((int) $record->id));
+        $this->assertFalse(window::shows_record((int) $theirs->id));
+        $this->assertSame([(int) $library->id], window::open_libraries($entityid));
         $other = $gen->create_record(['entityid' => $gen->create_library()->entityid]);
         $this->assertFalse(window::shows_record((int) $other->id));
 

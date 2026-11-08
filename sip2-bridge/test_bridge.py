@@ -209,6 +209,10 @@ class SettingsTest(unittest.TestCase):
         library = bridge.Library('https://x.example/local/oksigeniaayvurenda/self.php?key=abc')
         self.assertEqual('abc', library.key)
         self.assertEqual('https://x.example/local/oksigeniaayvurenda/sip_ajax.php', library.url)
+        # The address as the library gives it now, with its key after a '#'.
+        library = bridge.Library('https://x.example/local/oksigeniaayvurenda/self.php#key=def')
+        self.assertEqual('def', library.key)
+        self.assertEqual('https://x.example/local/oksigeniaayvurenda/sip_ajax.php', library.url)
         with self.assertRaises(ValueError):
             bridge.Library('https://x.example/nothing')
         with self.assertRaises(ValueError):

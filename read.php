@@ -23,7 +23,6 @@
  */
 
 use local_oksigeniaayvurenda\core\digital_rules;
-use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\shell;
@@ -40,16 +39,20 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/read.php', ['library' =
 
 $library = catalogue::library($ref);
 if (!$library) {
-    throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
+    shell::missing(get_string('nolibrary', 'local_oksigeniaayvurenda'));
 }
-$item = digital::get($id, $library);
+// What is not of this centre is not here, the same as what never was: the library's page that says so, never Moodle's.
+$item = $DB->get_record('local_oksigeniaayvurenda_digital', ['id' => $id, 'entityid' => $library->entityid]);
+if (!$item) {
+    shell::missing(get_string('recordnotfound', 'local_oksigeniaayvurenda'), $library);
+}
 // Someone without an account reads what is in an open window; the place they reach stays in their browser.
 $anyone = (!isloggedin() || isguestuser()) && window::shows($item);
 if (!$anyone) {
     require_login(null, false);
     shell::require('local/oksigeniaayvurenda:view', $library);
     if (!digital::visible($item, digital::viewer((int) $library->entityid, (int) $USER->id))) {
-        throw new required_capability_exception(access::context($library), 'local/oksigeniaayvurenda:desk', 'nopermissions', '');
+        shell::refuse(get_string('readnotforyou', 'local_oksigeniaayvurenda'), $library);
     }
 }
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);

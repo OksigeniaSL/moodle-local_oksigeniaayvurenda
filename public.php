@@ -35,6 +35,9 @@ use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\stacks;
 use local_oksigeniaayvurenda\local\window;
 
+// The frame of the newest books on a website opens no session of Moodle at each visit: nobody signs in inside it, and
+// a busy home page would fill the sessions table (seg-anon 06).
+define('NO_MOODLE_COOKIES', !empty($_GET['embed']));
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- the window is for everyone; managing it checks the capability.
 require(__DIR__ . '/../../config.php');
 
@@ -130,6 +133,13 @@ foreach (
 // A record, as anyone may see it: what it is, whether it is free and where it stands, and the books beside it.
 if ($recordid) {
     $found = $catalogue ? catalogue::record($recordid, $library) : null;
+    // Only the copies of the libraries that open their window: a classroom or a textbook bank that keeps it shut says
+    // nothing of its shelves to anyone without an account (seg-anon 05).
+    if ($found) {
+        $open = window::open_libraries((int) $library->entityid);
+        $found['copies'] = array_values(array_filter($found['copies'], fn($copy) => in_array($copy['libraryid'], $open, true)));
+        $found = $found['copies'] || window::shows_record($recordid) ? $found : null;
+    }
     if (!$found) {
         // A shared link or a poster's code of a book no longer here: the memory says so, with the way to the door
         // (jue-humor D2), as a page of the library with an account does.

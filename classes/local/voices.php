@@ -42,6 +42,9 @@ final class voices {
     /** @var int Days a family has to use the link they were sent. */
     public const INVITEDAYS = 14;
 
+    /** @var int Days a family's link still opens after they recorded with it. */
+    public const USEDDAYS = 2;
+
     /** @var string[] Whom a family may let hear their voice, beyond the teacher who invited them and the library. */
     public const FAMILYAUDIENCES = ['class', 'students', 'families', 'public'];
 
@@ -614,9 +617,20 @@ final class voices {
         if (!preg_match('/^[0-9a-f]{48}$/', $token)) {
             return null;
         }
+        $now = $now ?? time();
         $invite = $DB->get_record(self::T . 'voiceinvite', ['token' => $token]);
-        if (!$invite || (!$invite->timeused && $invite->timeexpires < ($now ?? time()))) {
+        if (!$invite || (!$invite->timeused && $invite->timeexpires < $now)) {
             return null;
+        }
+        // Once used, the link lets the family hear what they recorded and take it back for a couple of days, while the
+        // library has not published it; then it opens nothing, for it stays in a chat: removing the voice goes by its own
+        // link, sent to them by mail (seg-anon 11).
+        if ($invite->timeused) {
+            $published = $invite->digitalid
+                && $DB->get_field(self::T . 'digital', 'status', ['id' => $invite->digitalid]) === 'published';
+            if ($published || (int) $invite->timeused < $now - self::USEDDAYS * DAYSECS) {
+                return null;
+            }
         }
         return $invite;
     }

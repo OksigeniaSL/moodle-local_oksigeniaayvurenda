@@ -221,6 +221,14 @@ final class sip {
             selfloan::too_many($post, $now);
             return ['circulation' => '01', 'title' => '', 'message' => get_string('selfunknown', 'local_oksigeniaayvurenda')];
         }
+        // With nobody's card read at the machine, it says whether the copy is in, not what it is nor when it is due back: a
+        // machine in a public room shows its screen, and reading every code would list the library (seg-anon 03).
+        if (!(int) \cache::make('local_oksigeniaayvurenda', 'selfvisit')->get('post_' . $post->id)) {
+            if (selfloan::too_many($post, $now)) {
+                return self::busy($library, 'item', !empty($post->timestopped));
+            }
+            return ['circulation' => self::CIRCULATION[$item->status] ?? '01', 'title' => '', 'due' => ''];
+        }
         $due = $DB->get_field_select(
             self::T . 'loan',
             'timedue',

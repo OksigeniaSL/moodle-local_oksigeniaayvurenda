@@ -59,9 +59,16 @@ $entry = ris::entry((array) $found['record'], $by, $here[0]['callnumber'] ?? '')
 if ($entry === '') {
     shell::missing(get_string('recordnotfound', 'local_oksigeniaayvurenda'), $library);
 }
+// The file is named by its citation key (author, year, a word of the title), never by the title as it was typed in
+// (seg-salida 4).
+$name = \local_oksigeniaayvurenda\core\export\bibtex::key(
+    (string) ($by['author'][0] ?? ''),
+    (string) $found['record']->pubyear,
+    (string) $found['record']->title
+);
 send_file(
     $entry,
-    clean_filename(core_text::substr($found['record']->title, 0, 60)) . '.ris',
+    ($name !== '' ? $name : 'ayvurenda-' . (int) $found['record']->id) . '.ris',
     0,
     0,
     true,

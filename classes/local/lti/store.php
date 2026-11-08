@@ -56,7 +56,7 @@ final class store implements IDatabase {
     #[\Override]
     public function findDeployment(string $iss, string $deploymentid, ?string $clientid = null): ?ILtiDeployment {
         $platform = ltitool::platform_by_issuer($iss, $clientid);
-        if (!$platform || !ltitool::accepts($platform, $deploymentid)) {
+        if (!$platform || !ltitool::admit($platform, $deploymentid)) {
             return null;
         }
         return LtiDeployment::new($deploymentid);

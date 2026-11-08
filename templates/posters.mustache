@@ -33,7 +33,7 @@
 <div class="ayv-print-head">
     <h1 class="ayv-results-title">{{heading}}</h1>
     <p>{{hint}}</p>
-    <p class="ayv-book-actions">{{#hassheets}}<button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button>{{/hassheets}}
+    <p class="ayv-book-actions">{{#hassheets}}<button type="button" class="ayv-button" data-ayv-print>{{printnow}}</button>{{/hassheets}}
         <a class="ayv-button ayv-button-quiet" href="{{other}}">{{otherlabel}}</a></p>
     {{^hassheets}}<p class="ayv-empty">{{empty}}</p>{{/hassheets}}
 </div>

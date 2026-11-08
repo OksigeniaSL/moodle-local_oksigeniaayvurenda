@@ -27,6 +27,9 @@ namespace local_oksigeniaayvurenda\local;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class selfloan {
+    /** @var string The cookie that keeps the key of a post on its machine. */
+    public const COOKIE = 'ayvselfpost';
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -146,7 +149,39 @@ final class selfloan {
             'timetries' => 0,
             'createdby' => $userid ?: null, 'timecreated' => $now ?? time()]);
         \local_oksigeniaayvurenda\event\self_post_created::fire((int) $library->entityid, (int) $id);
-        return (new \moodle_url('/local/oksigeniaayvurenda/self.php', ['key' => $key]))->out(false);
+        return (new \moodle_url('/local/oksigeniaayvurenda/self.php', null, 'key=' . $key))->out(false);
+    }
+
+    /**
+     * The key of a post in its address: after the «#», or in the query of an address of before.
+     *
+     * @param string $address
+     * @return string
+     */
+    public static function key_of(string $address): string {
+        foreach ([PHP_URL_FRAGMENT, PHP_URL_QUERY] as $part) {
+            parse_str((string) parse_url($address, $part), $values);
+            if (!empty($values['key']) && is_string($values['key'])) {
+                return clean_param($values['key'], PARAM_ALPHANUM);
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Keeps the key of a post in a cookie of its page alone, for a year (or forgets it, given nothing): the post reopens
+     * itself with no key in its address.
+     *
+     * @param string $key
+     */
+    public static function keep_cookie(string $key): void {
+        global $CFG;
+        if (PHPUNIT_TEST || headers_sent()) {
+            return;
+        }
+        $path = (string) (parse_url($CFG->wwwroot, PHP_URL_PATH) ?? '') . '/local/oksigeniaayvurenda/';
+        setcookie(self::COOKIE, $key, ['expires' => $key !== '' ? time() + YEARSECS : 1, 'path' => $path,
+            'secure' => is_https(), 'httponly' => true, 'samesite' => 'Lax']);
     }
 
     /**
@@ -232,7 +267,13 @@ final class selfloan {
             ? ['state' => 'reader', 'ticket' => self::ticket($post, $holder, $now)] : ['state' => 'idle']);
         $item = $code === '' ? null : desk::by_code('item', 'barcode', $entityid, $code);
         if ($item) {
-            return $still(self::book($post, $library, $item, $holder, $now));
+            $answer = self::book($post, $library, $item, $holder, $now);
+            // A book that is neither lent nor given back counts like an unknown code: reading the whole file of codes in
+            // turn would tell what the library has and what is out (seg-anon 02).
+            if ($answer['sound'] !== 'ok' && self::too_many($post, $now)) {
+                return self::say('no', empty($post->timestopped) ? 'selfwait' : 'selfstopped') + ['state' => 'idle'];
+            }
+            return $still($answer);
         }
         // Reading every number in turn would tell who has a card: it is held back here, and nobody queues this fast.
         if (self::too_many($post, $now)) {

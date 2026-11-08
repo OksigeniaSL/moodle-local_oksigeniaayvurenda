@@ -51,7 +51,10 @@ if (!$entityid) {
         $message = $str('ltiregistered', $platform->name);
         $done = true;
     } catch (moodle_exception $e) {
-        $message = $e->getMessage();
+        // What went wrong stays in the site's debugging, not on the page: a platform's error may carry addresses and pieces
+        // of its answers (seg-anon 08).
+        debugging('LTI registration: ' . $e->getMessage() . ' ' . ($e->debuginfo ?? ''), DEBUG_DEVELOPER);
+        $message = $str('ltiregisterfailedplain');
     }
 }
 @header('Content-Type: text/html; charset=utf-8');

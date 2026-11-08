@@ -262,10 +262,13 @@ final class voices_test extends \advanced_testcase {
         voices::approve($id, $library, ['licence' => 'pd', 'audience' => ['students', 'public']]);
         $this->assertSame('students', digital::get($id, $library)->audience);
         $this->assertTrue(voices::can_hear(digital::get($id, $library), digital::viewer($entityid, (int) $student->id)));
-        // Deleted with the link, the link stays used and still opens to say so.
+        // Published, the link that was in a chat opens nothing: the family hears it where it is, removes it by its own link.
+        $this->assertNull(voices::invitation($token, $now));
+        // Deleted with the link, the link stays used and still opens to say so for a couple of days; then, nothing.
         voices::remove(digital::get($id, $library));
-        $this->assertNotNull(voices::invitation($token, $now + 30 * DAYSECS));
-        $this->assertNull(voices::invitation($token, $now + 30 * DAYSECS)->digitalid);
+        $this->assertNotNull(voices::invitation($token, $now + DAYSECS));
+        $this->assertNull(voices::invitation($token, $now + DAYSECS)->digitalid);
+        $this->assertNull(voices::invitation($token, $now + (voices::USEDDAYS + 1) * DAYSECS));
         // An unused link expires, and is cleared.
         $unused = voices::invite($library, (int) $record->id, (int) $teacher->id, 'Otra familia', $now);
         $this->assertNull(voices::invitation($unused, $now + (voices::INVITEDAYS + 1) * DAYSECS));

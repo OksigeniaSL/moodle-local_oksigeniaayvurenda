@@ -66,7 +66,7 @@
         <h1 class="ayv-memoir-title">{{heading}}</h1>
         <p class="ayv-memoir-intro">{{intro}} {{memoiranon}}</p>
     </div>
-    <button type="button" class="ayv-button ayv-button-quiet ayv-memoir-printbutton" onclick="window.print()">{{memoirprint}}</button>
+    <button type="button" class="ayv-button ayv-button-quiet ayv-memoir-printbutton" data-ayv-print>{{memoirprint}}</button>
 </header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#story}}
@@ -190,6 +190,6 @@
     <label class="ayv-memoir-field"><span class="ayv-memoir-heading">{{memoirnext}}</span>
         <textarea name="next" rows="5" maxlength="5000">{{next}}</textarea></label>
     <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{memoirsave}}</button>
-        <button type="button" class="ayv-button ayv-button-quiet" onclick="window.print()">{{memoirprint}}</button></p>
+        <button type="button" class="ayv-button ayv-button-quiet" data-ayv-print>{{memoirprint}}</button></p>
 </form>
 </section>

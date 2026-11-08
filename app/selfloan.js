@@ -27,19 +27,55 @@
     var root = document.getElementById('ayv-self');
     var form = document.getElementById('ayv-self-form');
     var SAVED = 'ayv-self-key';
-    // The address opens the post, so it does not stay in sight on the address bar nor in the history: this machine keeps it.
-    // Reloaded without it, the page asks with the key it kept; if the key is the one refused, it forgets it.
+    // The address opens the post with its key after a «#», which never reaches the server: the page takes it from there
+    // (or from what this machine kept), wipes it from the address bar and sends it by POST; the server keeps it in a
+    // cookie. A key the server refused is forgotten here too.
+    var open = function(key) {
+        var send = document.createElement('form');
+        send.method = 'post';
+        send.action = window.location.pathname;
+        send.hidden = true;
+        var field = document.createElement('input');
+        field.type = 'hidden';
+        field.name = 'key';
+        field.value = key;
+        send.appendChild(field);
+        document.body.appendChild(send);
+        send.submit();
+    };
+    var hashed = '';
+    try {
+        hashed = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('key') || '';
+        if (window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+        if (config.selfrefused) {
+            window.localStorage.removeItem(SAVED);
+        }
+    } catch (e) {
+        hashed = '';
+    }
+    // A new address typed on a machine already at its post changes only what follows the «#»: the page reloads with it.
+    window.addEventListener('hashchange', function() {
+        window.location.reload();
+    });
+    // A new address beats what this machine had, even an open post or a key just refused.
+    if (hashed && hashed !== config.selfkey && /^[A-Za-z0-9]+$/.test(hashed)) {
+        open(hashed);
+        return;
+    }
     if (!config.selfkey) {
-        var here = new URL(window.location.href);
+        var gone = document.getElementById('ayv-self-gone');
+        var kept = '';
         try {
-            if (here.searchParams.has('key')) {
-                window.localStorage.removeItem(SAVED);
-            } else if (window.localStorage.getItem(SAVED)) {
-                here.searchParams.set('key', window.localStorage.getItem(SAVED));
-                window.location.replace(here.href);
-            }
+            kept = config.selfrefused ? '' : window.localStorage.getItem(SAVED) || '';
         } catch (e) {
-            return;
+            kept = '';
+        }
+        if (kept && /^[A-Za-z0-9]+$/.test(kept)) {
+            open(kept);
+        } else if (gone) {
+            gone.hidden = false;
         }
         return;
     }

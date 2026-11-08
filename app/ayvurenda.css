@@ -4918,6 +4918,8 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     .ayv .ayv-navs-reader { flex-wrap: nowrap; justify-content: space-between; width: 100%; margin-left: 0; gap: 0; }
     .ayv .ayv-navs-reader .ayv-nav { padding: 0 .55rem; white-space: nowrap; }
     .ayv .ayv-navs-reader > a:nth-of-type(n+4) { display: none; }
+    /* The way out is in «More»; as a tab too, with few doors (someone without an account), it pushed «More» off the screen. */
+    .ayv .ayv-navs-reader > .ayv-nav-out { display: none; }
     .ayv .ayv-navs-reader .ayv-nav-phonemore { display: inline-flex; }
     .ayv .ayv-phonemore[open] {
         position: fixed;

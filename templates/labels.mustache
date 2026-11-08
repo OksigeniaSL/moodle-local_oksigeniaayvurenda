@@ -107,7 +107,7 @@
             <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
         </form>
     </dialog>
-    <p class="ayv-lab-count"><span>{{count}}</span>{{#haspages}} <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button>{{/haspages}}</p>
+    <p class="ayv-lab-count"><span>{{count}}</span>{{#haspages}} <button type="button" class="ayv-button" data-ayv-print>{{printnow}}</button>{{/haspages}}</p>
     {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
     {{^haspages}}<div class="ayv-nothing"><p>{{empty}}</p></div>{{/haspages}}
 </div>

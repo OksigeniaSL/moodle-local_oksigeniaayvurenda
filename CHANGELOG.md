@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.204.0
+
+- What is reached without an account, tightened (audit, seg-anon and seg-cripto):
+  - The address of a self-loan post carries its key after a «#», which never leaves the browser: the page sends it by
+    POST and the post keeps it in a cookie of its own, so it is in no log of the server nor of a proxy. Addresses of
+    before still open the post. The SIP bridge reads both.
+  - A book read at a post that is neither lent nor given back counts against the post's limit, like an unknown code; a
+    machine with nobody's card read says whether a copy is in, not what it is nor when it is due.
+  - The public record and its cover show only the copies of the libraries that open their window.
+  - The frame of the newest books for a website opens no Moodle session per visit.
+  - Reading places are not kept for the guest account; a digital item that is not for whoever asks, or of another
+    centre, is the library's page that says so, never Moodle's error.
+  - Covers, library pictures and portraits are cacheable by proxies only when an open window shows them.
+  - A family's link stops opening two days after they recorded with it, or as soon as the voice is published.
+  - LTI registration asks over https (plain http only to a host the administrator allowed) and no longer shows the
+    platform's raw error; with no deployment written, the first signed launch writes its own, and only that one comes in
+    after.
+  - «It is read here; the library does not offer it for download», which is what is true.
+  - A RIS file is named by its citation key, not by the title as typed.
+
 ## 0.203.0
 
 - The curious things of each catalogue, worked out once a day: with nothing of the reader's own to tell, the memory

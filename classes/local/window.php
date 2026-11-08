@@ -213,10 +213,18 @@ final class window {
      */
     public static function shows_record(int $recordid): bool {
         global $DB;
-        // A library that shows its catalogue to anyone shows every cover of its centre.
-        $entityid = (int) $DB->get_field(self::T . 'record', 'entityid', ['id' => $recordid]);
-        foreach ($DB->get_records(self::T . 'library', ['entityid' => $entityid], 'id', 'id, settings') as $library) {
-            if (self::catalogue_open($library)) {
+        // A library that shows its catalogue to anyone shows the covers of its own books, not those of the libraries of
+        // its centre that keep their window shut (seg-anon 05).
+        $open = self::open_libraries((int) $DB->get_field(self::T . 'record', 'entityid', ['id' => $recordid]));
+        if ($open) {
+            [$in, $params] = $DB->get_in_or_equal($open, SQL_PARAMS_NAMED);
+            if (
+                $DB->record_exists_select(
+                    self::T . 'item',
+                    "recordid = :recordid AND libraryid $in AND status <> 'lost' AND status <> 'withdrawn'",
+                    ['recordid' => $recordid] + $params
+                )
+            ) {
                 return true;
             }
         }
@@ -226,6 +234,23 @@ final class window {
             }
         }
         return false;
+    }
+
+    /**
+     * The libraries of a centre that show their catalogue to anyone.
+     *
+     * @param int $entityid
+     * @return int[]
+     */
+    public static function open_libraries(int $entityid): array {
+        global $DB;
+        $open = [];
+        foreach ($DB->get_records(self::T . 'library', ['entityid' => $entityid], 'id', 'id, settings') as $library) {
+            if (self::catalogue_open($library)) {
+                $open[] = (int) $library->id;
+            }
+        }
+        return $open;
     }
 
     /**

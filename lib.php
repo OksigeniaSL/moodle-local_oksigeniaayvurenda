@@ -45,6 +45,9 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
     $itemid = (int) array_shift($args);
     // Someone without an account gets only what an open public window shows, and its covers.
     $anyone = !isloggedin() || isguestuser();
+    // Only what an open window shows may be kept by a shared cache (a proxy, a school's network); the rest, by the browser
+    // that asked for it alone (seg-anon 10).
+    $shown = false;
     if ($filearea === 'digital') {
         // A digital book or recording: only for whom it is, and downloaded only where its licence allows.
         global $DB;
@@ -101,6 +104,7 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
             require_login(null, false);
             \local_oksigeniaayvurenda\local\access::require('local/oksigeniaayvurenda:view', $entityid);
         }
+        $shown = $open;
         $forcedownload = false;
     } else if ($filearea === 'cardlogo') {
         // A centre's logo: for whoever prints its cards.
@@ -135,7 +139,8 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         $forcedownload = false;
     } else if ($filearea === 'cover') {
         // A record's cover: for whoever sees its centre's library, and for anyone where an open window shows it.
-        if (!$anyone || !\local_oksigeniaayvurenda\local\window::shows_record($itemid)) {
+        $shown = $anyone && \local_oksigeniaayvurenda\local\window::shows_record($itemid);
+        if (!$shown) {
             global $DB;
             require_login(null, false);
             $entityid = (int) $DB->get_field('local_oksigeniaayvurenda_record', 'entityid', ['id' => $itemid]);
@@ -174,7 +179,7 @@ function local_oksigeniaayvurenda_pluginfile($course, $cm, $context, $filearea, 
         in_array($filearea, ['cover', 'libraryimage', 'portrait'], true) ? WEEKSECS : 0,
         0,
         $forcedownload,
-        $options
+        ['cacheability' => $shown ? 'public' : 'private'] + $options
     );
 }
 

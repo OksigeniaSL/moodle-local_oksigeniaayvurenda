@@ -31,15 +31,17 @@ use local_oksigeniaayvurenda\local\digital;
 
 require_login(null, false);
 require_sesskey();
+// Whoever comes without an account reads from the window: their place is kept by their browser, not in a row everyone
+// without an account would share (seg-anon 04).
+if (isguestuser()) {
+    echo json_encode(['ok' => false]);
+    die();
+}
 $item = $DB->get_record('local_oksigeniaayvurenda_digital', ['id' => required_param('item', PARAM_INT)], '*', MUST_EXIST);
 access::require('local/oksigeniaayvurenda:view', (int) $item->entityid);
 if (!digital::visible($item, digital::viewer((int) $item->entityid, (int) $USER->id))) {
-    throw new required_capability_exception(
-        access::context((int) $item->entityid),
-        'local/oksigeniaayvurenda:desk',
-        'nopermissions',
-        ''
-    );
+    echo json_encode(['ok' => false]);
+    die();
 }
 $position = optional_param('position', null, PARAM_RAW_TRIMMED);
 $bookmarks = optional_param('bookmarks', null, PARAM_RAW);

@@ -139,6 +139,29 @@ final class ltitool {
     }
 
     /**
+     * Whether a signed launch's deployment comes in. With none written, the first one that arrives is written, and from
+     * then on only it: on a platform in the cloud with one issuer for all its customers, the deployment is what tells one
+     * customer from another (seg-cripto SC-04). The platform's page shows it, to be changed if it was not the one.
+     *
+     * @param \stdClass $platform
+     * @param string $deploymentid
+     * @return bool
+     */
+    public static function admit(\stdClass $platform, string $deploymentid): bool {
+        global $DB;
+        $deploymentid = trim($deploymentid);
+        if ($deploymentid === '') {
+            return false;
+        }
+        if (trim((string) $platform->deployments) === '') {
+            $platform->deployments = $deploymentid;
+            $DB->set_field(self::T . 'ltiplatform', 'deployments', $deploymentid, ['id' => $platform->id]);
+            return true;
+        }
+        return self::accepts($platform, $deploymentid);
+    }
+
+    /**
      * Adds or changes a platform of an entity.
      *
      * @param int $entityid
@@ -268,6 +291,16 @@ final class ltitool {
         global $DB, $SITE;
         $client = self::$client ?? new \core\http_client();
         $fail = fn(string $why) => new \moodle_exception('ltiregisterfailed', 'local_oksigeniaayvurenda', '', $why);
+        // A platform speaks over https; plain http only to a host of the site's own network that its administrator allowed
+        // in the plugin's settings. Moodle's list of blocked hosts stands for both (seg-anon 08).
+        $host = strtolower((string) parse_url($configurl, PHP_URL_HOST));
+        $allowed = array_filter(array_map('trim', explode(',', strtolower((string) get_config(
+            'local_oksigeniaayvurenda',
+            'internalhosts'
+        )))));
+        if ($host === '' || (!str_starts_with(strtolower($configurl), 'https://') && !in_array($host, $allowed, true))) {
+            throw $fail('https');
+        }
         try {
             $config = json_decode((string) $client->get($configurl, ['timeout' => 20])->getBody(), true);
         } catch (\Throwable $e) {

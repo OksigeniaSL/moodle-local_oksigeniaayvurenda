@@ -41,7 +41,7 @@
 <ul class="ayv-weed-reasons ayv-late-spans">
     {{#spans}}<li><a class="ayv-weed-reason ayv-late-span-{{key}}{{#alarm}} ayv-late-span-old{{/alarm}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}><span class="ayv-weed-count">{{count}}</span> <span class="ayv-weed-label">{{label}}</span></a></li>{{/spans}}
 </ul>{{/only}}
-{{#only}}<p class="ayv-print-head"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{lateallgroups}}</a> <button type="button" class="ayv-button" onclick="window.print()">{{printnow}}</button></p>{{/only}}
+{{#only}}<p class="ayv-print-head"><a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{lateallgroups}}</a> <button type="button" class="ayv-button" data-ayv-print>{{printnow}}</button></p>{{/only}}
 {{#hascards}}
 <p class="ayv-late-orders">{{orderlabel}} {{#orders}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a> {{/orders}}</p>
 <ul class="ayv-late-cards">

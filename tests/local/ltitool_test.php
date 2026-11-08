@@ -168,6 +168,12 @@ final class ltitool_test extends \advanced_testcase {
             'keyseturl' => 'https://platform.invalid/k'];
         $id = ltitool::save_platform($one, $data);
         $this->assertTrue(ltitool::accepts(ltitool::platform_by_issuer(self::ISS), 'any'));
+        // With none written, the first signed launch writes its deployment, and only that one comes in after.
+        $this->assertFalse(ltitool::admit(ltitool::platform_by_issuer(self::ISS), ''));
+        $this->assertTrue(ltitool::admit(ltitool::platform_by_issuer(self::ISS), 'dep-9'));
+        $this->assertSame('dep-9', ltitool::platform_by_issuer(self::ISS)->deployments);
+        $this->assertTrue(ltitool::admit(ltitool::platform_by_issuer(self::ISS), 'dep-9'));
+        $this->assertFalse(ltitool::admit(ltitool::platform_by_issuer(self::ISS), 'dep-10'));
         try {
             ltitool::save_platform($two, $data);
             $this->fail('One platform, two libraries');
@@ -219,6 +225,14 @@ final class ltitool_test extends \advanced_testcase {
         $body = json_decode((string) $sent->getBody(), true);
         $this->assertSame([ltitool::urls()['launch']], $body['redirect_uris']);
         $this->assertSame(ltitool::urls()['login'], $body['initiate_login_uri']);
+
+        // A platform that does not speak over https.
+        try {
+            ltitool::register($entityid, 'http://plataforma.example/mod/lti/openid-configuration.php');
+            $this->fail('Plain http');
+        } catch (\moodle_exception $e) {
+            $this->assertSame('ltiregisterfailed', $e->errorcode);
+        }
 
         // A configuration that speaks for another platform.
         try {

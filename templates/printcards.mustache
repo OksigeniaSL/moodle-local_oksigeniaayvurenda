@@ -41,7 +41,7 @@
 <div class="ayv-print-head">
     <h1 class="ayv-results-title">{{heading}}</h1>
     <p>{{intro}}</p>
-    {{#hassheets}}<p><button type="button" class="ayv-button" onclick="window.print()">{{print}}</button></p>{{/hassheets}}
+    {{#hassheets}}<p><button type="button" class="ayv-button" data-ayv-print>{{print}}</button></p>{{/hassheets}}
     {{#next}}<p><a class="ayv-button ayv-button-quiet" href="{{next}}">{{nextlabel}}</a></p>{{/next}}
 </div>
 {{^hassheets}}<p class="ayv-empty">{{empty}}</p>{{/hassheets}}

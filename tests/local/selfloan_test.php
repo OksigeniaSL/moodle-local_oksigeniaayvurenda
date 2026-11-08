@@ -52,8 +52,7 @@ final class selfloan_test extends \advanced_testcase {
             $w->$name = $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id, 'barcode' => $code]);
         }
         $address = selfloan::create($w->library, 'Sala', (int) get_admin()->id);
-        parse_str((string) parse_url($address, PHP_URL_QUERY), $query);
-        $w->key = $query['key'];
+        $w->key = selfloan::key_of($address);
         $w->post = selfloan::by_key($w->key)['post'];
         $w->now = time();
         return $w;
@@ -275,10 +274,13 @@ final class selfloan_test extends \advanced_testcase {
         $this->assertStringNotContainsString('Leo', json_encode($answer));
         $w->now += 61;
         $this->assertSame('Leo', $this->read($w, $w->leo->cardcode)['name']);
-        // And books still go on being read while it holds back cards.
+        // Nor every book: one that is neither lent nor given back counts too, and waits with the rest (seg-anon 02); a
+        // minute later, it is read again.
         for ($i = 0; $i < 25; $i++) {
             $this->read($w, 'nothing' . $i);
         }
+        $this->assertSame('no', $this->read($w, $w->faro->barcode)['sound']);
+        $w->now += 61;
         $this->assertSame('look', $this->read($w, $w->faro->barcode)['sound']);
     }
 

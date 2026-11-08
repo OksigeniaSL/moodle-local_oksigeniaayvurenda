@@ -31,21 +31,35 @@ use local_oksigeniaayvurenda\local\characters;
 use local_oksigeniaayvurenda\local\selfloan;
 use local_oksigeniaayvurenda\local\shell;
 
-$key = optional_param('key', '', PARAM_ALPHANUM);
+// The key comes after a «#» in the address, which never leaves the browser: the page sends it here by POST, and from then
+// on it is kept in a cookie of this page alone. So it is in no log of the server nor of a proxy before it (seg-anon 01).
+// An address of before, with the key in its query, still opens the post, and is turned into the clean one at once.
+$offered = optional_param('key', '', PARAM_ALPHANUM);
+$key = $offered !== '' ? $offered : clean_param($_COOKIE[selfloan::COOKIE] ?? '', PARAM_ALPHANUM);
 $found = selfloan::by_key($key);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/self.php'));
 // The address is the key: it does not go to anyone in a Referer.
 @header('Referrer-Policy: no-referrer');
+if ($found && $offered !== '') {
+    selfloan::keep_cookie($key);
+    @header('Location: ' . $PAGE->url->out(false), true, 303);
+    die();
+}
 if (!$found) {
-    // The same page for a key that never was and for one taken away.
-    http_response_code(404);
+    // The same page for a key that never was, for one taken away and for none at all; without a key, the page looks for
+    // one after the «#» or kept by this machine, and sends it.
+    if ($key !== '') {
+        selfloan::keep_cookie('');
+        http_response_code(404);
+    }
     shell::output(
         get_string('selftitle', 'local_oksigeniaayvurenda'),
-        '<div class="ayv-self"><p class="ayv-self-title">' . s(get_string('selfgone', 'local_oksigeniaayvurenda')) . '</p></div>',
+        '<div class="ayv-self"><p class="ayv-self-title" id="ayv-self-gone" hidden>' .
+            s(get_string('selfgone', 'local_oksigeniaayvurenda')) . '</p></div>',
         null,
         '',
-        ['bare' => true, 'scripts' => ['selfloan']]
+        ['bare' => true, 'scripts' => ['selfloan'], 'config' => ['selfrefused' => $key !== '']]
     );
     die();
 }

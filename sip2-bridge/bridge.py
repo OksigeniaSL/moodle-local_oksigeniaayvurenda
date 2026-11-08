@@ -114,7 +114,9 @@ class Library:
 
     def __init__(self, post):
         address = urllib.parse.urlsplit(post)
-        key = urllib.parse.parse_qs(address.query).get('key', [''])[0]
+        # The key goes after a '#' in the address of a post (or in its query, in an address of before).
+        key = (urllib.parse.parse_qs(address.fragment).get('key', [''])[0]
+               or urllib.parse.parse_qs(address.query).get('key', [''])[0])
         if address.scheme not in ('https', 'http') or not key:
             raise ValueError('that is not the address of a post')
         self.key = key

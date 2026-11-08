@@ -54,8 +54,7 @@ final class sip_test extends \advanced_testcase {
             $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id, 'barcode' => $code]);
         }
         $address = selfloan::create($w->library, 'Máquina', (int) get_admin()->id, null, true);
-        parse_str((string) parse_url($address, PHP_URL_QUERY), $query);
-        $w->key = $query['key'];
+        $w->key = selfloan::key_of($address);
         $w->post = selfloan::by_key($w->key, true)['post'];
         $w->due = fn(string $code) => (int) $DB->get_field_sql(
             'SELECT l.timedue FROM {' . self::T . 'loan} l JOIN {' . self::T . 'item} i ON i.id = l.itemid
@@ -79,9 +78,11 @@ final class sip_test extends \advanced_testcase {
         $w = $this->world();
         $this->assertNull(selfloan::by_key($w->key));
         $address = selfloan::create($w->library, 'Sala', (int) get_admin()->id);
-        parse_str((string) parse_url($address, PHP_URL_QUERY), $query);
-        $this->assertNotNull(selfloan::by_key($query['key']));
-        $this->assertNull(selfloan::by_key($query['key'], true));
+        $this->assertStringContainsString('self.php#key=', $address);
+        $this->assertNotNull(selfloan::by_key(selfloan::key_of($address)));
+        $this->assertNull(selfloan::by_key(selfloan::key_of($address), true));
+        // An address of before, with the key in its query, still says it.
+        $this->assertSame('abc123', selfloan::key_of('https://x.example/local/oksigeniaayvurenda/self.php?key=abc123'));
     }
 
     /**
@@ -142,6 +143,12 @@ final class sip_test extends \advanced_testcase {
         $this->assertSame($lent['due'], $item['due']);
         $this->assertStringNotContainsString('Ana', json_encode($item));
         $this->assertSame('03', ($w->ask)('item', ['item' => 'B2'])['circulation']);
+        // With nobody's card read at the machine, only whether it is in: not what it is nor when it is due.
+        \cache::make('local_oksigeniaayvurenda', 'selfvisit')->purge();
+        $bare = ($w->ask)('item', ['item' => 'B1']);
+        $this->assertSame('04', $bare['circulation']);
+        $this->assertSame('', $bare['title']);
+        $this->assertSame('', $bare['due']);
 
         $back = ($w->ask)('checkin', ['item' => 'B1']);
         $this->assertTrue($back['ok']);

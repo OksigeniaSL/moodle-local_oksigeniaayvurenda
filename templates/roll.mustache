@@ -63,7 +63,7 @@
     <p class="ayv-roll-backline"><a href="{{back}}">{{bankrollback}}</a></p>
     <div class="ayv-roll-head">
         <h1 class="ayv-results-title">{{group}}</h1>
-        <button type="button" class="ayv-button ayv-button-quiet ayv-roll-print" onclick="window.print()">{{bankrollprint}}</button>
+        <button type="button" class="ayv-button ayv-button-quiet ayv-roll-print" data-ayv-print>{{bankrollprint}}</button>
     </div>
     <p class="ayv-roll-filters">
         {{#filters}}<a class="ayv-chip{{#current}} ayv-chip-on{{/current}}" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}<span class="ayv-chip-count">{{count}}</span></a> {{/filters}}

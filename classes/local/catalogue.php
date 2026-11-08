@@ -572,6 +572,7 @@ final class catalogue {
         foreach ($items as $item) {
             $copies[] = [
                 'id' => (int) $item->id,
+                'libraryid' => (int) $item->libraryid,
                 'here' => (int) $item->libraryid === (int) $library->id,
                 'library' => $libraries[$item->libraryid] ?? '',
                 'state' => self::state([$item]),
