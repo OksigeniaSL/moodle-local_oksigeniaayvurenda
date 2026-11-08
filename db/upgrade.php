@@ -641,6 +641,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110728, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026110732) {
+        // Not yet: a reservation put off until a day keeps its place in the queue (MER-03).
+        $table = new xmldb_table('local_oksigeniaayvurenda_hold');
+        $field = new xmldb_field('timesuspended', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'timeclosed');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110732, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

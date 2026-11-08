@@ -128,5 +128,17 @@ final class hunt_test extends \advanced_testcase {
         $this->assertTrue($public['young']);
         $this->assertStringContainsString('public.php?library=' . $library->slug . '&record=', $public['spines'][0]['url']);
         $this->assertNull(hunt::game($library, $gen->create_record(['entityid' => $library->entityid])->id, false, false));
+        // A grown reader gets the title and the author to work the label out; without an author, the label (JV-D11).
+        $this->assertFalse(hunt::game($library, $ids[1], false, false, true)['grown']);
+        $author = (int) $DB->insert_record(self::T . 'authority', ['entityid' => $library->entityid, 'kind' => 'author',
+            'code' => null, 'label' => 'Montes, Ana', 'timecreated' => $now, 'timemodified' => $now]);
+        $DB->insert_record(self::T . 'recauth', ['recordid' => $ids[1], 'authorityid' => $author, 'role' => 'author',
+            'sortorder' => 0]);
+        $grown = hunt::game($library, $ids[1], false, false, true);
+        $this->assertTrue($grown['grown']);
+        $this->assertStringContainsString('Montes', $grown['author']);
+        // Their spines carry no title, as seen from the aisle (Gaudí).
+        $html = $GLOBALS['OUTPUT']->render_from_template('local_oksigeniaayvurenda/spine', $grown['spines'][0]);
+        $this->assertStringNotContainsString('>' . $grown['spines'][0]['shown'] . '<', $html);
     }
 }

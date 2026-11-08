@@ -37,6 +37,9 @@ final class hunt {
     /** @var int Books on each side of the hidden one. */
     public const EACH = 6;
 
+    /** @var int The books on each side for a reader of the flower: a shorter shelf for the youngest (JV-D11). */
+    public const EACH_YOUNG = 4;
+
     /** @var int Of the books that may be hidden, how many are looked at around the day's one, to prefer one with a cover. */
     private const NEAR = 12;
 
@@ -110,12 +113,14 @@ final class hunt {
      *
      * @param \stdClass $library
      * @param int $recordid
-     * @param bool $young A reader of the flower: the cover too.
+     * @param bool $young A reader of the flower: the cover too, and a shorter shelf.
      * @param bool $public Seen through the window: the links lead there.
-     * @return array|null target, title, cover, lines, place, young and spines; null if the book is not on a shelf here.
+     * @param bool $grown A reader past the flower: the clue is the title and the author, and the label to work out.
+     * @return array|null target, title, author, cover, lines, place, young, grown and spines; null if the book is not on a
+     *     shelf here.
      */
-    public static function game(\stdClass $library, int $recordid, bool $young, bool $public): ?array {
-        $beside = stacks::neighbours($library, $recordid, self::EACH);
+    public static function game(\stdClass $library, int $recordid, bool $young, bool $public, bool $grown = false): ?array {
+        $beside = stacks::neighbours($library, $recordid, $young ? self::EACH_YOUNG : self::EACH);
         if (!$beside) {
             return null;
         }
@@ -138,13 +143,20 @@ final class hunt {
                 return null;
             }
         }
-        // In the game the spines keep their title for the screen reader, not in a tooltip to match with the cover (D15).
+        // In the game the spines keep their title for the screen reader, not in a tooltip to match with the cover (D15);
+        // for a grown reader, not on the spine either: they come to it by its label (Gaudí, JV-D11).
+        $cards = $grown ? catalogue::cards_of([$recordid], $library) : [];
+        $author = $cards ? (string) reset($cards)['authors'] : '';
         foreach ($spines as &$spine) {
             $spine['notip'] = true;
+            $spine['notitle'] = $grown && $author !== '';
         }
         unset($spine);
         return ['target' => $recordid, 'title' => $target['title'], 'cover' => $young ? $target['cover'] : null,
             'lines' => $target['lines'], 'place' => $target['place'], 'young' => $young,
+            // A grown reader works the label out from the title and the author, as on a real shelf; without an author,
+            // the label.
+            'grown' => $grown && $author !== '', 'author' => $author,
             'spines' => screens::spines($spines)];
     }
 
@@ -163,14 +175,15 @@ final class hunt {
             self::T . 'reader',
             ['entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active']
         ) : null;
-        $young = $reader && cards::look_of($reader) === 'flower';
+        $look = $reader ? cards::look_of($reader) : '';
+        $young = $look === 'flower';
         // The day's book, or the next turns' when it has a twin on its shelf: still the same for the same day and reader.
         for ($try = 0; $try < 5; $try++) {
             $recordid = self::target($library, $corner, $reader ? (int) $reader->id : 0, $turn + $try);
             if (!$recordid) {
                 return null;
             }
-            $game = self::game($library, $recordid, $young, $public);
+            $game = self::game($library, $recordid, $young, $public, $reader && !$young);
             if ($game) {
                 return $game;
             }

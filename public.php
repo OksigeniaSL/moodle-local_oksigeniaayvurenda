@@ -131,10 +131,9 @@ foreach (
 if ($recordid) {
     $found = $catalogue ? catalogue::record($recordid, $library) : null;
     if (!$found) {
-        http_response_code(404);
-        shell::output($str('recordnotfound'), '<h1 class="ayv-results-title">' . s($str('recordnotfound')) . '</h1><p><a href="' .
-            s($here()) . '">' . s($str('windowbackdoor')) . '</a></p>', $library, '', ['search' => false]);
-        die;
+        // A shared link or a poster's code of a book no longer here: the memory says so, with the way to the door
+        // (jue-humor D2), as a page of the library with an account does.
+        shell::missing($str('recordnotfound'), $library, [$here(), $str('windowbackdoor')]);
     }
     $data = screens::record($found, $library);
     $data['card'] = $public([$found['card']])[0];

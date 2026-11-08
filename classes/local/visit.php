@@ -559,7 +559,15 @@ final class visit {
         callable $url,
         string $game
     ): array {
+        global $DB, $USER;
         $out = [];
+        // Whoever comes with a card of the centre: the characters know them (JV-D12).
+        $reader = !$public && isloggedin() && !isguestuser() ? $DB->get_record(
+            self::T . 'reader',
+            ['entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active'],
+            '*',
+            IGNORE_MULTIPLE
+        ) : null;
         foreach ($scene['characters'] as $role => $one) {
             // The art's hummingbird perches on the furniture; a centre's own character stands on the floor, like a person.
             $standing = $one['standing'] ?? null;
@@ -567,7 +575,11 @@ final class visit {
                 $one = $standing;
             }
             $news = '';
-            if ($role === 'herald') {
+            $gone = $role === 'herald' && $scene['corner'] !== '' ? self::gone_this_week($library, $scene['corner']) : 0;
+            if ($gone >= 2) {
+                // In a room, what moved there this week, not the month's news of the whole library.
+                $news = get_string('visitcornerweek', 'local_oksigeniaayvurenda', $gone);
+            } else if ($role === 'herald') {
                 $pulse = window::pulse($library);
                 $news = get_string($pulse['new'] ? ($pulse['new'] === 1 ? 'windowpulsenewone' : 'windowpulsenew')
                     : 'visitpulsequiet', 'local_oksigeniaayvurenda', $pulse['new']);
@@ -576,12 +588,26 @@ final class visit {
             if (!$said || empty($said['figure'])) {
                 continue;
             }
+            // In the hall, the memory has for a reader what the home page has: today's idea, with the way to it.
+            $remember = null;
+            if ($role === 'memory' && $reader && $scene['corner'] === '') {
+                $remembers = memory::remembers($library, $reader);
+                if ($remembers) {
+                    $said['text'] = $remembers['say']['text'];
+                    $book = (int) $remembers['recordid'];
+                    $remember = ['url' => $book ? $url('record.php', ['id' => $book])
+                        : $url('search.php', ['q' => $remembers['query']]),
+                        'label' => get_string($book ? 'memorygo' : 'memorysearchagain', 'local_oksigeniaayvurenda')];
+                }
+            }
             $out[] = ['role' => $role, 'name' => $said['name'], 'text' => $said['text'], 'figure' => $said['figure'],
                 'puppet' => $said['puppet'] ?? '', 'size' => $one['height'], 'depth' => $depth,
                 'left' => round($one['feet'][0] - $one['height'] / 2), 'top' => round($one['feet'][1] - $one['height']),
                 'search' => $role === 'memory' ? ['action' => $public ? $url('public.php') : $url('search.php'),
                     'slug' => $library->slug] : null,
-                'voice' => $role === 'memory' ? (json_decode(
+                'remember' => $remember,
+                // Her greeting's voice, only when she says the greeting.
+                'voice' => $role === 'memory' && !$remember ? (json_decode(
                     self::voices($library, 'memory', ['hello' => 'hello']),
                     true
                 )['hello'] ?? '') : '',
@@ -592,6 +618,27 @@ final class visit {
                 'playid' => $game];
         }
         return $out;
+    }
+
+    /**
+     * How many books went home from a corner of the library in the last seven days.
+     *
+     * @param \stdClass $library
+     * @param string $corner Its top class.
+     * @return int
+     */
+    private static function gone_this_week(\stdClass $library, string $corner): int {
+        global $DB;
+        [$where, $params] = catalogue::class_condition('a.code', $corner, 'top');
+        return (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT l.id)
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "recauth} ra ON ra.recordid = i.recordid
+               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'class'
+              WHERE l.libraryid = :libraryid AND l.timeloaned >= :since AND $where",
+            ['libraryid' => $library->id, 'since' => time() - WEEKSECS] + $params
+        );
     }
 
     /**
@@ -623,7 +670,10 @@ final class visit {
         }
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $entityid = (int) $library->entityid;
-        $said = characters::say($entityid, 'memory', $game['young'] ? 'huntclueyoung' : 'huntclue', [], 'piensa');
+        // The clue by age: the cover and its letters for the youngest, the label, or the title and the author (JV-D11).
+        $cluekey = $game['young'] ? 'huntclueyoung' : (!empty($game['grown']) ? 'huntcluetitle' : 'huntclue');
+        $cluea = ['title' => format_string($game['title'], true, ['escape' => false]), 'author' => $game['author'] ?? ''];
+        $said = characters::say($entityid, 'memory', $cluekey, $cluea, 'piensa');
         $label = implode(' ', array_column($game['lines'], 'line'));
         $placecolour = '';
         foreach ($game['spines'] as $spine) {
@@ -637,7 +687,9 @@ final class visit {
             'target' => $game['target'],
             'heading' => $str('huntheading'),
             'name' => $said['name'] ?? '',
-            'clue' => $said['text'] ?? $str($game['young'] ? 'huntclueyoung' : 'huntclue', (object) ['name' => '']),
+            'clue' => $said['text'] ?? $str($cluekey, (object) ($cluea + ['name' => ''])),
+            'hidelabel' => !empty($game['grown']),
+            'huntshowlabel' => $str('huntshowlabel'),
             'figure' => $said['figure'] ?? null,
             'puppet' => $said['puppet'] ?? '',
             'cheer' => $cheer,
@@ -655,7 +707,7 @@ final class visit {
             'recordurl' => $public ? $url('public.php', ['record' => $game['target']])
                 : $url('record.php', ['id' => $game['target']]),
             'againurl' => $url('visit.php', ['room' => $room, 'hunt' => $turn + 1]) . '#busca',
-            'voices' => self::voices($library, 'memory', ['clue' => $game['young'] ? 'huntclueyoung' : 'huntclue',
+            'voices' => self::voices($library, 'memory', ['clue' => $cluekey,
                 'before' => 'huntbefore', 'after' => 'huntafter', 'gap' => 'huntgap', 'glow' => 'huntglow',
                 'found' => 'huntfound', 'look1' => 'huntlook1', 'look2' => 'huntlook2', 'look3' => 'huntlook3']),
             'messages' => json_encode(

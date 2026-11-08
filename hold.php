@@ -72,6 +72,22 @@ if ($action === 'ask') {
             $params['who'] = $desk->reader($readerid)['name'];
         }
     }
+} else if ($action === 'later' || $action === 'resume') {
+    // Not yet: their own reservation put off for a week, two or a month, or back in the queue (MER-03).
+    $hold = $DB->get_record('local_oksigeniaayvurenda_hold', ['id' => required_param('hold', PARAM_INT),
+        'libraryid' => $library->id], '*', MUST_EXIST);
+    if (!$isdesk && (!$mine || (int) $hold->readerid !== (int) $mine->id)) {
+        shell::refuse(get_string('holdnotyours', 'local_oksigeniaayvurenda'), $library);
+    }
+    if ($action === 'later') {
+        $days = optional_param('days', 7, PARAM_INT);
+        holds::suspend((int) $hold->id, $now + (in_array($days, [7, 14, 30], true) ? $days : 7) * DAYSECS, $now);
+        $notice = 'holdlaterdone';
+    } else {
+        holds::resume((int) $hold->id, $now);
+        $notice = 'holdresumed';
+    }
+    $recordid = (int) $hold->recordid;
 } else if ($action === 'cancel') {
     $hold = $DB->get_record('local_oksigeniaayvurenda_hold', ['id' => required_param('hold', PARAM_INT),
         'libraryid' => $library->id], '*', MUST_EXIST);

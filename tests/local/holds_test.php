@@ -67,6 +67,36 @@ final class holds_test extends \advanced_testcase {
     }
 
     /**
+     * «Not yet»: Hugo puts his reservation off; the copy that comes back goes to Marta, who waited behind him; one set
+     * aside put off goes to the next or to the shelf; back in the queue, Hugo has his place again (MER-03).
+     */
+    public function test_not_yet(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $lib = $w->library;
+        $now = time();
+        $hugo = holds::add($lib, (int) $w->record->id, (int) $w->hugo->id, null, $now - 60)['hold'];
+        $marta = holds::add($lib, (int) $w->record->id, (int) $w->marta->id, null, $now - 30)['hold'];
+        $this->assertSame(1, holds::ahead($marta));
+        holds::suspend((int) $hugo->id, $now + WEEKSECS, $now);
+        $this->assertSame(0, holds::ahead($marta), 'nobody waits behind one put off');
+        $desk = new desk($lib, (int) $w->staff->id);
+        $desk->scan($w->one->barcode);
+        $this->assertSame('ready', $DB->get_field(self::T . 'hold', 'status', ['id' => $marta->id]));
+        $this->assertSame('waiting', $DB->get_field(self::T . 'hold', 'status', ['id' => $hugo->id]));
+        // Marta puts hers off too, set aside as it was: the copy goes back to the shelf, nobody else waits.
+        holds::suspend((int) $marta->id, $now + WEEKSECS, $now);
+        $this->assertSame('available', $DB->get_field(self::T . 'item', 'status', ['id' => $w->one->id]));
+        $this->assertSame('waiting', $DB->get_field(self::T . 'hold', 'status', ['id' => $marta->id]));
+        // Hugo is back, first again: the next copy that comes back is his.
+        holds::resume((int) $hugo->id, $now);
+        $this->assertSame(0, holds::ahead($DB->get_record(self::T . 'hold', ['id' => $hugo->id])));
+        $desk->scan($w->two->barcode);
+        $this->assertSame('ready', $DB->get_field(self::T . 'hold', 'status', ['id' => $hugo->id]));
+    }
+
+    /**
      * The whole way: the queue, the copy set aside at the desk, the red card for anyone else, the loan to the reader
      * who waited, undoing each step, and the copy that waits past its date.
      */

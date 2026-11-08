@@ -57,7 +57,7 @@
                 "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1000, 900, 0, 1)", "title": "El faro",
                 "cover": "https://example.com/cover.jpg", "colour": 2, "url": "#"}
         ],
-        "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?",
+        "characters": [{"role": "memory", "name": "Memoria", "text": "¿Qué libro buscas?", "remember": null,
             "figure": "https://example.com/memoria-saluda.webp", "puppet": "", "size": 520, "left": 400, "top": 500,
             "depth": 0.35, "search": {"action": "#", "slug": "demo-1"}, "play": "", "playid": "", "voice": "https://example.com/hola.mp3" }],
         "young": false, "night": "day",
@@ -159,6 +159,7 @@
         {{#characters}}
         <div class="ayv-visit-say" id="ayv-visit-say-{{role}}" data-role="{{role}}"{{#voice}} data-voice="{{voice}}"{{/voice}} hidden>
             <p><strong>{{name}}</strong> {{text}}</p>
+            {{#remember}}<p class="ayv-visit-offer"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/remember}}
             {{#search}}
             <form class="ayv-visit-ask" role="search" action="{{action}}" method="get">
                 <input type="hidden" name="library" value="{{slug}}">
@@ -191,7 +192,7 @@
     </nav>
     {{/hasplaces}}
     {{#hunt}}
-    <dialog class="ayv-modal ayv-hunt" id="ayv-hunt" aria-labelledby="ayv-hunt-title" data-target="{{target}}" data-messages="{{messages}}" data-voices="{{voices}}">
+    <dialog class="ayv-modal ayv-hunt" id="ayv-hunt" aria-labelledby="ayv-hunt-title" data-target="{{target}}" data-messages="{{messages}}" data-voices="{{voices}}"{{#hidelabel}} data-grown="1"{{/hidelabel}}>
         <div class="ayv-modal-head">
             <h2 id="ayv-hunt-title" class="ayv-section-title">{{heading}}</h2>
             <form method="dialog"><button class="ayv-modal-close" aria-label="{{visitclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form>
@@ -204,7 +205,9 @@
                 <p>{{#name}}<strong>{{name}}</strong> {{/name}}{{clue}}</p>
                 <div class="ayv-hunt-card">
                     {{#huntcover}}<img class="ayv-hunt-cover" src="{{huntcover}}" alt="">{{/huntcover}}
+                    {{#hidelabel}}<details class="ayv-hunt-peek"><summary>{{huntshowlabel}}</summary>{{/hidelabel}}
                     <span class="ayv-where-label{{#huntplace}} ayv-spine-label-place{{/huntplace}}"{{#huntplace}} style="--place: {{huntplace}}"{{/huntplace}} role="img" aria-label="{{labelsr}}">{{#huntlines}}<span>{{line}}</span>{{/huntlines}}</span>
+                    {{#hidelabel}}</details>{{/hidelabel}}
                 </div>
             </div>
         </div>

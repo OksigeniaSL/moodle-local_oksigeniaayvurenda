@@ -611,8 +611,56 @@ final class holds {
      */
     private static function waiting(int $libraryid, int $recordid): array {
         global $DB;
-        return hold_rules::queue(array_values($DB->get_records(self::T . 'hold', ['libraryid' => $libraryid,
-            'recordid' => $recordid, 'status' => 'waiting'])));
+        // One put off («Not yet») keeps its place but is skipped, and nobody waits behind it meanwhile (MER-03).
+        return hold_rules::queue(array_values($DB->get_records_select(
+            self::T . 'hold',
+            "libraryid = :libraryid AND recordid = :recordid AND status = 'waiting'
+             AND (timesuspended IS NULL OR timesuspended <= :now)",
+            ['libraryid' => $libraryid, 'recordid' => $recordid, 'now' => time()]
+        )));
+    }
+
+    /**
+     * «Not yet»: puts a reservation off until a day, keeping its place in the queue. One set aside goes back to waiting,
+     * and its copy to the next, or to the shelf.
+     *
+     * @param int $holdid
+     * @param int $until
+     * @param int|null $now
+     */
+    public static function suspend(int $holdid, int $until, ?int $now = null): void {
+        global $DB;
+        $now = $now ?? time();
+        $hold = $DB->get_record(self::T . 'hold', ['id' => $holdid]);
+        if (!$hold || !in_array($hold->status, self::OPEN, true) || $until <= $now) {
+            return;
+        }
+        $transaction = $DB->start_delegated_transaction();
+        $DB->update_record(self::T . 'hold', (object) ['id' => $hold->id, 'status' => 'waiting', 'itemid' => null,
+            'timeready' => null, 'timeexpires' => null, 'timenotified' => null, 'timesuspended' => $until,
+            'timemodified' => $now]);
+        if ($hold->status === 'ready' && $hold->itemid) {
+            self::release((int) $hold->itemid, $now);
+        }
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Back in the queue, in its place, before the day the reader had put it off to.
+     *
+     * @param int $holdid
+     * @param int|null $now
+     */
+    public static function resume(int $holdid, ?int $now = null): void {
+        global $DB;
+        $DB->set_field_select(
+            self::T . 'hold',
+            'timesuspended',
+            null,
+            "id = :id AND status = 'waiting'",
+            ['id' => $holdid]
+        );
+        $DB->set_field(self::T . 'hold', 'timemodified', $now ?? time(), ['id' => $holdid]);
     }
 
     /**

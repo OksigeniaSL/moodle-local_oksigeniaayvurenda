@@ -85,6 +85,23 @@
             slot.classList.add('ayv-hunt-no');
         }
     };
+    // For a grown reader the spines have no titles, as seen from the aisle: a book touched comes out a little and shows
+    // its title, as someone takes it out to check, and goes back (Gaudí, JV-D11).
+    var grown = dialog.hasAttribute('data-grown');
+    var pull = function(spine, back) {
+        var title = spine.querySelector('.ayv-spine-title');
+        if (!grown || !title) {
+            return;
+        }
+        title.textContent = spine.getAttribute('data-title') || '';
+        spine.classList.add('ayv-spine-pulled');
+        if (back) {
+            window.setTimeout(function() {
+                spine.classList.remove('ayv-spine-pulled');
+                title.textContent = '';
+            }, 1800);
+        }
+    };
     var miss = function(spine) {
         var slot = spine.closest('.ayv-spine-slot');
         // The gap of a book that is out says so, and is not a try: a small child touching the bird three times has not
@@ -97,6 +114,7 @@
         }
         misses++;
         spine.setAttribute('data-tried', '1');
+        pull(spine, true);
         var parts = [];
         var heard = spines.indexOf(spine) < spines.indexOf(mine) ? 'before' : 'after';
         parts.push(spines.indexOf(spine) < spines.indexOf(mine) ? messages.before : messages.after);
@@ -128,6 +146,7 @@
     };
 
     var found = function() {
+        pull(mine, false);
         done = true;
         say.textContent = '';
         mine.closest('.ayv-spine-slot').classList.remove('ayv-hunt-glow');
@@ -186,11 +205,30 @@
         });
     });
 
-    var open = function() {
+    var show = function() {
         if (!dialog.open) {
             dialog.showModal();
             speak('clue');
         }
+    };
+    // The game comes out of the room's shelf, as a door is walked through: the room leans towards it, and the shelf
+    // of the game opens (JV-D13). With «reduce motion», or without a shelf in the room, it simply opens.
+    var open = function() {
+        var room = document.querySelector('.ayv-visit-room');
+        var visit = document.querySelector('.ayv-visit');
+        var place = document.querySelector('.ayv-visit-place[href*="stacks.php"][data-tip]');
+        if (reduce || dialog.open || !room || !visit || !place) {
+            show();
+            return;
+        }
+        var p = place.getAttribute('data-tip').split(' ').map(parseFloat);
+        var k = room.getBoundingClientRect().width / (parseFloat(visit.getAttribute('data-width')) || 2400);
+        room.style.transformOrigin = (p[0] * k) + 'px ' + (p[2] * k) + 'px';
+        room.classList.add('ayv-visit-peek');
+        window.setTimeout(function() {
+            show();
+            room.classList.remove('ayv-visit-peek');
+        }, 320);
     };
     Array.prototype.forEach.call(document.querySelectorAll('[data-open="ayv-hunt"]'), function(button) {
         button.hidden = false;
@@ -203,6 +241,6 @@
     });
     // «Another book» comes back here, straight into the game.
     if (window.location.hash === '#busca') {
-        open();
+        show();
     }
 })();

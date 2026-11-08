@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.197.0
+
+- Play and the visit (audit batch 10, with Gaudí):
+  - the hidden book by age: a shorter shelf for the youngest; for a reader past the flower, the memory gives the title
+    and the author, the label is folded under «See its label», the spines carry no title (as seen from the aisle), and
+    a book touched comes out a little with its title and goes back;
+  - in the hall, the memory tells a reader today's idea, with the way to it; in a room, the herald tells how many books
+    went home from that corner this week;
+  - the hidden-book game comes out of the room's shelf: the room leans towards it and the game opens from there.
+- «Not yet» on a reservation: a reader puts it off for a week, two or a month and keeps their place in the queue; nobody
+  waits behind it meanwhile, one already set aside goes to the next or to the shelf, and «I can now» brings it back
+  (MER-03).
+- A shared link to a book no longer in the public catalogue shows the memory and the way back to the door.
+
 ## 0.196.1
 
 - The personal area's block, after Gaudí's review: whoever lends at several desks gets one section with a row for each

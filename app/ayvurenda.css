@@ -5000,3 +5000,27 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 
 /* The class's island on a young reader's card (D10), drawn, a little smaller than in «My class». */
 .ayv .ayv-card-island { max-width: 28rem; margin: .5rem 0 1rem; }
+
+/* The hidden-book game comes out of the room's shelf: the room leans towards it, and the game opens from there. */
+.ayv .ayv-visit-room.ayv-visit-peek { transform: scale(1.22); }
+@media (prefers-reduced-motion: no-preference) {
+    .ayv dialog.ayv-hunt[open] { animation: ayv-hunt-in .26s ease-out; }
+}
+@keyframes ayv-hunt-in {
+    from { transform: scale(.92); opacity: 0; }
+}
+
+/* A grown reader works the label out first; it is there, folded, for whoever needs it (JV-D11). */
+.ayv .ayv-hunt-peek > summary { cursor: pointer; font-weight: 700; color: var(--green); }
+.ayv .ayv-hunt-peek[open] > summary { margin-bottom: .4rem; }
+
+/* A book touched in the grown reader's game comes out a little and shows its title, then goes back. */
+.ayv .ayv-hunt .ayv-spine.ayv-spine-pulled { transform: translateY(-14%); }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-hunt .ayv-spine.ayv-spine-pulled { transform: none; }
+}
+
+/* «Not yet» on a reservation: folded, with three lengths (MER-03). */
+.ayv .ayv-hold-later { margin-top: .6rem; }
+.ayv .ayv-hold-later > summary { cursor: pointer; font-weight: 700; color: var(--green); }
+.ayv .ayv-hold-later-choices { display: flex; flex-wrap: wrap; gap: .5rem; }

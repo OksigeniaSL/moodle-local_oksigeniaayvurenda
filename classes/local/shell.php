@@ -143,8 +143,9 @@ final class shell {
      *
      * @param string $why
      * @param \stdClass|null $library
+     * @param array|null $back Another way back than the library's home: its address and its words.
      */
-    public static function missing(string $why, ?\stdClass $library = null): void {
+    public static function missing(string $why, ?\stdClass $library = null, ?array $back = null): void {
         http_response_code(404);
         $memory = $library ? (characters::of((int) $library->entityid)['memory'] ?? null) : null;
         $alive = $memory && $memory['enabled'] && empty($memory['own']);
@@ -155,7 +156,8 @@ final class shell {
             $why,
             $library,
             (string) $figure,
-            $alive ? characters::puppet('memory', 'senala', $step) : ''
+            $alive ? characters::puppet('memory', 'senala', $step) : '',
+            $back
         );
     }
 

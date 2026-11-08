@@ -89,7 +89,22 @@
                 <input type="hidden" name="record" value="{{recordid}}">
                 <input type="hidden" name="hold" value="{{holdid}}">
                 <button type="submit" class="ayv-button ayv-button-quiet" name="action" value="cancel">{{holdcancelmine}}</button>
+                {{#paused}}<button type="submit" class="ayv-button" name="action" value="resume">{{holdresume}}</button>{{/paused}}
             </form>
+            {{#haslater}}
+            <details class="ayv-hold-later">
+                <summary>{{holdlater}}</summary>
+                <p class="ayv-field-hint">{{holdlaterhint}}</p>
+                <form method="post" action="{{action}}" class="ayv-hold-later-choices">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="library" value="{{library}}">
+                    <input type="hidden" name="record" value="{{recordid}}">
+                    <input type="hidden" name="hold" value="{{holdid}}">
+                    <input type="hidden" name="action" value="later">
+                    {{#later}}<button type="submit" class="ayv-button ayv-button-quiet" name="days" value="{{days}}">{{label}}</button>{{/later}}
+                </form>
+            </details>
+            {{/haslater}}
             {{/holdid}}
             {{/mine}}
             {{#canask}}

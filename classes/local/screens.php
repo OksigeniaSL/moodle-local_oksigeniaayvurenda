@@ -440,6 +440,7 @@ final class screens {
             'library' => $library->slug, 'recordid' => $recordid, 'notice' => '', 'mine' => '', 'ahead' => '',
             'holdid' => 0, 'canask' => false, 'staff' => false];
         $notices = ['holdadded', 'holdfree', 'holdhas', 'holdmax', 'holdnocopies', 'holdnotallowed', 'holdcancelled',
+            'holdlaterdone', 'holdresumed',
             'holdfreefor', 'holdhasfor', 'holdmaxfor', 'holdnocopiesfor', 'holdnoreader', 'holdmanyreaders'];
         if (in_array($notice, $notices, true)) {
             $box['notice'] = self::str($notice);
@@ -473,13 +474,24 @@ final class screens {
                 $box['holdid'] = (int) $mine->id;
                 $box['minekind'] = $mine->status === 'ready' ? 'ready' : 'waiting';
                 $box['mineuntil'] = (int) $mine->timeexpires;
+                $paused = (int) ($mine->timesuspended ?? 0) > $now;
                 if ($mine->status === 'ready') {
                     $box['mine'] = self::str('holdmineready', zones::date((int) $mine->timeexpires, 'strftimedateshort', $library));
+                } else if ($paused) {
+                    // Not yet: put off, keeping its place in the queue (MER-03).
+                    $box['mine'] = self::str(
+                        'holdminepaused',
+                        zones::date((int) $mine->timesuspended, 'strftimedateshort', $library)
+                    );
                 } else {
                     $box['mine'] = self::str('holdminewaiting');
                     $ahead = holds::ahead($mine);
                     $box['ahead'] = $ahead ? self::str('holdmineahead', $ahead) : '';
                 }
+                $box['paused'] = $paused;
+                $box['later'] = $paused ? [] : array_map(fn($days) => ['days' => $days,
+                    'label' => self::str('holdlater' . $days)], [7, 14, 30]);
+                $box['haslater'] = !$paused;
             } else if (in_array($state, ['out', 'held'], true) && holds::online($library, (int) $reader->id, $now)) {
                 $box['canask'] = true;
             }
@@ -494,7 +506,10 @@ final class screens {
         }
         // The box is named by what it holds: «You have it» is not a part called «Tell me when it comes back».
         $box['boxlabel'] = ($box['minekind'] ?? '') === 'loan' ? self::str('holdboxmine') : self::str('holdask');
-        foreach (['holdask', 'holdaskhint', 'holdcancelmine', 'holdfor', 'holdforhint', 'holdforgo', 'holdslink'] as $key) {
+        foreach (
+            ['holdask', 'holdaskhint', 'holdcancelmine', 'holdfor', 'holdforhint', 'holdforgo', 'holdslink', 'holdlater',
+                'holdlaterhint', 'holdresume'] as $key
+        ) {
             $box[$key] = self::str($key);
         }
         return $box;

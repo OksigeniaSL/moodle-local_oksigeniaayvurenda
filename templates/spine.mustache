@@ -47,7 +47,7 @@
         <span class="ayv-spine-away" aria-hidden="true">{{awaytext}}</span>
         {{/out}}
         {{^out}}
-        <span class="ayv-spine-title" aria-hidden="true">{{shown}}</span>
+        <span class="ayv-spine-title" aria-hidden="true">{{^notitle}}{{shown}}{{/notitle}}</span>
         <span class="ayv-spine-label{{#placecolour}} ayv-spine-label-place{{/placecolour}}" aria-hidden="true">{{#lines}}<span>{{line}}</span>{{/lines}}</span>
         {{#consult}}<span class="ayv-spine-room" aria-hidden="true"></span>{{/consult}}
         {{/out}}
