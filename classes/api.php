@@ -206,6 +206,53 @@ final class api {
     }
 
     /**
+     * What there is to celebrate at the libraries this week, as their readers hear it: the library turning a month or a
+     * year online, a round number of books lent this year, a book that went out a round number of times, the busiest day
+     * of the year, readers at the goal of a challenge of the library and readers taking their first book; added up and
+     * without names. For the screens of a centre, a newsletter, a block. Never a practice library nor a centre still
+     * closed to its readers.
+     *
+     * Each moment: kind (anniversary, loans, book, record, quest or first); text (plain text, in the current language and
+     * in the words of the centre's kind of library, to be escaped when shown); recordid (the book it is about, or 0) and
+     * cover (the stored_file of its picture, or null); library (the name of the centre's main library) and entityid.
+     *
+     * @param int|null $entityid Only this centre; null, every centre on the site.
+     * @param int|null $now
+     * @return array[] Each centre's, the most worth telling first.
+     */
+    public static function moments(?int $entityid = null, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        $fs = get_file_storage();
+        $context = \context_system::instance();
+        $out = [];
+        foreach ($DB->get_fieldset_select(self::T . 'entity', 'id', $entityid ? 'id = :id' : '1 = 1', ['id' => $entityid]) as $id) {
+            $main = local\mail::main_library((int) $id);
+            if (!$main || access::closed((int) $id) || practice::is((int) $id)) {
+                continue;
+            }
+            foreach (local\moments::of($main, $now, false) as $moment) {
+                $out[] = [
+                    'kind' => $moment['kind'],
+                    'text' => $moment['text'],
+                    'recordid' => $moment['recordid'],
+                    'cover' => $moment['recordid'] ? ($fs->get_file(
+                        $context->id,
+                        'local_oksigeniaayvurenda',
+                        'cover',
+                        $moment['recordid'],
+                        '/',
+                        'cover.jpg'
+                    ) ?: null) : null,
+                    'library' => format_string($main->name, true, ['escape' => false, 'context' => $context]),
+                    'entityid' => (int) $id,
+                ];
+            }
+        }
+        return $out;
+    }
+
+    /**
      * What is coming at the libraries: the activities of their agenda from a moment on, the soonest first; for the
      * screens of a centre, a newsletter, a block. Never a practice library nor a centre still closed to its readers.
      *

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.223.0 (2026-11-09)
+
+- The moments to celebrate (Enrique, 8 November: high roles see life too, not only figures): what happened this week
+  that is worth a cheer, added up and without names. The library online turning a month, a hundred days or a year (from
+  the day the centre opens to its readers, now written down, or its first loan here); a round number of books lent this
+  year and the book that made it («1,000 books lent so far this school year. Number 1,000 was «The lighthouse»»); a book
+  that has gone out a round number of times in all the library's years; the busiest day of the year at the desk; readers
+  reaching the goal of a challenge of the library, or how one that just ended went; readers taking their very first
+  book; and, for the staff only, the classes that met their challenge. In the words of each kind of library («this
+  year» where there are no courses, no classes where there are none).
+- On the home's board, a strip with paper pennants where the herald cheers the first and its book; whoever runs or keeps
+  the library sees the next two below it. Under the desk's cards, the first, quietly. In the dashboard's block (from
+  its 0.2.4), up to three for the staff and the first of the whole library for a reader. Readers hear only those of the
+  whole library, and those that count people only from five.
+- `\local_oksigeniaayvurenda\api::moments()`: the readers' moments of each centre for other plugins (the screens of a
+  centre, a newsletter), with the book's cover; never a practice library nor a centre still closed.
+
 ## 0.222.0 (2026-11-08)
 
 - The library's block on the dashboard tells at the desk (Enrique, 8 November: «Doesn't it tell anything?»): what is

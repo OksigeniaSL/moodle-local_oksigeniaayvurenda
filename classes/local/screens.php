@@ -130,7 +130,7 @@ final class screens {
             'hasrecent' => (bool) $recent,
             'herald' => $recent ? self::herald_new($library, $hero) : null,
             'weekbook' => self::week_book($library),
-            'board' => self::board($library, $recent),
+            'board' => self::board($library, $recent) + ['moments' => self::moments($library)],
             'empty' => !$corners && !$recent ? self::str('emptycatalogue') : '',
         ];
     }
@@ -1166,6 +1166,36 @@ final class screens {
                 array_slice($covers, 0, 6)
             ),
             'agenda' => self::week_agenda($library),
+        ];
+    }
+
+    /**
+     * The moments to celebrate this week, on the home's board: the herald cheers the first; whoever runs or keeps the
+     * library sees the next two below it (Enrique, 8 November: high roles see life too, not only figures).
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return array|null heading, what the herald says (text, figure…), cover, url, label and more.
+     */
+    public static function moments(\stdClass $library, ?int $now = null): ?array {
+        global $USER;
+        $entityid = (int) $library->entityid;
+        $staff = access::is_staff($entityid, (int) $USER->id) || access::keeps($library, (int) $USER->id);
+        $moments = moments::of($library, $now ?? time(), $staff);
+        if (!$moments) {
+            return null;
+        }
+        $first = array_shift($moments);
+        $said = characters::say($entityid, 'herald', $first['key'], $first['a'], 'celebra')
+            ?? ['text' => $first['text'], 'figure' => null, 'portrait' => null, 'initial' => '', 'role' => 'herald'];
+        $more = array_map(fn($moment) => ['text' => $moment['text'], 'url' => $moment['url']], array_slice($moments, 0, 2));
+        return $said + [
+            'heading' => self::str('momentsheading'),
+            // Explicit, so that Mustache does not look for them outside.
+            'cover' => $first['recordid'] ? (covers::url($first['recordid']) ?? false) : false,
+            'url' => $first['url'],
+            'label' => self::str($first['recordid'] ? 'memorygo' : 'momentsee'),
+            'more' => $more ? ['items' => $more] : false,
         ];
     }
 

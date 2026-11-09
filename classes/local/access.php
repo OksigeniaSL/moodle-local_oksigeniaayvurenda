@@ -255,6 +255,10 @@ final class access {
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $changed = !empty($settings['closed']) !== $closed;
         $settings['closed'] = $closed;
+        // The day it first opens to its readers is its birthday (moments::opened).
+        if ($changed && !$closed && empty($settings['opened'])) {
+            $settings['opened'] = time();
+        }
         $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
         \cache::make('local_oksigeniaayvurenda', 'access')->delete('closed_' . $entityid);
         if ($changed && $closed) {

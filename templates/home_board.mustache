@@ -24,7 +24,13 @@
     Example context (json):
     {
         "board": {"heraldtitle": "Lo que cuenta Mainumby", "memorytitle": "La memoria te recomienda", "allnew": "Verlos todos",
-            "covers": [{"url": "#", "cover": "https://example.org/c.jpg", "title": "El faro"}]},
+            "covers": [{"url": "#", "cover": "https://example.org/c.jpg", "title": "El faro"}],
+            "moments": {"heading": "Para celebrar", "text": "Este curso ya van 1.000 libros prestados. El número 1.000 fue «El faro».",
+                "figure": "https://example.org/m-celebra.webp", "portrait": null, "initial": "M", "role": "herald",
+                "cover": "https://example.org/c.jpg", "url": "https://example.org/record.php?id=1", "label": "Ver el libro",
+                "more": {"items": [{"text": "«Matilda» ha salido ya 100 veces de la biblioteca.", "url": "https://example.org/r.php"},
+                    {"text": "La clase 3.º B ha cumplido su reto.", "url": "https://example.org/reports.php"} ]
+                } },
         "herald": {"name": "Mainumby", "text": "Acaban de llegar doce libros.", "figure": "https://example.org/m.webp",
             "initial": "M", "role": "herald", "portrait": "https://example.org/p.webp", "listen": null},
         "hasrecent": true,
@@ -34,6 +40,17 @@
     }
 }}
 <div class="ayv-board">
+    {{#board.moments}}
+    <section class="ayv-board-card ayv-board-moments" aria-labelledby="ayv-board-moments">
+        <span class="ayv-board-who" aria-hidden="true">{{#figure}}<img src="{{figure}}" alt="" width="112" height="112">{{/figure}}{{^figure}}<span class="ayv-bubble-portrait ayv-bubble-{{role}}">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>{{/figure}}</span>
+        <div class="ayv-board-words">
+            <h2 class="ayv-board-title" id="ayv-board-moments">{{heading}}</h2>
+            <p class="ayv-board-moment">{{text}}</p>
+            {{#more}}<ul class="ayv-board-moments-more">{{#items}}<li>{{#url}}<a href="{{url}}">{{text}}</a>{{/url}}{{^url}}{{text}}{{/url}}</li>{{/items}}</ul>{{/more}}
+        </div>
+        {{#url}}<p class="ayv-board-book">{{#cover}}<img src="{{cover}}" alt="" loading="lazy" width="72" height="108">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/url}}
+    </section>
+    {{/board.moments}}
     <div class="ayv-board-col">
     {{#herald}}{{#hasrecent}}
     <section class="ayv-board-card ayv-board-herald" aria-labelledby="ayv-board-herald">

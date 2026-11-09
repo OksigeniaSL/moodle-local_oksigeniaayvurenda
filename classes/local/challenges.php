@@ -38,7 +38,7 @@ final class challenges {
     public const KINDS = ['corners' => 6, 'notes' => 20, 'everyone' => 0];
 
     /** @var int How long the herald celebrates a challenge met: two weeks. */
-    private const CHEER = 14 * DAYSECS;
+    public const CHEER = 14 * DAYSECS;
 
     /** @var int The months of classes a school year has, everywhere near enough: the terms are thirds of them. */
     private const CLASSMONTHS = 10;

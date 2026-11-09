@@ -177,7 +177,15 @@ final class dashboard {
         // without names (Enrique, 8 November: seeing that things happen gives confidence in the product and in whoever
         // keeps it up to date).
         // Only where the block knows how to show it (from its 0.2.3): an older one would draw an empty box.
-        $shows = (int) get_config('block_oksigeniaayvurenda', 'version') >= 2026110801;
+        $block = (int) get_config('block_oksigeniaayvurenda', 'version');
+        $shows = $block >= 2026110801;
+        // What there is to celebrate this week: all of it for whoever runs or keeps a library; one, the whole library's,
+        // for a reader (from the block's 0.2.4).
+        $staff = $desks || access::is_staff($entityid, $userid);
+        $moments = $block >= 2026110900 ? self::moments($library, $staff, $now, $skin, $say) : null;
+        if ($moments) {
+            $sections[] = ['moments' => $moments];
+        }
         if ($shows && ($desks || access::can('local/oksigeniaayvurenda:manage', $library, $userid))) {
             $pulse = self::pulse($library, $now, $say, $url);
             if ($pulse) {
@@ -659,6 +667,29 @@ final class dashboard {
                 ['course' => $courses[0]]
             ))->out(false) : '',
             'morelabel' => $say('dashreadingsmore')] : null;
+    }
+
+    /**
+     * The moments to celebrate, told by the herald: up to three for whoever runs or keeps a library, the first of the
+     * whole library for a reader.
+     *
+     * @param \stdClass $library
+     * @param bool $staff
+     * @param int $now
+     * @param string $skin
+     * @param \Closure $say
+     * @return array|null heading, face and items (text, url).
+     */
+    private static function moments(\stdClass $library, bool $staff, int $now, string $skin, \Closure $say): ?array {
+        $moments = moments::of($library, $now, $staff);
+        if (!$moments) {
+            return null;
+        }
+        return ['heading' => $say('momentsheading'), 'face' => self::face((int) $library->entityid, 'herald', $skin),
+            'items' => array_map(
+                fn($moment) => ['text' => $moment['text'], 'url' => $moment['url']],
+                array_slice($moments, 0, $staff ? 3 : 1)
+            )];
     }
 
     /**

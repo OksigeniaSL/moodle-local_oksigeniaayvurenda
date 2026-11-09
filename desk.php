@@ -149,6 +149,17 @@ if (!$help && !$own) {
             . '</ol></section>';
     }
 }
+// What there is to celebrate this week, quietly under the desk's cards: the desk is work, and it also has its days.
+$moment = '';
+if (!$help) {
+    $found = \local_oksigeniaayvurenda\local\moments::of($library, time(), true);
+    if ($found) {
+        $text = s($found[0]['text']);
+        $moment = '<p class="ayv-desk-moment"><span class="ayv-desk-moment-mark" aria-hidden="true"></span><span><b>'
+            . s($str('momentsheading')) . '</b> ' . ($found[0]['url'] !== '' ? '<a href="' . s($found[0]['url']) . '">' . $text
+            . '</a>' : $text) . '</span></p>';
+    }
+}
 $tools = shell::readers_tools($library);
 if ($help) {
     $tools['html'] = '';
@@ -168,7 +179,7 @@ $main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <div id="ayv-reader" class="ayv-reader" hidden></div>
 <ul id="ayv-today" class="ayv-today">' . $cards . '</ul>
 <ol id="ayv-log" class="ayv-log" aria-live="polite" data-empty="' . s($str('desklogempty')) . '"></ol>
-' . $yearlink . '
+' . $yearlink . $moment . '
 </section>';
 shell::output($str('desktitle'), $main, $library, '', [
     'search' => false,

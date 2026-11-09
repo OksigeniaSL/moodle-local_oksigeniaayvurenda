@@ -84,4 +84,10 @@ $definitions = [
         'simplekeys' => true,
         'ttl' => 2 * DAYSECS,
     ],
+    // The moments to celebrate of each centre this week, for an hour: the home, the block and Aty ask for them.
+    'moments' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 2 * HOURSECS,
+    ],
 ];
