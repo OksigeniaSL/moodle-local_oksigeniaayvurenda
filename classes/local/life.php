@@ -526,7 +526,10 @@ class life {
      * @return array lifetext, the whole sentence; lifebefore, lifelinked and lifeafter; lifehref, empty for no link.
      */
     public static function split(string $text, string $href): array {
-        if ($href !== '' && preg_match('/^(.*?«)([^»]+)(».*)$/su', $text, $m)) {
+        // The spaces French puts inside the guillemets stay outside the link.
+        $space = '[\s\x{00A0}\x{202F}]';
+        $pattern = '/^(.*?«' . $space . '*)([^»]*?[^»\s\x{00A0}\x{202F}])(' . $space . '*».*)$/su';
+        if ($href !== '' && preg_match($pattern, $text, $m)) {
             return ['lifetext' => $text, 'lifebefore' => $m[1], 'lifelinked' => $m[2], 'lifeafter' => $m[3], 'lifehref' => $href];
         }
         return ['lifetext' => $text, 'lifebefore' => $text, 'lifelinked' => '', 'lifeafter' => '', 'lifehref' => ''];

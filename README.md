@@ -60,7 +60,7 @@ upgrades from any earlier one.
 
 ## Development
 
-Code, comments and commit messages in English; texts in the language packs (`lang/en`, `lang/es`, and `lang/pt_br` and `lang/pt`, machine-translated from the Spanish and reviewed). The tests run with
+Code, comments and commit messages in English; texts in the language packs (`lang/en`, `lang/es`, and `lang/pt_br`, `lang/pt` and `lang/fr`, machine-translated from the Spanish and reviewed). The tests run with
 `moodle-plugin-ci` in GitHub Actions on Moodle 4.5 and 5.3 (PostgreSQL), on 5.3 with MariaDB 11.4 too, and on `main`
 to see what is coming. See [CONTRIBUTING.md](CONTRIBUTING.md).
 

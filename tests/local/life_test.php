@@ -178,6 +178,11 @@ final class life_test extends \advanced_testcase {
         $this->assertSame(['«', 'La isla del cometa', '» went out the very day it arrived.'], [$note['lifeitems'][1]['lifebefore'],
             $note['lifeitems'][1]['lifelinked'], $note['lifeitems'][1]['lifeafter']]);
         $this->assertSame('', $note['lifeitems'][0]['lifehref']);
+        // French guillemets carry a space inside: it stays out of the link.
+        $this->assertSame(['« ', 'Le phare', ' » est sorti.'], array_values(array_intersect_key(
+            life::split('« Le phare » est sorti.', 'https://example.org/'),
+            ['lifebefore' => 1, 'lifelinked' => 1, 'lifeafter' => 1]
+        )));
 
         // Nothing this month: the copy added by hand this year that went out most, from twice on.
         $DB->delete_records('local_oksigeniaayvurenda_loan');

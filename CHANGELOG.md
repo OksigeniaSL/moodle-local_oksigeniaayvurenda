@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.226.0 (2026-11-10)
+
+- French: the whole interface, in the French of France: a young reader is spoken to as «tu», the staff and every adult as
+  «vous», with French library words (banque de prêt, notice, cote, récolement, désherbage) and French typography. The
+  block (0.2.5) and the art package (0.1.58) too.
+- The year's report of a library that is not a school says it is the library's annual report, not the reading plan's.
+- In a sentence with a link, the spaces French puts inside the guillemets stay outside the link.
+
 ## 0.225.0 (2026-11-09)
 
 - What a fresh install showed, ahead of the Moodle Marketplace (an empty Moodle 4.5 and 5.3, the plugin from its zip,

@@ -2847,6 +2847,7 @@ $string['memoirheading'] = 'The library in the academic year {$a}';
 $string['memoirheadinglay'] = 'The library in the year {$a}';
 $string['memoirholdings'] = 'Copies now';
 $string['memoirintro'] = 'For the centre\'s report on its reading plan: print it, or copy it into your own.';
+$string['memoirintrolay'] = 'For the library\'s annual report: print it, or copy it into your own.';
 $string['memoirlifeheading'] = 'The library alive';
 $string['memoirloanone'] = '1 loan';
 $string['memoirloans'] = 'Loans';

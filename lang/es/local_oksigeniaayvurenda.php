@@ -2847,6 +2847,7 @@ $string['memoirheading'] = 'La biblioteca en el curso {$a}';
 $string['memoirheadinglay'] = 'La biblioteca en el año {$a}';
 $string['memoirholdings'] = 'Ejemplares ahora';
 $string['memoirintro'] = 'Para la memoria del plan de lectura del centro: imprímela o cópiala en la del centro.';
+$string['memoirintrolay'] = 'Para la memoria anual de la biblioteca: imprímela o cópiala en la tuya.';
 $string['memoirlifeheading'] = 'La biblioteca viva';
 $string['memoirloanone'] = '1 préstamo';
 $string['memoirloans'] = 'Préstamos';
