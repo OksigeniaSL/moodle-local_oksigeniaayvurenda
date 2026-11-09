@@ -86,8 +86,14 @@ final class memoir {
         }
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $number = fn(int $n) => screens::number($n);
-        $lines = [skins::say($entityid, 'memoirstoryloans', (object) ['came' => $number((int) $figures['came']),
-            'readers' => $number((int) $figures['readers']), 'loans' => $number((int) $figures['loans'])])];
+        // Of the readers of the year's groups, those who came; a library without groups (a town's, a company's) counts
+        // who took books, never «0 of the 0 readers».
+        $borrowers = (int) ($figures['borrowers'] ?? 0);
+        $lines = [(int) $figures['readers'] > 0
+            ? skins::say($entityid, 'memoirstoryloans', (object) ['came' => $number((int) $figures['came']),
+                'readers' => $number((int) $figures['readers']), 'loans' => $number((int) $figures['loans'])])
+            : skins::say($entityid, $borrowers === 1 ? 'memoirstoryloansallone' : 'memoirstoryloansall', (object) [
+                'borrowers' => $number($borrowers), 'loans' => $number((int) $figures['loans'])])];
         if ($report['before'] && (int) $report['before']['loans'] !== (int) $figures['loans']) {
             $change = (int) $figures['loans'] - (int) $report['before']['loans'];
             $lines[] = $str($change > 0 ? 'memoirstoryup' : 'memoirstorydown', (object) ['change' => $number(abs($change)),

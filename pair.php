@@ -46,6 +46,10 @@ if (!$library) {
 $entityid = (int) $library->entityid;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';
+// Without a connected platform there is nobody to pair with: say so, and where one is connected.
+if (!\local_oksigeniaayvurenda\local\sources\cifra::enabled($entityid)) {
+    shell::refuse($str('pairnoconnector'), $library, $str('pairnoconnectortitle'));
+}
 try {
     $piles = pairing::piles($entityid);
 } catch (\Throwable $e) {

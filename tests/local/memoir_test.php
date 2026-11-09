@@ -67,4 +67,30 @@ final class memoir_test extends \advanced_testcase {
         $this->assertSame(['done' => 'Un club de lectura.', 'next' => 'Más horas.'], memoir::of($library, $year)['notes']);
         $this->assertSame(['done' => '', 'next' => ''], memoir::notes($entityid, (int) $last->id));
     }
+
+    /**
+     * The memory's story counts the readers of the groups who came; a library without groups counts who took books,
+     * never «0 of the 0 readers».
+     */
+    public function test_story_without_groups(): void {
+        $this->resetAfterTest();
+        force_current_language('en');
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $year = $gen->create_year(['entityid' => $entityid] + \local_oksigeniaayvurenda\core\school_year::around(
+            time(),
+            '09-01',
+            \core_date::get_server_timezone_object()
+        ));
+        $reader = $gen->create_reader(['entityid' => $entityid]);
+        $book = $gen->create_record(['entityid' => $entityid]);
+        foreach ([1, 2] as $day) {
+            $item = $gen->create_item(['libraryid' => $library->id, 'recordid' => $book->id]);
+            $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id,
+                'yearid' => $year->id, 'timeloaned' => (int) $year->timestart + $day * DAYSECS]);
+        }
+        $story = memoir::story($entityid, memoir::of($library, $year));
+        $this->assertSame('This year, one reader took 2 books.', $story['lines'][0]);
+    }
 }

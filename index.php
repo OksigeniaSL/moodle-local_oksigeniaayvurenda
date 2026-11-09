@@ -39,7 +39,7 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/index.php', $ref !== ''
 
 if (!$library) {
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/choose', screens::choose());
-    shell::output(get_string('pluginname', 'local_oksigeniaayvurenda'), $html);
+    shell::output(get_string('productname', 'local_oksigeniaayvurenda'), $html);
     die();
 }
 // A bank of textbooks is not a library to visit: its pupil sees the books lent for the year, and until when.

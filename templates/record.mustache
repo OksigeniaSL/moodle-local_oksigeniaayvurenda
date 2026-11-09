@@ -251,7 +251,7 @@
                         <label class="ayv-field ayv-dig-field">{{correctcall2}} <input type="text" name="callnumber2" value="{{call2}}"></label>
                         <label class="ayv-field ayv-dig-field">{{correctcall3}} <input type="text" name="callnumber3" value="{{call3}}"></label>
                         </div>
-                        <label class="ayv-field ayv-dig-field">{{correctlocation}} <select name="locationid"><option value="0"></option>{{#places}}<option value="{{id}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/places}}</select></label>
+                        <label class="ayv-field ayv-dig-field">{{correctlocation}} <select name="locationid"><option value="0">{{#str}}addnolocation, local_oksigeniaayvurenda{{/str}}</option>{{#places}}<option value="{{id}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/places}}</select></label>
                         <label class="ayv-field ayv-dig-field">{{correctnotes}} <textarea name="notes" rows="2">{{notes}}</textarea></label>
                         <button type="submit" class="ayv-button">{{correctsave}}</button>
                     </form>

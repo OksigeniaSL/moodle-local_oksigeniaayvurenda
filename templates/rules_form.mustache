@@ -30,7 +30,7 @@
     }
 }}
 <dialog class="ayv-modal" id="ayv-rule-{{index}}" aria-labelledby="ayv-rule-{{index}}-title">
-    <div class="ayv-modal-head"><h3 id="ayv-rule-{{index}}-title" class="ayv-section-title">{{#removable}}{{rulesreader}} · {{rulesitem}}{{/removable}}{{^removable}}{{rulesnew}}{{/removable}}</h3>
+    <div class="ayv-modal-head"><h2 id="ayv-rule-{{index}}-title" class="ayv-section-title">{{#removable}}{{rulesreader}} · {{rulesitem}}{{/removable}}{{^removable}}{{rulesnew}}{{/removable}}</h2>
         <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
     <form method="post" action="{{action}}" class="ayv-rule-form">
         <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="rule" value="{{index}}">

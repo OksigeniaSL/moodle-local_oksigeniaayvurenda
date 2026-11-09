@@ -381,7 +381,7 @@ final class shell {
             . $main;
         $name = $library ? format_string($library->name, true, ['escape' => false]) : (onlylibrary::on()
             ? format_string($GLOBALS['SITE']->fullname, true, ['escape' => false])
-            : get_string('pluginname', 'local_oksigeniaayvurenda'));
+            : get_string('productname', 'local_oksigeniaayvurenda'));
         @header('Content-Type: text/html; charset=utf-8');
         self::frame_header();
         self::guard();

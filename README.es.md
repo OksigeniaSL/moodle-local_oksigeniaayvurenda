@@ -43,7 +43,7 @@ préstamos de cursos antiguos que dejan de decir quién se los llevó (`forget_h
 centro la baje, y puede salir además del servidor cifrada con la llave del propio centro (WebDAV, S3 o Google Drive). Un
 centro se recupera desde ella, con sus ficheros, en cualquier Moodle con este plugin.
 
-**Ajustes** (*Administración del sitio > Extensiones > Extensiones locales > Oksigenia Ayvurenda*): las direcciones de la
+**Ajustes** (*Administración del sitio > Extensiones > Extensiones locales > Biblioteca (Oksigenia Ayvurenda)*): las direcciones de la
 red del propio sitio a las que puede llegar un conector o una copia fuera del servidor (`internalhosts`,
 `offsitehosts`), un puente Z39.50 para los catálogos que solo hablan Z39.50, un cliente de Google para las copias en
 Drive, un sitio que es solo una biblioteca y una categoría por centro para un sitio que comparten varios.

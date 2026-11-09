@@ -4838,7 +4838,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-subject-option { display: inline-flex; align-items: center; gap: .45rem; padding: .35rem .8rem; border: 1px solid var(--line);
     border-radius: 999px; cursor: pointer; }
 .ayv .ayv-subject-option:has(input:checked) { border-color: var(--accent); background: var(--notice-bg); }
-.ayv .ayv-subject-count { color: var(--muted); font-size: .85em; }
+.ayv .ayv-subject-count { color: color-mix(in srgb, var(--ink) 72%, var(--surface)); font-size: .85em; }
 .ayv .ayv-subject-option .ayv-subject-count { color: var(--ink); }
 .ayv .ayv-subject-filter { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .6rem; margin: 0 0 1rem; }
 .ayv .ayv-subject-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .5rem; }

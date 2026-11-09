@@ -41,7 +41,7 @@ books and reservations at eight in each centre's time zone (`send_notices`, ever
 download, and may also go out of the server encrypted with the centre's own key (WebDAV, S3 or Google Drive). A centre can
 be recovered from it, with its files, on any Moodle with this plugin.
 
-**Settings** (*Site administration > Plugins > Local plugins > Oksigenia Ayvurenda*): the hosts of the site's own
+**Settings** (*Site administration > Plugins > Local plugins > Library (Oksigenia Ayvurenda)*): the hosts of the site's own
 network a connector or an off-server copy may reach (`internalhosts`, `offsitehosts`), a Z39.50 bridge for the
 catalogues that only speak Z39.50, a Google client for copies in Drive, a site that is only a library, and one category
 per centre for a site shared by several.

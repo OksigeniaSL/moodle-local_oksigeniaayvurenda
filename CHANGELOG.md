@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.225.0 (2026-11-09)
+
+- What a fresh install showed, ahead of the Moodle Marketplace (an empty Moodle 4.5 and 5.3, the plugin from its zip,
+  every screen at 1366 and 320 px, light and dark, with axe and the HTML validator): pairing readers with a platform says
+  that none is connected when there is none, instead of naming one; the memory's story of the year counts who took books
+  in a library without groups, never «0 of the 0 readers»; seven windows have a second-level heading; the empty choice of
+  a location says «No location»; the counts of the subjects are readable.
+- The plugin is named «Library (Oksigenia Ayvurenda)», as the house names its plugins; the brand stays in the header.
+- The description of the Marketplace listing (`MOODLE_ORG_PLUGIN_DESCRIPTION.md`).
+
 ## 0.224.1 (2026-11-09)
 
 - What the design review of the staff's notes asked: only the thing in a sentence is a link (the book's title), never
