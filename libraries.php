@@ -190,6 +190,8 @@ foreach (libraries::all() as $one) {
         array_values(array_unique(array_merge($groups, $chosen)))
     );
     $libs = [];
+    // Each card says how its week went: whoever runs the site sees its libraries alive.
+    $weeks = \local_oksigeniaayvurenda\local\life::weeks($one['libraries'], time());
     foreach ($one['libraries'] as $library) {
         $lgroups = \local_oksigeniaayvurenda\local\shelf::groups($library);
         $card = libraries::look($library);
@@ -203,6 +205,7 @@ foreach (libraries::all() as $one) {
             'hasgroupchips' => (bool) $lgroups,
             'count' => number_format((int) $library->copies, 0, '', get_string('thousandssep', 'langconfig')),
             'countword' => $str((int) $library->copies === 1 ? 'librariescopyone' : 'librariescopymany'),
+            'lifeweek' => $weeks[(int) $library->id] ?? '',
             'id' => (int) $library->id,
             'name' => format_string($library->name, true, ['escape' => false]),
             'rawname' => $library->name,
@@ -312,6 +315,7 @@ foreach (libraries::all() as $one) {
         'haschallenges' => !\local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id)
             && (bool) \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time()),
         'plansummary' => plans::summary((int) $entity->id),
+        'life' => \local_oksigeniaayvurenda\local\life::centre((int) $entity->id, time()),
         'staffpart' => $setsstaff ? (function () use ($entity, $str, $librarian) {
             $context = access::context((int) $entity->id);
             $own = $context->contextlevel === CONTEXT_COURSECAT;

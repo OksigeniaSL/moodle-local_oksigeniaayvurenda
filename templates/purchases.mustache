@@ -54,6 +54,7 @@
     {{#hasbudget}}<span class="ayv-share ayv-pur-share" aria-hidden="true"><span style="width: {{budgetshare}}%"></span></span>{{/hasbudget}}
     <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-pur-budget">{{purchasechange}}</button>
 </section>
+{{> local_oksigeniaayvurenda/life }}
 <nav class="ayv-tabs" aria-label="{{heading}}">
 {{#tabs}}<a class="ayv-toggle" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
 </nav>
@@ -107,7 +108,7 @@
 </section>
 {{/hasideas}}
 <dialog class="ayv-modal" id="ayv-pur-new" aria-labelledby="ayv-pur-new-title">
-    <div class="ayv-modal-head"><h3 id="ayv-pur-new-title" class="ayv-section-title">{{purchaseadd}}</h3>
+    <div class="ayv-modal-head"><h2 id="ayv-pur-new-title" class="ayv-section-title">{{purchaseadd}}</h2>
         <form method="dialog"><button class="ayv-modal-close" aria-label="{{purchaseclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
     <p class="ayv-field-hint">{{purchaseaddintro}}</p>
     <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">

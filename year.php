@@ -193,6 +193,7 @@ $week = ['heading' => $str('weekheading'), 'intro' => $str('weekintro'), 'startl
     )];
 $data = [
     'heading' => $str('yearheading', $year->name),
+    'life' => \local_oksigeniaayvurenda\local\life::year($library, time()),
     'closures' => $closures,
     'hasclosures' => (bool) $closures,
     'closuresheading' => $str('closuresheading'),

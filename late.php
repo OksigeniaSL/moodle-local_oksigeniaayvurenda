@@ -237,6 +237,8 @@ if ($all && $only === '' && !$adults && count($showing) <= 24) {
 }
 $data = [
     'heading' => $str($all ? 'lateallheading' : 'lateheading'),
+    // Beside what is late, what comes back: not on a class's printed list.
+    'life' => $only === '' ? \local_oksigeniaayvurenda\local\life::late($library, time()) : null,
     'notice' => $notice,
     'tabs' => [
         ['label' => $str('latetablate'), 'url' => $url(), 'current' => !$all],

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.224.0 (2026-11-09)
+
+- A little life on the staff's screens, each in its own subject and never the same strip on all, summed and without
+  names, under the desk's three pennants (`local\life`, template `life`): the reports open with this week (loans and
+  readers), the year ahead of the last at the same point when it is, and up to two moments to celebrate; the late books
+  say how much of what came back this year came back on time (from seven in ten) and how many came back this week; the
+  holds, how many books on hold reached whoever waited; the readers, how many took a book this year and how many their
+  very first this week; what was catalogued, how many times this month's copies already went out and how soon the first
+  did (or, with nothing this month, the copy added this year that went out most); weeding, the oldest books that still
+  went out this year; the year, its busiest day and a clear most lent book; purchases, how many times what arrived because
+  someone asked has gone out. On the page of libraries, each card says its loans this week and each centre its first
+  moment. Nothing in a practice library nor in a textbook bank, nothing when there is nothing good to tell, and nothing
+  on paper.
+- A moment with more than four classes that met their challenge says how many, not four names «and 7 more».
+- The window to add a purchase has a second-level heading.
+
 ## 0.223.0 (2026-11-09)
 
 - The moments to celebrate (Enrique, 8 November: high roles see life too, not only figures): what happened this week

@@ -90,6 +90,7 @@ $herald = !$lists['ready'] && !$lists['waiting']
     ? \local_oksigeniaayvurenda\local\characters::say($entityid, 'herald', 'holdsquiet', [], 'lee') : null;
 $data = [
     'heading' => $str('holdstitle'),
+    'life' => \local_oksigeniaayvurenda\local\life::holds($library, time()),
     'intro' => $str('holdsintroshort'),
     'notice' => $notice,
     'action' => (new moodle_url('/local/oksigeniaayvurenda/hold.php'))->out(false),

@@ -78,6 +78,7 @@ $size = catalogued::PAGE;
 $page = fn(int $start) => $link('catalogued.php', ['span' => $span, 'from' => $start]);
 $data = [
     'heading' => $str('catalogedtitle'),
+    'life' => \local_oksigeniaayvurenda\local\life::catalogued($library, $now),
     'intro' => $str('catalogedintro'),
     'spans' => array_map(fn($key) => ['key' => $key, 'count' => screens::number($counts[$key]),
         'label' => $str('catalogedspan' . $key), 'url' => $link('catalogued.php', ['span' => $key]),

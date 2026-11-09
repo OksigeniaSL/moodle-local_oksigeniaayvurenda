@@ -134,6 +134,29 @@ final class moments_test extends \advanced_testcase {
     }
 
     /**
+     * Past four classes that met their challenge, how many of them, never «and so many more».
+     */
+    public function test_many_classes(): void {
+        global $DB;
+        $this->resetAfterTest();
+        force_current_language('en');
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $year = years::around($entityid, $now);
+        foreach (['1.º A', '1.º B', '2.º A', '2.º B', '3.º A'] as $group) {
+            $DB->insert_record('local_oksigeniaayvurenda_challenge', ['yearid' => $year->id, 'groupname' => $group, 'term' => 1,
+                'seq' => 1, 'kind' => 'corners', 'timecompleted' => $now - DAYSECS, 'timecreated' => $now, 'timemodified' => $now]);
+        }
+        $found = array_column(moments::find($entityid, $now), null, 'kind');
+        $this->assertSame('momentchallengemany', $found['challenge']['key']);
+        $this->assertSame(
+            '5 classes met their challenge.',
+            skins::say($entityid, 'momentchallengemany', (object) $found['challenge']['a'])
+        );
+    }
+
+    /**
      * The library turning a hundred days; the day it opens is written down; nothing in a practice library.
      */
     public function test_anniversary_and_opening(): void {

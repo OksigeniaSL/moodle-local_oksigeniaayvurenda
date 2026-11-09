@@ -90,6 +90,7 @@ if ($group === null) {
     $erased = optional_param('erased', 0, PARAM_INT);
     $data = [
         'heading' => $str('readers'),
+        'life' => \local_oksigeniaayvurenda\local\life::readers($library, time()),
         'notice' => $erased ? $str($erased === 2 ? 'readererasedaccount' : 'readererased') : '',
         'summary' => $howmany($total) . ($groups ? ' · ' . $howgroups : ''),
         'bring' => $manage ? ['url' => (new moodle_url(

@@ -388,13 +388,11 @@ class moments {
             fn($name) => format_string($name, true, ['escape' => false, 'context' => \context_system::instance()]),
             $names
         );
-        $shown = array_slice($names, 0, 4);
-        $list = count($names) > 4
-            ? get_string('momentchallengemore', 'local_oksigeniaayvurenda', (object) ['names' => implode(', ', $shown),
-                'more' => count($names) - 4])
-            : self::join($shown);
-        return ['kind' => 'challenge', 'key' => count($names) === 1 ? 'momentchallengeone' : 'momentchallenge',
-            'a' => ['count' => count($names), 'names' => $list], 'staffpage' => 'reports.php'];
+        // Never «and so many more»: up to four, by name; past four, how many, and the reports say which.
+        $many = count($names) > 4;
+        return ['kind' => 'challenge', 'key' => count($names) === 1 ? 'momentchallengeone'
+                : ($many ? 'momentchallengemany' : 'momentchallenge'),
+            'a' => ['count' => count($names), 'names' => $many ? '' : self::join($names)], 'staffpage' => 'reports.php'];
     }
 
     /**

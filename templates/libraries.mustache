@@ -78,6 +78,7 @@
         <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-entity-{{id}}">{{> local_oksigeniaayvurenda/icon_settings}} {{librariesentity}}</button>
         {{#plansummary}}<p class="ayv-entity-plan">{{plansummary}}</p>{{/plansummary}}
     </div>
+    {{> local_oksigeniaayvurenda/life }}
     <ul class="ayv-libcards">
     {{#libraries}}
         <li class="ayv-libcard">
@@ -88,6 +89,7 @@
                 <p class="ayv-libcard-kind">{{kindlabel}}</p>
                 {{#hasgroupchips}}<ul class="ayv-libcard-groups">{{#groupchips}}<li>{{chip}}</li>{{/groupchips}}</ul>{{/hasgroupchips}}
                 <p class="ayv-libcard-count"><strong>{{count}}</strong> {{countword}}</p>
+                {{#lifeweek}}<p class="ayv-libcard-week">{{lifeweek}}</p>{{/lifeweek}}
                 {{#keepernames}}<p class="ayv-libcard-keepers">{{librarieskeptby}} {{keepernames}}</p>{{/keepernames}}
             </div>
             <div class="ayv-libcard-actions">

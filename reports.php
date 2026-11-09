@@ -171,6 +171,8 @@ $extra = $period ? ['from' => $shown($from), 'to' => $shown($to - 1)] : ($report
     ? ['unlent' => $unlent, 'older' => $older] : []);
 $data = [
     'heading' => $str('report' . $report . 'title'),
+    // A little life above the numbers: this week, the year ahead of the last, what there is to celebrate.
+    'life' => \local_oksigeniaayvurenda\local\life::reports($library, time()),
     'intro' => $str('report' . $report . 'intro'),
     'tabs' => array_map(fn($r) => ['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/reports.php',

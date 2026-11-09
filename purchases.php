@@ -135,6 +135,7 @@ foreach (
         'current' => $tab === $key, 'key' => $key];
 }
 $data = ['heading' => $str('purchasestitle'), 'intro' => $str('purchasesintro'), 'notice' => $notice, 'error' => $error,
+    'life' => \local_oksigeniaayvurenda\local\life::purchases($library, time()),
     'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'tabs' => $tabs, 'manage' => $manage,
     'isasked' => $tab === 'asked', 'isapproved' => $tab === 'approved', 'isordered' => $tab === 'ordered',
     'isdone' => $tab === 'done'];

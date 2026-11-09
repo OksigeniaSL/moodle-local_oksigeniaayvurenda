@@ -44,6 +44,7 @@
 <p>{{intro}}</p>
 <nav class="ayv-tabs" aria-label="{{heading}}">{{#tabs}}<a class="ayv-tab" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}</nav>
 {{#oncandidates}}
+{{> local_oksigeniaayvurenda/life }}
 <ul class="ayv-weed-reasons">
     {{#reasons}}<li><a class="ayv-weed-reason ayv-weed-reason-{{key}}{{#empty}} ayv-weed-reason-empty{{/empty}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}>
         <span class="ayv-weed-count">{{count}}</span> <span class="ayv-weed-label">{{label}}</span> <span class="ayv-weed-hint">{{hint}}</span></a></li>{{/reasons}}

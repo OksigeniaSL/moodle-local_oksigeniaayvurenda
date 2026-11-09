@@ -167,6 +167,8 @@ $records = array_map(fn($r) => $r + ['url' => $url(['record' => $r['id']]), 'whe
 $view = optional_param('view', '', PARAM_ALPHA) === 'records' ? 'records' : 'candidates';
 $data = [
     'heading' => $str('weedtitle'),
+    // Before weeding, the old books that still go out: old is not the same as dead.
+    'life' => \local_oksigeniaayvurenda\local\life::weed($library, time()),
     'intro' => $str('weedintroshort'),
     'action' => $url($keep + ['why' => $why, 'page' => $page]),
     'sesskey' => sesskey(),

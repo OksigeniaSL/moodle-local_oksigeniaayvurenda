@@ -5021,6 +5021,14 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
         conic-gradient(from -30deg at 50% 100%, var(--sun) 60deg, transparent 0) .8rem 0 / .8rem 100% no-repeat,
         conic-gradient(from -30deg at 50% 100%, var(--green2) 60deg, transparent 0) 1.6rem 0 / .8rem 100% no-repeat;
 }
+/* A little life on a staff screen (local\life): its own good news, under the desk's three pennants. */
+.ayv .ayv-life { margin: 1rem 0; padding: .75rem 1rem .85rem; border-radius: var(--radius); background: var(--paper2); }
+.ayv .ayv-life-lead { display: flex; gap: .6rem; align-items: center; margin: 0 0 .35rem; font-weight: 700; font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.ayv .ayv-life-items { display: grid; gap: .3rem; margin: 0; padding: 0; list-style: none; line-height: 1.45; }
+.ayv .ayv-libcard-week { margin: 0; color: var(--accent); font-weight: 600; font-size: .92rem; }
+@media print {
+    .ayv .ayv-life { display: none; }
+}
 .ayv .ayv-board-moments-more { display: grid; gap: .45rem; margin: .7rem 0 0; padding: .7rem 0 0; border-top: 1px dashed var(--line); list-style: none; }
 .ayv .ayv-board-moments-more li { padding-left: 1.3rem; background: radial-gradient(circle at .35rem .7em, var(--accent) 0 .22rem, transparent .24rem) no-repeat; }
 .ayv .ayv-board-book { display: flex; gap: .9rem; align-items: center; margin-top: .4rem !important; }
