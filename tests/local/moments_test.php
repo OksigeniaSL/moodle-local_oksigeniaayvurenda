@@ -85,7 +85,7 @@ final class moments_test extends \advanced_testcase {
         $this->assertSame('100 books lent so far this school year. Number 100 was «La isla del cometa».', $text['loans']);
         $this->assertSame((int) $new->id, $staff[0]['recordid']);
         $this->assertStringContainsString('/record.php', $staff[0]['url']);
-        $this->assertSame('«La isla del cometa» has now gone out 10 times.', $text['book']);
+        $this->assertSame('«La isla del cometa» reached 10 loans this week.', $text['book']);
         $this->assertStringContainsString('was the busiest day of the school year: 10 books lent.', $text['record']);
         $this->assertSame('One reader reached the goal of «Otoño lector» this week.', $text['quest']);
         $this->assertSame('Class 3.º B met its challenge.', $text['challenge']);

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.224.1 (2026-11-09)
+
+- What the design review of the staff's notes asked: only the thing in a sentence is a link (the book's title), never
+  the whole sentence, here and in the desk's moment; links underlined finer. A book's round number of loans says it is
+  this week's («“The lighthouse” reached 10 loans this week»), so that it does not clash with the year's figures. No
+  note on top of each centre on the page of libraries, whose cards already tell their week. On the readers' page, the
+  note goes under the search, which is what the page is for. «What was catalogued this month has already been lent…».
+  The reports' note is «These days», and each sentence in it says its own time.
+
 ## 0.224.0 (2026-11-09)
 
 - A little life on the staff's screens, each in its own subject and never the same strip on all, summed and without

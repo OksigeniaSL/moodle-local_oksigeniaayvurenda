@@ -170,10 +170,14 @@ final class life_test extends \advanced_testcase {
         $this->lend((int) $imported->id, (int) $reader->id, $this->now - HOURSECS);
         $note = life::catalogued($this->library, $this->now);
         $this->assertSame([
-            'What was added by hand this month has already gone out once.',
+            'What was catalogued this month has already been lent once.',
             '«La isla del cometa» went out the very day it arrived.',
         ], self::texts($note));
+        // Only the title is a link; a sentence without a link is all text.
         $this->assertStringContainsString('/record.php', $note['lifeitems'][1]['lifehref']);
+        $this->assertSame(['«', 'La isla del cometa', '» went out the very day it arrived.'], [$note['lifeitems'][1]['lifebefore'],
+            $note['lifeitems'][1]['lifelinked'], $note['lifeitems'][1]['lifeafter']]);
+        $this->assertSame('', $note['lifeitems'][0]['lifehref']);
 
         // Nothing this month: the copy added by hand this year that went out most, from twice on.
         $DB->delete_records('local_oksigeniaayvurenda_loan');
@@ -183,7 +187,7 @@ final class life_test extends \advanced_testcase {
             $this->lend((int) $byhand->id, (int) $reader->id, (int) $this->year->timestart + $days * DAYSECS);
         }
         $this->assertSame(
-            ['«La isla del cometa», added by hand this school year, has already gone out 3 times.'],
+            ['«La isla del cometa», catalogued this school year, has already been lent 3 times.'],
             self::texts(life::catalogued($this->library, $this->now))
         );
 
@@ -194,7 +198,7 @@ final class life_test extends \advanced_testcase {
             'recordid' => $record->id, 'timereceived' => (int) $this->year->timestart + 4 * DAYSECS - HOURSECS,
             'timecreated' => $this->now, 'timemodified' => $this->now]);
         $this->assertSame(
-            ['What arrived this school year because someone asked for it has already gone out 2 times.'],
+            ['What arrived this school year because someone asked for it has already been lent 2 times.'],
             self::texts(life::purchases($this->library, $this->now))
         );
     }
@@ -236,8 +240,8 @@ final class life_test extends \advanced_testcase {
     }
 
     /**
-     * The reports: this week, and the year ahead of the last at the same point; the cards of the libraries; the centre's
-     * moment; and nothing at all in a textbook bank.
+     * The reports: this week, and the year ahead of the last at the same point; the cards of the libraries; and nothing at
+     * all in a textbook bank.
      */
     public function test_reports_cards_and_quiet(): void {
         $item = $this->gen->create_item(['libraryid' => $this->library->id]);
@@ -256,9 +260,9 @@ final class life_test extends \advanced_testcase {
         $this->lend((int) $item->id, (int) $a->id, $this->now - 2 * DAYSECS);
         $this->lend((int) $item->id, (int) $b->id, $this->now - DAYSECS);
         $note = life::reports($this->library, $this->now);
-        $this->assertSame('This week', $note['lifelead']);
+        $this->assertSame('These days', $note['lifelead']);
         $texts = self::texts($note);
-        $this->assertSame('3 loans to 2 readers.', $texts[0]);
+        $this->assertSame('This week, 3 loans to 2 readers.', $texts[0]);
         $this->assertSame('That makes 12 loans this school year: 2 more than at this point last year.', $texts[1]);
         $this->assertContains('2 readers took their very first book from the library this week.', $texts, 'the moment');
 
@@ -267,8 +271,6 @@ final class life_test extends \advanced_testcase {
             [(int) $this->library->id => '3 loans this week'],
             life::weeks([$this->library, $other], $this->now)
         );
-        $centre = life::centre((int) $this->library->entityid, $this->now);
-        $this->assertSame('Worth celebrating', $centre['lifelead']);
 
         $bank = $this->gen->create_library(['entityid' => $this->library->entityid, 'kind' => bank::KIND]);
         $copy = $this->gen->create_item(['libraryid' => $bank->id]);

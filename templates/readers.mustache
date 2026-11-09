@@ -22,7 +22,6 @@
     </div>
     {{#bring}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{/bring}}
 </header>
-{{> local_oksigeniaayvurenda/life }}
 {{! Finding a reader is what is done every day: first, and the strong button; bringing them is once in a while. }}
 {{#hasreadersatall}}
 <form class="ayv-readers-find" role="search" method="get" action="{{action}}">
@@ -36,6 +35,8 @@
 <p class="ayv-readers-band"><span class="ayv-readers-bandtext"><b>{{line}}</b> {{hint}}</span>
     <a class="ayv-button ayv-button-quiet" href="{{url}}">{{go}}</a></p>
 {{/match}}
+{{! Under the search, which is what the page is for, before the groups. }}
+{{^found}}{{> local_oksigeniaayvurenda/life }}{{/found}}
 {{#said}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/said}}
 {{#found}}
 <section class="ayv-readers-found">

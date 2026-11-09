@@ -315,7 +315,6 @@ foreach (libraries::all() as $one) {
         'haschallenges' => !\local_oksigeniaayvurenda\local\skins::no_classes((int) $entity->id)
             && (bool) \local_oksigeniaayvurenda\local\holds::stages((int) $entity->id, time()),
         'plansummary' => plans::summary((int) $entity->id),
-        'life' => \local_oksigeniaayvurenda\local\life::centre((int) $entity->id, time()),
         'staffpart' => $setsstaff ? (function () use ($entity, $str, $librarian) {
             $context = access::context((int) $entity->id);
             $own = $context->contextlevel === CONTEXT_COURSECAT;

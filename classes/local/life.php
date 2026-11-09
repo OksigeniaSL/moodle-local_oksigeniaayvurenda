@@ -399,7 +399,7 @@ class life {
             ]);
         }
         foreach (array_slice(moments::of($library, $now, true), 0, 2) as $moment) {
-            $items[] = ['lifetext' => $moment['text'], 'lifehref' => $moment['url']];
+            $items[] = self::split($moment['text'], $moment['url']);
         }
         return self::note($entityid, 'lifereportslead', $items);
     }
@@ -440,25 +440,6 @@ class life {
             return null;
         }
         return ['now' => $sofar, 'before' => $before];
-    }
-
-    /**
-     * A centre on the page of libraries: the first thing it has to celebrate this week, for whoever runs the site.
-     *
-     * @param int $entityid
-     * @param int $now
-     * @return array|null
-     */
-    public static function centre(int $entityid, int $now): ?array {
-        $main = mail::main_library($entityid);
-        if (!$main) {
-            return null;
-        }
-        $found = moments::of($main, $now, true);
-        if (!$found) {
-            return null;
-        }
-        return self::note($entityid, 'momentsheading', [['lifetext' => $found[0]['text'], 'lifehref' => $found[0]['url']]]);
     }
 
     /**
@@ -533,7 +514,22 @@ class life {
      * @return array
      */
     private static function item(int $entityid, string $key, $a = null, string $href = ''): array {
-        return ['lifetext' => skins::say($entityid, $key, $a), 'lifehref' => $href];
+        return self::split(skins::say($entityid, $key, $a), $href);
+    }
+
+    /**
+     * A sentence with only its thing as a link, the title between «»: a whole sentence underlined weighs, most of all on a
+     * phone. Without a title in it, no link at all.
+     *
+     * @param string $text
+     * @param string $href
+     * @return array lifetext, the whole sentence; lifebefore, lifelinked and lifeafter; lifehref, empty for no link.
+     */
+    public static function split(string $text, string $href): array {
+        if ($href !== '' && preg_match('/^(.*?«)([^»]+)(».*)$/su', $text, $m)) {
+            return ['lifetext' => $text, 'lifebefore' => $m[1], 'lifelinked' => $m[2], 'lifeafter' => $m[3], 'lifehref' => $href];
+        }
+        return ['lifetext' => $text, 'lifebefore' => $text, 'lifelinked' => '', 'lifeafter' => '', 'lifehref' => ''];
     }
 
     /**

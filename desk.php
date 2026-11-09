@@ -154,10 +154,12 @@ $moment = '';
 if (!$help) {
     $found = \local_oksigeniaayvurenda\local\moments::of($library, time(), true);
     if ($found) {
-        $text = s($found[0]['text']);
+        // Only its title is a link, as on the other staff screens.
+        $part = \local_oksigeniaayvurenda\local\life::split($found[0]['text'], $found[0]['url']);
         $moment = '<p class="ayv-desk-moment"><span class="ayv-desk-moment-mark" aria-hidden="true"></span><span><b>'
-            . s($str('momentsheading')) . '</b> ' . ($found[0]['url'] !== '' ? '<a href="' . s($found[0]['url']) . '">' . $text
-            . '</a>' : $text) . '</span></p>';
+            . s($str('momentsheading')) . '</b> ' . s($part['lifebefore'])
+            . ($part['lifehref'] !== '' ? '<a href="' . s($part['lifehref']) . '">' . s($part['lifelinked']) . '</a>' : '')
+            . s($part['lifeafter']) . '</span></p>';
     }
 }
 $tools = shell::readers_tools($library);

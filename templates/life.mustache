@@ -18,19 +18,24 @@
     @template local_oksigeniaayvurenda/life
 
     A little life on a staff screen: what goes well in its own subject, under three small pennants, summed and without
-    names (local\life). Nothing without it. Each sentence carries its own keys, which no page uses, so that a missing one
-    is never looked up in the page around it.
+    names (local\life). Nothing without it. Only the thing in a sentence is a link (a title), never the whole sentence.
+    Each sentence carries all its own keys, which no page uses, so that a missing one is never looked up in the page
+    around it.
 
     Context variables required for this template:
-    * life - lifelead, the words in bold, and lifeitems: lifetext and lifehref (empty for no link).
+    * life - lifelead, the words above, and lifeitems: lifebefore, lifelinked and lifeafter, and lifehref (empty for
+      no link, and then the whole sentence is in lifebefore).
 
     Example context (json):
     {
         "life": {
-            "lifelead": "What comes back",
+            "lifelead": "Still going out",
             "lifeitems": [
-                {"lifetext": "87 % of what came back this school year came back on time.", "lifehref": ""},
-                {"lifetext": "46 books came back this week.", "lifehref": "https://example.org/local/oksigeniaayvurenda/late.php"}
+                {"lifebefore": "87 % of what came back this school year came back on time.", "lifelinked": "",
+                    "lifeafter": "", "lifehref": ""},
+                {"lifebefore": "«", "lifelinked": "The lighthouse",
+                    "lifeafter": "», from 1914, has gone out 3 times this school year.",
+                    "lifehref": "https://example.org/local/oksigeniaayvurenda/record.php?id=1"}
             ]
         }
     }
@@ -39,7 +44,7 @@
 <section class="ayv-life" aria-label="{{lifelead}}">
     <p class="ayv-life-lead"><span class="ayv-desk-moment-mark" aria-hidden="true"></span>{{lifelead}}</p>
     <ul class="ayv-life-items">
-        {{#lifeitems}}<li>{{#lifehref}}<a href="{{lifehref}}">{{lifetext}}</a>{{/lifehref}}{{^lifehref}}{{lifetext}}{{/lifehref}}</li>{{/lifeitems}}
+        {{#lifeitems}}<li>{{lifebefore}}{{#lifehref}}<a href="{{lifehref}}">{{lifelinked}}</a>{{/lifehref}}{{lifeafter}}</li>{{/lifeitems}}
     </ul>
 </section>
 {{/life}}
