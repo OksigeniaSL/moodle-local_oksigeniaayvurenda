@@ -173,7 +173,7 @@
         var pad = function(n) {
             return (n < 10 ? '0' : '') + n;
         };
-        document.querySelectorAll('input[type="date"]').forEach(function(input) {
+        var dated = function(input) {
             var now = new Date().getFullYear();
             var value = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input.value);
             var low = parseInt((input.min || '').slice(0, 4), 10) || now - 10;
@@ -242,7 +242,10 @@
             input.parentNode.insertBefore(box, input);
             input.type = 'hidden';
             box.appendChild(input);
-        });
+        };
+        document.querySelectorAll('input[type="date"]').forEach(dated);
+        // For a date field a screen makes later (the desk's day by hand for a renewal).
+        window.ayvDate = dated;
     }
     // What only matters with one answer of a form: «mode=days,fine» shows while the radio «mode» says one of those.
     document.querySelectorAll('[data-ayv-whens]').forEach(function(form) {

@@ -106,6 +106,67 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * Each centre says how often: only by hand, nothing goes by itself; once a month, a week later only Leo hears, late by
+     * then for the first time, and a month later Ana and the tutor again.
+     */
+    public function test_rhythm(): void {
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, , $now] = $this->library();
+        $entityid = (int) $library->entityid;
+        $save = fn(array $settings) => sanctions::save_settings($entityid, $settings + sanctions::settings($entityid));
+        $sink = $this->redirectMessages();
+        $save(['noticeevery' => 'hand']);
+        $this->assertSame(['readers' => 0, 'tutors' => 0], notices::run($now));
+        $save(['noticeevery' => 'month']);
+        $this->assertSame(['readers' => 1, 'tutors' => 1], notices::run($now));
+        $this->assertSame(['readers' => 1, 'tutors' => 0], notices::run($now + 7 * DAYSECS));
+        $this->assertSame(['readers' => 1, 'tutors' => 1], notices::run($now + 30 * DAYSECS));
+        $sink->close();
+    }
+
+    /**
+     * On the centre's days of the year: nothing before the day; on it, the books late enough that day (Ana's oldest, not
+     * the one late for six days then; Noa's, to the tutor), once; past a week after it, nothing until the next one.
+     */
+    public function test_on_its_days(): void {
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, , $now] = $this->library();
+        $entityid = (int) $library->entityid;
+        sanctions::save_settings($entityid, ['noticeevery' => 'dates', 'noticedates' => ['11-15'], 'noticeafter' => 7]
+            + sanctions::settings($entityid));
+        $sink = $this->redirectMessages();
+        $this->assertSame(['readers' => 0, 'tutors' => 0], notices::run($now));
+        $day = make_timestamp(2026, 11, 15, 9);
+        $this->assertSame(['readers' => 1, 'tutors' => 1], notices::run($day));
+        $told = array_filter($sink->get_messages(), fn($message) => $message->eventtype === 'overdue');
+        $this->assertStringContainsString('El faro dormido', reset($told)->fullmessage);
+        $this->assertStringNotContainsString('La nube de tinta', reset($told)->fullmessage);
+        $this->assertSame(['readers' => 0, 'tutors' => 0], notices::run($day + DAYSECS));
+        $this->assertSame(['readers' => 0, 'tutors' => 0], notices::run($day + 10 * DAYSECS));
+        $sink->close();
+    }
+
+    /**
+     * Each centre says to whom: without the tutor, only the reader hears; without the reader and the family, only the
+     * tutor.
+     */
+    public function test_to_whom(): void {
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, , $now] = $this->library();
+        $entityid = (int) $library->entityid;
+        $save = fn(array $settings) => sanctions::save_settings($entityid, $settings + sanctions::settings($entityid));
+        $sink = $this->redirectMessages();
+        $save(['noticetutors' => false]);
+        $this->assertSame(['readers' => 1, 'tutors' => 0], notices::run($now));
+        $save(['noticereaders' => false, 'noticefamilies' => false, 'noticetutors' => true]);
+        $this->assertSame(['readers' => 0, 'tutors' => 1], notices::run($now + 7 * DAYSECS));
+        $sink->close();
+    }
+
+    /**
      * A week of grace: nobody hears of a book three days late; Noa's ten days go to the tutor; once Ana's oldest book is
      * a week late, she hears of it, and only of it. The staff's «Tell the tutor now» does not wait.
      */

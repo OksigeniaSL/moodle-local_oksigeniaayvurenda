@@ -44,14 +44,17 @@ final class sanction_rules {
     /** @var array The settings of a centre that has said nothing. Money is in hundredths. */
     public const DEFAULTS = ['mode' => self::NONE, 'grace' => 0, 'perday' => 1, 'maxdays' => 30, 'cents' => 10,
         'maxcents' => 500, 'block' => 500, 'currency' => 'EUR', 'stages' => [], 'adults' => true,
-        'noticeafter' => 1];
+        'noticeafter' => 1, 'noticeevery' => 'week', 'noticedates' => [], 'noticereaders' => true, 'noticefamilies' => true,
+        'noticetutors' => true];
 
     /**
      * The settings, within reason, with the defaults where something is missing.
      *
      * @param array $settings
-     * @return array mode, grace, perday, maxdays, cents, maxcents, block, currency, stages, adults, and noticeafter: the days
-     *     after the due date when the first notice goes (1, the next day; 7, a week of grace), whatever the mode.
+     * @return array mode, grace, perday, maxdays, cents, maxcents, block, currency, stages, adults, and the notices of late
+     *     books, whatever the mode (notice_rules): noticeafter, the days after the due date when the first one goes (1, the
+     *     next day; 15, a fortnight of grace); noticeevery, how often after it; noticedates, the days of the year for
+     *     DATES; noticereaders, noticefamilies and noticetutors, to whom.
      */
     public static function settings(array $settings): array {
         $settings += self::DEFAULTS;
@@ -68,7 +71,13 @@ final class sanction_rules {
             'currency' => preg_match('/^[A-Z]{3}$/', $currency) ? $currency : self::DEFAULTS['currency'],
             'stages' => array_values(array_filter(array_map('strval', (array) $settings['stages']), fn($s) => trim($s) !== '')),
             'adults' => !empty($settings['adults']),
-            'noticeafter' => $between($settings['noticeafter'], 1, 30),
+            'noticeafter' => $between($settings['noticeafter'], 1, 90),
+            'noticeevery' => in_array($settings['noticeevery'], \local_oksigeniaayvurenda\core\notice_rules::rhythms(), true)
+                ? $settings['noticeevery'] : 'week',
+            'noticedates' => \local_oksigeniaayvurenda\core\notice_rules::dates((array) $settings['noticedates']),
+            'noticereaders' => !empty($settings['noticereaders']),
+            'noticefamilies' => !empty($settings['noticefamilies']),
+            'noticetutors' => !empty($settings['noticetutors']),
         ];
     }
 

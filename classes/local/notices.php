@@ -25,19 +25,18 @@
 namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\loan_rules;
+use local_oksigeniaayvurenda\core\notice_rules;
 
 /**
  * Tells about late books, as Moodle messages, so they go by whatever the site and each person use (the web, email,
- * the app, or other channels a centre adds). The reader hears on the first day late and then once a week, kindly and
- * with the titles, which are theirs. The tutor gets once a week who in the group has books late and for how long,
+ * the app, or other channels a centre adds). Each centre says when (notice_rules: so many days late, then every week, or
+ * month, or on its days of the year, or only from the desk) and to whom. The reader hears kindly and with the titles,
+ * which are theirs, and the family of a young one too. The tutor gets who in the group has books late and for how long,
  * without titles: the tutor sees the lateness, not what the child reads.
  */
 final class notices {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
-
-    /** @var int Time between two notices to the same reader, or two summaries to the same tutor. */
-    public const EVERY = 7 * DAYSECS;
 
     /**
      * Sends what is due.
@@ -52,8 +51,8 @@ final class notices {
     }
 
     /**
-     * Notices to readers with an account: once a week at most for each reader, with every book of theirs that is late
-     * past the centre's days of grace (a reader who stopped coming but still has books hears too).
+     * Notices to readers with an account (and the families of the young), when their centre's rhythm says, with every book
+     * of theirs that is late past the centre's days of grace (a reader who stopped coming but still has books hears too).
      *
      * @param int $now
      * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
@@ -79,28 +78,36 @@ final class notices {
         foreach ($loans as $loan) {
             $told[$loan->readerid] = max($told[$loan->readerid] ?? 0, (int) $loan->timenotified);
         }
-        $since = $now - self::EVERY + HOURSECS;
         $byreader = [];
-        $after = [];
+        $settings = [];
         foreach ($loans as $loan) {
-            if ($told[$loan->readerid] > $since || ($centres !== null && !in_array((int) $loan->entityid, $centres, true))) {
+            $entityid = (int) $loan->entityid;
+            if ($centres !== null && !in_array($entityid, $centres, true)) {
                 continue;
             }
-            // Late once the last day is over where its centre is, which the query cannot say, and told once the days of
-            // grace its centre gives are over too.
-            $entityid = (int) $loan->entityid;
-            $after[$entityid] = $after[$entityid] ?? sanctions::settings($entityid)['noticeafter'];
-            if (loan_rules::days_late((int) $loan->timedue, $now, zones::of($entityid)) >= $after[$entityid]) {
+            $settings[$entityid] ??= sanctions::settings($entityid);
+            $own = $settings[$entityid];
+            if (!$own['noticereaders'] && !$own['noticefamilies']) {
+                continue;
+            }
+            // Its rhythm says whether it is time, and the moment to judge it at (one of its days, or now). Late once the
+            // last day is over where its centre is, which the query cannot say, and told once the days of grace its
+            // centre gives are over too.
+            $tz = zones::of($entityid);
+            $at = notice_rules::moment($own, $told[$loan->readerid], $now, $tz);
+            if ($at !== null && loan_rules::days_late((int) $loan->timedue, $at, $tz) >= $own['noticeafter']) {
                 $byreader[$loan->readerid][] = $loan;
             }
         }
         $sent = 0;
         foreach ($byreader as $list) {
             // A centre open only to its staff tells its readers nothing yet.
-            if (access::closed((int) $list[0]->entityid)) {
+            $entityid = (int) $list[0]->entityid;
+            if (access::closed($entityid)) {
                 continue;
             }
-            $sent += self::tell_reader($list, $now) ? 1 : 0;
+            $own = $settings[$entityid];
+            $sent += self::tell_reader($list, $now, $own['noticereaders'], $own['noticefamilies']) ? 1 : 0;
         }
         return $sent;
     }
@@ -132,18 +139,41 @@ final class notices {
     }
 
     /**
-     * One message to a reader with their late books, in the tone of the centre's skin (by the herald, to the young).
+     * Tells a reader of their late books, and the family of a young one, as the centre says, and notes when.
      *
      * @param \stdClass[] $list The reader's late loans, the oldest first.
      * @param int $now
-     * @return bool Whether it went.
+     * @param bool $toreader The reader hears (noticereaders).
+     * @param bool $tofamily The family of a young reader hears (noticefamilies).
+     * @return bool Whether anything went.
      */
-    private static function tell_reader(array $list, int $now): bool {
+    private static function tell_reader(array $list, int $now, bool $toreader = true, bool $tofamily = true): bool {
         global $DB;
         $user = \core_user::get_user($list[0]->userid);
         if (!$user || $user->deleted || $user->suspended) {
             return false;
         }
+        $told = $toreader && self::message_reader($user, $list, $now);
+        // A young reader does not read these: their family hears it too, where the centre says so.
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
+        if ($tofamily && $reader && cards::look_of($reader, $now) === 'flower') {
+            $told = self::tell_family($user, $list, (int) $list[0]->entityid) > 0 || $told;
+        }
+        [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
+        $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
+        return $told;
+    }
+
+    /**
+     * The message to a reader with their late books, in the tone of the centre's skin (by the herald, to the young).
+     *
+     * @param \stdClass $user
+     * @param \stdClass[] $list The reader's late loans, the oldest first.
+     * @param int $now
+     * @return bool Whether it went.
+     */
+    private static function message_reader(\stdClass $user, array $list, int $now): bool {
+        global $DB;
         // In their language and at their hour, wherever the task runs; in the tone of the centre's skin.
         $language = force_current_language((string) $user->lang);
         $entityid = (int) $list[0]->entityid;
@@ -226,12 +256,6 @@ final class notices {
             'prefs' => true,
         ]);
         force_current_language($language);
-        // A young reader does not read these: their family hears it too.
-        if ($reader && cards::look_of($reader, $now) === 'flower') {
-            self::tell_family($user, $list, $entityid);
-        }
-        [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
-        $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
         return $told;
     }
 
@@ -314,7 +338,7 @@ final class notices {
     }
 
     /**
-     * Summaries to tutors: who in their group has books late, without titles, once a week.
+     * Summaries to tutors: who in their group has books late, without titles, when their centre's rhythm says.
      *
      * @param int $now
      * @param int[]|null $centres Only these centres (those whose morning it is); all without it.
@@ -323,19 +347,25 @@ final class notices {
     private static function tutors(int $now, ?array $centres = null): int {
         global $DB;
         $tutors = $DB->get_records_sql(
-            "SELECT t.id, t.yearid, t.groupname, t.userid, y.entityid
+            "SELECT t.id, t.yearid, t.groupname, t.userid, t.timenotified, y.entityid
                FROM {" . self::T . "tutor} t
                JOIN {" . self::T . "year} y ON y.id = t.yearid
-              WHERE y.timestart <= :a AND y.timeend > :b AND (t.timenotified IS NULL OR t.timenotified <= :since)",
-            ['a' => $now, 'b' => $now, 'since' => $now - self::EVERY + HOURSECS]
+              WHERE y.timestart <= :a AND y.timeend > :b",
+            ['a' => $now, 'b' => $now]
         );
         $sent = 0;
+        $settings = [];
         foreach ($tutors as $tutor) {
             $entityid = (int) $tutor->entityid;
             if (($centres !== null && !in_array($entityid, $centres, true)) || access::closed($entityid)) {
                 continue;
             }
-            $sent += self::tell_tutor($tutor, $now, true) ? 1 : 0;
+            $settings[$entityid] ??= sanctions::settings($entityid);
+            $at = $settings[$entityid]['noticetutors']
+                ? notice_rules::moment($settings[$entityid], (int) $tutor->timenotified, $now, zones::of($entityid)) : null;
+            if ($at !== null) {
+                $sent += self::tell_tutor($tutor, $now, true, $at) ? 1 : 0;
+            }
         }
         return $sent;
     }
@@ -346,9 +376,10 @@ final class notices {
      * @param \stdClass $tutor With id, yearid, groupname, userid and entityid.
      * @param int $now
      * @param bool $patient The nightly summary: only the books past the centre's days of grace before a notice.
+     * @param int|null $at The moment to judge the lateness at, when patient (one of the centre's days); now without it.
      * @return bool Whether a message went.
      */
-    public static function tell_tutor(\stdClass $tutor, int $now, bool $patient = false): bool {
+    public static function tell_tutor(\stdClass $tutor, int $now, bool $patient = false, ?int $at = null): bool {
         global $DB;
         $entityid = (int) $DB->get_field(self::T . 'year', 'entityid', ['id' => $tutor->yearid]);
         $tz = zones::of($entityid);
@@ -366,7 +397,7 @@ final class notices {
         );
         if ($patient) {
             $after = sanctions::settings($entityid)['noticeafter'];
-            $late = array_filter($late, fn($loan) => loan_rules::days_late((int) $loan->timedue, $now, $tz) >= $after);
+            $late = array_filter($late, fn($loan) => loan_rules::days_late((int) $loan->timedue, $at ?? $now, $tz) >= $after);
         }
         if (!$late) {
             return false;

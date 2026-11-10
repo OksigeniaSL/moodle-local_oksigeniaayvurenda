@@ -143,11 +143,15 @@
                 go(b, {from: other.from});
             }));
         });
-        var label = el('label', 'ayv-renew-day', str.deskrenewbyhand);
+        var label = el('label', 'ayv-renew-day ayv-field', str.deskrenewbyhand);
         var day = el('input');
         day.type = 'date';
         day.min = choices.first;
         label.appendChild(day);
+        // As the other dates of the library: day, month and year in its language (ayvurenda.js).
+        if (window.ayvDate) {
+            window.ayvDate(day);
+        }
         more.appendChild(label);
         more.appendChild(button(str.deskrenewbyhandgo, 'ayv-line-quiet', function(b) {
             if (!day.value) {

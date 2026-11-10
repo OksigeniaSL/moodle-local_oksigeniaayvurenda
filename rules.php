@@ -27,10 +27,12 @@ use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\cataloguer;
 use local_oksigeniaayvurenda\core\desk\sanction_rules;
 use local_oksigeniaayvurenda\core\loan_rules;
+use local_oksigeniaayvurenda\core\notice_rules;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\rules;
 use local_oksigeniaayvurenda\local\sanctions;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -55,6 +57,10 @@ if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPH
     // keeps what it was: it must not turn into a fine of next to nothing, or a stop at the first one.
     $before = sanctions::settings($entityid);
     sanctions::save_settings($entityid, [
+        // The notices of late books are saved apart, in their own sheet: they stay as they were.
+        'noticeafter' => $before['noticeafter'], 'noticeevery' => $before['noticeevery'], 'noticedates' => $before['noticedates'],
+        'noticereaders' => $before['noticereaders'], 'noticefamilies' => $before['noticefamilies'],
+        'noticetutors' => $before['noticetutors'],
         'mode' => optional_param('mode', sanction_rules::NONE, PARAM_ALPHA),
         'grace' => optional_param('grace', 0, PARAM_INT),
         'perday' => optional_param('perday', 1, PARAM_INT),
@@ -66,9 +72,36 @@ if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPH
         // With all the stages marked, no stage is chosen: every one.
         'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
         'adults' => optional_param('adults', 0, PARAM_BOOL),
-        'noticeafter' => optional_param('noticeafter', 1, PARAM_INT),
     ]);
     $notice = $str('sanctionssaved');
+} else if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'notices') {
+    // When late books are told about, and to whom, for the whole centre: a start of a touch (by kind of library, a
+    // school's days from its year), or the sheet as it was filled in.
+    $before = sanctions::settings($entityid);
+    $preset = optional_param('preset', '', PARAM_ALPHA);
+    if (isset(notice_rules::PRESETS[$preset])) {
+        $chosen = notice_rules::PRESETS[$preset];
+        if ($chosen['noticeevery'] === notice_rules::DATES) {
+            // The thirds of the classes: up to the date to have everything back, or the year less its long holiday.
+            $year = \local_oksigeniaayvurenda\local\years::around($entityid, time());
+            $last = \local_oksigeniaayvurenda\local\closures::return_by($entityid);
+            $end = $last !== null && $last > (int) $year->timestart && $last <= (int) $year->timeend ? $last
+                : (int) $year->timeend - 70 * DAYSECS;
+            $chosen['noticedates'] = notice_rules::thirds((int) $year->timestart, $end + 1, zones::of($entityid));
+        }
+        $notice = $str('noticespresetsaved');
+    } else {
+        $chosen = [
+            'noticeafter' => optional_param('noticeafter', 1, PARAM_INT),
+            'noticeevery' => optional_param('noticeevery', 'week', PARAM_ALPHA),
+            'noticedates' => optional_param_array('noticedates', [], PARAM_RAW_TRIMMED),
+            'noticereaders' => optional_param('noticereaders', 0, PARAM_BOOL),
+            'noticefamilies' => optional_param('noticefamilies', 0, PARAM_BOOL),
+            'noticetutors' => optional_param('noticetutors', 0, PARAM_BOOL),
+        ];
+        $notice = $str('noticessaved');
+    }
+    sanctions::save_settings($entityid, array_merge($before, $chosen));
 } else if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'renewfrom') {
     // How the desk counts a renewal, for the whole centre: the other count and a day by hand stay a touch away there.
     rules::save_renew_from($entityid, optional_param('renewfrom', loan_rules::FROM_TODAY, PARAM_ALPHA));
@@ -177,8 +210,8 @@ $latesentence = $late['mode'] === sanction_rules::DAYS
     ? $str('sanctionssentencedays', (object) ['days' => $counted($late['perday']), 'max' => $counted($late['maxdays'])])
     : ($late['mode'] === sanction_rules::FINE ? $str('sanctionssentencefine', (object) ['amount' => $money($late['cents']),
     'max' => $money($late['maxcents']), 'block' => $money($late['block'])]) : $str('sanctionssentencenone'));
-// When the first notice goes: the next day, or after the days of grace the library gives.
-$latefacts = [$late['noticeafter'] === 1 ? $str('sanctionsnoticenext') : $str('sanctionsnoticeafter', $late['noticeafter'])];
+// What a late book leaves; when it is told about has its own card.
+$latefacts = [];
 if ($late['mode'] !== sanction_rules::NONE) {
     if ($late['grace']) {
         $latefacts[] = $late['grace'] === 1 ? $str('sanctionsgraceone') : $str('sanctionsgrace', $late['grace']);
@@ -188,9 +221,42 @@ if ($late['mode'] !== sanction_rules::NONE) {
         : $str($late['adults'] ? 'sanctionswhoall' : 'sanctionswhostudents');
 }
 $renewfrom = rules::renew_from($entityid);
+// When late books are told about, as a sentence, and the sheet with the days of the year shown in this school year.
+$first = $late['noticeafter'] === 1 ? $str('noticesfirstnext') : $str('noticesfirstafter', $late['noticeafter']);
+$tz = zones::of($entityid);
+$year = \local_oksigeniaayvurenda\local\years::around($entityid, time());
+$inyear = function (string $date) use ($year, $tz): int {
+    $start = (new \DateTimeImmutable('@' . (int) $year->timestart))->setTimezone($tz);
+    $day = $start->setDate((int) $start->format('Y'), (int) substr($date, 0, 2), (int) substr($date, 3, 2))->setTime(12, 0);
+    return ($day < $start ? $day->modify('+1 year') : $day)->getTimestamp();
+};
+$days = array_map($inyear, $late['noticedates']);
+sort($days);
+$named = array_map(fn($time) => userdate($time, get_string('strftimedateshort', 'langconfig'), $tz->getName()), $days);
+$joined = count($named) > 1 ? implode(', ', array_slice($named, 0, -1)) . $str('addand') . end($named) : (string) reset($named);
+$noticesentence = match (true) {
+    $late['noticeevery'] === notice_rules::HAND => $str('noticeseveryhand'),
+    $late['noticeevery'] === notice_rules::DATES && !$named => $str('noticeseverydatesnone'),
+    $late['noticeevery'] === notice_rules::DATES => $str('noticeseverydates', (object) ['dates' => $joined,
+        'days' => $counted($late['noticeafter'])]),
+    default => $str('noticesevery' . $late['noticeevery'], $first),
+};
+$whom = array_values(array_filter([
+    $late['noticereaders'] ? $str('noticeswhoreaders') : '',
+    $late['noticefamilies'] ? $str('noticeswhofamilies') : '',
+    $late['noticetutors'] ? $str('noticeswhotutors') : '',
+]));
+$noticewho = !$whom ? $str('noticeswhonone') : $str('noticeswho', count($whom) > 1
+    ? implode(', ', array_slice($whom, 0, -1)) . $str('addand') . end($whom) : $whom[0]);
+// As a date field wants them (userdate() takes the zero off the day).
+$datefields = array_map(fn($time) => ['value' => (new \DateTimeImmutable('@' . $time))->setTimezone($tz)->format('Y-m-d')], $days);
+while (count($datefields) < 4) {
+    $datefields[] = ['value' => ''];
+}
 $latestate = sanctions::now($entityid, time());
 $stages = holds::stages($entityid, time());
 $currencies = get_string_manager()->get_list_of_currencies();
+$url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 $data = [
     'heading' => $str('rulestitle'),
     'intro' => $str('rulesintroshort'),
@@ -236,6 +302,22 @@ $data = [
     'adults' => $late['adults'],
     'noticeafter' => $late['noticeafter'],
     'renewsentence' => $str('renewfromsentence' . $renewfrom),
+    'noticesentence' => $noticesentence,
+    'noticewho' => $noticewho,
+    'latelist' => $url('late.php'),
+    'rhythms' => array_map(
+        fn($rhythm) => ['value' => $rhythm, 'label' => $str('noticesrhythm' . $rhythm),
+            'checked' => $late['noticeevery'] === $rhythm],
+        notice_rules::rhythms()
+    ),
+    'datefields' => $datefields,
+    'presets' => array_map(
+        fn($preset) => ['value' => $preset, 'label' => $str('noticespreset' . $preset)],
+        array_keys(notice_rules::PRESETS)
+    ),
+    'noticereaders' => $late['noticereaders'],
+    'noticefamilies' => $late['noticefamilies'],
+    'noticetutors' => $late['noticetutors'],
     'renewfroms' => array_map(
         fn($from) => ['value' => $from, 'label' => $str('renewfrom' . $from), 'hint' => $str('renewfrom' . $from . 'hint'),
         'checked' => $renewfrom === $from],
@@ -249,11 +331,12 @@ foreach (
         'sanctionsdayshint', 'sanctionsfieldcents', 'sanctionsfieldmaxcents', 'sanctionsfieldblock', 'sanctionsfieldcurrency',
         'sanctionsfinehint', 'sanctionsfieldgrace', 'holdsstages', 'holdsallstages', 'sanctionsadults', 'sanctionscentre',
         'sanctionsfieldnotice', 'sanctionsnoticehint', 'renewfromheading', 'renewfromdesk', 'renewfromlegend',
-        'renewfromcentre'] as $key
+        'renewfromcentre', 'noticesheading', 'noticespresets', 'noticespresetshint', 'noticesfieldafter', 'noticeseverylegend',
+        'noticesdateslegend', 'noticesdateshint', 'noticeswholegend', 'noticestoreaders', 'noticestofamilies', 'noticestotutors',
+        'menulate'] as $key
 ) {
     $data[$key] = $str($key);
 }
-$url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($str('rulestitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/rules', $data), $library, '', [
     'search' => false,
     'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [

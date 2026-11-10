@@ -47,7 +47,16 @@
         "adults": true, "sanctionsadults": "También el personal",
         "renewfromheading": "Al ampliar un préstamo", "renewsentence": "Los días de la ampliación cuentan desde el día que se amplía.",
         "renewfromdesk": "En el mostrador, «Otra fecha» ofrece también la otra cuenta y un día a mano.",
-        "renewfromlegend": "Desde cuándo cuentan", "renewfromcentre": "Vale para todas las bibliotecas de este centro.",
+        "renewfromlegend": "Desde cuándo cuentan",
+        "noticesheading": "Avisos de retraso", "noticesentence": "A los 15 días de retraso, y luego cada semana.",
+        "noticewho": "A quién: el lector y su tutor.", "latelist": "https://example.com/late.php", "menulate": "Retrasos",
+        "noticespresets": "Empezar como", "presets": [{"value": "school", "label": "Un colegio"}],
+        "noticespresetshint": "Un toque lo deja así.", "noticesfieldafter": "Días de retraso hasta el primer aviso",
+        "noticeseverylegend": "Después, cada cuánto", "rhythms": [{"value": "week", "label": "Cada semana", "checked": true}],
+        "noticesdateslegend": "Las fechas", "datefields": [{"value": "2026-12-20"}, {"value": ""}],
+        "noticesdateshint": "Se repiten cada año.", "noticeswholegend": "A quién", "noticereaders": true,
+        "noticefamilies": true, "noticetutors": false, "noticestoreaders": "Al lector",
+        "noticestofamilies": "A la familia de los pequeños", "noticestotutors": "Al tutor de su grupo", "renewfromcentre": "Vale para todas las bibliotecas de este centro.",
         "renewfroms": [{"value": "today", "label": "Desde el día que se amplía", "hint": "Vuelve el mismo día de la semana.", "checked": true},
             {"value": "due", "label": "Desde la fecha en que tenía que volver", "hint": "La fecha sigue la del préstamo.", "checked": false}]
     }
@@ -94,6 +103,47 @@
     </dialog>
 </section>
 <section class="ayv-section ayv-sanction-rule">
+    <h2 class="ayv-section-title">{{noticesheading}}</h2>
+    <div class="ayv-sanction-card">
+        <p class="ayv-rule-sentence">{{noticesentence}}</p>
+        <p class="ayv-field-hint">{{noticewho}}</p>
+        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-notices">{{ruleschange}}</button>
+            <a class="ayv-button ayv-button-quiet" href="{{latelist}}">{{menulate}}</a></p>
+    </div>
+    <dialog class="ayv-modal" id="ayv-notices" aria-labelledby="ayv-notices-title">
+        <div class="ayv-modal-head"><h3 id="ayv-notices-title" class="ayv-section-title">{{noticesheading}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p class="ayv-field-hint">{{renewfromcentre}}</p>
+        <form method="post" action="{{action}}" class="ayv-rule-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notices">
+            <fieldset class="ayv-dig-set"><legend>{{noticespresets}}</legend>
+                <p class="ayv-notice-presets">{{#presets}}<button type="submit" class="ayv-button ayv-button-quiet" name="preset" value="{{value}}">{{label}}</button>{{/presets}}</p>
+                <p class="ayv-field-hint">{{noticespresetshint}}</p>
+            </fieldset>
+        </form>
+        <form method="post" action="{{action}}" class="ayv-rule-form" data-ayv-whens>
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notices">
+            <div class="ayv-rule-numbers">
+                <label class="ayv-field ayv-dig-field">{{noticesfieldafter}} <input type="number" name="noticeafter" min="1" max="90" value="{{noticeafter}}"></label>
+            </div>
+            <p class="ayv-field-hint">{{sanctionsnoticehint}}</p>
+            <fieldset class="ayv-dig-set"><legend>{{noticeseverylegend}}</legend>
+                <div class="ayv-segmented">{{#rhythms}}<label><input type="radio" name="noticeevery" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/rhythms}}</div>
+            </fieldset>
+            <fieldset class="ayv-dig-set" data-ayv-when="noticeevery=dates"><legend>{{noticesdateslegend}}</legend>
+                <div class="ayv-notice-dates">{{#datefields}}<span class="ayv-field"><input type="date" name="noticedates[]" value="{{value}}" aria-label="{{noticesdateslegend}}"></span>{{/datefields}}</div>
+                <p class="ayv-field-hint">{{noticesdateshint}}</p>
+            </fieldset>
+            <fieldset class="ayv-dig-set"><legend>{{noticeswholegend}}</legend>
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="noticereaders" value="1" {{#noticereaders}}checked{{/noticereaders}}> {{noticestoreaders}}</label>
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="noticefamilies" value="1" {{#noticefamilies}}checked{{/noticefamilies}}> {{noticestofamilies}}</label>
+                <label class="ayv-field ayv-field-check"><input type="checkbox" name="noticetutors" value="1" {{#noticetutors}}checked{{/noticetutors}}> {{noticestotutors}}</label>
+            </fieldset>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+        </form>
+    </dialog>
+</section>
+<section class="ayv-section ayv-sanction-rule">
     <h2 class="ayv-section-title">{{sanctionsheading}}</h2>
     <div class="ayv-sanction-card">
         <p class="ayv-rule-sentence">{{latesentence}}</p>
@@ -114,9 +164,6 @@
                     {{#modes}}<label class="ayv-sanction-mode"><input type="radio" name="mode" value="{{value}}" {{#checked}}checked{{/checked}}><span><b>{{label}}</b>{{hint}}</span></label>{{/modes}}
                 </div>
             </fieldset>
-            <div class="ayv-rule-numbers">
-                <label class="ayv-field ayv-dig-field">{{sanctionsfieldnotice}} <input type="number" name="noticeafter" min="1" max="30" value="{{noticeafter}}"></label>
-            </div>
             <p class="ayv-field-hint">{{sanctionsnoticehint}}</p>
             <div data-ayv-when="mode=days">
                 <div class="ayv-rule-numbers">

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.229.0 (2026-11-10)
+
+- Each library says when late books are told about, and to whom, in «Late notices» in «Loan rules»: how many days late
+  before the first notice (up to 90), how often after it (every week, fortnight, month, two months or three months; on
+  some days every year, like the end of each term; or only by hand, with «Tell» in «Late»), and to whom (the reader, the
+  family of young readers, the tutor of their group), for the whole centre. A school does not want a message for a day
+  or two late; a university tells the next day. Three starts of a touch, retouched after: a school (15 days late, on the
+  last day of each third of its classes, to the family and the tutor), a university (the next day, every week, to the
+  reader) and a public library (3 days late, every week, to the reader). On the library's days, the books late enough
+  that day are told, once; a day still counts for a week after it, for a morning the task did not run. A centre that
+  never chose goes on as before: the next day, then every week, to all three.
+- The tutors' summaries follow the same rhythm and the same days late.
+- The day by hand for a renewal at the desk is picked like every other date of the library (day, month and year in its
+  language, `window.ayvDate` of `app/ayvurenda.js`): in 0.228.0 it was the browser's own field, mm/dd/yyyy in English.
+
 ## 0.228.0 (2026-11-10)
 
 - Renewing a loan, three ways at a touch. «Renew until Thursday, 12 November» gives the date the centre counts by; by
