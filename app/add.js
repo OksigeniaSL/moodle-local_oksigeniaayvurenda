@@ -267,6 +267,14 @@
         input.focus();
     };
 
+    // «Catalogued today» follows what is added and undone here (the page counted it when it opened).
+    var today = function(answer) {
+        var link = document.querySelector('.ayv-add-cataloged a');
+        if (link && answer && answer.today) {
+            link.textContent = answer.today;
+        }
+    };
+
     var line = function(answer) {
         var li = el('li', 'ayv-line ayv-line-saved ayv-sound-ok');
         var head = el('div', 'ayv-add-line');
@@ -294,6 +302,7 @@
                 if (undone.kind === 'undone') {
                     li.classList.add('ayv-line-undone');
                 }
+                today(undone);
                 tone('look');
                 return undone;
             }).catch(function() {
@@ -359,6 +368,7 @@
                 close();
             }
             line(answer);
+            today(answer);
             tone('ok');
             return answer;
         }).catch(function(error) {
@@ -379,7 +389,8 @@
     // A book without an ISBN whose title (and author) the library already has: the same one, or another?
     var similar = function(saving, answer) {
         saving.unsure = true;
-        say(answer.message, 'look');
+        // The question is in the box, by its buttons: the line above only points to it.
+        say(str.addsimilarlook, 'look');
         var box = $('ayv-book-existing');
         box.textContent = '';
         box.hidden = false;
@@ -390,6 +401,8 @@
         var go = function() {
             saving.unsure = false;
             box.hidden = true;
+            // Answered: the line that pointed to the question goes (an error while saving says its own).
+            say('');
             save().catch(function() {
                 return null;
             }).then(function() {

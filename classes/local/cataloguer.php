@@ -103,16 +103,19 @@ final class cataloguer {
 
     /**
      * Records of the centre with the same title and, when both say it, an author in common: a book without an ISBN typed
-     * twice would make a second record.
+     * twice would make a second record, and so would a book with one whose record was typed before without it. The title
+     * is compared without its article, wherever it is («El principito», «Principito, El»).
      *
      * @param int $entityid
      * @param string $title
      * @param string[] $authors
+     * @param bool $withoutisbn Only records without an ISBN (for a book that has one: those with one were found by it).
      * @return array[] id, title and author, three at most.
      */
-    public static function similar(int $entityid, string $title, array $authors): array {
+    public static function similar(int $entityid, string $title, array $authors, bool $withoutisbn = false): array {
         global $DB;
-        $words = text::words($title);
+        $wanted = text::title_key($title);
+        $words = text::words($wanted);
         if (!$words) {
             return [];
         }
@@ -121,6 +124,10 @@ final class cataloguer {
         foreach (array_slice($words, 0, 6) as $i => $word) {
             $conditions[] = $DB->sql_like('searchtext', ':w' . $i, false, false);
             $params['w' . $i] = '%' . $DB->sql_like_escape($word) . '%';
+        }
+        if ($withoutisbn) {
+            $conditions[] = '(isbn IS NULL OR isbn = :noisbn)';
+            $params['noisbn'] = '';
         }
         $rows = $DB->get_records_select(
             self::T . 'record',
@@ -131,11 +138,10 @@ final class cataloguer {
             0,
             50
         );
-        $wanted = text::normalise($title);
         $theirs = array_map(fn($author) => text::words(catalogue::display_name($author)), array_filter($authors, 'strlen'));
         $found = [];
         foreach ($rows as $row) {
-            if (text::normalise((string) $row->title) !== $wanted) {
+            if (text::title_key((string) $row->title) !== $wanted) {
                 continue;
             }
             $names = $DB->get_fieldset_sql(
@@ -290,7 +296,12 @@ final class cataloguer {
             $recordid = self::create_record($entityid, $description, $now);
             $newrecord = true;
         } else {
-            $DB->get_record(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid], 'id', MUST_EXIST);
+            $record = $DB->get_record(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid], 'id, isbn', MUST_EXIST);
+            // The same book, typed before without its ISBN: it takes this one, and its next copy is found by it.
+            $isbn = (string) ($description['record']['isbn'] ?? '');
+            if ((string) $record->isbn === '' && preg_match('/^\d{13}$/', $isbn)) {
+                $DB->update_record(self::T . 'record', (object) ['id' => $recordid, 'isbn' => $isbn, 'timemodified' => $now]);
+            }
         }
         // The codes and register numbers follow the entity's highest ones.
         $existing = [];

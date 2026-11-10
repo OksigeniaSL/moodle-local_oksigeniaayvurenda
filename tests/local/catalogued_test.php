@@ -67,6 +67,7 @@ final class catalogued_test extends \advanced_testcase {
             'externalid' => '77', 'localid' => $old->id, 'hash' => sha1('x'), 'timecreated' => $now, 'timemodified' => $now]);
 
         $this->assertSame(3, catalogued::count($library, $starts['today']));
+        $this->assertSame(3, catalogued::today($library, $now));
         $this->assertSame(4, catalogued::count($library, $starts['week']));
         $lines = catalogued::lines($library, $starts['week']);
         $this->assertCount(3, $lines);

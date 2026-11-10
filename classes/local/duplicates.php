@@ -28,9 +28,10 @@ use local_oksigeniaayvurenda\core\text;
 
 /**
  * A book catalogued twice, or brought twice by an old program, has two records: its copies, loans and reviews are split.
- * The records that share an ISBN, and those with the same title and author when one of them has no ISBN, are offered to
- * be joined; the person chooses which stays, and the other's copies, loans, holds, reviews, readings and the rest go to it,
- * with whatever the one that stays lacked (a summary, a cover).
+ * The records that share an ISBN, and those with the same title (without its article) and author when one of them has no
+ * ISBN, are offered to be joined (a record without an author goes with the first author's); the person chooses which
+ * stays, and the other's copies, loans, holds, reviews, readings and the rest go to it, with whatever the one that stays
+ * lacked (a summary, a cover).
  */
 final class duplicates {
     /** @var string Prefix of the plugin tables. */
@@ -78,15 +79,29 @@ final class duplicates {
             if ((string) $record->isbn !== '') {
                 $byisbn[$record->isbn][] = $id;
             }
-            $key = text::normalise((string) $record->title) . '|' . ($authors[$id] ?? '');
-            $bytitle[$key][] = $id;
+            // The title without its article, wherever the catalogue put it («El principito», «Principito, El»).
+            $key = text::title_key((string) $record->title);
+            if ($key !== '') {
+                $bytitle[$key][$authors[$id] ?? ''][] = $id;
+            }
         }
         $groups = array_values(array_filter($byisbn, fn($ids) => count($ids) > 1));
-        foreach ($bytitle as $ids) {
-            // The same title and author with different ISBNs are other editions; with one without ISBN, maybe not.
-            $without = array_filter($ids, fn($id) => (string) $records[$id]->isbn === '');
-            if (count($ids) > 1 && $without) {
-                $groups[] = $ids;
+        foreach ($bytitle as $byauthor) {
+            // A record without an author may be the book of any of them: it goes with the first.
+            $none = $byauthor[''] ?? [];
+            unset($byauthor['']);
+            if ($byauthor) {
+                $first = array_key_first($byauthor);
+                $byauthor[$first] = array_merge($byauthor[$first], $none);
+            } else {
+                $byauthor = [$none];
+            }
+            foreach ($byauthor as $ids) {
+                // The same title and author with different ISBNs are other editions; with one without ISBN, maybe not.
+                $without = array_filter($ids, fn($id) => (string) $records[$id]->isbn === '');
+                if (count($ids) > 1 && $without) {
+                    $groups[] = $ids;
+                }
             }
         }
         // One group for what was found both ways, and none for what someone said is not the same.

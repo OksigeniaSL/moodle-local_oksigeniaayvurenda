@@ -26,6 +26,7 @@ define('AJAX_SCRIPT', true);
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\catalogued;
 use local_oksigeniaayvurenda\local\cataloguer;
 use local_oksigeniaayvurenda\local\covers;
 use local_oksigeniaayvurenda\local\lookup;
@@ -197,19 +198,20 @@ switch ($action) {
         if (trim((string) ($description['record']['title'] ?? '')) === '') {
             throw new moodle_exception('addnotitle', 'local_oksigeniaayvurenda');
         }
-        // A new record without an ISBN whose title (and author) the centre already has: the same book typed twice, unless
-        // the person says it is another.
+        // A new record whose title (and author) the centre already has: the same book typed twice, unless the person says
+        // it is another. A book with an ISBN, only against records without one: those with it were found by it.
         $noisbn = trim((string) ($description['record']['isbn'] ?? '')) === '';
-        if (!$recordid && $noisbn && !optional_param('confirmnew', 0, PARAM_BOOL)) {
+        if (!$recordid && !optional_param('confirmnew', 0, PARAM_BOOL)) {
             $similar = cataloguer::similar(
                 $entityid,
                 (string) $description['record']['title'],
-                (array) ($description['authorities']['author'] ?? [])
+                (array) ($description['authorities']['author'] ?? []),
+                !$noisbn
             );
             if ($similar) {
                 echo json_encode(
                     ['kind' => 'similar', 'records' => $similar, 'message' => $str(
-                        'addsimilar',
+                        $noisbn ? 'addsimilar' : 'addsimilarnoisbn',
                         $similar[0]['title'] . ($similar[0]['author'] !== '' ? ', ' . $similar[0]['author'] : '')
                     )],
                     JSON_UNESCAPED_UNICODE
@@ -235,7 +237,7 @@ switch ($action) {
             echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
             die();
         }
-        if ($added['newrecord'] && $found['valid']) {
+        if ($found['valid'] && ($added['newrecord'] || covers::url($added['recordid']) === null)) {
             covers::adopt((int) $USER->id, $found['isbn'], $added['recordid'], (string) ($found['sourcename'] ?? 'Open Library'));
         }
         $count = count($added['barcodes']);
@@ -248,6 +250,8 @@ switch ($action) {
             'cover' => covers::url($added['recordid']),
             'url' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $target->slug,
                 'id' => $added['recordid']]))->out(false),
+            // The count of «Catalogued today», which the page made when it opened.
+            'today' => $str('catalogedtodaylink', \local_oksigeniaayvurenda\local\screens::number(catalogued::today($library))),
         ];
         catalogue::purge($entityid);
         break;
@@ -279,7 +283,8 @@ switch ($action) {
             $itemids,
             optional_param('newrecord', 0, PARAM_BOOL)
         );
-        $answer = ['kind' => $done ? 'undone' : 'kept', 'message' => $str($done ? 'addundone' : 'addcantundo')];
+        $answer = ['kind' => $done ? 'undone' : 'kept', 'message' => $str($done ? 'addundone' : 'addcantundo'),
+            'today' => $str('catalogedtodaylink', \local_oksigeniaayvurenda\local\screens::number(catalogued::today($library)))];
         if ($done) {
             catalogue::purge($entityid);
         }

@@ -99,4 +99,22 @@ final class text_test extends \basic_testcase {
         $this->assertNull(text::stem('mapa'));
         $this->assertNull(text::stem('1980s'));
     }
+
+    /**
+     * A title as a key: without its first article, wherever the catalogue put it; the rest of the title counts.
+     */
+    public function test_title_key(): void {
+        foreach (['El principito', 'Principito, El', 'Principito (el)', 'PRINCIPITO', ' principito '] as $title) {
+            $this->assertSame('principito', text::title_key($title), $title);
+        }
+        $this->assertSame('etranger', text::title_key("L'Étranger"));
+        $this->assertSame('etranger', text::title_key("Étranger (L')"));
+        $this->assertSame(text::title_key('O alquimista'), text::title_key('Alquimista, O'));
+        $this->assertSame(text::title_key('The Hobbit'), text::title_key('Hobbit, The'));
+        $this->assertSame('la orilla del viento', text::title_key('A la orilla del viento'));
+        $this->assertSame('yo robot', text::title_key('Yo, robot'));
+        $this->assertSame('cuentos los mejores', text::title_key('Cuentos (Los mejores)'));
+        $this->assertSame('la', text::title_key('La'));
+        $this->assertSame('', text::title_key(' — '));
+    }
 }

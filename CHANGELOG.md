@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.227.0 (2026-11-10)
+
+- A book catalogued twice is caught with its title written another way: with the article moved or left out
+  («El principito», «Principito, El», «Principito (El)», «Principito»), in Spanish, English, Portuguese, French,
+  Catalan and Galician. So when a book is added, and so in «Repeated records».
+- A book with an ISBN the catalogue does not have, whose title (and author) a record without an ISBN has, asks whether
+  it is the same book before making a second record: a book from the old program, typed without its ISBN, and a new copy
+  of it read by its barcode. If it is, the copy goes to that record, which takes the ISBN (never over one it has) and the
+  cover it lacked, and the next copy is found by it.
+- «Repeated records» offers a record without an author with the record of the same title that has one.
+- In «Add books», «Catalogued today» counts each copy as it is added or undone, not only when the page opens; and once
+  the question about a record already there is answered, the line above that pointed to it goes.
+
 ## 0.226.2 (2026-11-10)
 
 - The shelf framed in another website takes theme=light or theme=dark in its address, for a website with only one of the

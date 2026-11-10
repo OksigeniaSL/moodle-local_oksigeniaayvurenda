@@ -119,6 +119,38 @@ final class cataloguer_test extends \advanced_testcase {
     }
 
     /**
+     * A title typed again is found with its article moved or left out and an author in common, not with another author.
+     * A book with an ISBN is only compared with records without one, and adding its copy to one of them gives it the
+     * ISBN, never over one it has.
+     */
+    public function test_similar(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $entityid = (int) $library->entityid;
+        $record = fn(string $title, string $isbn, array $authors) => cataloguer::create_record($entityid, ['record' => [
+            'title' => $title, 'isbn' => $isbn ?: null], 'authorities' => ['author' => $authors]], time());
+        $old = $record('Isla del cometa, La', '', ['Montes, Ana']);
+        $other = $record('La isla del cometa', '9780306406157', ['Montes, Ana']);
+        $found = fn(string $title, array $authors, bool $withoutisbn = false) => array_column(
+            cataloguer::similar($entityid, $title, $authors, $withoutisbn),
+            'id'
+        );
+        $this->assertSame([$old, $other], $found('La isla del cometa', ['Ana Montes']));
+        $this->assertSame([$old, $other], $found('Isla del cometa', []));
+        $this->assertSame([], $found('La isla del cometa', ['Prado, Luis']));
+        $this->assertSame([], $found('La isla', ['Ana Montes']));
+        $this->assertSame([$old], $found('La isla del cometa', ['Ana Montes'], true));
+
+        $added = cataloguer::add($library, ['record' => ['isbn' => '9781861972712']], ['count' => 1], $old);
+        $this->assertFalse($added['newrecord']);
+        $this->assertSame('9781861972712', $DB->get_field(self::T . 'record', 'isbn', ['id' => $old]));
+        $this->assertSame([], $found('La isla del cometa', ['Ana Montes'], true));
+        cataloguer::add($library, ['record' => ['isbn' => '9788498798708']], ['count' => 1], $old);
+        $this->assertSame('9781861972712', $DB->get_field(self::T . 'record', 'isbn', ['id' => $old]));
+    }
+
+    /**
      * When an old program kept printing labels after the copy that came, new copy codes start where the centre says,
      * keep their zeros and letter, and follow the highest there is once past it; also those of an import.
      */

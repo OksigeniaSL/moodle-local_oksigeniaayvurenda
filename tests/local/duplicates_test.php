@@ -75,6 +75,27 @@ final class duplicates_test extends \advanced_testcase {
     }
 
     /**
+     * The same title with its article moved or left out is the same title; a record without an author goes with the
+     * book of the first author it may be; a record with another author is not offered.
+     */
+    public function test_groups_title_and_author(): void {
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $a = $this->book($library, 'Isla del cometa, La', '', ['Montes, Ana']);
+        $b = $this->book($library, 'La isla del cometa', '9780306406157', ['Ana Montes']);
+        $c = $this->book($library, 'Los cuentos del pantano', '', []);
+        $d = $this->book($library, 'Cuentos del pantano', '9781861972712', ['Prado, Luis']);
+        $this->book($library, 'Cuentos del pantano', '', ['Ríos, Eva']);
+        $groups = array_map(function ($ids) {
+            sort($ids);
+            return $ids;
+        }, duplicates::groups((int) $library->entityid));
+        $this->assertCount(2, $groups);
+        $this->assertContains([$a, $b], $groups);
+        $this->assertContains([$c, $d], $groups);
+    }
+
+    /**
      * Joining: the copies (with their loans), reviews, readings and subjects go to the one that stays, which takes the
      * summary it lacked and the link to the program it came from; the other goes; another centre is never touched.
      */

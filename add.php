@@ -71,10 +71,7 @@ $data = [
     'catalogedurl' => (new moodle_url('/local/oksigeniaayvurenda/catalogued.php', ['library' => $library->slug,
         'span' => 'today']))->out(false),
     'catalogedlabel' => $str('catalogedtodaylink', \local_oksigeniaayvurenda\local\screens::number(
-        \local_oksigeniaayvurenda\local\catalogued::count($library, \local_oksigeniaayvurenda\local\catalogued::starts(
-            (int) $library->entityid,
-            time()
-        )['today'])
+        \local_oksigeniaayvurenda\local\catalogued::today($library)
     )),
     'prompt' => $str('addprompt'),
     'libraries' => $libraries,
@@ -97,7 +94,7 @@ foreach (
         'addaddcopy', 'addotheredition', 'addspineproposed', 'addspinebefore', 'addsaved', 'addundo', 'addundone',
         'addcantundo', 'adderror', 'addnocover', 'addbadletter', 'addsearching', 'addsearchfound', 'addsearchnone',
         'addsearchprogress', 'addsearchspelled', 'addsearchmeant', 'addand',
-        'addsearchbyhand', 'addbyhand', 'addunsure', 'addsimilarsame', 'addsimilarother'] as $key
+        'addsearchbyhand', 'addbyhand', 'addunsure', 'addsimilarsame', 'addsimilarother', 'addsimilarlook'] as $key
 ) {
     $strings[$key] = $str($key);
 }

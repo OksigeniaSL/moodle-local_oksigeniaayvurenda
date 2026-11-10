@@ -155,6 +155,31 @@ final class text {
         return true;
     }
 
+    /** @var string[] Articles a title may start with, in the languages libraries catalogue in (Spanish, English, Portuguese,
+     * French, Catalan, Galician): a catalogue may write them after the title or leave them out. */
+    private const ARTICLES = ['el', 'la', 'los', 'las', 'lo', 'un', 'una', 'unos', 'unas', 'the', 'a', 'an', 'o', 'os', 'as',
+        'um', 'uma', 'uns', 'umas', 'le', 'les', 'l', 'une', 'des', 'els', 'unha', 'unhas'];
+
+    /**
+     * A title as a key to tell whether two records are the same book: normalised and without its first article, wherever
+     * the catalogue put it. «El principito», «Principito, El», «Principito (El)» and «Principito» give the same key.
+     *
+     * @param string $title
+     * @return string
+     */
+    public static function title_key(string $title): string {
+        // An article written after the title, as library catalogues do: «Principito, El», «Étranger (L')».
+        $moved = preg_match('/^(.+?)\s*[,(]\s*(\p{L}+)[\'’]?\s*\)?\s*$/u', trim($title), $match);
+        if ($moved && in_array(self::normalise($match[2]), self::ARTICLES, true)) {
+            $title = $match[1];
+        }
+        $words = explode(' ', self::normalise($title));
+        if (count($words) > 1 && in_array($words[0], self::ARTICLES, true)) {
+            array_shift($words);
+        }
+        return implode(' ', $words);
+    }
+
     /** @var string[] Words that say nothing of the book sought («un libro de dragones»), in the languages of the plugin. */
     private const EMPTY = ['a', 'al', 'de', 'del', 'el', 'la', 'las', 'lo', 'los', 'un', 'una', 'unos', 'unas', 'y', 'o', 'en',
         'con', 'para', 'por', 'sobre', 'que', 'libro', 'libros', 'quiero', 'busco', 'me', 'mi', 'an', 'the', 'of', 'and', 'or',

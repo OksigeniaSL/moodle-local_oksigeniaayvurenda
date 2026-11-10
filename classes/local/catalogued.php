@@ -75,6 +75,17 @@ final class catalogued {
         );
     }
 
+    /**
+     * How many copies were added by hand to a library today, in its centre's day: the count by «Add books».
+     *
+     * @param \stdClass $library
+     * @param int|null $now
+     * @return int
+     */
+    public static function today(\stdClass $library, ?int $now = null): int {
+        return self::count($library, self::starts((int) $library->entityid, $now ?? time())['today']);
+    }
+
     /** @var string The copies of a library added by hand since a time. */
     private const WHERE = 'i.libraryid = :libraryid AND i.timecreated >= :since
         AND NOT EXISTS (SELECT 1 FROM {' . self::T . "source} s WHERE s.tablename = 'item' AND s.localid = i.id)";
