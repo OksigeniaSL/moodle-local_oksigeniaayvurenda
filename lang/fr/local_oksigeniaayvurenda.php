@@ -5165,8 +5165,8 @@ $string['windowclosednote'] = 'La vitrine est fermée : vous seul voyez cette pa
 $string['windowdigital'] = 'À lire et à écouter ici';
 $string['windowdoors'] = 'Se promener dans la bibliothèque';
 $string['windowdownload'] = 'Télécharger';
-$string['windowembed'] = 'Le rayonnage sur le site de l\'établissement';
-$string['windowembedhint'] = 'Collez ce code sur le site de l\'établissement : il montre les dernières nouveautés, comme sur le rayonnage, et chaque livre ouvre sa notice ici.';
+$string['windowembed'] = 'Le rayonnage sur votre site';
+$string['windowembedhint'] = 'Collez ce code sur votre site : il montre ce qui vient d\'arriver, comme sur le rayonnage, et chaque livre ouvre sa notice ici. Le cadre suit le mode clair ou sombre de l\'appareil de la personne qui regarde ; si votre site n\'en a qu\'un, ajoutez &theme=light ou &theme=dark à la fin de l\'adresse.';
 $string['windowempty'] = 'Il n\'y a encore rien dans la vitrine : ici s\'affichent les œuvres sous licence libre destinées au public.';
 $string['windowheading'] = 'Vitrine publique';
 $string['windowindex'] = 'Permettre aux moteurs de recherche de la trouver';

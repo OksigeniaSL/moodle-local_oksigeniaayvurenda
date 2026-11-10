@@ -5165,8 +5165,8 @@ $string['windowclosednote'] = 'A janela está fechada: só você vê esta págin
 $string['windowdigital'] = 'Para ler e ouvir aqui';
 $string['windowdoors'] = 'Passeie pela biblioteca';
 $string['windowdownload'] = 'Baixar';
-$string['windowembed'] = 'A estante no site da instituição';
-$string['windowembedhint'] = 'Cole este código no site da instituição: ele mostra as últimas novidades, como na estante, e cada livro abre o seu registro aqui.';
+$string['windowembed'] = 'A estante no seu site';
+$string['windowembedhint'] = 'Cole este código no seu site: ele mostra o que acabou de chegar, como na estante, e cada livro abre seu registro aqui. A moldura segue o modo claro ou escuro do aparelho de quem olha; se o seu site só tiver um, adicione &theme=light ou &theme=dark no final do endereço.';
 $string['windowempty'] = 'Ainda não há nada na janela: aqui aparecem as obras com licença para todos e pensadas para o público.';
 $string['windowheading'] = 'Janela pública';
 $string['windowindex'] = 'Deixar que os buscadores a encontrem';

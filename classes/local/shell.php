@@ -473,12 +473,15 @@ Oksigenia Ayvurenda</button>
 
     /**
      * The library's newest books as a shelf for another website (a school's), in a frame: one plank of spines, each
-     * opening its record in the window in a new tab. Only for a library that shows its catalogue to anyone.
+     * opening its record in the window in a new tab. Only for a library that shows its catalogue to anyone. The other
+     * website cannot tell the frame its colours: the frame follows the device of whoever looks, unless the address says
+     * theme=light or theme=dark (a website with only one of the two).
      *
      * @param \stdClass $library
      */
     public static function embed(\stdClass $library): void {
         global $CFG, $OUTPUT;
+        $theme = optional_param('theme', '', PARAM_ALPHA);
         $version = (int) get_config('local_oksigeniaayvurenda', 'version');
         $app = $CFG->wwwroot . '/local/oksigeniaayvurenda/app/';
         $rows = array_map(fn($card) => (object) ['recordid' => $card['id'], 'k' => ''], catalogue::recent($library, 24));
@@ -500,7 +503,8 @@ Oksigenia Ayvurenda</button>
         @header('Content-Security-Policy: frame-ancestors *');
         self::guard();
         echo '<!DOCTYPE html>
-<html lang="' . s(str_replace('_', '-', current_language())) . '">
+<html lang="' . s(str_replace('_', '-', current_language())) . '"' .
+            (in_array($theme, ['light', 'dark'], true) ? ' data-bs-theme="' . $theme . '"' : '') . '>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -508,9 +512,10 @@ Oksigenia Ayvurenda</button>
 <base target="_blank">
 <title>' . s(format_string($library->name, true, ['escape' => false])) . '</title>
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
-<script nonce="' . self::nonce() . '">if (window.matchMedia && window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
+' . (in_array($theme, ['light', 'dark'], true) ? '' : '<script nonce="' . self::nonce() . '">if (window.matchMedia &&
+    window.matchMedia(\'(prefers-color-scheme: dark)\').matches) {
     document.documentElement.setAttribute(\'data-bs-theme\', \'dark\');
-}</script>
+}</script>') . '
 </head>
 <body class="ayv ayv-embed">
 ' . $html . '

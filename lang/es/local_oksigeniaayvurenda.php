@@ -5091,8 +5091,8 @@ $string['windowclosednote'] = 'La ventana está cerrada: solo tú ves esta pági
 $string['windowdigital'] = 'Para leer y escuchar aquí';
 $string['windowdoors'] = 'Pasea por la biblioteca';
 $string['windowdownload'] = 'Descargar';
-$string['windowembed'] = 'La estantería en la web del centro';
-$string['windowembedhint'] = 'Pega este código en la web del centro: enseña lo último que ha llegado, como en la estantería, y cada libro abre su ficha aquí.';
+$string['windowembed'] = 'La estantería en tu web';
+$string['windowembedhint'] = 'Pega este código en tu web: enseña lo último que ha llegado, como en la estantería, y cada libro abre su ficha aquí. El marco sigue el modo claro u oscuro del aparato de quien mira; si tu web solo tiene uno, añade &theme=light o &theme=dark al final de la dirección.';
 $string['windowempty'] = 'Todavía no hay nada en la ventana: aquí salen las obras con licencia para todos y pensadas para el público.';
 $string['windowheading'] = 'Ventana pública';
 $string['windowindex'] = 'Dejar que los buscadores la encuentren';

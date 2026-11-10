@@ -5092,7 +5092,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 /* The header on a phone (Gaudí's mock-up of 7 November 2026): a bar with the emblem, the name and a magnifier; the search
    opens over the bar; a reader has four tabs, the fourth «More», a sheet from below with the rest and the way out. */
 .ayv .ayv-search-toggle,
-.ayv .ayv-search-close,
+.ayv .ayv-search .ayv-search-close,
 .ayv .ayv-nav-phonemore { display: none; }
 @media (max-width: 30rem) {
     .ayv .ayv-top { position: relative; }

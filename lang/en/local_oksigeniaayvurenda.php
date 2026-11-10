@@ -5091,8 +5091,8 @@ $string['windowclosednote'] = 'The window is closed: only you see this page. Ope
 $string['windowdigital'] = 'To read and listen to here';
 $string['windowdoors'] = 'Walk around the library';
 $string['windowdownload'] = 'Download';
-$string['windowembed'] = 'The shelf on the school\'s website';
-$string['windowembedhint'] = 'Paste this code in the school\'s website: it shows what came in last, as on the shelf, and each book opens its record here.';
+$string['windowembed'] = 'The shelf on your website';
+$string['windowembedhint'] = 'Paste this code into your website: it shows what came in last, as on the shelf, and each book opens its record here. The frame follows the light or dark mode of the device of whoever looks; if your website has only one, add &theme=light or &theme=dark at the end of the address.';
 $string['windowempty'] = 'There is nothing in the window yet: works with a licence for everyone, meant for the public, appear here.';
 $string['windowheading'] = 'Public window';
 $string['windowindex'] = 'Let search engines find it';

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.226.2 (2026-11-10)
+
+- The shelf framed in another website takes theme=light or theme=dark in its address, for a website with only one of the
+  two; without it, it follows the device of whoever looks, as before. Its code says so, and speaks of «your website»,
+  not only a school's.
+- On a wide screen the search in the header has one cross, the one that empties it: the phone's «close» stayed in sight
+  since 0.193.0.
+
 ## 0.226.1 (2026-11-10)
 
 - The corners on the shelves come in even rows, as on the home page (seven are four and three), and the drawing in the
