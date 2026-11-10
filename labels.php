@@ -144,7 +144,7 @@ $data = [
     'testurl' => (new moodle_url('/local/oksigeniaayvurenda/labels.php', $here + ['test' => 1]))->out(false),
     'test' => (bool) $test,
     'start' => $start,
-    'count' => $str('labelscount', count($items)),
+    'count' => count($items) === 1 ? $str('labelscountone') : $str('labelscount', count($items)),
     'toomany' => $toomany ? $str('labelstoomany', labels::LIMIT) : '',
     'pages' => $test ? [['labels' => array_map(fn($n) => ['blank' => true, 'testnumber' => $n], range(1, $format['per']))]]
         : labels::sheets($items, $sheet, $start),

@@ -36,13 +36,14 @@ $page = max(0, optional_param('page', 0, PARAM_INT));
 $fragment = optional_param('fragment', false, PARAM_BOOL);
 $onlyfree = optional_param('free', false, PARAM_BOOL);
 $subject = optional_param('subject', 0, PARAM_INT);
+$asis = optional_param('asis', false, PARAM_BOOL);
 require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:view', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/search.php', ['library' => $ref, 'q' => $query,
-    'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree]));
+    'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree, 'asis' => (int) $asis]));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
@@ -50,7 +51,8 @@ if (!$library) {
 if ($query === '' && $corner === '') {
     redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]));
 }
-$data = screens::results($library, $query, $corner, $page, $onlyfree, $subject);
+$data = screens::results($library, $query, $corner, $page, $onlyfree, $subject, $asis);
+$query = $data['searched'] ?? $query;
 // The memory remembers what a reader looked for (words typed, three letters at least) and found: a search that gave
 // nothing is not one to offer again.
 if ($page === 0 && core_text::strlen($query) >= 3 && !$subject && $data['hascards']) {

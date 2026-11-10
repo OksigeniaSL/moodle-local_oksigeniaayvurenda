@@ -180,6 +180,9 @@ if ($shelf) {
             'art' => screens::art('rincon-' . $known['code']),
         ];
     }
+    // In even rows, as on the home page: seven corners are four and three, not six and one.
+    $n = count($data['corners']);
+    $data['cornercols'] = $n ? (int) ceil($n / ceil($n / 6)) : 1;
 }
 foreach (
     ['stacksplaces', 'stackscorners', 'stacksall', 'stacksprev', 'stacksnext', 'stacksmap', 'stackslectern', 'stacksrecord',

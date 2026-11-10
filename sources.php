@@ -93,7 +93,7 @@ foreach ($practice ? [] : cohorts::options($entityid) as $option) {
     $rows[] = $option;
 }
 $courses = array_map(
-    fn($c) => $c + ['groupslabel' => $str('sourcesgroupsof', $c['groups'])],
+    fn($c) => $c + ['groupslabel' => (int) $c['groups'] === 1 ? $str('sourcesgroupsofone') : $str('sourcesgroupsof', $c['groups'])],
     $practice ? [] : \local_oksigeniaayvurenda\local\sources\courses::options($entityid)
 );
 $page = fn(string $file) => (new moodle_url('/local/oksigeniaayvurenda/' . $file, ['library' => $library->slug]))->out(false);

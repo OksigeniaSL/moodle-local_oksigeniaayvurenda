@@ -144,6 +144,7 @@ final class screens {
      * @param int $page
      * @param bool $onlyfree
      * @param int $subject A topic to narrow by, if any.
+     * @param bool $asis The words as typed: when nothing is found, no search for the closest ones.
      * @return array
      */
     public static function results(
@@ -152,8 +153,10 @@ final class screens {
         string $corner,
         int $page,
         bool $onlyfree = false,
-        int $subject = 0
+        int $subject = 0,
+        bool $asis = false
     ): array {
+        $typed = '';
         $facets = null;
         if ($corner !== '' && $query === '') {
             $found = catalogue::corner($library, $corner, $page, $onlyfree);
@@ -169,6 +172,17 @@ final class screens {
             $here = ['corner' => $corner];
         } else {
             $found = catalogue::search($library, $query, $page, $onlyfree, $corner, $subject);
+            // A slip of the keys finds the closest words of the catalogue at once, as a child expects; the words as
+            // typed stay one link away.
+            if ($found['total'] === 0 && !$asis && $found['suggestions']) {
+                $closest = catalogue::search($library, $found['suggestions'][0], $page, $onlyfree, $corner, $subject);
+                if ($closest['total'] > 0) {
+                    $typed = $query;
+                    $query = $found['suggestions'][0];
+                    // The other close words stay on offer.
+                    $found = ['suggestions' => array_slice($found['suggestions'], 1)] + $closest;
+                }
+            }
             $narrow = array_filter(['corner' => $corner, 'subject' => $subject]);
             $here = ['q' => $query] + $narrow;
             $a = (object) ['count' => self::number((int) $found['total']), 'query' => $query];
@@ -192,6 +206,12 @@ final class screens {
             'suggestions' => $suggestions,
             'hassuggestions' => (bool) $suggestions,
             'didyoumean' => self::str('didyoumean'),
+            'searched' => $query,
+            'corrected' => $typed === '' ? null : [
+                'correctedtext' => self::str('searchcorrected', $typed),
+                'asislabel' => self::str('searchasis', $typed),
+                'asisurl' => self::url('search.php', $library, ['q' => $typed, 'asis' => 1]),
+            ],
             // The memory speaks when it found nothing; otherwise it keeps quiet.
             // Sure there is nothing only when there is nothing close either.
             'memory' => $corner === '' && $query !== '' ? self::nothing_found(

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.226.1 (2026-11-10)
+
+- The corners on the shelves come in even rows, as on the home page (seven are four and three), and the drawing in the
+  top corner of each tile sits smaller and softer, clear of its name.
+- One copy is «1 copy»: in the most lent books, the labels to print and the groups of a course.
+
 ## 0.226.0 (2026-11-10)
 
 - French: the whole interface, in the French of France: a young reader is spoken to as «tu», the staff and every adult as

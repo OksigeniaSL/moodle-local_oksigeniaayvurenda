@@ -442,6 +442,8 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 
 .ayv .ayv-where::before { content: "→ "; }
 
+.ayv .ayv-corrected { margin: 0 0 1rem; font-size: 1.05rem; }
+.ayv .ayv-corrected a { font-weight: 600; }
 .ayv .ayv-results-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .5rem 1rem; }
 
 /* A switch that filters: pressed, it is filled. */

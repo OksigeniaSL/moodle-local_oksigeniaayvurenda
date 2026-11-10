@@ -96,7 +96,8 @@ switch ($report) {
         $columns = [$str('reporttitle'), $str('reportloans'), $str('reportcopies')];
         $max = max(array_merge([1], array_column($found, 'value')));
         foreach ($found as $row) {
-            $rows[] = ['label' => $row['label'], 'value' => $row['value'], 'note' => $str('reportcopiesof', $row['copies']),
+            $copies = (int) $row['copies'] === 1 ? $str('reportcopiesofone') : $str('reportcopiesof', $row['copies']);
+            $rows[] = ['label' => $row['label'], 'value' => $row['value'], 'note' => $copies,
                 'share' => round(100 * $row['value'] / $max), 'csv' => [$row['label'], $row['value'], $row['copies']]];
         }
         break;

@@ -34,6 +34,8 @@
         "hassuggestions": true,
         "didyoumean": "¿Querías decir…?",
         "suggestions": [{"text": "volcan", "url": "#"}],
+        "corrected": {"correctedtext": "Has escrito «bolcan»: esto es lo más parecido del catálogo.",
+            "asislabel": "Buscar «bolcan» tal cual", "asisurl": "https://example.org/search.php?q=bolcan&asis=1"},
         "tryother": "",
         "more": null,
         "filter": {"url": "#", "label": "Solo los libres", "pressed": "false"},
@@ -47,6 +49,7 @@
         <h1 class="ayv-results-title">{{heading}}</h1>
         {{#filter}}<a class="ayv-toggle" href="{{url}}" role="button" aria-pressed="{{pressed}}">{{label}}</a>{{/filter}}
     </div>
+    {{#corrected}}<p class="ayv-corrected">{{correctedtext}} <a href="{{asisurl}}">{{asislabel}}</a></p>{{/corrected}}
     {{#facets}}
     <details class="ayv-facets-fold" open data-ayv-fold="{{#chosen}}keep{{/chosen}}">
     <summary class="ayv-chip">{{refinelabel}} · {{chips}}</summary>

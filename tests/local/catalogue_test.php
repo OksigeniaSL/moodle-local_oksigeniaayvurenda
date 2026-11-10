@@ -137,6 +137,25 @@ final class catalogue_test extends \advanced_testcase {
     }
 
     /**
+     * The search page shows the closest words at once, with the words as typed one link away.
+     */
+    public function test_results_closest(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $w = $this->make_world();
+        $data = screens::results($w->central, 'bolcan', '', 0);
+        $this->assertSame('volcan', $data['searched']);
+        $this->assertTrue($data['hascards']);
+        $this->assertStringContainsString('«bolcan»', $data['corrected']['correctedtext']);
+        $this->assertStringContainsString('asis=1', $data['corrected']['asisurl']);
+        $this->assertNull($data['memory']);
+        $asis = screens::results($w->central, 'bolcan', '', 0, false, 0, true);
+        $this->assertFalse($asis['hascards']);
+        $this->assertNull($asis['corrected']);
+        $this->assertSame('volcan', $asis['suggestions'][0]['text']);
+    }
+
+    /**
      * Cards tell, for the library the reader is in, whether the book is free and where, out, only to read there, or
      * kept in another library of the entity.
      */

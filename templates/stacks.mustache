@@ -31,7 +31,7 @@
         "heading": "La estantería", "intro": "Los libros están como en la biblioteca.",
         "map": true, "shelf": false,
         "places": [{"id": 3, "label": "Rojo", "countlabel": "120 libros", "url": "#", "colour": "#d63a2f", "hascolour": true}],
-        "corners": [{"label": "Lengua y literatura", "countlabel": "900 libros", "url": "#", "colour": 2, "art": null}],
+        "corners": [{"label": "Lengua y literatura", "countlabel": "900 libros", "url": "#", "colour": 2, "art": null}], "cornercols": 1,
         "allurl": "#", "spines": [], "prevurl": "", "nexturl": "", "mapurl": "#", "empty": "Aquí no hay libros.",
         "bookcase": "Libros de la estantería, en orden", "bookend": null, "bird": null, "posters": null,
         "end": "", "endurl": "", "endask": "",
@@ -67,7 +67,7 @@
 {{#corners.0}}
 <section class="ayv-section" aria-labelledby="ayv-stacks-corners">
     <h2 id="ayv-stacks-corners" class="ayv-section-title">{{stackscorners}}</h2>
-    <ul class="ayv-corners">
+    <ul class="ayv-corners ayv-corners-even" style="--ayv-cols: {{cornercols}}">
     {{#corners}}
         <li><a class="ayv-corner ayv-cover-{{colour}}{{#art}} ayv-corner-art{{/art}}" href="{{url}}">
             {{#art}}<img class="ayv-corner-img" src="{{art}}" alt="" loading="lazy">{{/art}}

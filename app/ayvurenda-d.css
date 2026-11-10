@@ -391,10 +391,13 @@ html[data-bs-theme="dark"] .ayv .ayv-epub {
    drawing on its cream plate. In dark mode the cream corner turns to sand, so it does not light up the page. */
 .ayv .ayv-corners { gap: 1rem; }
 .ayv .ayv-corner { min-height: 7.5rem; border-radius: 18px; box-shadow: var(--ayv-shadow); }
+/* The motif whole in the top corner, the words at the foot, clear of it. */
+.ayv .ayv-corner:not(.ayv-corner-art) { padding-top: 4.5rem; }
+.ayv .ayv-corner .ayv-corner-label, .ayv .ayv-corner .ayv-corner-count { position: relative; }
 .ayv .ayv-corner:hover { box-shadow: var(--ayv-shadow-lift); }
-.ayv .ayv-corner:not(.ayv-corner-art)::before { content: ""; position: absolute; top: -1.4rem; right: -1.4rem; width: 7rem; height: 7rem;
-    border-radius: 50%; background: currentColor; opacity: .18;
-    -webkit-mask: var(--ayv-motif) center / cover no-repeat; mask: var(--ayv-motif) center / cover no-repeat; }
+.ayv .ayv-corner:not(.ayv-corner-art)::before { content: ""; position: absolute; top: .75rem; right: .85rem; width: 3.4rem; height: 3.4rem;
+    background: currentColor; opacity: .16;
+    -webkit-mask: var(--ayv-motif) center / contain no-repeat; mask: var(--ayv-motif) center / contain no-repeat; }
 .ayv .ayv-corner-art { padding: .55rem .55rem .9rem; }
 .ayv .ayv-corner-art .ayv-corner-img { margin-bottom: .7rem; border-radius: 12px; box-shadow: 0 8px 16px -10px rgba(0, 0, 0, .5); }
 .ayv .ayv-corner-art .ayv-corner-label, .ayv .ayv-corner-art .ayv-corner-count { padding: 0 .4rem; }
