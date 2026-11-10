@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.228.0 (2026-11-10)
+
+- Renewing a loan, three ways at a touch. «Renew until Thursday, 12 November» gives the date the centre counts by; by
+  default a week (the renewal days of the rule) from the day it is renewed, so whoever renews on a Thursday comes back on
+  a Thursday. «Another date» opens the other count (from the date it was due: «Until Tuesday, 10 November, counting from
+  its date») and a day chosen by hand, for whoever needs more time (a teacher with a study, the head): given past the
+  renewals the rule allows and while someone waits for the book, which the desk says first. A day by hand that falls on
+  a closed day moves to the next open one. In the reader's list of loans and on a book just returned (Alt+A still gives
+  the first date).
+- «Rules» has «When a loan is renewed», for the whole centre: from the day it is renewed (the default) or from the date
+  it was due. A renewal is always more time: a count that would fall on or before the later of today and the old date
+  counts from that one. Renewals by the readers themselves and at a self-service machine follow the centre's count.
+- The dates of a renewal say their weekday, and «de» in Spanish: «martes, 17 de noviembre».
+
 ## 0.227.0 (2026-11-10)
 
 - A book catalogued twice is caught with its title written another way: with the article moved or left out

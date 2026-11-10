@@ -33,6 +33,36 @@ final class rules {
     /** @var string The table. */
     private const TABLE = 'local_oksigeniaayvurenda_rule';
 
+    /**
+     * How the desk counts the days of a renewal at a centre: from the day it is renewed (the default: a child comes back the
+     * same weekday, which is easy to remember) or from the date it was due (stricter libraries). The other count, and a day
+     * by hand, are a touch away at the desk.
+     *
+     * @param int $entityid
+     * @return string loan_rules::FROM_TODAY or FROM_DUE.
+     */
+    public static function renew_from(int $entityid): string {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true);
+        return ($settings['renewfrom'] ?? '') === \local_oksigeniaayvurenda\core\loan_rules::FROM_DUE
+            ? \local_oksigeniaayvurenda\core\loan_rules::FROM_DUE : \local_oksigeniaayvurenda\core\loan_rules::FROM_TODAY;
+    }
+
+    /**
+     * Sets how the desk counts the days of a renewal at a centre.
+     *
+     * @param int $entityid
+     * @param string $from loan_rules::FROM_TODAY or FROM_DUE.
+     */
+    public static function save_renew_from(int $entityid, string $from): void {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
+            ?: [];
+        $settings['renewfrom'] = $from === \local_oksigeniaayvurenda\core\loan_rules::FROM_DUE
+            ? \local_oksigeniaayvurenda\core\loan_rules::FROM_DUE : \local_oksigeniaayvurenda\core\loan_rules::FROM_TODAY;
+        $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $entityid]);
+    }
+
     /** @var array The rule material gets when a library with rules has none for it: a week, one at a time. */
     public const MATERIAL = ['readertype' => '*', 'itemtype' => 'device', 'loandays' => 7, 'maxloans' => 1, 'renewals' => 1,
         'renewdays' => 7];

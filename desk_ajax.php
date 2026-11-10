@@ -82,7 +82,12 @@ switch ($action) {
             'reader' => $desk->reader_panel(required_param('readerid', PARAM_INT))];
         break;
     case 'renew':
-        $answer = $desk->renew(required_param('loanid', PARAM_INT));
+        // By the centre's count, the other one (from), or a day chosen by hand (date, Y-m-d).
+        $answer = $desk->renew(
+            required_param('loanid', PARAM_INT),
+            optional_param('from', '', PARAM_ALPHA),
+            optional_param('date', '', PARAM_RAW_TRIMMED)
+        );
         break;
     case 'note':
         $answer = $desk->note(required_param('loanid', PARAM_INT), optional_param('note', '', PARAM_ALPHA));

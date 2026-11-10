@@ -84,7 +84,8 @@ final class loan_rules_test extends \basic_testcase {
     }
 
     /**
-     * Renewals: as many as the rule says, counted from the later of today and the old due date.
+     * Renewals: as many as the rule says, counted from today or from the old due date as the centre chooses, and always
+     * more time: a count that falls on or before the later of the two counts from that one.
      */
     public function test_renew(): void {
         $tz = new \DateTimeZone('Europe/Madrid');
@@ -92,16 +93,31 @@ final class loan_rules_test extends \basic_testcase {
         $this->assertTrue(loan_rules::can_renew($student, 1));
         $this->assertFalse(loan_rules::can_renew($student, 2));
         $this->assertFalse(loan_rules::can_renew(loan_rules::pick(self::RULES, 'family', 'device'), 0));
-        $due = (new \DateTimeImmutable('2026-10-30 23:59:59', $tz))->getTimestamp();
-        $early = (new \DateTimeImmutable('2026-10-28 09:00', $tz))->getTimestamp();
+        $at = fn(string $when) => (new \DateTimeImmutable($when, $tz))->getTimestamp();
+        $due = $at('2026-10-30 23:59:59');
+        $today = loan_rules::FROM_TODAY;
+        $fromdue = loan_rules::FROM_DUE;
+        // Two days early: a week from today, or a week from its date.
+        $this->assertSame($at('2026-11-04 23:59:59'), loan_rules::renewed_due($due, $at('2026-10-28 09:00'), $student, $tz));
         $this->assertSame(
-            (new \DateTimeImmutable('2026-11-06 23:59:59', $tz))->getTimestamp(),
-            loan_rules::renewed_due($due, $early, $student, $tz)
+            $at('2026-11-06 23:59:59'),
+            loan_rules::renewed_due($due, $at('2026-10-28 09:00'), $student, $tz, [], [6, 7], $fromdue)
         );
-        $late = (new \DateTimeImmutable('2026-11-03 09:00', $tz))->getTimestamp();
+        // Four days late: a week from today (the same weekday), or the date it was owed.
+        $this->assertSame($at('2026-11-10 23:59:59'), loan_rules::renewed_due($due, $at('2026-11-03 09:00'), $student, $tz));
         $this->assertSame(
-            (new \DateTimeImmutable('2026-11-10 23:59:59', $tz))->getTimestamp(),
-            loan_rules::renewed_due($due, $late, $student, $tz)
+            $at('2026-11-06 23:59:59'),
+            loan_rules::renewed_due($due, $at('2026-11-03 09:00'), $student, $tz, [], [6, 7], $fromdue)
+        );
+        // So late that its date plus a week has passed: from today.
+        $this->assertSame(
+            $at('2026-11-27 23:59:59'),
+            loan_rules::renewed_due($due, $at('2026-11-20 09:00'), $student, $tz, [], [6, 7], $fromdue)
+        );
+        // So early that a week from today is before its date: from its date.
+        $this->assertSame(
+            $at('2026-11-06 23:59:59'),
+            loan_rules::renewed_due($due, $at('2026-10-20 09:00'), $student, $tz, [], [6, 7], $today)
         );
     }
 

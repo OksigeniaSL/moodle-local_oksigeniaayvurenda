@@ -737,7 +737,16 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 /* The actions of a loan together at the end of its row, whichever comes first. */
 .ayv .ayv-loan > .ayv-loan-renew,
 .ayv .ayv-loan > .ayv-loan-back { margin-left: auto; }
-.ayv .ayv-loan > .ayv-loan-renew + .ayv-loan-back { margin-left: 0; }
+.ayv .ayv-loan > .ayv-loan-renew + .ayv-loan-back,
+.ayv .ayv-loan > .ayv-loan-renew + .ayv-loan-renew { margin-left: 0; }
+
+/* «Another date» for a renewal: the other count and a day by hand, on a row of its own under the loan. */
+.ayv .ayv-renew-more { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .75rem; margin: .35rem 0 .15rem; padding: .6rem .75rem; border-radius: .75rem; background: color-mix(in srgb, var(--green2) 9%, transparent); }
+.ayv .ayv-renew-why { flex-basis: 100%; margin: 0; font-weight: 700; }
+/* A long date wraps on a phone: a rounded box, not a pill. */
+.ayv .ayv-renew-more .ayv-line-button { border-radius: .75rem; text-align: left; }
+.ayv .ayv-renew-day { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ayv .ayv-renew-day input { min-width: 0; padding: .3rem .5rem; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: .5rem; }
 
 .ayv .ayv-staff { margin: .25rem 0 0; }
 

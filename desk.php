@@ -57,7 +57,8 @@ $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $strings = [];
 foreach (
-    ['deskundo', 'deskrenew', 'desklendanyway', 'deskdismiss', 'deskclose', 'profileview', 'deskoffline', 'deskofflineone',
+    ['deskundo', 'deskrenew', 'deskrenewother', 'deskrenewbyhand', 'deskrenewbyhandgo', 'desklendanyway', 'deskdismiss',
+        'deskclose', 'profileview', 'deskoffline', 'deskofflineone',
         'deskofflinemany', 'deskbackonline', 'noteloved', 'noteunfinished',
         'notemore',
         'deskbadletter', 'desknoloans', 'deskloans', 'deskerror', 'desklate', 'deskreaderopen', 'deskchoosehint', 'deskstampback',

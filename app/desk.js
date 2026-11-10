@@ -107,6 +107,71 @@
         return b;
     };
 
+    // More time for a loan: one touch gives the date the centre counts by; «Another date» opens the other count and a day
+    // by hand, with why the rules give none when they do not (a day by hand is the staff's to give). The buttons go into
+    // parent; the row with the rest is returned, for the caller to put at the end.
+    var renewal = function(parent, choices, loanid, mainclass, otherclass, after) {
+        var go = function(b, params) {
+            b.disabled = true;
+            params.action = 'renew';
+            params.loanid = loanid;
+            post(params).then(function(renewed) {
+                if (renewed.kind !== 'renewed') {
+                    b.disabled = false;
+                }
+                after(renewed);
+                return renewed;
+            }).catch(function() {
+                tone('no');
+                b.disabled = false;
+            });
+        };
+        var first = choices.dates[0];
+        if (first) {
+            parent.appendChild(button(first.label, mainclass, function(b) {
+                go(b, {from: first.from});
+            }));
+        }
+        var more = el('div', 'ayv-renew-more');
+        more.hidden = true;
+        more.id = 'ayv-renew-' + loanid + '-' + Math.random().toString(36).slice(2, 8);
+        if (choices.why) {
+            more.appendChild(el('p', 'ayv-renew-why', choices.why));
+        }
+        choices.dates.slice(1).forEach(function(other) {
+            more.appendChild(button(other.label, 'ayv-line-quiet', function(b) {
+                go(b, {from: other.from});
+            }));
+        });
+        var label = el('label', 'ayv-renew-day', str.deskrenewbyhand);
+        var day = el('input');
+        day.type = 'date';
+        day.min = choices.first;
+        label.appendChild(day);
+        more.appendChild(label);
+        more.appendChild(button(str.deskrenewbyhandgo, 'ayv-line-quiet', function(b) {
+            if (!day.value) {
+                tone('no');
+                return;
+            }
+            go(b, {date: day.value});
+        }));
+        // Not with button(): that one sends the focus back to the code field, and here it goes to what opens.
+        var toggle = el('button', 'ayv-line-button ' + otherclass, str.deskrenewother);
+        toggle.type = 'button';
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-controls', more.id);
+        toggle.addEventListener('click', function() {
+            more.hidden = !more.hidden;
+            toggle.setAttribute('aria-expanded', more.hidden ? 'false' : 'true');
+            if (!more.hidden) {
+                (more.querySelector('button') || day).focus();
+            }
+        });
+        parent.appendChild(toggle);
+        return more;
+    };
+
     var post = function(params) {
         var body = new URLSearchParams();
         body.set('library', config.library);
@@ -240,18 +305,8 @@
                 stamped = 0;
             }
             // More time, without the book: the reader is here, or the family asks.
-            if (loan.renewable) {
-                item.appendChild(button(str.deskrenew, 'ayv-line-quiet ayv-loan-renew', function(b) {
-                    b.disabled = true;
-                    post({action: 'renew', loanid: loan.id}).then(function(renewed) {
-                        add(renewed);
-                        return renewed;
-                    }).catch(function() {
-                        tone('no');
-                        b.disabled = false;
-                    });
-                }));
-            }
+            var more = loan.renew ? renewal(item, loan.renew, loan.id, 'ayv-line-quiet ayv-loan-renew',
+                'ayv-line-quiet ayv-loan-renew', add) : null;
             // A book without a label comes back with a touch.
             item.appendChild(button(str.deskgiveback, 'ayv-line-quiet ayv-loan-back', function(b) {
                 b.disabled = true;
@@ -267,6 +322,9 @@
                 b.disabled = true;
                 choose({action: 'lost', loanid: loan.id, readerid: reader.id}, loan.title);
             }));
+            if (more) {
+                item.appendChild(more);
+            }
             list.appendChild(item);
         });
         panel.appendChild(list);
@@ -397,21 +455,20 @@
                 notes.appendChild(chip);
             });
             actions.appendChild(notes);
-            if (answer.canrenew) {
-                var renew = button(str.deskrenew, 'ayv-line-renew', function(b) {
-                    b.disabled = true;
-                    post({action: 'renew', loanid: answer.loanid}).then(function(renewed) {
-                        li.classList.add('ayv-line-undone');
-                        actions.textContent = '';
+            if (answer.renew) {
+                var later = renewal(actions, answer.renew, answer.loanid, 'ayv-line-renew', 'ayv-line-quiet',
+                    function(renewed) {
+                        if (renewed.kind === 'renewed') {
+                            li.classList.add('ayv-line-undone');
+                            actions.textContent = '';
+                        }
                         add(renewed);
-                        return renewed;
-                    }).catch(function() {
-                        tone('no');
-                        b.disabled = false;
                     });
-                });
-                renew.setAttribute('aria-keyshortcuts', 'Alt+A');
-                actions.appendChild(renew);
+                var renew = actions.querySelector('.ayv-line-renew');
+                if (renew) {
+                    renew.setAttribute('aria-keyshortcuts', 'Alt+A');
+                }
+                actions.appendChild(later);
             }
             undo('returned');
         } else if (answer.kind === 'needreader' && answer.room) {

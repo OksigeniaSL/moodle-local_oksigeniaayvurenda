@@ -32,6 +32,12 @@ namespace local_oksigeniaayvurenda\core;
  * Part of the core: plain PHP, with no call to Moodle.
  */
 final class loan_rules {
+    /** @var string The renewal days count from the day the loan is renewed: the reader comes back the same weekday. */
+    public const FROM_TODAY = 'today';
+
+    /** @var string The renewal days count from the date the loan was due: its dates follow the loan's. */
+    public const FROM_DUE = 'due';
+
     /**
      * The rule that applies: an exact match first, then a rule for any item, then for any reader, then for anything.
      *
@@ -117,7 +123,10 @@ final class loan_rules {
     }
 
     /**
-     * The new due moment of a renewed loan: the renewal days count from today or from the old due date, the later.
+     * The new due moment of a renewed loan: the renewal days count from today (FROM_TODAY: whoever renews on a Thursday
+     * comes back on a Thursday) or from the old due date (FROM_DUE: the date it was owed), as the centre chooses. Either way
+     * it is more time: a count that falls on or before the later of today and the old due date (a loan renewed long before
+     * its date, or long after it) counts from that one.
      *
      * @param int $currentdue
      * @param int $now
@@ -125,6 +134,7 @@ final class loan_rules {
      * @param \DateTimeZone $tz
      * @param array $closed The centre's closed days, 'Y-m-d' => true.
      * @param int[] $rest The days the libraries close every week, by their ISO number.
+     * @param string $from FROM_TODAY or FROM_DUE.
      * @return int
      */
     public static function renewed_due(
@@ -133,9 +143,13 @@ final class loan_rules {
         array $rule,
         \DateTimeZone $tz,
         array $closed = [],
-        array $rest = [6, 7]
+        array $rest = [6, 7],
+        string $from = self::FROM_TODAY
     ): int {
-        return self::due(max($currentdue, $now), (int) $rule['renewdays'], $tz, true, $closed, $rest);
+        $days = (int) $rule['renewdays'];
+        $due = self::due($from === self::FROM_DUE ? $currentdue : $now, $days, $tz, true, $closed, $rest);
+        $later = max($currentdue, $now);
+        return $due > $later ? $due : self::due($later, $days, $tz, true, $closed, $rest);
     }
 
     /**

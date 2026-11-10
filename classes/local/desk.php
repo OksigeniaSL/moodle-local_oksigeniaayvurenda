@@ -862,6 +862,8 @@ final class desk {
         foreach ($rows as $row) {
             $days = loan_rules::days_late((int) $row->timedue, $this->now, $this->tz);
             $late += $days > 0 ? 1 : 0;
+            // More time without the book here (the reader at the desk, the family on the phone): by the rules, or by hand.
+            $renew = $this->renew_choices((int) $row->id);
             $loans[] = [
                 'id' => (int) $row->id,
                 'title' => $row->title,
@@ -871,8 +873,8 @@ final class desk {
                     'local_oksigeniaayvurenda',
                     $days
                 ) : '',
-                // More time without the book here (the reader at the desk, the family on the phone), where the rules let.
-                'renewable' => $this->renewable((int) $row->id) !== null,
+                'renew' => $renew,
+                'renewable' => !empty($renew['dates']),
             ];
         }
         // Whoever keeps one library only sees what waits for the reader there.
@@ -919,80 +921,170 @@ final class desk {
     }
 
     /**
-     * Gives a loan more time.
+     * Gives a loan more time: until the date its centre counts by (rules::renew_from), the other count, or a day chosen by
+     * hand. A day by hand is the staff's to give, for whoever needs it (a teacher with a study, the head): past the
+     * renewals the rule allows and while someone waits for the book, which the desk says first (renew_choices).
      *
      * @param int $loanid
+     * @param string $from loan_rules::FROM_TODAY or FROM_DUE; empty, the centre's.
+     * @param string $day A day chosen by hand, as Y-m-d; empty, by the rule.
      * @return array
      */
-    public function renew(int $loanid): array {
+    public function renew(int $loanid, string $from = '', string $day = ''): array {
         global $DB;
         $loan = $this->loan($loanid);
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid], '*', MUST_EXIST);
         $rule = $this->rule($reader->readertype, $item->itemtype);
-        if (!loan_rules::can_renew($rule, (int) $loan->renewals)) {
-            return $this->answer('stop', 'no', 'desknorenew', $this->title($item), ['readerid' => (int) $reader->id]);
+        $byhand = $day !== '';
+        $who = ['readerid' => (int) $reader->id];
+        if (!$byhand && !loan_rules::can_renew($rule, (int) $loan->renewals)) {
+            return $this->answer('stop', 'no', 'desknorenew', $this->title($item), $who);
         }
-        if (holds::blocks_renewal($item)) {
-            return $this->answer('stop', 'no', 'desknorenewheld', $this->title($item), ['readerid' => (int) $reader->id]);
+        if (!$byhand && holds::blocks_renewal($item)) {
+            return $this->answer('stop', 'no', 'desknorenewheld', $this->title($item), $who);
         }
-        if (reserves::active((int) $item->id, $this->now)) {
-            return $this->answer('stop', 'no', 'desknorenewreserve', $this->title($item), ['readerid' => (int) $reader->id]);
+        if (!$byhand && reserves::active((int) $item->id, $this->now)) {
+            return $this->answer('stop', 'no', 'desknorenewreserve', $this->title($item), $who);
         }
         $previous = (int) $loan->timedue;
         if ($loan->timereturned !== null && !$this->free_again($loan)) {
-            return $this->answer('stop', 'no', 'desktakenafter', $this->title($item), ['readerid' => (int) $reader->id]);
+            return $this->answer('stop', 'no', 'desktakenafter', $this->title($item), $who);
+        }
+        if ($byhand) {
+            $due = $this->by_hand($day);
+            $after = max($previous, $this->now);
+            if ($due === null || $due <= $after) {
+                return $this->answer('stop', 'no', 'deskrenewbadday', $this->date($after), $who);
+            }
+        } else {
+            $due = $this->renewed($loan, $rule, $from);
+            // No more time past the date to have everything back.
+            if ($due <= $previous && $loan->timereturned === null) {
+                return $this->answer('stop', 'no', 'desknorenewreturnby', $this->date($due), $who);
+            }
         }
         if ($loan->timereturned !== null) {
             // Renewing right after the copy came back: it goes out again with the same loan.
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         }
-        $due = $this->capped(loan_rules::renewed_due(
-            $previous,
-            $this->now,
-            $rule,
-            $this->tz,
-            $this->closed(),
-            zones::rest_days($this->library)
-        ));
-        // No more time past the date to have everything back.
-        if ($due <= $previous && $loan->timereturned === null) {
-            return $this->answer('stop', 'no', 'desknorenewreturnby', $this->date($due), ['readerid' => (int) $reader->id]);
-        }
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $due, 'timereturned' => null,
             'returnstaffid' => null, 'renewals' => $loan->renewals + 1, 'timemodified' => $this->now]);
-        $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
+        $a = (object) ['title' => $this->title($item), 'due' => $this->day($due)];
         return $this->answer('renewed', 'ok', 'deskrenewed', $a, ['loanid' => (int) $loan->id, 'previousdue' => $previous,
             'readerid' => (int) $reader->id, 'reader' => $this->reader_panel((int) $reader->id)]);
     }
 
     /**
-     * Whether a loan out can be given more time now, as renew() would see it, and until when.
+     * Whether a loan out can be given more time now by its rule, as renew() would give it, and until when.
      *
      * @param int $loanid
-     * @return int|null The new date it would be due, or null if it cannot.
+     * @return int|null The new date it would be due, by the centre's count, or null if it cannot.
      */
     public function renewable(int $loanid): ?int {
+        return $this->renew_choices($loanid)['dates'][0]['time'] ?? null;
+    }
+
+    /**
+     * How a loan can be given more time now, for the desk: the dates its rule gives, the centre's count first and the
+     * other one when it falls on another day, each with what its button says; why the rule gives none, when it does not;
+     * and the first day one chosen by hand can be.
+     *
+     * @param int $loanid
+     * @return array|null dates (from, time, label), why, first (Y-m-d); null when not even by hand (the copy went out again
+     *     with someone else).
+     */
+    public function renew_choices(int $loanid): ?array {
         global $DB;
         $loan = $this->loan($loanid);
+        if ($loan->timereturned !== null && !$this->free_again($loan)) {
+            return null;
+        }
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid], '*', MUST_EXIST);
         $rule = $this->rule($reader->readertype, $item->itemtype);
-        if (
-            !loan_rules::can_renew($rule, (int) $loan->renewals) || holds::blocks_renewal($item)
-            || reserves::active((int) $item->id, $this->now) || ($loan->timereturned !== null && !$this->free_again($loan))
-        ) {
-            return null;
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $why = '';
+        if (!loan_rules::can_renew($rule, (int) $loan->renewals)) {
+            $why = $str('deskrenewhandcount');
+        } else if (holds::blocks_renewal($item)) {
+            $why = $str('deskrenewhandheld');
+        } else if (reserves::active((int) $item->id, $this->now)) {
+            $why = $str('deskrenewhandreserve');
         }
-        $due = $this->capped(loan_rules::renewed_due(
+        $dates = [];
+        if ($why === '') {
+            $mine = rules::renew_from((int) $this->library->entityid);
+            $other = $mine === loan_rules::FROM_TODAY ? loan_rules::FROM_DUE : loan_rules::FROM_TODAY;
+            foreach ([$mine, $other] as $from) {
+                $time = $this->renewed($loan, $rule, $from);
+                if ($time > (int) $loan->timedue && !in_array($time, array_column($dates, 'time'), true)) {
+                    $dates[] = ['from' => $from, 'time' => $time, 'label' => $str(
+                        $dates ? 'deskrenewchoice' . $from : 'deskrenewuntil',
+                        $this->day($time)
+                    )];
+                }
+            }
+            $why = $dates ? '' : $str('deskrenewhandnone');
+        }
+        $first = (new \DateTimeImmutable('@' . max($this->now, (int) $loan->timedue)))->setTimezone($this->tz)->modify('+1 day');
+        return ['dates' => $dates, 'why' => $why, 'first' => $first->format('Y-m-d')];
+    }
+
+    /**
+     * The date a renewal by the rule gives a loan, counted as asked or as its centre counts.
+     *
+     * @param \stdClass $loan
+     * @param array $rule
+     * @param string $from loan_rules::FROM_TODAY or FROM_DUE; anything else, the centre's.
+     * @return int
+     */
+    private function renewed(\stdClass $loan, array $rule, string $from): int {
+        if (!in_array($from, [loan_rules::FROM_TODAY, loan_rules::FROM_DUE], true)) {
+            $from = rules::renew_from((int) $this->library->entityid);
+        }
+        return $this->capped(loan_rules::renewed_due(
             (int) $loan->timedue,
             $this->now,
             $rule,
             $this->tz,
             $this->closed(),
-            zones::rest_days($this->library)
+            zones::rest_days($this->library),
+            $from
         ));
-        return $due > (int) $loan->timedue ? $due : null;
+    }
+
+    /**
+     * The due moment of a day chosen by hand: the end of that day, or of the next one the library opens.
+     *
+     * @param string $day Y-m-d.
+     * @return int|null Null when it is not a day.
+     */
+    private function by_hand(string $day): ?int {
+        $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $day) ? \DateTimeImmutable::createFromFormat('!Y-m-d', $day, $this->tz)
+            : false;
+        if (!$date || $date->format('Y-m-d') !== $day) {
+            return null;
+        }
+        return loan_rules::due(
+            $date->setTime(12, 0)->getTimestamp(),
+            0,
+            $this->tz,
+            true,
+            $this->closed(),
+            zones::rest_days($this->library)
+        );
+    }
+
+    /**
+     * A day as the desk says it when it matters which one of the week: «jueves, 12 de noviembre».
+     *
+     * @param int $time
+     * @return string
+     */
+    private function day(int $time): string {
+        // The plugin's own format: Moodle's Spanish one leaves out the «de» («martes, 17 noviembre»).
+        return userdate($time, get_string('deskdayformat', 'local_oksigeniaayvurenda'), $this->tz->getName());
     }
 
     /**
@@ -1329,6 +1421,8 @@ final class desk {
             'loanid' => (int) $loan->id,
             'material' => $material,
             'canrenew' => !$hold && loan_rules::can_renew($rule, (int) $loan->renewals) && !holds::blocks_renewal($item),
+            // Not while it goes to whoever waits for it.
+            'renew' => $hold ? null : $this->renew_choices((int) $loan->id),
             'late' => $days,
             'readerid' => (int) $loan->readerid,
             'sanction' => $sanction,

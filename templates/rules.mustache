@@ -44,7 +44,12 @@
         "sanctionsfieldnotice": "Días hasta el primer aviso", "noticeafter": 1, "sanctionsnoticehint": "Con 1, al día siguiente.",
         "sanctionsfinehint": "Solo se apunta.", "sanctionsfieldgrace": "Días que no cuentan", "grace": 0, "hasstages": true,
         "holdsstages": "Etapas", "holdsallstages": "Todas", "allstages": true, "stages": [{"name": "Primaria", "chosen": false}],
-        "adults": true, "sanctionsadults": "También el personal"
+        "adults": true, "sanctionsadults": "También el personal",
+        "renewfromheading": "Al ampliar un préstamo", "renewsentence": "Los días de la ampliación cuentan desde el día que se amplía.",
+        "renewfromdesk": "En el mostrador, «Otra fecha» ofrece también la otra cuenta y un día a mano.",
+        "renewfromlegend": "Desde cuándo cuentan", "renewfromcentre": "Vale para todas las bibliotecas de este centro.",
+        "renewfroms": [{"value": "today", "label": "Desde el día que se amplía", "hint": "Vuelve el mismo día de la semana.", "checked": true},
+            {"value": "due", "label": "Desde la fecha en que tenía que volver", "hint": "La fecha sigue la del préstamo.", "checked": false}]
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -66,6 +71,28 @@
 {{/hascards}}
 <p class="ayv-field-hint">{{rulesprecedence}}</p>
 {{#newform}}{{> local_oksigeniaayvurenda/rules_form}}{{/newform}}
+<section class="ayv-section ayv-sanction-rule">
+    <h2 class="ayv-section-title">{{renewfromheading}}</h2>
+    <div class="ayv-sanction-card">
+        <p class="ayv-rule-sentence">{{renewsentence}}</p>
+        <p class="ayv-field-hint">{{renewfromdesk}}</p>
+        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-renewfrom">{{ruleschange}}</button></p>
+    </div>
+    <dialog class="ayv-modal" id="ayv-renewfrom" aria-labelledby="ayv-renewfrom-title">
+        <div class="ayv-modal-head"><h3 id="ayv-renewfrom-title" class="ayv-section-title">{{renewfromheading}}</h3>
+            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
+        <p class="ayv-field-hint">{{renewfromcentre}}</p>
+        <form method="post" action="{{action}}" class="ayv-rule-form">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="renewfrom">
+            <fieldset class="ayv-dig-set"><legend>{{renewfromlegend}}</legend>
+                <div class="ayv-sanction-modes">
+                    {{#renewfroms}}<label class="ayv-sanction-mode"><input type="radio" name="renewfrom" value="{{value}}" {{#checked}}checked{{/checked}}><span><b>{{label}}</b>{{hint}}</span></label>{{/renewfroms}}
+                </div>
+            </fieldset>
+            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+        </form>
+    </dialog>
+</section>
 <section class="ayv-section ayv-sanction-rule">
     <h2 class="ayv-section-title">{{sanctionsheading}}</h2>
     <div class="ayv-sanction-card">

@@ -281,6 +281,47 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * A renewal by the centre's count, by the other one, or to a day chosen by hand: the desk offers them; by hand, past
+     * the renewals the rule allows, never on or before the date it is due, and on a day the library opens.
+     */
+    public function test_renew_choices(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $thursday = new \DateTimeImmutable('next thursday 12:00', \core_date::get_server_timezone_object());
+        $end = fn(string $modify) => $thursday->modify($modify)->setTime(23, 59, 59)->getTimestamp();
+        $desk = new desk($w->library, (int) $w->staff->id, $thursday->getTimestamp());
+        $loanid = (int) $desk->scan('100000L', (int) $w->ana->id)['loanid'];
+        // It was due on Tuesday: renewed on Thursday, a week from today or a week from Tuesday.
+        $DB->set_field(self::T . 'loan', 'timedue', $end('-2 days'), ['id' => $loanid]);
+        $choices = $desk->renew_choices($loanid);
+        $this->assertSame(['today', 'due'], array_column($choices['dates'], 'from'));
+        $this->assertSame([$end('+7 days'), $end('+5 days')], array_column($choices['dates'], 'time'));
+        $this->assertSame('', $choices['why']);
+        $this->assertSame($thursday->modify('+1 day')->format('Y-m-d'), $choices['first']);
+        $this->assertSame($end('+7 days'), $desk->renewable($loanid));
+        // A centre that counts from the due date offers that one first, and gives it by default.
+        rules::save_renew_from((int) $w->library->entityid, 'due');
+        $this->assertSame(['due', 'today'], array_column($desk->renew_choices($loanid)['dates'], 'from'));
+        $this->assertSame('renewed', $desk->renew($loanid)['kind']);
+        $this->assertSame($end('+5 days'), (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $loanid]));
+
+        // Its one renewal used: only by hand, and the desk says why.
+        $choices = $desk->renew_choices($loanid);
+        $this->assertSame([], $choices['dates']);
+        $this->assertNotSame('', $choices['why']);
+        $this->assertSame('stop', $desk->renew($loanid)['kind']);
+        $this->assertSame('stop', $desk->renew($loanid, '', 'not a day')['kind']);
+        $this->assertSame('stop', $desk->renew($loanid, '', $thursday->modify('+3 days')->format('Y-m-d'))['kind']);
+        $day = $thursday->modify('+30 days');
+        $this->assertSame('renewed', $desk->renew($loanid, '', $day->format('Y-m-d'))['kind']);
+        $due = (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $loanid]);
+        $this->assertGreaterThanOrEqual($day->setTime(23, 59, 59)->getTimestamp(), $due);
+        $this->assertLessThan($day->modify('+3 days')->getTimestamp(), $due);
+        $this->assertSame(2, (int) $DB->get_field(self::T . 'loan', 'renewals', ['id' => $loanid]));
+    }
+
+    /**
      * What changed since is not undone: a return undone, or a returned loan renewed, after another reader took the copy;
      * a loan undone after the book came back; a renewal undone with a date that was not this loan's.
      */

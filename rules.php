@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\cataloguer;
 use local_oksigeniaayvurenda\core\desk\sanction_rules;
+use local_oksigeniaayvurenda\core\loan_rules;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\rules;
 use local_oksigeniaayvurenda\local\sanctions;
@@ -68,6 +69,10 @@ if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPH
         'noticeafter' => optional_param('noticeafter', 1, PARAM_INT),
     ]);
     $notice = $str('sanctionssaved');
+} else if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPHA) === 'renewfrom') {
+    // How the desk counts a renewal, for the whole centre: the other count and a day by hand stay a touch away there.
+    rules::save_renew_from($entityid, optional_param('renewfrom', loan_rules::FROM_TODAY, PARAM_ALPHA));
+    $notice = $str('renewfromsaved');
 } else if (data_submitted() && confirm_sesskey()) {
     // One rule at a time: changed, added or taken away; the others stay as they were.
     $all = rules::of((int) $library->id);
@@ -182,6 +187,7 @@ if ($late['mode'] !== sanction_rules::NONE) {
     $latefacts[] = $late['stages'] ? $str($late['adults'] ? 'sanctionswhostages' : 'sanctionswhostagesonly', $stagenames)
         : $str($late['adults'] ? 'sanctionswhoall' : 'sanctionswhostudents');
 }
+$renewfrom = rules::renew_from($entityid);
 $latestate = sanctions::now($entityid, time());
 $stages = holds::stages($entityid, time());
 $currencies = get_string_manager()->get_list_of_currencies();
@@ -229,6 +235,12 @@ $data = [
     'stages' => array_map(fn($name) => ['name' => $name, 'chosen' => in_array($name, $late['stages'], true)], $stages),
     'adults' => $late['adults'],
     'noticeafter' => $late['noticeafter'],
+    'renewsentence' => $str('renewfromsentence' . $renewfrom),
+    'renewfroms' => array_map(
+        fn($from) => ['value' => $from, 'label' => $str('renewfrom' . $from), 'hint' => $str('renewfrom' . $from . 'hint'),
+        'checked' => $renewfrom === $from],
+        [loan_rules::FROM_TODAY, loan_rules::FROM_DUE]
+    ),
 ];
 foreach (
     ['rulesreader', 'rulesitem', 'rulesdaysplain', 'rulesmaxplain', 'rulesrenewals', 'rulesrenewdays', 'rulesremoveone',
@@ -236,7 +248,8 @@ foreach (
         'sanctionsheading', 'menusanctions', 'sanctionsmodelegend', 'sanctionsfieldperday', 'sanctionsfieldmaxdays',
         'sanctionsdayshint', 'sanctionsfieldcents', 'sanctionsfieldmaxcents', 'sanctionsfieldblock', 'sanctionsfieldcurrency',
         'sanctionsfinehint', 'sanctionsfieldgrace', 'holdsstages', 'holdsallstages', 'sanctionsadults', 'sanctionscentre',
-        'sanctionsfieldnotice', 'sanctionsnoticehint'] as $key
+        'sanctionsfieldnotice', 'sanctionsnoticehint', 'renewfromheading', 'renewfromdesk', 'renewfromlegend',
+        'renewfromcentre'] as $key
 ) {
     $data[$key] = $str($key);
 }
