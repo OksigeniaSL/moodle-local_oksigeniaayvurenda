@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.230.0 (2026-11-10)
+
+- A big catalogue is imported apart: a file over 8 MB (the whole catalogue of a university, hundreds of thousands of
+  records) no longer has to fit in the ten minutes of the import page. It goes to a task that imports it as the person
+  who started it and sends them a message when it is done, with what came in (or why it could not); meanwhile the page
+  says so, work goes on, and no other import starts in that library. A small file is imported at once, as before.
+
 ## 0.229.0 (2026-11-10)
 
 - Each library says when late books are told about, and to whom, in «Late notices» in «Loan rules»: how many days late

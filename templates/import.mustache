@@ -31,6 +31,8 @@
         "heading": "Importar un catálogo", "intro": "Nada cambia hasta que digas «Importar».",
         "plansummary": "Plan Gratis: 812 de 1.000 ejemplares", "error": "", "action": "#", "sesskey": "abc",
         "upload": false, "done": null,
+        "queued": {"text": "«universidad.mrc» es grande: se está importando aparte desde las 12:40."},
+        "importqueuedtitle": "Importando aparte", "importqueuedmeanwhile": "Mientras tanto", "urldesk": "https://example.com/desk.php",
         "review": {
             "file": "catalogo.csv", "kind": "Hoja de cálculo",
             "figures": [{"count": "6", "label": "fichas"}, {"count": "6", "label": "ejemplares"}],
@@ -204,4 +206,19 @@
     <p class="ayv-imp-another"><a href="{{urlself}}">{{importanother}}</a></p>
 </section>
 {{/done}}
+{{#queued}}
+<section class="ayv-imp-done">
+    <header class="ayv-imp-head">
+        <div class="ayv-imp-headtext">
+            <h1 class="ayv-imp-title">{{importqueuedtitle}}</h1>
+        </div>
+    </header>
+    <p class="ayv-imp-lead">{{text}}</p>
+    <h2 class="ayv-section-title">{{importqueuedmeanwhile}}</h2>
+    <ul class="ayv-imp-next">
+        <li><a href="{{urldesk}}">{{> local_oksigeniaayvurenda/icon_scan_line}}<b>{{importnextdesk}}</b><span>{{importnextdeskhint}}</span></a></li>
+        <li><a href="{{urlreaders}}">{{> local_oksigeniaayvurenda/icon_users}}<b>{{importnextreaders}}</b><span>{{importnextreadershint}}</span></a></li>
+    </ul>
+</section>
+{{/queued}}
 </div>

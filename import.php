@@ -29,10 +29,9 @@ use local_oksigeniaayvurenda\core\marc\charset;
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\characters;
-use local_oksigeniaayvurenda\local\import\abies_import;
-use local_oksigeniaayvurenda\local\import\catalogue_import;
 use local_oksigeniaayvurenda\local\import\files;
 use local_oksigeniaayvurenda\local\import\preview;
+use local_oksigeniaayvurenda\local\import\runner;
 use local_oksigeniaayvurenda\local\plan_full;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\screens;
@@ -94,70 +93,34 @@ if (data_submitted() && confirm_sesskey()) {
         $pending['charset'] = in_array($set, charset::SETS, true) ? $set : charset::AUTO;
         $SESSION->ayvurendaimport = $pending;
     } else if ($step === 'import' && $pending) {
+        $options = ['notes' => optional_param('notes', 0, PARAM_BOOL), 'readers' => optional_param('readers', 0, PARAM_BOOL),
+            'map' => array_filter(
+                optional_param_array('column', [], PARAM_ALPHANUMEXT),
+                fn($f) => in_array($f, catalogue_csv::FIELDS, true)
+            )];
+        $queued = false;
         try {
-            if ($pending['kind'] === 'abies') {
-                $xml = files::abies_xml($pending['path']);
-                $importer = new abies_import(
-                    (int) $library->id,
-                    optional_param('notes', 0, PARAM_BOOL),
-                    optional_param('readers', 0, PARAM_BOOL)
-                );
-                $stats = plans::within($entityid, fn() => $importer->run(new export_reader($xml)));
-                $figures = [$figure($stats['record']['created'] ?? 0, 'importnewrecords'),
-                    $figure($stats['item']['created'] ?? 0, 'importnewitems')];
-                if (optional_param('readers', 0, PARAM_BOOL)) {
-                    $figures[] = $figure($stats['reader']['created'] ?? 0, 'importfigreaders');
-                    $figures[] = $figure($stats['loan']['created'] ?? 0, 'importfigloans');
-                }
-                $here = 0;
-                $made = 0;
-                foreach ($stats as $counts) {
-                    $here += ($counts['changedhere'] ?? 0) + ($counts['deletedhere'] ?? 0) + ($counts['erased'] ?? 0);
-                    $made += $counts['madehere'] ?? 0;
-                }
-                $again = [$str('importabiesagain')];
-                if ($here) {
-                    $again[] = $str('importabieshere');
-                }
-                if ($made) {
-                    $again[] = $str('importabiesmade');
-                }
-                $relabelled = array_map(fn($copy) => $copy[0] . ' → ' . $copy[1], $importer->relabelled());
-                $data['done'] = ['figures' => $figures, 'again' => implode(' ', $again),
-                    'newcodes' => $relabelled ? $str('importrelabelled', implode(', ', $relabelled)) : ''];
-                catalogue::purge($entityid);
+            if (runner::running($library)) {
+                // One import at a time in a library: the other one is still going.
+                $data['error'] = $str('importstillrunning');
+            } else if ((int) @filesize($pending['path']) > runner::BACKGROUND) {
+                // A big file does not fit in the page's time: it goes on apart, and a message says when it is done.
+                runner::queue($library, $pending, $options, (int) $USER->id);
+                $queued = true;
+                $data['upload'] = false;
             } else {
-                $map = array_filter(
-                    optional_param_array('column', [], PARAM_ALPHANUMEXT),
-                    fn($f) => in_array($f, catalogue_csv::FIELDS, true)
-                );
-                $records = $pending['kind'] === 'csv' ? files::csv_records($pending['path'], $map)
-                    : files::marc($pending['path'], $pending['kind'], $pending['charset'] ?? charset::AUTO);
-                $importer = new catalogue_import($library, $pending['kind'] === 'csv' ? 'csv' : 'marc');
-                $stats = plans::within($entityid, fn() => $importer->run($records));
-                $data['done'] = [
-                    'figures' => [$figure($stats['records'], 'importnewrecords'), $figure($stats['items'], 'importnewitems')],
-                    'again' => $stats['found'] || $stats['kept'] ? $str('importagain', (object) ['records' => $stats['found'],
-                        'items' => $stats['kept']]) : '',
-                    'newcodes' => trim(($stats['newcodes'] ? $str('importnewcodes', $stats['newcodes']) : '') . ' '
-                        . (!empty($stats['untitled']) ? $str(
-                            $stats['untitled'] === 1 ? 'importuntitledone' : 'importuntitled',
-                            $stats['untitled']
-                        ) : '') . ' ' . (!empty($stats['updated']) ? $str('importupdated', $stats['updated']) : '')
-                        . ' ' . ($importer->relabelled() ? $str('importrelabelled', implode(
-                            ', ',
-                            array_map(fn($copy) => $copy[0] . ' → ' . $copy[1], $importer->relabelled())
-                        )) : '')),
-                ];
+                $data['done'] = runner::run($library, $pending, $options);
+                $data['done']['said'] = characters::say($entityid, 'memory', 'importmemory', [], 'celebra');
+                $data['upload'] = false;
             }
-            $data['done']['said'] = characters::say($entityid, 'memory', 'importmemory', [], 'celebra');
-            $data['upload'] = false;
         } catch (plan_full $e) {
             $data['error'] = $e->getMessage();
         } catch (Throwable $e) {
             $data['error'] = $str('importfailed', $e->getMessage());
         }
-        @unlink($pending['path']);
+        if (!$queued) {
+            @unlink($pending['path']);
+        }
         $pending = null;
         unset($SESSION->ayvurendaimport);
     } else if ($step === 'cancel' && $pending) {
@@ -165,6 +128,14 @@ if (data_submitted() && confirm_sesskey()) {
         $pending = null;
         unset($SESSION->ayvurendaimport);
     }
+}
+$running = runner::running($library);
+if ($running && !$data['done']) {
+    $data['queued'] = ['text' => $str('importqueued', (object) ['name' => $running['name'],
+        'time' => userdate((int) $running['time'], get_string('strftimetime', 'langconfig'))])];
+    $data['upload'] = false;
+    $data['error'] = '';
+    $pending = null;
 }
 if ($pending) {
     try {
@@ -250,7 +221,7 @@ foreach (
         'importcancel', 'importbusy', 'importbusyhint', 'importuploadintro', 'importnotes', 'importreaders', 'importreadershint',
         'importdonetitle', 'importnextheading', 'importnextcatalogue', 'importnextcataloguehint', 'importnextlabels',
         'importnextlabelshint', 'importnextreaders', 'importnextreadershint', 'importnextdesk', 'importnextdeskhint',
-        'importanother', 'offsiteclose'] as $key
+        'importanother', 'offsiteclose', 'importqueuedtitle', 'importqueuedmeanwhile'] as $key
 ) {
     $data[$key] = $str($key);
 }
