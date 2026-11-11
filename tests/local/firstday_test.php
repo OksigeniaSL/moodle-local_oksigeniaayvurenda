@@ -88,8 +88,20 @@ final class firstday_test extends \advanced_testcase {
         $this->assertSame(['lend' => true, 'giveback' => true, 'cards' => false], firstday::done($library, (int) $new->id));
         $this->assertSame('2 of 3', firstday::context($library, (int) $new->id)['count']);
 
-        access::set_closed((int) $library->entityid, true);
+        // Someone who has lent there ten times is no newcomer, even without a card printed.
+        for ($i = 0; $i < 9; $i++) {
+            $other = $generator->create_item(['libraryid' => $library->id]);
+            $generator->create_loan(['libraryid' => $library->id, 'itemid' => $other->id, 'readerid' => $holder->id,
+                'staffid' => $new->id]);
+        }
         $this->assertNull(firstday::context($library, (int) $new->id));
+        $this->assertSame(['lend' => true, 'giveback' => true, 'cards' => false], firstday::done($library, (int) $new->id));
+
+        $fresh = $this->getDataGenerator()->create_user();
+        role_assign(roles::ensure_librarian(), $fresh->id, access::context((int) $library->entityid)->id);
+        $this->assertNotNull(firstday::context($library, (int) $fresh->id));
+        access::set_closed((int) $library->entityid, true);
+        $this->assertNull(firstday::context($library, (int) $fresh->id));
     }
 
     /**

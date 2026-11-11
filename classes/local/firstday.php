@@ -72,9 +72,30 @@ final class firstday {
         ];
     }
 
+    /** @var int Loans someone has made at a centre's desks to be no newcomer there. */
+    private const SEASONED = 10;
+
+    /**
+     * Whether someone already knows the desk of a centre: whoever has lent there a handful of times is no newcomer, even
+     * if they never printed a card.
+     *
+     * @param \stdClass $library
+     * @param int $userid
+     * @return bool
+     */
+    private static function seasoned(\stdClass $library, int $userid): bool {
+        global $DB;
+        return $DB->count_records_sql(
+            'SELECT COUNT(1) FROM {local_oksigeniaayvurenda_loan} l
+               JOIN {local_oksigeniaayvurenda_library} b ON b.id = l.libraryid
+              WHERE b.entityid = ? AND l.staffid = ?',
+            [(int) $library->entityid, $userid]
+        ) >= self::SEASONED;
+    }
+
     /**
      * What the template open_steps takes, or null when it does not show: the library is not open yet (its five steps
-     * show instead), the person does not work at its desk, or everything is done.
+     * show instead), the person does not work at its desk, everything is done, or they have lent there often already.
      *
      * @param \stdClass $library
      * @param int $userid
@@ -89,7 +110,7 @@ final class firstday {
             return null;
         }
         $done = self::done($library, $userid);
-        if (!in_array(false, $done, true)) {
+        if (!in_array(false, $done, true) || self::seasoned($library, $userid)) {
             return null;
         }
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);

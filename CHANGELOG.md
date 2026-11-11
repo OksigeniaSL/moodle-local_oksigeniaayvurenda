@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.234.1 (2026-11-11)
+
+- «Your first day here» is for newcomers only: whoever has already lent ten books at a centre's desks does not see it,
+  even if they never printed a card (a librarian of the school saw it for the card alone).
+
 ## 0.234.0 (2026-11-11)
 
 - «See a full sample library», beside the form of the first library: with one touch, a centre apart with some hundreds
