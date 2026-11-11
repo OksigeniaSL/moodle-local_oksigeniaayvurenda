@@ -850,3 +850,20 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
     .ayv .ayv-opening { grid-template-columns: minmax(0, 1fr); grid-template-areas: "figure" "text"; }
     .ayv .ayv-opening-figure { width: 140px; }
 }
+
+/* Jujol, 11 November: the quick way out of a step (the rules that come with it, running it alone) reads as a line, not
+   as a third button; the gaps of the shelf keep their muted ink at night. */
+.ayv .ayv-open-alt { margin: .15rem 0 0; }
+.ayv .ayv-open-skip {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.ayv .ayv-open-case .ayv-spine-gap .ayv-spine { color: var(--ayv-muted); }

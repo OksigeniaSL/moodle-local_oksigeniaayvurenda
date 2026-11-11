@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.232.1 (2026-11-11)
+
+- «To open your library», Jujol's review: each spine of the shelf carries a short name that fits (Catalogue, Readers,
+  Rules, Team, Open); «The ones it comes with will do» and «For now, I run it» read as a line under the step instead of
+  a third button, so the row keeps «Do it» and «Show me»; and the gaps of the shelf keep their muted ink at night.
+
 ## 0.232.0 (2026-11-11)
 
 - «To open your library»: a centre made from the screen or signed up starts closed to its readers, and its staff see

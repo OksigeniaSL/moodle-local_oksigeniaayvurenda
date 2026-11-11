@@ -28,7 +28,7 @@
     * eyebrow, title, lead - what the piece says on top (lead only when unfolded)
     * count - «2 of 5»; nowlabel, nowname - «Now:» and the step to do now; nowurl - where «Do it» goes
     * dolabel, showlabel, foldlabel, unfoldlabel, donelabel, nowmark - the words of the buttons and marks
-    * steps - n, name, short (three letters for the label), what, url, showurl, bg, ink (cream or ink), cm (height),
+    * steps - n, name, spine (its short name on the spine), short (three letters for the label), what, url, showurl, bg, ink (cream or ink), cm (height),
       done, now, todo, blocked, notyours, can (may do it), meta (who and when, when done), reason (why it waits),
       who (who does it, when it is not for whoever looks)
     * confirm (in a step) - for the rules and the team, a form that says what there is will do: action, sesskey, library,
@@ -42,11 +42,11 @@
         "lead": "Cinco pasos. Llevas dos.", "count": "2 de 5", "nowlabel": "Ahora:", "nowname": "las normas",
         "nowurl": "#", "dolabel": "Hacerlo", "showlabel": "Enséñamelo", "foldlabel": "Plegar",
         "unfoldlabel": "Ver los cinco pasos", "donelabel": "Hecho", "nowmark": "Ahora",
-        "steps": [{"n": 1, "name": "El catálogo", "short": "CAT", "what": "Los libros que ya tienes.", "url": "#",
+        "steps": [{"n": 1, "name": "El catálogo", "spine": "Catálogo", "short": "CAT", "what": "Los libros que ya tienes.", "url": "#",
             "showurl": "#", "bg": "#17574c", "ink": "cream", "cm": 25, "done": true, "now": false, "todo": false,
             "blocked": false, "notyours": false, "can": true, "meta": "1.240 libros · Luis Ortega, el 9 de noviembre",
             "reason": "", "who": "", "confirm": null},
-            {"n": 3, "name": "Las normas de préstamo", "short": "NOR", "what": "Cuántos días y cuántos libros.", "url": "#",
+            {"n": 3, "name": "Las normas de préstamo", "spine": "Normas", "short": "NOR", "what": "Cuántos días y cuántos libros.", "url": "#",
             "showurl": "", "bg": "#f2b632", "ink": "ink", "cm": 24, "done": false, "now": true, "todo": false,
             "blocked": false, "notyours": false, "can": true, "meta": "", "reason": "", "who": "",
             "confirm": {"action": "#", "sesskey": "abc", "library": "demo-1", "say": "rules",
@@ -77,7 +77,7 @@
                     {{#steps}}
                     <li class="ayv-spine-slot{{^done}} ayv-spine-gap{{/done}}{{#now}} ayv-open-slot-now{{/now}}" style="--w: 46px; --cm: {{cm}}">
                         <span class="ayv-spine ayv-spine-{{ink}}" style="--bg: {{bg}}; --bgd: {{bg}}">
-                            <span class="ayv-spine-title">{{name}}</span>
+                            <span class="ayv-spine-title">{{#spine}}{{spine}}{{/spine}}{{^spine}}{{name}}{{/spine}}</span>
                             {{#done}}<span class="ayv-spine-label ayv-spine-label-place" style="--place: {{bg}}"><span>{{n}}</span><span>{{short}}</span></span>{{/done}}
                             {{^done}}<span class="ayv-open-gapnum">{{n}}</span>{{/done}}
                         </span>
@@ -95,6 +95,7 @@
                 <div class="ayv-open-text">
                     <h3 class="ayv-open-name">{{#done}}<a href="{{url}}">{{name}}</a>{{/done}}{{^done}}{{name}}{{/done}}{{#now}} <span class="ayv-open-nowmark">{{nowmark}}</span>{{/now}}</h3>
                     {{^done}}<p class="ayv-open-what">{{what}}</p>{{/done}}
+                    {{#confirm}}<form method="post" action="{{action}}" class="ayv-open-alt"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="say" value="{{say}}"><button type="submit" class="ayv-open-skip" name="do" value="say">{{label}}</button></form>{{/confirm}}
                     {{#done}}<p class="ayv-open-meta ayv-open-meta-done">{{> local_oksigeniaayvurenda/icon_check }}<span><b>{{donelabel}}</b> · {{meta}}</span></p>{{/done}}
                     {{#blocked}}<p class="ayv-open-meta ayv-open-meta-why">{{reason}}</p>{{/blocked}}
                     {{#notyours}}<p class="ayv-open-meta ayv-open-meta-who">{{> local_oksigeniaayvurenda/icon_users }}<span>{{who}}</span></p>{{/notyours}}
@@ -102,7 +103,6 @@
                 {{^done}}
                 <div class="ayv-open-acts">
                     {{#can}}<a class="ayv-button{{^now}} ayv-button-quiet{{/now}} ayv-open-do" href="{{url}}">{{dolabel}}</a>{{/can}}
-                    {{#confirm}}<form method="post" action="{{action}}" class="ayv-open-say"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="say" value="{{say}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="say">{{label}}</button></form>{{/confirm}}
                     {{#showurl}}<a class="ayv-button ayv-button-quiet ayv-open-show" href="{{showurl}}">{{> local_oksigeniaayvurenda/icon_play }}<span>{{showlabel}}</span></a>{{/showurl}}
                 </div>
                 {{/done}}

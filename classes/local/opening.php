@@ -38,11 +38,11 @@ final class opening {
 
     /** @var array[] Of each step: the permission it needs, its page, its guided help, its colour and its height. */
     private const LOOK = [
-        'catalogue' => ['catalogue', 'import.php', 'import', '#17574c', 'cream', 25],
-        'readers' => ['manage', 'sources.php', 'readers', '#e2614a', 'ink', 22],
-        'rules' => ['manage', 'rules.php', 'rules', '#f2b632', 'ink', 24],
-        'team' => ['manage', '', 'keepers', '#7fb7a4', 'ink', 21],
-        'open' => ['manage', 'open.php', '', '#22303f', 'cream', 26],
+        'catalogue' => ['catalogue', 'import.php', 'import', '#17574c', 'cream', 28],
+        'readers' => ['manage', 'sources.php', 'readers', '#e2614a', 'ink', 29],
+        'rules' => ['manage', 'rules.php', 'rules', '#f2b632', 'ink', 27],
+        'team' => ['manage', '', 'keepers', '#7fb7a4', 'ink', 26],
+        'open' => ['manage', 'open.php', '', '#22303f', 'cream', 30],
     ];
 
     /** @var string The preference that keeps the list folded, for whoever folded it. */
@@ -159,7 +159,8 @@ final class opening {
                 '/local/oksigeniaayvurenda/help.php',
                 ['library' => $library->slug, 'piece' => $piece]
             ))->out(false) : '';
-            $rows[] = ['n' => $n, 'name' => self::str('openstep' . $key), 'short' => self::str('openshort' . $key),
+            $rows[] = ['n' => $n, 'name' => self::str('openstep' . $key), 'spine' => self::str('openspine' . $key),
+                'short' => self::str('openshort' . $key),
                 'what' => self::str('openwhat' . $key), 'url' => self::url($key, $page, $library), 'showurl' => $help,
                 'bg' => $bg, 'ink' => $ink, 'cm' => $cm, 'done' => $step['done'], 'now' => $key === $now && !$step['done'],
                 'todo' => !$step['done'] && $key !== $now, 'blocked' => $step['blocked'],
