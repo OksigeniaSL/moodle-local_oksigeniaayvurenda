@@ -69,6 +69,18 @@ final class libraries {
     }
 
     /**
+     * Whether the site has no library of its own yet: the practice libraries of the guided help do not count.
+     *
+     * @return bool
+     */
+    public static function none(): bool {
+        global $DB;
+        return !$DB->record_exists_select(self::T . 'library', 'NOT ' . $DB->sql_like('slug', ':practice'), [
+            'practice' => practice::SLUG . '%',
+        ]);
+    }
+
+    /**
      * Creates an entity with its first library, the central one.
      *
      * @param array $data name, library (its name), yearstart (MM-DD), classification, controlletter.

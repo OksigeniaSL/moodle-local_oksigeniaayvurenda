@@ -23,12 +23,14 @@
  */
 
 /**
- * Creates the librarian role.
+ * Creates the librarian's and the manager's roles, and gives the site's settings their values, so that Moodle does not
+ * stop on them on «New settings»: none is needed to start.
  *
  * @return bool
  */
 function xmldb_local_oksigeniaayvurenda_install() {
     \local_oksigeniaayvurenda\local\roles::ensure_librarian();
     \local_oksigeniaayvurenda\local\roles::ensure_manager();
+    \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;
 }

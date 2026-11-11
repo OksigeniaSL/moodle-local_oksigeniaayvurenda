@@ -706,6 +706,8 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110819, 'local', 'oksigeniaayvurenda');
     }
 
+    // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
+    \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;
 }
 

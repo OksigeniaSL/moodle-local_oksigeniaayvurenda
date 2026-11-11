@@ -25,6 +25,7 @@
     * featured - the big one (name, url, kindlabel, motto, colour, image, enter), or nothing
     * libraries - the others (name, url, kindlabel, motto, colour, image)
     * manage - url and label of the libraries page, for managers
+    * first - with no library yet, the form that names the first one (as libraries_newentity takes it), or nothing
 
     Example context (json):
     {
@@ -33,7 +34,10 @@
             "colour": 2, "image": null, "enter": "Entrar"},
         "hasothers": true, "othersheading": "Las demás bibliotecas",
         "libraries": [{"name": "Biblioteca de 3º A", "url": "#", "kindlabel": "De aula", "motto": "", "colour": 3, "image": null}],
-        "manage": {"url": "#", "label": "Las bibliotecas"}
+        "manage": {"url": "#", "label": "Las bibliotecas"},
+        "first": {"action": "#", "sesskey": "abc", "none": true, "librariesfirst": "Tu biblioteca",
+            "librariesfirsthint": "Para empezar, solo su nombre.", "librariesfirstname": "Nombre de la biblioteca",
+            "librariescreate": "Crear"}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -60,4 +64,5 @@
 {{/libraries}}
 </ul>
 {{/hasothers}}
+{{#first}}{{> local_oksigeniaayvurenda/libraries_newentity}}{{/first}}
 {{#manage}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/manage}}

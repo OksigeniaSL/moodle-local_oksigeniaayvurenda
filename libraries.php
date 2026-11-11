@@ -64,6 +64,10 @@ if (data_submitted() && confirm_sesskey()) {
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
             'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
         ]);
+        // The first library of the site: straight in, to its desk, where «To begin» says what comes next.
+        if (optional_param('first', 0, PARAM_BOOL)) {
+            redirect(new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]));
+        }
         $notice = $str('librariescreated', format_string($library->name, true, ['escape' => false]));
     } else if ($do === 'entity') {
         // The start of the year as a day and a month chosen from lists, not a format to know («09-01»).
@@ -362,7 +366,8 @@ $data = [
     'newclassifications' => $classifications('udc'),
 ];
 foreach (
-    ['librariesfirst', 'librariesfirsthint', 'librariesentityname', 'librarieslibraryname', 'librariesyearstart',
+    ['librariesfirst', 'librariesfirsthint', 'librariesfirstname', 'librariesentityname', 'librarieslibraryname',
+        'librariesyearstart',
         'yearday', 'yearmonth',
         'librariesyearstarthint', 'librariesclassification', 'librariescontrolletter', 'librariescopyfrom',
         'librariescopyfromhint', 'librariescardfrom', 'librariescardfromhint', 'librariescreate', 'librariesadd',

@@ -35,12 +35,12 @@ use local_oksigeniaayvurenda\local\onlylibrary;
  */
 final class hook_callbacks {
     /**
-     * In the top bar of the site: «Biblioteca», when there is one and the user may look it up.
+     * In the top bar of the site: «Biblioteca», when there is one and the user may look it up; before the first one,
+     * «Biblioteca: empieza aquí» for whoever may set it up.
      *
      * @param primary_extend $hook
      */
     public static function primary_extend(primary_extend $hook): void {
-        global $DB;
         // A site that is only a library has no home, dashboard or courses to go to, except for whoever runs it.
         if (onlylibrary::on() && !onlylibrary::runs_the_site()) {
             foreach (['home', 'myhome', 'mycourses'] as $key) {
@@ -50,8 +50,21 @@ final class hook_callbacks {
                 }
             }
         }
-        // The cheap question first: a site without libraries asks nothing more.
-        if (!isloggedin() || isguestuser() || !$DB->record_exists('local_oksigeniaayvurenda_library', [])) {
+        if (!isloggedin() || isguestuser()) {
+            return;
+        }
+        // A site without libraries yet: whoever may set one up finds the way from the first minute, with «start here»
+        // until there is one (just installed, there was no link at all and the address had to be guessed).
+        if (\local_oksigeniaayvurenda\local\libraries::none()) {
+            if (has_capability('local/oksigeniaayvurenda:manage', \context_system::instance())) {
+                $hook->get_primaryview()->add(
+                    get_string('navlibrarystart', 'local_oksigeniaayvurenda'),
+                    new \moodle_url('/local/oksigeniaayvurenda/index.php'),
+                    \navigation_node::TYPE_CUSTOM,
+                    null,
+                    'local_oksigeniaayvurenda_library'
+                );
+            }
             return;
         }
         // Not while every centre the person could see is still getting ready for its readers.

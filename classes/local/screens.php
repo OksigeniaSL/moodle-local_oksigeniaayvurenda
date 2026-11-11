@@ -728,6 +728,15 @@ final class screens {
             }
         }
         $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
+        // No library yet: whoever may set one up names it here and is in, without another page on the way.
+        $first = null;
+        if (!$all && $manage && libraries::none()) {
+            $first = ['action' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
+                'sesskey' => sesskey(), 'none' => true];
+            foreach (['librariesfirst', 'librariesfirsthint', 'librariesfirstname', 'librariescreate'] as $key) {
+                $first[$key] = self::str($key);
+            }
+        }
         $top = $featured ? $card($featured) : null;
         if ($top) {
             if (libraries::look($featured)['featured']) {
@@ -743,8 +752,9 @@ final class screens {
             'libraries' => $libraries,
             'hasothers' => (bool) $libraries,
             'othersheading' => self::str('chooseothers'),
-            'manage' => $manage ? ['url' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
+            'manage' => $manage && !$first ? ['url' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
                 'label' => self::str($libraries ? 'librariesnav' : 'librariesstart')] : null,
+            'first' => $first,
         ];
     }
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.231.0 (2026-11-11)
+
+- The first minutes after installing. Moodle no longer stops on «New settings» with some twenty settings of the library
+  (and two of LDAP, one for each of its roles) that nobody needs to start: each gets its default as soon as it exists,
+  on installing and on every upgrade, and what someone chose stays. The settings page is still there, and its first line
+  says that nothing on it is needed to start and where the library is set up.
+- Just installed, «Library: start here» is in the top bar for whoever may set the library up (before, there was no link
+  until a library existed, and its address had to be guessed). The page it opens names the first library there and
+  then: only its name, which the centre takes too; the start of the year, the classification and the control letter are
+  in the centre's settings. Creating it goes straight in, to its desk, where «To begin» says what comes next. Another
+  centre on the same site still asks the centre's name and its first library's.
+- Words that said two things or did not match: the rule a library has before writing its own says «no limit on how many
+  books at once»; the example of the most precise rule names «Material», as the screen does; and in English, «Batches»,
+  «The year's report», «Restore a backup» and «check books out on their own» say the same in the menu and in the help.
+
 ## 0.230.0 (2026-11-10)
 
 - A big catalogue is imported apart: a file over 8 MB (the whole catalogue of a university, hundreds of thousands of
