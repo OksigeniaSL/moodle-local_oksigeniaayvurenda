@@ -3723,6 +3723,7 @@ $string['privacy:metadata:member:stage'] = 'La etapa del lector ese curso.';
 $string['privacy:metadata:offsite'] = 'La copia diaria de un centro, cifrada con su llave, va a los sitios que eligió el centro (sus carpetas WebDAV) y al ordenador de la biblioteca, si lo pidió.';
 $string['privacy:metadata:offsite:copy'] = 'La copia, con los lectores y préstamos de la biblioteca, cifrada.';
 $string['privacy:metadata:preference:cardlook'] = 'Cómo eligió el lector ver su carné: con el cielo, con el aspecto clásico o sin juego.';
+$string['privacy:metadata:preference:firstdayfolded'] = 'Si la persona dejó plegado «Tu primer día aquí».';
 $string['privacy:metadata:preference:goal'] = 'El reto de lectura que se ha puesto el lector en cada curso';
 $string['privacy:metadata:preference:lastsearch'] = 'Lo último que alguien buscó en la biblioteca, para que la memoria lo recuerde durante un mes.';
 $string['privacy:metadata:preference:newbooks'] = 'Si el lector se ha apuntado a las novedades semanales de la biblioteca';

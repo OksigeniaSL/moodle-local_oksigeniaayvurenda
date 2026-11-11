@@ -3797,6 +3797,7 @@ $string['privacy:metadata:member:stage'] = 'O ciclo do leitor nesse ano letivo.'
 $string['privacy:metadata:offsite'] = 'A cópia diária de uma instituição, cifrada com a sua chave, vai para os locais escolhidos pela instituição (as suas pastas WebDAV) e para o computador da biblioteca, se tiver sido pedido.';
 $string['privacy:metadata:offsite:copy'] = 'A cópia de segurança, com os leitores e empréstimos da biblioteca, cifrada.';
 $string['privacy:metadata:preference:cardlook'] = 'Como o leitor escolheu ver o seu cartão: com o céu, com o aspeto clássico ou sem jogo.';
+$string['privacy:metadata:preference:firstdayfolded'] = 'Se a pessoa deixou «O teu primeiro dia aqui» recolhido.';
 $string['privacy:metadata:preference:goal'] = 'O desafio de leitura definido pelo leitor em cada ano letivo';
 $string['privacy:metadata:preference:lastsearch'] = 'A última pesquisa feita na biblioteca, para que a memória a guarde durante um mês.';
 $string['privacy:metadata:preference:newbooks'] = 'Se o leitor subscreveu as novidades semanais da biblioteca';

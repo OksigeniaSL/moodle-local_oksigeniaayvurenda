@@ -3797,6 +3797,7 @@ $string['privacy:metadata:member:stage'] = 'Le cycle du lecteur cette année sco
 $string['privacy:metadata:offsite'] = 'La sauvegarde quotidienne d\'un établissement, chiffrée avec sa clé, va vers les emplacements choisis par l\'établissement (ses dossiers WebDAV) et sur l\'ordinateur de la bibliothèque, s\'il l\'a demandé.';
 $string['privacy:metadata:offsite:copy'] = 'La sauvegarde, avec les lecteurs et les prêts de la bibliothèque, chiffrée.';
 $string['privacy:metadata:preference:cardlook'] = 'Comment le lecteur a choisi de voir sa carte : avec le ciel, avec l\'aspect classique ou sans jeu.';
+$string['privacy:metadata:preference:firstdayfolded'] = 'Si la personne a laissé « Votre premier jour ici » replié.';
 $string['privacy:metadata:preference:goal'] = 'Le défi de lecture que s\'est fixé le lecteur pour chaque année scolaire';
 $string['privacy:metadata:preference:lastsearch'] = 'La dernière chose que quelqu\'un a cherchée dans la bibliothèque, pour que la Mémoire s\'en souvienne pendant un mois.';
 $string['privacy:metadata:preference:newbooks'] = 'Si le lecteur s\'est inscrit aux nouveautés hebdomadaires de la bibliothèque';
