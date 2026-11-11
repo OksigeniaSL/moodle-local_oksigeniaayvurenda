@@ -122,9 +122,14 @@ if (!$help && access::can('local/oksigeniaayvurenda:manage', $library)) {
             s($label) . '</a></p>';
     }
 }
-// A centre that has just started: where to begin, in three steps, until it has books and readers.
+// A centre not open yet: its five steps. One already open that has just started: where to begin, in three steps, until
+// it has books and readers.
 $start = '';
-if (!$help && !$own) {
+$steps = !$help && !$own ? \local_oksigeniaayvurenda\local\opening::context($library, (int) $USER->id, 'ayv-open-desk', false)
+    : null;
+if ($steps) {
+    $start = $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', $steps);
+} else if (!$help && !$own) {
     $books = $DB->record_exists('local_oksigeniaayvurenda_item', ['entityid' => $library->entityid]);
     $people = $DB->record_exists_select(
         'local_oksigeniaayvurenda_reader',

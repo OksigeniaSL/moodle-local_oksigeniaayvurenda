@@ -43,7 +43,7 @@ final class activity {
             'library_deleted', 'window_changed', 'rules_changed', 'hold_settings_changed', 'voice_settings_changed',
             'purchase_ordered', 'budget_changed', 'self_post_created', 'self_post_removed', 'self_post_undone',
             'self_settings_changed',
-            'lti_platform_saved', 'lti_platform_deleted'],
+            'lti_platform_saved', 'lti_platform_deleted', 'rules_kept', 'team_alone'],
         'views' => ['reader_viewed'],
     ];
 
@@ -64,6 +64,34 @@ final class activity {
      */
     public static function available(): bool {
         return self::log() !== null;
+    }
+
+    /**
+     * The last time something was done in a centre, of some kinds of event, as the log keeps it: who did it and when.
+     *
+     * @param int $entityid
+     * @param string[] $names Short names of events of the library (catalogue_imported).
+     * @return array|null userid and time; null when the log does not have it or cannot be read.
+     */
+    public static function last(int $entityid, array $names): ?array {
+        global $DB;
+        $log = self::log();
+        if (!$log || !$names) {
+            return null;
+        }
+        [$in, $params] = $DB->get_in_or_equal(
+            array_map(fn($name) => '\\local_oksigeniaayvurenda\\event\\' . $name, $names),
+            SQL_PARAMS_NAMED
+        );
+        $found = $log->get_events_select(
+            'contextid = :contextid AND eventname ' . $in,
+            $params + ['contextid' => access::context($entityid)->id],
+            'timecreated DESC, id DESC',
+            0,
+            1
+        );
+        $event = reset($found);
+        return $event ? ['userid' => (int) $event->userid, 'time' => (int) $event->timecreated] : null;
     }
 
     /**

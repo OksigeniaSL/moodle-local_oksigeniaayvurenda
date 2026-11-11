@@ -50,35 +50,37 @@ final class menu {
         'sanctions.php' => 'sanctions'];
 
     /**
-     * The groups of «More», with what each person may open.
+     * The groups of «More», with what each person may open: what waits first, what is used every day, what once a year,
+     * and the five steps that set a library up together, as «To open your library» names them («How do I…?» went up to
+     * the head of the panel). The order never changes with what there is.
      *
-     * @return array[] title => [[page, label, capability]].
+     * @return array[] key => [title, [[page, label, capability]]]; «centre», «team» and «open» are not pages.
      */
     private static function groups(): array {
         $d = 'local/oksigeniaayvurenda:desk';
         $c = 'local/oksigeniaayvurenda:catalogue';
         $m = 'local/oksigeniaayvurenda:manage';
         return [
-            'menulending' => [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d],
+            'waiting' => ['menuattend', [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
+                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d]]],
+            'lending' => ['menulending', [['holds.php', 'menuholds', $d], ['late.php', 'menulate', $d],
                 ['sanctions.php', 'menusanctions', $d], ['selfloan.php', 'menuselfloan', $d], ['ill.php', 'menuill', $d],
-                ['lots.php', 'menulots', $d], ['formats.php', 'menuformats', $d]],
-            'menupeople' => [['cardprint.php', 'menucards', $d], ['sources.php', 'menusources', $m],
-                ['twins.php', 'menutwins', $m], ['tutors.php', 'menututors', $m]],
-            'menucataloguing' => [['add.php', 'menuadd', $c], ['catalogued.php', 'menucataloged', $c],
-                ['subjects.php', 'menusubjects', $c], ['duplicates.php', 'menuduplicates', $c], ['import.php', 'menuimport', $c],
-                ['free.php', 'menufree', $c],
-                ['material.php', 'menumaterial', $c], ['purchases.php', 'menupurchases', $c]],
-            'menushelves' => [['stacks.php', 'stacksnav', $d], ['labels.php', 'menulabels', $c],
-                ['posters.php', 'menuposters', $c], ['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c]],
-            'menureview' => [['reviews.php', 'menureviews', $d], ['wishes.php', 'menuwishes', $d],
-                ['voices.php', 'menuvoices', $d], ['readings.php', 'menureadings', $d], ['quests.php', 'menuquests', $m],
-                ['agenda.php', 'agendatitle', $d]],
-            'menureports' => [['memoir.php', 'menumemoir', $d], ['activity.php', 'menuactivity', $m]],
-            'menusettings' => [['centre', 'librariesentity', $m], ['copies.php', 'menucopies', $m],
-                ['rules.php', 'menurules', $m],
-                ['year.php', 'menuyear', $m], ['libraries.php', 'navlibraries', $m], ['corners.php', 'menucorners', $m],
-                ['characters.php', 'menucharacters', $m], ['lti.php', 'menulti', $m]],
-            'menuhelp' => [['howto.php', 'menuhowto', $d]],
+                ['lots.php', 'menulots', $d], ['formats.php', 'menuformats', $d]]],
+            'readers' => ['menupeople', [['cardprint.php', 'menucards', $d], ['twins.php', 'menutwins', $m],
+                ['tutors.php', 'menututors', $m]]],
+            'catalogue' => ['menucataloguing', [['add.php', 'menuadd', $c], ['catalogued.php', 'menucataloged', $c],
+                ['subjects.php', 'menusubjects', $c], ['duplicates.php', 'menuduplicates', $c], ['free.php', 'menufree', $c],
+                ['material.php', 'menumaterial', $c], ['purchases.php', 'menupurchases', $c]]],
+            'shelves' => ['menushelves', [['stacks.php', 'menustacks', $d], ['labels.php', 'menulabels', $c],
+                ['posters.php', 'menuposters', $c]]],
+            'reading' => ['menureading', [['quests.php', 'menuquests', $m], ['agenda.php', 'agendatitle', $d]]],
+            'year' => ['menuyeargroup', [['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c],
+                ['memoir.php', 'menumemoir', $d], ['year.php', 'menuyear', $m], ['activity.php', 'menuactivity', $m]]],
+            'setup' => ['menusetup', [['import.php', 'menuimport', $c], ['sources.php', 'menusources', $m],
+                ['rules.php', 'menurules', $m], ['team', 'menuteam', $m], ['open.php', 'menuopen', $m]]],
+            'settings' => ['menusettings', [['centre', 'librariesentity', $m], ['libraries.php', 'navlibraries', $m],
+                ['corners.php', 'menucorners', $m], ['characters.php', 'menucharacters', $m], ['copies.php', 'menucopies', $m],
+                ['lti.php', 'menulti', $m]]],
         ];
     }
 
@@ -159,7 +161,7 @@ final class menu {
         // What waits for someone to look at it, as a number on its link and on «More», as phones do.
         $waiting = self::waiting($library, $userid);
         $total = 0;
-        foreach (self::groups() as $title => $links) {
+        foreach (self::groups() as $key => [$title, $links]) {
             $shown = [];
             foreach ($links as [$page, $label, $capability]) {
                 $needs = self::ONLY_WITH[$page] ?? '';
@@ -167,7 +169,9 @@ final class menu {
                 if (
                     ($needs === 'classes' && skins::no_classes($entityid)) ||
                     ($needs === 'courses' && skins::no_courses($entityid)) ||
-                    ($needs === 'sanctions' && !sanctions::on($entityid))
+                    ($needs === 'sanctions' && !sanctions::on($entityid)) ||
+                    // Opening is a step while the centre is closed; closing it again is in its settings.
+                    ($page === 'open.php' && !access::closed($entityid))
                 ) {
                     continue;
                 }
@@ -175,28 +179,30 @@ final class menu {
                     $count = $waiting[$page] ?? 0;
                     $total += $count;
                     // The centre's own settings live in a window of «Libraries»: the link opens it.
-                    $link = $page === 'centre' ? $url('libraries.php') . '#ayv-entity-' . $entityid : $url($page);
+                    $link = $page === 'centre' ? $url('libraries.php') . '#ayv-entity-' . $entityid
+                        : ($page === 'team' ? opening::team_url($library) : $url($page));
                     $shown[] = ['url' => $link, 'label' => skins::say($entityid, $label), 'current' => $here === $page,
                         'count' => $count];
                     $inmore = $inmore || ($here === $page && !self::in_doors($here));
                 }
             }
             if ($shown) {
-                $groups[] = ['title' => $str($title), 'links' => $shown];
+                $groups[] = ['key' => $key, 'title' => skins::say((int) $library->entityid, $title), 'links' => $shown];
             }
         }
         if (challenges::tutored((int) $library->entityid, $userid)) {
-            array_unshift($groups, ['title' => $str('classnav'), 'links' => [['url' => $url('class.php'),
+            array_unshift($groups, ['key' => 'class', 'title' => $str('classnav'), 'links' => [['url' => $url('class.php'),
                 'label' => $str('classnav'), 'current' => $here === 'class.php']]]);
         }
         // The second factor of their account, where the site is only a library.
         $security = onlylibrary::security_url();
         if ($security) {
-            $groups[] = ['title' => $str('menuaccount'), 'links' => [['url' => $security, 'label' => $str('menusecurity'),
+            $groups[] = ['key' => 'account', 'title' => $str('menuaccount'), 'links' => [['url' => $security,
+                'label' => $str('menusecurity'),
                 'current' => false]]];
         }
         $doors[] = ['key' => 'more', 'url' => '', 'label' => $str('menumore'), 'current' => $inmore, 'groups' => $groups,
-            'count' => $total];
+            'count' => $total, 'howto' => $url('howto.php'), 'library' => $library];
         return $doors;
     }
 

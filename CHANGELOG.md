@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.232.0 (2026-11-11)
+
+- «To open your library»: a centre made from the screen or signed up starts closed to its readers, and its staff see
+  five steps to open it: the catalogue, the readers, the loan rules, the team and opening. Each is marked from the
+  centre's own data, never from having been seen, so closing it, skipping it or doing it from the console counts the
+  same; the rules and the team are also done by saying what there is will do («The ones it comes with will do», «For
+  now, I run it»). Each step says what it is, has «Do it» and, where there is one, «Show me» (its guided help); a step
+  done says who did it and when, opening waits for books and readers and says so, and whoever may not do a step reads
+  who does it. Opening is the last step, on its own page, and the herald celebrates it. A centre already open, or made
+  any other way, goes on as before.
+- The staff's home, while the centre is closed, is that list, with the drawn shelf of the steps and the herald reading
+  beside it; folded, it is a line on top of the readers' home, and it stays as each person left it. The desk shows the
+  same steps instead of «To begin», and «More» their line on top. Jujol's design.
+- «More», new: «What do you want to do?» on top (it searches «How do I…?» for now) with «How do I…?» beside it;
+  «Waiting for you» first, with its number or «nothing now»; «Setting the library up» with the five steps (bringing
+  a catalogue and the readers moved there); «Every school year» (stocktake, weeding, the year's report, the change of
+  year, who did what); «Encouraging reading»; and names that say what they are: «Batches for classrooms», «Large print,
+  audio and braille», «Public domain books», «Material to lend», «Readers' voices», «Added lately», «Course readings»,
+  «Bring the readers», «Corners of the room», «The library's characters», «Connect other platforms». The pages and the
+  help say the same words.
+
 ## 0.231.0 (2026-11-11)
 
 - The first minutes after installing. Moodle no longer stops on «New settings» with some twenty settings of the library

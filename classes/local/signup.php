@@ -76,7 +76,10 @@ final class signup {
         // The centre, with its first library and its category.
         $entity = self::centre_named($name);
         if (!$entity) {
-            $library = libraries::create_entity(['name' => $name, 'library' => trim((string) ($data['library'] ?? ''))], $now);
+            $library = libraries::create_entity(
+                ['name' => $name, 'library' => trim((string) ($data['library'] ?? '')), 'closed' => true],
+                $now
+            );
             $entity = $DB->get_record(self::T . 'entity', ['id' => $library->entityid], '*', MUST_EXIST);
             $created['centre'] = true;
         }

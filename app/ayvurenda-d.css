@@ -449,3 +449,404 @@ html[data-bs-theme="dark"] .ayv .ayv-corner.ayv-cover-5 { background: #3a3326; c
 @media (prefers-reduced-motion: reduce) {
     .ayv .ayv-record-cover .ayv-cover-big { transform: none; }
 }
+
+/* The day zero (0.232.0, Jujol's design of 11 November 2026): «To open your library», the staff's home while the
+   library is not open yet, and «More» with its search on top. */
+/* Day zero (Jujol, 11 November 2026): «To open your library», the new «More» and the staff's home while the library is
+   not open. To go after ayvurenda-d.css (or at the end of ayvurenda.css). Everything hangs from .ayv and uses the tokens
+   of the house: paper, surface, the cream plate, the ring, the soft shadows and the wood of the shelves. */
+
+/* 1. «To open your library». A shelf that fills: a step done is a book standing with its label; a step to do is its
+   gap, dashed like the gap of a book that is out; the step of now, its gap in sun. */
+.ayv .ayv-open {
+    margin: 0 0 1.5rem;
+    padding: .7rem .9rem;
+    border-radius: var(--ayv-radius-lg, 22px);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--ayv-ring), var(--ayv-shadow);
+}
+.ayv .ayv-open-line { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.ayv .ayv-open-heading { flex: 1 1 18rem; min-width: 0; }
+.ayv .ayv-open-eyebrow { margin: 0 0 .15rem; font-size: .95rem; font-weight: 700; color: var(--ayv-muted); }
+.ayv .ayv-open-title { display: inline; margin: 0 .5rem 0 0; font: 600 1.2rem/1.3 var(--title); color: var(--ink); }
+.ayv .ayv-open-count { display: inline; margin: 0; color: var(--ayv-muted); }
+.ayv .ayv-open-of { font-weight: 700; color: var(--accent); }
+.ayv .ayv-open-of::after { content: " ·"; color: var(--ayv-muted); font-weight: 400; }
+.ayv .ayv-open-now b { color: var(--ink); }
+.ayv .ayv-open-go { min-height: 44px; padding: .35rem 1.2rem; }
+.ayv .ayv-open-fold {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    min-height: 44px;
+    padding: 0 .9rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-open-fold:hover { background: var(--paper2); }
+.ayv .ayv-open-fold::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: var(--chevron) center / contain no-repeat;
+    transition: transform .2s ease;
+}
+.ayv .ayv-open-fold[aria-expanded="true"]::after { transform: rotate(180deg); }
+
+/* The little shelf of the folded line: five spines on a plank. */
+.ayv .ayv-open-mini {
+    flex: none;
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 36px;
+    padding: 0 5px;
+    border-bottom: 4px solid var(--ayv-wood2, #b8915f);
+    border-radius: 0 0 2px 2px;
+}
+.ayv .ayv-open-mini i {
+    display: block;
+    width: 10px;
+    height: calc(var(--cm) * 1.15px);
+    border: 1.5px dashed color-mix(in srgb, var(--ink) 34%, transparent);
+    border-bottom: 0;
+    border-radius: 2px 2px 0 0;
+}
+.ayv .ayv-open-mini i.ayv-open-mini-done {
+    border: 0;
+    background: var(--bg);
+    box-shadow: inset 0 3px 0 rgba(0, 0, 0, .2), inset 0 -4px 0 rgba(255, 253, 247, .85);
+}
+html[data-bs-theme="dark"] .ayv .ayv-open-mini { border-bottom-color: #7a6448; }
+.ayv .ayv-open-mini i.ayv-open-mini-now { border-color: #c98a12; background: color-mix(in srgb, var(--sun) 22%, transparent); }
+html[data-bs-theme="dark"] .ayv .ayv-open-mini i.ayv-open-mini-now { border-color: var(--sun); }
+
+/* The steps. */
+.ayv .ayv-open-body { margin-top: .6rem; }
+.ayv .ayv-open-lead { margin: 0 0 .5rem; color: var(--ink); }
+.ayv .ayv-open-steps { display: grid; gap: .3rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-open-step {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .2rem 1rem;
+    padding: .55rem .75rem;
+    border-radius: 16px;
+}
+.ayv .ayv-open-step-now { background: var(--notice-bg); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sun) 75%, transparent); }
+/* The label of each step, as the one at the foot of a spine: cream, with a stripe of its book's colour. */
+.ayv .ayv-open-tag {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.6rem;
+    border-top: 6px solid var(--place);
+    border-radius: 4px;
+    background: #fffdf7;
+    color: #1e2b2a;
+    font: 700 1.1rem/1 var(--text);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .15), inset 0 0 0 1px rgba(30, 43, 42, .12);
+}
+.ayv .ayv-open-step:not(.ayv-open-step-done) .ayv-open-tag {
+    border: 2px dashed color-mix(in srgb, var(--ink) 32%, transparent);
+    background: transparent;
+    color: var(--ayv-muted);
+    box-shadow: none;
+}
+.ayv .ayv-open-step-now .ayv-open-tag { border-color: #c98a12; background: #fffdf7; color: #1e2b2a; }
+html[data-bs-theme="dark"] .ayv .ayv-open-step-now .ayv-open-tag { border-color: var(--sun); }
+.ayv .ayv-open-text { min-width: 0; }
+.ayv .ayv-open-name { margin: 0; font: 600 1.1rem/1.3 var(--title); color: var(--ink); }
+.ayv .ayv-open-step-done .ayv-open-name a { color: var(--ayv-muted); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.ayv .ayv-open-nowmark {
+    display: inline-block;
+    margin-left: .35rem;
+    padding: .05rem .5rem;
+    border-radius: 4px;
+    background: var(--sun);
+    color: #1e2b2a;
+    font: 700 .8rem/1.4 var(--text);
+    vertical-align: .15em;
+}
+.ayv .ayv-open-what { margin: .1rem 0 0; color: var(--ink); }
+.ayv .ayv-open-meta { display: flex; align-items: flex-start; gap: .35rem; margin: .1rem 0 0; color: var(--ayv-muted); }
+.ayv .ayv-open-meta .ayv-icon { flex: none; width: 18px; height: 18px; margin-top: .2rem; }
+.ayv .ayv-open-meta-done .ayv-icon { color: var(--green2); }
+html[data-bs-theme="dark"] .ayv .ayv-open-meta-done .ayv-icon { color: var(--accent); }
+.ayv .ayv-open-meta-done b { color: var(--ayv-muted); }
+.ayv .ayv-open-meta-why { font-weight: 700; color: var(--ink); }
+.ayv .ayv-open-meta-why::before {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-top: .3rem;
+    border: 2px solid var(--ayv-muted);
+    border-radius: 3px;
+    background: linear-gradient(var(--ayv-muted), var(--ayv-muted)) center / 6px 2px no-repeat;
+}
+
+@media (min-width: 52.01rem) {
+    .ayv .ayv-open-step { grid-template-columns: 2.4rem 11.5rem minmax(0, 1fr) auto; row-gap: .05rem; }
+    .ayv .ayv-open-text { display: contents; }
+    .ayv .ayv-open-tag { grid-column: 1; grid-row: 1 / span 2; }
+    .ayv .ayv-open-name { grid-column: 2; grid-row: 1 / span 2; }
+    .ayv .ayv-open-what,
+    .ayv .ayv-open-meta { grid-column: 3; margin: 0; }
+    .ayv .ayv-open-acts { grid-column: 4; grid-row: 1 / span 2; }
+    .ayv .ayv-open-name + p:last-child { grid-row: 1 / span 2; align-self: center; }
+}
+
+.ayv .ayv-open-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.ayv .ayv-open-acts .ayv-button { min-height: 44px; padding: .35rem 1.1rem; gap: .4rem; white-space: nowrap; }
+.ayv .ayv-open-acts .ayv-button-quiet { border-width: 1.5px; }
+
+/* 2. Big, on the staff's home: the shelf drawn with the house's own bookcase, and the crier's place beside it. The
+   heading and the shelf share a band; the steps go under it, the whole width. */
+.ayv .ayv-open-big {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "head stage" "lead stage" "fold stage" "steps steps";
+    grid-template-rows: auto auto 1fr auto;
+    column-gap: clamp(1.5rem, 3vw, 3rem);
+    padding: clamp(1rem, 2.4vw, 1.75rem);
+}
+.ayv .ayv-open-big:not(.ayv-open-folded) .ayv-open-line,
+.ayv .ayv-open-big .ayv-open-body:not([hidden]) { display: contents; }
+.ayv .ayv-open-big .ayv-open-heading { grid-area: head; }
+.ayv .ayv-open-big:not(.ayv-open-folded) .ayv-open-fold { grid-area: fold; justify-self: start; align-self: start; margin: .25rem 0 0 -.9rem; }
+.ayv .ayv-open-big .ayv-open-lead { grid-area: lead; margin: .5rem 0 0; font-size: 1.1rem; }
+.ayv .ayv-open-big .ayv-open-steps { grid-area: steps; margin-top: 1.1rem; }
+.ayv .ayv-open-big .ayv-open-stage { grid-area: stage; align-self: end; }
+.ayv .ayv-open-big:not(.ayv-open-folded) .ayv-open-mini { display: none; }
+.ayv .ayv-open-big:not(.ayv-open-folded) .ayv-open-title { display: block; margin: 0 0 .1rem; font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.15; }
+.ayv .ayv-open-big:not(.ayv-open-folded) .ayv-open-count { font-size: 1.05rem; }
+.ayv .ayv-open-big.ayv-open-folded { display: block; }
+.ayv .ayv-open-stage { display: flex; align-items: flex-end; gap: 1rem; }
+.ayv .ayv-open-case { --u: 4.8px; margin: 0; }
+.ayv .ayv-open-case .ayv-bookcase { --end: 26px; flex-wrap: nowrap; gap: 0 3px; }
+.ayv .ayv-open-case .ayv-spine-slot:first-child::before,
+.ayv .ayv-open-case .ayv-spine-slot:last-child::after {
+    content: "";
+    position: absolute;
+    bottom: 14px;
+    width: var(--end);
+    height: calc(var(--end) * 2);
+    border-radius: 2px 18px 2px 2px;
+    background: var(--green2);
+}
+.ayv .ayv-open-case .ayv-spine-slot:first-child::before { left: calc(-6px - var(--end)); transform: scaleX(-1); }
+.ayv .ayv-open-case .ayv-spine-slot:last-child::after { right: calc(-6px - var(--end)); }
+.ayv .ayv-open-case .ayv-spine-cream { color: #fbf6ec; }
+.ayv .ayv-open-case .ayv-spine-ink { color: #1e2b2a; }
+.ayv .ayv-open-case .ayv-spine-title { bottom: 46px; font-size: 12px; }
+.ayv .ayv-open-case .ayv-spine-gap .ayv-spine-title { bottom: 40px; font-weight: 600; }
+.ayv .ayv-open-case .ayv-spine-label { font-size: 10px; }
+.ayv .ayv-open-case .ayv-spine-label > span:first-child { font-size: 14px; line-height: 1.1; }
+.ayv .ayv-open-gapnum {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+    border: 1.5px dashed currentColor;
+    border-radius: 3px;
+    font: 700 12px/21px var(--text);
+    text-align: center;
+}
+.ayv .ayv-open-case .ayv-open-slot-now .ayv-spine {
+    border-color: #c98a12;
+    background: color-mix(in srgb, var(--sun) 20%, transparent);
+    color: #1e2b2a;
+    transform: translateY(-8px);
+}
+html[data-bs-theme="dark"] .ayv .ayv-open-case .ayv-open-slot-now .ayv-spine { border-color: var(--sun); color: #fbf6ec; }
+/* The crier beside the shelf: Mainumby's puppet from the art package (pix/marionetas/mainumby, mainumby-cielo, by the
+   skin's rung), about 124 px wide, feet down, the air above for the flight and the petals. While the library is being
+   set up it plays «read» in a quiet loop; on opening, «arrive», «celebrate», «point» to the step «Open», then «idle»;
+   with reduced motion, the still pose of «celebrate». In a skin without characters there is none. */
+.ayv .ayv-open-crier {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 124px;
+    height: 200px;
+}
+.ayv .ayv-open-crier .ayv-figure { display: block; width: 124px; }
+.ayv .ayv-open-crier img { display: block; width: 124px; height: auto; }
+
+/* 3. «More», new: the search on top with «How do I…?» beside it, the line of the five steps, then the groups. */
+.ayv dialog.ayv-modal.ayv-more { width: min(82rem, calc(100vw - 2rem)); max-width: min(82rem, calc(100vw - 2rem)); }
+.ayv .ayv-more .ayv-modal-head { flex-wrap: wrap; gap: .6rem 1rem; padding-bottom: .6rem; }
+.ayv .ayv-more .ayv-modal-head .ayv-section-title { flex: none; font-size: 1.5rem; }
+.ayv .ayv-more-ask { position: relative; flex: 1 1 24rem; margin: 0; }
+.ayv .ayv-more-ask input {
+    width: 100%;
+    min-height: 52px;
+    padding: .5rem 1rem .5rem 3rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.1rem;
+    box-shadow: inset 0 0 0 1.5px var(--ayv-ring), var(--ayv-shadow);
+}
+.ayv .ayv-more-ask input::placeholder { color: var(--ayv-muted); opacity: 1; }
+.ayv .ayv-more-ask input:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-more-ask-icon { position: absolute; top: 26px; left: 1rem; margin-top: -10px; color: var(--accent); pointer-events: none; }
+.ayv .ayv-more-howto { flex: none; min-height: 52px; gap: .45rem; border-width: 1.5px; }
+.ayv .ayv-more-head .ayv-modal-close { flex: none; }
+/* The answers, over the panel and not pushing it: the panel never jumps under the hand. */
+.ayv .ayv-more-found {
+    position: absolute;
+    z-index: 3;
+    top: calc(100% + .5rem);
+    left: 0;
+    right: 0;
+    padding: .4rem;
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--ayv-ring), var(--ayv-shadow-lift);
+}
+.ayv .ayv-more-found[hidden] { display: none; }
+.ayv .ayv-more-found-title { margin: .3rem .7rem .35rem; font-size: .9rem; font-weight: 700; color: var(--ayv-muted); }
+.ayv .ayv-more-found ul { display: grid; gap: .15rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-more-answer {
+    display: grid;
+    grid-template-columns: 2.6rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .2rem .9rem;
+    padding: .6rem .7rem;
+    border-radius: 14px;
+}
+.ayv .ayv-more-answer:first-child { background: var(--notice-bg); }
+.ayv .ayv-more-answer-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--paper2); color: var(--accent); }
+.ayv .ayv-more-answer-kind { display: block; font-size: .85rem; font-weight: 700; color: var(--ayv-muted); }
+.ayv .ayv-more-answer-text { display: block; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.ayv .ayv-more-answer-sub { display: block; color: var(--ayv-muted); }
+/* A setting's value of now, on a little label like the ones of the spines (cream also in dark). */
+.ayv .ayv-more-value {
+    display: inline-block;
+    padding: 0 .4rem;
+    border-radius: 4px;
+    background: #fffdf7;
+    color: #1e2b2a;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .15), inset 0 0 0 1px rgba(30, 43, 42, .14);
+}
+.ayv .ayv-more-answer-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.ayv .ayv-more-answer-acts .ayv-button { min-height: 44px; padding: .35rem 1.1rem; gap: .4rem; white-space: nowrap; }
+.ayv .ayv-more-answer-acts .ayv-button-quiet { border-width: 1.5px; }
+/* The line of the five steps, in the paper of the page so it reads apart from the white of the panel. */
+.ayv .ayv-more .ayv-open { margin: .2rem 0 1.1rem; background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--ayv-ring); }
+/* The groups: five columns on a laptop, the heading in Literata with a little spine of its colour. */
+.ayv .ayv-more .ayv-more-groups { columns: 5 12.5rem; column-gap: 1.6rem; }
+.ayv .ayv-more .ayv-more-group { margin: 0 0 .9rem; }
+.ayv .ayv-more .ayv-more-group h4 {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0 0 .25rem;
+    font: 600 1.02rem/1.3 var(--title);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+}
+.ayv .ayv-more .ayv-more-group h4::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 20px;
+    border-radius: 2px 2px 1px 1px;
+    background: var(--g, var(--green));
+    box-shadow: inset 0 3px 0 rgba(0, 0, 0, .2), inset 0 -3px 0 rgba(0, 0, 0, .2);
+}
+.ayv .ayv-more .ayv-more-group h4 .ayv-badge { margin-left: 0; }
+.ayv .ayv-more .ayv-more-group ul { gap: 0; }
+.ayv .ayv-more .ayv-more-link { min-height: 32px; padding: .2rem .55rem; font-size: .98rem; }
+.ayv .ayv-more .ayv-more-link .ayv-badge { margin-left: auto; }
+.ayv .ayv-more-quiet { font: 400 .9rem/1.3 var(--text); color: var(--ayv-muted); }
+.ayv [data-group="waiting"] { --g: var(--coral); }
+.ayv [data-group="lending"] { --g: var(--green); }
+.ayv [data-group="readers"] { --g: var(--green2); }
+.ayv [data-group="catalogue"] { --g: var(--night); }
+.ayv [data-group="shelves"] { --g: var(--ayv-wood2, #b8915f); }
+.ayv [data-group="reading"] { --g: var(--sun); }
+.ayv [data-group="year"] { --g: #8a6a9a; }
+.ayv [data-group="setup"] { --g: var(--green2); }
+.ayv [data-group="settings"] { --g: var(--ayv-muted); }
+html[data-bs-theme="dark"] .ayv [data-group="catalogue"] { --g: #3f8f7e; }
+html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
+
+@media (pointer: coarse) {
+    .ayv .ayv-more .ayv-more-link { min-height: 44px; }
+}
+
+/* 4. The staff's home while the library is not open: the list rules; under it, what can be done meanwhile. */
+.ayv .ayv-staffhome { display: grid; gap: 0; }
+.ayv .ayv-staffhome .ayv-hero { margin-bottom: 1.25rem; }
+.ayv .ayv-staffhome-meanwhile { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem; }
+.ayv .ayv-staffhome-meanwhile p { margin: 0 .4rem 0 0; font-weight: 700; color: var(--ayv-muted); }
+.ayv .ayv-staffhome-meanwhile .ayv-chip { display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; padding: .35rem 1rem; border-radius: 999px; font-weight: 700; text-decoration: none; color: var(--accent); }
+
+/* 5. Narrow: the shelf goes under the heading; on a phone, everything in one column. */
+
+@media (max-width: 52rem) {
+    .ayv .ayv-open-big { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "lead" "fold" "stage" "steps"; }
+    .ayv .ayv-open-big .ayv-open-stage { align-self: stretch; }
+    .ayv .ayv-open-big .ayv-open-steps { margin-top: .9rem; }
+}
+
+@media (max-width: 40rem) {
+    .ayv .ayv-open { padding: .7rem .75rem; }
+    .ayv .ayv-open-big { padding: 1rem .85rem; grid-template-areas: "head" "lead" "fold" "stage" "steps"; }
+    .ayv .ayv-open-big:not(.ayv-open-folded) .ayv-open-fold { margin: .2rem 0 .6rem -.9rem; }
+    .ayv .ayv-open-heading { flex: 1 1 calc(100% - 90px); }
+    .ayv .ayv-open-count { display: block; }
+    .ayv .ayv-open-step { grid-template-columns: 2.2rem minmax(0, 1fr); padding: .6rem .5rem; }
+    .ayv .ayv-open-acts { grid-column: 2; justify-content: flex-start; margin-top: .35rem; }
+    .ayv .ayv-open-folded .ayv-open-fold { margin-left: auto; }
+    .ayv .ayv-open-stage { gap: .4rem; }
+    .ayv .ayv-open-case { --u: 4.6px; flex: 1 1 auto; min-width: 0; border-width: 7px; border-bottom-width: 0; }
+    .ayv .ayv-open-case .ayv-bookcase { --end: 14px; justify-content: center; padding: 0 20px; }
+    .ayv .ayv-open-case .ayv-spine-slot { --w: 37px !important; }
+    .ayv .ayv-open-case .ayv-spine-title { font-size: 11px; }
+    /* On a phone the crier perches on the top right corner of the frame, reading (Gaudí, 11 November 2026). */
+    .ayv .ayv-open-big .ayv-open-stage { position: relative; padding-top: 48px; }
+    .ayv .ayv-open-crier { position: absolute; top: 0; right: 12px; width: 64px; height: 64px; padding: 0; justify-content: center; align-items: center; border-radius: 50%; font-size: .68rem; line-height: 1.1; }
+    .ayv .ayv-open-crier span { display: none; }
+    .ayv .ayv-open-crier .ayv-open-crier-short { display: block; }
+    .ayv dialog.ayv-modal.ayv-more { padding: 0 1rem 1rem; }
+    .ayv .ayv-more .ayv-modal-head .ayv-section-title { order: 1; }
+    .ayv .ayv-more-howto { order: 2; margin-left: auto; min-height: 44px; padding: .3rem .8rem; }
+    .ayv .ayv-more .ayv-modal-head form[method="dialog"] { order: 3; }
+    .ayv .ayv-more-ask { order: 4; flex-basis: 100%; }
+    .ayv .ayv-more-answer { grid-template-columns: minmax(0, 1fr); }
+    .ayv .ayv-more-answer-icon { display: none; }
+    .ayv .ayv-more-answer-acts { justify-content: flex-start; margin-top: .3rem; }
+    .ayv .ayv-more .ayv-more-groups { columns: 1; }
+}
+
+/* Opening the library: the page of the last step, and the moment it opens, with the herald beside. */
+.ayv .ayv-opening {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    grid-template-areas: "text figure";
+    gap: 1rem 2rem;
+    align-items: center;
+}
+.ayv .ayv-opening-text { grid-area: text; min-width: 0; }
+.ayv .ayv-opening-text .ayv-results-title { margin-top: 0; }
+.ayv .ayv-opening-figure { grid-area: figure; display: block; width: 180px; }
+.ayv .ayv-opening-figure img { display: block; width: 100%; height: auto; }
+
+@media (max-width: 40rem) {
+    .ayv .ayv-opening { grid-template-columns: minmax(0, 1fr); grid-template-areas: "figure" "text"; }
+    .ayv .ayv-opening-figure { width: 140px; }
+}

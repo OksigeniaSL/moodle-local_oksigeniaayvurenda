@@ -255,6 +255,7 @@ class provider implements
         $collection->add_user_preference('local_oksigeniaayvurenda_newbookslast', 'privacy:metadata:preference:newbookslast');
         $collection->add_user_preference('local_oksigeniaayvurenda_goal', 'privacy:metadata:preference:goal');
         $collection->add_user_preference('local_oksigeniaayvurenda_lastsearch', 'privacy:metadata:preference:lastsearch');
+        $collection->add_user_preference('local_oksigeniaayvurenda_openfolded', 'privacy:metadata:preference:openfolded');
         return $collection;
     }
 
@@ -293,7 +294,8 @@ class provider implements
                 );
             }
         }
-        $names = ['newbooks' => 'newbooks', 'newbookslast' => 'newbookslast', 'goal' => 'goal', 'lastsearch' => 'lastsearch'];
+        $names = ['newbooks' => 'newbooks', 'newbookslast' => 'newbookslast', 'goal' => 'goal', 'lastsearch' => 'lastsearch',
+            'openfolded' => 'openfolded'];
         foreach ($names as $name => $key) {
             $value = get_user_preferences('local_oksigeniaayvurenda_' . $name, null, $userid);
             if ($value !== null) {

@@ -63,6 +63,7 @@ if (data_submitted() && confirm_sesskey()) {
             'yearstart' => optional_param('yearstart', '09-01', PARAM_TEXT),
             'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
             'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
+            'closed' => true,
         ]);
         // The first library of the site: straight in, to its desk, where «To begin» says what comes next.
         if (optional_param('first', 0, PARAM_BOOL)) {

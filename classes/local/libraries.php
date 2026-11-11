@@ -83,7 +83,8 @@ final class libraries {
     /**
      * Creates an entity with its first library, the central one.
      *
-     * @param array $data name, library (its name), yearstart (MM-DD), classification, controlletter.
+     * @param array $data name, library (its name), yearstart (MM-DD), classification, controlletter, closed (to its
+     *     readers until it opens).
      * @param int|null $now
      * @return \stdClass The library.
      */
@@ -104,6 +105,10 @@ final class libraries {
             access::category((int) $entityid);
         }
         \local_oksigeniaayvurenda\event\centre_created::fire((int) $entityid);
+        // Made from a screen or signed up, a centre starts closed to its readers: «To open your library» opens it.
+        if (!empty($data['closed'])) {
+            access::set_closed((int) $entityid, true);
+        }
         $library = trim((string) ($data['library'] ?? '')) !== '' ? trim($data['library']) : $name;
         return self::create_library((int) $entityid, ['name' => $library, 'kind' => 'central'], $now);
     }

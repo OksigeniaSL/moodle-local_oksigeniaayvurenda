@@ -290,21 +290,41 @@ final class shell {
                 $parts = '';
                 foreach ($door['groups'] as $group) {
                     $items = '';
+                    $waiting = 0;
                     foreach ($group['links'] as $link) {
+                        $waiting += (int) ($link['count'] ?? 0);
                         $items .= '<li><a class="ayv-more-link" href="' . s($link['url']) . '"'
                             . ($link['current'] ? ' aria-current="page"' : '') . '>' . s($link['label'])
                             . (!empty($link['count']) ? ' <span class="ayv-badge" aria-hidden="true">' . (int) $link['count']
                             . '</span><span class="ayv-sr">' . $str('menuwaiting', (int) $link['count']) . '</span>' : '')
                             . '</a></li>';
                     }
-                    $parts .= '<section class="ayv-more-group"><h4>' . s($group['title']) . '</h4><ul>' . $items
-                        . '</ul></section>';
+                    // What waits says so in its own title, «nothing now» too, without spending a line.
+                    $head = s($group['title']) . (($group['key'] ?? '') === 'waiting' ? ($waiting
+                        ? ' <span class="ayv-badge" aria-hidden="true">' . $waiting . '</span>'
+                        : ' <span class="ayv-more-quiet">' . $str('menunothingnow') . '</span>') : '');
+                    $parts .= '<section class="ayv-more-group" data-group="' . s($group['key'] ?? '') . '"><h4>' . $head
+                        . '</h4><ul>' . $items . '</ul></section>';
                 }
+                // On top: «What do you want to do?» and «How do I…?»; then, while the centre is closed, its five steps.
+                $more = $door['library'] ?? null;
+                $ask = $more ? '<form class="ayv-more-ask" role="search" action="' . s($door['howto']) . '">'
+                    . '<input type="hidden" name="library" value="' . s($more->slug) . '">'
+                    . '<label class="ayv-sr" for="ayv-more-q">' . $str('menuask') . '</label>'
+                    . '<span class="ayv-more-ask-icon">' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_search', [])
+                    . '</span><input id="ayv-more-q" type="search" name="q" autocomplete="off" placeholder="'
+                    . $str('menuask') . '"></form>'
+                    . '<a class="ayv-button ayv-button-quiet ayv-more-howto" href="' . s($door['howto']) . '">'
+                    . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_help', []) . '<span>' . $str('menuhowto')
+                    . '</span></a>' : '';
+                $steps = $more ? opening::context($more, (int) $USER->id, 'ayv-open-more', false, true) : null;
                 $sheet = '<dialog class="ayv-modal ayv-more" id="ayv-more" aria-labelledby="ayv-more-title">'
                     . '<div class="ayv-modal-head"><h3 id="ayv-more-title" class="ayv-section-title">' . s($door['label'])
-                    . '</h3><form method="dialog">'
+                    . '</h3>' . $ask . '<form method="dialog">'
                     . '<button class="ayv-modal-close" aria-label="' . $str('librariesclose') . '">'
                     . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_x', []) . '</button></form></div>'
+                    . ($steps ? $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', ['foldurl' => ''] + $steps)
+                        : '')
                     . '<div class="ayv-more-groups">' . $parts . '</div></dialog>';
                 continue;
             }

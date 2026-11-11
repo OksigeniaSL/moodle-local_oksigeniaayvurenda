@@ -51,6 +51,26 @@ if (
     shell::output(get_string('bankminetitle', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);
     die();
 }
-$html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', screens::home($library));
+// While the centre is closed to its readers, its staff's home is «To open your library»; folded, a line on top of the
+// home the readers will see. «See it as the readers will» shows that home alone.
+$asreader = optional_param('asreader', 0, PARAM_BOOL);
+$steps = $asreader ? null : \local_oksigeniaayvurenda\local\opening::context($library, (int) $USER->id, 'ayv-open', true);
+if ($steps && !$steps['folded']) {
+    $link = fn(string $page, string $key, array $more = []) => '<a class="ayv-chip" href="' . (new moodle_url(
+        '/local/oksigeniaayvurenda/' . $page,
+        ['library' => $library->slug] + $more
+    ))->out() . '">' . s(get_string($key, 'local_oksigeniaayvurenda')) . '</a>';
+    $html = '<section class="ayv-staffhome" aria-label="' . s(get_string('openstaffhome', 'local_oksigeniaayvurenda')) . '">'
+        . '<h1 class="ayv-sr">' . s(format_string($library->name, true, ['escape' => false])) . '</h1>'
+        . $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', $steps)
+        . '<nav class="ayv-staffhome-meanwhile" aria-label="' . s(get_string('openmeanwhile', 'local_oksigeniaayvurenda'))
+        . '"><p>' . s(get_string('openmeanwhile', 'local_oksigeniaayvurenda')) . '</p>'
+        . $link('index.php', 'openasreader', ['asreader' => 1]) . $link('desk.php', 'opendesk')
+        . $link('catalogued.php', 'menucataloged') . '</nav></section>';
+    shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);
+    die();
+}
+$html = ($steps ? $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', $steps) : '')
+    . $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', screens::home($library));
 // The home has its own search, at the top: the phone's magnifier takes the focus there.
 shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false, 'lens' => true]);

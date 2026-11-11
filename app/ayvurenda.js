@@ -451,6 +451,46 @@
             }, 30000);
         });
     });
+    // «To open your library»: folding or unfolding the steps. On the staff's home the page changes with it, so it is kept
+    // for the person and the page comes again; at the desk it is kept too, and in «More» it is only for now.
+    document.querySelectorAll('[data-ayv-steps]').forEach(function(box) {
+        var fold = box.querySelector('.ayv-open-fold');
+        var body = box.querySelector('.ayv-open-body');
+        if (!fold || !body) {
+            return;
+        }
+        fold.addEventListener('click', function() {
+            var folded = !body.hidden;
+            var url = box.getAttribute('data-fold');
+            var keep = url ? function() {
+                var data = new FormData();
+                data.append('do', 'fold');
+                data.append('folded', folded ? '1' : '0');
+                data.append('sesskey', box.getAttribute('data-sesskey') || '');
+                return fetch(url, {method: 'POST', body: data, credentials: 'same-origin'});
+            } : null;
+            if (keep && box.classList.contains('ayv-open-big')) {
+                keep().then(function() {
+                    window.location.reload();
+                }, function() {
+                    window.location.reload();
+                });
+                return;
+            }
+            body.hidden = folded;
+            box.classList.toggle('ayv-open-folded', folded);
+            fold.setAttribute('aria-expanded', folded ? 'false' : 'true');
+            var label = fold.querySelector('span');
+            if (label) {
+                label.textContent = fold.getAttribute(folded ? 'data-unfold-label' : 'data-fold-label') || label.textContent;
+            }
+            if (keep) {
+                keep().catch(function() {
+                    return null;
+                });
+            }
+        });
+    });
     document.querySelectorAll('[data-ayv-open]').forEach(function(button) {
         var sheet = document.getElementById(button.getAttribute('data-ayv-open'));
         if (!sheet) {

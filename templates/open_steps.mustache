@@ -1,0 +1,113 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/open_steps
+    «To open your library»: the five steps (the catalogue, the readers, the rules, the team, opening), one piece for the
+    staff's home, the top of «More» and the desk. A shelf that fills: each step done is a book standing with its label,
+    each step to do is its gap. Folded, one line with a little shelf; unfolded, the steps with what each one does, who
+    did it and when, why it cannot be done yet, or who does it. The steps come from the library's data, never from having
+    been seen. Big (the staff's home) adds the drawn shelf and the place for the crier who announces the opening.
+    Context variables required for this template:
+    * id - the id of the piece, unique in the page
+    * big - the staff's home: the drawn shelf and the crier's place
+    * folded - only the line
+    * eyebrow, title, lead - what the piece says on top (lead only when unfolded)
+    * count - «2 of 5»; nowlabel, nowname - «Now:» and the step to do now; nowurl - where «Do it» goes
+    * dolabel, showlabel, foldlabel, unfoldlabel, donelabel, nowmark - the words of the buttons and marks
+    * steps - n, name, short (three letters for the label), what, url, showurl, bg, ink (cream or ink), cm (height),
+      done, now, todo, blocked, notyours, can (may do it), meta (who and when, when done), reason (why it waits),
+      who (who does it, when it is not for whoever looks)
+    * confirm (in a step) - for the rules and the team, a form that says what there is will do: action, sesskey, library,
+      say and label; or nothing
+    * foldurl, sesskey - where folding or unfolding is kept for the person
+    * crier - the herald reading beside the shelf: figure (its drawing) and puppet (JSON), or nothing
+    Example context (json):
+    {
+        "id": "ayv-open", "big": true, "folded": false,
+        "eyebrow": "La biblioteca aún no está abierta a los lectores", "title": "Para abrir tu biblioteca",
+        "lead": "Cinco pasos. Llevas dos.", "count": "2 de 5", "nowlabel": "Ahora:", "nowname": "las normas",
+        "nowurl": "#", "dolabel": "Hacerlo", "showlabel": "Enséñamelo", "foldlabel": "Plegar",
+        "unfoldlabel": "Ver los cinco pasos", "donelabel": "Hecho", "nowmark": "Ahora",
+        "steps": [{"n": 1, "name": "El catálogo", "short": "CAT", "what": "Los libros que ya tienes.", "url": "#",
+            "showurl": "#", "bg": "#17574c", "ink": "cream", "cm": 25, "done": true, "now": false, "todo": false,
+            "blocked": false, "notyours": false, "can": true, "meta": "1.240 libros · Luis Ortega, el 9 de noviembre",
+            "reason": "", "who": "", "confirm": null},
+            {"n": 3, "name": "Las normas de préstamo", "short": "NOR", "what": "Cuántos días y cuántos libros.", "url": "#",
+            "showurl": "", "bg": "#f2b632", "ink": "ink", "cm": 24, "done": false, "now": true, "todo": false,
+            "blocked": false, "notyours": false, "can": true, "meta": "", "reason": "", "who": "",
+            "confirm": {"action": "#", "sesskey": "abc", "library": "demo-1", "say": "rules",
+                "label": "Me valen las de serie"} } ],
+        "foldurl": "#", "sesskey": "abc",
+        "crier": {"figure": "https://example.com/mainumby-lee.webp", "puppet": ""}
+    }
+}}
+<section class="ayv-open{{#big}} ayv-open-big{{/big}}{{#folded}} ayv-open-folded{{/folded}}" id="{{id}}" aria-labelledby="{{id}}-title" data-ayv-steps data-fold="{{foldurl}}" data-sesskey="{{sesskey}}">
+    <div class="ayv-open-line">
+        <span class="ayv-open-mini" aria-hidden="true">{{#steps}}<i class="{{#done}}ayv-open-mini-done{{/done}}{{#now}}ayv-open-mini-now{{/now}}" style="--bg: {{bg}}; --cm: {{cm}}"></i>{{/steps}}</span>
+        <div class="ayv-open-heading">
+            {{#eyebrow}}<p class="ayv-open-eyebrow">{{eyebrow}}</p>{{/eyebrow}}
+            <h2 class="ayv-open-title" id="{{id}}-title">{{title}}</h2>
+            <p class="ayv-open-count"><span class="ayv-open-of">{{count}}</span> <span class="ayv-open-now">{{nowlabel}} <b>{{nowname}}</b></span></p>
+        </div>
+        {{#folded}}<a class="ayv-button ayv-open-go" href="{{nowurl}}">{{dolabel}}</a>{{/folded}}
+        <button type="button" class="ayv-open-fold" data-fold-label="{{foldlabel}}" data-unfold-label="{{unfoldlabel}}" aria-expanded="{{^folded}}true{{/folded}}{{#folded}}false{{/folded}}" aria-controls="{{id}}-body">
+            <span>{{#folded}}{{unfoldlabel}}{{/folded}}{{^folded}}{{foldlabel}}{{/folded}}</span>
+        </button>
+    </div>
+    <div class="ayv-open-body" id="{{id}}-body"{{#folded}} hidden{{/folded}}>
+        {{#lead}}<p class="ayv-open-lead">{{lead}}</p>{{/lead}}
+        {{#big}}
+        <div class="ayv-open-stage" aria-hidden="true">
+            <div class="ayv-bookcase-wrap ayv-open-case">
+                <ul class="ayv-bookcase">
+                    {{#steps}}
+                    <li class="ayv-spine-slot{{^done}} ayv-spine-gap{{/done}}{{#now}} ayv-open-slot-now{{/now}}" style="--w: 46px; --cm: {{cm}}">
+                        <span class="ayv-spine ayv-spine-{{ink}}" style="--bg: {{bg}}; --bgd: {{bg}}">
+                            <span class="ayv-spine-title">{{name}}</span>
+                            {{#done}}<span class="ayv-spine-label ayv-spine-label-place" style="--place: {{bg}}"><span>{{n}}</span><span>{{short}}</span></span>{{/done}}
+                            {{^done}}<span class="ayv-open-gapnum">{{n}}</span>{{/done}}
+                        </span>
+                    </li>
+                    {{/steps}}
+                </ul>
+            </div>
+            {{#crier}}<div class="ayv-open-crier"><span class="ayv-figure"><img class="ayv-open-crier-figure" src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></div>{{/crier}}
+        </div>
+        {{/big}}
+        <ol class="ayv-open-steps">
+            {{#steps}}
+            <li class="ayv-open-step{{#done}} ayv-open-step-done{{/done}}{{#now}} ayv-open-step-now{{/now}}{{#blocked}} ayv-open-step-blocked{{/blocked}}{{#notyours}} ayv-open-step-other{{/notyours}}" style="--place: {{bg}}">
+                <span class="ayv-open-tag" aria-hidden="true">{{n}}</span>
+                <div class="ayv-open-text">
+                    <h3 class="ayv-open-name">{{#done}}<a href="{{url}}">{{name}}</a>{{/done}}{{^done}}{{name}}{{/done}}{{#now}} <span class="ayv-open-nowmark">{{nowmark}}</span>{{/now}}</h3>
+                    {{^done}}<p class="ayv-open-what">{{what}}</p>{{/done}}
+                    {{#done}}<p class="ayv-open-meta ayv-open-meta-done">{{> local_oksigeniaayvurenda/icon_check }}<span><b>{{donelabel}}</b> · {{meta}}</span></p>{{/done}}
+                    {{#blocked}}<p class="ayv-open-meta ayv-open-meta-why">{{reason}}</p>{{/blocked}}
+                    {{#notyours}}<p class="ayv-open-meta ayv-open-meta-who">{{> local_oksigeniaayvurenda/icon_users }}<span>{{who}}</span></p>{{/notyours}}
+                </div>
+                {{^done}}
+                <div class="ayv-open-acts">
+                    {{#can}}<a class="ayv-button{{^now}} ayv-button-quiet{{/now}} ayv-open-do" href="{{url}}">{{dolabel}}</a>{{/can}}
+                    {{#confirm}}<form method="post" action="{{action}}" class="ayv-open-say"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="say" value="{{say}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="say">{{label}}</button></form>{{/confirm}}
+                    {{#showurl}}<a class="ayv-button ayv-button-quiet ayv-open-show" href="{{showurl}}">{{> local_oksigeniaayvurenda/icon_play }}<span>{{showlabel}}</span></a>{{/showurl}}
+                </div>
+                {{/done}}
+            </li>
+            {{/steps}}
+        </ol>
+    </div>
+</section>
