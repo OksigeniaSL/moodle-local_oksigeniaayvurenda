@@ -867,3 +867,8 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
     cursor: pointer;
 }
 .ayv .ayv-open-case .ayv-spine-gap .ayv-spine { color: var(--ayv-muted); }
+
+/* The answers of «What do you want to do?»: what has to wait reads as a note, and the last line looks it up elsewhere. */
+.ayv .ayv-more-answer-wait { font-weight: 700; color: var(--ink); }
+.ayv .ayv-more-found-more { margin: .4rem .7rem .2rem; font-size: .95rem; }
+.ayv .ayv-more-found-more a { color: var(--accent); font-weight: 700; }

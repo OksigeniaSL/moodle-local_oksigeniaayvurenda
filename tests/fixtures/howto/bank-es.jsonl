@@ -1,0 +1,211 @@
+{"lang": "es", "region": "MX", "persona": "alumno ayudante en el mostrador", "q": "prestar libro", "need": "lend"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "un niño de 2º se quiere llevar un libro a casa, donde lo apunto", "need": "lend"}
+{"lang": "es", "region": "AR", "persona": "voluntario", "q": "devolcion", "need": "giveback"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "me han traido un libro de vuelta como lo quito de su ficha", "need": "giveback"}
+{"lang": "es", "region": "CO", "persona": "bibliotecario profesional", "q": "renvoar prestamo", "need": "renew"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "una alumna quiere quedarse el libro una semana mas", "need": "renew"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "se ha caido internet y tengo cola en el mostrador", "need": "offline"}
+{"lang": "es", "region": "CL", "persona": "informático que lo instaló", "q": "prestamos sin conexoin", "need": "offline"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "consulta en sala", "need": "room"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "como cuento los libros que leen ahi mismo sin llevarselos", "need": "room"}
+{"lang": "es", "region": "PE", "persona": "voluntario", "q": "el libro no tiene codigo de barras como lo presto", "need": "nolabel"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "devolver libro sin pegatina", "need": "nolabel"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "prestar con el isbn", "need": "isbn"}
+{"lang": "es", "region": "AR", "persona": "alumno ayudante en el mostrador", "q": "puedo escanear el codigo de barras que trae el libro de la editorial?", "need": "isbn"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "dar de alta libros nuevos", "need": "add"}
+{"lang": "es", "region": "MX", "persona": "técnico de biblioteca municipal", "q": "catalogar los libros que nos donaron", "need": "add"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "que cdu le pongo a este libro", "need": "classify"}
+{"lang": "es", "region": "CO", "persona": "profesor que lleva la biblioteca", "q": "no se que numero de clasificacion lleva una novela", "need": "classify"}
+{"lang": "es", "region": "ES", "persona": "archivero de empresa", "q": "registros creados hoy", "need": "catalogued"}
+{"lang": "es", "region": "AR", "persona": "bibliotecario universitario", "q": "ver lo que catalogue esta semana", "need": "catalogued"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "unificar materias repetidas", "need": "subjects"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "como le pongo temas a un libro para que salga al buscar dinosaurios", "need": "subjects"}
+{"lang": "es", "region": "ES", "persona": "archivero de empresa", "q": "fusionar registros duplicados", "need": "duplicates"}
+{"lang": "es", "region": "CL", "persona": "voluntario", "q": "me sale el mismo libro dos veces en el catalgo", "need": "duplicates"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "prestar tablest", "need": "material"}
+{"lang": "es", "region": "MX", "persona": "técnico de biblioteca municipal", "q": "quiero dar de alta juegos de mesa y mapas para prestarlos", "need": "material"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "obras de dominio publico", "need": "free"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "agregar libros gratis de gutenberg", "need": "free"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "imprimir tejuleos", "need": "labels"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "como imprimo los stickers con el codigo de barras para pegar en los libros", "need": "labels"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "que hoja de etiquetas apli tengo que comprar", "need": "labelsheets"}
+{"lang": "es", "region": "CO", "persona": "profesor que lleva la biblioteca", "q": "las etiquetas no me cuadran con las hojas que compre", "need": "labelsheets"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "imprimir carnets de los alumnos", "need": "cards"}
+{"lang": "es", "region": "MX", "persona": "técnico de biblioteca municipal", "q": "hacer credenicales de lector", "need": "cards"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "cargar alumnos", "need": "readers"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "no me salen los alumnos", "need": "readers"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "ficha del socio", "need": "profile"}
+{"lang": "es", "region": "CL", "persona": "alumno ayudante en el mostrador", "q": "como veo los datos de un alumno, su curso y lo que ha leido", "need": "profile"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "como mando a los alumnos la app de la biblioteca", "need": "applink"}
+{"lang": "es", "region": "MX", "persona": "técnico de biblioteca municipal", "q": "el usuario quiere la aplicacion en su celular", "need": "applink"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "un niño ha perdido el carnet", "need": "newcard"}
+{"lang": "es", "region": "CO", "persona": "técnico de biblioteca municipal", "q": "duplicado de credencial", "need": "newcard"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "morosos", "need": "late"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "mandar recordatorio a los que no devolvieron", "need": "late"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "resevas pendientes", "need": "holds"}
+{"lang": "es", "region": "PE", "persona": "alumno ayudante en el mostrador", "q": "un alumno quiere apartar un libro que esta prestado", "need": "holds"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "aprobar reseñas de los alumnos", "need": "reviews"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "donde veo los comentarios que dejan los lectores para publicarlos", "need": "reviews"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "peticiones de libros de los profes", "need": "wishes"}
+{"lang": "es", "region": "CO", "persona": "bibliotecario profesional", "q": "desideratas", "need": "wishes"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "soy tutora de 3º y quiero ponerle un reto de lectura a mi grupo", "need": "myclass"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "desafio lector para mi grupo", "need": "myclass"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "en que estanteria esta este libro", "need": "stacks"}
+{"lang": "es", "region": "AR", "persona": "voluntario", "q": "voy por los estantes con el celular y quiero ver donde va cada libro", "need": "stacks"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "carteles con codigo qr para las estanterias", "need": "posters"}
+{"lang": "es", "region": "CL", "persona": "técnico de biblioteca municipal", "q": "imprimir qr para pegar en los muebles", "need": "posters"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "estadisitcas de prestamo", "need": "reports"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario universitario", "q": "informe de libros mas prestados", "need": "reports"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "memoria anual de la biblioteca", "need": "memoir"}
+{"lang": "es", "region": "CO", "persona": "bibliotecario profesional", "q": "necesito el informe de fin de año para rectoria", "need": "memoir"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario universitario", "q": "bibliografia recomendada de las asignaturas", "need": "readings"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario universitario", "q": "cuantos ejemplares hay que comprar de las lecturas obligatorias de una materia", "need": "readings"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "descargar copia de seguirdad", "need": "copies"}
+{"lang": "es", "region": "AR", "persona": "informático que lo instaló", "q": "backup", "need": "copies"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "backup cifrado en otro sitio", "need": "offsite"}
+{"lang": "es", "region": "CL", "persona": "informático que lo instaló", "q": "y si se rompe el servidor, donde quedan los respaldos", "need": "offsite"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "hacer inventraio", "need": "stocktake"}
+{"lang": "es", "region": "MX", "persona": "voluntario", "q": "contar todos los libros que hay en los estantes", "need": "stocktake"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "expurgo", "need": "weed"}
+{"lang": "es", "region": "CO", "persona": "profesor que lleva la biblioteca", "q": "dar de baja libros rotos", "need": "weed"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "lote de libros para la biblioteca de aula", "need": "lots"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "mandar una caja de libros al aula de 4to", "need": "lots"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "autopresatmo", "need": "selfloan"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "que los niños se presten solos los libros sin que yo este", "need": "selfloan"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "conectar maquina de autoprestamo sip2", "need": "sip"}
+{"lang": "es", "region": "CL", "persona": "bibliotecario universitario", "q": "configurar el buzon de devolucion", "need": "sip"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario universitario", "q": "acceso a revistas electronicas desde casa", "need": "homelinks"}
+{"lang": "es", "region": "PE", "persona": "bibliotecario universitario", "q": "los alumnos no pueden entrar a las bases de datos fuera de la universidad", "need": "homelinks"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "compartir un libro en google classroom", "need": "shareclass"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "mandar una lectura a mi equipo de teams", "need": "shareclass"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "libro en letra grande para un señor mayor", "need": "formats"}
+{"lang": "es", "region": "MX", "persona": "técnico de biblioteca municipal", "q": "un usuario ciego pide un libro en braille", "need": "formats"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "borrar datos de un usuario rgpd", "need": "erase"}
+{"lang": "es", "region": "AR", "persona": "técnico de biblioteca municipal", "q": "un socio pidio que eliminemos todos sus datos", "need": "erase"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "presupuesto de adquisiciones", "need": "purchases"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "llevar la cuenta de los libros que compro con el dinero de la escuela", "need": "purchases"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario universitario", "q": "prestamo interbibliotecaro", "need": "ill"}
+{"lang": "es", "region": "CO", "persona": "técnico de biblioteca municipal", "q": "pedir un libro a otra biblioteca", "need": "ill"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "banco de libros de texto", "need": "bank"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "prestar los manuales a cada alumno para todo el año", "need": "bank"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "log de actividad", "need": "activity"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "quien borro este registro", "need": "activity"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "recogida libros de texto junio", "need": "bankround"}
+{"lang": "es", "region": "CL", "persona": "profesor que lleva la biblioteca", "q": "entregar los textos escolares en marzo curso por curso", "need": "bankround"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "importar catalogo de abies", "need": "import"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "pasar el acervo de siabuc a este sistema", "need": "import"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "cambiar de curso escolar", "need": "year"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "pasar al nuevo ciclo escolar, los alumnos suben de grado", "need": "year"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "que devuelvan todos los libros antes del verano", "need": "returnby"}
+{"lang": "es", "region": "CL", "persona": "bibliotecario profesional", "q": "fecha limite de devolucion para todos por inventario", "need": "returnby"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "asignar tutores a los grupos", "need": "tutors"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "poner que maestro es el titular de cada grupo", "need": "tutors"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "un alumno me sale dos veces", "need": "twins"}
+{"lang": "es", "region": "AR", "persona": "informático que lo instaló", "q": "unir dos usuarios duplicados", "need": "twins"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario universitario", "q": "abrir la biblioteca desde canvas", "need": "platforms"}
+{"lang": "es", "region": "CO", "persona": "informático que lo instaló", "q": "integrar con blackboard por lti", "need": "platforms"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "que los alumnos se actualicen solos desde el programa de secretaria", "need": "roster"}
+{"lang": "es", "region": "CO", "persona": "informático que lo instaló", "q": "conectar con el sistema academico por oneroster", "need": "roster"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "politica de prestamo", "need": "rules"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "cambiar las reglas de prestamo para maestros", "need": "rules"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "mutlas", "need": "sanctions"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "que el que devuelve tarde se quede sin sacar libros una semana", "need": "sanctions"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "cuando se mandan los avisos de retraso", "need": "noticeafter"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "que el aviso de atraso le llegue tambien a los papas", "need": "noticeafter"}
+{"lang": "es", "region": "ES", "persona": "técnico de biblioteca municipal", "q": "crear otra biblioteca de la red municipal", "need": "libraries"}
+{"lang": "es", "region": "CO", "persona": "bibliotecario universitario", "q": "agregar una sede nueva", "need": "libraries"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "dar permiso a otra profe para prestar", "need": "keepers"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "que un auxiliar atienda el mostrador de una sola biblioteca", "need": "keepers"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "cambiar el nombre de la mascota", "need": "characters"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "como se llaman los personajes de la biblioteca, quiero ponerles otro nombre", "need": "characters"}
+{"lang": "es", "region": "ES", "persona": "técnico de biblioteca municipal", "q": "opac publico sin contraseña", "need": "window"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "que se pueda ver el catalogo desde la pagina de la escuela sin entrar", "need": "window"}
+{"lang": "es", "region": "ES", "persona": "archivero de empresa", "q": "corregir el titulo de un libro", "need": "record"}
+{"lang": "es", "region": "MX", "persona": "alumno ayudante en el mostrador", "q": "cambiar el codigo de un ejemplar", "need": "record"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "abrir la bibilioteca a los alumnos", "need": "closed"}
+{"lang": "es", "region": "CL", "persona": "bibliotecario profesional", "q": "ya termine de configurar, como hago que los lectores la vean", "need": "closed"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "usar la camara del movil como lector de codigos", "need": "scanner"}
+{"lang": "es", "region": "AR", "persona": "voluntario", "q": "no tengo pistola lectora", "need": "scanner"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "configuracion del centro", "need": "settings"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "ajustes generales de la escuela", "need": "settings"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "escuchar las grabacines de los niños", "need": "voices"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "revisar los audios que grabaron los alumnos leyendo", "need": "voices"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "casar los lectores de abies con las cuentas del aula virtual", "need": "match"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "enlazar cada socio con su cuenta de moodle", "need": "match"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "subir los alumnos desde un excel", "need": "readerslist"}
+{"lang": "es", "region": "PE", "persona": "técnico de biblioteca municipal", "q": "tengo la lista de socios en una hoja de calculo", "need": "readerslist"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "manual de uso", "need": "helpme"}
+{"lang": "es", "region": "CO", "persona": "voluntario", "q": "ayuda no se por donde empezar", "need": "helpme"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "un alumno ha perdido un libro", "need": "lost"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "un niño extravio un libro y lo va a reponer", "need": "lost"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "quien tiene este libro", "need": "whohas"}
+{"lang": "es", "region": "AR", "persona": "bibliotecario profesional", "q": "buscar quien se llevo el ejemplar 3412", "need": "whohas"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "poner la biblioteca en el area personal de todos", "need": "dashboard"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "bloque de la biblioteca en el tablero de moodle", "need": "dashboard"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "dias de prestamo", "need": "loandays"}
+{"lang": "es", "region": "MX", "persona": "técnico de biblioteca municipal", "q": "quiero que los libros se presten 21 dias en vez de 15", "need": "loandays"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "cuantos libros puede llevarse un alumno a la vez", "need": "maxloans"}
+{"lang": "es", "region": "AR", "persona": "bibliotecario profesional", "q": "limite de prestamos por socio", "need": "maxloans"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "numero de renovaciones", "need": "renewcount"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "que solo puedan renovar una vez", "need": "renewcount"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "al renovar la fecha nueva se suma desde el dia que tocaba devolver", "need": "renewfrom"}
+{"lang": "es", "region": "CL", "persona": "bibliotecario profesional", "q": "renovacion desde fecha de vencimiento", "need": "renewfrom"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "cambiar de cdu a dewey", "need": "classification"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "usamos dewey, donde se configura", "need": "classification"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "letra de control del codigo de barras", "need": "controlletter"}
+{"lang": "es", "region": "AR", "persona": "informático que lo instaló", "q": "digito verificador codigo de barras", "need": "controlletter"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "por que numero empiezan los registros nuevos", "need": "numbering"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "que el siguiente numero de credencial sea el 5001", "need": "numbering"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "cuanto tiempo se guarda el histroial de prestamos", "need": "history"}
+{"lang": "es", "region": "AR", "persona": "archivero de empresa", "q": "borrar historial de lecturas despues de un año", "need": "history"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "que las reseñas salgan solo con iniciales", "need": "reviewsign"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "reseñas anonimass", "need": "reviewsign"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "diseño del carnet de infantil", "need": "cardlook"}
+{"lang": "es", "region": "CO", "persona": "profesor que lleva la biblioteca", "q": "cambiar como se ve el carnet para primaria y bachillerato", "need": "cardlook"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "no sale la foto del alumno al prestar", "need": "photos"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "ocultar fotos de los lectores en el mostrador", "need": "photos"}
+{"lang": "es", "region": "ES", "persona": "archivero de empresa", "q": "somos una biblioteca de empresa, no un colegio", "need": "entitykind"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "cambiar a biblioteca universitaria", "need": "entitykind"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "zona horraria", "need": "timezone"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "las fechas de devolucion salen con una hora de diferencia", "need": "timezone"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "de donde saca los datos cuando pongo el isbn", "need": "sources"}
+{"lang": "es", "region": "AR", "persona": "bibliotecario profesional", "q": "agregar la biblioteca nacional como fuente para catalogar", "need": "sources"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "desactivar los juegos", "need": "features"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "activar o quitar modulos de la biblioteca", "need": "features"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "quitar los retos de lectura en infantil", "need": "challenges"}
+{"lang": "es", "region": "CO", "persona": "profesor que lleva la biblioteca", "q": "activar desafios de lectura para primaria", "need": "challenges"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "rincones de la biblioteca por generos", "need": "corners"}
+{"lang": "es", "region": "MX", "persona": "bibliotecario profesional", "q": "secciones de terror, aventura y comic", "need": "corners"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "copias en google drive", "need": "drive"}
+{"lang": "es", "region": "MX", "persona": "informático que lo instaló", "q": "subir los respaldos a mi drive automaticamente", "need": "drive"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario profesional", "q": "z3950", "need": "z3950"}
+{"lang": "es", "region": "AR", "persona": "bibliotecario universitario", "q": "buscar en el catalogo de la biblioteca del congreso por z39.50", "need": "z3950"}
+{"lang": "es", "region": "ES", "persona": "alumno lector", "q": "quiero reservar un libro que esta prestado", "need": "readerhold"}
+{"lang": "es", "region": "MX", "persona": "socio adulto", "q": "apartar libro", "need": "readerhold"}
+{"lang": "es", "region": "ES", "persona": "alumno lector", "q": "no me ha dado tiempo a terminar el libro", "need": "readerrenew"}
+{"lang": "es", "region": "AR", "persona": "estudiante universitario", "q": "ampliar plazo de prestamo", "need": "readerrenew"}
+{"lang": "es", "region": "ES", "persona": "alumno lector", "q": "mis libros", "need": "readercard"}
+{"lang": "es", "region": "MX", "persona": "madre o padre", "q": "ver que libros tiene sacados mi hijo", "need": "readercard"}
+{"lang": "es", "region": "ES", "persona": "alumno lector", "q": "quiero decir si me gusto el libro", "need": "readerreview"}
+{"lang": "es", "region": "CO", "persona": "estudiante universitario", "q": "escribir una reseña", "need": "readerreview"}
+{"lang": "es", "region": "ES", "persona": "alumno lector", "q": "grabarme leyendo", "need": "readervoice"}
+{"lang": "es", "region": "MX", "persona": "alumno lector", "q": "como grabo mi voz leyendo un cuento", "need": "readervoice"}
+{"lang": "es", "region": "ES", "persona": "socio adulto", "q": "lo tienen en audiolibro", "need": "readerformat"}
+{"lang": "es", "region": "AR", "persona": "socio adulto", "q": "necesito el libro en letra grande para mi mama", "need": "readerformat"}
+{"lang": "es", "region": "ES", "persona": "alumno lector", "q": "no puedo entrar", "need": "password"}
+{"lang": "es", "region": "MX", "persona": "socio adulto", "q": "olvide mi contraseñna", "need": "password"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "harry potter y la piedra filosofal", "need": "none:catalogue"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "cien años de soleda", "need": "none:catalogue"}
+{"lang": "es", "region": "AR", "persona": "bibliotecario profesional", "q": "cortazar rayuela", "need": "none:catalogue"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "manolito gafotas", "need": "none:catalogue"}
+{"lang": "es", "region": "CO", "persona": "bibliotecario universitario", "q": "el principito", "need": "none:catalogue"}
+{"lang": "es", "region": "CL", "persona": "voluntario", "q": "libros de dinosaurios para niños de 6 años", "need": "none:catalogue"}
+{"lang": "es", "region": "ES", "persona": "alumno ayudante en el mostrador", "q": "lucia martin gomez 3ºB", "need": "none:reader"}
+{"lang": "es", "region": "MX", "persona": "alumno ayudante en el mostrador", "q": "credencial 004512", "need": "none:reader"}
+{"lang": "es", "region": "AR", "persona": "voluntario", "q": "juan pablo fernandez", "need": "none:reader"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "lector 2087", "need": "none:reader"}
+{"lang": "es", "region": "ES", "persona": "profesor que lleva la biblioteca", "q": "contraseña del wifi", "need": "none"}
+{"lang": "es", "region": "MX", "persona": "profesor que lleva la biblioteca", "q": "calificaciones del parcial de matematicas", "need": "none"}
+{"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "la impresora se ha atascado", "need": "none"}
+{"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "como subo una tarea en moodle", "need": "none"}
+{"lang": "es", "region": "CO", "persona": "alumno ayudante en el mostrador", "q": "horario del comedor", "need": "none"}

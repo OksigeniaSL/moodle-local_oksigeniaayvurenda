@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.233.0 (2026-11-11)
+
+- «What do you want to do?», in «More», answers as someone types: each answer says whether it is a task or a setting, a
+  line of what to do (or that it has to wait: «First, bring the readers»), «Go» or «Change» and, where there is one,
+  «Show me»; a setting also says what it is now («How many days a loan lasts · Now: 14 days»). Enter goes to the first
+  answer, and the last line always offers to look the words up in the catalogue (a title, a name) or in «How do I…?».
+- The search knows the settings people look for (the days of a loan, how many books at once, renewals, the
+  classification, the control letter, where codes start, the history, how reviews are signed, the cards by stage, the
+  photos, the kind of entity, the time zone, the catalogues for adding, what is on, the challenges, the corners, the
+  copies in Drive, Z39.50); forgives one letter wrong, missing, doubled or swapped in words of five letters or more; does
+  not answer with a task that only shares words of its steps, nor when the best answer covers less than two fifths of
+  what was asked (a book's title, Moodle's own things), nor for a code («card 004587»); and the words of each task and
+  setting grew with how libraries of every country ask for them, in the five languages.
+- Measured with a bank of 844 phrasings of lost people in Spanish (of Spain and of America), English, Portuguese and
+  French, written without seeing the search, with a third held out and never looked at: the first answer is the right
+  one for 92 % of the part that tuned it and 85 % of the part held out (94 % among the first three); it was 63 % and
+  58 %. `tests/local/howto_bank_test.php` keeps it there.
+
 ## 0.232.1 (2026-11-11)
 
 - «To open your library», Jujol's review: each spine of the shelf carries a short name that fits (Catalogue, Readers,

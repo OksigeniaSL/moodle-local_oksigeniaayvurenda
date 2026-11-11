@@ -1,0 +1,211 @@
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "chekc out a book", "need": "lend"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "issue book to pupil", "need": "lend"}
+{"lang": "en", "region": "US", "persona": "volunteer", "q": "check in", "need": "giveback"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "kid brought a book back how do i return it", "need": "giveback"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "renew loan", "need": "renew"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "student wants to extend his book for 7 more days", "need": "renew"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "internet is down can i still check out books", "need": "offline"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "offline circulation", "need": "offline"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "record in-house use", "need": "room"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "kids read during lunch in the library, i want that to count in the stats", "need": "room"}
+{"lang": "en", "region": "US", "persona": "volunteer", "q": "book has no barcode how do i check it out", "need": "nolabel"}
+{"lang": "en", "region": "GB", "persona": "student assistant at the desk", "q": "barcode missing on a returned book", "need": "nolabel"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "checkout using isbn", "need": "isbn"}
+{"lang": "en", "region": "IN", "persona": "student assistant at the desk", "q": "can i scan the barcode printed on the back cover", "need": "isbn"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "add new books", "need": "add"}
+{"lang": "en", "region": "IN", "persona": "professional librarian", "q": "accession new books", "need": "add"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "what dewy number for this book", "need": "classify"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "find classmark", "need": "classify"}
+{"lang": "en", "region": "US", "persona": "company archivist", "q": "items added today", "need": "catalogued"}
+{"lang": "en", "region": "AU", "persona": "university librarian", "q": "what did i catalogue this month", "need": "catalogued"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "merge subject headings", "need": "subjects"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "add topics to a book so kids can find it", "need": "subjects"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "merge duplicate bib recrods", "need": "duplicates"}
+{"lang": "en", "region": "AU", "persona": "volunteer", "q": "same book shows up twice in the catalouge", "need": "duplicates"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "circulate ipads", "need": "material"}
+{"lang": "en", "region": "GB", "persona": "municipal library technician", "q": "lend board games and maps", "need": "material"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "public domain ebooks", "need": "free"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "add free books from project gutenberg", "need": "free"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "print spine lables", "need": "labels"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "barcode stickers to put on the books", "need": "labels"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "which avery label sheet do i buy", "need": "labelsheets"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "labels print misaligned on my sheets", "need": "labelsheets"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "print libary cards", "need": "cards"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "generate borrower id cards", "need": "cards"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "import patrons", "need": "readers"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "my pupils aren't showing up", "need": "readers"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "patron record", "need": "profile"}
+{"lang": "en", "region": "AU", "persona": "student assistant at the desk", "q": "look up a student and see their picture", "need": "profile"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "send students the library app link", "need": "applink"}
+{"lang": "en", "region": "GB", "persona": "municipal library technician", "q": "how do members get the app on their phone", "need": "applink"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "kid lost his library card", "need": "newcard"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "issue duplicate id card", "need": "newcard"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "overdeu", "need": "late"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "chase up overdue books", "need": "late"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "holds queue", "need": "holds"}
+{"lang": "en", "region": "GB", "persona": "student assistant at the desk", "q": "reserve a book thats out for a pupil", "need": "holds"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "approve student book reviews", "need": "reviews"}
+{"lang": "en", "region": "AU", "persona": "professional librarian", "q": "where do i moderate reader comments", "need": "reviews"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "purchase suggestions from teachers", "need": "wishes"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "book requests from classes", "need": "wishes"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "set a reading challenge for my class", "need": "myclass"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "reading goal for my year 4s", "need": "myclass"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "where is this book on the shelf", "need": "stacks"}
+{"lang": "en", "region": "GB", "persona": "volunteer", "q": "shelf reading with my phone", "need": "stacks"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "qr code signs for the shelves", "need": "posters"}
+{"lang": "en", "region": "AU", "persona": "municipal library technician", "q": "print posters with a qr for the shelf ends", "need": "posters"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "cicrulation statistics", "need": "reports"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "monthly report of books issued", "need": "reports"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "annual library report for the principal", "need": "memoir"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "end of year report for governors", "need": "memoir"}
+{"lang": "en", "region": "GB", "persona": "university librarian", "q": "reading lists", "need": "readings"}
+{"lang": "en", "region": "US", "persona": "university librarian", "q": "required texts for my course, how many copies do we need", "need": "readings"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "download backpu", "need": "copies"}
+{"lang": "en", "region": "IN", "persona": "IT person who installed it", "q": "where is the daily db backup file", "need": "copies"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "encrypted offsite backup", "need": "offsite"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "what if the server dies, are the backups stored somewhere else", "need": "offsite"}
+{"lang": "en", "region": "AU", "persona": "professional librarian", "q": "stocktkae", "need": "stocktake"}
+{"lang": "en", "region": "US", "persona": "volunteer", "q": "inventory the collection", "need": "stocktake"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "weeding", "need": "weed"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "withdraw damaged stock", "need": "weed"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "send a box of books to a classroom", "need": "lots"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "block loan to the year 5 classroom", "need": "lots"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "self chekout", "need": "selfloan"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "let pupils issue books themselves at lunchtime", "need": "selfloan"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "sip2 kiosk setup", "need": "sip"}
+{"lang": "en", "region": "GB", "persona": "university librarian", "q": "connect our automated book drop", "need": "sip"}
+{"lang": "en", "region": "US", "persona": "university librarian", "q": "off campus access to databases", "need": "homelinks"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "students cant open e-journals from home", "need": "homelinks"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "share a book to google classroom", "need": "shareclass"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "post a book link in teams for my class", "need": "shareclass"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "large print request", "need": "formats"}
+{"lang": "en", "region": "AU", "persona": "professional librarian", "q": "braille copy for a vision impaired student", "need": "formats"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "gdpr delete patron", "need": "erase"}
+{"lang": "en", "region": "US", "persona": "municipal library technician", "q": "patron wants all their data removed", "need": "erase"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "acquistions budget", "need": "purchases"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "track book orders and how much money is left", "need": "purchases"}
+{"lang": "en", "region": "US", "persona": "university librarian", "q": "inter library laon", "need": "ill"}
+{"lang": "en", "region": "GB", "persona": "municipal library technician", "q": "request a book from another library", "need": "ill"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "textbook rental", "need": "bank"}
+{"lang": "en", "region": "IN", "persona": "teacher running the school library", "q": "issue textbooks for the whole class for the year", "need": "bank"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "audit log", "need": "activity"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "who deleted this record", "need": "activity"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "hand out textbooks at the start of the year by homeroom", "need": "bankround"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "collect all textbooks end of term 4 class by class", "need": "bankround"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "import marc records from destiny", "need": "import"}
+{"lang": "en", "region": "AU", "persona": "professional librarian", "q": "migrate from oliver", "need": "import"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "end of year rollover", "need": "year"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "move pupils up a year", "need": "year"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "everything due back before summer break", "need": "returnby"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "recall all loans before stocktake", "need": "returnby"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "assign form tutors", "need": "tutors"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "set homeroom teachers", "need": "tutors"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "merge duplicate patrons", "need": "twins"}
+{"lang": "en", "region": "IN", "persona": "IT person who installed it", "q": "same student appears twice", "need": "twins"}
+{"lang": "en", "region": "US", "persona": "university librarian", "q": "open the library from canvas", "need": "platforms"}
+{"lang": "en", "region": "AU", "persona": "IT person who installed it", "q": "lti blackboard integration", "need": "platforms"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "oneroster sync", "need": "roster"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "pull students from sims every night", "need": "roster"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "loan policy", "need": "rules"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "different loan rules for staff", "need": "rules"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "overdue fines", "need": "sanctions"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "block borrowing for kids with overdue books", "need": "sanctions"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "overdue notice schedule", "need": "noticeafter"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "send overdue emails to parents too", "need": "noticeafter"}
+{"lang": "en", "region": "US", "persona": "municipal library technician", "q": "add a branch", "need": "libraries"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "create a departmental library", "need": "libraries"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "give a volunteer access to just one branch", "need": "keepers"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "let the TA run the desk", "need": "keepers"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "rename the mascot", "need": "characters"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "change the names of the library characters", "need": "characters"}
+{"lang": "en", "region": "US", "persona": "municipal library technician", "q": "public opac without login", "need": "window"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "let parents browse the catalogue from the school website", "need": "window"}
+{"lang": "en", "region": "US", "persona": "company archivist", "q": "edit marc record", "need": "record"}
+{"lang": "en", "region": "GB", "persona": "student assistant at the desk", "q": "fix wrong title on a book", "need": "record"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "make the library visible to students", "need": "closed"}
+{"lang": "en", "region": "AU", "persona": "professional librarian", "q": "im done setting up, how do i go live", "need": "closed"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "use phone camera as barcode scanner", "need": "scanner"}
+{"lang": "en", "region": "IN", "persona": "volunteer", "q": "no barcode reader, can i use the webcam", "need": "scanner"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "site setings", "need": "settings"}
+{"lang": "en", "region": "AU", "persona": "IT person who installed it", "q": "change school name and institution settings", "need": "settings"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "listen to student read-aloud recordings", "need": "voices"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "check the voice clips pupils made", "need": "voices"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "link patrons to moodle accounts", "need": "match"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "match borrowers with user logins", "need": "match"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "upload students from a spreadsheet", "need": "readerslist"}
+{"lang": "en", "region": "GB", "persona": "municipal library technician", "q": "import members from csv", "need": "readerslist"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "user guide", "need": "helpme"}
+{"lang": "en", "region": "AU", "persona": "volunteer", "q": "help i dont know where to start", "need": "helpme"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "student lost a book", "need": "lost"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "charge for lost item", "need": "lost"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "who has this book checked out", "need": "whohas"}
+{"lang": "en", "region": "IN", "persona": "professional librarian", "q": "find borrower of accession no 4521", "need": "whohas"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "add library block to moodle dashboard", "need": "dashboard"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "show the library on everyones homepage", "need": "dashboard"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "loan period", "need": "loandays"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "change loan length to 3 weeks", "need": "loandays"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "max items per patron", "need": "maxloans"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "how many books can kids borrow at once", "need": "maxloans"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "renewl limit", "need": "renewcount"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "allow only two renewals", "need": "renewcount"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "when they renew does the new due date start today", "need": "renewfrom"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "renewal period calculated from original due date", "need": "renewfrom"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "switch from dewey to lcc", "need": "classification"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "we use ddc not udc", "need": "classification"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "barcde check digit", "need": "controlletter"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "remove the letter at the end of barcodes", "need": "controlletter"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "starting barcode number", "need": "numbering"}
+{"lang": "en", "region": "AU", "persona": "IT person who installed it", "q": "next card number should be 20001", "need": "numbering"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "keep circulation history", "need": "history"}
+{"lang": "en", "region": "GB", "persona": "IT person who installed it", "q": "how long do we store loan history gdpr", "need": "history"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "show reviews with first name only", "need": "reviewsign"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "anonymous reviews", "need": "reviewsign"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "library card design for elementary", "need": "cardlook"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "different card template for sixth form", "need": "cardlook"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "hide student photos at circulation desk", "need": "photos"}
+{"lang": "en", "region": "GB", "persona": "student assistant at the desk", "q": "pupil photos not showing when issuing", "need": "photos"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "change institution type to public library", "need": "entitykind"}
+{"lang": "en", "region": "AU", "persona": "company archivist", "q": "we are a corporate library not a school", "need": "entitykind"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "tiem zone", "need": "timezone"}
+{"lang": "en", "region": "IN", "persona": "IT person who installed it", "q": "due dates showing wrong time", "need": "timezone"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "where does it get the book details from the isbn", "need": "sources"}
+{"lang": "en", "region": "GB", "persona": "professional librarian", "q": "add british library as isbn source", "need": "sources"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "turn off games", "need": "features"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "disable reviews and voice recording", "need": "features"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "turn off reading challenges for kindergarten", "need": "challenges"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "enable class challenges for ks2", "need": "challenges"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "genrefy collection", "need": "corners"}
+{"lang": "en", "region": "AU", "persona": "teacher running the school library", "q": "set up the fantasy and horror corners", "need": "corners"}
+{"lang": "en", "region": "US", "persona": "IT person who installed it", "q": "backups to google drive", "need": "drive"}
+{"lang": "en", "region": "AU", "persona": "IT person who installed it", "q": "save the backups in our school google drive automatically", "need": "drive"}
+{"lang": "en", "region": "US", "persona": "professional librarian", "q": "z39.50 server", "need": "z3950"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "search loc catalog via z3950", "need": "z3950"}
+{"lang": "en", "region": "US", "persona": "student reader", "q": "place a hold", "need": "readerhold"}
+{"lang": "en", "region": "GB", "persona": "adult member", "q": "reserve a book thats on loan", "need": "readerhold"}
+{"lang": "en", "region": "US", "persona": "student reader", "q": "i need more time with my book", "need": "readerrenew"}
+{"lang": "en", "region": "IN", "persona": "university student", "q": "extend due date", "need": "readerrenew"}
+{"lang": "en", "region": "US", "persona": "student reader", "q": "my account", "need": "readercard"}
+{"lang": "en", "region": "AU", "persona": "parent", "q": "see what books my son has out", "need": "readercard"}
+{"lang": "en", "region": "US", "persona": "student reader", "q": "rate this book", "need": "readerreview"}
+{"lang": "en", "region": "GB", "persona": "university student", "q": "write a review", "need": "readerreview"}
+{"lang": "en", "region": "US", "persona": "student reader", "q": "record myself reading", "need": "readervoice"}
+{"lang": "en", "region": "AU", "persona": "student reader", "q": "how do i record my voice", "need": "readervoice"}
+{"lang": "en", "region": "US", "persona": "adult member", "q": "is there an audibook version", "need": "readerformat"}
+{"lang": "en", "region": "GB", "persona": "adult member", "q": "large print copy please", "need": "readerformat"}
+{"lang": "en", "region": "US", "persona": "student reader", "q": "cant log in", "need": "password"}
+{"lang": "en", "region": "IN", "persona": "university student", "q": "forgot passowrd", "need": "password"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "diary of a wimpy kid", "need": "none:catalogue"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "roald dahl", "need": "none:catalogue"}
+{"lang": "en", "region": "AU", "persona": "professional librarian", "q": "harry potter", "need": "none:catalogue"}
+{"lang": "en", "region": "IN", "persona": "university librarian", "q": "introduction to algorithms cormen", "need": "none:catalogue"}
+{"lang": "en", "region": "US", "persona": "volunteer", "q": "books about sharks", "need": "none:catalogue"}
+{"lang": "en", "region": "GB", "persona": "student assistant at the desk", "q": "the gruffallo", "need": "none:catalogue"}
+{"lang": "en", "region": "US", "persona": "student assistant at the desk", "q": "emily johnson grade 5", "need": "none:reader"}
+{"lang": "en", "region": "GB", "persona": "student assistant at the desk", "q": "borrower 11872", "need": "none:reader"}
+{"lang": "en", "region": "AU", "persona": "volunteer", "q": "jack thompson", "need": "none:reader"}
+{"lang": "en", "region": "IN", "persona": "student assistant at the desk", "q": "roll no 2023cs114", "need": "none:reader"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "wifi password", "need": "none"}
+{"lang": "en", "region": "GB", "persona": "teacher running the school library", "q": "year 9 maths grades", "need": "none"}
+{"lang": "en", "region": "AU", "persona": "IT person who installed it", "q": "printer jammed", "need": "none"}
+{"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "how do i create a quiz in moodle", "need": "none"}
+{"lang": "en", "region": "IN", "persona": "student assistant at the desk", "q": "canteen menu", "need": "none"}

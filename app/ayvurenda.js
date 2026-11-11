@@ -491,6 +491,120 @@
             }
         });
     });
+    // «What do you want to do?» in «More»: the answers while someone types, each with its way there; Enter goes to the
+    // first one, and the last line always offers to look it up in the catalogue (a title, a name).
+    document.querySelectorAll('form.ayv-more-ask[data-ask]').forEach(function(form) {
+        var input = form.querySelector('input[name="q"]');
+        var box = form.querySelector('.ayv-more-found');
+        var library = form.querySelector('input[name="library"]');
+        if (!input || !box || !library) {
+            return;
+        }
+        var timer = null;
+        var asked = 0;
+        var first = null;
+        var make = function(tag, cls, text) {
+            var el = document.createElement(tag);
+            if (cls) {
+                el.className = cls;
+            }
+            if (text) {
+                el.textContent = text;
+            }
+            return el;
+        };
+        var link = function(href, cls, text, icon) {
+            var a = make('a', cls);
+            a.href = href;
+            if (icon) {
+                a.insertAdjacentHTML('beforeend', icon);
+                a.appendChild(make('span', '', text));
+            } else {
+                a.textContent = text;
+            }
+            return a;
+        };
+        var show = function(data) {
+            box.textContent = '';
+            first = null;
+            box.appendChild(make('p', 'ayv-more-found-title', data.answers.length ? data.title : data.none));
+            var list = make('ul');
+            data.answers.forEach(function(answer, i) {
+                var item = make('li', 'ayv-more-answer');
+                var icon = make('span', 'ayv-more-answer-icon');
+                icon.insertAdjacentHTML('beforeend', answer.setting ? data.icons.setting : data.icons.task);
+                item.appendChild(icon);
+                var words = make('span');
+                words.appendChild(make('span', 'ayv-more-answer-kind', answer.kind));
+                var text = make('span', 'ayv-more-answer-text', answer.text);
+                if (answer.value) {
+                    text.appendChild(document.createTextNode(' '));
+                    text.appendChild(make('b', 'ayv-more-value', answer.value));
+                }
+                words.appendChild(text);
+                if (answer.sub) {
+                    words.appendChild(make('span', 'ayv-more-answer-sub' + (answer.wait ? ' ayv-more-answer-wait' : ''), answer.sub));
+                }
+                item.appendChild(words);
+                var acts = make('span', 'ayv-more-answer-acts');
+                acts.appendChild(link(answer.url, 'ayv-button' + (i ? ' ayv-button-quiet' : ''), answer.go));
+                if (answer.help) {
+                    acts.appendChild(link(answer.help, 'ayv-button ayv-button-quiet', data.showlabel, data.icons.play));
+                }
+                item.appendChild(acts);
+                list.appendChild(item);
+                if (!first) {
+                    first = answer.url;
+                }
+            });
+            box.appendChild(list);
+            var more = make('p', 'ayv-more-found-more');
+            more.appendChild(link(data.catalogue.url, '', data.catalogue.label));
+            more.appendChild(document.createTextNode(' · '));
+            more.appendChild(link(data.howto.url, '', data.howto.label));
+            box.appendChild(more);
+            box.hidden = false;
+        };
+        var ask = function() {
+            var q = input.value.trim();
+            if (q.length < 3) {
+                box.hidden = true;
+                first = null;
+                return;
+            }
+            var mine = ++asked;
+            var url = form.getAttribute('data-ask') + '?library=' + encodeURIComponent(library.value) + '&q=' +
+                encodeURIComponent(q);
+            fetch(url, {credentials: 'same-origin'}).then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                // Only the answer to what is written now: a slow one for an older word does not cover it.
+                if (mine === asked && data && data.answers) {
+                    show(data);
+                }
+            }).catch(function() {
+                return null;
+            });
+        };
+        input.addEventListener('input', function() {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(ask, 220);
+        });
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !box.hidden) {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = '';
+                box.hidden = true;
+            }
+        });
+        form.addEventListener('submit', function(e) {
+            if (first) {
+                e.preventDefault();
+                window.location.href = first;
+            }
+        });
+    });
     document.querySelectorAll('[data-ayv-open]').forEach(function(button) {
         var sheet = document.getElementById(button.getAttribute('data-ayv-open'));
         if (!sheet) {

@@ -1,0 +1,211 @@
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "enregistrer un prêt", "need": "lend"}
+{"lang": "fr", "region": "SN", "persona": "enseignant qui gère la bibliothèque", "q": "un élève veut emprunter un livre comment je fais", "need": "lend"}
+{"lang": "fr", "region": "FR", "persona": "bénévole", "q": "retour", "need": "giveback"}
+{"lang": "fr", "region": "CA", "persona": "élève assistant au prêt", "q": "un élève a rapporté son livre", "need": "giveback"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "prolongaton d'un prêt", "need": "renew"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "renouveler le livre d'un élève", "need": "renew"}
+{"lang": "fr", "region": "CI", "persona": "bibliothécaire professionnel", "q": "prêter quand il n'y a pas de connexion", "need": "offline"}
+{"lang": "fr", "region": "CM", "persona": "bibliothécaire professionnel", "q": "coupure de réseau, comment continuer les prêts", "need": "offline"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "consultation sur place", "need": "room"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "compter les livres lus pendant la récré à la bibliothèque", "need": "room"}
+{"lang": "fr", "region": "FR", "persona": "bénévole", "q": "livre sans code-barres comment le prêter", "need": "nolabel"}
+{"lang": "fr", "region": "SN", "persona": "élève assistant au prêt", "q": "rendre un livre qui n'a pas d'étiquette", "need": "nolabel"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "prêt avec l'isbn", "need": "isbn"}
+{"lang": "fr", "region": "CA", "persona": "élève assistant au prêt", "q": "scanner le code-barres au dos du livre", "need": "isbn"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "cataloguer les nouveautés", "need": "add"}
+{"lang": "fr", "region": "CI", "persona": "agent de médiathèque municipale", "q": "enregistrer les dons de livres", "need": "add"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "quelle cote dewey pour ce livre", "need": "classify"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire professionnel", "q": "trouver l'indice cdu", "need": "classify"}
+{"lang": "fr", "region": "FR", "persona": "archiviste d'entreprise", "q": "notices créées aujourd'hui", "need": "catalogued"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire universitaire", "q": "ce que j'ai catalogué cette semaine", "need": "catalogued"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "fusionner les mots-clés en double", "need": "subjects"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "ajouter des sujets à un livre pour qu'on le trouve", "need": "subjects"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "dédoublonnner les notices", "need": "duplicates"}
+{"lang": "fr", "region": "CM", "persona": "bénévole", "q": "le même livre apparaît deux fois", "need": "duplicates"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "prêter des tabletes", "need": "material"}
+{"lang": "fr", "region": "BE", "persona": "agent de médiathèque municipale", "q": "ajouter des jeux de société et des cartes au prêt", "need": "material"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "œuvres du domaine public", "need": "free"}
+{"lang": "fr", "region": "SN", "persona": "enseignant qui gère la bibliothèque", "q": "ajouter des livres gratuits en ligne", "need": "free"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "imprimer les étiqeuttes de cote", "need": "labels"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "étiquettes code-barres à coller", "need": "labels"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "quelles planches d'étiquettes avery acheter", "need": "labelsheets"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "les étiquettes ne tombent pas bien sur ma feuille", "need": "labelsheets"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "imprimer les cartes de lecteru", "need": "cards"}
+{"lang": "fr", "region": "CI", "persona": "agent de médiathèque municipale", "q": "faire les cartes d'adhérent", "need": "cards"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "importer les élèves", "need": "readers"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "mes élèves n'apparaissent pas", "need": "readers"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "fiche lecteur", "need": "profile"}
+{"lang": "fr", "region": "MA", "persona": "élève assistant au prêt", "q": "voir un élève avec sa photo", "need": "profile"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "envoyer l'appli aux élèves", "need": "applink"}
+{"lang": "fr", "region": "CA", "persona": "agent de médiathèque municipale", "q": "comment l'abonné installe l'application sur son cellulaire", "need": "applink"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "un élève a perdu sa carte", "need": "newcard"}
+{"lang": "fr", "region": "BE", "persona": "agent de médiathèque municipale", "q": "refaire une carte de lecteur", "need": "newcard"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "relnaces", "need": "late"}
+{"lang": "fr", "region": "CM", "persona": "enseignant qui gère la bibliothèque", "q": "liste des élèves en retard pour rendre les livres", "need": "late"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "réservatoin", "need": "holds"}
+{"lang": "fr", "region": "CA", "persona": "élève assistant au prêt", "q": "un élève veut réserver un livre déjà prêté", "need": "holds"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "valider les avis des élèves", "need": "reviews"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire professionnel", "q": "publier les critiques des lecteurs", "need": "reviews"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "suggestions d'achat des profs", "need": "wishes"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "demandes de livres des classes", "need": "wishes"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "choisir le défi lecture de ma classe", "need": "myclass"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "défi de lecture pour mon groupe", "need": "myclass"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "où est rangé ce livre", "need": "stacks"}
+{"lang": "fr", "region": "BE", "persona": "bénévole", "q": "ranger les rayons avec le téléphone", "need": "stacks"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "affiches avec qr code pour les rayons", "need": "posters"}
+{"lang": "fr", "region": "SN", "persona": "agent de médiathèque municipale", "q": "imprimer des qr pour les étagères", "need": "posters"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "statistques de prêt", "need": "reports"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire universitaire", "q": "rapport des documents les plus empruntés", "need": "reports"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "bilan annuel du cdi", "need": "memoir"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire professionnel", "q": "rapport d'activités de l'année pour la commune", "need": "memoir"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire universitaire", "q": "bibliographies des cours", "need": "readings"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire universitaire", "q": "combien d'exemplaires commander pour les lectures obligatoires", "need": "readings"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "télécharger la sauvgarde", "need": "copies"}
+{"lang": "fr", "region": "MA", "persona": "informaticien qui l'a installé", "q": "backup de la base", "need": "copies"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "sauvegarde chiffrée externalisée", "need": "offsite"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "si le serveur plante où sont les copies", "need": "offsite"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "récolemnt", "need": "stocktake"}
+{"lang": "fr", "region": "CA", "persona": "bénévole", "q": "faire l'inventaire", "need": "stocktake"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "désherbgae", "need": "weed"}
+{"lang": "fr", "region": "CI", "persona": "enseignant qui gère la bibliothèque", "q": "retirer les livres abîmés", "need": "weed"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "malle de livers pour une classe", "need": "lots"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "envoyer des livres à la bibliothèque de classe", "need": "lots"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "auto-prêt", "need": "selfloan"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "que les élèves enregistrent eux-mêmes leurs emprunts", "need": "selfloan"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "connecter un automate de prêt sip2", "need": "sip"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire universitaire", "q": "boîte de retour", "need": "sip"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire universitaire", "q": "accès distant aux ressources électroniques", "need": "homelinks"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire universitaire", "q": "les étudiants ne peuvent pas accéder aux revues hors campus", "need": "homelinks"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "partager un livre dans google classroom", "need": "shareclass"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "publier un livre dans l'équipe teams de ma classe", "need": "shareclass"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "livre en gros caractères", "need": "formats"}
+{"lang": "fr", "region": "CI", "persona": "agent de médiathèque municipale", "q": "un livre en braille pour un élève aveugle", "need": "formats"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "supprimer un lecteur rgpd", "need": "erase"}
+{"lang": "fr", "region": "CA", "persona": "agent de médiathèque municipale", "q": "un aboné demande qu'on efface ses données", "need": "erase"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "suivi des acquisitons et du budget", "need": "purchases"}
+{"lang": "fr", "region": "SN", "persona": "enseignant qui gère la bibliothèque", "q": "noter les livres achetés avec l'argent de l'école", "need": "purchases"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire universitaire", "q": "prêt entre bibliothèques", "need": "ill"}
+{"lang": "fr", "region": "BE", "persona": "agent de médiathèque municipale", "q": "demander un livre à une autre bibliothèque", "need": "ill"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "prêt des manuels scolaires", "need": "bank"}
+{"lang": "fr", "region": "CM", "persona": "enseignant qui gère la bibliothèque", "q": "location des manuels aux élèves", "need": "bank"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "journal des actions", "need": "activity"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "qui a supprimé cette notice", "need": "activity"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "ramassage des manuels en juin", "need": "bankround"}
+{"lang": "fr", "region": "SN", "persona": "enseignant qui gère la bibliothèque", "q": "distribuer les manuels à la rentrée d'octobre classe par classe", "need": "bankround"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "importer depuis bcdi", "need": "import"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "migrer de regard vers ici", "need": "import"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "changer d'année scolaire", "need": "year"}
+{"lang": "fr", "region": "BE", "persona": "informaticien qui l'a installé", "q": "passage à la nouvelle année, les élèves changent de classe", "need": "year"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "tous les livres rendus avant les grandes vacances", "need": "returnby"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "rappeler tous les prêts avant l'inventaire", "need": "returnby"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "professeurs principaux des classes", "need": "tutors"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "indiquer le titulaire de chaque groupe", "need": "tutors"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "fusionner deux lecteurs", "need": "twins"}
+{"lang": "fr", "region": "MA", "persona": "informaticien qui l'a installé", "q": "un élève apparaît en double", "need": "twins"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire universitaire", "q": "ouvrir la bibliothèque depuis canvas", "need": "platforms"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "intégration lti avec brightspace", "need": "platforms"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "synchroniser les élèves avec pronote chaque nuit", "need": "roster"}
+{"lang": "fr", "region": "BE", "persona": "informaticien qui l'a installé", "q": "oneroster", "need": "roster"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "règles de prêt", "need": "rules"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "conditions de prêt différentes pour les enseignants", "need": "rules"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "pénalités de retrad", "need": "sanctions"}
+{"lang": "fr", "region": "CI", "persona": "enseignant qui gère la bibliothèque", "q": "bloquer les élèves qui ne rendent pas", "need": "sanctions"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "quand partent les relances", "need": "noticeafter"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "envoyer les avis de retard aussi aux parents", "need": "noticeafter"}
+{"lang": "fr", "region": "FR", "persona": "agent de médiathèque municipale", "q": "ajouter une annexe", "need": "libraries"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire universitaire", "q": "créer une nouvelle succursale", "need": "libraries"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "donner l'accès au poste de prêt à un bénévole", "need": "keepers"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "la stagiaire ne doit gérer que la bibliothèque de l'école primaire", "need": "keepers"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "renommer la mascotte", "need": "characters"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "changer le nom des personnages", "need": "characters"}
+{"lang": "fr", "region": "FR", "persona": "agent de médiathèque municipale", "q": "opac public sans connexion", "need": "window"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "que les parents voient le catalogue sans se connecter", "need": "window"}
+{"lang": "fr", "region": "FR", "persona": "archiviste d'entreprise", "q": "modifier une notice", "need": "record"}
+{"lang": "fr", "region": "CA", "persona": "élève assistant au prêt", "q": "corriger le code d'un exemplaire", "need": "record"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "ouvrir la bibliotèque aux élèves", "need": "closed"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire professionnel", "q": "j'ai fini le paramétrage, comment la rendre visible aux lecteurs", "need": "closed"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "scanner avec la caméra du téléphone", "need": "scanner"}
+{"lang": "fr", "region": "SN", "persona": "bénévole", "q": "on n'a pas de douchette", "need": "scanner"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "paramètres de l'établissement", "need": "settings"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "réglages généraux", "need": "settings"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "écouter les enregistrements des élèves", "need": "voices"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "valider les lectures à voix haute enregistrées", "need": "voices"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "lier les lecteurs aux comptes moodle", "need": "match"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "associer les abonnés à leurs utilisateurs", "need": "match"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "importer les élèves depuis un tableur", "need": "readerslist"}
+{"lang": "fr", "region": "CA", "persona": "agent de médiathèque municipale", "q": "j'ai la liste des abonnés dans un fichier excel", "need": "readerslist"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "mode d'emploi", "need": "helpme"}
+{"lang": "fr", "region": "CI", "persona": "bénévole", "q": "je ne sais pas par où commencer", "need": "helpme"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "un élève a perdu un livre", "need": "lost"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "facturer un document perdu", "need": "lost"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "qui a emprunté ce livre", "need": "whohas"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire professionnel", "q": "qui a l'exemplaire 3381", "need": "whohas"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "mettre la bibliothèque sur le tableau de bord moodle", "need": "dashboard"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "bloc bibliothèque sur la page d'accueil de tous", "need": "dashboard"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "durée de prêt", "need": "loandays"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "prêter 3 semaines au lieu de 2", "need": "loandays"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "nombre maximum de prêts par lecteur", "need": "maxloans"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "combien de livres un élève peut prendre", "need": "maxloans"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "nombre de prolongations", "need": "renewcount"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "un seul renouvelement permis", "need": "renewcount"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "prolongation à partir de la date de retour prévue", "need": "renewfrom"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "quand on renouvelle, la nouvelle date part d'aujourd'hui?", "need": "renewfrom"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "passer de la cdu à la dewey", "need": "classification"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire universitaire", "q": "utiliser la classification de la library of congress", "need": "classification"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "clé de contrôle des codes-barres", "need": "controlletter"}
+{"lang": "fr", "region": "BE", "persona": "informaticien qui l'a installé", "q": "lettre à la fin du code-barres", "need": "controlletter"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "numéro d'inventaire de départ", "need": "numbering"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "commencer les numéros de carte à 5000", "need": "numbering"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "durée de conservation de l'historique des prêts", "need": "history"}
+{"lang": "fr", "region": "CA", "persona": "informaticien qui l'a installé", "q": "effacer l'historique après un an", "need": "history"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "avis signés avec les initiales", "need": "reviewsign"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "critiques anonymes", "need": "reviewsign"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "modèle de carte pour la maternelle", "need": "cardlook"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "changer l'apparence des cartes pour le secondaire", "need": "cardlook"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "masquer les photos des élèves au prêt", "need": "photos"}
+{"lang": "fr", "region": "CA", "persona": "élève assistant au prêt", "q": "la photo de l'élève n'apparaît pas", "need": "photos"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "type d'établissement mairie", "need": "entitykind"}
+{"lang": "fr", "region": "CA", "persona": "archiviste d'entreprise", "q": "on est une entreprise pas une école", "need": "entitykind"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "fuseau horraire", "need": "timezone"}
+{"lang": "fr", "region": "CI", "persona": "informaticien qui l'a installé", "q": "les heures de retour sont décalées", "need": "timezone"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "récupérer les notices de la bnf par isbn", "need": "sources"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "d'où viennent les infos quand je mets l'isbn", "need": "sources"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "désactiver les jeux", "need": "features"}
+{"lang": "fr", "region": "BE", "persona": "enseignant qui gère la bibliothèque", "q": "enlever les avis et les enregistrements", "need": "features"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "activer les défis lecture en cycle 3", "need": "challenges"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "désactiver les défis au préscolaire", "need": "challenges"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "coins par genre", "need": "corners"}
+{"lang": "fr", "region": "CA", "persona": "bibliothécaire professionnel", "q": "sections policier fantastique bd", "need": "corners"}
+{"lang": "fr", "region": "FR", "persona": "informaticien qui l'a installé", "q": "sauvegardes sur google drive", "need": "drive"}
+{"lang": "fr", "region": "SN", "persona": "informaticien qui l'a installé", "q": "envoyer les copies dans le drive automatiquement", "need": "drive"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire professionnel", "q": "serveur z39.50", "need": "z3950"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire universitaire", "q": "interroger le sudoc en z3950", "need": "z3950"}
+{"lang": "fr", "region": "FR", "persona": "élève lecteur", "q": "réserver un livre", "need": "readerhold"}
+{"lang": "fr", "region": "CA", "persona": "lecteur adulte", "q": "je veux le livre qui est déjà emprunté", "need": "readerhold"}
+{"lang": "fr", "region": "FR", "persona": "élève lecteur", "q": "j'ai pas fini mon livre", "need": "readerrenew"}
+{"lang": "fr", "region": "BE", "persona": "étudiant", "q": "prolonger mon emprunt", "need": "readerrenew"}
+{"lang": "fr", "region": "FR", "persona": "élève lecteur", "q": "mes prêts", "need": "readercard"}
+{"lang": "fr", "region": "CA", "persona": "parent", "q": "voir les livres de mon enfant", "need": "readercard"}
+{"lang": "fr", "region": "FR", "persona": "élève lecteur", "q": "donner mon avis sur le livre", "need": "readerreview"}
+{"lang": "fr", "region": "SN", "persona": "étudiant", "q": "noter un livre", "need": "readerreview"}
+{"lang": "fr", "region": "FR", "persona": "élève lecteur", "q": "m'enregistrer en train de lire", "need": "readervoice"}
+{"lang": "fr", "region": "CA", "persona": "élève lecteur", "q": "comment enregistrer ma voix", "need": "readervoice"}
+{"lang": "fr", "region": "FR", "persona": "lecteur adulte", "q": "vous l'avez en livre audio", "need": "readerformat"}
+{"lang": "fr", "region": "BE", "persona": "lecteur adulte", "q": "version en gros caractères svp", "need": "readerformat"}
+{"lang": "fr", "region": "FR", "persona": "élève lecteur", "q": "mot de pase oublié", "need": "password"}
+{"lang": "fr", "region": "CI", "persona": "lecteur adulte", "q": "je n'arrive pas à me connecter", "need": "password"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "le petit prnce", "need": "none:catalogue"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "michel tremblay", "need": "none:catalogue"}
+{"lang": "fr", "region": "BE", "persona": "bibliothécaire professionnel", "q": "tintin", "need": "none:catalogue"}
+{"lang": "fr", "region": "SN", "persona": "enseignant qui gère la bibliothèque", "q": "une si longue lettre mariama bâ", "need": "none:catalogue"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire universitaire", "q": "droit constitutionnel", "need": "none:catalogue"}
+{"lang": "fr", "region": "CI", "persona": "bénévole", "q": "livres sur les volcans", "need": "none:catalogue"}
+{"lang": "fr", "region": "FR", "persona": "élève assistant au prêt", "q": "lucas martin 6e b", "need": "none:reader"}
+{"lang": "fr", "region": "CA", "persona": "élève assistant au prêt", "q": "carte 004587", "need": "none:reader"}
+{"lang": "fr", "region": "BE", "persona": "bénévole", "q": "amélie dubois", "need": "none:reader"}
+{"lang": "fr", "region": "CM", "persona": "élève assistant au prêt", "q": "fotso jean-paul 3e", "need": "none:reader"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "code wifi", "need": "none"}
+{"lang": "fr", "region": "CA", "persona": "enseignant qui gère la bibliothèque", "q": "notes de mathématiques dans moodle", "need": "none"}
+{"lang": "fr", "region": "BE", "persona": "informaticien qui l'a installé", "q": "imprimante bloquée", "need": "none"}
+{"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "créer un devoir sur moodle", "need": "none"}
+{"lang": "fr", "region": "SN", "persona": "élève assistant au prêt", "q": "horaires de la cantine", "need": "none"}

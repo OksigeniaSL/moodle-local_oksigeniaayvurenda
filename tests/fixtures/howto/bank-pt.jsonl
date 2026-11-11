@@ -1,0 +1,211 @@
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "emprestar livro", "need": "lend"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "como faço a requsição domiciliária de um livro para um aluno", "need": "lend"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "dar baixa na devolução", "need": "giveback"}
+{"lang": "pt", "region": "PT", "persona": "voluntário", "q": "o miúdo trouxe o livro de volta, onde registo", "need": "giveback"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "renvoar empréstimo", "need": "renew"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "prolongar a requisição mais uma semana", "need": "renew"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "empréstimo sem internet", "need": "offline"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "a rede foi abaixo e tenho alunos à espera", "need": "offline"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "consulta presencial", "need": "room"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "contar os livros que os alunos leem no recreio dentro da biblioteca", "need": "room"}
+{"lang": "pt", "region": "BR", "persona": "voluntário", "q": "livro sem etiqueta como empresto", "need": "nolabel"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "devolver livro que não tem código de barras", "need": "nolabel"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "emprestar pelo isbn", "need": "isbn"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "posso ler o código de barras da contracapa?", "need": "isbn"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "cadastrar livros novos", "need": "add"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "registar novas aquisições", "need": "add"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "qual a cdd desse livro", "need": "classify"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "que cota ponho neste livro", "need": "classify"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "livros cadastrados hoje", "need": "catalogued"}
+{"lang": "pt", "region": "PT", "persona": "arquivista de empresa", "q": "registos criados esta semana", "need": "catalogued"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "descritores repetidos, como unificar", "need": "subjects"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "colocar assuntos no livro pra achar na busca", "need": "subjects"}
+{"lang": "pt", "region": "BR", "persona": "voluntário", "q": "o mesmo livro aparece duas vezes", "need": "duplicates"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "fundir registos bibliográficos duplicados", "need": "duplicates"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "emprestar tablets e jogos", "need": "material"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "registar mapas e jogos de tabuleiro para emprestar", "need": "material"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "obras em domínio público", "need": "free"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "livros digitais gratuitos para a biblioteca", "need": "free"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "imprimir etiqeutas de lombada", "need": "labels"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "etiquetas com a cota para colar nos livros", "need": "labels"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "qual folha de etiqueta pimaco comprar", "need": "labelsheets"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "as etiquetas saem desalinhadas na folha", "need": "labelsheets"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "imprimir carterinhas dos alunos", "need": "cards"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "cartões de leitor imprimir", "need": "cards"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "importar alunos", "need": "readers"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "os alunos não aparecem", "need": "readers"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "ver ficha do leitor com foto", "need": "profile"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "dados de um leitor", "need": "profile"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "mandar o aplicativo pros alunos", "need": "applink"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "enviar a app ao leitor por email", "need": "applink"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "aluno perdeu a carteirinha", "need": "newcard"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "segunda via do cartão de leitor", "need": "newcard"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "empréstimos em atraso", "need": "late"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "lembrar os alunos que não devolveram", "need": "late"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "reservsa", "need": "holds"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "um aluno quer reservar um livro que está requisitado", "need": "holds"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "aprovar resehnas dos alunos", "need": "reviews"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "publicar as opiniões dos leitores", "need": "reviews"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "sugestões de compra dos professores", "need": "wishes"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "pedidos de livros das turmas", "need": "wishes"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "desafio de leitura da minha turma", "need": "myclass"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "sou professora do 3.º ano e quero escolher um desafio para a turma", "need": "myclass"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "em qual estante fica esse livro", "need": "stacks"}
+{"lang": "pt", "region": "PT", "persona": "voluntário", "q": "percorrer as estantes com o telemóvel", "need": "stacks"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "cartazes com qr code para as estantes", "need": "posters"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "imprimir qr para afixar nas estantes", "need": "posters"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "estatísitcas de empréstimo", "need": "reports"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário universitário", "q": "relatório dos livros mais requisitados", "need": "reports"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "relatório anual da biblioteca escolar", "need": "memoir"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "relatório do ano pra direção", "need": "memoir"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário universitário", "q": "bibliografia básica das disciplinas", "need": "readings"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário universitário", "q": "quantos exemplares comprar para a bibliografia da cadeira", "need": "readings"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "baixar backpu", "need": "copies"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "descarregar cópia de segurança", "need": "copies"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "backup criptografado fora do servidor", "need": "offsite"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "se o servidor avariar onde ficam as cópias", "need": "offsite"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "invetário do acervo", "need": "stocktake"}
+{"lang": "pt", "region": "PT", "persona": "voluntário", "q": "contar todos os livros das estantes", "need": "stocktake"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "descrate de livros", "need": "weed"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "abate de documentos", "need": "weed"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "mandar uma caixa de livros pra sala de aula", "need": "lots"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "lote de livros para a biblioteca de turma", "need": "lots"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "autoempréstmo", "need": "selfloan"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "os alunos requisitarem sozinhos sem eu estar", "need": "selfloan"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "configurar máquina de autoatendimento sip2", "need": "sip"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário universitário", "q": "ligar a caixa de devolução", "need": "sip"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário universitário", "q": "acesso remoto ao portal de periódicos capes", "need": "homelinks"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário universitário", "q": "aceder à b-on a partir de casa", "need": "homelinks"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "compartilhar livro no google sala de aula", "need": "shareclass"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "partilhar um livro na equipa do teams", "need": "shareclass"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "livro em braile", "need": "formats"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "leitor pede versão em letra grande", "need": "formats"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "apagar dados do usuário lgpd", "need": "erase"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "um leitor pediu para eliminar os dados dele rgpd", "need": "erase"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "controle de aquisições e orçamento", "need": "purchases"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "registar compras e verba da biblioteca", "need": "purchases"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário universitário", "q": "empréstimo entre bibliotecsa", "need": "ill"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "pedir um livro a outra biblioteca da rede", "need": "ill"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "emprestar livros didáticos do pnld", "need": "bank"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "banco de manuais escolares", "need": "bank"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "log de atividades", "need": "activity"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "quem apagou este registo", "need": "activity"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "devolução dos manuais em junho turma a turma", "need": "bankround"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "entregar os livros didáticos em fevereiro por turma", "need": "bankround"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "importar acervo do biblivre", "need": "import"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "migrar do bibliobase", "need": "import"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "virar o ano letivo", "need": "year"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "mudar de ano letivo", "need": "year"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "todos os livros de volta antes das férias de dezembro", "need": "returnby"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "recolher todos os livros antes do inventário", "need": "returnby"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "diretores de turma", "need": "tutors"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "professor regente de cada turma", "need": "tutors"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "aluno duplicado", "need": "twins"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "o mesmo leitor está registado duas vezes", "need": "twins"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário universitário", "q": "abrir a biblioteca pelo canvas", "need": "platforms"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "integração lti com blackboard", "need": "platforms"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "sincronizar alunos com o sistema da secretaria toda noite", "need": "roster"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "importar alunos do inovar todas as noites", "need": "roster"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "políticas de empréstimo", "need": "rules"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "regras de requisição para professores", "need": "rules"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "multa por atrsao", "need": "sanctions"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "quem não devolve fica sem poder requisitar", "need": "sanctions"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "quando enviar aviso de atraso", "need": "noticeafter"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "que os avisos de atraso cheguem aos encarregados de educação", "need": "noticeafter"}
+{"lang": "pt", "region": "BR", "persona": "técnico de biblioteca municipal", "q": "adicionar biblioteca filial", "need": "libraries"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "criar a biblioteca de outra escola do agrupamento", "need": "libraries"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "dar acesso ao balcão para um estagiário", "need": "keepers"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "a assistente operacional só pode emprestar numa biblioteca", "need": "keepers"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "mudar o nome do mascote", "need": "characters"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "nomes das personagens da biblioteca", "need": "characters"}
+{"lang": "pt", "region": "BR", "persona": "técnico de biblioteca municipal", "q": "catálogo online sem login", "need": "window"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "que os pais vejam o catálogo no site da escola", "need": "window"}
+{"lang": "pt", "region": "BR", "persona": "arquivista de empresa", "q": "editar registro do livro", "need": "record"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "corrigir o número de um exemplar", "need": "record"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "liberar a biblioetca para os alunos", "need": "closed"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "já configurei tudo, como abro aos leitores", "need": "closed"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "usar câmera do celular como leitor", "need": "scanner"}
+{"lang": "pt", "region": "PT", "persona": "voluntário", "q": "não tenho leitor de código de barras", "need": "scanner"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "configurações da escola", "need": "settings"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "definições gerais", "need": "settings"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "ouvir as gravações dos alunos", "need": "voices"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "rever os áudios de leitura", "need": "voices"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "vincular leitores às contas do moodle", "need": "match"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "associar leitores aos utilizadores", "need": "match"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "subir os alunos de uma planilah", "need": "readerslist"}
+{"lang": "pt", "region": "PT", "persona": "técnico de biblioteca municipal", "q": "importar leitores de um ficheiro excel", "need": "readerslist"}
+{"lang": "pt", "region": "BR", "persona": "voluntário", "q": "tutorial", "need": "helpme"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "não sei por onde começar", "need": "helpme"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "aluno perdeu o livro", "need": "lost"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "livro extraviado pelo leitor", "need": "lost"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "quem está com esse livro", "need": "whohas"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "quem tem o exemplar 2210", "need": "whohas"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "colocar a biblioteca no painel do moodle", "need": "dashboard"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "bloco da biblioteca na página inicial de todos", "need": "dashboard"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "prazo de empréstimo", "need": "loandays"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "mudar para 15 dias de requisição", "need": "loandays"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "limite de livros por leitor", "need": "maxloans"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "quantos livros pode levar cada aluno", "need": "maxloans"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "quantidade de renovações", "need": "renewcount"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "só deixar renovar uma vez", "need": "renewcount"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "nova data ao renovar começa quando", "need": "renewfrom"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "a renovação soma a partir do fim do prazo", "need": "renewfrom"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "trocar de cdu para cdd", "need": "classification"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário universitário", "q": "que sistema de classificação usar", "need": "classification"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "dígito verifcador do código de barras", "need": "controlletter"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "letra no fim dos códigos", "need": "controlletter"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "número de tombo inicial", "need": "numbering"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "próximo número de cartão começar em 3000", "need": "numbering"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "guardar histórico de empréstimos", "need": "history"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "por quanto tempo fica o histórico de leituras", "need": "history"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "resenhas só com as iniciais", "need": "reviewsign"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "opiniões anónimas", "need": "reviewsign"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "modelo da carteirinha do fundamental", "need": "cardlook"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "aspeto do cartão para o pré-escolar", "need": "cardlook"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "esconder fotos dos alunos no balcão", "need": "photos"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "não aparece a fotografia do aluno", "need": "photos"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "mudar tipo para biblioteca municipal", "need": "entitykind"}
+{"lang": "pt", "region": "PT", "persona": "arquivista de empresa", "q": "somos uma empresa não uma escola", "need": "entitykind"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "fuso horáiro de manaus", "need": "timezone"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "as horas aparecem erradas nos prazos", "need": "timezone"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "buscar dados do isbn na biblioteca nacional", "need": "sources"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário profissional", "q": "usar a porbase para preencher os dados", "need": "sources"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "desligar os jogos", "need": "features"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "desativar opiniões e gravações", "need": "features"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "ativar desafios de leitura para o fundamental", "need": "challenges"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "tirar os desafios no pré-escolar", "need": "challenges"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "cantinhos por gênero", "need": "corners"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "secções de terror e aventura", "need": "corners"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "salvar backup no google drive", "need": "drive"}
+{"lang": "pt", "region": "PT", "persona": "técnico de informática que a instalou", "q": "cópias automáticas para o drvie", "need": "drive"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "z39.50", "need": "z3950"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário universitário", "q": "configurar servidor z3950 da library of congress", "need": "z3950"}
+{"lang": "pt", "region": "BR", "persona": "aluno leitor", "q": "reservar livro", "need": "readerhold"}
+{"lang": "pt", "region": "PT", "persona": "leitor adulto", "q": "quero o livro que está requisitado, posso ficar na fila?", "need": "readerhold"}
+{"lang": "pt", "region": "BR", "persona": "aluno leitor", "q": "preciso de mais tempo pra terminar o livro", "need": "readerrenew"}
+{"lang": "pt", "region": "PT", "persona": "estudante universitário", "q": "prolongar prazo", "need": "readerrenew"}
+{"lang": "pt", "region": "BR", "persona": "aluno leitor", "q": "meus empréstimos", "need": "readercard"}
+{"lang": "pt", "region": "PT", "persona": "pai ou mãe", "q": "ver os livros que o meu filho tem", "need": "readercard"}
+{"lang": "pt", "region": "BR", "persona": "aluno leitor", "q": "dar nota pro livro", "need": "readerreview"}
+{"lang": "pt", "region": "PT", "persona": "estudante universitário", "q": "escrever uma opinião sobre o livro", "need": "readerreview"}
+{"lang": "pt", "region": "BR", "persona": "aluno leitor", "q": "gravar minha voz lendo", "need": "readervoice"}
+{"lang": "pt", "region": "PT", "persona": "aluno leitor", "q": "como me gravo a ler", "need": "readervoice"}
+{"lang": "pt", "region": "BR", "persona": "leitor adulto", "q": "tem audiolivro?", "need": "readerformat"}
+{"lang": "pt", "region": "PT", "persona": "leitor adulto", "q": "pedir em letra grande", "need": "readerformat"}
+{"lang": "pt", "region": "BR", "persona": "aluno leitor", "q": "esqueci a senah", "need": "password"}
+{"lang": "pt", "region": "PT", "persona": "leitor adulto", "q": "mudar a palavra-passe", "need": "password"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "diário de um banana", "need": "none:catalogue"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "os maias eça de queirós", "need": "none:catalogue"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário profissional", "q": "machado de assis", "need": "none:catalogue"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "uma aventura", "need": "none:catalogue"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário universitário", "q": "fundamentos de física halliday", "need": "none:catalogue"}
+{"lang": "pt", "region": "PT", "persona": "voluntário", "q": "livros sobre dinossauros", "need": "none:catalogue"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "ana carolina souza 7º ano", "need": "none:reader"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "cartão 10234", "need": "none:reader"}
+{"lang": "pt", "region": "BR", "persona": "voluntário", "q": "pedro henrique", "need": "none:reader"}
+{"lang": "pt", "region": "PT", "persona": "aluno monitor no balcão", "q": "joão miguel ferreira 8.ºB", "need": "none:reader"}
+{"lang": "pt", "region": "BR", "persona": "professor que cuida da biblioteca", "q": "senha do wifi", "need": "none"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "notas do teste de matemática", "need": "none"}
+{"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "impressora travou", "need": "none"}
+{"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "como criar um questionário no moodle", "need": "none"}
+{"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "cardápio da merenda", "need": "none"}

@@ -102,8 +102,8 @@ final class howto_test extends \advanced_testcase {
         $this->assertSame('lost', $first('a reader has lost a book', $admin));
         $this->assertSame('password', $first('I forgot my password', $admin));
         $this->assertSame('helpme', $first('is there a manual?', $admin));
-        // An acronym alone is still a question.
-        $this->assertContains('scanner', array_column(howto::find('QR', $library, $admin), 'key'));
+        // An acronym in capitals is a question too: «QR» finds what has QR codes (the posters, reading them…).
+        $this->assertNotEmpty(array_intersect(['scanner', 'posters'], array_column(howto::find('QR', $library, $admin), 'key')));
         $this->assertSame('cards', $first('print the cards', $admin));
         $this->assertStringContainsString('cardprint.php', howto::find('print the cards', $library, $admin)[0]['url']);
         // Words alone that say nothing: no answer, not every task.

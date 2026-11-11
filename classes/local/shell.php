@@ -308,12 +308,15 @@ final class shell {
                 }
                 // On top: «What do you want to do?» and «How do I…?»; then, while the centre is closed, its five steps.
                 $more = $door['library'] ?? null;
-                $ask = $more ? '<form class="ayv-more-ask" role="search" action="' . s($door['howto']) . '">'
+                $ask = $more ? '<form class="ayv-more-ask" role="search" action="' . s($door['howto']) . '" data-ask="'
+                    . s((new \moodle_url('/local/oksigeniaayvurenda/ask_ajax.php'))->out(false)) . '">'
                     . '<input type="hidden" name="library" value="' . s($more->slug) . '">'
                     . '<label class="ayv-sr" for="ayv-more-q">' . $str('menuask') . '</label>'
                     . '<span class="ayv-more-ask-icon">' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_search', [])
                     . '</span><input id="ayv-more-q" type="search" name="q" autocomplete="off" placeholder="'
-                    . $str('menuask') . '"></form>'
+                    . $str('menuask') . '" aria-controls="ayv-more-found" aria-autocomplete="list">'
+                    . '<div class="ayv-more-found" id="ayv-more-found" role="region" aria-live="polite" aria-label="'
+                    . $str('howtoasktitle') . '" hidden></div></form>'
                     . '<a class="ayv-button ayv-button-quiet ayv-more-howto" href="' . s($door['howto']) . '">'
                     . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_help', []) . '<span>' . $str('menuhowto')
                     . '</span></a>' : '';
