@@ -127,8 +127,12 @@ if (!$help && access::can('local/oksigeniaayvurenda:manage', $library)) {
 $start = '';
 $steps = !$help && !$own ? \local_oksigeniaayvurenda\local\opening::context($library, (int) $USER->id, 'ayv-open-desk', false)
     : null;
+// Someone new at the desk of a library already open: «Your first day here», until they have done it.
+$firstday = !$help && !$steps ? \local_oksigeniaayvurenda\local\firstday::context($library, (int) $USER->id) : null;
 if ($steps) {
     $start = $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', $steps);
+} else if ($firstday) {
+    $start = $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', $firstday);
 } else if (!$help && !$own) {
     $books = $DB->record_exists('local_oksigeniaayvurenda_item', ['entityid' => $library->entityid]);
     $people = $DB->record_exists_select(

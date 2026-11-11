@@ -69,15 +69,32 @@ final class libraries {
     }
 
     /**
-     * Whether the site has no library of its own yet: the practice libraries of the guided help do not count.
+     * Whether the site has no library of its own yet: the practice libraries of the guided help and the sample library
+     * do not count.
      *
      * @return bool
      */
     public static function none(): bool {
         global $DB;
-        return !$DB->record_exists_select(self::T . 'library', 'NOT ' . $DB->sql_like('slug', ':practice'), [
-            'practice' => practice::SLUG . '%',
-        ]);
+        $sample = sample::library();
+        return !$DB->record_exists_select(
+            self::T . 'library',
+            'NOT ' . $DB->sql_like('slug', ':practice') . ' AND entityid <> :sample',
+            ['practice' => practice::SLUG . '%', 'sample' => $sample ? (int) $sample->entityid : 0]
+        );
+    }
+
+    /**
+     * The offer of a sample library beside the form of the first one, while there is none and it may be made.
+     *
+     * @return array|null label and hint, or null.
+     */
+    public static function sample_offer(): ?array {
+        if (!sample::allowed() || sample::library()) {
+            return null;
+        }
+        return ['label' => get_string('samplemake', 'local_oksigeniaayvurenda'),
+            'hint' => get_string('samplemakehint', 'local_oksigeniaayvurenda')];
     }
 
     /**

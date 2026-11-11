@@ -17,14 +17,16 @@
     @template local_oksigeniaayvurenda/libraries_newentity
 
     The form for a new centre. The first one asks only the library's name (the centre takes it too): the rest comes
-    afterwards, inside the library. Another centre on the same site asks the centre's name and its first library's.
+    afterwards, inside the library; beside it, while it may be made, a sample library to look around first. Another
+    centre on the same site asks the centre's name and its first library's.
 
     Example context (json):
     {
         "action": "#", "sesskey": "abc", "none": true,
         "librariesfirst": "Tu biblioteca", "librariesfirsthint": "Para empezar, solo su nombre.",
         "librariesfirstname": "Nombre de la biblioteca", "librariesentityname": "Nombre del centro",
-        "librarieslibraryname": "Nombre de su primera biblioteca", "librariescreate": "Crear"
+        "librarieslibraryname": "Nombre de su primera biblioteca", "librariescreate": "Crear",
+        "sample": {"label": "Ver una biblioteca de ejemplo llena", "hint": "Antes de montar la tuya."}
     }
 }}
 <form method="post" action="{{action}}"{{#none}} class="ayv-book"{{/none}}>
@@ -37,3 +39,7 @@
     <label class="ayv-field">{{librarieslibraryname}} <input type="text" name="library" maxlength="255"></label>{{/none}}
     <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="newentity">{{librariescreate}}</button></p>
 </form>
+{{#none}}{{#sample}}<form method="post" action="{{action}}" class="ayv-sample-offer"><input type="hidden" name="sesskey" value="{{sesskey}}">
+    <p class="ayv-field-hint">{{hint}}</p>
+    <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="sample">{{label}}</button></p>
+</form>{{/sample}}{{/none}}

@@ -130,7 +130,13 @@ final class signup {
         }
         $context = \context_coursecat::instance($categoryid);
         if (!$DB->record_exists('role_assignments', ['roleid' => $roleid, 'userid' => $user->id, 'contextid' => $context->id])) {
-            role_assign($roleid, $user->id, $context->id);
+            // The account's own e-mail already brings them in: not a second notice for the same thing.
+            welcome::$quiet = true;
+            try {
+                role_assign($roleid, $user->id, $context->id);
+            } finally {
+                welcome::$quiet = false;
+            }
             $created['role'] = true;
         }
         \cache::make('local_oksigeniaayvurenda', 'access')->purge();

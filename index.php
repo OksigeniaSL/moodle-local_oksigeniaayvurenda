@@ -37,7 +37,11 @@ shell::require('local/oksigeniaayvurenda:view', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/index.php', $ref !== '' ? ['library' => $ref] : []));
 
-if (!$library) {
+// No library of the site's own yet: whoever may set one up gets the page that names it, even with the sample library
+// there (which would otherwise be the only one, and open by itself).
+$setup = $ref === '' && \local_oksigeniaayvurenda\local\libraries::none()
+    && has_capability('local/oksigeniaayvurenda:manage', context_system::instance());
+if (!$library || $setup) {
     $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/choose', screens::choose());
     shell::output(get_string('productname', 'local_oksigeniaayvurenda'), $html);
     die();

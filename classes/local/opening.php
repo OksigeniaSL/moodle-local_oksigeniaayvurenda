@@ -56,7 +56,8 @@ final class opening {
      * @return bool
      */
     public static function shows(\stdClass $library, ?int $userid = null): bool {
-        if (!access::closed((int) $library->entityid) || practice::is((int) $library->entityid)) {
+        $entityid = (int) $library->entityid;
+        if (!access::closed($entityid) || practice::is($entityid) || sample::is($entityid)) {
             return false;
         }
         foreach (['desk', 'catalogue', 'manage'] as $what) {

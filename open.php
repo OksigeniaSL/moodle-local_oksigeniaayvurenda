@@ -41,7 +41,9 @@ $do = optional_param('do', '', PARAM_ALPHA);
 // Folding or unfolding the list is kept for the person, wherever they did it.
 if ($do === 'fold') {
     require_sesskey();
-    set_user_preference(opening::FOLDED, optional_param('folded', 0, PARAM_BOOL) ? 1 : null);
+    $which = optional_param('which', '', PARAM_ALPHA) === 'firstday' ? \local_oksigeniaayvurenda\local\firstday::FOLDED
+        : opening::FOLDED;
+    set_user_preference($which, optional_param('folded', 0, PARAM_BOOL) ? 1 : null);
     header('Content-Type: application/json');
     echo json_encode(['ok' => true]);
     die();

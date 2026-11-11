@@ -30,4 +30,13 @@ $observers = [
         'eventname' => '\core\event\course_deleted',
         'callback' => '\local_oksigeniaayvurenda\local\readings::course_deleted',
     ],
+    // Whoever is given a place in a library hears it, with the way to its desk.
+    [
+        'eventname' => '\core\event\role_assigned',
+        'callback' => '\local_oksigeniaayvurenda\local\welcome::role_assigned',
+    ],
+    [
+        'eventname' => '\local_oksigeniaayvurenda\event\keeper_added',
+        'callback' => '\local_oksigeniaayvurenda\local\welcome::keeper_added',
+    ],
 ];

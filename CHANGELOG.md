@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.234.0 (2026-11-11)
+
+- «See a full sample library», beside the form of the first library: with one touch, a centre apart with some hundreds
+  of made-up books, readers in groups and a term of loans, in English or in Spanish as the site speaks, that says on
+  every page that everything in it is made up. It is not the site's library: «Library: start here» stays and leads to
+  the form of the own one, the sample never shows its steps to open, has no accounts and stays closed to readers. It
+  goes whole with «Remove it» and a second «Yes, remove it» in «Libraries». Only on a site of one centre, for whoever
+  runs it.
+- «Your first day here», at the desk, for whoever works at the desk of a library already open: lending a book, taking
+  one back and printing a card, each ticked when this person has done it here, from anywhere; a librarian of years never
+  sees it. The same piece and look as «To open your library», folded as each one leaves it.
+- Whoever is given the librarian's or the manager's role of a centre, or the desk of one library, hears it in a notice
+  of Moodle (by the site, e-mail, the app or whatever they chose), with who gave it and the way to the desk; before,
+  nothing told them.
+
 ## 0.233.0 (2026-11-11)
 
 - «What do you want to do?», in «More», answers as someone types: each answer says whether it is a task or a setting, a

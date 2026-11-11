@@ -45,6 +45,32 @@ final class demo {
     /** @var string[] Adjectives for titles, in the masculine. */
     private const ADJECTIVES = ['perdido', 'dormido', 'invisible', 'pequeño', 'valiente', 'olvidado', 'mágico',
         'secreto', 'antiguo', 'nuevo', 'salvaje', 'escondido'];
+    /** @var string[] The same words in English, for a sample library on a site that does not speak Spanish. */
+    private const ENGLISH = [
+        'nouns' => ['secret', 'lighthouse', 'forest', 'dragon', 'island', 'clock', 'journey', 'garden', 'map', 'storm',
+            'castle', 'river', 'star', 'thief', 'bridge', 'volcano', 'comet', 'grandmother', 'pirate', 'cloud', 'treasure',
+            'winter', 'hummingbird', 'seed', 'mountain', 'maze', 'boat', 'wolf', 'city', 'mirror'],
+        'adjectives' => ['lost', 'sleeping', 'invisible', 'little', 'brave', 'forgotten', 'magic', 'secret', 'ancient', 'new',
+            'wild', 'hidden'],
+        'subjects' => ['Adventure', 'Mystery', 'Animals', 'Friendship', 'Science', 'Humour', 'Fantasy', 'History', 'Nature',
+            'Poetry', 'Sport', 'Family', 'Travel', 'Space', 'Dinosaurs'],
+        'publishers' => ['Hummingbird Books', 'Lighthouse Press', 'Seedling', 'Valley Books', 'Cloud Editions',
+            'Compass Books'],
+        'locations' => ['Children\'s shelves', 'Young adult shelves', 'Comics', 'Reference', 'New arrivals', 'Poetry corner',
+            'Science', 'History'],
+        'stages' => [['Early years', 3], ['Primary', 6], ['Secondary', 4], ['Sixth form', 2]],
+        'classes' => ['0' => 'General works', '004' => 'Computing', '02' => 'Libraries', '03' => 'Encyclopaedias',
+            '3' => 'Social sciences', '33' => 'Economics', '37' => 'Education', '398' => 'Folk tales', '5' => 'Science',
+            '51' => 'Mathematics', '52' => 'Astronomy', '57' => 'Biology', '58' => 'Botany', '59' => 'Zoology',
+            '6' => 'Applied sciences', '62' => 'Engineering', '629' => 'Vehicles', '641' => 'Cooking', '7' => 'Arts',
+            '75' => 'Painting', '78' => 'Music', '79' => 'Games and sport', '8' => 'Language and literature',
+            '82' => 'Literature', '821' => 'National literatures', '821.134.2-3' => 'Novels', '821.134.2-1' => 'Poetry',
+            '9' => 'Geography and history', '91' => 'Geography', '929' => 'Biographies', '94' => 'History'],
+    ];
+
+    /** @var string The language of the made-up words: es, or en. */
+    private static string $lang = 'es';
+
     /** @var string[] Made-up first names. */
     private const FIRSTNAMES = ['Ana', 'Leo', 'Marta', 'Hugo', 'Lucía', 'Pablo', 'Irene', 'Mateo', 'Sara', 'Daniel',
         'Nora', 'Adrián', 'Julia', 'Bruno', 'Elena', 'Iker', 'Carla', 'Óscar', 'Noa', 'Teo', 'Vega', 'Marco', 'Alba',
@@ -84,10 +110,12 @@ final class demo {
      * @param int $records Titles in the catalogue; copies come to about a fifth more.
      * @param int $readers
      * @param int $seed
+     * @param string $lang es, or en for a site that does not speak Spanish.
      * @return int The entity id.
      */
-    public static function create(string $name, int $records, int $readers, int $seed = 20261023): int {
+    public static function create(string $name, int $records, int $readers, int $seed = 20261023, string $lang = 'es'): int {
         global $DB;
+        self::$lang = $lang === 'en' ? 'en' : 'es';
         mt_srand($seed);
         $now = time();
         $transaction = $DB->start_delegated_transaction();
@@ -112,9 +140,9 @@ final class demo {
         self::rules($libraryid, $now);
 
         $classes = self::classes($entityid, $now);
-        $locations = self::authorities($entityid, 'location', self::LOCATIONS, $now);
-        $subjects = self::authorities($entityid, 'subject', self::SUBJECTS, $now);
-        $publishers = self::authorities($entityid, 'publisher', self::PUBLISHERS, $now);
+        $locations = self::authorities($entityid, 'location', self::words('locations', self::LOCATIONS), $now);
+        $subjects = self::authorities($entityid, 'subject', self::words('subjects', self::SUBJECTS), $now);
+        $publishers = self::authorities($entityid, 'publisher', self::words('publishers', self::PUBLISHERS), $now);
         $authornames = [];
         for ($i = 0; $i < max(1, intdiv($records, 2)); $i++) {
             $authornames[] = self::pick(self::SURNAMES) . ' ' . self::pick(self::SURNAMES) . ', ' . self::pick(self::FIRSTNAMES);
@@ -154,7 +182,7 @@ final class demo {
                 'doctype' => 'book',
                 'title' => $title,
                 'pubyear' => (string) mt_rand(1985, 2026),
-                'lang' => 'spa',
+                'lang' => self::$lang === 'en' ? 'eng' : 'spa',
                 'extent' => mt_rand(24, 320) . ' p.',
                 'searchtext' => text::normalise($title . ' ' . $authors[$author] . ' ' . $subjects[$subject]),
                 'timecreated' => $now,
@@ -168,7 +196,7 @@ final class demo {
             ]);
             $copies = mt_rand(1, 100) <= 85 ? 1 : mt_rand(2, 4);
             $call = [$classes[$class], strtoupper(mb_substr($authors[$author], 0, 3)),
-                mb_strtolower(mb_substr(preg_replace('/^(El|La|Un|Una) /', '', $title), 0, 3))];
+                mb_strtolower(mb_substr(preg_replace('/^(El|La|Un|Una|The|An|A) /', '', $title), 0, 3))];
             $items = [];
             for ($c = 0; $c < $copies; $c++) {
                 $items[] = [
@@ -387,7 +415,7 @@ final class demo {
                 'entityid' => $entityid,
                 'kind' => 'class',
                 'code' => $code,
-                'label' => $label,
+                'label' => self::$lang === 'en' ? (self::ENGLISH['classes'][$code] ?? $label) : $label,
                 'parentid' => $parent === null ? null : $ids[$parent],
                 'timecreated' => $now,
                 'timemodified' => $now,
@@ -432,10 +460,10 @@ final class demo {
     private static function readers(int $entityid, int $yearid, int $count, int $now): void {
         global $DB;
         $groups = [];
-        foreach (self::STAGES as [$stage, $years]) {
+        foreach (self::words('stages', self::STAGES) as [$stage, $years]) {
             for ($y = 1; $y <= $years; $y++) {
                 foreach (['A', 'B'] as $letter) {
-                    $groups[] = [$stage, $y . 'º ' . $stage . ' ' . $letter];
+                    $groups[] = [$stage, self::$lang === 'en' ? $stage . ' ' . $y . $letter : $y . 'º ' . $stage . ' ' . $letter];
                 }
             }
         }
@@ -684,6 +712,18 @@ final class demo {
      * @return string
      */
     private static function title(): string {
+        if (self::$lang === 'en') {
+            $noun = ucfirst(self::pick(self::ENGLISH['nouns']));
+            $other = ucfirst(self::pick(self::ENGLISH['nouns']));
+            switch (mt_rand(1, 3)) {
+                case 1:
+                    return 'The ' . ucfirst(self::pick(self::ENGLISH['adjectives'])) . ' ' . $noun;
+                case 2:
+                    return 'The ' . $noun . ' of the ' . $other;
+                default:
+                    return (preg_match('/^[AEIOU]/', $noun) ? 'An ' : 'A ') . $noun . ' in the ' . $other;
+            }
+        }
         $noun = self::pick(array_keys(self::NOUNS));
         $other = self::pick(array_keys(self::NOUNS));
         $female = self::NOUNS[$noun] === 'f';
@@ -700,6 +740,17 @@ final class demo {
             default:
                 return ($female ? 'Una ' : 'Un ') . $noun . ' en ' . ($of === 'del' ? 'el' : 'la') . ' ' . $other;
         }
+    }
+
+    /**
+     * A list of made-up words in the language of the library being made.
+     *
+     * @param string $what A key of ENGLISH.
+     * @param array $spanish The Spanish list.
+     * @return array
+     */
+    private static function words(string $what, array $spanish): array {
+        return self::$lang === 'en' ? self::ENGLISH[$what] : $spanish;
     }
 
     /**

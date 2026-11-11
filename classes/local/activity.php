@@ -71,9 +71,10 @@ final class activity {
      *
      * @param int $entityid
      * @param string[] $names Short names of events of the library (catalogue_imported).
+     * @param int|null $userid Only what this person did.
      * @return array|null userid and time; null when the log does not have it or cannot be read.
      */
-    public static function last(int $entityid, array $names): ?array {
+    public static function last(int $entityid, array $names, ?int $userid = null): ?array {
         global $DB;
         $log = self::log();
         if (!$log || !$names) {
@@ -84,8 +85,8 @@ final class activity {
             SQL_PARAMS_NAMED
         );
         $found = $log->get_events_select(
-            'contextid = :contextid AND eventname ' . $in,
-            $params + ['contextid' => access::context($entityid)->id],
+            'contextid = :contextid AND eventname ' . $in . ($userid ? ' AND userid = :userid' : ''),
+            $params + ['contextid' => access::context($entityid)->id] + ($userid ? ['userid' => $userid] : []),
             'timecreated DESC, id DESC',
             0,
             1

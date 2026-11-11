@@ -64,7 +64,8 @@
         "planpreset": "Plan de la tarifa", "planpresetcustom": "A medida",
         "plancopies": "Ejemplares", "planreaders": "Lectores", "planlimithint": "Con 0, sin tope",
         "librariesstaff": "Personal del centro", "librariesstaffassign": "Dar roles en el centro",
-        "librariesstaffseparate": "Darle al centro su categoría"
+        "librariesstaffseparate": "Darle al centro su categoría",
+        "sampleremoval": {"title": "Quitar la biblioteca de ejemplo", "hint": "Se borra entera.", "go": "Sí, quitarla"}
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -222,6 +223,15 @@
     </dialog>
 </section>
 {{/entities}}
+{{#sampleremoval}}
+<section class="ayv-open ayv-sample-remove" id="ayv-sample" aria-labelledby="ayv-sample-title">
+    <h2 id="ayv-sample-title" class="ayv-section-title">{{title}}</h2>
+    <p>{{hint}}</p>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="removesample">{{go}}</button></p>
+    </form>
+</section>
+{{/sampleremoval}}
 {{#sitewide}}
 {{#none}}{{> local_oksigeniaayvurenda/libraries_newentity}}{{/none}}
 {{^none}}

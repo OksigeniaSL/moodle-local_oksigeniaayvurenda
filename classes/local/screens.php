@@ -730,9 +730,9 @@ final class screens {
         $manage = has_capability('local/oksigeniaayvurenda:manage', \context_system::instance());
         // No library yet: whoever may set one up names it here and is in, without another page on the way.
         $first = null;
-        if (!$all && $manage && libraries::none()) {
+        if ($manage && libraries::none()) {
             $first = ['action' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
-                'sesskey' => sesskey(), 'none' => true];
+                'sesskey' => sesskey(), 'none' => true, 'sample' => libraries::sample_offer()];
             foreach (['librariesfirst', 'librariesfirsthint', 'librariesfirstname', 'librariescreate'] as $key) {
                 $first[$key] = self::str($key);
             }

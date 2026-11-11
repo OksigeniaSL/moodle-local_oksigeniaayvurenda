@@ -42,7 +42,7 @@ $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     // The centre each action touches: the one given, or the one of the library given.
-    if ($do === 'newentity') {
+    if (in_array($do, ['newentity', 'sample', 'removesample'], true)) {
         require_capability('local/oksigeniaayvurenda:manage', $context);
     } else if ($do === 'category') {
         require_capability('moodle/category:manage', $context);
@@ -55,6 +55,15 @@ if (data_submitted() && confirm_sesskey()) {
             ['id' => required_param('library', PARAM_INT)],
             MUST_EXIST
         ));
+    }
+    // A sample library to look around before setting up one's own, and taking it away.
+    if ($do === 'sample' && \local_oksigeniaayvurenda\local\sample::allowed()) {
+        $sample = \local_oksigeniaayvurenda\local\sample::make();
+        redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $sample->slug]));
+    }
+    if ($do === 'removesample' && \local_oksigeniaayvurenda\local\sample::allowed()) {
+        \local_oksigeniaayvurenda\local\sample::remove();
+        $notice = $str('sampleremoved');
     }
     if ($do === 'newentity') {
         $library = libraries::create_entity([
@@ -360,7 +369,11 @@ $data = [
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
     'entities' => $entities,
-    'none' => !$entities,
+    // The sample library is not the centre's own: while it is the only one, the form of the first one is there.
+    'none' => libraries::none(),
+    'sample' => libraries::sample_offer(),
+    'sampleremoval' => \local_oksigeniaayvurenda\local\sample::allowed() && \local_oksigeniaayvurenda\local\sample::library()
+        ? ['title' => $str('sampleremovetitle'), 'hint' => $str('sampleremovehint'), 'go' => $str('sampleremovego')] : null,
     'sitewide' => $sitewide,
     'recoverurl' => (new moodle_url('/local/oksigeniaayvurenda/recover.php'))->out(false),
     'recoverlabel' => $str('recovernav'),
