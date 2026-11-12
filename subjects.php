@@ -57,7 +57,7 @@ if (data_submitted() && confirm_sesskey()) {
 }
 $all = subjects::all($entityid);
 $groups = [];
-foreach (array_slice(subjects::alike($entityid), 0, 40) as $n => $group) {
+foreach (array_slice(subjects::alike($entityid, $all), 0, 40) as $n => $group) {
     $groups[] = ['n' => $n, 'subjects' => array_map(fn($subject, $i) => ['id' => $subject['id'], 'label' => $subject['label'],
         'count' => $str($subject['count'] === 1 ? 'subjectsbookone' : 'subjectsbooks', screens::number($subject['count'])),
         'first' => $i === 0, 'url' => $link('search.php', ['subject' => $subject['id']])], $group, array_keys($group))];

@@ -706,6 +706,29 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110819, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111200) {
+        // OAI-PMH pages by the record's own date, through an index, and that date moves when a digital form changes: the
+        // records whose digital form changed after them take that date now.
+        $table = new xmldb_table('local_oksigeniaayvurenda_record');
+        $index = new xmldb_index('entitymodified', XMLDB_INDEX_NOTUNIQUE, ['entityid', 'timemodified']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        $rows = $DB->get_recordset_sql(
+            "SELECT d.recordid, MAX(d.timemodified) AS ts
+               FROM {local_oksigeniaayvurenda_digital} d
+               JOIN {local_oksigeniaayvurenda_record} r ON r.id = d.recordid
+              WHERE d.status = 'published' AND d.kind <> 'voice'
+           GROUP BY d.recordid, r.timemodified
+             HAVING MAX(d.timemodified) > r.timemodified"
+        );
+        foreach ($rows as $row) {
+            $DB->set_field('local_oksigeniaayvurenda_record', 'timemodified', (int) $row->ts, ['id' => $row->recordid]);
+        }
+        $rows->close();
+        upgrade_plugin_savepoint(true, 2026111200, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

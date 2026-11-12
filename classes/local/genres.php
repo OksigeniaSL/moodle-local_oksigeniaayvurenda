@@ -283,20 +283,34 @@ final class genres {
     }
 
     /**
-     * The records of each genre of a library.
+     * The records of each genre of a library, or of those among some records.
      *
      * @param \stdClass $library
+     * @param int[]|null $among Only these records (the results of a search): each genre was asked for all its records on
+     *     every search, also when it found nothing.
      * @return array Code => record ids (as keys).
      */
-    public static function records(\stdClass $library): array {
+    public static function records(\stdClass $library, ?array $among = null): array {
         global $DB;
         $records = [];
+        if ($among === []) {
+            return array_fill_keys(array_column(self::of($library), 'code'), []);
+        }
         foreach (self::of($library) as $genre) {
             [$sql, $params] = self::condition($library, $genre, 'r.id', 'gr');
-            $records[$genre['code']] = array_flip(array_map('intval', $DB->get_fieldset_sql(
-                'SELECT r.id FROM {' . self::T . 'record} r WHERE r.entityid = :gentity AND ' . $sql,
-                ['gentity' => $library->entityid] + $params
-            )));
+            $records[$genre['code']] = [];
+            foreach ($among === null ? [null] : array_chunk($among, 1000) as $chunk) {
+                $where = 'r.entityid = :gentity AND ' . $sql;
+                $more = [];
+                if ($chunk !== null) {
+                    [$in, $more] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED, 'gam');
+                    $where .= " AND r.id $in";
+                }
+                $records[$genre['code']] += array_flip(array_map('intval', $DB->get_fieldset_sql(
+                    'SELECT r.id FROM {' . self::T . 'record} r WHERE ' . $where,
+                    ['gentity' => $library->entityid] + $params + $more
+                )));
+            }
         }
         return $records;
     }

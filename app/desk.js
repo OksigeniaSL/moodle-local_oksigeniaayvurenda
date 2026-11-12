@@ -435,7 +435,8 @@
             }
             undo('lent');
         } else if (answer.kind === 'renewed') {
-            undo('renewed', {previousdue: answer.previousdue});
+            undo('renewed', {previousdue: answer.previousdue, reopened: answer.reopened || 0,
+                reopenedby: answer.reopenedby || 0});
         } else if (answer.kind === 'returned' && answer.loanid && answer.material) {
             actions.appendChild(states(answer));
             undo('returned');

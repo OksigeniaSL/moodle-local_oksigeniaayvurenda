@@ -151,10 +151,11 @@ final class subjects {
      * Each group starts with the most used, which is what it would be joined into.
      *
      * @param int $entityid
+     * @param array[]|null $all The centre's subjects, when already read (all()).
      * @return array[] Groups, each a list of id, label and count.
      */
-    public static function alike(int $entityid): array {
-        $all = self::all($entityid);
+    public static function alike(int $entityid, ?array $all = null): array {
+        $all ??= self::all($entityid);
         $bykey = [];
         foreach ($all as $subject) {
             $bykey[self::key($subject['label'])][] = $subject;
@@ -182,13 +183,35 @@ final class subjects {
                 $buckets[substr($key, 0, 2)][] = $i;
             }
         }
+        // Two keys a typo apart share the key less one letter (a letter more, less, other or two swapped): each key and each of
+        // those is written as a number with the key's place, sorted, and only the keys that share one are compared. Every
+        // one with every one in a bucket was 30 million comparisons, almost a minute, with a university's 146,000 subjects.
         foreach ($buckets as $bucket) {
-            $count = count($bucket);
-            for ($x = 0; $x < $count; $x++) {
-                for ($y = $x + 1; $y < $count; $y++) {
-                    [$a, $b] = [$keys[$bucket[$x]], $keys[$bucket[$y]]];
-                    if (abs(strlen($a) - strlen($b)) <= 1 && self::typo($a, $b)) {
-                        $parent[$find($bucket[$x])] = $find($bucket[$y]);
+            $codes = [];
+            foreach ($bucket as $place => $i) {
+                $key = $keys[$i];
+                $codes[] = (crc32($key) << 20) | $place;
+                for ($p = 2, $length = strlen($key); $p < $length; $p++) {
+                    $codes[] = (crc32(substr($key, 0, $p) . substr($key, $p + 1)) << 20) | $place;
+                }
+            }
+            sort($codes);
+            $count = count($codes);
+            for ($start = 0; $start < $count; $start = $end) {
+                $hash = $codes[$start] >> 20;
+                $end = $start + 1;
+                while ($end < $count && ($codes[$end] >> 20) === $hash) {
+                    $end++;
+                }
+                for ($x = $start; $x < $end; $x++) {
+                    for ($y = $x + 1; $y < $end; $y++) {
+                        [$i, $j] = [$bucket[$codes[$x] & 0xFFFFF], $bucket[$codes[$y] & 0xFFFFF]];
+                        if ($i !== $j && $find($i) !== $find($j)) {
+                            [$a, $b] = [$keys[$i], $keys[$j]];
+                            if (abs(strlen($a) - strlen($b)) <= 1 && self::typo($a, $b)) {
+                                $parent[$find($i)] = $find($j);
+                            }
+                        }
                     }
                 }
             }

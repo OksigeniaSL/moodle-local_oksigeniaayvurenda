@@ -113,4 +113,38 @@ final class runner_test extends \advanced_testcase {
         $this->assertNull(runner::running($library));
         $this->assertSame(0, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
     }
+
+    /**
+     * A background import alive is not taken as dead however long it lasts (it beats at each batch); one that died twice
+     * on the way (the process killed, so Moodle runs it again) says so and lets the library import again.
+     */
+    public function test_alive_and_dead_twice(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $user = $this->getDataGenerator()->create_user();
+        $now = time();
+        runner::queue($library, $this->upload(), [], (int) $user->id, $now);
+        $this->assertSame(1, runner::started((int) $library->id, $now + 5 * HOURSECS));
+        runner::beat((int) $library->id, $now + 10 * HOURSECS);
+        $this->assertNotNull(runner::running($library, $now + 11 * HOURSECS));
+        $this->assertNull(runner::running($library, $now + 17 * HOURSECS));
+        // Two starts already, as if it had died twice: the third one does not import.
+        $this->assertSame(2, runner::started((int) $library->id));
+        $sink = $this->redirectMessages();
+        ob_start();
+        $this->runAdhocTasks(\local_oksigeniaayvurenda\task\run_import::class);
+        ob_end_clean();
+        $messages = $sink->get_messages();
+        $sink->close();
+        $this->assertCount(1, $messages);
+        $this->assertStringContainsString(
+            get_string('importbgfailedsubject', 'local_oksigeniaayvurenda', 'programa.xml'),
+            $messages[0]->subject
+        );
+        $this->assertNull(runner::running($library));
+        $this->assertSame(0, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+        $this->assertSame([], glob(make_upload_directory('local_oksigeniaayvurenda/imports') . '/*'));
+    }
 }

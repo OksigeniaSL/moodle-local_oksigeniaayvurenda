@@ -260,7 +260,7 @@ final class catalogue {
         }
         // A book of a genre is in the genre, and no longer in the corner of stories it comes from.
         $ingenre = [];
-        foreach (genres::of($library) ? genres::records($library) : [] as $code => $records) {
+        foreach ($ids && genres::of($library) ? genres::records($library, $ids) : [] as $code => $records) {
             $found = array_intersect_key(array_flip($ids), $records);
             if ($found) {
                 $corners[$code] = $found;

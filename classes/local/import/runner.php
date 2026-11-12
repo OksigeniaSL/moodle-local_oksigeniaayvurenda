@@ -41,8 +41,11 @@ final class runner {
     /** @var int A file bigger than this goes to the background: some tens of thousands of records. */
     public const BACKGROUND = 8 * 1024 * 1024;
 
-    /** @var int A background import not over after this long is taken as dead: the library can import again. */
+    /** @var int A background import with no sign of life for this long is taken as dead: the library can import again. */
     private const STALE = 6 * HOURSECS;
+
+    /** @var int Times a background import may start: one that died twice (out of memory, killed) is not tried again. */
+    public const TRIES = 2;
 
     /**
      * Imports a reviewed file.
@@ -50,9 +53,10 @@ final class runner {
      * @param \stdClass $library
      * @param array $pending path, name, kind (abies, csv, marc, marcxml, onix…) and charset.
      * @param array $options notes and readers (an Abies export); map, the CSV columns.
+     * @param callable|null $beat Said after each batch of records: the import is alive.
      * @return array figures (count, label), again and newcodes: what the page or the message says.
      */
-    public static function run(\stdClass $library, array $pending, array $options): array {
+    public static function run(\stdClass $library, array $pending, array $options, ?callable $beat = null): array {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         // A count with the word that goes with it, one or many.
         $figure = fn(int $count, string $key) => ['count' => screens::number($count),
@@ -89,6 +93,9 @@ final class runner {
         $records = $pending['kind'] === 'csv' ? files::csv_records($pending['path'], $map)
             : files::marc($pending['path'], $pending['kind'], $pending['charset'] ?? charset::AUTO);
         $importer = new catalogue_import($library, $pending['kind'] === 'csv' ? 'csv' : 'marc');
+        if ($beat) {
+            $importer->on_batch($beat);
+        }
         $stats = plans::within($entityid, fn() => $importer->run($records));
         catalogue::purge($entityid);
         return [
@@ -134,7 +141,7 @@ final class runner {
 
     /**
      * What is being imported into a library in the background: the file's name and since when; null when nothing is, or
-     * when what was started has not ended in six hours.
+     * when it has given no sign of life in six hours (it beats at each batch of records, so a long one is still alive).
      *
      * @param \stdClass $library
      * @param int|null $now
@@ -142,7 +149,37 @@ final class runner {
      */
     public static function running(\stdClass $library, ?int $now = null): ?array {
         $mark = json_decode((string) get_config('local_oksigeniaayvurenda', 'importing_' . $library->id), true);
-        return is_array($mark) && (int) ($mark['time'] ?? 0) > ($now ?? time()) - self::STALE ? $mark : null;
+        $alive = is_array($mark) ? max((int) ($mark['time'] ?? 0), (int) ($mark['alive'] ?? 0)) : 0;
+        return $alive > ($now ?? time()) - self::STALE ? $mark : null;
+    }
+
+    /**
+     * A background import starts: its mark is alive from now. It says how many times it has started, the first one 1.
+     *
+     * @param int $libraryid
+     * @param int|null $now
+     * @return int
+     */
+    public static function started(int $libraryid, ?int $now = null): int {
+        $mark = json_decode((string) get_config('local_oksigeniaayvurenda', 'importing_' . $libraryid), true) ?: [];
+        $mark['tries'] = (int) ($mark['tries'] ?? 0) + 1;
+        $mark['alive'] = $now ?? time();
+        set_config('importing_' . $libraryid, json_encode($mark), 'local_oksigeniaayvurenda');
+        return $mark['tries'];
+    }
+
+    /**
+     * A background import is still going: at each batch of records.
+     *
+     * @param int $libraryid
+     * @param int|null $now
+     */
+    public static function beat(int $libraryid, ?int $now = null): void {
+        $mark = json_decode((string) get_config('local_oksigeniaayvurenda', 'importing_' . $libraryid), true);
+        if (is_array($mark)) {
+            $mark['alive'] = $now ?? time();
+            set_config('importing_' . $libraryid, json_encode($mark), 'local_oksigeniaayvurenda');
+        }
     }
 
     /**

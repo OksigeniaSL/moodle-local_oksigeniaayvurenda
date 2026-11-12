@@ -143,6 +143,21 @@ final class oai_test extends \advanced_testcase {
         $next = $ask(['verb' => 'ListIdentifiers', 'resumptionToken' => $token]);
         $this->assertSame(2, $next->query('//o:header')->length, 'the last one, and Libro 0 changed now');
         $this->assertSame('', $next->evaluate('string(//o:resumptionToken)'));
+        // The whole list is counted on the first page and carried in the token, not counted again on every page.
+        $this->assertStringEndsWith('-101', $token);
+        $this->assertSame('101', $next->evaluate('string(//o:resumptionToken/@completeListSize)'));
+        // A record that gets a digital form, or a copy more, changes: a harvester asking since a date sees it.
+        $five = (int) $DB->get_field('local_oksigeniaayvurenda_record', 'id', ['title' => 'Libro 5']);
+        $since = gmdate('Y-m-d\TH:i:s\Z', time() - 60);
+        $DB->set_field('local_oksigeniaayvurenda_record', 'timemodified', $then, ['id' => $five]);
+        digital::add_link($library, $five, 'https://example.org/libro-5', ['title' => '', 'licence' => 'cc-by',
+            'audience' => ['public']], 0);
+        $this->assertGreaterThan($then, (int) $DB->get_field('local_oksigeniaayvurenda_record', 'timemodified', ['id' => $five]));
+        $changed = $ask(['verb' => 'ListIdentifiers', 'metadataPrefix' => 'oai_dc', 'from' => $since]);
+        $this->assertContains(oai::identifier($library, $five), array_map(
+            fn($n) => $n->textContent,
+            iterator_to_array($changed->query('//o:header/o:identifier'))
+        ));
         // In MARC 21, with its copy here and no code.
         $id = oai::identifier($library, (int) $DB->get_field('local_oksigeniaayvurenda_record', 'id', ['title' => 'Libro 5']));
         $marc = $ask(['verb' => 'GetRecord', 'identifier' => $id, 'metadataPrefix' => 'marc21']);

@@ -25,6 +25,7 @@
 define('AJAX_SCRIPT', true);
 
 use local_oksigeniaayvurenda\local\access;
+use local_oksigeniaayvurenda\local\busy;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\catalogued;
 use local_oksigeniaayvurenda\local\cataloguer;
@@ -233,7 +234,7 @@ switch ($action) {
             $taken = preg_replace('/^.*taken:/', '', $e->debuginfo ?? $e->getMessage());
             echo json_encode(['error' => $str('addtaken', $taken)], JSON_UNESCAPED_UNICODE);
             die();
-        } catch (plan_full $e) {
+        } catch (plan_full | busy $e) {
             echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
             die();
         }

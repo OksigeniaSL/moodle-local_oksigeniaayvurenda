@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.235.0 (2026-11-12)
+
+The highs of the review of 12 November: a big catalogue (a university's, hundreds of thousands of records) and the desk.
+
+- At the desk, «Renew» on a book just taken back and then «Undo» puts it back on the shelf, as it was; before, it was
+  left on loan with its old date, and the reader got notices and was held back for a book on the shelf.
+- A catalogue coming in holds the centre's new codes batch by batch (500 records or five seconds), as a book added by
+  hand does, and reads what others added meanwhile: someone adding books, or another library of the centre importing,
+  never takes the same code. A book added by hand while a batch is written waits a moment; if it cannot, it says to try
+  again and saves nothing, instead of going on blind.
+- A background import says it is alive at each batch, so a long one is not taken as dead after six hours; if the process
+  dies on the way (out of memory, killed) Moodle runs it again and it goes on, and if it dies twice it says so to whoever
+  started it and stops.
+- Importing looks up authors, publishers, classes and subjects in memory: each name went through all those of its kind in
+  the database, and a university's catalogue took hours.
+- Importing again from a program that joined two records moves the copy, with its label, to the record that has it now;
+  and a record whose ISBN was corrected in its program is still the same one. Before, the copy was there twice and was
+  listed to be relabelled.
+- «Subjects» with a university's 146,000 subjects loads in about two seconds instead of almost a minute, with the same
+  groups: only the subjects that share all but one letter are compared.
+- «Duplicate records» reads whole only the records that repeat an ISBN or a title: with 300,000 records it no longer runs
+  out of memory.
+- OAI-PMH pages by each record's own date, through a new index, and counts the whole list once, on the first page; a
+  digital form, or a first copy in a library, changes that date, so a harvester asking since a date sees it. SRU keeps
+  its count for some minutes and does not go deeper than the 10,000th record (OAI-PMH is for a whole catalogue).
+- With genres, a search asks each genre only about its results, not for all its books.
+- Pages that come in by LTI keep the header that says who may frame them: the library's script rules no longer replace
+  it.
+
 ## 0.234.1 (2026-11-11)
 
 - «Your first day here» is for newcomers only: whoever has already lent ten books at a centre's desks does not see it,

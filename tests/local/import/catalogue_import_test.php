@@ -56,7 +56,7 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame('marcxml', files::kind($single, 'una.xml'));
         $stats = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
         $this->assertSame(['records' => 1, 'found' => 1, 'items' => 3, 'kept' => 0, 'newcodes' => 1, 'untitled' => 0,
-            'updated' => 0], $stats);
+            'updated' => 0, 'moved' => 0], $stats);
         $this->assertSame(2, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
         $new = $DB->get_record(self::T . 'item', ['barcode' => control_letter::append('100042')], '*', MUST_EXIST);
         $this->assertSame('N', $new->callnumber1);
@@ -67,7 +67,7 @@ final class catalogue_import_test extends \advanced_testcase {
 
         $again = (new catalogue_import($library, 'marc'))->run(files::marc($path, 'marcxml'));
         $this->assertSame(['records' => 0, 'found' => 2, 'items' => 0, 'kept' => 3, 'newcodes' => 0, 'untitled' => 0,
-            'updated' => 0], $again);
+            'updated' => 0, 'moved' => 0], $again);
     }
 
     /**
@@ -132,7 +132,7 @@ final class catalogue_import_test extends \advanced_testcase {
         // Another pass repeats nothing, though these copies have no code; one more copy in the file is one more.
         $again = (new catalogue_import($library, 'csv'))->run($records);
         $this->assertSame(['records' => 0, 'found' => 1, 'items' => 0, 'kept' => 2, 'newcodes' => 0, 'untitled' => 0,
-            'updated' => 0], $again);
+            'updated' => 0, 'moved' => 0], $again);
         file_put_contents($dir . '/libros.csv', "Título;Autor;Ejemplares\nCuentos a oscuras;Olmo Ríos, Bruno;3\n");
         $more = (new catalogue_import($library, 'csv'))->run(files::csv_records(
             $dir . '/libros.csv',
@@ -213,5 +213,73 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame(0, (new catalogue_import($library, 'marc'))->run($one('Título otra vez Zeta'))['updated']);
         $this->assertSame('Título de aquí Zeta', $DB->get_field(self::T . 'record', 'title', ['id' => $id]));
         $this->assertSame(1, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+    }
+
+    /**
+     * The program joins two records, or corrects an ISBN: brought again, the copy moves with its label to the record that
+     * has it now, and the record with its ISBN corrected is still the same one; nothing is there twice.
+     */
+    public function test_joined_and_isbn_corrected(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $book = fn(string $key, string $title, string $isbn, array $codes) => ['key' => $key, 'description' => ['record' => [
+            'title' => $title, 'isbn' => $isbn], 'authorities' => []], 'items' => array_map(
+                fn($code) => ['barcode' => $code, 'callnumber' => ['', '', '']],
+                $codes
+            )];
+        (new catalogue_import($library, 'marc'))->run([
+            $book('S1', 'Libro unido Zeta', '', ['ZETA-J1']),
+            $book('D1', 'Libro unido Zeta, repetido', '', ['ZETA-J2']),
+            $book('I1', 'Libro con su ISBN Zeta', '9780000000002', ['ZETA-J3']),
+        ]);
+        $this->assertSame(3, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
+        $kept = (int) $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-J1']);
+        $isbnrecord = (int) $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-J3']);
+        $import = new catalogue_import($library, 'marc');
+        $stats = $import->run([
+            $book('S1', 'Libro unido Zeta', '', ['ZETA-J1', 'ZETA-J2']),
+            $book('I1', 'Libro con su ISBN Zeta', '9780000000019', ['ZETA-J3']),
+        ]);
+        $this->assertSame(1, $stats['moved']);
+        $this->assertSame(0, $stats['records']);
+        $this->assertSame(0, $stats['items']);
+        $this->assertSame([], $import->relabelled());
+        $this->assertSame($kept, (int) $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-J2']));
+        $this->assertSame($isbnrecord, (int) $DB->get_field(self::T . 'item', 'recordid', ['barcode' => 'ZETA-J3']));
+        $this->assertSame(3, $DB->count_records(self::T . 'item', ['libraryid' => $library->id]));
+    }
+
+    /**
+     * A catalogue coming in lets the centre's codes go between batches: a book added by hand meanwhile takes its own
+     * code, and the import, reading it, never gives the same one; while a batch is written, the hand waits.
+     */
+    public function test_hand_add_between_batches(): void {
+        global $DB;
+        $this->resetAfterTest();
+        // Not inside the test's own transaction, which would hold the codes to the end.
+        $this->preventResetByRollback();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $records = function () {
+            for ($i = 0; $i < 520; $i++) {
+                yield ['key' => 'B' . $i, 'description' => ['record' => ['title' => 'Lote Zeta ' . $i], 'authorities' => [
+                    'author' => ['Autora Zeta ' . ($i % 7)]]], 'items' => [['barcode' => '', 'callnumber' => ['', '', '']]]];
+            }
+        };
+        $import = new catalogue_import($library, 'marc');
+        $byhand = [];
+        $import->on_batch(function () use ($library, &$byhand) {
+            $byhand[] = \local_oksigeniaayvurenda\local\cataloguer::add($library, ['record' => ['title' => 'A mano Zeta'],
+                'authorities' => []], ['count' => 1])['barcodes'][0];
+        });
+        $stats = $import->run($records());
+        $this->assertNotEmpty($byhand);
+        $this->assertSame(520, $stats['items']);
+        $codes = $DB->get_fieldset_select(self::T . 'item', 'barcode', 'entityid = ?', [$library->entityid]);
+        $this->assertCount(520 + count($byhand), $codes);
+        $this->assertCount(count($codes), array_unique($codes));
+        // Seven authors, each made once though they were looked up in memory.
+        $this->assertSame(7, $DB->count_records(self::T . 'authority', ['entityid' => $library->entityid, 'kind' => 'author']));
     }
 }

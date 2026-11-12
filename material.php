@@ -23,6 +23,7 @@
  */
 
 use local_oksigeniaayvurenda\local\access;
+use local_oksigeniaayvurenda\local\busy;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\cataloguer;
 use local_oksigeniaayvurenda\local\plan_full;
@@ -76,7 +77,7 @@ if (data_submitted() && confirm_sesskey()) {
             $recordid = 0;
         } catch (invalid_parameter_exception $e) {
             $error = $str('addtaken', preg_replace('/^.*taken:/', '', $e->debuginfo ?? ''));
-        } catch (plan_full $e) {
+        } catch (plan_full | busy $e) {
             $error = $e->getMessage();
         }
     }

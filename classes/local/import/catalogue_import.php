@@ -65,10 +65,31 @@ final class catalogue_import {
 
     /** @var array<string, int> What was done. */
     private array $stats = ['records' => 0, 'found' => 0, 'items' => 0, 'kept' => 0, 'newcodes' => 0, 'untitled' => 0,
-        'updated' => 0];
+        'updated' => 0, 'moved' => 0];
 
     /** @var array[] Copies whose code was another record's: [the code printed, the new one]. */
     private array $relabelled = [];
+
+    /** @var array<int, bool> Records brought before from this same system: a copy of one of them may move to another. */
+    private array $ours = [];
+
+    /** @var array<string, int> Codes this file has named so far, and for which record. */
+    private array $infile = [];
+
+    /** @var array<int, bool> Records made by this import: a copy of one of those does not change its date again. */
+    private array $fresh = [];
+
+    /** @var int[] The last copy, record and source read: what others write meanwhile is read on top, batch by batch. */
+    private array $last = ['item' => 0, 'record' => 0, 'source' => 0];
+
+    /** @var callable|null Said after each batch, to say the import is alive (the background mark). */
+    private $beat = null;
+
+    /** @var int Records in a batch, at most: each batch is written, and the centre's codes let go a moment, on its own. */
+    private const BATCH = 500;
+
+    /** @var int Seconds of a batch, at most: whoever adds a book by hand meanwhile waits no longer than this. */
+    private const BATCHTIME = 5;
 
     /**
      * An import into a library.
@@ -85,20 +106,77 @@ final class catalogue_import {
     }
 
     /**
+     * Something to say after each batch that the import is still going (a background import renews its mark with it).
+     *
+     * @param callable $beat
+     */
+    public function on_batch(callable $beat): void {
+        $this->beat = $beat;
+    }
+
+    /**
      * Writes the records and their copies.
      *
      * @param iterable $records Each with key, description (as the describers give it) and items.
      * @return array records (new), found (already there), items (new), kept (codes already there), newcodes, untitled (records
      *     with no title anywhere, left out and counted).
+     * @throws \local_oksigeniaayvurenda\local\busy When the centre's codes could not be had in two minutes.
      */
     public function run(iterable $records): array {
         global $DB;
-        $this->load();
+        $entityid = (int) $this->library->entityid;
+        // The centre's new codes are held while a batch is written, as when a book is added by hand, and let go between
+        // batches: someone adding books meanwhile, or another library of the centre importing, never takes the same code.
+        // Inside a transaction already (a plan that refuses a whole import that does not fit), nothing is written until the
+        // end, so they are held to the end.
+        $whole = $DB->is_transaction_started();
+        $lock = $this->hold();
+        try {
+            $this->load();
+            cataloguer::know_authorities($entityid);
+            $this->write($records, $whole, $lock);
+        } finally {
+            if ($lock) {
+                $lock->release();
+            }
+            cataloguer::know_authorities(0);
+        }
+        catalogue::purge($entityid);
+        stacks::refresh_keys($entityid);
+        $told = ['how' => $this->system] + array_filter($this->stats, 'is_int');
+        \local_oksigeniaayvurenda\event\catalogue_imported::fire($entityid, null, $told);
+        return $this->stats;
+    }
+
+    /**
+     * The centre's codes, waited for two minutes at most.
+     *
+     * @return \core\lock\lock
+     * @throws \local_oksigeniaayvurenda\local\busy
+     */
+    private function hold(): \core\lock\lock {
+        $lock = cataloguer::lock('copies', (int) $this->library->entityid, 120);
+        if (!$lock) {
+            throw new \local_oksigeniaayvurenda\local\busy('copiesbusy', 'local_oksigeniaayvurenda');
+        }
+        return $lock;
+    }
+
+    /**
+     * Writes the records, batch by batch.
+     *
+     * @param iterable $records
+     * @param bool $whole Whether it all goes in one transaction (the codes held to the end).
+     * @param \core\lock\lock|null $lock The centre's codes, held; let go and had again between batches.
+     */
+    private function write(iterable $records, bool $whole, ?\core\lock\lock &$lock): void {
+        global $DB;
         $entityid = (int) $this->library->entityid;
         $now = time();
         $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $letter = !empty($settings['controlletter']);
         $batch = 0;
+        $since = time();
         $transaction = $DB->start_delegated_transaction();
         $oldused = [];
         foreach ($records as $record) {
@@ -170,6 +248,7 @@ final class catalogue_import {
                     continue;
                 }
                 $recordid = cataloguer::create_record($entityid, $description, $now);
+                $this->fresh[$recordid] = true;
                 $this->stats['records']++;
                 if ($isbn !== '') {
                     $this->isbns[$isbn] = $recordid;
@@ -182,6 +261,7 @@ final class catalogue_import {
                     'hash' => $hash, 'localhash' => $own, 'timecreated' => $now]);
                 $this->sources[$key] = $recordid;
                 $this->tracked[$key] = [$sourceid, $hash, $own];
+                $this->ours[$recordid] = true;
             }
             foreach ($record['items'] ?? [] as $item) {
                 // A copy with no code, or with another record's (relabelled the time before), is one this record already has.
@@ -194,17 +274,23 @@ final class catalogue_import {
                 }
                 $this->item($recordid, $item, $letter, $now);
             }
-            if (++$batch % 500 === 0) {
+            if (++$batch % self::BATCH === 0 || time() - $since >= self::BATCHTIME) {
                 $transaction->allow_commit();
+                if (!$whole) {
+                    $lock->release();
+                    $lock = null;
+                    if ($this->beat) {
+                        ($this->beat)();
+                    }
+                    $lock = $this->hold();
+                    $this->load();
+                    cataloguer::know_authorities($entityid);
+                }
                 $transaction = $DB->start_delegated_transaction();
+                $since = time();
             }
         }
         $transaction->allow_commit();
-        catalogue::purge($entityid);
-        stacks::refresh_keys($entityid);
-        $told = ['how' => $this->system] + array_filter($this->stats, 'is_int');
-        \local_oksigeniaayvurenda\event\catalogue_imported::fire($entityid, null, $told);
-        return $this->stats;
     }
 
     /**
@@ -222,8 +308,24 @@ final class catalogue_import {
         // gun) gets a new code and is listed to be relabelled, not lost.
         $printed = '';
         if ($code !== '' && isset($this->codes[$code])) {
-            if ($this->codes[$code] === $recordid) {
+            $owner = $this->codes[$code];
+            if ($owner === $recordid) {
+                $this->infile[$code] = $recordid;
                 $this->stats['kept']++;
+                return;
+            }
+            // The program joined two records, or moved the copy to another: a copy of a record it brought before, that
+            // this file has not named for another record, moves here with its label, instead of being there and here.
+            if (!isset($this->infile[$code]) && isset($this->ours[$owner])) {
+                $DB->set_field(
+                    self::T . 'item',
+                    'recordid',
+                    $recordid,
+                    ['entityid' => $this->library->entityid, 'barcode' => $code]
+                );
+                $this->codes[$code] = $recordid;
+                $this->infile[$code] = $recordid;
+                $this->stats['moved']++;
                 return;
             }
             $printed = $code;
@@ -237,6 +339,7 @@ final class catalogue_import {
             $this->lastcode = max($this->lastcode, (int) $parts[1]);
         }
         $this->codes[$code] = $recordid;
+        $this->infile[$code] = $recordid;
         if ($printed !== '') {
             $this->relabelled[] = [$printed, $code];
         }
@@ -267,6 +370,10 @@ final class catalogue_import {
             'timecreated' => $now,
             'timemodified' => $now,
         ]);
+        // A record already here with a copy more changes: harvesters asking since a date see it.
+        if (!isset($this->fresh[$recordid])) {
+            $DB->set_field(self::T . 'record', 'timemodified', $now, ['id' => $recordid]);
+        }
         $this->stats['items']++;
     }
 
@@ -293,21 +400,24 @@ final class catalogue_import {
     }
 
     /**
-     * What the entity already has: codes, register numbers, places, ISBNs and what came from this system before.
+     * What the entity already has: codes, register numbers, places, ISBNs and what came from this system before. Called
+     * again, what was written since, by this import or by anyone else.
      */
     private function load(): void {
         global $DB;
         $entityid = (int) $this->library->entityid;
+        $first = !$this->last['item'] && !$this->last['record'] && !$this->last['source'];
         $rows = $DB->get_recordset_select(
             self::T . 'item',
-            'entityid = :entityid',
-            ['entityid' => $entityid],
-            '',
+            'entityid = :entityid AND id > :last',
+            ['entityid' => $entityid, 'last' => $this->last['item']],
+            'id',
             'id, barcode, regnumber, recordid'
         );
         foreach ($rows as $row) {
+            $this->last['item'] = (int) $row->id;
             $code = strtoupper((string) $row->barcode);
-            $this->codes[$code] = (int) $row->recordid;
+            $this->codes[$code] ??= (int) $row->recordid;
             if (preg_match('/^(\d+)[A-Z]?$/', $code, $parts)) {
                 $this->lastcode = max($this->lastcode, (int) $parts[1]);
                 $this->digits = max($this->digits, strlen($parts[1]));
@@ -317,6 +427,37 @@ final class catalogue_import {
             }
         }
         $rows->close();
+        $rows = $DB->get_recordset_select(
+            self::T . 'record',
+            "entityid = :entityid AND id > :last",
+            ['entityid' => $entityid, 'last' => $this->last['record']],
+            'id',
+            'id, isbn'
+        );
+        foreach ($rows as $row) {
+            $this->last['record'] = (int) $row->id;
+            if ((string) $row->isbn !== '') {
+                $this->isbns[$row->isbn] = $this->isbns[$row->isbn] ?? (int) $row->id;
+            }
+        }
+        $rows->close();
+        $rows = $DB->get_recordset_select(
+            self::T . 'source',
+            "entityid = :entityid AND origin = :origin AND tablename = 'record' AND id > :last",
+            ['entityid' => $entityid, 'origin' => $this->system, 'last' => $this->last['source']],
+            'id',
+            'id, externalid, localid, hash, localhash'
+        );
+        foreach ($rows as $source) {
+            $this->last['source'] = (int) $source->id;
+            $this->sources[$source->externalid] ??= (int) $source->localid;
+            $this->ours[(int) $source->localid] = true;
+            $this->tracked[$source->externalid] ??= [(int) $source->id, $source->hash, $source->localhash];
+        }
+        $rows->close();
+        if (!$first) {
+            return;
+        }
         // Where the centre said its new codes start.
         foreach (\local_oksigeniaayvurenda\local\cataloguer::below_first_code($entityid) as $below) {
             $this->lastcode = max($this->lastcode, (int) $below);
@@ -332,28 +473,6 @@ final class catalogue_import {
         ) {
             $this->places[\core_text::strtolower($label)] = (int) $id;
         }
-        $rows = $DB->get_recordset_select(
-            self::T . 'record',
-            "entityid = :entityid AND isbn IS NOT NULL",
-            ['entityid' => $entityid],
-            '',
-            'id, isbn'
-        );
-        foreach ($rows as $row) {
-            $this->isbns[$row->isbn] = $this->isbns[$row->isbn] ?? (int) $row->id;
-        }
-        $rows->close();
-        foreach (
-            $DB->get_records(
-                self::T . 'source',
-                ['entityid' => $entityid, 'origin' => $this->system, 'tablename' => 'record'],
-                '',
-                'id, externalid, localid, hash, localhash'
-            ) as $source
-        ) {
-            $this->sources[$source->externalid] = (int) $source->localid;
-            $this->tracked[$source->externalid] = [(int) $source->id, $source->hash, $source->localhash];
-        }
     }
 
     /**
@@ -366,8 +485,10 @@ final class catalogue_import {
     }
 
     /**
-     * Whether a record of the catalogue is the book a description of the file says: the same ISBN when both have one,
-     * else the same first author, or most of the words of their titles (a title corrected in its program is still it).
+     * Whether a record of the catalogue is the book a description of the file says: the same ISBN when both have one (or
+     * one of the file's, when it lists the hardback and the paperback in another order), or, with the ISBN corrected in
+     * its program, the same title; else the same first author, or most of the words of their titles (a title corrected in
+     * its program is still it).
      *
      * @param int $recordid
      * @param array $description
@@ -381,7 +502,10 @@ final class catalogue_import {
         }
         $isbn = (string) ($description['record']['isbn'] ?? '');
         if ($isbn !== '' && (string) $record->isbn !== '') {
-            return $isbn === (string) $record->isbn;
+            $isbns = array_map('strval', (array) ($description['extra']['isbns'] ?? []));
+            return $isbn === (string) $record->isbn || in_array((string) $record->isbn, $isbns, true)
+                || \local_oksigeniaayvurenda\core\text::normalise((string) ($description['record']['title'] ?? ''))
+                    === \local_oksigeniaayvurenda\core\text::normalise((string) $record->title);
         }
         $author = \local_oksigeniaayvurenda\core\text::normalise((string) ($description['authorities']['author'][0] ?? ''));
         if ($author !== '') {

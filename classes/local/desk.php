@@ -971,8 +971,11 @@ final class desk {
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $due, 'timereturned' => null,
             'returnstaffid' => null, 'renewals' => $loan->renewals + 1, 'timemodified' => $this->now]);
         $a = (object) ['title' => $this->title($item), 'due' => $this->day($due)];
+        // Renewed right after it came back: undoing it gives it back as it was, not a loan left open and late.
+        $reopened = $loan->timereturned !== null ? ['reopened' => (int) $loan->timereturned,
+            'reopenedby' => (int) $loan->returnstaffid] : [];
         return $this->answer('renewed', 'ok', 'deskrenewed', $a, ['loanid' => (int) $loan->id, 'previousdue' => $previous,
-            'readerid' => (int) $reader->id, 'reader' => $this->reader_panel((int) $reader->id)]);
+            'readerid' => (int) $reader->id, 'reader' => $this->reader_panel((int) $reader->id)] + $reopened);
     }
 
     /**
@@ -1142,9 +1145,11 @@ final class desk {
      * @param int $loanid
      * @param string $what lent, returned or renewed.
      * @param int $previousdue For a renewal: the due date before it.
+     * @param int $reopened For a renewal made right after the book came back: when it came back (renew() says so).
+     * @param int $reopenedby And who took it back.
      * @return array
      */
-    public function undo(int $loanid, string $what, int $previousdue = 0): array {
+    public function undo(int $loanid, string $what, int $previousdue = 0, int $reopened = 0, int $reopenedby = 0): array {
         global $DB;
         $loan = $this->loan($loanid);
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
@@ -1182,8 +1187,18 @@ final class desk {
                 'conditionin' => null, 'timemodified' => $this->now]);
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         } else if ($what === 'renewed' && $previousdue > 0 && $loan->renewals > 0) {
-            $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $previousdue,
-                'renewals' => $loan->renewals - 1, 'timemodified' => $this->now]);
+            // A renewal made right after the book came back goes back to that return: the loan closed again, with its
+            // day and who took it back, and the copy on the shelf (or set aside for whoever waits for it).
+            $back = $reopened >= (int) $loan->timeloaned && $reopened <= $this->now ? $reopened : 0;
+            $DB->update_record(self::T . 'loan', (object) (['id' => $loan->id, 'timedue' => $previousdue,
+                'renewals' => $loan->renewals - 1, 'timemodified' => $this->now]
+                + ($back ? ['timereturned' => $back, 'returnstaffid' => $reopenedby ?: null] : [])));
+            if ($back) {
+                $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'available',
+                    'timemodified' => $this->now]);
+                $item->status = 'available';
+                holds::place($item, $this->now);
+            }
         }
         $transaction->allow_commit();
         return $this->answer(

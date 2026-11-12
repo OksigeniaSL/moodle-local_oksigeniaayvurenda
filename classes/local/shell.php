@@ -527,7 +527,7 @@ Oksigenia Ayvurenda</button>
         ]);
         // Another website frames it: no X-Frame-Options, and any page may.
         @header('Content-Type: text/html; charset=utf-8');
-        @header('Content-Security-Policy: frame-ancestors *');
+        @header('Content-Security-Policy: frame-ancestors *', false);
         self::guard();
         echo '<!DOCTYPE html>
 <html lang="' . s(str_replace('_', '-', current_language())) . '"' .
@@ -591,7 +591,9 @@ Oksigenia Ayvurenda</button>
                 return;
             }
         }
-        @header("Content-Security-Policy: script-src 'self' 'nonce-" . self::nonce() . "'; object-src 'none'; base-uri 'self'");
+        // Beside any other policy of the page (who may frame it, a reader's own), never instead of it: each one holds.
+        $policy = "script-src 'self' 'nonce-" . self::nonce() . "'; object-src 'none'; base-uri 'self'";
+        @header('Content-Security-Policy: ' . $policy, false);
     }
 
     /**
@@ -602,7 +604,7 @@ Oksigenia Ayvurenda</button>
         global $CFG;
         $framers = ltitool::framers();
         if ($framers) {
-            @header("Content-Security-Policy: frame-ancestors 'self' " . implode(' ', $framers));
+            @header("Content-Security-Policy: frame-ancestors 'self' " . implode(' ', $framers), false);
         } else if (empty($CFG->allowframembedding)) {
             @header('X-Frame-Options: SAMEORIGIN');
         }

@@ -223,8 +223,9 @@ final class oai {
             if (!$token) {
                 return ['badResumptionToken', 'Bad or expired token'];
             }
-            [$after, $from, $until, $prefix, $set] = $token;
+            [$after, $from, $until, $prefix, $set, $size] = $token;
         } else {
+            $size = null;
             $from = isset($args['from']) ? self::time($args['from'], false) : null;
             $until = isset($args['until']) ? self::time($args['until'], true) : null;
             $set = $args['set'] ?? '';
@@ -244,10 +245,13 @@ final class oai {
         }
         if ($after || $more) {
             $xml->startElement('resumptionToken');
-            $xml->writeAttribute('completeListSize', (string) self::count($library, $set, $from, $until));
+            // Counted once, on the first page, and carried in the token: counting it on every page went through the whole
+            // catalogue each time.
+            $size ??= self::count($library, $set, $from, $until);
+            $xml->writeAttribute('completeListSize', (string) $size);
             if ($more) {
                 $last = end($items);
-                $xml->text(self::token([$last['datestamp'], $last['id']], $from, $until, $prefix, $set));
+                $xml->text(self::token([$last['datestamp'], $last['id']], $from, $until, $prefix, $set, $size));
             }
             $xml->endElement();
         }
@@ -321,14 +325,12 @@ final class oai {
             $where[] = "r.id $in";
             $params += $inparams;
         }
-        // A record changes when a digital form of it changes too.
-        $sql = "SELECT r.id, CASE WHEN d.ts IS NOT NULL AND d.ts > r.timemodified THEN d.ts ELSE r.timemodified END AS ds
+        // The datestamp is the record's own date, which a digital form or a first copy here also moves: by the index of the
+        // centre and that date, a page is the next hundred, not the whole catalogue computed and sorted each time.
+        $sql = "SELECT r.id, r.timemodified AS ds
                   FROM {" . self::T . "record} r
-             LEFT JOIN (SELECT recordid, MAX(timemodified) AS ts FROM {" . self::T . "digital}
-                         WHERE entityid = :dentity AND status = 'published' AND kind <> 'voice'
-                      GROUP BY recordid) d ON d.recordid = r.id
                  WHERE r.entityid = :entityid AND (" . implode(' OR ', $where) . ")";
-        return [$sql, $params + ['dentity' => $library->entityid]];
+        return [$sql, $params];
     }
 
     /**
@@ -679,25 +681,28 @@ final class oai {
      * @param int|null $until
      * @param string $prefix
      * @param string $set
+     * @param int $size How many the whole list has.
      * @return string
      */
-    private static function token(array $after, ?int $from, ?int $until, string $prefix, string $set): string {
-        return $after[0] . '_' . $after[1] . '-' . ($from ?? '') . '-' . ($until ?? '') . '-' . $prefix . '-' . $set;
+    private static function token(array $after, ?int $from, ?int $until, string $prefix, string $set, int $size): string {
+        return $after[0] . '_' . $after[1] . '-' . ($from ?? '') . '-' . ($until ?? '') . '-' . $prefix . '-' . $set . '-'
+            . $size;
     }
 
     /**
      * Reads a resumption token.
      *
      * @param string $token
-     * @return array|null after, from, until, prefix and set.
+     * @return array|null after, from, until, prefix, set and size (null in a token of before it was carried).
      */
     private static function untoken(string $token): ?array {
         if (
-            !preg_match('/^(\d+)_(\d+)-(\d*)-(\d*)-(\w+)-(\w*)$/', $token, $m) || !isset(self::FORMATS[$m[5]])
+            !preg_match('/^(\d+)_(\d+)-(\d*)-(\d*)-(\w+)-(\w*)(?:-(\d+))?$/', $token, $m) || !isset(self::FORMATS[$m[5]])
                 || ($m[6] !== '' && !in_array($m[6], self::SETS, true))
         ) {
             return null;
         }
-        return [[(int) $m[1], (int) $m[2]], $m[3] === '' ? null : (int) $m[3], $m[4] === '' ? null : (int) $m[4], $m[5], $m[6]];
+        return [[(int) $m[1], (int) $m[2]], $m[3] === '' ? null : (int) $m[3], $m[4] === '' ? null : (int) $m[4], $m[5], $m[6],
+            isset($m[7]) && $m[7] !== '' ? (int) $m[7] : null];
     }
 }

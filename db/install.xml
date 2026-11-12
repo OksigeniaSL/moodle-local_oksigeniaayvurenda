@@ -66,6 +66,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="isbn" UNIQUE="false" FIELDS="isbn"/>
+        <INDEX NAME="entitymodified" UNIQUE="false" FIELDS="entityid, timemodified"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_oksigeniaayvurenda_authority" COMMENT="Authors, subjects, publishers, classification codes, locations and collections of an entity">

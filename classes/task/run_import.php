@@ -28,7 +28,9 @@ use local_oksigeniaayvurenda\local\import\runner;
 
 /**
  * Imports a file too big for the import page's time, as the person who started it, and tells them how it went. It does
- * not try again on its own: a file that cannot be imported says why, and the library can import again.
+ * not try again on its own: a file that cannot be imported says why, and the library can import again. If the process
+ * dies on the way (out of memory, killed), Moodle runs it again and it goes on (what came in is not repeated); dead twice,
+ * it says so and stops.
  */
 class run_import extends \core\task\adhoc_task {
     /**
@@ -55,11 +57,15 @@ class run_import extends \core\task\adhoc_task {
         \core_php_time_limit::raise();
         raise_memory_limit(MEMORY_HUGE);
         $userid = (int) $this->get_userid();
+        $libraryid = (int) $library->id;
         try {
             if (!is_file((string) ($pending['path'] ?? ''))) {
                 throw new \moodle_exception('importunknown', 'local_oksigeniaayvurenda');
             }
-            $done = runner::run($library, $pending, (array) ($data['options'] ?? []));
+            if (runner::started($libraryid) > runner::TRIES) {
+                throw new \moodle_exception('importdied', 'local_oksigeniaayvurenda');
+            }
+            $done = runner::run($library, $pending, (array) ($data['options'] ?? []), fn() => runner::beat($libraryid));
             mtrace('Ayvurenda: imported «' . $pending['name'] . '» into library ' . $library->id . ': '
                 . json_encode(array_column($done['figures'], 'count')));
             runner::tell($userid, $library, (string) $pending['name'], $done);

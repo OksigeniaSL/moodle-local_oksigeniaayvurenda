@@ -173,6 +173,7 @@ final class digital {
         $item = self::get($id, $library);
         $fields = self::fields($data);
         $DB->update_record(self::T . 'digital', (object) (['id' => $item->id, 'timemodified' => $now ?? time()] + $fields));
+        self::touch((int) $item->recordid, $now ?? time());
         // Who marked a tale to read at home, and when: a person looked at it (Enrique: tales are looked at first).
         \local_oksigeniaayvurenda\event\digital_changed::fire(
             (int) $library->entityid,
@@ -215,7 +216,22 @@ final class digital {
         $DB->delete_records(self::T . 'fragment', ['digitalid' => $item->id]);
         $DB->set_field(self::T . 'formatask', 'digitalid', null, ['digitalid' => $item->id]);
         $DB->delete_records(self::T . 'digital', ['id' => $item->id]);
+        self::touch((int) $item->recordid, time());
         \local_oksigeniaayvurenda\event\digital_removed::fire((int) $library->entityid, $id);
+    }
+
+    /**
+     * The record changed when a digital form of it did: its date is what harvesters (OAI-PMH) ask by.
+     *
+     * @param int $recordid
+     * @param int $now
+     */
+    private static function touch(int $recordid, int $now): void {
+        global $DB;
+        $DB->set_field_select(self::T . 'record', 'timemodified', $now, 'id = :id AND timemodified < :now', [
+            'id' => $recordid,
+            'now' => $now,
+        ]);
     }
 
     /**
@@ -402,9 +418,11 @@ final class digital {
         global $DB;
         $now = $now ?? time();
         $DB->get_record(self::T . 'record', ['id' => $recordid, 'entityid' => $library->entityid], 'id', MUST_EXIST);
-        return (int) $DB->insert_record(self::T . 'digital', ['entityid' => $library->entityid, 'recordid' => $recordid,
+        $id = (int) $DB->insert_record(self::T . 'digital', ['entityid' => $library->entityid, 'recordid' => $recordid,
             'kind' => $kind, 'format' => $format, 'url' => $url, 'status' => 'published', 'createdby' => $userid ?: null,
             'timecreated' => $now, 'timemodified' => $now] + self::fields($data));
+        self::touch($recordid, $now);
+        return $id;
     }
 
     /**

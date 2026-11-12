@@ -132,11 +132,21 @@ final class desk_test extends \advanced_testcase {
         $this->assertSame('onloan', $DB->get_field(self::T . 'item', 'status', ['id' => $w->faro->id]));
         $this->assertSame('stop', $desk->renew($back['loanid'])['kind']);
 
-        $desk->undo($back['loanid'], 'renewed', $renewed['previousdue']);
-        $this->assertSame(0, (int) $DB->get_field(self::T . 'loan', 'renewals', ['id' => $back['loanid']]));
-        $desk->undo($back['loanid'], 'lent');
-        $this->assertFalse($DB->record_exists(self::T . 'loan', ['id' => $back['loanid']]));
+        // Undoing the renewal made at the return leaves the book returned, as it was, and on the shelf: not on loan and late.
+        $this->assertSame((int) $back['loanid'], $renewed['loanid']);
+        $this->assertGreaterThan(0, $renewed['reopened']);
+        $desk->undo($back['loanid'], 'renewed', $renewed['previousdue'], $renewed['reopened'], $renewed['reopenedby']);
+        $loan = $DB->get_record(self::T . 'loan', ['id' => $back['loanid']]);
+        $this->assertSame(0, (int) $loan->renewals);
+        $this->assertSame($renewed['reopened'], (int) $loan->timereturned);
+        $this->assertSame((int) $w->staff->id, (int) $loan->returnstaffid);
         $this->assertSame('available', $DB->get_field(self::T . 'item', 'status', ['id' => $w->faro->id]));
+        // An ordinary renewal undone stays on loan, with its date back.
+        $again = $desk->scan('100000L', (int) $w->ana->id);
+        $more = $desk->renew($again['loanid']);
+        $this->assertArrayNotHasKey('reopened', $more);
+        $desk->undo($again['loanid'], 'renewed', $more['previousdue']);
+        $this->assertNull($DB->get_field(self::T . 'loan', 'timereturned', ['id' => $again['loanid']]));
     }
 
     /**

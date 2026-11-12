@@ -37,6 +37,15 @@ final class cataloguer {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
+    /** @var array<string, int>|null While a catalogue is imported: its centre's authorities by kind and name. */
+    private static ?array $known = null;
+
+    /** @var int The centre of those authorities. */
+    private static int $knownentity = 0;
+
+    /** @var int The last of them read: what others make meanwhile is read on top. */
+    private static int $knownlast = 0;
+
     /**
      * Records of the entity with this ISBN, with their copies by library.
      *
@@ -242,6 +251,7 @@ final class cataloguer {
      * @return array recordid, newrecord, itemids, barcodes.
      * @throws \invalid_parameter_exception When a barcode is taken.
      * @throws plan_full When the copies do not fit in the centre's plan.
+     * @throws busy When the centre's codes are being given by someone else for longer than a moment.
      */
     public static function add(\stdClass $library, array $description, array $copy, int $recordid = 0): array {
         global $DB;
@@ -255,14 +265,16 @@ final class cataloguer {
             }
         }
         plans::check($entityid, 'copies', $count);
-        // Two people adding at once (two desks the day a box comes) must not take the same code.
+        // Two people adding at once (two desks the day a box comes), or a catalogue coming in, must not take the same code:
+        // without the lock, nothing is added and it can be tried again in a moment.
         $lock = self::lock('copies', $entityid);
+        if (!$lock) {
+            throw new busy('copiesbusy', 'local_oksigeniaayvurenda');
+        }
         try {
             return self::add_now($library, $entityid, $recordid, $description, $copy, $barcodes, $count, $now);
         } finally {
-            if ($lock) {
-                $lock->release();
-            }
+            $lock->release();
         }
     }
 
@@ -299,9 +311,9 @@ final class cataloguer {
             $record = $DB->get_record(self::T . 'record', ['id' => $recordid, 'entityid' => $entityid], 'id, isbn', MUST_EXIST);
             // The same book, typed before without its ISBN: it takes this one, and its next copy is found by it.
             $isbn = (string) ($description['record']['isbn'] ?? '');
-            if ((string) $record->isbn === '' && preg_match('/^\d{13}$/', $isbn)) {
-                $DB->update_record(self::T . 'record', (object) ['id' => $recordid, 'isbn' => $isbn, 'timemodified' => $now]);
-            }
+            // A copy more changes it too: a record with its first copy in a library comes into what that library shows.
+            $DB->update_record(self::T . 'record', (object) (['id' => $recordid, 'timemodified' => $now]
+                + ((string) $record->isbn === '' && preg_match('/^\d{13}$/', $isbn) ? ['isbn' => $isbn] : [])));
         }
         // The codes and register numbers follow the entity's highest ones.
         $existing = [];
@@ -596,6 +608,16 @@ final class cataloguer {
                 return $found;
             }
         }
+        // Importing a catalogue, each name is looked up in memory: in the database, without an index on the name, each one
+        // went through all the authorities of its kind, and a university's catalogue took hours.
+        $known = self::$known !== null && self::$knownentity === $entityid;
+        $name = $kind . '|' . \core_text::strtolower($label);
+        if ($known) {
+            if (isset(self::$known[$name])) {
+                return self::$known[$name];
+            }
+            return self::$known[$name] = self::make_authority($entityid, $kind, $label, $now);
+        }
         $field = $kind === 'class' ? 'code' : 'label';
         $id = $DB->get_field_select(
             self::T . 'authority',
@@ -604,9 +626,53 @@ final class cataloguer {
             ['entityid' => $entityid, 'kind' => $kind, 'label' => $label],
             IGNORE_MULTIPLE
         );
-        if ($id) {
-            return (int) $id;
+        return $id ? (int) $id : self::make_authority($entityid, $kind, $label, $now);
+    }
+
+    /**
+     * While a catalogue is imported, the centre's authorities are known by name in memory; then, forgotten. Called again
+     * for the same centre, it reads only those made since by others (someone cataloguing by hand meanwhile).
+     *
+     * @param int $entityid The centre; 0 forgets them.
+     */
+    public static function know_authorities(int $entityid): void {
+        global $DB;
+        if (!$entityid || self::$known === null || self::$knownentity !== $entityid) {
+            self::$known = null;
+            self::$knownentity = $entityid;
+            self::$knownlast = 0;
+            if (!$entityid) {
+                return;
+            }
         }
+        $known = self::$known ?? [];
+        $rows = $DB->get_recordset_select(
+            self::T . 'authority',
+            'entityid = :entityid AND id > :last',
+            ['entityid' => $entityid, 'last' => self::$knownlast],
+            'id',
+            'id, kind, code, label'
+        );
+        foreach ($rows as $row) {
+            $known[$row->kind . '|' . \core_text::strtolower((string) ($row->kind === 'class' ? $row->code : $row->label))]
+                ??= (int) $row->id;
+            self::$knownlast = (int) $row->id;
+        }
+        $rows->close();
+        self::$known = $known;
+    }
+
+    /**
+     * A new authority of the centre.
+     *
+     * @param int $entityid
+     * @param string $kind
+     * @param string $label
+     * @param int $now
+     * @return int
+     */
+    private static function make_authority(int $entityid, string $kind, string $label, int $now): int {
+        global $DB;
         $id = (int) $DB->insert_record(self::T . 'authority', ['entityid' => $entityid, 'kind' => $kind,
             'code' => $kind === 'class' ? \core_text::substr($label, 0, 100) : null, 'label' => $label,
             'timecreated' => $now, 'timemodified' => $now]);
@@ -633,10 +699,11 @@ final class cataloguer {
      *
      * @param string $what copies or readers.
      * @param int $entityid
+     * @param int $wait Seconds to wait for it.
      * @return \core\lock\lock|false
      */
-    public static function lock(string $what, int $entityid) {
-        return \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock($what . '_' . $entityid, 15);
+    public static function lock(string $what, int $entityid, int $wait = 15) {
+        return \core\lock\lock_config::get_lock_factory('local_oksigeniaayvurenda')->get_lock($what . '_' . $entityid, $wait);
     }
 
     /**

@@ -55,23 +55,63 @@ final class duplicates {
      */
     public static function groups(int $entityid): array {
         global $DB;
-        $records = $DB->get_records(self::T . 'record', ['entityid' => $entityid], 'id', 'id, title, isbn');
-        if (!$records) {
-            return [];
-        }
-        $authors = [];
-        $rows = $DB->get_recordset_sql(
-            "SELECT ra.recordid, a.label
-               FROM {" . self::T . "recauth} ra
-               JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'author'
-              WHERE a.entityid = :entityid
-           ORDER BY ra.recordid, ra.sortorder, ra.id",
-            ['entityid' => $entityid]
+        // A university's catalogue (300,000 records) read whole as objects took more memory than a page has. First, only
+        // the ISBNs that repeat (in the database) and the titles that repeat (as numbers, record by record); then only
+        // those records, whole, with their first authors.
+        $repeated = $DB->get_fieldset_sql(
+            "SELECT isbn FROM {" . self::T . "record}
+              WHERE entityid = :entityid AND isbn IS NOT NULL AND isbn <> :none
+           GROUP BY isbn
+             HAVING COUNT(1) > 1",
+            ['entityid' => $entityid, 'none' => '']
         );
+        $candidates = [];
+        foreach (array_chunk($repeated, 1000) as $chunk) {
+            [$in, $params] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED);
+            $params['entityid'] = $entityid;
+            foreach ($DB->get_fieldset_select(self::T . 'record', 'id', "entityid = :entityid AND isbn $in", $params) as $id) {
+                $candidates[(int) $id] = true;
+            }
+        }
+        $first = [];
+        $rows = $DB->get_recordset(self::T . 'record', ['entityid' => $entityid], '', 'id, title');
         foreach ($rows as $row) {
-            $authors[(int) $row->recordid] ??= text::normalise(catalogue::display_name((string) $row->label));
+            $key = text::title_key((string) $row->title);
+            if ($key === '') {
+                continue;
+            }
+            $hash = crc32($key);
+            if (isset($first[$hash])) {
+                $candidates[$first[$hash]] = true;
+                $candidates[(int) $row->id] = true;
+            } else {
+                $first[$hash] = (int) $row->id;
+            }
         }
         $rows->close();
+        unset($first);
+        if (!$candidates) {
+            return [];
+        }
+        $records = [];
+        $authors = [];
+        foreach (array_chunk(array_keys($candidates), 1000) as $chunk) {
+            [$in, $params] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED);
+            $records += $DB->get_records_select(self::T . 'record', "id $in", $params, 'id', 'id, title, isbn');
+            $rows = $DB->get_recordset_sql(
+                "SELECT ra.recordid, a.label
+                   FROM {" . self::T . "recauth} ra
+                   JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind = 'author'
+                  WHERE ra.recordid $in
+               ORDER BY ra.recordid, ra.sortorder, ra.id",
+                $params
+            );
+            foreach ($rows as $row) {
+                $authors[(int) $row->recordid] ??= text::normalise(catalogue::display_name((string) $row->label));
+            }
+            $rows->close();
+        }
+        ksort($records);
         $byisbn = [];
         $bytitle = [];
         foreach ($records as $record) {
@@ -128,10 +168,14 @@ final class duplicates {
         if (!$found) {
             return [];
         }
-        $copies = $DB->get_records_sql_menu(
-            'SELECT recordid, COUNT(1) FROM {' . self::T . 'item} WHERE entityid = :entityid GROUP BY recordid',
-            ['entityid' => $entityid]
-        );
+        $copies = [];
+        foreach (array_chunk(array_unique(array_merge(...$found)), 1000) as $chunk) {
+            [$in, $params] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED);
+            $copies += $DB->get_records_sql_menu(
+                'SELECT recordid, COUNT(1) FROM {' . self::T . "item} WHERE recordid $in GROUP BY recordid",
+                $params
+            );
+        }
         usort($found, fn($a, $b) => array_sum(array_map(fn($id) => (int) ($copies[$id] ?? 0), $b))
             <=> array_sum(array_map(fn($id) => (int) ($copies[$id] ?? 0), $a)));
         return $found;

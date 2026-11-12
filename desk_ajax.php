@@ -103,7 +103,9 @@ switch ($action) {
         $answer = $desk->undo(
             required_param('loanid', PARAM_INT),
             required_param('what', PARAM_ALPHA),
-            optional_param('previousdue', 0, PARAM_INT)
+            optional_param('previousdue', 0, PARAM_INT),
+            optional_param('reopened', 0, PARAM_INT),
+            optional_param('reopenedby', 0, PARAM_INT)
         );
         break;
     case 'sanction':

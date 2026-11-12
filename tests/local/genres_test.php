@@ -103,6 +103,10 @@ final class genres_test extends \advanced_testcase {
 
         $found = catalogue::search($this->library, 'cometa');
         $this->assertSame(['8' => 1, 'g1' => 4], $found['facets']['corners']);
+        // Each genre is asked only about the results, not for all its books on every search.
+        $one = array_key_first(genres::records($this->library)['g1']);
+        $this->assertSame([$one], array_keys(genres::records($this->library, [$one, 999999])['g1']));
+        $this->assertSame([], genres::records($this->library, [])['g1']);
         $narrowed = catalogue::search($this->library, 'cometa', 0, false, 'g1');
         $this->assertSame(4, $narrowed['total']);
         $this->assertContains($spine, array_map(fn($card) => (int) $card['id'], $narrowed['cards']));

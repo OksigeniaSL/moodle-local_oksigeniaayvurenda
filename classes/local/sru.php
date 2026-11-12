@@ -41,6 +41,9 @@ final class sru {
     /** @var int Records at most in one answer. */
     public const MOST = 50;
 
+    /** @var int The deepest first record a search may ask for. */
+    public const DEEPEST = 10000;
+
     /** @var array<string, string> The indexes it answers to and what they look in. */
     public const INDEXES = ['cql.anywhere' => 'words', 'cql.serverchoice' => 'words', 'serverchoice' => 'words',
         'dc.title' => 'words', 'bath.title' => 'words', 'dc.creator' => 'words', 'bath.author' => 'words',
@@ -182,6 +185,10 @@ final class sru {
         if (!$problem && ($start < 1 || $most < 0)) {
             $problem = [6, 'Unsupported parameter value'];
         }
+        // Deeper than this, a search is a crawl of the whole catalogue page by page: OAI-PMH is the way for that.
+        if (!$problem && $start > self::DEEPEST) {
+            $problem = [61, 'First record position out of range'];
+        }
         if ($problem) {
             $xml->writeElementNs('srw', 'numberOfRecords', null, '0');
             self::diagnostics($xml, [$problem]);
@@ -191,7 +198,14 @@ final class sru {
         $most = min($most, self::MOST);
         [$sql, $params] = self::where($library, $clauses);
         global $DB;
-        $total = (int) $DB->count_records_sql('SELECT COUNT(1) FROM {' . self::T . 'record} r WHERE ' . $sql, $params);
+        // The same search asked again (the next page) is not counted again for some minutes.
+        $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
+        $key = 'sru_' . md5($sql . json_encode($params));
+        $total = $cache->get($key);
+        if ($total === false) {
+            $total = (int) $DB->count_records_sql('SELECT COUNT(1) FROM {' . self::T . 'record} r WHERE ' . $sql, $params);
+            $cache->set($key, $total);
+        }
         $xml->writeElementNs('srw', 'numberOfRecords', null, (string) $total);
         $ids = $most ? array_keys($DB->get_records_sql(
             'SELECT r.id FROM {' . self::T . 'record} r WHERE ' . $sql . ' ORDER BY r.id',
