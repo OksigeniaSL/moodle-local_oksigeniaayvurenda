@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.237.0 (2026-11-12)
+
+- «How your library works», a new page from Jujol's mock-up, in «More»: the centre's settings and the library's loan
+  rules read as sentences on three shelves (day to day, the library's voice, the house), each a book with its spine.
+  Touched, its gesture opens in place: who and what in chips, days, books at once and renewals with − and +, the sign on
+  the door, a light for each thing that can be on, the same review signed three ways, a light per stage for the class
+  challenge, the card by stage with its drawing, the kind of centre in six cards, the start of the year with its sheet,
+  the spine label each classification prints, the control letter with a real code. Each gesture sends only what it
+  changes and saves at once, also without JavaScript; the page comes back to the sentence touched, which says «Saved»,
+  and Mainumby celebrates.
+- The window of the centre in «Libraries» keeps only what is set once by whoever runs the site: the first codes, the
+  catalogues for adding books, the links of a university and the plan; it now saves only what it sends.
+- «What do you want to do?» and the guided steps send each of those settings to its sentence in the new page.
+
 ## 0.236.0 (2026-11-12)
 
 The mediums of the review of 12 November.

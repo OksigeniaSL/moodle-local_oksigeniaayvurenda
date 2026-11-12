@@ -80,50 +80,20 @@ if (data_submitted() && confirm_sesskey()) {
         }
         $notice = $str('librariescreated', format_string($library->name, true, ['escape' => false]));
     } else if ($do === 'entity') {
-        // The start of the year as a day and a month chosen from lists, not a format to know («09-01»).
-        $monthday = optional_param('startmonth', 0, PARAM_INT)
-            ? sprintf(
-                '%02d-%02d',
-                max(1, min(12, optional_param('startmonth', 9, PARAM_INT))),
-                max(1, min(31, optional_param('startday', 1, PARAM_INT)))
-            )
-            : optional_param('yearstart', '09-01', PARAM_TEXT);
-        $data = [
-            'name' => required_param('name', PARAM_TEXT),
-            'yearstart' => $monthday,
-            'classification' => optional_param('classification', 'udc', PARAM_ALPHA),
-            'controlletter' => optional_param('controlletter', 0, PARAM_BOOL),
-            'copyfrom' => optional_param('copyfrom', '', PARAM_ALPHANUM),
-            'cardfrom' => optional_param('cardfrom', '', PARAM_ALPHANUM),
-            // Stage names go as values: array keys in Moodle's parameters only take letters, digits, - and _.
-            'cardlooks' => array_combine(
-                optional_param_array('cardstage', [], PARAM_TEXT),
-                optional_param_array('cardlook', [], PARAM_ALPHA)
-            ) ?: [],
-            'reviewsign' => optional_param('reviewsign', '', PARAM_ALPHA),
-            'historyyears' => optional_param('historyyears', -1, PARAM_INT),
-            'skin' => optional_param('skin', 'school', PARAM_ALPHA),
-            'photos' => optional_param('photos', 0, PARAM_BOOL),
-            'timezone' => optional_param('timezone', '', PARAM_TIMEZONE),
-            'linkproxy' => optional_param('linkproxy', '', PARAM_RAW_TRIMMED),
-            'linkresolver' => optional_param('linkresolver', '', PARAM_RAW_TRIMMED),
-            // The catalogues for adding books, only with the form that lists them.
-            'sources' => optional_param('sourcesform', 0, PARAM_BOOL) ? optional_param_array('sources', [], PARAM_ALPHANUMEXT)
-                : null,
-            // What is on, only with the form that lists it.
-            'play' => optional_param('playform', 0, PARAM_BOOL) ? optional_param_array('play', [], PARAM_ALPHA) : null,
-            // The stages listed on the form whose box is left empty play no class challenge.
-            'challengesoff' => array_values(array_diff(
-                optional_param_array('challengestage', [], PARAM_TEXT),
-                optional_param_array('challengeon', [], PARAM_TEXT)
-            )),
-        ];
-        // A skin without classes does not show the stages: what a school chose stays for when it is one again.
-        if (!optional_param_array('cardstage', [], PARAM_TEXT)) {
-            unset($data['cardlooks']);
+        // Only what this window still holds (the first codes, the catalogues for adding, the links of a university, the
+        // plan): the rest is said and changed in «How your library works», and what is not sent is left as it is.
+        $data = [];
+        foreach (
+            ['copyfrom' => PARAM_ALPHANUM, 'cardfrom' => PARAM_ALPHANUM, 'linkproxy' => PARAM_RAW_TRIMMED,
+            'linkresolver' => PARAM_RAW_TRIMMED] as $key => $type
+        ) {
+            $value = optional_param($key, null, $type);
+            if ($value !== null) {
+                $data[$key] = $value;
+            }
         }
-        if (!optional_param_array('challengestage', [], PARAM_TEXT)) {
-            unset($data['challengesoff']);
+        if (optional_param('sourcesform', 0, PARAM_BOOL)) {
+            $data['sources'] = optional_param_array('sources', [], PARAM_ALPHANUMEXT);
         }
         libraries::update_entity(required_param('entity', PARAM_INT), $data);
         // The plan only goes with the form of whoever may set it.
@@ -254,9 +224,15 @@ foreach (libraries::all() as $one) {
             })(),
         ];
     }
+    $main = \local_oksigeniaayvurenda\local\mail::main_library((int) $entity->id);
     $entities[] = [
         'id' => (int) $entity->id,
         'name' => format_string($entity->name, true, ['escape' => false]),
+        // What the centre does every day, its name, its year and how it classifies are said in «How your library works».
+        'workingsurl' => $main
+            ? (new moodle_url('/local/oksigeniaayvurenda/howitworks.php', ['library' => $main->slug]))->out(false) : '',
+        'workingslabel' => $str('hiwtitle'),
+        'librariesmoved' => $str('librariesmoved'),
         'rawname' => $entity->name,
         'yearstart' => $entity->yearstart,
         'startdays' => array_map(fn($d) => ['value' => $d, 'label' => $d,

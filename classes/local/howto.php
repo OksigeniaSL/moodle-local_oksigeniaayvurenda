@@ -92,9 +92,9 @@ final class howto {
         'characters' => ['characters.php', 'manage', ''],
         'window' => ['public.php', 'manage', ''],
         'record' => ['search.php', 'catalogue', 'record'],
-        'closed' => ['libraries.php', 'manage', ''],
+        'closed' => ['howitworks.php', 'manage', ''],
         'scanner' => ['phone.php', 'desk', ''],
-        'settings' => ['libraries.php', 'manage', ''],
+        'settings' => ['howitworks.php', 'manage', ''],
         'voices' => ['voices.php', 'desk', 'voices'],
         'match' => ['match.php', 'manage', ''],
         'readerslist' => ['readerslist.php', 'manage', 'readerslist'],
@@ -114,14 +114,20 @@ final class howto {
     /** @var array[] Each setting someone may look for: where it is changed (a page; «centre» for the centre's settings, «site»
      *  for Moodle's) and the permission it needs. A search answers with it and its value now. */
     public const SETTINGS = [
-        'loandays' => ['rules.php', 'manage'], 'maxloans' => ['rules.php', 'manage'], 'renewcount' => ['rules.php', 'manage'],
-        'renewfrom' => ['rules.php', 'manage'], 'classification' => ['centre', 'manage'], 'controlletter' => ['centre', 'manage'],
-        'numbering' => ['centre', 'manage'], 'history' => ['centre', 'manage'], 'reviewsign' => ['centre', 'manage'],
-        'cardlook' => ['centre', 'manage'], 'photos' => ['centre', 'manage'], 'entitykind' => ['centre', 'manage'],
-        'timezone' => ['centre', 'manage'], 'sources' => ['centre', 'manage'], 'features' => ['centre', 'manage'],
-        'challenges' => ['centre', 'manage'], 'corners' => ['corners.php', 'manage'], 'drive' => ['copies.php', 'manage'],
-        'z3950' => ['site', 'manage'],
+        'loandays' => ['howitworks', 'manage'], 'maxloans' => ['howitworks', 'manage'], 'renewcount' => ['howitworks', 'manage'],
+        'renewfrom' => ['rules.php', 'manage'], 'classification' => ['howitworks', 'manage'],
+        'controlletter' => ['howitworks', 'manage'], 'numbering' => ['centre', 'manage'], 'history' => ['howitworks', 'manage'],
+        'reviewsign' => ['howitworks', 'manage'], 'cardlook' => ['howitworks', 'manage'], 'photos' => ['howitworks', 'manage'],
+        'entitykind' => ['howitworks', 'manage'], 'timezone' => ['howitworks', 'manage'], 'sources' => ['centre', 'manage'],
+        'features' => ['howitworks', 'manage'], 'challenges' => ['howitworks', 'manage'],
+        'corners' => ['corners.php', 'manage'], 'drive' => ['copies.php', 'manage'], 'z3950' => ['site', 'manage'],
     ];
+
+    /** @var string[] The sentence of «How your library works» each setting is in. */
+    private const SENTENCES = ['loandays' => 'daily', 'maxloans' => 'daily', 'renewcount' => 'daily',
+        'classification' => 'classification', 'controlletter' => 'letter', 'history' => 'history', 'reviewsign' => 'sign',
+        'cardlook' => 'card', 'photos' => 'photos', 'entitykind' => 'skin', 'timezone' => 'zone', 'features' => 'lights',
+        'challenges' => 'challenges'];
 
     /** @var string[] The tasks that need classes, or courses, to mean anything. */
     private const ONLY_WITH = ['myclass' => 'classes', 'wishes' => 'classes', 'tutors' => 'classes', 'bank' => 'classes',
@@ -495,6 +501,8 @@ final class howto {
         [$page] = self::SETTINGS[$key];
         $entityid = (int) $library->entityid;
         $url = match ($page) {
+            'howitworks' => (new \moodle_url('/local/oksigeniaayvurenda/howitworks.php', ['library' => $library->slug]))->out(false)
+                . '#ayv-hiw-' . (self::SENTENCES[$key] ?? 'daily'),
             'centre' => (new \moodle_url('/local/oksigeniaayvurenda/libraries.php', ['library' => $library->slug]))->out(false)
                 . '#ayv-entity-' . $entityid,
             'site' => (new \moodle_url('/admin/settings.php', ['section' => 'local_oksigeniaayvurenda']))->out(false),

@@ -78,7 +78,7 @@ final class menu {
                 ['memoir.php', 'menumemoir', $d], ['year.php', 'menuyear', $m], ['activity.php', 'menuactivity', $m]]],
             'setup' => ['menusetup', [['import.php', 'menuimport', $c], ['sources.php', 'menusources', $m],
                 ['rules.php', 'menurules', $m], ['team', 'menuteam', $m], ['open.php', 'menuopen', $m]]],
-            'settings' => ['menusettings', [['centre', 'librariesentity', $m], ['libraries.php', 'navlibraries', $m],
+            'settings' => ['menusettings', [['howitworks.php', 'hiwtitle', $m], ['libraries.php', 'navlibraries', $m],
                 ['corners.php', 'menucorners', $m], ['characters.php', 'menucharacters', $m], ['copies.php', 'menucopies', $m],
                 ['lti.php', 'menulti', $m]]],
         ];

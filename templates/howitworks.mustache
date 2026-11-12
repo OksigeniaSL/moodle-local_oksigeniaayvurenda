@@ -1,0 +1,138 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/howitworks
+
+    «How your library works»: three shelves of sentences, each a book with its spine; touched, its gesture opens under it,
+    and each button sends only what it changes (no JavaScript needed).
+
+    Context variables required for this template:
+    * title, intro, action, sesskey, change, close, lesslabel, morelabel, savedword - the page's words and where gestures go
+    * crier - the herald by the title: figure and puppet, or nothing
+    * shelves - id, title, sub, colour, phrases (id, kind, spine, spinecolour, says as HTML, and one gesture: rule, newrule,
+      door, lights, reviews, card, chips, skins, spines, letter, year, name, zone)
+    * elsewhere, elsewhereurl, elsewherelabel - where the plan and the connectors are
+
+    Example context (json):
+    {
+        "title": "Cómo funciona tu biblioteca", "intro": "Cada frase dice lo que pasa hoy.",
+        "action": "https://example.com/howitworks.php", "sesskey": "abc", "change": "Cambiar", "close": "Cerrar",
+        "lesslabel": "Uno menos", "morelabel": "Uno más", "savedword": "Guardado", "crier": null,
+        "shelves": [{"id": "ayv-hiw-daily", "title": "El día a día", "sub": "Lo que más se toca.", "colour": "green",
+            "phrases": [
+                {"id": "ayv-hiw-rule-0", "kind": "rule", "spine": "PRÉ", "spinecolour": "green", "says": "<b>Alumnos</b>", "justsaved": true,
+                    "rule": {"index": "0",
+                        "who": [{"name": "readertype", "value": "student", "label": "Alumnos", "pressed": true}],
+                        "what": [{"name": "itemtype", "value": "any", "label": "Cualquier ejemplar", "pressed": true}],
+                        "lent": true,
+                        "steps": [{"field": "loandays", "label": "Durante", "value": 7, "unit": "7 días", "less": 6, "more": 8,
+                            "atmin": false, "atmax": false}],
+                        "home": [{"name": "loandays", "value": "7", "label": "Se lleva a casa", "pressed": true}],
+                        "removelabel": "Quitar esta norma", "removeyes": "Sí, quitar esta norma", "note": "Manda la más precisa."} },
+                {"id": "ayv-hiw-door", "kind": "door", "spine": "PUE", "spinecolour": "coral", "says": "Abierta",
+                    "door": {"open": true, "value": 0, "face": "Abierta", "back": "Cerrada", "explain": "Cerrada, solo el personal."} },
+                {"id": "ayv-hiw-letter", "kind": "letter", "spine": "COD", "spinecolour": "green2", "says": "Con letra",
+                    "letter": {"light": {"name": "set[controlletter]", "value": "0", "label": "Letra de control", "pressed": true},
+                        "code": "100234", "mark": "K", "note": "Un número mal tecleado no se confunde."} }
+            ]}],
+        "elsewhere": "El plan y los conectores están en", "elsewhereurl": "https://example.com/libraries.php",
+        "elsewherelabel": "Bibliotecas"
+    }
+}}
+<div class="ayv-cf">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{title}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+        </div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
+<form id="ayv-hiw-centre" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
+{{#shelves}}
+<section class="ayv-cf-estante ayv-cf-balda-{{colour}}" id="{{id}}" aria-labelledby="{{id}}-t">
+    <h2 class="ayv-cf-estante-t" id="{{id}}-t">{{title}}</h2>
+    <p class="ayv-cf-estante-s">{{sub}}</p>
+    <ul class="ayv-cf-frases">
+        {{#phrases}}
+        <li class="ayv-cf-frase ayv-cf-lomo-{{spinecolour}}{{#isnew}} ayv-cf-nueva{{/isnew}}" id="{{id}}">
+            <details><summary><span class="ayv-cf-lomo" aria-hidden="true"><span>{{spine}}</span></span><span class="ayv-cf-dice">{{{says}}}{{#justsaved}} <span class="ayv-cf-guardado" role="status">{{savedword}}</span>{{/justsaved}}</span>{{^isnew}}<span class="ayv-cf-cambiar">{{change}}</span><span class="ayv-cf-cerrar">{{close}}</span>{{/isnew}}</summary>
+            <div class="ayv-cf-gesto">
+            {{#rule}}
+                <form id="ayv-hiw-rule-{{index}}-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="rule" value="{{index}}"></form>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{#str}}hiwwho, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-cf-chapas">{{#who}}<button class="ayv-cf-chapa" type="submit" form="ayv-hiw-rule-{{index}}-f" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/who}}</span></div>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{#str}}hiwwhat, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-cf-chapas">{{#what}}<button class="ayv-cf-chapa" type="submit" form="ayv-hiw-rule-{{index}}-f" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/what}}</span></div>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{#str}}hiwhome, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-cf-chapas">{{#home}}<button class="ayv-cf-chapa" type="submit" form="ayv-hiw-rule-{{index}}-f" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/home}}</span></div>
+                {{#lent}}<div class="ayv-cf-numeros">
+                    {{#steps}}<div class="ayv-cf-numero"><span class="ayv-cf-rotulo">{{label}}</span><span class="ayv-cf-paso" role="group" aria-label="{{label}}"><button class="ayv-cf-menos" type="submit" form="ayv-hiw-rule-{{index}}-f" name="{{field}}" value="{{less}}" aria-label="{{lesslabel}}"{{#atmin}} disabled{{/atmin}}>−</button><span class="ayv-cf-cifra">{{#unlimited}}{{unit}}{{/unlimited}}{{^unlimited}}<b>{{unit}}</b>{{/unlimited}}</span><button class="ayv-cf-mas" type="submit" form="ayv-hiw-rule-{{index}}-f" name="{{field}}" value="{{more}}" aria-label="{{morelabel}}"{{#atmax}} disabled{{/atmax}}>+</button></span>{{#nolimit}}<button class="ayv-cf-chapa ayv-cf-chapa-sola" type="submit" form="ayv-hiw-rule-{{index}}-f" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/nolimit}}</div>{{/steps}}
+                </div>{{/lent}}
+                <details class="ayv-cf-quitar"><summary>{{removelabel}}</summary><button class="ayv-button ayv-cf-peligro" type="submit" form="ayv-hiw-rule-{{index}}-f" name="remove" value="1">{{removeyes}}</button></details>
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/rule}}
+            {{#newrule}}
+                <form id="ayv-hiw-rule-new-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="rule" value="new"></form>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{#str}}hiwwho, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-cf-chapas">{{#who}}<button class="ayv-cf-chapa" type="submit" form="ayv-hiw-rule-new-f" name="{{name}}" value="{{value}}">{{label}}</button>{{/who}}</span></div>
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/newrule}}
+            {{#door}}
+                <div class="ayv-cf-fila"><button class="ayv-cf-cartel" type="submit" form="ayv-hiw-centre" name="door" value="{{value}}" aria-pressed="{{#open}}true{{/open}}{{^open}}false{{/open}}"><span class="ayv-cf-cartel-cara">{{face}}</span><span class="ayv-cf-cartel-dorso">{{back}}</span></button>
+                <span class="ayv-cf-explica">{{explain}}</span></div>
+            {{/door}}
+            {{#lights}}
+                <div class="ayv-cf-luces">{{#list}}<button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/list}}</div>
+                {{#note}}<p class="ayv-cf-nota">{{note}}</p>{{/note}}
+            {{/lights}}
+            {{#reviews}}
+                <div class="ayv-cf-resenas">{{#list}}<button class="ayv-cf-resena" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-resena-texto">{{text}}</span><span class="ayv-cf-resena-firma">{{signature}}</span><span class="ayv-sr">{{label}}</span></button>{{/list}}</div>
+            {{/reviews}}
+            {{#card}}
+                <div class="ayv-cf-carnes">{{#rows}}<div class="ayv-cf-carne-fila"><span class="ayv-cf-rotulo">{{stage}}</span><span class="ayv-cf-chapas">{{#chips}}<button class="ayv-cf-chapa ayv-cf-chapa-carne" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{#mini}}<span class="ayv-cf-mini ayv-cf-mini-{{mini}}" aria-hidden="true"></span>{{/mini}}{{label}}</button>{{/chips}}</span></div>{{/rows}}</div>
+            {{/card}}
+            {{#chips}}
+                <div class="ayv-cf-chapas">{{#list}}<button class="ayv-cf-chapa" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/list}}</div>
+            {{/chips}}
+            {{#skins}}
+                <div class="ayv-cf-tipos">{{#list}}<button class="ayv-cf-tipo" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><b>{{label}}</b><span>{{what}}</span></button>{{/list}}</div>
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/skins}}
+            {{#spines}}
+                <div class="ayv-cf-tejuelos">{{#list}}<button class="ayv-cf-tejuelo-b" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-tejuelo-m" aria-hidden="true"><b>{{code}}</b><span>{{mark}}</span></span><span>{{label}}</span></button>{{/list}}</div>
+            {{/spines}}
+            {{#letter}}
+                <div class="ayv-cf-fila">{{#light}}<button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/light}}<span class="ayv-cf-codigo" aria-hidden="true">{{code}}<b>{{mark}}</b></span>
+                <span class="ayv-cf-explica">{{note}}</span></div>
+            {{/letter}}
+            {{#year}}
+                <div class="ayv-cf-fila"><span class="ayv-cf-hoja" aria-hidden="true"><small>{{monthshort}}</small><b>{{day}}</b></span>
+                <span class="ayv-cf-fecha"><span class="ayv-cf-rotulo">{{monthlabel}}</span><span class="ayv-cf-chapas">{{#months}}<button class="ayv-cf-chapa" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/months}}</span>
+                <span class="ayv-cf-rotulo">{{daylabel}}</span><span class="ayv-cf-paso" role="group" aria-label="{{daylabel}}"><button class="ayv-cf-menos" type="submit" form="ayv-hiw-centre" name="set[startday]" value="{{less}}" aria-label="{{lesslabel}}"{{#atfirst}} disabled{{/atfirst}}>−</button><span class="ayv-cf-cifra"><b>{{day}}</b></span><button class="ayv-cf-mas" type="submit" form="ayv-hiw-centre" name="set[startday]" value="{{more}}" aria-label="{{morelabel}}"{{#atlast}} disabled{{/atlast}}>+</button></span></span></div>
+                <p class="ayv-cf-nota"><a class="ayv-cf-enlace" href="{{sheet}}">{{sheetlabel}}</a></p>
+            {{/year}}
+            {{#name}}
+                <form class="ayv-cf-fila ayv-cf-placa" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><label class="ayv-sr" for="ayv-hiw-name-in">{{label}}</label><input id="ayv-hiw-name-in" name="set[name]" value="{{value}}" autocomplete="off" maxlength="255" required>
+                <button class="ayv-button" type="submit">{{save}}</button></form>
+            {{/name}}
+            {{#zone}}
+                <form class="ayv-cf-fila ayv-cf-placa" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><label class="ayv-sr" for="ayv-hiw-zone-in">{{label}}</label><select id="ayv-hiw-zone-in" name="set[timezone]">{{#options}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/options}}</select>
+                <button class="ayv-button" type="submit">{{save}}</button></form>
+            {{/zone}}
+            </div></details>
+        </li>
+        {{/phrases}}
+    </ul>
+</section>
+{{/shelves}}
+<p class="ayv-cf-pie">{{elsewhere}} <a class="ayv-cf-enlace" href="{{elsewhereurl}}">{{elsewherelabel}}</a>.</p>
+</div>

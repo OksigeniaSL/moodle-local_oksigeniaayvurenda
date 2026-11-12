@@ -156,21 +156,9 @@
             <form method="dialog"><button class="ayv-modal-close" aria-label="{{librariesclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
         <form method="post" action="{{action}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="entity" value="{{id}}">
-            <label class="ayv-field">{{librariesentityname}} <input type="text" name="name" value="{{rawname}}" maxlength="255" required></label>
-            <fieldset class="ayv-dig-set ayv-start-set"><legend>{{librariesyearstart}}</legend>
-                <label class="ayv-field">{{yearday}} <select name="startday">{{#startdays}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/startdays}}</select></label>
-                <label class="ayv-field">{{yearmonth}} <select name="startmonth">{{#startmonths}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/startmonths}}</select></label>
-            </fieldset>
-            <label class="ayv-field">{{librariesclassification}} <select name="classification">{{#classifications}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/classifications}}</select></label>
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="controlletter" value="1" {{#controlletter}}checked{{/controlletter}}> {{librariescontrolletter}}</label>
+            {{#workingsurl}}<p class="ayv-field-hint ayv-entity-moved">{{librariesmoved}} <a href="{{workingsurl}}">{{workingslabel}}</a>.</p>{{/workingsurl}}
             <label class="ayv-field">{{librariescopyfrom}} <span class="ayv-field-hint">{{librariescopyfromhint}}</span> <input type="text" name="copyfrom" value="{{copyfrom}}" maxlength="12" inputmode="numeric" pattern="[0-9]*"></label>
             <label class="ayv-field">{{librariescardfrom}} <span class="ayv-field-hint">{{librariescardfromhint}}</span> <input type="text" name="cardfrom" value="{{cardfrom}}" maxlength="12" inputmode="numeric" pattern="[0-9]*"></label>
-            {{#hascardlooks}}<fieldset class="ayv-fieldset"><legend>{{librariescardlooks}}</legend>
-                <p class="ayv-field-hint">{{librariescardlookshint}}</p>
-                {{#cardlooks}}<label class="ayv-field">{{stage}} <input type="hidden" name="cardstage[]" value="{{stage}}">
-                    <select name="cardlook[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select></label>{{/cardlooks}}
-            </fieldset>{{/hascardlooks}}
-            <label class="ayv-field">{{librarieszone}} <span class="ayv-field-hint">{{librarieszonehint}}</span> <select name="timezone">{{#zones}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/zones}}</select></label>
             <details class="ayv-fieldset"><summary>{{librariescatalogues}}</summary>
                 <p class="ayv-field-hint">{{librariescatalogueshint}}</p>
                 <input type="hidden" name="sourcesform" value="1">
@@ -183,20 +171,6 @@
                 <label class="ayv-field">{{librariesproxy}} <span class="ayv-field-hint">{{librariesproxyhint}}</span> <input type="text" inputmode="url" name="linkproxy" value="{{linkproxy}}" placeholder="https://login.proxy.example.org/login?url=" spellcheck="false"></label>
                 <label class="ayv-field">{{librariesresolver}} <span class="ayv-field-hint">{{librariesresolverhint}}</span> <input type="text" inputmode="url" name="linkresolver" value="{{linkresolver}}" spellcheck="false"></label>
             </details>
-            <label class="ayv-field">{{librariesskin}} <span class="ayv-field-hint">{{librariesskinhint}}</span> <select name="skin">{{#skins}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/skins}}</select></label>
-            <fieldset class="ayv-fieldset"><legend>{{librariesplay}}</legend>
-                <p class="ayv-field-hint">{{librariesplayhint}}</p>
-                <input type="hidden" name="playform" value="1">
-                <div class="ayv-choices">{{#play}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="play[]" value="{{what}}" {{#on}}checked{{/on}}> {{label}}</label>{{/play}}</div>
-            </fieldset>
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="photos" value="1" {{#photos}}checked{{/photos}}> {{librariesphotos}}</label>
-            <p class="ayv-field-hint">{{librariesphotoshint}}</p>
-            <label class="ayv-field">{{librariesreviewsign}} <select name="reviewsign">{{#reviewsigns}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/reviewsigns}}</select></label>
-            <label class="ayv-field">{{librarieshistory}} <span class="ayv-field-hint">{{librarieshistoryhint}}</span> <select name="historyyears">{{#historyyears}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/historyyears}}</select></label>
-            {{#haschallenges}}<fieldset class="ayv-fieldset"><legend>{{librarieschallenges}}</legend>
-                <p class="ayv-field-hint">{{librarieschallengeshint}}</p>
-                <div class="ayv-choices">{{#challengestages}}<label class="ayv-field ayv-field-check"><input type="hidden" name="challengestage[]" value="{{stage}}"><input type="checkbox" name="challengeon[]" value="{{stage}}" {{#on}}checked{{/on}}> {{stage}}</label>{{/challengestages}}</div>
-            </fieldset>{{/haschallenges}}
             {{#planform}}
             <fieldset class="ayv-fieldset"><legend>{{librariesplan}}</legend>
                 <p class="ayv-field-hint">{{librariesplanhint}}</p>
