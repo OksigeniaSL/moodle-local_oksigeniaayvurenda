@@ -4,3 +4,5 @@
 844d3451002b66df2b7f0f3f2efe6b38e0b74625:tests/core/s3_test.php:aws-access-token:57
 # The signature of the OAuth 1.0a test vector in the OneRoster tests, computed from made-up values: not a key.
 8cf50fa01f9bc448d8594e18c651e442a871f59a:tests/core/readers/oneroster_rest_test.php:generic-api-key:118
+# The made-up first password in the example of the sheet of passwords (templates/entries.mustache): not a password.
+7f824ccda9914cf2eaf23624c317244e8a0a40d0:templates/entries.mustache:generic-api-key:30
