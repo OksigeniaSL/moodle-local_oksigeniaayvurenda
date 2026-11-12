@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.236.0 (2026-11-12)
+
+The mediums of the review of 12 November.
+
+- Notices of late books do not go on a day the library is closed (Christmas, a strike), and the days it was closed after
+  a book was due are not days late, for the reader nor in the tutor's summary, as when the book is given back.
+- A reader whose notice fails (a messenger down, a family's address) no longer leaves the readers after them untold, and
+  is not told again every morning because their family's message failed.
+- Lent, renewed, given back or lost at another library's desk, a copy follows the rules of its own library: a classroom's
+  days, a textbook of the bank until the round ends and never a fine, the limits of its own rules.
+- A reservation put off («Not yet») that comes back gets the copy that is free on the shelf at once, also when its days
+  end on their own at night.
+- Forgetting a reader's old history no longer counts them twice in that year's groups and stages.
+- The first passwords of «Give them their way in» are two words and four figures («Faro-Tigre-4821»), some 37 million
+  instead of 216,000; unused for three weeks, they lapse, and the reader can be given their way in again from their card
+  (or with the class). The sheet with the passwords is not kept by the browser.
+- The moments of the library are kept apart in each language: a reader in French no longer read Spanish dates and lists.
+- The notice to a family of a late book no longer leads to a page where the adult can do nothing: the message says the
+  books and their dates, and the way to the library goes only to an adult who reads there too.
+- A control character in a title no longer makes a whole page of OAI-PMH, SRU, OPDS or a MARCXML export unreadable.
+- Copies brought by an import no longer count as catalogued by hand today.
+- A subject with ñ is not joined with the one without it («Año» and «Ano»), nor are subjects in alphabets whose marks
+  make other words; joining or renaming subjects changes their records' date for harvesters.
+- A file whose review counted more than 10,000 records goes to the background however small it is (a zip), and its
+  letters are guessed from its first 4 MB.
+- The suggestions while typing a class or a subject go through the subjects already normalised and kept: a word that
+  matched nothing took over a second with a university's subjects.
+- The latest arrivals and the count of new books are kept for some minutes and gone when the catalogue changes; the
+  panel of /my, the door and the window no longer go through every copy on each visit. The memory's door looks at a few
+  thousand books of a subject at most.
+- A search goes through the catalogue once when its results fit among the candidates (the usual), not twice.
+- «Duplicate records»: each record says whether it goes into the join («Same book»); an edition with another ISBN comes
+  unticked, so two editions are not joined without saying so.
+
 ## 0.235.0 (2026-11-12)
 
 The highs of the review of 12 November: a big catalogue (a university's, hundreds of thousands of records) and the desk.

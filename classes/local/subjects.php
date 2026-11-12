@@ -37,12 +37,22 @@ final class subjects {
 
     /**
      * The key of a subject: without capitals or accents, each word in the singular («Misterios» and «misterio» give the
-     * same). Simple and on purpose: it only decides when two labels are one subject.
+     * same), but the ñ is not an n, and the marks of other alphabets stay. Simple and on purpose: it only decides when two
+     * labels are one subject.
      *
      * @param string $label
      * @return string
      */
     public static function key(string $label): string {
+        if (class_exists(\Normalizer::class)) {
+            $label = (string) \Normalizer::normalize($label, \Normalizer::FORM_C);
+        }
+        // In alphabets whose marks make other words (Thai, Devanagari), the marks stay: only capitals and punctuation go.
+        if (preg_match('/[^\p{Latin}\p{Common}\p{Inherited}]/u', $label)) {
+            return trim(preg_replace('/[^\p{L}\p{M}\p{N}]+/u', ' ', mb_strtolower($label, 'UTF-8')));
+        }
+        // The ñ is a letter of its own, not an n with an accent: «Año» is not «Ano», nor «Peña» «Pena».
+        $label = str_replace(['ñ', 'Ñ'], 'nqq', $label);
         $words = [];
         foreach (text::words($label) as $word) {
             if (strlen($word) > 4 && str_ends_with($word, 'es') && strpbrk(substr($word, -3, 1), 'lrndzj') !== false) {
@@ -78,6 +88,7 @@ final class subjects {
         $keys = self::keys($entityid);
         $keys[self::key($label)] = $id;
         \cache::make('local_oksigeniaayvurenda', 'access')->set('subjects_' . $entityid, $keys);
+        self::forget($entityid);
     }
 
     /**
@@ -93,36 +104,96 @@ final class subjects {
         if (!$words) {
             return [];
         }
-        $all = self::all($entityid);
-        $starts = [];
-        $near = [];
-        foreach ($all as $subject) {
-            $own = text::words($subject['label']);
-            $every = true;
-            $close = true;
-            foreach ($words as $word) {
-                $hit = false;
-                $almost = false;
-                foreach ($own as $theirs) {
-                    if (str_starts_with($theirs, $word)) {
-                        $hit = true;
-                        break;
-                    }
-                    // Only suggestions: what text::near takes for a typo (two letters in a long word) may come up.
-                    $almost = $almost || text::near($word, $theirs) !== null;
-                }
-                $every = $every && $hit;
-                $close = $close && ($hit || $almost);
-            }
-            if ($every) {
-                $starts[] = $subject;
-            } else if ($close) {
-                $near[] = $subject;
+        $index = self::index($entityid);
+        // First what starts like it, which is quick; only when nothing does, the near ones, among the most used: a word
+        // that matched nothing went through every subject with the typo check, over a second a key with a university's.
+        $found = [];
+        foreach ($index as [$id, $label, $count, $normal]) {
+            if (self::starts($words, $normal)) {
+                $found[] = ['id' => $id, 'label' => $label, 'count' => $count];
             }
         }
-        $found = $starts ?: $near;
+        if (!$found) {
+            foreach (array_slice($index, 0, self::NEAREST) as [$id, $label, $count, $normal]) {
+                if (self::close($words, explode(' ', $normal))) {
+                    $found[] = ['id' => $id, 'label' => $label, 'count' => $count];
+                }
+            }
+        }
         usort($found, fn($a, $b) => [-$a['count'], $a['label']] <=> [-$b['count'], $b['label']]);
         return array_slice($found, 0, $limit);
+    }
+
+    /** @var int The most used subjects a typo is looked for among. */
+    private const NEAREST = 20000;
+
+    /**
+     * Whether each word typed starts a word of a subject.
+     *
+     * @param string[] $words Normalised.
+     * @param string $normal The subject, normalised.
+     * @return bool
+     */
+    public static function starts(array $words, string $normal): bool {
+        foreach ($words as $word) {
+            if (!str_contains(' ' . $normal, ' ' . $word)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Whether each word typed starts a word of a subject or is a typo away from one.
+     *
+     * @param string[] $words Normalised.
+     * @param string[] $own The subject's words.
+     * @return bool
+     */
+    private static function close(array $words, array $own): bool {
+        foreach ($words as $word) {
+            $hit = false;
+            foreach ($own as $theirs) {
+                // Only suggestions: what text::near takes for a typo (two letters in a long word) may come up.
+                if (str_starts_with($theirs, $word) || text::near($word, $theirs) !== null) {
+                    $hit = true;
+                    break;
+                }
+            }
+            if (!$hit) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * The subjects of a centre, the most used first, each with its words normalised, kept until the catalogue changes:
+     * what the suggestions go through at each key.
+     *
+     * @param int $entityid
+     * @return array[] [id, label, count, normalised].
+     */
+    public static function index(int $entityid): array {
+        $cache = \cache::make('local_oksigeniaayvurenda', 'vocabulary');
+        $index = $cache->get('subjects' . $entityid);
+        if ($index === false) {
+            $index = array_map(
+                fn($subject) => [$subject['id'], $subject['label'], $subject['count'], text::normalise($subject['label'])],
+                self::all($entityid)
+            );
+            $cache->set('subjects' . $entityid, $index);
+        }
+        return $index;
+    }
+
+    /**
+     * The subjects changed: the suggestions read them again.
+     *
+     * @param int $entityid
+     */
+    public static function forget(int $entityid): void {
+        \cache::make('local_oksigeniaayvurenda', 'vocabulary')->delete('subjects' . $entityid);
     }
 
     /**
@@ -299,6 +370,7 @@ final class subjects {
         self::reword($records);
         $transaction->allow_commit();
         \cache::make('local_oksigeniaayvurenda', 'access')->delete('subjects_' . $entityid);
+        self::forget($entityid);
         catalogue::purge($entityid);
         return count($records);
     }
@@ -332,6 +404,7 @@ final class subjects {
             [$id]
         )));
         \cache::make('local_oksigeniaayvurenda', 'access')->delete('subjects_' . $entityid);
+        self::forget($entityid);
         catalogue::purge($entityid);
         return $id;
     }
@@ -344,8 +417,11 @@ final class subjects {
     private static function reword(array $recordids): void {
         global $DB;
         foreach (array_chunk($recordids, 500) as $chunk) {
+            // The record changed too: a harvest asking since a date (OAI-PMH) sees its new subjects.
+            $now = time();
             foreach ($DB->get_records_list(self::T . 'record', 'id', $chunk, '', 'id, title, subtitle') as $record) {
-                $DB->set_field(self::T . 'record', 'searchtext', corrections::words($record), ['id' => $record->id]);
+                $DB->update_record(self::T . 'record', (object) ['id' => $record->id, 'searchtext' => corrections::words($record),
+                    'timemodified' => $now]);
             }
         }
     }

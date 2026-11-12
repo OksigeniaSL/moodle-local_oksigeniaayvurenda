@@ -174,9 +174,18 @@ final class catalogue {
         }
         $normalquery = implode(' ', $words);
         $where = 'r.entityid = :entityid AND ' . implode(' AND ', $conditions);
-        $count = $DB->count_records_sql('SELECT COUNT(1) FROM {' . self::T . 'record} r WHERE ' . $where, $params);
+        // One pass when they fit among the candidates, which is the usual: the count and the candidates were two passes over
+        // the catalogue for every search. Only with more, the count and the candidates in order.
+        $records = $DB->get_records_sql(
+            'SELECT r.id, r.title, r.subtitle FROM {' . self::T . 'record} r WHERE ' . $where,
+            $params,
+            0,
+            self::CANDIDATES + 1
+        );
+        $count = count($records);
         $order = '';
         if ($count > self::CANDIDATES) {
+            $count = $DB->count_records_sql('SELECT COUNT(1) FROM {' . self::T . 'record} r WHERE ' . $where, $params);
             // More than are scored: those whose title starts with what was typed (with or without its article) come into
             // the candidates first; the search text begins with the title.
             $cases = [];
@@ -185,15 +194,15 @@ final class catalogue {
                 $params['lead' . $i] = $article . $DB->sql_like_escape($normalquery) . '%';
             }
             $order = ' ORDER BY CASE ' . implode(' ', $cases) . ' ELSE 1 END, r.id';
+            $records = $DB->get_records_sql(
+                'SELECT r.id, r.title, r.subtitle
+                   FROM {' . self::T . 'record} r
+                  WHERE ' . $where . $order,
+                $params,
+                0,
+                self::CANDIDATES
+            );
         }
-        $records = $DB->get_records_sql(
-            'SELECT r.id, r.title, r.subtitle
-               FROM {' . self::T . 'record} r
-              WHERE ' . $where . $order,
-            $params,
-            0,
-            self::CANDIDATES
-        );
         $scored = [];
         foreach ($records as $record) {
             $title = ' ' . text::normalise($record->title . ' ' . $record->subtitle) . ' ';
@@ -573,16 +582,25 @@ final class catalogue {
                 self::class_condition('a.code', $corner, 'code')[0] . ')';
             $params += ['entityid' => $library->entityid] + self::class_condition('a.code', $corner, 'code')[1];
         }
-        $latest = $DB->get_records_sql(
-            'SELECT i.recordid, MAX(COALESCE(i.timeacquired, i.timecreated)) AS acquired
-               FROM {' . self::T . 'item} i
-              WHERE i.libraryid = :libraryid' . $where . '
-           GROUP BY i.recordid
-           ORDER BY acquired DESC, i.recordid DESC',
-            $params,
-            0,
-            $limit
-        );
+        // It groups every copy of the library: kept for some minutes, and gone when the catalogue changes (the panel of /my,
+        // the door, the window and the frame all ask for it).
+        $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
+        $kept = $cache->get('recent_' . $library->id) ?: [];
+        $variant = $limit . '|' . $corner;
+        if (!isset($kept[$variant])) {
+            $kept[$variant] = array_map('intval', array_keys($DB->get_records_sql(
+                'SELECT i.recordid, MAX(COALESCE(i.timeacquired, i.timecreated)) AS acquired
+                   FROM {' . self::T . 'item} i
+                  WHERE i.libraryid = :libraryid' . $where . '
+               GROUP BY i.recordid
+               ORDER BY acquired DESC, i.recordid DESC',
+                $params,
+                0,
+                $limit
+            )));
+            $cache->set('recent_' . $library->id, $kept);
+        }
+        $latest = array_flip($kept[$variant]);
         if (!$latest) {
             return [];
         }
@@ -678,11 +696,14 @@ final class catalogue {
      * @param int $entityid
      */
     public static function purge(int $entityid): void {
-        \cache::make('local_oksigeniaayvurenda', 'vocabulary')->delete($entityid);
+        \cache::make('local_oksigeniaayvurenda', 'vocabulary')->delete_many([$entityid, 'subjects' . $entityid]);
         global $DB;
         $keys = [$entityid . '_reading', $entityid . '_bank'];
-        foreach ($DB->get_fieldset_select(self::T . 'library', 'id', 'entityid = ? AND parentid IS NOT NULL', [$entityid]) as $id) {
-            $keys[] = $entityid . '_reading_' . $id;
+        foreach ($DB->get_records(self::T . 'library', ['entityid' => $entityid], '', 'id, parentid') as $id => $one) {
+            if (!empty($one->parentid)) {
+                $keys[] = $entityid . '_reading_' . $id;
+            }
+            $keys[] = 'recent_' . $id;
         }
         \cache::make('local_oksigeniaayvurenda', 'corners')->delete_many($keys);
     }

@@ -82,7 +82,7 @@ final class sru {
             self::explain($xml, $library, $operation !== '' && $operation !== 'explain');
         }
         $xml->endDocument();
-        return $xml->outputMemory();
+        return text::xmlsafe($xml->outputMemory());
     }
 
     /**
@@ -370,7 +370,7 @@ final class sru {
             $xml->writeElementNs('dc', 'language', null, $record->lang);
         }
         $xml->endElement();
-        return $xml->outputMemory();
+        return text::xmlsafe($xml->outputMemory());
     }
 
     /**

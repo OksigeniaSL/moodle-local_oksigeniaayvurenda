@@ -80,6 +80,10 @@ final class forgetting_test extends \advanced_testcase {
         // The year's figures stay: as many readers as before, in the same group and stage.
         $this->assertSame($before, $DB->count_records_sql('SELECT COUNT(DISTINCT readerid) FROM {' . self::T . 'loan}
             WHERE yearid = ?', [$years[3]->id]));
+        // Each reader counts once in the year's numbers: the stand-in keeps the loans in the group, not one more in it.
+        $summary = year_change::summary($years[3]);
+        $this->assertSame(2, $summary['members']);
+        $this->assertSame(2, $summary['borrowers']);
         $standins = $DB->get_records_select(self::T . 'reader', "entityid = ? AND cardcode LIKE 'past-%'", [$entityid]);
         $this->assertCount(4, $standins);
         foreach ($standins as $standin) {

@@ -201,7 +201,8 @@ final class memoir {
     private static function stages(\stdClass $year): array {
         global $DB;
         $rows = $DB->get_records_sql(
-            "SELECT COALESCE(m.stage, '') AS stage, COUNT(DISTINCT m.readerid) AS readers,
+            "SELECT COALESCE(m.stage, '') AS stage,
+                    COUNT(DISTINCT CASE WHEN m.source IS NULL OR m.source <> 'past' THEN m.readerid END) AS readers,
                     COUNT(DISTINCT l.readerid) AS borrowers, COUNT(l.id) AS loans
                FROM {" . self::T . "member} m
           LEFT JOIN {" . self::T . "loan} l ON l.readerid = m.readerid AND l.yearid = m.yearid

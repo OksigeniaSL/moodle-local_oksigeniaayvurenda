@@ -53,6 +53,11 @@ final class subjects_test extends \advanced_testcase {
         $this->assertSame(subjects::key('Animales'), subjects::key('animal'));
         $this->assertSame(subjects::key('Ciencias naturales'), subjects::key('ciencia natural'));
         $this->assertNotSame(subjects::key('Misterio'), subjects::key('Historia'));
+        // Other letters are other words: the ñ, and the marks of other alphabets.
+        $this->assertNotSame(subjects::key('Año'), subjects::key('Ano'));
+        $this->assertNotSame(subjects::key('Peña'), subjects::key('Pena'));
+        $this->assertSame(subjects::key('Años'), subjects::key('año'));
+        $this->assertNotSame(subjects::key('ปู่'), subjects::key('ปู'));
         $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
         $one = $this->book($library, 'El faro dormido', ['Misterio', 'Aventuras']);
         $two = $this->book($library, 'La isla', ['misterios', 'aventura']);

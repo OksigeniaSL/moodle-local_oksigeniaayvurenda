@@ -198,6 +198,26 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * The days the library was closed after a book was due are not days late: past the days of grace counting them, the
+     * reader is not told yet.
+     */
+    public function test_closed_days_are_not_late(): void {
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, , $now] = $this->library();
+        $entityid = (int) $library->entityid;
+        sanctions::save_settings($entityid, ['noticeafter' => 7, 'noticetutors' => 0]);
+        $tz = zones::of($entityid);
+        $day = fn(int $time) => (new \DateTimeImmutable('@' . $time))->setTimezone($tz)->format('Y-m-d');
+        $this->assertTrue(closures::add($entityid, $day($now - 20 * DAYSECS), $day($now + 3 * DAYSECS), 'Vacaciones'));
+        $sink = $this->redirectMessages();
+        $this->assertSame(0, notices::run($now + 4 * DAYSECS)['readers']);
+        closures::remove($entityid, $day($now - 20 * DAYSECS), $day($now + 3 * DAYSECS));
+        $this->assertSame(1, notices::run($now + 4 * DAYSECS)['readers']);
+        $sink->close();
+    }
+
+    /**
      * The week counts by reader: two books late three days apart are one message with what is late, none three days
      * later, and one a week later with both; a reader who stopped coming but has books hears too.
      */
@@ -260,8 +280,12 @@ final class notices_test extends \advanced_testcase {
         $tomother = array_values(array_filter($messages->get_messages(), fn($m) => (int) $m->useridto === (int) $mother->id));
         $this->assertCount(1, $tomother);
         $this->assertStringContainsString('El faro dormido', $tomother[0]->fullmessage);
+        // Not a reader herself: no way to the library's pages, where she would only read «you are not a reader».
+        $this->assertEmpty($tomother[0]->contexturl);
+        $this->assertStringNotContainsString('index.php', $tomother[0]->fullmessagehtml);
         $toivan = array_values(array_filter($emails->get_messages(), fn($m) => $m->to === 'ivan.familia@example.org'));
         $this->assertCount(1, $toivan);
+        $this->assertStringNotContainsString('index.php', $toivan[0]->body);
         $messages->close();
         $emails->close();
     }

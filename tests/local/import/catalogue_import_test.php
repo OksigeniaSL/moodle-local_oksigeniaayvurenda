@@ -166,6 +166,8 @@ final class catalogue_import_test extends \advanced_testcase {
         $this->assertSame(0, $again['items']);
         $this->assertSame(2, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
         $this->assertSame(2, $DB->count_records(self::T . 'item', ['libraryid' => $library->id]));
+        // Imported, not catalogued by hand today.
+        $this->assertSame(0, \local_oksigeniaayvurenda\local\catalogued::today($library));
     }
 
     /**

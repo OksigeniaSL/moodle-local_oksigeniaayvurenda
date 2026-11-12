@@ -89,8 +89,8 @@ final class zones {
 
     /**
      * The centres whose morning it is, for what the night leaves to tell: from 8 to 20 in the centre's zone, once a day
-     * (a cron that missed eight o'clock tells at nine); the notices of late books, only on weekdays. Practice libraries
-     * tell nobody.
+     * (a cron that missed eight o'clock tells at nine); the notices of late books, only on the days the library opens (not
+     * on its days of rest, nor on a day it is closed: Christmas, a strike). Practice libraries tell nobody.
      *
      * @param int $now
      * @param bool $weekdays Only on the days the centre's libraries open (not Saturday or Sunday, unless it says others).
@@ -105,7 +105,7 @@ final class zones {
             $hour = (int) $local->format('G');
             if (
                 ($weekdays && in_array((int) $local->format('N'), self::rest_days($id), true)) || $hour < 8 || $hour >= 20
-                    || practice::is($id)
+                    || practice::is($id) || ($weekdays && isset(closures::days($id, $now)[$local->format('Y-m-d')]))
             ) {
                 continue;
             }

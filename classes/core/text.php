@@ -52,6 +52,18 @@ final class text {
     }
 
     /**
+     * XML as it can be read: without the control characters XML 1.0 does not allow, which a record may carry (from a
+     * spreadsheet, an old MARC badly converted, or typed) and which XMLWriter and DOM write as they are. One of them made a
+     * whole page of a harvest unreadable.
+     *
+     * @param string $xml
+     * @return string
+     */
+    public static function xmlsafe(string $xml): string {
+        return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $xml);
+    }
+
+    /**
      * Lower case, without accents, with single spaces and no punctuation.
      *
      * @param string $text

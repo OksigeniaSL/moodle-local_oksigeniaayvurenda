@@ -79,6 +79,9 @@ final class catalogue_import {
     /** @var array<int, bool> Records made by this import: a copy of one of those does not change its date again. */
     private array $fresh = [];
 
+    /** @var int[] Copies this batch brought, to note where they came from when it is written. */
+    private array $made = [];
+
     /** @var int[] The last copy, record and source read: what others write meanwhile is read on top, batch by batch. */
     private array $last = ['item' => 0, 'record' => 0, 'source' => 0];
 
@@ -275,6 +278,7 @@ final class catalogue_import {
                 $this->item($recordid, $item, $letter, $now);
             }
             if (++$batch % self::BATCH === 0 || time() - $since >= self::BATCHTIME) {
+                $this->note_made($now);
                 $transaction->allow_commit();
                 if (!$whole) {
                     $lock->release();
@@ -290,7 +294,25 @@ final class catalogue_import {
                 $since = time();
             }
         }
+        $this->note_made($now);
         $transaction->allow_commit();
+    }
+
+    /**
+     * Notes where the copies of the batch came from: a copy with no origin is one added by hand, and an import of a
+     * university's catalogue counted as hundreds of thousands catalogued by hand today, and as news.
+     *
+     * @param int $now
+     */
+    private function note_made(int $now): void {
+        global $DB;
+        if (!$this->made) {
+            return;
+        }
+        $DB->insert_records(self::T . 'source', array_map(fn($id) => ['entityid' => $this->library->entityid,
+            'origin' => $this->system, 'tablename' => 'item', 'externalid' => 'item-' . $id, 'localid' => $id,
+            'timecreated' => $now], $this->made));
+        $this->made = [];
     }
 
     /**
@@ -351,7 +373,7 @@ final class catalogue_import {
         // whole catalogue this year's acquisitions.
         $acquired = !empty($item['acquired']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $item['acquired'], $d)
             ? make_timestamp((int) $d[1], (int) $d[2], (int) $d[3]) : null;
-        $DB->insert_record(self::T . 'item', [
+        $this->made[] = (int) $DB->insert_record(self::T . 'item', [
             'entityid' => $this->library->entityid,
             'libraryid' => $this->library->id,
             'recordid' => $recordid,

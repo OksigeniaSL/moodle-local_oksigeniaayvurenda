@@ -183,23 +183,16 @@ final class classify {
      */
     private static function learned(int $entityid, array $words): array {
         global $DB;
+        // The subjects, normalised once and kept: each key went through all of them with the typo check.
         $subjects = [];
-        $rows = $DB->get_recordset_select(
-            self::T . 'authority',
-            "entityid = :entityid AND kind = 'subject'",
-            ['entityid' => $entityid],
-            '',
-            'id, label'
-        );
-        foreach ($rows as $row) {
-            if (self::fits($words, (string) $row->label) === 0) {
-                $subjects[] = (int) $row->id;
+        foreach (subjects::index($entityid) as [$id, , , $normal]) {
+            if (subjects::starts($words, $normal)) {
+                $subjects[] = (int) $id;
                 if (count($subjects) >= 40) {
                     break;
                 }
             }
         }
-        $rows->close();
         if (!$subjects) {
             return [];
         }

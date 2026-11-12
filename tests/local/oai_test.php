@@ -158,6 +158,12 @@ final class oai_test extends \advanced_testcase {
             fn($n) => $n->textContent,
             iterator_to_array($changed->query('//o:header/o:identifier'))
         ));
+        // A control character in a title (from a spreadsheet, an old MARC) does not make the answer unreadable.
+        $odd = $gen->create_record(['entityid' => $library->entityid, 'title' => "Libro \x1Bcon \x0Bcontrol"]);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $odd->id]);
+        foreach (['oai_dc', 'marc21'] as $prefix) {
+            $ask(['verb' => 'GetRecord', 'identifier' => oai::identifier($library, (int) $odd->id), 'metadataPrefix' => $prefix]);
+        }
         // In MARC 21, with its copy here and no code.
         $id = oai::identifier($library, (int) $DB->get_field('local_oksigeniaayvurenda_record', 'id', ['title' => 'Libro 5']));
         $marc = $ask(['verb' => 'GetRecord', 'identifier' => $id, 'metadataPrefix' => 'marc21']);

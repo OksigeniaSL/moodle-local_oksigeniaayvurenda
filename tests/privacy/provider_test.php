@@ -85,7 +85,7 @@ final class provider_test extends provider_testcase {
      */
     public function test_metadata(): void {
         $items = provider::get_metadata(new collection('local_oksigeniaayvurenda'))->get_collection();
-        $this->assertCount(41, $items);
+        $this->assertCount(42, $items);
     }
 
     /**

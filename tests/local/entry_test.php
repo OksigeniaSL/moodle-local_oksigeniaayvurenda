@@ -60,13 +60,29 @@ final class entry_test extends \advanced_testcase {
         $sink->clear();
         $given = entry::give($without);
         $this->assertSame('sheet', $given['state']);
-        $this->assertMatchesRegularExpression('/^[A-Z][a-z]+-\d{4}$/', $given['password']);
+        $this->assertMatchesRegularExpression('/^[A-Z][a-z]+-[A-Z][a-z]+-\d{4}$/', $given['password']);
         $this->assertCount(0, $sink->get_messages());
         $user = \core_user::get_user((int) $DB->get_field(self::T . 'reader', 'userid', ['id' => $without->id]));
         $this->assertStringEndsWith('@' . applink::NOMAIL, $user->email);
         $this->assertSame('10002', $user->lastname);
         $this->assertFalse(user_not_fully_set_up($user, false));
         $this->assertTrue(validate_internal_user_password($user, $given['password']));
+        // Given again while never used (the sheet was lost): a new first password, and the one before no longer opens it.
+        $first = $given['password'];
+        $again = entry::give($DB->get_record(self::T . 'reader', ['id' => $without->id]));
+        $this->assertSame('sheet', $again['state']);
+        $user = \core_user::get_user($user->id);
+        $this->assertFalse(validate_internal_user_password($user, $first));
+        $this->assertTrue(validate_internal_user_password($user, $again['password']));
+        // Unused past its days, it lapses: nobody can open the account with it, and it can be given again.
+        set_user_preference(entry::GIVEN, time() - (entry::DAYS + 1) * DAYSECS, $user->id);
+        $this->assertSame(1, entry::lapse(time()));
+        $this->assertFalse(validate_internal_user_password(\core_user::get_user($user->id), $again['password']));
+        $this->assertSame('0', get_user_preferences(entry::GIVEN, null, $user->id));
+        $this->assertSame(0, entry::lapse(time()));
+        $this->assertTrue(entry::may($DB->get_record(self::T . 'reader', ['id' => $without->id])));
+        // Once used, it is theirs: nothing more is given.
+        $DB->set_field('user', 'lastlogin', time(), ['id' => $user->id]);
         $this->assertSame('none', entry::give($DB->get_record(self::T . 'reader', ['id' => $without->id]))['state']);
 
         $twin = $gen->create_reader(['entityid' => $entityid, 'firstname' => 'Eva', 'lastname' => 'Ríos',

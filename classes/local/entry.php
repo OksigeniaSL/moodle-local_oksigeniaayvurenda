@@ -31,9 +31,18 @@ namespace local_oksigeniaayvurenda\local;
  * The password is never kept: whoever gives it sees it once.
  */
 final class entry {
-    /** @var string[] What a first password starts with: plain words, for any age, the same in Spanish and in English. */
+    /** @var string[] The words of a first password: plain, for any age, easy to read aloud and to type (no accents). */
     private const WORDS = ['Faro', 'Luna', 'Nube', 'Lobo', 'Kiwi', 'Koala', 'Panda', 'Mango', 'Pino', 'Isla', 'Rayo', 'Duna',
-        'Lince', 'Puma', 'Nido', 'Brisa', 'Lago', 'Atlas', 'Cometa', 'Mapa', 'Globo', 'Ancla', 'Tinta', 'Libro'];
+        'Lince', 'Puma', 'Nido', 'Brisa', 'Lago', 'Atlas', 'Cometa', 'Mapa', 'Globo', 'Ancla', 'Tinta', 'Libro', 'Radio',
+        'Piano', 'Robot', 'Tango', 'Llama', 'Oso', 'Gato', 'Tigre', 'Delfin', 'Rana', 'Cebra', 'Hiena', 'Coco', 'Lima', 'Uva',
+        'Cacao', 'Vela', 'Barco', 'Tren', 'Taxi', 'Bote', 'Cohete', 'Volcan', 'Selva', 'Rio', 'Monte', 'Valle', 'Playa',
+        'Arena', 'Estrella', 'Sol', 'Planeta', 'Bosque', 'Hoja', 'Flor', 'Roca', 'Trueno', 'Grillo', 'Ardilla', 'Buho'];
+
+    /** @var string When a first password was given (0 once it lapsed unused), on the account, until it is first used. */
+    public const GIVEN = 'local_oksigeniaayvurenda_firstentry';
+
+    /** @var int Days a first password lasts if nobody uses it: a sheet forgotten in a drawer does not open the account. */
+    public const DAYS = 21;
 
     /**
      * Whether a reader can be given their way in: active, with no account, and whoever asks may make one (on a site of
@@ -43,7 +52,7 @@ final class entry {
      * @return bool
      */
     public static function may(\stdClass $reader): bool {
-        if ($reader->status !== 'active' || !empty($reader->userid)) {
+        if ($reader->status !== 'active' || (!empty($reader->userid) && !self::again($reader))) {
             return false;
         }
         return has_capability('moodle/user:create', \context_system::instance())
@@ -51,13 +60,62 @@ final class entry {
     }
 
     /**
-     * A first password easy to read aloud and to type: a word, a dash and four figures («Faro-4821»), which meets the
-     * usual rules of Moodle (a capital, a small letter, a figure and a sign).
+     * Whether a reader with an account can be given their way in again: an account made here that was never used (its
+     * first password lapsed, or the sheet was lost).
+     *
+     * @param \stdClass $reader
+     * @param bool $lapsed Only when the first password lapsed.
+     * @return bool
+     */
+    private static function again(\stdClass $reader, bool $lapsed = false): bool {
+        global $DB;
+        $user = $DB->get_record('user', ['id' => $reader->userid, 'deleted' => 0], 'id, auth, lastlogin');
+        if (!$user || $user->auth !== 'manual' || (int) $user->lastlogin !== 0) {
+            return false;
+        }
+        $given = get_user_preferences(self::GIVEN, null, (int) $user->id);
+        return $given !== null && (!$lapsed || (int) $given === 0);
+    }
+
+    /**
+     * A first password easy to read aloud and to type: two words, a dash between them and four figures
+     * («Faro-Tigre-4821»), which meets the usual rules of Moodle (a capital, a small letter, a figure and a sign). One
+     * word and four figures could be guessed (216,000 tries); these are some 37 million, and they lapse.
      *
      * @return string
      */
     public static function password(): string {
-        return self::WORDS[random_int(0, count(self::WORDS) - 1)] . '-' . random_int(1000, 9999);
+        $pick = fn() => self::WORDS[random_int(0, count(self::WORDS) - 1)];
+        return $pick() . '-' . $pick() . '-' . random_int(1000, 9999);
+    }
+
+    /**
+     * The first passwords nobody used in their days are changed for one nobody knows: the reader is given their way in
+     * again from their card when they need it.
+     *
+     * @param int $now
+     * @return int How many lapsed.
+     */
+    public static function lapse(int $now): int {
+        global $DB;
+        $rows = $DB->get_records_sql(
+            "SELECT up.id, up.userid, up.value
+               FROM {user_preferences} up
+               JOIN {user} u ON u.id = up.userid
+              WHERE up.name = :given AND u.lastlogin = 0 AND u.deleted = 0 AND u.auth = 'manual'",
+            ['given' => self::GIVEN]
+        );
+        $lapsed = 0;
+        foreach ($rows as $row) {
+            if ((int) $row->value === 0 || (int) $row->value > $now - self::DAYS * DAYSECS) {
+                continue;
+            }
+            $user = \core_user::get_user((int) $row->userid, '*', MUST_EXIST);
+            update_internal_user_password($user, generate_password(32));
+            set_user_preference(self::GIVEN, 0, (int) $row->userid);
+            $lapsed++;
+        }
+        return $lapsed;
     }
 
     /**
@@ -73,13 +131,20 @@ final class entry {
         }
         $password = self::password();
         $email = applink::email($reader);
-        $userid = applink::account($reader, $password, true);
-        if (!$userid) {
-            return ['state' => 'taken'];
+        if (!empty($reader->userid)) {
+            // Again, for an account never used: a new first password, and the one before no longer opens it.
+            $userid = (int) $reader->userid;
+            update_internal_user_password(\core_user::get_user($userid, '*', MUST_EXIST), $password);
+        } else {
+            $userid = applink::account($reader, $password, true);
+            if (!$userid) {
+                return ['state' => 'taken'];
+            }
+            $reader->userid = $userid;
         }
-        $reader->userid = $userid;
-        // The first password is only for the first time.
+        // The first password is only for the first time, and only for some days.
         set_user_preference('auth_forcepasswordchange', 1, $userid);
+        set_user_preference(self::GIVEN, time(), $userid);
         $user = \core_user::get_user($userid, '*', MUST_EXIST);
         $mailed = $email !== '' && self::mail($reader, $user, $password);
         \local_oksigeniaayvurenda\event\entry_given::fire(
@@ -141,11 +206,14 @@ final class entry {
             "SELECT r.*
                FROM {local_oksigeniaayvurenda_reader} r
                JOIN {local_oksigeniaayvurenda_member} m ON m.readerid = r.id AND m.yearid = :yearid AND m.groupname = :groupname
-              WHERE r.entityid = :entityid AND r.userid IS NULL AND r.status = 'active'
+              WHERE r.entityid = :entityid AND r.status = 'active'
            ORDER BY r.lastname, r.firstname, r.id",
             ['yearid' => $year->id, 'groupname' => $group, 'entityid' => $library->entityid]
         );
-        return array_values(array_filter($readers, [self::class, 'may']));
+        // Those with no account, and those whose first password lapsed unused; not those still within its days, whose sheet
+        // may be in their hands.
+        return array_values(array_filter($readers, fn($reader) => (empty($reader->userid) || self::again($reader, true))
+            && self::may($reader)));
     }
 
     /**

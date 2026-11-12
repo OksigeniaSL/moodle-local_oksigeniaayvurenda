@@ -103,7 +103,7 @@ if (data_submitted() && confirm_sesskey()) {
             if (runner::running($library)) {
                 // One import at a time in a library: the other one is still going.
                 $data['error'] = $str('importstillrunning');
-            } else if ((int) @filesize($pending['path']) > runner::BACKGROUND) {
+            } else if (runner::too_big($pending)) {
                 // A big file does not fit in the page's time: it goes on apart, and a message says when it is done.
                 runner::queue($library, $pending, $options, (int) $USER->id);
                 $queued = true;
@@ -167,7 +167,9 @@ if ($pending) {
                 $look = preview::of(files::marc($pending['path'], $pending['kind'], $set));
                 $review['kind'] = $str($pending['kind'] === 'onix' ? 'importkindonix' : 'importkindmarc');
                 // Not in Unicode: the letters are guessed, and they can be read another way, seeing the books change.
-                $seen = $pending['kind'] === 'marc' ? charset::guess((string) file_get_contents($pending['path'])) : 'utf8';
+                // The letters are guessed from the start of the file: a university's MARC whole would not fit in memory.
+                $seen = $pending['kind'] === 'marc'
+                    ? charset::guess((string) file_get_contents($pending['path'], false, null, 0, 4 * 1024 * 1024)) : 'utf8';
                 if ($seen !== 'utf8' || $set !== charset::AUTO) {
                     $review['letters'] = ['options' => array_map(fn($code) => [
                         'value' => $code,
@@ -206,6 +208,8 @@ if ($pending) {
         }
         $data['review'] = $review;
         $data['upload'] = false;
+        // What the review counted decides whether it goes apart: a small zip may carry a big catalogue.
+        $SESSION->ayvurendaimport['records'] = (int) $look['records'];
     } catch (Throwable $e) {
         $data['error'] = $str('importfailed', $e->getMessage());
         @unlink($pending['path']);

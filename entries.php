@@ -105,4 +105,7 @@ if ($waiting && data_submitted() && confirm_sesskey()) {
     $data['notice'] = $str($readerid ? 'entryalready' : 'entrygroupnone');
 }
 $html = $OUTPUT->render_from_template('local_oksigeniaayvurenda/entries', $data);
+// A page with passwords on it is not kept by the browser of a shared desk computer.
+@header('Cache-Control: no-store, no-cache, must-revalidate');
+@header('Pragma: no-cache');
 shell::output($data['heading'], $html, $library, '', ['search' => false]);

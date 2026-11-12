@@ -283,7 +283,7 @@ final class holds {
         if ($item->itemtype === 'reference') {
             return null;
         }
-        $first = self::waiting((int) $item->libraryid, (int) $item->recordid)[0] ?? null;
+        $first = self::waiting((int) $item->libraryid, (int) $item->recordid, $now)[0] ?? null;
         if (!$first) {
             return null;
         }
@@ -651,17 +651,58 @@ final class holds {
      *
      * @param int $libraryid
      * @param int $recordid
+     * @param int|null $now
      * @return \stdClass[]
      */
-    private static function waiting(int $libraryid, int $recordid): array {
+    private static function waiting(int $libraryid, int $recordid, ?int $now = null): array {
         global $DB;
         // One put off («Not yet») keeps its place but is skipped, and nobody waits behind it meanwhile (MER-03).
         return hold_rules::queue(array_values($DB->get_records_select(
             self::T . 'hold',
             "libraryid = :libraryid AND recordid = :recordid AND status = 'waiting'
              AND (timesuspended IS NULL OR timesuspended <= :now)",
-            ['libraryid' => $libraryid, 'recordid' => $recordid, 'now' => time()]
+            ['libraryid' => $libraryid, 'recordid' => $recordid, 'now' => $now ?? time()]
         )));
+    }
+
+    /**
+     * A reservation back in the queue finds the copy that came back while it was put off: free on the shelf, it is set
+     * aside now (before, the reader read «you are first» with the book free on the shelf).
+     *
+     * @param \stdClass $hold
+     * @param int $now
+     * @return \stdClass|null The reservation the copy went to.
+     */
+    private static function wake(\stdClass $hold, int $now): ?\stdClass {
+        global $DB;
+        $item = $DB->get_record_select(
+            self::T . 'item',
+            "libraryid = :libraryid AND recordid = :recordid AND status = 'available' AND itemtype <> 'reference'",
+            ['libraryid' => $hold->libraryid, 'recordid' => $hold->recordid],
+            '*',
+            IGNORE_MULTIPLE
+        );
+        return $item && !reserves::active((int) $item->id, $now) ? self::place($item, $now) : null;
+    }
+
+    /**
+     * The reservations whose «Not yet» ended: back in the queue, and with the copy that is free, if there is one.
+     *
+     * @param int $now
+     * @return int How many came back.
+     */
+    public static function wake_due(int $now): int {
+        global $DB;
+        $back = $DB->get_records_select(
+            self::T . 'hold',
+            "status = 'waiting' AND timesuspended IS NOT NULL AND timesuspended <= :now",
+            ['now' => $now]
+        );
+        foreach ($back as $hold) {
+            $DB->set_field(self::T . 'hold', 'timesuspended', null, ['id' => $hold->id]);
+            self::wake($hold, $now);
+        }
+        return count($back);
     }
 
     /**
@@ -697,6 +738,7 @@ final class holds {
      */
     public static function resume(int $holdid, ?int $now = null): void {
         global $DB;
+        $now = $now ?? time();
         $DB->set_field_select(
             self::T . 'hold',
             'timesuspended',
@@ -704,7 +746,11 @@ final class holds {
             "id = :id AND status = 'waiting'",
             ['id' => $holdid]
         );
-        $DB->set_field(self::T . 'hold', 'timemodified', $now ?? time(), ['id' => $holdid]);
+        $DB->set_field(self::T . 'hold', 'timemodified', $now, ['id' => $holdid]);
+        $hold = $DB->get_record(self::T . 'hold', ['id' => $holdid, 'status' => 'waiting']);
+        if ($hold) {
+            self::wake($hold, $now);
+        }
     }
 
     /**

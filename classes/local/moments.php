@@ -67,12 +67,13 @@ class moments {
             return [];
         }
         $cache = \cache::make('local_oksigeniaayvurenda', 'moments');
-        // Once an hour is enough: a moment lasts a week.
-        $hour = intdiv($now, HOURSECS);
-        $found = $cache->get($entityid . '_' . $hour);
+        // Once an hour is enough: a moment lasts a week. In each language apart: its dates, figures and lists are written in
+        // the language of whoever asked, and a reader in French read them in Spanish.
+        $key = $entityid . '_' . intdiv($now, HOURSECS) . '_' . current_language();
+        $found = $cache->get($key);
         if ($found === false) {
             $found = self::find($entityid, $now);
-            $cache->set($entityid . '_' . $hour, $found);
+            $cache->set($key, $found);
         }
         $main = mail::main_library($entityid) ?? $library;
         $out = [];

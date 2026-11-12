@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace local_oksigeniaayvurenda\local;
-namespace local_oksigeniaayvurenda\local;
 
 /**
  * Each centre's day ends at its own midnight, wherever the site runs.
@@ -184,5 +183,9 @@ final class zones_test extends \advanced_testcase {
         $this->assertNotContains($w->entityid, zones::mornings($this->bogota('2026-11-14 08:30')));
         // What expires goes every day, Saturday too.
         $this->assertContains($w->entityid, zones::mornings($this->bogota('2026-11-14 08:30'), false));
+        // No notice of late books on a day the library is closed; what expires still goes.
+        closures::add($w->entityid, '2026-11-16', '2026-11-16', 'Cierre');
+        $this->assertNotContains($w->entityid, zones::mornings($this->bogota('2026-11-16 08:30')));
+        $this->assertContains($w->entityid, zones::mornings($this->bogota('2026-11-16 08:30'), false));
     }
 }

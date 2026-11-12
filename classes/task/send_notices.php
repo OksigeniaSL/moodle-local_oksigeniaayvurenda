@@ -52,6 +52,8 @@ class send_notices extends \core\task\scheduled_task {
         mtrace('Ayvurenda: centres whose morning it is: ' . json_encode(['weekdays' => $week, 'every day' => $every]));
         // Each step apart: one that fails does not stop the others, nor the other centres' notices.
         $steps = [
+            'reservations back from «Not yet»' => fn() => \local_oksigeniaayvurenda\local\holds::wake_due($now),
+            'first passwords nobody used' => fn() => \local_oksigeniaayvurenda\local\entry::lapse($now),
             'voices past the days the centre keeps them' => fn() => \local_oksigeniaayvurenda\local\voices::expire(),
             'voices of reviews past those days' => fn() => \local_oksigeniaayvurenda\local\reviews::expire_voices(),
         ];

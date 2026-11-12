@@ -95,7 +95,7 @@ final class notices {
             // centre gives are over too.
             $tz = zones::of($entityid);
             $at = notice_rules::moment($own, $told[$loan->readerid], $now, $tz);
-            if ($at !== null && loan_rules::days_late((int) $loan->timedue, $at, $tz) >= $own['noticeafter']) {
+            if ($at !== null && self::late_open($entityid, (int) $loan->timedue, $at, $tz) >= $own['noticeafter']) {
                 $byreader[$loan->readerid][] = $loan;
             }
         }
@@ -107,9 +107,45 @@ final class notices {
                 continue;
             }
             $own = $settings[$entityid];
-            $sent += self::tell_reader($list, $now, $own['noticereaders'], $own['noticefamilies']) ? 1 : 0;
+            // One reader whose message fails (a messenger down, a family's address) does not leave the rest untold.
+            try {
+                $sent += self::tell_reader($list, $now, $own['noticereaders'], $own['noticefamilies']) ? 1 : 0;
+            } catch (\Throwable $e) {
+                self::failed('reader ' . $list[0]->readerid, $e);
+            }
         }
         return $sent;
+    }
+
+    /**
+     * The days a book is late with the library open: the days it was closed after the book was due do not count, as
+     * when it is given back.
+     *
+     * @param int $entityid
+     * @param int $due
+     * @param int $at
+     * @param \DateTimeZone $tz
+     * @return int
+     */
+    private static function late_open(int $entityid, int $due, int $at, \DateTimeZone $tz): int {
+        $late = loan_rules::days_late($due, $at, $tz);
+        return $late > 0 ? max(0, $late - closures::between($entityid, $due, $at)) : $late;
+    }
+
+    /**
+     * Notes what failed, and lets the night go on.
+     *
+     * @param string $who
+     * @param \Throwable $e
+     */
+    private static function failed(string $who, \Throwable $e): void {
+        global $DB;
+        if ($DB->is_transaction_started()) {
+            $DB->force_transaction_rollback();
+        }
+        if (!PHPUNIT_TEST) {
+            mtrace('Ayvurenda: the notice to ' . $who . ' failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -154,13 +190,14 @@ final class notices {
             return false;
         }
         $told = $toreader && self::message_reader($user, $list, $now);
+        // Noted before the family hears: if that fails, the reader is not told again tomorrow and every morning after.
+        [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
+        $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
         // A young reader does not read these: their family hears it too, where the centre says so.
         $reader = $DB->get_record(self::T . 'reader', ['id' => $list[0]->readerid]);
         if ($tofamily && $reader && cards::look_of($reader, $now) === 'flower') {
             $told = self::tell_family($user, $list, (int) $list[0]->entityid) > 0 || $told;
         }
-        [$in, $params] = $DB->get_in_or_equal(array_map(fn($l) => (int) $l->id, $list));
-        $DB->set_field_select(self::T . 'loan', 'timenotified', $now, 'id ' . $in, $params);
         return $told;
     }
 
@@ -321,8 +358,18 @@ final class notices {
             ];
             $text = $hello . "\n\n" . $str($one ? 'noticefamilylead' : 'noticefamilyleadmany') . "\n" . $a->books . "\n\n"
                 . $str($one ? 'noticefamilyafter' : 'noticefamilyaftermany');
+            // The library's pages are for its readers: an adult who is not one found there (or in the app) only «you are not
+            // a reader», and without an account, Moodle's login. The message itself says the books and their dates; the
+            // way to the library goes only to an adult who reads there too.
+            $reads = $user && $DB->record_exists(self::T . 'reader', ['entityid' => $entityid, 'userid' => $user->id,
+                'status' => 'active']);
+            if (!$reads) {
+                $design['button'] = null;
+                $design['outsider'] = true;
+            }
             if ($user) {
-                $sent = self::send('overdue', $user, $subject, $text, $url, $a->library, $a->library, $design + ['prefs' => true]);
+                $sent = self::send('overdue', $user, $subject, $text, $reads ? $url : '', $a->library, $a->library, $design
+                    + ['prefs' => true]);
             } else {
                 $to = clone \core_user::get_noreply_user();
                 $to->email = $email;
@@ -364,7 +411,11 @@ final class notices {
             $at = $settings[$entityid]['noticetutors']
                 ? notice_rules::moment($settings[$entityid], (int) $tutor->timenotified, $now, zones::of($entityid)) : null;
             if ($at !== null) {
-                $sent += self::tell_tutor($tutor, $now, true, $at) ? 1 : 0;
+                try {
+                    $sent += self::tell_tutor($tutor, $now, true, $at) ? 1 : 0;
+                } catch (\Throwable $e) {
+                    self::failed('tutor ' . $tutor->id, $e);
+                }
             }
         }
         return $sent;
@@ -397,7 +448,7 @@ final class notices {
         );
         if ($patient) {
             $after = sanctions::settings($entityid)['noticeafter'];
-            $late = array_filter($late, fn($loan) => loan_rules::days_late((int) $loan->timedue, $at ?? $now, $tz) >= $after);
+            $late = array_filter($late, fn($loan) => self::late_open($entityid, (int) $loan->timedue, $at ?? $now, $tz) >= $after);
         }
         if (!$late) {
             return false;

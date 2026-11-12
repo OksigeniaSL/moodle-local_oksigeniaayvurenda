@@ -129,7 +129,7 @@ final class opds {
         }
         $xml->endElement();
         $xml->endDocument();
-        return $xml->outputMemory();
+        return \local_oksigeniaayvurenda\core\text::xmlsafe($xml->outputMemory());
     }
 
     /**
@@ -157,7 +157,7 @@ final class opds {
         $xml->endElement();
         $xml->endElement();
         $xml->endDocument();
-        return $xml->outputMemory();
+        return \local_oksigeniaayvurenda\core\text::xmlsafe($xml->outputMemory());
     }
 
     /**

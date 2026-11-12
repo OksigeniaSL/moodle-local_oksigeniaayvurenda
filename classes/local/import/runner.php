@@ -41,6 +41,20 @@ final class runner {
     /** @var int A file bigger than this goes to the background: some tens of thousands of records. */
     public const BACKGROUND = 8 * 1024 * 1024;
 
+    /** @var int A file with more records than this goes to the background too, however small (a zip). */
+    public const RECORDS = 10000;
+
+    /**
+     * Whether a reviewed file is too big for the page's time: by its size, or by the records the review counted (a zip
+     * of a few megabytes may carry seventy of XML).
+     *
+     * @param array $pending path, and records once reviewed.
+     * @return bool
+     */
+    public static function too_big(array $pending): bool {
+        return (int) @filesize($pending['path']) > self::BACKGROUND || (int) ($pending['records'] ?? 0) > self::RECORDS;
+    }
+
     /** @var int A background import with no sign of life for this long is taken as dead: the library can import again. */
     private const STALE = 6 * HOURSECS;
 

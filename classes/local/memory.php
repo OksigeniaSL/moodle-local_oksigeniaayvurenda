@@ -629,14 +629,17 @@ final class memory {
             $corners[(string) $known['code']] = $known['label'];
         }
         foreach (array_slice($from, 0, 5) as $note) {
-            $ids = $DB->get_fieldset_sql(
+            // A few thousand at most: a subject like «Novel» has tens of thousands of books, and only 500 are looked at.
+            $ids = array_keys($DB->get_records_sql(
                 "SELECT DISTINCT ra2.recordid
                    FROM {" . self::T . "recauth} ra
                    JOIN {" . self::T . "authority} a ON a.id = ra.authorityid AND a.kind IN ('author', 'subject')
                    JOIN {" . self::T . "recauth} ra2 ON ra2.authorityid = ra.authorityid
                   WHERE ra.recordid = :recordid AND ra2.recordid <> :other",
-                ['recordid' => $note->recordid, 'other' => $note->recordid]
-            );
+                ['recordid' => $note->recordid, 'other' => $note->recordid],
+                0,
+                2000
+            ));
             $ids = array_values(array_diff(array_map('intval', $ids), array_keys($read)));
             $ids = self::free($library, array_slice($ids, 0, 500));
             if (!$ids) {

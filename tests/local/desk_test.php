@@ -391,6 +391,26 @@ final class desk_test extends \advanced_testcase {
         $lent = $desk->scan('AULA1', (int) $w->leo->id);
         $this->assertSame('lent', $lent['kind']);
         $this->assertEquals($classroom->id, $DB->get_field(self::T . 'loan', 'libraryid', ['id' => $lent['loanid']]));
+
+        // Lent at the main desk, a copy follows the rules of its own library: a classroom's thirty days, and a textbook of
+        // the bank until the round ends, not the desk's seven.
+        $DB->delete_records(self::T . 'loan', ['readerid' => $w->leo->id]);
+        $DB->set_field(self::T . 'item', 'status', 'available', ['barcode' => 'AULA1']);
+        $DB->insert_record(self::T . 'rule', ['libraryid' => $classroom->id, 'readertype' => '*', 'itemtype' => '*',
+            'loandays' => 30, 'maxloans' => 5, 'renewals' => 2, 'renewdays' => 15, 'timecreated' => time(),
+            'timemodified' => time()]);
+        $lent = $desk->scan('AULA1', (int) $w->leo->id);
+        $this->assertSame('lent', $lent['kind']);
+        $due = (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $lent['loanid']]);
+        $this->assertGreaterThan(time() + 25 * DAYSECS, $due);
+        $gen->create_item(['libraryid' => $bank->id, 'barcode' => 'BANK2']);
+        $lent = $desk->scan('BANK2', (int) $w->leo->id);
+        $this->assertSame('lent', $lent['kind']);
+        $this->assertEqualsWithDelta(
+            bankround::due($bank, time()),
+            (int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $lent['loanid']]),
+            5
+        );
     }
 
     /**

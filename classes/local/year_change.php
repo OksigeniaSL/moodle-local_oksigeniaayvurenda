@@ -122,10 +122,11 @@ final class year_change {
         global $DB;
         // One library's (a classroom's, a department's), or the whole centre's.
         $here = $libraryid ? ' AND libraryid = ' . (int) $libraryid : '';
+        // The stand-in of a reader whose history was forgotten keeps their loans in their group, but is not one more in it.
         $members = $DB->get_records_sql(
-            'SELECT groupname, COUNT(1) AS members, MIN(stage) AS stage FROM {' . self::T . 'member}
-              WHERE yearid = :yearid AND groupname IS NOT NULL
-           GROUP BY groupname',
+            "SELECT groupname, COUNT(1) AS members, MIN(stage) AS stage FROM {" . self::T . "member}
+              WHERE yearid = :yearid AND groupname IS NOT NULL AND (source IS NULL OR source <> 'past')
+           GROUP BY groupname",
             ['yearid' => $year->id]
         );
         $loans = $DB->get_records_sql(

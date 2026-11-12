@@ -147,4 +147,16 @@ final class runner_test extends \advanced_testcase {
         $this->assertSame(0, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
         $this->assertSame([], glob(make_upload_directory('local_oksigeniaayvurenda/imports') . '/*'));
     }
+
+    /**
+     * A file goes apart when it is big, or when the review counted many records in it, however small (a zip).
+     */
+    public function test_too_big(): void {
+        $this->resetAfterTest();
+        $upload = $this->upload();
+        $this->assertFalse(runner::too_big($upload));
+        $this->assertTrue(runner::too_big($upload + ['records' => runner::RECORDS + 1]));
+        $this->assertFalse(runner::too_big($upload + ['records' => 30]));
+        @unlink($upload['path']);
+    }
 }

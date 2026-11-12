@@ -112,7 +112,7 @@ final class oai {
         }
         $xml->endElement();
         $xml->endDocument();
-        return $xml->outputMemory();
+        return \local_oksigeniaayvurenda\core\text::xmlsafe($xml->outputMemory());
     }
 
     /**

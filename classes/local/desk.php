@@ -83,6 +83,9 @@ final class desk {
     /** @var array|null The centre's closed days, once read. */
     private ?array $closeddays = null;
 
+    /** @var array<int, \stdClass> The libraries copies belong to, by id, once read. */
+    private array $homes = [];
+
     /**
      * The desk of a library.
      *
@@ -698,7 +701,14 @@ final class desk {
         $days = max(0, loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz)
             - closures::between((int) $this->library->entityid, (int) $loan->timedue, $this->now));
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
-        $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
+        $sanction = $reader ? sanctions::after_return(
+            $this->home((int) $item->libraryid),
+            $reader,
+            $loan,
+            $days,
+            $this->staffid,
+            $this->now
+        ) : null;
         $transaction->allow_commit();
         \local_oksigeniaayvurenda\event\book_lost::fire((int) $this->library->entityid, (int) $loan->id);
         $extra = ['loanid' => (int) $loan->id, 'readerid' => (int) $loan->readerid, 'sanction' => $sanction];
@@ -935,7 +945,7 @@ final class desk {
         $loan = $this->loan($loanid);
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid], '*', MUST_EXIST);
-        $rule = $this->rule($reader->readertype, $item->itemtype);
+        $rule = $this->rule($reader->readertype, $item->itemtype, $this->home((int) $item->libraryid));
         $byhand = $day !== '';
         $who = ['readerid' => (int) $reader->id];
         if (!$byhand && !loan_rules::can_renew($rule, (int) $loan->renewals)) {
@@ -1005,7 +1015,7 @@ final class desk {
         }
         $item = $DB->get_record(self::T . 'item', ['id' => $loan->itemid], '*', MUST_EXIST);
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid], '*', MUST_EXIST);
-        $rule = $this->rule($reader->readertype, $item->itemtype);
+        $rule = $this->rule($reader->readertype, $item->itemtype, $this->home((int) $item->libraryid));
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $why = '';
         if (!loan_rules::can_renew($rule, (int) $loan->renewals)) {
@@ -1046,7 +1056,7 @@ final class desk {
         if (!in_array($from, [loan_rules::FROM_TODAY, loan_rules::FROM_DUE], true)) {
             $from = rules::renew_from((int) $this->library->entityid);
         }
-        return $this->capped(loan_rules::renewed_due(
+        return $this->capped($this->home((int) $loan->libraryid), loan_rules::renewed_due(
             (int) $loan->timedue,
             $this->now,
             $rule,
@@ -1094,11 +1104,12 @@ final class desk {
      * A date a reading library gives, no later than the centre's date to have everything back when it has set one and it
      * has not passed (a bank keeps its own round).
      *
+     * @param \stdClass $home The library the copy belongs to, whose rules it follows.
      * @param int $due
      * @return int
      */
-    private function capped(int $due): int {
-        if (bank::is($this->library)) {
+    private function capped(\stdClass $home, int $due): int {
+        if (bank::is($home)) {
             return $due;
         }
         $last = closures::return_by((int) $this->library->entityid);
@@ -1247,10 +1258,13 @@ final class desk {
         if (!$this->allowed($readerid)) {
             return $this->answer('unknown', 'no', 'deskotherreader');
         }
-        $rule = $this->rule($reader->readertype, $item->itemtype);
+        // A copy follows the rules of its own library, wherever it is lent (a textbook of the bank at the main desk is still
+        // the bank's: until the round ends, and no fine).
+        $home = $this->home((int) $item->libraryid);
+        $rule = $this->rule($reader->readertype, $item->itemtype, $home);
         // What counts against the limit (and what is late) is what is out of the libraries under the same rules: not the
         // textbooks of a bank, nor the books of a classroom with rules of its own.
-        [$in, $params] = $DB->get_in_or_equal($this->same_rules(), SQL_PARAMS_NAMED, 'lib');
+        [$in, $params] = $DB->get_in_or_equal($this->same_rules($home), SQL_PARAMS_NAMED, 'lib');
         $open = $DB->get_records_sql(
             'SELECT l.id, l.timedue, i.itemtype, i.recordid
                FROM {' . self::T . 'loan} l
@@ -1271,7 +1285,7 @@ final class desk {
         }
         $set = $item->status === 'held' ? holds::ready_for((int) $item->id) : null;
         // A textbook bank lends what a student needs for class, whatever they owe the library.
-        $sanction = $force || bank::is($this->library) ? null
+        $sanction = $force || bank::is($home) ? null
             : sanctions::stop((int) $this->library->entityid, $readerid, $this->now);
         $decision = policy::lend(
             $rule,
@@ -1309,7 +1323,7 @@ final class desk {
         );
         // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today).
         $reserve = reserves::active((int) $item->id, $this->now);
-        $due = bank::is($this->library) ? bankround::due($this->library, $this->now)
+        $due = bank::is($home) ? bankround::due($home, $this->now)
             : ($reserve ? loan_rules::due(
                 $this->now,
                 (int) $reserve->days,
@@ -1318,7 +1332,7 @@ final class desk {
                 $this->closed(),
                 zones::rest_days($this->library)
             )
-            : $this->capped(loan_rules::due(
+            : $this->capped($home, loan_rules::due(
                 $this->now,
                 (int) $rule['loandays'],
                 $this->tz,
@@ -1426,11 +1440,12 @@ final class desk {
         $days = max(0, loan_rules::days_late((int) $loan->timedue, $this->now, $this->tz)
             - closures::between((int) $this->library->entityid, (int) $loan->timedue, $this->now));
         $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
-        $sanction = $reader ? sanctions::after_return($this->library, $reader, $loan, $days, $this->staffid, $this->now) : null;
+        $home = $this->home((int) $item->libraryid);
+        $sanction = $reader ? sanctions::after_return($home, $reader, $loan, $days, $this->staffid, $this->now) : null;
         $transaction->allow_commit();
         covers::seek((int) $item->recordid, $this->now);
         $owner = $this->reader((int) $loan->readerid);
-        $rule = $reader ? $this->rule($reader->readertype, $item->itemtype) : null;
+        $rule = $reader ? $this->rule($reader->readertype, $item->itemtype, $home) : null;
         $a = (object) ['title' => $this->title($item), 'name' => $owner['name'], 'days' => $days];
         $extra = [
             'loanid' => (int) $loan->id,
@@ -1469,9 +1484,10 @@ final class desk {
      *
      * @param string $readertype
      * @param string $itemtype
+     * @param \stdClass $home The library the copy belongs to.
      * @return array|null
      */
-    private function rule(string $readertype, string $itemtype): ?array {
+    private function rule(string $readertype, string $itemtype, \stdClass $home): ?array {
         global $DB;
         // Another library is no reader of the rules: what it gets is what it agrees on, with no limit; only what is never
         // lent stays here.
@@ -1481,12 +1497,12 @@ final class desk {
                 'renewals' => 1, 'renewdays' => 14];
         }
         // A textbook bank lends a whole set, until the year ends, unless it has its own rules.
-        if (bank::is($this->library) && !$DB->record_exists(self::T . 'rule', ['libraryid' => $this->library->id])) {
+        if (bank::is($home) && !$DB->record_exists(self::T . 'rule', ['libraryid' => $home->id])) {
             // Lent (any days, the year's end sets the date), with no limit of copies and no renewal.
             return ['readertype' => '*', 'itemtype' => '*', 'loandays' => 365, 'maxloans' => 0, 'renewals' => 0,
                 'renewdays' => 0];
         }
-        $library = $this->library;
+        $library = $home;
         $seen = [];
         // Up the libraries it hangs from, each once (a loop in the data cannot hang the desk).
         while ($library && !isset($seen[$library->id])) {
@@ -1501,12 +1517,13 @@ final class desk {
     }
 
     /**
-     * The libraries of the centre that lend under the same rules as this one: those whose rules come from the same
+     * The libraries of the centre that lend under the same rules as a copy's: those whose rules come from the same
      * library up their chain (or all that have none, under the default ones).
      *
+     * @param \stdClass $home The library the copy belongs to.
      * @return int[]
      */
-    private function same_rules(): array {
+    private function same_rules(\stdClass $home): array {
         global $DB;
         $libraries = $DB->get_records(self::T . 'library', ['entityid' => $this->library->entityid], '', 'id, parentid');
         $ruled = array_flip(array_map('intval', $DB->get_fieldset_sql(
@@ -1525,9 +1542,26 @@ final class desk {
             }
             return 0;
         };
-        $mine = $source((int) $this->library->id);
+        $mine = $source((int) $home->id);
         $same = array_values(array_filter(array_keys($libraries), fn($id) => $source((int) $id) === $mine));
-        return $same ?: [(int) $this->library->id];
+        return $same ?: [(int) $home->id];
+    }
+
+    /**
+     * The library a copy belongs to (the desk's own, or another of the centre lent at this desk).
+     *
+     * @param int $libraryid
+     * @return \stdClass
+     */
+    private function home(int $libraryid): \stdClass {
+        global $DB;
+        if (!$libraryid || $libraryid === (int) $this->library->id) {
+            return $this->library;
+        }
+        return $this->homes[$libraryid] ??= $DB->get_record(
+            self::T . 'library',
+            ['id' => $libraryid, 'entityid' => $this->library->entityid]
+        ) ?: $this->library;
     }
 
     /**

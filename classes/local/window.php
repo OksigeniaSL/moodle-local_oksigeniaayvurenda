@@ -130,11 +130,19 @@ final class window {
                 }
             }
         }
-        $new = (int) $DB->count_records_sql(
-            "SELECT COUNT(DISTINCT recordid) FROM {" . self::T . "item}
-              WHERE libraryid = :libraryid AND COALESCE(timeacquired, timecreated) >= :month AND status <> 'withdrawn'",
-            ['libraryid' => $library->id, 'month' => $now - 30 * DAYSECS]
-        );
+        // Counted over every copy of the library: kept for some minutes with the latest arrivals, and gone with them when
+        // the catalogue changes.
+        $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
+        $kept = $cache->get('recent_' . $library->id) ?: [];
+        if (!isset($kept['new'])) {
+            $kept['new'] = (int) $DB->count_records_sql(
+                "SELECT COUNT(DISTINCT recordid) FROM {" . self::T . "item}
+                  WHERE libraryid = :libraryid AND COALESCE(timeacquired, timecreated) >= :month AND status <> 'withdrawn'",
+                ['libraryid' => $library->id, 'month' => $now - 30 * DAYSECS]
+            );
+            $cache->set('recent_' . $library->id, $kept);
+        }
+        $new = $kept['new'];
         return ['today' => $out, 'corner' => $corner, 'new' => $new];
     }
 

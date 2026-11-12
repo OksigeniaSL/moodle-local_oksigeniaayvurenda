@@ -48,7 +48,7 @@ $notice = '';
 if (data_submitted() && confirm_sesskey()) {
     $ids = optional_param_array('ids', [], PARAM_INT);
     if (optional_param('do', '', PARAM_ALPHA) === 'apart') {
-        duplicates::apart($entityid, $ids);
+        duplicates::apart($entityid, optional_param_array('all', [], PARAM_INT));
         $notice = $str('duplicatesapartdone');
     } else {
         $keep = required_param('keep', PARAM_INT);
@@ -69,6 +69,12 @@ foreach ($shown as $n => $ids) {
     $records = array_map([duplicates::class, 'describe'], $ids);
     // The one with more copies stays, by default; with as many, the oldest.
     usort($records, fn($a, $b) => [-$a['copies'], $a['created']] <=> [-$b['copies'], $b['created']]);
+    // Two editions with their own ISBN are two books (each its own lot in a textbook bank): only the first goes into the
+    // join on its own; the others, if the person ticks them.
+    $edition = null;
+    foreach ($records as $r) {
+        $edition ??= (string) $r['isbn'] !== '' ? (string) $r['isbn'] : null;
+    }
     $cards[] = ['n' => $from + $n, 'records' => array_map(fn($r, $i) => [
         'id' => $r['id'],
         'title' => format_string($r['title'], true, ['escape' => false]),
@@ -87,12 +93,14 @@ foreach ($shown as $n => $ids) {
         'coverurl' => $covers[$r['id']] ?? '',
         'colour' => $r['id'] % 6,
         'first' => $i === 0,
+        'joins' => (string) $r['isbn'] === '' || (string) $r['isbn'] === $edition,
     ], $records, array_keys($records))];
 }
 $page = fn(int $start) => $link('duplicates.php', ['from' => $start]);
 $data = [
     'heading' => $str('duplicatestitle'),
     'intro' => $groups ? $str('duplicatesintro', screens::number(count($groups))) : $str('duplicatesnone'),
+    'joinhint' => $groups ? $str('duplicatesjoinhint') : '',
     'notice' => $notice,
     'action' => $link('duplicates.php', ['from' => $from]),
     'sesskey' => sesskey(),
@@ -106,7 +114,7 @@ $data = [
         'nextlabel' => $str('readersnext'),
     ] : null,
 ];
-foreach (['duplicateskeep', 'duplicatesjoin', 'duplicatesapart', 'duplicatesjoinhint'] as $key) {
+foreach (['duplicateskeep', 'duplicatesinclude', 'duplicatesjoin', 'duplicatesapart'] as $key) {
     $data[$key] = $str($key);
 }
 shell::output(

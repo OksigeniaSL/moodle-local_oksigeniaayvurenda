@@ -4869,7 +4869,14 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-dup-group { padding: 1rem; border-radius: var(--radius); background: var(--surface); box-shadow: 0 1px 4px rgba(15, 58, 51, .08); }
 .ayv .ayv-dup-records { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .75rem;
     margin: 0; padding: 0; border: 0; min-width: 0; }
-.ayv .ayv-dup-record { display: grid; gap: .5rem; padding: .75rem; border: 2px solid var(--line); border-radius: 12px; cursor: pointer; }
+.ayv .ayv-dup-record { display: grid; gap: .5rem; padding: .75rem; border: 2px solid var(--line); border-radius: 12px; }
+.ayv .ayv-dup-record:not(:has(input[type="radio"]:checked)):has(input[type="checkbox"]:not(:checked)) { opacity: .72; }
+.ayv .ayv-dup-picks { display: flex; flex-wrap: wrap; gap: .4rem 1rem; }
+.ayv .ayv-dup-picks label { cursor: pointer; }
+.ayv .ayv-dup-in { display: inline-flex; align-items: center; gap: .4rem; }
+/* The one that stays is in the join: its box is not asked. */
+.ayv .ayv-dup-record:has(input[type="radio"]:checked) .ayv-dup-in { display: none; }
+.ayv .ayv-dup-hint { margin: 0 0 1rem; }
 .ayv .ayv-dup-record:has(input[type="radio"]:checked) { border-color: var(--accent); background: var(--notice-bg); }
 .ayv .ayv-dup-pick { display: inline-flex; align-items: center; gap: .4rem; font-weight: 700; color: var(--accent); }
 .ayv .ayv-dup-body { display: flex; gap: .75rem; align-items: flex-start; }

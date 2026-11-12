@@ -370,6 +370,13 @@ final class mail {
         if (!empty($content['button']['url'])) {
             return self::leading((string) $content['button']['url'], $content);
         }
+        // To someone who is not a reader there (a child's family), the library's own pages say only «you are not a reader»:
+        // its window open to anyone, if it is, or the site.
+        if (!empty($content['outsider'])) {
+            return !empty($library->slug) && window::open((string) $library->slug)
+                ? (new \moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug]))->out(false)
+                : $CFG->wwwroot;
+        }
         return !empty($library->slug)
             ? (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]))->out(false) : $CFG->wwwroot;
     }

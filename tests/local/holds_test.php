@@ -117,11 +117,17 @@ final class holds_test extends \advanced_testcase {
         holds::suspend((int) $marta->id, $now + WEEKSECS, $now);
         $this->assertSame('available', $DB->get_field(self::T . 'item', 'status', ['id' => $w->one->id]));
         $this->assertSame('waiting', $DB->get_field(self::T . 'hold', 'status', ['id' => $marta->id]));
-        // Hugo is back, first again: the next copy that comes back is his.
+        // Hugo is back, first again: the copy free on the shelf is set aside for him at once.
         holds::resume((int) $hugo->id, $now);
-        $this->assertSame(0, holds::ahead($DB->get_record(self::T . 'hold', ['id' => $hugo->id])));
-        $desk->scan($w->two->barcode);
         $this->assertSame('ready', $DB->get_field(self::T . 'hold', 'status', ['id' => $hugo->id]));
+        $this->assertEquals($w->one->id, $DB->get_field(self::T . 'hold', 'itemid', ['id' => $hugo->id]));
+        $this->assertSame('held', $DB->get_field(self::T . 'item', 'status', ['id' => $w->one->id]));
+        // Marta's «Not yet» ends: the night puts her back in the queue, and the next copy that comes back is hers.
+        $DB->set_field(self::T . 'hold', 'timesuspended', $now - 1, ['id' => $marta->id]);
+        $this->assertSame(1, holds::wake_due($now));
+        $this->assertNull($DB->get_field(self::T . 'hold', 'timesuspended', ['id' => $marta->id]));
+        $desk->scan($w->two->barcode);
+        $this->assertSame('ready', $DB->get_field(self::T . 'hold', 'status', ['id' => $marta->id]));
     }
 
     /**

@@ -138,7 +138,7 @@ final class marcxml {
                 $node->appendChild($data);
             }
         }
-        return $doc->saveXML();
+        return \local_oksigeniaayvurenda\core\text::xmlsafe($doc->saveXML());
     }
 
     /**
