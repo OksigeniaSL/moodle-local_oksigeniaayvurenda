@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.238.0 (2026-11-12)
+
+- The year page is one sheet, from Jujol's mock-up: the twelve months as a wall calendar, each day saying what it is
+  (its term as a band, closed, closed every week, the first day, the date to have everything back, today). A day touched
+  (a link, no JavaScript needed) comes up as a card that says what it is now and what can be done with it: close it, close
+  from it to another day touched (with a name), end a term on it, make it the date to have everything back, or take its
+  closure away. Below, what rules the year as sentences: the days the libraries close every week (seven discs), the start
+  of the week, the closures with their «×», the ends of the terms with «Back to three equal parts», the date to have
+  everything back with «No date», and the start of next year. The six «Save» buttons, nine lists and the date field that
+  started in 2016 are gone. A year before the library lent says so in one line.
+
 ## 0.237.0 (2026-11-12)
 
 - «How your library works», a new page from Jujol's mock-up, in «More»: the centre's settings and the library's loan

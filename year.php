@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The school year: what its beginning asks, its end, last year in numbers and the day it starts.
+ * The school year as one sheet: its days, a day touched, what rules it, its groups, and last year in numbers.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -24,10 +24,11 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\characters;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
-use local_oksigeniaayvurenda\local\sources\cohorts;
 use local_oksigeniaayvurenda\local\year_change;
+use local_oksigeniaayvurenda\local\yearsheet;
 use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
@@ -47,41 +48,7 @@ $entityid = (int) $library->entityid;
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
-    $action = optional_param('do', '', PARAM_ALPHA);
-    if ($action === 'sync') {
-        $stats = cohorts::sync($entityid, null, true);
-        $notice = $str('yearsynced', (object) $stats) . plans::left_out($stats);
-    } else if ($action === 'closedadd') {
-        $ok = \local_oksigeniaayvurenda\local\closures::add(
-            $entityid,
-            optional_param('from', '', PARAM_RAW_TRIMMED),
-            optional_param('to', '', PARAM_RAW_TRIMMED),
-            optional_param('label', '', PARAM_TEXT)
-        );
-        $notice = $str($ok ? 'closuresadded' : 'closuresbad', \local_oksigeniaayvurenda\local\closures::LONGEST);
-    } else if ($action === 'closedremove') {
-        \local_oksigeniaayvurenda\local\closures::remove(
-            $entityid,
-            optional_param('from', '', PARAM_RAW_TRIMMED),
-            optional_param('to', '', PARAM_RAW_TRIMMED)
-        );
-        $notice = $str('closuresremoved');
-    } else if ($action === 'week') {
-        \local_oksigeniaayvurenda\local\libraries::update_entity($entityid, [
-            'weekstart' => optional_param('weekstart', 0, PARAM_INT),
-            'restdays' => optional_param_array('restdays', [], PARAM_INT),
-        ]);
-        $notice = $str('weeksaved');
-    } else if ($action === 'returnby') {
-        $day = optional_param('clear', 0, PARAM_BOOL) ? '' : optional_param('returnby', '', PARAM_RAW_TRIMMED);
-        $ok = \local_oksigeniaayvurenda\local\closures::set_return_by($entityid, $day);
-        $notice = $str(!$ok ? 'yearbadday' : ($day === '' ? 'returnbygone' : 'returnbysaved'));
-    } else if ($action === 'terms') {
-        $days = optional_param('clear', 0, PARAM_BOOL) ? [] : [optional_param('term1', '', PARAM_RAW_TRIMMED),
-            optional_param('term2', '', PARAM_RAW_TRIMMED), optional_param('term3', '', PARAM_RAW_TRIMMED)];
-        $ok = \local_oksigeniaayvurenda\local\challenges::set_ends($entityid, $days);
-        $notice = $str(!$ok ? 'yearbadday' : 'termssaved');
-    } else if ($action === 'remindall') {
+    if (optional_param('do', '', PARAM_ALPHA) === 'remindall') {
         // Everyone with a book of a reading library out is told, with the date to have it back, and each class's tutor.
         $classes = !\local_oksigeniaayvurenda\local\skins::no_classes($entityid);
         foreach (catalogue::libraries() as $one) {
@@ -97,18 +64,29 @@ if (data_submitted() && confirm_sesskey()) {
             }
         }
         $notice = $str('bankroundremindqueued');
-    } else if ($action === 'start') {
-        $ok = year_change::set_start($entityid, optional_param('month', 0, PARAM_INT), optional_param('day', 0, PARAM_INT));
-        $notice = $str($ok ? 'sourcessaved' : 'yearbadday');
+    } else {
+        // Each gesture of the sheet sends only what it changes; back to where it was touched.
+        [$anchor, $extra] = yearsheet::apply($library, time());
+        redirect(new moodle_url(
+            '/local/oksigeniaayvurenda/year.php',
+            ['library' => $library->slug, 'at' => $anchor] + $extra,
+            $anchor
+        ));
     }
+}
+$touched = optional_param('dia', '', PARAM_RAW_TRIMMED);
+$from = optional_param('desde', '', PARAM_RAW_TRIMMED);
+$from = preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) ? $from : '';
+$saved = optional_param('saved', 0, PARAM_BOOL) ? optional_param('at', '', PARAM_ALPHANUMEXT) : '';
+if (optional_param('toolong', 0, PARAM_BOOL)) {
+    $notice = $str('closuresbad', \local_oksigeniaayvurenda\local\closures::LONGEST);
+} else if (optional_param('order', 0, PARAM_BOOL)) {
+    $notice = $str('yearsheetorder');
+} else if (($synced = json_decode(optional_param('synced', '', PARAM_RAW), true)) && is_array($synced)) {
+    $notice = $str('yearsynced', (object) $synced) . plans::left_out($synced);
 }
 $status = year_change::status($entityid);
 // The date to have everything back, while it is to come and six weeks away at most.
-// The ends of the terms of the year running, as the class challenges count them.
-$termyear = \local_oksigeniaayvurenda\local\years::around($entityid, time());
-$termends = $termyear ? \local_oksigeniaayvurenda\local\challenges::ends($termyear) : [];
-$entitysettings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
-    ?: [];
 $soon = $status['returnby'] && time() <= $status['returnby'] && time() >= $status['returnby'] - 6 * WEEKSECS;
 $year = $status['year'];
 $url = fn(string $page, array $params = []) => (new moodle_url(
@@ -118,10 +96,14 @@ $url = fn(string $page, array $params = []) => (new moodle_url(
 $date = fn(int $time) => zones::date($time, 'strftimedate', $library);
 
 $cards = [
-    ['number' => $status['groups'], 'label' => $str('yeargroups', $status['members']), 'url' => $url('readers.php')],
+    ['number' => \local_oksigeniaayvurenda\local\screens::number($status['groups']), 'label' => $str(
+        'yeargroups',
+        \local_oksigeniaayvurenda\local\screens::number($status['members'])
+    ), 'url' => $url('readers.php')],
     ['number' => $status['tutors'] . ' / ' . $status['groups'], 'label' => $str('yeartutors'), 'url' => $url('tutors.php'),
         'late' => $status['notutor'] > 0],
-    ['number' => $status['out'], 'label' => $str('yearout'), 'url' => $url('late.php', ['all' => 1])],
+    ['number' => \local_oksigeniaayvurenda\local\screens::number($status['out']), 'label' => $str('yearout'),
+        'url' => $url('late.php', ['all' => 1])],
 ];
 if (\local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid)) {
     $cards = array_slice($cards, 2);
@@ -130,7 +112,11 @@ if ($status['left']) {
     $cards[] = ['number' => count($status['left']), 'label' => $str('yearleft'), 'url' => '#ayv-left', 'late' => true];
 }
 $last = null;
-if ($status['last']) {
+$lastnone = '';
+if ($status['last'] && !(int) $status['last']['loans']) {
+    // A year before the library lent: said in one line, not in zeros.
+    $lastnone = $str('yearsheetlastnone', $status['last']['name']);
+} else if ($status['last']) {
     $l = $status['last'];
     $last = [
         'heading' => $str('yearlast', $l['name']),
@@ -140,122 +126,60 @@ if ($status['last']) {
             'share' => $g['members'] ? round(100 * $g['borrowers'] / $g['members']) : 0], $l['groups']),
     ];
 }
-[$month, $day] = array_map('intval', explode('-', (string) ($DB->get_field(
-    'local_oksigeniaayvurenda_entity',
-    'yearstart',
-    ['id' => $entityid]
-) ?: '09-01')));
-$days = [];
-for ($d = 1; $d <= 31; $d++) {
-    $days[] = ['value' => $d, 'label' => $d, 'selected' => $d === $day];
-}
-$months = [];
-for ($m = 1; $m <= 12; $m++) {
-    $months[] = ['value' => $m, 'label' => userdate(make_timestamp(2001, $m, 15, 12), '%B'), 'selected' => $m === $month];
-}
-// The days the centre is closed: what is to come first, and what passed, faded.
-$today = zones::date(time(), '%Y-%m-%d', $library);
-$closures = array_map(function ($range) use ($library, $str, $today) {
-    $day = fn(string $d) => zones::date(
-        (new DateTimeImmutable($d . ' 12:00', zones::of($library)))->getTimestamp(),
-        'strftimedate',
-        $library
-    );
-    return $range + [
-        'name' => $range['label'] !== '' ? $range['label'] : $str('closuresnoname'),
-        'when' => $range['from'] === $range['to'] ? $day($range['from'])
-            : $str('closuresrange', (object) ['from' => $day($range['from']), 'to' => $day($range['to'])]),
-        'past' => $range['to'] < $today,
-    ];
-}, \local_oksigeniaayvurenda\local\closures::of($entityid));
-// The centre's week: the day it starts, and the days the libraries close every week (due dates, notices, «this week»),
-// the days in the order of its week (Monday 1 to Sunday 7, as ISO numbers them).
-$calendar = \core_calendar\type_factory::get_calendar_instance();
-$weekdays = $calendar->get_weekdays();
-$dayname = fn(int $iso) => (string) $weekdays[$iso % 7]['fullname'];
-$moodlestart = (int) $calendar->get_starting_weekday() ?: 7;
-$ownstart = (int) ((json_decode(
-    (string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]),
-    true
-) ?: [])['weekstart'] ?? 0);
-$rest = zones::rest_days($library);
-$first = zones::first_weekday($library);
-$week = ['heading' => $str('weekheading'), 'intro' => $str('weekintro'), 'startlabel' => $str('weekstart'),
-    'restlabel' => $str('weekrest'), 'save' => $str('weeksave'),
-    'starts' => array_merge(
-        [['value' => 0, 'label' => $str('weekstartmoodle', $dayname($moodlestart)), 'selected' => $ownstart === 0]],
-        array_map(fn($iso) => ['value' => $iso, 'label' => $dayname($iso), 'selected' => $ownstart === $iso], range(1, 7))
-    ),
-    'days' => array_map(
-        fn($i) => ['value' => ($first - 1 + $i) % 7 + 1, 'label' => $dayname(($first - 1 + $i) % 7 + 1),
-            'on' => in_array(($first - 1 + $i) % 7 + 1, $rest, true)],
-        range(0, 6)
-    )];
+$sheet = yearsheet::months($library, $year, time(), $touched, $from, '/local/oksigeniaayvurenda/year.php');
+$step = characters::step($entityid);
+$pose = $saved !== '' ? 'celebra' : 'lee';
+$crier = characters::whole($entityid) ? characters::figure('herald', $pose, $step) : null;
+$classes = !\local_oksigeniaayvurenda\local\skins::no_classes($entityid);
 $data = [
     'heading' => $str('yearheading', $year->name),
-    'life' => \local_oksigeniaayvurenda\local\life::year($library, time()),
-    'closures' => $closures,
-    'hasclosures' => (bool) $closures,
-    'closuresheading' => $str('closuresheading'),
-    'closuresintro' => $str('closuresintro'),
-    'closuresnone' => $str('closuresnone'),
-    'closuresadd' => $str('closuresadd'),
-    'closuresremove' => $str('closuresremove'),
-    'closuresname' => $str('closuresname'),
-    'closuresnamehint' => $str('closuresnamehint'),
-    'closuresfrom' => $str('closuresfrom'),
-    'closuresto' => $str('closuresto'),
-    'closuressave' => $str('closuressave'),
-    'closuresclose' => $str('offsiteclose'),
-    'closurestoday' => $today,
     'dates' => $str('yeardates', (object) ['start' => $date((int) $year->timestart),
-        'end' => $date((int) $year->timeend - DAYSECS)]),
+        'end' => $date((int) $year->timeend - DAYSECS)])
+        . ' ' . $str($classes ? 'yearsheethint' : 'yearsheethintlay'),
+    'crier' => $crier ? ['figure' => $crier, 'puppet' => characters::puppet('herald', $pose, $step)] : null,
     'notice' => $notice,
+    'life' => \local_oksigeniaayvurenda\local\life::year($library, time()),
     // Weeks before the date to have everything back, or the end of the year without one: what is out, and telling everyone.
     'ending' => $status['out'] && ($soon || $status['moment'] === 'end') ? ['text' => $soon
         ? $str('returnbyending', (object) ['date' => $date((int) $status['returnby']), 'out' => $status['out']])
         : $str('yearending', $status['out']), 'url' => $url('late.php', ['all' => 1]), 'label' => $str('lateall'),
         'remind' => $str('yearremindall'), 'remindsure' => $str('yearremindsure')] : null,
-    // The centre's week: the day it starts, and the days the libraries close every week (due dates, notices, «this week»).
-    'week' => $week,
-    // The date by which everything lent has to be back: any library, any calendar.
-    'returnby' => [
-        'heading' => $str('returnbyheading'),
-        'intro' => $str('returnbyintro'),
-        'text' => $status['returnby'] ? $date((int) $status['returnby']) : $str('returnbynone'),
-        'value' => $status['returnby'] ? zones::date((int) $status['returnby'], '%Y-%m-%d', $library) : '',
-        'has' => (bool) $status['returnby'],
-        'label' => $str('returnbylabel'),
-        'save' => $str('returnbysave'),
-        'clear' => $str('returnbyclear'),
-    ],
-    // When each term ends, for the class challenges: where there are classes, any country's calendar (D4).
-    'terms' => \local_oksigeniaayvurenda\local\skins::no_classes($entityid) || !$termyear ? null : [
-        'heading' => $str('termsheading'),
-        'intro' => $str('termsintro'),
-        'save' => $str('returnbysave'),
-        'clear' => $str('termsclear'),
-        'has' => !empty($entitysettings['termends']),
-        'ends' => array_map(fn($end, $i) => ['name' => 'term' . ($i + 1), 'label' => $str('termsend', $i + 1),
-            'value' => zones::date($end, '%Y-%m-%d', $library)], $termends, array_keys($termends)),
-    ],
     'cards' => $cards,
-    'startintro' => $str('yearstartintro'),
+    'card' => yearsheet::card($library, $year, $touched, $from, $str),
+    'release' => (new moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug], 'ayv-cs-sheet'))->out(false),
+    'releaselabel' => $str('yearsheetrelease'),
+    'choosing' => $from !== '' && ($touched === '' || $touched < $from) ? $str('yearsheetchoosing') : '',
+    'sheettitle' => $str('yearsheettitle'),
+    'legend' => array_values(array_filter([
+        $classes ? ['class' => 'ayv-cs-t1', 'label' => $str('yearsheetlegendt1')] : null,
+        $classes ? ['class' => 'ayv-cs-t2', 'label' => $str('yearsheetlegendt2')] : null,
+        $classes ? ['class' => 'ayv-cs-t3', 'label' => $str('yearsheetlegendt3')] : null,
+        ['class' => 'ayv-cs-lc', 'label' => $str('yearsheetlegendclosed')],
+        ['class' => 'ayv-cs-lf', 'label' => $str('yearsheetlegendrest')],
+        ['class' => 'ayv-cs-ll', 'label' => $str('yearsheetlegenddeadline')],
+        ['class' => 'ayv-cs-lh', 'label' => $str('yearsheetlegendtoday')],
+    ])),
+    'months' => $sheet['months'],
+    'letters' => $sheet['letters'],
+    'rulestitle' => $str('yearsheetrulestitle'),
+    'rulessub' => $str('yearsheetrulessub'),
+    'phrases' => yearsheet::rules($library, $year, $str, $saved),
+    'groupstitle' => $str('yearsheetgroupstitle'),
+    'groupsintro' => $str('yearstartintro'),
+    'sync' => $str('yearsync'),
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'sync' => $str('yearsync'),
+    'change' => $str('hiwchange'),
+    'close' => $str('hiwclose'),
+    'lesslabel' => $str('hiwless'),
+    'morelabel' => $str('hiwmore'),
+    'savedword' => $str('hiwsaved'),
     'left' => $status['left'],
     'hasleft' => (bool) $status['left'],
     'leftheading' => $str('yearleftheading'),
     'leftintro' => $str('yearleftintro'),
     'last' => $last,
-    'startheading' => $str('yearstartheading'),
-    'startnote' => $str('yearstartnote'),
-    'days' => $days,
-    'months' => $months,
-    'daylabel' => $str('yearday'),
-    'monthlabel' => $str('yearmonth'),
-    'save' => $str('sourcessave'),
+    'lastnone' => $lastnone,
 ];
 foreach ($data['left'] as &$row) {
     $row['bookslabel'] = $str($row['books'] === 1 ? 'yearleftone' : 'yearleftmany', $row['books']);

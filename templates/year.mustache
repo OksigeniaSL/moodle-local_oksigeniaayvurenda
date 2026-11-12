@@ -13,76 +13,117 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/year
 
-    The school year: what its beginning asks, its end, last year in numbers and the day it starts.
+    The year as one sheet: the twelve months as a wall calendar (each day a link that touches it, no JavaScript needed),
+    the card of the day touched with what can be done with it, what rules the year as sentences, its groups, those who
+    left with books and last year in numbers.
 
     Context variables required for this template:
-    * heading, dates, notice - texts
-    * ending - text, url, label, remind and remindsure when the year is ending with books out
-    * returnby - heading, intro, text, value, has, label, save, clear
-    * cards - number, label, url, late
-    * left - readers who left with books (name, group, bookslabel)
-    * last - last year in numbers: heading, total, groups (group, line, share)
-    * days, months - options of the start day
+    * heading, dates, notice, crier, ending, cards, life - the head of the page, as before
+    * card - the day touched: long, now, monthshort, n, actions (name, value, label; or link and url) or range (from, to,
+      says, namelabel, save); release, releaselabel - letting it go
+    * choosing - while the last day of a closure is chosen
+    * sheettitle, legend (class, label), letters (letter), months (name, year, cells: blank, aria, n, date, url, band,
+      termend, closed, rest, first, deadline, today, touched, chosen)
+    * rulestitle, rulessub, phrases - what rules the year, as the sentences of «How your library works»
+    * groupstitle, groupsintro, sync, left, hasleft, leftheading, leftintro, last
+    * action, sesskey, change, close, lesslabel, morelabel, savedword
 
     Example context (json):
     {
-        "heading": "Curso 2026-2027",
-        "dates": "Del 1 de septiembre de 2026 al 31 de agosto de 2027.",
-        "notice": "",
-        "ending": null,
-        "terms": {"heading": "Los trimestres", "intro": "Cuándo acaba cada uno.", "save": "Guardar", "clear": "Volver", "has": false,
-            "ends": [{"name": "term1", "label": "Acaba el 1.º", "value": "2026-12-22"}]},
-        "week": {"heading": "La semana de la biblioteca", "intro": "Cuándo empieza y qué días cierra.",
-            "startlabel": "La semana empieza el", "restlabel": "Cierra cada semana", "save": "Guardar",
-            "starts": [{"value": 0, "label": "Como dice el idioma: lunes", "selected": true}],
-            "days": [{"value": 6, "label": "sábado", "on": true}]},
-        "returnby": {"heading": "Fecha límite de devolución", "intro": "Nada de lo que se presta vence después.", "text": "19 de junio de 2027",
-            "value": "2027-06-19", "has": true, "label": "Fecha", "save": "Guardar", "clear": "Quitar la fecha"},
-        "cards": [{"number": 30, "label": "grupos, 2000 lectores", "url": "#", "late": false}],
-        "startintro": "Basta con mover las cohortes en Moodle.",
-        "action": "#",
-        "sesskey": "abc",
-        "sync": "Traer ahora los grupos",
-        "hasleft": true,
-        "left": [{"name": "Ana Montes", "group": "6º Primaria A", "bookslabel": "1 libro"}],
-        "leftheading": "Se fueron con libros",
-        "leftintro": "Estaban en un grupo el curso pasado y este no.",
-        "last": {"heading": "2025-2026 en cifras", "total": "1200 préstamos.", "groups": [{"group": "3º A", "line": "18 de 25 lectores", "share": 72}]},
-        "startheading": "Cuándo empieza el curso",
-        "startnote": "Desde el curso que viene.",
-        "days": [{"value": 1, "label": 1, "selected": true}],
-        "months": [{"value": 9, "label": "septiembre", "selected": true}],
-        "daylabel": "Día",
-        "monthlabel": "Mes",
-        "save": "Guardar",
-        "hasclosures": true, "closuresheading": "Días cerrados", "closuresintro": "Nada vence en un día cerrado.",
-        "closuresnone": "Ningún día cerrado.", "closuresadd": "Añadir días cerrados", "closuresremove": "Quitar",
-        "closuresname": "Nombre", "closuresnamehint": "Navidad, Semana Santa", "closuresfrom": "Desde", "closuresto": "Hasta",
-        "closuressave": "Guardar", "closuresclose": "Cerrar", "closurestoday": "2026-11-07",
-        "closures": [{"name": "Navidad", "when": "del 23 de diciembre al 7 de enero", "from": "2026-12-23", "to": "2027-01-07", "past": false}]
+        "heading": "Curso 2026-27", "dates": "Del 1 de septiembre al 31 de agosto.", "notice": "", "crier": null,
+        "ending": null, "life": null, "cards": [{"number": "30", "label": "grupos", "url": "https://example.com/readers.php"}],
+        "card": {"long": "Viernes, 26 de febrero de 2027", "now": "Es del 2.º trimestre.", "monthshort": "feb", "n": 26,
+            "actions": [{"name": "closeday", "value": "2027-02-26", "label": "Cerrar solo este día"}], "range": null},
+        "release": "https://example.com/year.php", "releaselabel": "Soltar este día", "choosing": "",
+        "sheettitle": "La hoja del curso", "legend": [{"class": "ayv-cs-lc", "label": "Cerrado"}],
+        "letters": [{"letter": "L"}],
+        "months": [{"name": "Septiembre", "year": "2026", "cells": [{"blank": true},
+            {"blank": false, "aria": "martes 1 de septiembre", "n": 1, "date": "2026-09-01", "url": "https://example.com/y",
+                "band": "t1", "first": true}]}],
+        "rulestitle": "Lo que rige el curso", "rulessub": "Lo que cierra y cuándo acaba cada trimestre.",
+        "phrases": [{"id": "ayv-cs-deadline", "spine": "DEV", "spinecolour": "coral", "says": "Sin fecha",
+            "deadline": {"has": false, "none": "Sin fecha", "note": "Se pone desde la hoja."} }],
+        "groupstitle": "Los grupos del curso", "groupsintro": "Cada noche se apuntan.", "sync": "Traer ahora los grupos",
+        "left": [], "hasleft": false, "leftheading": "", "leftintro": "", "last": null,
+        "action": "https://example.com/year.php", "sesskey": "abc", "change": "Cambiar", "close": "Cerrar",
+        "lesslabel": "Uno menos", "morelabel": "Uno más", "savedword": "Guardado"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{dates}}</p>
+<div class="ayv-cf ayv-cs">
+<form id="ayv-cs-form" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{dates}}</p></div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#ending}}<div class="ayv-notice"><p>{{text}} <a href="{{url}}">{{label}}</a></p>
     <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="remindall">
         <button type="submit" class="ayv-button" data-ayv-twice="{{remindsure}}">{{remind}}</button></form></div>{{/ending}}
-<ul class="ayv-today">
-{{#cards}}
-    <li><a class="ayv-today-card {{#late}}ayv-today-late{{/late}}" href="{{url}}"><span class="ayv-today-number">{{number}}</span>
-        <span class="ayv-today-label">{{label}}</span></a></li>
-{{/cards}}
+<ul class="ayv-cs-cifras">
+    {{#cards}}<li><a class="ayv-cf-enlace" href="{{url}}"><b>{{number}}</b> {{label}}</a></li>{{/cards}}
 </ul>
 {{> local_oksigeniaayvurenda/life }}
-<form method="post" action="{{action}}" class="ayv-section">
-    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sync">
-    <p>{{startintro}}</p>
-    <p><button type="submit" class="ayv-button ayv-button-quiet">{{sync}}</button></p>
-</form>
+{{#card}}
+<aside class="ayv-cs-tarjeta" id="ayv-cs-touched" aria-labelledby="ayv-cs-touched-t">
+    <span class="ayv-cf-hoja" aria-hidden="true"><small>{{monthshort}}</small><b>{{n}}</b></span>
+    <div><h2 class="ayv-cs-tocado-t" id="ayv-cs-touched-t">{{long}}</h2>
+        <p class="ayv-cf-nota">{{now}}</p>
+        {{#actions.0}}<div class="ayv-cs-hacer">{{/actions.0}}{{#actions}}{{#link}}<a class="ayv-cf-chapa" href="{{url}}">{{label}}</a>{{/link}}{{^link}}<button class="ayv-cf-chapa" type="submit" form="ayv-cs-form" name="{{name}}" value="{{value}}">{{label}}</button>{{/link}}{{/actions}}{{#actions.0}}</div>{{/actions.0}}
+        {{#range}}<form class="ayv-cf-fila ayv-cf-placa" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="closefrom" value="{{from}}"><input type="hidden" name="closeto" value="{{to}}">
+            <span class="ayv-cf-explica">{{says}}</span><label class="ayv-sr" for="ayv-cs-closedname">{{namelabel}}</label><input id="ayv-cs-closedname" name="closedname" maxlength="60" placeholder="{{namelabel}}">
+            <button class="ayv-button" type="submit">{{save}}</button></form>{{/range}}
+    </div>
+    <a class="ayv-cs-soltar" href="{{release}}" aria-label="{{releaselabel}}">×</a>
+</aside>
+{{/card}}
+<section class="ayv-cs-hoja" id="ayv-cs-sheet" aria-labelledby="ayv-cs-sheet-t">
+    <h2 class="ayv-cf-estante-t" id="ayv-cs-sheet-t">{{sheettitle}}</h2>
+    {{#choosing}}<p class="ayv-notice" role="status">{{choosing}}</p>{{/choosing}}
+    <div class="ayv-cs-leyenda" aria-hidden="true">{{#legend}}<span class="ayv-cs-l {{class}}">{{label}}</span>{{/legend}}</div>
+    <div class="ayv-cs-meses">
+        {{#months}}
+        <section class="ayv-cs-mes" aria-label="{{name}} {{year}}"><h3>{{name}} <span>{{year}}</span></h3>
+            <div class="ayv-cs-semana" aria-hidden="true">{{#letters}}<span>{{letter}}</span>{{/letters}}</div>
+            <div class="ayv-cs-dias">{{#cells}}{{#blank}}<span class="ayv-cs-hueco" aria-hidden="true"></span>{{/blank}}{{^blank}}<a class="ayv-cs-dia{{#band}} ayv-cs-{{band}}{{/band}}{{#termend}} ayv-cs-fin{{/termend}}{{#closed}} ayv-cs-cerrado{{/closed}}{{#rest}} ayv-cs-finde{{/rest}}{{#first}} ayv-cs-inicio{{/first}}{{#deadline}} ayv-cs-limite{{/deadline}}{{#today}} ayv-cs-hoy{{/today}}{{#touched}} ayv-cs-tocado{{/touched}}{{#chosen}} ayv-cs-elegido{{/chosen}}" href="{{url}}" aria-label="{{aria}}"{{#today}} aria-current="date"{{/today}}>{{n}}</a>{{/blank}}{{/cells}}</div>
+        </section>
+        {{/months}}
+    </div>
+</section>
+<section class="ayv-cf-estante ayv-cf-balda-green" id="ayv-cs-rules" aria-labelledby="ayv-cs-rules-t">
+    <h2 class="ayv-cf-estante-t" id="ayv-cs-rules-t">{{rulestitle}}</h2>
+    <p class="ayv-cf-estante-s">{{rulessub}}</p>
+    <ul class="ayv-cf-frases">
+        {{#phrases}}
+        <li class="ayv-cf-frase ayv-cf-lomo-{{spinecolour}}" id="{{id}}">
+            <details><summary><span class="ayv-cf-lomo" aria-hidden="true"><span>{{spine}}</span></span><span class="ayv-cf-dice">{{{says}}}{{#justsaved}} <span class="ayv-cf-guardado" role="status">{{savedword}}</span>{{/justsaved}}</span><span class="ayv-cf-cambiar">{{change}}</span><span class="ayv-cf-cerrar">{{close}}</span></summary>
+            <div class="ayv-cf-gesto">
+            {{#discs.0}}<div class="ayv-cs-discos">{{/discs.0}}{{#discs}}<button class="ayv-cs-disco" type="submit" form="ayv-cs-form" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><b>{{letter}}</b><span>{{label}}</span></button>{{/discs}}{{#discs.0}}</div>{{/discs.0}}
+            {{#chips.0}}<div class="ayv-cf-chapas">{{/chips.0}}{{#chips}}<button class="ayv-cf-chapa" type="submit" form="ayv-cs-form" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/chips}}{{#chips.0}}</div>{{/chips.0}}
+            {{#closures}}<ul class="ayv-cs-cerrados">{{#list}}<li><span class="ayv-cs-trama" aria-hidden="true"></span><b>{{name}}</b><span>{{when}}</span><button class="ayv-cs-quitar" type="submit" form="ayv-cs-form" name="removeclosed" value="{{value}}" aria-label="{{remove}} {{name}}"><span aria-hidden="true">×</span></button></li>{{/list}}</ul>
+                <p class="ayv-cf-nota">{{note}}</p>{{/closures}}
+            {{#terms}}{{#reset}}<div class="ayv-cf-fila"><button class="ayv-cf-chapa" type="submit" form="ayv-cs-form" name="termsreset" value="1">{{reset}}</button></div>{{/reset}}
+                <p class="ayv-cf-nota">{{note}}</p>{{/terms}}
+            {{#deadline}}{{#has}}<div class="ayv-cf-fila"><button class="ayv-cf-chapa" type="submit" form="ayv-cs-form" name="deadline" value="">{{none}}</button></div>{{/has}}
+                <p class="ayv-cf-nota">{{note}}</p>{{/deadline}}
+            {{#next}}<div class="ayv-cf-fila"><span class="ayv-cf-hoja" aria-hidden="true"><small>{{monthshort}}</small><b>{{day}}</b></span>
+                <span class="ayv-cf-fecha"><span class="ayv-cf-rotulo">{{monthlabel}}</span><span class="ayv-cf-chapas">{{#months}}<button class="ayv-cf-chapa" type="submit" form="ayv-cs-form" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/months}}</span>
+                <span class="ayv-cf-rotulo">{{daylabel}}</span><span class="ayv-cf-paso" role="group" aria-label="{{daylabel}}"><button class="ayv-cf-menos" type="submit" form="ayv-cs-form" name="startday" value="{{less}}" aria-label="{{lesslabel}}"{{#atfirst}} disabled{{/atfirst}}>−</button><span class="ayv-cf-cifra"><b>{{day}}</b></span><button class="ayv-cf-mas" type="submit" form="ayv-cs-form" name="startday" value="{{more}}" aria-label="{{morelabel}}"{{#atlast}} disabled{{/atlast}}>+</button></span></span></div>{{/next}}
+            </div></details>
+        </li>
+        {{/phrases}}
+    </ul>
+</section>
+<section class="ayv-cs-grupos" id="ayv-cs-groups" aria-labelledby="ayv-cs-groups-t">
+    <h2 class="ayv-cf-estante-t" id="ayv-cs-groups-t">{{groupstitle}}</h2>
+    <p>{{groupsintro}}</p>
+    <p><button class="ayv-button" type="submit" form="ayv-cs-form" name="sync" value="1">{{sync}}</button></p>
+    {{#lastnone}}<p class="ayv-cf-nota">{{lastnone}}</p>{{/lastnone}}
+</section>
 {{#hasleft}}
 <section class="ayv-section" id="ayv-left">
     <h2 class="ayv-section-title">{{leftheading}}</h2>
@@ -107,81 +148,4 @@
     </ul>
 </section>
 {{/last}}
-<section class="ayv-section" id="ayv-closures">
-    <h2 class="ayv-section-title">{{closuresheading}}</h2>
-    <p>{{closuresintro}}</p>
-    {{#hasclosures}}
-    <ul class="ayv-closures">
-        {{#closures}}
-        <li class="ayv-closure{{#past}} ayv-closure-past{{/past}}">
-            <span class="ayv-closure-words"><b>{{name}}</b> <span>{{when}}</span></span>
-            <form method="post" action="{{action}}">
-                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="closedremove">
-                <input type="hidden" name="from" value="{{from}}"><input type="hidden" name="to" value="{{to}}">
-                <button type="submit" class="ayv-button ayv-button-quiet">{{closuresremove}}</button>
-            </form>
-        </li>
-        {{/closures}}
-    </ul>
-    {{/hasclosures}}
-    {{^hasclosures}}<p class="ayv-empty">{{closuresnone}}</p>{{/hasclosures}}
-    <p class="ayv-book-actions"><button type="button" class="ayv-button" data-ayv-open="ayv-closure-new">{{closuresadd}}</button></p>
-    <dialog class="ayv-modal" id="ayv-closure-new" aria-labelledby="ayv-closure-new-title">
-        <div class="ayv-modal-head"><h3 id="ayv-closure-new-title" class="ayv-section-title">{{closuresadd}}</h3>
-            <form method="dialog"><button class="ayv-modal-close" aria-label="{{closuresclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <form method="post" action="{{action}}">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="closedadd">
-            <label class="ayv-field">{{closuresname}} <span class="ayv-field-hint">{{closuresnamehint}}</span> <input type="text" name="label" maxlength="60"></label>
-            <label class="ayv-field">{{closuresfrom}} <input type="date" name="from" value="{{closurestoday}}" required></label>
-            <label class="ayv-field">{{closuresto}} <input type="date" name="to" value="{{closurestoday}}" required></label>
-            <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{closuressave}}</button></p>
-        </form>
-    </dialog>
-</section>
-{{#terms}}
-<section class="ayv-section" id="ayv-terms">
-    <h2 class="ayv-section-title">{{heading}}</h2>
-    <p>{{intro}}</p>
-    <form method="post" action="{{action}}" class="ayv-inline-form">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="terms">
-        {{#ends}}<label class="ayv-field">{{label}} <input type="date" name="{{name}}" value="{{value}}" required></label>{{/ends}}
-        <button type="submit" class="ayv-button">{{save}}</button>
-        {{#has}}<button type="submit" class="ayv-button ayv-button-quiet" name="clear" value="1" formnovalidate>{{clear}}</button>{{/has}}
-    </form>
-</section>
-{{/terms}}
-{{#week}}
-<section class="ayv-section" id="ayv-week">
-    <h2 class="ayv-section-title">{{heading}}</h2>
-    <p>{{intro}}</p>
-    <form method="post" action="{{action}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="week">
-        <label class="ayv-field">{{startlabel}} <select name="weekstart">{{#starts}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/starts}}</select></label>
-        <fieldset class="ayv-fieldset"><legend>{{restlabel}}</legend><div class="ayv-choices">{{#days}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="restdays[]" value="{{value}}" {{#on}}checked{{/on}}> {{label}}</label>{{/days}}</div></fieldset>
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{save}}</button></p>
-    </form>
-</section>
-{{/week}}
-{{#returnby}}
-<section class="ayv-section" id="ayv-returnby">
-    <h2 class="ayv-section-title">{{heading}}</h2>
-    <p>{{intro}}</p>
-    <form method="post" action="{{action}}" class="ayv-inline-form">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="returnby">
-        <label class="ayv-field">{{label}} <input type="date" name="returnby" value="{{value}}" required></label>
-        <button type="submit" class="ayv-button">{{save}}</button>
-        {{#has}}<button type="submit" class="ayv-button ayv-button-quiet" name="clear" value="1" formnovalidate>{{clear}}</button>{{/has}}
-    </form>
-    {{^has}}<p class="ayv-field-hint">{{text}}</p>{{/has}}
-</section>
-{{/returnby}}
-<section class="ayv-section">
-    <h2 class="ayv-section-title">{{startheading}}</h2>
-    <form method="post" action="{{action}}" class="ayv-inline-form">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="start">
-        <label class="ayv-field">{{daylabel}} <select name="day">{{#days}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/days}}</select></label>
-        <label class="ayv-field">{{monthlabel}} <select name="month">{{#months}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/months}}</select></label>
-        <button type="submit" class="ayv-button">{{save}}</button>
-    </form>
-    <p>{{startnote}}</p>
-</section>
+</div>

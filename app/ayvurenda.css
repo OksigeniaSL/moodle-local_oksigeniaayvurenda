@@ -6522,3 +6522,31 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 .ayv .ayv-cs-dia.ayv-cs-elegido {
     box-shadow: inset 0 0 0 2px var(--coral);
 }
+
+/* The legend in the ink of the page, softened: the grey fell short of contrast. */
+.ayv .ayv-cs-leyenda {
+    color: var(--ink);
+    opacity: .8;
+}
+
+.ayv .ayv-cs-tarjeta .ayv-cs-tocado-t {
+    margin: 0 0 2px;
+    font-family: var(--title);
+    font-size: 1.25rem;
+}
+
+/* The year beside each month and the days the libraries close every week: faded, but readable. */
+.ayv .ayv-cs-mes h3 span,
+.ayv .ayv-cs-dia.ayv-cs-finde {
+    color: var(--ink);
+    opacity: .7;
+}
+
+.ayv a.ayv-cf-chapa {
+    text-decoration: none;
+}
+
+.ayv .ayv-cs-disco > span {
+    color: var(--ink);
+    opacity: .75;
+}
