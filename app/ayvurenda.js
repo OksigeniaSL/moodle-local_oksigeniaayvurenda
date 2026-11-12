@@ -1313,3 +1313,22 @@
         }, 5000);
     });
 })();
+
+// A search box that filters a list as one types (the tray of faces of the tutors): data-filtra says which items. Without
+// JavaScript the list is whole and in order.
+(function() {
+    'use strict';
+    var plain = function(text) {
+        return String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+    };
+    document.addEventListener('input', function(event) {
+        var box = event.target;
+        if (!box || !box.matches || !box.matches('input[data-filtra]')) {
+            return;
+        }
+        var typed = plain(box.value);
+        document.querySelectorAll(box.getAttribute('data-filtra')).forEach(function(item) {
+            item.hidden = typed !== '' && plain(item.textContent).indexOf(typed) === -1;
+        });
+    });
+})();

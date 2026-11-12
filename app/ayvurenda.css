@@ -6550,3 +6550,497 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     color: var(--ink);
     opacity: .75;
 }
+
+/* «Tutores» (personal-tutors) as faces on the shelves of each stage (Jujol, 12 Nov 2026). Each group is a card with
+   the face of its tutor, standing on the plank of its stage; a group without a tutor shows an empty, dashed face in
+   coral. Touching a card opens one tray with every teacher's face (?grupo=), and touching a face saves it. After
+   como-funciona.css (its head and shelves) and curso.css (its «×»). */
+.ayv .ayv-tu-cuenta {
+    margin: 0 0 18px;
+    font-size: 1.125rem;
+}
+
+.ayv .ayv-tu-cuenta b {
+    font-family: var(--title);
+}
+
+.ayv .ayv-tu-etapa {
+    margin: 0 0 26px;
+}
+
+.ayv .ayv-tu-balda {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 10px 0 0;
+    padding: 0 0 4px;
+    list-style: none;
+}
+
+.ayv .ayv-tu-balda::after {
+    content: "";
+    grid-column: 1 / -1;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--balda, var(--green));
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, .22), 0 6px 10px -6px rgba(0, 0, 0, .45);
+}
+
+/* A group: its tutor's face, its name and who it is. The whole card is the gesture. */
+.ayv .ayv-tu-grupo {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    height: 100%;
+    padding: 14px 10px 12px;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line), 0 10px 18px -14px rgba(30, 43, 42, .5);
+    color: var(--ink);
+    text-align: center;
+    text-decoration: none;
+}
+
+.ayv .ayv-tu-grupo:hover,
+.ayv .ayv-tu-grupo:focus-visible {
+    box-shadow: 0 0 0 2px var(--accent), 0 10px 18px -14px rgba(30, 43, 42, .5);
+}
+
+.ayv .ayv-tu-elegido {
+    box-shadow: 0 0 0 3px var(--accent), 0 10px 18px -14px rgba(30, 43, 42, .5);
+}
+
+.ayv .ayv-tu-cara {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 4px;
+    border-radius: 50%;
+    background: var(--cara, var(--green));
+    color: var(--cf-crema);
+    font-family: var(--title);
+    font-size: 1.375rem;
+    box-shadow: 0 0 0 3px var(--surface), 0 0 0 4.5px var(--line);
+}
+
+/* The coral and the sun carry dark letters, as everywhere in the house. */
+.ayv .ayv-tu-cara[style*="--coral"],
+.ayv .ayv-tu-cara[style*="--sun"] {
+    color: var(--cf-tinta-fija);
+}
+
+.ayv .ayv-tu-cara-falta {
+    background: transparent;
+    color: var(--coral);
+    box-shadow: inset 0 0 0 2px var(--coral);
+    border: 0;
+    outline: 2px dashed var(--coral);
+    outline-offset: 3px;
+}
+
+.ayv .ayv-tu-nombre {
+    font-family: var(--title);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.ayv .ayv-tu-quien {
+    color: var(--muted);
+    font-size: .875rem;
+    line-height: 1.3;
+}
+
+.ayv .ayv-tu-sin {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--coral);
+}
+
+.ayv .ayv-tu-sin .ayv-tu-quien {
+    color: var(--coral);
+    font-weight: 700;
+}
+
+/* The tray of faces: one for the whole page, for the group touched. */
+.ayv .ayv-tu-bandeja {
+    position: relative;
+    margin: 0 0 24px;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 0 0 2px var(--accent), 0 16px 30px -18px rgba(30, 43, 42, .55);
+}
+
+.ayv .ayv-tu-bandeja-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    padding-right: 40px;
+}
+
+.ayv .ayv-tu-bandeja h2 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.375rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-tu-buscar {
+    flex: 1 1 14rem;
+    min-height: 44px;
+    padding: 6px 4px;
+    border: 0;
+    border-bottom: 2px dashed var(--muted);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+}
+
+.ayv .ayv-tu-buscar:focus {
+    outline: none;
+    border-bottom: 2px solid var(--accent);
+}
+
+.ayv .ayv-tu-profes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 6px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-tu-profe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 52px;
+    padding: 6px 10px 6px 6px;
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.ayv .ayv-tu-profe:hover {
+    border-color: var(--line);
+    background: var(--paper);
+}
+
+.ayv .ayv-tu-profe[aria-pressed="true"] {
+    border-color: var(--green);
+    background: var(--paper);
+}
+
+.ayv .ayv-tu-profe span:last-child {
+    display: grid;
+}
+
+.ayv .ayv-tu-profe small {
+    color: var(--muted);
+    font-size: .8125rem;
+}
+
+.ayv .ayv-tu-cara-p {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    font-size: .9375rem;
+    box-shadow: none;
+}
+
+.ayv .ayv-tu-nadie .ayv-tu-cara-falta {
+    outline: 0;
+}
+
+@media (max-width: 720px) {
+    .ayv .ayv-tu-balda {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .ayv .ayv-tu-cara {
+        width: 56px;
+        height: 56px;
+    }
+
+    .ayv .ayv-tu-profes {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* The faces of the tutors in the colours of the house, by class (no style attributes), and a photo when there is one. */
+.ayv .ayv-tu-cara-green { --cara: var(--green); }
+.ayv .ayv-tu-cara-green2 { --cara: var(--green2); }
+.ayv .ayv-tu-cara-coral { --cara: var(--coral); }
+.ayv .ayv-tu-cara-sun { --cara: var(--sun); }
+.ayv .ayv-tu-cara-night { --cara: var(--night); }
+
+.ayv .ayv-tu-cara img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Initials readable on every face: on the sun in dark ink, on a deeper coral in white. */
+.ayv .ayv-tu-cara.ayv-tu-cara-sun {
+    color: var(--cf-tinta-fija);
+}
+
+.ayv .ayv-tu-cara.ayv-tu-cara-coral {
+    --cara: #b9452d;
+    color: #fff;
+}
+
+.ayv .ayv-tu-quien,
+.ayv .ayv-tu-profe small {
+    color: var(--ink);
+    opacity: .75;
+}
+
+/* «No tutor» in a coral dark enough on the white card; on the dark theme, the coral itself. */
+.ayv .ayv-tu-sin .ayv-tu-quien {
+    color: #a53a24;
+    opacity: 1;
+}
+
+[data-bs-theme="dark"] .ayv .ayv-tu-sin .ayv-tu-quien {
+    color: var(--coral);
+}
+
+/* «Informes» (personal-reports): periods that are touched instead of selects (Jujol, 12 Nov 2026). The reports are
+   index cards on top of their sheet; the period is a row of leaves (this week, this month, each term, the year, last
+   year, another), each a link with its dates under its name; «Otro» opens the strip of the months of the year to touch
+   the first and the last. After como-funciona.css. The rows of each report stay as they are. */
+.ayv .ayv-in-dias {
+    display: grid;
+    gap: 2px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1.0625rem;
+}
+
+/* The reports, as the index cards of a file box: the open one joins its sheet. */
+.ayv .ayv-in-fichas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0 0;
+    padding: 0 14px;
+}
+
+.ayv .ayv-in-ficha {
+    padding: 10px 16px 8px;
+    border-radius: 10px 10px 0 0;
+    background: var(--paper2);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: inset 0 -1px 0 var(--line);
+}
+
+.ayv .ayv-in-ficha[aria-current] {
+    background: var(--surface);
+    box-shadow: inset 0 4px 0 var(--coral);
+}
+
+.ayv .ayv-in-hoja {
+    display: grid;
+    gap: 18px;
+    padding: 18px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line), 0 12px 24px -18px rgba(30, 43, 42, .5);
+}
+
+/* The period: a row of leaves, the one chosen in green. */
+.ayv .ayv-in-periodo {
+    display: grid;
+    gap: 8px;
+}
+
+.ayv .ayv-in-periodos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ayv .ayv-in-p {
+    display: grid;
+    gap: 1px;
+    min-width: 7.5rem;
+    padding: 10px 14px 9px;
+    border-radius: 4px 4px 10px 10px;
+    background: linear-gradient(var(--line) 0 5px, transparent 5px), var(--paper);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-in-p span {
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+.ayv .ayv-in-p:hover {
+    box-shadow: inset 0 0 0 1.5px var(--muted);
+}
+
+.ayv .ayv-in-p[aria-current] {
+    background: linear-gradient(var(--coral) 0 5px, transparent 5px), var(--green);
+    box-shadow: none;
+    color: var(--cf-crema);
+}
+
+.ayv .ayv-in-p[aria-current] span {
+    color: var(--cf-crema);
+    opacity: .85;
+}
+
+.ayv .ayv-in-p-otro {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--muted);
+    border: 0;
+}
+
+/* Another span: the twelve months of the year in a strip; the first touched in green, those it can end on as links. */
+.ayv .ayv-in-meses {
+    display: grid;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--paper);
+}
+
+.ayv .ayv-in-tira {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ayv .ayv-in-m {
+    display: grid;
+    place-items: center;
+    min-width: 3.5rem;
+    min-height: 44px;
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: capitalize;
+}
+
+.ayv .ayv-in-m-desde {
+    background: var(--green);
+    box-shadow: none;
+    color: var(--cf-crema);
+}
+
+.ayv .ayv-in-m-no {
+    color: var(--muted);
+    font-weight: 400;
+    box-shadow: none;
+    background: transparent;
+}
+
+.ayv .ayv-in-res {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+}
+
+.ayv .ayv-in-res h2 {
+    margin: 0;
+    font-family: var(--text);
+    font-size: 1.125rem;
+    font-weight: 400;
+}
+
+.ayv .ayv-in-res h2 b {
+    font-family: var(--title);
+    font-size: 1.5rem;
+}
+
+/* Only the stand-in rows of the mock-up (the report draws its own). */
+.ayv .ayv-in-filas {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-in-filas li {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    align-items: center;
+    gap: 2px 14px;
+}
+
+.ayv .ayv-in-barra {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ayv .ayv-in-barra i {
+    width: calc(var(--v) * 100%);
+    height: 14px;
+    border-radius: 3px;
+    background: var(--green);
+}
+
+.ayv .ayv-in-barra em {
+    font-style: normal;
+    font-weight: 700;
+}
+
+.ayv .ayv-in-sub {
+    grid-column: 2;
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+@media (max-width: 720px) {
+    .ayv .ayv-in-fichas {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0;
+    }
+
+    .ayv .ayv-in-ficha {
+        white-space: nowrap;
+    }
+
+    .ayv .ayv-in-hoja {
+        padding: 14px 12px;
+    }
+
+    .ayv .ayv-in-p {
+        min-width: calc(50% - 4px);
+        flex: 1 1 calc(50% - 4px);
+    }
+
+    .ayv .ayv-in-filas li {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-in-sub {
+        grid-column: auto;
+    }
+}

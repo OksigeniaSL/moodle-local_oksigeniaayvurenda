@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.239.0 (2026-11-12)
+
+- Tutors, from Jujol's mock-up: each stage a shelf, each group a card with its tutor's face (initials, or their photo
+  where the centre shows them) and a dashed coral face where it has none; above, how many have one and the first that
+  does not, with the way to it. Touching a group opens one tray of faces for the whole page, each person with the groups
+  they already look after and «No tutor» last; touching a face saves it and goes back to the group's card. Last year's
+  tutors, while only proposed, stay with one touch. The thirty lists and the «Save» are gone; with JavaScript, the tray's
+  search filters the faces as one types.
+- The guided help of Tutors follows the new screen, with its three new lines voiced in Spanish and English (art 0.1.60).
+
 ## 0.238.0 (2026-11-12)
 
 - The year page is one sheet, from Jujol's mock-up: the twelve months as a wall calendar, each day saying what it is

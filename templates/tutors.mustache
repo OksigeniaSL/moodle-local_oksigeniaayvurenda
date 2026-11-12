@@ -13,56 +13,72 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/tutors
 
-    The tutor of each group this school year.
+    The tutors of the year: each stage a shelf, each group a card with its tutor's face; a group touched opens one tray
+    of faces for the whole page, and a face touched saves it. No JavaScript needed; with it, the tray's search filters.
 
     Context variables required for this template:
-    * heading, intro, notice, empty, nocandidates - texts
-    * action, sesskey, save - the form
-    * rows - list of index, group, proposed and options (value, label, selected)
+    * heading, intro, crier, saved, sesskey, action - the head of the page
+    * count, missing (url, label, group), proposed (text, accept) - how many have one, the first without, last year's
+    * tray - group, heading (HTML), action, release, people (userid, name, face, already, current), nonecurrent
+    * stages - stage, colour, cards (id, url, group, who, none, proposed, chosen, aria, face: initials, colour, photo)
+    * hasgroups, empty, nocandidates, search, searchlabel, releaselabel, nobody, nobodyhint, proposedmark
 
     Example context (json):
     {
-        "heading": "Tutores de 2026-2027",
-        "intro": "Reciben cada semana quién de su grupo tiene libros con retraso.",
-        "notice": "",
-        "action": "#",
-        "sesskey": "abc",
-        "hasrows": true,
-        "rows": [{"index": 0, "group": "3º Primaria A", "proposed": true,
-                  "options": [{"value": 0, "label": "Sin tutor", "selected": false}, {"value": 5, "label": "Irene Laurel", "selected": true}]}],
-        "proposedlabel": "Propuesto: el del curso pasado",
-        "save": "Guardar",
-        "empty": "",
-        "nocandidates": ""
+        "heading": "Tutores de 2026-27", "intro": "Toca su cara para cambiarlo.", "crier": null, "saved": "",
+        "sesskey": "abc", "action": "https://example.com/tutors.php", "count": "29 de 30 grupos tienen tutor.",
+        "missing": {"url": "https://example.com/tutors.php?grupo=0", "label": "Falta", "group": "1.º Infantil A"},
+        "proposed": null,
+        "tray": {"group": "1.º Infantil A", "heading": "¿Quién es el tutor de <b>1.º Infantil A</b>?",
+            "action": "https://example.com/tutors.php", "release": "https://example.com/tutors.php",
+            "people": [{"userid": 5, "name": "Ana Calma", "face": {"initials": "AC", "colour": "green", "photo": "https://example.com/cara.jpg"},
+                "already": "Ya lleva 1.º Primaria A", "current": false}], "nonecurrent": true},
+        "stages": [{"stage": "Infantil", "colour": "green", "cards": [{"id": "g0", "url": "https://example.com/t?grupo=0",
+            "group": "1.º Infantil A", "who": "Sin tutor", "none": true, "proposed": false, "chosen": true,
+            "aria": "1.º Infantil A: sin tutor. Cambiar", "face": null}]}],
+        "hasgroups": true, "empty": "", "nocandidates": "", "search": "Buscar por el nombre", "searchlabel": "Buscar",
+        "releaselabel": "Cerrar sin cambiar", "nobody": "Sin tutor", "nobodyhint": "Nadie recibe sus retrasos",
+        "proposedmark": "Del curso pasado"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
-{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<div class="ayv-cf ayv-tu">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p></div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
+{{#saved}}<p class="ayv-notice" role="status">{{saved}}</p>{{/saved}}
 {{#nocandidates}}<p class="ayv-empty">{{nocandidates}}</p>{{/nocandidates}}
-{{#hasrows}}
-{{#summary}}<p class="ayv-tut-sum">{{summary}}</p>{{/summary}}
-<form method="post" action="{{action}}">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    {{#stages}}
-    <section class="ayv-tut-stage">
-        {{#stage}}<h2 class="ayv-section-title">{{stage}}</h2>{{/stage}}
-        <ul class="ayv-sources ayv-tut-rows">
-        {{#rows}}
-            <li class="ayv-source{{^hastutor}} ayv-tut-none{{/hastutor}}">
-                <span class="ayv-source-name">{{group}}</span>
-                <input type="hidden" name="group[{{index}}]" value="{{group}}">
-                <select name="tutor[{{index}}]" aria-label="{{group}}">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</select>
-                {{#proposed}}<span class="ayv-source-count">{{proposedlabel}}</span>{{/proposed}}
-            </li>
-        {{/rows}}
-        </ul>
-    </section>
-    {{/stages}}
-    <p class="ayv-tut-save"><button type="submit" class="ayv-button">{{save}}</button></p>
-</form>
-{{/hasrows}}
-{{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}
+{{#hasgroups}}
+<p class="ayv-tu-cuenta">{{count}}{{#missing}} {{label}} <a class="ayv-cf-enlace" href="{{url}}">{{group}}</a>.{{/missing}}</p>
+{{#proposed}}<form class="ayv-cf-fila" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><span class="ayv-cf-explica">{{text}}</span>
+    <button class="ayv-button" type="submit" name="acceptall" value="1">{{accept}}</button></form>{{/proposed}}
+{{#tray}}
+<section class="ayv-tu-bandeja" id="ayv-tu-bandeja" aria-labelledby="ayv-tu-bandeja-t">
+    <form id="ayv-tu-elegir" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}"></form>
+    <div class="ayv-tu-bandeja-cab"><h2 id="ayv-tu-bandeja-t">{{{heading}}}</h2>
+        <label class="ayv-sr" for="ayv-tu-buscar">{{searchlabel}}</label><input class="ayv-tu-buscar" id="ayv-tu-buscar" type="search" placeholder="{{search}}" data-filtra=".ayv-tu-profes > li" autocomplete="off">
+        <a class="ayv-cs-soltar" href="{{release}}" aria-label="{{releaselabel}}">×</a></div>
+    <ul class="ayv-tu-profes">
+        {{#people}}<li><button class="ayv-tu-profe{{#current}} ayv-tu-elegido{{/current}}" type="submit" form="ayv-tu-elegir" name="tutor" value="{{userid}}"{{#current}} aria-current="true"{{/current}}>
+            {{#face}}<span class="ayv-tu-cara ayv-tu-cara-p ayv-tu-cara-{{colour}}" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initials}}{{/photo}}</span>{{/face}}<span><b>{{name}}</b>{{#already}}<small>{{already}}</small>{{/already}}</span></button></li>{{/people}}
+        <li><button class="ayv-tu-profe ayv-tu-nadie{{#nonecurrent}} ayv-tu-elegido{{/nonecurrent}}" type="submit" form="ayv-tu-elegir" name="tutor" value="0"><span class="ayv-tu-cara ayv-tu-cara-p ayv-tu-cara-falta" aria-hidden="true">?</span><span><b>{{nobody}}</b><small>{{nobodyhint}}</small></span></button></li>
+    </ul>
+</section>
+{{/tray}}
+{{#stages}}
+<section class="ayv-tu-etapa ayv-cf-balda-{{colour}}" aria-label="{{stage}}">
+    {{#stage}}<h2 class="ayv-cf-estante-t">{{stage}}</h2>{{/stage}}
+    <ul class="ayv-tu-balda">
+        {{#cards}}<li id="{{id}}"><a class="ayv-tu-grupo{{#none}} ayv-tu-sin{{/none}}{{#chosen}} ayv-tu-elegido{{/chosen}}" href="{{url}}">
+            {{#face}}<span class="ayv-tu-cara ayv-tu-cara-{{colour}}" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initials}}{{/photo}}</span>{{/face}}{{^face}}<span class="ayv-tu-cara ayv-tu-cara-falta" aria-hidden="true">?</span>{{/face}}<span class="ayv-tu-nombre">{{group}}</span><span class="ayv-tu-quien">{{who}}</span>{{#proposed}}<span class="ayv-tu-quien">{{proposedmark}}</span>{{/proposed}}</a></li>{{/cards}}
+    </ul>
+</section>
+{{/stages}}
+{{/hasgroups}}
+{{^hasgroups}}<p class="ayv-empty">{{empty}}</p>{{/hasgroups}}
+</div>

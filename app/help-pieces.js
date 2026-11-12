@@ -706,23 +706,24 @@ window.AYVHelpPieces = {
             return h.say(5);
         });
     },
-    // Who looks after each group: how many have one, what they get, choosing one, last year's, and «now you»: save.
+    // Who looks after each group: how many have one, what they get, a group's face opens the tray of faces, last year's,
+    // and «now you»: touch a group's face.
     tutors: function(h) {
         'use strict';
-        return h.point('.ayv-tut-sum').then(function() {
+        return h.point('.ayv-tu-cuenta').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('.ayv-tut-stage');
+            return h.point('.ayv-tu-etapa');
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.choose('select[name="tutor[0]"]', h.codes.me);
+            return h.point('.ayv-tu-grupo');
         }).then(function() {
             return h.say(2);
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.you(4, '.ayv-tut-save .ayv-button');
+            return h.you(4, '.ayv-tu-grupo');
         });
     },
     // What a late book leaves: off of itself; days, a fine, how to save it, how it reads, and who has the last word.
