@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.248.0 (2026-11-13)
+
+- Loan rules, from Jujol's mock-up: each rule is a library loan card, its band in the colour of its readers, its
+  sentence and its counters in sight («At a time», «For», «Renew», «Each renewal», with «−» and «+»), and two lights,
+  «No limit at a time» and «Only in the library»; at its foot, who and what it is for, and taking it away. Another rule
+  is a dashed card that opens on who and what, as chips. Every other setting is a card with its sentence on top and its
+  gestures under it: how a renewal counts (two chips); the notices of late books (the first one with «−» and «+», the
+  rhythm as chips, the dates when it goes by dates, already with the end of each third of the year, and three lights:
+  the reader, the family of the young ones, the tutor); what a late book leaves (only the notice, days without lending
+  or a fine, with its counters, the days of grace, the adults, the stages as chips, and the currency folded). Each
+  gesture is kept at once and back to its card; the old forms and their «Change» are gone. The two guided helps follow
+  the new screen, with their voices (art 0.1.63).
+- How it works: a new rule for «Any reader» was kept for a kind of reader called «any», which no one is; now it is for
+  any reader.
+- Characters, from Jujol's look at them mounted: on its stage each one stands whole, as it says its line (or the
+  centre's own figure, or the house's), not its round portrait on a cream square; a portrait the centre uploaded hangs
+  on the wall in a thin frame. Material: under some 360 px the tiles go in one column; the links on the back of a tile
+  in the size of «Its data»; with nothing yet, «Add» instead of «Add another», with room under the empty line.
+
 ## 0.247.0 (2026-11-13)
 
 - Characters, from Jujol's mock-up: the memory and the herald each stand on their own stage, with their figure, a line

@@ -108,13 +108,15 @@ $saved = optional_param('saved', '', PARAM_ALPHA);
 $roles = [];
 foreach (characters::of($entityid) as $role => $character) {
     [$key, $a] = $samples[$role];
-    $said = $character['enabled'] ? characters::say($entityid, $role, $key, $a) : null;
-    $figure = $said['figure'] ?? null;
-    $figure = $figure ?: ($character['portrait'] ?? null) ?: characters::figure(
-        $role,
-        $poses[$role],
-        characters::step($entityid)
-    );
+    $said = $character['enabled'] ? characters::say($entityid, $role, $key, $a, $poses[$role]) : null;
+    // Standing whole: as it says its line, or the centre's own drawn whole, or the house's. A portrait the centre
+    // uploaded (a square) hangs on the wall in its frame; the house's portrait only when there is no figure at all.
+    $uploaded = \local_oksigeniaayvurenda\local\images::url('portrait', $entityid, $role);
+    $figure = $said['figure'] ?? ($character['own'] && !$uploaded
+        ? characters::own_figure($entityid, $role, $poses[$role]) : null);
+    $framed = !$figure && $uploaded !== null;
+    $figure = $figure ?: $uploaded ?: characters::figure($role, $poses[$role], characters::step($entityid))
+        ?: $character['portrait'];
     $roles[] = [
         'role' => $role,
         'title' => $str('characterrole' . $role . $character['sex']),
@@ -122,6 +124,7 @@ foreach (characters::of($entityid) as $role => $character) {
         'enabled' => $character['enabled'],
         'name' => $character['name'],
         'figure' => $figure,
+        'framed' => $framed,
         'alt' => $character['name'] . ', ' . $str('characterrole' . $role . $character['sex']),
         'bubble' => $said['text'] ?? '',
         'female' => $character['sex'] === 'f',

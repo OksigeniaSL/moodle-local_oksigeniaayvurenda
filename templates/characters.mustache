@@ -24,7 +24,7 @@
 
     Context variables required for this template:
     * heading, intro, notice, action, sesskey, savedword - the head and where gestures go
-    * roles - role, title, job, enabled, name, figure, alt, bubble, female, herald, signs, own, justsaved
+    * roles - role, title, job, enabled, name, figure, framed, alt, bubble, female, herald, signs, own, justsaved
     * charactername, charactersigns, characterdrop, characterdropor, characterdrophint, characterstageout,
       characterstagein, charactertalks, charactersayf, charactersaym, characternamehint, characternamesave,
       characterother, characterreset, sourcessave - words
@@ -34,7 +34,7 @@
         "heading": "Los personajes", "intro": "Cámbiales el nombre.", "notice": "", "action": "https://example.com/characters.php",
         "sesskey": "abc", "savedword": "Guardado",
         "roles": [{"role": "herald", "title": "El pregonero", "job": "Cuenta lo que pasa.", "enabled": true, "name": "Mainumby",
-            "figure": "https://example.com/mainumby.webp", "alt": "Mainumby, El pregonero", "bubble": "Acaban de llegar.",
+            "figure": "https://example.com/mainumby.webp", "framed": false, "alt": "Mainumby, El pregonero", "bubble": "Acaban de llegar.",
             "female": false, "herald": true, "signs": false, "own": false, "justsaved": true}],
         "charactername": "Su nombre", "charactersigns": "Firma los avisos", "characterdrop": "Suelta aquí",
         "characterdropor": "o elígelo", "characterdrophint": "Una imagen o un zip.", "characterstageout": "Que salga de escena",
@@ -55,7 +55,7 @@
     {{#roles}}
     <li><article class="ayv-pj-ficha ayv-pj-{{role}}{{^enabled}} ayv-pj-fuera{{/enabled}}" id="ayv-pj-{{role}}" aria-labelledby="ayv-pj-{{role}}-t">
         <form id="ayv-pj-{{role}}-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="character" value="{{role}}"><button class="ayv-sr" type="submit" name="do" value="name" tabindex="-1" aria-hidden="true">{{characternamesave}}</button></form>
-        <div class="ayv-pj-escena">{{#figure}}<img src="{{figure}}" alt="{{alt}}" width="250" height="250">{{/figure}}
+        <div class="ayv-pj-escena">{{#figure}}<img{{#framed}} class="ayv-pj-cuadro"{{/framed}} src="{{figure}}" alt="{{alt}}" width="250" height="250">{{/figure}}
             {{#enabled}}{{#bubble}}<p class="ayv-pj-bocadillo">{{bubble}}</p>{{/bubble}}{{/enabled}}</div>
         <label class="ayv-pj-placa"><small id="ayv-pj-{{role}}-t">{{title}}</small><input form="ayv-pj-{{role}}-f" name="name" value="{{name}}" aria-label="{{charactername}}" maxlength="40" autocomplete="off"></label>
         <div class="ayv-pj-cuerpo">

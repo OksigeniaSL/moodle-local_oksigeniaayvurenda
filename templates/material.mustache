@@ -65,7 +65,7 @@
 <form id="ayv-mt-gestos" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
 <section aria-labelledby="ayv-mt-hay">
     <h2 id="ayv-mt-hay" class="ayv-cf-estante-t">{{materialhave}}</h2>
-    {{^hastiles}}<p class="ayv-cf-nota">{{materialnone}}</p>{{/hastiles}}
+    {{^hastiles}}<p class="ayv-cf-nota ayv-mt-vacio">{{materialnone}}</p>{{/hastiles}}
     {{#hastiles}}
     <ul class="ayv-mt-losetas">
         {{#tiles}}

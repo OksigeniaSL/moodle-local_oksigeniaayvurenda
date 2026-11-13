@@ -9345,3 +9345,321 @@ html[data-bs-theme="dark"] .ayv .ayv-pq-flor .ayv-pq-entra {
     --pj-a: rgba(226, 101, 76, .18);
     --pj-b: rgba(226, 101, 76, .32);
 }
+
+/* «Normas de préstamo» (rules.php), from Jujol's mock-up (13 Nov 2026). Each loan rule is a library loan card, ruled like
+   the ones in a book pocket, its band in the colour of its readers and its counters in sight; every other setting a
+   card with its sentence on top and its gestures under it, each a submit button that saves by itself. The tints are
+   plain rgba, not color-mix(), for the old browsers of the classrooms. */
+.ayv .ayv-nr {
+    --nr-pauta: rgba(30, 43, 42, .07);
+}
+
+html[data-bs-theme="dark"] .ayv .ayv-nr {
+    --nr-pauta: rgba(244, 238, 226, .07);
+}
+
+.ayv .ayv-nr-fichas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 14px;
+    margin: 12px 0 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-nr-ficha {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    height: 100%;
+    padding: 0 16px 14px;
+    border-radius: 4px 4px 10px 10px;
+    background:
+        repeating-linear-gradient(transparent 0 27px, var(--nr-pauta) 27px 28px) 0 54px / 100% calc(100% - 54px) no-repeat,
+        var(--surface);
+    box-shadow: 0 1px 0 var(--line), 0 10px 18px -14px rgba(30, 43, 42, .5);
+}
+
+.ayv .ayv-nr-ficha-green {
+    --ficha: var(--green);
+    --ficha-fondo: rgba(23, 87, 76, .10);
+}
+
+.ayv .ayv-nr-ficha-green2 {
+    --ficha: var(--green2);
+    --ficha-fondo: rgba(44, 122, 106, .12);
+}
+
+.ayv .ayv-nr-ficha-coral {
+    --ficha: var(--coral);
+    --ficha-fondo: rgba(226, 101, 76, .12);
+}
+
+.ayv .ayv-nr-ficha-sun {
+    --ficha: var(--sun);
+    --ficha-fondo: rgba(240, 180, 60, .16);
+}
+
+.ayv .ayv-nr-ficha-night {
+    --ficha: var(--night);
+    --ficha-fondo: rgba(15, 58, 51, .12);
+}
+
+/* Its head: who, on the band of the card; what, in words beside it (not a chip: it is not a button). */
+.ayv .ayv-nr-ficha-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    margin: 0 -16px;
+    padding: 12px 16px 8px;
+    border-top: 6px solid var(--ficha, var(--green));
+    border-radius: 4px 4px 0 0;
+    background: var(--ficha-fondo, rgba(23, 87, 76, .10));
+}
+
+.ayv .ayv-nr-ficha-cab h3 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-nr-ficha-cab span {
+    color: var(--ink);
+    font-weight: 700;
+    opacity: .75;
+}
+
+.ayv .ayv-nr-dice {
+    margin: 0;
+    font-size: .9375rem;
+}
+
+.ayv .ayv-nr-ficha .ayv-cf-numeros {
+    gap: 10px 20px;
+}
+
+.ayv .ayv-nr .ayv-cf-cifra {
+    color: var(--ink);
+}
+
+.ayv .ayv-nr-ficha .ayv-cf-cifra {
+    min-width: 3.5rem;
+    background: var(--surface);
+}
+
+.ayv .ayv-nr-sin b {
+    font-size: 1.375rem;
+}
+
+.ayv .ayv-nr-ficha-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 6px 18px;
+    margin-top: 2px;
+}
+
+/* What is folded on a card or a setting (who and what it is for, taking it away, the currency, the starts): a link
+   without the triangle of the browser. */
+.ayv .ayv-nr-plegado > summary {
+    color: var(--ink);
+    font-size: .875rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-nr-plegado > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-nr-plegado[open] {
+    display: grid;
+    gap: 8px;
+    flex-basis: 100%;
+}
+
+/* A new rule: the blank card, dashed; it opens on who and what, as chips. */
+.ayv .ayv-nr-nueva > details > summary {
+    display: grid;
+    place-items: center;
+    min-height: 100%;
+    padding: 20px 16px;
+    border: 1.5px dashed var(--muted);
+    border-radius: 10px;
+    color: var(--accent);
+    font-family: var(--title);
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-nr-nueva > details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-nr-nueva > details[open] {
+    display: grid;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--green);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.ayv .ayv-nr-nueva > details[open] > summary {
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    justify-items: start;
+}
+
+.ayv .ayv-nr-nueva form {
+    display: grid;
+    gap: 12px;
+}
+
+.ayv .ayv-nr-radios input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ayv .ayv-nr-radios input:checked + .ayv-cf-chapa {
+    border-color: var(--green);
+    background: var(--green);
+    color: var(--cf-crema);
+}
+
+.ayv .ayv-nr-radios input:focus-visible + .ayv-cf-chapa {
+    outline: 3px solid var(--sun);
+    outline-offset: 2px;
+}
+
+/* Every other setting: a card, its sentence, its gestures in sight. */
+.ayv .ayv-nr-ajustes {
+    display: grid;
+    gap: 14px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-nr-ajuste {
+    display: grid;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line), 0 8px 18px -14px rgba(30, 43, 42, .45);
+}
+
+.ayv .ayv-nr-ajuste h2 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-nr-frase {
+    margin: 0;
+    font-size: 1.0625rem;
+}
+
+.ayv .ayv-nr-gestos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px 28px;
+}
+
+.ayv .ayv-nr-grupo {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* A line that carries a link: in full ink, as the link would take any opacity and lose its contrast. */
+.ayv .ayv-nr-pie {
+    margin: 0;
+    color: var(--ink);
+    font-size: .9375rem;
+}
+
+.ayv .ayv-nr-grupo-entera {
+    flex-basis: 100%;
+}
+
+.ayv .ayv-nr-fechas {
+    display: grid;
+    gap: 8px;
+}
+
+.ayv .ayv-nr-fecha {
+    margin: 0;
+}
+
+.ayv .ayv-nr-ajuste .ayv-cf-guardado-fila,
+.ayv .ayv-nr-ficha .ayv-cf-guardado-fila {
+    margin: 0;
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-nr-fichas {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-nr-gestos {
+        gap: 12px 18px;
+    }
+
+    .ayv .ayv-nr-ajuste {
+        padding: 14px 12px;
+    }
+}
+
+/* Material, Jujol's look at it mounted (13 Nov 2026): under some 360 px the tiles go in one column (two of 145 px broke
+   their names and «None lent»); the links on its back in the size of «Its data»; room under the line of an empty shelf. */
+.ayv .ayv-mt .ayv-mt-dorso p,
+.ayv .ayv-mt .ayv-mt-dorso p .ayv-cf-enlace {
+    font-size: .875rem;
+}
+
+.ayv .ayv-mt .ayv-mt-vacio {
+    margin-bottom: 26px;
+}
+
+@media (max-width: 360px) {
+    .ayv .ayv-mt-losetas {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Characters: a portrait the centre uploaded (a square) hangs on the wall of the stage in a thin frame, instead of
+   standing as a figure. */
+.ayv .ayv-pj-escena img.ayv-pj-cuadro {
+    left: 9%;
+    bottom: 34%;
+    width: 150px;
+    height: 150px;
+    padding: 6px;
+    border: 3px solid #8d5e33;
+    background: #f4eee2;
+    object-fit: cover;
+    box-shadow: 0 8px 14px -8px rgba(0, 0, 0, .5);
+    filter: none;
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-pj-escena img.ayv-pj-cuadro {
+        width: 120px;
+        height: 120px;
+    }
+}

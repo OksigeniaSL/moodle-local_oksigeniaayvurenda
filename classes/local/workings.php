@@ -138,53 +138,73 @@ final class workings {
     }
 
     /**
-     * Changes, adds or takes away a loan rule of the library: only the part touched.
+     * Changes, adds or takes away a loan rule of the library, and says where the page goes back to.
      *
      * @param \stdClass $library
      * @param string $index The rule's place, or «new».
      * @return string
      */
     private static function apply_rule(\stdClass $library, string $index): string {
+        $place = self::change_rule($library, $index);
+        return $place === null ? 'ayv-hiw-daily' : 'ayv-hiw-rule-' . $place;
+    }
+
+    /**
+     * Changes, adds or takes away a loan rule of the library: only the part touched. A new one is for the readers and
+     * copies sent («any», or nothing, is any), and starts as the rule a reader of any kind has here; if there is one for
+     * them already, that one is the one touched.
+     *
+     * @param \stdClass $library
+     * @param string $index The rule's place, or «new».
+     * @return int|null Where the rule touched is now, or null when it is gone or was not there.
+     */
+    public static function change_rule(\stdClass $library, string $index): ?int {
         $all = rules::of((int) $library->id);
-        if ($index === 'new') {
-            $who = optional_param('readertype', '*', PARAM_ALPHANUMEXT) ?: '*';
-            foreach ($all as $at => $one) {
-                if ($one['readertype'] === $who && $one['itemtype'] === '*') {
-                    return 'ayv-hiw-rule-' . $at;
+        $type = fn(string $name, string $was) => match ($sent = optional_param($name, '', PARAM_ALPHANUMEXT)) {
+            '' => $was,
+            'any' => '*',
+            default => $sent,
+        };
+        $find = function (string $who, string $what) use ($library): ?int {
+            foreach (rules::of((int) $library->id) as $at => $one) {
+                if ($one['readertype'] === $who && $one['itemtype'] === $what) {
+                    return $at;
                 }
+            }
+            return null;
+        };
+        if ($index === 'new') {
+            $who = $type('readertype', '*');
+            $what = $type('itemtype', '*');
+            $there = $find($who, $what);
+            if ($there !== null) {
+                return $there;
             }
             // It starts as the rule a reader of any kind has here, and is changed in its place.
-            $base = self::rule_for($library, $all);
-            $all[] = ['readertype' => $who, 'itemtype' => '*'] + $base;
+            $all[] = ['readertype' => $who, 'itemtype' => $what] + self::rule_for($library, $all);
             rules::save((int) $library->id, $all);
-            foreach (rules::of((int) $library->id) as $at => $one) {
-                if ($one['readertype'] === $who && $one['itemtype'] === '*') {
-                    return 'ayv-hiw-rule-' . $at;
-                }
-            }
-            return 'ayv-hiw-daily';
+            return $find($who, $what);
         }
         $at = (int) $index;
         if (!isset($all[$at])) {
-            return 'ayv-hiw-daily';
+            return null;
         }
         if (optional_param('remove', 0, PARAM_BOOL)) {
             unset($all[$at]);
             rules::save((int) $library->id, array_values($all));
-            return 'ayv-hiw-daily';
+            return null;
         }
         $rule = $all[$at];
-        $readertype = optional_param('readertype', '', PARAM_ALPHANUMEXT);
-        $itemtype = optional_param('itemtype', '', PARAM_ALPHANUMEXT);
-        if ($readertype !== '' || $itemtype !== '') {
-            $rule['readertype'] = $readertype !== '' ? ($readertype === 'any' ? '*' : $readertype) : $rule['readertype'];
-            $rule['itemtype'] = $itemtype !== '' ? ($itemtype === 'any' ? '*' : $itemtype) : $rule['itemtype'];
+        $who = $type('readertype', $rule['readertype']);
+        $what = $type('itemtype', $rule['itemtype']);
+        if ($who !== $rule['readertype'] || $what !== $rule['itemtype']) {
             // Two rules for the same readers and copies cannot be: the other one stays, this one does not change.
-            foreach ($all as $other => $one) {
-                if ($other !== $at && $one['readertype'] === $rule['readertype'] && $one['itemtype'] === $rule['itemtype']) {
-                    return 'ayv-hiw-rule-' . $at;
-                }
+            $there = $find($who, $what);
+            if ($there !== null) {
+                return $at;
             }
+            $rule['readertype'] = $who;
+            $rule['itemtype'] = $what;
         }
         foreach (
             ['loandays' => [0, 999], 'maxloans' => [0, 99], 'renewals' => [0, 20], 'renewdays' => [1,
@@ -197,12 +217,7 @@ final class workings {
         }
         $all[$at] = $rule;
         rules::save((int) $library->id, $all);
-        foreach (rules::of((int) $library->id) as $place => $one) {
-            if ($one['readertype'] === $rule['readertype'] && $one['itemtype'] === $rule['itemtype']) {
-                return 'ayv-hiw-rule-' . $place;
-            }
-        }
-        return 'ayv-hiw-daily';
+        return $find($rule['readertype'], $rule['itemtype']);
     }
 
     /**
@@ -572,7 +587,7 @@ final class workings {
      * @param \stdClass $library
      * @return string[]
      */
-    private static function readertypes(\stdClass $library): array {
+    public static function readertypes(\stdClass $library): array {
         global $DB;
         $known = $DB->get_fieldset_sql(
             'SELECT DISTINCT readertype FROM {local_oksigeniaayvurenda_reader} WHERE entityid = ?',
@@ -592,7 +607,7 @@ final class workings {
      * @param callable $str
      * @return string
      */
-    private static function who(\stdClass $library, string $type, callable $str): string {
+    public static function who(\stdClass $library, string $type, callable $str): string {
         if ($type === '*') {
             return $str('rulesanyreader');
         }
@@ -607,7 +622,7 @@ final class workings {
      * @param callable $str
      * @return string
      */
-    private static function what(string $type, callable $str): string {
+    public static function what(string $type, callable $str): string {
         if ($type === '*') {
             return $str('rulesanyitem');
         }

@@ -13,185 +13,142 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/rules
 
-    The loan rules of a library: each one a card read as a sentence, changed in its own sheet; a new one from the top.
+    The loan rules of a library, each a library loan card with its counters in sight («−» and «+»), its lights and, at
+    its foot, who and what it is for and taking it away; a dashed card for another one. Under them, a card for each
+    setting of the centre (renewals, notices of late books, what a late book leaves), its sentence on top and its
+    gestures under it. Each gesture is a button of an empty form that sends only what it changes (no JavaScript needed).
+
+    Context variables required for this template:
+    * title, intro, action, sesskey, savedword - the page's words and where gestures go
+    * crier - the herald by the title: figure and puppet, or nothing
+    * shelf, shelfsub, inherited - the shelf of the rules, and what lends while there is none
+    * cards - index, form, colour, who, what, says, steps, hassteps, lights, justsaved, retarget, whochips, whatchips,
+      removelabel, removeyes
+    * newcard - summary, who, what (value, label, checked), wholabel, whatlabel, create, note
+    * settings - id, set, title, says, justsaved, groups (label, steps, lights, chips, haslights, haschips, whole), notes, dates,
+      presets, currency, link, help
 
     Example context (json):
     {
-        "heading": "Normas de préstamo", "intro": "Manda la más precisa.", "inherited": "", "notice": "",
-        "action": "#", "sesskey": "abc", "hascards": true,
-        "cards": [{"who": "Alumnos", "what": "Cualquier ejemplar", "sentence": "Se llevan hasta 1, durante 7 días.",
-            "form": {"index": "0", "readertypes": [{"value": "student", "label": "Alumnos", "selected": true}],
-                "itemtypes": [{"value": "*", "label": "Cualquier ejemplar", "selected": true}], "roomonly": false,
-                "loandays": 7, "nolimit": false, "maxloans": 1, "renewals": 1, "renewdays": 7, "removable": true} }],
-        "newform": {"index": "new", "readertypes": [{"value": "*", "label": "Cualquier lector", "selected": true}],
-            "itemtypes": [{"value": "*", "label": "Cualquier ejemplar", "selected": true}], "roomonly": false,
-            "loandays": 14, "nolimit": false, "maxloans": 1, "renewals": 1, "renewdays": 7, "removable": false},
-        "rulesreader": "Lectores", "rulesitem": "Ejemplares", "rulesdaysplain": "Días", "rulesmaxplain": "A la vez",
-        "rulesrenewals": "Ampliaciones", "rulesrenewdays": "Días de cada ampliación", "rulesremoveone": "Quitar esta norma",
-        "rulesnew": "Nueva norma", "sourcessave": "Guardar", "rulesroomonlyfield": "No se presta: se lee aquí",
-        "rulesnolimit": "Sin límite", "ruleschange": "Cambiar", "rulesprecedence": "Manda la más precisa.",
-        "offsiteclose": "Cerrar", "sanctionsheading": "Si un libro vuelve tarde", "latesentence": "Se avisa y nada más.",
-        "latefacts": [], "lateleft": "", "latereport": "", "menusanctions": "Sanciones y multas",
-        "sanctionscentre": "Vale para todas las bibliotecas de este centro.", "sanctionsmodelegend": "Qué deja",
-        "modes": [{"value": "none", "label": "Solo el aviso", "hint": "Nada más.", "checked": true}],
-        "sanctionsfieldperday": "Días por cada día", "perday": 1, "sanctionsfieldmaxdays": "Como mucho", "maxdays": 30,
-        "sanctionsdayshint": "No se suman.", "sanctionsfieldcents": "Por cada día", "amount": "0.10",
-        "sanctionsfieldmaxcents": "Como mucho", "maxamount": "5.00", "sanctionsfieldblock": "Avisa si debe", "block": "5.00",
-        "sanctionsfieldcurrency": "Moneda", "currencies": [{"code": "EUR", "name": "Euro", "chosen": true}],
-        "sanctionsfieldnotice": "Días hasta el primer aviso", "noticeafter": 1, "sanctionsnoticehint": "Con 1, al día siguiente.",
-        "sanctionsfinehint": "Solo se apunta.", "sanctionsfieldgrace": "Días que no cuentan", "grace": 0, "hasstages": true,
-        "holdsstages": "Etapas", "holdsallstages": "Todas", "allstages": true, "stages": [{"name": "Primaria", "chosen": false}],
-        "adults": true, "sanctionsadults": "También el personal",
-        "renewfromheading": "Al ampliar un préstamo", "renewsentence": "Los días de la ampliación cuentan desde el día que se amplía.",
-        "renewfromdesk": "En el mostrador, «Otra fecha» ofrece también la otra cuenta y un día a mano.",
-        "renewfromlegend": "Desde cuándo cuentan",
-        "noticesheading": "Avisos de retraso", "noticesentence": "A los 15 días de retraso, y luego cada semana.",
-        "noticewho": "A quién: el lector y su tutor.", "latelist": "https://example.com/late.php", "menulate": "Retrasos",
-        "noticespresets": "Empezar como", "presets": [{"value": "school", "label": "Un colegio"}],
-        "noticespresetshint": "Un toque lo deja así.", "noticesfieldafter": "Días de retraso hasta el primer aviso",
-        "noticeseverylegend": "Después, cada cuánto", "rhythms": [{"value": "week", "label": "Cada semana", "checked": true}],
-        "noticesdateslegend": "Las fechas", "datefields": [{"value": "2026-12-20"}, {"value": ""}],
-        "noticesdateshint": "Se repiten cada año.", "noticeswholegend": "A quién", "noticereaders": true,
-        "noticefamilies": true, "noticetutors": false, "noticestoreaders": "Al lector",
-        "noticestofamilies": "A la familia de los pequeños", "noticestotutors": "Al tutor de su grupo", "renewfromcentre": "Vale para todas las bibliotecas de este centro.",
-        "renewfroms": [{"value": "today", "label": "Desde el día que se amplía", "hint": "Vuelve el mismo día de la semana.", "checked": true},
-            {"value": "due", "label": "Desde la fecha en que tenía que volver", "hint": "La fecha sigue la del préstamo.", "checked": false}]
+        "title": "Normas de préstamo", "intro": "Cada número se cambia con «−» y «+».",
+        "action": "https://example.com/rules.php", "sesskey": "abc", "savedword": "Guardado", "crier": null,
+        "shelf": "Las normas", "shelfsub": "Manda la más precisa.", "inherited": "",
+        "cards": [{"index": "0", "form": "ayv-nr-norma-0-f", "colour": "coral", "who": "Alumnos", "what": "cualquier ejemplar",
+            "says": "Se llevan uno cada vez, durante 7 días.", "hassteps": true, "justsaved": true,
+            "steps": [{"form": "ayv-nr-norma-0-f", "field": "loandays", "label": "Durante", "shown": "7", "unit": "días",
+                "less": 6, "more": 8, "atmin": false, "atmax": false, "lesslabel": "Uno menos", "morelabel": "Uno más",
+                "still": false}],
+            "lights": [{"form": "ayv-nr-norma-0-f", "name": "loandays", "value": 0, "pressed": false,
+                "label": "Solo en la biblioteca"}],
+            "retarget": "Para quién y qué",
+            "whochips": [{"value": "student", "label": "Alumnos", "pressed": true}],
+            "whatchips": [{"value": "any", "label": "Cualquier ejemplar", "pressed": true}],
+            "removelabel": "Quitar esta norma", "removeyes": "Sí, quitarla"}],
+        "newcard": {"summary": "+ Otra norma", "wholabel": "Para", "whatlabel": "Qué", "create": "Crear la norma",
+            "note": "Nace como la general.", "who": [{"value": "any", "label": "Cualquier lector", "checked": true}],
+            "what": [{"value": "any", "label": "Cualquier ejemplar", "checked": true}]},
+        "settings": [{"id": "ayv-nr-tarde", "set": "late", "title": "Si un libro vuelve tarde", "says": "Se avisa y nada más.",
+            "justsaved": false, "groups": [{"label": "", "steps": [], "lights": [], "haslights": false, "haschips": true, "whole": true,
+                "chips": [{"form": "ayv-nr-tarde-f", "name": "mode", "value": "none", "label": "Solo el aviso", "pressed": true}]}],
+            "notes": [{"text": "Vale para todo el centro."}],
+            "dates": {"legend": "Las fechas", "hint": "Cada año.", "save": "Guardar los días",
+                "fields": [{"value": "2026-12-18", "label": "Fecha 1"}]},
+            "presets": {"summary": "Empezar como", "hint": "Un toque.", "list": [{"form": "ayv-nr-tarde-f", "name": "preset",
+                "value": "school", "label": "Un colegio", "pressed": false}]},
+            "currency": {"summary": "Moneda: EUR", "label": "Moneda", "save": "Guardar",
+                "list": [{"code": "EUR", "name": "Euro"}]},
+            "link": {"lead": "Lo que deben:", "url": "https://example.com/sanctions.php", "label": "Sanciones y multas"},
+            "help": {"url": "https://example.com/help.php", "label": "¿Cómo funciona?"} }]
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
-{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<p class="ayv-rules-top"><button type="button" class="ayv-button" data-ayv-open="ayv-rule-new">{{rulesnew}}</button></p>
-{{#inherited}}<p class="ayv-empty">{{inherited}}</p>{{/inherited}}
-{{#hascards}}
-<ul class="ayv-rules">
-{{#cards}}
-    <li class="ayv-rule">
-        <p class="ayv-rule-head"><span class="ayv-rule-who">{{who}}</span> <span class="ayv-chip">{{what}}</span></p>
-        <p class="ayv-rule-sentence">{{sentence}}</p>
-        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-rule-{{form.index}}">{{ruleschange}}</button></p>
-        {{#form}}{{> local_oksigeniaayvurenda/rules_form}}{{/form}}
-    </li>
-{{/cards}}
+<div class="ayv-cf ayv-nr">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{title}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+    </div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
+<section class="ayv-nr-las" id="ayv-nr-las" aria-labelledby="ayv-nr-las-t">
+    <h2 class="ayv-cf-estante-t" id="ayv-nr-las-t">{{shelf}}</h2>
+    <p class="ayv-cf-estante-s">{{shelfsub}}</p>
+    {{#inherited}}<p class="ayv-nr-frase">{{inherited}}</p>{{/inherited}}
+    <ul class="ayv-nr-fichas">
+        {{#cards}}
+        <li><article class="ayv-nr-ficha ayv-nr-ficha-{{colour}}" id="ayv-nr-norma-{{index}}" aria-labelledby="ayv-nr-norma-{{index}}-t">
+            <form id="{{form}}" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="rule" value="{{index}}"></form>
+            <header class="ayv-nr-ficha-cab"><h3 id="ayv-nr-norma-{{index}}-t">{{who}}</h3><span>{{what}}</span></header>
+            {{#justsaved}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
+            <p class="ayv-nr-dice">{{says}}</p>
+            {{#hassteps}}<div class="ayv-cf-numeros">
+                {{#steps}}<div class="ayv-nr-grupo"><span class="ayv-cf-rotulo">{{label}}</span>{{#still}}<span class="ayv-cf-cifra ayv-nr-sin"><b>{{shown}}</b></span>{{/still}}{{^still}}<span class="ayv-cf-paso" role="group" aria-label="{{label}}"><button class="ayv-cf-menos" type="submit" form="{{form}}" name="{{field}}" value="{{less}}" aria-label="{{lesslabel}}"{{#atmin}} disabled{{/atmin}}>−</button><span class="ayv-cf-cifra"><b>{{shown}}</b> {{unit}}</span><button class="ayv-cf-mas" type="submit" form="{{form}}" name="{{field}}" value="{{more}}" aria-label="{{morelabel}}"{{#atmax}} disabled{{/atmax}}>+</button></span>{{/still}}</div>{{/steps}}
+            </div>{{/hassteps}}
+            <div class="ayv-cf-luces">{{#lights}}<button class="ayv-cf-luz" type="submit" form="{{form}}" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/lights}}</div>
+            <div class="ayv-nr-ficha-pie">
+                <details class="ayv-nr-plegado"><summary>{{retarget}}</summary>
+                    <div class="ayv-cf-chapas">{{#whochips}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="readertype" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/whochips}}</div>
+                    <div class="ayv-cf-chapas">{{#whatchips}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="itemtype" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/whatchips}}</div>
+                </details>
+                <details class="ayv-nr-plegado"><summary>{{removelabel}}</summary><button class="ayv-button ayv-cf-peligro" type="submit" form="{{form}}" name="remove" value="1">{{removeyes}}</button></details>
+            </div>
+        </article></li>
+        {{/cards}}
+        {{#newcard}}
+        <li class="ayv-nr-nueva"><details><summary>{{summary}}</summary>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="rule" value="new">
+                <div class="ayv-nr-grupo"><span class="ayv-cf-rotulo" id="ayv-nr-nueva-quien">{{wholabel}}</span><div class="ayv-cf-chapas ayv-nr-radios" role="radiogroup" aria-labelledby="ayv-nr-nueva-quien">{{#who}}<input type="radio" name="readertype" value="{{value}}" id="ayv-nr-quien-{{value}}"{{#checked}} checked{{/checked}}><label class="ayv-cf-chapa" for="ayv-nr-quien-{{value}}">{{label}}</label>{{/who}}</div></div>
+                <div class="ayv-nr-grupo"><span class="ayv-cf-rotulo" id="ayv-nr-nueva-que">{{whatlabel}}</span><div class="ayv-cf-chapas ayv-nr-radios" role="radiogroup" aria-labelledby="ayv-nr-nueva-que">{{#what}}<input type="radio" name="itemtype" value="{{value}}" id="ayv-nr-que-{{value}}"{{#checked}} checked{{/checked}}><label class="ayv-cf-chapa" for="ayv-nr-que-{{value}}">{{label}}</label>{{/what}}</div></div>
+                <p class="ayv-cf-nota">{{note}}</p>
+                <p class="ayv-cf-fila"><button class="ayv-button" type="submit">{{create}}</button></p>
+            </form>
+        </details></li>
+        {{/newcard}}
+    </ul>
+</section>
+<ul class="ayv-nr-ajustes">
+    {{#settings}}
+    <li><section class="ayv-nr-ajuste" id="{{id}}" aria-labelledby="{{id}}-t">
+        <form id="{{id}}-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{set}}"></form>
+        <h2 id="{{id}}-t">{{title}}</h2>
+        {{#justsaved}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
+        <p class="ayv-nr-frase">{{says}}</p>
+        <div class="ayv-nr-gestos">
+            {{#groups}}<div class="ayv-nr-grupo{{#whole}} ayv-nr-grupo-entera{{/whole}}">{{#label}}<span class="ayv-cf-rotulo">{{label}}</span>{{/label}}
+                {{#steps}}<span class="ayv-cf-paso" role="group" aria-label="{{label}}"><button class="ayv-cf-menos" type="submit" form="{{form}}" name="{{field}}" value="{{less}}" aria-label="{{lesslabel}}"{{#atmin}} disabled{{/atmin}}>−</button><span class="ayv-cf-cifra"><b>{{shown}}</b> {{unit}}</span><button class="ayv-cf-mas" type="submit" form="{{form}}" name="{{field}}" value="{{more}}" aria-label="{{morelabel}}"{{#atmax}} disabled{{/atmax}}>+</button></span>{{/steps}}
+                {{#haslights}}<span class="ayv-cf-luces">{{#lights}}<button class="ayv-cf-luz" type="submit" form="{{form}}" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/lights}}</span>{{/haslights}}
+                {{#haschips}}<span class="ayv-cf-chapas">{{#chips}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/chips}}</span>{{/haschips}}
+            </div>{{/groups}}
+        </div>
+        {{#dates}}
+        <form class="ayv-nr-fechas" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="notices"><input type="hidden" name="dates" value="1">
+            <span class="ayv-cf-rotulo">{{legend}}</span>
+            <div class="ayv-nr-gestos">{{#fields}}<label class="ayv-nr-fecha"><span class="ayv-sr">{{label}}</span><input type="date" name="noticedates[]" value="{{value}}"></label>{{/fields}}</div>
+            <p class="ayv-cf-nota">{{hint}}</p>
+            <p class="ayv-cf-fila"><button class="ayv-button" type="submit">{{save}}</button></p>
+        </form>
+        {{/dates}}
+        {{#currency}}
+        <details class="ayv-nr-plegado"><summary>{{summary}}</summary>
+            <form class="ayv-cf-fila" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="late">
+                <label for="ayv-nr-moneda">{{label}}</label><input id="ayv-nr-moneda" name="currency" list="ayv-nr-monedas" size="8" autocomplete="off">
+                <datalist id="ayv-nr-monedas">{{#list}}<option value="{{code}}">{{name}}</option>{{/list}}</datalist>
+                <button class="ayv-button" type="submit">{{save}}</button>
+            </form>
+        </details>
+        {{/currency}}
+        {{#notes}}<p class="ayv-cf-nota">{{text}}</p>{{/notes}}
+        {{#presets}}
+        <details class="ayv-nr-plegado"><summary>{{summary}}</summary>
+            <p class="ayv-cf-nota">{{hint}}</p>
+            <span class="ayv-cf-chapas">{{#list}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="{{name}}" value="{{value}}">{{label}}</button>{{/list}}</span>
+        </details>
+        {{/presets}}
+        {{#link}}<p class="ayv-nr-pie">{{lead}} <a class="ayv-cf-enlace" href="{{url}}">{{label}}</a></p>{{/link}}
+        {{#help}}<p class="ayv-nr-pie"><a class="ayv-cf-enlace" href="{{url}}">{{label}}</a></p>{{/help}}
+    </section></li>
+    {{/settings}}
 </ul>
-{{/hascards}}
-<p class="ayv-field-hint">{{rulesprecedence}}</p>
-{{#newform}}{{> local_oksigeniaayvurenda/rules_form}}{{/newform}}
-<section class="ayv-section ayv-sanction-rule">
-    <h2 class="ayv-section-title">{{renewfromheading}}</h2>
-    <div class="ayv-sanction-card">
-        <p class="ayv-rule-sentence">{{renewsentence}}</p>
-        <p class="ayv-field-hint">{{renewfromdesk}}</p>
-        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-renewfrom">{{ruleschange}}</button></p>
-    </div>
-    <dialog class="ayv-modal" id="ayv-renewfrom" aria-labelledby="ayv-renewfrom-title">
-        <div class="ayv-modal-head"><h3 id="ayv-renewfrom-title" class="ayv-section-title">{{renewfromheading}}</h3>
-            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <p class="ayv-field-hint">{{renewfromcentre}}</p>
-        <form method="post" action="{{action}}" class="ayv-rule-form">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="renewfrom">
-            <fieldset class="ayv-dig-set"><legend>{{renewfromlegend}}</legend>
-                <div class="ayv-sanction-modes">
-                    {{#renewfroms}}<label class="ayv-sanction-mode"><input type="radio" name="renewfrom" value="{{value}}" {{#checked}}checked{{/checked}}><span><b>{{label}}</b>{{hint}}</span></label>{{/renewfroms}}
-                </div>
-            </fieldset>
-            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
-        </form>
-    </dialog>
-</section>
-<section class="ayv-section ayv-sanction-rule">
-    <h2 class="ayv-section-title">{{noticesheading}}</h2>
-    <div class="ayv-sanction-card">
-        <p class="ayv-rule-sentence">{{noticesentence}}</p>
-        <p class="ayv-field-hint">{{noticewho}}</p>
-        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-notices">{{ruleschange}}</button>
-            <a class="ayv-button ayv-button-quiet" href="{{latelist}}">{{menulate}}</a></p>
-    </div>
-    <dialog class="ayv-modal" id="ayv-notices" aria-labelledby="ayv-notices-title">
-        <div class="ayv-modal-head"><h3 id="ayv-notices-title" class="ayv-section-title">{{noticesheading}}</h3>
-            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <p class="ayv-field-hint">{{renewfromcentre}}</p>
-        <form method="post" action="{{action}}" class="ayv-rule-form">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notices">
-            <fieldset class="ayv-dig-set"><legend>{{noticespresets}}</legend>
-                <p class="ayv-notice-presets">{{#presets}}<button type="submit" class="ayv-button ayv-button-quiet" name="preset" value="{{value}}">{{label}}</button>{{/presets}}</p>
-                <p class="ayv-field-hint">{{noticespresetshint}}</p>
-            </fieldset>
-        </form>
-        <form method="post" action="{{action}}" class="ayv-rule-form" data-ayv-whens>
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notices">
-            <div class="ayv-rule-numbers">
-                <label class="ayv-field ayv-dig-field">{{noticesfieldafter}} <input type="number" name="noticeafter" min="1" max="90" value="{{noticeafter}}"></label>
-            </div>
-            <p class="ayv-field-hint">{{sanctionsnoticehint}}</p>
-            <fieldset class="ayv-dig-set"><legend>{{noticeseverylegend}}</legend>
-                <div class="ayv-segmented">{{#rhythms}}<label><input type="radio" name="noticeevery" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/rhythms}}</div>
-            </fieldset>
-            <fieldset class="ayv-dig-set" data-ayv-when="noticeevery=dates"><legend>{{noticesdateslegend}}</legend>
-                <div class="ayv-notice-dates">{{#datefields}}<span class="ayv-field"><input type="date" name="noticedates[]" value="{{value}}" aria-label="{{noticesdateslegend}}"></span>{{/datefields}}</div>
-                <p class="ayv-field-hint">{{noticesdateshint}}</p>
-            </fieldset>
-            <fieldset class="ayv-dig-set"><legend>{{noticeswholegend}}</legend>
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="noticereaders" value="1" {{#noticereaders}}checked{{/noticereaders}}> {{noticestoreaders}}</label>
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="noticefamilies" value="1" {{#noticefamilies}}checked{{/noticefamilies}}> {{noticestofamilies}}</label>
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="noticetutors" value="1" {{#noticetutors}}checked{{/noticetutors}}> {{noticestotutors}}</label>
-            </fieldset>
-            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
-        </form>
-    </dialog>
-</section>
-<section class="ayv-section ayv-sanction-rule">
-    <h2 class="ayv-section-title">{{sanctionsheading}}</h2>
-    <div class="ayv-sanction-card">
-        <p class="ayv-rule-sentence">{{latesentence}}</p>
-        {{#latefacts}}<p class="ayv-field-hint">{{fact}}</p>{{/latefacts}}
-        {{#lateleft}}<p class="ayv-field-hint">{{lateleft}}</p>{{/lateleft}}
-        <p class="ayv-rule-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-sanctions">{{ruleschange}}</button>
-            {{#latereport}}<a class="ayv-button ayv-button-quiet" href="{{latereport}}">{{menusanctions}}</a>{{/latereport}}
-            {{#latehelp}}<a class="ayv-button ayv-button-quiet" href="{{latehelp}}">{{latehelplabel}}</a>{{/latehelp}}</p>
-    </div>
-    <dialog class="ayv-modal" id="ayv-sanctions" aria-labelledby="ayv-sanctions-title">
-        <div class="ayv-modal-head"><h3 id="ayv-sanctions-title" class="ayv-section-title">{{sanctionsheading}}</h3>
-            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <p class="ayv-field-hint">{{sanctionscentre}}</p>
-        <form method="post" action="{{action}}" class="ayv-rule-form" data-ayv-whens>
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sanctions">
-            <fieldset class="ayv-dig-set"><legend>{{sanctionsmodelegend}}</legend>
-                <div class="ayv-sanction-modes">
-                    {{#modes}}<label class="ayv-sanction-mode"><input type="radio" name="mode" value="{{value}}" {{#checked}}checked{{/checked}}><span><b>{{label}}</b>{{hint}}</span></label>{{/modes}}
-                </div>
-            </fieldset>
-            <p class="ayv-field-hint">{{sanctionsnoticehint}}</p>
-            <div data-ayv-when="mode=days">
-                <div class="ayv-rule-numbers">
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldperday}} <input type="number" name="perday" min="1" max="30" value="{{perday}}"></label>
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldmaxdays}} <input type="number" name="maxdays" min="1" max="365" value="{{maxdays}}"></label>
-                </div>
-                <p class="ayv-field-hint">{{sanctionsdayshint}}</p>
-            </div>
-            <div data-ayv-when="mode=fine">
-                <div class="ayv-rule-numbers">
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldcents}} <input type="number" name="amount" min="0.01" step="0.01" value="{{amount}}"></label>
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldmaxcents}} <input type="number" name="maxamount" min="0.01" step="0.01" value="{{maxamount}}"></label>
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldblock}} <input type="number" name="block" min="0.01" step="0.01" value="{{block}}"></label>
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldcurrency}} <select name="currency">{{#currencies}}<option value="{{code}}"{{#chosen}} selected{{/chosen}}>{{name}}</option>{{/currencies}}</select></label>
-                </div>
-                <p class="ayv-field-hint">{{sanctionsfinehint}}</p>
-            </div>
-            <div data-ayv-when="mode=days,fine">
-                <div class="ayv-rule-numbers">
-                    <label class="ayv-field ayv-dig-field">{{sanctionsfieldgrace}} <input type="number" name="grace" min="0" max="30" value="{{grace}}"></label>
-                </div>
-                {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{holdsstages}}</legend>
-                    <div class="ayv-segmented"><label><input type="checkbox" name="allstages" value="1" {{#allstages}}checked{{/allstages}}><span>{{holdsallstages}}</span></label>
-                    {{#stages}}<label><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}><span>{{name}}</span></label>{{/stages}}</div>
-                </fieldset>{{/hasstages}}
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="adults" value="1" {{#adults}}checked{{/adults}}> {{sanctionsadults}}</label>
-            </div>
-            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
-        </form>
-    </dialog>
-</section>
+</div>

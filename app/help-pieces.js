@@ -97,29 +97,23 @@ window.AYVHelpPieces = {
             return h.say(7);
         });
     },
-    // The loan rules: one read as a sentence, changing it, and a new one for an exception.
+    // The loan rules: a card, a number changed with its «+» and kept, and a new card for an exception.
     rules: function(h) {
         'use strict';
-        return h.point('.ayv-rule').then(function() {
+        return h.point('.ayv-nr-ficha').then(function() {
             return h.say(0);
         }).then(function() {
-            return Promise.all([h.say(1), h.tap('.ayv-rule-actions button').then(function() {
-                return h.point('dialog[open] .ayv-rule-numbers');
+            return Promise.all([h.say(1), h.tap('.ayv-nr-ficha .ayv-cf-mas[name="loandays"]').then(function() {
+                return h.point('.ayv-nr-ficha .ayv-cf-guardado');
             })]);
         }).then(function() {
-            return h.tap('dialog[open] .ayv-modal-close');
+            return h.tap('.ayv-nr-nueva > details > summary');
         }).then(function() {
-            return Promise.all([h.say(2), h.tap('[data-ayv-open="ayv-rule-new"]').then(function() {
-                return h.choose('#ayv-rule-new select[name="readertype"]', h.codes.ruletype);
-            }).then(function() {
-                return h.type('#ayv-rule-new input[name="loandays"]', '30');
-            }).then(function() {
-                return h.type('#ayv-rule-new input[name="maxloans"]', '5');
-            })]);
+            return Promise.all([h.say(2), h.tap('label[for="ayv-nr-quien-' + h.codes.ruletype + '"]')]);
         }).then(function() {
-            return h.you(3, '#ayv-rule-new button[value="save"]');
+            return h.you(3, '.ayv-nr-nueva .ayv-button');
         }).then(function() {
-            return h.point('.ayv-rule:nth-child(2)');
+            return h.point('.ayv-nr-ficha .ayv-cf-guardado');
         }).then(function() {
             return h.say(4);
         }).then(function() {
@@ -735,23 +729,27 @@ window.AYVHelpPieces = {
             return h.you(4, '.ayv-tu-grupo');
         });
     },
-    // What a late book leaves: off of itself; days, a fine, how to save it, how it reads, and who has the last word.
+    // What a late book leaves: off of itself; days, a fine, the days kept, how it reads, and who has the last word. Each
+    // chip saves itself: the next step waits for what only the page after it has (its counters).
     sanctions: function(h) {
         'use strict';
-        return h.point('.ayv-sanction-card').then(function() {
+        var late = '#ayv-nr-tarde';
+        return h.point(late).then(function() {
             return h.say(0);
         }).then(function() {
-            return h.tap('[data-ayv-open="ayv-sanctions"]');
+            return Promise.all([h.say(1), h.tap(late + ' button[name="mode"][value="days"]').then(function() {
+                return h.point(late + ' .ayv-cf-mas[name="perday"]');
+            })]);
         }).then(function() {
-            return Promise.all([h.say(1), h.tap('#ayv-sanctions input[name="mode"][value="days"]')]);
+            return Promise.all([h.say(2), h.tap(late + ' button[name="mode"][value="fine"]').then(function() {
+                return h.point(late + ' .ayv-cf-mas[name="cents"]');
+            })]);
         }).then(function() {
-            return Promise.all([h.say(2), h.tap('#ayv-sanctions input[name="mode"][value="fine"]')]);
+            return h.you(3, late + ' button[name="mode"][value="days"]');
         }).then(function() {
-            return h.tap('#ayv-sanctions input[name="mode"][value="days"]');
+            return h.point(late + ' .ayv-cf-mas[name="perday"]');
         }).then(function() {
-            return h.you(3, '#ayv-sanctions button[type="submit"]:not(.ayv-modal-close)');
-        }).then(function() {
-            return h.point('.ayv-sanction-card');
+            return h.point(late + ' .ayv-nr-frase');
         }).then(function() {
             return h.say(4);
         }).then(function() {

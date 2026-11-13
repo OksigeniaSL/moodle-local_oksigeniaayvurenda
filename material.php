@@ -180,6 +180,10 @@ $words = ['materialhave', 'materialnone', 'materialother', 'materialotherhint', 
 foreach ($words as $key) {
     $data[$key] = $str($key);
 }
+// With nothing yet, there is no «another»: just «Add».
+if (!$tiles) {
+    $data['materialother'] = $str('materialsave');
+}
 $url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($str('materialtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/material', $data), $library, '', [
     'search' => false,
