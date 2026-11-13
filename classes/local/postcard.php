@@ -194,7 +194,7 @@ final class postcard {
 
     /**
      * A text in its box: centred up and down by its ink, to the left or in the middle; smaller down to its minimum if it
-     * does not fit, and cut to the width if not even then.
+     * does not fit, and cut to the width if not even then. The diploma writes its texts with it too.
      *
      * @param \GdImage $image
      * @param string $art The art package's folder.
@@ -202,7 +202,7 @@ final class postcard {
      * @param string $text
      * @param string $colour #rrggbb
      */
-    private static function text($image, string $art, array $box, string $text, string $colour): void {
+    public static function text($image, string $art, array $box, string $text, string $colour): void {
         $font = $art . '/fuentes/' . $box['fuente'];
         if (!is_readable($font) || $text === '') {
             return;

@@ -272,6 +272,9 @@ $data = [
     'holds' => array_map(fn($h) => ['title' => $h['title'], 'state' => $h['ready'] ? $str('profileholdready', $h['until'])
         : $str('profileholdwaiting')], $record['holds']),
     'hasholds' => (bool) $record['holds'],
+    // The diplomas of their full bingo cards, to print for whoever has no account to download theirs.
+    'diplomas' => \local_oksigeniaayvurenda\local\diploma::of_reader($reader, time(), $str),
+    'profilediplomas' => $str('profilediplomas'),
     'readheading' => $str($record['read']['total'] === 1 ? 'profilereadone' : 'profileread', (object) ['year' => $record['year'],
         'count' => $record['read']['total']]),
     'read' => array_map(

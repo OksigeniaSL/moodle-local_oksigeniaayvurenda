@@ -20,7 +20,7 @@
     A cartilla on the reader's card (Jujol's mock-up of 13 November): the printed card of nine squares, each filled with
     the desk's date stamp or a link to the books that fill it, its lines in highlighter, the big stamp when it is full;
     beside it, what it is, how it goes, Mainumby when there is something to celebrate, and how it is played (not once it
-    is full: no square is left to touch).
+    is full: no square is left to touch). With a full card and the art package, its diploma, to download.
 
     Example context (json):
     {
@@ -45,7 +45,9 @@
         "cartillasquares": "Las nueve casillas", "cartillahowtitle": "Cómo se juega.",
         "cartillahow": "Cada libro que te llevas del mostrador llena una casilla.",
         "cartillahownew": "Toca una casilla para ver qué libros la llenan.", "cartillaonlyyou": "Solo la ves tú.",
-        "cartillaemblem": "https://example.com/emblema-pequeno.svg"
+        "cartillaemblem": "https://example.com/emblema-pequeno.svg",
+        "diploma": {"img": "https://example.com/diploma.php?small=1", "url": "https://example.com/diploma.php?download=1",
+            "alt": "Tu diploma de «La cartilla de otoño»", "save": "Descargar tu diploma"}
     }
 }}
 <div class="ayv-ct-juego{{^joined}} ayv-ct-juego-nueva{{/joined}}">
@@ -67,6 +69,7 @@
         {{#text}}<p>{{text}}</p>{{/text}}
         {{#count}}<p class="ayv-ct-cuenta">{{count}}</p>{{/count}}
         {{#cheer}}<div class="ayv-ct-pajaro">{{#figure}}<img src="{{figure}}" alt="" width="96" height="96">{{/figure}}<p>{{text}}</p></div>{{/cheer}}
+        {{#diploma}}<div class="ayv-ct-diploma"><a href="{{url}}" download><img src="{{img}}" alt="{{alt}}" width="640" height="452" loading="lazy"></a><a class="ayv-button ayv-ct-diploma-bajar" href="{{url}}" download>{{save}}</a></div>{{/diploma}}
         {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button ayv-ct-jugar">{{cartillajoin}}</button></form>{{/canjoin}}
         {{^full}}<p class="ayv-ct-como"><b>{{cartillahowtitle}}</b> {{#joined}}{{cartillahow}}{{/joined}}{{^joined}}{{cartillahownew}}{{/joined}}</p>{{/full}}
         <p class="ayv-ct-solo">{{cartillaonlyyou}}</p>

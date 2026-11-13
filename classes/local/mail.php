@@ -73,6 +73,17 @@ final class mail {
             's' => self::seal('postcard', $loanid, 'p')]))->out(false);
     }
 
+    /**
+     * The address of the diploma of a full bingo card (the reader's in the challenge): drawn each time, nothing kept.
+     *
+     * @param int $joinedid
+     * @return string
+     */
+    public static function diploma(int $joinedid): string {
+        return (new \moodle_url('/local/oksigeniaayvurenda/mailimage.php', ['a' => 'diploma', 'i' => $joinedid, 'n' => 'd',
+            's' => self::seal('diploma', $joinedid, 'd')]))->out(false);
+    }
+
     /** @var string[] What every mail program shows: WebP is not among them. */
     private const TYPES = ['jpg', 'png', 'gif'];
 

@@ -84,7 +84,9 @@ $crier = function (string $pose) use ($library) {
         return null;
     }
     $step = characters::step($entityid);
-    return ['figure' => characters::figure('herald', $pose, $step), 'puppet' => characters::puppet('herald', $pose, $step)];
+    // Without the art package there is no herald to show.
+    $figure = characters::figure('herald', $pose, $step);
+    return $figure ? ['figure' => $figure, 'puppet' => characters::puppet('herald', $pose, $step)] : null;
 };
 if (!$id) {
     // The ones done before, as minutes: the open one first.

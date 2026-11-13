@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.261.0 (2026-11-13)
+
+- The diploma of a full bingo card, a «subidón» of the review of 12 November, from Gaudí's art (art package 0.1.68).
+  - When a reader fills the nine squares of a bingo card, they get a diploma: Gaudí's paper, the nine drawings of
+    their card with their seals, their first name, the card's name (in two lines when it is long), the day of the
+    ninth book, the library's name and its logo when it has one.
+  - It is drawn each time from the card, nothing kept, as a JPEG that prints on A4 and reads on a phone.
+  - **The reader's card**: under the full card, the diploma, to download.
+  - **The reader's record**: «Their diplomas», for the staff to print one for a reader without an account.
+  - **The family**: the morning after, the family of a flower reader gets it by e-mail, in the centre's own words and
+    time, once the centre turns it on in «How your library works», where the diploma's sentence shows a sample with
+    the library's own name and logo. It starts off.
+  - The morning also notes the day each card filled for whoever never looked at it, and a full card says it was
+    finished the day of its ninth book, as its diploma, not the day its reader first looked.
+  - Without the art package, there is no diploma and nothing of it shows.
+- The materials page and the stocktake no longer draw an empty picture of the herald on a site without the art
+  package (the HTML validator of the Marketplace lab).
+
 ## 0.260.2 (2026-11-13)
 
 - A reader's page and the late notice count the days a book is late as the desk and the list of late books do: calendar

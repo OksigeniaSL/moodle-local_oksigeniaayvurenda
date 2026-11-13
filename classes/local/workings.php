@@ -45,7 +45,7 @@ final class workings {
 
     /** @var string[] The colours of the spines, by shelf and kind. */
     private const SPINES = ['rule' => 'green', 'door' => 'coral', 'lights' => 'sun', 'route' => 'green2', 'postcard' => 'coral',
-        'sign' => 'coral', 'challenges' => 'sun',
+        'diploma' => 'sun', 'sign' => 'coral', 'challenges' => 'sun',
         'card' => 'green2', 'history' => 'green', 'photos' => 'coral', 'skin' => 'night', 'name' => 'green', 'year' => 'coral',
         'classification' => 'sun', 'letter' => 'green2', 'zone' => 'night'];
 
@@ -99,6 +99,12 @@ final class workings {
         if ($firstbook !== -1) {
             firstbook::save($entityid, (bool) $firstbook);
             return 'ayv-hiw-firstbook';
+        }
+        // The diploma of a full bingo card, to the family.
+        $diploma = optional_param('diploma', -1, PARAM_INT);
+        if ($diploma !== -1) {
+            diploma::save($entityid, (bool) $diploma);
+            return 'ayv-hiw-diploma';
         }
         $stages = holds::stages($entityid, time());
         $challenge = optional_param_array('challenge', [], PARAM_INT);
@@ -402,6 +408,19 @@ final class workings {
                 'note' => $str('hiwfirstbooknote'),
             ],
         ]);
+        // The diploma of a full bingo card: every reader downloads theirs; the family of a young one, if the centre wants.
+        if (diploma::drawable()) {
+            $diploma = diploma::on($entityid);
+            $voice[] = $phrase('diploma', 'diploma', $str('hiwspinediploma'), $str(
+                $diploma ? 'hiwdiplomaon' : 'hiwdiplomaoff'
+            ), [
+                'diploma' => [
+                    'img' => diploma::sample($library),
+                    'light' => $chip('diploma', $diploma ? '0' : '1', $str('hiwdiplomalight'), $diploma),
+                    'note' => $str('hiwdiplomanote'),
+                ],
+            ]);
+        }
         if ($classes) {
             $off = challenges::stages_off($entityid);
             $on = array_values(array_diff($stages, $off));

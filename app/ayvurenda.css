@@ -12111,3 +12111,53 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
 .ayv .ayv-or-postal.ayv-or-postal-gaudi::after {
     display: none;
 }
+
+/* The diploma of a full bingo card (0.261): on the reader's card, to download; on their record, for the staff to print. */
+.ayv .ayv-ct-diploma {
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+}
+
+.ayv .ayv-ct-diploma a:first-child {
+    display: block;
+    width: 100%;
+}
+
+.ayv .ayv-ct-diploma img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 8px 22px rgba(30, 43, 42, .18);
+}
+
+.ayv .ayv-profile-diplomas {
+    display: grid;
+    gap: .8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-profile-diplomas li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .8rem 1rem;
+}
+
+.ayv .ayv-profile-diplomas img {
+    display: block;
+    width: 160px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(30, 43, 42, .16);
+}
+
+.ayv .ayv-profile-diplomas li > span {
+    display: grid;
+    gap: .4rem;
+    justify-items: start;
+    min-width: 0;
+}

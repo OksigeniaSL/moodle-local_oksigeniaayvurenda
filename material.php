@@ -158,11 +158,14 @@ foreach (materialshelf::KINDS as $kind) {
 }
 $entity = (int) $library->entityid;
 $step = \local_oksigeniaayvurenda\local\characters::step($entity);
+// The herald only where the skin shows whole figures and the art package brings hers (a site with the plugin alone has none).
+$figure = \local_oksigeniaayvurenda\local\characters::whole($entity)
+    ? \local_oksigeniaayvurenda\local\characters::figure('herald', $saved !== '' ? 'celebra' : 'lee', $step) : '';
 $data = [
     'heading' => $str('materialtitle'),
     'intro' => $str('materialintro'),
-    'crier' => \local_oksigeniaayvurenda\local\characters::whole($entity) ? [
-        'figure' => \local_oksigeniaayvurenda\local\characters::figure('herald', $saved !== '' ? 'celebra' : 'lee', $step),
+    'crier' => $figure ? [
+        'figure' => $figure,
         'puppet' => \local_oksigeniaayvurenda\local\characters::puppet('herald', $saved !== '' ? 'celebra' : 'lee', $step),
     ] : null,
     'notice' => $notice,

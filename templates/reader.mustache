@@ -149,6 +149,12 @@
             <ul class="ayv-profile-holds">{{#holds}}<li><b>{{title}}</b> <span>{{state}}</span></li>{{/holds}}</ul>
         </section>
         {{/hasholds}}
+        {{#diplomas.0}}
+        <section class="ayv-profile-box">
+            <h2 class="ayv-profile-heading">{{profilediplomas}}</h2>
+            <ul class="ayv-profile-diplomas">{{#diplomas}}<li><a href="{{url}}" download><img src="{{img}}" alt="{{alt}}" width="160" height="113" loading="lazy"></a><span><b>{{name}}</b><a class="ayv-button ayv-button-quiet" href="{{url}}" download>{{save}}</a></span></li>{{/diplomas}}</ul>
+        </section>
+        {{/diplomas.0}}
         {{#staffonly}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{profileneeds}}</h2>

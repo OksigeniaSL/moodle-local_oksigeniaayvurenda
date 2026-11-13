@@ -271,7 +271,9 @@ final class cartilla {
     public static function view(\stdClass $quest, \stdClass $library, \stdClass $reader, int $now, callable $str): array {
         $joined = !empty($quest->joinedid);
         $card = self::card($quest, $library, (int) $reader->id, $now, $str);
-        quests::note_done($quest, $card['filled'], $now);
+        // A full card was finished the day its ninth book went home, whenever its reader looks: as its diploma says.
+        $finished = $card['full'] ? max(array_column($card['squares'], 'time')) : 0;
+        quests::note_done($quest, $card['filled'], $finished ?: $now);
         $entityid = (int) $library->entityid;
         $art = self::options_art($library);
         $squares = [];
@@ -307,8 +309,8 @@ final class cartilla {
         $said = $cheer ? characters::say($entityid, 'herald', $cheer[0], $cheer[1], 'celebra') : null;
         $days = (int) ceil(((int) $quest->timeend - $now) / DAYSECS);
         $when = $str('questwhen', zones::span((int) $quest->timestart, (int) $quest->timeend, $entityid));
-        if ($full && !empty($quest->timedone)) {
-            $when = $str('cartillafullon', zones::date((int) $quest->timedone, 'strftimedate', $entityid));
+        if ($full) {
+            $when = $str('cartillafullon', zones::date($finished, 'strftimedate', $entityid));
         } else if ($days >= 1 && (int) $quest->timestart <= $now) {
             $when .= ' · ' . ($days === 1 ? $str('cartillalastday') : $str('cartillaleft', $days));
         }
@@ -323,6 +325,36 @@ final class cartilla {
                 ? $str('cartillaoneline') : $str('cartillalines', count($lines))) : '') : '',
             'cheer' => $cheer ? ['text' => $said['text'] ?? get_string($cheer[0], 'local_oksigeniaayvurenda', (object) $cheer[1]),
                 'figure' => $said['figure'] ?? null] : null,
+            // The diploma of the full card (Gaudí's), to keep, print and send on.
+            'diploma' => $full && diploma::drawable() ? self::diploma_links($quest, $library, (int) $reader->id, $str, false)
+                : null,
+        ];
+    }
+
+    /**
+     * Where the diploma of a reader's full card is: small to show, whole to download.
+     *
+     * @param \stdClass $quest
+     * @param \stdClass $library The challenge's library.
+     * @param int $readerid
+     * @param callable $str
+     * @param bool $staff For the staff, about the reader (their diploma, to print); else, to the reader (yours).
+     * @return array img, url, alt and save.
+     */
+    public static function diploma_links(
+        \stdClass $quest,
+        \stdClass $library,
+        int $readerid,
+        callable $str,
+        bool $staff
+    ): array {
+        $params = ['library' => $library->slug, 'quest' => (int) $quest->id, 'reader' => $readerid];
+        $name = format_string($quest->name, true, ['escape' => false]);
+        return [
+            'img' => (new \moodle_url('/local/oksigeniaayvurenda/diploma.php', $params + ['small' => 1]))->out(false),
+            'url' => (new \moodle_url('/local/oksigeniaayvurenda/diploma.php', $params + ['download' => 1]))->out(false),
+            'alt' => $str($staff ? 'profilediplomaalt' : 'diplomacardalt', $name),
+            'save' => $str($staff ? 'profilediplomaprint' : 'diplomadownload'),
         ];
     }
 
@@ -355,15 +387,25 @@ final class cartilla {
      * @return array Spec => URL or null.
      */
     private static function options_art(\stdClass $library): array {
-        $art = [];
+        return array_map(fn($name) => screens::art($name), self::art_names($library));
+    }
+
+    /**
+     * The name of the drawing of each square a library can carry, in the art package (its pages and the diploma's copies).
+     *
+     * @param \stdClass $library
+     * @return string[] Spec => name, without its extension.
+     */
+    public static function art_names(\stdClass $library): array {
+        $names = [];
         foreach (catalogue::corners($library, true, true) as $corner) {
-            $art[(!empty($corner['genre']) ? 'genre:' : 'corner:') . $corner['code']] = !empty($corner['genre'])
-                ? screens::art('genero-' . ($corner['kind'] ?? '')) : screens::art('rincon-' . $corner['code']);
+            $names[(!empty($corner['genre']) ? 'genre:' : 'corner:') . $corner['code']] = !empty($corner['genre'])
+                ? 'genero-' . ($corner['kind'] ?? '') : 'rincon-' . $corner['code'];
         }
         foreach (self::SPECIAL as $special) {
-            $art[$special] = screens::art('casilla-' . $special);
+            $names[$special] = 'casilla-' . $special;
         }
-        return $art;
+        return $names;
     }
 
     /**

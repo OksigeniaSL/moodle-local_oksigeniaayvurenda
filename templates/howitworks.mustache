@@ -104,6 +104,11 @@
                 {{#light}}<span class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></span>{{/light}}</div>
                 <p class="ayv-cf-nota">{{note}}</p>
             {{/firstbook}}
+            {{#diploma}}
+                <div class="ayv-cf-fila">{{#img}}<span class="ayv-or-postal ayv-or-postal-gaudi" aria-hidden="true"><img src="{{img}}" alt="" width="480" height="339"></span>{{/img}}
+                {{#light}}<span class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></span>{{/light}}</div>
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/diploma}}
             {{#reviews}}
                 <div class="ayv-cf-resenas">{{#list}}<button class="ayv-cf-resena" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-resena-texto">{{text}}</span><span class="ayv-cf-resena-firma">{{signature}}</span><span class="ayv-sr">{{label}}</span></button>{{/list}}</div>
             {{/reviews}}

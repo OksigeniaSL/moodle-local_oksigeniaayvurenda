@@ -16,8 +16,8 @@
 
 /**
  * A picture for a notice sent by e-mail: a mail program has no session, so its address carries a seal instead. A book's
- * cover, a library's picture or a character's portrait; and the postcard of a child's first book, which only its family has
- * the address of.
+ * cover, a library's picture or a character's portrait; and the postcard of a child's first book or the diploma of a full
+ * bingo card, which only the family has the address of.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -36,15 +36,19 @@ $itemid = required_param('i', PARAM_INT);
 $name = required_param('n', PARAM_ALPHANUMEXT);
 $seal = required_param('s', PARAM_ALPHANUM);
 
-// The postcard of a first book is drawn from its loan each time: nothing of it is kept.
-if ($area === 'postcard') {
-    $jpeg = hash_equals(mail::seal($area, $itemid, $name), $seal) ? \local_oksigeniaayvurenda\local\postcard::make($itemid) : null;
+// The postcard of a first book and the diploma of a full bingo card are drawn each time: nothing of them is kept.
+if ($area === 'postcard' || $area === 'diploma') {
+    $jpeg = null;
+    if (hash_equals(mail::seal($area, $itemid, $name), $seal)) {
+        $jpeg = $area === 'postcard' ? \local_oksigeniaayvurenda\local\postcard::make($itemid)
+            : \local_oksigeniaayvurenda\local\diploma::make($itemid);
+    }
     if ($jpeg === null) {
         http_response_code(404);
         die;
     }
     @header('Content-Type: image/jpeg');
-    @header('Content-Disposition: inline; filename="primer-libro.jpg"');
+    @header('Content-Disposition: inline; filename="' . ($area === 'postcard' ? 'primer-libro' : 'diploma') . '.jpg"');
     @header('Cache-Control: private, max-age=2592000');
     @header('X-Content-Type-Options: nosniff');
     echo $jpeg;
