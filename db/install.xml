@@ -621,6 +621,7 @@
         <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The end of its last day, in the centre's zone"/>
         <FIELD NAME="goal" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Books to take home"/>
         <FIELD NAME="stages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON list of the stages it is for; null for everyone"/>
+        <FIELD NAME="squares" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="A cartilla: JSON list of its nine squares (corner:8, genre:g2, new, voice, rescued); null for a challenge of so many books"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>

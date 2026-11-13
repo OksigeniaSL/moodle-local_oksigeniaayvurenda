@@ -71,7 +71,15 @@ final class quests {
         if (!$start || !$end || $end <= $start) {
             return 'questerrdates';
         }
-        $goal = (int) ($data['goal'] ?? 0);
+        // A cartilla: nine squares, and its goal the full card.
+        $squares = array_values(array_unique(array_filter(
+            array_map('strval', (array) ($data['squares'] ?? [])),
+            fn($spec) => cartilla::valid($spec)
+        )));
+        if ($squares && count($squares) !== cartilla::SIZE) {
+            return 'questerrsquares';
+        }
+        $goal = $squares ? cartilla::SIZE : (int) ($data['goal'] ?? 0);
         if ($goal < 1 || $goal > self::MAXGOAL) {
             return 'questerrgoal';
         }
@@ -79,7 +87,7 @@ final class quests {
         $stages = array_values(array_intersect(array_map('strval', (array) ($data['stages'] ?? [])), $known));
         $row = ['libraryid' => $library->id, 'name' => $name,
             'text' => \core_text::substr(trim((string) ($data['text'] ?? '')), 0, 255) ?: null,
-            'timestart' => $start, 'timeend' => $end, 'goal' => $goal,
+            'timestart' => $start, 'timeend' => $end, 'goal' => $goal, 'squares' => $squares ? json_encode($squares) : null,
             'stages' => $stages && count($stages) < count($known) ? json_encode($stages) : null, 'timemodified' => $now];
         if ($id && $DB->record_exists(self::T . 'quest', ['id' => $id, 'libraryid' => $library->id])) {
             $DB->update_record(self::T . 'quest', (object) (['id' => $id] + $row));
@@ -206,6 +214,17 @@ final class quests {
      */
     public static function stamps(\stdClass $quest, int $readerid, int $now): int {
         global $DB;
+        // A cartilla counts its squares filled, not its books.
+        if (cartilla::squares($quest)) {
+            $library = $DB->get_record(self::T . 'library', ['id' => $quest->libraryid]);
+            return $library ? cartilla::card(
+                $quest,
+                $library,
+                $readerid,
+                $now,
+                fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a)
+            )['filled'] : 0;
+        }
         [$sql, $params] = self::loans($quest, $now);
         return (int) $DB->count_records_sql(
             "SELECT COUNT(1) $sql AND l.readerid = :qreader",
@@ -247,6 +266,18 @@ final class quests {
             $DB->set_field(self::T . 'questreader', 'timedone', $now, ['id' => $quest->joinedid]);
             $quest->timedone = $now;
         }
+    }
+
+    /**
+     * The loans that count for a challenge: of its centre, not of a textbook bank, between its two dates (and no later
+     * than now).
+     *
+     * @param \stdClass $quest
+     * @param int $now
+     * @return array The FROM and WHERE of the SQL, and its parameters.
+     */
+    public static function loans_sql(\stdClass $quest, int $now): array {
+        return self::loans($quest, $now);
     }
 
     /**

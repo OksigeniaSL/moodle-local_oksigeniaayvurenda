@@ -749,6 +749,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111312, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111315) {
+        // A library challenge may be a cartilla: nine squares the desk measures (P3).
+        $table = new xmldb_table('local_oksigeniaayvurenda_quest');
+        $field = new xmldb_field('squares', XMLDB_TYPE_TEXT, null, null, null, null, null, 'stages');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026111315, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

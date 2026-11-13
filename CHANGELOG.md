@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.256.0 (2026-11-13)
+
+- «La cartilla» (P3 of the review), its engine; the screens come with Jujol's mock-up. A library challenge may be a
+  bingo card of nine squares instead of a number of books: a corner, a genre of the library, a new book, a book with
+  a voice in Ayvu rande, a book rescued (nobody took it home in two years). Each loan in its days fills one square it
+  fits, as many as can be filled; a row or a column is a line, nine the full card, which is its goal. New field
+  `squares` of the challenges.
+
 ## 0.255.0 (2026-11-13)
 
 - The clock of the class challenge (P5 of the review: it had a deadline nobody saw): under its marks, how many days are
