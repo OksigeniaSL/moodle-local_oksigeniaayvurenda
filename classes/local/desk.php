@@ -1410,6 +1410,13 @@ final class desk {
         if ($today === 100) {
             $extra['herald'] = $this->herald_word('deskheraldhundred');
         }
+        // The hidden book this reader found in the visit this week goes home now («Llévatelo»); the desk celebrates it
+        // a moment, and it is kept for the seal of their card (P1).
+        if (!$fulfilled && !$reserve && carry::taken($readerid, (int) $item->recordid, $this->now)) {
+            $message = 'desklentfound';
+            $extra['found'] = true;
+            $extra['herald'] = $this->herald_word('deskheraldfound', ['title' => $a->title]) ?? ($extra['herald'] ?? null);
+        }
         return $this->answer('lent', 'ok', $message, $a, $extra);
     }
 

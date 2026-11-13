@@ -186,10 +186,11 @@ final class cards {
      * @param array $levels Level of each path, 0 to 3.
      * @param string $label What it says to a screen reader.
      * @param int $size Pixels.
+     * @param array|null $seal The seal of «Llévatelo» (carry::seal()), when the card carries it.
      * @return string SVG.
      */
-    public static function flower_svg(int $stage, array $levels, string $label, int $size): string {
-        return self::layered('flor', $stage, $levels, $label, $size)
+    public static function flower_svg(int $stage, array $levels, string $label, int $size, ?array $seal = null): string {
+        return self::layered('flor', $stage, $levels, $label, $size, false, $seal)
             ?? self::drawing('flor/' . flower::STAGES[$stage] . '.svg', $levels, $label, $size, $size);
     }
 
@@ -205,10 +206,11 @@ final class cards {
      * @param string $label
      * @param int $size
      * @param bool $sober
+     * @param array|null $seal The seal of «Llévatelo» (carry::seal()), when the card carries it.
      * @return string
      */
-    public static function sky_svg(int $stage, array $levels, string $label, int $size, bool $sober): string {
-        return self::layered('cielo', $stage, $levels, $label, $size, $sober)
+    public static function sky_svg(int $stage, array $levels, string $label, int $size, bool $sober, ?array $seal = null): string {
+        return self::layered('cielo', $stage, $levels, $label, $size, $sober, $seal)
             ?? self::drawing('cielo/' . self::SKY[$stage] . '.svg', $levels, $label, $size, $size, $sober);
     }
 
@@ -226,6 +228,8 @@ final class cards {
      * @param string $label What it says to a screen reader.
      * @param int $size Pixels, at most (it shrinks with its box).
      * @param bool $sober
+     * @param array|null $seal The seal of «Llévatelo»: level (0 to 3) and gold; stamped on the edge of the medallion, over
+     *     the marks, one image at a time (Gaudí, 13 November).
      * @return string|null HTML; null without the art package's drawing.
      */
     private static function layered(
@@ -234,7 +238,8 @@ final class cards {
         array $levels,
         string $label,
         int $size,
-        bool $sober = false
+        bool $sober = false,
+        ?array $seal = null
     ): ?string {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
         $json = $dir ? $dir . '/pix/carne/' . $kind . '/carne.json' : '';
@@ -266,6 +271,23 @@ final class cards {
                     $html .= '<img class="ayv-layered-mark' . ($lit ? '' : ' ayv-layered-waiting') . '" src="' . s($url)
                         . '" alt="" style="left: ' . $left . '%; top: ' . $top . '%; width: ' . $width . '%">';
                 }
+            }
+        }
+        $stamp = (array) ($layout['seal'] ?? []);
+        if ($seal !== null && $stamp) {
+            $level = max(0, min(3, (int) ($seal['level'] ?? 0)));
+            // Waiting, dotted, until it is earned; the sober sky leaves it out, as its waiting marks.
+            $file = $level === 0 && !$sober ? (string) ($stamp['waiting'] ?? '') : '';
+            foreach ((array) ($stamp['levels'] ?? []) as $one) {
+                if ($level > 0 && (int) ($one['n'] ?? 0) === $level) {
+                    $file = (string) (!empty($seal['gold']) ? ($one['gold'] ?? '') : ($one['plain'] ?? ''));
+                }
+            }
+            $url = $file !== '' ? screens::art('carne/' . $kind . '/' . pathinfo($file, PATHINFO_FILENAME)) : null;
+            [$left, $top, $width] = array_map('floatval', array_slice((array) ($stamp['pct'] ?? []), 0, 3) + [0, 0, 0]);
+            if ($url && $width > 0) {
+                $html .= '<img class="ayv-layered-mark ayv-layered-seal' . ($level ? '' : ' ayv-layered-waiting') . '" src="'
+                    . s($url) . '" alt="" style="left: ' . $left . '%; top: ' . $top . '%; width: ' . $width . '%">';
             }
         }
         return $html . '</span>';

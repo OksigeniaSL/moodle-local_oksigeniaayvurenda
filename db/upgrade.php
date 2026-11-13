@@ -729,6 +729,26 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111200, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111312) {
+        // The hidden books a reader found in the visit, and when they took them home (Llévatelo).
+        $table = new xmldb_table('local_oksigeniaayvurenda_find');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('readerid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('recordid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('lanterns', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timefound', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timetaken', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('readerid', XMLDB_KEY_FOREIGN, ['readerid'], 'local_oksigeniaayvurenda_reader', ['id']);
+            $table->add_key('recordid', XMLDB_KEY_FOREIGN, ['recordid'], 'local_oksigeniaayvurenda_record', ['id']);
+            $table->add_index('readerfound', XMLDB_INDEX_NOTUNIQUE, ['readerid', 'timefound']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026111312, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

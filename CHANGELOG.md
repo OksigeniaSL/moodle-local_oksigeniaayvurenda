@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.253.0 (2026-11-13)
+
+- «Take it home» (P1 of the review), with Gaudí's art (art 0.1.64): the hidden book of the visit is a game now. It
+  starts with three paper lanterns and each wrong spine puts one out; it always ends. The book found is kept for a
+  reader with a card, with the lanterns left; if they take it home from the desk that week, the desk celebrates it
+  («the book they found in the visit») and their card carries a seal stamped on the edge of its medallion: the seal,
+  the seal with ribbons and the rosette (1, 3 and 10 books), golden when as many went with a lantern still lit, dotted
+  while waiting. The result is theirs alone. The books found go with the reader when they are erased, and are in their
+  export (new table `find`).
+
 ## 0.252.0 (2026-11-13)
 
 - The book of the week, picked by the library (P9 of the review): from a record, whoever works at the desk recommends

@@ -129,8 +129,12 @@ foreach ($readers as $reader) {
         : fullname($USER);
     $card = cards::card($reader, $name, $group, $entity, $stage);
     $card['stage'] = $sky ? $str('stagesky' . $stage) : ($look === 'flower' ? $card['stage'] : '');
-    $card['flowersvg'] = $look === 'flower' ? cards::flower_svg($stage, $album['flower']['levels'], $card['stage'], 160)
-        : ($sky ? cards::sky_svg($stage, $album['flower']['levels'], $card['stage'], 160, $sober) : '');
+    // The seal of «Llévatelo», of the hidden books found and taken home, where the centre has the games on or it was won.
+    $seal = \local_oksigeniaayvurenda\local\carry::seal((int) $reader->id);
+    $seal = $seal['level'] || \local_oksigeniaayvurenda\local\skins::on((int) $reader->entityid, 'games') ? $seal : null;
+    $drawn = $card['stage'] . ($seal ? ' · ' . \local_oksigeniaayvurenda\local\carry::says($seal, $str) : '');
+    $card['flowersvg'] = $look === 'flower' ? cards::flower_svg($stage, $album['flower']['levels'], $drawn, 160, $seal)
+        : ($sky ? cards::sky_svg($stage, $album['flower']['levels'], $drawn, 160, $sober, $seal) : '');
     $classic = $look === 'classic' ? garden::classic($reader, $album['year']) : [];
     $paths = [];
     foreach ($look === 'none' ? [] : flower::PATHS as $path) {

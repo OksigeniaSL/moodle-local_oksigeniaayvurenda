@@ -102,6 +102,48 @@
             }, 1800);
         }
     };
+    // «Llévatelo»: three lanterns, each wrong spine puts one out; the game always ends, and the book found is kept for
+    // a reader with a card, with the lanterns left.
+    var lanterns = dialog.querySelector('.ayv-hunt-farolillos');
+    var lit = 3;
+    var dim = function() {
+        if (!lanterns) {
+            return;
+        }
+        lit = Math.max(0, 3 - misses);
+        lanterns.querySelectorAll('.ayv-hunt-farolillo').forEach(function(lamp, at) {
+            if (at < lit) {
+                return;
+            }
+            if (lamp.tagName === 'IMG' && lanterns.getAttribute('data-off')) {
+                lamp.src = lanterns.getAttribute('data-off');
+            }
+            lamp.classList.remove('ayv-hunt-luz');
+            lamp.classList.add('ayv-hunt-apagado');
+        });
+        var said = lanterns.querySelector('.ayv-hunt-farolillos-t');
+        said.textContent = lit === 0 ? lanterns.getAttribute('data-none') : (lit === 1 ? lanterns.getAttribute('data-leftone')
+            : (lanterns.getAttribute('data-left') || '').replace('{n}', lit));
+    };
+    var keep = function() {
+        if (!lanterns || !lanterns.getAttribute('data-url') || !window.fetch || !window.FormData) {
+            return;
+        }
+        var body = new FormData();
+        ['sesskey', 'library', 'corner', 'turn'].forEach(function(name) {
+            body.append(name, lanterns.getAttribute('data-' + name) || '');
+        });
+        body.append('record', target);
+        body.append('lanterns', String(lit));
+        window.fetch(lanterns.getAttribute('data-url'), {method: 'POST', body: body, credentials: 'same-origin'})
+            .catch(function() {
+                // Without network the game still ends; the book is just not kept.
+            });
+        var promise = dialog.querySelector('.ayv-hunt-carry [data-gold]');
+        if (promise && lit > 0 && promise.getAttribute('data-gold')) {
+            promise.textContent = promise.getAttribute('data-gold');
+        }
+    };
     var miss = function(spine) {
         var slot = spine.closest('.ayv-spine-slot');
         // The gap of a book that is out says so, and is not a try: a small child touching the bird three times has not
@@ -113,6 +155,7 @@
             return;
         }
         misses++;
+        dim();
         spine.setAttribute('data-tried', '1');
         pull(spine, true);
         var parts = [];
@@ -148,6 +191,7 @@
     var found = function() {
         pull(mine, false);
         done = true;
+        keep();
         say.textContent = '';
         mine.closest('.ayv-spine-slot').classList.remove('ayv-hunt-glow');
         mine.closest('.ayv-spine-slot').classList.add('ayv-hunt-yes');

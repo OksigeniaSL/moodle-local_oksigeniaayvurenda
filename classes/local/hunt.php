@@ -185,7 +185,8 @@ final class hunt {
             }
             $game = self::game($library, $recordid, $young, $public, $reader && !$young);
             if ($game) {
-                return $game;
+                // Who plays, for «Llévatelo»: the book found is kept for a reader with a card.
+                return $game + ['readerid' => $reader ? (int) $reader->id : 0];
             }
         }
         return null;

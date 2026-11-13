@@ -1501,7 +1501,10 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-shelf-group { margin: .75rem 0 .4rem; font-size: 1rem; font-weight: 700; color: var(--accent); }
 
 /* The sky of the card, from twelve on: its own night, in light mode too. */
-.ayv .ayv-card-sky { border-radius: 50%; overflow: hidden; }
+/* Round by its picture, not by clipping: the seal of «Llévatelo» is stamped half over the edge (Gaudí, 13 Nov). */
+.ayv .ayv-card-sky { border-radius: 50%; overflow: visible; }
+.ayv .ayv-card-sky .ayv-layered-base { border-radius: 50%; }
+.ayv .ayv-card-sky > svg { clip-path: circle(50%); }
 
 .ayv .ayv-path-detail { font-weight: 700; color: var(--accent); }
 
@@ -9876,4 +9879,52 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     background: rgba(240, 180, 60, .22);
     color: var(--ink);
     font-weight: 700;
+}
+
+/* «Llévatelo» (P1): the three lanterns of the hidden book, Gaudí's paper lanterns (or the house's lamps without the art
+   package); each wrong spine puts one out. */
+.ayv .ayv-hunt-farolillos {
+    display: flex;
+    justify-content: center;
+    margin: 2px 0 6px;
+}
+
+.ayv .ayv-hunt-farolillos-luces {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.ayv img.ayv-hunt-farolillo {
+    width: 32px;
+    height: 44px;
+}
+
+.ayv span.ayv-hunt-farolillo {
+    width: 26px;
+    height: 26px;
+}
+
+.ayv span.ayv-hunt-farolillo.ayv-hunt-luz {
+    background: radial-gradient(circle at 40% 35%, #fff4cf, var(--sun) 62%, #d99418);
+    box-shadow: 0 0 12px 2px rgba(240, 180, 60, .55);
+}
+
+.ayv .ayv-hunt-carry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(240, 180, 60, .18);
+    font-weight: 700;
+}
+
+.ayv .ayv-hunt-carry-sello {
+    flex: none;
+}
+
+/* The seal of «Llévatelo», stamped on the edge of the card's medallion, over the marks. */
+.ayv .ayv-layered-seal {
+    z-index: 1;
 }

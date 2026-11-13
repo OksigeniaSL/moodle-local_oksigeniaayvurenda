@@ -77,6 +77,12 @@
             "huntplace": "#d63a2f", "labelsr": "El tejuelo del libro escondido: 82-3 MON", "title": "El dragón que leía",
             "found": "¡Lo has encontrado! Está en Rojo.", "foundhint": "Búscalo allí.", "recordurl": "#", "againurl": "#",
             "messages": "{}", "voices": "{}",
+            "carry": {"url": "https://example.com/hunt_ajax.php", "sesskey": "abc", "library": "demo-1", "corner": "8",
+                "turn": 0, "lanterns": [{"n": 1}, {"n": 2}, {"n": 3}], "on": "https://example.com/farolillo-encendido.webp",
+                "off": "https://example.com/farolillo-apagado.webp", "label": "Farolillos", "start": "Te quedan 3 farolillos",
+                "left": "Te quedan {n} farolillos", "leftone": "Te queda 1 farolillo", "none": "Sin farolillos",
+                "promise": "Si te lo llevas esta semana, se queda en tu carné.", "promisegold": "Con farolillo: dorado.",
+                "sealimg": "https://example.com/llevatelo-1-dorada.webp"},
             "spines": [{"id": 7, "url": "#", "title": "El dragón que leía", "shown": "El dragón que leía", "authors": "Ana Montes",
                 "callnumber": "82-3 MON dra", "place": "Rojo", "label": "El dragón que leía, Ana Montes, 82-3 MON dra",
                 "cm": 22, "width": 34, "background": "#2c7a6a", "dark": "#246a5c", "ink": "cream", "small": false,
@@ -220,6 +226,10 @@
                 </div>
             </div>
         </div>
+        {{#carry}}<div class="ayv-hunt-farolillos" data-url="{{url}}" data-sesskey="{{sesskey}}" data-library="{{library}}" data-corner="{{corner}}" data-turn="{{turn}}" data-off="{{off}}" data-left="{{left}}" data-leftone="{{leftone}}" data-none="{{none}}">
+            <span class="ayv-hunt-farolillos-luces" aria-hidden="true">{{#lanterns}}{{#on}}<img class="ayv-hunt-farolillo" src="{{on}}" alt="" width="32" height="44">{{/on}}{{^on}}<span class="ayv-cf-bombilla ayv-hunt-farolillo ayv-hunt-luz"></span>{{/on}}{{/lanterns}}</span>
+            <span class="ayv-sr ayv-hunt-farolillos-t" role="status">{{start}}</span>
+        </div>{{/carry}}
         <p class="ayv-hunt-say" aria-live="polite"></p>
         <div class="ayv-hunt-lens" aria-hidden="true"><span class="ayv-hunt-lens-hint">{{huntlens}}</span></div>
         <div class="ayv-bookcase-wrap ayv-hunt-shelf">
@@ -235,6 +245,7 @@
                 <p class="ayv-hunt-found-title" tabindex="-1">{{found}}</p>
                 <p><strong>{{title}}</strong></p>
                 <p>{{foundhint}}</p>
+                {{#carry}}<p class="ayv-hunt-carry">{{#sealimg}}<img class="ayv-hunt-carry-sello" src="{{sealimg}}" alt="" width="48" height="56">{{/sealimg}}<span data-gold="{{promisegold}}">{{promise}}</span></p>{{/carry}}
                 <p class="ayv-book-actions">
                     <a class="ayv-button" href="{{recordurl}}">{{huntrecord}}</a>
                     <a class="ayv-button ayv-button-quiet" href="{{againurl}}">{{huntagain}}</a>

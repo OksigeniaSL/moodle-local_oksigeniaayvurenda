@@ -109,6 +109,13 @@ class provider implements
             'note' => 'privacy:metadata:ill:note',
             'createdby' => 'privacy:metadata:ill:createdby',
         ], 'privacy:metadata:ill');
+        $collection->add_database_table(self::T . 'find', [
+            'readerid' => 'privacy:metadata:find:readerid',
+            'recordid' => 'privacy:metadata:find:recordid',
+            'lanterns' => 'privacy:metadata:find:lanterns',
+            'timefound' => 'privacy:metadata:find:timefound',
+            'timetaken' => 'privacy:metadata:find:timetaken',
+        ], 'privacy:metadata:find');
         $collection->add_database_table(self::T . 'keepsake', [
             'readerid' => 'privacy:metadata:keepsake:readerid',
             'flower' => 'privacy:metadata:keepsake:flower',
@@ -443,6 +450,22 @@ class provider implements
                     (object) ['books' => $asked]
                 );
             }
+            // The hidden books found in the visit, and when they went home («Llévatelo»).
+            $finds = [];
+            foreach ($DB->get_records(self::T . 'find', ['readerid' => $reader->id], 'timefound') as $find) {
+                $finds[] = [
+                    'title' => $DB->get_field(self::T . 'record', 'title', ['id' => $find->recordid]),
+                    'lanterns' => (int) $find->lanterns,
+                    'found' => transform::datetime($find->timefound),
+                    'taken' => $find->timetaken ? transform::datetime($find->timetaken) : null,
+                ];
+            }
+            if ($finds) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:finds', 'local_oksigeniaayvurenda')]),
+                    (object) ['finds' => $finds]
+                );
+            }
             $holds = [];
             foreach ($DB->get_records(self::T . 'hold', ['readerid' => $reader->id], 'timecreated') as $hold) {
                 $holds[] = [
@@ -673,6 +696,7 @@ class provider implements
         $DB->delete_records(self::T . 'sanction');
         $DB->delete_records(self::T . 'formatask');
         $DB->delete_records(self::T . 'keepsake');
+        $DB->delete_records(self::T . 'find');
         $DB->delete_records(self::T . 'questreader');
         $DB->execute('UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE direction = 'in'");
         $DB->set_field_select(self::T . 'ill', 'createdby', null, 'createdby IS NOT NULL');

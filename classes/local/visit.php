@@ -854,6 +854,28 @@ final class visit {
                 'same' => $str('huntsame')],
                 JSON_UNESCAPED_UNICODE
             ),
+            // The lanterns of «Llévatelo» (P1): three, each wrong spine puts one out; the book found is kept for a reader with a
+            // card, and taken home from the desk this week it leaves a seal on the card.
+            'carry' => !empty($game['readerid']) ? [
+                'url' => (new \moodle_url('/local/oksigeniaayvurenda/hunt_ajax.php'))->out(false),
+                'sesskey' => sesskey(),
+                'library' => $library->slug,
+                'corner' => $corner,
+                'turn' => $turn,
+                'lanterns' => array_map(fn($i) => ['n' => $i], range(1, carry::LANTERNS)),
+                'on' => screens::art('juegos/farolillo-encendido'),
+                'off' => screens::art('juegos/farolillo-apagado') ?? '',
+                'label' => $str('huntlanterns'),
+                'start' => $str('huntlanternsleft', carry::LANTERNS),
+                'left' => $str('huntlanternsleft', '{n}'),
+                'leftone' => $str('huntlanternsleftone'),
+                'none' => $str('huntlanternsnone'),
+                // With a seal already, a book found with a lantern counts towards gilding it, not always gilds it (Gaudí).
+                'promise' => $str('huntcarrypromise'),
+                'promisegold' => $str(carry::seal((int) $game['readerid'])['level'] ? 'huntcarrypromisegoldmore'
+                    : 'huntcarrypromisegold'),
+                'sealimg' => screens::art('carne/' . (!empty($game['young']) ? 'flor' : 'cielo') . '/llevatelo-1-dorada'),
+            ] : null,
         ];
     }
 
