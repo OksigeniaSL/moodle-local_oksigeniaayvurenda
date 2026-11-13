@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.260.2 (2026-11-13)
+
+- A reader's page and the late notice count the days a book is late as the desk and the list of late books do: calendar
+  days where the centre is, not hours. The same loan said 19 days on the reader's page and 20 at the desk (Jujol, from
+  the Marketplace screenshots).
+
 ## 0.260.1 (2026-11-13)
 
 - «Su primer libro» is off until the centre turns it on in «How your library works», even where it tells families of late

@@ -131,6 +131,28 @@ final class profile_test extends \advanced_testcase {
     }
 
     /**
+     * A book due late last night is a day late this morning, on the reader's page as at the desk and in the list of late
+     * books: calendar days where the centre is, not hours.
+     */
+    public function test_late_by_the_calendar(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $tz = zones::of((int) $library->entityid);
+        $now = (new \DateTimeImmutable('2026-11-13 08:00', $tz))->getTimestamp();
+        $due = (new \DateTimeImmutable('2026-11-12 22:00', $tz))->getTimestamp();
+        $reader = $gen->create_reader(['entityid' => $library->entityid]);
+        $copy = $gen->create_item(['libraryid' => $library->id,
+            'recordid' => $gen->create_record(['entityid' => $library->entityid, 'title' => 'Anoche'])->id]);
+        $gen->create_loan(['libraryid' => $library->id, 'itemid' => $copy->id, 'readerid' => $reader->id,
+            'timeloaned' => $due - 14 * DAYSECS, 'timedue' => $due]);
+        // Ten hours after it was due, but the next day where the centre is: one day late, as the desk says.
+        $this->assertSame(1, profile::of($library, (int) $reader->id, $now)['loans'][0]['late']);
+        $this->assertSame(1, \local_oksigeniaayvurenda\core\loan_rules::days_late($due, $now, $tz));
+    }
+
+    /**
      * Someone without an account can have their name, address, kind and group changed, and what is wrong is not saved;
      * the name of an account and the group the platform brings stay as they are.
      */

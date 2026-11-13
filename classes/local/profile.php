@@ -472,10 +472,12 @@ final class profile {
            ORDER BY l.timedue, l.id",
             ['readerid' => $readerid, 'entityid' => $library->entityid]
         );
+        // Days late as the desk and the list of late books count them: calendar days where the centre is, not seconds.
+        $tz = zones::of((int) $library->entityid);
         return array_values(array_map(fn($r) => ['loanid' => (int) $r->id, 'recordid' => (int) $r->recordid,
             'title' => $r->title, 'libraryid' => (int) $r->libraryid,
             'library' => format_string($r->library, true, ['escape' => false]), 'due' => (int) $r->timedue,
-            'late' => max(0, (int) floor(($now - (int) $r->timedue) / DAYSECS))], $rows));
+            'late' => \local_oksigeniaayvurenda\core\loan_rules::days_late((int) $r->timedue, $now, $tz)], $rows));
     }
 
     /**

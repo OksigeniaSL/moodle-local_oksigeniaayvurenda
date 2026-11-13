@@ -241,7 +241,11 @@ final class notices {
         $other = $one && $reader && $warning === '' && crc32($reader->id . '-' . date('Ymd', $now)) % 2;
         $look = $reader ? cards::look_of($reader, $now) : 'none';
         $late = (object) ['title' => $list[0]->title, 'due' => zones::date((int) $list[0]->timedue, 'strftimedateshort', $entityid),
-            'days' => max(1, intdiv($now - (int) $list[0]->timedue, DAYSECS)), 'reader' => $user->firstname];
+            'days' => max(1, \local_oksigeniaayvurenda\core\loan_rules::days_late(
+                (int) $list[0]->timedue,
+                $now,
+                zones::of($entityid)
+            )), 'reader' => $user->firstname];
         if ($other && $look !== 'flower') {
             $skin = skins::of($entityid);
             $waiting = $DB->record_exists(self::T . 'hold', ['recordid' => $list[0]->recordid, 'status' => 'waiting']);
