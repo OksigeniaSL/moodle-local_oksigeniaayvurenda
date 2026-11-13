@@ -417,28 +417,30 @@ window.AYVHelpPieces = {
     labels: function(h) {
         'use strict';
         var c = h.codes;
-        return h.point('.ayv-lab-kinds').then(function() {
+        return h.point('.ayv-et-tipos').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.tap('.ayv-lab-which .ayv-lab-pill:last-child');
+            return h.point('#ayv-et-dias .ayv-cf-chapas');
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.type('textarea[name="codes"]', c.faro + '\n' + c.ladrona);
+            return h.go('#ayv-et-dias .ayv-cf-chapa:last-child');
+        }).then(function() {
+            return h.type('#ayv-et-codigos', c.faro + '\n' + c.ladrona);
         }).then(function() {
             return h.say(2);
         }).then(function() {
-            return h.go('.ayv-print-head form button[type="submit"]');
+            return h.go('.ayv-et-lista button[type="submit"]');
         }).then(function() {
-            return h.point('.ayv-labelsheet');
+            return h.point('.ayv-et-papel');
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.point('.ayv-lab-map');
+            return h.point('.ayv-et-primera');
         }).then(function() {
             return h.say(4);
         }).then(function() {
-            return h.point('.ayv-print-head .ayv-button[onclick]');
+            return h.point('.ayv-et-muestra-hoja .ayv-cf-fila .ayv-button');
         }).then(function() {
             return h.say(5);
         });

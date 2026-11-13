@@ -14,40 +14,27 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The form of the labels: what shows with each choice, and the first free label chosen on the sheet.
+ * The page that prints every sheet of labels opens the print window by itself, once: back to it (from the browser's
+ * history), it does not open it again. Without JavaScript, its button does the same.
  */
 (function() {
     'use strict';
-    var form = document.querySelector('[data-ayv-lab]');
-    if (!form) {
+    var bar = document.querySelector('[data-ayv-autoprint]');
+    if (!bar || !window.print || !document.querySelector('.ayv-labelsheet')) {
         return;
     }
-    var part = function(selector) {
-        return form.querySelector(selector);
-    };
-    var which = function() {
-        var chosen = part('input[name="which"]:checked');
-        return chosen ? chosen.value : 'today';
-    };
-    var show = function() {
-        part('.ayv-lab-since').hidden = which() !== 'since';
-        part('.ayv-lab-codes').hidden = which() !== 'codes';
-        part('.ayv-lab-go').hidden = which() === 'today';
-    };
-    form.addEventListener('change', function(event) {
-        show();
-        var name = event.target.name;
-        if (name === 'sheet') {
-            part('input[name="start"]').value = '1';
+    var key = 'ayv-printed:' + window.location.search;
+    try {
+        if (window.sessionStorage.getItem(key)) {
+            return;
         }
-        if (name === 'kind' || name === 'sheet' || (name === 'which' && event.target.value === 'today')) {
-            form.submit();
-        }
-    });
-    form.querySelectorAll('[data-start]').forEach(function(cell) {
-        cell.addEventListener('click', function() {
-            part('input[name="start"]').value = cell.getAttribute('data-start');
-            form.submit();
-        });
+        window.sessionStorage.setItem(key, '1');
+    } catch (e) {
+        // No storage (a private window): it prints every time, which is what was asked.
+    }
+    window.addEventListener('load', function() {
+        window.setTimeout(function() {
+            window.print();
+        }, 300);
     });
 })();

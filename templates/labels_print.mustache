@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/labels_print
+
+    Every sheet of labels, on a page of its own to print: a bar on screen (how many sheets, print, back), and the sheets
+    drawn to the millimetre. The print window opens by itself once.
+
+    Context variables required for this template:
+    * says, hint, printnow, back, backlabel - the bar
+    * pages - each with labels (blank, testnumber, callnumber, library, title, svg)
+    * spines, letter, test, style - the sheet: spine labels, US Letter, the numbered test sheet, its grid in CSS
+
+    Example context (json):
+    {
+        "says": "Imprimir las 2 hojas", "hint": "Al cien por cien.", "printnow": "Imprimir",
+        "back": "https://example.com/labels.php", "backlabel": "Volver a las etiquetas",
+        "spines": false, "letter": false, "test": false,
+        "style": "--cols: 3; --rows: 8; --w: 70mm; --h: 37mm; --top: 0mm; --left: 0mm; --gx: 0mm; --gy: 0mm; --dx: 0mm; --dy: 0mm;",
+        "pages": [{"labels": [{"blank": true}, {"blank": false, "library": "Biblioteca", "title": "La isla",
+            "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'><rect width='1' height='4'/></svg>",
+            "callnumber": ["82-3", "ROW"]}]}]
+    }
+}}
+<div class="ayv-print-head ayv-et-imprime" data-ayv-autoprint>
+    <h1 class="ayv-et-dice">{{says}}</h1>
+    <p class="ayv-cf-nota">{{hint}}</p>
+    <p class="ayv-cf-fila"><button type="button" class="ayv-button" data-ayv-print>{{printnow}}</button> <a class="ayv-cf-enlace" href="{{back}}">{{backlabel}}</a></p>
+</div>
+{{#pages}}
+<div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}{{#letter}} ayv-labelsheet-letter{{/letter}}{{#test}} ayv-labelsheet-test{{/test}}" style="{{style}}">
+{{#labels}}
+    <div class="ayv-label{{#blank}} ayv-label-empty{{/blank}}">{{#testnumber}}<span class="ayv-label-number">{{testnumber}}</span>{{/testnumber}}
+        {{^blank}}
+        {{#spines}}<div class="ayv-spine-lines">{{#callnumber}}<span>{{.}}</span>{{/callnumber}}</div>{{/spines}}
+        {{^spines}}
+        <p class="ayv-label-library">{{library}}</p>
+        <p class="ayv-label-title">{{title}}</p>
+        {{#svg}}<div class="ayv-label-barcode">{{{svg}}}</div>{{/svg}}
+        {{/spines}}
+        {{/blank}}
+    </div>
+{{/labels}}
+</div>
+{{/pages}}

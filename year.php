@@ -81,6 +81,13 @@ $from = preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) ? $from : '';
 $pickreport = optional_param('elegir', '', PARAM_ALPHA);
 $pick = in_array($pickreport, \local_oksigeniaayvurenda\local\reports::ALL, true) ? ['report' => $pickreport, 'first' => $from]
     : null;
+// Or the day the labels start from: one touch, and back to them with what came in since.
+if ($pickreport === 'labels') {
+    $pick = ['report' => 'labels', 'first' => '', 'back' => [
+        'kind' => optional_param('kind', 'labels', PARAM_ALPHA) === 'spines' ? 'spines' : 'labels',
+        'sheet' => optional_param('sheet', '', PARAM_ALPHANUMEXT),
+    ]];
+}
 if ($pick) {
     $from = '';
     $touched = '';
@@ -140,6 +147,17 @@ $step = characters::step($entityid);
 $pose = $saved !== '' ? 'celebra' : 'lee';
 $crier = characters::whole($entityid) ? characters::figure('herald', $pose, $step) : null;
 $classes = !\local_oksigeniaayvurenda\local\skins::no_classes($entityid);
+// What the sheet asks for while choosing: the day the labels start from, or the first and the last of a report.
+if ($pick && $pick['report'] === 'labels') {
+    $choosing = $str('yearsheetpicklabels');
+} else if ($pick) {
+    $choosing = $pick['first'] !== '' ? $str('yearsheetpicklast', $date((new DateTimeImmutable(
+        $pick['first'] . ' 12:00',
+        zones::of($library)
+    ))->getTimestamp())) : $str('yearsheetpickfirst');
+} else {
+    $choosing = $from !== '' && ($touched === '' || $touched < $from) ? $str('yearsheetchoosing') : '';
+}
 $data = [
     'heading' => $str('yearheading', $year->name),
     'dates' => $str('yeardates', (object) ['start' => $date((int) $year->timestart),
@@ -157,11 +175,7 @@ $data = [
     'card' => yearsheet::card($library, $year, $touched, $from, $str),
     'release' => (new moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug], 'ayv-cs-sheet'))->out(false),
     'releaselabel' => $str('yearsheetrelease'),
-    'choosing' => $pick ? ($pick['first'] !== '' ? $str('yearsheetpicklast', $date((new DateTimeImmutable(
-        $pick['first'] . ' 12:00',
-        zones::of($library)
-    ))->getTimestamp())) : $str('yearsheetpickfirst')) : ($from !== '' && ($touched === '' || $touched < $from)
-        ? $str('yearsheetchoosing') : ''),
+    'choosing' => $choosing,
     'sheettitle' => $str('yearsheettitle'),
     'legend' => array_values(array_filter([
         $classes ? ['class' => 'ayv-cs-t1', 'label' => $str('yearsheetlegendt1')] : null,

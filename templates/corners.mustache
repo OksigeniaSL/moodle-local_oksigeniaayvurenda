@@ -30,8 +30,9 @@
       nameof, blank, justsaved
     * hasplates, none, importurl, importlabel - with no corners yet, how to have them
     * hallurl, halllabel - the hall of the visit
-    * genres - heading, intro, mine (code, label, says, topics, prefixes, dropsure), proposals (key, label, says),
-      canadd, many, lights (value, pressed, label), haslights, justsaved and their words; or nothing in a bank
+    * genres - heading, intro, mine (code, label, says, chips (value, label, pressed), prefixes, open, dropsure),
+      proposals (key, label, says), canadd, many, lights (value, pressed, label), haslights, justsaved and their words;
+      or nothing in a bank
 
     Example context (json):
     {
@@ -51,13 +52,14 @@
         "hasplates": true, "none": "Aún no hay rincones.", "importurl": "https://example.com/import.php",
         "importlabel": "Importar", "hallurl": "https://example.com/visit.php", "halllabel": "Ver el vestíbulo",
         "genres": {"heading": "Los géneros de la narrativa", "intro": "Rincones propios.",
-            "mine": [{"code": "g1", "label": "Misterio", "says": "4 libros", "topics": "Misterio", "prefixes": "",
-                "dropsure": "Misterio: toca otra vez."}],
+            "mine": [{"code": "g1", "label": "Misterio", "says": "4 libros", "prefixes": "", "open": true,
+                "chips": [{"value": "g1|Misterio", "label": "Misterio", "pressed": true}], "dropsure": "Misterio: toca otra vez."}],
             "proposals": [{"key": "poetry", "label": "Poesía", "says": "9 libros"}],
             "canadd": true, "many": false, "lights": [{"value": "8:0", "pressed": true, "label": "8 · Literatura"}],
             "haslights": true, "justsaved": false, "change": "Cambiar", "drop": "Quitar", "other": "Otro género",
-            "othersub": "con sus temas", "name": "Nombre", "topicslabel": "Temas, separados por comas",
-            "topicshint": "Los más usados: Misterio.", "prefixeslabel": "Principio del tejuelo", "addit": "Añadirlo",
+            "othersub": "con sus temas", "name": "Nombre", "topicslead": "Sus temas.", "addtopic": "+ Otro tema",
+            "addtopiclabel": "Otro tema", "prefixlead": "El principio del tejuelo", "prefixhint": "si tus lomos ya lo dicen",
+            "addit": "Añadirlo",
             "save": "Guardar", "addall": "Añadirlos todos", "fromlead": "De dónde toman los libros:",
             "fromhint": "solo de estos rincones."}
     }
@@ -100,18 +102,23 @@
 {{/hasplates}}
 {{#genres}}
 <section class="ayv-ri-estante" id="ayv-ri-generos" aria-labelledby="ayv-ri-g">
-    <h2 class="ayv-cf-estante-t" id="ayv-ri-g">{{heading}}{{#justsaved}} <span class="ayv-cf-guardado" role="status">{{savedword}}</span>{{/justsaved}}</h2>
+    <h2 class="ayv-cf-estante-t" id="ayv-ri-g">{{heading}}</h2>{{#justsaved}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
     <p class="ayv-cf-estante-s">{{intro}}</p>
     <ul class="ayv-ri-generos">
         {{#mine}}
-        <li><details class="ayv-ri-genero ayv-ri-genero-mio"><summary><b>{{label}}</b><span>{{says}} · {{change}}</span></summary>
-            <form class="ayv-ri-genero-dorso" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="genre" value="{{code}}">
-                <label for="ayv-ri-gn{{code}}">{{name}}</label><input id="ayv-ri-gn{{code}}" name="label" value="{{label}}" maxlength="60" required autocomplete="off">
-                <label for="ayv-ri-gt{{code}}">{{topicslabel}}</label><input id="ayv-ri-gt{{code}}" name="topics" value="{{topics}}" aria-describedby="ayv-ri-gh{{code}}" autocomplete="off">
-                <span class="ayv-cf-nota" id="ayv-ri-gh{{code}}">{{topicshint}}</span>
-                <label for="ayv-ri-gp{{code}}">{{prefixeslabel}}</label><input id="ayv-ri-gp{{code}}" name="prefixes" value="{{prefixes}}" maxlength="200" autocomplete="off">
-                <span class="ayv-cf-fila"><button class="ayv-button" type="submit">{{save}}</button><button class="ayv-cf-chapa" type="submit" form="ayv-ri-f" name="genredrop" value="{{code}}" data-ayv-twice="{{dropsure}}">{{drop}}</button></span>
-            </form></details></li>
+        <li id="ayv-ri-g{{code}}"><details class="ayv-ri-genero ayv-ri-genero-mio"{{#open}} open{{/open}}><summary><b>{{label}}</b><span>{{says}} · {{change}}</span></summary>
+            <div class="ayv-ri-genero-dorso">
+                <form class="ayv-ri-genero-nombre" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="genre" value="{{code}}">
+                    <label class="ayv-sr" for="ayv-ri-gn{{code}}">{{name}}</label><input class="ayv-ri-nombre-in" id="ayv-ri-gn{{code}}" name="label" value="{{label}}" maxlength="60" required autocomplete="off">
+                    <span class="ayv-ri-tejuelo"><span class="ayv-cf-tejuelo-m"><label class="ayv-sr" for="ayv-ri-gp{{code}}">{{prefixlead}}</label><input id="ayv-ri-gp{{code}}" name="prefixes" value="{{prefixes}}" maxlength="200" autocomplete="off" placeholder="N MIS"></span><span class="ayv-cf-nota">{{prefixlead}}, {{prefixhint}}</span></span>
+                    <span class="ayv-cf-fila"><button class="ayv-button" type="submit">{{save}}</button><button class="ayv-cf-chapa" type="submit" form="ayv-ri-f" name="genredrop" value="{{code}}" data-ayv-twice="{{dropsure}}">{{drop}}</button></span>
+                </form>
+                <p class="ayv-cf-nota">{{topicslead}}</p>
+                <div class="ayv-cf-chapas">{{#chips}}<button class="ayv-cf-chapa" type="submit" form="ayv-ri-f" name="topic" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/chips}}</div>
+                <form class="ayv-ri-tema" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="genretopic" value="{{code}}">
+                    <label class="ayv-sr" for="ayv-ri-gt{{code}}">{{addtopiclabel}}</label><input id="ayv-ri-gt{{code}}" name="addtopic" maxlength="80" required autocomplete="off" placeholder="{{addtopic}}">
+                    <button class="ayv-cf-chapa" type="submit">{{addit}}</button></form>
+            </div></details></li>
         {{/mine}}
         {{#proposals}}
         <li><button class="ayv-ri-genero" type="submit" form="ayv-ri-f" name="propose" value="{{key}}"><b>+ {{label}}</b><span>{{says}}</span></button></li>
@@ -119,10 +126,7 @@
         {{#canadd}}
         <li><details class="ayv-ri-genero ayv-ri-genero-otro"><summary><b>+ {{other}}</b><span>{{othersub}}</span></summary>
             <form class="ayv-ri-genero-dorso" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="genre" value="new">
-                <label for="ayv-ri-gnnew">{{name}}</label><input id="ayv-ri-gnnew" name="label" maxlength="60" required autocomplete="off">
-                <label for="ayv-ri-gtnew">{{topicslabel}}</label><input id="ayv-ri-gtnew" name="topics" aria-describedby="ayv-ri-ghnew" autocomplete="off">
-                <span class="ayv-cf-nota" id="ayv-ri-ghnew">{{topicshint}}</span>
-                <label for="ayv-ri-gpnew">{{prefixeslabel}}</label><input id="ayv-ri-gpnew" name="prefixes" maxlength="200" autocomplete="off">
+                <label class="ayv-sr" for="ayv-ri-gnnew">{{name}}</label><input class="ayv-ri-nombre-in" id="ayv-ri-gnnew" name="label" maxlength="60" required autocomplete="off" placeholder="{{other}}">
                 <span class="ayv-cf-fila"><button class="ayv-button" type="submit">{{addit}}</button></span>
             </form></details></li>
         {{/canadd}}

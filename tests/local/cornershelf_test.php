@@ -162,7 +162,28 @@ final class cornershelf_test extends \advanced_testcase {
         $this->assertNotEmpty(genres::from($this->library));
         $this->touch(['genre' => 'new', 'label' => 'Humor', 'topics' => 'Humor', 'prefixes' => '']);
         $this->assertSame(['Enigmas', 'Humor'], array_column(genres::of($this->library), 'label'));
+        // A topic touched on its back goes off, and on again; one more is written; the name alone leaves the topics.
+        $topics = fn() => genres::of($this->library)[0]['topics'];
+        $this->assertSame('ayv-ri-g' . $code, $this->touch(['topic' => $code . '|Detectives']));
+        $this->assertSame(['Misterio'], $topics());
+        $this->touch(['topic' => $code . '|Detectives']);
+        $this->assertSame(['Misterio', 'Detectives'], $topics());
+        $this->touch(['genretopic' => $code, 'addtopic' => 'Casos sin resolver']);
+        $this->assertSame(['Misterio', 'Detectives', 'Casos sin resolver'], $topics());
+        $this->touch(['genretopic' => $code, 'addtopic' => 'misterio']);
+        $this->assertCount(3, $topics());
+        $this->touch(['genre' => $code, 'label' => 'Casos', 'prefixes' => 'N CAS']);
+        $this->assertSame(
+            ['Casos', ['Misterio', 'Detectives', 'Casos sin resolver'], ['N CAS']],
+            [genres::of($this->library)[0]['label'], $topics(), genres::of($this->library)[0]['prefixes']]
+        );
+        // Made with its name alone, its name is its first topic.
+        $this->touch(['genre' => 'new', 'label' => 'Rimas']);
+        $this->assertSame(['Rimas'], array_values(array_filter(
+            genres::of($this->library),
+            fn($g) => $g['label'] === 'Rimas'
+        ))[0]['topics']);
         $this->touch(['genredrop' => $code]);
-        $this->assertSame(['Humor'], array_column(genres::of($this->library), 'label'));
+        $this->assertSame(['Humor', 'Rimas'], array_column(genres::of($this->library), 'label'));
     }
 }

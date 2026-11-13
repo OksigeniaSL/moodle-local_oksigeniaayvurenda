@@ -157,7 +157,8 @@ final class yearsheet {
      * @param string $touched The day touched, or ''.
      * @param string $from The first day of a closure being chosen, or ''.
      * @param string $base The address of the page.
-     * @param array|null $pick Choosing the days of a report: report, and first (the first day, or '').
+     * @param array|null $pick Choosing the days of a report: report, and first (the first day, or ''); or the day the
+     *     labels start from: report «labels», and back (kind, sheet).
      * @return array months and the letters of the week.
      */
     public static function months(
@@ -211,7 +212,10 @@ final class yearsheet {
                     'dia' => $date] + ($from !== '' && $date >= $from ? ['desde' => $from] : []);
                 // Choosing the days of a report: the first touch is its first day, the second goes back to the report.
                 $link = new \moodle_url($base, $params, 'ayv-cs-touched');
-                if ($pick) {
+                if ($pick && $pick['report'] === 'labels') {
+                    $link = new \moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $library->slug,
+                        'which' => 'since', 'since' => $date] + array_filter($pick['back'] ?? []), 'ayv-et-hoja');
+                } else if ($pick) {
                     $link = $pick['first'] !== '' && $date >= $pick['first']
                         ? new \moodle_url('/local/oksigeniaayvurenda/reports.php', ['library' => $library->slug,
                             'report' => $pick['report'], 'desde' => $pick['first'], 'hasta' => $date])

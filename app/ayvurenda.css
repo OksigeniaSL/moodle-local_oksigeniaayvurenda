@@ -7432,3 +7432,461 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
         background: linear-gradient(to right, var(--lomo, var(--green)) 28px, transparent 28px);
     }
 }
+/* «Etiquetas» (personal-labels) as one sample sheet (Jujol, 12 Nov 2026): on the left, what is printed (two cards with
+   their sample label), of which copies (chips) and the sheet (drawings of sheets, the favourites first); on the right,
+   the first sheet as it will come out, drawn to its grid, its first free label touched on it. The page says how many
+   sheets instead of painting every label. After como-funciona.css. */
+.ayv .ayv-et-mesa {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px 32px;
+}
+
+.ayv .ayv-et-elige {
+    display: grid;
+    gap: 22px;
+}
+
+.ayv .ayv-et-paso h2 {
+    margin: 0 0 8px;
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* What is printed: two cards, each with its sample label. */
+.ayv .ayv-et-tipos,
+.ayv .ayv-et-hojas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ayv .ayv-et-tipo,
+.ayv .ayv-et-hoja-b {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+    flex: 1 1 12rem;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.ayv .ayv-et-tipo > span:last-child,
+.ayv .ayv-et-hoja-b > span:last-child {
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+.ayv .ayv-et-tipo[aria-pressed="true"],
+.ayv .ayv-et-hoja-b[aria-pressed="true"] {
+    border-color: var(--green);
+    box-shadow: inset 0 0 0 1.5px var(--green);
+}
+
+.ayv .ayv-et-muestra {
+    display: block;
+    width: 150px;
+    height: 80px;
+    margin-bottom: 8px;
+}
+
+.ayv .ayv-et-muestra-tej {
+    width: 64px;
+}
+
+.ayv .ayv-et-dias {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-top: 10px;
+}
+
+.ayv .ayv-et-dia {
+    padding: 6px 12px;
+    border-radius: 4px 4px 8px 8px;
+    background: linear-gradient(var(--line) 0 4px, transparent 4px), var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ayv .ayv-et-dia-si {
+    background: linear-gradient(var(--coral) 0 4px, transparent 4px), var(--green);
+    box-shadow: none;
+    color: var(--cf-crema);
+}
+
+/* A sheet drawn small: its grid of labels. */
+.ayv .ayv-et-mini {
+    display: grid;
+    grid-template-columns: repeat(var(--c), 1fr);
+    gap: 1px;
+    width: 46px;
+    height: 64px;
+    margin-bottom: 6px;
+    padding: 3px;
+    border-radius: 2px;
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--line), 0 4px 8px -4px rgba(0, 0, 0, .4);
+}
+
+.ayv .ayv-et-mini i {
+    border-radius: 1px;
+    background: rgba(23, 87, 76, .22);
+}
+
+.ayv .ayv-et-mas > summary {
+    margin-top: 10px;
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-et-mas > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-et-mas[open] > summary {
+    margin-bottom: 10px;
+}
+
+/* The first sheet, drawn as it will come out: white paper in light and in dark, its labels on their grid. */
+.ayv .ayv-et-muestra-hoja {
+    display: grid;
+    gap: 12px;
+    position: sticky;
+    top: 12px;
+}
+
+.ayv .ayv-et-dice {
+    margin: 0;
+    font-size: 1.125rem;
+}
+
+.ayv .ayv-et-dice b {
+    font-family: var(--title);
+}
+
+.ayv .ayv-et-papel {
+    display: grid;
+    grid-template-columns: repeat(var(--c), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--r), minmax(0, 1fr));
+    gap: 4px;
+    aspect-ratio: 210 / 297;
+    padding: 4% 3%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .2), 0 18px 30px -18px rgba(0, 0, 0, .55);
+}
+
+.ayv .ayv-et-celda {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 3px;
+    color: #1e2b2a;
+    text-decoration: none;
+    box-shadow: inset 0 0 0 1px rgba(30, 43, 42, .12);
+}
+
+.ayv .ayv-et-celda:hover {
+    box-shadow: inset 0 0 0 2px #17574c;
+}
+
+.ayv .ayv-et-primera {
+    box-shadow: inset 0 0 0 2px #e2654c;
+}
+
+.ayv .ayv-et-e {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    height: 100%;
+    overflow: hidden;
+    padding: 2px;
+    color: #1e2b2a;
+    font-size: .5625rem;
+    line-height: 1.15;
+    text-align: center;
+}
+
+.ayv .ayv-et-cod small {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: .5rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.ayv .ayv-et-cod b {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: .5625rem;
+    letter-spacing: .02em;
+}
+
+.ayv .ayv-et-barras {
+    width: 80%;
+    height: 2.2em;
+    background: repeating-linear-gradient(90deg, #1e2b2a 0 1px, transparent 1px 3px, #1e2b2a 3px 5px, transparent 5px 6px, #1e2b2a 6px 7px, transparent 7px 9px);
+}
+
+.ayv .ayv-et-tej {
+    gap: 0;
+    font-size: .6875rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-et-tej b {
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: #f0b43c;
+}
+
+/* Labels already used on the sheet: crossed, they are not printed. */
+.ayv .ayv-et-usada {
+    background: repeating-linear-gradient(45deg, rgba(30, 43, 42, .14) 0 2px, transparent 2px 7px);
+}
+
+.ayv .ayv-et-muestra .ayv-et-e {
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--line);
+    font-size: .6875rem;
+}
+
+.ayv .ayv-et-muestra .ayv-et-cod b {
+    font-size: .6875rem;
+}
+
+.ayv .ayv-et-muestra .ayv-et-cod small {
+    font-size: .5625rem;
+}
+
+@media (max-width: 900px) {
+    .ayv .ayv-et-mesa {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-et-muestra-hoja {
+        position: static;
+    }
+}
+
+/* Etiquetas, as mounted: the choices are links (a view), so the chosen one is aria-current. */
+.ayv a.ayv-cf-chapa[aria-current="true"],
+.ayv a.ayv-et-dia[aria-current="true"] {
+    border-color: var(--green);
+    background: linear-gradient(var(--coral) 0 4px, transparent 4px), var(--green);
+    box-shadow: none;
+    color: var(--cf-crema);
+}
+
+.ayv a.ayv-cf-chapa[aria-current="true"] {
+    background: var(--green);
+}
+
+.ayv a.ayv-et-tipo,
+.ayv a.ayv-et-hoja-b,
+.ayv a.ayv-et-dia {
+    text-decoration: none;
+}
+
+.ayv .ayv-et-tipo[aria-current="true"],
+.ayv .ayv-et-hoja-b[aria-current="true"] {
+    border-color: var(--green);
+    box-shadow: inset 0 0 0 1.5px var(--green);
+}
+
+.ayv .ayv-et-tipo > b,
+.ayv .ayv-et-hoja-b > b {
+    font-size: 1.0625rem;
+}
+
+.ayv .ayv-et-tipo > span:last-child,
+.ayv .ayv-et-hoja-b > span:last-child {
+    color: var(--ink);
+    opacity: .75;
+}
+
+/* The barcode of a sample or of a label on the first sheet: the real one, drawn small. */
+.ayv .ayv-et-codigo {
+    display: block;
+    width: 80%;
+    height: 2.2em;
+}
+
+.ayv .ayv-et-codigo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.ayv .ayv-et-papel-carta {
+    aspect-ratio: 216 / 279;
+}
+
+.ayv .ayv-et-tej span {
+    display: block;
+}
+
+/* The list of codes: a sheet of lined paper, one code a line. */
+.ayv .ayv-et-lista {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.ayv .ayv-et-lista label {
+    font-weight: 700;
+}
+
+.ayv .ayv-et-lista textarea {
+    width: 100%;
+    min-height: calc(6 * 1.75rem);
+    padding: 0 12px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #fff;
+    background-image: linear-gradient(transparent calc(1.75rem - 1px), rgba(23, 87, 76, .3) calc(1.75rem - 1px));
+    background-size: 100% 1.75rem;
+    background-attachment: local;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .2), 0 10px 18px -12px rgba(0, 0, 0, .45);
+    color: #1e2b2a;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.75rem;
+}
+
+/* Moving the print: four arrows, each half a millimetre, kept at once. */
+.ayv .ayv-et-ajuste {
+    display: grid;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.ayv .ayv-et-ajuste h3 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.125rem;
+}
+
+.ayv .ayv-et-ajuste p {
+    margin: 0;
+}
+
+.ayv .ayv-et-flechas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ayv .ayv-et-muestra-hoja .ayv-cf-fila form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* The page that prints them all: a bar on screen only. */
+.ayv .ayv-et-imprime {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.ayv .ayv-et-imprime p {
+    margin: 0;
+}
+
+/* Rincones, Jujol's second look (13 Nov 2026): the gestures at the foot of each place, in line along the shelf. */
+.ayv .ayv-ri-rincon {
+    grid-template-rows: 1fr auto auto;
+    align-content: stretch;
+}
+
+.ayv .ayv-ri-lamina {
+    align-self: start;
+}
+
+/* A genre opened takes the whole row: its name written on the plate, its shelf mark drawn as one, its topics as chips. */
+.ayv .ayv-ri-generos > li:has(> .ayv-ri-genero-mio[open]),
+.ayv .ayv-ri-generos > li:has(> .ayv-ri-genero-otro[open]) {
+    flex: 1 1 100%;
+}
+
+.ayv .ayv-ri-genero-mio[open],
+.ayv .ayv-ri-genero-otro[open] {
+    width: 100%;
+}
+
+.ayv .ayv-ri-genero-nombre {
+    display: grid;
+    gap: 10px;
+}
+
+.ayv .ayv-ri-genero-dorso .ayv-ri-nombre-in {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-ri-tejuelo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+}
+
+.ayv .ayv-ri-tejuelo .ayv-cf-tejuelo-m {
+    width: 104px;
+}
+
+.ayv .ayv-ri-genero-dorso .ayv-ri-tejuelo input {
+    width: 88px;
+    min-height: 36px;
+    padding: 2px 4px;
+    border: 0;
+    border-radius: 2px;
+    background: #f0b43c;
+    color: #1e2b2a;
+    font-family: var(--text);
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.ayv .ayv-ri-tema {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.ayv .ayv-ri-genero-dorso .ayv-ri-tema input {
+    width: auto;
+    flex: 1 1 12rem;
+    font-family: var(--text);
+}
+
+/* «Saved» under a heading, never inside it (a status in a heading is not valid HTML). */
+.ayv .ayv-cf-guardado-fila {
+    margin: -4px 0 6px;
+}
+
+.ayv .ayv-cf-guardado-fila .ayv-cf-guardado {
+    margin-left: 0;
+}

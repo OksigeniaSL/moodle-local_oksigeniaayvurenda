@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.242.0 (2026-11-13)
+
+- Labels, from Jujol's mock-up, as one sample sheet. On the left, what is printed (the code or the spine label, each a
+  card with its sample label), of which copies (chips with how many: added today, since a day, a list of codes) and the
+  sheet (each drawn small with its grid, its size and how many it holds; the favourites and the chosen one first, the rest
+  under «Other sheets»). «Since a day» offers the last days things came in as small sheets, and today, and any other day
+  on the year sheet, which in this mode takes one touch and goes back to the labels. The list of codes is written on a
+  sheet of lined paper. On the right, the first sheet as it will come out, with its real labels: touching one makes it
+  the first free one, and those before it are crossed out. A sentence says how many labels on how many sheets. Every
+  choice is a link and needs no JavaScript.
+- The page no longer paints every label (2,000 of them made it almost 100,000 px long): «Print the 84 sheets» opens a
+  page of its own with all of them, which opens the print window once. «Adjust the print» opens four arrows that move it
+  half a millimetre each, kept at once, «Back to its place», and the test sheet. The favourite is one button.
+- The guided help of Labels follows the new screen; its words and voices stay.
+- The corners, from Jujol's second look: the gestures of every plate stand in line at the foot of the shelf; an opened
+  genre takes the whole row, with its name written on the plate, its topics as chips that turn on and off at a touch
+  (its own lit, the most used in the stories off) and «+ Another topic», and the start of its shelf mark drawn on a
+  spine label. «Another genre» asks only for its name, which becomes its first topic.
+- «Saved» under the heading of the genres, not inside it, which the HTML validator refused.
+
 ## 0.241.0 (2026-11-13)
 
 - The corners of the room, from Jujol's mock-up: each corner is its plate standing on a wooden shelf, in the order the

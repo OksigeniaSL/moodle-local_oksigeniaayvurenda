@@ -13,117 +13,142 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/labels
 
-    Labels with the barcode, or spine labels, laid out on the chosen A4 sheet.
+    The labels as one sample sheet: on the left, what is printed (two cards with a sample label), of which copies (chips,
+    the last days things came in, a list of codes) and the sheet (each drawn small, the favourites first); on the right,
+    the first sheet as it will come out, where the first free label is touched, and the way to print them all. Every
+    choice is a link; the favourite and the moved print are kept with a button each.
 
     Context variables required for this template:
-    * heading, count, empty - texts
-    * action, library - the form; kinds, whiches, sheets (value, label, selected); since, codes, start
-    * cols, cells - the map of the sheet (n, used, first, label); istoday, issince, iscodes; toomany
-    * pages - sheets of labels (blank, barcode, title, callnumber lines, library, svg)
-    * spines - whether they are spine labels; style - the measures of the sheet
+    * title, intro, savedword, crier - the head
+    * kindtitle, kinds (url, current, iscode, name, sub, library, code, svg, booktitle, lines) - what is printed
+    * whichtitle, whiches (url, current, label), days (lead, list, otherurl, otherlabel), codes (action, hidden, label,
+      value, show) - of which copies
+    * sheettitle, sheets (top, others, hasothers; each url, current, name, sub, cols, rows, cells), otherslabel, othersnote
+    * firstsheet, says, haslabels, empty, toomany, paper (cols, rows, letter, cells: url, aria, used, first, blank,
+      spine, code), note, printurl, printlabel, favaction, sesskey, fav (pressed, label, justsaved), adjusturl,
+      adjustlabel, adjust (title, hint, now, justsaved, moves, reset, testhint, testurl, testlabel, close, closelabel)
 
     Example context (json):
     {
-        "heading": "Etiquetas",
-        "action": "#",
-        "library": "central",
-        "kinds": [{"value": "labels", "label": "Etiquetas", "selected": true, "isspine": false}],
-        "cols": 3, "cells": [{"n": 1, "used": false, "first": true, "label": "Empezar en la etiqueta 1"}],
-        "istoday": true, "issince": false, "iscodes": false, "toomany": "", "labelsmaphint": "Toca la primera libre.",
-        "whiches": [{"value": "today", "label": "Lo dado de alta hoy", "selected": true}],
-        "since": "",
-        "codes": "",
-        "sheetgroups": [{"label": "Apli", "options": [{"value": "apli-01286", "label": "Apli 01286 · 52,5 × 29,7 mm · 40 por hoja", "selected": true}]}],
-        "sheet": "apli-01286", "sesskey": "abc", "which": "today", "isfav": false, "favbutton": "Marcar como favorita",
-        "nudgex": 0, "nudgey": 0, "nudged": "", "testurl": "#", "test": false, "letter": false,
-        "labelsnudge": "Ajustar la impresión", "labelsnudgetitle": "Ajustar la impresión", "labelsnudgehint": "Mueve la impresión.",
-        "labelsnudgex": "A la derecha (mm)", "labelsnudgey": "Hacia abajo (mm)", "labelstest": "Hoja de prueba",
-        "labelstesthint": "Imprímela en papel normal.", "sourcessave": "Guardar", "offsiteclose": "Cerrar",
-        "start": 1,
-        "count": "2 ejemplares",
-        "haspages": true,
-        "pages": [{"labels": [{"blank": false, "barcode": "100000L", "title": "El faro dormido", "callnumber": ["N", "LAU", "far"], "library": "Central", "svg": ""}]}],
-        "empty": "",
-        "spines": false,
-        "style": "",
-        "labelskind": "Qué", "labelswhich": "De qué ejemplares", "labelssince": "Desde", "labelscodes": "Códigos",
-        "labelssheetlabel": "Hoja", "labelsstart": "Empezar en la etiqueta", "labelsshow": "Ver", "printnow": "Imprimir"
+        "title": "Etiquetas", "intro": "Elige qué.", "savedword": "Guardado", "crier": null, "kindtitle": "Qué",
+        "kinds": [
+            {"url": "https://example.com/labels.php", "current": false, "iscode": true, "name": "El código", "sub": "Para el mostrador",
+                "library": "Biblioteca", "code": "AY-1", "booktitle": "La isla",
+                "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'><rect width='1' height='4'/></svg>"},
+            {"url": "https://example.com/labels.php?kind=spines", "current": true, "iscode": false, "name": "El tejuelo",
+                "sub": "Para el lomo", "lines": [{"line": "82-3", "top": true}, {"line": "ROW", "top": false}]}
+        ],
+        "whichtitle": "De qué ejemplares",
+        "whiches": [{"url": "https://example.com/labels.php?which=today", "current": true, "label": "Los dados de alta hoy · 2"}],
+        "days": {"lead": "Desde el día que se toca:", "otherurl": "https://example.com/year.php", "otherlabel": "Otro día",
+            "list": [{"url": "https://example.com/labels.php?since=2026-10-02", "label": "vie 2 oct", "current": true}]},
+        "codes": {"action": "https://example.com/labels.php", "hidden": [{"name": "which", "value": "codes"}],
+            "label": "Códigos", "value": "AY-1", "show": "Ver"},
+        "sheettitle": "La hoja", "otherslabel": "Otras hojas", "othersnote": "Arriba, tus favoritas.",
+        "sheets": {"hasothers": true,
+            "top": [{"url": "https://example.com/labels.php?sheet=a", "current": true, "name": "Apli 01273", "sub": "70 × 37 mm",
+                "cols": 3, "rows": 2, "cells": [{"x": 1}, {"x": 1}]}],
+            "others": [{"url": "https://example.com/labels.php?sheet=b", "current": false, "name": "Avery L7160", "sub": "63,5 × 38,1 mm",
+                "cols": 3, "rows": 7, "cells": [{"x": 1}]}]},
+        "firstsheet": "La primera hoja", "says": "<b>2 tejuelos</b> en <b>1 hoja</b>.", "haslabels": true,
+        "empty": "Nada.", "toomany": "",
+        "paper": {"cols": 3, "rows": 8, "letter": false, "cells": [
+            {"url": "https://example.com/labels.php?start=1", "aria": "Empezar en la 1", "used": true, "first": false,
+                "blank": false, "spine": null, "code": null},
+            {"url": "https://example.com/labels.php?start=2", "aria": "Empezar en la 2", "used": false, "first": true,
+                "blank": false, "spine": {"lines": [{"line": "82-3", "top": true}]}, "code": null},
+            {"url": "https://example.com/labels.php?start=3", "aria": "Empezar en la 3", "used": false, "first": false,
+                "blank": false, "spine": null, "code": {"library": "Biblioteca", "barcode": "AY-1", "title": "La isla",
+                "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'><rect width='1' height='4'/></svg>"} },
+            {"url": "https://example.com/labels.php?start=4", "aria": "Empezar en la 4", "used": false, "first": false,
+                "blank": true, "spine": null, "code": null}
+        ]},
+        "note": "Toca la primera libre.", "printurl": "https://example.com/labels.php?print=1", "printlabel": "Imprimir la hoja",
+        "favaction": "https://example.com/labels.php", "sesskey": "abc",
+        "fav": {"pressed": true, "label": "Una de tus favoritas", "justsaved": false},
+        "adjusturl": "https://example.com/labels.php?adjust=1", "adjustlabel": "Ajustar la impresión",
+        "adjust": {"title": "Ajustar", "hint": "Medio milímetro.", "now": "En su sitio.", "justsaved": true,
+            "moves": [{"value": "left", "label": "A la izquierda", "arrow": "←"}], "reset": "Volver a su sitio",
+            "testhint": "En papel normal.", "testurl": "https://example.com/labels.php?print=1&test=1", "testlabel": "Hoja de prueba",
+            "close": "https://example.com/labels.php", "closelabel": "Cerrar"}
     }
 }}
-<div class="ayv-print-head">
-    <h1 class="ayv-results-title">{{heading}}</h1>
-    <form method="get" action="{{action}}" class="ayv-lab" data-ayv-lab>
-        <input type="hidden" name="library" value="{{library}}">
-        <input type="hidden" name="start" value="{{start}}">
-        <div class="ayv-lab-main">
-            <fieldset class="ayv-lab-kinds"><legend class="ayv-sr">{{labelskind}}</legend>
-                {{#kinds}}
-                <label class="ayv-lab-kind"><input type="radio" name="kind" value="{{value}}" {{#selected}}checked{{/selected}}>
-                    <span class="ayv-lab-sample" aria-hidden="true">
-                        {{#isspine}}<span class="ayv-lab-spine"><b>N</b><b>LAU</b><b>far</b></span>{{/isspine}}
-                        {{^isspine}}<span class="ayv-lab-code"><i></i><i></i><i></i></span>{{/isspine}}
-                    </span>
-                    <span class="ayv-lab-kindname">{{label}}</span></label>
-                {{/kinds}}
-            </fieldset>
-            <fieldset class="ayv-lab-which"><legend>{{labelswhich}}</legend>
-                {{#whiches}}<label class="ayv-lab-pill"><input type="radio" name="which" value="{{value}}" {{#selected}}checked{{/selected}}> <span>{{label}}</span></label>{{/whiches}}
-            </fieldset>
-            <label class="ayv-field ayv-dig-field ayv-lab-since"{{^issince}} hidden{{/issince}}>{{labelssince}} <input type="date" name="since" value="{{since}}"></label>
-            <label class="ayv-field ayv-dig-field ayv-lab-codes"{{^iscodes}} hidden{{/iscodes}}>{{labelscodes}} <textarea name="codes" rows="3" spellcheck="false">{{codes}}</textarea></label>
-            <p class="ayv-lab-go"{{#istoday}} hidden{{/istoday}}><button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button></p>
+<div class="ayv-cf ayv-et">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{title}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
         </div>
-        <div class="ayv-lab-side">
-            <label class="ayv-field ayv-dig-field">{{labelssheetlabel}} <select name="sheet">{{#sheetgroups}}<optgroup label="{{label}}">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/options}}</optgroup>{{/sheetgroups}}</select></label>
-            <p class="ayv-lab-sheettools">
-                <button type="submit" form="ayv-lab-fav" class="ayv-button ayv-button-quiet ayv-lab-fav{{#isfav}} ayv-lab-fav-on{{/isfav}}" aria-pressed="{{#isfav}}true{{/isfav}}{{^isfav}}false{{/isfav}}"><span aria-hidden="true">{{#isfav}}★{{/isfav}}{{^isfav}}☆{{/isfav}}</span> {{favbutton}}</button>
-                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-lab-nudge">{{labelsnudge}}</button></p>
-            {{#nudged}}<p class="ayv-field-hint">{{nudged}}</p>{{/nudged}}
-            <p class="ayv-field-hint">{{labelsmaphint}}</p>
-            <div class="ayv-lab-map" style="--cols: {{cols}}" role="group" aria-label="{{labelsstart}}">{{#cells}}<button type="button" class="ayv-lab-cell{{#used}} ayv-lab-cell-used{{/used}}{{#first}} ayv-lab-cell-first{{/first}}" data-start="{{n}}" aria-label="{{label}}"{{#first}} aria-current="true"{{/first}}></button>{{/cells}}</div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
+<div class="ayv-et-mesa">
+<div class="ayv-et-elige">
+    <section class="ayv-et-paso" aria-labelledby="ayv-et-que">
+        <h2 id="ayv-et-que">{{kindtitle}}</h2>
+        <div class="ayv-et-tipos">
+            {{#kinds}}<a class="ayv-et-tipo" href="{{url}}"{{#current}} aria-current="true"{{/current}}><span class="ayv-et-muestra{{^iscode}} ayv-et-muestra-tej{{/iscode}}" aria-hidden="true">{{#iscode}}<span class="ayv-et-e ayv-et-cod"><small>{{library}}</small><span class="ayv-et-codigo">{{{svg}}}</span><b>{{code}}</b><small>{{booktitle}}</small></span>{{/iscode}}{{^iscode}}<span class="ayv-et-e ayv-et-tej">{{#lines}}{{#top}}<b>{{line}}</b>{{/top}}{{^top}}<span>{{line}}</span>{{/top}}{{/lines}}</span>{{/iscode}}</span><b>{{name}}</b><span>{{sub}}</span></a>{{/kinds}}
         </div>
-    </form>
-    <form id="ayv-lab-fav" method="post" action="{{action}}" hidden><input type="hidden" name="sesskey" value="{{sesskey}}">
-        <input type="hidden" name="do" value="fav"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="kind" value="{{kind}}">
-        <input type="hidden" name="sheet" value="{{sheet}}"><input type="hidden" name="which" value="{{which}}"><input type="hidden" name="since" value="{{since}}">
-        <input type="hidden" name="codes" value="{{codes}}"></form>
-    <dialog class="ayv-modal" id="ayv-lab-nudge" aria-labelledby="ayv-lab-nudge-title">
-        <div class="ayv-modal-head"><h2 id="ayv-lab-nudge-title" class="ayv-section-title">{{labelsnudgetitle}}</h2>
-            <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <p class="ayv-field-hint">{{labelstesthint}}</p>
-        <p><a class="ayv-button ayv-button-quiet" href="{{testurl}}">{{labelstest}}</a></p>
-        <form method="post" action="{{action}}" class="ayv-rule-form"><input type="hidden" name="sesskey" value="{{sesskey}}">
-            <input type="hidden" name="do" value="nudge"><input type="hidden" name="library" value="{{library}}"><input type="hidden" name="kind" value="{{kind}}">
-            <input type="hidden" name="sheet" value="{{sheet}}"><input type="hidden" name="which" value="{{which}}"><input type="hidden" name="since" value="{{since}}">
-            <input type="hidden" name="codes" value="{{codes}}">
-            <p class="ayv-field-hint">{{labelsnudgehint}}</p>
-            <div class="ayv-rule-numbers">
-                <label class="ayv-field ayv-dig-field">{{labelsnudgex}} <input type="number" name="x" min="-10" max="10" step="0.5" value="{{nudgex}}"></label>
-                <label class="ayv-field ayv-dig-field">{{labelsnudgey}} <input type="number" name="y" min="-10" max="10" step="0.5" value="{{nudgey}}"></label>
-            </div>
-            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
+    </section>
+    <section class="ayv-et-paso" aria-labelledby="ayv-et-de" id="ayv-et-dias">
+        <h2 id="ayv-et-de">{{whichtitle}}</h2>
+        <div class="ayv-cf-chapas">{{#whiches}}<a class="ayv-cf-chapa" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>{{/whiches}}</div>
+        {{#days}}
+        <div class="ayv-et-dias"><span class="ayv-cf-nota">{{lead}}</span>{{#list}}<a class="ayv-et-dia" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>{{/list}}
+            <a class="ayv-cf-enlace" href="{{otherurl}}">{{otherlabel}}</a></div>
+        {{/days}}
+        {{#codes}}
+        <form class="ayv-et-lista" id="ayv-et-lista" method="get" action="{{action}}">{{#hidden}}<input type="hidden" name="{{name}}" value="{{value}}">{{/hidden}}
+            <label for="ayv-et-codigos">{{label}}</label>
+            <textarea id="ayv-et-codigos" name="codes" rows="5" spellcheck="false" autocomplete="off">{{value}}</textarea>
+            <span class="ayv-cf-fila"><button type="submit" class="ayv-button">{{show}}</button></span>
         </form>
-    </dialog>
-    <p class="ayv-lab-count"><span>{{count}}</span>{{#haspages}} <button type="button" class="ayv-button" data-ayv-print>{{printnow}}</button>{{/haspages}}</p>
+        {{/codes}}
+    </section>
+    <section class="ayv-et-paso" aria-labelledby="ayv-et-hojas">
+        <h2 id="ayv-et-hojas">{{sheettitle}}</h2>
+        {{#sheets}}
+        <div class="ayv-et-hojas">{{#top}}{{> local_oksigeniaayvurenda/labels_sheet}}{{/top}}</div>
+        {{#hasothers}}
+        <details class="ayv-et-mas"><summary>{{otherslabel}}</summary>
+            <div class="ayv-et-hojas">{{#others}}{{> local_oksigeniaayvurenda/labels_sheet}}{{/others}}</div>
+            <p class="ayv-cf-nota">{{othersnote}}</p></details>
+        {{/hasothers}}
+        {{/sheets}}
+    </section>
+</div>
+<section class="ayv-et-muestra-hoja" id="ayv-et-hoja" aria-labelledby="ayv-et-hoja-t">
+    <h2 id="ayv-et-hoja-t" class="ayv-sr">{{firstsheet}}</h2>
+    {{#haslabels}}
+    <p class="ayv-et-dice">{{{says}}}</p>
     {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
-    {{^haspages}}<div class="ayv-nothing"><p>{{empty}}</p></div>{{/haspages}}
-</div>
-{{#pages}}
-<div class="ayv-labelsheet{{#spines}} ayv-labelsheet-spines{{/spines}}{{#letter}} ayv-labelsheet-letter{{/letter}}{{#test}} ayv-labelsheet-test{{/test}}" style="{{style}}">
-{{#labels}}
-    <div class="ayv-label{{#blank}} ayv-label-empty{{/blank}}">{{#testnumber}}<span class="ayv-label-number">{{testnumber}}</span>{{/testnumber}}
-        {{^blank}}
-        {{#spines}}<div class="ayv-spine-lines">{{#callnumber}}<span>{{.}}</span>{{/callnumber}}</div>{{/spines}}
-        {{^spines}}
-        <p class="ayv-label-library">{{library}}</p>
-        <p class="ayv-label-title">{{title}}</p>
-        {{#svg}}<div class="ayv-label-barcode">{{{svg}}}</div>{{/svg}}
-        {{/spines}}
-        {{/blank}}
+    {{#paper}}
+    <div class="ayv-et-papel{{#letter}} ayv-et-papel-carta{{/letter}}" style="--c: {{cols}}; --r: {{rows}};">{{#cells}}<a class="ayv-et-celda{{#first}} ayv-et-primera{{/first}}" href="{{url}}"{{#first}} aria-current="true"{{/first}}><span class="ayv-sr">{{aria}}</span><span class="ayv-et-e{{#used}} ayv-et-usada{{/used}}{{#spine}} ayv-et-tej{{/spine}}{{#code}} ayv-et-cod{{/code}}" aria-hidden="true">{{#spine}}{{#lines}}{{#top}}<b>{{line}}</b>{{/top}}{{^top}}<span>{{line}}</span>{{/top}}{{/lines}}{{/spine}}{{#code}}<small>{{library}}</small><span class="ayv-et-codigo">{{{svg}}}</span><b>{{barcode}}</b><small>{{title}}</small>{{/code}}</span></a>{{/cells}}</div>
+    {{/paper}}
+    <p class="ayv-cf-nota">{{note}}</p>
+    <div class="ayv-cf-fila">
+        <a class="ayv-button" href="{{printurl}}">{{printlabel}}</a>
+        <form method="post" action="{{favaction}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="fav">
+            {{#fav}}<button class="ayv-cf-chapa" type="submit" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span aria-hidden="true">{{#pressed}}★{{/pressed}}{{^pressed}}☆{{/pressed}}</span> {{label}}</button>{{#justsaved}} <span class="ayv-cf-guardado" role="status">{{savedword}}</span>{{/justsaved}}{{/fav}}</form>
+        <a class="ayv-cf-enlace" href="{{adjusturl}}">{{adjustlabel}}</a>
     </div>
-{{/labels}}
+    {{/haslabels}}
+    {{^haslabels}}<p class="ayv-et-dice">{{empty}}</p>{{/haslabels}}
+    {{#adjust}}
+    <div class="ayv-et-ajuste" id="ayv-et-ajuste">
+        <h3>{{title}}</h3>{{#justsaved}}<p><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
+        <p>{{now}}</p>
+        <p class="ayv-cf-nota">{{hint}}</p>
+        <form class="ayv-et-flechas" method="post" action="{{favaction}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="nudge">
+            {{#moves}}<button class="ayv-cf-chapa" type="submit" name="move" value="{{value}}"><span aria-hidden="true">{{arrow}}</span> {{label}}</button>{{/moves}}
+            {{#reset}}<button class="ayv-cf-chapa" type="submit" name="move" value="reset">{{reset}}</button>{{/reset}}
+        </form>
+        <p class="ayv-cf-nota">{{testhint}}</p>
+        <p class="ayv-cf-fila"><a class="ayv-button ayv-button-quiet" href="{{testurl}}">{{testlabel}}</a> <a class="ayv-cf-enlace" href="{{close}}">{{closelabel}}</a></p>
+    </div>
+    {{/adjust}}
+</section>
 </div>
-{{/pages}}
+</div>
