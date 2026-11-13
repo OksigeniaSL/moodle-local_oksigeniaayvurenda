@@ -92,4 +92,6 @@ export const SPOTS = {
   lighthouse: { x: -2.42, z: 0.32 },
   dock: { x: 1.9, z: 0.55, yaw: -0.3, length: 0.85 },
   boat: { x: 2.72, z: 1.02, yaw: -0.3 },
+  // The ship of the term (P5), moored off the beach in front, its bow to the open sea on the left.
+  ship: { x: -1.42, z: 2.02, yaw: 2.89 },
 };

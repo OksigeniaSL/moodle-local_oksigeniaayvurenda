@@ -118,6 +118,13 @@ foreach ($shown as $i => $group) {
     // Once met, the tutor may start another one this term (JV-D5).
     $choices = challenges::choices($challenge);
     $planted = challenges::garden($entityid, $group, $now);
+    // How many steps each challenge would have for this class: «everyone» is its readers this year.
+    $steps = ['corners' => challenges::KINDS['corners'], 'notes' => challenges::KINDS['notes'],
+        'everyone' => max(1, $DB->count_records_select(
+            'local_oksigeniaayvurenda_member',
+            'yearid = :yearid AND groupname = :groupname',
+            ['yearid' => $year->id, 'groupname' => $group]
+        ))];
     $garden = array_map(
         fn($p) => ['label' => $str('challengeplanted', $p['term']) . ' · ' . $str('challengekind' . $p['kind'])],
         $planted
@@ -143,14 +150,28 @@ foreach ($shown as $i => $group) {
         'offstage' => $off !== null ? $str('classoff', $off) : '',
         'current' => $challenge ? challenges::view($challenge, $entityid, $pupil === null) : null,
         'canchoose' => $off === null && $pupil === null,
-        'kinds' => $choices['kinds'],
+        // The challenge of the term as cards (Jujol): each with what it asks and its garland, still empty.
+        'kinds' => array_map(fn($k) => array_merge($k, [
+            // The card «This term's» is the one chosen; choosing another after one met marks none (the met one is above).
+            'checked' => !$choices['again'] && $k['checked'],
+            'off' => $k['value'] === 'off',
+            'label' => $k['value'] === 'off' ? $str('challengecardoff') : $k['label'],
+            'phrase' => match ($k['value']) {
+                'corners' => $str('challengecorners', challenges::KINDS['corners']),
+                'notes' => $str('challengenotes', challenges::KINDS['notes']),
+                'everyone' => $str('challengeeveryone'),
+                default => $str('challengecardoffphrase'),
+            },
+            'steps' => $k['value'] === 'off' ? null : ['progresslabel' => $str('challengecardsteps', $steps[$k['value']]),
+                'marks' => challenges::garland(0, $steps[$k['value']])],
+        ]), $choices['kinds']),
         'choose' => $choices['choose'],
         'choosehint' => $choices['choosehint'],
         'save' => $choices['save'],
         'garden' => $garden,
         'hasgarden' => (bool) $garden,
         // The garden drawn, when the art package brings the island.
-        'island' => ($layers = screens::island(
+        'island' => $island = ($layers = screens::island(
             count($planted),
             in_array('everyone', array_column($planted, 'kind'), true),
             $boat
@@ -158,10 +179,23 @@ foreach ($shown as $i => $group) {
             'islandlabel' => $str('islandlabel', count($planted)),
             // The same island in 3D, over the layers, where the site allows it.
             'islandstate' => get_config('local_oksigeniaayvurenda', 'island3d') !== '0' ? json_encode(['met' => count($planted),
-                'everyone' => in_array('everyone', array_column($planted, 'kind'), true), 'boat' => $boat]) : '',
+                'everyone' => in_array('everyone', array_column($planted, 'kind'), true), 'boat' => $boat,
+                // The ship of the term (P5): the last week it waits, the last day it sails, among sparks if met.
+                'ship' => challenges::ship($entityid, $now), 'shipmet' => $challenge && !empty($challenge->complete)]) : '',
             'islandkey' => $library->id . '-' . md5($group),
             // Gaudí's models of the art package, for the pieces that have one; the drawn ones without them.
-            'islandassets' => json_encode(array_filter(['hut' => screens::art('isla3d/caseta-q', 'glb')]))] : null,
+            'islandassets' => json_encode(array_filter(['hut' => screens::art('isla3d/caseta-q', 'glb'),
+                'ship' => screens::art('isla3d/velero', 'glb')]))] : null,
+        // The board «Enseñar a la clase» (Jujol): the class's, on the whiteboard, for its tutor, while the term has a
+        // challenge.
+        'board' => ($board = $pupil === null && $challenge ? challenges::board($challenge, $group, $entityid, $now) : null)
+            ? $board + ['island' => $island, 'islandlabel' => $island['islandlabel'] ?? '', 'page' => false,
+            'pageurl' => (new moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => $library->slug, 'pizarra' => $group]))
+                ->out(false),
+            'back' => (new moodle_url('/local/oksigeniaayvurenda/class.php', ['library' => $library->slug]))->out(false),
+            'show' => $str('boardshow'), 'showhint' => $str('boardshowhint'), 'smaller' => $str('boardsmaller'),
+            'bigger' => $str('boardbigger'), 'full' => $str('boardfull'), 'exit' => $str('boardexit'), 'listen' => $str('listen')]
+            : null,
         'cards' => $reads,
         'hasreads' => (bool) $reads,
         'rewards' => $rewards,
@@ -169,6 +203,25 @@ foreach ($shown as $i => $group) {
     ];
 }
 
+// What the page needs: the island in 3D where there is one to draw, and the board where there is a challenge.
+$scripts = array_merge(
+    array_filter(array_map(fn($g) => $g['island']['islandstate'] ?? '', $data)) ? ['isla3d', 'island'] : [],
+    array_filter(array_column($data, 'board')) ? ['barco'] : []
+);
+// The board as a page of its own (its button, without script): only the board of that group.
+$asboard = optional_param('pizarra', '', PARAM_TEXT);
+foreach ($asboard !== '' ? $data : [] as $one) {
+    if ($one['group'] === $asboard && $one['board']) {
+        shell::output(
+            $str('boardshow') . ' · ' . $one['group'],
+            $OUTPUT->render_from_template('local_oksigeniaayvurenda/class_board', array_merge($one['board'], ['page' => true])),
+            $library,
+            '',
+            ['search' => false, 'scripts' => $scripts]
+        );
+        die();
+    }
+}
 shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/class', [
     'heading' => $str('classtitle'),
     // The rules of the challenge only where there is a class; without one, the empty island and where to go.
@@ -194,6 +247,7 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
     'choose' => $str('challengechoose'),
+    'chosen' => $str('challengechosen'),
     'choosehint' => $str('challengechoosehint'),
     'save' => $str('challengesave'),
     'gardenheading' => $str('challengegarden'),
@@ -212,7 +266,7 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
 ]), $library, '', [
     'search' => false,
     // The island in 3D, only where there is one to draw.
-    'scripts' => array_filter(array_map(fn($g) => $g['island']['islandstate'] ?? '', $data)) ? ['isla3d', 'island'] : [],
+    'scripts' => $scripts,
     // The guided help is the tutor's: a pupil has nothing to choose here.
     'nav' => optional_param('help', 0, PARAM_BOOL) || $pupil !== null ? [] : [['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/help.php',

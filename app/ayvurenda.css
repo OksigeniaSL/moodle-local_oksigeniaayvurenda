@@ -12395,3 +12395,545 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
     gap: .55rem;
     justify-items: start;
 }
+
+/* «El barco del trimestre» (P5 of the review of 12 November), Jujol, 13 Nov 2026: the class's island on the classroom board,
+   the place to open it in «Mi clase» with the challenge chosen as a gesture, and the line on the reader's card. After the
+   plugin's sheets; everything carries the prefix .ayv-bc-. The progress is a garland of pennants, the ship's: one per step,
+   coloured when it is done. Firefox 98 and Chrome 93 (the boards of the classrooms): no :has(), no color-mix(), no
+   container units; sizes in vmin so that it reads from the back of the room on any board. */
+
+/* ---------- The garland: the challenge's steps as the ship's pennants ---------- */
+.ayv .ayv-bc-guirnalda {
+    --bc-banderin: 2.2rem;
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: .2rem;
+    margin: 0;
+    padding: .55rem .4rem 0;
+}
+
+/* The rope, slightly sagging. */
+.ayv .ayv-bc-guirnalda::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: calc(var(--bc-banderin) * .6);
+    border-bottom: 3px solid #6d5232;
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+
+.ayv .ayv-bc-banderin {
+    position: relative;
+    flex: 0 1 var(--bc-banderin);
+    width: var(--bc-banderin);
+    height: calc(var(--bc-banderin) * 1.15);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    background: rgba(30, 43, 42, .16);
+}
+
+/* The middle ones hang a little lower, following the rope. */
+.ayv .ayv-bc-banderin:nth-child(n+2):nth-last-child(n+2) {
+    margin-top: calc(var(--bc-banderin) * .12);
+}
+
+.ayv .ayv-bc-banderin-hecho {
+    background: var(--bc-color, #e2654c);
+}
+
+.ayv .ayv-bc-banderin-hecho:nth-child(4n+1) { --bc-color: #e2654c; }
+.ayv .ayv-bc-banderin-hecho:nth-child(4n+2) { --bc-color: #f0b43c; }
+.ayv .ayv-bc-banderin-hecho:nth-child(4n+3) { --bc-color: #2c7a6a; }
+.ayv .ayv-bc-banderin-hecho:nth-child(4n+4) { --bc-color: #7a5a9a; }
+
+/* ---------- 1. «Enseñar a la clase»: the island on the board ---------- */
+.ayv-bc-pizarra {
+    --e: 1;
+    --u: calc(var(--e) * 1vmin);
+    position: fixed;
+    z-index: 1100;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    background: #1aa5a6;
+    color: #1e2b2a;
+    font-family: "Andika", system-ui, sans-serif;
+}
+
+html.ayv-bc-abierta,
+html.ayv-bc-abierta body {
+    overflow: hidden;
+}
+
+/* Without JavaScript the board is a page of its own (class.php?pizarra=<group>): the same, in the page's flow. */
+.ayv-bc-pizarra-pagina {
+    position: relative;
+    height: 100vh;
+}
+
+.ayv-bc-isla {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.ayv-bc-isla img,
+.ayv-bc-isla canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* The board's words sit on paper, so they read over the sea and over the island in any light. */
+.ayv-bc-papel {
+    border-radius: calc(var(--u) * 1.6);
+    background: rgba(251, 246, 236, .94);
+    box-shadow: 0 calc(var(--u) * .8) calc(var(--u) * 2.4) calc(var(--u) * -1) rgba(10, 40, 40, .55);
+}
+
+/* Top left: the class and its challenge, with the garland under it. */
+.ayv-bc-cartel {
+    position: absolute;
+    top: calc(var(--u) * 3);
+    left: calc(var(--u) * 3);
+    width: calc(var(--u) * 78);
+    max-width: calc(100% - var(--u) * 26);
+    padding: calc(var(--u) * 2.2) calc(var(--u) * 3) calc(var(--u) * 2.6);
+}
+
+.ayv-bc-grupo {
+    margin: 0;
+    font-family: "Literata", Georgia, serif;
+    font-size: calc(var(--u) * 6.4);
+    font-weight: 600;
+    line-height: 1;
+}
+
+.ayv-bc-reto {
+    margin: calc(var(--u) * 1.2) 0 calc(var(--u) * 1.6);
+    font-size: calc(var(--u) * 4);
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.ayv-bc-pizarra .ayv-bc-guirnalda {
+    --bc-banderin: calc(var(--u) * 6.2);
+}
+
+.ayv-bc-marcha {
+    margin: calc(var(--u) * 1.4) 0 0;
+    font-size: calc(var(--u) * 3.4);
+    line-height: 1.1;
+}
+
+.ayv-bc-marcha b {
+    font-family: "Literata", Georgia, serif;
+    font-size: calc(var(--u) * 5);
+}
+
+/* Top right: the board's controls, small (the teacher's), and big enough for a finger and a touchpad. */
+.ayv-bc-mandos {
+    position: absolute;
+    top: calc(var(--u) * 2.4);
+    right: calc(var(--u) * 2.4);
+    display: flex;
+    gap: calc(var(--u) * .8);
+}
+
+.ayv-bc-mando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0 calc(var(--u) * 1.4);
+    border: 0;
+    border-radius: 999px;
+    background: rgba(251, 246, 236, .94);
+    color: #1e2b2a;
+    font: 700 max(16px, calc(var(--u) * 2.2)) / 1 "Andika", system-ui, sans-serif;
+    box-shadow: 0 4px 10px -6px rgba(10, 40, 40, .6);
+    cursor: pointer;
+}
+
+/* − and + are signs, not words: they need more body to be seen. */
+.ayv-bc-mando[data-bc="menos"],
+.ayv-bc-mando[data-bc="mas"] {
+    font-size: max(26px, calc(var(--u) * 3.6));
+}
+
+.ayv-bc-mando svg {
+    width: calc(var(--u) * 2.8);
+    height: calc(var(--u) * 2.8);
+    min-width: 22px;
+    min-height: 22px;
+}
+
+.ayv-bc-mando:focus-visible {
+    outline: 4px solid #f0b43c;
+    outline-offset: 3px;
+}
+
+/* Bottom right: the harbour's board on its post, with the days. */
+.ayv-bc-tablilla {
+    position: absolute;
+    right: calc(var(--u) * 4);
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ayv-bc-tabla {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: calc(var(--u) * 34);
+    padding: calc(var(--u) * 2) calc(var(--u) * 3.2) calc(var(--u) * 2.4);
+    border-radius: calc(var(--u) * 1.2);
+    background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, .06) 0 2px, transparent 2px 9px),
+        linear-gradient(#a87442, #8c5c33);
+    box-shadow: inset 0 0 0 calc(var(--u) * .5) #6d4826, 0 calc(var(--u) * 1) calc(var(--u) * 2) calc(var(--u) * -.8) rgba(10, 30, 30, .6);
+    color: #fff8ea;
+    text-align: center;
+}
+
+.ayv-bc-tabla small {
+    font-size: calc(var(--u) * 3.2);
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.ayv-bc-tabla .ayv-bc-nota {
+    margin-top: calc(var(--u) * .8);
+    font-size: calc(var(--u) * 2.6);
+    opacity: .92;
+}
+
+.ayv-bc-tabla b {
+    font-family: "Literata", Georgia, serif;
+    font-size: calc(var(--u) * 15);
+    line-height: .95;
+}
+
+.ayv-bc-tabla .ayv-bc-frase {
+    font-family: "Literata", Georgia, serif;
+    font-size: calc(var(--u) * 5.2);
+    font-weight: 600;
+    line-height: 1.05;
+}
+
+.ayv-bc-poste {
+    width: calc(var(--u) * 2.4);
+    height: calc(var(--u) * 9);
+    background: linear-gradient(90deg, #6d4826, #8c5c33 40%, #6d4826);
+}
+
+/* The last week: the board says it in coral; the day the ship sails, in sun. */
+.ayv-bc-pizarra[data-estado="ultima"] .ayv-bc-tabla {
+    background: linear-gradient(#d4583e, #b4432c);
+    box-shadow: inset 0 0 0 calc(var(--u) * .5) #8e3220, 0 calc(var(--u) * 1) calc(var(--u) * 2) calc(var(--u) * -.8) rgba(10, 30, 30, .6);
+}
+
+.ayv-bc-pizarra[data-estado="zarpa-hecho"] .ayv-bc-tabla,
+.ayv-bc-pizarra[data-estado="hecho"] .ayv-bc-tabla {
+    background: linear-gradient(#f5c454, #e8a72a);
+    box-shadow: inset 0 0 0 calc(var(--u) * .5) #b9801a, 0 calc(var(--u) * 1) calc(var(--u) * 2) calc(var(--u) * -.8) rgba(10, 30, 30, .6);
+    color: #2b1d08;
+}
+
+/* Bottom left: the herald, with a sentence that is heard. */
+.ayv-bc-pregonero {
+    position: absolute;
+    bottom: calc(var(--u) * 3);
+    left: calc(var(--u) * 3);
+    display: flex;
+    align-items: flex-end;
+    gap: calc(var(--u) * 1);
+    max-width: calc(100% - var(--u) * 48);
+}
+
+.ayv-bc-pregonero > img {
+    flex: none;
+    width: calc(var(--u) * 17);
+    height: calc(var(--u) * 17);
+    filter: drop-shadow(0 calc(var(--u) * .6) calc(var(--u) * .8) rgba(10, 30, 30, .45));
+}
+
+.ayv-bc-bocadillo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--u) * 1.6);
+    margin-bottom: calc(var(--u) * 7);
+    padding: calc(var(--u) * 1.8) calc(var(--u) * 2.4);
+}
+
+.ayv-bc-bocadillo::before {
+    content: "";
+    position: absolute;
+    bottom: calc(var(--u) * 2);
+    left: calc(var(--u) * -1.8);
+    border-top: calc(var(--u) * 1.4) solid transparent;
+    border-right: calc(var(--u) * 2) solid rgba(251, 246, 236, .94);
+    border-bottom: calc(var(--u) * 1.4) solid transparent;
+}
+
+.ayv-bc-bocadillo p {
+    margin: 0;
+    font-size: calc(var(--u) * 3.4);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.ayv-bc-oir {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--u) * 8);
+    height: calc(var(--u) * 8);
+    min-width: 48px;
+    min-height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: #f0b43c;
+    color: #1e2b2a;
+    cursor: pointer;
+}
+
+.ayv-bc-oir svg,
+.ayv .ayv-bc-oir .ayv-icon {
+    width: 55%;
+    height: 55%;
+}
+
+.ayv-bc-oir[aria-pressed="true"] {
+    background: #2c7a6a;
+    color: #fff;
+}
+
+.ayv-bc-oir:focus-visible {
+    outline: 4px solid #1e2b2a;
+    outline-offset: 3px;
+}
+
+/* The words of the board in dark: the island keeps its day (it is the class's picture), the papers go to the night. */
+html[data-bs-theme="dark"] .ayv-bc-papel,
+html[data-bs-theme="dark"] .ayv-bc-mando {
+    background: rgba(18, 36, 34, .94);
+    color: #ece4d4;
+}
+
+html[data-bs-theme="dark"] .ayv-bc-bocadillo::before {
+    border-right-color: rgba(18, 36, 34, .94);
+}
+
+html[data-bs-theme="dark"] .ayv-bc-banderin {
+    background: rgba(236, 228, 212, .2);
+}
+
+html[data-bs-theme="dark"] .ayv-bc-banderin-hecho {
+    background: var(--bc-color, #e2654c);
+}
+
+html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
+    border-bottom-color: #c9a87a;
+}
+
+/* A short board (1280 × 600): the herald smaller, the board's sign narrower, nothing over anything. */
+@media (max-aspect-ratio: 16/8) and (max-height: 640px), (max-height: 560px) {
+    .ayv-bc-pregonero > img {
+        width: calc(var(--u) * 14);
+        height: calc(var(--u) * 14);
+    }
+}
+
+@media (max-aspect-ratio: 4/3) {
+    .ayv-bc-cartel {
+        width: auto;
+        right: calc(var(--u) * 3);
+        max-width: none;
+        margin-top: calc(var(--u) * 7);
+    }
+
+    .ayv-bc-pregonero {
+        max-width: calc(100% - var(--u) * 6);
+        bottom: calc(var(--u) * 30);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .ayv-bc-pizarra[data-estado="ultima"] .ayv-bc-tabla {
+        animation: bc-late 3.2s ease-in-out infinite;
+    }
+}
+
+@keyframes bc-late {
+    0%, 85%, 100% { transform: none; }
+    90% { transform: rotate(-2deg); }
+    95% { transform: rotate(1.5deg); }
+}
+
+/* ---------- 2. «Mi clase»: the board's door, and the challenge chosen as a gesture ---------- */
+.ayv .ayv-challenge .ayv-bc-guirnalda {
+    --bc-banderin: 2rem;
+    width: 100%;
+    max-width: 24rem;
+    margin: .3rem 0 .5rem;
+}
+
+.ayv .ayv-bc-ensenar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem 1rem;
+    margin: .9rem 0 1.4rem;
+}
+
+.ayv .ayv-bc-ensenar .ayv-button {
+    gap: .55rem;
+}
+
+.ayv .ayv-bc-ensenar .ayv-button svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.ayv .ayv-bc-ensenar span {
+    font-size: .95rem;
+    opacity: .82;
+}
+
+/* The challenges, as cards on a plank: each says what the class will do; touching one chooses it (and saves). */
+.ayv .ayv-bc-retos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr));
+    gap: .9rem;
+    margin: .4rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-bc-reto-carta {
+    display: grid;
+    align-content: start;
+    gap: .5rem;
+    width: 100%;
+    height: 100%;
+    padding: 1rem 1.1rem 1.1rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ayv .ayv-bc-reto-carta b {
+    font-family: var(--title);
+    font-size: 1.15rem;
+}
+
+.ayv .ayv-bc-reto-carta span {
+    font-size: .95rem;
+    line-height: 1.35;
+}
+
+.ayv .ayv-bc-reto-carta .ayv-bc-guirnalda {
+    --bc-banderin: 1.25rem;
+    margin-top: .2rem;
+}
+
+.ayv .ayv-bc-reto-carta[aria-pressed="true"] {
+    border-color: var(--green);
+    box-shadow: inset 0 0 0 2px var(--green);
+}
+
+.ayv .ayv-bc-reto-carta[aria-pressed="true"]::after {
+    content: attr(data-elegido);
+    justify-self: start;
+    padding: .1rem .6rem .15rem;
+    border-radius: 999px;
+    background: var(--green);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-bc-reto-carta:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.ayv .ayv-bc-sin-reto {
+    border-style: dashed;
+    background: transparent;
+}
+
+/* ---------- 3. The reader's card: one line about their class ---------- */
+.ayv .ayv-bc-carne {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: .4rem 1rem;
+    align-items: center;
+    margin: 0 0 1.25rem;
+    padding: .7rem 1rem;
+    border-radius: var(--radius);
+    background: var(--paper2);
+}
+
+.ayv .ayv-bc-carne .ayv-bc-guirnalda {
+    --bc-banderin: 1.1rem;
+}
+
+.ayv .ayv-bc-carne p {
+    margin: 0;
+}
+
+.ayv .ayv-bc-carne b {
+    color: var(--accent);
+}
+
+@media (max-width: 420px) {
+    .ayv .ayv-bc-carne {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-bc-carne .ayv-bc-guirnalda {
+        width: 7.5rem;
+    }
+}
+
+/* The challenge's garland fits its box on a phone: one column no wider than the page, and the pennants shrink (0.264). */
+.ayv .ayv-challenge {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* On the whiteboard the class's island fills the board: none of the frame it has in «My class» (0.264). */
+.ayv .ayv-bc-isla .ayv-island {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    border-radius: 0;
+    aspect-ratio: auto;
+}
+
+/* The challenge's cards keep their garland inside: one column no wider than the card (0.264). */
+.ayv .ayv-bc-reto-carta {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+}

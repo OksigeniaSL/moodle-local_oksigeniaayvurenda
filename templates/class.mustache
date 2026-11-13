@@ -23,15 +23,21 @@
     Example context (json):
     {
         "heading": "Mi clase", "intro": "El reto, el jardín y lo que leen.", "notice": "", "none": "", "nobody": false,
-        "action": "#", "sesskey": "abc", "choose": "El reto de este trimestre", "choosehint": "Cooperativo y anónimo.",
-        "save": "Guardar", "gardenheading": "El jardín de la clase", "gardenempty": "Todavía no hay nada plantado.",
+        "action": "https://example.com/local/oksigeniaayvurenda/class.php?library=demo-1", "sesskey": "abc", "choose": "El reto de este trimestre", "choosehint": "Cooperativo y anónimo.",
+        "save": "Guardar", "chosen": "El de este trimestre", "gardenheading": "El jardín de la clase", "gardenempty": "Todavía no hay nada plantado.",
         "readsheading": "Lo que lee tu clase", "readshint": "Nunca quién.", "readsempty": "Todavía nada.",
         "shelfprev": "Anteriores", "shelfnext": "Siguientes",
         "groups": [{"index": 0, "group": "3º A", "offstage": "", "canchoose": true,
             "current": {"heading": "Trimestre 1", "text": "Libros de 6 rincones distintos, entre todos",
                 "marks": [{"lit": true}, {"lit": false}], "progresslabel": "1 de 2", "left": "", "complete": false,
                 "herald": null},
-            "kinds": [{"value": "corners", "label": "Rincones", "checked": true}],
+            "kinds": [{"value": "corners", "label": "Rincones", "checked": true, "off": false,
+                "phrase": "Libros de 6 rincones distintos, entre todos.",
+                "steps": {"marks": [{"lit": false}, {"lit": false}], "progresslabel": "6 pasos"}
+                },
+                {"value": "off", "label": "Sin reto", "checked": false, "off": true, "phrase": "La clase solo lee.",
+                "steps": null}],
+            "board": null,
             "garden": [{"label": "Trimestre 1 · Rincones"}], "hasgarden": true, "island": null, "cards": [], "hasreads": false,
             "hasrewards": true, "rewards": [{"challengeid": 4, "label": "Trimestre 1 · Rincones", "ask": true, "state": ""}]}],
         "rewardheading": "El premio de la clase", "rewardhint": "Más lectura.", "wishtitle": "El libro", "wishnote": "Por qué",
@@ -55,14 +61,14 @@
     <h2 id="ayv-class-{{index}}" class="ayv-section-title">{{group}}</h2>
     {{#offstage}}<p class="ayv-field-hint">{{offstage}}</p>{{/offstage}}
     {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
-    {{#canchoose}}<form method="post" action="{{action}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
-        <fieldset class="ayv-fieldset"><legend>{{choose}}</legend>
-            <p class="ayv-field-hint">{{choosehint}}</p>
-            <div class="ayv-choices">{{#kinds}}<label class="ayv-field ayv-field-check"><input type="radio" name="challenge" value="{{value}}" {{#checked}}checked{{/checked}}> {{label}}</label>{{/kinds}}</div>
-        </fieldset>
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></p>
-    </form>{{/canchoose}}
+    {{! «Enseñar a la clase» (Jujol): the island on the whiteboard, over the page; without script, as a page of its own. }}
+    {{#board}}<p class="ayv-bc-ensenar"><a class="ayv-button" href="{{pageurl}}" data-bc-abrir="ayv-bc-molde-{{index}}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 2 2 4-4"/></svg>{{show}}</a><span>{{showhint}}</span></p>
+    <template id="ayv-bc-molde-{{index}}">{{> local_oksigeniaayvurenda/class_board}}</template>{{/board}}
+    {{! The challenge of the term as cards (Jujol): a touch chooses it and keeps it. }}
+    {{#canchoose}}<form id="ayv-bc-reto-{{index}}" method="post" action="{{action}}#ayv-class-{{index}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}"></form>
+    <h3 class="ayv-section-title">{{choose}}</h3>
+    <p class="ayv-field-hint">{{choosehint}}</p>
+    <ul class="ayv-bc-retos">{{#kinds}}<li><button type="submit" form="ayv-bc-reto-{{index}}" name="challenge" value="{{value}}" class="ayv-bc-reto-carta{{#off}} ayv-bc-sin-reto{{/off}}" aria-pressed="{{#checked}}true{{/checked}}{{^checked}}false{{/checked}}" data-elegido="{{chosen}}"><b>{{label}}</b><span>{{phrase}}</span>{{#steps}}{{> local_oksigeniaayvurenda/garland}}{{/steps}}</button></li>{{/kinds}}</ul>{{/canchoose}}
     <h3 class="ayv-section-title">{{gardenheading}}</h3>
     {{#island}}<figure class="ayv-island" role="img" aria-label="{{islandlabel}}"{{#islandstate}} data-island="{{islandstate}}" data-island-key="{{islandkey}}" data-island-assets="{{islandassets}}"{{/islandstate}}>{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/island}}
     {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}

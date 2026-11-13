@@ -185,6 +185,12 @@ foreach ($readers as $reader) {
         $classisland = $layers ? ['islandlayers' => array_map(fn($u) => ['layer' => $u], $layers),
             'islandlabel' => $str('islandlabel', count($plantedall))] : null;
     }
+    // The ship of the class this term (P5, Jujol): how far the class is and when it sails, in one line.
+    $classship = $group !== '' && ($look === 'flower' || $sky) ? \local_oksigeniaayvurenda\local\challenges::card_line(
+        \local_oksigeniaayvurenda\local\challenges::of((int) $reader->entityid, $group, time()),
+        (int) $reader->entityid,
+        time()
+    ) : null;
     $herald = $look === 'flower' || $sky ? \local_oksigeniaayvurenda\local\characters::say(
         (int) $reader->entityid,
         'herald',
@@ -354,6 +360,7 @@ foreach ($readers as $reader) {
         'haspast' => (bool) $past,
         'classgarden' => $classgarden,
         'classisland' => $classisland,
+        'classship' => $classship,
         'hasclassgarden' => (bool) $classgarden,
         'classgardenheading' => $str('challengegarden'),
         'classgardenhint' => $str('challengegardenhint'),

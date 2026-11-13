@@ -490,6 +490,52 @@ export function makeDock(mat) {
   return group;
 }
 
+// The ship of the term (P5): it waits off the beach the last week of the term and sets sail the last day. A white hull
+// with a coral stripe like the dock's boat, a deck, its mast, the sail (hoisted from its foot: the group «sail») and the
+// class's pennant on top. Its origin is at the waterline, so it bobs and heels from there.
+export function makeShip(mat) {
+  const S = SPOTS.ship;
+  const group = new THREE.Group();
+  group.position.set(S.x, SEA_Y - 0.01, S.z);
+  group.rotation.y = S.yaw;
+  const hull = new THREE.BoxGeometry(0.8, 0.17, 0.3, 12, 2, 2);
+  const p = hull.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), yv = p.getY(i);
+    const taper = 1 - Math.pow(Math.abs(x) / 0.4, 3) * 0.85;
+    const keel = yv < 0 ? 0.55 : 1;
+    p.setZ(i, p.getZ(i) * taper * keel);
+    p.setY(i, yv + Math.pow(Math.abs(x) / 0.4, 2) * 0.045);
+  }
+  hull.computeVertexNormals();
+  group.add(mesh([paint(hull, '#fbf6ec', '#e2654c', 0.04, 17).translate(0, 0.07, 0),
+    box(0.64, 0.02, 0.2, '#a8703a', 0, 0.135, 0, 0, 18),
+    paint(new THREE.CylinderGeometry(0.012, 0.017, 0.82, 8), '#7a4a22', '#5e3a1c', 0.06, 19).translate(0.05, 0.55, 0),
+    box(0.34, 0.018, 0.018, '#7a4a22', -0.11, 0.22, 0, 0, 20)], mat.solid));
+  // The sail: a triangle from the mast to the boom, hoisted from its foot.
+  const sail = new THREE.Group();
+  sail.position.set(0.05, 0.22, 0);
+  const shape = new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(0, 0.66), new THREE.Vector2(-0.32, 0.02)]);
+  sail.add(mesh([paint(new THREE.ShapeGeometry(shape), '#fff7e8', '#efe2c4', 0.03, 21).translate(-0.01, 0, 0.012)],
+    mat.leaf));
+  group.add(sail);
+  // The class's pennant, coral, at the top of the mast.
+  const pennant = new THREE.Group();
+  pennant.position.set(0.05, 0.95, 0);
+  const flag = new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(0, 0.08), new THREE.Vector2(0.17, 0.04)]);
+  pennant.add(mesh([paint(new THREE.ShapeGeometry(flag), '#e2654c', '#c8443a', 0.04, 22)], mat.leaf));
+  group.add(pennant);
+  group.userData = { sail, pennant, furl: null, hoist: 0, size: 1 };
+  // Gaudí's model (velero.glb) brings its own sail, its furled sail and its pennant, by name: the page moves those.
+  group.userData.rehook = (scene) => {
+    const ud = group.userData;
+    ud.sail = scene.getObjectByName('vela') || ud.sail;
+    ud.pennant = scene.getObjectByName('banderin') || ud.pennant;
+    ud.furl = scene.getObjectByName('vela_recogida') || null;
+  };
+  return group;
+}
+
 // Gold and coral motes that rise and fade where a piece grows.
 export function makeSparkles(count = 64) {
   const geo = new THREE.BufferGeometry();

@@ -20,6 +20,10 @@
 //
 //   const island = AYVIsland3D.mount(element, {met: 2, everyone: false, boat: false, reduce: false});
 //   island.update({met: 3, everyone: true, boat: false});  // the new pieces grow
+//
+// The ship of the term (P5): with ship «wait» it is moored off the beach (the last week of the term); with «sail» (its
+// last day) it hoists its sail and sets off to the horizon on the left, among sparks if the class met the challenge
+// (shipmet), quietly if not, and the beach stays as it was.
 //   island.destroy();                                      // frees geometries, textures and the WebGL context
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -27,7 +31,7 @@ import { makeSea } from './sea.js';
 import { makeGround, grassOf } from './terrain.js';
 import {
   materials, makePalm, makeBushes, makeRocks, ROCKS, makeTree, makeHut, makeGarden, makeLighthouse, makeDock,
-  makeSparkles, makeGrass, halo,
+  makeSparkles, makeGrass, halo, makeShip,
 } from './models.js';
 import { SPOTS, SEA_Y } from './shape.js';
 
@@ -38,8 +42,17 @@ const PIECES = [
   { name: 'garden', make: makeGarden, on: (s) => s.met >= 3 },
   { name: 'lighthouse', make: makeLighthouse, on: (s) => !!s.everyone },
   { name: 'dock', make: makeDock, on: (s) => !!s.boat },
+  { name: 'ship', make: makeShip, on: (s) => s.ship === 'wait' || s.ship === 'sail' },
 ];
 const GROW_MS = 1100;
+// The ship's going: it waits a moment, hoists its sail and sails out of sight.
+const SAIL_WAIT_MS = 1200;
+const SAIL_MS = 6500;
+const HOIST = 0.16;
+// Where it goes: off to the left and away, out of the frame.
+const OFFING = { dx: -3.6, dz: -1.7 };
+const ease = (t) => t * t * (3 - 2 * t);
+const stateOf = (s) => ({ met: s.met || 0, everyone: !!s.everyone, boat: !!s.boat, ship: s.ship || '', shipmet: !!s.shipmet });
 
 const easeOutBack = (t) => {
   const c = 1.6;
@@ -91,6 +104,11 @@ export function mount(element, options = {}) {
   scene.add(makeGrass(grassOf('base'), 5), makePalm(mat), makeBushes(mat), makeRocks(mat));
   const rings = ROCKS.filter(([x, z]) => Math.hypot(x / 2.55, z / 1.62) > 0.92).map(([x, z, r]) => ({ x, z, r: r * 0.9 }));
   rings.push({ x: SPOTS.lighthouse.x, z: SPOTS.lighthouse.z, r: 0.2 });
+  // Four rings of foam for the ship (Gaudí): one round its hull, so it floats, and three that follow it as its wake.
+  const SHIP_RING = rings.length;
+  for (let i = 0; i < 4; i++) {
+    rings.push({ x: 0, z: 0, r: -1 });
+  }
   const sea = makeSea(rings);
   sea.mesh.material.uniforms.uTime = time;
   sea.mesh.position.y = SEA_Y;
@@ -122,6 +140,21 @@ export function mount(element, options = {}) {
           o.material = o.name === 'pantalla' ? mat.bulb : mat.solid;
         }
       });
+      // A sail and a pennant are a single sheet: seen from either side, wherever the ship points.
+      for (const sheet of ['vela', 'vela_recogida', 'banderin']) {
+        const part = gltf.scene.getObjectByName(sheet);
+        if (part) {
+          part.traverse((o) => {
+            if (o.isMesh) {
+              o.material = mat.leaf;
+            }
+          });
+        }
+      }
+      if (group.userData.rehook) {
+        group.userData.rehook(gltf.scene);
+        rig(group, group.userData.hoist || 0);
+      }
       const light = gltf.scene.getObjectByName('luz');
       if (light) {
         light.add(halo(mat, 0, 0, 0, 0.32));
@@ -133,20 +166,56 @@ export function mount(element, options = {}) {
     });
   }
 
+  // How far the ship's sail is up (0 furled, 1 hoisted): the sail grows from its foot and the furled one shrinks.
+  function rig(ship, hoist) {
+    const ud = ship.userData;
+    ud.hoist = hoist;
+    const up = ease(Math.max(0, Math.min(1, hoist)));
+    ud.sail.scale.set(1, 0.12 + 0.88 * up, 1);
+    if (ud.furl) {
+      ud.furl.scale.set(1, Math.max(0.001, 1 - up), 1);
+      ud.furl.visible = up < 0.999;
+    }
+  }
+
+  // The ship's foam: round its hull while it is there, and its wake while it sails.
+  const wake = [];
+  function foam(ship) {
+    const slots = sea.mesh.material.uniforms.uRings.value;
+    const on = ship && ship.visible;
+    slots[SHIP_RING].set(on ? ship.position.x : 0, on ? ship.position.z : 0, on ? 0.34 : -1);
+    for (let i = 0; i < 3; i++) {
+      const w = on && sailing ? wake[(i + 1) * 7] : null;
+      slots[SHIP_RING + 1 + i].set(w ? w.x : 0, w ? w.z : 0, w ? 0.24 - i * 0.06 : -1);
+    }
+  }
+
   const shown = new Map();
   let growing = [];
+  let sailing = null;
+  let sailed = false;
   let until = 0;
   let frame = 0;
   let last = 0;
 
+  // Where the island stands in its box: in the middle, or (frame) moved right and down and a little further away, as
+  // on the whiteboard, clear of the sign at the top left and the herald below (Jujol).
+  const framing = options.frame || null;
+  // Where the ship waits and where it goes: off the front beach and away to the left, or (berth) elsewhere, as on the
+  // whiteboard, where the herald's bubble covers the front beach and the ship waits behind the island instead.
+  const berth = options.berth || null;
+  const offing = berth && berth.offing ? berth.offing : OFFING;
   function frameSize() {
     const w = Math.max(1, element.clientWidth), h = Math.max(1, element.clientHeight);
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     // A box narrower than 16:10 sees the island from further away, so it always fits whole.
-    const far = 8.7 * Math.max(1, 1.6 / camera.aspect);
+    const far = 8.7 * Math.max(1, 1.6 / camera.aspect) * (framing ? framing.zoom || 1 : 1);
     camera.position.set(0.55, far * 0.68, far * 0.78);
     camera.lookAt(look);
+    if (framing) {
+      camera.setViewOffset(w, h, -(framing.x || 0) * w, -(framing.y || 0) * h, w, h);
+    }
     camera.updateProjectionMatrix();
   }
 
@@ -189,6 +258,39 @@ export function mount(element, options = {}) {
       boat.position.y = SEA_Y - 0.01 + Math.sin(time.value * 1.6) * 0.008;
       boat.rotation.z = Math.sin(time.value * 1.2) * 0.03;
     }
+    // The ship bobs too, and on its day it hoists its sail and goes.
+    const ship = shown.get('ship');
+    if (ship && ship.visible) {
+      ship.position.y = SEA_Y - 0.01 + Math.sin(time.value * 1.4 + 1) * 0.01;
+      ship.rotation.z = Math.sin(time.value * 1.1 + 1) * 0.035;
+      ship.userData.pennant.rotation.y = Math.sin(time.value * 5) * 0.35;
+      if (sailing) {
+        const t = Math.max(0, (now - sailing.start) / SAIL_MS);
+        rig(ship, Math.min(1, t / HOIST));
+        const go = ease(Math.max(0, Math.min(1, (t - HOIST) / (1 - HOIST))));
+        // Where it has been, for its wake.
+        if (go > 0) {
+          wake.unshift({ x: ship.position.x, z: ship.position.z });
+          wake.length = Math.min(wake.length, 24);
+        }
+        ship.position.x = sailing.x + offing.dx * go;
+        ship.position.z = sailing.z + offing.dz * go;
+        // Its bow turns to where it goes, and it heels with the wind once under way.
+        ship.rotation.y = sailing.yaw + (Math.atan2(-offing.dz, offing.dx) - sailing.yaw) * Math.min(1, go * 3);
+        ship.rotation.x = -0.06 * Math.min(1, go * 4);
+        if (t >= 1) {
+          ship.visible = false;
+          sailing = null;
+          sailed = true;
+          wake.length = 0;
+        } else {
+          moving = true;
+        }
+      }
+      foam(ship);
+    } else if (ship) {
+      foam(null);
+    }
     render();
     if (moving || now < until) {
       frame = requestAnimationFrame(tick);
@@ -222,6 +324,10 @@ export function mount(element, options = {}) {
 
   // Shows what the state asks for: pieces that were there appear at once; new ones grow, one after another.
   function show(state, animate) {
+    // With «reduce motion», on its last day the ship has simply gone.
+    if (state.ship === 'sail' && reduce) {
+      state = Object.assign({}, state, { ship: '' });
+    }
     const names = [];
     let delay = 0;
     for (const piece of PIECES) {
@@ -233,6 +339,11 @@ export function mount(element, options = {}) {
         continue;
       }
       const group = piece.make(mat);
+      if (piece.name === 'ship' && berth) {
+        group.position.x = berth.x;
+        group.position.z = berth.z;
+        group.rotation.y = berth.yaw;
+      }
       group.userData.size = group.userData.size || 1;
       group.scale.setScalar(group.userData.size);
       shown.set(piece.name, group);
@@ -256,11 +367,33 @@ export function mount(element, options = {}) {
       }
     }
     ground.paint(names);
-    run(animate ? delay + GROW_MS + 1800 : 2500);
+    const ship = shown.get('ship');
+    if (ship && state.ship !== 'wait' && state.ship !== 'sail') {
+      ship.visible = false;
+    }
+    // Waiting, its sail is furled: hoisting it is what says it is going.
+    if (ship && state.ship === 'wait' && !sailing) {
+      rig(ship, 0);
+    }
+    foam(ship || null);
+    // Its last day: once it is in sight, it sails (once for each time the island is opened).
+    let ms = animate ? delay + GROW_MS + 1800 : 2500;
+    if (ship && state.ship === 'sail' && !sailing && !sailed) {
+      rig(ship, 0);
+      sailing = { start: performance.now() + SAIL_WAIT_MS, x: ship.position.x, z: ship.position.z, yaw: ship.rotation.y };
+      if (state.shipmet) {
+        // The class met its challenge: it leaves among sparks.
+        setTimeout(() => {
+          spark(new THREE.Vector3(ship.position.x, SEA_Y + 0.5, ship.position.z));
+        }, SAIL_WAIT_MS + 300);
+      }
+      ms = Math.max(ms, SAIL_WAIT_MS + SAIL_MS + 600);
+    }
+    run(ms);
   }
 
   frameSize();
-  show({ met: options.met || 0, everyone: !!options.everyone, boat: !!options.boat }, false);
+  show(stateOf(options), false);
   render();
   const resize = new ResizeObserver(() => {
     frameSize();
@@ -274,7 +407,7 @@ export function mount(element, options = {}) {
       return { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
     },
     update(state) {
-      show({ met: state.met || 0, everyone: !!state.everyone, boat: !!state.boat }, true);
+      show(stateOf(state), true);
     },
     destroy() {
       gone = true;

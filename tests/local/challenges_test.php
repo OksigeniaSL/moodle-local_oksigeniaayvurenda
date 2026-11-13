@@ -70,6 +70,115 @@ final class challenges_test extends \advanced_testcase {
     }
 
     /**
+     * The ship of the term (P5): not there most of the term, waiting off the beach its last week, setting sail its last
+     * day, as the challenge's clock counts the days.
+     */
+    public function test_ship(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $tz = zones::of($entityid);
+        $gen->create_year(['entityid' => $entityid, 'name' => '2026-2027',
+            'timestart' => (new \DateTimeImmutable('2026-09-01 00:00:00', $tz))->getTimestamp(),
+            'timeend' => (new \DateTimeImmutable('2027-09-01 00:00:00', $tz))->getTimestamp()]);
+        $this->assertTrue(challenges::set_ends($entityid, ['2026-12-22', '2027-03-26', '2027-06-18']));
+        $year = years::around($entityid, (new \DateTimeImmutable('2026-11-10 10:00:00', $tz))->getTimestamp());
+        $end = challenges::bounds($year, 1)[1];
+        $this->assertSame('', challenges::ship($entityid, $end - 20 * DAYSECS));
+        $this->assertSame('wait', challenges::ship($entityid, $end - 5 * DAYSECS));
+        $this->assertSame('sail', challenges::ship($entityid, $end - 6 * HOURSECS));
+        // The next term starts without it.
+        $this->assertSame('', challenges::ship($entityid, $end + DAYSECS));
+    }
+
+    /**
+     * The garland (Jujol): a pennant for each step up to its most, ten tenths past that.
+     */
+    public function test_garland(): void {
+        $lit = fn(array $marks) => count(array_filter(array_column($marks, 'lit')));
+        $six = challenges::garland(5, 6);
+        $this->assertSame([6, 5], [count($six), $lit($six)]);
+        $many = challenges::garland(18, 25);
+        $this->assertSame([10, 7], [count($many), $lit($many)]);
+        $board = challenges::garland(18, 25, challenges::GARLAND_BOARD);
+        $this->assertSame([25, 18], [count($board), $lit($board)]);
+        $this->assertSame(10, $lit(challenges::garland(90, 82)));
+        $this->assertSame([1, 0], [count(challenges::garland(0, 0)), $lit(challenges::garland(0, 0))]);
+    }
+
+    /**
+     * The voyage of the term (P5) and what it gives the board and the card: days left and the herald's state, the
+     * harbour's board, the garland, and a line on the card; nothing without a challenge or past its term.
+     */
+    public function test_voyage_board_and_card(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $tz = zones::of($entityid);
+        $gen->create_year(['entityid' => $entityid, 'name' => '2026-2027',
+            'timestart' => (new \DateTimeImmutable('2026-09-01 00:00:00', $tz))->getTimestamp(),
+            'timeend' => (new \DateTimeImmutable('2027-09-01 00:00:00', $tz))->getTimestamp()]);
+        $this->assertTrue(challenges::set_ends($entityid, ['2026-12-22', '2027-03-26', '2027-06-18']));
+        $year = years::around($entityid, (new \DateTimeImmutable('2026-11-10 10:00:00', $tz))->getTimestamp());
+        $end = challenges::bounds($year, 1)[1];
+        $challenge = (object) ['term' => 1, 'kind' => 'corners', 'done' => 5, 'target' => 6, 'complete' => false];
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+
+        $this->assertNull(challenges::voyage(null, $entityid, $end - 5 * DAYSECS));
+        $this->assertNull(challenges::card_line(null, $entityid, $end - 5 * DAYSECS));
+        $this->assertSame(['quedan', 20], array_values(array_slice(
+            challenges::voyage($challenge, $entityid, $end - 20 * DAYSECS + HOURSECS),
+            0,
+            2
+        )));
+        $this->assertSame(['ultima', 4], array_values(array_slice(
+            challenges::voyage($challenge, $entityid, $end - 4 * DAYSECS + HOURSECS),
+            0,
+            2
+        )));
+        $this->assertSame('zarpa-sin', challenges::voyage($challenge, $entityid, $end - 6 * HOURSECS)['state']);
+        // Past its term, no voyage.
+        $this->assertNull(challenges::voyage($challenge, $entityid, $end + HOURSECS));
+
+        // The board of the last week: the days on the harbour's board, the garland of six, never a pupil.
+        $board = challenges::board($challenge, '2.º B', $entityid, $end - 4 * DAYSECS + HOURSECS);
+        $this->assertSame(['ultima', '2.º B', 4], [$board['state'], $board['group'], $board['days']['number']]);
+        $this->assertSame($str('boardwaiting'), $board['note']);
+        $this->assertCount(6, $board['marks']);
+        $this->assertSame($str('boardmarchcorners', (object) ['done' => '<b>5</b>', 'target' => 6]), $board['march']);
+        $this->assertSame($str('boardsaysultima'), $board['says']);
+        $line = challenges::card_line($challenge, $entityid, $end - 4 * DAYSECS + HOURSECS);
+        $this->assertSame('ultima', $line['state']);
+        $this->assertStringContainsString(
+            '<b>' . $str('boardmarchcorners', (object) ['done' => '5', 'target' => 6]) . '</b>',
+            $line['line']
+        );
+
+        // Met before the last day: the day it sails; met on it: it sails today, with the challenge met.
+        $challenge->done = 6;
+        $challenge->complete = true;
+        $board = challenges::board($challenge, '2.º B', $entityid, $end - 4 * DAYSECS + HOURSECS);
+        $this->assertSame(['hecho', null, $str('boardmet')], [$board['state'], $board['days'], $board['phrase']]);
+        $this->assertSame($str('boardsailson', zones::date($end - 1, '%A %e', $entityid)), $board['small']);
+        $this->assertSame(
+            $str('cardshipmet', (object) ['march' => '', 'days' => 4, 'day' => zones::date($end - 1, '%A', $entityid)]),
+            challenges::card_line($challenge, $entityid, $end - 4 * DAYSECS + HOURSECS)['line']
+        );
+        $board = challenges::board($challenge, '2.º B', $entityid, $end - 6 * HOURSECS);
+        $this->assertSame(
+            ['zarpa-hecho', $str('boardsails'), $str('boardsailsmet')],
+            [$board['state'], $board['phrase'], $board['small']]
+        );
+        $this->assertSame($str('cardshiptoday'), challenges::card_line($challenge, $entityid, $end - 6 * HOURSECS)['line']);
+        // The challenge «Everyone» in a class of 25: one pennant for each on the board, ten tenths on the card.
+        $everyone = (object) ['term' => 1, 'kind' => 'everyone', 'done' => 18, 'target' => 25, 'complete' => false];
+        $this->assertCount(25, challenges::board($everyone, '2.º B', $entityid, $end - 20 * DAYSECS)['marks']);
+        $this->assertCount(10, challenges::card_line($everyone, $entityid, $end - 20 * DAYSECS)['marks']);
+    }
+
+    /**
      * «Everyone»: three in the class, two take a book; then the third, and the challenge is met and planted once.
      * Another kind chosen: corners, by the first digit of their class. Turned off: no challenge.
      */

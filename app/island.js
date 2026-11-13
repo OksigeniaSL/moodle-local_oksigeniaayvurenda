@@ -27,9 +27,12 @@
     if (reduce || !window.AYVIsland3D) {
         return;
     }
-    Array.prototype.forEach.call(document.querySelectorAll('.ayv-island[data-island]'), function(figure) {
+    // Mounts the island of one figure: what this browser saw last (under its own key) shows at once, and what is new
+    // grows. «Enseñar a la clase» mounts it again on the whiteboard with a key of its own, so that what grew since it
+    // was last shown to the class grows in front of the class (Jujol).
+    var mountFigure = function(figure, place) {
         var state = JSON.parse(figure.getAttribute('data-island'));
-        var key = 'ayv-island-' + figure.getAttribute('data-island-key');
+        var key = 'ayv-island-' + (place ? place + '-' : '') + figure.getAttribute('data-island-key');
         var before = null;
         try {
             before = JSON.parse(window.localStorage.getItem(key) || 'null');
@@ -48,10 +51,17 @@
         } catch (e) {
             assets = {};
         }
-        var island = window.AYVIsland3D.mount(stage, {met: seen.met, everyone: seen.everyone, boat: seen.boat, assets: assets});
+        // The ship of the term goes with what is now, not with what this browser saw.
+        // On the whiteboard, the island centre-right and a little further, clear of the sign and the herald (Jujol).
+        // There the herald's bubble covers the front beach, so the ship waits behind the island and sails away to the right.
+        var board = !!figure.closest('.ayv-bc-pizarra');
+        var frame = board ? {x: 0.1, y: 0.07, zoom: 1.18} : null;
+        var berth = board ? {x: 2.0, z: -1.75, yaw: 0.44, offing: {dx: 3.4, dz: -1.6}} : null;
+        var island = window.AYVIsland3D.mount(stage, {met: seen.met, everyone: seen.everyone, boat: seen.boat,
+            ship: state.ship || '', shipmet: !!state.shipmet, assets: assets, frame: frame, berth: berth});
         if (!island) {
             stage.parentNode.removeChild(stage);
-            return;
+            return null;
         }
         figure.classList.add('ayv-island-on');
         if (seen.met < state.met || seen.everyone !== state.everyone || seen.boat !== state.boat) {
@@ -63,6 +73,14 @@
             window.localStorage.setItem(key, JSON.stringify(state));
         } catch (e) {
             // Without storage, it grows again next time: no harm.
+        }
+        return island;
+    };
+    window.AYVIslandMount = mountFigure;
+    Array.prototype.forEach.call(document.querySelectorAll('.ayv-island[data-island]'), function(figure) {
+        // The board's island is the board's to mount (barco.js), with its own key.
+        if (!figure.closest('.ayv-bc-pizarra')) {
+            mountFigure(figure, '');
         }
     });
 })();

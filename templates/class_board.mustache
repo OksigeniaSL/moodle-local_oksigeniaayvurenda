@@ -1,0 +1,60 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/class_board
+
+    «Enseñar a la clase» (Jujol, 13 November; P5 of the review of 12 November): the class's island over the whole
+    whiteboard, to read from the back of the classroom, never a pupil's name. The island (3D where it can, its layers
+    otherwise), the sign with the class, its challenge, garland and how far it is; the harbour's board with the days,
+    coral the last week, sun when met; and the herald with a sentence that plays on a touch. − and + resize it, the screen
+    button asks for full screen, «Salir» and Esc close it. As a page of its own (page), «Salir» goes back to «My class».
+
+    Example context (json):
+    {
+        "page": false, "back": "https://example.com/class.php", "state": "ultima", "group": "2.º Secundaria A",
+        "challenge": "Libros de 6 rincones distintos, entre todos", "progresslabel": "5 de 6 rincones",
+        "marks": [{"lit": true}, {"lit": false}], "march": "<b>5</b> de 6 rincones",
+        "days": {"pre": "Quedan", "number": 4, "post": "días"}, "note": "El barco ya espera en la playa",
+        "phrase": "", "small": "", "herald": "https://example.com/mainumby-cielo-senala.webp",
+        "says": "¡El barco ya espera en la playa! Queda poco: un último empujón entre todos.",
+        "voice": "https://example.com/barco-ultima.mp3",
+        "island": {"islandlabel": "La isla de la clase", "islandlayers": [{"layer": "https://example.com/base.webp"}],
+            "islandstate": "{\"met\":1}", "islandkey": "1-abc", "islandassets": "{}"},
+        "islandlabel": "La isla de la clase", "smaller": "Más pequeño", "bigger": "Más grande",
+        "full": "Pantalla completa", "exit": "Salir", "listen": "Escuchar"
+    }
+}}
+<div class="ayv-bc-pizarra{{#page}} ayv-bc-pizarra-pagina{{/page}}" data-estado="{{state}}" role="dialog" aria-modal="true" aria-labelledby="ayv-bc-grupo"{{#page}} data-volver="{{back}}"{{/page}}>
+    <div class="ayv-bc-isla">{{#island}}<figure class="ayv-island" role="img" aria-label="{{islandlabel}}"{{#islandstate}} data-island="{{islandstate}}" data-island-key="{{islandkey}}" data-island-assets="{{islandassets}}"{{/islandstate}}>{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/island}}</div>
+    <div class="ayv-bc-cartel ayv-bc-papel">
+        <p class="ayv-bc-grupo" id="ayv-bc-grupo">{{group}}</p>
+        <p class="ayv-bc-reto">{{challenge}}</p>
+        {{> local_oksigeniaayvurenda/garland}}
+        <p class="ayv-bc-marcha">{{{march}}}</p>
+    </div>
+    <div class="ayv-bc-mandos">
+        <button type="button" class="ayv-bc-mando" data-bc="menos" aria-label="{{smaller}}">−</button>
+        <button type="button" class="ayv-bc-mando" data-bc="mas" aria-label="{{bigger}}">+</button>
+        <button type="button" class="ayv-bc-mando" data-bc="completa" aria-label="{{full}}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button type="button" class="ayv-bc-mando" data-bc="salir">{{exit}}</button>
+    </div>
+    <div class="ayv-bc-pregonero">
+        {{#herald}}<img src="{{herald}}" alt="" width="512" height="512">{{/herald}}
+        <div class="ayv-bc-bocadillo ayv-bc-papel"><p>{{says}}</p>{{#voice}}<button type="button" class="ayv-bc-oir" data-bc="oir" data-voz="{{voice}}" aria-pressed="false" aria-label="{{listen}}">{{> local_oksigeniaayvurenda/icon_volume}}</button>{{/voice}}</div>
+    </div>
+    <div class="ayv-bc-tablilla" aria-live="polite"><div class="ayv-bc-tabla">{{#days}}<small>{{pre}}</small><b>{{number}}</b><small>{{post}}</small>{{/days}}{{#phrase}}<span class="ayv-bc-frase">{{phrase}}</span>{{/phrase}}{{#small}}<small>{{small}}</small>{{/small}}{{#note}}<small class="ayv-bc-nota">{{note}}</small>{{/note}}</div><div class="ayv-bc-poste" aria-hidden="true"></div></div>
+</div>

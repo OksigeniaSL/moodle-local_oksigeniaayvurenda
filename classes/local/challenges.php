@@ -108,6 +108,173 @@ final class challenges {
         return 3;
     }
 
+    /** @var int Pennants a garland shows one for each step; past this many, ten, each a tenth (Jujol). */
+    public const GARLAND = 12;
+
+    /** @var int On the board, one for each step up to this many: «everyone» in a class of 25 reads well there. */
+    public const GARLAND_BOARD = 30;
+
+    /** @var string[] The herald's pose on the board, by the ship's state. */
+    private const POSES = ['quedan' => 'senala', 'ultima' => 'senala', 'hecho' => 'celebra', 'zarpa-hecho' => 'celebra',
+        'zarpa-sin' => 'piensa'];
+
+    /**
+     * A challenge's garland (Jujol): a pennant for each step, coloured when done; with more steps than fit, ten, each a
+     * tenth of the way (18 of 25 lights 7), and the words beside it say the number.
+     *
+     * @param int $done
+     * @param int $target
+     * @param int $most The most pennants shown one for each step.
+     * @return array[] lit, for each pennant.
+     */
+    public static function garland(int $done, int $target, int $most = self::GARLAND): array {
+        $target = max(1, $target);
+        if ($target <= $most) {
+            return array_map(fn($i) => ['lit' => $i < $done], range(0, $target - 1));
+        }
+        $lit = (int) floor(min($done, $target) * 10 / $target);
+        return array_map(fn($i) => ['lit' => $i < $lit], range(0, 9));
+    }
+
+    /**
+     * The voyage of a class's ship this term (P5): how its challenge goes against the term's days.
+     *
+     * @param \stdClass|null $challenge This term's, as of() gives it.
+     * @param int $entityid
+     * @param int $now
+     * @return array|null state (quedan, ultima, hecho, zarpa-hecho, zarpa-sin), days left (1 is the last day) and end;
+     *     null without a challenge, or with its term over.
+     */
+    public static function voyage(?\stdClass $challenge, int $entityid, int $now): ?array {
+        if (!$challenge) {
+            return null;
+        }
+        $end = self::bounds(years::around($entityid, $now), (int) $challenge->term)[1];
+        $days = (int) ceil(($end - $now) / DAYSECS);
+        if ($days < 1) {
+            return null;
+        }
+        $last = $days === 1;
+        $open = $last ? 'zarpa-sin' : ($days <= 7 ? 'ultima' : 'quedan');
+        $state = $challenge->complete ? ($last ? 'zarpa-hecho' : 'hecho') : $open;
+        return ['state' => $state, 'days' => $days, 'end' => $end];
+    }
+
+    /**
+     * How far a class is, in words: «5 of 6 corners», «18 of 25», «12 of 20 books with their note».
+     *
+     * @param \stdClass $challenge
+     * @param bool $bold The number done in bold (HTML), for the board.
+     * @return string
+     */
+    public static function march(\stdClass $challenge, bool $bold = false): string {
+        $done = (int) $challenge->done;
+        return get_string('boardmarch' . $challenge->kind, 'local_oksigeniaayvurenda', (object) [
+            'done' => $bold ? '<b>' . $done . '</b>' : (string) $done, 'target' => (int) $challenge->target]);
+    }
+
+    /**
+     * «Enseñar a la clase» (Jujol): the class's board, for the whiteboard of the classroom. The island, the class with
+     * its challenge, its garland and how far it is, the harbour's board with the days, and the herald with a sentence
+     * to hear. Never a pupil's name.
+     *
+     * @param \stdClass $challenge This term's.
+     * @param string $group
+     * @param int $entityid
+     * @param int $now
+     * @return array|null null without a voyage this term.
+     */
+    public static function board(\stdClass $challenge, string $group, int $entityid, int $now): ?array {
+        $voyage = self::voyage($challenge, $entityid, $now);
+        if (!$voyage) {
+            return null;
+        }
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $state = $voyage['state'];
+        $day = zones::date($voyage['end'] - 1, '%A %e', $entityid);
+        $text = match ($challenge->kind) {
+            'corners' => $str('challengecorners', $challenge->target),
+            'notes' => $str('challengenotes', $challenge->target),
+            default => $str('challengeeveryone'),
+        };
+        $sex = (characters::of($entityid)['herald']['sex'] ?? 'm') === 'f' ? 'f' : 'm';
+        $voice = screens::listen(['herald-' . $sex . '/{lang}/barco-' . $state]);
+        $key = str_replace('-', '', $state);
+        return [
+            'state' => $state,
+            'group' => $group,
+            'challenge' => $text,
+            'marks' => self::garland((int) $challenge->done, (int) $challenge->target, self::GARLAND_BOARD),
+            'progresslabel' => self::march($challenge),
+            'march' => self::march($challenge, true),
+            // The harbour's board: the days, or the day it sails.
+            'days' => in_array($state, ['quedan', 'ultima'], true) ? ['pre' => $str('boardleftpre'),
+                'number' => $voyage['days'], 'post' => $str('boardleftpost')] : null,
+            'note' => $state === 'ultima' ? $str('boardwaiting') : '',
+            'phrase' => match ($state) {
+                'hecho' => $str('boardmet'),
+                'zarpa-hecho', 'zarpa-sin' => $str('boardsails'),
+                default => '',
+            },
+            'small' => match ($state) {
+                'hecho' => $str('boardsailson', $day),
+                'zarpa-hecho' => $str('boardsailsmet'),
+                default => '',
+            },
+            'herald' => characters::figure('herald', self::POSES[$state], characters::step($entityid)),
+            'says' => $str('boardsays' . $key, $day),
+            'voice' => $voice ? $voice['urls'] : '',
+        ];
+    }
+
+    /**
+     * The line of a reader's card about their class's ship (Jujol): how far the class is and when it sails.
+     *
+     * @param \stdClass|null $challenge The class's, this term.
+     * @param int $entityid
+     * @param int $now
+     * @return array|null state, line (HTML: the numbers in bold), marks and progresslabel; null without a voyage.
+     */
+    public static function card_line(?\stdClass $challenge, int $entityid, int $now): ?array {
+        $voyage = self::voyage($challenge, $entityid, $now);
+        if (!$voyage) {
+            return null;
+        }
+        $state = $voyage['state'];
+        $a = (object) ['march' => s(self::march($challenge)), 'days' => $voyage['days'],
+            'day' => s(zones::date($voyage['end'] - 1, '%A', $entityid))];
+        $key = match ($state) {
+            'quedan' => 'cardshipleft',
+            'ultima' => 'cardshipsoon',
+            'hecho' => 'cardshipmet',
+            default => 'cardshiptoday',
+        };
+        return ['state' => $state, 'line' => get_string($key, 'local_oksigeniaayvurenda', $a),
+            'marks' => self::garland((int) $challenge->done, (int) $challenge->target), 'progresslabel' => self::march($challenge)];
+    }
+
+    /**
+     * Where the ship of the term is (P5): off the beach of the class island the last week of the term, waiting with its
+     * sail furled, and setting sail its last day; the rest of the term, it is not there. The days are counted as the
+     * challenge's clock counts them.
+     *
+     * @param int $entityid
+     * @param int|null $now
+     * @return string wait, sail, or nothing.
+     */
+    public static function ship(int $entityid, ?int $now = null): string {
+        $now = $now ?? time();
+        $year = years::around($entityid, $now);
+        for ($term = 1; $term <= 3; $term++) {
+            [$start, $end] = self::bounds($year, $term);
+            if ($now >= $start && $now < $end) {
+                $days = (int) ceil(($end - $now) / DAYSECS);
+                return $days <= 1 ? 'sail' : ($days <= 7 ? 'wait' : '');
+            }
+        }
+        return '';
+    }
+
     /**
      * When a term starts and ends.
      *
@@ -429,10 +596,8 @@ final class challenges {
             'notes' => $str('challengenotes', $challenge->target),
             default => $str('challengeeveryone'),
         };
-        $marks = [];
-        for ($i = 0; $i < $challenge->target; $i++) {
-            $marks[] = ['lit' => $i < $challenge->done];
-        }
+        // The garland: a pennant a step, or ten tenths for a long one (Jujol).
+        $marks = self::garland((int) $challenge->done, (int) $challenge->target);
         $left = $challenge->kind === 'everyone' && !$challenge->complete && $challenge->target > $challenge->done
             ? $str('challengeeveryoneleft', $challenge->target - $challenge->done) : '';
         // Its clock, in sight (P5 of the review: the challenge had a deadline nobody saw): the days left in the term.

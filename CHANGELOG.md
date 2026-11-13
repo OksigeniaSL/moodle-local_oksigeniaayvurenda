@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.264.0 (2026-11-13)
+
+- «The ship of the term» (P5 of the review of 12 November), from Jujol's mock-ups and Gaudí's ship.
+  - **The ship**: the last week of the term a ship waits off the beach of the class island, its sail furled; on the
+    term's last day it hoists its sail and sails away, with sparks if the class met its challenge. The rest of the
+    term it is not there. With «reduce motion», on its last day it has simply gone.
+  - **«Show the class»**: in «My class», each group the tutor has gets a board for the classroom's whiteboard, over
+    the page and full screen: the island in 3D, the group with its challenge, its garland and how far it is, the
+    harbour's board with the days left (coral the last week) or the day it sails, and the herald with a sentence for
+    each state and its recording, heard only after a touch. − and + for the size, full screen and «Exit»; Esc closes
+    it. Never a pupil's name. Without JavaScript, the same button opens the board as a page of its own.
+  - **The garland**: the challenge's marks become pennants, coloured as each step is met (one for each step up to
+    twelve; on the board, up to thirty; past that, ten tenths, and the words beside it say the number). In «My
+    class», on the board and on the reader's card.
+  - **The challenge, chosen with a touch**: the three challenges and «No challenge» are four cards; the one of this term
+    is marked, and touching another chooses it and keeps it, without «Save».
+  - **On the reader's card**, a line about their class: «Your class: 5 of 6 corners. The ship sails in 4 days!», or
+    that it met the challenge, or that the ship sails today.
+- Needs the art package 0.1.70 for the ship and the herald's recordings; without it, a drawn ship and no «Listen».
+
 ## 0.263.0 (2026-11-13)
 
 - **A new voice on everyone's home.** The home's board («To celebrate») tells of a new voice for a week, «A new voice
