@@ -8096,3 +8096,373 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
         grid-column: auto;
     }
 }
+
+/* «Inventario» (stocktake) as the plan of the shelves of the room (Jujol, 13 Nov 2026). Each place of the library is a
+   piece of furniture: its name on a plate and one shelf of twenty spines. To start, the shelf (or the whole library) is
+   touched and the stocktake begins, named by itself. While reading, the spines light up as their books are read, the
+   shelf where the reader stands carries the light and «Estás aquí», and touching another shelf says where one is now.
+   At the end, the same plan says how many are missing from each shelf. After como-funciona.css. */
+.ayv .ayv-st {
+    --st-hueco: var(--line);
+    --st-madera: linear-gradient(#c99a6e, #a8743f 40%, #7d5328);
+}
+
+/* The plan: the furniture in rows, the whole library first and wider. */
+.ayv .ayv-st-plano {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+    margin: 12px 0 8px;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-st-mueble {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    padding: 14px 14px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ayv .ayv-st-mueble:hover,
+.ayv .ayv-st-mueble:focus-within,
+.ayv .ayv-st-mueble:focus-visible {
+    border-color: var(--green);
+}
+
+/* Its name, on the plate of the shelf: cream on the band of the house, as the label of a spine. */
+.ayv .ayv-st-placa {
+    justify-self: start;
+    padding: 3px 10px 2px;
+    border-radius: 3px;
+    background: var(--cf-crema);
+    box-shadow: inset 0 3px 0 var(--green), 0 1px 2px rgba(0, 0, 0, .18);
+    color: var(--cf-tinta-fija);
+    font-family: var(--title);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* The shelf: twenty spines on a plank. A spine not read yet is the hollow of its book; read, it lights up in the
+   colours of the house, each a little taller or shorter. */
+.ayv .ayv-st-balda {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 58px;
+    padding: 0 4px;
+    border-bottom: 9px solid #7d5328;
+    border-image: var(--st-madera) 1;
+}
+
+.ayv .ayv-st-balda i {
+    flex: 1 1 0;
+    height: 78%;
+    border-radius: 2px 2px 0 0;
+    background: var(--st-hueco);
+}
+
+.ayv .ayv-st-balda i:nth-child(3n) {
+    height: 92%;
+}
+
+.ayv .ayv-st-balda i:nth-child(4n + 1) {
+    height: 66%;
+}
+
+.ayv .ayv-st-balda i:nth-child(7n + 2) {
+    height: 100%;
+}
+
+.ayv .ayv-st-balda i.si {
+    background: var(--green);
+    box-shadow: inset -2px 0 0 rgba(0, 0, 0, .14), inset 2px 0 0 rgba(255, 255, 255, .16);
+}
+
+.ayv .ayv-st-balda i.si:nth-child(3n) {
+    background: var(--coral);
+}
+
+.ayv .ayv-st-balda i.si:nth-child(5n + 2) {
+    background: var(--sun);
+}
+
+.ayv .ayv-st-balda i.si:nth-child(7n) {
+    background: var(--green2);
+}
+
+/* Before starting, the books stand quiet, not counted yet. */
+.ayv .ayv-st-quieta i {
+    background: rgba(23, 87, 76, .32);
+}
+
+.ayv .ayv-st-cuenta {
+    color: var(--muted);
+    font-size: .9375rem;
+}
+
+.ayv .ayv-st-cuenta b {
+    color: var(--ink);
+    font-family: var(--title);
+    font-size: 1.125rem;
+}
+
+/* The shelf where the reader is: raised, the lamp over it and its words. */
+.ayv .ayv-st-aqui {
+    border-color: var(--sun);
+    box-shadow: 0 0 0 3px var(--sun), 0 -18px 30px -16px rgba(240, 180, 60, .8);
+    transform: translateY(-3px);
+}
+
+.ayv .ayv-st-aqui-t {
+    display: none;
+    position: absolute;
+    top: -12px;
+    right: 12px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--sun);
+    color: var(--cf-tinta-fija);
+    font-size: .8125rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-st-aqui .ayv-st-aqui-t {
+    display: block;
+}
+
+/* A shelf read whole. */
+.ayv .ayv-st-entera .ayv-st-cuenta::after {
+    content: " ✓";
+    color: var(--green);
+    font-weight: 700;
+}
+
+/* While reading, each shelf is a radio: «Estoy aquí» is touching it (the script moves .ayv-st-aqui to the one checked). */
+.ayv .ayv-st-mueble input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* The whole library: wider, its plate on the band of the sun, three planks for every shelf. */
+.ayv .ayv-st-todo {
+    grid-column: span 2;
+}
+
+.ayv .ayv-st-todo .ayv-st-placa {
+    box-shadow: inset 0 3px 0 var(--sun), 0 1px 2px rgba(0, 0, 0, .18);
+}
+
+.ayv .ayv-st-todo .ayv-st-balda {
+    height: 30px;
+    border-bottom-width: 6px;
+}
+
+.ayv .ayv-st-sin {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    min-height: 100%;
+    border-style: dashed;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: center;
+}
+
+/* What is missing from a shelf, at the end: a coral plate with the number, on the shelf itself. */
+.ayv .ayv-st-faltan {
+    justify-self: start;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--coral);
+    color: var(--cf-tinta-fija);
+    font-size: .875rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-st-faltan-0 {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--green);
+    color: var(--green);
+}
+
+/* The reader: the field where the books pass, a counter that says how it goes. The field is the one of the desk, on
+   the card of the reader instead of its own. */
+.ayv .ayv-st-lector .ayv-scan {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.ayv .ayv-st-lector {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 10px 24px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1.5px var(--line);
+}
+
+.ayv .ayv-st-cifra {
+    margin: 0;
+    color: var(--muted);
+    text-align: end;
+}
+
+.ayv .ayv-st-cifra b {
+    display: block;
+    color: var(--ink);
+    font-family: var(--title);
+    font-size: 2.25rem;
+    line-height: 1.05;
+}
+
+.ayv .ayv-st-dos {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px 28px;
+    margin-top: 18px;
+}
+
+.ayv .ayv-st-dos h2 {
+    margin: 0 0 4px;
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* The ones done before: minutes of paper, the open one first. */
+.ayv .ayv-st-actas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-st-acta {
+    display: grid;
+    gap: 2px;
+    padding: 12px 14px 12px 18px;
+    border-radius: 3px 10px 10px 3px;
+    background: linear-gradient(90deg, var(--line) 0 4px, transparent 4px), var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-st-acta b {
+    font-family: var(--title);
+    font-size: 1.0625rem;
+}
+
+.ayv .ayv-st-acta span {
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+.ayv .ayv-st-acta-abierta {
+    background: linear-gradient(90deg, var(--sun) 0 4px, transparent 4px), var(--surface);
+}
+
+.ayv .ayv-st-acta:hover {
+    box-shadow: 0 0 0 1.5px var(--green);
+}
+
+@media (max-width: 900px) {
+    .ayv .ayv-st-dos {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-st-plano {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .ayv .ayv-st-mueble {
+        padding: 12px 10px 10px;
+    }
+
+    .ayv .ayv-st-placa {
+        font-size: .9375rem;
+    }
+
+    .ayv .ayv-st-balda {
+        height: 44px;
+    }
+
+    .ayv .ayv-st-lector {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-st-cifra {
+        text-align: start;
+    }
+}
+
+/* As mounted: the sentence at the end, read from the left; each list of the results, apart. */
+.ayv .ayv-st-cifra-suma {
+    margin: 4px 0 12px;
+    text-align: start;
+}
+
+.ayv .ayv-st-lista {
+    margin-top: 24px;
+}
+
+.ayv .ayv-st .ayv-st-cuenta,
+.ayv .ayv-st .ayv-st-acta span,
+.ayv .ayv-st .ayv-st-cifra {
+    color: var(--ink);
+}
+
+.ayv .ayv-st .ayv-st-cuenta,
+.ayv .ayv-st .ayv-st-acta span {
+    opacity: .78;
+}
+
+.ayv .ayv-st .ayv-st-faltan {
+    background: #b9452d;
+    color: #fff;
+}
+
+.ayv .ayv-st .ayv-st-faltan-0 {
+    background: transparent;
+    color: var(--green);
+}
+
+.ayv .ayv-st .ayv-st-sin {
+    color: var(--ink);
+}
+
+/* The lists of the results, side by side on a wide screen: a shelf of fifty is not a page of fifty cards. */
+.ayv .ayv-st-lista .ayv-log {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 8px;
+}
+
+.ayv .ayv-st-lista .ayv-line {
+    margin: 0;
+}

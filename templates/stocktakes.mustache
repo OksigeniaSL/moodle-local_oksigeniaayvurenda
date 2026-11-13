@@ -13,38 +13,47 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/stocktakes
 
-    The stocktakes of a library, and starting one.
+    Stocktakes: each place of the library a piece of furniture, touched to start there (or the whole library, wider), and
+    the ones done before as minutes, the open one first.
+
+    Context variables required for this template:
+    * heading, intro, crier, action, sesskey - the head and where a start goes
+    * whole (label, says, spines), furniture (id, label, says, spines) - what can be stocktaken
+    * before, minutes (name, url, open, state, line), hasminutes - the ones done before
 
     Example context (json):
     {
-        "heading": "Inventario", "intro": "Recorre las estanterías.", "haslist": true,
-        "list": [{"name": "Inventario de junio", "url": "#", "state": "Abierto", "progress": "Leídos: 10 de 600"}],
-        "action": "#", "sesskey": "abc", "defaultname": "Inventario del 24 de octubre de 2026",
-        "places": [{"id": 1, "label": "Narrativa (120)"}],
-        "stocktakenew": "Empezar un inventario", "stocktakename": "Nombre", "stocktakewhere": "Qué recorre",
-        "stocktakeall": "Toda la biblioteca", "stocktakestart": "Empezar", "stocktakelist": "Inventarios"
+        "heading": "Inventario", "intro": "Toca la estantería.", "crier": null, "action": "https://example.com/stocktake.php",
+        "sesskey": "abc", "whole": {"label": "Toda la biblioteca", "says": "<b>120</b> libros en 2 estanterías",
+            "spines": [{"on": false}]},
+        "furniture": [{"id": 3, "label": "Ciencias", "says": "<b>60</b> libros", "spines": [{"on": false}]}],
+        "before": "Los de antes", "hasminutes": true,
+        "minutes": [{"name": "Inventario del 3 de noviembre", "url": "https://example.com/stocktake.php?id=1", "open": true,
+            "state": "Toda la biblioteca · abierto", "line": "Seguir pasando libros"}]
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
-{{#haslist}}
-<h2 class="ayv-section-title">{{stocktakelist}}</h2>
-<ul class="ayv-holds">
-{{#list}}
-    <li class="ayv-holds-row"><a class="ayv-holds-title" href="{{url}}">{{name}}</a>
-        <span class="ayv-holds-who">{{state}}</span> <span class="ayv-holds-when">{{progress}}</span></li>
-{{/list}}
+<div class="ayv-cf ayv-st">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+        </div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
+<form id="ayv-st-empezar" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
+<ul class="ayv-st-plano">
+    {{#whole}}<li class="ayv-st-todo"><button class="ayv-st-mueble" type="submit" form="ayv-st-empezar" name="location" value="0"><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-cuenta">{{{says}}}</span></button></li>{{/whole}}
+    {{#furniture}}<li><button class="ayv-st-mueble" type="submit" form="ayv-st-empezar" name="location" value="{{id}}"><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-cuenta">{{{says}}}</span></button></li>{{/furniture}}
 </ul>
-{{/haslist}}
-<form method="post" action="{{action}}" class="ayv-book">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <h2 class="ayv-section-title">{{stocktakenew}}</h2>
-    <label class="ayv-field ayv-dig-field">{{stocktakename}} <input type="text" name="name" value="{{defaultname}}" maxlength="100"></label>
-    <label class="ayv-field ayv-dig-field">{{stocktakewhere}}
-        <select name="location"><option value="0">{{stocktakeall}}</option>{{#places}}<option value="{{id}}">{{label}}</option>{{/places}}</select>
-    </label>
-    <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{stocktakestart}}</button></p>
-</form>
+{{#hasminutes}}
+<section aria-labelledby="ayv-st-antes">
+    <h2 id="ayv-st-antes" class="ayv-cf-estante-t">{{before}}</h2>
+    <ul class="ayv-st-actas">
+        {{#minutes}}<li><a class="ayv-st-acta{{#open}} ayv-st-acta-abierta{{/open}}" href="{{url}}"><b>{{name}}</b><span>{{state}}</span><span>{{line}}</span></a></li>{{/minutes}}
+    </ul>
+</section>
+{{/hasminutes}}
+</div>

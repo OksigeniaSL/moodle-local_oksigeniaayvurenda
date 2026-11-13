@@ -53,10 +53,12 @@ if ($action === 'read') {
         $here = (int) ($read['here'] ?? 0);
         $answers[] = stocktake::read($stocktake, $code, $here ?: null, (int) $USER->id);
     }
-    $answer = ['answers' => $answers, 'counts' => stocktake::counts($stocktake)];
+    // With what was read on each shelf, for the plan whose spines light up.
+    $answer = ['answers' => $answers, 'counts' => stocktake::counts($stocktake), 'places' => stocktake::byplace($stocktake)];
 } else if ($action === 'return') {
     access::require('local/oksigeniaayvurenda:desk', $library);
     $returned = (new desk($library, (int) $USER->id))->scan(required_param('code', PARAM_TEXT));
-    $answer = ['kind' => $returned['kind'], 'message' => $returned['message'], 'counts' => stocktake::counts($stocktake)];
+    $answer = ['kind' => $returned['kind'], 'message' => $returned['message'], 'counts' => stocktake::counts($stocktake),
+        'places' => stocktake::byplace($stocktake)];
 }
 echo json_encode($answer);

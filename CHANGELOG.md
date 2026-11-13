@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.244.0 (2026-11-13)
+
+- Stocktake, from Jujol's mock-up: each place of the library is a piece of furniture with its name on a plate and a
+  shelf of twenty spines. To start, the shelf (or the whole library) is touched, and the stocktake names itself with the
+  day and what it covers; the ones before are minutes, the open one first. While reading, the figure says how many are
+  read of how many, the plan says where one stands (touched, the light goes with it; the list is gone) and each shelf's
+  spines light up as its books are read, with each answer of the server. At the end, the same plan says how many are
+  missing from each shelf; touching one opens its own list, fifty at a time, «See all» and its download, so the page is
+  no longer 17,000 px long. The lists of the results stand side by side on a wide screen.
+
 ## 0.243.0 (2026-11-13)
 
 - The words of the review: «site» meant the platform and a place of the library at once; now «the platform» is the

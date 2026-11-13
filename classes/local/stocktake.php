@@ -190,16 +190,56 @@ final class stocktake {
     }
 
     /**
+     * How it goes on each shelf: the copies it should find there and those already read, by place (0, without one).
+     *
+     * @param \stdClass $stocktake
+     * @return array[] place id => count and seen.
+     */
+    public static function byplace(\stdClass $stocktake): array {
+        global $DB;
+        [$expected, $eparams] = self::scope($stocktake, stocktake_rules::EXPECTED);
+        $places = [];
+        foreach (
+            $DB->get_records_sql(
+                'SELECT COALESCE(i.locationid, 0) AS place, COUNT(1) AS copies
+                   FROM {' . self::T . 'item} i
+                  WHERE ' . $expected . '
+               GROUP BY COALESCE(i.locationid, 0)',
+                $eparams
+            ) as $row
+        ) {
+            $places[(int) $row->place] = ['count' => (int) $row->copies, 'seen' => 0];
+        }
+        foreach (
+            $DB->get_records_sql(
+                'SELECT COALESCE(i.locationid, 0) AS place, COUNT(DISTINCT r.itemid) AS copies
+                   FROM {' . self::T . 'stockread} r
+                   JOIN {' . self::T . 'item} i ON i.id = r.itemid
+                  WHERE r.stocktakeid = :stocktakeid AND ' . $expected . '
+               GROUP BY COALESCE(i.locationid, 0)',
+                $eparams + ['stocktakeid' => $stocktake->id]
+            ) as $row
+        ) {
+            $places[(int) $row->place] = ($places[(int) $row->place] ?? ['count' => 0]) + ['seen' => 0];
+            $places[(int) $row->place]['seen'] = (int) $row->copies;
+        }
+        return $places;
+    }
+
+    /**
      * What the stocktake found.
      *
      * @param \stdClass $stocktake
      * @param int $limit How many of each list at most; 0 for all.
+     * @param int|null $place Only the missing from this place (0, those without one); null, from all.
      * @return array missing, misplaced, lent and found (copies with id, title, code, call number, place and where they
-     *     were read); unknown (codes); missingbyplace (place and how many are missing from it).
+     *     were read); unknown (codes); missingbyplace (place id, its label and how many are missing from it).
      */
-    public static function results(\stdClass $stocktake, int $limit = 0): array {
+    public static function results(\stdClass $stocktake, int $limit = 0, ?int $place = null): array {
         global $DB;
         [$shelf, $sparams] = self::scope($stocktake, stocktake_rules::ON_SHELF);
+        $there = $place === null ? '' : ' AND COALESCE(i.locationid, 0) = :missingplace';
+        $thereparams = $place === null ? [] : ['missingplace' => $place];
         $notread = 'NOT EXISTS (SELECT 1 FROM {' . self::T . 'stockread} r WHERE r.stocktakeid = :stocktakeid AND r.itemid = i.id)';
         $mine = ['stocktakeid' => $stocktake->id];
         $missing = $DB->get_records_sql(
@@ -208,9 +248,9 @@ final class stocktake {
                FROM {' . self::T . 'item} i
                JOIN {' . self::T . 'record} rec ON rec.id = i.recordid
           LEFT JOIN {' . self::T . 'authority} a ON a.id = i.locationid
-              WHERE ' . $shelf . ' AND ' . $notread . '
+              WHERE ' . $shelf . ' AND ' . $notread . $there . '
            ORDER BY a.label, i.callnumber1, i.callnumber2, i.callnumber3, rec.title, i.id',
-            $sparams + $mine,
+            $sparams + $mine + $thereparams,
             0,
             $limit
         );
@@ -270,7 +310,7 @@ final class stocktake {
                 $mine
             ))),
             'missingbyplace' => array_values(array_map(
-                fn($p) => ['label' => (string) $p->label, 'count' => (int) $p->copies],
+                fn($p) => ['place' => (int) $p->place, 'label' => (string) $p->label, 'count' => (int) $p->copies],
                 $byplace
             )),
         ];

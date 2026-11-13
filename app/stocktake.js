@@ -28,7 +28,11 @@
     var form = document.getElementById('ayv-scan');
     var input = document.getElementById('ayv-code');
     var log = document.getElementById('ayv-log');
-    var here = document.getElementById('ayv-here');
+    // Where the reader stands: the shelf touched on the plan (a radio), or the place the stocktake covers.
+    var here = function() {
+        var checked = document.querySelector('input[name="ayv-here"]:checked');
+        return checked ? Number(checked.value || 0) : Number(config.place || 0);
+    };
     var progress = document.getElementById('ayv-progress');
     var pending = document.getElementById('ayv-pending');
     if (!form || !input || !log || !window.fetch) {
@@ -113,13 +117,53 @@
         return text.replace('{$a}', function() { return a; });
     };
 
+    var lang = document.documentElement.lang || undefined;
     var counts = function(c) {
         if (progress && c) {
-            var lang = document.documentElement.lang || undefined;
-            progress.textContent = fill(str.stocktakeprogress, {seen: Number(c.seen).toLocaleString(lang),
-                expected: Number(c.expected).toLocaleString(lang)});
+            var big = progress.querySelector('b');
+            var of = progress.querySelector('span');
+            if (big && of) {
+                big.textContent = Number(c.seen).toLocaleString(lang);
+                of.textContent = fill(str.stocktakecifra, Number(c.expected).toLocaleString(lang));
+            } else {
+                progress.textContent = fill(str.stocktakeprogress, {seen: Number(c.seen).toLocaleString(lang),
+                    expected: Number(c.expected).toLocaleString(lang)});
+            }
         }
     };
+    // The plan: each shelf's spines lit as its books are read (twenty spines, the whole shelf), with what was read.
+    var shelves = function(places) {
+        if (!places) {
+            return;
+        }
+        document.querySelectorAll('.ayv-st-mueble[data-place]').forEach(function(shelf) {
+            var one = places[shelf.getAttribute('data-place')];
+            if (!one) {
+                return;
+            }
+            var count = Number(one.count || 0);
+            var seen = Number(one.seen || 0);
+            var lit = count > 0 ? Math.round(20 * Math.min(seen, count) / count) : 0;
+            shelf.setAttribute('data-seen', String(seen));
+            shelf.querySelectorAll('.ayv-st-balda i').forEach(function(spine, i) {
+                spine.classList.toggle('si', i < lit);
+            });
+            var big = shelf.querySelector('.ayv-st-cuenta b');
+            if (big) {
+                big.textContent = seen.toLocaleString(lang);
+            }
+            shelf.classList.toggle('ayv-st-entera', count > 0 && seen >= count);
+        });
+    };
+    // Touching another shelf says one stands there now: the light goes with it.
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.name === 'ayv-here') {
+            document.querySelectorAll('.ayv-st-mueble').forEach(function(shelf) {
+                shelf.classList.toggle('ayv-st-aqui', shelf.contains(event.target));
+            });
+            input.focus();
+        }
+    });
 
     // Why the reads wait, when it is not the network: the session ran out, or the server said no.
     var stalled = '';
@@ -172,6 +216,7 @@
                     actions.textContent = '';
                     li.appendChild(el('p', 'ayv-line-note', returned.message));
                     counts(returned.counts);
+                    shelves(returned.places);
                     return returned;
                 }).catch(function() {
                     b.disabled = false;
@@ -205,6 +250,7 @@
             save();
             (answer.answers || []).forEach(line);
             counts(answer.counts);
+            shelves(answer.places);
             sending = false;
             showPending(false);
             if (queue.length) {
@@ -236,7 +282,7 @@
             line({kind: 'badletter', code: code});
             return;
         }
-        queue.push({code: code, here: here ? Number(here.value || 0) : 0, t: Date.now()});
+        queue.push({code: code, here: here(), t: Date.now()});
         save();
         flush();
     };

@@ -13,54 +13,65 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/stocktakeresults
 
-    What a stocktake found: missing, out of place, thought lent, thought lost.
+    What a stocktake found: how many are missing in one sentence, the plan of the shelves saying how many are missing
+    from each (touched, its list), and the lists of the missing, the misplaced, the lent and the found.
+
+    Context variables required for this template:
+    * heading, intro, crier, notice, lead, rest - the head and the sentence
+    * furniture (url, here, label, spines, missing, nonemissing), hasfurniture - the plan
+    * open, readurl, action, sesskey - while it is open
+    * sections (heading, anchor, hint, lines (title, note), haslines, empty, allurl, alllabel, downloadurl, lose, recover)
+    * unknown, stocktakeback, stocktakelose, stocktakerecover, stocktakeclose, stocktakedownloadsheet - the rest
 
     Example context (json):
     {
-        "heading": "Inventario de junio", "scope": "Toda la biblioteca", "notice": "", "progress": "Leídos: 590 de 600",
-        "open": true, "readurl": "#", "action": "#", "sesskey": "abc", "downloadurl": "#", "unknown": "",
-        "sections": [{"heading": "Faltan: 1", "anchor": "ayv-stock-missing", "moreurl": "", "hint": "Deberían estar.", "byplace": "", "more": "", "hascopies": true, "empty": "Ninguno",
-            "lose": true, "recover": false, "download": true,
-            "copies": [{"id": 1, "title": "El faro dormido", "barcode": "100000L", "callnumber": "N MON far",
-                        "where": "Narrativa", "readat": ""}]}],
-        "stocktakeback": "Seguir leyendo", "stocktakelose": "Darlos por perdidos", "stocktakerecover": "Devolverlos a la estantería",
-        "stocktakeclose": "Cerrar el inventario", "stocktakedownload": "Descargar la lista", "stocktakecolwhere": "Leído en",
-        "callnumber": "Signatura"
+        "heading": "Inventario del 24 de octubre", "intro": "Toda la biblioteca.", "crier": null, "notice": "",
+        "lead": "12 faltan", "rest": "de 120.", "hasfurniture": true,
+        "furniture": [{"url": "https://example.com/stocktake.php?place=3", "here": true, "label": "Ciencias",
+            "spines": [{"on": true}], "missing": "Faltan 12", "nonemissing": false}],
+        "open": true, "readurl": "https://example.com/stocktake.php?id=1", "action": "https://example.com/stocktake.php?id=1",
+        "sesskey": "abc", "unknown": "",
+        "sections": [{"heading": "Faltan en Ciencias: 12", "anchor": "ayv-stock-missing", "hint": "No se han leído.",
+            "lines": [{"title": "La isla", "note": "82-3 ROW · 1001K"}], "haslines": true, "empty": "Ninguno.",
+            "allurl": "https://example.com/stocktake.php?show=12", "alllabel": "Ver los 12",
+            "downloadurl": "https://example.com/stocktake.php?download=missing", "lose": true, "recover": false}],
+        "stocktakeback": "Seguir pasando libros", "stocktakelose": "Dar por perdidos", "stocktakerecover": "Devolverlos",
+        "stocktakeclose": "Cerrar el inventario", "stocktakedownloadsheet": "Descargarlos en una hoja"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{scope}} · {{progress}}</p>
+<div class="ayv-cf ayv-st">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+        </div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-{{#open}}<p class="ayv-more"><a class="ayv-button" href="{{readurl}}">{{stocktakeback}}</a></p>{{/open}}
-{{#sections}}
-<h2 class="ayv-section-title" id="{{anchor}}">{{heading}}</h2>
-<p class="ayv-field-hint">{{hint}}</p>
-{{#byplace}}<p class="ayv-stock-scope">{{byplace}}</p>{{/byplace}}
-{{^hascopies}}<p class="ayv-empty">{{empty}}</p>{{/hascopies}}
-<ul class="ayv-holds">
-{{#copies}}
-    <li class="ayv-holds-row"><span class="ayv-holds-title">{{title}}</span>
-        <span class="ayv-holds-who">{{where}}{{#callnumber}} · {{callnumber}}{{/callnumber}}</span>
-        <span class="ayv-holds-when">{{barcode}}{{#readat}} · {{stocktakecolwhere}}: {{readat}}{{/readat}}</span></li>
-{{/copies}}
+<p class="ayv-st-cifra ayv-st-cifra-suma"><b>{{lead}}</b>{{rest}}</p>
+{{#open}}<p class="ayv-cf-fila"><a class="ayv-button" href="{{readurl}}">{{stocktakeback}}</a></p>{{/open}}
+{{#hasfurniture}}
+<ul class="ayv-st-plano">
+    {{#furniture}}<li><a class="ayv-st-mueble{{#here}} ayv-st-aqui{{/here}}" href="{{url}}"{{#here}} aria-current="true"{{/here}}><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-faltan{{#nonemissing}} ayv-st-faltan-0{{/nonemissing}}">{{missing}}</span></a></li>{{/furniture}}
 </ul>
-{{#more}}<p class="ayv-field-hint">{{more}}</p>{{/more}}
-{{#moreurl}}<p><a class="ayv-button ayv-button-quiet" href="{{moreurl}}">{{stocktakeseemore}}</a></p>{{/moreurl}}
-{{#download}}<p><a href="{{downloadurl}}">{{stocktakedownload}}</a></p>{{/download}}
-{{#lose}}
-<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
-    <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="lose">{{stocktakelose}}</button></form>
-{{/lose}}
-{{#recover}}
-<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
-    <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="recover">{{stocktakerecover}}</button></form>
-{{/recover}}
+{{/hasfurniture}}
+{{#sections}}
+<section class="ayv-st-lista" id="{{anchor}}" aria-labelledby="{{anchor}}-t">
+    <h2 class="ayv-cf-estante-t" id="{{anchor}}-t">{{heading}}</h2>
+    <p class="ayv-cf-estante-s">{{hint}}</p>
+    {{#haslines}}<ol class="ayv-log">{{#lines}}<li class="ayv-line"><p class="ayv-line-text">{{title}}</p><p class="ayv-line-note">{{note}}</p></li>{{/lines}}</ol>{{/haslines}}
+    {{^haslines}}<p class="ayv-cf-nota">{{empty}}</p>{{/haslines}}
+    <p class="ayv-cf-fila">{{#allurl}}<a class="ayv-button ayv-button-quiet" href="{{allurl}}">{{alllabel}}</a>{{/allurl}}{{#downloadurl}}<a class="ayv-cf-enlace" href="{{downloadurl}}">{{stocktakedownloadsheet}}</a>{{/downloadurl}}</p>
+    {{#lose}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><button type="submit" class="ayv-cf-chapa" name="do" value="lose">{{stocktakelose}}</button></form>{{/lose}}
+    {{#recover}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><button type="submit" class="ayv-cf-chapa" name="do" value="recover">{{stocktakerecover}}</button></form>{{/recover}}
+</section>
 {{/sections}}
-{{#unknown}}<p class="ayv-field-hint">{{unknown}}</p>{{/unknown}}
+{{#unknown}}<p class="ayv-cf-nota">{{unknown}}</p>{{/unknown}}
 {{#open}}
 <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
-    <p class="ayv-more"><button type="submit" class="ayv-button" name="do" value="close">{{stocktakeclose}}</button></p></form>
+    <p class="ayv-cf-fila"><button type="submit" class="ayv-button" name="do" value="close">{{stocktakeclose}}</button></p></form>
 {{/open}}
+</div>

@@ -24,8 +24,10 @@ namespace local_oksigeniaayvurenda\local;
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_oksigeniaayvurenda\local\stocktake
+ * @covers     \local_oksigeniaayvurenda\local\stockplan
  */
 #[\PHPUnit\Framework\Attributes\CoversClass(stocktake::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(stockplan::class)]
 final class stocktake_test extends \advanced_testcase {
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
@@ -109,5 +111,36 @@ final class stocktake_test extends \advanced_testcase {
             [['id' => (int) $w->poesia, 'label' => 'Poesía', 'count' => 1]],
             array_values(array_filter(stocktake::places($w->library), fn($p) => $p['label'] === 'Poesía'))
         );
+    }
+
+    /**
+     * The plan: what is expected and read on each shelf, the missing of one shelf, the spines lit and the name a
+     * stocktake takes by itself.
+     */
+    public function test_plan(): void {
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $id = stocktake::start($w->library, 'Junio', null, (int) $w->user->id);
+        $st = stocktake::get($id, $w->library);
+        stocktake::read($st, $w->a1->barcode, $w->narrativa, (int) $w->user->id);
+        stocktake::read($st, $w->b1->barcode, $w->narrativa, (int) $w->user->id);
+        $byplace = stocktake::byplace($st);
+        $this->assertSame(['count' => 3, 'seen' => 1], $byplace[$w->narrativa]);
+        $this->assertSame(['count' => 1, 'seen' => 1], $byplace[$w->poesia]);
+        $results = stocktake::results($st, 0, $w->narrativa);
+        $this->assertSame([(int) $w->a2->id], array_column($results['missing'], 'id'));
+        $this->assertSame([], stocktake::results($st, 0, $w->poesia)['missing']);
+        $this->assertSame([$w->narrativa], array_column(stocktake::results($st)['missingbyplace'], 'place'));
+        $this->assertSame(20, count(stockplan::spines(4, 1)));
+        $this->assertSame(5, count(array_filter(array_column(stockplan::spines(4, 1), 'on'))));
+        $this->assertSame(7, count(array_filter(array_column(stockplan::spines(3, 1), 'on'))));
+        $this->assertSame(20, count(array_filter(array_column(stockplan::spines(3, 9), 'on'))));
+        $this->assertSame(0, count(array_filter(array_column(stockplan::spines(0, 0), 'on'))));
+        $furniture = stockplan::furniture($w->library, $st);
+        $this->assertSame(['Narrativa', 'Poesía'], array_column($furniture, 'label'));
+        $this->assertSame([false, true], array_column($furniture, 'whole'));
+        $one = stocktake::get(stocktake::start($w->library, 'Poesía', $w->poesia, (int) $w->user->id), $w->library);
+        $this->assertSame(['Poesía'], array_column(stockplan::furniture($w->library, $one), 'label'));
+        $this->assertStringContainsString('Poesía', stockplan::name($w->library, time(), 'Poesía'));
     }
 }

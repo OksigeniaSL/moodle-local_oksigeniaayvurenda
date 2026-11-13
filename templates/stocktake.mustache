@@ -13,35 +13,59 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/stocktake
 
-    Reading the shelves of a stocktake.
+    Reading the shelves: the reader with how many are read, the plan of the shelves (each a radio to say where one
+    stands, its spines lighting up as its books are read) and the last reads. Works offline (app/stocktake.js).
+
+    Context variables required for this template:
+    * heading, intro, crier, prompt, cifra (seen, of), tools - the head and the reader
+    * where, youarehere, nowhere, pick, furniture (id, label, count, seen, seenlabel, of, whole, here, spines) - the plan
+    * last, resultsurl, results, hint - the last reads
 
     Example context (json):
     {
-        "heading": "Inventario de junio", "scope": "Toda la biblioteca", "prompt": "Pasa los libros",
-        "here": "Estoy en", "nowhere": "Sin decir", "hasplaces": true, "places": [{"id": 1, "label": "Narrativa", "count": 120}],
-        "tools": "", "progress": "Leídos: 0 de 600", "resultsurl": "#", "results": "Ver lo que falta",
-        "hint": "Sin red, lo leído se guarda en el móvil."
+        "heading": "Inventario del 13 de noviembre", "intro": "Toda la biblioteca.", "crier": null, "prompt": "Pasa los libros",
+        "cifra": {"seen": "12", "of": "leídos de 120"}, "tools": "", "where": "Dónde estás", "youarehere": "Estás aquí",
+        "nowhere": "Sin decir dónde", "pick": true,
+        "furniture": [{"id": 3, "label": "Ciencias", "count": 60, "seen": 12, "seenlabel": "12", "of": "de 60", "whole": false,
+            "here": false, "spines": [{"on": true}, {"on": false}]}],
+        "last": "Lo último que has pasado", "resultsurl": "https://example.com/stocktake.php?view=results",
+        "results": "Ver lo que falta", "hint": "Sin red, lo leído se guarda."
     }
 }}
-<section class="ayv-desk ayv-stock">
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p class="ayv-stock-scope">{{scope}} · <span id="ayv-progress" role="status">{{progress}}</span></p>
-{{#hasplaces}}
-<label class="ayv-field ayv-dig-field">{{here}}
-    <select id="ayv-here"><option value="0">{{nowhere}}</option>{{#places}}<option value="{{id}}">{{label}}</option>{{/places}}</select>
-</label>
-{{/hasplaces}}
-<form id="ayv-scan" class="ayv-scan" autocomplete="off">
-    <label for="ayv-code" class="ayv-scan-label">{{prompt}}</label>
-    <input id="ayv-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-        autofocus maxlength="200">
-</form>
+<div class="ayv-cf ayv-st ayv-desk ayv-stock">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+        </div>
+    {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
+</header>
+<div class="ayv-st-lector">
+    <form id="ayv-scan" class="ayv-scan" autocomplete="off">
+        <label for="ayv-code" class="ayv-scan-label">{{prompt}}</label>
+        <input id="ayv-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+            autofocus maxlength="200">
+    </form>
+    {{#cifra}}<p class="ayv-st-cifra" id="ayv-progress" role="status"><b>{{seen}}</b><span>{{of}}</span></p>{{/cifra}}
+</div>
 {{{tools}}}
 <p class="ayv-notice" id="ayv-pending" role="status" hidden></p>
-<ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
-<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{resultsurl}}">{{results}}</a></p>
-<p class="ayv-field-hint">{{hint}}</p>
-</section>
+<div class="ayv-st-dos">
+    <section aria-labelledby="ayv-st-plano-t">
+        <h2 id="ayv-st-plano-t">{{where}}</h2>
+        <ul class="ayv-st-plano">
+            {{#furniture}}<li><label class="ayv-st-mueble{{#here}} ayv-st-aqui{{/here}}{{#whole}} ayv-st-entera{{/whole}}" data-place="{{id}}" data-count="{{count}}" data-seen="{{seen}}">{{#pick}}<input type="radio" name="ayv-here" value="{{id}}">{{/pick}}<span class="ayv-st-aqui-t">{{youarehere}}</span><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-cuenta"><b>{{seenlabel}}</b> {{of}}</span></label></li>{{/furniture}}
+            {{#pick}}<li><label class="ayv-st-mueble ayv-st-sin ayv-st-aqui"><input type="radio" name="ayv-here" value="0" checked><span class="ayv-st-aqui-t">{{youarehere}}</span>{{nowhere}}</label></li>{{/pick}}
+        </ul>
+    </section>
+    <section aria-labelledby="ayv-st-ultimo-t">
+        <h2 id="ayv-st-ultimo-t">{{last}}</h2>
+        <ol id="ayv-log" class="ayv-log" aria-live="polite"></ol>
+        <p class="ayv-cf-fila"><a class="ayv-button ayv-button-quiet" href="{{resultsurl}}">{{results}}</a></p>
+        <p class="ayv-cf-nota">{{hint}}</p>
+    </section>
+</div>
+</div>
