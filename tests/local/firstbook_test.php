@@ -30,7 +30,7 @@ final class firstbook_test extends \advanced_testcase {
     /**
      * Only the first book, and only the day after it went home; the second book is no news. Each adult of the family hears
      * once, through their account or to their e-mail, with the book and the way to record it with their voice. A centre
-     * that does not write to families, or turned it off, sends nothing.
+     * that never turned it on, or turned it off, sends nothing.
      */
     public function test_first(): void {
         global $CFG, $DB;
@@ -68,7 +68,9 @@ final class firstbook_test extends \advanced_testcase {
             'userid' => (int) $mother->id]);
         \local_oksigeniafamily\api::add_adult($family, ['firstname' => 'Iván', 'email' => 'ivan.familia@example.org']);
         \local_oksigeniafamily\api::add_child($family, (int) $child->id);
-        // A school writes to families by default; this one has turned it off.
+        // Off until the centre turns it on, even where it tells families of late books; and off again, off.
+        $this->assertFalse(firstbook::on((int) $library->entityid));
+        $this->assertSame(0, firstbook::run($now));
         firstbook::save((int) $library->entityid, false);
         $this->assertSame(0, firstbook::run($now));
         firstbook::save((int) $library->entityid, true);

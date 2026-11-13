@@ -28,15 +28,16 @@ namespace local_oksigeniaayvurenda\local;
  * The day a young reader (the card of the flower) takes home their very first book of the centre, their family hears of it
  * the next morning, in the centre's own: a postcard with its cover, the child's name and the day, to keep and send on,
  * and the way to give that book their own voice for them. The one who has to be moved is the mother or the father; the
- * child will say «my book» by its title. Where the site keeps its families (Oksigenia Family), and only if the centre
- * writes to families.
+ * child will say «my book» by its title. Where the site keeps its families (Oksigenia Family), and only once the centre
+ * turned it on.
  */
 final class firstbook {
     /** @var string Prefix of the tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
     /**
-     * Whether a centre sends it: as it chose, or, if it never did, as it writes to families about late books.
+     * Whether a centre sends it: only once it turned it on. It writes to families who never heard from the library this
+     * way, so the centre chooses it, even where it already tells them of late books.
      *
      * @param int $entityid
      * @return bool
@@ -44,8 +45,7 @@ final class firstbook {
     public static function on(int $entityid): bool {
         global $DB;
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
-        return array_key_exists('firstbook', $entity) ? !empty($entity['firstbook'])
-            : !empty(sanctions::settings($entityid)['noticefamilies']);
+        return !empty($entity['firstbook']);
     }
 
     /**

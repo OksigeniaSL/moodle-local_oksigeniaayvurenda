@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.260.1 (2026-11-13)
+
+- «Su primer libro» is off until the centre turns it on in «How your library works», even where it tells families of late
+  books: it writes to families who never heard from the library this way.
+
 ## 0.260.0 (2026-11-13)
 
 - «La orientación con insignia» (P8 of the review), from Jujol's mock-up and Gaudí's badge.
