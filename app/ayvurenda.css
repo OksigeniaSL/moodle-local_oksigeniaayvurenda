@@ -8466,3 +8466,244 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 .ayv .ayv-st-lista .ayv-line {
     margin: 0;
 }
+
+/* The home of a young reader (Infantil) on a phone, as one screen (Jujol, 13 Nov 2026): Mainumby says hello in a
+   bubble with its voice, and three big doors, each with its picture, its word and its voice: a story for today, into
+   the library, and my flower. No field to type, nothing to read before the pictures. After como-funciona.css. */
+.ayv .ayv-pq {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 6px 0 18px;
+}
+
+/* Mainumby and what it says: the bubble points to it, its voice beside the words. */
+.ayv .ayv-pq-saludo {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+}
+
+.ayv .ayv-pq-saludo img {
+    display: block;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+}
+
+.ayv .ayv-pq-bocadillo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 12px 12px 16px;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1.5px var(--line), 0 8px 16px -12px rgba(0, 0, 0, .4);
+}
+
+.ayv .ayv-pq-bocadillo::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    background: var(--surface);
+    box-shadow: -1.5px 1.5px 0 var(--line);
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.ayv .ayv-pq-bocadillo p {
+    flex: 1;
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* The voice: a round button with a speaker, big enough for a small finger. */
+.ayv .ayv-pq-voz {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--sun);
+    color: var(--cf-tinta-fija);
+    cursor: pointer;
+    box-shadow: 0 3px 0 #906c24;
+}
+
+.ayv .ayv-pq-voz svg {
+    width: 26px;
+    height: 26px;
+}
+
+.ayv .ayv-pq-voz:active {
+    box-shadow: none;
+    transform: translateY(3px);
+}
+
+/* The three doors: each the whole width, its picture filling it, its word on a plate at the foot, its voice in the
+   corner. The door is the link; the voice is a button of its own beside it. */
+.ayv .ayv-pq-puertas {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-pq-puerta {
+    position: relative;
+}
+
+.ayv .ayv-pq-entra {
+    position: relative;
+    display: block;
+    height: 168px;
+    overflow: hidden;
+    border-radius: 22px;
+    background: var(--door, var(--green));
+    color: var(--cf-tinta-fija);
+    text-decoration: none;
+    box-shadow: 0 0 0 3px var(--door, var(--green)), 0 14px 22px -16px rgba(0, 0, 0, .6);
+}
+
+.ayv .ayv-pq-entra img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ayv .ayv-pq-palabra {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    padding: 6px 14px 5px;
+    border-radius: 12px;
+    background: var(--cf-crema);
+    box-shadow: 0 4px 10px -4px rgba(0, 0, 0, .5);
+    font-family: var(--title);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+.ayv .ayv-pq-puerta .ayv-pq-voz {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+}
+
+.ayv .ayv-pq-entra:focus-visible {
+    outline: 4px solid var(--sun);
+    outline-offset: 3px;
+}
+
+/* A story for today: the cover of the book standing on a green wall, Memoria pointing at it. */
+.ayv .ayv-pq-cuento {
+    --door: var(--green);
+}
+
+.ayv .ayv-pq-cuento .ayv-pq-entra img.ayv-pq-tapa {
+    inset: 14px auto 14px 50%;
+    width: auto;
+    height: calc(100% - 28px);
+    border-radius: 4px 8px 8px 4px;
+    box-shadow: -4px 0 0 rgba(0, 0, 0, .25), 0 10px 18px -6px rgba(0, 0, 0, .6);
+    transform: translateX(-50%) rotate(-3deg);
+}
+
+.ayv .ayv-pq-cuento .ayv-pq-entra img.ayv-pq-quien {
+    inset: auto 70px -6px auto;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+}
+
+/* Into the library: the hall itself. */
+.ayv .ayv-pq-sala {
+    --door: var(--coral);
+}
+
+/* My flower: the flower of the card on a sunny wall, as big as it is now. */
+.ayv .ayv-pq-flor {
+    --door: var(--sun);
+}
+
+.ayv .ayv-pq-flor .ayv-pq-entra {
+    background: radial-gradient(circle at 70% 40%, #fff6d8, var(--sun) 70%);
+}
+
+.ayv .ayv-pq-flor .ayv-pq-entra img {
+    inset: 8px 8px 8px auto;
+    width: 60%;
+    object-fit: contain;
+}
+
+/* The adult who goes with the child: a quiet line at the end to the whole home. */
+.ayv .ayv-pq-mayores {
+    justify-self: center;
+    color: var(--muted);
+    font-size: .9375rem;
+}
+
+html[data-bs-theme="dark"] .ayv .ayv-pq-flor .ayv-pq-entra {
+    background: radial-gradient(circle at 70% 40%, #6b5a2a, #3a321c 75%);
+}
+
+/* On a tablet or a board, the three doors side by side. */
+@media (min-width: 720px) {
+    .ayv .ayv-pq-puertas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ayv .ayv-pq-entra {
+        height: 240px;
+    }
+}
+
+@media (max-width: 380px) {
+    .ayv .ayv-pq-entra {
+        height: 150px;
+    }
+
+    .ayv .ayv-pq-palabra {
+        font-size: 1.3125rem;
+    }
+}
+
+/* As mounted: the voice is the «Listen» of the readers (ayv-listen), round and yellow here; pressed, it plays. */
+.ayv .ayv-pq .ayv-listen.ayv-pq-voz {
+    padding: 0;
+}
+
+.ayv .ayv-pq .ayv-pq-voz[aria-pressed="true"] {
+    background: var(--coral);
+}
+
+.ayv .ayv-pq .ayv-pq-mayores {
+    color: var(--ink);
+    opacity: .78;
+}
+
+/* While the stocktake is open, what is on a shelf and not read yet is not missing: quiet ink, not coral. */
+.ayv .ayv-st .ayv-st-faltan.ayv-st-sinleer {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--line);
+    color: var(--ink);
+}
+
+/* The camera and the phone are gestures, not options: no circle of a radio before them (the review, R5). */
+.ayv .ayv-tools .ayv-toggle::before {
+    content: none;
+}

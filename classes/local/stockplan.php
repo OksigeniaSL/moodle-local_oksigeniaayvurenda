@@ -35,14 +35,14 @@ final class stockplan {
     public const SPINES = 20;
 
     /**
-     * The spines of a shelf, lit as its books are read.
+     * The spines of a shelf, lit as its books are read: the first as soon as one is, so a shelf begun shows it.
      *
      * @param int $count Copies it should find there.
      * @param int $seen Copies read.
      * @return array[] on, for each spine.
      */
     public static function spines(int $count, int $seen): array {
-        $lit = $count > 0 ? (int) round(self::SPINES * min($seen, $count) / $count) : 0;
+        $lit = $count > 0 ? (int) ceil(self::SPINES * min($seen, $count) / $count) : 0;
         return array_map(fn($i) => ['on' => $i < $lit], range(0, self::SPINES - 1));
     }
 

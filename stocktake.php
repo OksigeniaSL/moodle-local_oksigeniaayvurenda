@@ -178,14 +178,20 @@ if ($view === 'results' || $stocktake->status !== 'open') {
     $shown = max(50, min(5000, optional_param('show', 50, PARAM_INT)));
     $results = stocktake::results($stocktake, $shown, $place);
     $missingat = array_column($results['missingbyplace'], 'count', 'place');
+    // While it is open nothing is missing yet, only not read yet: in quiet ink; «Missing», in coral, once closed.
+    $open = $stocktake->status === 'open';
     $labels = array_column($results['missingbyplace'], 'label', 'place');
     $furniture = [];
     foreach (stockplan::furniture($library, $stocktake) as $f) {
         $missing = (int) ($missingat[$f['id']] ?? 0);
         $furniture[] = $f + ['url' => $url(['id' => $id, 'view' => 'results', 'place' => $f['id']]) . '#ayv-stock-missing',
-            'here' => $place === $f['id'], 'missing' => $missing === 0 ? $str('stocktakeplacenone')
-                : ($missing === 1 ? $str('stocktakeplacemissingone') : $str('stocktakeplacemissing', $number($missing))),
-            'nonemissing' => $missing === 0];
+            'here' => $place === $f['id'],
+            'missing' => $missing === 0 ? $str($open ? 'stocktakeplaceallread' : 'stocktakeplacenone')
+                : $str(
+                    $open ? 'stocktakeunread' : ($missing === 1 ? 'stocktakeplacemissingone' : 'stocktakeplacemissing'),
+                    $number($missing)
+                ),
+            'nonemissing' => $missing === 0, 'unread' => $open && $missing > 0];
     }
     $missinghere = $place === null ? (int) $counts['missing'] : (int) ($missingat[$place] ?? 0);
     $placelabel = $place === null ? '' : ($labels[$place] ?? '');
@@ -202,11 +208,12 @@ if ($view === 'results' || $stocktake->status !== 'open') {
             'scope' => $scope, 'date' => zones::date((int) ($stocktake->timeclosed ?: $now), 'strftimedate', $library)]),
         'crier' => $crier('lee'),
         'notice' => $notice,
-        'lead' => match ((int) $counts['missing']) {
-            0 => $str('stocktakeplacenone'),
-            1 => $str('stocktakesumleadone'),
-            default => $str('stocktakesumlead', $number($counts['missing'])),
-        },
+        'lead' => $open ? ((int) $counts['missing'] === 0 ? $str('stocktakeplaceallread')
+            : $str('stocktakesumleadopen', $number($counts['missing']))) : match ((int) $counts['missing']) {
+                0 => $str('stocktakeplacenone'),
+                1 => $str('stocktakesumleadone'),
+                default => $str('stocktakesumlead', $number($counts['missing'])),
+            },
         'rest' => $str('stocktakesumrest', (object) ['expected' => $number($counts['expected']),
             'misplaced' => $number($counts['misplaced']), 'lent' => $number($counts['lent']),
             'found' => $number($counts['found'])]),
@@ -226,8 +233,9 @@ if ($view === 'results' || $stocktake->status !== 'open') {
         $folded = $kind === 'missing' && $choose && $total > 0;
         $data['sections'][] = [
             'heading' => $kind === 'missing' && $placelabel !== ''
-                ? $str('stocktakemissingin', (object) ['place' => $placelabel, 'count' => $number($total)])
-                : $str('stocktake' . $kind . 'heading', $number($total)),
+                ? $str($open ? 'stocktakeunreadin' : 'stocktakemissingin', (object) ['place' => $placelabel,
+                    'count' => $number($total)])
+                : $str($kind === 'missing' && $open ? 'stocktakeunread' : 'stocktake' . $kind . 'heading', $number($total)),
             'anchor' => 'ayv-stock-' . $kind,
             'hint' => $str('stocktake' . $kind . 'hint'),
             'lines' => $folded ? [] : array_map($line, $results[$kind]),

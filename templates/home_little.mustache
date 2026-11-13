@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/home_little
+
+    The home of a young reader: one screen, the herald greeting with its voice and three big doors, each with its
+    drawing, its word and its own voice (a button apart, so hearing it does not open it). A line for the grown-ups opens
+    the whole home.
+
+    Context variables required for this template:
+    * greeting, herald, hello (urls), hellolabel - the herald's greeting and its voice
+    * doors - kind, url, image, cover, pointing, word, listen (urls), listenlabel
+    * elders - url and label of the whole home
+
+    Example context (json):
+    {
+        "greeting": "¡Hola, Leo! ¿Adónde vamos hoy?", "herald": "https://example.com/mainumby-saluda.webp",
+        "hello": {"urls": "https://example.com/hola.mp3"}, "hellolabel": "Escuchar: ¡Hola, Leo!",
+        "doors": [{"kind": "cuento", "url": "https://example.com/record.php?id=1", "image": "https://example.com/tapa.jpg",
+            "cover": true, "pointing": "https://example.com/memoria.webp", "word": "Un cuento para hoy",
+            "listen": {"urls": "https://example.com/cuento.mp3"}, "listenlabel": "Escuchar: Un cuento para hoy"}],
+        "elders": {"url": "https://example.com/index.php?todo=1", "label": "Para los mayores: toda la portada"}
+    }
+}}
+<div class="ayv-cf ayv-pq">
+<h1 class="ayv-sr">{{greeting}}</h1>
+<div class="ayv-pq-saludo">{{#herald}}<img src="{{herald}}" alt="" width="96" height="96">{{/herald}}
+    <div class="ayv-pq-bocadillo"><p>{{greeting}}</p>{{#hello}}<button class="ayv-listen ayv-pq-voz" type="button" data-ayv-say="{{urls}}" aria-pressed="false" aria-label="{{hellolabel}}">{{> local_oksigeniaayvurenda/icon_volume}}</button>{{/hello}}</div>
+</div>
+<ul class="ayv-pq-puertas">
+    {{#doors}}<li class="ayv-pq-puerta ayv-pq-{{kind}}"><a class="ayv-pq-entra" href="{{url}}">{{#image}}<img{{#cover}} class="ayv-pq-tapa"{{/cover}} src="{{image}}" alt="">{{/image}}{{#pointing}}<img class="ayv-pq-quien" src="{{pointing}}" alt="">{{/pointing}}<span class="ayv-pq-palabra">{{word}}</span></a>{{#listen}}<button class="ayv-listen ayv-pq-voz" type="button" data-ayv-say="{{urls}}" aria-pressed="false" aria-label="{{listenlabel}}">{{> local_oksigeniaayvurenda/icon_volume}}</button>{{/listen}}</li>{{/doors}}
+</ul>
+{{#elders}}<a class="ayv-pq-mayores ayv-cf-enlace" href="{{url}}">{{label}}</a>{{/elders}}
+</div>

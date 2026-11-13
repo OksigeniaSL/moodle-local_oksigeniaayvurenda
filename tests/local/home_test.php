@@ -100,6 +100,35 @@ final class home_test extends \advanced_testcase {
     }
 
     /**
+     * A young reader (the card of the flower) gets the three doors: the story for today first, the flower last, each
+     * with its word; the greeting says their name; the grown-ups have the whole home a line away.
+     */
+    public function test_home_of_a_young_reader(): void {
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $user = $this->getDataGenerator()->create_user(['firstname' => 'Leo']);
+        $generator->create_reader(['entityid' => $library->entityid, 'userid' => $user->id, 'readertype' => 'student',
+            'band' => 'flower']);
+        $this->setUser($user);
+        $home = screens::home($library);
+        $this->assertTrue($home['hero']['young']);
+        $little = screens::little($library, $home['hero']);
+        $this->assertSame(get_string('littlehello', 'local_oksigeniaayvurenda', 'Leo'), $little['greeting']);
+        $kinds = array_column($little['doors'], 'kind');
+        $this->assertSame('cuento', reset($kinds));
+        $this->assertSame('flor', end($kinds));
+        $this->assertStringContainsString('card.php', end($little['doors'])['url']);
+        $this->assertNotSame('', $little['doors'][0]['word']);
+        $this->assertStringContainsString('todo=1', $little['elders']['url']);
+        // A grown-up's card is not the flower: the home of always.
+        $teacher = $this->getDataGenerator()->create_user(['firstname' => 'Ana']);
+        $generator->create_reader(['entityid' => $library->entityid, 'userid' => $teacher->id, 'readertype' => 'teacher']);
+        $this->setUser($teacher);
+        $this->assertFalse(screens::home($library)['hero']['young']);
+    }
+
+    /**
      * «Listen» only finds clips inside the art package's voices, and has nothing to say without them.
      */
     public function test_listen_paths(): void {

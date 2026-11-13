@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.245.0 (2026-11-13)
+
+- The home of a young reader (the card of the flower), from Jujol's mock-up: one screen, with the herald greeting them
+  by name («Hello, Leo! Where shall we go today?») and three big doors, each a drawing with its word on a plate and its
+  own voice in a round yellow button (hearing it does not open the door): «A story for today», the book the memory
+  recommends with its cover and the memory pointing at it; «Come into the library», the hall of the visit; and «My
+  flower», their flower as it goes, to their card. No field to type in. On a tablet or a board the doors stand in a row.
+  «For the grown-ups: the whole home» opens the home of always.
+- The herald's new lines, with the herald and the herald girl, in Spanish and English (art 0.1.62); the flower says what
+  it already said on the card.
+- Stocktake, from Jujol's look at it: while it is open, a shelf says «Not read: 2,856» in quiet ink, and «Missing» in
+  coral only once it is closed; a shelf with one book read already lights its first spine; the camera and the phone are
+  gestures, without the circle of a radio button (also at the desk).
+
 ## 0.244.0 (2026-11-13)
 
 - Stocktake, from Jujol's mock-up: each place of the library is a piece of furniture with its name on a plate and a

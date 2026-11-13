@@ -143,7 +143,7 @@
             }
             var count = Number(one.count || 0);
             var seen = Number(one.seen || 0);
-            var lit = count > 0 ? Math.round(20 * Math.min(seen, count) / count) : 0;
+            var lit = count > 0 ? Math.ceil(20 * Math.min(seen, count) / count) : 0;
             shelf.setAttribute('data-seen', String(seen));
             shelf.querySelectorAll('.ayv-st-balda i').forEach(function(spine, i) {
                 spine.classList.toggle('si', i < lit);

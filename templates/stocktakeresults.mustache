@@ -32,7 +32,7 @@
         "heading": "Inventario del 24 de octubre", "intro": "Toda la biblioteca.", "crier": null, "notice": "",
         "lead": "12 faltan", "rest": "de 120.", "hasfurniture": true,
         "furniture": [{"url": "https://example.com/stocktake.php?place=3", "here": true, "label": "Ciencias",
-            "spines": [{"on": true}], "missing": "Faltan 12", "nonemissing": false}],
+            "spines": [{"on": true}], "missing": "Faltan 12", "nonemissing": false, "unread": false}],
         "open": true, "readurl": "https://example.com/stocktake.php?id=1", "action": "https://example.com/stocktake.php?id=1",
         "sesskey": "abc", "unknown": "",
         "sections": [{"heading": "Faltan en Ciencias: 12", "anchor": "ayv-stock-missing", "hint": "No se han leído.",
@@ -55,7 +55,7 @@
 {{#open}}<p class="ayv-cf-fila"><a class="ayv-button" href="{{readurl}}">{{stocktakeback}}</a></p>{{/open}}
 {{#hasfurniture}}
 <ul class="ayv-st-plano">
-    {{#furniture}}<li><a class="ayv-st-mueble{{#here}} ayv-st-aqui{{/here}}" href="{{url}}"{{#here}} aria-current="true"{{/here}}><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-faltan{{#nonemissing}} ayv-st-faltan-0{{/nonemissing}}">{{missing}}</span></a></li>{{/furniture}}
+    {{#furniture}}<li><a class="ayv-st-mueble{{#here}} ayv-st-aqui{{/here}}" href="{{url}}"{{#here}} aria-current="true"{{/here}}><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-faltan{{#nonemissing}} ayv-st-faltan-0{{/nonemissing}}{{#unread}} ayv-st-sinleer{{/unread}}">{{missing}}</span></a></li>{{/furniture}}
 </ul>
 {{/hasfurniture}}
 {{#sections}}

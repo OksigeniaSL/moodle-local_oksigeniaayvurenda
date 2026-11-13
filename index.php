@@ -74,7 +74,19 @@ if ($steps && !$steps['folded']) {
     shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false]);
     die();
 }
+$home = screens::home($library);
+// A young reader (the card of the flower) gets one screen with three doors; «For the grown-ups» (todo=1), the whole home.
+if (!$steps && $home['hero']['young'] && !optional_param('todo', 0, PARAM_BOOL)) {
+    shell::output(
+        get_string('homeheading', 'local_oksigeniaayvurenda'),
+        $OUTPUT->render_from_template('local_oksigeniaayvurenda/home_little', screens::little($library, $home['hero'])),
+        $library,
+        '',
+        ['search' => false]
+    );
+    die();
+}
 $html = ($steps ? $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', $steps) : '')
-    . $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', screens::home($library));
+    . $OUTPUT->render_from_template('local_oksigeniaayvurenda/home', $home);
 // The home has its own search, at the top: the phone's magnifier takes the focus there.
 shell::output(get_string('homeheading', 'local_oksigeniaayvurenda'), $html, $library, '', ['search' => false, 'lens' => true]);

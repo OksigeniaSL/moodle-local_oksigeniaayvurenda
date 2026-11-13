@@ -1035,6 +1035,60 @@ final class screens {
     }
 
     /**
+     * The home of a young reader (the card of the flower), from Jujol's mock-up: one screen, the herald greeting with its
+     * voice and three big doors, each with its drawing, its word and its voice apart (hearing it does not open it): a
+     * story for today (the memory's book), into the library (the visit) and their flower (their card). No field to
+     * type in; «For the grown-ups» opens the whole home.
+     *
+     * @param \stdClass $library
+     * @param array $hero What self::hero() said, with young set.
+     * @return array greeting, hello, herald, doors, elders.
+     */
+    public static function little(\stdClass $library, array $hero): array {
+        global $DB, $USER;
+        $entityid = (int) $library->entityid;
+        $step = characters::step($entityid);
+        $voice = 'herald-' . ($hero['heraldsex'] === 'f' ? 'f' : 'm') . '/{lang}/';
+        $name = format_string($USER->firstname, true, ['escape' => false]);
+        $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['entityid' => $entityid, 'userid' => $USER->id,
+            'status' => 'active']);
+        $stage = $reader ? (int) garden::album($reader)['flower']['stage'] : 0;
+        $book = !empty($hero['remembers']['cover']) ? $hero['remembers'] : null;
+        $doors = [[
+            'kind' => 'cuento',
+            'url' => $book ? $book['url'] : self::url('search.php', $library, ['corner' => '8']),
+            'image' => $book ? $book['cover'] : self::art('rincon-8'),
+            'cover' => true,
+            'pointing' => characters::figure('memory', 'senala', $step),
+            'word' => self::str('littlestory'),
+            'listen' => self::listen([$voice . 'infantstory']),
+        ]];
+        $visit = visit::card($library, false);
+        if ($visit) {
+            $doors[] = ['kind' => 'sala', 'url' => $visit['url'], 'image' => self::art('visita/vestibulo-fondo'),
+                'cover' => false, 'pointing' => null, 'word' => self::str('littlevisit'),
+                'listen' => self::listen([$voice . 'infantvisit'])];
+        }
+        $doors[] = ['kind' => 'flor', 'url' => self::url('card.php', $library),
+            'image' => self::art('carne/flor/' . ['semilla', 'brote', 'capullo', 'flor'][min(3, max(0, $stage))]),
+            'cover' => false, 'pointing' => null, 'word' => self::str('littleflower'),
+            'listen' => self::listen([$voice . 'heraldstage' . $stage])];
+        foreach ($doors as &$door) {
+            $door['listenlabel'] = self::str('littlelisten', $door['word']);
+        }
+        unset($door);
+        $hello = self::str('littlehello', $name);
+        return [
+            'greeting' => $hello,
+            'herald' => characters::figure('herald', 'saluda', $step),
+            'hello' => self::listen([$voice . 'infanthello']),
+            'hellolabel' => self::str('littlelisten', $hello),
+            'doors' => $doors,
+            'elders' => ['url' => self::url('index.php', $library, ['todo' => 1]), 'label' => self::str('littleelders')],
+        ];
+    }
+
+    /**
      * The top of the home: the greeting, the search with its ideas and, for a reader, their card as it grows.
      *
      * @param \stdClass $library
