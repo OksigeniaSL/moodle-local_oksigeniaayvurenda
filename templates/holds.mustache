@@ -17,25 +17,30 @@
     @template local_oksigeniaayvurenda/holds
 
     The reservations of a library: first what waits (copies set aside, the queues) as cards with their cover and reader;
-    the herald when nothing waits; the settings read in one line and changed in a sheet, for managers.
+    the herald when nothing waits; for managers, how one reserves as a card with its gestures in sight (settingcard).
 
     Example context (json):
     {
-        "heading": "Reservas", "intro": "Lo que se espera.", "notice": "", "action": "#", "self": "#", "sesskey": "abc",
+        "heading": "Reservas", "intro": "Lo que se espera.", "notice": "", "action": "https://example.com/hold.php",
+        "self": "https://example.com/holds.php", "sesskey": "abc",
         "library": "demo-1", "readyheading": "Apartados", "waitingheading": "En cola", "cancel": "Anular",
-        "ready": [{"id": 1, "title": "El faro dormido", "url": "#", "name": "Hugo Lago", "group": "5.º A", "barcode": "100000L",
-            "when": "hasta el 30 de octubre", "aheadlabel": "", "cover": null, "colour": 2}],
-        "waiting": [], "quiet": false, "herald": null,
-        "manage": true, "summary": "En línea: no · 5 días · 3 por lector", "online": true, "renewonline": false,
-        "renew": false, "days": 5, "max": 3, "allstages": true, "hasstages": true, "stages": [{"name": "Primaria", "chosen": false}],
-        "holdssettings": "Cómo se reserva", "holdssettingsintro": "En el mostrador, siempre.", "holdsonline": "En línea",
-        "holdsstages": "Etapas", "holdsnostages": "Sin etapas", "holdsdays": "Días", "holdsmax": "A la vez",
-        "holdsrenew": "Ampliar con cola", "holdsrenewonline": "Ampliar en línea", "holdssave": "Guardar",
-        "holdschange": "Cambiar", "holdsallstages": "Todas las etapas", "offsiteclose": "Cerrar"
+        "ready": [{"id": 1, "title": "El faro dormido", "url": "https://example.com/record.php", "name": "Hugo Lago",
+            "group": "5.º A", "barcode": "100000L", "when": "hasta el 30 de octubre", "aheadlabel": "", "cover": null,
+            "colour": 2}],
+        "waiting": [], "quiet": false, "herald": null, "manage": true, "savedword": "Guardado",
+        "settings": [{"id": "ayv-nr-reservas", "set": "holds", "title": "Cómo se reserva", "says": "Solo en el mostrador.",
+            "justsaved": false, "notes": [], "dates": null, "presets": null, "currency": null, "link": null, "help": null,
+            "text": null, "groups": [{"label": "En línea", "steps": [], "chips": [], "haslights": true, "haschips": false,
+                "whole": false, "lights": [{"form": "ayv-nr-reservas-f", "name": "online", "value": 1, "pressed": false,
+                "label": "Se reserva desde casa"}]}]}]
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
+<div class="ayv-cf ayv-nr">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+    </div>
+</header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#quiet}}{{#herald}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/herald}}{{/quiet}}
 {{> local_oksigeniaayvurenda/life }}
@@ -76,30 +81,10 @@
 </ul>
 {{/waiting.0}}
 {{#manage}}
-<section class="ayv-settingcard" aria-labelledby="ayv-holds-settings">
-    <h2 id="ayv-holds-settings" class="ayv-section-title">{{holdssettings}}</h2>
-    <p>{{summary}}</p>
-    <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-holds-sheet">{{holdschange}}</button></p>
-</section>
-<dialog class="ayv-modal" id="ayv-holds-sheet" aria-labelledby="ayv-holds-sheet-title">
-    <div class="ayv-modal-head"><h3 id="ayv-holds-sheet-title" class="ayv-section-title">{{holdssettings}}</h3>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <p class="ayv-field-hint">{{holdssettingsintro}}</p>
-    <form method="post" action="{{self}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="online" value="1" {{#online}}checked{{/online}}> {{holdsonline}}</label>
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="renewonline" value="1" {{#renewonline}}checked{{/renewonline}}> {{holdsrenewonline}}</label>
-        <fieldset class="ayv-dig-set"><legend>{{holdsstages}}</legend>
-            {{#hasstages}}<div class="ayv-segmented"><label><input type="checkbox" name="allstages" value="1" {{#allstages}}checked{{/allstages}}><span>{{holdsallstages}}</span></label>
-            {{#stages}}<label><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}><span>{{name}}</span></label>{{/stages}}</div>{{/hasstages}}
-            {{^hasstages}}<p class="ayv-empty">{{holdsnostages}}</p>{{/hasstages}}
-        </fieldset>
-        <div class="ayv-rule-numbers">
-            <label class="ayv-field ayv-dig-field">{{holdsdays}} <input type="number" name="days" value="{{days}}" min="1" max="30"></label>
-            <label class="ayv-field ayv-dig-field">{{holdsmax}} <input type="number" name="max" value="{{max}}" min="1" max="20"></label>
-        </div>
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="renew" value="1" {{#renew}}checked{{/renew}}> {{holdsrenew}}</label>
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{holdssave}}</button></p>
-    </form>
-</dialog>
+<ul class="ayv-nr-ajustes">
+    {{#settings}}
+    <li>{{> local_oksigeniaayvurenda/settingcard}}</li>
+    {{/settings}}
+</ul>
 {{/manage}}
+</div>

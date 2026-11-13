@@ -16,7 +16,8 @@
 {{!
     @template local_oksigeniaayvurenda/voices
 
-    Voices waiting for approval, with the family's permission for each minor, and the centre's settings.
+    Voices waiting for approval, with the family's permission for each minor; for managers, the centre's settings as
+    cards with their gestures in sight (settingcard).
 
     Example context (json):
     {
@@ -26,20 +27,27 @@
             "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
             "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "Sin permiso, solo su docente",
             "signature": "La mamá de Ana"}],
-        "manage": true, "voicetext": "", "infourl": "#",
-        "keeps": [{"days": 0, "label": "Sin plazo", "selected": false}, {"days": 730, "label": "Dos cursos", "selected": true}],
-        "familyoptions": [{"value": "class", "label": "Su clase", "checked": true}],
+        "manage": true, "infourl": "https://example.com/voicesinfo.php", "savedword": "Guardado",
+        "settings": [{"id": "ayv-nr-oyen", "set": "hear", "title": "Quién puede oírlas", "says": "Lo que eligen las familias.",
+            "justsaved": false, "notes": [], "dates": null, "presets": null, "currency": null, "link": null, "help": null,
+            "text": null, "groups": [{"label": "", "steps": [], "chips": [], "haslights": true, "haschips": false,
+                "whole": false, "lights": [{"form": "ayv-nr-oyen-f", "name": "option[class]", "value": 0, "pressed": true,
+                "label": "Su clase"}]}]}],
         "voicesignaturereview": "Firma", "voicesignaturereviewhint": "se ve al aprobarla", "voicesfamilyoptions": "Qué eligen las familias",
         "voicesnone": "Ninguna", "voiceapprove": "Aprobar", "voicereject": "Rechazar", "voicelicence": "Licencia",
         "voiceaudience": "Quién más la oye", "voiceprivatehint": "Sin permiso, solo su docente",
         "voicepermissiongive": "Anotar el permiso", "voicepermissiontake": "Retirar el permiso",
         "voicepermissionhas": "Su familia dio permiso", "voicepermissionnot": "Sin permiso de su familia",
-        "voicessettings": "Cuánto se guardan", "voiceskeepdays": "Días", "voicestext": "Texto del centro",
+        "voicestext": "Texto del centro",
         "voicestexthint": "Se añade a la página", "voicessave": "Guardar", "voiceinfo": "Cómo se tratan las voces"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
+<div class="ayv-cf ayv-nr">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}} <a class="ayv-cf-enlace" href="{{infourl}}">{{voiceinfo}}</a></p>
+    </div>
+</header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{^haspending}}{{#quiet}}<div class="ayv-holds-quiet">{{> local_oksigeniaayvurenda/bubble}}</div>{{/quiet}}{{^quiet}}<p class="ayv-empty">{{voicesnone}}</p>{{/quiet}}{{/haspending}}
 {{#pending}}
@@ -67,22 +75,10 @@
 </section>
 {{/pending}}
 {{#manage}}
-<section class="ayv-settingcard" aria-labelledby="ayv-voices-settings">
-    <h2 id="ayv-voices-settings" class="ayv-section-title">{{voicessettings}}</h2>
-    <p>{{summary}}</p>
-    <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-voices-sheet">{{holdschange}}</button></p>
-</section>
-<dialog class="ayv-modal" id="ayv-voices-sheet" aria-labelledby="ayv-voices-sheet-title">
-    <div class="ayv-modal-head"><h3 id="ayv-voices-sheet-title" class="ayv-section-title">{{voicessettings}}</h3>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-<form method="post" action="{{action}}">
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <label class="ayv-field ayv-dig-field">{{voiceskeepdays}} <select name="keepdays">{{#keeps}}<option value="{{days}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/keeps}}</select></label>
-    <fieldset class="ayv-dig-set"><legend>{{voicesfamilyoptions}}</legend><div class="ayv-segmented">
-        {{#familyoptions}}<label><input type="checkbox" name="familyoptions[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/familyoptions}}</div></fieldset>
-    <label class="ayv-field ayv-dig-field">{{voicestext}} <span class="ayv-field-hint">{{voicestexthint}}</span>
-        <textarea name="voicetext" rows="4">{{voicetext}}</textarea></label>
-    <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="settings">{{voicessave}}</button></p>
-</form>
-</dialog>
+<ul class="ayv-nr-ajustes">
+    {{#settings}}
+    <li>{{> local_oksigeniaayvurenda/settingcard}}</li>
+    {{/settings}}
+</ul>
 {{/manage}}
+</div>

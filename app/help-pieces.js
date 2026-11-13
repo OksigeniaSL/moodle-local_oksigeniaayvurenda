@@ -164,14 +164,10 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            if (!h.has('[data-ayv-open="ayv-holds-sheet"]')) {
+            if (!h.has('#ayv-nr-reservas')) {
                 return null;
             }
-            return Promise.all([h.say(4), h.tap('[data-ayv-open="ayv-holds-sheet"]').then(function() {
-                return h.point('#ayv-holds-sheet form[method="post"]');
-            })]).then(function() {
-                return h.tap('#ayv-holds-sheet .ayv-modal-close');
-            });
+            return Promise.all([h.say(4), h.point('#ayv-nr-reservas .ayv-cf-luz[name="online"]')]);
         });
     },
     // The voices waiting: listening, the family's permission, the licence, who else hears it, the signature.
@@ -204,10 +200,10 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(6);
         }).then(function() {
-            if (!h.has('.ayv-settingcard')) {
+            if (!h.has('#ayv-nr-guardan')) {
                 return null;
             }
-            return h.point('.ayv-settingcard').then(function() {
+            return h.point('#ayv-nr-guardan').then(function() {
                 return h.say(7);
             });
         });

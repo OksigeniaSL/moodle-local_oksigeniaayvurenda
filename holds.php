@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\gestures;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\shell;
 
@@ -46,17 +47,26 @@ $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $manage = has_capability('local/oksigeniaayvurenda:manage', $context);
 $now = time();
 $notice = optional_param('notice', '', PARAM_ALPHA) === 'holdcancelled' ? $str('holdcancelled') : '';
-if ($manage && data_submitted() && confirm_sesskey()) {
-    holds::save_settings($entityid, [
-        'online' => optional_param('online', 0, PARAM_BOOL),
-        // With all the stages marked, no stage is chosen: every one.
-        'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
-        'days' => optional_param('days', 5, PARAM_INT),
-        'max' => optional_param('max', 3, PARAM_INT),
-        'renew' => optional_param('renew', 0, PARAM_BOOL),
-        'renewonline' => optional_param('renewonline', 0, PARAM_BOOL),
-    ]);
-    $notice = $str('holdssaved');
+if ($manage && data_submitted() && confirm_sesskey() && optional_param('set', '', PARAM_ALPHA) === 'holds') {
+    // Each gesture sends only what it changes; back to its card, which says it is kept.
+    $before = holds::settings($entityid);
+    $changed = [];
+    foreach (['online', 'renew', 'renewonline'] as $key) {
+        if (($value = gestures::number($key)) !== null) {
+            $changed[$key] = (bool) $value;
+        }
+    }
+    foreach (['days', 'max'] as $key) {
+        if (($value = gestures::number($key)) !== null) {
+            $changed[$key] = $value;
+        }
+    }
+    $stages = gestures::stage_touched($before['stages'], holds::stages($entityid, $now));
+    if ($stages !== null) {
+        $changed['stages'] = $stages;
+    }
+    holds::save_settings($entityid, array_merge($before, $changed));
+    redirect(new moodle_url($PAGE->url, ['saved' => 'ayv-nr-reservas'], 'ayv-nr-reservas'));
 }
 $lists = holds::lists($library, $now);
 $record = fn(int $id) => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $id]))
@@ -75,16 +85,69 @@ $rows = function (array $list, string $when) use ($str, $record, $covers) {
     ], $list);
 };
 $settings = holds::settings($entityid);
-$chosen = array_flip($settings['stages']);
-$yes = fn(bool $on) => $str($on ? 'holdson' : 'holdsoff');
-// The settings read in one line, changed in a sheet.
-$summary = $str($settings['online'] ? 'holdssummary' : 'holdssummaryoff', (object) [
-    'online' => $yes((bool) $settings['online']),
-    'stages' => $settings['stages'] ? implode(', ', $settings['stages']) : \core_text::strtolower($str('holdsallstages')),
-    'days' => (int) $settings['days'],
-    'max' => (int) $settings['max'],
-    'renewonline' => $yes((bool) $settings['renewonline']),
-]);
+// How one reserves, in sight: a sentence, and its gestures under it.
+$form = 'ayv-nr-reservas-f';
+$days = (int) $settings['days'];
+$max = (int) $settings['max'];
+$says = $str($settings['online'] ? 'holdssayson' : 'holdssaysoff', (object) [
+    'days' => $str($days === 1 ? 'holdsschoolday' : 'holdsschooldays', $days),
+    'max' => $str($max === 1 ? 'holdsmaxone' : 'holdsmaxn', $max),
+]) . ' ' . $str($settings['renew'] ? 'holdssaysrenew' : 'holdssaysnorenew');
+$groups = [
+    gestures::group($str('holdslabelonline'), [], [gestures::lamp(
+        $form,
+        'online',
+        (bool) $settings['online'],
+        $str('holdslightonline')
+    )], []),
+    gestures::group($str('holdslabelkept'), [gestures::step(
+        $form,
+        'days',
+        $str('holdslabelkept'),
+        $days,
+        1,
+        30,
+        1,
+        (string) $days,
+        $str($days === 1 ? 'holdsunitday' : 'holdsunitdays'),
+        $str
+    )], [], []),
+    gestures::group($str('hiwatonce'), [gestures::step(
+        $form,
+        'max',
+        $str('hiwatonce'),
+        $max,
+        1,
+        20,
+        1,
+        (string) $max,
+        $str('holdsunitmax'),
+        $str
+    )], [], []),
+    gestures::group($str('hiwrenewals'), [], [
+        gestures::lamp($form, 'renew', (bool) $settings['renew'], $str('holdslightrenew')),
+        gestures::lamp($form, 'renewonline', (bool) $settings['renewonline'], $str('holdslightrenewonline')),
+    ], []),
+];
+$stagelist = holds::stages($entityid, $now);
+if ($stagelist && ($settings['online'] || $settings['renewonline'])) {
+    $groups[] = gestures::group($str('holdsstageslabel'), [], [], gestures::stages(
+        $form,
+        $settings['stages'],
+        $stagelist,
+        $str
+    ));
+}
+$card = gestures::card(
+    'ayv-nr-reservas',
+    'holds',
+    $str('holdssettings'),
+    $says,
+    optional_param('saved', '', PARAM_ALPHANUMEXT) === 'ayv-nr-reservas',
+    $groups,
+    // The page's action is the one that cancels a reservation: the card sends to this page.
+    ['action' => $PAGE->url->out(false)]
+);
 // Nothing waiting: the herald says so, if she is on.
 $herald = !$lists['ready'] && !$lists['waiting']
     ? \local_oksigeniaayvurenda\local\characters::say($entityid, 'herald', 'holdsquiet', [], 'lee') : null;
@@ -105,24 +168,11 @@ $data = [
     'nowaiting' => $str('holdsnowaiting'),
     'cancel' => $str('holdcancel'),
     'manage' => $manage,
-    'summary' => $summary,
     'herald' => $herald,
     'quiet' => !$lists['ready'] && !$lists['waiting'],
-    'allstages' => !$settings['stages'],
-    'online' => $settings['online'],
-    'renew' => $settings['renew'],
-    'renewonline' => $settings['renewonline'],
-    'days' => $settings['days'],
-    'max' => $settings['max'],
-    'stages' => array_map(fn($s) => ['name' => $s, 'chosen' => isset($chosen[$s])], holds::stages($entityid, $now)),
+    'savedword' => $str('hiwsaved'),
+    'settings' => $manage ? [$card] : [],
 ];
-$data['hasstages'] = (bool) $data['stages'];
-foreach (
-    ['holdssettings', 'holdssettingsintro', 'holdsonline', 'holdsstages', 'holdsnostages', 'holdsdays', 'holdsmax',
-        'holdsrenew', 'holdsrenewonline', 'holdssave', 'holdschange', 'holdsallstages', 'offsiteclose'] as $key
-) {
-    $data[$key] = $str($key);
-}
 $url = fn(string $page) => (new moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
 shell::output($str('holdstitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/holds', $data), $library, '', [
     'search' => false,

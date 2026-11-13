@@ -1,0 +1,95 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/settingcard
+
+    A setting of the centre in sight, as a card (each in a li of ul.ayv-nr-ajustes): its sentence on top and its gestures under
+    it (counters with «−» and «+», lights, chips), each a button of the card's empty form that sends only what it changes
+    (no JavaScript needed). Some carry dates, a text to write, a currency, starting points, a link or a help.
+    The context is the card's (gestures::card), with the page's action, sesskey and savedword around it.
+
+    Context variables required for this template:
+    * action, sesskey, savedword - from the page; a card may carry its own action
+    * id, set, title, says, justsaved - the card, its anchor, what its form sends as «set», and its sentence
+    * groups - label, steps, lights, chips, haslights, haschips, whole
+    * notes, dates, presets, currency, link, help, text - what some cards carry, or nothing
+
+    Example context (json):
+    {
+        "action": "https://example.com/holds.php", "sesskey": "abc", "savedword": "Guardado",
+        "id": "ayv-nr-reservas", "set": "holds", "title": "Cómo se reserva", "says": "En el mostrador, siempre.",
+        "justsaved": true,
+        "groups": [{"label": "Apartado", "lights": [], "chips": [], "haslights": false, "haschips": false, "whole": false,
+            "steps": [{"form": "ayv-nr-reservas-f", "field": "days", "label": "Apartado", "shown": "5", "unit": "días",
+                "less": 4, "more": 6, "atmin": false, "atmax": false, "lesslabel": "Uno menos", "morelabel": "Uno más"}]},
+            {"label": "En línea", "steps": [], "chips": [], "haslights": true, "haschips": false, "whole": false,
+            "lights": [{"form": "ayv-nr-reservas-f", "name": "online", "value": 0, "pressed": true,
+                "label": "Se reserva desde casa"}]}],
+        "notes": [{"text": "Vale para todo el centro."}], "dates": null, "presets": null, "currency": null,
+        "link": {"lead": "Lo que espera, en", "url": "https://example.com/holds.php", "label": "Reservas"}, "help": null,
+        "text": {"summary": "Escribir uno propio del centro", "open": false, "label": "El texto", "name": "voicetext",
+            "value": "", "hint": "En blanco, el de siempre.", "save": "Guardarlo"}
+    }
+}}
+<section class="ayv-nr-ajuste" id="{{id}}" aria-labelledby="{{id}}-t">
+    <form id="{{id}}-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{set}}"></form>
+    <h2 id="{{id}}-t">{{title}}</h2>
+    {{#justsaved}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
+    <p class="ayv-nr-frase">{{says}}</p>
+    <div class="ayv-nr-gestos">
+        {{#groups}}<div class="ayv-nr-grupo{{#whole}} ayv-nr-grupo-entera{{/whole}}">{{#label}}<span class="ayv-cf-rotulo">{{label}}</span>{{/label}}
+            {{#steps}}<span class="ayv-cf-paso" role="group" aria-label="{{label}}"><button class="ayv-cf-menos" type="submit" form="{{form}}" name="{{field}}" value="{{less}}" aria-label="{{lesslabel}}"{{#atmin}} disabled{{/atmin}}>−</button><span class="ayv-cf-cifra"><b>{{shown}}</b> {{unit}}</span><button class="ayv-cf-mas" type="submit" form="{{form}}" name="{{field}}" value="{{more}}" aria-label="{{morelabel}}"{{#atmax}} disabled{{/atmax}}>+</button></span>{{/steps}}
+            {{#haslights}}<span class="ayv-cf-luces">{{#lights}}<button class="ayv-cf-luz" type="submit" form="{{form}}" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/lights}}</span>{{/haslights}}
+            {{#haschips}}<span class="ayv-cf-chapas">{{#chips}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/chips}}</span>{{/haschips}}
+        </div>{{/groups}}
+    </div>
+    {{#dates}}
+    <form class="ayv-nr-fechas" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="notices"><input type="hidden" name="dates" value="1">
+        <span class="ayv-cf-rotulo">{{legend}}</span>
+        <div class="ayv-nr-gestos">{{#fields}}<label class="ayv-nr-fecha"><span class="ayv-sr">{{label}}</span><input type="date" name="noticedates[]" value="{{value}}"></label>{{/fields}}</div>
+        <p class="ayv-cf-nota">{{hint}}</p>
+        <p class="ayv-cf-fila"><button class="ayv-button" type="submit">{{save}}</button></p>
+    </form>
+    {{/dates}}
+    {{#currency}}
+    <details class="ayv-nr-plegado"><summary>{{summary}}</summary>
+        <form class="ayv-cf-fila" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="late">
+            <label for="ayv-nr-moneda">{{label}}</label><input id="ayv-nr-moneda" name="currency" list="ayv-nr-monedas" size="8" autocomplete="off">
+            <datalist id="ayv-nr-monedas">{{#list}}<option value="{{code}}">{{name}}</option>{{/list}}</datalist>
+            <button class="ayv-button" type="submit">{{save}}</button>
+        </form>
+    </details>
+    {{/currency}}
+    {{#text}}
+    <details class="ayv-nr-plegado"{{#open}} open{{/open}}><summary>{{summary}}</summary>
+        <form class="ayv-nr-texto" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{set}}"><input type="hidden" name="do" value="text">
+            <label class="ayv-sr" for="{{id}}-texto">{{label}}</label><textarea id="{{id}}-texto" name="{{name}}" rows="5">{{value}}</textarea>
+            <p class="ayv-cf-nota">{{hint}}</p>
+            <p class="ayv-cf-fila"><button class="ayv-button" type="submit">{{save}}</button></p>
+        </form>
+    </details>
+    {{/text}}
+    {{#notes}}<p class="ayv-cf-nota">{{text}}</p>{{/notes}}
+    {{#presets}}
+    <details class="ayv-nr-plegado"><summary>{{summary}}</summary>
+        <p class="ayv-cf-nota">{{hint}}</p>
+        <span class="ayv-cf-chapas">{{#list}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="{{name}}" value="{{value}}">{{label}}</button>{{/list}}</span>
+    </details>
+    {{/presets}}
+    {{#link}}<p class="ayv-nr-pie">{{lead}} <a class="ayv-cf-enlace" href="{{url}}">{{label}}</a></p>{{/link}}
+    {{#help}}<p class="ayv-nr-pie"><a class="ayv-cf-enlace" href="{{url}}">{{label}}</a></p>{{/help}}
+</section>

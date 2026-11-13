@@ -27,6 +27,7 @@ use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;
 use local_oksigeniaayvurenda\local\digital;
+use local_oksigeniaayvurenda\local\gestures;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
 
@@ -47,42 +48,51 @@ if (!$library) {
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $manage = has_capability('local/oksigeniaayvurenda:manage', $context);
 $notice = '';
+$set = optional_param('set', '', PARAM_ALPHA);
+if ($manage && $set !== '' && data_submitted() && confirm_sesskey()) {
+    // The settings, each gesture only what it changes; back to its card, which says it is kept.
+    $settings = json_decode((string) $DB->get_field(
+        'local_oksigeniaayvurenda_entity',
+        'settings',
+        ['id' => $library->entityid]
+    ), true) ?: [];
+    $keep = gestures::number('keepdays');
+    if ($set === 'keep' && $keep !== null) {
+        // 0 keeps voices until whoever recorded them deletes them.
+        $settings['voicekeepdays'] = $keep <= 0 ? 0 : max(30, min(3650, $keep));
+    }
+    if ($set === 'hear') {
+        $on = (array) ($settings['voicefamilyoptions'] ?? voices::FAMILYAUDIENCES);
+        foreach (optional_param_array('option', [], PARAM_INT) as $option => $value) {
+            $on = $value ? array_merge($on, [$option]) : array_diff($on, [$option]);
+        }
+        $settings['voicefamilyoptions'] = array_values(array_intersect(voices::FAMILYAUDIENCES, $on));
+    }
+    if ($set === 'text') {
+        $settings['voicetext'] = trim(optional_param('voicetext', '', PARAM_TEXT));
+    }
+    $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $library->entityid]);
+    \local_oksigeniaayvurenda\event\voice_settings_changed::fire((int) $library->entityid);
+    $anchor = ['keep' => 'ayv-nr-guardan', 'hear' => 'ayv-nr-oyen', 'text' => 'ayv-nr-texto'][$set] ?? 'ayv-nr-guardan';
+    redirect(new moodle_url($PAGE->url, ['saved' => $anchor], $anchor));
+}
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
-    if ($do === 'settings' && $manage) {
-        $settings = json_decode((string) $DB->get_field(
-            'local_oksigeniaayvurenda_entity',
-            'settings',
-            ['id' => $library->entityid]
-        ), true) ?: [];
-        // 0 keeps voices until whoever recorded them deletes them.
-        $keep = optional_param('keepdays', voices::KEEPDAYS, PARAM_INT);
-        $settings['voicekeepdays'] = $keep <= 0 ? 0 : max(30, min(3650, $keep));
-        $settings['voicetext'] = trim(optional_param('voicetext', '', PARAM_TEXT));
-        $settings['voicefamilyoptions'] = array_values(array_intersect(
-            voices::FAMILYAUDIENCES,
-            optional_param_array('familyoptions', [], PARAM_ALPHA)
-        ));
-        $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $library->entityid]);
-        \local_oksigeniaayvurenda\event\voice_settings_changed::fire((int) $library->entityid);
+    $item = digital::get(required_param('item', PARAM_INT), $library);
+    if ($item->kind !== 'voice' || !voices::can_approve($item, (int) $USER->id)) {
+        shell::refuse(get_string('voicenotyours', 'local_oksigeniaayvurenda'), $library);
+    }
+    if ($do === 'approve') {
+        voices::approve((int) $item->id, $library, ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),
+            'audience' => optional_param_array('audience', [], PARAM_ALPHA),
+            'signature' => optional_param('signature', '', PARAM_TEXT)]);
+        $notice = $str('voiceapprovednow');
+    } else if ($do === 'reject') {
+        voices::remove($item);
+        $notice = $str('voicerejected');
+    } else if ($do === 'permission' && $item->readerid) {
+        voices::permission((int) $item->readerid, (bool) optional_param('given', 0, PARAM_BOOL), (int) $USER->id);
         $notice = $str('voicessaved');
-    } else {
-        $item = digital::get(required_param('item', PARAM_INT), $library);
-        if ($item->kind !== 'voice' || !voices::can_approve($item, (int) $USER->id)) {
-            shell::refuse(get_string('voicenotyours', 'local_oksigeniaayvurenda'), $library);
-        }
-        if ($do === 'approve') {
-            voices::approve((int) $item->id, $library, ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),
-                'audience' => optional_param_array('audience', [], PARAM_ALPHA),
-                'signature' => optional_param('signature', '', PARAM_TEXT)]);
-            $notice = $str('voiceapprovednow');
-        } else if ($do === 'reject') {
-            voices::remove($item);
-            $notice = $str('voicerejected');
-        } else if ($do === 'permission' && $item->readerid) {
-            voices::permission((int) $item->readerid, (bool) optional_param('given', 0, PARAM_BOOL), (int) $USER->id);
-            $notice = $str('voicessaved');
-        }
     }
 }
 $desk = new desk($library, 0);
@@ -129,23 +139,9 @@ $data = [
     'pending' => $pending,
     'haspending' => (bool) $pending,
     'manage' => $manage,
-    'keeps' => array_map(
-        fn($days) => ['days' => $days, 'label' => in_array($days, [0, 365, 730, 1095, 1825], true)
-        ? $str('voiceskeep' . $days) : $str('voiceskeepdaysn', $days), 'selected' => $days === voices::keepdays(
-            (int) $library->entityid
-        )],
-        array_values(array_unique(array_merge([0, 365, 730, 1095, 1825], [voices::keepdays((int) $library->entityid)])))
-    ),
-    'familyoptions' => array_map(
-        fn($a) => ['value' => $a, 'label' => $str('voicefamilyoption' . $a),
-        'checked' => in_array($a, (array) ($settings['voicefamilyoptions'] ?? voices::FAMILYAUDIENCES), true)],
-        \local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid)
-            ? array_diff(voices::FAMILYAUDIENCES, ['class']) : voices::FAMILYAUDIENCES
-    ),
-    'voicetext' => (string) ($settings['voicetext'] ?? ''),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
 ];
-// Nothing to listen to: the memory says so. The settings, read in one line and changed in a sheet.
+// Nothing to listen to: the memory says so.
 $data['quiet'] = !$pending ? \local_oksigeniaayvurenda\local\characters::say(
     (int) $library->entityid,
     'memory',
@@ -153,15 +149,80 @@ $data['quiet'] = !$pending ? \local_oksigeniaayvurenda\local\characters::say(
     [],
     'lee'
 ) : null;
-$keepdays = voices::keepdays((int) $library->entityid);
-$chosenoptions = array_filter($data['familyoptions'], fn($o) => $o['checked']);
-$data['summary'] = $str('voicessummary', (object) [
-    'keep' => $keepdays === 0 ? $str('voiceskeepforever') : (in_array($keepdays, [365, 730, 1095, 1825], true)
-        ? \core_text::strtolower($str('voiceskeep' . $keepdays)) : $str('voiceskeepdaysn', $keepdays)),
-    'options' => $chosenoptions ? implode(', ', array_map(fn($o) => $str('voicefamilyshort' . $o['value']), $chosenoptions))
-        : $str('voicesnooptions'),
-    'text' => $str(trim($data['voicetext']) !== '' ? 'holdson' : 'holdsoff'),
-]);
+// The settings in sight, for whoever manages: three cards, each gesture kept at once.
+$saved = optional_param('saved', '', PARAM_ALPHANUMEXT);
+$entityid = (int) $library->entityid;
+$keepdays = voices::keepdays($entityid);
+$years = max(1, (int) round($keepdays / 365));
+$keepword = $keepdays === 0 ? '' : (in_array($keepdays, [365, 730, 1095, 1825], true)
+    ? \core_text::strtolower($str('voiceskeep' . $keepdays)) : $str('voiceskeepdaysn', $keepdays));
+$form = 'ayv-nr-guardan-f';
+$keepgroups = [gestures::group('', [], [gestures::light(
+    $form,
+    'keepdays',
+    $keepdays === 0 ? voices::KEEPDAYS : 0,
+    $keepdays === 0,
+    $str('voiceskeeplight')
+)], [])];
+if ($keepdays !== 0) {
+    array_unshift($keepgroups, gestures::group('', [gestures::step(
+        $form,
+        'keepdays',
+        $str('voiceskeepdays'),
+        $keepdays,
+        365,
+        3650,
+        365,
+        (string) $years,
+        $str($years === 1 ? 'voicesunityear' : 'voicesunityears'),
+        $str
+    )], [], []));
+}
+$on = (array) ($settings['voicefamilyoptions'] ?? voices::FAMILYAUDIENCES);
+$upper = fn(string $text) => \core_text::strtoupper(\core_text::substr($text, 0, 1)) . \core_text::substr($text, 1);
+$offered = \local_oksigeniaayvurenda\local\skins::no_classes($entityid)
+    ? array_diff(voices::FAMILYAUDIENCES, ['class']) : voices::FAMILYAUDIENCES;
+$owntext = trim((string) ($settings['voicetext'] ?? ''));
+$data['savedword'] = $str('hiwsaved');
+$data['settings'] = !$manage ? [] : [
+    gestures::card('ayv-nr-guardan', 'keep', $str('voiceskeeptitle'), $keepdays === 0 ? $str('voiceskeepsaysforever')
+        : $str('voiceskeepsays', $keepword), $saved === 'ayv-nr-guardan', $keepgroups),
+    gestures::card(
+        'ayv-nr-oyen',
+        'hear',
+        $str('voiceshear'),
+        $str('voiceshearsays'),
+        $saved === 'ayv-nr-oyen',
+        [gestures::group(
+            '',
+            [],
+            array_map(
+                fn($option) => gestures::lamp(
+                    'ayv-nr-oyen-f',
+                    'option[' . $option . ']',
+                    in_array($option, $on, true),
+                    $upper($str('voicefamilyshort' . $option))
+                ),
+                array_values($offered)
+            ),
+            []
+        )]
+    ),
+    gestures::card(
+        'ayv-nr-texto',
+        'text',
+        $str('voicestextcard'),
+        $str($owntext !== '' ? 'voicestextown' : 'voicestextnone'),
+        $saved === 'ayv-nr-texto',
+        [],
+        [
+            'text' => ['summary' => $str($owntext !== '' ? 'voicestextchange' : 'voicestextadd'), 'open' => false,
+                'label' => $str('voicestext'), 'name' => 'voicetext', 'value' => $owntext, 'hint' => $str('voicestextblank'),
+                'save' => $str('voicessave')],
+            'link' => ['lead' => $str('voicestextsee'), 'url' => $data['infourl'], 'label' => $str('voiceinfo')],
+        ]
+    ),
+];
 foreach (
     ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voiceaudience',
         'voicepermissiongive', 'voicepermissiontake', 'voicepermissionhas', 'voicepermissionnot', 'voicessettings',

@@ -151,16 +151,9 @@ final class rulesheet {
         if ($currency !== '' && array_key_exists($currency, get_string_manager()->get_list_of_currencies())) {
             $changed['currency'] = $currency;
         }
-        $stage = optional_param('stage', '', PARAM_ALPHANUM);
-        $stages = holds::stages($entityid, time());
-        if ($stage === 'all') {
-            $changed['stages'] = [];
-        } else if ($stage !== '' && isset($stages[(int) $stage])) {
-            // A stage touched comes in or goes out; with every stage in, or none left, it is all of them again.
-            $name = $stages[(int) $stage];
-            $mine = $before['stages'];
-            $mine = in_array($name, $mine, true) ? array_values(array_diff($mine, [$name])) : array_merge($mine, [$name]);
-            $changed['stages'] = count(array_intersect($stages, $mine)) === count($stages) ? [] : $mine;
+        $stages = gestures::stage_touched($before['stages'], holds::stages($entityid, time()));
+        if ($stages !== null) {
+            $changed['stages'] = $stages;
         }
         return $changed;
     }
@@ -247,8 +240,8 @@ final class rulesheet {
         $word = fn(int $n, string $one, string $many) => $str($n === 1 ? $one : $many);
         $steps = [];
         if ($loan > 0) {
-            $steps[] = $max === 0 ? self::still($str('hiwatonce'), $str('hiwnolimit'))
-                : self::step(
+            $steps[] = $max === 0 ? gestures::still($str('hiwatonce'), $str('hiwnolimit'))
+                : gestures::step(
                     $form,
                     'maxloans',
                     $str('hiwatonce'),
@@ -260,7 +253,7 @@ final class rulesheet {
                     $word($max, 'rulesunitbook', 'rulesunitbooks'),
                     $str
                 );
-            $steps[] = self::step(
+            $steps[] = gestures::step(
                 $form,
                 'loandays',
                 $str('hiwdays'),
@@ -272,7 +265,7 @@ final class rulesheet {
                 $word($loan, 'rulesunitday', 'rulesunitdays'),
                 $str
             );
-            $steps[] = self::step(
+            $steps[] = gestures::step(
                 $form,
                 'renewals',
                 $str('hiwrenewals'),
@@ -285,7 +278,7 @@ final class rulesheet {
                 $str
             );
             if ($renewals > 0) {
-                $steps[] = self::step(
+                $steps[] = gestures::step(
                     $form,
                     'renewdays',
                     $str('hiwrenewdays'),
@@ -301,11 +294,11 @@ final class rulesheet {
         }
         $lights = [];
         if ($loan > 0) {
-            $lights[] = self::light($form, 'maxloans', $max === 0 ? 1 : 0, $max === 0, $str('rulesnolimitlight'));
+            $lights[] = gestures::light($form, 'maxloans', $max === 0 ? 1 : 0, $max === 0, $str('rulesnolimitlight'));
         }
         // Back home, a rule takes the days of the general one.
         $home = (int) (self::general($library)['loandays'] ?? 14) ?: 14;
-        $lights[] = self::light($form, 'loandays', $loan === 0 ? $home : 0, $loan === 0, $str('rulesroomlight'));
+        $lights[] = gestures::light($form, 'loandays', $loan === 0 ? $home : 0, $loan === 0, $str('rulesroomlight'));
         $type = (string) $rule['readertype'];
         $items = array_merge(['*'], cataloguer::itemtypes((int) $library->entityid));
         return [
@@ -384,8 +377,8 @@ final class rulesheet {
             'title' => $str('renewfromheading'),
             'says' => $str('renewfromsentence' . $from),
             'justsaved' => $justsaved,
-            'groups' => [self::group('', [], [], array_map(
-                fn($value) => self::chip('ayv-nr-ampliar-f', 'renewfrom', $value, $str('renewfrom' . $value), $value === $from),
+            'groups' => [gestures::group('', [], [], array_map(
+                fn($value) => gestures::chip('ayv-nr-ampliar-f', 'renewfrom', $value, $str('renewfrom' . $value), $value === $from),
                 [loan_rules::FROM_TODAY, loan_rules::FROM_DUE]
             ))],
             'notes' => [['text' => $str('renewfromdesk')], ['text' => $str('renewfromcentre')]],
@@ -394,6 +387,7 @@ final class rulesheet {
             'currency' => null,
             'link' => null,
             'help' => null,
+            'text' => null,
         ];
     }
 
@@ -442,7 +436,7 @@ final class rulesheet {
         $after = $late['noticeafter'];
         $groups = [];
         if ($every !== notice_rules::HAND) {
-            $groups[] = self::group($str('noticesfirstlabel'), [self::step(
+            $groups[] = gestures::group($str('noticesfirstlabel'), [gestures::step(
                 $form,
                 'noticeafter',
                 $str('noticesfirstlabel'),
@@ -455,26 +449,26 @@ final class rulesheet {
                 $str
             )], [], []);
         }
-        $groups[] = self::group($str('noticesthenlabel'), [], [], array_map(
-            fn($rhythm) => self::chip($form, 'noticeevery', $rhythm, $str('noticesrhythm' . $rhythm), $rhythm === $every),
+        $groups[] = gestures::group($str('noticesthenlabel'), [], [], array_map(
+            fn($rhythm) => gestures::chip($form, 'noticeevery', $rhythm, $str('noticesrhythm' . $rhythm), $rhythm === $every),
             notice_rules::rhythms()
         ));
-        $groups[] = self::group($str('noticeswholegend'), [], [
-            self::light(
+        $groups[] = gestures::group($str('noticeswholegend'), [], [
+            gestures::light(
                 $form,
                 'noticereaders',
                 $late['noticereaders'] ? 0 : 1,
                 $late['noticereaders'],
                 $str('noticeslightreaders')
             ),
-            self::light(
+            gestures::light(
                 $form,
                 'noticefamilies',
                 $late['noticefamilies'] ? 0 : 1,
                 $late['noticefamilies'],
                 $str('noticeslightfamilies')
             ),
-            self::light($form, 'noticetutors', $late['noticetutors'] ? 0 : 1, $late['noticetutors'], $str('noticeslighttutors')),
+            gestures::lamp($form, 'noticetutors', $late['noticetutors'], $str('noticeslighttutors')),
         ], []);
         // As a date field wants them (userdate() takes the zero off the day), and room for four.
         $fields = array_map(
@@ -498,12 +492,13 @@ final class rulesheet {
             'dates' => $every === notice_rules::DATES ? ['fields' => $fields, 'legend' => $str('noticesdateslegend'),
                 'hint' => $str('noticesdateshint'), 'save' => $str('noticesdatessave')] : null,
             'presets' => ['summary' => $str('noticespresets'), 'hint' => $str('noticespresetshint'), 'list' => array_map(
-                fn($preset) => self::chip($form, 'preset', $preset, $str('noticespreset' . $preset), false),
+                fn($preset) => gestures::chip($form, 'preset', $preset, $str('noticespreset' . $preset), false),
                 array_keys(notice_rules::PRESETS)
             )],
             'currency' => null,
             'link' => ['lead' => $str('rulesseelate'), 'url' => $url('late.php'), 'label' => $str('menulate')],
             'help' => null,
+            'text' => null,
         ];
     }
 
@@ -534,8 +529,8 @@ final class rulesheet {
             ? $str('sanctionssentencedays', (object) ['days' => $counted($late['perday']), 'max' => $counted($late['maxdays'])])
             : ($mode === sanction_rules::FINE ? $str('sanctionssentencefine', (object) ['amount' => $money($late['cents']),
             'max' => $money($late['maxcents']), 'block' => $money($late['block'])]) : $str('sanctionssentencenone'));
-        $groups = [self::group('', [], [], array_map(
-            fn($value) => self::chip($form, 'mode', $value, $str('sanctionsmode' . $value), $value === $mode),
+        $groups = [gestures::group('', [], [], array_map(
+            fn($value) => gestures::chip($form, 'mode', $value, $str('sanctionsmode' . $value), $value === $mode),
             [sanction_rules::NONE, sanction_rules::DAYS, sanction_rules::FINE]
         ))];
         $notes = [];
@@ -548,7 +543,7 @@ final class rulesheet {
                 : $str($late['adults'] ? 'sanctionswhoall' : 'sanctionswhostudents'));
             $daysunit = fn(int $n) => $str($n === 1 ? 'rulesunitday' : 'rulesunitdays');
             $counters = $mode === sanction_rules::DAYS ? [
-                self::step(
+                gestures::step(
                     $form,
                     'perday',
                     $str('sanctionsfieldperday'),
@@ -560,7 +555,7 @@ final class rulesheet {
                     $daysunit($late['perday']),
                     $str
                 ),
-                self::step(
+                gestures::step(
                     $form,
                     'maxdays',
                     $str('sanctionsfieldmaxdays'),
@@ -573,7 +568,7 @@ final class rulesheet {
                     $str
                 ),
             ] : [
-                self::step(
+                gestures::step(
                     $form,
                     'cents',
                     $str('sanctionsfieldcents'),
@@ -585,7 +580,7 @@ final class rulesheet {
                     '',
                     $str
                 ),
-                self::step(
+                gestures::step(
                     $form,
                     'maxcents',
                     $str('sanctionsfieldmaxcents'),
@@ -597,7 +592,7 @@ final class rulesheet {
                     '',
                     $str
                 ),
-                self::step(
+                gestures::step(
                     $form,
                     'block',
                     $str('sanctionsfieldblock'),
@@ -610,7 +605,7 @@ final class rulesheet {
                     $str
                 ),
             ];
-            $counters[] = self::step(
+            $counters[] = gestures::step(
                 $form,
                 'grace',
                 $str('sanctionsfieldgrace'),
@@ -623,9 +618,9 @@ final class rulesheet {
                 $str
             );
             foreach ($counters as $counter) {
-                $groups[] = self::group($counter['label'], [$counter], [], []);
+                $groups[] = gestures::group($counter['label'], [$counter], [], []);
             }
-            $groups[] = self::group($str('noticeswholegend'), [], [self::light(
+            $groups[] = gestures::group($str('noticeswholegend'), [], [gestures::light(
                 $form,
                 'adults',
                 $late['adults'] ? 0 : 1,
@@ -633,14 +628,8 @@ final class rulesheet {
                 $str('sanctionsadults')
             )], []);
             if ($classes) {
-                $groups[] = self::group($str('holdsstages'), [], [], array_merge(
-                    [self::chip($form, 'stage', 'all', $str('holdsallstages'), !$late['stages'])],
-                    array_map(fn($i, $name) => self::chip($form, 'stage', (string) $i, $name, in_array(
-                        $name,
-                        $late['stages'],
-                        true
-                    )), array_keys($stages), $stages)
-                ));
+                $chips = gestures::stages($form, $late['stages'], $stages, $str);
+                $groups[] = gestures::group($str('holdsstages'), [], [], $chips);
             }
             $notes[] = ['text' => $str($mode === sanction_rules::DAYS ? 'sanctionsdayshint' : 'sanctionsfinehint')];
         }
@@ -663,94 +652,7 @@ final class rulesheet {
                     array_values($currencies)
                 )] : null,
             'link' => ['lead' => $str('rulesseesanctions'), 'url' => $url('sanctions.php'), 'label' => $str('menusanctions')],
+            'text' => null,
         ];
-    }
-
-    /**
-     * A group of gestures under a label: counters, lights or chips.
-     *
-     * @param string $label
-     * @param array[] $steps
-     * @param array[] $lights
-     * @param array[] $chips
-     * @return array
-     */
-    private static function group(string $label, array $steps, array $lights, array $chips): array {
-        // Chips take a row of their own: one choice among several reads better on its own line than beside counters.
-        return ['label' => $label, 'steps' => $steps, 'lights' => $lights, 'chips' => $chips, 'haslights' => (bool) $lights,
-            'haschips' => (bool) $chips, 'whole' => (bool) $chips];
-    }
-
-    /**
-     * A number with its «−» and «+».
-     *
-     * @param string $form
-     * @param string $field
-     * @param string $label
-     * @param int $value
-     * @param int $min
-     * @param int $max
-     * @param int $by How much each sign moves it.
-     * @param string $shown The number as it is read.
-     * @param string $unit What it counts, under it.
-     * @param callable $str
-     * @return array
-     */
-    private static function step(
-        string $form,
-        string $field,
-        string $label,
-        int $value,
-        int $min,
-        int $max,
-        int $by,
-        string $shown,
-        string $unit,
-        callable $str
-    ): array {
-        return ['form' => $form, 'field' => $field, 'label' => $label, 'shown' => $shown, 'unit' => $unit,
-            'less' => max($min, $value - $by), 'more' => min($max, $value + $by), 'atmin' => $value <= $min,
-            'atmax' => $value >= $max, 'lesslabel' => $str('hiwless') . ': ' . $label,
-            'morelabel' => $str('hiwmore') . ': ' . $label, 'still' => false];
-    }
-
-    /**
-     * A figure that is not counted with «−» and «+» (no limit), in the place of one.
-     *
-     * @param string $label
-     * @param string $shown
-     * @return array
-     */
-    private static function still(string $label, string $shown): array {
-        return ['form' => '', 'field' => '', 'label' => $label, 'shown' => $shown, 'unit' => '', 'less' => 0, 'more' => 0,
-            'atmin' => true, 'atmax' => true, 'lesslabel' => '', 'morelabel' => '', 'still' => true];
-    }
-
-    /**
-     * A lamp: sends what it turns to.
-     *
-     * @param string $form
-     * @param string $name
-     * @param int $value
-     * @param bool $on
-     * @param string $label
-     * @return array
-     */
-    private static function light(string $form, string $name, int $value, bool $on, string $label): array {
-        return ['form' => $form, 'name' => $name, 'value' => $value, 'pressed' => $on, 'label' => $label];
-    }
-
-    /**
-     * A chip: sends its value.
-     *
-     * @param string $form
-     * @param string $name
-     * @param string $value
-     * @param string $label
-     * @param bool $on
-     * @return array
-     */
-    private static function chip(string $form, string $name, string $value, string $label, bool $on): array {
-        return ['form' => $form, 'name' => $name, 'value' => $value, 'label' => $label, 'pressed' => $on];
     }
 }

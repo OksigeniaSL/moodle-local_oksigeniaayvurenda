@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.249.0 (2026-11-13)
+
+- Reservations and the voices of the readers, from Jujol's mock-ups: their settings are cards with their sentence on top
+  and their gestures in sight, instead of a line and «Change» opening a sheet. Reservations: reserving from home as a
+  light, the days a book is kept set aside and the reservations at a time with «−» and «+», renewing even if someone
+  waits and from home as lights, and who reserves online as stage chips. Voices: how long they are kept, in school
+  years with «−» and «+» or with no time limit; who may hear them, a light for each thing families can choose; and the
+  centre's own words for «How voices are handled», folded, the only thing written. Each gesture is kept at once and
+  back to its card.
+- The card of a setting is one template for every page (settingcard), with its gestures in one class (gestures); the
+  loan rules use them too.
+
 ## 0.248.0 (2026-11-13)
 
 - Loan rules, from Jujol's mock-up: each rule is a library loan card, its band in the colour of its readers, its
