@@ -203,6 +203,9 @@ class provider implements
             'createdby' => 'privacy:metadata:digital:createdby',
             'title' => 'privacy:metadata:digital:title',
             'signature' => 'privacy:metadata:digital:signature',
+            'forlittle' => 'privacy:metadata:digital:forlittle',
+            'tellfamily' => 'privacy:metadata:digital:tellfamily',
+            'timetold' => 'privacy:metadata:digital:timetold',
             'timecreated' => 'privacy:metadata:digital:timecreated',
         ], 'privacy:metadata:digital');
         $collection->add_database_table(self::T . 'digitalread', [
@@ -636,6 +639,8 @@ class provider implements
             $path = array_merge($base, [get_string('privacy:path:voices', 'local_oksigeniaayvurenda'), (string) $voice->id]);
             writer::with_context($context)->export_data($path, (object) ['title' => $voice->title, 'status' => $voice->status,
                 'audience' => $voice->audience, 'signature' => $voice->signature,
+                'forlittle' => transform::yesno((bool) $voice->forlittle), 'family' => transform::yesno((bool) $voice->tellfamily),
+                'told' => $voice->timetold ? transform::datetime($voice->timetold) : null,
                 'created' => transform::datetime($voice->timecreated)]);
             writer::with_context($context)->export_area_files($path, 'local_oksigeniaayvurenda', 'digital', $voice->id);
         }

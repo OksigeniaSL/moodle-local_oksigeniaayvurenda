@@ -26,6 +26,9 @@ define('AJAX_SCRIPT', true);
 
 require(__DIR__ . '/../../config.php');
 
+// What it sends (a notice, a mail) formats its texts in the context of a page.
+$PAGE->set_context(context_system::instance());
+
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
@@ -56,5 +59,14 @@ $id = voices::record(
     optional_param('ext', 'webm', PARAM_ALPHANUM),
     null,
     optional_param('signature', '', PARAM_TEXT)
+);
+// Read for the little ones, and whether the reader's family hears it once approved («Leyó para los pequeños»).
+$reader = $viewer['readerid'] ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $viewer['readerid']]) : null;
+\local_oksigeniaayvurenda\local\forlittle::mark(
+    $id,
+    $reader ?: null,
+    optional_param('forlittle', 0, PARAM_BOOL),
+    optional_param('tellfamily', 0, PARAM_BOOL),
+    time()
 );
 echo json_encode(['id' => $id]);

@@ -22,6 +22,11 @@
     {
         "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar", "voicewhat": "Qué has leído",
         "voicewhathint": "un capítulo, unas páginas", "voicesend": "Enviar", "consent": false,
+        "voiceforwho": "¿Para quién es?", "voiceforlittle": "Lo he leído para los pequeños", "voicefamily": "Que lo oiga mi familia",
+        "forwho": {"bud": "https://example.com/capullo.webp", "family": true,
+            "off": "Si es para los pequeños, lo escucharán en su portada cuando lo aprueben.",
+            "on": "Los más pequeños lo escucharán en su portada cuando lo aprueben.",
+            "familyon": "Tu familia recibirá un enlace para escucharlo."},
         "voicesignature": "Firma", "voicesignaturehint": "si quieres", "askemail": true, "voiceemail": "Tu correo",
         "voiceemailhint": "si quieres el enlace para borrarla"
     }
@@ -39,6 +44,14 @@
             <input type="text" id="ayv-what" maxlength="255"></label>
         <label class="ayv-field ayv-field-wide ayv-field-quiet">{{voicesignature}} <span class="ayv-field-hint">{{voicesignaturehint}}</span>
             <input type="text" id="ayv-signature" maxlength="60"></label>
+        {{#forwho}}<div class="ayv-cf ayv-lp-para" role="group" aria-labelledby="ayv-lp-para-t" data-off="{{off}}" data-on="{{on}}" data-family="{{familyon}}">
+            <p id="ayv-lp-para-t"><b>{{voiceforwho}}</b></p>
+            <div class="ayv-cf-luces">
+                <button type="button" class="ayv-cf-luz ayv-lp-pequenos" id="ayv-lp-little" aria-pressed="false"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{#bud}}<img class="ayv-lp-quien" src="{{bud}}" alt=""> {{/bud}}{{voiceforlittle}}</span></button>
+                {{#family}}<button type="button" class="ayv-cf-luz ayv-lp-familia" id="ayv-lp-family" aria-pressed="false" aria-disabled="true"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{voicefamily}}</span></button>{{/family}}
+            </div>
+            <p class="ayv-lp-nota" aria-live="polite">{{off}}</p>
+        </div>{{/forwho}}
         {{#askemail}}<label class="ayv-field ayv-field-wide ayv-field-quiet">{{voiceemail}} <span class="ayv-field-hint">{{voiceemailhint}}</span>
             <input type="email" id="ayv-email" maxlength="254" autocomplete="email"></label>{{/askemail}}
         <p class="ayv-book-actions">

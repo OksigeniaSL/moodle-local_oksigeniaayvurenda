@@ -805,6 +805,22 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111320, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111325) {
+        // For «Leyó para los pequeños»: a voice read for the little ones, and the family who hears it if its reader wants.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $fields = [
+            new xmldb_field('forlittle', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'deletetoken'),
+            new xmldb_field('tellfamily', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'forlittle'),
+            new xmldb_field('timetold', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'tellfamily'),
+        ];
+        foreach ($fields as $field) {
+            if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026111325, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

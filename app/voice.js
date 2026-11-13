@@ -28,6 +28,43 @@
     var stop = document.getElementById('ayv-stop');
     var again = document.getElementById('ayv-again');
     var send = document.getElementById('ayv-send');
+    // «¿Para quién es?» (Jujol): for the little ones, and then, only then, the family too; the sentence says what happens.
+    var forwho = document.querySelector('.ayv-lp-para');
+    var little = document.getElementById('ayv-lp-little');
+    var family = document.getElementById('ayv-lp-family');
+    var pressed = function(button) {
+        return !!button && button.getAttribute('aria-pressed') === 'true';
+    };
+    var sayForWho = function() {
+        var note = forwho ? forwho.querySelector('.ayv-lp-nota') : null;
+        if (!note) {
+            return;
+        }
+        note.textContent = !pressed(little) ? forwho.getAttribute('data-off')
+            : forwho.getAttribute('data-on') + (pressed(family) ? ' ' + forwho.getAttribute('data-family') : '');
+    };
+    if (little) {
+        little.addEventListener('click', function() {
+            var on = !pressed(little);
+            little.setAttribute('aria-pressed', on ? 'true' : 'false');
+            if (family) {
+                family.setAttribute('aria-disabled', on ? 'false' : 'true');
+                if (!on) {
+                    family.setAttribute('aria-pressed', 'false');
+                }
+            }
+            sayForWho();
+        });
+    }
+    if (family) {
+        family.addEventListener('click', function() {
+            if (family.getAttribute('aria-disabled') === 'true') {
+                return;
+            }
+            family.setAttribute('aria-pressed', pressed(family) ? 'false' : 'true');
+            sayForWho();
+        });
+    }
     var preview = document.getElementById('ayv-preview');
     var time = document.getElementById('ayv-time');
     var said = document.getElementById('ayv-voice-said');
@@ -201,6 +238,8 @@
             body.append('record', config.record);
         }
         body.append('title', what ? what.value : '');
+        body.append('forlittle', pressed(little) ? '1' : '0');
+        body.append('tellfamily', pressed(little) && pressed(family) ? '1' : '0');
         var signature = document.getElementById('ayv-signature');
         body.append('signature', signature ? signature.value : '');
         var email = document.getElementById('ayv-email');

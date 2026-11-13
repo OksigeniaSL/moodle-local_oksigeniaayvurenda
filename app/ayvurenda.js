@@ -733,7 +733,7 @@
         }
     };
     document.addEventListener('click', function(event) {
-        var button = event.target.closest ? event.target.closest('.ayv-listen') : null;
+        var button = event.target.closest ? event.target.closest('.ayv-listen, .ayv-lp-play') : null;
         if (!button) {
             return;
         }

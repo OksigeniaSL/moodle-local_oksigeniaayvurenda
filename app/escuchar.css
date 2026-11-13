@@ -1,0 +1,311 @@
+/* «Leyó para los pequeños»: the page a family opens from the link (Jujol, 13 Nov 2026). Outside Moodle, with no header:
+   opened from WhatsApp on a phone, read by a grown-up who should be moved. The book in front, the sentence that says who
+   read it and for whom, a big «play», and a way to send it on. Light and dark follow the phone; --lp-acento is the
+   library's colour. Old phones: flexbox, no :has(), no color-mix(). */
+@font-face { font-family: "Literata"; font-weight: 600; font-display: swap; src: url("fonts/literata-600.woff2") format("woff2"); }
+@font-face { font-family: "Andika"; font-weight: 400; font-display: swap; src: url("fonts/andika-400.woff2") format("woff2"); }
+@font-face { font-family: "Andika"; font-weight: 700; font-display: swap; src: url("fonts/andika-700.woff2") format("woff2"); }
+
+:root {
+    --lp-acento: #17574c;
+    --lp-sobre-acento: #fff;
+    --lp-coral: #a8402a;
+    --lp-fondo: #fbf6ec;
+    --lp-fondo-2: #f2e7d2;
+    --lp-tinta: #1e2b2a;
+    --lp-suave: #4f5b57;
+    --lp-linea: rgba(30, 43, 42, .16);
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="claro"]) {
+        --lp-acento: #8fd3c1;
+        --lp-sobre-acento: #0e1c1a;
+        --lp-coral: #f08a72;
+        --lp-fondo: #0e1c1a;
+        --lp-fondo-2: #17302b;
+        --lp-tinta: #ece4d4;
+        --lp-suave: #b9c3bf;
+        --lp-linea: rgba(236, 228, 212, .18);
+    }
+}
+
+:root[data-tema="oscuro"] {
+    --lp-acento: #8fd3c1;
+    --lp-sobre-acento: #0e1c1a;
+    --lp-coral: #f08a72;
+    --lp-fondo: #0e1c1a;
+    --lp-fondo-2: #17302b;
+    --lp-tinta: #ece4d4;
+    --lp-suave: #b9c3bf;
+    --lp-linea: rgba(236, 228, 212, .18);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--lp-fondo);
+    color: var(--lp-tinta);
+    font: 1.125rem/1.5 "Andika", system-ui, sans-serif;
+}
+
+.lp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1.25rem 1.25rem 2rem;
+}
+
+/* The library, quiet, at the top. */
+.lp-biblio {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin: 0 0 1.75rem;
+    color: var(--lp-suave);
+    font-size: .95rem;
+    font-weight: 700;
+}
+
+.lp-biblio img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+}
+
+/* The book, in front, on a glow of the library's colour: a present just unwrapped. */
+.lp-libro {
+    position: relative;
+    width: 11.5rem;
+    margin: .25rem 0 1.75rem;
+}
+
+.lp-libro::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 19rem;
+    height: 19rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--lp-fondo-2) 0%, var(--lp-fondo-2) 45%, transparent 70%);
+    transform: translate(-50%, -50%);
+}
+
+.lp-libro img {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px 10px 10px 4px;
+    box-shadow: 0 22px 30px -18px rgba(0, 0, 0, .6), inset 6px 0 0 rgba(0, 0, 0, .12);
+    transform: rotate(-3deg);
+}
+
+/* A book without a cover picture: its title on its colour, as the mail draws it (Ayvurenda). */
+.lp-tapa-sin {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 2 / 3;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 4px 10px 10px 4px;
+    box-shadow: 0 22px 30px -18px rgba(0, 0, 0, .6), inset 6px 0 0 rgba(0, 0, 0, .12);
+    font-family: "Literata", Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    transform: rotate(-3deg);
+}
+
+.lp-etiqueta {
+    margin: 0 0 .5rem;
+    color: var(--lp-coral);
+    font-size: .85rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+/* The sentence: who read it, what, and for whom. */
+.lp-frase {
+    margin: 0 0 1.5rem;
+    font-family: "Literata", Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    text-wrap: balance;
+}
+
+.lp-frase b {
+    color: var(--lp-acento);
+}
+
+/* The player: a big round button that fills as it plays, the time, and a line to move along. */
+.lp-reproductor {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: .9rem 1.1rem .9rem .9rem;
+    border-radius: 999px;
+    background: var(--lp-fondo-2);
+}
+
+.lp-play {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--lp-acento);
+    color: var(--lp-sobre-acento);
+    cursor: pointer;
+}
+
+.lp-play svg.lp-icono {
+    width: 1.9rem;
+    height: 1.9rem;
+}
+
+.lp-play .lp-icono-pausa {
+    display: none;
+}
+
+.lp-play[aria-pressed="true"] .lp-icono-play {
+    display: none;
+}
+
+.lp-play[aria-pressed="true"] .lp-icono-pausa {
+    display: block;
+}
+
+.lp-play:focus-visible {
+    outline: 3px solid var(--lp-coral);
+    outline-offset: 3px;
+}
+
+.lp-pista {
+    display: grid;
+    flex: 1 1 auto;
+    gap: .35rem;
+    min-width: 0;
+}
+
+.lp-barra {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--lp-acento);
+}
+
+.lp-tiempo {
+    display: flex;
+    justify-content: space-between;
+    color: var(--lp-suave);
+    font-size: .9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Without JS, the browser's own player. */
+.lp-audio-sin-js {
+    width: 100%;
+}
+
+.lp-con-js .lp-audio-sin-js {
+    display: none;
+}
+
+.lp-sin-js .lp-reproductor {
+    display: none;
+}
+
+/* Send it on. */
+.lp-pasar {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 3rem;
+    margin: 1.25rem 0 0;
+    padding: 0 1.4rem;
+    border: 2px solid var(--lp-acento);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--lp-acento);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lp-pasar svg {
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+.lp-pasado {
+    min-height: 1.5em;
+    margin: .5rem 0 0;
+    color: var(--lp-suave);
+    font-size: .95rem;
+}
+
+.lp-pie {
+    margin: auto 0 0;
+    padding-top: 2rem;
+    color: var(--lp-suave);
+    font-size: .95rem;
+    text-align: center;
+}
+
+.lp-contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 30rem;
+}
+
+@media (min-width: 720px) {
+    .lp {
+        padding-top: 3rem;
+    }
+
+    .lp-libro {
+        width: 14rem;
+    }
+
+    .lp-frase {
+        font-size: 2rem;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .lp-libro img {
+        animation: lp-llega .9s cubic-bezier(.2, 1.2, .4, 1) both;
+    }
+}
+
+@keyframes lp-llega {
+    from {
+        opacity: 0;
+        transform: translateY(18px) rotate(-8deg) scale(.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(-3deg);
+    }
+}

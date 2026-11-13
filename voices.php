@@ -124,6 +124,9 @@ foreach (voices::pending($library, (int) $USER->id) as $item) {
         'privatehint' => $str($invite ? 'voicefamilyprivate' : 'voiceprivatehint'),
         // The signature is read here first: it shows only once approved, as it is left here.
         'signature' => (string) $item->signature,
+        // Whom what is approved reaches: the little ones, and their family (Jujol).
+        'marks' => $item->forlittle ? ['bud' => \local_oksigeniaayvurenda\local\screens::art('carne/flor/capullo'),
+            'little' => $str('voicemarklittle'), 'family' => $item->tellfamily ? $str('voicemarkfamily') : ''] : null,
     ];
 }
 $settings = json_decode(

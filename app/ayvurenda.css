@@ -12161,3 +12161,230 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
     justify-items: start;
     min-width: 0;
 }
+
+/* «Leyó para los pequeños», Jujol, 13 Nov 2026: the pieces inside the library (the recorder of an older reader, the shelf of
+   the flower home, the story of today in Infantil, the mark on the staff's table). After the plugin's sheets; everything
+   hangs from .ayv and carries the prefix .ayv-lp-. The family's page has its own sheet (escuchar.css). Chrome 93 and
+   Firefox 98: no :has(), no color-mix(). */
+
+/* ---------- 1. In the recorder: two gestures before «Enviar» ---------- */
+/* A soft box over whatever the recorder's card is, light or dark: it takes the card's ink. */
+.ayv .ayv-lp-para {
+    display: grid;
+    gap: .75rem;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    background: rgba(127, 127, 127, .12);
+    color: inherit;
+}
+
+.ayv .ayv-lp-para p {
+    margin: 0;
+}
+
+.ayv .ayv-lp-para .ayv-cf-luces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+}
+
+/* The little ones' gesture carries the drawing of a small reader listening, so the older one sees for whom. */
+.ayv .ayv-lp-para .ayv-cf-luz .ayv-lp-quien {
+    display: inline-block;
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: -.2rem 0;
+}
+
+.ayv .ayv-lp-nota {
+    font-size: .95rem;
+    opacity: .85;
+}
+
+/* The family's gesture waits for the first: grey, and says why. */
+.ayv .ayv-lp-familia[aria-disabled="true"] {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* ---------- 2. The shelf of the flower home: «Te lo leen los mayores» ---------- */
+.ayv .ayv-lp-balda {
+    margin: 1.75rem 0;
+}
+
+.ayv .ayv-lp-balda-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .75rem;
+    margin: 0 0 .9rem;
+}
+
+.ayv .ayv-lp-balda-cab > div {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.ayv .ayv-lp-balda-cab img {
+    flex: none;
+    width: 64px;
+    height: 64px;
+}
+
+.ayv .ayv-lp-balda-cab h2 {
+    margin: 0;
+    font-family: var(--title);
+}
+
+.ayv .ayv-lp-balda-cab p {
+    margin: .15rem 0 0;
+    opacity: .8;
+}
+
+.ayv .ayv-lp-libros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 1.25rem 1rem;
+    padding: 1.1rem 1rem .9rem;
+    margin: 0;
+    list-style: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(to bottom, transparent calc(100% - 12px), #a87442 calc(100% - 12px), #8c5c33);
+}
+
+.ayv .ayv-lp-libro {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: .45rem;
+    padding-bottom: 14px;
+    text-align: center;
+}
+
+.ayv .ayv-lp-tapa {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 8.5rem;
+    aspect-ratio: 2 / 3;
+    border-radius: 3px 8px 8px 3px;
+    overflow: hidden;
+    box-shadow: 0 10px 16px -10px rgba(30, 20, 5, .6);
+}
+
+.ayv .ayv-lp-tapa img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* The round «play» on the cover: what the little one touches. */
+.ayv .ayv-lp-play {
+    position: absolute;
+    right: .4rem;
+    bottom: .4rem;
+    display: grid;
+    place-items: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: var(--coral);
+    color: #fff;
+    box-shadow: 0 6px 12px -6px rgba(0, 0, 0, .6);
+    cursor: pointer;
+}
+
+.ayv .ayv-lp-play svg {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-left: .15rem;
+}
+
+.ayv .ayv-lp-play[aria-pressed="true"] {
+    background: var(--green);
+}
+
+.ayv .ayv-lp-play[aria-pressed="true"] svg {
+    margin-left: 0;
+}
+
+.ayv .ayv-lp-play:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.ayv .ayv-lp-titulo {
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.ayv .ayv-lp-lee {
+    font-size: .95rem;
+    line-height: 1.2;
+}
+
+.ayv .ayv-lp-lee b {
+    color: var(--accent);
+}
+
+/* ---------- 3. Infantil: the story of today, read by an older one ---------- */
+/* The door of the story of today says who reads it, small, for the grown-up beside the child: the child needs only the cover
+   and the voice. */
+.ayv .ayv-lp-mayores {
+    display: block;
+    margin-top: .2rem;
+    font-size: .9rem;
+    font-weight: 400;
+    opacity: .85;
+}
+
+/* ---------- 4. The staff's table: the mark on the voice's card ---------- */
+.ayv .ayv-lp-marcas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: 0;
+}
+
+.ayv .ayv-lp-marca {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .2rem .7rem .25rem .45rem;
+    border-radius: 999px;
+    background: var(--paper2);
+    box-shadow: inset 0 0 0 1.5px var(--coral);
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-lp-marca img,
+.ayv .ayv-lp-marca svg {
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+.ayv .ayv-lp-marca-familia {
+    box-shadow: inset 0 0 0 1.5px var(--green2, var(--green));
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-lp-libros {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ayv .ayv-lp-balda-cab img {
+        width: 52px;
+        height: 52px;
+    }
+}
+
+/* A book without a cover on the little ones' shelf: its colour, as the shelves draw it (Ayvurenda). */
+.ayv .ayv-lp-sintapa {
+    display: block;
+    width: 100%;
+    height: 100%;
+}

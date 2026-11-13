@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.262.0 (2026-11-13)
+
+- «Leyó para los pequeños», a «subidón» of the review of 12 November, from Jujol's mock-ups.
+  - **The recorder**: a reader past the flower says «Who is it for?» with two lights before sending, «I read it for
+    the little ones» and, where their account has a family, «Let my family hear it» (only once the first is on); a
+    sentence says what will happen.
+  - **The staff's table** marks the voice «For the little ones» and «Their family will get the link» before approving.
+  - **The little ones**: once approved, the story for today on their home is one of those voices, the next one each
+    day, with «An older reader reads it to you» for the grown-up beside them; their whole home has the shelf «The
+    older ones read to you», each book standing with a round «play» on its cover.
+  - **The family**: if the reader asked for it and the centre turns it on in «How your library works» (it starts off),
+    the morning after the approval their family gets by e-mail a sealed link to a page without an account: the cover,
+    who read it and for whom, a big player and «Send it to someone» with the phone's own way of sharing; the chats
+    show its cover before it is opened. Once, and only for what was approved in the last fourteen days. The link opens
+    only that voice, while it is published.
+  - Three new fields of the voices (`forlittle`, `tellfamily`, `timetold`), in the privacy provider and its export.
+- A reader's recording no longer says «It could not be sent» after it was kept: the upload sent its «we got it» notice
+  without the page's context. The same context is set in the other four AJAX pages that had none.
+
 ## 0.261.0 (2026-11-13)
 
 - The diploma of a full bingo card, a «subidón» of the review of 12 November, from Gaudí's art (art package 0.1.68).

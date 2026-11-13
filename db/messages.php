@@ -154,6 +154,14 @@ $messageproviders = [
             'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To the family of a reader who read a book for the little ones, if they wanted: the way to hear it.
+    'forlittle' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To the family of a young reader: the diploma of their full bingo card, the morning after.
     'diploma' => [
         'defaults' => [

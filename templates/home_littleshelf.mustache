@@ -1,0 +1,41 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/home_littleshelf
+
+    «Te lo leen los mayores» (Jujol, 13 November): on a young reader's home, the books the older readers read for them,
+    standing, each with a round «play» on its cover, its title and who reads it.
+
+    Example context (json):
+    {
+        "heading": "Te lo leen los mayores", "hint": "Los mayores de la biblioteca te los leen en voz alta. Toca y escucha.",
+        "figure": "https://example.com/memoria-senala.webp",
+        "books": [{"title": "La isla del cometa", "url": "https://example.com/record.php?id=50", "hascover": true,
+            "coverurl": "https://example.com/tapa.jpg", "colour": 2, "audio": "https://example.com/voz.webm",
+            "by": "Te lo lee Iker, 2.º de ESO", "playlabel": "Escuchar «La isla del cometa», Te lo lee Iker"}]
+    }
+}}
+<section class="ayv-lp-balda" aria-labelledby="ayv-lp-balda-t">
+    <div class="ayv-lp-balda-cab">{{#figure}}<img src="{{figure}}" alt="" width="64" height="64">{{/figure}}
+        <div><h2 id="ayv-lp-balda-t">{{heading}}</h2><p>{{hint}}</p></div></div>
+    <ul class="ayv-lp-libros">{{#books}}<li class="ayv-lp-libro">
+        <span class="ayv-lp-tapa">{{#hascover}}<img src="{{coverurl}}" alt="" width="400" height="600" loading="lazy">{{/hascover}}{{^hascover}}<span class="ayv-cover ayv-cover-{{colour}} ayv-lp-sintapa" aria-hidden="true"></span>{{/hascover}}
+            {{#audio}}<button type="button" class="ayv-lp-play" data-ayv-say="{{audio}}" aria-pressed="false" aria-label="{{playlabel}}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button>{{/audio}}</span>
+        <a class="ayv-lp-titulo" href="{{url}}">{{title}}</a>
+        <span class="ayv-lp-lee">{{by}}</span>
+    </li>{{/books}}</ul>
+</section>

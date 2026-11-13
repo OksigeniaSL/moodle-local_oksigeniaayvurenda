@@ -24,6 +24,8 @@
         "heading": "Voces", "intro": "Las que esperan.", "notice": "", "action": "#", "sesskey": "abc", "haspending": true,
         "pending": [{"id": 1, "book": "El faro dormido", "title": "Capítulo 1", "who": "Ana Montes (4º B)", "url": "#",
             "share": false, "minor": true, "permission": false,
+            "marks": {"bud": "https://example.com/capullo.webp", "little": "Para los pequeños",
+                "family": "Su familia recibirá el enlace"},
             "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
             "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "Sin permiso, solo su docente",
             "signature": "La mamá de Ana"}],
@@ -53,6 +55,7 @@
 {{#pending}}
 <section class="ayv-book">
     <h2 class="ayv-section-title">{{book}}{{#title}} · {{title}}{{/title}}</h2>
+    {{#marks}}<p class="ayv-lp-marcas"><span class="ayv-lp-marca">{{#bud}}<img src="{{bud}}" alt="">{{/bud}}{{little}}</span>{{#family}}<span class="ayv-lp-marca ayv-lp-marca-familia"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg>{{family}}</span>{{/family}}</p>{{/marks}}
     <p>{{who}}</p>
     <audio class="ayv-media" controls preload="none" src="{{url}}"></audio>
     {{#minor}}

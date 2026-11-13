@@ -27,6 +27,9 @@ define('AJAX_SCRIPT', true);
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- the link itself is the key, for families without an account.
 require(__DIR__ . '/../../config.php');
 
+// What it sends (a notice, a mail) formats its texts in the context of a page.
+$PAGE->set_context(context_system::instance());
+
 use local_oksigeniaayvurenda\local\voices;
 
 require_sesskey();

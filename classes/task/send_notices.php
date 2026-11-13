@@ -76,6 +76,10 @@ class send_notices extends \core\task\scheduled_task {
                     $every
                 ),
                 'the diplomas of the full bingo cards' => fn() => \local_oksigeniaayvurenda\local\diploma::run($now, $every),
+                'what was read for the little ones, to the families' => fn() => \local_oksigeniaayvurenda\local\forlittle::run(
+                    $now,
+                    $every
+                ),
                 'the library\'s news to whoever signed up' => fn() => \local_oksigeniaayvurenda\local\newsletter::run(
                     $now,
                     $every

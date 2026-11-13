@@ -27,6 +27,9 @@ define('AJAX_SCRIPT', true);
 
 require(__DIR__ . '/../../config.php');
 
+// What it sends (a notice, a mail) formats its texts in the context of a page.
+$PAGE->set_context(context_system::instance());
+
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\desk;

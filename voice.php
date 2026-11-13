@@ -151,8 +151,18 @@ if ($caninvite) {
     }
 }
 $data['hasinvites'] = (bool) $data['invites'];
+// The box «¿Para quién es?»: a reader past the flower reads it for the little ones, and their family may hear it (Jujol).
+$me = !empty($viewer['readerid']) ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $viewer['readerid']]) : null;
+$data['forwho'] = \local_oksigeniaayvurenda\local\forlittle::can_read($me ?: null, time()) ? [
+    'bud' => \local_oksigeniaayvurenda\local\screens::art('carne/flor/capullo'),
+    'family' => \local_oksigeniaayvurenda\local\forlittle::can_tell($me),
+    'off' => $str('voiceforlittleoff'),
+    'on' => $str('voiceforlittleon'),
+    'familyon' => $str('voicefamilyon'),
+] : null;
 foreach (
-    ['voiceinfo', 'voicerecord', 'voicestop', 'voiceagain', 'voicewhat', 'voicewhathint', 'voicesend', 'voicemine',
+    ['voiceforwho', 'voiceforlittle', 'voicefamily', 'voiceinfo', 'voicerecord', 'voicestop', 'voiceagain', 'voicewhat',
+        'voicewhathint', 'voicesend', 'voicemine',
         'voicedelete', 'voicenomic', 'backtorecord', 'voiceinvitetitle', 'voiceinvitehint', 'voiceinvitename',
         'voiceinvitenamehint', 'voiceinvitemake', 'voicesignature', 'voicesignaturehint', 'voicetextheading', 'voicepaper',
         'voiceinvitechild', 'voiceinvitechildnone', 'voiceinvitechildhint'] as $key

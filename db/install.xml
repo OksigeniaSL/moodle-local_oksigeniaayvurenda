@@ -454,6 +454,9 @@
         <FIELD NAME="classyearid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice heard by one class: its school year"/>
         <FIELD NAME="classgroup" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice heard by one class: its group"/>
         <FIELD NAME="deletetoken" TYPE="char" LENGTH="48" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: the key of the link that deletes it without logging in"/>
+        <FIELD NAME="forlittle" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a voice: an older reader read it for the little ones"/>
+        <FIELD NAME="tellfamily" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a voice: whoever recorded it wants their family to hear it once approved"/>
+        <FIELD NAME="timetold" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: when their family was sent the way to hear it"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

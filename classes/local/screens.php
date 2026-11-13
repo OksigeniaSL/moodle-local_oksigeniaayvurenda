@@ -113,6 +113,8 @@ final class screens {
             'hero' => $hero,
             'classblock' => $hero['classreads'] ? ['cards' => $hero['classreads']] : null,
             'eldersblock' => $hero['young'] ? self::elders($library) : null,
+            // What the older readers read for them («Leyó para los pequeños»): only on a young reader's home.
+            'littleshelf' => $hero['young'] ? self::little_shelf($library) : null,
             'classheading' => self::said($library, 'homeclass'),
             'shelfprev' => self::str('shelfprev'),
             'shelfnext' => self::str('shelfnext'),
@@ -1040,6 +1042,23 @@ final class screens {
     }
 
     /**
+     * «Te lo leen los mayores»: the books the older readers read for the little ones, with Memoria pointing at them.
+     *
+     * @param \stdClass $library
+     * @return array|null heading, hint, figure, books; null when there is none to hear.
+     */
+    private static function little_shelf(\stdClass $library): ?array {
+        global $USER;
+        $books = forlittle::shelf($library, digital::viewer((int) $library->entityid, (int) $USER->id));
+        if (!$books) {
+            return null;
+        }
+        return ['heading' => self::str('littleshelf'), 'hint' => self::str('littleshelfhint'),
+            'figure' => characters::figure('memory', 'senala', characters::step((int) $library->entityid)),
+            'books' => $books];
+    }
+
+    /**
      * «Listen» for a young reader: the clips of some lines, in the reader's language, played in turn.
      *
      * @param string[] $paths With {lang} for the language, like ui/{lang}/homequestion.
@@ -1071,24 +1090,36 @@ final class screens {
             'status' => 'active']);
         $stage = $reader ? (int) garden::album($reader)['flower']['stage'] : 0;
         $book = !empty($hero['remembers']['cover']) ? $hero['remembers'] : null;
-        $doors = [[
+        // With voices the older readers read for them, the story for today is one of those, the next one each day.
+        $read = forlittle::today($library, digital::viewer($entityid, (int) $USER->id), time());
+        $doors = [$read ? [
+            'kind' => 'cuento',
+            'url' => $read['url'],
+            'image' => $read['hascover'] ? $read['coverurl'] : self::art('rincon-8'),
+            'cover' => true,
+            'pointing' => null,
+            'word' => self::str('littlestory'),
+            'by' => $read['by'],
+            'listen' => $read['audio'] !== '' ? ['urls' => $read['audio']] : null,
+        ] : [
             'kind' => 'cuento',
             'url' => $book ? $book['url'] : self::url('search.php', $library, ['corner' => '8']),
             'image' => $book ? $book['cover'] : self::art('rincon-8'),
             'cover' => true,
             'pointing' => characters::figure('memory', 'senala', $step),
             'word' => self::str('littlestory'),
+            'by' => '',
             'listen' => self::listen([$voice . 'infantstory']),
         ]];
         $visit = visit::card($library, false);
         if ($visit) {
             $doors[] = ['kind' => 'sala', 'url' => $visit['url'], 'image' => self::art('visita/vestibulo-fondo'),
-                'cover' => false, 'pointing' => null, 'word' => self::str('littlevisit'),
+                'cover' => false, 'pointing' => null, 'word' => self::str('littlevisit'), 'by' => '',
                 'listen' => self::listen([$voice . 'infantvisit'])];
         }
         $doors[] = ['kind' => 'flor', 'url' => self::url('card.php', $library),
             'image' => self::art('carne/flor/' . ['semilla', 'brote', 'capullo', 'flor'][min(3, max(0, $stage))]),
-            'cover' => false, 'pointing' => null, 'word' => self::str('littleflower'),
+            'cover' => false, 'pointing' => null, 'word' => self::str('littleflower'), 'by' => '',
             'listen' => self::listen([$voice . 'heraldstage' . $stage])];
         foreach ($doors as &$door) {
             $door['listenlabel'] = self::str('littlelisten', $door['word']);

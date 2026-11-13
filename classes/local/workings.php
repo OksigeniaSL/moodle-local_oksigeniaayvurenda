@@ -45,7 +45,7 @@ final class workings {
 
     /** @var string[] The colours of the spines, by shelf and kind. */
     private const SPINES = ['rule' => 'green', 'door' => 'coral', 'lights' => 'sun', 'route' => 'green2', 'postcard' => 'coral',
-        'diploma' => 'sun', 'sign' => 'coral', 'challenges' => 'sun',
+        'diploma' => 'sun', 'forlittle' => 'green2', 'sign' => 'coral', 'challenges' => 'sun',
         'card' => 'green2', 'history' => 'green', 'photos' => 'coral', 'skin' => 'night', 'name' => 'green', 'year' => 'coral',
         'classification' => 'sun', 'letter' => 'green2', 'zone' => 'night'];
 
@@ -99,6 +99,12 @@ final class workings {
         if ($firstbook !== -1) {
             firstbook::save($entityid, (bool) $firstbook);
             return 'ayv-hiw-firstbook';
+        }
+        // What a reader read for the little ones, to their family.
+        $readforlittle = optional_param('readforlittle', -1, PARAM_INT);
+        if ($readforlittle !== -1) {
+            forlittle::save($entityid, (bool) $readforlittle);
+            return 'ayv-hiw-forlittle';
         }
         // The diploma of a full bingo card, to the family.
         $diploma = optional_param('diploma', -1, PARAM_INT);
@@ -408,6 +414,18 @@ final class workings {
                 'note' => $str('hiwfirstbooknote'),
             ],
         ]);
+        // What an older reader read for the little ones: the family of whoever wants it hears it, if the centre wants.
+        if (plans::allows($entityid, 'voices')) {
+            $told = forlittle::on($entityid);
+            $voice[] = $phrase('forlittle', 'forlittle', $str('hiwspineforlittle'), $str(
+                $told ? 'hiwforlittleon' : 'hiwforlittleoff'
+            ), [
+                'lights' => [
+                    'list' => [$chip('readforlittle', $told ? '0' : '1', $str('hiwforlittlelight'), $told)],
+                    'note' => $str('hiwforlittlenote'),
+                ],
+            ]);
+        }
         // The diploma of a full bingo card: every reader downloads theirs; the family of a young one, if the centre wants.
         if (diploma::drawable()) {
             $diploma = diploma::on($entityid);

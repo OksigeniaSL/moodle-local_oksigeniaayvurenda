@@ -42,7 +42,7 @@
     <div class="ayv-pq-bocadillo"><p>{{greeting}}</p>{{#hello}}<button class="ayv-listen ayv-pq-voz" type="button" data-ayv-say="{{urls}}" aria-pressed="false" aria-label="{{hellolabel}}">{{> local_oksigeniaayvurenda/icon_volume}}</button>{{/hello}}</div>
 </div>
 <ul class="ayv-pq-puertas">
-    {{#doors}}<li class="ayv-pq-puerta ayv-pq-{{kind}}"><a class="ayv-pq-entra" href="{{url}}">{{#image}}<img{{#cover}} class="ayv-pq-tapa"{{/cover}} src="{{image}}" alt="">{{/image}}{{#pointing}}<img class="ayv-pq-quien" src="{{pointing}}" alt="">{{/pointing}}<span class="ayv-pq-palabra">{{word}}</span></a>{{#listen}}<button class="ayv-listen ayv-pq-voz" type="button" data-ayv-say="{{urls}}" aria-pressed="false" aria-label="{{listenlabel}}">{{> local_oksigeniaayvurenda/icon_volume}}</button>{{/listen}}</li>{{/doors}}
+    {{#doors}}<li class="ayv-pq-puerta ayv-pq-{{kind}}"><a class="ayv-pq-entra" href="{{url}}">{{#image}}<img{{#cover}} class="ayv-pq-tapa"{{/cover}} src="{{image}}" alt="">{{/image}}{{#pointing}}<img class="ayv-pq-quien" src="{{pointing}}" alt="">{{/pointing}}<span class="ayv-pq-palabra">{{word}}{{#by}}<span class="ayv-lp-mayores">{{by}}</span>{{/by}}</span></a>{{#listen}}<button class="ayv-listen ayv-pq-voz" type="button" data-ayv-say="{{urls}}" aria-pressed="false" aria-label="{{listenlabel}}">{{> local_oksigeniaayvurenda/icon_volume}}</button>{{/listen}}</li>{{/doors}}
 </ul>
 {{#elders}}<a class="ayv-pq-mayores ayv-cf-enlace" href="{{url}}">{{label}}</a>{{/elders}}
 </div>
