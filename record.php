@@ -83,6 +83,23 @@ if ($channel && optional_param('channel', 0, PARAM_BOOL) && data_submitted() && 
     $posted = \local_oksigeniaayvurenda\local\channel::post_book($library, $id);
     redirect(new moodle_url($PAGE->url, ['channelsent' => $posted ? 1 : 2]));
 }
+// Whoever works at the desk picks this book as the book of the week, with a line of their own (P9), or takes it away.
+$pickable = access::can('local/oksigeniaayvurenda:desk', $library) && !\local_oksigeniaayvurenda\local\bank::is($library);
+$weekpick = optional_param('weekpick', '', PARAM_ALPHA);
+if ($pickable && $weekpick !== '' && data_submitted() && confirm_sesskey()) {
+    if ($weekpick === 'pick') {
+        \local_oksigeniaayvurenda\local\weekpick::pick(
+            $library,
+            $id,
+            optional_param('phrase', '', PARAM_TEXT),
+            (int) $USER->id,
+            time()
+        );
+    } else if ($weekpick === 'clear') {
+        \local_oksigeniaayvurenda\local\weekpick::clear($library);
+    }
+    redirect(new moodle_url($PAGE->url, ['picked' => 1], 'ayv-weekpick'));
+}
 // A reader who took the book home tells what they thought, or takes it back.
 $do = optional_param('review', '', PARAM_ALPHA);
 if ($do !== '' && data_submitted() && confirm_sesskey()) {
@@ -168,6 +185,28 @@ $data['memoryalso'] = $said ? [
     'heading' => get_string('memoryalsoheading', 'local_oksigeniaayvurenda'),
     'said' => $said,
     'cards' => array_values(screens::cards(catalogue::cards_of($also, $library), $library)),
+] : null;
+$pick = $pickable ? \local_oksigeniaayvurenda\local\weekpick::of($library, time()) : null;
+$isthis = $pick && $pick['recordid'] === $id;
+$data['weekpick'] = $pickable ? [
+    'action' => $PAGE->url->out(false),
+    'sesskey' => sesskey(),
+    'heading' => get_string('weekpickheading', 'local_oksigeniaayvurenda'),
+    'says' => $isthis ? get_string('weekpickthis', 'local_oksigeniaayvurenda', userdate(
+        $pick['until'],
+        get_string('strftimedaydate', 'langconfig')
+    )) : ($pick ? get_string(
+        'weekpickother',
+        'local_oksigeniaayvurenda',
+        format_string($pick['title'], true, ['escape' => false])
+    ) : get_string('weekpicknone', 'local_oksigeniaayvurenda')),
+    'isthis' => $isthis,
+    'value' => $isthis ? $pick['phrase'] : '',
+    'label' => get_string('weekpickphrase', 'local_oksigeniaayvurenda'),
+    'hint' => get_string('weekpickhint', 'local_oksigeniaayvurenda'),
+    'pick' => get_string($isthis ? 'weekpickkeep' : 'weekpickdo', 'local_oksigeniaayvurenda'),
+    'clear' => get_string('weekpickclear', 'local_oksigeniaayvurenda'),
+    'saved' => optional_param('picked', 0, PARAM_BOOL) ? get_string('hiwsaved', 'local_oksigeniaayvurenda') : '',
 ] : null;
 $sent = optional_param('channelsent', 0, PARAM_INT);
 $data['channel'] = $channel ? [

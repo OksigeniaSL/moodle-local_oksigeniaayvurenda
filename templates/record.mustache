@@ -31,6 +31,10 @@
     {
         "card": {"colour": 1, "title": "El faro dormido", "authors": "Ana Montes", "statelabel": "Libre",
                  "stateclass": "free", "location": "Estantería infantil"},
+        "weekpick": {"action": "https://example.com/record.php", "sesskey": "abc", "heading": "El libro de la semana",
+            "says": "Es el libro de la semana hasta el viernes.", "isthis": true, "value": "Para leer de un tirón.",
+            "label": "Tu frase, en una línea", "hint": "Sale con tu nombre.", "pick": "Guardar la frase",
+            "clear": "Quitarlo", "saved": "Guardado"},
         "title": "El faro dormido",
         "subtitle": "una aventura en la costa",
         "authors": [{"name": "Ana Montes", "role": ""}, {"name": "Leo Prado", "role": "ilustraciones"}],
@@ -198,6 +202,18 @@
         {{#done}}<p class="ayv-notice" role="status">{{done}}</p>{{/done}}
         <form method="post" action="{{action}}" class="ayv-record-channel"><input type="hidden" name="sesskey" value="{{sesskey}}"><button type="submit" class="ayv-button ayv-button-quiet" name="channel" value="1">{{label}}</button> <span class="ayv-field-hint">{{hint}}</span></form>
         {{/channel}}
+        {{#weekpick}}
+        <section class="ayv-weekpick" id="ayv-weekpick" aria-labelledby="ayv-weekpick-t">
+            <h2 class="ayv-section-title" id="ayv-weekpick-t">{{heading}}</h2>
+            {{#saved}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{saved}}</span></p>{{/saved}}
+            <p>{{says}}</p>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                <label class="ayv-nr-escrito"><span>{{label}}</span><input type="text" name="phrase" maxlength="160" value="{{value}}" autocomplete="off"></label>
+                <p class="ayv-cf-nota">{{hint}}</p>
+                <p class="ayv-cf-fila"><button class="ayv-button" type="submit" name="weekpick" value="pick">{{pick}}</button>{{#isthis}}<button class="ayv-button ayv-button-quiet" type="submit" name="weekpick" value="clear">{{clear}}</button>{{/isthis}}</p>
+            </form>
+        </section>
+        {{/weekpick}}
         {{#correct}}
         {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
         {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
@@ -326,6 +342,7 @@
                 </div>
                 {{#canrecommend}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="forlittle" value="1" {{#recommended}}checked{{/recommended}}> {{recommend}}</label>{{/canrecommend}}
                 {{#hasmine}}<p class="ayv-field-hint">{{state}}</p>{{/hasmine}}
+                {{#scent}}<p class="ayv-review-scent">{{scent}}</p>{{/scent}}
                 <p class="ayv-book-actions ayv-review-send">{{#hasmine}}<button type="submit" class="ayv-button ayv-button-quiet" name="review" value="remove" formnovalidate>{{remove}}</button>{{/hasmine}}
                     <button type="submit" class="ayv-button" name="review" value="send">{{send}}</button></p>
             </form>{{/write}}

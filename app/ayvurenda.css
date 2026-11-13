@@ -9866,3 +9866,14 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
 .ayv .ayv-board-moments-sobrio::before {
     content: none;
 }
+
+/* «The nose»: to the author of a review, how many took the book since it went up (P4). */
+.ayv .ayv-review-scent {
+    display: inline-block;
+    margin: 4px 0 0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(240, 180, 60, .22);
+    color: var(--ink);
+    font-weight: 700;
+}

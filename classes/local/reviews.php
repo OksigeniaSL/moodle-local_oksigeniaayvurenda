@@ -352,6 +352,30 @@ final class reviews {
     }
 
     /**
+     * «The nose» (P4 of the review of 12 November): how many other readers have taken the book since a review of it
+     * was published, for its author alone.
+     *
+     * @param \stdClass $review
+     * @return int
+     */
+    public static function followers(\stdClass $review): int {
+        global $DB;
+        if ($review->status !== 'published') {
+            return 0;
+        }
+        return (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT l.readerid)
+               FROM {local_oksigeniaayvurenda_loan} l
+               JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+               JOIN {local_oksigeniaayvurenda_library} b ON b.id = l.libraryid
+              WHERE i.recordid = :recordid AND b.entityid = :entityid AND l.timeloaned >= :since
+                AND l.readerid <> :readerid",
+            ['recordid' => $review->recordid, 'entityid' => $review->entityid,
+                'since' => (int) ($review->timedecided ?: $review->timemodified), 'readerid' => $review->readerid]
+        );
+    }
+
+    /**
      * Publishes a review, or not.
      *
      * @param int $id

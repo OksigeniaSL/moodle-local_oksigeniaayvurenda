@@ -980,6 +980,8 @@ final class screens {
                 'send' => self::str($mine ? 'reviewresend' : 'reviewsend'),
                 'hasmine' => (bool) $mine,
                 'state' => $mine ? self::str('reviewstate' . $mine->status) : '',
+                // To its author alone, and only from a few readers on: how many took the book since it went up (P4).
+                'scent' => $mine && ($taken = reviews::followers($mine)) >= anonymity::FEW ? self::str('reviewscent', $taken) : '',
                 'remove' => self::str('reviewremove'),
                 'canrecommend' => $older,
                 'recommend' => self::str('reviewforlittle'),
@@ -1362,6 +1364,20 @@ final class screens {
         global $DB;
         if (bank::is($library)) {
             return null;
+        }
+        // The one a librarian picked this week, with their line and their name; else the one most taken.
+        $pick = weekpick::of($library, $now ?? time());
+        if ($pick) {
+            $said = characters::say(
+                (int) $library->entityid,
+                'herald',
+                $pick['phrase'] !== '' ? 'heraldpick' : 'heraldpicknophrase',
+                ['title' => $pick['title'], 'phrase' => $pick['phrase'], 'name' => $pick['name'] !== '' ? $pick['name']
+                : format_string($library->name, true, ['escape' => false])],
+                'celebra'
+            );
+            return $said ? $said + ['url' => self::url('record.php', $library, ['id' => $pick['recordid']]),
+                'cover' => covers::url($pick['recordid']), 'label' => self::str('memorygo')] : null;
         }
         $rows = $DB->get_records_sql(
             "SELECT i.recordid, COUNT(DISTINCT l.readerid) AS readers

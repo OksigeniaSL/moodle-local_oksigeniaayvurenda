@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.252.0 (2026-11-13)
+
+- The book of the week, picked by the library (P9 of the review): from a record, whoever works at the desk recommends
+  it this week with a line of their own; for seven days the herald says it on the readers' home with that line and
+  their first name («Elena, from the library, recommends…»); then, or when taken away, the home goes back to the book
+  most taken.
+- «The nose» (P4): the author of a published review, and only they, sees under it how many readers have taken the book
+  since it went up, from five on.
+
 ## 0.251.0 (2026-11-13)
 
 - My class for a pupil: their own class as its tutor sees it, without choosing anything (the challenge of the term,
