@@ -122,6 +122,9 @@ body > p a { color: inherit; }
     <h1 class="ayvm-ink ayvm-title" style="margin:0 0 12px;font-family:Literata,Georgia,'Times New Roman',serif;font-size:30px;line-height:1.2;font-weight:600;color:#1e2b2a;">{{heading}}</h1>
     {{#lead}}<p class="ayvm-ink" style="margin:0 0 12px;font-size:16px;line-height:1.55;color:#1e2b2a;">{{.}}</p>{{/lead}}
 </td></tr>
+{{#postcard}}
+<tr><td class="ayvm-pad" style="border:0;padding:6px 32px 10px;"><img src="{{url}}" width="536" alt="{{alt}}" style="display:block;width:100%;height:auto;border-radius:12px;"></td></tr>
+{{/postcard}}
 {{#book}}
 <tr><td class="ayvm-pad" style="border:0;padding:6px 32px 10px;">
 <table role="presentation" class="ayvm-slip" style="width:100%;border-collapse:separate;border-spacing:0;background-color:#fdfaf2;border:1px solid #e4d8bf;border-radius:16px;">

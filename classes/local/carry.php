@@ -82,7 +82,8 @@ final class carry {
             return true;
         }
         $DB->insert_record(self::T, ['entityid' => $library->entityid, 'readerid' => $readerid, 'recordid' => $recordid,
-            'lanterns' => max(0, min(self::LANTERNS, $lanterns)), 'timefound' => $now, 'timetaken' => null]);
+            'lanterns' => max(0, min(self::LANTERNS, $lanterns)), 'corner' => \core_text::substr($corner, 0, 10),
+            'timefound' => $now, 'timetaken' => null]);
         return true;
     }
 

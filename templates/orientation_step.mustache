@@ -1,0 +1,34 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/orientation_step
+
+    The route in the game of a room, after a book found (Jujol's mock-up of 13 November): with the first and second rooms,
+    the small path and the rooms left; with the third, the badge falling like a stamp, and the way to it.
+
+    Example context (json):
+    {
+        "avance": {"pathlabel": "2 de 3 salas: Artes, Ciencias", "steps": [{"done": true, "room": "Artes"},
+            {"done": true, "room": "Ciencias"}, {"done": false, "room": ""}], "meta": null,
+            "says": "Te queda una sala para conocer la biblioteca."},
+        "insignia": null
+    }
+}}
+{{#avance}}<div class="ayv-or-avance" role="status">{{> local_oksigeniaayvurenda/orientation_path}}<p>{{says}}</p></div>{{/avance}}
+{{#insignia}}<div class="ayv-or-insignia" role="status">{{#img}}<img src="{{img}}" alt="" width="104" height="104">{{/img}}
+    <p class="ayv-or-insignia-t">{{title}}</p>
+    <p>{{text}} <a href="{{link}}">{{linklabel}}</a></p></div>{{/insignia}}

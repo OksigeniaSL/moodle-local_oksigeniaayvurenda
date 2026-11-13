@@ -1,0 +1,36 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/orientation_card
+
+    The welcome route on the reader's card, first of their paths and twice as wide (Jujol's mock-up of 13 November): on the
+    way, the badge grey and the rooms; won, its day and the way to their badges. The card wraps it in its li.
+
+    Example context (json):
+    {
+        "img": "https://example.com/insignia.webp", "name": "Conoce la biblioteca", "won": false,
+        "pathlabel": "1 de 3 salas: Lengua y literatura",
+        "steps": [{"done": true, "room": "Lengua y literatura"}, {"done": false, "room": "La que elijas"}], "meta": null,
+        "hint": "Encuentra el libro escondido en dos salas más de la visita.",
+        "link": "https://example.com/visit.php", "linklabel": "Ir a la visita"
+    }
+}}
+{{#img}}<img src="{{img}}" alt="" width="92" height="92">{{/img}}
+<p class="ayv-path-name">{{name}}</p>
+{{^won}}{{> local_oksigeniaayvurenda/orientation_path}}{{/won}}
+{{#won}}<p class="ayv-path-detail">{{day}}</p>{{/won}}
+<p class="ayv-path-hint">{{hint}}{{#link}} <a href="{{link}}">{{linklabel}}</a>{{/link}}</p>

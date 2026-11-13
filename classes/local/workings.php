@@ -44,7 +44,8 @@ final class workings {
     private const SAMPLES = ['udc' => '82-3 ROW', 'dewey' => '823 ROW', 'other' => 'N ROW'];
 
     /** @var string[] The colours of the spines, by shelf and kind. */
-    private const SPINES = ['rule' => 'green', 'door' => 'coral', 'lights' => 'sun', 'sign' => 'coral', 'challenges' => 'sun',
+    private const SPINES = ['rule' => 'green', 'door' => 'coral', 'lights' => 'sun', 'route' => 'green2', 'postcard' => 'coral',
+        'sign' => 'coral', 'challenges' => 'sun',
         'card' => 'green2', 'history' => 'green', 'photos' => 'coral', 'skin' => 'night', 'name' => 'green', 'year' => 'coral',
         'classification' => 'sun', 'letter' => 'green2', 'zone' => 'night'];
 
@@ -75,6 +76,29 @@ final class workings {
             }
             libraries::update_entity($entityid, ['play' => array_keys(array_filter($on))]);
             return 'ayv-hiw-lights';
+        }
+        // The welcome route (P8): its light, and the stages it is for (none chosen: all but Infantil).
+        $route = optional_param('orientation', -1, PARAM_INT);
+        $routestages = optional_param_array('orientationstage', [], PARAM_INT);
+        if ($route !== -1 || $routestages) {
+            $now = orientation::settings($entityid);
+            $known = array_values(array_filter(holds::stages($entityid, time()), fn($s) => !cartilla::infant($s)));
+            $for = $now['stages'] ?: $known;
+            foreach ($routestages as $index => $value) {
+                $stage = $known[(int) $index] ?? null;
+                if ($stage !== null) {
+                    $for = $value ? array_values(array_unique(array_merge($for, [$stage])))
+                        : array_values(array_diff($for, [$stage]));
+                }
+            }
+            orientation::save($entityid, $route !== -1 ? (bool) $route : $now['on'], $for);
+            return 'ayv-hiw-orientation';
+        }
+        // The postcard of the first book, to the family (the first «subidón»).
+        $firstbook = optional_param('firstbook', -1, PARAM_INT);
+        if ($firstbook !== -1) {
+            firstbook::save($entityid, (bool) $firstbook);
+            return 'ayv-hiw-firstbook';
         }
         $stages = holds::stages($entityid, time());
         $challenge = optional_param_array('challenge', [], PARAM_INT);
@@ -327,6 +351,32 @@ final class workings {
                 ))),
                 'note' => $str('hiwlightsnote'),
             ]]);
+        // The welcome route, behind the lights it needs (Jujol, 13 November).
+        $route = orientation::settings($entityid);
+        $needs = empty($play['visit']) || empty($play['games']);
+        $grown = array_values(array_filter($stages, fn($stage) => !cartilla::infant($stage)));
+        $routefor = $route['stages'] ?: $grown;
+        $routeon = $route['on'] && !$needs;
+        $daily[] = $phrase('orientation', 'route', $str('hiwspineroute'), !$routeon ? $str('hiworientationoff')
+            : ($routefor ? $str('hiworientationon', self::join(array_map('s', $routefor), $str)) : $str('hiworientationonall')), [
+            'orientation' => [
+                'img' => orientation::art('sky'),
+                'light' => $chip('orientation', $route['on'] ? '0' : '1', $str('hiworientationlight'), $routeon)
+                    + ['disabled' => $needs],
+                'stages' => $needs ? [] : array_map(
+                    fn($stage, $i) => $chip(
+                        'orientationstage[' . $i . ']',
+                        in_array($stage, $routefor, true) ? '0' : '1',
+                        $stage,
+                        in_array($stage, $routefor, true)
+                    ),
+                    $grown,
+                    array_keys($grown)
+                ),
+                'hasstages' => !$needs && $grown,
+                'note' => $str($needs ? 'hiworientationneeds' : 'hiworientationnote'),
+            ],
+        ]);
 
         // The library's voice: signing, the class challenges, the card, the history, the photo.
         $voice = [];
@@ -337,6 +387,21 @@ final class workings {
             'list' => array_map(fn($s) => $chip('set[reviewsign]', $s, $str('reviewsign' . $s), $s === $sign) + [
                 'text' => $str('hiwsignsample'), 'signature' => $str(skins::words($entityid, 'hiwsignby' . $s))], reviews::SIGNS),
         ]]);
+        // The postcard of the first book, to the family of a young reader (the first «subidón»; Jujol, 13 November).
+        $postcard = firstbook::on($entityid);
+        $voice[] = $phrase('firstbook', 'postcard', $str('hiwspinepostcard'), $str(
+            $postcard ? 'hiwfirstbookon' : 'hiwfirstbookoff'
+        ), [
+            'firstbook' => [
+                // Gaudí's postcard itself, small, with example data (Jujol); the drawn one without the art package.
+                'postcard' => postcard::sample($library),
+                'cover' => screens::art('portadas/libro-abuela'),
+                'sampletitle' => $str('hiwfirstbooksampletitle'),
+                'sampleline' => $str('hiwfirstbooksampleline'),
+                'light' => $chip('firstbook', $postcard ? '0' : '1', $str('hiwfirstbooklight'), $postcard),
+                'note' => $str('hiwfirstbooknote'),
+            ],
+        ]);
         if ($classes) {
             $off = challenges::stages_off($entityid);
             $on = array_values(array_diff($stages, $off));

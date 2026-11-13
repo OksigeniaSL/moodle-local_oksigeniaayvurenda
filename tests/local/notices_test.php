@@ -265,6 +265,9 @@ final class notices_test extends \advanced_testcase {
         if (!class_exists('\\local_oksigeniafamily\\api')) {
             require_once($CFG->dirroot . '/local/oksigeniaayvurenda/tests/fixtures/family_api.php');
         }
+        if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {
+            \local_oksigeniafamily\api::reset();
+        }
         [$library, $year, $now, $readers] = $this->library();
         $ana = $DB->get_record(self::T . 'reader', ['id' => $readers['ana']->id]);
         $this->assertSame('flower', cards::look_of($ana, $now));
@@ -288,6 +291,9 @@ final class notices_test extends \advanced_testcase {
         $this->assertStringNotContainsString('index.php', $toivan[0]->body);
         $messages->close();
         $emails->close();
+        if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {
+            \local_oksigeniafamily\api::reset();
+        }
     }
 
     /**

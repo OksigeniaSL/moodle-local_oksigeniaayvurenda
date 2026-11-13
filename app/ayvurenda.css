@@ -11710,6 +11710,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     font-weight: 700;
 }
 
+
 /* The barcode of the copy on the label, from code39 as labels.php draws it. */
 .ayv .ayv-cc-etiqueta-codigo svg {
     display: block;
@@ -11726,4 +11727,387 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     .ayv .ayv-cc-hoja:last-of-type {
         break-after: auto;
     }
+}
+
+/* «La orientación con insignia» (P8 of the review of 12 November) and «Su primer libro», Jujol, 13 Nov 2026. After
+   como-funciona.css; everything hangs from .ayv and carries the prefix .ayv-or-. The route is the drawing of Gaudí's
+   badge laid on the floor: three stepping stones to the open door. A stone lights up, warm as the lantern of the game,
+   with the room where the book was found; the badge waits at the end, grey, until the third. Chrome 93 and Firefox 98:
+   no :has(), no color-mix(). */
+
+.ayv .ayv-or-camino {
+    --or-piedra: #d8cfc0;
+    --or-piedra-borde: #b9ad99;
+    --or-luz: #f0b43c;
+    --or-luz-borde: #c98a17;
+    --or-brillo: rgba(240, 180, 60, .35);
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+html[data-bs-theme="dark"] .ayv .ayv-or-camino {
+    --or-piedra: #3a4d49;
+    --or-piedra-borde: #566b66;
+}
+
+/* The path between the stones, a line of footsteps. */
+.ayv .ayv-or-camino::before {
+    content: "";
+    position: absolute;
+    top: 17px;
+    right: 40px;
+    left: 30px;
+    border-top: 3px dotted var(--or-piedra-borde);
+}
+
+.ayv .ayv-or-paso {
+    position: relative;
+    display: grid;
+    flex: 1 1 0;
+    justify-items: center;
+    gap: 6px;
+    min-width: 0;
+    text-align: center;
+}
+
+.ayv .ayv-or-piedra {
+    display: block;
+    width: 46px;
+    height: 34px;
+    border: 2px solid var(--or-piedra-borde);
+    border-radius: 48% 52% 44% 56% / 58% 50% 50% 42%;
+    background: var(--or-piedra);
+    box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .08);
+}
+
+.ayv .ayv-or-paso:nth-child(2) .ayv-or-piedra {
+    border-radius: 55% 45% 52% 48% / 46% 56% 44% 54%;
+    transform: rotate(-6deg);
+}
+
+.ayv .ayv-or-paso:nth-child(3) .ayv-or-piedra {
+    border-radius: 44% 56% 50% 50% / 52% 44% 56% 48%;
+    transform: rotate(5deg);
+}
+
+.ayv .ayv-or-hecha .ayv-or-piedra {
+    border-color: var(--or-luz-borde);
+    background: radial-gradient(circle at 40% 35%, #ffe2a0, var(--or-luz) 70%);
+    box-shadow: 0 0 0 6px var(--or-brillo), inset 0 -4px 0 rgba(120, 70, 0, .18);
+}
+
+.ayv .ayv-or-sala {
+    font-size: .85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.ayv .ayv-or-paso:not(.ayv-or-hecha) .ayv-or-sala {
+    font-weight: 400;
+    opacity: .7;
+}
+
+/* The badge at the end of the path: grey and dim until the third stone. */
+.ayv .ayv-or-meta {
+    position: relative;
+    display: grid;
+    flex: none;
+    justify-items: center;
+    gap: 4px;
+    width: 76px;
+    margin-top: -18px;
+    text-align: center;
+}
+
+.ayv .ayv-or-meta img {
+    display: block;
+    width: 64px;
+    height: 64px;
+    filter: grayscale(1);
+    opacity: .55;
+}
+
+.ayv .ayv-or-ganada .ayv-or-meta img {
+    filter: none;
+    opacity: 1;
+}
+
+.ayv .ayv-or-meta span {
+    font-size: .75rem;
+    line-height: 1.15;
+    opacity: .75;
+}
+
+/* ---------- 1. The hall of the visit: the route, between the bar and the scene ---------- */
+.ayv .ayv-or-ruta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+    gap: 14px 28px;
+    align-items: center;
+    padding: 16px 22px;
+    margin: 0 0 16px;
+    border-radius: var(--radius);
+    background: var(--paper2);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.ayv .ayv-or-ruta h2 {
+    margin: 0 0 4px;
+    font-family: var(--title);
+    font-size: 1.25rem;
+}
+
+.ayv .ayv-or-ruta p {
+    margin: 0;
+}
+
+.ayv .ayv-or-ruta .ayv-button {
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .ayv .ayv-or-ruta {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-or-ruta .ayv-button {
+        justify-self: start;
+        white-space: normal;
+    }
+}
+
+/* ---------- 2. In the game of the room: how the route goes, and the badge with the third ---------- */
+.ayv .ayv-or-avance {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 14px;
+    align-items: center;
+    padding: 10px 14px;
+    margin: 8px 0 12px;
+    border-radius: 12px;
+    background: var(--paper2);
+}
+
+.ayv .ayv-or-avance p {
+    margin: 0;
+    font-weight: 700;
+}
+
+.ayv .ayv-or-avance .ayv-or-camino {
+    gap: 4px;
+}
+
+.ayv .ayv-or-avance .ayv-or-camino::before {
+    top: 11px;
+    right: 14px;
+    left: 14px;
+}
+
+.ayv .ayv-or-avance .ayv-or-piedra {
+    width: 30px;
+    height: 22px;
+}
+
+.ayv .ayv-or-avance .ayv-or-hecha .ayv-or-piedra {
+    box-shadow: 0 0 0 4px var(--or-brillo), inset 0 -3px 0 rgba(120, 70, 0, .18);
+}
+
+/* The third: the badge comes down like a seal on paper. */
+.ayv .ayv-or-insignia {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 18px;
+    align-items: center;
+    padding: 14px 18px;
+    margin: 8px 0 12px;
+    border-radius: 14px;
+    background: var(--paper2);
+    box-shadow: inset 0 0 0 2px var(--sun);
+}
+
+.ayv .ayv-or-insignia img {
+    display: block;
+    width: 104px;
+    height: 104px;
+    grid-row: span 2;
+    animation: ayv-or-sello .7s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+
+.ayv .ayv-or-insignia p {
+    margin: 0;
+}
+
+.ayv .ayv-or-insignia .ayv-or-insignia-t {
+    font-family: var(--title);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+@keyframes ayv-or-sello {
+    from {
+        opacity: 0;
+        transform: scale(1.6) rotate(-14deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-or-insignia img {
+        animation: none;
+    }
+}
+
+/* ---------- 3. The card of the reader: the route, and the badge won ---------- */
+.ayv .ayv-or-carne {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 16px;
+    align-items: center;
+    padding: .8rem 1rem;
+    border-radius: var(--radius);
+    background: var(--paper2);
+}
+
+.ayv .ayv-or-carne-ancha {
+    grid-column: span 2;
+}
+
+.ayv .ayv-or-carne > img {
+    display: block;
+    width: 92px;
+    height: 92px;
+    grid-row: span 3;
+}
+
+.ayv .ayv-or-carne-sin > img {
+    filter: grayscale(1);
+    opacity: .5;
+}
+
+.ayv .ayv-or-carne p {
+    margin: 0;
+}
+
+.ayv .ayv-or-carne .ayv-or-camino {
+    margin: 4px 0 2px;
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-or-avance {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-or-carne-ancha {
+        grid-column: auto;
+    }
+
+    .ayv .ayv-or-carne > img {
+        width: 72px;
+        height: 72px;
+    }
+
+    .ayv .ayv-or-meta {
+        width: 60px;
+    }
+
+    .ayv .ayv-or-meta img {
+        width: 52px;
+        height: 52px;
+    }
+
+    .ayv .ayv-or-sala {
+        font-size: .8rem;
+    }
+}
+
+/* ---------- 4. «Cómo funciona»: the badge beside its light, and the postcard of the first book ---------- */
+.ayv .ayv-or-cf-insignia {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+
+.ayv .ayv-or-cf-insignia img {
+    flex: none;
+    width: 72px;
+    height: 72px;
+}
+
+/* A postcard in miniature, until Gaudí's: the cover, the name and the day, with its stamp. */
+.ayv .ayv-or-postal {
+    position: relative;
+    display: grid;
+    flex: none;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    width: 15rem;
+    padding: 10px 12px;
+    border-radius: 4px;
+    background: #fffdf8;
+    box-shadow: 0 6px 14px -8px rgba(30, 20, 5, .55), inset 0 0 0 1px rgba(30, 43, 42, .12);
+    color: #1e2b2a;
+    transform: rotate(-2deg);
+}
+
+.ayv .ayv-or-postal img {
+    display: block;
+    width: 54px;
+    height: 81px;
+    object-fit: cover;
+    border-radius: 2px 4px 4px 2px;
+}
+
+.ayv .ayv-or-postal b {
+    display: block;
+    font-family: var(--title);
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.ayv .ayv-or-postal small {
+    display: block;
+    color: #5d6965;
+    font-size: .78rem;
+}
+
+.ayv .ayv-or-postal::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 26px;
+    border: 2px dashed var(--coral);
+    border-radius: 2px;
+}
+
+/* As mounted: in «How your library works», Gaudí's postcard itself, small, keeping the turn and the shadow of the drawn
+   one (Jujol); its own stamp is in the picture. */
+.ayv .ayv-or-postal.ayv-or-postal-gaudi {
+    display: block;
+    padding: 0;
+    overflow: hidden;
+}
+
+.ayv .ayv-or-postal.ayv-or-postal-gaudi img {
+    width: 100%;
+    height: auto;
+    object-fit: initial;
+    border-radius: 4px;
+}
+
+.ayv .ayv-or-postal.ayv-or-postal-gaudi::after {
+    display: none;
 }

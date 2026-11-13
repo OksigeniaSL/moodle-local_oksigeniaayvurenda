@@ -38,6 +38,14 @@ if (!class_exists('\local_oksigeniafamily\api', false)) {
         private static int $next = 0;
 
         /**
+         * Forgets every family: one test's families are not the next one's.
+         */
+        public static function reset(): void {
+            self::$families = [];
+            self::$next = 0;
+        }
+
+        /**
          * A new family.
          *
          * @param string $source

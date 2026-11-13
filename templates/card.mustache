@@ -90,6 +90,7 @@
     <h2 class="ayv-section-title">{{pathsheading}}</h2>
     {{#listenpaths}}<p class="ayv-listen-row">{{> local_oksigeniaayvurenda/listen}}</p>{{/listenpaths}}
     <ul class="ayv-paths">
+    {{#orientation}}<li class="ayv-or-carne ayv-or-carne-ancha{{^won}} ayv-or-carne-sin{{/won}}">{{> local_oksigeniaayvurenda/orientation_card}}</li>{{/orientation}}
     {{#paths}}
         <li class="ayv-path"><span class="ayv-path-name">{{label}}</span>
             {{#marks}}<span class="ayv-path-marks">{{{marks}}}</span>{{/marks}}{{#detail}}<span class="ayv-path-detail">{{detail}}</span>{{/detail}}

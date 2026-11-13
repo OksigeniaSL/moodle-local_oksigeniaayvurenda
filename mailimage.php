@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * A picture for a notice sent by e-mail: a mail program has no session, so its address carries a seal instead. Only a book's
- * cover, a library's picture or a character's portrait, nothing about anyone.
+ * A picture for a notice sent by e-mail: a mail program has no session, so its address carries a seal instead. A book's
+ * cover, a library's picture or a character's portrait; and the postcard of a child's first book, which only its family has
+ * the address of.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -35,6 +36,20 @@ $itemid = required_param('i', PARAM_INT);
 $name = required_param('n', PARAM_ALPHANUMEXT);
 $seal = required_param('s', PARAM_ALPHANUM);
 
+// The postcard of a first book is drawn from its loan each time: nothing of it is kept.
+if ($area === 'postcard') {
+    $jpeg = hash_equals(mail::seal($area, $itemid, $name), $seal) ? \local_oksigeniaayvurenda\local\postcard::make($itemid) : null;
+    if ($jpeg === null) {
+        http_response_code(404);
+        die;
+    }
+    @header('Content-Type: image/jpeg');
+    @header('Content-Disposition: inline; filename="primer-libro.jpg"');
+    @header('Cache-Control: private, max-age=2592000');
+    @header('X-Content-Type-Options: nosniff');
+    echo $jpeg;
+    die;
+}
 $file = hash_equals(mail::seal($area, $itemid, $name), $seal) ? mail::file_of($area, $itemid, $name) : null;
 if (!$file) {
     http_response_code(404);

@@ -113,6 +113,7 @@ class provider implements
             'readerid' => 'privacy:metadata:find:readerid',
             'recordid' => 'privacy:metadata:find:recordid',
             'lanterns' => 'privacy:metadata:find:lanterns',
+            'corner' => 'privacy:metadata:find:corner',
             'timefound' => 'privacy:metadata:find:timefound',
             'timetaken' => 'privacy:metadata:find:timetaken',
         ], 'privacy:metadata:find');

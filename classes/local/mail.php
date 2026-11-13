@@ -61,6 +61,18 @@ final class mail {
     /** @var string[] Where a picture of a centre may be. */
     public const AREAS = ['cover', 'libraryimage', 'portrait'];
 
+    /**
+     * The address of the postcard of a first book (the loan's): made each time from the loan, nothing kept; sealed as the
+     * other pictures of a notice.
+     *
+     * @param int $loanid
+     * @return string
+     */
+    public static function postcard(int $loanid): string {
+        return (new \moodle_url('/local/oksigeniaayvurenda/mailimage.php', ['a' => 'postcard', 'i' => $loanid, 'n' => 'p',
+            's' => self::seal('postcard', $loanid, 'p')]))->out(false);
+    }
+
     /** @var string[] What every mail program shows: WebP is not among them. */
     private const TYPES = ['jpg', 'png', 'gif'];
 
@@ -68,7 +80,8 @@ final class mail {
      * A notice ready to send.
      *
      * @param array $content library (its row) or entityid, preheader, hello, heading, lead (paragraphs), book (from book()),
-     *     stamp and place (label, value), books (rows from book() with line, urgent), shelf (from book()), more, people (name,
+     *     postcard (url, alt), stamp and place (label, value), books (rows from book() with line, urgent), shelf (from book()),
+     *     more, people (name,
      *     line), tasks (text, url), button (url, text), after (paragraphs), quiet (hint, url, text), sign (from sign()), why,
      *     prefs,
      *     young (for a reader with the flower), userid (who it is for, so its button can open their app).
@@ -104,6 +117,8 @@ final class mail {
             'hello' => (string) ($content['hello'] ?? ''),
             'heading' => (string) ($content['heading'] ?? ''),
             'lead' => $lead,
+            // A picture to keep and send on, under the lead: the postcard of a first book.
+            'postcard' => $content['postcard'] ?? null,
             'book' => $content['book'] ?? null,
             'stamp' => $content['stamp'] ?? null,
             'place' => $content['place'] ?? null,

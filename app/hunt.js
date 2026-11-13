@@ -136,6 +136,18 @@
         body.append('record', target);
         body.append('lanterns', String(lit));
         window.fetch(lanterns.getAttribute('data-url'), {method: 'POST', body: body, credentials: 'same-origin'})
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(answer) {
+                // A room more of the orientation: the rooms left, or the badge with the third (P8).
+                var route = dialog.querySelector('.ayv-hunt-ruta');
+                if (route && answer && answer.orientation && answer.orientation.html) {
+                    // Drawn by the server from the plugin's own template: the path, or the badge falling like a stamp.
+                    route.innerHTML = answer.orientation.html;
+                    route.hidden = false;
+                }
+            })
             .catch(function() {
                 // Without network the game still ends; the book is just not kept.
             });

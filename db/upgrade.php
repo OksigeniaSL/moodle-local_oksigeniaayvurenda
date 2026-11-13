@@ -795,6 +795,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111319, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111320) {
+        // The room where each hidden book was found: three rooms make the orientation (P8).
+        $table = new xmldb_table('local_oksigeniaayvurenda_find');
+        $field = new xmldb_field('corner', XMLDB_TYPE_CHAR, '10', null, null, null, null, 'lanterns');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026111320, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

@@ -312,14 +312,17 @@ foreach ($readers as $reader) {
     $blindlibrary = $library ?? \local_oksigeniaayvurenda\local\mail::main_library((int) $reader->entityid);
     $blinddates = $blindlibrary ? \local_oksigeniaayvurenda\local\blind::card($reader, $blindlibrary, time(), $str, !$previewid)
         : [];
+    // The welcome route, first of their paths, while they do it and once they won it (P8).
+    $orientation = $blindlibrary ? \local_oksigeniaayvurenda\local\orientation::card($reader, $blindlibrary, $look, time()) : null;
     $cardsdata[] = $card + [
+        'orientation' => $orientation,
         'blinddates' => $blinddates,
         'quests' => $questcards,
         'hasquests' => (bool) $questcards,
         'sanctionline' => \local_oksigeniaayvurenda\local\sanctions::for_reader((int) $reader->entityid, (int) $reader->id, time()),
         'herald' => $herald,
         'paths' => $paths,
-        'haspaths' => (bool) $paths,
+        'haspaths' => (bool) $paths || (bool) $orientation,
         'listenpaths' => $young ? \local_oksigeniaayvurenda\local\screens::listen(array_map(
             fn($p) => 'ui/{lang}/path' . $p,
             ['back', 'explore', 'tell', 'stay']

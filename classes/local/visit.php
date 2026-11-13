@@ -408,9 +408,13 @@ final class visit {
         foreach ($back as $layer) {
             $depth = $layer['depth'];
         }
+        // In the hall, the welcome route of whoever arrives, until they found the hidden book in three rooms (P8).
+        $route = $name === $hallname && !$public && $games
+            ? orientation::band($library, (int) $GLOBALS['USER']->id, $corners, $rooms, $url) : null;
         return [
             'name' => $name,
             'title' => $title,
+            'route' => $route,
             'width' => self::SIZE[0],
             'height' => self::SIZE[1],
             'back' => $back,

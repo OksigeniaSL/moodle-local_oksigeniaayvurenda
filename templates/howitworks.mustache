@@ -94,6 +94,16 @@
                 <div class="ayv-cf-luces">{{#list}}<button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/list}}</div>
                 {{#note}}<p class="ayv-cf-nota">{{note}}</p>{{/note}}
             {{/lights}}
+            {{#orientation}}
+                <div class="ayv-or-cf-insignia">{{#img}}<img src="{{img}}" alt="" width="72" height="72">{{/img}}{{#light}}<div class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"{{#disabled}} disabled{{/disabled}}><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></div>{{/light}}</div>
+                {{#hasstages}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{#str}}cartillafor, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-cf-luces">{{#stages}}<button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/stages}}</span></div>{{/hasstages}}
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/orientation}}
+            {{#firstbook}}
+                <div class="ayv-cf-fila">{{#postcard}}<span class="ayv-or-postal ayv-or-postal-gaudi" aria-hidden="true"><img src="{{postcard}}" alt="" width="480" height="320"></span>{{/postcard}}{{^postcard}}<span class="ayv-or-postal" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" width="54" height="81">{{/cover}}<span><b>{{sampletitle}}</b><small>{{sampleline}}</small></span></span>{{/postcard}}
+                {{#light}}<span class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></span>{{/light}}</div>
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/firstbook}}
             {{#reviews}}
                 <div class="ayv-cf-resenas">{{#list}}<button class="ayv-cf-resena" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-resena-texto">{{text}}</span><span class="ayv-cf-resena-firma">{{signature}}</span><span class="ayv-sr">{{label}}</span></button>{{/list}}</div>
             {{/reviews}}

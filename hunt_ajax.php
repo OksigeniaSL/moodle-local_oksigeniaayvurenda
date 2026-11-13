@@ -29,9 +29,12 @@ require(__DIR__ . '/../../config.php');
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\carry;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\orientation;
 
 require_login(null, false);
 require_sesskey();
+// The route's block is drawn here from a template, and the badge may be given: both need the page's context.
+$PAGE->set_context(context_system::instance());
 $library = catalogue::library(required_param('library', PARAM_ALPHANUMEXT));
 access::require('local/oksigeniaayvurenda:view', $library);
 if (!$library) {
@@ -41,7 +44,7 @@ if (!$library) {
 $reader = $DB->get_record(
     'local_oksigeniaayvurenda_reader',
     ['entityid' => $library->entityid, 'userid' => $USER->id, 'status' => 'active'],
-    'id',
+    '*',
     IGNORE_MULTIPLE
 );
 $kept = $reader && carry::found(
@@ -53,4 +56,11 @@ $kept = $reader && carry::found(
     required_param('lanterns', PARAM_INT),
     time()
 );
-echo json_encode(['kept' => $kept]);
+// A room more of the orientation, and its badge with the third (P8): what the game shows, drawn here.
+$route = $kept ? orientation::step($reader, time()) : null;
+$shown = $route && ($route['left'] > 0 || $route['finished']) ? $OUTPUT->render_from_template(
+    'local_oksigeniaayvurenda/orientation_step',
+    orientation::shown($reader, $library, $route) + ['avance' => null, 'insignia' => null]
+) : '';
+echo json_encode(['kept' => $kept, 'orientation' => $route ? ['done' => $route['done'], 'left' => $route['left'],
+    'finished' => $route['finished'], 'says' => orientation::says($route), 'html' => $shown] : null]);

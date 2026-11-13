@@ -1,0 +1,36 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/orientation_band
+
+    The welcome route in the hall of the visit (Jujol's mock-up of 13 November), between the title and the scene, until the
+    reader has found the hidden book in three rooms: what it is, the path, and the way to the next room.
+
+    Example context (json):
+    {
+        "title": "Tu primera visita", "lead": "Llevas dos salas de tres. Encuentra el libro escondido en tres salas.",
+        "pathlabel": "2 de 3 salas: Lengua y literatura, Ciencias",
+        "steps": [{"done": true, "room": "Lengua y literatura"}, {"done": false, "room": "La que elijas"}],
+        "meta": {"img": "https://example.com/insignia.webp", "label": "Conoce la biblioteca"},
+        "go": {"url": "https://example.com/visit.php?room=artes", "label": "Sigue por Artes →"}
+    }
+}}
+<section class="ayv-or-ruta" aria-labelledby="ayv-or-ruta-t">
+    <div><h2 id="ayv-or-ruta-t">{{title}}</h2><p>{{lead}}</p></div>
+    {{> local_oksigeniaayvurenda/orientation_path}}
+    {{#go}}<a class="ayv-button" href="{{url}}">{{label}}</a>{{/go}}
+</section>

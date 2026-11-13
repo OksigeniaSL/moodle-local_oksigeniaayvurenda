@@ -109,6 +109,7 @@
         </span>
         {{/sound}}
     </div>
+    {{#route}}{{> local_oksigeniaayvurenda/orientation_band}}{{/route}}
     <div class="ayv-visit-frame" hidden>
         {{! While the first layer of the painting comes, a line over the blank paper, by day or by night (jue-humor H14). }}
         <p class="ayv-visit-loading" data-night="{{visitloadingnight}}" hidden>{{visitloading}}</p>
@@ -245,7 +246,8 @@
                 <p class="ayv-hunt-found-title" tabindex="-1">{{found}}</p>
                 <p><strong>{{title}}</strong></p>
                 <p>{{foundhint}}</p>
-                {{#carry}}<p class="ayv-hunt-carry">{{#sealimg}}<img class="ayv-hunt-carry-sello" src="{{sealimg}}" alt="" width="48" height="56">{{/sealimg}}<span data-gold="{{promisegold}}">{{promise}}</span></p>{{/carry}}
+                {{#carry}}<p class="ayv-hunt-carry">{{#sealimg}}<img class="ayv-hunt-carry-sello" src="{{sealimg}}" alt="" width="48" height="56">{{/sealimg}}<span data-gold="{{promisegold}}">{{promise}}</span></p>
+                <div class="ayv-hunt-ruta" hidden></div>{{/carry}}
                 <p class="ayv-book-actions">
                     <a class="ayv-button" href="{{recordurl}}">{{huntrecord}}</a>
                     <a class="ayv-button ayv-button-quiet" href="{{againurl}}">{{huntagain}}</a>

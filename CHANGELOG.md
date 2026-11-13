@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.260.0 (2026-11-13)
+
+- «La orientación con insignia» (P8 of the review), from Jujol's mock-up and Gaudí's badge.
+  - A newcomer gets to know the library in the visit by finding the hidden book in three different rooms.
+  - **The hall** shows the route until then: a path of three stones that light up with each room, the badge waiting at
+    the end, and the way to the next room of the board.
+  - **The game of a room**: after a book found, the small path and the rooms left. With the third room, the badge
+    «Get to know the library» falls like a stamp. It is a Moodle badge of the site, made the first time it is given, in
+    the reader's profile; without badges on the site, its mark stays on the card.
+  - **The card**: the route is the first of the reader's paths, on the way or won, with its day and the way to their
+    badges.
+  - **«How your library works»**: the route has its light and its stages, after the lights of the visit it needs. It is
+    not shown in Infantil.
+  - Nothing new is kept of the reader: the rooms come from the hidden books found, which now keep their room (new field
+    `corner` of `find`).
+- «Su primer libro», the first «subidón».
+  - **The family**: the morning after a young reader (the card of the flower) takes home their very first book, their
+    family hears of it, through their account or by e-mail, where the site keeps its families (Oksigenia Family).
+  - **The postcard «Mi primer libro»**, Gaudí's: the cover, the child's name and the day, to keep and send on. It is
+    drawn from the loan each time it is opened (`mailimage.php`), and nothing of it is kept.
+  - **Their voice**: a button to record that book for the child with their own voice, with the one-time link of family
+    voices.
+  - **The setting**: its light in «How your library works». By default, it follows the centre's notices of late books to
+    families.
+  - New message provider `firstbook`.
+
 ## 0.259.0 (2026-11-13)
 
 - «La cita a ciegas» (P7 of the review), from Jujol's mock-up and Gaudí's drawings.

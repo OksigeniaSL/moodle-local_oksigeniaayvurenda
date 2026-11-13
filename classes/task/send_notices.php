@@ -71,6 +71,10 @@ class send_notices extends \core\task\scheduled_task {
                     $every
                 ),
                 'readers told what a late book left' => fn() => \local_oksigeniaayvurenda\local\sanctions::notify($now, $every),
+                'the first book of the young, to their families' => fn() => \local_oksigeniaayvurenda\local\firstbook::run(
+                    $now,
+                    $every
+                ),
                 'the library\'s news to whoever signed up' => fn() => \local_oksigeniaayvurenda\local\newsletter::run(
                     $now,
                     $every

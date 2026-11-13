@@ -1080,6 +1080,7 @@
         <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="lanterns" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The lanterns still lit when it was found, of three"/>
+        <FIELD NAME="corner" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The corner of the room where it was found: the rooms of the orientation"/>
         <FIELD NAME="timefound" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timetaken" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When it went home from the desk, within the week"/>
       </FIELDS>
