@@ -150,7 +150,7 @@ foreach (copies::list((int) $library->entityid) as $file) {
         )->out(false),
         'label' => userdate($file->get_timecreated(), get_string('strftimedatetime', 'langconfig'))
             . (copies::by_hand($file) ? ' · ' . $str('copiesbyhand') : ''),
-        'size' => display_size($file->get_filesize()),
+        'size' => \local_oksigeniaayvurenda\local\screens::size((int) $file->get_filesize()),
     ];
 }
 $data = [
@@ -195,7 +195,7 @@ function local_oksigeniaayvurenda_copies_files(int $entityid, callable $str): ar
             true
         )->out(false) : '',
         'label' => $latest ? userdate($latest->get_timecreated(), get_string('strftimedatetime', 'langconfig')) : '',
-        'size' => $latest ? display_size($latest->get_filesize()) : '',
+        'size' => $latest ? \local_oksigeniaayvurenda\local\screens::size((int) $latest->get_filesize()) : '',
         'failed' => !empty($last['failed']) ? $str('filecopyfailed', implode(', ', $last['failed'])) : '',
     ];
 }

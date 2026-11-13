@@ -212,7 +212,8 @@ $waiting = cardprint::waiting($library);
 $ready = [];
 $done = optional_param('done', 0, PARAM_INT);
 foreach (cardprint::files($entityid) as $file) {
-    $ready[] = ['id' => $file->get_id(), 'name' => $file->get_filename(), 'size' => display_size($file->get_filesize()),
+    $ready[] = ['id' => $file->get_id(), 'name' => $file->get_filename(),
+        'size' => \local_oksigeniaayvurenda\local\screens::size((int) $file->get_filesize()),
         'fresh' => (int) $file->get_id() === $done,
         'url' => $url($state + ['file' => $file->get_id()]),
         'when' => userdate($file->get_timecreated(), get_string('strftimedatetimeshort', 'langconfig'))];

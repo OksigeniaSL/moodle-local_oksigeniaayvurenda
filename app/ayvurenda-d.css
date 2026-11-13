@@ -872,3 +872,27 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
 .ayv .ayv-more-answer-wait { font-weight: 700; color: var(--ink); }
 .ayv .ayv-more-found-more { margin: .4rem .7rem .2rem; font-size: .95rem; }
 .ayv .ayv-more-found-more a { color: var(--accent); font-weight: 700; }
+
+/* Chrome 93 and Firefox 98 do not know color-mix(): with a var() inside, the declaration is lost when computed and
+   the border or the background goes. There, the same thing in plain colours (from the light palette). */
+@supports not (color: color-mix(in srgb, red, red)) {
+    .ayv .ayv-open-mini i {
+        border: 1.5px dashed var(--muted);
+    }
+
+    .ayv .ayv-open-mini i.ayv-open-mini-now {
+        background: rgba(240, 180, 60, 0.22);
+    }
+
+    .ayv .ayv-open-step-now {
+        box-shadow: inset 0 0 0 2px rgba(240, 180, 60, 0.75);
+    }
+
+    .ayv .ayv-open-step:not(.ayv-open-step-done) .ayv-open-tag {
+        border: 2px dashed var(--muted);
+    }
+
+    .ayv .ayv-open-case .ayv-open-slot-now .ayv-spine {
+        background: rgba(240, 180, 60, 0.2);
+    }
+}

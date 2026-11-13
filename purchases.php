@@ -105,8 +105,10 @@ $card = function (array $row) use ($str, $money) {
     $names = $row['names'];
     $asked = '';
     if ($names) {
-        $asked = count($names) === 1 ? $str('purchaseaskedone', $names[0])
-            : $str('purchaseaskedmore', (object) ['name' => $names[0], 'more' => count($names) - 1]);
+        // Every name, never «and N more».
+        $last = array_pop($names);
+        $asked = !$names ? $str('purchaseaskedone', $last)
+            : $str('purchaseaskedall', implode(', ', $names) . $str('labelsand') . $last);
     }
     $price = $row['price'] === null ? null : (int) $row['price'];
     return [

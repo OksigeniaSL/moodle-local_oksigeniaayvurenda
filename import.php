@@ -192,8 +192,8 @@ if ($pending) {
         }
         $review['books'] = array_map(fn($book) => $book + ['hascopies' => $book['copies'] > 1,
             'copieslabel' => $book['copies'] > 1 ? $str('importbookcopies', $book['copies']) : ''], $look['books']);
-        $review['more'] = $look['records'] > count($look['books'])
-            ? $str('importshelfmore', screens::number($look['records'] - count($look['books']))) : '';
+        // A sample of the shelf, without «and N more»: the figures above say how many there are.
+        $review['more'] = '';
         $review['safe'] = $str('importsafe') . (empty($look['nocode']) ? '' : ' ' . $str('importnocodehint'))
             . (empty($look['badisbn']) ? '' : ' ' . $str(
                 count($look['badisbn']) === 1 ? 'importbadisbnone' : 'importbadisbn',

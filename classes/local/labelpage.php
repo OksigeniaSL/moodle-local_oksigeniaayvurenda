@@ -95,8 +95,11 @@ final class labelpage {
             ],
             'whichtitle' => $str('labelswhich'),
             'whiches' => [
-                ['url' => $url(['which' => 'today', 'since' => null, 'codes' => null, 'start' => null]),
-                    'current' => $state['which'] === 'today', 'label' => $str('labelswhichtodayn', screens::number(count($first)))],
+                // Nothing today: said quietly, not a chip that leads to an empty sheet.
+                ['url' => $first || $state['which'] === 'today'
+                    ? $url(['which' => 'today', 'since' => null, 'codes' => null, 'start' => null]) : null,
+                    'current' => $state['which'] === 'today', 'label' => $first || $state['which'] === 'today'
+                        ? $str('labelswhichtodayn', screens::number(count($first))) : $str('labelswhichtodaynone')],
                 ['url' => $url(['which' => 'since', 'codes' => null, 'start' => null], 'ayv-et-dias'),
                     'current' => $state['which'] === 'since', 'label' => $state['which'] === 'since' && $state['since'] !== ''
                         ? $str('labelswhichsincen', (object) ['day' => self::day($library, $state['since']),

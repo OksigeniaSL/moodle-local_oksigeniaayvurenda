@@ -137,7 +137,7 @@ $data = [
             : $str('recoverfilestitle'),
         'brought' => $brought,
         'entity' => $filesfor,
-        'limit' => $str('recoverfileslimit', display_size(get_max_upload_file_size())),
+        'limit' => $str('recoverfileslimit', \local_oksigeniaayvurenda\local\screens::size((int) get_max_upload_file_size())),
         'url' => (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $firstslug]))->out(false),
         'urllibraries' => (new moodle_url('/local/oksigeniaayvurenda/libraries.php'))->out(false),
     ] : null,

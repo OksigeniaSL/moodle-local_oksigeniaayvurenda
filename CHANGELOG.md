@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.243.0 (2026-11-13)
+
+- The words of the review: «site» meant the platform and a place of the library at once; now «the platform» is the
+  one and «place» the other (the readers without an account, the groups of the platform, the places of the shelves,
+  the copies that go somewhere else). The voices are kept in the library «and do not leave it», without «on this site».
+  Headings that took the library's name without its article say «this library». «Your garden» in the class challenge is
+  «the class garden». The menu and the titles say the same: Import a catalogue, Reviews to read, Shelf posters, Material
+  to lend, The school year. Unclear lines said plainly: who did what with nobody signed in, the records looked at, the
+  kind of centre changed, a work of the centre's own, the loans of a reader joined to another.
+- No more «and N more»: the reader's history, the readers that link by themselves, the books of a desk search, a shelf
+  and a list being imported, the new books by mail, the counts of a stocktake and of weeding, and those who ask for a
+  purchase (every name now).
+- No dead ends: the textbook bank of a library that is not one goes to the centre's bank, or offers to open one in
+  «Libraries»; linking readers with their accounts always has the way back to Readers. Sizes and ordinals as Spanish
+  writes them («5,5 MB», «1.º Primaria» in the example library), and the year says its readers are those in groups.
+- Chrome 93 and Firefox 98, still in many classrooms: the borders and backgrounds made with color-mix() have plain
+  colours there, and what :has() shows (the option chosen, the connector's fields, an open genre or plate) comes from
+  classes the script puts. An anchor is no longer hidden under the fixed header in them.
+- From Jujol's look at Labels and Corners: with nothing added today, it says so quietly instead of a chip that leads
+  nowhere; an open genre writes its name only on the plate.
+
 ## 0.242.0 (2026-11-13)
 
 - Labels, from Jujol's mock-up, as one sample sheet. On the left, what is printed (the code or the spine label, each a

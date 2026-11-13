@@ -35,7 +35,6 @@
         "hassure": true,
         "sureheading": "Casan solos: 1",
         "sure": [{"reader": "Ana Montes Prado", "readergroup": "3º A", "account": "Ana Montes Prado", "accountgroup": "4º A"}],
-        "more": "",
         "surebutton": "Enlazar los 1",
         "hasdoubt": true,
         "doubtheading": "Dudosos: 1",
@@ -45,7 +44,7 @@
         "hasnone": true,
         "noneheading": "No están en Moodle: 1",
         "noneintro": "Siguen siendo lectores sin cuenta.",
-        "nonebutton": "Marcarlos como antiguos lectores", "nonesure": "¿A todos? Toca otra vez",
+        "nonebutton": "Marcarlos como antiguos lectores", "readersurl": "https://example.com/readers.php", "readersback": "Volver a Lectores", "nonesure": "¿A todos? Toca otra vez",
         "empty": "",
         "skipped": ""
     }
@@ -64,7 +63,6 @@
             <span class="ayv-person-card">{{readergroup}}</span> → <span>{{account}} {{#accountgroup}}· {{accountgroup}}{{/accountgroup}}</span></li>
     {{/sure}}
     </ul>
-    {{#more}}<p>{{more}}</p>{{/more}}
     <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="do" value="sure">
         <p class="ayv-more"><button type="submit" class="ayv-button">{{surebutton}}</button></p>
@@ -106,3 +104,4 @@
     </form>
 </section>
 {{/hasnone}}
+<p class="ayv-cf-fila"><a class="ayv-cf-enlace" href="{{readersurl}}">{{readersback}}</a></p>

@@ -133,7 +133,6 @@ if ($step === 'check') {
         return ['name' => $name, 'group' => (string) ($reader['group'] ?? ''),
             'initial' => \local_oksigeniaayvurenda\local\profile::initial($name)];
     }, array_slice($readers, 0, 6));
-    $more = count($readers) - count($people);
     $data['check'] = [
         'csv' => $text,
         'filename' => $filename,
@@ -144,7 +143,8 @@ if ($step === 'check') {
             $emails ? ['count' => $number($emails), 'label' => $str('readerslistfigemail')] : null,
         ])),
         'people' => $people,
-        'more' => $more > 0 ? $str('readerslistmore', $number($more)) : '',
+        // A sample of the list, without «and N more»: the figures above say how many.
+        'more' => '',
         'columns' => $columns,
         'allknown' => count($map) === count($columns),
         'line' => count($map) === count($columns) ? $str('importcolumnsall', count($columns))

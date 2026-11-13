@@ -94,7 +94,7 @@
     </section>
     <section class="ayv-et-paso" aria-labelledby="ayv-et-de" id="ayv-et-dias">
         <h2 id="ayv-et-de">{{whichtitle}}</h2>
-        <div class="ayv-cf-chapas">{{#whiches}}<a class="ayv-cf-chapa" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>{{/whiches}}</div>
+        <div class="ayv-cf-chapas">{{#whiches}}{{#url}}<a class="ayv-cf-chapa" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>{{/url}}{{^url}}<span class="ayv-et-callada">{{label}}</span>{{/url}}{{/whiches}}</div>
         {{#days}}
         <div class="ayv-et-dias"><span class="ayv-cf-nota">{{lead}}</span>{{#list}}<a class="ayv-et-dia" href="{{url}}"{{#current}} aria-current="true"{{/current}}>{{label}}</a>{{/list}}
             <a class="ayv-cf-enlace" href="{{otherurl}}">{{otherlabel}}</a></div>

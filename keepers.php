@@ -53,7 +53,7 @@ if (data_submitted() && confirm_sesskey()) {
 }
 $found = $query !== '' ? keepers::candidates($library, $query) : [];
 $data = [
-    'heading' => $str('keepersheading', format_string($library->name, true, ['escape' => false])),
+    'heading' => $str('keepersheading'),
     'intro' => $str('keepersintro'),
     'notice' => $notice,
     // The search stays after giving or taking away.

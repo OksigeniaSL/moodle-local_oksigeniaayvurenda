@@ -279,8 +279,6 @@ $data = [
         $record['read']['books']
     ),
     'hasread' => (bool) $record['read']['books'],
-    'readmore' => $record['read']['total'] > count($record['read']['books'])
-        ? $str('profilereadmore', $record['read']['total'] - count($record['read']['books'])) : '',
     'past' => array_map(fn($p) => ['year' => $p['year'], 'loans' => $p['loans'] === 1 ? $str('profilepastone')
         : $str('profilepast', $p['loans'])], $record['past']),
     'haspast' => (bool) $record['past'],

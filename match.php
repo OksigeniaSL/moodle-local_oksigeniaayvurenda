@@ -94,25 +94,27 @@ $data = [
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
-    'sureheading' => $str('matchsure', count($piles['sure'])),
+    'sureheading' => $str('matchsure', \local_oksigeniaayvurenda\local\screens::number(count($piles['sure']))),
     'sure' => $sure,
     'hassure' => (bool) $piles['sure'],
-    'more' => count($piles['sure']) > count($sure) ? $str('matchmore', count($piles['sure']) - count($sure)) : '',
-    'surebutton' => $str('matchsurebutton', count($piles['sure'])),
-    'doubtheading' => $str('matchdoubt', count($piles['doubt'])),
+    'surebutton' => $str('matchsurebutton', \local_oksigeniaayvurenda\local\screens::number(count($piles['sure']))),
+    'doubtheading' => $str('matchdoubt', \local_oksigeniaayvurenda\local\screens::number(count($piles['doubt']))),
     'doubthint' => $str('matchdoubthint'),
     'doubt' => $doubt,
     'hasdoubt' => (bool) $piles['doubt'],
     'nobody' => $str('matchnobody'),
     'doubtbutton' => $str('matchdoubtbutton'),
-    'noneheading' => $str('matchnone', count($piles['none'])),
+    'noneheading' => $str('matchnone', \local_oksigeniaayvurenda\local\screens::number(count($piles['none']))),
     'noneintro' => $str('matchnoneintro'),
     'hasnone' => (bool) $piles['none'],
     'nonebutton' => $str('matchnonebutton'),
-    'nonesure' => $str('matchnonesure', count($piles['none'])),
+    'nonesure' => $str('matchnonesure', \local_oksigeniaayvurenda\local\screens::number(count($piles['none']))),
     'empty' => !$piles['sure'] && !$piles['doubt'] && !$piles['none'] ? $str('matchempty') : '',
 ];
+// Whatever is left to do here, the way back to the readers is always there.
 $readersurl = (new moodle_url('/local/oksigeniaayvurenda/readers.php', ['library' => $library->slug]))->out(false);
+$data['readersurl'] = $readersurl;
+$data['readersback'] = $str('matchback');
 shell::output(
     $data['heading'],
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/match', $data),

@@ -42,7 +42,21 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/bank.php', ['library' =
 
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 if (!$library || !bank::is($library)) {
-    shell::missing($str('banknotbank'), $library);
+    // Not a bank: the centre's bank if it has one; if not, where one is opened (a library of the kind «textbook bank»).
+    $other = $library ? $DB->get_records(
+        'local_oksigeniaayvurenda_library',
+        ['entityid' => $library->entityid, 'kind' => bank::KIND],
+        'id',
+        'id, slug',
+        0,
+        1
+    ) : [];
+    if ($other) {
+        redirect(new moodle_url('/local/oksigeniaayvurenda/bank.php', ['library' => reset($other)->slug]));
+    }
+    shell::missing($str('banknotbank'), $library, $library && access::can('local/oksigeniaayvurenda:manage', $library)
+        ? [(new moodle_url('/local/oksigeniaayvurenda/libraries.php', ['library' => $library->slug]))->out(false),
+            $str('banknotbankopen')] : null);
 }
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {

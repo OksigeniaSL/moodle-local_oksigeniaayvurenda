@@ -28,7 +28,7 @@
       formtutors: what the staff can change; gonenow, stayaccount, canmatch, cantwin: whether they still come
     * loans - title, url, hascover, coverurl, colour, due, library, late; hasloans
     * holds - title, state; hasholds
-    * readheading, read (title, url, hascover, coverurl, colour, when, note), hasread, readmore
+    * readheading, read (title, url, hascover, coverurl, colour, when, note), hasread
     * past - year, loans; haspast
     * notes, staffonly, notice, action, sesskey, deskurl, cardurl, appheading
     * app - false, or can, button and hint: the way into the app, by e-mail
@@ -44,7 +44,7 @@
             "due": "Hasta el 14 de noviembre", "library": "Biblioteca", "late": ""}], "hasloans": true,
         "holds": [], "hasholds": false, "readheading": "2026-2027: 3 libros",
         "read": [{"title": "El faro dormido", "url": "#", "hascover": true, "coverurl": "https://example.com/portada.jpg", "colour": 2,
-            "when": "14 de octubre", "note": "Le encantó"}], "hasread": true, "readmore": "",
+            "when": "14 de octubre", "note": "Le encantó"}], "hasread": true,
         "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
         "backurl": "#", "backlabel": "Lectores", "profileback": "Volver a", "tutorof": [], "historyurl": "#",
         "historylabel": "Ver todo su historial (3)", "canedit": false, "gonenow": false,
@@ -208,7 +208,6 @@
                     <span><b>{{title}}</b><span>{{when}}{{#note}} · {{note}}{{/note}}</span></span></a></li>
                 {{/read}}
             </ul>
-            {{#readmore}}<p class="ayv-profile-empty">{{readmore}}</p>{{/readmore}}
             {{#historyurl}}<p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{historyurl}}">{{historylabel}}</a></p>{{/historyurl}}
         </section>
         {{#haspast}}

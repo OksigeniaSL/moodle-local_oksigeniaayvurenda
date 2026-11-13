@@ -797,6 +797,22 @@ final class screens {
     }
 
     /**
+     * The size of a file as the page's language writes it: «5,5 MB» in Spanish, «5.5 MB» in English (Moodle's
+     * display_size writes the point everywhere).
+     *
+     * @param int $bytes
+     * @return string
+     */
+    public static function size(int $bytes): string {
+        foreach ([[1073741824, 'GB'], [1048576, 'MB'], [1024, 'KB']] as [$unit, $name]) {
+            if ($bytes >= $unit) {
+                return format_float($bytes / $unit, $bytes >= 10 * $unit ? 0 : 1, true, true) . ' ' . $name;
+            }
+        }
+        return $bytes . ' B';
+    }
+
+    /**
      * A whole number as the page's language writes it, with its thousands separator (17.378 in Spanish, 17,378 in
      * English); plain digits without the intl extension.
      *

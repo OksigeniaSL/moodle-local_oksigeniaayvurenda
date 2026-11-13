@@ -243,7 +243,7 @@ final class demo {
         $groups = [];
         foreach (self::STAGES as [$stage, $years]) {
             for ($y = 1; $y <= $years; $y++) {
-                $groups[] = [$stage, $y . 'º ' . $stage . ' A'];
+                $groups[] = [$stage, $y . '.º ' . $stage . ' A'];
             }
         }
         foreach ($groups as [$stage, $name]) {
@@ -463,7 +463,7 @@ final class demo {
         foreach (self::words('stages', self::STAGES) as [$stage, $years]) {
             for ($y = 1; $y <= $years; $y++) {
                 foreach (['A', 'B'] as $letter) {
-                    $groups[] = [$stage, self::$lang === 'en' ? $stage . ' ' . $y . $letter : $y . 'º ' . $stage . ' ' . $letter];
+                    $groups[] = [$stage, self::$lang === 'en' ? $stage . ' ' . $y . $letter : $y . '.º ' . $stage . ' ' . $letter];
                 }
             }
         }

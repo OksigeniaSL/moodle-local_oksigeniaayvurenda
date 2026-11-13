@@ -106,7 +106,7 @@
     <p class="ayv-cf-estante-s">{{intro}}</p>
     <ul class="ayv-ri-generos">
         {{#mine}}
-        <li id="ayv-ri-g{{code}}"><details class="ayv-ri-genero ayv-ri-genero-mio"{{#open}} open{{/open}}><summary><b>{{label}}</b><span>{{says}} · {{change}}</span></summary>
+        <li id="ayv-ri-g{{code}}"><details class="ayv-ri-genero ayv-ri-genero-mio"{{#open}} open{{/open}}><summary><b>{{label}}</b><span>{{says}}<span class="ayv-ri-cambiar"> · {{change}}</span></span></summary>
             <div class="ayv-ri-genero-dorso">
                 <form class="ayv-ri-genero-nombre" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="genre" value="{{code}}">
                     <label class="ayv-sr" for="ayv-ri-gn{{code}}">{{name}}</label><input class="ayv-ri-nombre-in" id="ayv-ri-gn{{code}}" name="label" value="{{label}}" maxlength="60" required autocomplete="off">

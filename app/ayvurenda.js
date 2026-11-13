@@ -1337,3 +1337,46 @@
         });
     });
 })();
+
+// What :has() says, also for the browsers that do not know it (Chrome 93, Firefox 98, still in classrooms): a box with
+// a checked input inside gets «ayv-has-checked», a form says its connector mode in data-mode and data-auth, and a list
+// item whose details are open gets «ayv-is-open». The style sheet uses both.
+(function() {
+    'use strict';
+    var boxes = '.ayv-field-check, .ayv-swatch, .ayv-scene, .ayv-twinset-person, .ayv-subject-option, .ayv-dup-record, '
+        + '.ayv-lab-kind, .ayv-lab-pill';
+    var sync = function() {
+        document.querySelectorAll('.ayv ' + boxes.split(', ').join(', .ayv ')).forEach(function(box) {
+            box.classList.toggle('ayv-has-checked', !!box.querySelector('input:checked'));
+            box.classList.toggle('ayv-has-radio', !!box.querySelector('input[type="radio"]:checked'));
+            box.classList.toggle('ayv-has-unchecked', !!box.querySelector('input[type="checkbox"]:not(:checked)'));
+        });
+        document.querySelectorAll('.ayv details[open]').forEach(function(details) {
+            if (details.parentElement) {
+                details.parentElement.classList.add('ayv-is-open');
+            }
+        });
+        document.querySelectorAll('.ayv form').forEach(function(form) {
+            var mode = form.querySelector('input[name="mode"]:checked');
+            var auth = form.querySelector('input[name="auth"]:checked');
+            if (mode) {
+                form.setAttribute('data-mode', mode.value);
+            }
+            if (auth) {
+                form.setAttribute('data-auth', auth.value);
+            }
+        });
+    };
+    document.addEventListener('change', sync);
+    document.addEventListener('toggle', function(event) {
+        var details = event.target;
+        if (details && details.tagName === 'DETAILS' && details.parentElement) {
+            details.parentElement.classList.toggle('ayv-is-open', details.open);
+        }
+    }, true);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', sync);
+    } else {
+        sync();
+    }
+})();

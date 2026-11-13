@@ -7890,3 +7890,209 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 .ayv .ayv-cf-guardado-fila .ayv-cf-guardado {
     margin-left: 0;
 }
+
+/* «Nothing came in today»: said quietly beside the chips, not one of them. */
+.ayv .ayv-et-callada {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 4px 4px;
+    color: var(--ink);
+    opacity: .75;
+}
+
+/* A genre opened writes its name on the plate: the summary keeps only how many books. */
+.ayv .ayv-ri-genero-mio[open] > summary > b,
+.ayv .ayv-ri-genero-mio[open] .ayv-ri-cambiar {
+    display: none;
+}
+
+/* Chrome 93 and Firefox 98 do not know color-mix(): with a var() inside, the declaration is lost when computed and
+   the border or the background goes. There, the same thing in plain colours (from the light palette). */
+@supports not (color: color-mix(in srgb, red, red)) {
+    .ayv .ayv-scan-reader input {
+        box-shadow: 0 0 0 2px rgba(23, 87, 76, 0.3);
+    }
+
+    .ayv .ayv-renew-more {
+        background: rgba(44, 122, 106, 0.09);
+    }
+
+    .ayv .ayv-libcard-new {
+        border: 2px dashed var(--muted);
+    }
+
+    .ayv .ayv-memoir {
+        --soft: var(--muted);
+    }
+
+    .ayv .ayv-memoir-meter {
+        background: var(--paper);
+    }
+
+    .ayv .ayv-mine {
+        --soft: var(--muted);
+    }
+
+    .ayv .ayv-profile {
+        --soft: var(--muted);
+    }
+
+    .ayv .ayv-classbar-hint {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-reading-optional {
+        background: rgba(23, 87, 76, 0.12);
+    }
+
+    .ayv .ayv-dig-new {
+        border: 2px dashed var(--muted);
+    }
+
+    .ayv .ayv-dig-only {
+        background: rgba(163, 50, 30, 0.12);
+    }
+
+    .ayv .ayv-navs .ayv-nav-out {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-off-state-ok {
+        background: rgba(44, 122, 106, 0.16);
+    }
+
+    .ayv .ayv-off-state-bad {
+        background: rgba(226, 101, 76, 0.22);
+    }
+
+    .ayv .ayv-weed-reason-empty .ayv-weed-count {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-imp-drop {
+        border: 2px dashed var(--muted);
+    }
+
+    .ayv .ayv-imp-drop:hover,
+    .ayv .ayv-imp-drop.ayv-imp-over {
+        background: var(--paper);
+    }
+
+    .ayv .ayv-imp-dropformats {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-imp-kind {
+        background: rgba(23, 87, 76, 0.12);
+    }
+
+    .ayv .ayv-imp-bookby,
+    .ayv .ayv-imp-bookplace,
+    .ayv .ayv-imp-bookcopies {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-imp-chip {
+        background: rgba(23, 87, 76, 0.11);
+    }
+
+    .ayv .ayv-imp-chip-off {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-imp-mapsample {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-readers-group:hover {
+        background: var(--paper);
+    }
+
+    .ayv .ayv-subject-count {
+        color: var(--muted);
+    }
+
+    .ayv .ayv-start-state {
+        background: rgba(240, 180, 60, 0.35);
+    }
+
+    .ayv .ayv-start-done .ayv-start-state {
+        background: rgba(23, 87, 76, 0.25);
+    }
+
+    .ayv .ayv-self-still {
+        background: rgba(240, 180, 60, 0.35);
+    }
+}
+
+/* The same as the :has() rules above, by the classes ayvurenda.js puts, for Chrome 93 and Firefox 98. There, an anchor
+   is not hidden under the fixed header either (the newer ones have scroll-padding on html, which would add up). */
+@supports not selector(:has(*)) {
+    .ayv [id] {
+        scroll-margin-top: 7rem;
+    }
+}
+
+.ayv .ayv-mycard .ayv-field-check.ayv-has-checked {
+    background: var(--accent);
+    color: var(--surface);
+}
+
+.ayv form[data-mode="key"] .ayv-connect-oauth,
+.ayv form[data-mode="oauth"] .ayv-connect-key,
+.ayv form[data-auth="oauth1"] .ayv-connect-oauth2 {
+    display: none;
+}
+
+.ayv .ayv-swatch.ayv-has-checked,
+.ayv .ayv-scene.ayv-has-checked {
+    outline: 3px solid var(--sun);
+    outline-offset: 2px;
+}
+
+.ayv .ayv-lab-kind.ayv-has-checked {
+    border-color: var(--accent);
+    box-shadow: var(--ayv-shadow);
+}
+
+.ayv .ayv-lab-pill.ayv-has-checked {
+    border-color: var(--accent);
+    font-weight: 700;
+}
+
+.ayv .ayv-twinset-person.ayv-has-checked {
+    border-color: var(--accent);
+}
+
+.ayv .ayv-twinset-person.ayv-has-checked .ayv-twinset-stays {
+    display: inline;
+}
+
+.ayv .ayv-subject-option.ayv-has-checked,
+.ayv .ayv-dup-record.ayv-has-radio {
+    border-color: var(--accent);
+    background: var(--notice-bg);
+}
+
+.ayv .ayv-dup-record.ayv-has-radio .ayv-dup-in {
+    display: none;
+}
+
+.ayv .ayv-dup-record:not(.ayv-has-radio).ayv-has-unchecked {
+    opacity: .72;
+}
+
+.ayv .ayv-ri-rincon.ayv-is-open {
+    grid-column: span 2;
+}
+
+.ayv .ayv-ri-generos > li.ayv-is-open {
+    flex: 1 1 100%;
+}
+
+@media (max-width: 360px) {
+    .ayv .ayv-ri-rincon.ayv-is-open {
+        grid-column: auto;
+    }
+}

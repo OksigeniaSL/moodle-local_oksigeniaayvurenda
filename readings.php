@@ -128,7 +128,7 @@ if (!$courseid) {
             'short' => !$row['copies'] || $row['waiting'] > 0,
         ];
     }
-    $data = ['heading' => $str('readingsdemandheading', format_string($library->name, true, ['escape' => false])),
+    $data = ['heading' => $str('readingsdemandheading'),
         'intro' => $str('readingsdemandintro'),
         'titles' => $titles, 'hastitles' => (bool) $titles, 'none' => $str('readingsdemandnone'), 'notice' => $notice,
         'action' => $PAGE->url->out(false), 'sesskey' => sesskey(), 'reserveuntil' => zones::date($yearend, '%Y-%m-%d', $library),
