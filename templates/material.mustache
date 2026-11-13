@@ -42,7 +42,8 @@
         "new": [{"kind": "portatil", "drawing": "<svg viewBox='0 0 24 24'><rect x='4' y='5' width='16' height='11'/></svg>",
             "label": "Portátil", "open": true,
             "counts": [{"n": 1, "id": "ayv-mt-portatil-1", "checked": true, "prev": "ayv-mt-portatil-1", "next": "ayv-mt-portatil-2",
-                "word": "unidad"}],
+                "word": "unidad"}, {"n": 2, "id": "ayv-mt-portatil-2", "checked": false, "prev": "ayv-mt-portatil-1",
+                "next": "ayv-mt-portatil-2", "word": "unidades"}],
             "places": [{"value": 0, "label": "Sin lugar", "id": "ayv-mt-portatil-s0", "checked": true}]}],
         "materialhave": "Lo que hay", "materialnone": "Aún no hay material.", "materialother": "Dar de alta otro",
         "materialotherhint": "Toca lo que es.", "materialdata": "Sus datos", "materiallabelsprint": "Imprimir sus etiquetas",
@@ -96,7 +97,7 @@
         <li class="ayv-mt-nueva"><details{{#open}} open{{/open}}><summary>{{{drawing}}}<span>+ {{label}}</span></summary>
             <form class="ayv-mt-alta" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="kind" value="{{kind}}">
                 <label class="ayv-mt-escrito">{{materialname}}<input type="text" name="name" maxlength="255" value="{{label}}" autocomplete="off" required></label>
-                <div class="ayv-mt-paso"><span>{{materialhowmany}}</span><div class="ayv-mt-contador" role="radiogroup" aria-label="{{materialcountlabel}}">{{#counts}}<input type="radio" name="count" value="{{n}}" id="{{id}}"{{#checked}} checked{{/checked}} aria-label="{{n}} {{word}}"><span class="ayv-mt-unidades"><label class="ayv-mt-signo" for="{{prev}}" aria-hidden="true">−</label><span class="ayv-mt-cifra"><b>{{n}}</b><span>{{word}}</span></span><label class="ayv-mt-signo" for="{{next}}" aria-hidden="true">+</label></span>{{/counts}}</div></div>
+                <div class="ayv-mt-paso"><span>{{materialhowmany}}</span><div class="ayv-mt-contador" role="radiogroup" aria-label="{{materialcountlabel}}">{{#counts}}<input type="radio" name="count" value="{{n}}" id="{{id}}"{{#checked}} checked{{/checked}} aria-label="{{n}} {{word}}"><span class="ayv-mt-unidades"><label class="ayv-mt-signo" for="{{prev}}"><span aria-hidden="true">−</span></label><span class="ayv-mt-cifra"><b>{{n}}</b><span>{{word}}</span></span><label class="ayv-mt-signo" for="{{next}}"><span aria-hidden="true">+</span></label></span>{{/counts}}</div></div>
                 <div class="ayv-mt-paso"><span>{{materialwhere}}</span><div class="ayv-cf-chapas ayv-mt-sitios" role="radiogroup" aria-label="{{materialwhere}}">{{#places}}<input type="radio" name="locationid" value="{{value}}" id="{{id}}"{{#checked}} checked{{/checked}}><label class="ayv-cf-chapa" for="{{id}}">{{label}}</label>{{/places}}</div></div>
                 <details class="ayv-mt-mas"><summary>{{materialmorefolded}}</summary>
                     <label class="ayv-mt-escrito">{{materialbrand}}<input type="text" name="brand" maxlength="100" autocomplete="off"></label>

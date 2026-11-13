@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.247.0 (2026-11-13)
+
+- Characters, from Jujol's mock-up: the memory and the herald each stand on their own stage, with their figure, a line
+  of theirs in a bubble and their name on a brass plate where it is written (Enter keeps it, without touching anything
+  else). Under it, gestures that keep themselves: the curtain to take them off the stage or bring them back, how they
+  speak («I am sure» said by her or by him) and, for the herald, whether it signs the notices to the readers. Another
+  portrait, or the whole character from a pack, folded at the foot; «Back to the one of the house» only when it is
+  your own.
+- Material, as 0.246.0 left it: that version did not go out, because the sample of its template was short of a unit for
+  the «+» to point at. Its «−» and «+» hide their sign from screen readers inside the label, not on it.
+
 ## 0.246.0 (2026-11-13)
 
 - Material, from Jujol's mock-up: each thing is a tile with its line drawing standing on a plank (laptop, tablet,

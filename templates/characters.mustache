@@ -13,74 +13,77 @@
 
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
 {{!
     @template local_oksigeniaayvurenda/characters
 
-    The two characters: name, sex and whether they appear, with how they speak.
+    The characters, each big on its stage (its wall in its colour, the floorboards), saying one of its lines in a bubble,
+    with its name on a brass plate where it is written. The gestures in sight, each kept at once: the curtain (out of or
+    onto the stage), how it speaks («I'm sure» in each form), the herald's signature; folded, another portrait or the
+    whole character, and back to Ayvurenda's.
 
     Context variables required for this template:
-    * heading, intro, notice - texts
-    * action, sesskey - the form
-    * roles - role, title, job, enabled, name, female, male, herald, signs and preview (initial, role, name, text)
-    * the words of the fields
+    * heading, intro, notice, action, sesskey, savedword - the head and where gestures go
+    * roles - role, title, job, enabled, name, figure, alt, bubble, female, herald, signs, own, justsaved
+    * charactername, charactersigns, characterdrop, characterdropor, characterdrophint, characterstageout,
+      characterstagein, charactertalks, charactersayf, charactersaym, characternamehint, characternamesave,
+      characterother, characterreset, sourcessave - words
 
     Example context (json):
     {
-        "heading": "Los personajes",
-        "intro": "Dos personajes con oficios distintos.",
-        "notice": "",
-        "action": "https://example.org/characters.php",
-        "sesskey": "abc",
-        "roles": [{"role": "memory", "title": "La memoria", "job": "Se le pregunta.", "enabled": true, "name": "Memoria",
-                   "female": true, "male": false, "herald": false, "signs": false, "own": false,
-                   "preview": {"initial": "M", "role": "memory", "name": "Memoria", "text": "He buscado por toda la biblioteca."} }],
-        "characterenabled": "Que aparezca", "charactername": "Nombre", "charactersex": "Sexo",
-        "charactersexf": "Femenino", "charactersexm": "Masculino", "charactersigns": "Firma los avisos",
-        "characterpreview": "Así habla:", "sourcessave": "Guardar", "characterdrop": "Suelta aquí su retrato o su zip",
-        "characterdropor": "o elígelo", "characterdrophint": "Una imagen es su retrato.", "characterzipwhat": "Qué lleva el zip",
-        "characterpackhint": "Sus posturas.", "characterportraithint": "Cuadrada.", "characternoportrait": "Volver al de serie",
-        "characternopack": "Quitar el propio"
+        "heading": "Los personajes", "intro": "Cámbiales el nombre.", "notice": "", "action": "https://example.com/characters.php",
+        "sesskey": "abc", "savedword": "Guardado",
+        "roles": [{"role": "herald", "title": "El pregonero", "job": "Cuenta lo que pasa.", "enabled": true, "name": "Mainumby",
+            "figure": "https://example.com/mainumby.webp", "alt": "Mainumby, El pregonero", "bubble": "Acaban de llegar.",
+            "female": false, "herald": true, "signs": false, "own": false, "justsaved": true}],
+        "charactername": "Su nombre", "charactersigns": "Firma los avisos", "characterdrop": "Suelta aquí",
+        "characterdropor": "o elígelo", "characterdrophint": "Una imagen o un zip.", "characterstageout": "Que salga de escena",
+        "characterstagein": "Que entre en escena", "charactertalks": "Habla así", "charactersayf": "«Estoy segura»",
+        "charactersaym": "«Estoy seguro»", "characternamehint": "Su nombre se escribe en la placa.",
+        "characternamesave": "Guardar el nombre", "characterother": "Otro retrato", "characterreset": "Volver al de Ayvurenda",
+        "sourcessave": "Guardar"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
-{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<div class="ayv-characters">
-{{#roles}}
-    <section class="ayv-character" aria-labelledby="ayv-character-{{role}}">
-        <h2 class="ayv-section-title" id="ayv-character-{{role}}">{{title}}</h2>
-        <p class="ayv-field-hint">{{job}}</p>
-        <div class="ayv-character-face">
-            <p class="ayv-character-preview">{{characterpreview}}</p>
-            {{#preview}}{{> local_oksigeniaayvurenda/bubble}}{{/preview}}
+<div class="ayv-cf ayv-pj">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
         </div>
-        <form method="post" action="{{action}}#ayv-character-{{role}}" class="ayv-character-form">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}"><input type="hidden" name="do" value="save">
-            <label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}enabled" value="1" {{#enabled}}checked{{/enabled}}> {{characterenabled}}</label>
-            <label class="ayv-field ayv-field-wide">{{charactername}} <input type="text" name="{{role}}name" value="{{name}}" maxlength="60"></label>
-            <fieldset class="ayv-dig-set"><legend>{{charactersex}}</legend><div class="ayv-segmented">
-                <label><input type="radio" name="{{role}}sex" value="f" {{#female}}checked{{/female}}><span>{{charactersexf}}</span></label>
-                <label><input type="radio" name="{{role}}sex" value="m" {{#male}}checked{{/male}}><span>{{charactersexm}}</span></label>
-            </div></fieldset>
-            {{#herald}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="{{role}}signs" value="1" {{#signs}}checked{{/signs}}> {{charactersigns}}</label>{{/herald}}
-            <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{sourcessave}}</button></p>
-        </form>
-        <form method="post" action="{{action}}#ayv-character-{{role}}" enctype="multipart/form-data" class="ayv-character-upload">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}"><input type="hidden" name="do" value="upload">
-            <label class="ayv-imp-drop ayv-character-drop" data-ayv-drop>
-                <span class="ayv-imp-droptitle">{{characterdrop}}</span>
-                <span class="ayv-imp-dropor">{{characterdropor}}</span>
-                <input type="file" name="{{role}}file" required accept="image/png,image/jpeg,image/webp,image/gif,.zip,application/zip">
-                <span class="ayv-imp-dropformats">{{characterdrophint}}</span>
-            </label>
-            <noscript><p><button type="submit" class="ayv-button ayv-button-quiet">{{sourcessave}}</button></p></noscript>
-        </form>
-        <details class="ayv-character-zip"><summary>{{characterzipwhat}}</summary><p class="ayv-field-hint">{{characterportraithint}}</p><p class="ayv-field-hint">{{characterpackhint}}</p></details>
-        {{#own}}<form method="post" action="{{action}}#ayv-character-{{role}}" class="ayv-book-actions">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}">
-            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="noportrait">{{characternoportrait}}</button>
-            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="nopack">{{characternopack}}</button>
-        </form>{{/own}}
-    </section>
-{{/roles}}
+</header>
+{{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
+<ul class="ayv-pj-escenas">
+    {{#roles}}
+    <li><article class="ayv-pj-ficha ayv-pj-{{role}}{{^enabled}} ayv-pj-fuera{{/enabled}}" id="ayv-pj-{{role}}" aria-labelledby="ayv-pj-{{role}}-t">
+        <form id="ayv-pj-{{role}}-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="character" value="{{role}}"><button class="ayv-sr" type="submit" name="do" value="name" tabindex="-1" aria-hidden="true">{{characternamesave}}</button></form>
+        <div class="ayv-pj-escena">{{#figure}}<img src="{{figure}}" alt="{{alt}}" width="250" height="250">{{/figure}}
+            {{#enabled}}{{#bubble}}<p class="ayv-pj-bocadillo">{{bubble}}</p>{{/bubble}}{{/enabled}}</div>
+        <label class="ayv-pj-placa"><small id="ayv-pj-{{role}}-t">{{title}}</small><input form="ayv-pj-{{role}}-f" name="name" value="{{name}}" aria-label="{{charactername}}" maxlength="40" autocomplete="off"></label>
+        <div class="ayv-pj-cuerpo">
+            {{#justsaved}}<p><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
+            <p class="ayv-pj-que">{{job}}</p>
+            <div class="ayv-pj-gestos">
+                {{#enabled}}<button class="ayv-pj-telon" type="submit" form="ayv-pj-{{role}}-f" name="show" value="0">{{characterstageout}}</button>{{/enabled}}
+                {{^enabled}}<button class="ayv-pj-telon" type="submit" form="ayv-pj-{{role}}-f" name="show" value="1">{{characterstagein}}</button>{{/enabled}}
+                <span class="ayv-pj-habla"><span class="ayv-cf-rotulo">{{charactertalks}}</span><span class="ayv-cf-chapas"><button class="ayv-cf-chapa" type="submit" form="ayv-pj-{{role}}-f" name="gender" value="f" aria-pressed="{{#female}}true{{/female}}{{^female}}false{{/female}}">{{charactersayf}}</button><button class="ayv-cf-chapa" type="submit" form="ayv-pj-{{role}}-f" name="gender" value="m" aria-pressed="{{#female}}false{{/female}}{{^female}}true{{/female}}">{{charactersaym}}</button></span></span>
+                {{#herald}}<span class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-pj-{{role}}-f" name="signs" value="{{#signs}}0{{/signs}}{{^signs}}1{{/signs}}" aria-pressed="{{#signs}}true{{/signs}}{{^signs}}false{{/signs}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{charactersigns}}</span></button></span>{{/herald}}
+            </div>
+            <p class="ayv-cf-nota">{{characternamehint}}</p>
+            <p class="ayv-cf-fila"><button class="ayv-button ayv-button-quiet" type="submit" form="ayv-pj-{{role}}-f" name="do" value="name">{{characternamesave}}</button></p>
+            <details class="ayv-pj-otra"><summary>{{characterother}}</summary>
+                <form method="post" action="{{action}}#ayv-pj-{{role}}" enctype="multipart/form-data" class="ayv-pj-suelta">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="only" value="{{role}}"><input type="hidden" name="do" value="upload">
+                    <label class="ayv-imp-drop ayv-character-drop" data-ayv-drop>
+                        <span class="ayv-imp-droptitle">{{characterdrop}}</span>
+                        <span class="ayv-imp-dropor">{{characterdropor}}</span>
+                        <input type="file" name="{{role}}file" required accept="image/png,image/jpeg,image/webp,image/gif,.zip,application/zip">
+                        <span class="ayv-imp-dropformats">{{characterdrophint}}</span>
+                    </label>
+                    <noscript><p><button type="submit" class="ayv-button ayv-button-quiet">{{sourcessave}}</button></p></noscript>
+                </form>
+                {{#own}}<button class="ayv-pj-volver" type="submit" form="ayv-pj-{{role}}-f" name="do" value="reset">{{characterreset}}</button>{{/own}}
+            </details>
+        </div>
+    </article></li>
+    {{/roles}}
+</ul>
 </div>

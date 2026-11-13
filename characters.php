@@ -44,30 +44,46 @@ $entityid = (int) $library->entityid;
 $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
 $notice = '';
 if (data_submitted() && confirm_sesskey()) {
-    // Each character has its own card: what is sent is only that one's, and the other keeps what it had.
-    $only = optional_param('only', '', PARAM_ALPHA);
-    $do = optional_param('do', 'save', PARAM_ALPHA);
-    if (in_array($only, characters::ROLES, true)) {
-        if ($do === 'save') {
-            $chosen = [];
-            foreach (characters::of($entityid) as $role => $character) {
-                $chosen[$role] = $role !== $only ? ['enabled' => $character['enabled'], 'name' => $character['name'],
-                    'sex' => $character['sex'], 'signs' => $character['signs']] : [
-                    'enabled' => optional_param($role . 'enabled', 0, PARAM_BOOL),
-                    'name' => optional_param($role . 'name', '', PARAM_TEXT),
-                    'sex' => optional_param($role . 'sex', 'f', PARAM_ALPHA),
-                    'signs' => optional_param($role . 'signs', 0, PARAM_BOOL),
-                ];
-            }
-            characters::save($entityid, $chosen);
-            $notice = $str('sourcessaved');
-        } else if ($do === 'noportrait') {
+    // Each character on its own stage: a gesture changes only that one's thing (the curtain, how it speaks, the signature,
+    // its name), and the other character keeps what it had.
+    $only = optional_param('character', '', PARAM_ALPHA) ?: optional_param('only', '', PARAM_ALPHA);
+    $do = optional_param('do', '', PARAM_ALPHA);
+    if (in_array($only, characters::ROLES, true) && in_array($do, ['', 'name'], true)) {
+        $chosen = [];
+        foreach (characters::of($entityid) as $role => $character) {
+            $chosen[$role] = ['enabled' => $character['enabled'], 'name' => $character['name'], 'sex' => $character['sex'],
+                'signs' => $character['signs']];
+        }
+        $show = optional_param('show', -1, PARAM_INT);
+        $chosen[$only]['enabled'] = $show === -1 ? $chosen[$only]['enabled'] : (bool) $show;
+        $gender = optional_param('gender', '', PARAM_ALPHA);
+        $chosen[$only]['sex'] = in_array($gender, ['f', 'm'], true) ? $gender : $chosen[$only]['sex'];
+        $signs = optional_param('signs', -1, PARAM_INT);
+        $chosen[$only]['signs'] = $signs === -1 ? $chosen[$only]['signs'] : (bool) $signs;
+        if ($do === 'name') {
+            $chosen[$only]['name'] = optional_param('name', '', PARAM_TEXT);
+        }
+        characters::save($entityid, $chosen);
+        redirect(new moodle_url(
+            '/local/oksigeniaayvurenda/characters.php',
+            ['library' => $library->slug, 'saved' => $only],
+            'ayv-pj-' . $only
+        ));
+    } else if (in_array($only, characters::ROLES, true)) {
+        if ($do === 'reset' || $do === 'noportrait') {
             \local_oksigeniaayvurenda\local\images::remove('portrait', $entityid, $only);
-            $notice = $str('sourcessaved');
-        } else if ($do === 'nopack') {
+        }
+        if ($do === 'reset' || $do === 'nopack') {
             characters::remove_pack($entityid, $only);
-            $notice = $str('sourcessaved');
-        } else if ($do === 'upload') {
+        }
+        if (in_array($do, ['reset', 'noportrait', 'nopack'], true)) {
+            redirect(new moodle_url(
+                '/local/oksigeniaayvurenda/characters.php',
+                ['library' => $library->slug, 'saved' => $only],
+                'ayv-pj-' . $only
+            ));
+        }
+        if ($do === 'upload') {
             // One place to drop it: a picture is its portrait; a zip, the whole character with its poses and puppet.
             $upload = $_FILES[$only . 'file'] ?? null;
             $ok = $upload && ($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK && is_uploaded_file($upload['tmp_name']);
@@ -84,24 +100,35 @@ if (data_submitted() && confirm_sesskey()) {
         }
     }
 }
+// Each one big on its stage, saying one of its lines: the memory when it does not find something, the herald with the
+// new books; off stage, the same figure in shadow behind the curtain, without its bubble.
 $samples = ['memory' => ['memorynothing', ['query' => $str('charactersamplequery')]], 'herald' => ['heraldnew', []]];
+$poses = ['memory' => 'piensa', 'herald' => 'saluda'];
+$saved = optional_param('saved', '', PARAM_ALPHA);
 $roles = [];
 foreach (characters::of($entityid) as $role => $character) {
     [$key, $a] = $samples[$role];
-    $preview = characters::say($entityid, $role, $key, $a) ?? ['name' => $character['name'],
-        'text' => $str('characteroff'), 'initial' => $character['initial'], 'role' => $role];
+    $said = $character['enabled'] ? characters::say($entityid, $role, $key, $a) : null;
+    $figure = $said['figure'] ?? null;
+    $figure = $figure ?: ($character['portrait'] ?? null) ?: characters::figure(
+        $role,
+        $poses[$role],
+        characters::step($entityid)
+    );
     $roles[] = [
         'role' => $role,
         'title' => $str('characterrole' . $role . $character['sex']),
         'job' => $str('characterjob' . $role),
         'enabled' => $character['enabled'],
         'name' => $character['name'],
+        'figure' => $figure,
+        'alt' => $character['name'] . ', ' . $str('characterrole' . $role . $character['sex']),
+        'bubble' => $said['text'] ?? '',
         'female' => $character['sex'] === 'f',
-        'male' => $character['sex'] === 'm',
         'herald' => $role === 'herald',
-        'signs' => $character['signs'],
+        'signs' => (bool) $character['signs'],
         'own' => $character['own'],
-        'preview' => $preview,
+        'justsaved' => $saved === $role,
     ];
 }
 $data = [
@@ -110,12 +137,13 @@ $data = [
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),
+    'savedword' => $str('hiwsaved'),
     'roles' => $roles,
 ];
 foreach (
-    ['characterenabled', 'charactername', 'charactersex', 'charactersexf', 'charactersexm', 'charactersigns',
-        'characterpreview', 'sourcessave', 'characterportraithint', 'characternoportrait', 'characterpackhint',
-        'characternopack', 'characterdrop', 'characterdropor', 'characterdrophint', 'characterzipwhat'] as $key
+    ['charactername', 'charactersigns', 'characterdrop', 'characterdropor', 'characterdrophint', 'characterstageout',
+        'characterstagein', 'charactertalks', 'charactersayf', 'charactersaym', 'characternamehint', 'characternamesave',
+        'characterother', 'characterreset', 'sourcessave'] as $key
 ) {
     $data[$key] = $str($key);
 }
