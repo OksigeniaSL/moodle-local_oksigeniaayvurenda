@@ -116,6 +116,12 @@ class provider implements
             'timefound' => 'privacy:metadata:find:timefound',
             'timetaken' => 'privacy:metadata:find:timetaken',
         ], 'privacy:metadata:find');
+        $collection->add_database_table(self::T . 'blind', [
+            'readerid' => 'privacy:metadata:blind:readerid',
+            'note' => 'privacy:metadata:blind:note',
+            'timenoted' => 'privacy:metadata:blind:timenoted',
+            'createdby' => 'privacy:metadata:blind:createdby',
+        ], 'privacy:metadata:blind');
         $collection->add_database_table(self::T . 'keepsake', [
             'readerid' => 'privacy:metadata:keepsake:readerid',
             'flower' => 'privacy:metadata:keepsake:flower',
@@ -380,6 +386,7 @@ class provider implements
             []
         );
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'lot} WHERE createdby IS NOT NULL', []);
+        $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'blind} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('createdby', 'SELECT createdby FROM {' . self::T . 'digital} WHERE createdby IS NOT NULL', []);
         $userlist->add_from_sql('userid', 'SELECT userid FROM {' . self::T . 'digitalread}', []);
         $userlist->add_from_sql('notedby', 'SELECT notedby FROM {' . self::T . 'voiceconsent} WHERE notedby IS NOT NULL', []);
@@ -464,6 +471,26 @@ class provider implements
                 writer::with_context($context)->export_data(
                     array_merge($base, [get_string('privacy:path:finds', 'local_oksigeniaayvurenda')]),
                     (object) ['finds' => $finds]
+                );
+            }
+            // Their blind dates: the book each was, and what they said of it.
+            $dates = [];
+            foreach ($DB->get_records(self::T . 'blind', ['readerid' => $reader->id], 'id') as $date) {
+                $dates[] = [
+                    'number' => (int) $date->tagno,
+                    'title' => $DB->get_field_sql(
+                        'SELECT r.title FROM {' . self::T . 'record} r JOIN {' . self::T . 'item} i ON i.recordid = r.id
+                          WHERE i.id = ?',
+                        [$date->itemid]
+                    ),
+                    'note' => $date->note,
+                    'noted' => $date->timenoted ? transform::datetime($date->timenoted) : null,
+                ];
+            }
+            if ($dates) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:blind', 'local_oksigeniaayvurenda')]),
+                    (object) ['dates' => $dates]
                 );
             }
             $holds = [];
@@ -571,6 +598,13 @@ class provider implements
                 array_merge($base, [get_string('privacy:path:withdrawal', 'local_oksigeniaayvurenda')]),
                 (object) ['withdrawals' => array_values(array_map(fn($w) => ['reason' => $w->reason,
                     'created' => transform::datetime($w->timecreated)], $withdrawals))]
+            );
+        }
+        $wrapped = $DB->count_records(self::T . 'blind', ['createdby' => $userid]);
+        if ($wrapped) {
+            writer::with_context($context)->export_data(
+                array_merge($base, [get_string('privacy:path:blindwrapped', 'local_oksigeniaayvurenda')]),
+                (object) ['wrapped' => $wrapped]
             );
         }
         $lots = $DB->get_records(self::T . 'lot', ['createdby' => $userid], 'timecreated', 'id, name, timecreated');
@@ -697,6 +731,8 @@ class provider implements
         $DB->delete_records(self::T . 'formatask');
         $DB->delete_records(self::T . 'keepsake');
         $DB->delete_records(self::T . 'find');
+        $DB->set_field_select(self::T . 'blind', 'readerid', null, 'readerid IS NOT NULL');
+        $DB->set_field_select(self::T . 'blind', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'questreader');
         $DB->execute('UPDATE {' . self::T . "ill} SET readerid = NULL, note = NULL WHERE direction = 'in'");
         $DB->set_field_select(self::T . 'ill', 'createdby', null, 'createdby IS NOT NULL');
@@ -777,6 +813,7 @@ class provider implements
         $DB->set_field(self::T . 'stockread', 'userid', null, ['userid' => $userid]);
         $DB->set_field(self::T . 'withdrawal', 'createdby', null, ['createdby' => $userid]);
         $DB->set_field(self::T . 'lot', 'createdby', null, ['createdby' => $userid]);
+        $DB->set_field(self::T . 'blind', 'createdby', null, ['createdby' => $userid]);
         // Their voices go, with their files; the permissions noted for their readers too.
         foreach ($DB->get_records(self::T . 'digital', ['kind' => 'voice', 'createdby' => $userid]) as $voice) {
             \local_oksigeniaayvurenda\local\voices::remove($voice);
@@ -840,6 +877,7 @@ class provider implements
             $DB->record_exists(self::T . 'stockread', ['userid' => $userid]) ||
             $DB->record_exists(self::T . 'withdrawal', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'lot', ['createdby' => $userid]) ||
+            $DB->record_exists(self::T . 'blind', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'digital', ['createdby' => $userid]) ||
             $DB->record_exists(self::T . 'digitalread', ['userid' => $userid]) ||
             $DB->record_exists(self::T . 'voiceconsent', ['notedby' => $userid]) ||

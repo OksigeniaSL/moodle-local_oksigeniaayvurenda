@@ -1092,5 +1092,36 @@
         <INDEX NAME="readerfound" UNIQUE="false" FIELDS="readerid, timefound"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_blind" COMMENT="A blind date: a copy wrapped in paper with its clues, who took it home and what they said (La cita a ciegas)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="tagno" TYPE="int" LENGTH="6" NOTNULL="true" SEQUENCE="false" COMMENT="Its number in the centre, on its tag"/>
+        <FIELD NAME="paper" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Its paper, one of the six drawn"/>
+        <FIELD NAME="clues" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Its clues, as a JSON list"/>
+        <FIELD NAME="loanid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The loan it went home with"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="note" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="What the reader said: loved, fine or notforme"/>
+        <FIELD NAME="timenoted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timeclosed" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Unwrapped without going home"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+        <KEY NAME="loanid" TYPE="foreign" FIELDS="loanid" REFTABLE="local_oksigeniaayvurenda_loan" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="createdby" TYPE="foreign" FIELDS="createdby" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="entitytag" UNIQUE="false" FIELDS="entityid, tagno"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

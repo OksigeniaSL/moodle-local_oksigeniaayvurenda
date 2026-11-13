@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/blind_card
+
+    A reader's blind date on their card (Jujol's mock-up of 13 November): at home, wrapped, not to be opened until home,
+    with its clues and the day it comes back; back, the book it was out of the torn paper, and three touches of what they
+    say, each a button of an empty form, kept on its own.
+
+    Example context (json):
+    {
+        "id": 4, "out": false, "number": 4, "art": null, "wrappedlabel": "Un libro envuelto en papel, la cita n.º 4",
+        "small": false, "clues": ["Hay un faro."], "back": "Vuelve el 27 de noviembre.",
+        "title": "Una abuela en la barca", "author": "Lucía Medina Brito", "cover": "https://example.com/abuela.jpg",
+        "cannote": true, "noted": true,
+        "notes": [{"value": "loved", "label": "Me encantó", "pressed": "true", "isloved": true},
+            {"value": "fine", "label": "Estuvo bien", "pressed": "false", "isfine": true},
+            {"value": "notforme", "label": "No era para mí", "pressed": "false", "isnotforme": true}],
+        "action": "https://example.com/card.php", "sesskey": "abc", "blindnumberabbr": "n.º",
+        "blindyours": "Tu cita a ciegas", "blindunwrap": "No la desenvuelvas hasta llegar a casa.",
+        "blindwas": "Tu cita a ciegas era", "blindhow": "¿Qué tal la cita?",
+        "blindsaved": "Guardado. Solo cuenta en una suma: nadie ve quién dijo qué."
+    }
+}}
+<section class="ayv-cc ayv-cc-carne" id="ayv-cc-carne-{{id}}" aria-labelledby="ayv-cc-carne-t-{{id}}">
+{{#out}}
+    {{> local_oksigeniaayvurenda/blind_wrapped}}
+    <div class="ayv-cc-carne-texto"><h2 id="ayv-cc-carne-t-{{id}}">{{blindyours}}</h2>
+        <p class="ayv-cc-aviso">{{blindunwrap}}</p>
+        <ol class="ayv-cc-pistas">{{#clues}}<li>{{.}}</li>{{/clues}}</ol>
+        <p class="ayv-cc-vuelve">{{back}}</p></div>
+{{/out}}
+{{^out}}
+    <div class="ayv-cc-desvelado">{{#cover}}<img src="{{cover}}" alt="" width="400" height="600" loading="lazy">{{/cover}}</div>
+    <div class="ayv-cc-carne-texto"><p class="ayv-cc-era">{{blindwas}}</p>
+        <h2 id="ayv-cc-carne-t-{{id}}">{{title}}</h2>{{#author}}<p class="ayv-cc-autor">{{author}}</p>{{/author}}
+        {{#cannote}}
+        <p class="ayv-cc-nota-t" id="ayv-cc-nota-t-{{id}}">{{blindhow}}</p>
+        <form id="cc-nota-{{id}}" method="post" action="{{action}}#ayv-cc-carne-{{id}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="blindnote"><input type="hidden" name="blinddate" value="{{id}}"></form>
+        <div class="ayv-cc-notas" role="group" aria-labelledby="ayv-cc-nota-t-{{id}}">{{#notes}}<button class="ayv-cc-toque" type="submit" form="cc-nota-{{id}}" name="note" value="{{value}}" aria-pressed="{{pressed}}">{{#isloved}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="currentColor" stroke="none"/></svg>{{/isloved}}{{#isfine}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14c1.2 1.4 2.5 2 4 2s2.8-.6 4-2M9 9.5h.01M15 9.5h.01"/></svg>{{/isfine}}{{#isnotforme}}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 15h8M9 9.5h.01M15 9.5h.01"/></svg>{{/isnotforme}}{{label}}</button>{{/notes}}</div>
+        {{#noted}}<p class="ayv-cc-solo">{{blindsaved}}</p>{{/noted}}
+        {{/cannote}}
+    </div>
+{{/out}}
+</section>

@@ -110,6 +110,10 @@ final class mine_test extends \advanced_testcase {
         );
         $this->assertSame(['library' => $library->slug, 'id' => $faro], $cards[0]['items'][1]['args']);
         $this->assertSame('mobile_record_view', $cards[0]['items'][1]['method']);
+        // For Aty's home: a loan's date is when it goes back, and the rest of them are behind «All your loans».
+        $this->assertSame(['due', 'due'], array_column($cards[0]['items'], 'kind'));
+        $this->assertSame(get_string('mobileallloans', 'local_oksigeniaayvurenda'), $cards[0]['seeall']['label']);
+        $this->assertSame('mobile_library_view', $cards[0]['seeall']['method']);
 
         // What is set aside for them comes too, by the day it stops being kept; what they only wait for does not.
         $held = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Apartado']);
@@ -121,6 +125,8 @@ final class mine_test extends \advanced_testcase {
         }
         $cards = mine::home_cards((int) $ana->id, $now);
         $this->assertSame(['La sal', 'Apartado', 'El faro'], array_column($cards[0]['items'], 'title'));
+        // A book waiting at the desk is something to do: its button says so.
+        $this->assertSame(get_string('mobilepickup', 'local_oksigeniaayvurenda'), $cards[0]['items'][1]['actionlabel']);
 
         foreach (range(1, 6) as $n) {
             $lend('Otro ' . $n, $now + (10 + $n) * DAYSECS);

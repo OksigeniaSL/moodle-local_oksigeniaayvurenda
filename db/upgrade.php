@@ -759,6 +759,42 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111315, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111319) {
+        // A blind date: a copy wrapped in paper with its clues, who took it home and what they said (P7).
+        $table = new xmldb_table('local_oksigeniaayvurenda_blind');
+        $paper = new xmldb_field('paper', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1', 'tagno');
+        if ($dbman->table_exists($table) && !$dbman->field_exists($table, $paper)) {
+            $dbman->add_field($table, $paper);
+        }
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('libraryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('itemid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('tagno', XMLDB_TYPE_INTEGER, '6', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('paper', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
+            $table->add_field('clues', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+            $table->add_field('loanid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('readerid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('note', XMLDB_TYPE_CHAR, '10', null, null, null, null);
+            $table->add_field('timenoted', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('createdby', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timeclosed', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('entityid', XMLDB_KEY_FOREIGN, ['entityid'], 'local_oksigeniaayvurenda_entity', ['id']);
+            $table->add_key('libraryid', XMLDB_KEY_FOREIGN, ['libraryid'], 'local_oksigeniaayvurenda_library', ['id']);
+            $table->add_key('itemid', XMLDB_KEY_FOREIGN, ['itemid'], 'local_oksigeniaayvurenda_item', ['id']);
+            $table->add_key('loanid', XMLDB_KEY_FOREIGN, ['loanid'], 'local_oksigeniaayvurenda_loan', ['id']);
+            $table->add_key('readerid', XMLDB_KEY_FOREIGN, ['readerid'], 'local_oksigeniaayvurenda_reader', ['id']);
+            $table->add_key('createdby', XMLDB_KEY_FOREIGN, ['createdby'], 'user', ['id']);
+            $table->add_index('entitytag', XMLDB_INDEX_NOTUNIQUE, ['entityid', 'tagno']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026111319, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

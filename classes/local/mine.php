@@ -32,6 +32,9 @@ final class mine {
     /** @var int The most rows a reader's home in the app shows. */
     private const HOME_ROWS = 5;
 
+    /** @var int Days before a book is due back from which the app offers more time on the home. */
+    private const SOON = 3;
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -189,17 +192,23 @@ final class mine {
             foreach ($library['loans'] as $loan) {
                 if (!$loan['textbook']) {
                     // Late says so in words: a colour alone does not reach everyone, and a library's own may be close to it.
+                    // Its date is when it goes back («Entrega» in the app); due in a few days and with more time to give,
+                    // its button gives it, and the home puts it among what is to do today.
                     $items[] = ['title' => $loan['title'], 'detail' => $loan['late'] ? $str('mobilelate', $loan['due'])
                         : $library['name'], 'date' => self::noon((int) $loan['timedue'], $library['entityid']),
-                        'urgent' => $loan['late'],
+                        'urgent' => $loan['late'], 'kind' => 'due',
                         'method' => 'mobile_record_view',
-                        'args' => ['library' => $loan['where'], 'id' => $loan['recordid']]];
+                        'args' => ['library' => $loan['where'], 'id' => $loan['recordid']]]
+                        + (($loan['renewuntil'] ?? '') !== '' && (int) $loan['timedue'] <= $now + self::SOON * DAYSECS
+                        ? ['actionlabel' => $str('mobilerenew')] : []);
                 }
             }
             foreach ($library['holds'] as $hold) {
                 if ($hold['ready']) {
+                    // A book waiting at the desk is something to do: go and pick it up.
                     $items[] = ['title' => $hold['title'], 'detail' => $str('mobileready', $hold['until']),
                         'date' => self::noon((int) $hold['expires'], $library['entityid']), 'urgent' => false,
+                        'actionlabel' => $str('mobilepickup'),
                         'method' => 'mobile_record_view',
                         'args' => ['library' => $hold['slug'], 'id' => $hold['recordid']]];
                 }
@@ -209,7 +218,10 @@ final class mine {
         $card = ['tile' => ['label' => $str('mobilelibrary'), 'icon' => 'fas-book-open-reader', 'method' => 'mobile_library_view',
             'pagetitle' => $str('mobilelibrary')]];
         if ($items) {
-            $card += ['heading' => $str('mobileloans'), 'items' => array_slice($items, 0, self::HOME_ROWS)];
+            // The home shows two rows, the most pressing; the rest are behind «All your loans», the library's page.
+            $card += ['heading' => $str('mobileloans'), 'items' => array_slice($items, 0, self::HOME_ROWS),
+                'seeall' => ['label' => $str('mobileallloans'), 'method' => 'mobile_library_view',
+                    'pagetitle' => $str('mobilelibrary')]];
         }
         // The reader's card, a tap away, to show at the desk.
         $card2 = ['tile' => ['label' => $str('mobilecard'), 'icon' => 'fas-id-card', 'method' => 'mobile_card_view',
@@ -245,9 +257,19 @@ final class mine {
                 continue;
             }
             $young = $reader && cards::look_of($reader, $now) === 'flower';
-            $row = function (array $book, string $detail, int $date, bool $late, string $where) use ($young, $str) {
+            $row = function (
+                array $book,
+                string $detail,
+                int $date,
+                bool $late,
+                string $where,
+                string $kind = ''
+            ) use (
+                $young,
+                $str
+            ) {
                 return ['title' => $young ? $book['title'] : $str('mobilechildbook'), 'detail' => $detail, 'date' => $date,
-                    'urgent' => $late] + ($young ? ['method' => 'mobile_record_view',
+                    'urgent' => $late] + ($kind !== '' ? ['kind' => $kind] : []) + ($young ? ['method' => 'mobile_record_view',
                     'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['plain' => true]);
             };
             foreach ($library['loans'] as $loan) {
@@ -257,7 +279,8 @@ final class mine {
                         $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $loan['due']),
                         self::noon((int) $loan['timedue'], $library['entityid']),
                         (bool) $loan['late'],
-                        (string) $loan['where']
+                        (string) $loan['where'],
+                        'due'
                     );
                 }
             }

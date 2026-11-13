@@ -1410,9 +1410,17 @@ final class desk {
         if ($today === 100) {
             $extra['herald'] = $this->herald_word('deskheraldhundred');
         }
-        // The hidden book this reader found in the visit this week goes home now («Llévatelo»); the desk celebrates it
-        // a moment, and it is kept for the seal of their card (P1).
-        if (!$fulfilled && !$reserve && carry::taken($readerid, (int) $item->recordid, $this->now)) {
+        // A copy wrapped for a blind date goes home with this reader: the desk says so, by its number, so that nobody
+        // unwraps it there (P7).
+        $blind = !$fulfilled && !$reserve ? blind::lent((int) $item->id, (int) $loanid, $readerid, $this->now) : null;
+        if ($blind !== null) {
+            $message = 'desklentblind';
+            $a->number = $blind;
+            $extra['blind'] = $blind;
+            $extra['herald'] = $this->herald_word('deskheraldblind', ['number' => $blind]) ?? ($extra['herald'] ?? null);
+        } else if (!$fulfilled && !$reserve && carry::taken($readerid, (int) $item->recordid, $this->now)) {
+            // The hidden book this reader found in the visit this week goes home now («Llévatelo»); the desk celebrates
+            // it a moment, and it is kept for the seal of their card (P1).
             $message = 'desklentfound';
             $extra['found'] = true;
             $extra['herald'] = $this->herald_word('deskheraldfound', ['title' => $a->title]) ?? ($extra['herald'] ?? null);

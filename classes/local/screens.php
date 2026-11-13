@@ -130,6 +130,8 @@ final class screens {
             'hasrecent' => (bool) $recent,
             'herald' => $recent ? self::herald_new($library, $hero) : null,
             'weekbook' => self::week_book($library),
+            // The blind dates waiting on the shelf, with their clues (P7).
+            'blindshelf' => blind::shelf($library, (int) $USER->id, fn(string $key, $a = null) => self::str($key, $a)),
             'board' => self::board($library, $recent) + ['moments' => self::moments($library)],
             'empty' => !$corners && !$recent ? self::str('emptycatalogue') : '',
         ];

@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.259.0 (2026-11-13)
+
+- «La cita a ciegas» (P7 of the review), from Jujol's mock-up and Gaudí's drawings.
+  - **The staff**, on a book's page: a free copy is wrapped in paper with three clues, without title or author. It gets
+    the next number of the centre and one of six papers, the first no other date on the shelf wears. Wrapped, the card
+    shows its number, its clues, «Print its label» and how to unwrap it, with how its dates went below, never with names.
+  - **The label** (`blindtags.php`): four on an A4, with cutting lines. Each has its number, its clues, the library and
+    the barcode of the copy, which the desk reads outside the paper.
+  - **The reader**, on the home of the library: the shelf of dates, each wrapped, with its number and the memory giving
+    its clues with a finger on her lips; a date out on loan leaves the shelf until it is back. Not in Infantil.
+  - **The desk** knows a wrapped copy when it lends it: «Blind date no. 4 lent: no unwrapping until home».
+  - **The card**: at home, the date wrapped with its clues and the day it is due back; back, the book it was, out of the
+    torn paper, and three touches («I loved it», «It was fine», «Not for me»), each kept on its own and changed by
+    another touch. It only counts in a sum.
+- New table `blind`: in the centre's copy and its recovery, merged with twin readers, in the privacy provider (a reader
+  erased leaves the date and what was said, without who).
+- «What do you want to do?» knows how to wrap a book for a blind date.
+- Oksigenia Aty's new home: a loan's row says its date is when it goes back (`kind` due), one due within three days that
+  can have more time carries «Renew», a book waiting at the desk carries «Pick up», and the card has «All your loans».
+
 ## 0.258.0 (2026-11-13)
 
 - Jujol's review of the bingo card:

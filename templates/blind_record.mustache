@@ -1,0 +1,67 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/blind_record
+
+    The card «Blind date» of a book's page, for the staff (Jujol's mock-up of 13 November): free, the copies to choose and
+    three clues on the lines of a paper tag; wrapped, its number, its clues, its label to print and how to unwrap it; and
+    below, how its dates went, never with names.
+
+    Example context (json):
+    {
+        "action": "https://example.com/record.php?id=54", "sesskey": "abc", "id": 54, "heading": "Cita a ciegas",
+        "explain": "Envuelve un ejemplar libre en papel y escríbele tres pistas.", "copylabel": "El ejemplar",
+        "wraplabel": "Envolverlo", "printlabel": "Imprimir su etiqueta", "unwrapask": "Desenvolverlo",
+        "unwraphint": "Deja de ser una cita y vuelve a su estante con su título.", "unwrapyes": "Sí, desenvolverlo",
+        "notice": "", "error": "", "blindnumberabbr": "n.º", "out": "", "none": "",
+        "free": {"chosen": 123, "copies": [{"id": 123, "pressed": "true", "label": "00123 · Estantería infantil"}],
+            "clues": [{"n": 1, "label": "Primera pista", "value": "Hay un faro.", "hint": "80 letras como mucho.",
+                "idea": "", "missing": ""}, {"n": 3, "label": "Tercera pista", "value": "", "hint": "",
+                "idea": "Algo que se oiga", "missing": "Le falta la tercera pista."}]},
+        "wrapped": null,
+        "sums": ["Salió 6 veces", "4 «Me encantó»"], "hassums": true
+    }
+}}
+<section class="ayv-cc ayv-cf ayv-cc-ficha" id="ayv-cc-ficha" aria-labelledby="ayv-cc-ficha-t">
+    <h2 id="ayv-cc-ficha-t">{{heading}}</h2>
+    {{#notice}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{notice}}</span></p>{{/notice}}
+    {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
+    {{#free}}
+    <form id="cc-envolver" method="post" action="{{action}}#ayv-cc-ficha"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="blind" value="choose"></form>
+    <p class="ayv-cc-explica">{{explain}}</p>
+    <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{copylabel}}</span><input type="hidden" form="cc-envolver" name="blinditem" value="{{chosen}}">
+        <span class="ayv-cf-chapas">{{#copies}}<button class="ayv-cf-chapa" type="submit" form="cc-envolver" name="blinditem" value="{{id}}" aria-pressed="{{pressed}}">{{label}}</button>{{/copies}}</span></div>
+    <div class="ayv-cc-renglones">
+    {{#clues}}
+        <label class="ayv-cc-renglon{{#missing}} ayv-cc-falta{{/missing}}"><span>{{label}}</span><input form="cc-envolver" name="clue{{n}}" maxlength="80" value="{{value}}"{{#idea}} placeholder="{{idea}}"{{/idea}} autocomplete="off"{{#missing}} aria-invalid="true"{{/missing}}>{{#missing}}<small class="ayv-cc-falta-t">{{missing}}</small>{{/missing}}{{^missing}}{{#hint}}<small>{{hint}}</small>{{/hint}}{{/missing}}</label>
+    {{/clues}}
+    </div>
+    <div class="ayv-cc-acciones"><button class="ayv-button" type="submit" form="cc-envolver" name="blind" value="wrap">{{wraplabel}}</button></div>
+    {{/free}}
+    {{#wrapped}}
+    <form id="cc-cita-{{id}}" method="post" action="{{action}}#ayv-cc-ficha"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="blinddate" value="{{id}}"></form>
+    <div class="ayv-cc-ficha-cuerpo">{{> local_oksigeniaayvurenda/blind_wrapped}}
+        <div class="ayv-cc-ficha-lado"><p>{{says}}</p>
+            <ol class="ayv-cc-pistas">{{#clues}}<li>{{.}}</li>{{/clues}}</ol>
+            <div class="ayv-cc-acciones"><a class="ayv-button" href="{{printurl}}">{{printlabel}}</a>
+                <details class="ayv-cc-desenvolver"><summary>{{unwrapask}}</summary><p>{{unwraphint}}</p><button class="ayv-button ayv-button-quiet" type="submit" form="cc-cita-{{id}}" name="blind" value="unwrap">{{unwrapyes}}</button></details></div>
+        </div></div>
+    {{/wrapped}}
+    {{#out}}<p class="ayv-cc-explica">{{out}}</p>{{/out}}
+    {{#none}}<p class="ayv-cc-explica">{{none}}</p>{{/none}}
+    {{#hassums}}<p class="ayv-cc-sumas">{{#sums}}<span>{{.}}</span>{{/sums}}</p>{{/hassums}}
+</section>

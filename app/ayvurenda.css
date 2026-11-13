@@ -10964,3 +10964,766 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
         min-width: 0;
     }
 }
+
+/* «La cita a ciegas» (P7 of the review of 12 November), Jujol, 13 Nov 2026. After como-funciona.css; everything hangs from
+   .ayv and carries the prefix .ayv-cc-. The wrapped books are Gaudí's (pix/cita-1 to cita-6.webp, 320 × 480, the book
+   standing on the bottom edge), objects on the desk, the same in light and in dark; the tag with the number is HTML, hung
+   from the knot, which in all six falls at 56 % of the width and 61 % of the height. Chrome 93 and Firefox 98: no :has(),
+   no color-mix(); aspect-ratio is there (88 and 89). */
+
+.ayv .ayv-cc {
+    --cc-kraft: #c99d66;
+    --cc-kraft-2: #b5874f;
+    --cc-cordel-2: #d9c7a6;
+    --cc-papel: #fbf6ec;
+    --cc-tinta: #1e2b2a;
+    --cc-coral: #c4513a;
+}
+
+/* ---------- The wrapped book: Gaudí's drawing, and the round tag of its number hanging from the knot ---------- */
+/* The drawing is 2:3 with the book from 20 % of its height down; the frame is 4:5 and shows it from the bottom, so the
+   top sixth of empty air is left out and the book keeps a little room over its head. The knot, at 61 % of the drawing,
+   falls at 53 % of the frame. */
+.ayv .ayv-cc-envuelto {
+    position: relative;
+    flex: none;
+    width: 9rem;
+    aspect-ratio: 4 / 5;
+}
+
+.ayv .ayv-cc-envuelto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 100%;
+    filter: drop-shadow(0 10px 8px rgba(30, 20, 5, .28));
+}
+
+.ayv .ayv-cc-numero {
+    position: absolute;
+    z-index: 1;
+    top: calc(53% + 18px);
+    left: calc(56% + 8px);
+    display: grid;
+    place-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    border-radius: 50%;
+    background: var(--cc-papel);
+    box-shadow: inset 0 0 0 2px var(--cc-coral), 0 4px 6px -3px rgba(30, 20, 5, .6);
+    color: var(--cc-tinta);
+    line-height: 1;
+    text-align: center;
+    transform: rotate(-8deg);
+}
+
+.ayv .ayv-cc-numero small {
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.ayv .ayv-cc-numero b {
+    font-family: var(--title);
+    font-size: 1.45rem;
+}
+
+/* The thread that ties the tag to the knot. */
+.ayv .ayv-cc-numero::before {
+    content: "";
+    position: absolute;
+    top: -17px;
+    left: 4px;
+    width: 2px;
+    height: 20px;
+    background: var(--cc-cordel-2);
+    transform: rotate(-30deg);
+}
+
+.ayv .ayv-cc-envuelto-pequeno {
+    width: 5.5rem;
+}
+
+.ayv .ayv-cc-envuelto-pequeno .ayv-cc-numero {
+    top: calc(53% + 10px);
+    left: calc(56% + 4px);
+    width: 2.6rem;
+    height: 2.6rem;
+}
+
+.ayv .ayv-cc-envuelto-pequeno .ayv-cc-numero b {
+    font-size: 1.05rem;
+}
+
+.ayv .ayv-cc-envuelto-pequeno .ayv-cc-numero small {
+    font-size: .5rem;
+}
+
+/* ---------- The shelf of the home: the dates standing on a plank, each with Memoria saying its clues ---------- */
+.ayv .ayv-cc-estante {
+    margin: 28px 0;
+}
+
+.ayv .ayv-cc-estante-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin: 0 0 14px;
+}
+
+.ayv .ayv-cc-estante-cab h2 {
+    margin: 0;
+    font-family: var(--title);
+}
+
+.ayv .ayv-cc-estante-cab p {
+    margin: 0;
+    color: var(--ink);
+    opacity: .78;
+}
+
+.ayv .ayv-cc-citas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-cc-cita {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+}
+
+/* The book on its piece of plank, as on the shelf of the room. */
+.ayv .ayv-cc-balda {
+    display: flex;
+    justify-content: center;
+    padding: 14px 0 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(to bottom, transparent calc(100% - 14px), #a87442 calc(100% - 14px), #8c5c33);
+}
+
+.ayv .ayv-cc-balda .ayv-cc-envuelto {
+    margin-bottom: 14px;
+}
+
+/* Memoria, small, and her bubble with the three clues. */
+.ayv .ayv-cc-memoria {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* Memoria with her finger on her lips (memoria-secreto, or memoria-cielo-secreto from 12): big enough to read the gesture. */
+.ayv .ayv-cc-memoria > img {
+    flex: none;
+    width: 84px;
+    height: 84px;
+    margin: -10px -14px 0 -16px;
+}
+
+.ayv .ayv-cc-bocadillo {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+}
+
+.ayv .ayv-cc-bocadillo::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: -8px;
+    width: 14px;
+    height: 14px;
+    border-bottom: 1.5px solid var(--line);
+    border-left: 1.5px solid var(--line);
+    background: var(--surface);
+    transform: rotate(45deg);
+}
+
+.ayv .ayv-cc-quien {
+    margin: 0 0 6px;
+    color: var(--accent);
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-cc-pistas {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-cc-pistas li {
+    display: flex;
+    gap: 8px;
+    font-family: var(--title);
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.3;
+}
+
+.ayv .ayv-cc-pistas li::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-top: .5em;
+    border-radius: 50%;
+    background: var(--coral);
+}
+
+.ayv .ayv-cc-pide {
+    margin: 10px 0 0;
+    font-weight: 700;
+}
+
+.ayv .ayv-cc-pide b {
+    color: var(--accent);
+}
+
+.ayv .ayv-cc-bocadillo .ayv-listen {
+    margin-top: 8px;
+}
+
+/* ---------- The card of the reader: the date at home, and unwrapped after it came back ---------- */
+.ayv .ayv-cc-carne {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px 24px;
+    padding: 18px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.ayv .ayv-cc-carne-texto {
+    display: grid;
+    flex: 1 1 16rem;
+    gap: 8px;
+    min-width: 0;
+}
+
+.ayv .ayv-cc-carne-texto h2 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.35rem;
+}
+
+.ayv .ayv-cc-carne-texto p {
+    margin: 0;
+}
+
+.ayv .ayv-cc-aviso {
+    font-weight: 700;
+}
+
+.ayv .ayv-cc-vuelve {
+    color: var(--ink);
+    opacity: .78;
+}
+
+/* Unwrapped: the cover, with the kraft paper torn open behind it. */
+.ayv .ayv-cc-desvelado {
+    position: relative;
+    flex: none;
+    width: 8.5rem;
+    padding: 12px 12px 12px 18px;
+    border-radius: 6px;
+    background:
+        repeating-linear-gradient(97deg, rgba(255, 255, 255, .07) 0 2px, transparent 2px 7px),
+        linear-gradient(160deg, var(--cc-kraft), var(--cc-kraft-2));
+    -webkit-clip-path: polygon(0 4%, 9% 0, 22% 3%, 37% 0, 55% 4%, 71% 1%, 86% 4%, 100% 0, 97% 18%, 100% 35%, 96% 52%,
+        100% 70%, 97% 86%, 100% 100%, 82% 97%, 64% 100%, 47% 96%, 30% 100%, 14% 97%, 0 100%, 3% 80%, 0 62%, 4% 43%, 0 24%);
+    clip-path: polygon(0 4%, 9% 0, 22% 3%, 37% 0, 55% 4%, 71% 1%, 86% 4%, 100% 0, 97% 18%, 100% 35%, 96% 52%, 100% 70%,
+        97% 86%, 100% 100%, 82% 97%, 64% 100%, 47% 96%, 30% 100%, 14% 97%, 0 100%, 3% 80%, 0 62%, 4% 43%, 0 24%);
+}
+
+.ayv .ayv-cc-desvelado img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 2px 5px 5px 2px;
+    box-shadow: 0 6px 10px -6px rgba(30, 20, 5, .6);
+}
+
+.ayv .ayv-cc-era {
+    color: var(--accent);
+    font-size: .9rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.ayv .ayv-cc-autor {
+    color: var(--ink);
+    opacity: .78;
+}
+
+/* The note, with a touch: three tokens, the one chosen marked. */
+.ayv .ayv-cc-carne-texto .ayv-cc-nota-t {
+    margin-top: 6px;
+    font-weight: 700;
+}
+
+.ayv .ayv-cc-notas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ayv .ayv-cc-toque {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 4px 16px 4px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 22px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ayv .ayv-cc-toque svg {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    color: var(--coral);
+}
+
+.ayv .ayv-cc-toque[aria-pressed="true"] {
+    border-color: var(--green);
+    background: var(--green);
+    color: #fff;
+}
+
+.ayv .ayv-cc-toque[aria-pressed="true"] svg {
+    color: var(--sun);
+}
+
+.ayv .ayv-cc-toque:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.ayv .ayv-cc-solo {
+    font-size: .88rem;
+    font-style: italic;
+    opacity: .78;
+}
+
+/* ---------- The card of the record, for the staff: wrap a free copy, and the date it is ---------- */
+.ayv .ayv-cc-ficha {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    padding: 22px 20px 20px;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* A strip of the kraft paper on top: this card wraps books. */
+.ayv .ayv-cc-ficha::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 8px;
+    background:
+        repeating-linear-gradient(97deg, rgba(255, 255, 255, .08) 0 2px, transparent 2px 7px),
+        linear-gradient(90deg, var(--cc-kraft), var(--cc-kraft-2));
+}
+
+.ayv .ayv-cc-ficha h2 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.3rem;
+}
+
+.ayv .ayv-cc-ficha p {
+    margin: 0;
+}
+
+.ayv .ayv-cc-explica {
+    color: var(--ink);
+    opacity: .78;
+}
+
+.ayv .ayv-cc-ficha-cuerpo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 18px 24px;
+}
+
+.ayv .ayv-cc-ficha-lado {
+    display: grid;
+    flex: 1 1 18rem;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* The clues, written on the lines of the label: each one a line of paper, not a box. */
+.ayv .ayv-cc-renglones {
+    display: grid;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--cc-papel);
+    box-shadow: inset 0 0 0 1px rgba(30, 43, 42, .12);
+    color: var(--cc-tinta);
+}
+
+.ayv .ayv-cc-renglon {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+}
+
+.ayv .ayv-cc-renglon span {
+    color: #5d6965;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-cc-renglon input {
+    width: 100%;
+    min-width: 0;
+    padding: 4px 2px;
+    border: 0;
+    border-bottom: 2px dotted rgba(30, 43, 42, .4);
+    border-radius: 0;
+    background: transparent;
+    color: var(--cc-tinta);
+    font-family: var(--title);
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.ayv .ayv-cc-renglon input:focus {
+    border-bottom-color: var(--cc-coral);
+    outline: none;
+}
+
+.ayv .ayv-cc-renglon small {
+    color: #5d6965;
+    font-size: .75rem;
+}
+
+.ayv .ayv-cc-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+}
+
+.ayv .ayv-cc-desenvolver summary {
+    color: var(--late);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ayv .ayv-cc-desenvolver p {
+    margin: 8px 0;
+}
+
+.ayv .ayv-cc-sumas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+}
+
+.ayv .ayv-cc-sumas b {
+    font-family: var(--title);
+    font-size: 1.15rem;
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-cc-envuelto {
+        width: 7.5rem;
+    }
+
+    /* On a phone each date is a row: the book small on its plank beside its clues, so that three fit in a screen and
+       a half rather than in four. Memoria's picture gives way; her bubble stays. */
+    .ayv .ayv-cc-cita {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: start;
+        gap: 12px;
+    }
+
+    .ayv .ayv-cc-balda {
+        padding: 0 4px;
+    }
+
+    .ayv .ayv-cc-balda .ayv-cc-envuelto {
+        width: 5.2rem;
+    }
+
+    .ayv .ayv-cc-balda .ayv-cc-numero {
+        top: calc(53% + 10px);
+        left: calc(56% + 3px);
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .ayv .ayv-cc-balda .ayv-cc-numero::before {
+        top: -11px;
+        height: 13px;
+    }
+
+    .ayv .ayv-cc-balda .ayv-cc-numero b {
+        font-size: 1rem;
+    }
+
+    .ayv .ayv-cc-balda .ayv-cc-numero small {
+        font-size: .48rem;
+    }
+
+    .ayv .ayv-cc-cita .ayv-cc-memoria > img {
+        display: none;
+    }
+
+    .ayv .ayv-cc-cita .ayv-cc-bocadillo::before {
+        top: 22px;
+    }
+
+    .ayv .ayv-cc-pistas li {
+        font-size: .98rem;
+    }
+
+    .ayv .ayv-cc-carne {
+        padding: 14px;
+    }
+
+    .ayv .ayv-cc-desvelado {
+        width: 7rem;
+    }
+}
+
+/* ---------- The label, to stick on the paper: four on an A4 (A6 each), with cutting marks ---------- */
+.ayv-cc-hoja {
+    display: grid;
+    grid-template-columns: 105mm 105mm;
+    grid-template-rows: 148.5mm 148.5mm;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    color: #1e2b2a;
+}
+
+.ayv-cc-etiqueta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 12mm 11mm 10mm;
+    border: .3mm dashed #b9b2a5;
+    font-family: "Andika", sans-serif;
+}
+
+.ayv-cc-etiqueta-cab {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    margin: 0;
+    font-family: "Literata", Georgia, serif;
+    font-size: 13pt;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.ayv-cc-etiqueta-cab img {
+    width: 9mm;
+    height: 9mm;
+}
+
+.ayv-cc-etiqueta-numero {
+    margin: 7mm 0 5mm;
+    font-family: "Literata", Georgia, serif;
+    font-size: 54pt;
+    font-weight: 600;
+    line-height: .9;
+}
+
+.ayv-cc-etiqueta-numero small {
+    font-size: 16pt;
+    letter-spacing: .04em;
+}
+
+.ayv-cc-etiqueta ol {
+    display: grid;
+    gap: 3.5mm;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv-cc-etiqueta li {
+    padding-bottom: 2mm;
+    border-bottom: .3mm dotted #8b9591;
+    font-family: "Literata", Georgia, serif;
+    font-size: 13pt;
+    font-style: italic;
+    line-height: 1.25;
+}
+
+.ayv-cc-etiqueta-pie {
+    margin: auto 0 0;
+    padding-top: 5mm;
+    font-size: 10pt;
+    line-height: 1.35;
+}
+
+.ayv-cc-etiqueta-pie b {
+    display: block;
+    font-size: 11pt;
+}
+
+/* The code of the copy, outside the paper: the desk reads it when it lends the date. The bars come from the barcode of
+   labels.php; here, drawn. */
+.ayv-cc-etiqueta-codigo {
+    display: grid;
+    justify-items: start;
+    gap: 1mm;
+    margin-top: 4mm;
+    font-family: ui-monospace, monospace;
+    font-size: 9pt;
+    letter-spacing: .1em;
+}
+
+.ayv-cc-etiqueta-codigo i {
+    display: block;
+    width: 42mm;
+    height: 11mm;
+    background: repeating-linear-gradient(90deg, #111 0 .5mm, transparent .5mm .9mm, #111 .9mm 1.6mm, transparent 1.6mm 2mm,
+        #111 2mm 2.3mm, transparent 2.3mm 3.1mm);
+}
+
+/* As mounted: without the art package, the wrapped book of the first mock-up, kraft paper and string in CSS, 2:3, and the
+   tag hanging from its knot. */
+.ayv .ayv-cc-envuelto-css {
+    --cc-cordel: #f2e7d2;
+    position: relative;
+    flex: none;
+    width: 9rem;
+    aspect-ratio: 2 / 3;
+    border-radius: 3px 8px 8px 3px;
+    background:
+        repeating-linear-gradient(97deg, rgba(255, 255, 255, .07) 0 2px, transparent 2px 7px),
+        repeating-linear-gradient(8deg, rgba(90, 60, 20, .08) 0 1px, transparent 1px 9px),
+        linear-gradient(160deg, var(--cc-kraft), var(--cc-kraft-2));
+    box-shadow: inset 7px 0 0 rgba(60, 35, 10, .13), inset -2px 0 0 rgba(255, 255, 255, .12),
+        0 12px 18px -12px rgba(30, 20, 5, .65);
+}
+
+/* The string: one turn up and down, one across, twisted. */
+.ayv .ayv-cc-envuelto-css::before,
+.ayv .ayv-cc-envuelto-css::after {
+    content: "";
+    position: absolute;
+    background: repeating-linear-gradient(135deg, var(--cc-cordel) 0 3px, var(--cc-cordel-2) 3px 5px);
+    box-shadow: 0 1px 1px rgba(40, 25, 5, .35);
+}
+
+.ayv .ayv-cc-envuelto-css::before {
+    top: 0;
+    bottom: 0;
+    left: 60%;
+    width: 5px;
+}
+
+.ayv .ayv-cc-envuelto-css::after {
+    top: 36%;
+    right: 0;
+    left: 0;
+    height: 5px;
+}
+
+/* The knot where the string crosses, and the round tag of its number hanging from it. */
+.ayv .ayv-cc-envuelto-css .ayv-cc-lazo {
+    position: absolute;
+    z-index: 1;
+    top: calc(36% - 9px);
+    left: calc(60% - 14px);
+    width: 33px;
+    height: 23px;
+}
+
+.ayv .ayv-cc-envuelto-css .ayv-cc-lazo::before,
+.ayv .ayv-cc-envuelto-css .ayv-cc-lazo::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    width: 15px;
+    height: 17px;
+    border: 4px solid var(--cc-cordel);
+    border-radius: 50%;
+    box-shadow: 0 1px 1px rgba(40, 25, 5, .35);
+}
+
+.ayv .ayv-cc-envuelto-css .ayv-cc-lazo::before {
+    left: 0;
+    transform: rotate(-30deg);
+}
+
+.ayv .ayv-cc-envuelto-css .ayv-cc-lazo::after {
+    right: 0;
+    transform: rotate(30deg);
+}
+
+.ayv .ayv-cc-envuelto-css .ayv-cc-numero {
+    top: calc(36% + 22px);
+    left: calc(60% + 6px);
+}
+
+/* As mounted: a clue left empty when wrapping, its line in coral and what is missing under it (Jujol). */
+.ayv .ayv-cc-falta input {
+    border-bottom-color: var(--cc-coral);
+    border-bottom-style: solid;
+}
+
+.ayv .ayv-cc-renglon .ayv-cc-falta-t {
+    color: #a63f2b;
+    font-weight: 700;
+}
+
+/* The barcode of the copy on the label, from code39 as labels.php draws it. */
+.ayv .ayv-cc-etiqueta-codigo svg {
+    display: block;
+    width: 42mm;
+    height: 11mm;
+}
+
+/* The sheet of labels on the screen sits on the page like the other sheets; on paper, alone. */
+@media print {
+    .ayv .ayv-cc-hoja {
+        break-after: page;
+    }
+
+    .ayv .ayv-cc-hoja:last-of-type {
+        break-after: auto;
+    }
+}

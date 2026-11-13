@@ -100,6 +100,27 @@ if ($pickable && $weekpick !== '' && data_submitted() && confirm_sesskey()) {
     }
     redirect(new moodle_url($PAGE->url, ['picked' => 1], 'ayv-weekpick'));
 }
+// Whoever works at the desk wraps a free copy of this book for a blind date, with its clues, or unwraps it (P7).
+$blind = optional_param('blind', '', PARAM_ALPHA);
+$blindnotice = '';
+if ($pickable && $blind !== '' && data_submitted() && confirm_sesskey()) {
+    $clues = [optional_param('clue1', '', PARAM_TEXT), optional_param('clue2', '', PARAM_TEXT),
+        optional_param('clue3', '', PARAM_TEXT)];
+    $chosenitem = optional_param('blinditem', 0, PARAM_INT);
+    $back = ['blinditem' => $chosenitem];
+    if ($blind === 'wrap') {
+        $wrapped = \local_oksigeniaayvurenda\local\blind::wrap($library, $chosenitem, $clues, (int) $USER->id, time());
+        $back = is_int($wrapped) ? ['blindsaved' => 'wrap'] : $back + ['blinderror' => $wrapped];
+    } else if ($blind === 'unwrap') {
+        \local_oksigeniaayvurenda\local\blind::unwrap(required_param('blinddate', PARAM_INT), (int) $library->id, time());
+        $back = ['blindsaved' => 'unwrap'];
+    }
+    // What was written stays written while a copy is chosen, or when something was missing.
+    if (!isset($back['blindsaved'])) {
+        $back += ['clue1' => $clues[0], 'clue2' => $clues[1], 'clue3' => $clues[2]];
+    }
+    redirect(new moodle_url($PAGE->url, $back, 'ayv-cc-ficha'));
+}
 // A reader who took the book home tells what they thought, or takes it back.
 $do = optional_param('review', '', PARAM_ALPHA);
 if ($do !== '' && data_submitted() && confirm_sesskey()) {
@@ -207,6 +228,35 @@ $data['weekpick'] = $pickable ? [
     'pick' => get_string($isthis ? 'weekpickkeep' : 'weekpickdo', 'local_oksigeniaayvurenda'),
     'clear' => get_string('weekpickclear', 'local_oksigeniaayvurenda'),
     'saved' => optional_param('picked', 0, PARAM_BOOL) ? get_string('hiwsaved', 'local_oksigeniaayvurenda') : '',
+] : null;
+$blindsaved = optional_param('blindsaved', '', PARAM_ALPHA);
+$blinderror = optional_param('blinderror', '', PARAM_ALPHA);
+$bstr = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+$data['blindcard'] = $pickable ? \local_oksigeniaayvurenda\local\blind::staff(
+    $library,
+    $id,
+    optional_param('blinditem', 0, PARAM_INT),
+    [optional_param('clue1', '', PARAM_TEXT), optional_param('clue2', '', PARAM_TEXT), optional_param('clue3', '', PARAM_TEXT)],
+    $bstr,
+    $blinderror === 'blinderrclues'
+) + [
+    'action' => $PAGE->url->out(false),
+    'sesskey' => sesskey(),
+    'explain' => $bstr('blindexplain'),
+    'copylabel' => $bstr('blindcopy'),
+    'wraplabel' => $bstr('blindwrap'),
+    'printlabel' => $bstr('blindprint'),
+    'unwrapask' => $bstr('blindunwrapask'),
+    'unwraphint' => $bstr('blindunwraphint'),
+    'unwrapyes' => $bstr('blindunwrapyes'),
+    'blindnumberabbr' => $bstr('blindnumberabbr'),
+    'notice' => in_array($blindsaved, ['wrap', 'unwrap'], true) ? $bstr('blindsaved' . $blindsaved) : '',
+    // A clue missing is said under its line; the rest, above.
+    'error' => in_array($blinderror, ['blinderritem', 'blinderrwrapped'], true) ? $bstr($blinderror) : '',
+    'out' => '',
+    'none' => '',
+    'wrapped' => null,
+    'free' => null,
 ] : null;
 $sent = optional_param('channelsent', 0, PARAM_INT);
 $data['channel'] = $channel ? [

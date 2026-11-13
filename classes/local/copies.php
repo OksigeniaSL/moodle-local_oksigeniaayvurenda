@@ -65,6 +65,8 @@ final class copies {
         'keepsake' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',
         // The hidden books found in the visit, which give the seal of the card, as what a reader won.
         'find' => 'entityid = :entityid',
+        // The blind dates: the library's wrapped books with their clues, and who took each home.
+        'blind' => 'entityid = :entityid',
         'quest' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'activity' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'questreader' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',

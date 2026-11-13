@@ -82,6 +82,15 @@ if (data_submitted() && confirm_sesskey()) {
         if ($joiner) {
             \local_oksigeniaayvurenda\local\quests::join($questid, $joiner, time());
         }
+    } else if ($do === 'blindnote') {
+        // What a reader says of their blind date once it is back, as the reader of its centre (P7).
+        $dateid = required_param('blinddate', PARAM_INT);
+        $centre = $DB->get_field('local_oksigeniaayvurenda_blind', 'entityid', ['id' => $dateid]);
+        $noter = $centre ? $DB->get_record('local_oksigeniaayvurenda_reader', ['userid' => $USER->id, 'status' => 'active',
+            'entityid' => $centre], '*', IGNORE_MULTIPLE) : null;
+        if ($noter) {
+            \local_oksigeniaayvurenda\local\blind::note($dateid, (int) $noter->id, optional_param('note', '', PARAM_ALPHA), time());
+        }
     } else if ($do === 'goal') {
         // A number written, or one of those offered.
         $wanted = optional_param('goalother', 0, PARAM_INT) ?: optional_param('goal', 0, PARAM_INT);
@@ -299,7 +308,12 @@ foreach ($readers as $reader) {
             'line' => $reached ? $str('questreached')
                 : ($goal - $stamps === 1 ? $str('questtogoone') : $str('questtogo', $goal - $stamps))];
     }
+    // Their blind dates: the one at home, wrapped; the one back, the book it was and what they say of it (P7).
+    $blindlibrary = $library ?? \local_oksigeniaayvurenda\local\mail::main_library((int) $reader->entityid);
+    $blinddates = $blindlibrary ? \local_oksigeniaayvurenda\local\blind::card($reader, $blindlibrary, time(), $str, !$previewid)
+        : [];
     $cardsdata[] = $card + [
+        'blinddates' => $blinddates,
         'quests' => $questcards,
         'hasquests' => (bool) $questcards,
         'sanctionline' => \local_oksigeniaayvurenda\local\sanctions::for_reader((int) $reader->entityid, (int) $reader->id, time()),
@@ -395,6 +409,12 @@ $data = [
     'questsheading' => $str('questsheading'),
     'questjoin' => $str('questjoin'),
     'cartillajoin' => $str('cartillajoin'),
+    'blindyours' => $str('blindyours'),
+    'blindunwrap' => $str('blindunwrap'),
+    'blindwas' => $str('blindwas'),
+    'blindhow' => $str('blindhow'),
+    'blindsaved' => $str('blindsavednote'),
+    'blindnumberabbr' => $str('blindnumberabbr'),
     'cartillastamp' => $str('cartillastamp'),
     'cartillafull' => $str('cartillafull'),
     'cartillasquares' => $str('cartillasquares'),

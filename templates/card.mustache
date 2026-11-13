@@ -120,6 +120,7 @@
     </ul>
     {{/hasbooks}}
     {{^hasbooks}}<div class="ayv-posed">{{#nobooksfigure}}<span class="ayv-figure"><img class="ayv-posed-figure" src="{{nobooksfigure}}" alt="" width="512" height="512"{{#nobookspuppet}} data-puppet="{{nobookspuppet}}"{{/nobookspuppet}}></span>{{/nobooksfigure}}<p class="ayv-empty">{{nobooks}}{{#listennobooks}} {{> local_oksigeniaayvurenda/listen}}{{/listennobooks}}</p></div>{{/hasbooks}}
+    {{#blinddates}}{{> local_oksigeniaayvurenda/blind_card}}{{/blinddates}}
     {{#hasquests}}
     <section class="ayv-card-quests" id="ayv-quests-{{code}}" aria-labelledby="ayv-quests-title-{{code}}">
         <h2 class="ayv-section-title" id="ayv-quests-title-{{code}}">{{questsheading}}</h2>

@@ -1,0 +1,49 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/blind_tags
+
+    The labels of the blind dates, to stick on the paper (Jujol's mock-up of 13 November): four on an A4 (A6 each), with
+    their cutting lines; each with its number, its clues, the library and the barcode of the copy, which the desk reads
+    outside the paper.
+
+    Example context (json):
+    {
+        "says": "Imprimir una etiqueta", "hint": "En A4, al cien por cien.", "printnow": "Imprimir",
+        "back": "https://example.com/record.php", "backlabel": "Volver a la ficha",
+        "emblem": "https://example.com/emblema-pequeno.svg", "tagtitle": "Cita a ciegas", "blindnumberabbr": "n.º",
+        "library": "Biblioteca de ejemplo", "tagfoot": "Pídela en el mostrador por su número.",
+        "sheets": [{"tags": [{"number": 4, "clues": ["Hay un faro."], "barcode": "00123",
+            "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 4'><rect width='1' height='4'/></svg>"}]}]
+    }
+}}
+<div class="ayv-print-head ayv-et-imprime" data-ayv-autoprint>
+    <h1 class="ayv-et-dice">{{says}}</h1>
+    <p class="ayv-cf-nota">{{hint}}</p>
+    <p class="ayv-cf-fila"><button type="button" class="ayv-button" data-ayv-print>{{printnow}}</button> <a class="ayv-cf-enlace" href="{{back}}">{{backlabel}}</a></p>
+</div>
+{{#sheets}}
+<div class="ayv-cc-hoja">
+{{#tags}}
+    <article class="ayv-cc-etiqueta"><p class="ayv-cc-etiqueta-cab"><img src="{{emblem}}" alt="" width="34" height="34">{{tagtitle}}</p>
+        <p class="ayv-cc-etiqueta-numero"><small>{{blindnumberabbr}}</small> {{number}}</p>
+        <ol>{{#clues}}<li>{{.}}</li>{{/clues}}</ol>
+        <p class="ayv-cc-etiqueta-pie"><b>{{library}}</b>{{tagfoot}}</p>
+        <div class="ayv-cc-etiqueta-codigo">{{{svg}}}<span>{{barcode}}</span></div></article>
+{{/tags}}
+</div>
+{{/sheets}}

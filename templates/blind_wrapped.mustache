@@ -1,0 +1,29 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/blind_wrapped
+
+    The wrapped book of a blind date (Jujol's mock-up of 13 November): Gaudí's drawing of its paper (one of six) when the
+    art package has it, else kraft paper and string in CSS; its number always HTML, so that it reads and can be any.
+
+    Example context (json):
+    {
+        "number": 4, "art": null, "wrappedlabel": "Un libro envuelto para regalo, la cita n.º 4", "small": false,
+        "blindnumberabbr": "n.º"
+    }
+}}
+<div class="ayv-cc-envuelto{{#small}} ayv-cc-envuelto-pequeno{{/small}}{{^art}} ayv-cc-envuelto-css{{/art}}" role="img" aria-label="{{wrappedlabel}}">{{#art}}<img src="{{art}}" alt="" width="320" height="480" loading="lazy">{{/art}}{{^art}}<span class="ayv-cc-lazo" aria-hidden="true"></span>{{/art}}<span class="ayv-cc-numero" aria-hidden="true"><small>{{blindnumberabbr}}</small><b>{{number}}</b></span></div>

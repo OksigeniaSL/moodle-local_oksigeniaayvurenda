@@ -100,6 +100,7 @@ final class howto {
         'readerslist' => ['readerslist.php', 'manage', 'readerslist'],
         'quests' => ['quests.php', 'manage', ''],
         'cartilla' => ['quests.php', 'manage', ''],
+        'blind' => ['search.php', 'desk', ''],
         'helpme' => ['howto.php', 'desk', ''],
         'lost' => ['desk.php', 'desk', ''],
         'whohas' => ['late.php', 'desk', ''],

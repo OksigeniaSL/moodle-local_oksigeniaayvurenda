@@ -1,0 +1,44 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/blind_shelf
+
+    The shelf of blind dates on the home of a library (Jujol's mock-up of 13 November): each date wrapped, with its number,
+    and the memory giving its three clues; it is asked for at the desk by its number.
+
+    Example context (json):
+    {
+        "heading": "Citas a ciegas", "hint": "Tres pistas y ningún título. Elige la que te llame.",
+        "who": "Memoria te da sus pistas", "memoryfigure": "https://example.com/memoria-senala.webp",
+        "blindask": "Pídela en el mostrador por su número:", "blindnumberabbr": "n.º",
+        "dates": [{"number": 4, "art": null, "wrappedlabel": "Un libro envuelto en papel, la cita n.º 4", "small": false,
+            "clues": ["Hay un faro y alguien que espera.", "Se lee en una tarde de lluvia."], "numbertext": "la n.º 4"}]
+    }
+}}
+<section class="ayv-cc ayv-cc-estante" id="ayv-citas" aria-labelledby="ayv-cc-t">
+    <div class="ayv-cc-estante-cab"><h2 id="ayv-cc-t">{{heading}}</h2><p>{{hint}}</p></div>
+    <ul class="ayv-cc-citas">
+    {{#dates}}
+        <li class="ayv-cc-cita">
+            <div class="ayv-cc-balda">{{> local_oksigeniaayvurenda/blind_wrapped}}</div>
+            <div class="ayv-cc-memoria">{{#memoryfigure}}<img src="{{memoryfigure}}" alt="" width="84" height="84" loading="lazy">{{/memoryfigure}}
+                <div class="ayv-cc-bocadillo"><p class="ayv-cc-quien">{{who}}</p><ol class="ayv-cc-pistas">{{#clues}}<li>{{.}}</li>{{/clues}}</ol>
+                <p class="ayv-cc-pide">{{blindask}} <b>{{numbertext}}</b>.</p></div></div>
+        </li>
+    {{/dates}}
+    </ul>
+</section>
