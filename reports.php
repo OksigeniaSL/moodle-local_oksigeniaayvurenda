@@ -54,13 +54,19 @@ $order = \local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entit
 $report = in_array($report, reports::ALL, true) ? $report : $order[0];
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $date = fn(int $time) => zones::date($time, 'strftimedate', $library);
-$day = function (string $text, int $default) use ($library): int {
-    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $text)
-        ? (new DateTimeImmutable($text . ' 00:00:00', zones::of($library)))->getTimestamp() : $default;
-};
 $year = years::around((int) $library->entityid, time());
-$from = $day(optional_param('from', '', PARAM_TEXT), (int) $year->timestart);
-$to = $day(optional_param('to', '', PARAM_TEXT), time() + DAYSECS);
+// The period: a sheet touched (this week, a term, the year…), months from «Another», or exact days from the sheet of the
+// year; the days of before (from, to) still say the same.
+$periodkey = optional_param('periodo', '', PARAM_ALPHANUM);
+$desde = optional_param('desde', '', PARAM_RAW_TRIMMED);
+$hasta = optional_param('hasta', '', PARAM_RAW_TRIMMED);
+$oldfrom = optional_param('from', '', PARAM_TEXT);
+if ($desde === '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $oldfrom)) {
+    $desde = $oldfrom;
+    $hasta = optional_param('to', '', PARAM_TEXT);
+}
+[$from, $to, $chosen] = \local_oksigeniaayvurenda\local\periods::resolve($library, time(), $periodkey, $desde, $hasta);
+$other = optional_param('otro', 0, PARAM_BOOL) || $chosen === 'otro';
 $unlent = max(0, optional_param('unlent', 3, PARAM_INT));
 $older = max(0, optional_param('older', 5, PARAM_INT));
 $rows = [];
@@ -89,7 +95,7 @@ switch ($report) {
         // It says which days it counts, and each group opens its readers.
         $summary = $str('reportloansspan', (object) ['loans' => \local_oksigeniaayvurenda\local\screens::number(
             (int) $found['total']
-        ), 'from' => $date($from), 'to' => $date(min($to, time()))]);
+        ), 'from' => $date($from), 'to' => $date(min($to - 1, time()))]);
         break;
     case 'top':
         $found = reports::top($library, $from, $to);
@@ -168,8 +174,29 @@ if ($format === 'csv') {
 }
 $params = ['library' => $library->slug, 'report' => $report];
 $shown = fn(int $time) => zones::date($time, '%Y-%m-%d', $library);
-$extra = $period ? ['from' => $shown($from), 'to' => $shown($to - 1)] : ($report === 'never'
+$extra = $period ? ['desde' => $shown($from), 'hasta' => $shown($to - 1)] : ($report === 'never'
     ? ['unlent' => $unlent, 'older' => $older] : []);
+// The row of sheets of the periods, and the strip of months of «Another».
+$here = fn(array $more) => (new moodle_url('/local/oksigeniaayvurenda/reports.php', $params + $more))->out(false);
+$sheets = [];
+foreach (\local_oksigeniaayvurenda\local\periods::all($library, time()) as $one) {
+    $sheets[] = ['name' => $one['name'], 'dates' => $one['dates'], 'url' => $here(['periodo' => $one['key']]),
+        'current' => !$other && $one['key'] === $chosen, 'other' => false];
+}
+$sheets[] = ['name' => $str('periodother'), 'dates' => $str('periodotherdates'), 'url' => $here(['otro' => 1]) . '#ayv-in-meses',
+    'current' => $chosen === 'otro' || $other, 'other' => true];
+$first = preg_match('/^\d{4}-\d{2}$/', $desde) && $hasta === '' ? $desde : '';
+$strip = $other && $hasta === '' ? [
+    'prompt' => $first !== '' ? $str('periodfrom', '<b>' . s(userdate((new DateTimeImmutable($first . '-15 12:00'))
+        ->getTimestamp(), '%B')) . '</b>') : $str('periodfirst'),
+    'months' => \local_oksigeniaayvurenda\local\periods::months($library, time(), $first, fn(array $more) => $here($more)),
+    'days' => (new moodle_url(
+        '/local/oksigeniaayvurenda/year.php',
+        ['library' => $library->slug, 'elegir' => $report],
+        'ayv-cs-sheet'
+    ))->out(false),
+    'dayslabel' => $str('perioddays'),
+] : null;
 $data = [
     'heading' => $str('report' . $report . 'title'),
     // A little life above the numbers: this week, the year ahead of the last, what there is to celebrate.
@@ -177,13 +204,14 @@ $data = [
     'intro' => $str('report' . $report . 'intro'),
     'tabs' => array_map(fn($r) => ['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/reports.php',
-        ['library' => $library->slug, 'report' => $r]
+        ['library' => $library->slug, 'report' => $r] + ($chosen !== 'curso' ? $extra : [])
     ))->out(false), 'label' => $str('report' . $r . 'title'),
         'current' => $r === $report], $order),
     'action' => (new moodle_url('/local/oksigeniaayvurenda/reports.php'))->out(false),
     'library' => $library->slug,
     'report' => $report,
-    'period' => $period ? ['from' => $shown($from), 'to' => $shown($to - 1)] : null,
+    'period' => $period ? ['label' => $str('periodlabel'), 'sheets' => $sheets, 'strip' => $strip] : null,
+    'reportsnav' => $str('reportsnav'),
     'never' => $report === 'never' ? ['unlent' => $unlent, 'older' => $older] : null,
     'summary' => $summary,
     'rows' => $rows,

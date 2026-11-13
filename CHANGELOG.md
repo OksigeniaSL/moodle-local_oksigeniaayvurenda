@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.240.0 (2026-11-12)
+
+- Reports, from Jujol's mock-up: the reports are tabs on a sheet, and the period of «Loans by group» and «Most lent» is a
+  row of sheets, each with its dates under its name: this week, this month, each term of the year sheet, the year, last
+  year, and «Another». Each term is named by the month the centre opens in after the one before (past its closures).
+  «Another» opens the strip of the twelve months of the year: touch the first and then the last. Exact days come from
+  the year sheet, which in this mode asks for the first day and then the last and goes back to the report with them. The
+  six lists of day, month and year (with years from 2016) and the «Show» are gone; the old «from» and «to» addresses
+  still work. The summary says the last day counted, not the day after.
+- The guided help of Reports follows the new period, with its line re-voiced in Spanish and English (art 0.1.61).
+- «How your library works»: the link at its foot keeps its contrast in light mode.
+
 ## 0.239.0 (2026-11-12)
 
 - Tutors, from Jujol's mock-up: each stage a shelf, each group a card with its tutor's face (initials, or their photo

@@ -77,6 +77,14 @@ if (data_submitted() && confirm_sesskey()) {
 $touched = optional_param('dia', '', PARAM_RAW_TRIMMED);
 $from = optional_param('desde', '', PARAM_RAW_TRIMMED);
 $from = preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) ? $from : '';
+// Choosing the exact days of a report (from «Reports», «Another»): two touches on the sheet, and back to it.
+$pickreport = optional_param('elegir', '', PARAM_ALPHA);
+$pick = in_array($pickreport, \local_oksigeniaayvurenda\local\reports::ALL, true) ? ['report' => $pickreport, 'first' => $from]
+    : null;
+if ($pick) {
+    $from = '';
+    $touched = '';
+}
 $saved = optional_param('saved', 0, PARAM_BOOL) ? optional_param('at', '', PARAM_ALPHANUMEXT) : '';
 if (optional_param('toolong', 0, PARAM_BOOL)) {
     $notice = $str('closuresbad', \local_oksigeniaayvurenda\local\closures::LONGEST);
@@ -126,7 +134,7 @@ if ($status['last'] && !(int) $status['last']['loans']) {
             'share' => $g['members'] ? round(100 * $g['borrowers'] / $g['members']) : 0], $l['groups']),
     ];
 }
-$sheet = yearsheet::months($library, $year, time(), $touched, $from, '/local/oksigeniaayvurenda/year.php');
+$sheet = yearsheet::months($library, $year, time(), $touched, $from, '/local/oksigeniaayvurenda/year.php', $pick);
 $step = characters::step($entityid);
 $pose = $saved !== '' ? 'celebra' : 'lee';
 $crier = characters::whole($entityid) ? characters::figure('herald', $pose, $step) : null;
@@ -148,7 +156,11 @@ $data = [
     'card' => yearsheet::card($library, $year, $touched, $from, $str),
     'release' => (new moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug], 'ayv-cs-sheet'))->out(false),
     'releaselabel' => $str('yearsheetrelease'),
-    'choosing' => $from !== '' && ($touched === '' || $touched < $from) ? $str('yearsheetchoosing') : '',
+    'choosing' => $pick ? ($pick['first'] !== '' ? $str('yearsheetpicklast', $date((new DateTimeImmutable(
+        $pick['first'] . ' 12:00',
+        zones::of($library)
+    ))->getTimestamp())) : $str('yearsheetpickfirst')) : ($from !== '' && ($touched === '' || $touched < $from)
+        ? $str('yearsheetchoosing') : ''),
     'sheettitle' => $str('yearsheettitle'),
     'legend' => array_values(array_filter([
         $classes ? ['class' => 'ayv-cs-t1', 'label' => $str('yearsheetlegendt1')] : null,

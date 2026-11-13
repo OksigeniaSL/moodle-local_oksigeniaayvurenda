@@ -6132,10 +6132,14 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
     opacity: .75;
 }
 
-.ayv .ayv-cf-rotulo,
-.ayv .ayv-cf-pie {
+.ayv .ayv-cf-rotulo {
     color: var(--ink);
     opacity: .75;
+}
+
+/* The foot carries a link: no opacity, which the link would take too and lose its contrast. */
+.ayv .ayv-cf-pie {
+    color: var(--ink);
 }
 
 .ayv .ayv-cf-nota,
@@ -6877,8 +6881,8 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 .ayv .ayv-in-p {
     display: grid;
     gap: 1px;
-    min-width: 7.5rem;
-    padding: 10px 14px 9px;
+    min-width: 7rem;
+    padding: 10px 12px 9px;
     border-radius: 4px 4px 10px 10px;
     background: linear-gradient(var(--line) 0 5px, transparent 5px), var(--paper);
     box-shadow: inset 0 0 0 1.5px var(--line);
@@ -6910,6 +6914,11 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     background: transparent;
     box-shadow: inset 0 0 0 1.5px var(--muted);
     border: 0;
+}
+
+.ayv .ayv-in-p-otro:not([aria-current]) span {
+    color: var(--ink);
+    opacity: .75;
 }
 
 /* Another span: the twelve months of the year in a strip; the first touched in green, those it can end on as links. */
@@ -6948,7 +6957,8 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 }
 
 .ayv .ayv-in-m-no {
-    color: var(--muted);
+    color: var(--ink);
+    opacity: .7;
     font-weight: 400;
     box-shadow: none;
     background: transparent;

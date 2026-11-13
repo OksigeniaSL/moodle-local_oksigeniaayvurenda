@@ -447,12 +447,12 @@ window.AYVHelpPieces = {
     reports: function(h) {
         'use strict';
         var tab = function(n) {
-            return '.ayv-tabs a:nth-child(' + n + ')';
+            return '.ayv-in-fichas a:nth-child(' + n + ')';
         };
-        return h.point('.ayv-tabs').then(function() {
+        return h.point('.ayv-in-fichas').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('.ayv-inline-form');
+            return h.point('.ayv-in-periodos');
         }).then(function() {
             return h.say(1);
         }).then(function() {

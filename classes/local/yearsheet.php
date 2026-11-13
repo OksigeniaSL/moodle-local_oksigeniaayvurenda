@@ -157,6 +157,7 @@ final class yearsheet {
      * @param string $touched The day touched, or ''.
      * @param string $from The first day of a closure being chosen, or ''.
      * @param string $base The address of the page.
+     * @param array|null $pick Choosing the days of a report: report, and first (the first day, or '').
      * @return array months and the letters of the week.
      */
     public static function months(
@@ -165,7 +166,8 @@ final class yearsheet {
         int $now,
         string $touched,
         string $from,
-        string $base
+        string $base,
+        ?array $pick = null
     ): array {
         $entityid = (int) $library->entityid;
         $zone = zones::of($entityid);
@@ -207,6 +209,18 @@ final class yearsheet {
                 }
                 $params = ['library' => $library->slug,
                     'dia' => $date] + ($from !== '' && $date >= $from ? ['desde' => $from] : []);
+                // Choosing the days of a report: the first touch is its first day, the second goes back to the report.
+                $link = new \moodle_url($base, $params, 'ayv-cs-touched');
+                if ($pick) {
+                    $link = $pick['first'] !== '' && $date >= $pick['first']
+                        ? new \moodle_url('/local/oksigeniaayvurenda/reports.php', ['library' => $library->slug,
+                            'report' => $pick['report'], 'desde' => $pick['first'], 'hasta' => $date])
+                        : new \moodle_url(
+                            $base,
+                            ['library' => $library->slug, 'elegir' => $pick['report'], 'desde' => $date],
+                            'ayv-cs-sheet'
+                        );
+                }
                 // What a screen reader says of the day: its name and what it is.
                 $aria = [get_string('hiwdaymonth', 'local_oksigeniaayvurenda', (object) ['day' => (int) $day->format('j'),
                     'month' => userdate($day->getTimestamp(), '%B')])];
@@ -226,7 +240,7 @@ final class yearsheet {
                     'aria' => implode(', ', $aria),
                     'n' => (int) $day->format('j'),
                     'date' => $date,
-                    'url' => (new \moodle_url($base, $params, 'ayv-cs-touched'))->out(false),
+                    'url' => $link->out(false),
                     'band' => $term ? self::BANDS[$term] : '',
                     'termend' => in_array($date, $ends, true),
                     'closed' => isset($closed[$date]),
@@ -235,8 +249,9 @@ final class yearsheet {
                     'deadline' => $date === $deadline,
                     'today' => $date === $today,
                     'touched' => $date === $touched,
-                    'chosen' => $from !== '' && $date >= $from
-                        && $date <= ($touched !== '' && $touched >= $from ? $touched : $from),
+                    'chosen' => ($from !== '' && $date >= $from
+                        && $date <= ($touched !== '' && $touched >= $from ? $touched : $from))
+                        || ($pick && $date === $pick['first']),
                 ];
                 $day = $day->modify('+1 day');
             }

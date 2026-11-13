@@ -33,7 +33,12 @@
         "action": "#",
         "library": "central",
         "report": "loans",
-        "period": {"from": "2026-09-01", "to": "2026-10-24"},
+        "period": {"label": "El periodo", "sheets": [{"name": "Esta semana", "dates": "9 al 15 nov",
+            "url": "https://example.org/reports.php?periodo=semana", "current": true, "other": false}],
+            "strip": {"prompt": "Desde <b>octubre</b>. Toca el último mes:", "months": [{"label": "oct",
+                "url": "https://example.org/reports.php?desde=2026-10", "first": true}],
+                "days": "https://example.org/year.php", "dayslabel": "Por días exactos"} },
+        "reportsnav": "Informes",
         "never": null,
         "summary": "120 préstamos.",
         "hasrows": true,
@@ -45,18 +50,21 @@
     }
 }}
 {{> local_oksigeniaayvurenda/life }}
-<nav class="ayv-tabs" aria-label="{{heading}}">
-{{#tabs}}<a class="ayv-toggle" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
-</nav>
+<div class="ayv-cf ayv-in">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
+<nav class="ayv-in-fichas" aria-label="{{reportsnav}}">
+{{#tabs}}<a class="ayv-in-ficha" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
+</nav>
+<section class="ayv-in-hoja">
 {{#period}}
-<form method="get" action="{{action}}" class="ayv-inline-form">
-    <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="report" value="{{report}}">
-    <label class="ayv-field">{{reportfrom}} <input type="date" name="from" value="{{from}}"></label>
-    <label class="ayv-field">{{reportto}} <input type="date" name="to" value="{{to}}"></label>
-    <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
-</form>
+<div class="ayv-in-periodo" role="group" aria-labelledby="ayv-in-p">
+    <span class="ayv-cf-rotulo" id="ayv-in-p">{{label}}</span>
+    <div class="ayv-in-periodos">{{#sheets}}<a class="ayv-in-p{{#other}} ayv-in-p-otro{{/other}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}><b>{{name}}</b><span>{{dates}}</span></a>{{/sheets}}</div>
+    {{#strip}}<div class="ayv-in-meses" id="ayv-in-meses"><p class="ayv-cf-nota">{{{prompt}}}</p>
+        <div class="ayv-in-tira">{{#months}}{{#url}}<a class="ayv-in-m{{#first}} ayv-in-m-desde{{/first}}" href="{{url}}">{{label}}</a>{{/url}}{{^url}}<span class="ayv-in-m ayv-in-m-no">{{label}}</span>{{/url}}{{/months}}</div>
+        <a class="ayv-cf-enlace" href="{{days}}">{{dayslabel}}</a></div>{{/strip}}
+</div>
 {{/period}}
 {{#never}}
 <form method="get" action="{{action}}" class="ayv-inline-form">
@@ -83,3 +91,5 @@
 </ul>
 {{/hasrows}}
 {{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}
+</section>
+</div>
