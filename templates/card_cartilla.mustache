@@ -19,7 +19,8 @@
 
     A cartilla on the reader's card (Jujol's mock-up of 13 November): the printed card of nine squares, each filled with
     the desk's date stamp or a link to the books that fill it, its lines in highlighter, the big stamp when it is full;
-    beside it, what it is, how it goes, Mainumby when there is something to celebrate, and how it is played.
+    beside it, what it is, how it goes, Mainumby when there is something to celebrate, and how it is played (not once it
+    is full: no square is left to touch).
 
     Example context (json):
     {
@@ -67,7 +68,7 @@
         {{#count}}<p class="ayv-ct-cuenta">{{count}}</p>{{/count}}
         {{#cheer}}<div class="ayv-ct-pajaro">{{#figure}}<img src="{{figure}}" alt="" width="96" height="96">{{/figure}}<p>{{text}}</p></div>{{/cheer}}
         {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button ayv-ct-jugar">{{cartillajoin}}</button></form>{{/canjoin}}
-        <p class="ayv-ct-como"><b>{{cartillahowtitle}}</b> {{#joined}}{{cartillahow}}{{/joined}}{{^joined}}{{cartillahownew}}{{/joined}}</p>
+        {{^full}}<p class="ayv-ct-como"><b>{{cartillahowtitle}}</b> {{#joined}}{{cartillahow}}{{/joined}}{{^joined}}{{cartillahownew}}{{/joined}}</p>{{/full}}
         <p class="ayv-ct-solo">{{cartillaonlyyou}}</p>
     </div>
 </div>

@@ -64,6 +64,24 @@ final class zones_test extends \advanced_testcase {
     }
 
     /**
+     * A span of days says its month and its year once: in one month, the first day alone; in one year, each with its
+     * month; across years, each whole. In the centre's zone, not the site's.
+     */
+    public function test_span(): void {
+        $w = $this->world();
+        $span = fn(string $from, string $to) => array_values((array) zones::span(
+            $this->bogota($from),
+            $this->bogota($to),
+            $w->entityid
+        ));
+        $this->assertSame(['8', '29 November'], $span('2026-11-08 00:00', '2026-11-29 23:59'));
+        $this->assertSame(['13 November', '10 December'], $span('2026-11-13 00:00', '2026-12-10 23:59'));
+        $this->assertSame(['28 December 2026', '8 January 2027'], $span('2026-12-28 00:00', '2027-01-08 23:59'));
+        // Late at night in Bogotá it is already the next day in Madrid: the centre's day counts.
+        $this->assertSame(['8', '30 November'], $span('2026-11-08 00:00', '2026-11-30 22:00'));
+    }
+
+    /**
      * The setting: what is known is kept, and nothing chosen is the site's.
      */
     public function test_setting(): void {

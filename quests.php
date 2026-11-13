@@ -130,7 +130,6 @@ if (data_submitted() && confirm_sesskey()) {
 }
 $stages = quests::stages($library, $now);
 $date = fn(int $time, string $format) => zones::date($time, $format, $library);
-$long = 'strftimedate';
 // A cartilla on the list: its card small (only its drawings), its sums without names, and the square filled the least.
 $options = null;
 $box = function () use (&$options, $library, $str, $now) {
@@ -164,8 +163,7 @@ foreach (quests::of($library) as $quest) {
         'id' => (int) $quest->id,
         'name' => format_string($quest->name, true, ['escape' => false]),
         'text' => (string) $quest->text,
-        'when' => $str('questwhen', (object) ['from' => $date((int) $quest->timestart, $long),
-            'to' => $date((int) $quest->timeend, $long)]),
+        'when' => $str('questwhen', zones::span((int) $quest->timestart, (int) $quest->timeend, $library)),
         'for' => $for ? implode(', ', $for) : $str('questforall'),
         'goal' => (int) $quest->goal,
         'goalline' => (int) $quest->goal === 1 ? $str('questgoallineone') : $str('questgoalline', (int) $quest->goal),
@@ -204,8 +202,11 @@ if ($quest && cartilla::squares($quest)) {
             : $str('cartillabooks', screens::number($option['count']));
         $tiles[$option['group']][] = ['spec' => $option['spec'], 'label' => $option['label'], 'art' => $option['art'],
             'in' => $at !== false, 'at' => $at !== false ? $at : $next, 'value' => $at !== false ? '' : $option['spec'],
-            'few' => $option['count'] < 10, 'count' => $option['count'] < 10 ? $str('cartillafew', $count) : $count,
-            'off' => $at === false && $next === false];
+            'few' => $option['count'] > 0 && $option['count'] < 10,
+            'count' => $option['count'] === 0 ? $str('cartillanone' . (isset($units[$option['spec']]) ? $option['spec'] : ''))
+                : ($option['count'] < 10 ? $str('cartillafew', $count) : $count),
+            // A square no book fills yet cannot go on the card: nobody could fill it (it may still leave, if it is in).
+            'off' => $at === false && ($next === false || $option['count'] === 0)];
     }
     $sheet = fn(int $time) => ['month' => \core_text::strtolower(zones::date($time, '%b', $library)),
         'day' => zones::date($time, '%e', $library), 'week' => zones::date($time, '%A', $library)];

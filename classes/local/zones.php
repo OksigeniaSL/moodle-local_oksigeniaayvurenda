@@ -204,6 +204,28 @@ final class zones {
     }
 
     /**
+     * The two ends of a span of days in a centre's zone, without saying twice what they share: «8» and «29 de noviembre»
+     * in one month, «13 de noviembre» and «10 de diciembre» in one year, each with its year otherwise.
+     *
+     * @param int $from
+     * @param int $to
+     * @param \stdClass|int $where
+     * @return \stdClass from and to, for a string such as questwhen.
+     */
+    public static function span(int $from, int $to, $where): \stdClass {
+        $year = fn(int $time) => self::date($time, '%Y', $where);
+        $month = fn(int $time) => self::date($time, '%Y-%m', $where);
+        if ($year($from) !== $year($to)) {
+            return (object) ['from' => self::date($from, 'strftimedate', $where), 'to' => self::date($to, 'strftimedate', $where)];
+        }
+        return (object) [
+            'from' => $month($from) === $month($to) ? ltrim(self::date($from, '%d', $where), '0')
+                : self::date($from, 'strftimedateshort', $where),
+            'to' => self::date($to, 'strftimedateshort', $where),
+        ];
+    }
+
+    /**
      * A date in a centre's zone.
      *
      * @param int $time

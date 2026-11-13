@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.258.0 (2026-11-13)
+
+- Jujol's review of the bingo card:
+  - A square no book fills yet (no book with a voice, say) is turned off in the box, with «None with a voice yet»: a card
+    with it could never be full. «Few» is for one to nine.
+  - The dates of a challenge say their month and year once: «From 8 to 29 November» in one month, «From 13 November to
+    10 December» in one year; on the reader's card and on the list of challenges.
+  - A full card no longer says how it is played: no square is left to touch.
+
 ## 0.257.0 (2026-11-13)
 
 - «La cartilla», its two screens, from Jujol's mock-up.

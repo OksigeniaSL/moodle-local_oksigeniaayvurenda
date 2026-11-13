@@ -264,7 +264,6 @@ foreach ($readers as $reader) {
             'newbookson' => newsletter::subscribed((int) $USER->id, (int) $reader->entityid)];
     }
     // The library's challenges with their own dates: a card of stamps, one for each book taken home in its days.
-    $longdate = 'strftimedate';
     $questcards = [];
     // A cartilla is a game: not with the card «without a game», nor in Infantil, where the flower is.
     $cartillas = $look !== 'none' && !\local_oksigeniaayvurenda\local\cartilla::infant(
@@ -287,9 +286,11 @@ foreach ($readers as $reader) {
         $reached = !empty($quest->joinedid) && $stamps >= $goal;
         $questcards[] = ['id' => (int) $quest->id, 'name' => format_string($quest->name, true, ['escape' => false]),
             'text' => (string) $quest->text, 'cartilla' => false,
-            'when' => $str('questwhen', (object) [
-                'from' => \local_oksigeniaayvurenda\local\zones::date((int) $quest->timestart, $longdate, $reader->entityid),
-                'to' => \local_oksigeniaayvurenda\local\zones::date((int) $quest->timeend, $longdate, $reader->entityid)]),
+            'when' => $str('questwhen', \local_oksigeniaayvurenda\local\zones::span(
+                (int) $quest->timestart,
+                (int) $quest->timeend,
+                $reader->entityid
+            )),
             'joined' => !empty($quest->joinedid), 'canjoin' => empty($quest->joinedid) && !$previewid
                 && (int) $quest->timeend >= time(),
             'reached' => $reached,

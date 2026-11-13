@@ -306,8 +306,7 @@ final class cartilla {
         }
         $said = $cheer ? characters::say($entityid, 'herald', $cheer[0], $cheer[1], 'celebra') : null;
         $days = (int) ceil(((int) $quest->timeend - $now) / DAYSECS);
-        $when = $str('questwhen', (object) ['from' => zones::date((int) $quest->timestart, 'strftimedate', $entityid),
-            'to' => zones::date((int) $quest->timeend, 'strftimedate', $entityid)]);
+        $when = $str('questwhen', zones::span((int) $quest->timestart, (int) $quest->timeend, $entityid));
         if ($full && !empty($quest->timedone)) {
             $when = $str('cartillafullon', zones::date((int) $quest->timedone, 'strftimedate', $entityid));
         } else if ($days >= 1 && (int) $quest->timestart <= $now) {
