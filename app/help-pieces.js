@@ -665,18 +665,25 @@ window.AYVHelpPieces = {
     // What is lent and is no book: its name, how many, the rest folded, and «now you»: add them.
     material: function(h) {
         'use strict';
-        return h.type('input[name="name"]', h.codes.material).then(function() {
+        // The last dashed tile, «Something else»: it opens with its name written; the + of the counter, twice.
+        var tile = '.ayv-mt-nueva:last-child';
+        var plus = tile + ' input[name="count"]:checked + .ayv-mt-unidades .ayv-mt-signo:last-child';
+        return h.tap(tile + ' > details > summary').then(function() {
+            return h.type(tile + ' input[name="name"]', h.codes.material);
+        }).then(function() {
             return h.say(0);
         }).then(function() {
-            return h.choose('input[name="count"]', '3');
+            return h.tap(plus);
+        }).then(function() {
+            return h.tap(plus);
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.tap('.ayv-mat-more summary');
+            return h.tap(tile + ' .ayv-mt-mas summary');
         }).then(function() {
             return h.say(2);
         }).then(function() {
-            return h.you(3, '.ayv-book-actions .ayv-button');
+            return h.you(3, tile + ' .ayv-cf-fila .ayv-button');
         }).then(function() {
             return h.point('.ayv-notice');
         }).then(function() {

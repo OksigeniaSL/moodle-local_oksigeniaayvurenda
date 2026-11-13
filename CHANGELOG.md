@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.246.0 (2026-11-13)
+
+- Material, from Jujol's mock-up: each thing is a tile with its line drawing standing on a plank (laptop, tablet,
+  calculator, camera, game, headphones or something else), its name, where it lives and its units with «−» and «+»,
+  each kept at once and back to the tile; below, how many are lent; on its back, its brand, model and codes, its labels
+  and its record. «−» takes out the last unit added that is in its place (with a record of it, as weeding does), and is
+  off when every unit is lent. To add another, a dashed tile per kind opens with its name already written, how many with
+  «−» and «+» (no script), where it lives as chips, and the rest folded. The kind is kept with the brand and the model;
+  for the material of before, its name says it. The guided help follows the new screen.
+
 ## 0.245.0 (2026-11-13)
 
 - The home of a young reader (the card of the flower), from Jujol's mock-up: one screen, with the herald greeting them

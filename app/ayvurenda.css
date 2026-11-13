@@ -8707,3 +8707,382 @@ html[data-bs-theme="dark"] .ayv .ayv-pq-flor .ayv-pq-entra {
 .ayv .ayv-tools .ayv-toggle::before {
     content: none;
 }
+
+/* «Material» (material.php) as tiles on their shelf (Jujol, 13 Nov 2026): each kind of thing the library lends that is
+   not a book (laptops, tablets, calculators, cameras, games…) is a tile with its drawing standing on a plank, its name,
+   how many units there are and how many are out, and where it lives; «−» and «+» take one unit away or add one, each
+   saved by itself; its data on its back. To add a new one, the dashed tile of its kind opens its back: the name
+   written, the units with «−» and «+», the shelf where it lives as chips, and «Dar de alta». No JavaScript needed: the
+   counter of a new one is a row of radios, one shown at a time. After como-funciona.css. */
+.ayv .ayv-mt-losetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 14px;
+    margin: 12px 0 26px;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-mt-losetas > li {
+    display: flex;
+}
+
+.ayv .ayv-mt-loseta {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 14px 14px 12px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1.5px var(--line), 0 10px 18px -16px rgba(0, 0, 0, .5);
+}
+
+/* The thing, drawn in line, standing on its plank. */
+.ayv .ayv-mt-dibujo {
+    display: grid;
+    place-items: end center;
+    height: 84px;
+    margin: 0 0 4px;
+    border-bottom: 8px solid #7d5328;
+    border-image: linear-gradient(#c99a6e, #a8743f 40%, #7d5328) 1;
+    color: var(--green);
+}
+
+.ayv .ayv-mt-dibujo svg {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 2px;
+}
+
+.ayv .ayv-mt-nombre {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.ayv .ayv-mt-vive {
+    margin: 0;
+    color: var(--muted);
+    font-size: .9375rem;
+}
+
+/* The units: «−», the number, «+». Each sign is a button of its own form and saves by itself. */
+/* At the foot of the tile, so the counters of a row stay in line whatever the length of the names. */
+.ayv .ayv-mt-unidades {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.ayv .ayv-mt-signo {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.ayv .ayv-mt-signo:hover,
+.ayv .ayv-mt-signo:focus-visible {
+    border-color: var(--green);
+}
+
+.ayv .ayv-mt-signo:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.ayv .ayv-mt-cifra {
+    display: grid;
+    min-width: 4.5rem;
+    text-align: center;
+    line-height: 1.1;
+}
+
+.ayv .ayv-mt-cifra b {
+    font-family: var(--title);
+    font-size: 1.75rem;
+}
+
+.ayv .ayv-mt-cifra span {
+    color: var(--muted);
+    font-size: .8125rem;
+}
+
+.ayv .ayv-mt-fuera {
+    margin: 0;
+    font-size: .9375rem;
+}
+
+.ayv .ayv-mt-fuera b {
+    color: var(--coral);
+}
+
+/* Its data, on its back. */
+.ayv .ayv-mt-dorso > summary {
+    margin-top: 2px;
+    color: var(--accent);
+    font-size: .875rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-mt-dorso > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-mt-dorso dl {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 2px 10px;
+    margin: 8px 0 0;
+    font-size: .9375rem;
+}
+
+.ayv .ayv-mt-dorso dt {
+    color: var(--muted);
+}
+
+.ayv .ayv-mt-dorso dd {
+    margin: 0;
+}
+
+/* A new one: the dashed tiles of the kinds; the one opened takes the whole row with its back. */
+.ayv .ayv-mt-nuevas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-mt-nueva {
+    flex: 1 1 150px;
+    min-width: 0;
+}
+
+.ayv .ayv-mt-nueva > details > summary {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 12px 10px 10px;
+    border: 1.5px dashed var(--muted);
+    border-radius: 14px;
+    color: var(--accent);
+    font-family: var(--title);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-mt-nueva > details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-mt-nueva > details > summary svg {
+    width: 52px;
+    height: 52px;
+    color: var(--muted);
+}
+
+.ayv .ayv-mt-nueva > details > summary:hover {
+    border-style: solid;
+}
+
+.ayv .ayv-mt-nueva:has(> details[open]) {
+    flex-basis: 100%;
+}
+
+.ayv .ayv-mt-nueva > details[open] > summary {
+    justify-items: start;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    border-style: solid;
+    border-color: var(--green);
+    border-radius: 14px 14px 0 0;
+    text-align: start;
+}
+
+.ayv .ayv-mt-alta {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1.5px solid var(--green);
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+    background: var(--surface);
+}
+
+.ayv .ayv-mt-alta label.ayv-mt-escrito {
+    display: grid;
+    gap: 4px;
+    color: var(--muted);
+    font-size: .875rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-mt-alta input[type="text"],
+.ayv .ayv-mt-alta textarea {
+    width: 100%;
+    padding: 4px 2px;
+    border: 0;
+    border-bottom: 2px dashed var(--muted);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-family: var(--title);
+    font-size: 1.25rem;
+}
+
+.ayv .ayv-mt-alta textarea {
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.ayv .ayv-mt-paso {
+    display: grid;
+    gap: 6px;
+}
+
+.ayv .ayv-mt-paso > span {
+    color: var(--muted);
+    font-size: .875rem;
+    font-weight: 700;
+}
+
+/* The counter of a new one without JavaScript: one radio per number, and only the face of the checked one shows,
+   with its «−» and «+» pointing to the radios before and after. */
+.ayv .ayv-mt-contador input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ayv .ayv-mt-contador .ayv-mt-unidades {
+    display: none;
+    margin: 0;
+}
+
+.ayv .ayv-mt-contador input:checked + .ayv-mt-unidades {
+    display: flex;
+}
+
+.ayv .ayv-mt-contador label.ayv-mt-signo {
+    user-select: none;
+}
+
+.ayv .ayv-mt-contador input:focus-visible + .ayv-mt-unidades .ayv-mt-cifra {
+    outline: 3px solid var(--sun);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.ayv .ayv-mt-mas > summary {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-mt-mas > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-mt-mas[open] > summary {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 560px) {
+    .ayv .ayv-mt-losetas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .ayv .ayv-mt-loseta {
+        padding: 12px 10px 10px;
+    }
+
+    .ayv .ayv-mt-dibujo svg {
+        width: 60px;
+        height: 60px;
+    }
+
+    .ayv .ayv-mt-signo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .ayv .ayv-mt-cifra {
+        min-width: 3rem;
+    }
+
+    .ayv .ayv-mt-nueva {
+        flex-basis: calc(50% - 6px);
+    }
+
+    .ayv .ayv-mt-nueva:has(> details[open]) {
+        flex-basis: 100%;
+    }
+}
+
+/* Where it lives, as chips: radios with the chip of «Cómo funciona» as their face. */
+.ayv .ayv-mt-sitios input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ayv .ayv-mt-sitios input:checked + .ayv-cf-chapa {
+    border-color: var(--green);
+    background: var(--green);
+    color: var(--cf-crema);
+}
+
+.ayv .ayv-mt-sitios input:focus-visible + .ayv-cf-chapa {
+    outline: 3px solid var(--sun);
+    outline-offset: 2px;
+}
+
+/* As mounted: the quiet words in ink with less weight (the muted grey does not reach the contrast on the tiles), and the
+   kind opened taking the whole row also where :has() is unknown (the class ayvurenda.js puts). */
+.ayv .ayv-mt .ayv-mt-vive,
+.ayv .ayv-mt .ayv-mt-cifra span,
+.ayv .ayv-mt .ayv-mt-dorso dt,
+.ayv .ayv-mt .ayv-mt-alta label.ayv-mt-escrito,
+.ayv .ayv-mt .ayv-mt-paso > span {
+    color: var(--ink);
+    opacity: .75;
+}
+
+.ayv .ayv-mt-nueva.ayv-is-open {
+    flex-basis: 100%;
+}
+
+.ayv .ayv-mt-signo:disabled {
+    opacity: .35;
+    cursor: default;
+}
