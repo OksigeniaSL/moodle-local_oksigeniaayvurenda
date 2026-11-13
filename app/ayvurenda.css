@@ -5730,8 +5730,9 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
     box-shadow: 0 0 12px 2px rgba(240, 180, 60, .55);
 }
 
-.ayv .ayv-cf-luz[aria-pressed="false"] {
-    color: var(--muted);
+/* Off, the words go quieter, still readable: ink with less weight of colour, not the muted grey. */
+.ayv .ayv-cf-luz[aria-pressed="false"] > span:last-child {
+    opacity: .72;
 }
 
 /* The sign of the door: open, green; closed, coral. Touching it turns it round. */
@@ -6109,6 +6110,7 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
 .ayv .ayv-cf-balda-green { --balda: var(--green); }
 .ayv .ayv-cf-balda-coral { --balda: var(--coral); }
 .ayv .ayv-cf-balda-night { --balda: var(--night); }
+.ayv .ayv-cf-balda-sun { --balda: var(--sun); }
 
 .ayv .ayv-cf-guardado {
     display: inline-block;
@@ -6593,6 +6595,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 /* A group: its tutor's face, its name and who it is. The whole card is the gesture. */
 .ayv .ayv-tu-grupo {
     display: grid;
+    align-content: start;
     justify-items: center;
     gap: 4px;
     height: 100%;
@@ -7052,5 +7055,380 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 
     .ayv .ayv-in-sub {
         grid-column: auto;
+    }
+}
+/* «Rincones» (personal-corners): the plates of the corners standing on a shelf in the order of the room (Jujol, 12 Nov
+   2026). Each moves with «◀» and «▶», hides (it turns its back, greyed) and keeps its name on its back; the genres of
+   the narrative are dashed plates to add with one touch, and where they take their books from, lamps. After
+   como-funciona.css. */
+.ayv .ayv-ri-estante {
+    margin: 0 0 30px;
+}
+
+/* The shelf: the plates in a row, standing on a plank of wood. */
+.ayv .ayv-ri-balda {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 18px 14px;
+    margin: 12px 0 10px;
+    padding: 0 0 4px;
+    list-style: none;
+}
+
+.ayv .ayv-ri-balda::after {
+    content: "";
+    grid-column: 1 / -1;
+    height: 14px;
+    border-radius: 3px;
+    background: linear-gradient(#c99a6e, #a8743f 40%, #7d5328);
+    box-shadow: 0 6px 10px -6px rgba(0, 0, 0, .5);
+}
+
+.ayv .ayv-ri-rincon {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 8px;
+}
+
+.ayv .ayv-ri-lamina {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.ayv .ayv-ri-lamina img {
+    display: block;
+    width: 116px;
+    height: 180px;
+    border: 5px solid #7d5328;
+    border-radius: 4px;
+    object-fit: cover;
+    box-shadow: 0 10px 16px -10px rgba(0, 0, 0, .6);
+}
+
+.ayv .ayv-ri-lamina figcaption {
+    display: grid;
+    text-align: center;
+}
+
+.ayv .ayv-ri-lamina b {
+    font-family: var(--title);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.ayv .ayv-ri-lamina figcaption > span:not(.ayv-cf-guardado) {
+    color: var(--ink);
+    font-size: .875rem;
+    opacity: .75;
+}
+
+/* A hidden corner turns its back: the plate greyed and lowered, its name crossed out softly. */
+.ayv .ayv-ri-oculto .ayv-ri-lamina img {
+    filter: grayscale(1);
+    opacity: .4;
+    transform: translateY(6px);
+}
+
+.ayv .ayv-ri-oculto .ayv-ri-lamina b {
+    opacity: .7;
+    text-decoration: line-through;
+}
+
+.ayv .ayv-ri-gestos {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ayv .ayv-ri-mover {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: .875rem;
+    cursor: pointer;
+}
+
+.ayv .ayv-ri-mover:disabled {
+    opacity: .3;
+    cursor: default;
+}
+
+.ayv .ayv-ri-ocultar {
+    min-height: 36px;
+    padding: 2px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: .875rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ayv .ayv-ri-ocultar[aria-pressed="true"] {
+    border-color: var(--green);
+    background: var(--green);
+    color: var(--cf-crema);
+}
+
+/* The back of the plate: its name for the readers. */
+.ayv .ayv-ri-dorso {
+    width: 100%;
+    text-align: center;
+}
+
+.ayv .ayv-ri-dorso > summary {
+    color: var(--accent);
+    font-size: .875rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ayv .ayv-ri-dorso > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-ri-rincon:has(> .ayv-ri-dorso[open]) {
+    grid-column: span 2;
+}
+
+.ayv .ayv-ri-dorso-c {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.ayv .ayv-ri-dorso[open] {
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: 0 0 0 2px var(--accent);
+    text-align: start;
+}
+
+.ayv .ayv-ri-dorso input,
+.ayv .ayv-ri-genero-dorso input {
+    width: 100%;
+    min-height: 40px;
+    padding: 4px;
+    border: 0;
+    border-bottom: 2px dashed var(--muted);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-family: var(--title);
+}
+
+/* The genres the catalogue suggests: dashed plates; one touch adds it. */
+.ayv .ayv-ri-generos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-ri-genero {
+    display: grid;
+    gap: 2px;
+    min-width: 9rem;
+    padding: 12px 16px;
+    border: 1.5px dashed var(--muted);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+.ayv .ayv-ri-genero b {
+    color: var(--accent);
+    font-family: var(--title);
+    font-size: 1.125rem;
+}
+
+.ayv .ayv-ri-genero > span,
+.ayv .ayv-ri-genero > summary > span {
+    color: var(--ink);
+    font-size: .875rem;
+    opacity: .75;
+}
+
+.ayv .ayv-ri-genero:hover {
+    border-style: solid;
+}
+
+.ayv .ayv-ri-genero-otro > summary {
+    display: grid;
+    gap: 2px;
+    list-style: none;
+}
+
+.ayv .ayv-ri-genero-otro > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-ri-genero-otro[open] {
+    min-width: 18rem;
+    border-style: solid;
+}
+
+.ayv .ayv-ri-genero-dorso {
+    display: grid;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.ayv .ayv-ri-genero-dorso label {
+    color: var(--ink);
+    font-size: .875rem;
+    font-weight: 700;
+    opacity: .75;
+}
+
+.ayv .ayv-ri-de {
+    margin: 18px 0 8px;
+}
+
+@media (max-width: 720px) {
+    .ayv .ayv-ri-balda {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ayv .ayv-ri-genero {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 0;
+    }
+
+    .ayv .ayv-ri-genero-otro[open] {
+        flex-basis: 100%;
+    }
+}
+
+/* At 320 px two plates with their gestures do not fit side by side: one a row, its back under it. */
+@media (max-width: 360px) {
+    .ayv .ayv-ri-balda {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-ri-rincon:has(> .ayv-ri-dorso[open]) {
+        grid-column: auto;
+    }
+}
+
+/* A corner with no plate of its own (a letter, a genre made by hand): its mark on its colour, the size of a plate. */
+.ayv .ayv-ri-sinlamina {
+    display: grid;
+    place-items: center;
+    width: 116px;
+    height: 180px;
+    border: 5px solid #7d5328;
+    border-radius: 4px;
+    font-family: var(--title);
+    font-size: 2.5rem;
+    font-weight: 700;
+    box-shadow: 0 10px 16px -10px rgba(0, 0, 0, .6);
+}
+
+.ayv .ayv-ri-oculto .ayv-ri-sinlamina {
+    filter: grayscale(1);
+    opacity: .4;
+    transform: translateY(6px);
+}
+
+/* A genre the library has: a solid plate; touched, its back with its name, topics and shelf mark. */
+.ayv .ayv-ri-genero-mio {
+    border-style: solid;
+    background: var(--surface);
+}
+
+.ayv .ayv-ri-genero-mio > summary {
+    display: grid;
+    gap: 2px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.ayv .ayv-ri-genero-mio > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-ri-genero-mio[open] {
+    min-width: 18rem;
+}
+
+.ayv .ayv-ri-genero-mio b {
+    color: var(--ink);
+}
+
+.ayv .ayv-ri-lamina .ayv-cf-guardado {
+    justify-self: center;
+}
+
+/* The sentence of the period: the figure in the letter of titles, the rest in that of the text (Jujol, 13 Nov 2026). */
+.ayv .ayv-report-sum.ayv-in-cifra {
+    font-family: var(--text);
+    font-size: 1.125rem;
+    font-weight: 400;
+}
+
+.ayv .ayv-in-cifra b {
+    font-family: var(--title);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Each group's bar runs along the whole bottom of its card, so 86 and 6 are told apart at a glance. */
+.ayv .ayv-in .ayv-report .ayv-person {
+    position: relative;
+    padding-bottom: calc(.75rem + 6px);
+    overflow: hidden;
+}
+
+.ayv .ayv-in .ayv-report .ayv-share {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    height: 6px;
+    border-radius: 0;
+}
+
+/* A link under a sentence (the sheet of the year), outside its summary so it is not a control inside a control; the
+   spine goes on down beside it. Open, the gesture has its own. */
+.ayv .ayv-cf-frase-enlace {
+    display: block;
+    margin-top: -6px;
+    padding: 0 16px 12px 52px;
+    background: linear-gradient(to right, var(--lomo, var(--green)) 36px, transparent 36px);
+}
+
+.ayv .ayv-cf-frase > details[open] + .ayv-cf-frase-enlace {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .ayv .ayv-cf-frase-enlace {
+        padding-left: 44px;
+        background: linear-gradient(to right, var(--lomo, var(--green)) 28px, transparent 28px);
     }
 }

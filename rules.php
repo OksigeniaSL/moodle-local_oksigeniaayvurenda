@@ -173,7 +173,11 @@ $sentence = function (array $rule) use ($str): string {
     if ((int) $rule['loandays'] === 0) {
         return $str('rulesroomonly');
     }
-    $max = (int) $rule['maxloans'] === 0 ? $str('rulesanynumber') : $str('rulesupto', (int) $rule['maxloans']);
+    $max = match ((int) $rule['maxloans']) {
+        0 => $str('rulesanynumber'),
+        1 => $str('rulesuptoone'),
+        default => $str('rulesupto', (int) $rule['maxloans']),
+    };
     $renew = (int) $rule['renewals'] === 0 ? $str('rulesnorenew')
         : $str((int) $rule['renewals'] === 1 ? 'rulesrenewonce' : 'rulesrenewtimes', (object) ['times' => (int) $rule['renewals'],
             'days' => $days((int) $rule['renewdays'])]);

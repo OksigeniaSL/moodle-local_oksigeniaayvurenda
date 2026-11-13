@@ -72,6 +72,7 @@ $older = max(0, optional_param('older', 5, PARAM_INT));
 $rows = [];
 $columns = [];
 $summary = '';
+$figure = null;
 $period = $report === 'loans' || $report === 'top';
 switch ($report) {
     case 'loans':
@@ -92,10 +93,31 @@ switch ($report) {
                 'csv' => [$row['label'], $row['value'], $row['readers'], $row['members']]];
         }
         $columns[] = $str('reportmembers');
-        // It says which days it counts, and each group opens its readers.
-        $summary = $str('reportloansspan', (object) ['loans' => \local_oksigeniaayvurenda\local\screens::number(
-            (int) $found['total']
-        ), 'from' => $date($from), 'to' => $date(min($to - 1, time()))]);
+        // It says which days it counts, and each group opens its readers: the figure first, in the letter of titles; a
+        // whole month by its name; the year only when it is not the same at both ends.
+        $total = (int) $found['total'];
+        $lead = $str(
+            $total === 1 ? 'reportloansone' : 'reportloanscount',
+            \local_oksigeniaayvurenda\local\screens::number($total)
+        );
+        $zone = zones::of($library);
+        $at = fn(int $time) => (new DateTimeImmutable('@' . $time))->setTimezone($zone);
+        $first = $at($from);
+        $last = $at(min($to - 1, time()));
+        $month = fn(DateTimeImmutable $day) => userdate($day->getTimestamp(), '%B', zones::name($library));
+        $wholemonth = $first->format('j H:i') === '1 00:00'
+            && $at($to)->format('Y-m-d H:i') === $first->modify('first day of next month')->format('Y-m-d H:i');
+        if ($wholemonth) {
+            $rest = $str('reportloansinmonth', $first->format('Y') === $at(time())->format('Y') ? $month($first)
+                : $str('reportmonthyear', (object) ['month' => $month($first), 'year' => $first->format('Y')]));
+        } else if ($first->format('Y') === $last->format('Y')) {
+            $short = fn(DateTimeImmutable $day) => $str('reportdaymonth', (object) ['day' => $day->format('j'),
+                'month' => $month($day)]);
+            $rest = $str('reportloansrange', (object) ['from' => $short($first), 'to' => $short($last)]);
+        } else {
+            $rest = $str('reportloansrange', (object) ['from' => $date($from), 'to' => $date($last->getTimestamp())]);
+        }
+        $figure = ['lead' => $lead, 'rest' => $rest];
         break;
     case 'top':
         $found = reports::top($library, $from, $to);
@@ -214,6 +236,7 @@ $data = [
     'reportsnav' => $str('reportsnav'),
     'never' => $report === 'never' ? ['unlent' => $unlent, 'older' => $older] : null,
     'summary' => $summary,
+    'figure' => $figure,
     'rows' => $rows,
     'hasrows' => (bool) $rows,
     'empty' => $str('reportempty'),

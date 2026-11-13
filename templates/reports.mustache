@@ -20,6 +20,7 @@
 
     Context variables required for this template:
     * heading, intro, summary, empty - texts
+    * figure - the sentence of a period: lead (the figure, in the letter of titles) and rest; or nothing
     * tabs - url, label, current
     * action, library, report - the form; period (from, to) or never (unlent, older)
     * rows - label, value, note, share (bar, 0 to 100), part
@@ -40,7 +41,7 @@
                 "days": "https://example.org/year.php", "dayslabel": "Por días exactos"} },
         "reportsnav": "Informes",
         "never": null,
-        "summary": "120 préstamos.",
+        "summary": "", "figure": {"lead": "325 préstamos", "rest": "en octubre."},
         "hasrows": true,
         "rows": [{"label": "3º A", "url": "https://example.org/readers.php", "value": 40, "note": "18 de 25 lectores", "share": 100, "part": ""}],
         "empty": "",
@@ -76,6 +77,7 @@
 {{/never}}
 <div class="ayv-report-top">
     {{#summary}}<p class="ayv-report-sum">{{summary}}</p>{{/summary}}
+    {{#figure}}<p class="ayv-report-sum ayv-in-cifra"><b>{{lead}}</b> {{rest}}</p>{{/figure}}
     {{#hasrows}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{csv}}">{{reportcsv}}</a></p>{{/hasrows}}
 </div>
 {{#hasrows}}

@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.241.0 (2026-11-13)
+
+- The corners of the room, from Jujol's mock-up: each corner is its plate standing on a wooden shelf, in the order the
+  hall of the visit shows them, with its name and its books under it. «◀» and «▶» move it one place, «Hide» turns it
+  round (greyed, its name crossed out) and «Show» back, and «Change the name» opens its back, where a blank name brings
+  back the classification's. The genres of the stories: those the library has, each opening its name, topics and shelf
+  mark with «Remove»; those the catalogue suggests as dashed plates added with one touch, or all at once; another made
+  by hand; and where they take their books from as a light per corner (the last one stays on). Each gesture sends only
+  what it changes and comes back to the plate touched, saying so; no JavaScript needed. The rows of fields, the
+  checkboxes, the one «Save» and the windows are gone.
+- A button that asks to be touched twice (remove a genre, a closure, a lot, a challenge…) asks again on every page: on
+  the pages with no search box it did what it said at the first touch.
+- From Jujol's look at the screens already made: a rule of one book says «one at a time», not «up to 1 at a time»; the
+  year's sentence in «How your library works» carries the link to the year sheet; «29 of 30 groups with a tutor»; the
+  loans by group say their period without repeating the year when both ends share it, and «in October» for a whole
+  month, the figure in the letter of titles; each group's bar runs along the bottom of its card; the tutor cards of a
+  row line up when a name takes two lines; the shelf of the third stage is yellow.
+- The words off a light, under the plates and of the suggested genres keep their contrast in light mode.
+
 ## 0.240.0 (2026-11-12)
 
 - Reports, from Jujol's mock-up: the reports are tabs on a sheet, and the period of «Loans by group» and «Most lent» is a

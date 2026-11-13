@@ -128,7 +128,7 @@
                 <form class="ayv-cf-fila ayv-cf-placa" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><label class="ayv-sr" for="ayv-hiw-zone-in">{{label}}</label><select id="ayv-hiw-zone-in" name="set[timezone]">{{#options}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/options}}</select>
                 <button class="ayv-button" type="submit">{{save}}</button></form>
             {{/zone}}
-            </div></details>
+            </div></details>{{#link}}<a class="ayv-cf-enlace ayv-cf-frase-enlace" href="{{url}}">{{label}}</a>{{/link}}
         </li>
         {{/phrases}}
     </ul>

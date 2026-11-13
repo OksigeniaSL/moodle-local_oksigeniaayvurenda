@@ -108,7 +108,8 @@ $cards = [
         'yeargroups',
         \local_oksigeniaayvurenda\local\screens::number($status['members'])
     ), 'url' => $url('readers.php')],
-    ['number' => $status['tutors'] . ' / ' . $status['groups'], 'label' => $str('yeartutors'), 'url' => $url('tutors.php'),
+    ['number' => $str('yeartutorsof', (object) ['done' => $status['tutors'], 'of' => $status['groups']]),
+        'label' => $str('yeartutors'), 'url' => $url('tutors.php'),
         'late' => $status['notutor'] > 0],
     ['number' => \local_oksigeniaayvurenda\local\screens::number($status['out']), 'label' => $str('yearout'),
         'url' => $url('late.php', ['all' => 1])],

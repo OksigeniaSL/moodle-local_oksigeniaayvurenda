@@ -267,7 +267,7 @@ final class workings {
             'label' => $label, 'pressed' => $on];
         $phrase = fn(string $id, string $kind, string $spine, string $says, array $gesture = []) => ['id' => 'ayv-hiw-' . $id,
             'kind' => $kind, 'spine' => $spine, 'spinecolour' => self::SPINES[$kind] ?? 'green', 'says' => $says,
-            'justsaved' => $saved === 'ayv-hiw-' . $id] + $gesture;
+            'justsaved' => $saved === 'ayv-hiw-' . $id] + $gesture + ['link' => null];
         $stages = holds::stages($entityid, time());
         $classes = !skins::no_classes($entityid) && $stages;
 
@@ -412,6 +412,9 @@ final class workings {
             'daylabel' => $str('hiwyearday'), 'monthlabel' => $str('hiwyearmonth'),
             'sheet' => (new \moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug]))->out(false),
             'sheetlabel' => $str('hiwyearsheet'),
+        ], 'link' => [
+            'url' => (new \moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug]))->out(false),
+            'label' => $str(skins::words($entityid, 'hiwyearsheetof'), years::around($entityid, time())->name),
         ]]);
         $classification = (string) ($settings['classification'] ?? 'udc');
         $house[] = $phrase('classification', 'classification', $str('hiwspineclass'), $str('hiwclass', (object) [
@@ -490,7 +493,12 @@ final class workings {
         if ((int) $rule['loandays'] === 0) {
             return $who . s($low($str('rulesroomonly')));
         }
-        $max = (int) $rule['maxloans'] === 0 ? $b($str('rulesanynumber')) : $b($str('rulesupto', (int) $rule['maxloans']));
+        // One is «one at a time», not «up to 1 at a time».
+        $max = match ((int) $rule['maxloans']) {
+            0 => $b($str('rulesanynumber')),
+            1 => $b($str('rulesuptoone')),
+            default => $b($str('rulesupto', (int) $rule['maxloans'])),
+        };
         $renew = (int) $rule['renewals'] === 0 ? s($str('rulesnorenew')) : $str(
             (int) $rule['renewals'] === 1 ? 'rulesrenewonce' : 'rulesrenewtimes',
             (object) ['times' => '<b>' . (int) $rule['renewals'] . '</b>', 'days' => s($days((int) $rule['renewdays']))]

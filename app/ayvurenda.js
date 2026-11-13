@@ -1293,7 +1293,12 @@
             show(query);
         }, 300);
     });
+})();
 
+// A button that undoes something asks once more in its own place, on every page: it lived in the live search, which
+// stops early where a page has no search box (the corners, How your library works), and there it did not ask.
+(function() {
+    'use strict';
     // A button that undoes something asks once more in its own place: the first touch says what it will do, a second does it.
     document.addEventListener('click', function(event) {
         var button = event.target.closest ? event.target.closest('[data-ayv-twice]') : null;
