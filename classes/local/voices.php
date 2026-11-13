@@ -315,6 +315,8 @@ final class voices {
             'signature' => array_key_exists('signature', $data) ? self::signature((string) $data['signature'])
                 : $item->signature]);
         \local_oksigeniaayvurenda\event\voice_published::fire((int) $library->entityid, $id);
+        // The home's board tells of a new voice now, not within the hour its moments are kept.
+        \cache::make('local_oksigeniaayvurenda', 'moments')->purge();
     }
 
     /**

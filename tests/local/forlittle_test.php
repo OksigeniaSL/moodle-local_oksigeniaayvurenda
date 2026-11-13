@@ -89,6 +89,15 @@ final class forlittle_test extends \advanced_testcase {
             ['id' => $mine],
             'forlittle, tellfamily'
         )));
+        // Someone of the staff reads for the little ones too, with no family to tell.
+        $staffvoice = $this->voice($library, $young, 'Un cuento del profe', 'pending', $now);
+        forlittle::mark($staffvoice, null, true, true, $now, true);
+        $this->assertEquals([1, 0], array_values((array) $DB->get_record(
+            self::T . 'digital',
+            ['id' => $staffvoice],
+            'forlittle, tellfamily'
+        )));
+        $DB->delete_records(self::T . 'digital', ['id' => $staffvoice]);
         $read = $this->voice($library, $older, 'La isla del cometa', 'pending', $now);
         forlittle::mark($read, $older, true, true, $now);
         $this->assertEquals([1, 0], array_values((array) $DB->get_record(

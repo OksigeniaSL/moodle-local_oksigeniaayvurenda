@@ -93,18 +93,27 @@ final class forlittle {
     }
 
     /**
-     * Marks a voice just recorded: for the little ones, and whether its reader's family hears it. Only what the reader
-     * may choose is kept.
+     * Marks a voice just recorded: for the little ones, and whether its reader's family hears it. Only what whoever
+     * recorded may choose is kept: a reader past the flower, or someone of the staff (a teacher, the librarian), who reads
+     * for the little ones too but has no family to tell.
      *
      * @param int $digitalid
      * @param \stdClass|null $reader
      * @param bool $little
      * @param bool $family
      * @param int $now
+     * @param bool $staff Whether whoever recorded is of the centre's staff.
      */
-    public static function mark(int $digitalid, ?\stdClass $reader, bool $little, bool $family, int $now): void {
+    public static function mark(
+        int $digitalid,
+        ?\stdClass $reader,
+        bool $little,
+        bool $family,
+        int $now,
+        bool $staff = false
+    ): void {
         global $DB;
-        $little = $little && self::can_read($reader, $now);
+        $little = $little && ($staff || self::can_read($reader, $now));
         $DB->update_record(self::T . 'digital', (object) ['id' => $digitalid, 'forlittle' => (int) $little,
             'tellfamily' => (int) ($little && $family && self::can_tell($reader))]);
     }

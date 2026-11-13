@@ -67,6 +67,7 @@ $reader = $viewer['readerid'] ? $DB->get_record('local_oksigeniaayvurenda_reader
     $reader ?: null,
     optional_param('forlittle', 0, PARAM_BOOL),
     optional_param('tellfamily', 0, PARAM_BOOL),
-    time()
+    time(),
+    in_array($viewer['who'], ['desk', 'staff'], true)
 );
 echo json_encode(['id' => $id]);

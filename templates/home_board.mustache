@@ -48,7 +48,7 @@
             <p class="ayv-board-moment">{{text}}</p>
             {{#more}}<ul class="ayv-board-moments-more">{{#items}}<li>{{#url}}<a href="{{url}}">{{text}}</a>{{/url}}{{^url}}{{text}}{{/url}}</li>{{/items}}</ul>{{/more}}
         </div>
-        {{#url}}<p class="ayv-board-book">{{#cover}}<img src="{{cover}}" alt="" loading="lazy" width="72" height="108">{{/cover}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a></p>{{/url}}
+        {{#url}}<p class="ayv-board-book">{{#cover}}<img src="{{cover}}" alt="" loading="lazy" width="72" height="108">{{/cover}}{{#listen}}<span class="ayv-board-acts"><button class="ayv-listen ayv-board-voice" type="button" data-ayv-say="{{urls}}" aria-pressed="false">{{> local_oksigeniaayvurenda/icon_volume}} <span>{{label}}</span></button>{{/listen}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}</a>{{#listen}}</span>{{/listen}}</p>{{/url}}
     </section>
     {{/board.moments}}
     <div class="ayv-board-col">

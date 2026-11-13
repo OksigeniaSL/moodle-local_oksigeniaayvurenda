@@ -47,10 +47,10 @@ class moments {
     public const RECORD = 10;
 
     /** @var string[] The kinds readers hear too; the classes that met their challenge, only the staff. */
-    public const PUBLIC = ['anniversary', 'loans', 'book', 'record', 'quest', 'first'];
+    public const PUBLIC = ['anniversary', 'voice', 'loans', 'book', 'record', 'quest', 'first'];
 
     /** @var string[] Most worth telling first. */
-    public const ORDER = ['anniversary', 'loans', 'book', 'record', 'quest', 'challenge', 'first'];
+    public const ORDER = ['anniversary', 'voice', 'loans', 'book', 'record', 'quest', 'challenge', 'first'];
 
     /**
      * The moments of a centre this week, the most worth telling first.
@@ -95,6 +95,8 @@ class moments {
                     ['library' => $main->slug] + $params
                 ))->out(false) : '',
                 'recordid' => (int) ($moment['recordid'] ?? 0),
+                // A voice to hear right there.
+                'audio' => (string) ($moment['audio'] ?? ''),
             ];
         }
         return $out;
@@ -111,6 +113,7 @@ class moments {
         $since = $now - self::DAYS * DAYSECS;
         $moments = array_filter([
             self::anniversary($entityid, $now),
+            self::voice($entityid, $now, $since),
             self::loans($entityid, $now, $since),
             self::book($entityid, $now, $since),
             self::record($entityid, $now, $since),
@@ -119,6 +122,41 @@ class moments {
             self::first($entityid, $now, $since),
         ]);
         return array_values($moments);
+    }
+
+    /**
+     * A new voice in the library: the last one published this week that every reader of the centre may hear (for all
+     * its students or for anyone, not for one class or some stages), with who read it as they signed it.
+     *
+     * @param int $entityid
+     * @param int $now
+     * @param int $since
+     * @return array|null
+     */
+    private static function voice(int $entityid, int $now, int $since): ?array {
+        global $DB;
+        $rows = $DB->get_records_select(
+            self::T . 'digital',
+            "entityid = :entityid AND kind = 'voice' AND status = 'published' AND timemodified >= :since
+                AND timemodified <= :now",
+            ['entityid' => $entityid, 'since' => $since, 'now' => $now],
+            'timemodified DESC, id DESC',
+            '*',
+            0,
+            20
+        );
+        foreach ($rows as $row) {
+            $audience = array_filter(explode(',', (string) $row->audience));
+            if (json_decode((string) $row->stages, true) || !array_intersect($audience, ['students', 'public'])) {
+                continue;
+            }
+            $who = trim(format_string((string) $row->signature, true, ['escape' => false]));
+            return ['kind' => 'voice', 'key' => $who !== '' ? 'momentvoice' : 'momentvoiceanon',
+                'a' => ['who' => $who, 'title' => self::title((int) $row->recordid)],
+                'recordid' => (int) $row->recordid, 'staffpage' => 'record.php', 'readerpage' => 'record.php',
+                'params' => ['id' => (int) $row->recordid], 'audio' => digital::file_url($row)];
+        }
+        return null;
     }
 
     /**

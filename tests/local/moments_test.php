@@ -134,6 +134,52 @@ final class moments_test extends \advanced_testcase {
     }
 
     /**
+     * A new voice is told this week to everyone only when every reader may hear it (not one for some stages or kept for
+     * a class), with who read it as they signed it, and heard right on the board; unsigned, «someone».
+     */
+    public function test_a_new_voice(): void {
+        global $DB;
+        $this->resetAfterTest();
+        force_current_language('en');
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time();
+        $voice = function (
+            string $title,
+            string $audience,
+            ?string $stages,
+            string $signature,
+            int $when
+        ) use (
+            $gen,
+            $DB,
+            $entityid
+) {
+            $record = $gen->create_record(['entityid' => $entityid, 'title' => $title]);
+            return (int) $DB->insert_record('local_oksigeniaayvurenda_digital', ['entityid' => $entityid,
+                'recordid' => $record->id, 'kind' => 'voice', 'format' => 'audio', 'title' => 'Entero',
+                'status' => 'published', 'audience' => $audience, 'stages' => $stages, 'licence' => 'rights',
+                'signature' => $signature, 'timecreated' => $when, 'timemodified' => $when]);
+        };
+        $voice('Para una etapa', 'students', '["Primaria"]', 'Ana', $now - HOURSECS);
+        $voice('Para la clase', 'class', null, 'Luis', $now - 2 * HOURSECS);
+        $this->assertSame([], array_column(moments::find($entityid, $now), 'kind'));
+        $voice('La isla del cometa', 'students', null, 'Enrique, profe de EF', $now - 3 * HOURSECS);
+        $found = moments::find($entityid, $now);
+        $this->assertSame('voice', $found[0]['kind']);
+        $this->assertSame(['who' => 'Enrique, profe de EF', 'title' => 'La isla del cometa'], $found[0]['a']);
+        $said = moments::of($library, $now, false)[0];
+        $this->assertStringContainsString('Enrique, profe de EF', $said['text']);
+        $this->assertStringContainsString('record.php', $said['url']);
+        $this->assertSame('voice', $said['kind']);
+        // A week later, it is no news.
+        $this->assertSame([], array_column(moments::find($entityid, $now + 8 * DAYSECS), 'kind'));
+        $DB->set_field('local_oksigeniaayvurenda_digital', 'signature', '', []);
+        $this->assertSame('momentvoiceanon', moments::find($entityid, $now)[0]['key']);
+    }
+
+    /**
      * Past four classes that met their challenge, how many of them, never «and so many more».
      */
     public function test_many_classes(): void {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.263.0 (2026-11-13)
+
+- **A new voice on everyone's home.** The home's board («To celebrate») tells of a new voice for a week, «A new voice
+  in the library: Iker has read «…». Listen to it!», with its cover and its «Listen» right there. Only a voice every
+  reader of the centre may hear (for all its students or for anyone, not one class or some stages); unsigned, «someone».
+  Approving a voice tells it at once, not within the hour the board keeps its moments.
+- **Staff read for the little ones too.** A teacher or the librarian recording a book gets «Who is it for?» and «I read
+  it for the little ones» as an older reader does (without the family's light: there is no family to tell).
+
 ## 0.262.0 (2026-11-13)
 
 - «Leyó para los pequeños», a «subidón» of the review of 12 November, from Jujol's mock-ups.

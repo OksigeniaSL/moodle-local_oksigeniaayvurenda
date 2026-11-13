@@ -1338,7 +1338,7 @@ final class screens {
             ?? ['text' => $first['text'], 'figure' => null, 'portrait' => null, 'initial' => '', 'role' => 'herald'];
         $more = array_map(fn($moment) => ['text' => $moment['text'], 'url' => $moment['url']], array_slice($moments, 0, 2));
         $skin = skins::of($entityid);
-        return $said + [
+        $board = $said + [
             'heading' => self::str('momentsheading'),
             // The paper pennants are for the young of a school; older readers and grown-ups see the moment soberly.
             'sober' => !in_array($skin, ['school', 'secondary'], true) || characters::step($entityid) === 'cielo',
@@ -1348,6 +1348,9 @@ final class screens {
             'label' => self::str($first['recordid'] ? 'memorygo' : 'momentsee'),
             'more' => $more ? ['items' => $more] : false,
         ];
+        // A new voice is heard right on the board: after the herald's words, which carry a «listen» of their own (null).
+        $board['listen'] = $first['audio'] !== '' ? ['urls' => $first['audio'], 'label' => self::str('listen')] : false;
+        return $board;
     }
 
     /**
