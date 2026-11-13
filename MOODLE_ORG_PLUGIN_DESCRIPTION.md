@@ -22,7 +22,10 @@
 <h3>Readers who come back</h3>
 <ul>
 <li>A <strong>reader card that grows</strong> with each book (a flower for the youngest, a sky from twelve, or a plain card), with an album at the end of the year. No rankings and no comparisons.</li>
-<li><strong>Class challenges</strong>, cooperative and anonymous, library challenges with dates, reviews in a sentence, a drawing or a voice, and an idea a day from the library for each reader.</li>
+<li><strong>Class challenges</strong>, cooperative and anonymous, and <strong>library challenges with dates</strong>: counting books, or a <strong>reading bingo card</strong> of nine squares (corners, genres, a new book, one with a voice, one nobody took home for years) that the desk fills as books go out.</li>
+<li><strong>Blind dates with a book</strong>: the library wraps a copy with three clues and readers ask for it by its number; back home, they see which book it was and say how it went in one touch.</li>
+<li>The book of the week chosen by the library, the first reader of a new copy who premieres it, reviews in a sentence, a drawing or a voice, and an idea a day from the library for each reader.</li>
+<li>For the families of the youngest, if the library wants it, a message the morning after their child's first book, with the way to record it for them in their own voice.</li>
 <li>In the Moodle app: their books, holds, renewals and their card.</li>
 </ul>
 <h3>Everything a library does</h3>
@@ -30,7 +33,7 @@
 <h3>Each library in its own words</h3>
 <p>Six looks, each with its words and what is switched on: public or foundation library, university or academy, company, mobile library, secondary school and primary school. A site can also keep each centre apart, with its own staff, for a service shared by many libraries.</p>
 <h3>Help for the staff</h3>
-<p>Guided tours on a practice library of one's own, and «How do I…?» with nearly eighty tasks; from Moodle 4.5, the site's AI can answer in its own words, using only the guide.</p>
+<p>Guided tours on a practice library of one's own, and «How do I…?» with over eighty tasks; from Moodle 4.5, the site's AI can answer in its own words, using only the guide.</p>
 <h3>Configuration</h3>
 <p>Under Site administration → Plugins → Local plugins → Library (Oksigenia Ayvurenda), and the rest from the library itself, by its staff. Two roles come with it, Librarian and Library manager.</p>
 <h3>Privacy</h3>
