@@ -125,6 +125,8 @@
         <h2 class="ayv-section-title" id="ayv-quests-title-{{code}}">{{questsheading}}</h2>
         <ul class="ayv-quest-plays">
         {{#quests}}
+            {{#cartilla}}<li class="ayv-quest-play-cartilla ayv-ct">{{> local_oksigeniaayvurenda/card_cartilla}}</li>{{/cartilla}}
+            {{^cartilla}}
             <li class="ayv-quest-play{{#reached}} ayv-quest-play-reached{{/reached}}">
                 <h3 class="ayv-quest-card-name">{{name}}</h3>
                 <p class="ayv-field-hint">{{when}}</p>
@@ -135,6 +137,7 @@
                 {{/joined}}
                 {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button">{{questjoin}}</button></form>{{/canjoin}}
             </li>
+            {{/cartilla}}
         {{/quests}}
         </ul>
     </section>

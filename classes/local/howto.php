@@ -98,6 +98,8 @@ final class howto {
         'voices' => ['voices.php', 'desk', 'voices'],
         'match' => ['match.php', 'manage', ''],
         'readerslist' => ['readerslist.php', 'manage', 'readerslist'],
+        'quests' => ['quests.php', 'manage', ''],
+        'cartilla' => ['quests.php', 'manage', ''],
         'helpme' => ['howto.php', 'desk', ''],
         'lost' => ['desk.php', 'desk', ''],
         'whohas' => ['late.php', 'desk', ''],

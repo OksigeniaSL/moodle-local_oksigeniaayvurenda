@@ -71,13 +71,16 @@ final class quests {
         if (!$start || !$end || $end <= $start) {
             return 'questerrdates';
         }
-        // A cartilla: nine squares, and its goal the full card.
-        $squares = array_values(array_unique(array_filter(
-            array_map('strval', (array) ($data['squares'] ?? [])),
-            fn($spec) => cartilla::valid($spec)
-        )));
-        if ($squares && count($squares) !== cartilla::SIZE) {
-            return 'questerrsquares';
+        // A cartilla: its nine places, a square or '' while it is a draft (no square twice), and its goal the full card.
+        $squares = [];
+        if (array_key_exists('squares', $data)) {
+            $seen = [];
+            for ($at = 0; $at < cartilla::SIZE; $at++) {
+                $spec = (string) ($data['squares'][$at] ?? '');
+                $spec = cartilla::valid($spec) && !isset($seen[$spec]) ? $spec : '';
+                $seen[$spec] = $spec !== '';
+                $squares[] = $spec;
+            }
         }
         $goal = $squares ? cartilla::SIZE : (int) ($data['goal'] ?? 0);
         if ($goal < 1 || $goal > self::MAXGOAL) {
@@ -153,6 +156,10 @@ final class quests {
         );
         $stage = self::stage_of($reader, $now);
         return array_values(array_filter($rows, function ($quest) use ($stage) {
+            // A cartilla still a draft shows on no card.
+            if (cartilla::squares($quest) && !cartilla::complete($quest)) {
+                return false;
+            }
             $stages = json_decode((string) $quest->stages, true);
             return !$stages || !empty($quest->joinedid) || in_array($stage, $stages, true);
         }));

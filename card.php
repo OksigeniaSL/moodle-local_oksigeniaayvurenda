@@ -266,13 +266,27 @@ foreach ($readers as $reader) {
     // The library's challenges with their own dates: a card of stamps, one for each book taken home in its days.
     $longdate = 'strftimedate';
     $questcards = [];
+    // A cartilla is a game: not with the card «without a game», nor in Infantil, where the flower is.
+    $cartillas = $look !== 'none' && !\local_oksigeniaayvurenda\local\cartilla::infant(
+        \local_oksigeniaayvurenda\local\quests::stage_of($reader, time())
+    );
     foreach (\local_oksigeniaayvurenda\local\quests::open($reader, time()) as $quest) {
+        if (\local_oksigeniaayvurenda\local\cartilla::squares($quest)) {
+            $questlibrary = $cartillas ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => $quest->libraryid]) : null;
+            if ($questlibrary) {
+                $questcards[] = ['id' => (int) $quest->id, 'name' => format_string($quest->name, true, ['escape' => false]),
+                    'text' => (string) $quest->text, 'joined' => !empty($quest->joinedid),
+                    'canjoin' => empty($quest->joinedid) && !$previewid && (int) $quest->timeend >= time()]
+                    + \local_oksigeniaayvurenda\local\cartilla::view($quest, $questlibrary, $reader, time(), $str);
+            }
+            continue;
+        }
         $stamps = empty($quest->joinedid) ? 0 : \local_oksigeniaayvurenda\local\quests::stamps($quest, (int) $reader->id, time());
         \local_oksigeniaayvurenda\local\quests::note_done($quest, $stamps, time());
         $goal = (int) $quest->goal;
         $reached = !empty($quest->joinedid) && $stamps >= $goal;
         $questcards[] = ['id' => (int) $quest->id, 'name' => format_string($quest->name, true, ['escape' => false]),
-            'text' => (string) $quest->text,
+            'text' => (string) $quest->text, 'cartilla' => false,
             'when' => $str('questwhen', (object) [
                 'from' => \local_oksigeniaayvurenda\local\zones::date((int) $quest->timestart, $longdate, $reader->entityid),
                 'to' => \local_oksigeniaayvurenda\local\zones::date((int) $quest->timeend, $longdate, $reader->entityid)]),
@@ -379,6 +393,15 @@ $data = [
     'mineheading' => $str('mineheading'),
     'questsheading' => $str('questsheading'),
     'questjoin' => $str('questjoin'),
+    'cartillajoin' => $str('cartillajoin'),
+    'cartillastamp' => $str('cartillastamp'),
+    'cartillafull' => $str('cartillafull'),
+    'cartillasquares' => $str('cartillasquares'),
+    'cartillahowtitle' => $str('cartillahowtitle'),
+    'cartillahow' => $str('cartillahow'),
+    'cartillahownew' => $str('cartillahownew'),
+    'cartillaonlyyou' => $str('cartillaonlyyou'),
+    'cartillaemblem' => (new moodle_url('/local/oksigeniaayvurenda/app/emblema-pequeno.svg'))->out(false),
     'goaltitle' => $str('goaltitle'),
     'goallabel' => $str('goallabel'),
     'goalhint' => $str('goalhint'),

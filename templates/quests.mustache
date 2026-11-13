@@ -36,11 +36,12 @@
         "questbooks": "libros"
     }
 }}
-<section class="ayv-quests">
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
+<section class="ayv-quests ayv-cf ayv-ct ayv-ct-personal">
+<header class="ayv-cf-cabeza"><div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+    <p class="ayv-cf-entrada">{{intro}}</p></div></header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#problem}}<p class="ayv-notice ayv-notice-error" role="alert">{{problem}}</p>{{/problem}}
+{{#mesa}}{{> local_oksigeniaayvurenda/quests_cartilla}}{{/mesa}}
 <ul class="ayv-quest-cards">
 {{#quests}}
     <li class="ayv-quest-card" id="ayv-quest-{{id}}">
@@ -48,6 +49,14 @@
             <h2 class="ayv-quest-card-name">{{name}}</h2>
             <span class="ayv-quest-state ayv-quest-state-{{stateclass}}">{{state}}</span>
         </div>
+        {{#cartilla}}
+        <div class="ayv-ct-reto-mini"><div class="ayv-ct-carton ayv-ct-carton-mini"><div class="ayv-ct-rejilla"><ol class="ayv-ct-casillas" aria-hidden="true">{{#mini}}<li class="ayv-ct-casilla{{#empty}} ayv-ct-hueco{{/empty}}">{{#art}}<img class="ayv-ct-dibujo" src="{{art}}" alt="" width="512" height="512">{{/art}}</li>{{/mini}}</ol></div></div></div>
+        <p class="ayv-field-hint">{{when}} · {{for}}{{#draft}} · {{cartilladraft}}{{/draft}}</p>
+        <p class="ayv-ct-sumas">{{sums}}</p>
+        {{#hardest}}<p class="ayv-ct-dificil">{{hardest}}</p>{{/hardest}}
+        <p><a class="ayv-cf-chapa" href="{{url}}">{{cartillachange}}</a></p>
+        {{/cartilla}}
+        {{^cartilla}}
         <p class="ayv-field-hint">{{when}} · {{for}} · {{goalline}}</p>
         {{#text}}<p>{{text}}</p>{{/text}}
         <dl class="ayv-quest-figures">
@@ -55,8 +64,9 @@
             <div><dt>{{questdone}}</dt><dd>{{done}}</dd></div>
             <div><dt>{{questbooks}}</dt><dd>{{books}}</dd></div>
         </dl>
+        {{/cartilla}}
         <div class="ayv-quest-card-do">
-            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-quest-edit-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{questedit}}</button>
+            {{^cartilla}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-quest-edit-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{questedit}}</button>{{/cartilla}}
             <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remove" data-ayv-twice="{{removesure}}">{{questremove}}</button></form>
         </div>
         <dialog class="ayv-modal ayv-entity-edit" id="ayv-quest-edit-{{id}}" aria-labelledby="ayv-quest-edit-{{id}}-title">
@@ -78,7 +88,12 @@
     </li>
 {{/quests}}
 {{^hasquests}}<li class="ayv-quest-card ayv-quest-card-none"><p>{{questsnone}}</p></li>{{/hasquests}}
-    <li class="ayv-libcard ayv-libcard-new ayv-quest-card-new"><button type="button" data-ayv-open="ayv-quest-new">{{> local_oksigeniaayvurenda/icon_plus}} <span>{{questsnew}}</span></button></li>
+    <li class="ayv-quest-card ayv-ct-reto-nuevo"><h2 class="ayv-quest-card-name">{{questsnew}}</h2>
+        <form id="rt-nuevo" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
+        <div class="ayv-ct-tipos">
+            <button type="button" class="ayv-ct-tipo" data-ayv-open="ayv-quest-new"><span class="ayv-ct-tipo-dibujo ayv-ct-tipo-sellos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><b>{{questkindbooks}}</b><span>{{questkindbooksdesc}}</span></button>
+            <button type="submit" class="ayv-ct-tipo" form="rt-nuevo" name="do" value="newcartilla"><span class="ayv-ct-tipo-dibujo ayv-ct-tipo-carton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>{{questkindcartilla}}</b><span>{{questkindcartilladesc}}</span></button>
+        </div></li>
 </ul>
 <dialog class="ayv-modal ayv-entity-edit" id="ayv-quest-new" aria-labelledby="ayv-quest-new-title">
     <div class="ayv-modal-head"><h2 id="ayv-quest-new-title" class="ayv-section-title">{{questsnew}}</h2>

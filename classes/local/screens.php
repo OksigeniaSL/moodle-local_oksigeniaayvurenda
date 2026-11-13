@@ -145,6 +145,7 @@ final class screens {
      * @param bool $onlyfree
      * @param int $subject A topic to narrow by, if any.
      * @param bool $asis The words as typed: when nothing is found, no search for the closest ones.
+     * @param string $square A square of a cartilla that is no corner (new or rescued): its books.
      * @return array
      */
     public static function results(
@@ -154,11 +155,19 @@ final class screens {
         int $page,
         bool $onlyfree = false,
         int $subject = 0,
-        bool $asis = false
+        bool $asis = false,
+        string $square = ''
     ): array {
         $typed = '';
         $facets = null;
-        if ($corner !== '' && $query === '') {
+        if ($square !== '' && $query === '') {
+            // The books that fill a square of a cartilla that is no corner: the new ones, or those waiting to be rescued.
+            $found = catalogue::square($library, $square, $page, $onlyfree);
+            $found['suggestions'] = [];
+            $heading = self::str('cartillabooks' . $square);
+            $next = ['square' => $square, 'page' => $page + 1];
+            $here = ['square' => $square];
+        } else if ($corner !== '' && $query === '') {
             $found = catalogue::corner($library, $corner, $page, $onlyfree);
             $label = $corner;
             foreach (catalogue::corners($library) as $known) {

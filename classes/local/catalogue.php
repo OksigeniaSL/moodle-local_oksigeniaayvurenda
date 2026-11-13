@@ -452,11 +452,37 @@ final class catalogue {
      * @return array{total: int, cards: array}
      */
     public static function corner(\stdClass $library, string $code, int $page = 0, bool $onlyfree = false): array {
+        return self::listing($library, self::corner_condition($library, $code, 'r.id', 'code') ?? ['1 = 0', []], $page, $onlyfree);
+    }
+
+    /**
+     * The records that fill a square of every library of a cartilla (new ones, or waiting to be rescued), by title.
+     *
+     * @param \stdClass $library
+     * @param string $special new or rescued.
+     * @param int $page
+     * @param bool $onlyfree Only records with a copy free in this library.
+     * @return array{total: int, cards: array}
+     */
+    public static function square(\stdClass $library, string $special, int $page = 0, bool $onlyfree = false): array {
+        return self::listing($library, cartilla::condition($library, $special, 'r.id', 'sq', time()), $page, $onlyfree);
+    }
+
+    /**
+     * The records of the centre that meet a condition, by title, a page of them.
+     *
+     * @param \stdClass $library
+     * @param array $condition SQL on r.id and its parameters.
+     * @param int $page
+     * @param bool $onlyfree
+     * @return array{total: int, cards: array}
+     */
+    private static function listing(\stdClass $library, array $condition, int $page, bool $onlyfree): array {
         global $DB;
-        [$incorner, $cornerparams] = self::corner_condition($library, $code, 'r.id', 'code') ?? ['1 = 0', []];
+        [$where, $whereparams] = $condition;
         $sql = "FROM {" . self::T . "record} r
-               WHERE r.entityid = :entityid AND $incorner";
-        $params = ['entityid' => $library->entityid] + $cornerparams;
+               WHERE r.entityid = :entityid AND $where";
+        $params = ['entityid' => $library->entityid] + $whereparams;
         if ($onlyfree) {
             $sql .= ' AND ' . self::free_condition();
             $params['freelibrary'] = $library->id;

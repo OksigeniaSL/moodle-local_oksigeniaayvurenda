@@ -41,7 +41,13 @@ final class cartilla_test extends \advanced_testcase {
         $squares = ['new', 'voice', 'rescued', 'corner:0', 'corner:1', 'corner:2', 'corner:3', 'corner:5', 'corner:6'];
         $data = ['name' => 'La cartilla', 'start' => date('Y-m-d', $now - 5 * DAYSECS), 'end' => date('Y-m-d', $now + 5 * DAYSECS),
             'squares' => $squares];
-        $this->assertSame('questerrsquares', quests::save($library, ['squares' => array_slice($squares, 0, 4)] + $data, $now));
+        // A draft keeps its squares in their places, and shows on no card.
+        $draft = quests::save($library, ['squares' => [1 => 'new', 4 => 'voice']] + $data, $now);
+        $row = $DB->get_record('local_oksigeniaayvurenda_quest', ['id' => $draft]);
+        $this->assertSame(['', 'new', '', '', 'voice', '', '', '', ''], cartilla::squares($row));
+        $this->assertFalse(cartilla::complete($row));
+        $this->assertSame([], quests::open($reader, $now));
+        $DB->delete_records('local_oksigeniaayvurenda_quest', ['id' => $draft]);
         $id = quests::save($library, $data, $now);
         $quest = $DB->get_record('local_oksigeniaayvurenda_quest', ['id' => $id]);
         $this->assertSame([9, $squares], [(int) $quest->goal, cartilla::squares($quest)]);
@@ -59,5 +65,57 @@ final class cartilla_test extends \advanced_testcase {
         $this->assertSame(['Recién llegado', '', 'Olvidado'], array_column(array_slice($card['squares'], 0, 3), 'title'));
         $this->assertSame($str('cartillanew'), $card['squares'][0]['label']);
         $this->assertSame(2, quests::stamps($quest, (int) $reader->id, $now));
+        $this->assertCount(1, quests::open($reader, $now));
+    }
+
+    /**
+     * The reader's card: before joining, nothing filled and every square a link; joined, the first row filled is a
+     * line and Mainumby cheers; a full card is noted as done. The new and the rescued books are listed by search.
+     */
+    public function test_view(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $reader = $gen->create_reader(['entityid' => $library->entityid]);
+        $now = time();
+        $squares = ['new', 'voice', 'rescued', 'corner:0', 'corner:1', 'corner:2', 'corner:3', 'corner:5', 'corner:6'];
+        $id = quests::save($library, ['name' => 'La cartilla', 'start' => date('Y-m-d', $now - 5 * DAYSECS),
+            'end' => date('Y-m-d', $now + 5 * DAYSECS), 'squares' => $squares], $now);
+        $item = fn($title, $acquired) => $gen->create_item(['libraryid' => $library->id,
+            'recordid' => $gen->create_record(['entityid' => $library->entityid, 'title' => $title])->id,
+            'timeacquired' => $acquired]);
+        $new = $item('Recién llegado', $now - 10 * DAYSECS);
+        $voiced = $item('Con su voz', $now - 400 * DAYSECS);
+        $DB->insert_record('local_oksigeniaayvurenda_digital', ['entityid' => $library->entityid, 'recordid' => $voiced->recordid,
+            'kind' => 'voice', 'format' => 'audio', 'status' => 'published', 'timecreated' => $now, 'timemodified' => $now]);
+        $old = $item('Olvidado', $now - 5 * 365 * DAYSECS);
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        // The lists of a square that is no corner: one new book, one waiting to be rescued.
+        $this->assertSame(1, catalogue::square($library, 'new')['total']);
+        $this->assertSame(1, catalogue::square($library, 'rescued')['total']);
+        $this->assertSame(['new' => 1, 'voice' => 1, 'rescued' => 1], cartilla::counts($library, $now));
+        $this->assertStringContainsString('square=rescued', cartilla::link($library, 'rescued'));
+        $this->assertStringContainsString('ayvurande.php', cartilla::link($library, 'voice'));
+        $this->assertStringContainsString('corner=5', cartilla::link($library, 'corner:5'));
+        $quest = fn() => quests::open($reader, $now)[0];
+        $view = cartilla::view($quest(), $library, $reader, $now, $str);
+        $this->assertSame([0, [], null, ''], [count(array_filter(array_column($view['squares'], 'filled'))), $view['lines'],
+            $view['cheer'], $view['count']]);
+        $this->assertNotContains('', array_column($view['squares'], 'url'));
+        quests::join($id, $reader, $now);
+        foreach ([$new, $voiced, $old] as $at => $it) {
+            $gen->create_loan(['libraryid' => $library->id, 'itemid' => $it->id, 'readerid' => $reader->id,
+                'timeloaned' => $now - (3 - $at) * DAYSECS]);
+        }
+        $view = cartilla::view($quest(), $library, $reader, $now, $str);
+        $this->assertSame([['name' => 'f0']], $view['lines']);
+        $titles = array_column(array_slice($view['squares'], 0, 4), 'title');
+        $this->assertSame(['Recién llegado', 'Con su voz', 'Olvidado', ''], $titles);
+        $this->assertSame('', $view['squares'][0]['url']);
+        $this->assertSame($str('cartillacount', 3) . ' · ' . $str('cartillaoneline'), $view['count']);
+        $this->assertStringContainsString('6', $view['cheer']['text']);
+        $this->assertFalse($view['full']);
+        $this->assertEmpty($DB->get_field('local_oksigeniaayvurenda_questreader', 'timedone', ['questid' => $id]));
     }
 }

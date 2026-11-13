@@ -37,21 +37,25 @@ $fragment = optional_param('fragment', false, PARAM_BOOL);
 $onlyfree = optional_param('free', false, PARAM_BOOL);
 $subject = optional_param('subject', 0, PARAM_INT);
 $asis = optional_param('asis', false, PARAM_BOOL);
+// The books that fill a square of a cartilla that is no corner.
+$square = optional_param('square', '', PARAM_ALPHA);
+$square = in_array($square, ['new', 'rescued'], true) ? $square : '';
 require_login(null, false);
 $library = catalogue::library($ref);
 $context = access::context($library);
 shell::require('local/oksigeniaayvurenda:view', $library);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/search.php', ['library' => $ref, 'q' => $query,
-    'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree, 'asis' => (int) $asis]));
+    'corner' => $corner, 'subject' => $subject, 'page' => $page, 'free' => (int) $onlyfree, 'asis' => (int) $asis,
+    'square' => $square]));
 
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
-if ($query === '' && $corner === '') {
+if ($query === '' && $corner === '' && $square === '') {
     redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]));
 }
-$data = screens::results($library, $query, $corner, $page, $onlyfree, $subject, $asis);
+$data = screens::results($library, $query, $corner, $page, $onlyfree, $subject, $asis, $square);
 $query = $data['searched'] ?? $query;
 // The memory remembers what a reader looked for (words typed, three letters at least) and found: a search that gave
 // nothing is not one to offer again.

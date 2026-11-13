@@ -1,0 +1,73 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/card_cartilla
+
+    A cartilla on the reader's card (Jujol's mock-up of 13 November): the printed card of nine squares, each filled with
+    the desk's date stamp or a link to the books that fill it, its lines in highlighter, the big stamp when it is full;
+    beside it, what it is, how it goes, Mainumby when there is something to celebrate, and how it is played.
+
+    Example context (json):
+    {
+        "id": 7, "name": "La cartilla de otoño", "text": "Nueve libros distintos, uno por casilla.", "joined": true,
+        "canjoin": false, "full": false, "library": "Biblioteca de ejemplo",
+        "when": "Del 2 de noviembre de 2026 al 29 de noviembre de 2026 · quedan 16 días",
+        "count": "4 de 9 casillas · 1 línea",
+        "squares": [
+            {"label": "Poesía", "art": "https://example.com/genero-poetry.webp", "filled": true, "title": "Versos de agua",
+                "day": "5 nov", "said": ": llena con «Versos de agua», el 5 nov"},
+            {"label": "Ciencias", "art": "https://example.com/rincon-5.webp", "filled": true, "title": "El universo",
+                "day": "7 nov", "said": ": llena con «El universo», el 7 nov"},
+            {"label": "Una novedad", "art": "https://example.com/casilla-new.webp", "filled": true, "title": "La barca",
+                "day": "10 nov", "said": ": llena con «La barca», el 10 nov"},
+            {"label": "Cómic", "art": null, "filled": false, "title": "",
+                "url": "https://example.com/search.php?corner=g2", "said": ": por llenar. Buscar libros que la llenen"}
+        ],
+        "lines": [{"name": "f0"}],
+        "cheer": {"text": "¡Línea! Ahora, a por la cartilla llena: te faltan 6.", "figure": "https://example.com/mainumby.webp"},
+        "action": "https://example.com/card.php", "code": "12200X", "sesskey": "abc",
+        "cartillajoin": "Jugar esta cartilla", "cartillastamp": "Llevado", "cartillafull": "Cartilla llena",
+        "cartillasquares": "Las nueve casillas", "cartillahowtitle": "Cómo se juega.",
+        "cartillahow": "Cada libro que te llevas del mostrador llena una casilla.",
+        "cartillahownew": "Toca una casilla para ver qué libros la llenan.", "cartillaonlyyou": "Solo la ves tú.",
+        "cartillaemblem": "https://example.com/emblema-pequeno.svg"
+    }
+}}
+<div class="ayv-ct-juego{{^joined}} ayv-ct-juego-nueva{{/joined}}">
+    <div class="ayv-ct-carton{{#full}} ayv-ct-carton-llena{{/full}}">
+        <p class="ayv-ct-carton-cab"><span>{{name}}</span><img src="{{cartillaemblem}}" alt="" width="22" height="22"></p>
+        <div class="ayv-ct-rejilla"><ol class="ayv-ct-casillas" aria-label="{{cartillasquares}}">
+        {{#squares}}
+            {{#filled}}<li class="ayv-ct-casilla ayv-ct-llena">{{#art}}<img class="ayv-ct-dibujo" src="{{art}}" alt="" width="512" height="512" loading="lazy">{{/art}}{{^art}}<span class="ayv-ct-dibujo ayv-ct-sin" aria-hidden="true"></span>{{/art}}<span class="ayv-ct-nombre">{{label}}</span><span class="ayv-ct-libro">{{title}}</span><span class="ayv-ct-sello" aria-hidden="true"><small>{{cartillastamp}}</small><b>{{day}}</b></span><span class="ayv-sr">{{said}}</span></li>{{/filled}}
+            {{^filled}}<li class="ayv-ct-casilla"><a class="ayv-ct-buscar" href="{{url}}">{{#art}}<img class="ayv-ct-dibujo" src="{{art}}" alt="" width="512" height="512" loading="lazy">{{/art}}{{^art}}<span class="ayv-ct-dibujo ayv-ct-sin" aria-hidden="true"></span>{{/art}}<span class="ayv-ct-nombre">{{label}}</span><span class="ayv-ct-lupa" aria-hidden="true"></span><span class="ayv-sr">{{said}}</span></a></li>{{/filled}}
+        {{/squares}}
+        </ol>
+        {{#lines}}<span class="ayv-ct-raya ayv-ct-raya-{{name}}" aria-hidden="true"></span>{{/lines}}
+        {{#full}}<span class="ayv-ct-llena-sello" aria-hidden="true"><small>{{library}}</small><b>{{cartillafull}}</b></span>{{/full}}
+        </div>
+    </div>
+    <div class="ayv-ct-lado">
+        <h3 class="ayv-ct-titulo">{{name}}</h3>
+        <p class="ayv-ct-cuando">{{when}}</p>
+        {{#text}}<p>{{text}}</p>{{/text}}
+        {{#count}}<p class="ayv-ct-cuenta">{{count}}</p>{{/count}}
+        {{#cheer}}<div class="ayv-ct-pajaro">{{#figure}}<img src="{{figure}}" alt="" width="96" height="96">{{/figure}}<p>{{text}}</p></div>{{/cheer}}
+        {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button ayv-ct-jugar">{{cartillajoin}}</button></form>{{/canjoin}}
+        <p class="ayv-ct-como"><b>{{cartillahowtitle}}</b> {{#joined}}{{cartillahow}}{{/joined}}{{^joined}}{{cartillahownew}}{{/joined}}</p>
+        <p class="ayv-ct-solo">{{cartillaonlyyou}}</p>
+    </div>
+</div>

@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.257.0 (2026-11-13)
+
+- «La cartilla», its two screens, from Jujol's mock-up.
+  - **The reader**, on their card: a printed bingo card of nine squares. A filled square carries the desk's date stamp
+    and the book; an empty one leads to the books that fill it (its corner or genre on the shelves, the books with a
+    voice, or new lists of the new books and of those waiting to be rescued). A line is drawn in highlighter, and a full
+    card gets its big stamp and the day it was finished. Beside it: the days left, the count, and Mainumby when there is
+    something to celebrate. Before joining, the drawings are lit and the button says «Play this bingo card». It does not
+    show with the card «without a game», nor in Infantil.
+  - **The staff**, in «Library challenges»: a new challenge is «Count books» or «A bingo card». A bingo card opens a table
+    to choose its nine squares from the box (corners, genres, and the three of every library, each with how many books
+    fill it, few in red), shuffle them or let Ayvurenda put the missing ones, and set the dates, how long it lasts and for
+    whom, each gesture saved on its own. A draft keeps its places and shows on no card until it has all nine. The list of
+    challenges shows each bingo card small, with its sums (who plays, lines, full cards, never names) and the square
+    filled the least.
+- A corner square of a bingo card counts its books as its shelf does: a book of a genre fills the genre, not the corner of
+  stories it comes from.
+- «What do you want to do?» knows how to make a library challenge and a bingo card.
+- English says «bingo card» where Spanish says «cartilla».
+
 ## 0.256.0 (2026-11-13)
 
 - «La cartilla» (P3 of the review), its engine; the screens come with Jujol's mock-up. A library challenge may be a

@@ -1,0 +1,31 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/quests_cartilla_tile
+
+    One tile of the box of squares: its drawing, its name and how many books fill it (few, in red); touched, it goes to
+    the next free place of the card, or back to the box when it is in it. Its form is the table's, outside it: the
+    example goes without it, as a tile alone has no table.
+
+    Example context (json):
+    {
+        "spec": "corner:5", "label": "Ciencias", "art": "https://example.com/rincon-5.webp",
+        "in": true, "at": 1, "value": "", "few": false, "count": "512 libros", "off": false,
+        "cartillaincard": "En la cartilla"
+    }
+}}
+<button class="ayv-ct-ficha" type="submit"{{#form}} form="{{form}}"{{/form}} name="squares[{{at}}]" value="{{value}}" aria-pressed="{{#in}}true{{/in}}{{^in}}false{{/in}}"{{#off}} disabled{{/off}}>{{#art}}<img class="ayv-ct-ficha-dibujo" src="{{art}}" alt="" width="512" height="512">{{/art}}<span class="ayv-ct-ficha-n">{{label}}</span><span class="ayv-ct-ficha-c{{#few}} ayv-ct-pocos{{/few}}">{{count}}</span>{{#in}}<span class="ayv-ct-ficha-en">{{cartillaincard}}</span>{{/in}}</button>

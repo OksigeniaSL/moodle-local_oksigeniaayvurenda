@@ -1,0 +1,95 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/quests_cartilla
+
+    The table of a cartilla, from Jujol's mock-up: its card with nine places (the squares put, each with its «×»; the
+    empty ones dashed, the next one in coral), what it is beside it (the name on its plate, the dates as calendar sheets
+    with «−» and «+», how long as chips, the stages as lights, the line for the readers folded, shuffle and fill), and
+    the box of squares below, each a tile with its drawing and how many books fill it. Every gesture is a button of the
+    empty form, with the nine places in hidden fields before it; PHP keeps the last of each.
+
+    Context variables required for this template:
+    * action, sesskey - from the page
+    * id, form, places, hidden, state, saved, name, text, start, end, lengths, stages, hasstages, next, corners, genres,
+      every, hascorners, hasgenres - the table
+    * and the words of the page (cartilla…)
+
+    Example context (json):
+    {
+        "action": "https://example.com/quests.php", "sesskey": "abc", "id": 7, "form": "rt-cartilla-7",
+        "places": [{"at": 0, "empty": false, "label": "Poesía", "art": "https://example.com/genero-poetry.webp",
+            "remove": "Quitar Poesía de la casilla 1"},
+            {"at": 1, "empty": true, "number": 2, "next": true, "word": "Aquí va la siguiente", "sr": "Casilla 2, vacía"}],
+        "hidden": [{"at": 0, "spec": "genre:g1"}, {"at": 1, "spec": ""}],
+        "state": "Lleva 1 de 9 casillas.", "saved": "Guardado", "name": "La cartilla de otoño", "text": "",
+        "start": {"month": "nov", "day": "16", "week": "lunes"}, "end": {"month": "dic", "day": "13", "week": "domingo"},
+        "lengths": [{"value": "28", "label": "Cuatro semanas", "pressed": true}],
+        "stages": [{"index": 0, "label": "Infantil", "infant": true, "on": false, "value": 1},
+            {"index": 1, "label": "Primaria", "infant": false, "on": true, "value": 0}], "hasstages": true, "next": 2,
+        "corners": [{"spec": "corner:5", "label": "Ciencias", "art": "https://example.com/rincon-5.webp", "in": false, "at": 1,
+            "value": "corner:5", "few": false, "count": "512 libros", "off": false}],
+        "genres": [], "every": [{"spec": "new", "label": "Una novedad", "art": null, "in": false, "at": 1, "value": "new",
+            "few": true, "count": "Pocos: 4 nuevos este curso", "off": false}],
+        "hascorners": true, "hasgenres": false,
+        "cartillanewtitle": "Una cartilla", "cartillaname": "Nombre", "cartillasave": "Guardar", "cartillastarts": "Empieza",
+        "cartillaends": "Acaba", "cartilladayless": "Un día antes", "cartilladaymore": "Un día después", "questlength": "Dura",
+        "cartillafor": "Para quién", "cartillanoinfant": "En Infantil no sale: allí va la flor.",
+        "cartillaline": "Una frase para los lectores", "cartillashuffle": "Barajar las casillas",
+        "cartillafill": "Que Ayvurenda ponga las que faltan", "cartillabox": "La caja de casillas",
+        "cartillaboxhint": "Toca una y va a la casilla 2.", "cartillaboxcorners": "Los rincones",
+        "cartillaboxgenres": "Los géneros", "cartillaboxevery": "De todas las bibliotecas", "cartillaincard": "En la cartilla",
+        "cartillawhat": "Una novedad es un libro nuevo.", "cartillasquares": "Las nueve casillas"
+    }
+}}
+<section class="ayv-ct-mesa" id="rt-{{id}}" aria-labelledby="rt-{{id}}-t">
+<form id="{{form}}" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}"><input type="hidden" name="do" value="cartilla"></form>
+{{#hidden}}<input type="hidden" form="{{form}}" name="squares[{{at}}]" value="{{spec}}">{{/hidden}}
+<header class="ayv-ct-mesa-cab"><h2 id="rt-{{id}}-t">{{cartillanewtitle}}</h2>{{#saved}}<span class="ayv-cf-guardado" role="status">{{saved}}</span>{{/saved}}<p class="ayv-ct-estado">{{state}}</p></header>
+<div class="ayv-ct-mesa-cuerpo">
+    <div class="ayv-ct-carton ayv-ct-carton-mesa">
+        <p class="ayv-ct-carton-cab"><span>{{name}}</span></p>
+        <div class="ayv-ct-rejilla"><ol class="ayv-ct-casillas" aria-label="{{cartillasquares}}">
+        {{#places}}
+            {{#empty}}<li class="ayv-ct-casilla ayv-ct-hueco{{#next}} ayv-ct-siguiente{{/next}}"><span class="ayv-ct-numero" aria-hidden="true">{{number}}</span><span class="ayv-ct-nombre">{{word}}</span><span class="ayv-sr">{{sr}}</span></li>{{/empty}}
+            {{^empty}}<li class="ayv-ct-casilla">{{#art}}<img class="ayv-ct-dibujo" src="{{art}}" alt="" width="512" height="512">{{/art}}<span class="ayv-ct-nombre">{{label}}</span><button class="ayv-ct-quitar" type="submit" form="{{form}}" name="squares[{{at}}]" value="" aria-label="{{remove}}"><span aria-hidden="true">×</span></button></li>{{/empty}}
+        {{/places}}
+        </ol></div>
+    </div>
+    <div class="ayv-ct-ajustes">
+        <div class="ayv-cf-fila ayv-cf-placa ayv-ct-placa"><label class="ayv-cf-rotulo" for="rt-{{id}}-name">{{cartillaname}}</label><input id="rt-{{id}}-name" form="{{form}}" name="name" value="{{name}}" maxlength="120" autocomplete="off"><button class="ayv-cf-chapa ayv-cf-chapa-sola" type="submit" form="{{form}}">{{cartillasave}}</button></div>
+        <div class="ayv-ct-fechas">
+            <span class="ayv-ct-fecha"><span class="ayv-cf-rotulo">{{cartillastarts}}</span><span class="ayv-ct-fecha-fila"><button class="ayv-cf-menos" type="submit" form="{{form}}" name="start" value="menos" aria-label="{{cartillastarts}}: {{cartilladayless}}">−</button>{{#start}}<span class="ayv-cf-hoja ayv-ct-hoja"><small>{{month}}</small><b>{{day}}</b><small>{{week}}</small></span>{{/start}}<button class="ayv-cf-mas" type="submit" form="{{form}}" name="start" value="mas" aria-label="{{cartillastarts}}: {{cartilladaymore}}">+</button></span></span>
+            <span class="ayv-ct-fecha"><span class="ayv-cf-rotulo">{{cartillaends}}</span><span class="ayv-ct-fecha-fila"><button class="ayv-cf-menos" type="submit" form="{{form}}" name="end" value="menos" aria-label="{{cartillaends}}: {{cartilladayless}}">−</button>{{#end}}<span class="ayv-cf-hoja ayv-ct-hoja"><small>{{month}}</small><b>{{day}}</b><small>{{week}}</small></span>{{/end}}<button class="ayv-cf-mas" type="submit" form="{{form}}" name="end" value="mas" aria-label="{{cartillaends}}: {{cartilladaymore}}">+</button></span></span>
+        </div>
+        <div class="ayv-ct-dura"><span class="ayv-cf-rotulo">{{questlength}}</span><span class="ayv-cf-chapas">{{#lengths}}<button class="ayv-cf-chapa" type="submit" form="{{form}}" name="length" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}">{{label}}</button>{{/lengths}}</span></div>
+        {{#hasstages}}<div class="ayv-ct-para"><span class="ayv-cf-rotulo">{{cartillafor}}</span><span class="ayv-cf-luces">
+        {{#stages}}{{#infant}}<span class="ayv-ct-infantil"><span class="ayv-cf-luz" aria-disabled="true"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></span><small>{{cartillanoinfant}}</small></span>{{/infant}}{{^infant}}<button class="ayv-cf-luz" type="submit" form="{{form}}" name="stages[{{index}}]" value="{{value}}" aria-pressed="{{#on}}true{{/on}}{{^on}}false{{/on}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/infant}}{{/stages}}
+        </span></div>{{/hasstages}}
+        <details class="ayv-ct-frase"><summary>{{cartillaline}}{{#text}} <span>«{{text}}»</span>{{/text}}</summary>
+            <label class="ayv-sr" for="rt-{{id}}-text">{{cartillaline}}</label><input id="rt-{{id}}-text" form="{{form}}" name="text" value="{{text}}" maxlength="255"><button class="ayv-cf-chapa ayv-cf-chapa-sola" type="submit" form="{{form}}">{{cartillasave}}</button></details>
+        <p class="ayv-ct-acciones"><button class="ayv-cf-chapa" type="submit" form="{{form}}" name="shuffle" value="1">{{cartillashuffle}}</button><button class="ayv-cf-chapa" type="submit" form="{{form}}" name="fill" value="1">{{cartillafill}}</button></p>
+    </div>
+</div>
+<div class="ayv-ct-caja">
+    <h3 class="ayv-ct-caja-t">{{cartillabox}} <span>{{cartillaboxhint}}</span></h3>
+    {{#hascorners}}<h4>{{cartillaboxcorners}}</h4><ul class="ayv-ct-fichas">{{#corners}}<li>{{> local_oksigeniaayvurenda/quests_cartilla_tile}}</li>{{/corners}}</ul>{{/hascorners}}
+    {{#hasgenres}}<h4>{{cartillaboxgenres}}</h4><ul class="ayv-ct-fichas">{{#genres}}<li>{{> local_oksigeniaayvurenda/quests_cartilla_tile}}</li>{{/genres}}</ul>{{/hasgenres}}
+    <h4>{{cartillaboxevery}}</h4><ul class="ayv-ct-fichas">{{#every}}<li>{{> local_oksigeniaayvurenda/quests_cartilla_tile}}</li>{{/every}}</ul>
+    <p class="ayv-ct-nota">{{cartillawhat}}</p>
+</div>
+</section>

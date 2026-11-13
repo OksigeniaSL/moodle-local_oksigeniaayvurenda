@@ -43,42 +43,159 @@ final class cartilla {
     /** @var int A book nobody took home for so long is rescued. */
     public const RESCUED = 2 * 365 * DAYSECS;
 
+    /** @var string The stages of the youngest, where a cartilla does not show (the flower is their game). */
+    public const INFANT = '/infantil|preescolar|kinder|nursery|\\bei\\b/i';
+
     /** @var int[][] The rows and columns of the card. */
     public const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8]];
 
     /**
-     * The squares a library can put on a card: its corners, its genres and the three of every library.
+     * The squares a library can put on a card, in the three groups of the box: its corners, its genres and the three of
+     * every library; each with its drawing and how many books fill it.
      *
      * @param \stdClass $library
      * @param callable $str
-     * @return array[] spec and label.
+     * @param int|null $now
+     * @return array[] spec, label, group (corners, genres, every), art and count.
      */
-    public static function options(\stdClass $library, callable $str): array {
+    public static function options(\stdClass $library, callable $str, ?int $now = null): array {
         $options = [];
-        foreach (catalogue::corners($library, false, false) as $corner) {
-            $options[] = ['spec' => 'corner:' . $corner['code'], 'label' => (string) $corner['label']];
+        foreach (catalogue::corners($library, false, true) as $corner) {
+            $genre = !empty($corner['genre']);
+            $options[] = ['spec' => ($genre ? 'genre:' : 'corner:') . $corner['code'], 'label' => (string) $corner['label'],
+                'group' => $genre ? 'genres' : 'corners', 'count' => (int) $corner['count'],
+                'art' => $genre ? screens::art('genero-' . ($corner['kind'] ?? '')) : screens::art('rincon-' . $corner['code'])];
         }
-        foreach (genres::of($library) as $genre) {
-            $options[] = ['spec' => 'genre:' . $genre['code'], 'label' => $genre['label']];
-        }
+        $counts = self::counts($library, $now ?? time());
         foreach (self::SPECIAL as $special) {
-            $options[] = ['spec' => $special, 'label' => $str('cartilla' . $special)];
+            $options[] = ['spec' => $special, 'label' => $str('cartilla' . $special), 'group' => 'every',
+                'count' => $counts[$special], 'art' => screens::art('casilla-' . $special)];
         }
         return $options;
     }
 
     /**
-     * The squares of a challenge that is a cartilla, in their order; [] for a challenge of so many books.
+     * How many books fill each of the squares of every library now: new ones, with a voice, and waiting to be rescued.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @return int[] new, voice and rescued.
+     */
+    public static function counts(\stdClass $library, int $now): array {
+        global $DB;
+        $counts = [];
+        foreach (self::SPECIAL as $special) {
+            [$condition, $params] = self::condition($library, $special, 'r.id', 'n' . $special, $now);
+            $counts[$special] = $DB->count_records_sql(
+                "SELECT COUNT(1) FROM {" . self::T . "record} r WHERE r.entityid = :rentity AND $condition",
+                $params + ['rentity' => $library->entityid]
+            );
+        }
+        return $counts;
+    }
+
+    /**
+     * The SQL that says a book fills one of the squares of every library now: a copy that came in within
+     * premieres::DAYS (new), its reading published (voice), or a copy on the shelf for two years that nobody took home in
+     * them (rescued).
+     *
+     * @param \stdClass $library
+     * @param string $special new, voice or rescued.
+     * @param string $field The record id, as alias.id.
+     * @param string $name Prefix of the aliases and parameters.
+     * @param int $now
+     * @return array SQL and its parameters.
+     */
+    public static function condition(\stdClass $library, string $special, string $field, string $name, int $now): array {
+        $t = self::T;
+        if ($special === 'voice') {
+            return ["$field IN (SELECT {$name}d.recordid FROM {{$t}digital} {$name}d
+                                 WHERE {$name}d.kind = 'voice' AND {$name}d.status = 'published')", []];
+        }
+        $items = "SELECT {$name}i.recordid
+                    FROM {{$t}item} {$name}i
+                    JOIN {{$t}library} {$name}b ON {$name}b.id = {$name}i.libraryid
+                   WHERE {$name}b.entityid = :{$name}e";
+        if ($special === 'new') {
+            return ["$field IN ($items AND {$name}i.status <> 'withdrawn' AND {$name}i.timeacquired >= :{$name}f)",
+                [$name . 'e' => $library->entityid, $name . 'f' => $now - premieres::DAYS * DAYSECS]];
+        }
+        return ["$field IN ($items AND {$name}i.status = 'available' AND {$name}i.timeacquired < :{$name}o)
+                 AND NOT EXISTS (SELECT 1
+                                   FROM {{$t}loan} {$name}ln
+                                   JOIN {{$t}item} {$name}x ON {$name}x.id = {$name}ln.itemid
+                                  WHERE {$name}x.recordid = $field AND {$name}ln.timeloaned >= :{$name}s)",
+            [$name . 'e' => $library->entityid, $name . 'o' => $now - self::RESCUED, $name . 's' => $now - self::RESCUED]];
+    }
+
+    /**
+     * The nine places of a challenge that is a cartilla, each a square or '' while it is a draft; [] for a challenge of
+     * so many books.
      *
      * @param \stdClass $quest
      * @return string[]
      */
     public static function squares(\stdClass $quest): array {
         $squares = json_decode((string) ($quest->squares ?? ''), true);
-        return is_array($squares) ? array_values(array_slice(array_filter(
-            array_map('strval', $squares),
-            fn($spec) => self::valid($spec)
-        ), 0, self::SIZE)) : [];
+        if (!is_array($squares) || !$squares) {
+            return [];
+        }
+        $places = [];
+        for ($at = 0; $at < self::SIZE; $at++) {
+            $spec = (string) ($squares[$at] ?? '');
+            $places[] = self::valid($spec) ? $spec : '';
+        }
+        return $places;
+    }
+
+    /**
+     * Whether a cartilla has its nine squares: a draft does not show on any card.
+     *
+     * @param \stdClass $quest
+     * @return bool
+     */
+    public static function complete(\stdClass $quest): bool {
+        $squares = self::squares($quest);
+        return $squares && !in_array('', $squares, true);
+    }
+
+    /**
+     * The squares still missing, put in their places: varied (a corner, a genre, one of every library in turn), only
+     * squares with ten books or more, none twice.
+     *
+     * @param string[] $squares The nine places.
+     * @param array[] $options As options() gives them.
+     * @return string[]
+     */
+    public static function fill(array $squares, array $options): array {
+        $groups = ['corners' => [], 'genres' => [], 'every' => []];
+        foreach ($options as $option) {
+            if ($option['count'] >= 10 && !in_array($option['spec'], $squares, true)) {
+                $groups[$option['group']][] = $option['spec'];
+            }
+        }
+        foreach ($groups as $group => $specs) {
+            shuffle($groups[$group]);
+        }
+        $order = ['corners', 'genres', 'every'];
+        $turn = 0;
+        foreach ($squares as $at => $spec) {
+            for ($try = 0; $spec === '' && $try < 3; $try++, $turn++) {
+                $spec = (string) array_shift($groups[$order[$turn % 3]]);
+            }
+            $squares[$at] = $spec;
+        }
+        return $squares;
+    }
+
+    /**
+     * Whether a cartilla is the stage's game: not in Infantil, where the flower is.
+     *
+     * @param string $stage
+     * @return bool
+     */
+    public static function infant(string $stage): bool {
+        return (bool) preg_match(self::INFANT, $stage);
     }
 
     /**
@@ -106,7 +223,7 @@ final class cartilla {
     public static function card(\stdClass $quest, \stdClass $library, int $readerid, int $now, callable $str): array {
         global $DB;
         $squares = self::squares($quest);
-        $labels = array_column(self::options($library, $str), 'label', 'spec');
+        $labels = self::labels($library, $str);
         [$from, $params] = quests::loans_sql($quest, $now);
         $params += ['creader' => $readerid];
         $loans = $DB->get_records_sql(
@@ -121,14 +238,15 @@ final class cartilla {
         // Which loans fit each square.
         $fits = [];
         foreach ($squares as $at => $spec) {
-            $fits[$at] = $loans ? self::fitting($spec, $library, array_keys($loans)) : [];
+            $fits[$at] = $loans && $spec !== '' ? self::fitting($spec, $library, array_keys($loans)) : [];
         }
         $by = self::match($fits, array_keys($loans));
         $card = [];
         foreach ($squares as $at => $spec) {
             $loanid = $by[$at] ?? null;
             $card[] = ['spec' => $spec, 'label' => $labels[$spec] ?? $spec, 'filled' => $loanid !== null,
-                'title' => $loanid !== null ? (string) $loans[$loanid]->title : ''];
+                'title' => $loanid !== null ? (string) $loans[$loanid]->title : '',
+                'time' => $loanid !== null ? (int) $loans[$loanid]->timeloaned : 0];
         }
         $filled = count(array_filter($card, fn($square) => $square['filled']));
         $lines = count(self::SIZE === count($card) ? array_filter(self::LINES, fn($line) => count(array_filter(
@@ -136,6 +254,168 @@ final class cartilla {
             fn($i) => $card[$i]['filled']
         )) === 3) : []);
         return ['squares' => $card, 'filled' => $filled, 'lines' => $lines, 'full' => $card && $filled === count($card)];
+    }
+
+    /**
+     * A cartilla on a reader's card, as the page draws it: the nine squares (the drawing and the word; when filled, the
+     * book and the day, as the desk's date stamp; when not, a link to the books that fill it), its lines, and what
+     * Mainumby says when there is something to celebrate. Before joining, the drawings lit and nothing filled.
+     *
+     * @param \stdClass $quest
+     * @param \stdClass $library The challenge's library.
+     * @param \stdClass $reader
+     * @param int $now
+     * @param callable $str
+     * @return array
+     */
+    public static function view(\stdClass $quest, \stdClass $library, \stdClass $reader, int $now, callable $str): array {
+        $joined = !empty($quest->joinedid);
+        $card = self::card($quest, $library, (int) $reader->id, $now, $str);
+        quests::note_done($quest, $card['filled'], $now);
+        $entityid = (int) $library->entityid;
+        $art = self::options_art($library);
+        $squares = [];
+        foreach ($card['squares'] as $at => $square) {
+            $filled = $joined && $square['filled'];
+            $day = $filled ? zones::date($square['time'], '%e %b', $entityid) : '';
+            $squares[] = ['label' => $square['label'], 'art' => $art[$square['spec']] ?? null, 'filled' => $filled,
+                'title' => $filled ? format_string($square['title'], true, ['escape' => false]) : '', 'day' => $day,
+                'url' => $filled ? '' : self::link($library, $square['spec']),
+                'said' => $filled ? $str('cartillasaidfilled', (object) ['title' => format_string(
+                    $square['title'],
+                    true,
+                    ['escape' => false]
+                ), 'day' => $day]) : $str('cartillasaidempty')];
+        }
+        $lines = [];
+        foreach (self::LINES as $i => $line) {
+            if ($joined && count(array_filter($line, fn($at) => $squares[$at]['filled'])) === 3) {
+                $lines[] = ['name' => ['f0', 'f1', 'f2', 'c0', 'c1', 'c2'][$i]];
+            }
+        }
+        $filled = $joined ? $card['filled'] : 0;
+        $full = $joined && $card['full'];
+        $left = self::SIZE - $filled;
+        $cheer = null;
+        if ($full) {
+            $cheer = ['cartillacheerfull', []];
+        } else if (count($lines) === 1) {
+            $cheer = ['cartillacheerline', ['left' => $left]];
+        } else if ($lines) {
+            $cheer = [$left === 1 ? 'cartillacheerlinesone' : 'cartillacheerlines', ['lines' => count($lines), 'left' => $left]];
+        }
+        $said = $cheer ? characters::say($entityid, 'herald', $cheer[0], $cheer[1], 'celebra') : null;
+        $days = (int) ceil(((int) $quest->timeend - $now) / DAYSECS);
+        $when = $str('questwhen', (object) ['from' => zones::date((int) $quest->timestart, 'strftimedate', $entityid),
+            'to' => zones::date((int) $quest->timeend, 'strftimedate', $entityid)]);
+        if ($full && !empty($quest->timedone)) {
+            $when = $str('cartillafullon', zones::date((int) $quest->timedone, 'strftimedate', $entityid));
+        } else if ($days >= 1 && (int) $quest->timestart <= $now) {
+            $when .= ' · ' . ($days === 1 ? $str('cartillalastday') : $str('cartillaleft', $days));
+        }
+        return [
+            'cartilla' => true,
+            'squares' => $squares,
+            'lines' => $lines,
+            'full' => $full,
+            'library' => format_string($library->name, true, ['escape' => false]),
+            'when' => $when,
+            'count' => $joined ? $str('cartillacount', $filled) . ($lines ? ' · ' . (count($lines) === 1
+                ? $str('cartillaoneline') : $str('cartillalines', count($lines))) : '') : '',
+            'cheer' => $cheer ? ['text' => $said['text'] ?? get_string($cheer[0], 'local_oksigeniaayvurenda', (object) $cheer[1]),
+                'figure' => $said['figure'] ?? null] : null,
+        ];
+    }
+
+    /**
+     * Where the books that fill a square are: its corner or genre on the shelves, the books with a voice, or a list of
+     * the new ones or of those waiting to be rescued.
+     *
+     * @param \stdClass $library
+     * @param string $spec
+     * @return string
+     */
+    public static function link(\stdClass $library, string $spec): string {
+        $params = ['library' => $library->slug];
+        if ($spec === 'voice') {
+            $script = 'ayvurande.php';
+        } else if (in_array($spec, self::SPECIAL, true)) {
+            $script = 'search.php';
+            $params['square'] = $spec;
+        } else {
+            $script = 'search.php';
+            $params['corner'] = substr($spec, strpos($spec, ':') + 1);
+        }
+        return (new \moodle_url('/local/oksigeniaayvurenda/' . $script, $params))->out(false);
+    }
+
+    /**
+     * The drawing of each square a library can carry, without counting its books.
+     *
+     * @param \stdClass $library
+     * @return array Spec => URL or null.
+     */
+    private static function options_art(\stdClass $library): array {
+        $art = [];
+        foreach (catalogue::corners($library, true, true) as $corner) {
+            $art[(!empty($corner['genre']) ? 'genre:' : 'corner:') . $corner['code']] = !empty($corner['genre'])
+                ? screens::art('genero-' . ($corner['kind'] ?? '')) : screens::art('rincon-' . $corner['code']);
+        }
+        foreach (self::SPECIAL as $special) {
+            $art[$special] = screens::art('casilla-' . $special);
+        }
+        return $art;
+    }
+
+    /**
+     * The name of each square a library can carry, without counting its books.
+     *
+     * @param \stdClass $library
+     * @param callable $str
+     * @return string[] Spec => label.
+     */
+    public static function labels(\stdClass $library, callable $str): array {
+        $labels = [];
+        foreach (catalogue::corners($library, true, true) as $corner) {
+            $labels[(!empty($corner['genre']) ? 'genre:' : 'corner:') . $corner['code']] = (string) $corner['label'];
+        }
+        foreach (self::SPECIAL as $special) {
+            $labels[$special] = $str('cartilla' . $special);
+        }
+        return $labels;
+    }
+
+    /**
+     * How a cartilla goes, all added up, never with names: who plays, the lines and full cards, and the square that is
+     * filled the least.
+     *
+     * @param \stdClass $quest
+     * @param \stdClass $library
+     * @param int $now
+     * @param callable $str
+     * @return array players, lines, full, hardest (label and count) or null.
+     */
+    public static function stats(\stdClass $quest, \stdClass $library, int $now, callable $str): array {
+        global $DB;
+        $readers = $DB->get_fieldset_select(self::T . 'questreader', 'readerid', 'questid = :questid', ['questid' => $quest->id]);
+        $lines = 0;
+        $full = 0;
+        $filled = array_fill(0, self::SIZE, 0);
+        $squares = self::squares($quest);
+        foreach ($readers as $readerid) {
+            $card = self::card($quest, $library, (int) $readerid, $now, $str);
+            $lines += $card['lines'];
+            $full += $card['full'] ? 1 : 0;
+            foreach ($card['squares'] as $at => $square) {
+                $filled[$at] += $square['filled'] ? 1 : 0;
+            }
+        }
+        $hardest = null;
+        if ($readers && $squares) {
+            $at = array_search(min($filled), $filled, true);
+            $hardest = ['label' => self::labels($library, $str)[$squares[$at]] ?? $squares[$at], 'count' => $filled[$at]];
+        }
+        return ['players' => count($readers), 'lines' => $lines, 'full' => $full, 'hardest' => $hardest];
     }
 
     /**
@@ -167,26 +447,14 @@ final class cartilla {
                                                 AND o.timeloaned >= l.timeloaned - :rescued)
                           AND i.timeacquired IS NOT NULL AND i.timeacquired < l.timeloaned - :old";
             $params += ['rescued' => self::RESCUED, 'old' => self::RESCUED];
-        } else if (str_starts_with($spec, 'corner:')) {
-            [$class, $classparams] = catalogue::class_condition('ca.code', substr($spec, 7), 'cc');
-            $sql = "$base AND i.recordid IN (SELECT cra.recordid
-                                              FROM {" . self::T . "recauth} cra
-                                              JOIN {" . self::T . "authority} ca ON ca.id = cra.authorityid
-                                             WHERE ca.entityid = :centity AND ca.kind = 'class' AND $class)";
-            $params += $classparams + ['centity' => $library->entityid];
         } else {
-            $genre = null;
-            foreach (genres::of($library) as $one) {
-                if ('genre:' . $one['code'] === $spec) {
-                    $genre = $one;
-                }
-            }
-            if (!$genre) {
+            // A corner or a genre as its shelf has it: a book of a genre is in the genre, not in the corner of stories.
+            $condition = catalogue::corner_condition($library, substr($spec, strpos($spec, ':') + 1), 'i.recordid', 'cc');
+            if (!$condition) {
                 return [];
             }
-            [$condition, $genreparams] = genres::condition($library, $genre, 'i.recordid', 'cg');
-            $sql = "$base AND $condition";
-            $params += $genreparams;
+            $sql = "$base AND {$condition[0]}";
+            $params += $condition[1];
         }
         return array_map('intval', $DB->get_fieldset_sql($sql, $params));
     }
