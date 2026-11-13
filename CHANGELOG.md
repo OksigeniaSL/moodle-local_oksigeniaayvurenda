@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.255.0 (2026-11-13)
+
+- The clock of the class challenge (P5 of the review: it had a deadline nobody saw): under its marks, how many days are
+  left and the day the term ends; in coral in its last week, and «the last day of the term» on it. On «My class», for
+  the tutor and the pupils, and wherever the challenge shows.
+- 0.254.0 did not go out: the test of the news letter still failed now and then (it counts copies by when they were
+  made here, and the test only fixed when they came in); now both are fixed. Its premieres come with this one.
+
 ## 0.254.0 (2026-11-13)
 
 - «Premieres» (P2 of the review): a copy that came into the library in the last four months and nobody had taken

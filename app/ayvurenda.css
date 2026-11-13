@@ -9939,3 +9939,19 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     font-size: .75rem;
     font-weight: 700;
 }
+
+/* The clock of the class challenge (P5): the days left in the term, coral in its last week. */
+.ayv .ayv-challenge-clock {
+    display: block;
+    margin-top: 4px;
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.ayv .ayv-challenge-clock-prisa {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #b9452d;
+    color: #fff;
+}

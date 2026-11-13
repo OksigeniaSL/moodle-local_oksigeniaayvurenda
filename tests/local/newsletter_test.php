@@ -75,9 +75,12 @@ final class newsletter_test extends \advanced_testcase {
         $now = time();
         $novel = $gen->create_record(['entityid' => $entityid, 'title' => 'El faro dormido']);
         $textbook = $gen->create_record(['entityid' => $entityid, 'title' => 'Matemáticas 1']);
-        // A minute before now: made at the next second, they would be news again a week later.
-        $gen->create_item(['libraryid' => $library->id, 'recordid' => $novel->id, 'timeacquired' => $now - 60]);
-        $gen->create_item(['libraryid' => $bank->id, 'recordid' => $textbook->id, 'timeacquired' => $now - 60]);
+        // A minute before now (the letter counts copies by when they were made here): made at the next second, they would
+        // be news again a week later.
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $novel->id, 'timeacquired' => $now - 60,
+            'timecreated' => $now - 60]);
+        $gen->create_item(['libraryid' => $bank->id, 'recordid' => $textbook->id, 'timeacquired' => $now - 60,
+            'timecreated' => $now - 60]);
         $sink = $this->redirectMessages();
         $this->assertSame(['subscribers' => 0, 'sent' => 0], newsletter::run($now));
         newsletter::subscribe((int) $user->id, true, $entityid);

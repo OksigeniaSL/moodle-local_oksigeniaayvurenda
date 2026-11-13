@@ -435,12 +435,27 @@ final class challenges {
         }
         $left = $challenge->kind === 'everyone' && !$challenge->complete && $challenge->target > $challenge->done
             ? $str('challengeeveryoneleft', $challenge->target - $challenge->done) : '';
+        // Its clock, in sight (P5 of the review: the challenge had a deadline nobody saw): the days left in the term.
+        $clock = '';
+        $urgent = false;
+        if (!$challenge->complete) {
+            $now = time();
+            $end = self::bounds(years::around($entityid, $now), (int) $challenge->term)[1];
+            $days = (int) ceil(($end - $now) / DAYSECS);
+            if ($days > 0) {
+                $clock = $days === 1 ? $str('challengeclockone') : $str('challengeclock', (object) ['days' => $days,
+                    'date' => zones::date($end - 1, 'strftimedaydate', $entityid)]);
+                $urgent = $days <= 7;
+            }
+        }
         return [
             'heading' => $staff ? $str('challengeterm', $challenge->term) : $str('challengeheading'),
             'text' => $text,
             'marks' => $marks,
             'progresslabel' => $str('challengeprogress', (object) ['done' => $challenge->done, 'target' => $challenge->target]),
             'left' => $left,
+            'clock' => $clock,
+            'urgent' => $urgent,
             'complete' => $challenge->complete,
             'listen' => null,
             // The herald celebrates for two weeks, not every day until the next term (D5).

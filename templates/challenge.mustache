@@ -18,7 +18,7 @@
     @template local_oksigeniaayvurenda/challenge
     The challenge of a class: what it is, its marks lit, how many are still to come (never who), and the herald when met.
     Context variables required for this template:
-    * heading, text, progresslabel, left - texts
+    * heading, text, progresslabel, left, clock - texts (clock: the days left in the term, urgent in its last week)
     * marks - one per step (lit)
     * complete - whether it is met
     * herald - what the herald says when it is met (see local_oksigeniaayvurenda/bubble)
@@ -30,6 +30,8 @@
         "marks": [{"lit": true}, {"lit": true}, {"lit": false}],
         "progresslabel": "2 de 3",
         "left": "",
+        "clock": "Quedan 12 días: el trimestre acaba el viernes, 18 de diciembre.",
+        "urgent": false,
         "complete": false,
         "herald": null,
         "meton": ""
@@ -40,6 +42,7 @@
     <span class="ayv-challenge-text">{{text}}{{#listen}} {{> local_oksigeniaayvurenda/listen}}{{/listen}}</span>
     <span class="ayv-challenge-marks" role="img" aria-label="{{progresslabel}}">{{#marks}}<span class="ayv-mark{{#lit}} ayv-mark-lit{{/lit}}"></span>{{/marks}}</span>
     {{#left}}<span class="ayv-field-hint">{{left}}</span>{{/left}}
+    {{#clock}}<span class="ayv-challenge-clock{{#urgent}} ayv-challenge-clock-prisa{{/urgent}}">{{clock}}</span>{{/clock}}
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
     {{#meton}}<span class="ayv-field-hint">{{meton}}</span>{{/meton}}
 </div>
