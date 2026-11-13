@@ -55,7 +55,7 @@
         // On the whiteboard, the island centre-right and a little further, clear of the sign and the herald (Jujol).
         // There the herald's bubble covers the front beach, so the ship waits behind the island and sails away to the right.
         var board = !!figure.closest('.ayv-bc-pizarra');
-        var frame = board ? {x: 0.1, y: 0.07, zoom: 1.18} : null;
+        var frame = board ? {x: 0.14, y: 0.07, zoom: 1.24} : null;
         var berth = board ? {x: 2.0, z: -1.75, yaw: 0.44, offing: {dx: 3.4, dz: -1.6}} : null;
         var island = window.AYVIsland3D.mount(stage, {met: seen.met, everyone: seen.everyone, boat: seen.boat,
             ship: state.ship || '', shipmet: !!state.shipmet, assets: assets, frame: frame, berth: berth});

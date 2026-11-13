@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.264.1 (2026-11-13)
+
+- Jujol's review of the board: the sign and the herald's bubble are opaque paper (the palm showed through them), the
+  island stands a little further right and further away, so what grows is seen whole, and there is room below the
+  challenge's cards.
+- The day the ship sails says its date when it is more than a week away («on 22 December»), not a weekday that read
+  as the next one.
+
 ## 0.264.0 (2026-11-13)
 
 - «The ship of the term» (P5 of the review of 12 November), from Jujol's mock-ups and Gaudí's ship.

@@ -12495,7 +12495,8 @@ html.ayv-bc-abierta body {
 /* The board's words sit on paper, so they read over the sea and over the island in any light. */
 .ayv-bc-papel {
     border-radius: calc(var(--u) * 1.6);
-    background: rgba(251, 246, 236, .94);
+    /* Opaque: with the live island, what passes under the paper (the palm) showed through it. */
+    background: #fbf6ec;
     box-shadow: 0 calc(var(--u) * .8) calc(var(--u) * 2.4) calc(var(--u) * -1) rgba(10, 40, 40, .55);
 }
 
@@ -12684,7 +12685,7 @@ html.ayv-bc-abierta body {
     bottom: calc(var(--u) * 2);
     left: calc(var(--u) * -1.8);
     border-top: calc(var(--u) * 1.4) solid transparent;
-    border-right: calc(var(--u) * 2) solid rgba(251, 246, 236, .94);
+    border-right: calc(var(--u) * 2) solid #fbf6ec;
     border-bottom: calc(var(--u) * 1.4) solid transparent;
 }
 
@@ -12730,12 +12731,12 @@ html.ayv-bc-abierta body {
 /* The words of the board in dark: the island keeps its day (it is the class's picture), the papers go to the night. */
 html[data-bs-theme="dark"] .ayv-bc-papel,
 html[data-bs-theme="dark"] .ayv-bc-mando {
-    background: rgba(18, 36, 34, .94);
+    background: #122422;
     color: #ece4d4;
 }
 
 html[data-bs-theme="dark"] .ayv-bc-bocadillo::before {
-    border-right-color: rgba(18, 36, 34, .94);
+    border-right-color: #122422;
 }
 
 html[data-bs-theme="dark"] .ayv-bc-banderin {
@@ -12819,7 +12820,7 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr));
     gap: .9rem;
-    margin: .4rem 0 0;
+    margin: .4rem 0 2.2rem;
     padding: 0;
     list-style: none;
 }

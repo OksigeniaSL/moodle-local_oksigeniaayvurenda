@@ -161,6 +161,22 @@ final class challenges {
     }
 
     /**
+     * The day a ship sails, as a sentence says it: the weekday in its last week («el martes», or «el martes 22» on the
+     * board), the date when it is further off («el 22 de diciembre»), so a Tuesday weeks away never reads as the next.
+     *
+     * @param array $voyage As voyage() gives it.
+     * @param int $entityid
+     * @param bool $number The day of the month after the weekday.
+     * @return string
+     */
+    private static function sailday(array $voyage, int $entityid, bool $number): string {
+        if ($voyage['days'] > 7) {
+            return zones::date($voyage['end'] - 1, 'strftimedateshort', $entityid);
+        }
+        return trim(preg_replace('/\s+/', ' ', zones::date($voyage['end'] - 1, $number ? '%A %e' : '%A', $entityid)));
+    }
+
+    /**
      * How far a class is, in words: «5 of 6 corners», «18 of 25», «12 of 20 books with their note».
      *
      * @param \stdClass $challenge
@@ -191,7 +207,7 @@ final class challenges {
         }
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $state = $voyage['state'];
-        $day = zones::date($voyage['end'] - 1, '%A %e', $entityid);
+        $day = self::sailday($voyage, $entityid, true);
         $text = match ($challenge->kind) {
             'corners' => $str('challengecorners', $challenge->target),
             'notes' => $str('challengenotes', $challenge->target),
@@ -242,7 +258,7 @@ final class challenges {
         }
         $state = $voyage['state'];
         $a = (object) ['march' => s(self::march($challenge)), 'days' => $voyage['days'],
-            'day' => s(zones::date($voyage['end'] - 1, '%A', $entityid))];
+            'day' => s(self::sailday($voyage, $entityid, false))];
         $key = match ($state) {
             'quedan' => 'cardshipleft',
             'ultima' => 'cardshipsoon',

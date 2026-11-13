@@ -161,7 +161,15 @@ final class challenges_test extends \advanced_testcase {
         $challenge->complete = true;
         $board = challenges::board($challenge, '2.º B', $entityid, $end - 4 * DAYSECS + HOURSECS);
         $this->assertSame(['hecho', null, $str('boardmet')], [$board['state'], $board['days'], $board['phrase']]);
-        $this->assertSame($str('boardsailson', zones::date($end - 1, '%A %e', $entityid)), $board['small']);
+        $this->assertSame(
+            $str('boardsailson', trim(preg_replace('/\s+/', ' ', zones::date($end - 1, '%A %e', $entityid)))),
+            $board['small']
+        );
+        // Weeks before, the date, not a weekday that would read as the next one.
+        $this->assertSame(
+            $str('boardsailson', zones::date($end - 1, 'strftimedateshort', $entityid)),
+            challenges::board($challenge, '2.º B', $entityid, $end - 20 * DAYSECS)['small']
+        );
         $this->assertSame(
             $str('cardshipmet', (object) ['march' => '', 'days' => 4, 'day' => zones::date($end - 1, '%A', $entityid)]),
             challenges::card_line($challenge, $entityid, $end - 4 * DAYSECS + HOURSECS)['line']
