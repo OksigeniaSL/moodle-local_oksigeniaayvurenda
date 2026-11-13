@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.254.0 (2026-11-13)
+
+- «Premieres» (P2 of the review): a copy that came into the library in the last four months and nobody had taken
+  home yet is premiered by its first reader. The desk says so («and they premiere it: nobody had taken it home») with
+  a word from the herald, and the album of their card marks it («You premiered it»). Read from the loans themselves;
+  a copy without the day it came in (an imported catalogue without it) is not new.
+
 ## 0.253.0 (2026-11-13)
 
 - «Take it home» (P1 of the review), with Gaudí's art (art 0.1.64): the hidden book of the visit is a game now. It

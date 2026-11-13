@@ -68,7 +68,7 @@ final class garden {
      *
      * @param \stdClass $reader
      * @param int|null $now
-     * @return array year, flower, books (id, title, cover, note), past (year name, stage, the reader's group then and how
+     * @return array year, flower, books (id, title, cover, note, premiere), past (year name, stage, the reader's group then and how
      *     many challenges that class met).
      */
     public static function album(\stdClass $reader, ?int $now = null): array {
@@ -83,8 +83,11 @@ final class garden {
             }
         }
         $covers = covers::urls(array_keys($books));
+        // The ones they premiered: the first to take home a new copy (P2).
+        $premiered = array_flip(premieres::of((int) $reader->id, (int) $year->id));
         foreach ($books as $id => $book) {
             $books[$id]['cover'] = $covers[$id] ?? null;
+            $books[$id]['premiere'] = isset($premiered[$id]);
         }
         $past = [];
         $years = $DB->get_records_sql(

@@ -33,7 +33,7 @@
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "detail": "Última visita: el martes"}],
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
                    "sky": false, "haschoices": false, "choosefirst": false, "choices": [], "mine": false,
-                   "herald": null, "hasbooks": true, "books": [{"title": "El faro dormido", "cover": null}], "haspast": false, "past": [],
+                   "herald": null, "hasbooks": true, "albumpremiere": "Lo estrenaste", "books": [{"title": "El faro dormido", "cover": null, "premiere": true}], "haspast": false, "past": [],
                    "hasclassgarden": false, "classisland": null, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
                    "hascromos": true, "cromosheading": "Tus cromos", "cromoscount": "1 de 2",
                    "cromos": [{"name": "Ciencias", "art": "app/emblema.svg", "won": true, "state": "3 de octubre",
@@ -114,6 +114,7 @@
     <ul class="ayv-album">
     {{#books}}
         <li class="ayv-album-book">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}{{^cover}}<span class="ayv-album-spine">{{title}}</span>{{/cover}}
+            {{#premiere}}<span class="ayv-album-estreno">{{albumpremiere}}</span>{{/premiere}}
             <span class="ayv-album-title">{{title}}</span></li>
     {{/books}}
     </ul>

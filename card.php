@@ -366,6 +366,7 @@ $data = [
     'sesskey' => sesskey(),
     'lookheading' => $str('cardlookheading'),
     'booksheading' => $str('cardbooks'),
+    'albumpremiere' => $str('albumpremiere'),
     // The empty album, told to Infantil as a plate before dinner (jue-humor H53).
     'nobooks' => $str($library && \local_oksigeniaayvurenda\local\characters::band((int) $library->entityid) === 'inf'
         ? 'cardnobooksinf' : 'cardnobooks'),

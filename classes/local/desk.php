@@ -1416,6 +1416,14 @@ final class desk {
             $message = 'desklentfound';
             $extra['found'] = true;
             $extra['herald'] = $this->herald_word('deskheraldfound', ['title' => $a->title]) ?? ($extra['herald'] ?? null);
+        } else if (
+            !$fulfilled && !$reserve
+                && premieres::premiered((int) $item->id, isset($item->timeacquired) ? (int) $item->timeacquired : null, $this->now)
+        ) {
+            // A new copy nobody had taken home: this reader premieres it (P2).
+            $message = 'desklentpremiere';
+            $extra['premiere'] = true;
+            $extra['herald'] = $this->herald_word('deskheraldpremiere', ['title' => $a->title]) ?? ($extra['herald'] ?? null);
         }
         return $this->answer('lent', 'ok', $message, $a, $extra);
     }
