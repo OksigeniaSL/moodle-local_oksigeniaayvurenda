@@ -131,12 +131,11 @@ $groups = [
 ];
 $stagelist = holds::stages($entityid, $now);
 if ($stagelist && ($settings['online'] || $settings['renewonline'])) {
-    $groups[] = gestures::group($str('holdsstageslabel'), [], [], gestures::stages(
-        $form,
-        $settings['stages'],
-        $stagelist,
-        $str
-    ));
+    // The stages are for what is done online: reserving, renewing, or both.
+    $label = $settings['online'] && $settings['renewonline'] ? 'holdsstageslabel'
+        : ($settings['online'] ? 'holdsstagesreserve' : 'holdsstagesrenew');
+    $chips = gestures::stages($form, $settings['stages'], $stagelist, $str);
+    $groups[] = gestures::group($str($label), [], [], $chips);
 }
 $card = gestures::card(
     'ayv-nr-reservas',

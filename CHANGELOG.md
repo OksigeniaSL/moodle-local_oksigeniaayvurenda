@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.250.0 (2026-11-13)
+
+- Purchases and self-service, from Jujol's mock-ups, the last two of the second round. Purchases: what is spent this
+  year, against the budget in a bar, and the budget with «−» and «+» in steps of 50 (down to nothing, only the count of
+  what is spent), the currency folded; whether readers ask for books, a light, and which stages, as chips; then the
+  tabs and «Add a book» as before. Self-service: each post drawn as a stand with its name and when it was last used,
+  and folded on it, undoing its last day and taking it away; a dashed post to make another, with where it is and what it
+  is (a tablet or computer, or a machine) as chips; who may use them and whether books are returned at them, as a card.
+  Each gesture is kept at once and back to its card; the sheets and their «Change» are gone. Their guided helps follow
+  the new screens.
+- Reservations, from Jujol's look at them: the stages say who reserves online, who renews online, or both, as what is
+  on.
+- The currency and the dates of a setting card are sent for its own card (the currency of the budget went to the late
+  books).
+- 0.249.0 did not go out: a test of the news letter failed when the clock passed a second while it ran (now fixed).
+  Its reservations and voices come with this one.
+
 ## 0.249.0 (2026-11-13)
 
 - Reservations and the voices of the readers, from Jujol's mock-ups: their settings are cards with their sentence on top

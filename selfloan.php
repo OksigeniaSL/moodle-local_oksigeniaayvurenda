@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\gestures;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\selfloan;
 use local_oksigeniaayvurenda\local\shell;
@@ -53,6 +54,19 @@ $notice = '';
 $error = '';
 $address = '';
 $machine = false;
+if ($manage && optional_param('set', '', PARAM_ALPHA) === 'self' && data_submitted() && confirm_sesskey()) {
+    // Who may use the posts and whether they take books back: each gesture only what it changes.
+    $settings = selfloan::settings($library);
+    if (($returns = gestures::number('returns')) !== null) {
+        $settings['returns'] = (bool) $returns;
+    }
+    $stages = gestures::stage_touched($settings['stages'], holds::stages((int) $library->entityid, $now));
+    if ($stages !== null) {
+        $settings['stages'] = $stages;
+    }
+    selfloan::save_settings($library, $settings);
+    redirect(new moodle_url($PAGE->url, ['saved' => 'ayv-nr-quien'], 'ayv-nr-quien'));
+}
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     if ($do === 'undo') {
@@ -80,12 +94,6 @@ if (data_submitted() && confirm_sesskey()) {
     } else if ($manage && $do === 'undoday') {
         $count = selfloan::undo_since($library, required_param('post', PARAM_INT), $now - DAYSECS, (int) $USER->id);
         $notice = $str('selfundoneday', $count);
-    } else if ($manage && $do === 'settings') {
-        selfloan::save_settings($library, [
-            'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
-            'returns' => optional_param('returns', 0, PARAM_BOOL),
-        ]);
-        $notice = $str('selfsaved');
     }
 }
 $settings = selfloan::settings($library);
@@ -115,18 +123,36 @@ $data = [
     'qr' => $address !== '' ? 'data:image/png;base64,' . base64_encode((new core_qrcode($address))->getBarcodePngData(4, 4)) : '',
     'hasposts' => (bool) $posts,
     'posts' => $posts,
-    'who' => $settings['stages'] ? $str('selfwhostages', implode(', ', $settings['stages'])) : $str('selfwhoall'),
-    'returnsword' => $str($settings['returns'] ? 'selfreturnson' : 'selfreturnsoff'),
-    'returnson' => $settings['returns'],
-    'allstages' => !$settings['stages'],
-    'hasstages' => (bool) $stages,
-    'stages' => array_map(fn($s) => ['name' => $s, 'chosen' => in_array($s, $settings['stages'], true)], $stages),
+    'savedword' => $str('hiwsaved'),
+    'settings' => $manage ? [gestures::card(
+        'ayv-nr-quien',
+        'self',
+        $str('selfwhoheading'),
+        ($settings['stages'] ? $str('selfwhostages', implode(', ', $settings['stages'])) : $str('selfwhoall')) . ' '
+            . $str($settings['returns'] ? 'selfreturnson' : 'selfreturnsoff'),
+        optional_param('saved', '', PARAM_ALPHANUMEXT) === 'ayv-nr-quien',
+        array_merge(
+            [gestures::group('', [], [gestures::lamp(
+                'ayv-nr-quien-f',
+                'returns',
+                $settings['returns'],
+                $str('selfreturnslight')
+            )], [])],
+            $stages ? [gestures::group($str('selfstages'), [], [], gestures::stages(
+                'ayv-nr-quien-f',
+                $settings['stages'],
+                $stages,
+                $str
+            ))] : []
+        )
+    )] : [],
     'hasrows' => (bool) $rows,
     'rows' => $rows,
     'manyrows' => count($rows) >= 100,
 ];
 foreach (
-    ['selfnew', 'selfnewintro', 'selfnamelabel', 'selfnewname', 'selfcreate', 'selfpostsheading', 'selfremove',
+    ['selfpostssub', 'selfnewtile', 'selfremovepost', 'selfremoveyes', 'selfkindlabel', 'selfkindscreen', 'selfkindmachine',
+        'selfnew', 'selfnewintro', 'selfnamelabel', 'selfnewname', 'selfcreate', 'selfpostsheading', 'selfremove',
         'selfcreatedheading', 'selfcreatedhint', 'selfaddress', 'selfcopy', 'selfmachinefield', 'selfmachinehint',
         'selfmachinetag', 'selfsiplink',
         'selfwhoheading', 'selfchange', 'selfstages',

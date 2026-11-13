@@ -39,7 +39,7 @@ final class gestures {
      * @param string $says
      * @param bool $justsaved
      * @param array[] $groups
-     * @param array $more notes, dates, presets, currency, link, help, text: what some cards carry.
+     * @param array $more notes, dates, presets, currency, link, help, text, bar, action: what some cards carry.
      * @return array
      */
     public static function card(
@@ -53,7 +53,7 @@ final class gestures {
     ): array {
         return ['id' => $id, 'set' => $set, 'title' => $title, 'says' => $says, 'justsaved' => $justsaved, 'groups' => $groups]
             + $more + ['notes' => [], 'dates' => null, 'presets' => null, 'currency' => null, 'link' => null, 'help' => null,
-            'text' => null];
+            'text' => null, 'bar' => null];
     }
 
     /**

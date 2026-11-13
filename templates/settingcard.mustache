@@ -26,7 +26,7 @@
     * action, sesskey, savedword - from the page; a card may carry its own action
     * id, set, title, says, justsaved - the card, its anchor, what its form sends as «set», and its sentence
     * groups - label, steps, lights, chips, haslights, haschips, whole
-    * notes, dates, presets, currency, link, help, text - what some cards carry, or nothing
+    * notes, dates, presets, currency, link, help, text, bar (share, over) - what some cards carry, or nothing
 
     Example context (json):
     {
@@ -41,6 +41,7 @@
                 "label": "Se reserva desde casa"}]}],
         "notes": [{"text": "Vale para todo el centro."}], "dates": null, "presets": null, "currency": null,
         "link": {"lead": "Lo que espera, en", "url": "https://example.com/holds.php", "label": "Reservas"}, "help": null,
+        "bar": {"share": 42, "over": false},
         "text": {"summary": "Escribir uno propio del centro", "open": false, "label": "El texto", "name": "voicetext",
             "value": "", "hint": "En blanco, el de siempre.", "save": "Guardarlo"}
     }
@@ -50,6 +51,7 @@
     <h2 id="{{id}}-t">{{title}}</h2>
     {{#justsaved}}<p class="ayv-cf-guardado-fila"><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
     <p class="ayv-nr-frase">{{says}}</p>
+    {{#bar}}<span class="ayv-nr-barra{{#over}} ayv-nr-barra-pasada{{/over}}" aria-hidden="true"><i style="width: {{share}}%"></i></span>{{/bar}}
     <div class="ayv-nr-gestos">
         {{#groups}}<div class="ayv-nr-grupo{{#whole}} ayv-nr-grupo-entera{{/whole}}">{{#label}}<span class="ayv-cf-rotulo">{{label}}</span>{{/label}}
             {{#steps}}<span class="ayv-cf-paso" role="group" aria-label="{{label}}"><button class="ayv-cf-menos" type="submit" form="{{form}}" name="{{field}}" value="{{less}}" aria-label="{{lesslabel}}"{{#atmin}} disabled{{/atmin}}>−</button><span class="ayv-cf-cifra"><b>{{shown}}</b> {{unit}}</span><button class="ayv-cf-mas" type="submit" form="{{form}}" name="{{field}}" value="{{more}}" aria-label="{{morelabel}}"{{#atmax}} disabled{{/atmax}}>+</button></span>{{/steps}}
@@ -58,7 +60,7 @@
         </div>{{/groups}}
     </div>
     {{#dates}}
-    <form class="ayv-nr-fechas" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="notices"><input type="hidden" name="dates" value="1">
+    <form class="ayv-nr-fechas" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{set}}"><input type="hidden" name="dates" value="1">
         <span class="ayv-cf-rotulo">{{legend}}</span>
         <div class="ayv-nr-gestos">{{#fields}}<label class="ayv-nr-fecha"><span class="ayv-sr">{{label}}</span><input type="date" name="noticedates[]" value="{{value}}"></label>{{/fields}}</div>
         <p class="ayv-cf-nota">{{hint}}</p>
@@ -67,7 +69,7 @@
     {{/dates}}
     {{#currency}}
     <details class="ayv-nr-plegado"><summary>{{summary}}</summary>
-        <form class="ayv-cf-fila" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="late">
+        <form class="ayv-cf-fila" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="set" value="{{set}}">
             <label for="ayv-nr-moneda">{{label}}</label><input id="ayv-nr-moneda" name="currency" list="ayv-nr-monedas" size="8" autocomplete="off">
             <datalist id="ayv-nr-monedas">{{#list}}<option value="{{code}}">{{name}}</option>{{/list}}</datalist>
             <button class="ayv-button" type="submit">{{save}}</button>

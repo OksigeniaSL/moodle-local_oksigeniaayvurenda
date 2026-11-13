@@ -24,6 +24,7 @@
 
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
+use local_oksigeniaayvurenda\local\gestures;
 use local_oksigeniaayvurenda\local\holds;
 use local_oksigeniaayvurenda\local\purchases;
 use local_oksigeniaayvurenda\local\screens;
@@ -53,6 +54,33 @@ $manage = has_capability('local/oksigeniaayvurenda:manage', $context);
 $now = time();
 $notice = '';
 $error = '';
+$set = optional_param('set', '', PARAM_ALPHA);
+if ($set !== '' && data_submitted() && confirm_sesskey()) {
+    // The budget and what readers may ask, each gesture only what it changes; back to its card, which says it is kept.
+    $anchor = 'ayv-nr-gasto';
+    if ($set === 'budget') {
+        $budget = purchases::budget($library, $now);
+        $cents = gestures::number('cents');
+        $currency = \core_text::strtoupper(optional_param('currency', '', PARAM_ALPHA));
+        $currency = array_key_exists($currency, get_string_manager()->get_list_of_currencies()) ? $currency
+            : $budget['currency'];
+        $cents ??= $budget['amount'];
+        // Down to nothing, there is no budget: only the count of what is spent.
+        purchases::save_budget($library, $cents ? number_format($cents / 100, 2, '.', '') : '', $currency, $now);
+    } else if ($set === 'suggest' && $manage) {
+        $settings = purchases::settings($library);
+        if (($on = gestures::number('suggest')) !== null) {
+            $settings['suggest'] = (bool) $on;
+        }
+        $stages = gestures::stage_touched($settings['stages'], holds::stages($entityid, $now));
+        if ($stages !== null) {
+            $settings['stages'] = $stages;
+        }
+        purchases::save_settings($library, $settings);
+        $anchor = 'ayv-nr-piden';
+    }
+    redirect(new moodle_url($PAGE->url, ['saved' => $anchor], $anchor));
+}
 if (data_submitted() && confirm_sesskey()) {
     $do = required_param('do', PARAM_ALPHA);
     $id = optional_param('id', 0, PARAM_INT);
@@ -87,16 +115,6 @@ if (data_submitted() && confirm_sesskey()) {
         }
     } else if ($do === 'received') {
         $notice = purchases::received($library, $id, optional_param('code', '', PARAM_TEXT), $now) ? $str('purchasereceived') : '';
-    } else if ($do === 'budget') {
-        $amount = optional_param('amount', '', PARAM_TEXT);
-        purchases::save_budget($library, $amount, optional_param('currency', 'EUR', PARAM_ALPHA), $now);
-        $notice = $str('purchasebudgetsaved');
-    } else if ($manage && $do === 'settings') {
-        purchases::save_settings($library, [
-            'suggest' => optional_param('suggest', 0, PARAM_BOOL),
-            'stages' => optional_param('allstages', 0, PARAM_BOOL) ? [] : optional_param_array('stages', [], PARAM_TEXT),
-        ]);
-        $notice = $str('purchasesaved');
     }
 }
 $budget = purchases::budget($library, $now);
@@ -199,29 +217,66 @@ if ($tab === 'asked') {
     $data['hasreceived'] = (bool) $data['received'];
     $data['hasdeclined'] = (bool) $data['declined'];
 }
-// The budget and whether readers may ask.
-$data['budgetline'] = $budget['amount'] !== null
-    ? $str('purchasebudgetline', (object) ['spent' => $money($budget['spent']), 'amount' => $money($budget['amount']),
-        'year' => $budget['year']])
-    : $str('purchasebudgetnone', (object) ['spent' => $money($budget['spent']), 'year' => $budget['year']]);
-$data['budgetshare'] = $budget['amount'] ? min(100, (int) round($budget['spent'] * 100 / max(1, $budget['amount']))) : 0;
-$data['hasbudget'] = $budget['amount'] !== null;
-$data['over'] = $budget['amount'] !== null && $budget['spent'] > $budget['amount'];
-$data['amountvalue'] = $budget['amount'] !== null ? number_format($budget['amount'] / 100, 2, '.', '') : '';
+// The budget and what readers may ask, as cards with their gestures in sight.
+$saved = optional_param('saved', '', PARAM_ALPHANUMEXT);
+$amount = $budget['amount'];
+$says = $amount !== null
+    ? $str('purchasebudgetsays', (object) ['spent' => $money($budget['spent']), 'amount' => $money($amount)])
+        . ($budget['spent'] > $amount ? ' ' . $str('purchasebudgetoversays') : '')
+    : $str('purchasebudgetsaysnone', $money($budget['spent']));
+$form = 'ayv-nr-gasto-f';
 $currencies = get_string_manager()->get_list_of_currencies();
-$data['currencies'] = array_map(
-    fn($code, $name) => ['code' => $code, 'name' => $name . ' (' . $code . ')', 'selected' => $code === $budget['currency']],
-    array_keys($currencies),
-    array_values($currencies)
-);
-$settings = purchases::settings($library);
-$stages = holds::stages($entityid, $now);
-$data['suggestline'] = !$settings['suggest'] ? $str('purchasesuggestoff')
-    : ($settings['stages'] ? $str('purchasesuggeststages', implode(', ', $settings['stages'])) : $str('purchasesuggestall'));
-$data['suggeston'] = $settings['suggest'];
-$data['allstages'] = !$settings['stages'];
-$data['hasstages'] = (bool) $stages;
-$data['stages'] = array_map(fn($s) => ['name' => $s, 'chosen' => in_array($s, $settings['stages'], true)], $stages);
+$cards = [gestures::card(
+    'ayv-nr-gasto',
+    'budget',
+    $str('purchasespentin', $budget['year']),
+    $says,
+    $saved === 'ayv-nr-gasto',
+    [gestures::group($str('purchasebudgetfor'), [gestures::step(
+        $form,
+        'cents',
+        $str('purchasebudgetfor'),
+        (int) $amount,
+        0,
+        10000000,
+        5000,
+        $money((int) $amount),
+        '',
+        $str
+    )], [], [])],
+    [
+        'bar' => $amount ? ['share' => min(100, (int) round($budget['spent'] * 100 / max(1, $amount))),
+            'over' => $budget['spent'] > $amount] : null,
+        'notes' => [['text' => $str('purchasebudgetstep', $money(5000))]],
+        'currency' => $amount ? ['summary' => $str('sanctionscurrencynow', $budget['currency']),
+            'label' => $str('purchasefieldcurrency'), 'save' => $str('sourcessave'), 'list' => array_map(
+                fn($code, $name) => ['code' => $code, 'name' => $name],
+                array_keys($currencies),
+                array_values($currencies)
+            )] : null,
+        'action' => $PAGE->url->out(false),
+    ]
+)];
+if ($manage) {
+    $settings = purchases::settings($library);
+    $stages = holds::stages($entityid, $now);
+    $form = 'ayv-nr-piden-f';
+    $groups = [gestures::group(
+        '',
+        [],
+        [gestures::lamp($form, 'suggest', $settings['suggest'], $str('purchasesuggestlight'))],
+        []
+    )];
+    if ($stages && $settings['suggest']) {
+        $chips = gestures::stages($form, $settings['stages'], $stages, $str);
+        $groups[] = gestures::group($str('purchasesuggestwho'), [], [], $chips);
+    }
+    $cards[] = gestures::card('ayv-nr-piden', 'suggest', $str('purchasesuggestheading'), !$settings['suggest']
+        ? $str('purchasesuggestoff') : ($settings['stages'] ? $str('purchasesuggeststages', implode(', ', $settings['stages']))
+        : $str('purchasesuggestall')), $saved === 'ayv-nr-piden', $groups, ['action' => $PAGE->url->out(false)]);
+}
+$data['settings'] = $cards;
+$data['savedword'] = $str('hiwsaved');
 foreach (
     ['purchaseadd', 'purchaseaddintro', 'purchasefieldtitle', 'purchasefieldauthor', 'purchasefieldisbn', 'purchasefieldnote',
         'purchasefieldcopies', 'purchasefieldprice', 'purchasefieldpricehint', 'purchasefieldvendor', 'purchasesave',

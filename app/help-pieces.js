@@ -802,7 +802,7 @@ window.AYVHelpPieces = {
         return h.point('.ayv-pur-cards .ayv-dig-card').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('.ayv-pur-budget');
+            return h.point('#ayv-nr-gasto');
         }).then(function() {
             return h.say(1);
         }).then(function() {
@@ -834,22 +834,22 @@ window.AYVHelpPieces = {
     // A post: what it is, making one, its address, who may use it, and going over what was done at it.
     selfloan: function(h) {
         'use strict';
-        return h.point('.ayv-results-title').then(function() {
+        return h.point('.ayv-cf-titulo').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.tap('[data-ayv-open="ayv-self-new"]');
+            return h.tap('#ayv-nr-puesto-nuevo > summary');
         }).then(function() {
-            return h.type('#ayv-self-new input[name="name"]', h.codes.post);
+            return h.type('#ayv-nr-puesto-nuevo input[name="name"]', h.codes.post);
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.you(2, '#ayv-self-new button[type="submit"]');
+            return h.you(2, '#ayv-nr-puesto-nuevo button[type="submit"]');
         }).then(function() {
             return h.point('.ayv-self-created');
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.point('.ayv-self-settings');
+            return h.point('#ayv-nr-quien');
         }).then(function() {
             return h.say(4);
         }).then(function() {

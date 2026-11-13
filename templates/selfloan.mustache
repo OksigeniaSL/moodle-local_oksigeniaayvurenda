@@ -17,30 +17,44 @@
 {{!
     @template local_oksigeniaayvurenda/selfloan
 
-    The self-loan posts of a library: what was done at them first, then the posts and who may use them.
+    The self-loan posts of a library, from Jujol's mock-up: each post drawn as a stand with its name, when it was last
+    used and, for whoever manages, reopening it, undoing its last day and taking it away, folded; a dashed post to make
+    another, with where it is and what it is. Then who may use them and whether they take books back, as a card with its
+    gestures in sight (settingcard), and what was done at them.
 
     Example context (json):
     {
         "heading": "Autopréstamo", "intro": "Una tableta donde cada lector se presta solo.", "notice": "", "error": "",
-        "action": "#", "sesskey": "abc", "manage": true, "address": "https://example.org/self.php?key=abc",
-        "qr": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
-        "hasposts": true, "posts": [{"id": 1, "name": "Sala de lectura", "last": "Usado el 2 de noviembre", "stopped": true}],
-        "manyrows": false, "selfstoppedhint": "Se ha parado.", "selfreopen": "Volver a abrirlo", "selfundoday": "Deshacer lo de hoy",
-        "selfundodayintro": "Todo lo de las últimas 24 horas.", "selfmanyrows": "Se enseñan cien.",
-        "who": "Pueden usarlo todos los lectores.", "returnsword": "También se devuelven libros en él.", "returnson": true,
-        "allstages": true, "hasstages": true, "stages": [{"name": "Primaria", "chosen": false}],
+        "action": "https://example.com/selfloan.php", "sesskey": "abc", "manage": true,
+        "address": "https://example.org/self.php?key=abc", "qr": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
+        "hasposts": true, "posts": [{"id": 1, "name": "Sala de lectura", "last": "Usado el 2 de noviembre", "stopped": true,
+            "machine": false}],
+        "manyrows": false, "selfstoppedhint": "Se ha parado.", "selfreopen": "Volver a abrirlo",
+        "selfundoday": "Deshacer el último día", "selfundodayintro": "Todo lo de las últimas 24 horas.",
+        "selfmanyrows": "Se enseñan cien.", "selfmachinetag": "Máquina", "selfmachinehint": "Con su puente.",
+        "selfsiplink": "El puente", "ismachine": false, "savedword": "Guardado",
+        "settings": [{"id": "ayv-nr-quien", "set": "self", "title": "Quién puede usarlo", "says": "Todos los lectores.",
+            "justsaved": false, "notes": [], "dates": null, "presets": null, "currency": null, "link": null, "help": null,
+            "text": null, "bar": null, "groups": [{"label": "", "steps": [], "chips": [], "haslights": true,
+                "haschips": false, "whole": false, "lights": [{"form": "ayv-nr-quien-f", "name": "returns", "value": 0,
+                "pressed": true, "label": "También devuelven"}]}]}],
         "hasrows": true, "rows": [{"loanid": 1, "what": "lent", "when": "2/11/26, 10:42", "verb": "Se llevó",
             "title": "El faro dormido", "reader": "Ana Montes", "post": "Sala de lectura", "undo": true}],
-        "selfnew": "Nuevo puesto", "selfnewintro": "Un nombre.", "selfnamelabel": "Dónde está", "selfnewname": "Sala de lectura",
-        "selfcreate": "Crear el puesto", "selfpostsheading": "Puestos", "selfremove": "Quitar",
-        "selfcreatedheading": "Ya está el puesto", "selfcreatedhint": "Ábrela allí.", "selfaddress": "Dirección", "selfcopy": "Copiar",
-        "selfwhoheading": "Quién puede usarlo", "selfchange": "Cambiar", "selfstages": "Etapas", "selfallstages": "Todas las etapas",
-        "selfreturnslabel": "También se devuelven libros", "selfsave": "Guardar", "selfrecentheading": "Lo que se ha hecho",
-        "selfrecentintro": "Los últimos siete días.", "selfnothing": "Nada todavía.", "selfundo": "Deshacer", "selfclose": "Cerrar"
+        "selfnewtile": "+ Otro puesto", "selfnewintro": "Un nombre.", "selfnamelabel": "Dónde está",
+        "selfnewname": "Sala de lectura", "selfcreate": "Crear el puesto", "selfpostsheading": "Los puestos",
+        "selfpostssub": "Cada uno, con su último uso.", "selfremovepost": "Quitar este puesto", "selfremoveyes": "Sí, quitarlo",
+        "selfkindlabel": "Qué es", "selfkindscreen": "Una tableta o un ordenador", "selfkindmachine": "Una máquina (SIP2)",
+        "selfcreatedheading": "Ya está el puesto", "selfcreatedhint": "Ábrela allí.", "selfaddress": "Dirección",
+        "selfcopy": "Copiar", "selfrecentheading": "Lo que se ha hecho", "selfrecentintro": "Los últimos siete días.",
+        "selfnothing": "Nada todavía.", "selfundo": "Deshacer"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
+<div class="ayv-cf ayv-nr">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p>
+    </div>
+</header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#error}}<p class="ayv-notice ayv-notice-error" role="alert">{{error}}</p>{{/error}}
 {{#address}}
@@ -55,6 +69,49 @@
     {{^ismachine}}<img class="ayv-self-qr" src="{{qr}}" alt="" width="148" height="148">{{/ismachine}}
 </section>
 {{/address}}
+<section class="ayv-self-posts" aria-labelledby="ayv-nr-puestos-t">
+    <h2 class="ayv-cf-estante-t" id="ayv-nr-puestos-t">{{selfpostsheading}}</h2>
+    <p class="ayv-cf-estante-s">{{selfpostssub}}</p>
+    <ul class="ayv-nr-puestos">
+    {{#posts}}
+        <li class="ayv-nr-puesto{{#stopped}} ayv-nr-puesto-parado{{/stopped}}" id="ayv-nr-puesto-{{id}}"><svg class="ayv-nr-puesto-dibujo" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="11" rx="1.5"/><path d="M12 13.5v5M8 21.5h8M9.5 18.5h5"/><path d="M8.5 6.5h3M8.5 9h7"/></svg>
+            <b>{{name}}</b>{{#machine}}<span class="ayv-nr-puesto-tipo">{{selfmachinetag}}</span>{{/machine}}
+            <span class="ayv-nr-puesto-uso">{{last}}</span>
+            {{#stopped}}<span class="ayv-nr-puesto-parado-t" role="status">{{selfstoppedhint}}</span>{{/stopped}}
+            {{#manage}}
+            {{#stopped}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="reopen"><input type="hidden" name="post" value="{{id}}">
+                <button type="submit" class="ayv-button">{{selfreopen}}</button></form>{{/stopped}}
+            <details class="ayv-nr-plegado"><summary>{{selfundoday}}</summary>
+                <p class="ayv-cf-nota">{{selfundodayintro}}</p>
+                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="undoday"><input type="hidden" name="post" value="{{id}}">
+                    <button type="submit" class="ayv-button ayv-cf-peligro">{{selfundoday}}</button></form>
+            </details>
+            <details class="ayv-nr-plegado"><summary>{{selfremovepost}}</summary>
+                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="removepost"><input type="hidden" name="post" value="{{id}}">
+                    <button type="submit" class="ayv-button ayv-cf-peligro">{{selfremoveyes}}</button></form>
+            </details>
+            {{/manage}}
+        </li>
+    {{/posts}}
+    {{#manage}}
+        <li class="ayv-nr-puesto-nuevo"><details id="ayv-nr-puesto-nuevo"><summary><svg class="ayv-nr-puesto-dibujo" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="11" rx="1.5"/><path d="M12 13.5v5M8 21.5h8M9.5 18.5h5"/><path d="M8.5 6.5h3M8.5 9h7"/></svg><span>{{selfnewtile}}</span></summary>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="newpost">
+                <p class="ayv-cf-nota">{{selfnewintro}}</p>
+                <label class="ayv-field ayv-dig-field">{{selfnamelabel}} <input type="text" name="name" maxlength="100" placeholder="{{selfnewname}}"></label>
+                <div class="ayv-nr-grupo"><span class="ayv-cf-rotulo" id="ayv-nr-puesto-que">{{selfkindlabel}}</span><div class="ayv-cf-chapas ayv-nr-radios" role="radiogroup" aria-labelledby="ayv-nr-puesto-que"><input type="radio" name="machine" value="0" id="ayv-nr-puesto-pantalla" checked><label class="ayv-cf-chapa" for="ayv-nr-puesto-pantalla">{{selfkindscreen}}</label><input type="radio" name="machine" value="1" id="ayv-nr-puesto-maquina"><label class="ayv-cf-chapa" for="ayv-nr-puesto-maquina">{{selfkindmachine}}</label></div></div>
+                <p class="ayv-cf-fila"><button type="submit" class="ayv-button">{{selfcreate}}</button></p>
+            </form>
+        </details></li>
+    {{/manage}}
+    </ul>
+</section>
+{{#manage}}
+<ul class="ayv-nr-ajustes">
+    {{#settings}}
+    <li>{{> local_oksigeniaayvurenda/settingcard}}</li>
+    {{/settings}}
+</ul>
+{{/manage}}
 {{#hasposts}}
 <section class="ayv-section ayv-self-recent">
     <h2 class="ayv-section-title">{{selfrecentheading}}</h2>
@@ -75,66 +132,4 @@
     {{^hasrows}}<div class="ayv-nothing"><p>{{selfnothing}}</p></div>{{/hasrows}}
 </section>
 {{/hasposts}}
-<section class="ayv-section ayv-self-posts">
-    <h2 class="ayv-section-title">{{selfpostsheading}}</h2>
-    {{#hasposts}}
-    <ul class="ayv-dig-grid">
-    {{#posts}}
-        <li class="ayv-dig-card"><h3 class="ayv-dig-title">{{name}}{{#machine}} <span class="ayv-chip">{{selfmachinetag}}</span>{{/machine}}</h3>
-            <p class="ayv-field-hint">{{last}}</p>
-            {{#stopped}}<p class="ayv-self-stopped" role="status">{{selfstoppedhint}}</p>{{/stopped}}
-            {{#manage}}<div class="ayv-dig-actions">
-                {{#stopped}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
-                    <input type="hidden" name="do" value="reopen"><input type="hidden" name="post" value="{{id}}">
-                    <button type="submit" class="ayv-button">{{selfreopen}}</button></form>{{/stopped}}
-                <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-self-day-{{id}}">{{selfundoday}}</button>
-                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
-                <input type="hidden" name="do" value="removepost"><input type="hidden" name="post" value="{{id}}">
-                <button type="submit" class="ayv-button ayv-button-quiet">{{selfremove}}</button></form></div>
-            <dialog class="ayv-modal" id="ayv-self-day-{{id}}" aria-labelledby="ayv-self-day-title-{{id}}">
-                <div class="ayv-modal-head"><h3 id="ayv-self-day-title-{{id}}" class="ayv-section-title">{{selfundoday}}</h3>
-                    <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-                <p>{{selfundodayintro}}</p>
-                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
-                    <input type="hidden" name="do" value="undoday"><input type="hidden" name="post" value="{{id}}">
-                    <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{selfundoday}}</button></p></form>
-            </dialog>{{/manage}}</li>
-    {{/posts}}
-    </ul>
-    {{/hasposts}}
-    {{#manage}}<p class="ayv-more"><button type="button" class="ayv-button" data-ayv-open="ayv-self-new">{{selfnew}}</button></p>{{/manage}}
-</section>
-{{#manage}}
-<dialog class="ayv-modal" id="ayv-self-new" aria-labelledby="ayv-self-new-title">
-    <div class="ayv-modal-head"><h3 id="ayv-self-new-title" class="ayv-section-title">{{selfnew}}</h3>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <p class="ayv-field-hint">{{selfnewintro}}</p>
-    <form method="post" action="{{action}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="newpost">
-        <label class="ayv-field ayv-dig-field">{{selfnamelabel}} <input type="text" name="name" maxlength="100" placeholder="{{selfnewname}}"></label>
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="machine" value="1"> {{selfmachinefield}}</label>
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{selfcreate}}</button></p>
-    </form>
-</dialog>
-<section class="ayv-settingcard ayv-self-settings" aria-labelledby="ayv-self-who">
-    <h2 id="ayv-self-who" class="ayv-section-title">{{selfwhoheading}}</h2>
-    <p>{{who}} {{returnsword}}</p>
-    <p><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-self-sheet">{{selfchange}}</button></p>
-</section>
-<dialog class="ayv-modal" id="ayv-self-sheet" aria-labelledby="ayv-self-sheet-title">
-    <div class="ayv-modal-head"><h3 id="ayv-self-sheet-title" class="ayv-section-title">{{selfwhoheading}}</h3>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <form method="post" action="{{action}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="settings">
-        {{#hasstages}}
-        <fieldset class="ayv-dig-set"><legend>{{selfstages}}</legend>
-            <div class="ayv-segmented"><label><input type="checkbox" name="allstages" value="1" {{#allstages}}checked{{/allstages}}><span>{{selfallstages}}</span></label>
-            {{#stages}}<label><input type="checkbox" name="stages[]" value="{{name}}" {{#chosen}}checked{{/chosen}}><span>{{name}}</span></label>{{/stages}}</div>
-        </fieldset>
-        {{/hasstages}}
-        {{^hasstages}}<input type="hidden" name="allstages" value="1">{{/hasstages}}
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="returns" value="1" {{#returnson}}checked{{/returnson}}> {{selfreturnslabel}}</label>
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{selfsave}}</button></p>
-    </form>
-</dialog>
-{{/manage}}
+</div>
