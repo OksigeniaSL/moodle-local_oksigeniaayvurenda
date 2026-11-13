@@ -28,7 +28,7 @@
         "action": "https://example.com/selfloan.php", "sesskey": "abc", "manage": true,
         "address": "https://example.org/self.php?key=abc", "qr": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
         "hasposts": true, "posts": [{"id": 1, "name": "Sala de lectura", "last": "Usado el 2 de noviembre", "stopped": true,
-            "machine": false}],
+            "machine": false, "used": true}],
         "manyrows": false, "selfstoppedhint": "Se ha parado.", "selfreopen": "Volver a abrirlo",
         "selfundoday": "Deshacer el último día", "selfundodayintro": "Todo lo de las últimas 24 horas.",
         "selfmanyrows": "Se enseñan cien.", "selfmachinetag": "Máquina", "selfmachinehint": "Con su puente.",
@@ -81,11 +81,13 @@
             {{#manage}}
             {{#stopped}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="reopen"><input type="hidden" name="post" value="{{id}}">
                 <button type="submit" class="ayv-button">{{selfreopen}}</button></form>{{/stopped}}
+            {{#used}}
             <details class="ayv-nr-plegado"><summary>{{selfundoday}}</summary>
                 <p class="ayv-cf-nota">{{selfundodayintro}}</p>
                 <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="undoday"><input type="hidden" name="post" value="{{id}}">
                     <button type="submit" class="ayv-button ayv-cf-peligro">{{selfundoday}}</button></form>
             </details>
+            {{/used}}
             <details class="ayv-nr-plegado"><summary>{{selfremovepost}}</summary>
                 <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="removepost"><input type="hidden" name="post" value="{{id}}">
                     <button type="submit" class="ayv-button ayv-cf-peligro">{{selfremoveyes}}</button></form>
@@ -96,8 +98,8 @@
     {{#manage}}
         <li class="ayv-nr-puesto-nuevo"><details id="ayv-nr-puesto-nuevo"><summary><svg class="ayv-nr-puesto-dibujo" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="11" rx="1.5"/><path d="M12 13.5v5M8 21.5h8M9.5 18.5h5"/><path d="M8.5 6.5h3M8.5 9h7"/></svg><span>{{selfnewtile}}</span></summary>
             <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="newpost">
+                <label class="ayv-nr-escrito"><span>{{selfnamelabel}}</span><input type="text" name="name" maxlength="100" placeholder="{{selfnewname}}" autocomplete="off"></label>
                 <p class="ayv-cf-nota">{{selfnewintro}}</p>
-                <label class="ayv-field ayv-dig-field">{{selfnamelabel}} <input type="text" name="name" maxlength="100" placeholder="{{selfnewname}}"></label>
                 <div class="ayv-nr-grupo"><span class="ayv-cf-rotulo" id="ayv-nr-puesto-que">{{selfkindlabel}}</span><div class="ayv-cf-chapas ayv-nr-radios" role="radiogroup" aria-labelledby="ayv-nr-puesto-que"><input type="radio" name="machine" value="0" id="ayv-nr-puesto-pantalla" checked><label class="ayv-cf-chapa" for="ayv-nr-puesto-pantalla">{{selfkindscreen}}</label><input type="radio" name="machine" value="1" id="ayv-nr-puesto-maquina"><label class="ayv-cf-chapa" for="ayv-nr-puesto-maquina">{{selfkindmachine}}</label></div></div>
                 <p class="ayv-cf-fila"><button type="submit" class="ayv-button">{{selfcreate}}</button></p>
             </form>

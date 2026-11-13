@@ -9826,3 +9826,43 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
 .ayv .ayv-nr-ajustes {
     margin-bottom: 18px;
 }
+
+/* A name written on a dashed line, as in Material (the new post of self-service). */
+.ayv .ayv-nr-escrito {
+    display: grid;
+    gap: 4px;
+    font-size: .875rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-nr-escrito > span {
+    color: var(--ink);
+    opacity: .75;
+}
+
+.ayv .ayv-nr-escrito input[type="text"] {
+    width: 100%;
+    padding: 4px 2px;
+    border: 0;
+    border-bottom: 2px dashed var(--muted);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-family: var(--title);
+    font-size: 1.25rem;
+}
+
+.ayv .ayv-nr-escrito input[type="text"]:focus-visible {
+    outline: 3px solid var(--sun);
+    outline-offset: 2px;
+}
+
+/* The moments, soberly: without the paper pennants, for older readers and grown-ups (P6 of the review). */
+.ayv .ayv-board-moments-sobrio {
+    padding-top: 1rem;
+}
+
+.ayv .ayv-board-moments-sobrio::before {
+    content: none;
+}

@@ -60,14 +60,27 @@ if ($asked !== '' && !in_array($asked, $groups, true) && has_capability('local/o
     $groups = [$asked];
 }
 
-// A pupil who reaches this page by its address (a tutor shared it) is not told about tutors: their class is on the home.
-if (
-    !$groups && !has_capability('local/oksigeniaayvurenda:desk', $context) && $DB->record_exists(
+// A pupil sees their own class as its tutor does, without choosing anything: its challenge, its island, what it reads.
+// One with no group this year is not told about tutors: their home is the place.
+$pupil = null;
+if (!$groups && !has_capability('local/oksigeniaayvurenda:desk', $context)) {
+    $reader = $DB->get_record(
         'local_oksigeniaayvurenda_reader',
-        ['entityid' => $entityid, 'userid' => $USER->id, 'status' => 'active', 'readertype' => 'student']
-    )
-) {
-    redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug], 'ayv-class'));
+        ['entityid' => $entityid, 'userid' => $USER->id, 'status' => 'active', 'readertype' => 'student'],
+        'id',
+        IGNORE_MULTIPLE
+    );
+    $member = $reader ? $DB->get_record(
+        'local_oksigeniaayvurenda_member',
+        ['readerid' => $reader->id, 'yearid' => years::around($entityid, $now)->id],
+        'groupname',
+        IGNORE_MULTIPLE
+    ) : null;
+    if ($member && trim((string) $member->groupname) !== '') {
+        $pupil = (string) $member->groupname;
+    } else if ($reader) {
+        redirect(new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $library->slug]));
+    }
 }
 
 $notice = '';
@@ -95,9 +108,11 @@ if (data_submitted() && confirm_sesskey()) {
     }
 }
 
-$year = $groups ? years::around($entityid, $now) : null;
+// What is shown: the tutor's groups, or the pupil's own class (the form above only ever changes a tutor's).
+$shown = $pupil !== null ? [$pupil] : $groups;
+$year = $shown ? years::around($entityid, $now) : null;
 $data = [];
-foreach ($groups as $i => $group) {
+foreach ($shown as $i => $group) {
     $challenge = challenges::of($entityid, $group, $now);
     $off = challenges::stage_off($entityid, (int) $year->id, $group);
     // Once met, the tutor may start another one this term (JV-D5).
@@ -118,7 +133,7 @@ foreach ($groups as $i => $group) {
             'challengeid' => (int) $reward['challenge']->id,
             'label' => $str('challengeplanted', $reward['challenge']->term) . ' · ' .
                 $str('challengekind' . $reward['challenge']->kind),
-            'ask' => !$wish || $wish->status === 'declined',
+            'ask' => $pupil === null && (!$wish || $wish->status === 'declined'),
             'state' => $wish ? $str('wishstate' . $wish->status, format_string($wish->title, true, ['escape' => false])) : '',
         ];
     }
@@ -126,8 +141,8 @@ foreach ($groups as $i => $group) {
         'index' => $i,
         'group' => $group,
         'offstage' => $off !== null ? $str('classoff', $off) : '',
-        'current' => $challenge ? challenges::view($challenge, $entityid, true) : null,
-        'canchoose' => $off === null,
+        'current' => $challenge ? challenges::view($challenge, $entityid, $pupil === null) : null,
+        'canchoose' => $off === null && $pupil === null,
         'kinds' => $choices['kinds'],
         'choose' => $choices['choose'],
         'choosehint' => $choices['choosehint'],
@@ -157,10 +172,10 @@ foreach ($groups as $i => $group) {
 shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigeniaayvurenda/class', [
     'heading' => $str('classtitle'),
     // The rules of the challenge only where there is a class; without one, the empty island and where to go.
-    'intro' => $groups ? $str('classintro') : '',
+    'intro' => $pupil !== null ? $str('classintropupil') : ($groups ? $str('classintro') : ''),
     'notice' => $notice,
-    'none' => $groups ? '' : $str('classnone'),
-    'nobody' => $groups ? null : [
+    'none' => $shown ? '' : $str('classnone'),
+    'nobody' => $shown ? null : [
         'herald' => \local_oksigeniaayvurenda\local\characters::say(
             (int) $library->entityid,
             'herald',
@@ -198,7 +213,8 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
     'search' => false,
     // The island in 3D, only where there is one to draw.
     'scripts' => array_filter(array_map(fn($g) => $g['island']['islandstate'] ?? '', $data)) ? ['isla3d', 'island'] : [],
-    'nav' => optional_param('help', 0, PARAM_BOOL) ? [] : [['url' => (new moodle_url(
+    // The guided help is the tutor's: a pupil has nothing to choose here.
+    'nav' => optional_param('help', 0, PARAM_BOOL) || $pupil !== null ? [] : [['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/help.php',
         ['library' => $library->slug, 'piece' => 'myclass']
     ))->out(false), 'label' => $str('helpnav')]],

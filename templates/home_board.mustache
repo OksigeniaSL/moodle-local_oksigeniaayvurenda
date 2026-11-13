@@ -25,7 +25,7 @@
     {
         "board": {"heraldtitle": "Lo que cuenta Mainumby", "memorytitle": "La memoria te recomienda", "allnew": "Verlos todos",
             "covers": [{"url": "#", "cover": "https://example.org/c.jpg", "title": "El faro"}],
-            "moments": {"heading": "Para celebrar", "text": "Este curso ya van 1.000 libros prestados. El número 1.000 fue «El faro».",
+            "moments": {"heading": "Para celebrar", "sober": false, "text": "Este curso ya van 1.000 libros prestados. El número 1.000 fue «El faro».",
                 "figure": "https://example.org/m-celebra.webp", "portrait": null, "initial": "M", "role": "herald",
                 "cover": "https://example.org/c.jpg", "url": "https://example.org/record.php?id=1", "label": "Ver el libro",
                 "more": {"items": [{"text": "«Matilda» ha salido ya 100 veces de la biblioteca.", "url": "https://example.org/r.php"},
@@ -41,7 +41,7 @@
 }}
 <div class="ayv-board">
     {{#board.moments}}
-    <section class="ayv-board-card ayv-board-moments" aria-labelledby="ayv-board-moments">
+    <section class="ayv-board-card ayv-board-moments{{#sober}} ayv-board-moments-sobrio{{/sober}}" aria-labelledby="ayv-board-moments">
         <span class="ayv-board-who" aria-hidden="true">{{#figure}}<img src="{{figure}}" alt="" width="112" height="112">{{/figure}}{{^figure}}<span class="ayv-bubble-portrait ayv-bubble-{{role}}">{{#portrait}}<img class="ayv-bubble-img" src="{{portrait}}" alt="">{{/portrait}}{{^portrait}}{{initial}}{{/portrait}}</span>{{/figure}}</span>
         <div class="ayv-board-words">
             <h2 class="ayv-board-title" id="ayv-board-moments">{{heading}}</h2>

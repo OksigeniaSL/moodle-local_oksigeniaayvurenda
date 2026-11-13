@@ -104,6 +104,8 @@ $posts = array_map(fn($p) => [
     'last' => $p->timelast ? $str('selflast', userdate((int) $p->timelast, get_string('strftimedatetimeshort', 'langconfig')))
         : $str('selfnever'),
     'stopped' => !empty($p->timestopped),
+    // A post never used has no day to undo.
+    'used' => !empty($p->timelast),
     'machine' => !empty($p->machine),
 ], selfloan::posts($library));
 $rows = array_map(fn($r) => $r + [

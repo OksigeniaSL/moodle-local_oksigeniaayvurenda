@@ -789,6 +789,10 @@ final class screens {
      */
     public static function skin_art(int $entityid): ?string {
         $skin = skins::of($entityid);
+        // A reader of the sky in a school sees the secondary school's picture, not the infants' on their cushions.
+        if ($skin === 'school' && characters::step($entityid) === 'cielo' && ($older = self::art('portada-instituto'))) {
+            return $older;
+        }
         if ($skin === 'school') {
             return self::art('portada');
         }
@@ -1289,8 +1293,11 @@ final class screens {
         $said = characters::say($entityid, 'herald', $first['key'], $first['a'], 'celebra')
             ?? ['text' => $first['text'], 'figure' => null, 'portrait' => null, 'initial' => '', 'role' => 'herald'];
         $more = array_map(fn($moment) => ['text' => $moment['text'], 'url' => $moment['url']], array_slice($moments, 0, 2));
+        $skin = skins::of($entityid);
         return $said + [
             'heading' => self::str('momentsheading'),
+            // The paper pennants are for the young of a school; older readers and grown-ups see the moment soberly.
+            'sober' => !in_array($skin, ['school', 'secondary'], true) || characters::step($entityid) === 'cielo',
             // Explicit, so that Mustache does not look for them outside.
             'cover' => $first['recordid'] ? (covers::url($first['recordid']) ?? false) : false,
             'url' => $first['url'],

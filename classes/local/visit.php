@@ -84,6 +84,19 @@ final class visit {
     }
 
     /**
+     * The scenes a visitor of a centre may walk: those of its skin and, for a reader of the sky in a school, the
+     * secondary school's too (its hall, P6).
+     *
+     * @param int $entityid
+     * @return string[]
+     */
+    private static function scenes_for(int $entityid): array {
+        $skin = skins::of($entityid);
+        $scenes = skins::scenes($skin);
+        return $skin === 'school' && characters::step($entityid) === 'cielo' ? array_merge(['secondary'], $scenes) : $scenes;
+    }
+
+    /**
      * The hall of a centre's visit, by its skin: without the hall of its skin, there is no visit, unless the skin borrows
      * another's until the art brings its own (`skins::SCENES`).
      *
@@ -93,6 +106,11 @@ final class visit {
      */
     public static function hall(int $entityid, ?array $art = null): string {
         $skin = skins::of($entityid);
+        // A reader of the sky in a school walks into the secondary school's hall: a fourteen-year-old is not shown the
+        // infants' (P6 of the review of 12 November).
+        if ($skin === 'school' && characters::step($entityid) === 'cielo' && self::scene(self::HALLS['secondary'], $art) !== null) {
+            return self::HALLS['secondary'];
+        }
         foreach (skins::scenes($skin) as $from) {
             if (self::scene(self::HALLS[$from] ?? self::HALL, $art) !== null) {
                 return self::HALLS[$from] ?? self::HALL;
@@ -266,7 +284,7 @@ final class visit {
         $scene = self::scene($name, $art);
         // Only the scenes of the centre's skin are its visit, when the centre has it on.
         $entityid = (int) $library->entityid;
-        if (!$scene || !in_array($scene['skin'], skins::scenes(skins::of($entityid)), true) || !skins::on($entityid, 'visit')) {
+        if (!$scene || !in_array($scene['skin'], self::scenes_for($entityid), true) || !skins::on($entityid, 'visit')) {
             return null;
         }
         $hallname = self::hall((int) $library->entityid, $art);
@@ -786,7 +804,8 @@ final class visit {
         if (!$game) {
             return null;
         }
-        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        // In the words of the centre's kind: a university's own, not the school's (P6).
+        $str = fn(string $key, $a = null) => skins::say((int) $library->entityid, $key, $a);
         $entityid = (int) $library->entityid;
         // The clue by age: the cover and its letters for the youngest, the label, or the title and the author (JV-D11).
         $cluekey = $game['young'] ? 'huntclueyoung' : (!empty($game['grown']) ? 'huntcluetitle' : 'huntclue');
@@ -853,7 +872,8 @@ final class visit {
         if (!$books) {
             return null;
         }
-        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        // In the words of the centre's kind: a university's own, not the school's (P6).
+        $str = fn(string $key, $a = null) => skins::say((int) $library->entityid, $key, $a);
         $said = characters::say((int) $library->entityid, 'herald', 'sortintro', [], 'saluda');
         foreach ($books as $i => &$book) {
             $book['count'] = $str('sortcount', (object) ['n' => $i + 1, 'total' => count($books)]);

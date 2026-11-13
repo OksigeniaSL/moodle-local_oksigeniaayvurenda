@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.251.0 (2026-11-13)
+
+- My class for a pupil: their own class as its tutor sees it, without choosing anything (the challenge of the term,
+  its island and what the class reads); it used to send them to the home without a word. One with no class this year
+  still goes to the home.
+- Each age in its place (P6 of the review): in a school, a reader past the flower sees the secondary school's picture
+  on the home and walks into its hall in the visit, not the infants'; the moments to celebrate keep their paper
+  pennants only for the young of a school; the two games of the visit speak with a university's words where the
+  centre is one (or a company).
+- Self-service, from Jujol's look at it: «Books are returned at the posts too», the same in the sentence and the light;
+  «Undo the last day» only on a post that has been used; the name of a new post written on a dashed line, as in
+  Material, with its hint under it.
+
 ## 0.250.0 (2026-11-13)
 
 - Purchases and self-service, from Jujol's mock-ups, the last two of the second round. Purchases: what is spent this
