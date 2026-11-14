@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.266.2 (2026-11-14)
+
+- The finder's kept questions leave out names with accents on every database: the 0.266.1 compared them with the
+  database's own collation, which keeps accents in PostgreSQL and in a binary MariaDB (its CI failed, and it was not
+  installed anywhere).
+
 ## 0.266.1 (2026-11-14)
 
 - «What do you want to do?» keeps the questions it could not answer, to tune it by its use: only their words, without who

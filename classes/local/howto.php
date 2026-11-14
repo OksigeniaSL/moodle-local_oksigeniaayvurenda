@@ -304,12 +304,23 @@ final class howto {
      */
     private static function someone(string $word, int $entityid): bool {
         global $DB;
-        // The same letters, whatever their accents and capitals.
-        $named = '(' . $DB->sql_like('firstname', ':a', false, false) . ' OR '
-            . $DB->sql_like('lastname', ':b', false, false) . ')';
-        return $DB->record_exists_select('user', 'deleted = 0 AND ' . $named, ['a' => $word, 'b' => $word])
-            || $DB->record_exists_select('local_oksigeniaayvurenda_reader', 'entityid = :e AND ' . $named, ['e' => $entityid,
-                'a' => $word, 'b' => $word]);
+        // Whatever the database does with accents (PostgreSQL and a binary collation keep them): the letters that may
+        // carry one go as a wildcard, and what comes back is compared in its words, as the finder writes them.
+        $pattern = '%' . preg_replace('/[aeiouncy]/u', '_', $DB->sql_like_escape($word)) . '%';
+        $named = '(' . $DB->sql_like('firstname', ':a', false) . ' OR ' . $DB->sql_like('lastname', ':b', false) . ')';
+        $where = [['user', 'deleted = 0 AND ' . $named, []],
+            ['local_oksigeniaayvurenda_reader', 'entityid = :e AND ' . $named, ['e' => $entityid]]];
+        foreach ($where as [$table, $select, $more]) {
+            $params = ['a' => $pattern, 'b' => $pattern] + $more;
+            $rows = $DB->get_records_select($table, $select, $params, '', 'id, firstname, lastname', 0, 200);
+            foreach ($rows as $row) {
+                $words = preg_split('/[^\p{L}\p{N}]+/u', text::normalise($row->firstname . ' ' . $row->lastname)) ?: [];
+                if (in_array($word, $words, true)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
