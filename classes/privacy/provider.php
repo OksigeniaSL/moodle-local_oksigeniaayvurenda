@@ -117,6 +117,13 @@ class provider implements
             'timefound' => 'privacy:metadata:find:timefound',
             'timetaken' => 'privacy:metadata:find:timetaken',
         ], 'privacy:metadata:find');
+        $collection->add_database_table(self::T . 'booklet', [
+            'readerid' => 'privacy:metadata:booklet:readerid',
+            'yearid' => 'privacy:metadata:booklet:yearid',
+            'kind' => 'privacy:metadata:booklet:kind',
+            'tellfamily' => 'privacy:metadata:booklet:tellfamily',
+            'timesent' => 'privacy:metadata:booklet:timesent',
+        ], 'privacy:metadata:booklet');
         $collection->add_database_table(self::T . 'blind', [
             'readerid' => 'privacy:metadata:blind:readerid',
             'note' => 'privacy:metadata:blind:note',
@@ -477,6 +484,22 @@ class provider implements
                     (object) ['finds' => $finds]
                 );
             }
+            // Their booklets for the family: which school year and edition, and when the family was told.
+            $booklets = [];
+            foreach ($DB->get_records(self::T . 'booklet', ['readerid' => $reader->id], 'timedue, id') as $booklet) {
+                $booklets[] = [
+                    'year' => $DB->get_field(self::T . 'year', 'name', ['id' => $booklet->yearid]),
+                    'edition' => $booklet->kind,
+                    'family' => transform::yesno($booklet->tellfamily),
+                    'sent' => $booklet->timesent ? transform::datetime($booklet->timesent) : null,
+                ];
+            }
+            if ($booklets) {
+                writer::with_context($context)->export_data(
+                    array_merge($base, [get_string('privacy:path:booklets', 'local_oksigeniaayvurenda')]),
+                    (object) ['booklets' => $booklets]
+                );
+            }
             // Their blind dates: the book each was, and what they said of it.
             $dates = [];
             foreach ($DB->get_records(self::T . 'blind', ['readerid' => $reader->id], 'id') as $date) {
@@ -737,6 +760,7 @@ class provider implements
         $DB->delete_records(self::T . 'formatask');
         $DB->delete_records(self::T . 'keepsake');
         $DB->delete_records(self::T . 'find');
+        $DB->delete_records(self::T . 'booklet');
         $DB->set_field_select(self::T . 'blind', 'readerid', null, 'readerid IS NOT NULL');
         $DB->set_field_select(self::T . 'blind', 'createdby', null, 'createdby IS NOT NULL');
         $DB->delete_records(self::T . 'questreader');

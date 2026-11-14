@@ -45,7 +45,7 @@ final class workings {
 
     /** @var string[] The colours of the spines, by shelf and kind. */
     private const SPINES = ['rule' => 'green', 'door' => 'coral', 'lights' => 'sun', 'route' => 'green2', 'postcard' => 'coral',
-        'diploma' => 'sun', 'forlittle' => 'green2', 'sign' => 'coral', 'challenges' => 'sun',
+        'diploma' => 'sun', 'booklet' => 'sun', 'forlittle' => 'green2', 'sign' => 'coral', 'challenges' => 'sun',
         'card' => 'green2', 'history' => 'green', 'photos' => 'coral', 'skin' => 'night', 'name' => 'green', 'year' => 'coral',
         'classification' => 'sun', 'letter' => 'green2', 'zone' => 'night'];
 
@@ -111,6 +111,21 @@ final class workings {
         if ($diploma !== -1) {
             diploma::save($entityid, (bool) $diploma);
             return 'ayv-hiw-diploma';
+        }
+        // The reader's booklet, to the family, and the library's two lines in it.
+        $booklet = optional_param('booklet', -1, PARAM_INT);
+        $lines = optional_param_array('set', [], PARAM_RAW_TRIMMED);
+        if ($booklet !== -1 || isset($lines['bookletline']) || isset($lines['bookletfarewell'])) {
+            if ($booklet !== -1) {
+                booklet::save($entityid, (bool) $booklet);
+            }
+            if (isset($lines['bookletline'])) {
+                booklet::save_line($entityid, (int) years::around($entityid, time())->id, (string) $lines['bookletline']);
+            }
+            if (isset($lines['bookletfarewell'])) {
+                booklet::save_farewell($entityid, (string) $lines['bookletfarewell']);
+            }
+            return 'ayv-hiw-booklet';
         }
         $stages = holds::stages($entityid, time());
         $challenge = optional_param_array('challenge', [], PARAM_INT);
@@ -439,6 +454,18 @@ final class workings {
                 ],
             ]);
         }
+        // The reader's booklet: each reader's at the end of the year; to their family, if the centre turns it on (Jujol).
+        $sends = booklet::on($entityid);
+        $voice[] = $phrase('booklet', 'booklet', $str('hiwspinebooklet'), $str($sends ? 'hiwbookleton' : 'hiwbookletoff'), [
+            'booklet' => [
+                'img' => bookletview::sample($library),
+                'light' => $chip('booklet', $sends ? '0' : '1', $str('hiwbookletlight'), $sends),
+                'line' => booklet::line($entityid, (int) years::around($entityid, time())->id),
+                'farewell' => booklet::farewell($entityid),
+                'max' => booklet::LINE,
+                'note' => $str('hiwbookletnote'),
+            ],
+        ]);
         if ($classes) {
             $off = challenges::stages_off($entityid);
             $on = array_values(array_diff($stages, $off));

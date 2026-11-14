@@ -109,6 +109,22 @@
                 {{#light}}<span class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></span>{{/light}}</div>
                 <p class="ayv-cf-nota">{{note}}</p>
             {{/diploma}}
+            {{#booklet}}
+                <div class="ayv-cf-fila">{{#img}}<span class="ayv-or-postal ayv-or-postal-gaudi" aria-hidden="true"><img src="{{img}}" alt="" width="480" height="252"></span>{{/img}}
+                {{#light}}<span class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></span>{{/light}}</div>
+                <form class="ayv-lb-lineas" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <div class="ayv-lb-fichas">
+                        <label class="ayv-lb-escribir"><span class="ayv-cf-rotulo">{{#str}}hiwbookletline, local_oksigeniaayvurenda{{/str}}</span>
+                            <textarea name="set[bookletline]" maxlength="{{max}}" rows="3">{{line}}</textarea>
+                            <span class="ayv-lb-escribir-que"><span>{{#str}}hiwbookletlinehint, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-lb-guardado" data-ayv-lb-dicho="set[bookletline]" data-guardado="{{#str}}hiwbookletsaved, local_oksigeniaayvurenda{{/str}}" aria-live="polite"></span></span></label>
+                        <label class="ayv-lb-escribir"><span class="ayv-cf-rotulo">{{#str}}hiwbookletfarewell, local_oksigeniaayvurenda{{/str}}</span>
+                            <textarea name="set[bookletfarewell]" maxlength="{{max}}" rows="3" placeholder="{{#str}}hiwbookletfarewellempty, local_oksigeniaayvurenda{{/str}}">{{farewell}}</textarea>
+                            <span class="ayv-lb-escribir-que"><span>{{#str}}hiwbookletfarewellhint, local_oksigeniaayvurenda{{/str}}</span><span class="ayv-lb-guardado" data-ayv-lb-dicho="set[bookletfarewell]" data-guardado="{{#str}}hiwbookletsaved, local_oksigeniaayvurenda{{/str}}" aria-live="polite"></span></span></label>
+                    </div>
+                    <p class="ayv-lb-guardar"><button class="ayv-button" type="submit">{{#str}}save, core{{/str}}</button></p>
+                </form>
+                <p class="ayv-cf-nota">{{note}}</p>
+            {{/booklet}}
             {{#reviews}}
                 <div class="ayv-cf-resenas">{{#list}}<button class="ayv-cf-resena" type="submit" form="ayv-hiw-centre" name="{{name}}" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-resena-texto">{{text}}</span><span class="ayv-cf-resena-firma">{{signature}}</span><span class="ayv-sr">{{label}}</span></button>{{/list}}</div>
             {{/reviews}}

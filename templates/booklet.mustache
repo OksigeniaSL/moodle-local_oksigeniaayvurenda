@@ -1,0 +1,81 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/booklet
+
+    The reader's booklet as a page of its own, without Moodle around it (Jujol, 13 November): the family's, from their
+    sealed link, with «Print it or keep it» and «Send it to someone»; the one the staff open from the reader's record; and
+    the tutor's, with every sheet of the class one after another to print at once. On screen a sheet on the table; on
+    paper, the paper.
+
+    Example context (json):
+    {
+        "lang": "es", "title": "El curso de Lucía, en libros", "ogdescription": "Biblioteca de ejemplo",
+        "ogimage": "https://example.com/portada.jpg", "url": "https://example.com/booklet.php?b=1&s=x",
+        "css": "https://example.com/app/librito.css", "js": "https://example.com/app/librito.js",
+        "edition": "curso", "skin": "flor", "library": "Biblioteca de ejemplo", "emblem": "https://example.com/emblema.svg",
+        "bar": {"print": "Imprimirlo o guardarlo", "share": "Mandárselo a alguien", "sharetitle": "El curso de Lucía, en libros",
+            "sharetext": "Los libros que se llevó Lucía este curso, con su flor.", "copied": "Copiado."},
+        "classhead": null,
+        "sheets": [], "lives": [],
+        "foot": {"foottext": "La biblioteca se lo da a cada lector al acabar el curso.", "footlink": "El enlace no pide cuenta.",
+            "madewith": "Hecho con Ayvurenda"}
+    }
+}}
+<!DOCTYPE html>
+<html lang="{{lang}}" class="lb-sin-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="robots" content="noindex, nofollow">
+{{#ogimage}}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{ogdescription}}">
+<meta property="og:url" content="{{url}}">
+<meta property="og:image" content="{{ogimage}}">
+{{/ogimage}}
+<link rel="stylesheet" href="{{css}}">
+</head>
+<body>
+<main class="lb" data-edicion="{{edition}}" data-piel="{{skin}}">
+{{#bar}}
+<div class="lb-barra">
+    <p class="lb-biblio"><img src="{{emblem}}" alt="" width="32" height="32">{{library}}</p>
+    <div class="lb-acciones"><button type="button" class="lb-boton" data-lb="imprimir"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>{{print}}</button>
+        {{#share}}<button type="button" class="lb-boton lb-boton-suave" data-lb="pasar" data-titulo="{{sharetitle}}" data-texto="{{sharetext}}" data-copiado="{{copied}}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4 9.5 14.5M20 4l-6.5 16-4-5.5L4 10.5z"/></svg>{{share}}</button>{{/share}}</div>
+    <p class="lb-pasado" aria-live="polite"></p>
+</div>
+{{/bar}}
+{{#classhead}}
+<header class="lb-clase-cabeza">
+    <h1>{{heading}}</h1>
+    <p>{{lead}}</p>
+    <div class="lb-acciones"><button type="button" class="lb-boton" data-lb="imprimir"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>{{printall}}</button>
+        <a class="lb-boton lb-boton-suave" href="{{backurl}}">{{back}}</a></div>
+</header>
+{{/classhead}}
+{{#sheets}}{{> local_oksigeniaayvurenda/booklet_sheet }}{{/sheets}}
+{{#lives}}{{> local_oksigeniaayvurenda/booklet_life }}{{/lives}}
+{{#foot}}
+<p class="lb-pie">{{foottext}} {{footlink}}{{#madewith}}<br><a href="https://ayvurenda.com/">{{madewith}}</a>{{/madewith}}</p>
+{{/foot}}
+</main>
+<script src="{{js}}"></script>
+</body>
+</html>

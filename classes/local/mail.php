@@ -58,8 +58,8 @@ final class mail {
     /** @var string[] The skins where the herald signs for anyone; in the rest, for a young reader or if the centre asks. */
     private const HERALD_SIGNS = ['school', 'secondary'];
 
-    /** @var string[] Where a picture of a centre may be. */
-    public const AREAS = ['cover', 'libraryimage', 'portrait'];
+    /** @var string[] Where a picture of a centre may be: and the drawing of a review, for the reader's booklet. */
+    public const AREAS = ['cover', 'libraryimage', 'portrait', reviews::AREA];
 
     /**
      * The address of the postcard of a first book (the loan's): made each time from the loan, nothing kept; sealed as the
@@ -243,7 +243,7 @@ final class mail {
     /**
      * The address of a picture for a mail program, which has no session: sealed, so that only the e-mail knows it.
      *
-     * @param string $area cover, libraryimage or portrait.
+     * @param string $area cover, libraryimage, portrait or reviewdrawing.
      * @param int $itemid The record, the library or the centre.
      * @param string $name Its name, without the ending.
      * @return string

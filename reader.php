@@ -275,6 +275,8 @@ $data = [
     // The diplomas of their full bingo cards, to print for whoever has no account to download theirs.
     'diplomas' => \local_oksigeniaayvurenda\local\diploma::of_reader($reader, time(), $str),
     'profilediplomas' => $str('profilediplomas'),
+    // Their booklets, the year's and that of all their years, to see and print (Jujol).
+    'booklets' => \local_oksigeniaayvurenda\local\bookletview::record($reader, $library),
     'readheading' => $str($record['read']['total'] === 1 ? 'profilereadone' : 'profileread', (object) ['year' => $record['year'],
         'count' => $record['read']['total']]),
     'read' => array_map(

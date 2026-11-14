@@ -1127,5 +1127,28 @@
         <INDEX NAME="entitytag" UNIQUE="false" FIELDS="entityid, tagno"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_booklet" COMMENT="A reader's booklet for the family: the school year's when its classes end, or the whole life's when the reader leaves">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="readerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="yearid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The school year it ends with"/>
+        <FIELD NAME="kind" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="year or life"/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When it may go to the family"/>
+        <FIELD NAME="tellfamily" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="A reader of twelve or over wants their family to get it"/>
+        <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When its family was told, or it was done without one"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+        <KEY NAME="readerid" TYPE="foreign" FIELDS="readerid" REFTABLE="local_oksigeniaayvurenda_reader" REFFIELDS="id"/>
+        <KEY NAME="yearid" TYPE="foreign" FIELDS="yearid" REFTABLE="local_oksigeniaayvurenda_year" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="readeryearkind" UNIQUE="false" FIELDS="readerid, yearid, kind"/>
+        <INDEX NAME="duesent" UNIQUE="false" FIELDS="timesent, timedue"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

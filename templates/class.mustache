@@ -69,6 +69,16 @@
     <h3 class="ayv-section-title">{{choose}}</h3>
     <p class="ayv-field-hint">{{choosehint}}</p>
     <ul class="ayv-bc-retos">{{#kinds}}<li><button type="submit" form="ayv-bc-reto-{{index}}" name="challenge" value="{{value}}" class="ayv-bc-reto-carta{{#off}} ayv-bc-sin-reto{{/off}}" aria-pressed="{{#checked}}true{{/checked}}{{^checked}}false{{/checked}}" data-elegido="{{chosen}}"><b>{{label}}</b><span>{{phrase}}</span>{{#steps}}{{> local_oksigeniaayvurenda/garland}}{{/steps}}</button></li>{{/kinds}}</ul>{{/canchoose}}
+    {{#booklets}}
+    <div class="ayv-lb-banda">
+        <span class="ayv-lb-hojas" aria-hidden="true"><span></span><span></span><span>{{{bandmedal}}}<i></i><i></i></span></span>
+        <div>
+            <p class="ayv-lb-banda-titulo">{{bandtitle}}</p>
+            <p>{{bandhint}} {{bandleaving}}</p>
+            <p class="ayv-lb-banda-acciones"><a class="ayv-button" href="{{printurl}}">{{printtext}}</a><a class="ayv-button ayv-button-quiet" href="{{lifeurl}}">{{lifetext}}</a><span class="ayv-field-hint">{{sheets}}</span></p>
+        </div>
+    </div>
+    {{/booklets}}
     <h3 class="ayv-section-title">{{gardenheading}}</h3>
     {{#island}}<figure class="ayv-island" role="img" aria-label="{{islandlabel}}"{{#islandstate}} data-island="{{islandstate}}" data-island-key="{{islandkey}}" data-island-assets="{{islandassets}}"{{/islandstate}}>{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/island}}
     {{#hasgarden}}<ul class="ayv-sources">{{#garden}}<li>{{label}}</li>{{/garden}}</ul>{{/hasgarden}}

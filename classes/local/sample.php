@@ -94,7 +94,9 @@ final class sample {
         if ($library) {
             return $library;
         }
-        $lang = str_starts_with(current_language(), 'es') ? 'es' : 'en';
+        // In the site's language: Spanish, Portuguese (of Brazil or of Portugal) or French; English for any other.
+        $lang = substr(current_language(), 0, 2);
+        $lang = in_array($lang, ['es', 'pt', 'fr'], true) ? $lang : 'en';
         $entityid = demo::create(get_string('samplename', 'local_oksigeniaayvurenda'), 600, 150, 20261111, $lang);
         $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
             ?: [];

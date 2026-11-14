@@ -196,6 +196,28 @@ foreach ($shown as $i => $group) {
             'show' => $str('boardshow'), 'showhint' => $str('boardshowhint'), 'smaller' => $str('boardsmaller'),
             'bigger' => $str('boardbigger'), 'full' => $str('boardfull'), 'exit' => $str('boardexit'), 'listen' => $str('listen')]
             : null,
+        // The year's booklets (Jujol): for the tutor, from three weeks before the last day, to print the class's at once.
+        'booklets' => $pupil === null && $now >= ($bookletsfrom = \local_oksigeniaayvurenda\local\booklet::classes_end($year)
+            - 21 * DAYSECS) && $now < $bookletsfrom + (21 + \local_oksigeniaayvurenda\local\booklet::ONCARD) * DAYSECS ? [
+            'bandmedal' => str_replace('role="img"', 'aria-hidden="true"', \local_oksigeniaayvurenda\local\bookletview::medal(
+                'flower',
+                3,
+                ['stay' => 3, 'back' => 3, 'explore' => 2, 'tell' => 3],
+                '',
+                36
+            )),
+            'bandtitle' => $str('bookletcourse'),
+            'bandhint' => $str('bookletcoursehint'),
+            'bandleaving' => $str('bookletcourseleaving'),
+            'printurl' => (new moodle_url('/local/oksigeniaayvurenda/booklet.php', ['library' => $library->slug,
+                'group' => $group]))
+                ->out(false),
+            'printtext' => $str('bookletcourseprint'),
+            'lifeurl' => (new moodle_url('/local/oksigeniaayvurenda/booklet.php', ['library' => $library->slug, 'group' => $group,
+                'life' => 1]))->out(false),
+            'lifetext' => $str('bookletcourselife'),
+            'sheets' => $str('bookletcoursesheets', $steps['everyone']),
+        ] : null,
         'cards' => $reads,
         'hasreads' => (bool) $reads,
         'rewards' => $rewards,

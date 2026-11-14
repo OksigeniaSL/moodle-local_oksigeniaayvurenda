@@ -67,6 +67,8 @@ final class copies {
         'find' => 'entityid = :entityid',
         // The blind dates: the library's wrapped books with their clues, and who took each home.
         'blind' => 'entityid = :entityid',
+        // The booklets for the families, so that a centre restored does not send them again.
+        'booklet' => 'entityid = :entityid',
         'quest' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'activity' => 'libraryid IN (SELECT id FROM {local_oksigeniaayvurenda_library} WHERE entityid = :entityid)',
         'questreader' => 'readerid IN (SELECT id FROM {local_oksigeniaayvurenda_reader} WHERE entityid = :entityid)',

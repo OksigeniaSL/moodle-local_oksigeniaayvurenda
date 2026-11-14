@@ -275,6 +275,8 @@ final class cohorts {
             foreach ($leaving as $reader) {
                 $DB->update_record(self::T . 'reader', (object) ['id' => $reader->id, 'status' => 'left', 'timemodified' => $now]);
                 $stats['left']++;
+                // Their whole life's booklet, for the family, if the centre sends them.
+                \local_oksigeniaayvurenda\local\booklet::left($reader, $now);
             }
         } else {
             $stats['held'] = count($leaving);

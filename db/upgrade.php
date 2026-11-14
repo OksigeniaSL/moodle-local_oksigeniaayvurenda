@@ -821,6 +821,35 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111325, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026111331) {
+        // The reader's booklet for the family: the school year's and the whole life's.
+        $table = new xmldb_table('local_oksigeniaayvurenda_booklet');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('readerid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('yearid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('kind', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timedue', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('tellfamily', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timesent', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('entityid', XMLDB_KEY_FOREIGN, ['entityid'], 'local_oksigeniaayvurenda_entity', ['id']);
+            $table->add_key('readerid', XMLDB_KEY_FOREIGN, ['readerid'], 'local_oksigeniaayvurenda_reader', ['id']);
+            $table->add_key('yearid', XMLDB_KEY_FOREIGN, ['yearid'], 'local_oksigeniaayvurenda_year', ['id']);
+            $table->add_index('readeryearkind', XMLDB_INDEX_NOTUNIQUE, ['readerid', 'yearid', 'kind']);
+            $table->add_index('duesent', XMLDB_INDEX_NOTUNIQUE, ['timesent', 'timedue']);
+            $dbman->create_table($table);
+        }
+        // Whether a reader of twelve or over wants their family to get it.
+        $field = new xmldb_field('tellfamily', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'timedue');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026111331, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

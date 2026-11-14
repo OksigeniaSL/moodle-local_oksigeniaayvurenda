@@ -12938,3 +12938,255 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     grid-template-columns: minmax(0, 1fr);
     min-width: 0;
 }
+
+/* The reader's booklet inside the library (Jujol, 13 Nov 2026): the band in «Mi clase» that prints the class, the
+   booklets in the reader's record, the slips where the library writes its line in «Cómo funciona», and the line on the
+   card of twelve and over that asks before anything reaches the family. After the plugin's sheets, with its colours
+   (--ink, --paper2, --line…), so it follows light and dark. Prefix .ayv-lb-. No :has(), no color-mix(). */
+
+/* ---------- «Mi clase»: the booklets of the course ---------- */
+.ayv .ayv-lb-banda {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem 1.4rem;
+    margin: 1.2rem 0;
+    padding: 1.1rem 1.3rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius, 14px);
+    background: var(--paper2);
+}
+
+/* A small pile of sheets, the top one with the class's flower: what comes out of the printer. */
+.ayv .ayv-lb-hojas {
+    position: relative;
+    display: block;
+    width: 4.4rem;
+    height: 5.6rem;
+}
+
+.ayv .ayv-lb-hojas > span {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(30, 43, 42, .22);
+    border-radius: 3px;
+    background: #fffdf7;
+    box-shadow: 0 4px 10px -6px rgba(30, 43, 42, .5);
+}
+
+.ayv .ayv-lb-hojas > span:nth-child(1) {
+    transform: rotate(-8deg) translate(-4px, 2px);
+}
+
+.ayv .ayv-lb-hojas > span:nth-child(2) {
+    transform: rotate(5deg) translate(3px, 1px);
+}
+
+.ayv .ayv-lb-hojas > span:nth-child(3) {
+    display: grid;
+    align-content: start;
+    justify-items: center;
+    gap: 4px;
+    padding: 7px 6px;
+}
+
+.ayv .ayv-lb-hojas img {
+    display: block;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+}
+
+.ayv .ayv-lb-hojas i {
+    display: block;
+    width: 82%;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(30, 43, 42, .2);
+}
+
+.ayv .ayv-lb-hojas i + i {
+    width: 60%;
+}
+
+.ayv .ayv-lb-banda-titulo {
+    margin: 0 0 .25rem;
+    color: var(--ink);
+    font-family: Literata, Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-lb-banda p {
+    margin: 0;
+}
+
+.ayv .ayv-lb-banda-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem 1rem;
+    margin-top: .8rem !important;
+}
+
+@media (max-width: 30rem) {
+    .ayv .ayv-lb-banda {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ---------- The reader's record: «Sus libritos» ---------- */
+.ayv .ayv-lb-ficha {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-lb-ficha li {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    align-items: center;
+    gap: .9rem;
+}
+
+.ayv .ayv-lb-ficha .ayv-layered {
+    width: 4rem !important;
+    border-radius: 50%;
+}
+
+.ayv .ayv-lb-ficha b {
+    display: block;
+    font-family: Literata, Georgia, serif;
+    font-weight: 600;
+}
+
+.ayv .ayv-lb-ficha-que {
+    display: block;
+    color: var(--ink);
+    opacity: .8;
+    font-size: .92rem;
+}
+
+.ayv .ayv-lb-ficha-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .45rem;
+}
+
+/* ---------- «Cómo funciona»: the library writes its line on the lending slip itself ---------- */
+.ayv .ayv-lb-fichas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: 1rem 1.4rem;
+    margin: .4rem 0 .2rem;
+}
+
+.ayv .ayv-lb-escribir {
+    display: grid;
+    gap: .35rem;
+}
+
+.ayv .ayv-lb-escribir textarea {
+    display: block;
+    width: 100%;
+    min-height: 6.4rem;
+    padding: .5rem 1rem .3rem;
+    border: 1px solid #d8c7a4;
+    border-radius: 3px;
+    background-color: #fdf8ec;
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 1.95rem, rgba(60, 100, 150, .22) 1.95rem, rgba(60, 100, 150, .22) calc(1.95rem + 1px));
+    background-attachment: local;
+    background-position: 0 .5rem;
+    color: #24406b;
+    font: 700 1.5rem/1.95rem Caveat, "Comic Sans MS", cursive;
+    resize: vertical;
+    box-shadow: 0 8px 16px -14px rgba(30, 43, 42, .7);
+}
+
+/* An empty slip says what goes in its place, in the same hand and lighter (Jujol, 0.265). */
+.ayv .ayv-lb-escribir textarea::placeholder {
+    color: rgba(36, 64, 107, .5);
+    opacity: 1;
+}
+
+.ayv .ayv-lb-escribir textarea:focus-visible {
+    outline: 3px solid var(--coral);
+    outline-offset: 2px;
+}
+
+.ayv .ayv-lb-escribir-que {
+    display: flex;
+    justify-content: space-between;
+    gap: .6rem;
+    color: var(--ink);
+    opacity: .8;
+    font-size: .9rem;
+}
+
+.ayv .ayv-lb-guardado {
+    color: var(--green);
+    font-weight: 700;
+}
+
+/* Without JavaScript the slips are saved with a button; with librito-ayv.js, each one when you leave it. */
+.ayv .ayv-lb-guardar {
+    margin: .3rem 0 0;
+}
+
+.ayv .ayv-lb-solo .ayv-lb-guardar {
+    display: none;
+}
+
+/* The Caveat of the slips: the booklet brings it (fonts/caveat-700.woff2). */
+@font-face {
+    font-family: "Caveat";
+    font-weight: 700;
+    font-display: swap;
+    src: url("fonts/caveat-700.woff2") format("woff2");
+}
+
+/* ---------- The card of twelve and over: the booklet is theirs; the family, if they want ---------- */
+.ayv .ayv-lb-carne {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    align-items: center;
+    gap: .5rem 1rem;
+    margin: 1rem 0;
+    padding: .9rem 1.1rem;
+    border-radius: 14px;
+    background: var(--paper2);
+}
+
+.ayv .ayv-lb-carne .ayv-layered {
+    width: 3.6rem !important;
+    border-radius: 50%;
+}
+
+.ayv .ayv-lb-carne p {
+    margin: 0;
+}
+
+.ayv .ayv-lb-carne-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .8rem;
+    grid-column: 2;
+}
+
+.ayv .ayv-lb-carne-nota {
+    grid-column: 2;
+    color: var(--ink);
+    opacity: .8;
+    font-size: .9rem;
+}
+
+@media (max-width: 30rem) {
+    .ayv .ayv-lb-carne-botones,
+    .ayv .ayv-lb-carne-nota {
+        grid-column: 1 / -1;
+    }
+}

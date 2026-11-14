@@ -1380,3 +1380,32 @@
         sync();
     }
 })();
+
+// The library's slips in «Cómo funciona» (Jujol, 13 Nov 2026): each one is saved when you leave it, as every gesture
+// of that page; without this file, the «Guardar» button under them does it.
+(function () {
+    'use strict';
+    Array.prototype.forEach.call(document.querySelectorAll('form.ayv-lb-lineas'), function (form) {
+        if (!window.fetch || !window.FormData) {
+            return;
+        }
+        form.classList.add('ayv-lb-solo');
+        Array.prototype.forEach.call(form.querySelectorAll('textarea'), function (area) {
+            var antes = area.value;
+            var dicho = form.querySelector('[data-ayv-lb-dicho="' + area.name + '"]');
+            area.addEventListener('blur', function () {
+                if (area.value === antes) {
+                    return;
+                }
+                fetch(form.action, {method: 'POST', body: new FormData(form), credentials: 'same-origin'}).then(function (r) {
+                    if (r.ok) {
+                        antes = area.value;
+                        if (dicho) {
+                            dicho.textContent = dicho.getAttribute('data-guardado');
+                        }
+                    }
+                });
+            });
+        });
+    });
+})();

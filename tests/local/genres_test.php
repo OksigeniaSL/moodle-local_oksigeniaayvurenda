@@ -157,4 +157,23 @@ final class genres_test extends \advanced_testcase {
         genres::save($this->library, array_map(fn($n) => ['label' => 'G' . $n, 'topics' => ['T' . $n]], range(1, 15)));
         $this->assertCount(genres::MAX, genres::of($this->library));
     }
+
+    /**
+     * The topics of a catalogue in French or Portuguese make their genres too, as their keys come out, plurals included.
+     */
+    public function test_known_in_four_languages(): void {
+        $known = [];
+        foreach (genres::KNOWN as $genre => $keys) {
+            foreach ($keys as $key) {
+                $known[$key] = $genre;
+            }
+        }
+        $topics = ['Aventures' => 'adventure', "Romans d'aventures" => 'adventure', 'Bandes dessinées' => 'comic',
+            'Mystères' => 'mystery', 'Romans policiers' => 'mystery', 'Science-fiction' => 'scifi', 'Animaux' => 'animals',
+            'Ficção científica' => 'scifi', 'Histórias em quadrinhos' => 'comic', 'Banda desenhada' => 'comic',
+            'Dragões' => 'fantasy', 'Animais' => 'animals', 'Esportes' => 'sport', 'Aventuras' => 'adventure'];
+        foreach ($topics as $topic => $genre) {
+            $this->assertSame($genre, $known[subjects::key($topic)] ?? null, $topic);
+        }
+    }
 }

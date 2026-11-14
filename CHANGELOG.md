@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.265.0 (2026-11-14)
+
+- **The reader's booklet**, the last two «subidones» of the review of 12 November, from Jujol's mock-ups and Gaudí's
+  cover.
+  - **«My year in books»**: when the school year's classes end, each young reader's year on one sheet, in their own
+    voice: their flower or their sky as the year ended, the books they took home in their order (with «I premiered
+    it»), the island their class planted, the collector cards won that year, their full bingo card, their drawings and
+    their voice (on paper, a QR that plays it), and a line the library writes.
+  - **«My years in books»**: for whoever leaves the school, every year they had here: a road of medallions from the
+    seed to the moons, their first book ever, each year in its block, the first years of which only the flower is kept
+    together, and, to close, their collector cards, the islands of their classes and the library's farewell.
+  - **For the family**: if the centre turns it on in «How your library works» (it starts off), the family gets it the
+    morning after the last day, or when the reader leaves, with Gaudí's cover in the e-mail and in the chats that show
+    the link: a sealed page without an account, to see on a phone, print or keep, and send on. From twelve the booklet
+    is the reader's own: their card says it is ready, and their family gets it only if they turn on «Let my family
+    have it».
+  - **On paper**: one sheet for each reader and year, on one side, on A4 or letter, that reads well photocopied in
+    black and white; the covers take as many columns as the year needs to fit. The tutor prints the whole class from
+    «My class» (a band from three weeks before the last day), and the staff any reader's from their record («Their
+    booklets»).
+  - A new table (`booklet`), in the privacy provider, the centre's copies, the merging of twin readers and the erasure
+    of a reader; a new message (`booklet`).
+- **A shield against robots**: whoever comes without an account to the public window, OAI-PMH, SRU or OPDS may ask for
+  so many pages a minute from one address (120 in the window, 30 in OAI, 60 in the others); past that, they are asked to
+  come back in a minute (429, or 503 with Retry-After in OAI, as the protocol asks). Private addresses (a proxy's) are
+  never counted. A site turns it off with the setting `shield` at 0.
+- **Genres in French and Portuguese**: the topics of a catalogue in those languages make their genres too («Aventures»,
+  «Bandes dessinées», «Ficção científica», «Banda desenhada»…).
+- **The example library in Portuguese and French**, with its titles made up in the grammar of each language, on a site
+  in those languages (it came out in English).
+
 ## 0.264.1 (2026-11-13)
 
 - Jujol's review of the board: the sign and the herald's bubble are opaque paper (the palm showed through them), the

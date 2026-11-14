@@ -91,6 +91,18 @@ if (data_submitted() && confirm_sesskey()) {
         if ($noter) {
             \local_oksigeniaayvurenda\local\blind::note($dateid, (int) $noter->id, optional_param('note', '', PARAM_ALPHA), time());
         }
+    } else if ($do === 'bookletfamily') {
+        // A reader of twelve or over says whether their family gets their booklet (Jujol): only their own.
+        $bookletid = required_param('booklet', PARAM_INT);
+        $mine = $DB->record_exists_sql(
+            'SELECT 1 FROM {local_oksigeniaayvurenda_booklet} b
+               JOIN {local_oksigeniaayvurenda_reader} r ON r.id = b.readerid
+              WHERE b.id = ? AND r.userid = ?',
+            [$bookletid, $USER->id]
+        );
+        if ($mine) {
+            \local_oksigeniaayvurenda\local\booklet::wish($bookletid, optional_param('family', 0, PARAM_BOOL));
+        }
     } else if ($do === 'goal') {
         // A number written, or one of those offered.
         $wanted = optional_param('goalother', 0, PARAM_INT) ?: optional_param('goal', 0, PARAM_INT);
@@ -184,6 +196,33 @@ foreach ($readers as $reader) {
         ) : null;
         $classisland = $layers ? ['islandlayers' => array_map(fn($u) => ['layer' => $u], $layers),
             'islandlabel' => $str('islandlabel', count($plantedall))] : null;
+    }
+    // From twelve, the booklet is theirs (Jujol): when it is ready, a line to see it and to say if their family gets it.
+    $bookletrow = $sky ? \local_oksigeniaayvurenda\local\booklet::on_card($reader, time()) : null;
+    $bookletcard = null;
+    if ($bookletrow && \local_oksigeniaayvurenda\local\booklet::theirs($reader, (int) $bookletrow->yearid)) {
+        $bookletyear = $DB->get_record('local_oksigeniaayvurenda_year', ['id' => $bookletrow->yearid]);
+        $bookletpage = \local_oksigeniaayvurenda\local\booklet::year($reader, $bookletyear);
+        $asks = \local_oksigeniaayvurenda\local\booklet::on((int) $reader->entityid) && $bookletrow->timesent === null;
+        $bookletcard = [
+            'medal' => \local_oksigeniaayvurenda\local\bookletview::medal(
+                'sky',
+                (int) $bookletpage['stage'],
+                $bookletpage['levels'],
+                $str('bookletmysky', \local_oksigeniaayvurenda\local\bookletview::stage_name(
+                    'sky',
+                    (int) $bookletpage['stage']
+                )),
+                64
+            ),
+            'ready' => $bookletrow->kind === 'life' ? $str('bookletcardreadylife') : (!$bookletpage['books']
+                ? $str('bookletcardreadynone') : $str('bookletcardready', count($bookletpage['books']))),
+            'seeurl' => \local_oksigeniaayvurenda\local\booklet::url((int) $bookletrow->id),
+            'see' => $str('bookletcardsee'),
+            'family' => $asks ? ['value' => $bookletrow->tellfamily ? '0' : '1', 'pressed' => (bool) $bookletrow->tellfamily,
+                'label' => $str('bookletcardfamily'), 'hint' => $str('bookletcardfamilyhint'), 'bookletid' => (int) $bookletrow->id,
+                'action' => $PAGE->url->out(false), 'sesskey' => sesskey()] : null,
+        ];
     }
     // The ship of the class this term (P5, Jujol): how far the class is and when it sails, in one line.
     $classship = $group !== '' && ($look === 'flower' || $sky) ? \local_oksigeniaayvurenda\local\challenges::card_line(
@@ -361,6 +400,7 @@ foreach ($readers as $reader) {
         'classgarden' => $classgarden,
         'classisland' => $classisland,
         'classship' => $classship,
+        'bookletcard' => $bookletcard,
         'hasclassgarden' => (bool) $classgarden,
         'classgardenheading' => $str('challengegarden'),
         'classgardenhint' => $str('challengegardenhint'),

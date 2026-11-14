@@ -84,6 +84,12 @@ $definitions = [
         'simplekeys' => true,
         'ttl' => 2 * DAYSECS,
     ],
+    // The pages asked for this minute from each address at the public doors (the shield against robots).
+    'shield' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 120,
+    ],
     // The moments to celebrate of each centre this week, for an hour: the home, the block and Aty ask for them.
     'moments' => [
         'mode' => cache_store::MODE_APPLICATION,

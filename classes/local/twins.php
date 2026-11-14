@@ -38,7 +38,7 @@ final class twins {
 
     /** @var string[] Tables whose rows belong to a reader. */
     public const OWNED = ['purchasewho', 'loan', 'hold', 'digital', 'voiceconsent', 'voiceinvite', 'sanction', 'formatask',
-        'ill', 'find', 'blind'];
+        'ill', 'find', 'blind', 'booklet'];
 
     /**
      * Active readers that look like the same person: same words in the name, same type; in the order of the name.

@@ -75,20 +75,7 @@ final class garden {
         global $DB;
         $now = $now ?? time();
         $year = years::around((int) $reader->entityid, $now);
-        $loans = self::loans((int) $reader->id, (int) $year->id);
-        $books = [];
-        foreach (array_reverse($loans) as $loan) {
-            if (!isset($books[$loan['recordid']])) {
-                $books[$loan['recordid']] = ['id' => $loan['recordid'], 'title' => $loan['title'], 'note' => $loan['note']];
-            }
-        }
-        $covers = covers::urls(array_keys($books));
-        // The ones they premiered: the first to take home a new copy (P2).
-        $premiered = array_flip(premieres::of((int) $reader->id, (int) $year->id));
-        foreach ($books as $id => $book) {
-            $books[$id]['cover'] = $covers[$id] ?? null;
-            $books[$id]['premiere'] = isset($premiered[$id]);
-        }
+        $books = self::books($reader, (int) $year->id, true);
         $past = [];
         $years = $DB->get_records_sql(
             'SELECT DISTINCT y.id, y.name, y.timestart, y.timeend
@@ -127,7 +114,33 @@ final class garden {
             $past[] = ['year' => $other->name, 'group' => $group, 'met' => $met]
                 + (is_array($flower) && isset($flower['levels'], $flower['stage']) ? $flower : self::flower($reader, $other));
         }
-        return ['year' => $year, 'flower' => self::flower($reader, $year), 'books' => array_values($books), 'past' => $past];
+        return ['year' => $year, 'flower' => self::flower($reader, $year), 'books' => $books, 'past' => $past];
+    }
+
+    /**
+     * The books a reader took home in a school year, each once: the last first in the album, in their order in the
+     * booklet.
+     *
+     * @param \stdClass $reader
+     * @param int $yearid
+     * @param bool $latest The last one first.
+     * @return array[] id, title, note, cover and premiere (the first to take home a new copy, P2).
+     */
+    public static function books(\stdClass $reader, int $yearid, bool $latest = false): array {
+        $loans = self::loans((int) $reader->id, $yearid);
+        $books = [];
+        foreach ($latest ? array_reverse($loans) : $loans as $loan) {
+            if (!isset($books[$loan['recordid']])) {
+                $books[$loan['recordid']] = ['id' => $loan['recordid'], 'title' => $loan['title'], 'note' => $loan['note']];
+            }
+        }
+        $covers = covers::urls(array_keys($books));
+        $premiered = array_flip(premieres::of((int) $reader->id, $yearid));
+        foreach ($books as $id => $book) {
+            $books[$id]['cover'] = $covers[$id] ?? null;
+            $books[$id]['premiere'] = isset($premiered[$id]);
+        }
+        return array_values($books);
     }
 
     /**

@@ -1,0 +1,104 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/booklet_sheet
+
+    «Mi curso en libros» (Jujol, 13 November): one school year of a reader on one sheet, the same on the family's page, on
+    the tutor's page that prints the class and on the reader's record. Written in the reader's voice. On paper the covers
+    take as many columns as the year needs to fit (sheetcols, worked out by the server); with eight or fewer, their titles
+    go under them.
+
+    Example context (json):
+    {
+        "sheetid": "r1y2", "sheettitle": "Mi curso en libros", "readername": "Lucía", "groupname": "3.º de Primaria B",
+        "yearname": "2026-2027", "medal": "<span class=\"ayv-layered\" role=\"img\" aria-label=\"Mi flor: Flor\"></span>",
+        "stagename": "Flor", "stageline": "así acabó el curso",
+        "hasbooks": true, "bookshead": "Los libros que me llevé", "bookcount": 2, "sheetcols": 3, "titled": true,
+        "premierehint": "<b>Lo estrené:</b> nadie se lo había llevado antes.",
+        "books": [{"bookcover": "https://example.com/c.jpg", "booktitle": "La isla del cometa", "premiere": "Lo estrené"},
+            {"bookcover": "https://example.com/atlas.jpg", "bookbg": "#17574c", "bookink": "#ffffff", "booktitle": "Mi primer atlas", "premiere": ""}],
+        "body": true, "islandonly": false,
+        "island": {"islandhead": "La isla de mi clase", "islandlabel": "La isla de 3.º de Primaria B",
+            "layers": [{"layer": "https://example.com/isla/base.webp"}], "planted": [{"plantedlabel": "Trimestre 1 · Rincones"}]},
+        "cromos": {"cromoshead": "Mis cromos", "cromoscount": "1 de 7",
+            "list": [{"cromoart": "https://example.com/cromo-8.webp", "cromoname": "Lengua y literatura", "cromowhen": "16 de octubre"}]},
+        "cartilla": {"cartillahead": "Mi cartilla", "cartillaimg": "https://example.com/d.jpg", "cartillaalt": "El diploma",
+            "cartillafull": "¡Cartilla llena!", "cartillaname": "La cartilla del recorrido", "cartillawhen": "29 de noviembre de 2026"},
+        "told": {"toldhead": "Lo que conté", "hasdrawings": true,
+            "drawings": [{"drawingurl": "https://example.com/dibujo.png", "drawingalt": "Mi dibujo de «La isla del cometa»",
+                "drawingtitle": "«La isla del cometa»"}],
+            "voice": {"voicetext": "Leí «La isla del cometa» en voz alta", "audio": "https://example.com/v.mp3",
+                "qr": "https://example.com/qr.png", "paper": "Leí «La isla del cometa» en voz alta. Escanéalo con el móvil para oírla.",
+                "listen": "Escuchar", "pause": "Pausar"} },
+        "note": {"notetext": "Gracias por cada visita de este curso.", "notesign": "La biblioteca · Biblioteca de ejemplo",
+            "stamp": "Biblioteca", "stampyear": "2026-2027"}
+    }
+}}
+<article class="lb-hoja lb-curso" aria-labelledby="lb-titulo-{{sheetid}}">
+    <header class="lb-portada">
+        <h1 class="lb-titulo" id="lb-titulo-{{sheetid}}">{{sheettitle}}</h1>
+        <p class="lb-etiqueta"><span class="lb-nombre" id="lb-nombre-{{sheetid}}">{{readername}}</span></p>
+        <p class="lb-clase">{{#groupname}}<b>{{groupname}}</b> · {{/groupname}}{{yearname}}</p>
+        <figure class="lb-medalla">{{{medal}}}<figcaption><b>{{stagename}}</b>{{stageline}}</figcaption></figure>
+    </header>
+    {{#hasbooks}}
+    <section class="lb-libros">
+        <h2 class="lb-seccion" id="lb-libros-{{sheetid}}">{{bookshead}} <span class="lb-cuenta">{{bookcount}}</span></h2>
+        {{#premierehint}}<p class="lb-leyenda">{{{premierehint}}}</p>{{/premierehint}}
+        <ol class="lb-balda{{#titled}} lb-balda-titulos{{/titled}}" style="--lb-cols-papel: {{sheetcols}}">{{#books}}<li class="lb-libro"><span class="lb-tapa">{{#bookcover}}<img src="{{bookcover}}" alt="" width="400" height="600">{{/bookcover}}{{^bookcover}}<span class="lb-tapa-sin" style="background: {{bookbg}}; color: {{bookink}};">{{booktitle}}</span>{{/bookcover}}{{#premiere}}<span class="lb-estreno">{{premiere}}</span>{{/premiere}}</span><span class="lb-libro-titulo">{{booktitle}}</span></li>{{/books}}</ol>
+    </section>
+    {{/hasbooks}}
+    {{#body}}
+    <div class="lb-cuerpo{{#islandonly}} lb-cuerpo-isla{{/islandonly}}">
+        {{#island}}
+        <section class="lb-isla">
+            <h2 class="lb-seccion" id="lb-isla-{{sheetid}}">{{islandhead}}</h2>
+            <figure class="lb-isla-figura" role="img" aria-label="{{islandlabel}}">{{#layers}}<img src="{{layer}}" alt="" width="1600" height="1000">{{/layers}}</figure>
+            <ul class="lb-plantado">{{#planted}}<li>{{plantedlabel}}</li>{{/planted}}</ul>
+        </section>
+        {{/island}}
+        {{#cromos}}
+        <section>
+            <h2 class="lb-seccion" id="lb-cromos-{{sheetid}}">{{cromoshead}} <span class="lb-cuenta">{{cromoscount}}</span></h2>
+            <ul class="lb-cromos">{{#list}}<li class="lb-cromo"><span class="lb-cromo-carta"><img src="{{cromoart}}" alt="" width="600" height="840"><span class="lb-cromo-nombre">{{cromoname}}</span></span>{{#cromowhen}}<span class="lb-cromo-cuando">{{cromowhen}}</span>{{/cromowhen}}</li>{{/list}}</ul>
+        </section>
+        {{/cromos}}
+        {{#cartilla}}
+        <section>
+            <h2 class="lb-seccion" id="lb-cartilla-{{sheetid}}">{{cartillahead}}</h2>
+            <div class="lb-cartilla"><span class="lb-cartilla-foto"><img src="{{cartillaimg}}" alt="{{cartillaalt}}" width="900" height="636"></span>
+                <p class="lb-cartilla-texto"><b>{{cartillafull}}</b><span>{{cartillaname}}, {{cartillawhen}}</span></p></div>
+        </section>
+        {{/cartilla}}
+        {{#told}}
+        <section class="lb-conte">
+            <h2 class="lb-seccion" id="lb-conte-{{sheetid}}">{{toldhead}}</h2>
+            {{#hasdrawings}}<ul class="lb-dibujos">{{#drawings}}<li><figure class="lb-dibujo"><img src="{{drawingurl}}" alt="{{drawingalt}}" width="640" height="400"><figcaption>{{drawingtitle}}</figcaption></figure></li>{{/drawings}}</ul>{{/hasdrawings}}
+            {{#voice}}
+            <div class="lb-voz lb-solo-pantalla" id="voz-{{sheetid}}"><button type="button" class="lb-voz-play" aria-pressed="false" aria-label="{{listen}}" data-escuchar="{{listen}}" data-pausar="{{pause}}"><svg class="lb-icono-play" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><svg class="lb-icono-pausa" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg></button>
+                <span class="lb-voz-texto">{{voicetext}}</span><audio controls preload="none" src="{{audio}}"></audio></div>
+            <div class="lb-qr lb-solo-papel"><img src="{{qr}}" alt="" width="37" height="37"><span>{{paper}}</span></div>
+            {{/voice}}
+        </section>
+        {{/told}}
+    </div>
+    {{/body}}
+    {{#note}}
+    <footer class="lb-nota"><p class="lb-nota-texto">{{notetext}}</p><p class="lb-nota-firma">{{notesign}}</p>
+        <span class="lb-sello" aria-hidden="true">{{stamp}}<b>{{stampyear}}</b></span></footer>
+    {{/note}}
+</article>

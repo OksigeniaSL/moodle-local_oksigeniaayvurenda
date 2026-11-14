@@ -116,6 +116,7 @@ final class erasure {
         $DB->delete_records(self::T . 'voiceconsent', ['readerid' => $readerid]);
         $DB->delete_records(self::T . 'keepsake', ['readerid' => $readerid]);
         $DB->delete_records(self::T . 'find', ['readerid' => $readerid]);
+        $DB->delete_records(self::T . 'booklet', ['readerid' => $readerid]);
         // Their blind dates stay the library's, without who took them: what was said of each is no one's.
         $DB->set_field(self::T . 'blind', 'readerid', null, ['readerid' => $readerid]);
         $DB->delete_records(self::T . 'questreader', ['readerid' => $readerid]);

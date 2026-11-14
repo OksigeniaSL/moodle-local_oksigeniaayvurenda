@@ -17,6 +17,7 @@
 namespace local_oksigeniaayvurenda\local\sources;
 
 use local_oksigeniaayvurenda\core\readers\oneroster as roster;
+use local_oksigeniaayvurenda\local\booklet;
 use local_oksigeniaayvurenda\local\tutors;
 use local_oksigeniaayvurenda\local\years;
 
@@ -111,8 +112,13 @@ final class oneroster {
         }
         $left = 0;
         foreach (array_keys($leaving) as $readerid) {
-            $left += $DB->count_records(self::T . 'reader', ['id' => $readerid, 'status' => 'active']);
+            $was = $DB->get_record(self::T . 'reader', ['id' => $readerid, 'status' => 'active']);
+            $left += $was ? 1 : 0;
             $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $readerid, 'status' => 'active']);
+            // Their whole life's booklet, for the family, if the centre sends them.
+            if ($was) {
+                booklet::left($was, $now);
+            }
         }
         // The tutor of each group, when its teacher has an account and the group has no tutor yet.
         $year = years::around($entityid, $now);

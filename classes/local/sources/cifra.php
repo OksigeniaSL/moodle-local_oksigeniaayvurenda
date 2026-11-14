@@ -187,6 +187,8 @@ final class cifra {
             foreach ($leaving as $readerid) {
                 $DB->set_field(self::T . 'reader', 'status', 'left', ['id' => $readerid]);
                 $left++;
+                // Their whole life's booklet, for the family, if the centre sends them.
+                \local_oksigeniaayvurenda\local\booklet::left($DB->get_record(self::T . 'reader', ['id' => $readerid]), $now);
             }
         } else {
             $stats['held'] = count($leaving);

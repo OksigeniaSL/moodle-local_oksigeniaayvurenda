@@ -43,23 +43,31 @@ final class genres {
 
     /**
      * The genres a library may be offered, each with the keys of the topics that make it (subjects::key: lower case,
-     * no accents, each word in the singular), in Spanish and in English.
+     * no accents, each word in the singular), in Spanish, English, French and Portuguese. A French plural in -res, -nes
+     * or -des loses its «es» as a Spanish one does («Aventures», aventur), so those keys are here too.
      */
     public const KNOWN = [
         'mystery' => ['misterio', 'detective', 'intriga', 'policiaca', 'policiaco', 'novela policiaca', 'enigma', 'mystery',
-            'crime', 'detective story'],
-        'fantasy' => ['fantasia', 'magia', 'bruja', 'hada', 'dragon', 'mago', 'fantasy', 'magic', 'witch', 'wizard', 'fairy'],
-        'adventure' => ['aventura', 'pirata', 'adventure', 'adventure story', 'pirate'],
-        'humour' => ['humor', 'humorismo', 'comedia', 'humour', 'humorous story', 'comedy'],
-        'horror' => ['terror', 'miedo', 'fantasma', 'vampiro', 'horror', 'ghost', 'ghost story', 'vampire'],
-        'scifi' => ['ciencia ficcion', 'robot', 'science fiction'],
-        'love' => ['amor', 'romantica', 'novela romantica', 'love', 'love story', 'romance'],
-        'comic' => ['comic', 'historieta', 'tebeo', 'novela grafica', 'manga', 'graphic novel', 'comic book'],
-        'poetry' => ['poesia', 'poema', 'poetry', 'poem'],
-        'drama' => ['teatro', 'drama', 'play'],
-        'sport' => ['deporte', 'futbol', 'sport', 'football', 'soccer'],
-        'animals' => ['animal', 'mascota', 'pet'],
-        'historical' => ['novela historica', 'historical fiction', 'historical novel'],
+            'crime', 'detective story', 'roman policier', 'policier', 'polar', 'mystere', 'myster', 'enquete', 'romance policial',
+            'policial', 'detetive'],
+        'fantasy' => ['fantasia', 'magia', 'bruja', 'hada', 'dragon', 'mago', 'fantasy', 'magic', 'witch', 'wizard', 'fairy',
+            'magie', 'sorciere', 'sorcier', 'fee', 'magicien', 'bruxa', 'fada', 'dragao', 'dragoe', 'feiticeiro'],
+        'adventure' => ['aventura', 'pirata', 'adventure', 'adventure story', 'pirate', 'aventure', 'aventur', 'roman d aventure',
+            'roman d aventur', 'romance de aventura'],
+        'humour' => ['humor', 'humorismo', 'comedia', 'humour', 'humorous story', 'comedy', 'roman humoristique', 'comedie'],
+        'horror' => ['terror', 'miedo', 'fantasma', 'vampiro', 'horror', 'ghost', 'ghost story', 'vampire', 'horreur',
+            'epouvante', 'fantome', 'medo'],
+        'scifi' => ['ciencia ficcion', 'robot', 'science fiction', 'anticipation', 'ficcao cientifica', 'robo'],
+        'love' => ['amor', 'romantica', 'novela romantica', 'love', 'love story', 'romance', 'amour', 'roman d amour',
+            'romance romantico'],
+        'comic' => ['comic', 'historieta', 'tebeo', 'novela grafica', 'manga', 'graphic novel', 'comic book', 'bande dessinee',
+            'band dessinee', 'bd', 'roman graphique', 'historia em quadrinho', 'quadrinho', 'banda desenhada', 'gibi',
+            'romance grafico'],
+        'poetry' => ['poesia', 'poema', 'poetry', 'poem', 'poesie', 'poeme'],
+        'drama' => ['teatro', 'drama', 'play', 'theatre', 'drame'],
+        'sport' => ['deporte', 'futbol', 'sport', 'football', 'soccer', 'esporte', 'desporto', 'futebol'],
+        'animals' => ['animal', 'mascota', 'pet', 'animaux', 'animai', 'bicho'],
+        'historical' => ['novela historica', 'historical fiction', 'historical novel', 'roman historique', 'romance historico'],
     ];
 
     /** @var int[] Colours of the corners (catalogue's), from where the genres start, to tell them from the classes. */

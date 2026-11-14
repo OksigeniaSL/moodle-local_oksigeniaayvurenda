@@ -80,6 +80,10 @@ class send_notices extends \core\task\scheduled_task {
                     $now,
                     $every
                 ),
+                'the readers\' booklets, to their families' => fn() => \local_oksigeniaayvurenda\local\booklet::run(
+                    $now,
+                    $every
+                ),
                 'the library\'s news to whoever signed up' => fn() => \local_oksigeniaayvurenda\local\newsletter::run(
                     $now,
                     $every

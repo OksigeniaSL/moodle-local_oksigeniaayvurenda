@@ -87,6 +87,14 @@
     {{#choosefirst}}<div class="ayv-mine-first">{{> local_oksigeniaayvurenda/card_lookchoice}}</div>{{/choosefirst}}
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
     {{#classship}}<div class="ayv-bc-carne" data-estado="{{state}}">{{> local_oksigeniaayvurenda/garland}}<p>{{{line}}}</p></div>{{/classship}}
+    {{#bookletcard}}
+    <div class="ayv-lb-carne">{{{medal}}}
+        <p>{{{ready}}}</p>
+        <span class="ayv-lb-carne-botones"><a class="ayv-button" href="{{seeurl}}">{{see}}</a>{{#family}}<button class="ayv-cf-luz" type="submit" form="ayv-lb-familia" name="family" value="{{value}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/family}}</span>
+        {{#family}}<p class="ayv-lb-carne-nota">{{hint}}</p>{{/family}}
+    </div>
+    {{#family}}<form id="ayv-lb-familia" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="bookletfamily"><input type="hidden" name="booklet" value="{{bookletid}}"></form>{{/family}}
+    {{/bookletcard}}
     {{#haspaths}}
     <h2 class="ayv-section-title">{{pathsheading}}</h2>
     {{#listenpaths}}<p class="ayv-listen-row">{{> local_oksigeniaayvurenda/listen}}</p>{{/listenpaths}}

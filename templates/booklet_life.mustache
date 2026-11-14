@@ -1,0 +1,104 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/booklet_life
+
+    «Mis años en libros» (Jujol, 13 November): every school year of a reader who leaves the centre. A cover with one
+    medallion for each year and their first book ever; the first years of which only the flower is kept, together; each
+    year with books in its own block, never split between two pages; and, closing it, their collection of collector
+    cards, the islands of their classes and the library's farewell.
+
+    Example context (json):
+    {
+        "lifeid": "r1", "lifetitle": "Mis años en libros", "readername": "Daniel",
+        "fromto": "De <b>1.º de Infantil A</b> a <b>4.º de ESO B</b> · 2014-2027", "library": "Biblioteca de ejemplo",
+        "emblem": "https://example.com/emblema.svg", "hasroad": true,
+        "road": [{"roadanchor": "y1-r1", "roadmedal": "<span class=\"ayv-layered\" role=\"img\" aria-label=\"2014-2015\"></span>",
+            "roadshort": "14-15"}], "roadhint": "Toca un curso para ir a él.",
+        "first": {"firsthead": "Mi primer libro", "firstcover": "https://example.com/primero.jpg", "firstbg": "#17574c", "firstink": "#ffffff",
+            "firsttitle": "El erizo que leía", "firstwhen": "En 1.º de Infantil, el 14 de octubre de 2014"},
+        "count": "<b>13 cursos</b> en la biblioteca.",
+        "firsts": {"firstshead": "Mis primeros cursos", "firstskept": "De aquellos cursos quedan las flores.",
+            "list": [{"firstanchor": "y1-r1", "firstmedal": "<span class=\"ayv-layered\" role=\"img\" aria-label=\"2014-2015\"></span>",
+                "firstyear": "2014-2015", "firstwhat": "1.º de Infantil A · Brote"}]},
+        "years": [{"yearanchor": "y2-r1", "yearmedal": "<span class=\"ayv-layered\" role=\"img\" aria-label=\"2018-2019\"></span>",
+            "yearname": "2018-2019", "yearwhat": "<b>2.º de Primaria A</b> · Flor · 18 libros", "bookshead": "Los libros que me llevé",
+            "hasbooks": true, "bookcount": 1, "yearcols": 6, "yeartitled": true,
+            "books": [{"bookcover": "https://example.com/atlas.jpg", "bookbg": "#17574c", "bookink": "#ffffff", "booktitle": "Mi primer atlas", "premiere": ""}],
+            "hasrow": true, "yearisland": {"islandhead": "La isla de 2.º de Primaria A", "islandlabel": "La isla de 2.º de Primaria A",
+                "layers": [{"layer": "https://example.com/isla/base.webp"}]},
+            "yearcromos": {"cromoshead": "Mis cromos", "cromoscount": "1",
+                "list": [{"cromoart": "https://example.com/cromo-0.webp", "cromoname": "Generalidades", "cromowhen": ""}]} }],
+        "closing": {"collectionhead": "Mi colección de cromos", "collectioncount": "2",
+            "collection": [{"cromoart": "https://example.com/cromo-0.webp", "cromoname": "Generalidades", "cromowhen": "2.º de Primaria"}],
+            "islandshead": "Las islas de mis clases", "hasislands": true,
+            "islands": [{"islandlabel": "La isla de 2.º de Primaria A", "islandcaption": "2.º de Primaria A · 2018-2019",
+                "layers": [{"layer": "https://example.com/isla/base.webp"}]}],
+            "note": {"notetext": "Gracias por todos estos años.", "notesign": "La biblioteca · Biblioteca de ejemplo",
+                "stamp": "Biblioteca", "stampyear": "2014-2027"} }
+    }
+}}
+<article class="lb-hoja lb-tapa-vida" aria-labelledby="lb-titulo-{{lifeid}}">
+    <h1 class="lb-titulo" id="lb-titulo-{{lifeid}}">{{lifetitle}}</h1>
+    <p class="lb-etiqueta"><span class="lb-nombre" id="lb-nombre-{{lifeid}}">{{readername}}</span></p>
+    <p class="lb-clase">{{{fromto}}}</p>
+    <p class="lb-biblio"><img src="{{emblem}}" alt="" width="32" height="32">{{library}}</p>
+    {{#hasroad}}<ol class="lb-camino">{{#road}}<li><a href="#{{roadanchor}}">{{{roadmedal}}}<span>{{roadshort}}</span></a></li>{{/road}}</ol>{{/hasroad}}
+    {{#roadhint}}<p class="lb-camino-ayuda lb-solo-pantalla">{{roadhint}}</p>{{/roadhint}}
+    {{#first}}
+    <div class="lb-primero"><span class="lb-tapa">{{#firstcover}}<img src="{{firstcover}}" alt="" width="400" height="600">{{/firstcover}}{{^firstcover}}<span class="lb-tapa-sin" style="background: {{firstbg}}; color: {{firstink}};">{{firsttitle}}</span>{{/firstcover}}</span>
+        <div><p class="lb-primero-que">{{firsthead}}</p><p class="lb-primero-titulo">{{firsttitle}}</p><p class="lb-primero-cuando">{{firstwhen}}</p></div></div>
+    {{/first}}
+    <p class="lb-cifras">{{{count}}}</p>
+</article>
+{{#firsts}}
+<section class="lb-hoja lb-ano">
+    <h2 class="lb-ano-curso" id="lb-primeros-{{lifeid}}">{{firstshead}}</h2>
+    <p class="lb-ano-que">{{firstskept}}</p>
+    <ul class="lb-anos-solo">{{#list}}<li id="{{firstanchor}}">{{{firstmedal}}}<span><b>{{firstyear}}</b><span>{{firstwhat}}</span></span></li>{{/list}}</ul>
+</section>
+{{/firsts}}
+{{#years}}
+<section class="lb-hoja lb-ano" id="{{yearanchor}}">
+    <header class="lb-ano-cabeza"><span class="lb-ano-medalla">{{{yearmedal}}}</span>
+        <div><h2 class="lb-ano-curso" id="{{yearanchor}}-t">{{yearname}}</h2><p class="lb-ano-que">{{{yearwhat}}}</p></div></header>
+    {{#hasbooks}}
+    <h3 class="lb-seccion">{{bookshead}} <span class="lb-cuenta">{{bookcount}}</span></h3>
+    <ol class="lb-balda{{#yeartitled}} lb-balda-titulos{{/yeartitled}}" style="--lb-cols-papel: {{yearcols}}">{{#books}}<li class="lb-libro"><span class="lb-tapa">{{#bookcover}}<img src="{{bookcover}}" alt="" width="400" height="600">{{/bookcover}}{{^bookcover}}<span class="lb-tapa-sin" style="background: {{bookbg}}; color: {{bookink}};">{{booktitle}}</span>{{/bookcover}}{{#premiere}}<span class="lb-estreno">{{premiere}}</span>{{/premiere}}</span><span class="lb-libro-titulo">{{booktitle}}</span></li>{{/books}}</ol>
+    {{/hasbooks}}
+    {{#hasrow}}
+    <div class="lb-ano-fila">
+        {{#yearisland}}<div><h3 class="lb-seccion">{{islandhead}}</h3><figure class="lb-isla-figura" role="img" aria-label="{{islandlabel}}">{{#layers}}<img src="{{layer}}" alt="" width="1600" height="1000">{{/layers}}</figure></div>{{/yearisland}}
+        {{#yearcromos}}<div><h3 class="lb-seccion">{{cromoshead}} <span class="lb-cuenta">{{cromoscount}}</span></h3><ul class="lb-cromos">{{#list}}<li class="lb-cromo"><span class="lb-cromo-carta"><img src="{{cromoart}}" alt="" width="600" height="840"><span class="lb-cromo-nombre">{{cromoname}}</span></span></li>{{/list}}</ul></div>{{/yearcromos}}
+    </div>
+    {{/hasrow}}
+</section>
+{{/years}}
+{{#closing}}
+<article class="lb-hoja lb-cierre" aria-labelledby="lb-cierre-{{lifeid}}">
+    <h2 class="lb-seccion" id="lb-cierre-{{lifeid}}">{{collectionhead}} <span class="lb-cuenta">{{collectioncount}}</span></h2>
+    <ul class="lb-cromos">{{#collection}}<li class="lb-cromo"><span class="lb-cromo-carta"><img src="{{cromoart}}" alt="" width="600" height="840"><span class="lb-cromo-nombre">{{cromoname}}</span></span>{{#cromowhen}}<span class="lb-cromo-cuando">{{cromowhen}}</span>{{/cromowhen}}</li>{{/collection}}</ul>
+    {{#hasislands}}
+    <h2 class="lb-seccion">{{islandshead}}</h2>
+    <ul class="lb-archipielago">{{#islands}}<li><figure><figure class="lb-isla-figura" role="img" aria-label="{{islandlabel}}">{{#layers}}<img src="{{layer}}" alt="" width="1600" height="1000">{{/layers}}</figure><figcaption>{{islandcaption}}</figcaption></figure></li>{{/islands}}</ul>
+    {{/hasislands}}
+    {{#note}}
+    <footer class="lb-nota"><p class="lb-nota-texto">{{notetext}}</p><p class="lb-nota-firma">{{notesign}}</p>
+        <span class="lb-sello" aria-hidden="true">{{stamp}}<b>{{stampyear}}</b></span></footer>
+    {{/note}}
+</article>
+{{/closing}}

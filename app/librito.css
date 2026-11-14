@@ -1,0 +1,1571 @@
+/* The reader's booklet (Jujol, 13 Nov 2026): «Mi curso en libros», the album of a school year, and «Mis años en libros»,
+   all the years of a reader who leaves. One sheet for the phone, the wide screen and paper: the family opens it from a
+   sealed link (WhatsApp, mail), the tutor prints the whole class on the last day, the staff prints one from the record.
+   In the child's voice, as Gaudí's postcard «Mi primer libro». The world is the album's: paper, a tag with the name, the
+   flower (or the sky) as it ended, the covers in their order, the island of the class and the library's slip.
+   Paper first: A4 and Letter from the browser (Chrome 93, Firefox 98), one side, and it holds a black and white
+   photocopy: nothing depends on a background or a colour. Old browsers: no :has(), no color-mix(), no container units.
+   --lb-acento is the library's colour; data-piel="cielo" is the sober skin of twelve and over. */
+@font-face { font-family: "Literata"; font-weight: 600; font-display: swap; src: url("fonts/literata-600.woff2") format("woff2"); }
+@font-face { font-family: "Andika"; font-weight: 400; font-display: swap; src: url("fonts/andika-400.woff2") format("woff2"); }
+@font-face { font-family: "Andika"; font-weight: 700; font-display: swap; src: url("fonts/andika-700.woff2") format("woff2"); }
+@font-face { font-family: "Caveat"; font-weight: 700; font-display: swap; src: url("fonts/caveat-700.woff2") format("woff2"); }
+
+:root {
+    --lb-acento: #17574c;
+    --lb-sobre-acento: #fff;
+    --lb-coral: #a8402a;
+    --lb-oro: #b8862a;
+    --lb-mesa: #ece2cc;
+    --lb-papel: #fffdf7;
+    --lb-velo: rgba(30, 43, 42, .06);
+    --lb-tinta: #1e2b2a;
+    --lb-suave: #4f5b57;
+    --lb-linea: rgba(30, 43, 42, .16);
+    --lb-sombra: 0 1px 0 rgba(30, 43, 42, .06), 0 22px 44px -30px rgba(30, 43, 42, .55);
+    --lb-nombre: #b4462f;
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="claro"]) {
+        --lb-acento: #8fd3c1;
+        --lb-sobre-acento: #0e1c1a;
+        --lb-coral: #f08a72;
+        --lb-oro: #e2b75c;
+        --lb-mesa: #0a1412;
+        --lb-papel: #14211e;
+        --lb-velo: rgba(236, 228, 212, .07);
+        --lb-tinta: #ece4d4;
+        --lb-suave: #b9c3bf;
+        --lb-linea: rgba(236, 228, 212, .18);
+        --lb-sombra: 0 0 0 1px rgba(236, 228, 212, .06), 0 22px 44px -30px #000;
+    }
+}
+
+:root[data-tema="oscuro"] {
+    --lb-acento: #8fd3c1;
+    --lb-sobre-acento: #0e1c1a;
+    --lb-coral: #f08a72;
+    --lb-oro: #e2b75c;
+    --lb-mesa: #0a1412;
+    --lb-papel: #14211e;
+    --lb-velo: rgba(236, 228, 212, .07);
+    --lb-tinta: #ece4d4;
+    --lb-suave: #b9c3bf;
+    --lb-linea: rgba(236, 228, 212, .18);
+    --lb-sombra: 0 0 0 1px rgba(236, 228, 212, .06), 0 22px 44px -30px #000;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--lb-mesa);
+    color: var(--lb-tinta);
+    font: 1.0625rem/1.5 "Andika", system-ui, sans-serif;
+}
+
+.lb {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: .9rem clamp(.6rem, 3vw, 1.5rem) 2.5rem;
+}
+
+.lb img {
+    max-width: 100%;
+}
+
+.lb :where(h1, h2, h3, p, figure) {
+    margin: 0;
+}
+
+/* What only the screen has, and what only paper has (the QR of the voice). */
+.lb-solo-papel {
+    display: none;
+}
+
+/* ---------- The bar: the library, quiet, and what to do with the booklet ---------- */
+.lb-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem 1rem;
+    padding: .2rem 0 1rem;
+}
+
+.lb-biblio {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    color: var(--lb-tinta);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.lb-biblio img {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+}
+
+.lb-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.lb-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 48px;
+    padding: .55rem 1.15rem;
+    border: 2px solid var(--lb-acento);
+    border-radius: 999px;
+    background: var(--lb-acento);
+    color: var(--lb-sobre-acento);
+    font: 700 1rem/1.2 "Andika", system-ui, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.lb-boton-suave {
+    background: transparent;
+    color: var(--lb-acento);
+}
+
+.lb-boton svg {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.lb-boton:focus-visible,
+.lb-voz-play:focus-visible,
+.lb-indice a:focus-visible {
+    outline: 3px solid var(--lb-coral);
+    outline-offset: 3px;
+}
+
+/* Without JavaScript the browser prints and shares from its own menu: the buttons that need it go away. */
+.lb-sin-js [data-lb] {
+    display: none;
+}
+
+.lb-pasado {
+    flex-basis: 100%;
+    color: var(--lb-suave);
+    font-size: .95rem;
+    text-align: right;
+}
+
+.lb-pasado:empty {
+    display: none;
+}
+
+/* ---------- The sheet: paper on the desk ---------- */
+.lb-hoja {
+    position: relative;
+    margin: 0 0 1.4rem;
+    padding: clamp(1.1rem, 4.5vw, 2.8rem);
+    border-radius: 10px;
+    background: var(--lb-papel);
+    box-shadow: var(--lb-sombra);
+}
+
+/* ---------- The cover of the course: the title, the name on its tag, the class, and the flower as it ended ---------- */
+.lb-portada {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "titulo medalla" "nombre medalla" "clase medalla";
+    align-items: center;
+    gap: .2rem 2rem;
+}
+
+.lb-titulo {
+    grid-area: titulo;
+    align-self: end;
+    color: var(--lb-acento);
+    font: 600 clamp(1.7rem, 6.4vw, 2.7rem)/1.1 "Literata", Georgia, serif;
+}
+
+.lb-etiqueta {
+    grid-area: nombre;
+    justify-self: start;
+    margin: .55rem 0 .45rem -.2rem;
+    filter: drop-shadow(0 6px 8px rgba(30, 43, 42, .2));
+}
+
+/* The tag of the postcard: cream card, a dashed seam, the corner cut and its eyelet. It stays light in dark mode:
+   it is an object. */
+.lb-nombre {
+    position: relative;
+    display: inline-block;
+    padding: .2rem 2.7rem .3rem 1.35rem;
+    background: #fffaf0;
+    color: var(--lb-nombre);
+    font: 700 clamp(2.6rem, 12vw, 4.4rem)/1.05 "Caveat", "Comic Sans MS", cursive;
+    transform: rotate(-2.5deg);
+    clip-path: polygon(0 0, calc(100% - 1.15rem) 0, 100% 1.15rem, 100% calc(100% - 1.15rem), calc(100% - 1.15rem) 100%, 0 100%);
+}
+
+.lb-nombre::before {
+    content: "";
+    position: absolute;
+    top: .32rem;
+    right: 1.55rem;
+    bottom: .32rem;
+    left: .32rem;
+    border: 2px dashed rgba(180, 70, 47, .5);
+    border-radius: 3px;
+}
+
+.lb-nombre::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: .55rem;
+    width: .72rem;
+    height: .72rem;
+    margin-top: -.36rem;
+    border: 3px solid #c8962a;
+    border-radius: 50%;
+    background: var(--lb-papel);
+}
+
+.lb-clase {
+    grid-area: clase;
+    align-self: start;
+    color: var(--lb-suave);
+    font-size: 1.05rem;
+}
+
+.lb-clase b {
+    color: var(--lb-tinta);
+}
+
+.lb-medalla {
+    grid-area: medalla;
+    display: grid;
+    justify-items: center;
+    gap: .55rem;
+    width: clamp(10rem, 30vw, 15rem);
+    text-align: center;
+}
+
+.lb-medalla .ayv-layered,
+.lb-ano-medalla .ayv-layered,
+.lb-camino .ayv-layered {
+    position: relative;
+    display: block;
+    width: 100% !important;
+    aspect-ratio: 1 / 1;
+}
+
+.lb .ayv-layered img {
+    position: absolute;
+    display: block;
+}
+
+.lb .ayv-layered .ayv-layered-base {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.lb .ayv-layered .ayv-layered-mark {
+    height: auto;
+}
+
+.lb-medalla .ayv-layered {
+    border-radius: 50%;
+    box-shadow: 0 0 0 6px var(--lb-papel), 0 0 0 7px var(--lb-linea), 0 16px 30px -18px rgba(30, 43, 42, .6);
+}
+
+.lb-medalla figcaption {
+    display: grid;
+    color: var(--lb-suave);
+    font-size: .92rem;
+    line-height: 1.3;
+}
+
+.lb-medalla figcaption b {
+    color: var(--lb-tinta);
+    font: 600 1.15rem/1.25 "Literata", Georgia, serif;
+}
+
+/* On a phone: the title, the flower big in the middle, then the name and the class. */
+@media (max-width: 40rem) {
+    .lb-portada {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "titulo" "medalla" "nombre" "clase";
+        justify-items: center;
+        text-align: center;
+    }
+
+    .lb-titulo {
+        align-self: auto;
+    }
+
+    .lb-medalla {
+        width: min(72%, 16rem);
+        margin: 1.1rem 0 .6rem;
+    }
+
+    .lb-etiqueta {
+        justify-self: center;
+        margin-left: 0;
+    }
+}
+
+/* ---------- The sections ---------- */
+.lb-seccion {
+    display: flex;
+    align-items: baseline;
+    gap: .6rem;
+    margin: 2.2rem 0 .9rem;
+    color: var(--lb-tinta);
+    font: 600 1.3rem/1.2 "Literata", Georgia, serif;
+}
+
+.lb-seccion::after {
+    content: "";
+    flex: 1 1 2rem;
+    min-width: 1rem;
+    border-bottom: 1px solid var(--lb-linea);
+}
+
+.lb-cuenta {
+    color: var(--lb-coral);
+    font: 700 1rem/1 "Andika", system-ui, sans-serif;
+    white-space: nowrap;
+}
+
+.lb-leyenda {
+    margin: -.4rem 0 .9rem;
+    color: var(--lb-suave);
+    font-size: .92rem;
+}
+
+/* ---------- The books, in their order ---------- */
+.lb-balda {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.6rem, 1fr));
+    gap: 1.1rem .9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-libro {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    min-width: 0;
+}
+
+.lb-tapa {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    border: 1px solid rgba(30, 43, 42, .14);
+    border-radius: 2px 5px 5px 2px;
+    background: #f2e7d2;
+    box-shadow: 0 8px 14px -10px rgba(30, 43, 42, .7);
+}
+
+.lb-tapa img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
+/* A book without its picture: its title on its colour, as the plugin draws it (coverbg and coverink, inline). */
+.lb-tapa-sin {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    padding: .45rem;
+    overflow: hidden;
+    border-radius: inherit;
+    font: 600 .8rem/1.15 "Literata", Georgia, serif;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+/* «Lo estrené»: nobody had taken it before. A sticker, white with its edge, so that it holds a photocopy. */
+.lb-estreno {
+    position: absolute;
+    top: .35rem;
+    right: -.3rem;
+    padding: .16rem .4rem;
+    border: 1.5px solid #a8402a;
+    border-radius: 3px;
+    background: #fff;
+    color: #a8402a;
+    font: 700 .64rem/1 "Andika", system-ui, sans-serif;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: rotate(5deg);
+    box-shadow: 0 2px 4px rgba(30, 43, 42, .25);
+}
+
+.lb-libro-titulo {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .86rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* ---------- The body of the course: the island and what was told; the cromos and the bingo card ---------- */
+.lb-cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 0 2.4rem;
+}
+
+@media (max-width: 52rem) {
+    .lb-cuerpo {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.lb-cuerpo-isla {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.lb-isla-figura {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #2fb3b0;
+}
+
+.lb-isla-figura img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lb-plantado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin: .7rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-plantado li {
+    padding: .2rem .65rem;
+    border: 1px solid var(--lb-linea);
+    border-radius: 999px;
+    font-size: .88rem;
+}
+
+.lb-cromos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.2rem, 1fr));
+    gap: .9rem .7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-cromo {
+    display: grid;
+    gap: .3rem;
+    font-size: .8rem;
+    line-height: 1.25;
+    text-align: center;
+}
+
+.lb-cromo-carta {
+    position: relative;
+    display: block;
+    aspect-ratio: 600 / 840;
+    filter: drop-shadow(0 6px 8px rgba(30, 43, 42, .22));
+}
+
+.lb-cromo-carta img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* The name goes on the cromo's own band, as on the card. */
+.lb-cromo-nombre {
+    position: absolute;
+    right: 10%;
+    bottom: 7.4%;
+    left: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 12.4%;
+    color: #1e2b2a;
+    font: 700 .62rem/1.05 "Andika", system-ui, sans-serif;
+    text-align: center;
+}
+
+.lb-cromo-cuando {
+    color: var(--lb-suave);
+}
+
+.lb-dibujos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: .9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-dibujo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid rgba(30, 43, 42, .18);
+    border-radius: 6px;
+    background: #fff;
+}
+
+.lb-dibujo figcaption {
+    margin-top: .35rem;
+    color: var(--lb-suave);
+    font-size: .86rem;
+    line-height: 1.25;
+}
+
+/* The voice: a big «play» on the screen; on paper, a QR that opens it. */
+.lb-voz {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    margin-top: 1rem;
+    padding: .45rem 1rem .45rem .45rem;
+    border-radius: 999px;
+    background: var(--lb-velo);
+}
+
+.lb-voz-play {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--lb-acento);
+    color: var(--lb-sobre-acento);
+    cursor: pointer;
+}
+
+.lb-voz-play svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.lb-voz-play[aria-pressed="true"] .lb-icono-play,
+.lb-voz-play[aria-pressed="false"] .lb-icono-pausa {
+    display: none;
+}
+
+.lb-voz-texto {
+    line-height: 1.3;
+}
+
+.lb-voz audio {
+    width: 100%;
+}
+
+.lb-con-js .lb-voz audio {
+    display: none;
+}
+
+.lb-sin-js .lb-voz-play {
+    display: none;
+}
+
+.lb-qr {
+    align-items: center;
+    gap: 3mm;
+}
+
+.lb-qr svg,
+.lb-qr img {
+    flex: none;
+    width: 17mm;
+    height: 17mm;
+}
+
+/* The bingo card's diploma, small, held with two strips of tape as the postcard holds its cover. */
+.lb-cartilla {
+    display: grid;
+    gap: .8rem;
+}
+
+.lb-cartilla-foto {
+    position: relative;
+    display: block;
+    margin: .5rem .4rem 0;
+    transform: rotate(-1.6deg);
+}
+
+.lb-cartilla-foto img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+    box-shadow: 0 10px 20px -12px rgba(30, 43, 42, .7);
+}
+
+.lb-cartilla-foto::before,
+.lb-cartilla-foto::after {
+    content: "";
+    position: absolute;
+    top: -.55rem;
+    width: 3.4rem;
+    height: 1.1rem;
+    background: rgba(226, 190, 112, .78);
+    clip-path: polygon(3% 0, 97% 6%, 100% 100%, 0 92%);
+}
+
+.lb-cartilla-foto::before {
+    left: -.6rem;
+    transform: rotate(-28deg);
+}
+
+.lb-cartilla-foto::after {
+    right: -.6rem;
+    background: rgba(226, 140, 118, .7);
+    transform: rotate(26deg);
+}
+
+.lb-cartilla-texto b {
+    display: block;
+    color: var(--lb-tinta);
+    font: 600 1.15rem/1.25 "Literata", Georgia, serif;
+}
+
+.lb-cartilla-texto span {
+    color: var(--lb-suave);
+    font-size: .95rem;
+}
+
+/* ---------- The library's line: its lending slip, ruled, with its round stamp ---------- */
+.lb-nota {
+    position: relative;
+    margin-top: 2.6rem;
+    padding: .9rem 7rem 1rem 1.3rem;
+    border: 1px solid #d8c7a4;
+    border-radius: 3px;
+    background-color: #fdf8ec;
+    background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 2.05rem, rgba(60, 100, 150, .22) 2.05rem, rgba(60, 100, 150, .22) calc(2.05rem + 1px));
+    background-position: 0 .55rem;
+    color: #1e2b2a;
+    box-shadow: 0 10px 18px -14px rgba(30, 43, 42, .6);
+}
+
+.lb-nota-texto {
+    color: #24406b;
+    font: 700 1.65rem/2.05rem "Caveat", "Comic Sans MS", cursive;
+}
+
+.lb-nota-firma {
+    color: #4f5b57;
+    font-size: .92rem;
+    line-height: 2.05rem;
+}
+
+.lb-sello {
+    position: absolute;
+    top: 50%;
+    right: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 5.2rem;
+    height: 5.2rem;
+    margin-top: -2.6rem;
+    padding: .6rem;
+    border: 2px solid #a8402a;
+    border-radius: 50%;
+    color: #a8402a;
+    font: 700 .58rem/1.2 "Andika", system-ui, sans-serif;
+    letter-spacing: .06em;
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(-12deg);
+}
+
+.lb-sello b {
+    display: block;
+    font-size: .74rem;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.lb-sello::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px dashed #a8402a;
+    border-radius: 50%;
+}
+
+@media (max-width: 30rem) {
+    .lb-nota {
+        padding-right: 1.1rem;
+        padding-bottom: 5.6rem;
+    }
+
+    .lb-sello {
+        top: auto;
+        bottom: .6rem;
+        margin-top: 0;
+    }
+}
+
+/* ---------- Under the sheets ---------- */
+.lb-pie {
+    color: var(--lb-suave);
+    font-size: .92rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.lb-pie a {
+    color: inherit;
+}
+
+/* ---------- «Mis años en libros»: the cover, the years, the closing ---------- */
+.lb-tapa-vida {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .3rem;
+    text-align: center;
+}
+
+.lb-tapa-vida > * {
+    align-self: center;
+}
+
+.lb-tapa-vida .lb-titulo {
+    font-size: clamp(2rem, 8vw, 3.4rem);
+}
+
+.lb-tapa-vida .lb-etiqueta {
+    margin: .8rem 0 .6rem;
+}
+
+.lb-camino-ayuda {
+    color: var(--lb-suave);
+    font-size: .88rem;
+}
+
+.lb-tapa-vida .lb-clase {
+    font-size: 1.1rem;
+}
+
+.lb-tapa-vida .lb-biblio {
+    justify-content: center;
+    margin-top: .4rem;
+    color: var(--lb-suave);
+}
+
+/* The road: one medallion per year, in order; from the seed to the flower, then the moons. */
+.lb-camino {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .9rem .55rem;
+    width: 100%;
+    margin: 2rem 0 .4rem;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-camino li {
+    display: grid;
+    justify-items: center;
+    gap: .25rem;
+    width: 4.2rem;
+    color: var(--lb-suave);
+    font-size: .78rem;
+    line-height: 1.15;
+}
+
+.lb-camino a {
+    display: grid;
+    justify-items: center;
+    gap: .25rem;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.lb-camino .ayv-layered {
+    border-radius: 50%;
+}
+
+.lb-primero {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 1.4rem;
+    max-width: 30rem;
+    margin: 2.2rem auto 0;
+    text-align: left;
+}
+
+.lb-primero .lb-tapa {
+    transform: rotate(-3deg);
+}
+
+.lb-primero .lb-tapa::before,
+.lb-primero .lb-tapa::after {
+    content: "";
+    position: absolute;
+    top: -.5rem;
+    z-index: 1;
+    width: 2.8rem;
+    height: .95rem;
+    background: rgba(226, 190, 112, .82);
+    clip-path: polygon(3% 0, 97% 6%, 100% 100%, 0 92%);
+}
+
+.lb-primero .lb-tapa::before {
+    left: -.9rem;
+    transform: rotate(-32deg);
+}
+
+.lb-primero .lb-tapa::after {
+    right: -.9rem;
+    background: rgba(226, 140, 118, .75);
+    transform: rotate(30deg);
+}
+
+.lb-primero-que {
+    color: var(--lb-coral);
+    font: 700 .82rem/1.2 "Andika", system-ui, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.lb-primero-titulo {
+    margin: .3rem 0 .4rem;
+    font: 600 1.35rem/1.2 "Literata", Georgia, serif;
+}
+
+.lb-primero-cuando {
+    color: var(--lb-suave);
+    font-size: .95rem;
+}
+
+.lb-cifras {
+    margin-top: 1.8rem;
+    color: var(--lb-suave);
+}
+
+.lb-cifras b {
+    color: var(--lb-tinta);
+}
+
+/* The index of the years, on the screen only. */
+.lb-indice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin: 0 0 1.4rem;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-indice a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: .3rem .85rem;
+    border: 1px solid var(--lb-linea);
+    border-radius: 999px;
+    background: var(--lb-papel);
+    color: var(--lb-tinta);
+    font-size: .92rem;
+    text-decoration: none;
+}
+
+/* One year. */
+.lb-ano {
+    scroll-margin-top: 1rem;
+}
+
+.lb-ano-cabeza {
+    display: grid;
+    grid-template-columns: 5.4rem minmax(0, 1fr);
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.lb-ano-medalla .ayv-layered {
+    border-radius: 50%;
+}
+
+.lb-ano-curso {
+    font: 600 clamp(1.4rem, 5vw, 1.9rem)/1.15 "Literata", Georgia, serif;
+}
+
+.lb-ano-que {
+    color: var(--lb-suave);
+}
+
+.lb-ano-que b {
+    color: var(--lb-tinta);
+}
+
+.lb-ano-solo {
+    margin-top: 1rem;
+    color: var(--lb-suave);
+    font-style: italic;
+}
+
+/* The first years, when only their flowers are kept: together, in a row. */
+.lb-anos-solo {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1.2rem 1rem;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-anos-solo li {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    align-items: center;
+    gap: .7rem;
+    line-height: 1.25;
+}
+
+.lb-anos-solo .ayv-layered {
+    position: relative;
+    display: block;
+    width: 100% !important;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+}
+
+.lb-anos-solo b {
+    display: block;
+    font: 600 1.05rem/1.2 "Literata", Georgia, serif;
+}
+
+.lb-anos-solo span {
+    color: var(--lb-suave);
+    font-size: .9rem;
+}
+
+.lb-ano-fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 0 2.2rem;
+}
+
+@media (max-width: 52rem) {
+    .lb-ano-fila {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* The archipelago: the islands of all their classes. */
+.lb-archipielago {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1.1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lb-archipielago figcaption {
+    margin-top: .35rem;
+    color: var(--lb-suave);
+    font-size: .88rem;
+}
+
+/* ---------- The skin of twelve and over: the same album, sober ---------- */
+.lb[data-piel="cielo"] .lb-nombre {
+    color: #22406b;
+    transform: none;
+}
+
+.lb[data-piel="cielo"] .lb-nombre::before {
+    border-color: rgba(34, 64, 107, .4);
+}
+
+.lb[data-piel="cielo"] .lb-cartilla-foto,
+.lb[data-piel="cielo"] .lb-primero .lb-tapa {
+    transform: none;
+}
+
+/* ---------- The tutor's page: every sheet of the class, one after another ---------- */
+.lb-clase-cabeza {
+    display: grid;
+    gap: .4rem;
+    margin: 0 0 1.4rem;
+}
+
+.lb-clase-cabeza h1 {
+    font: 600 1.6rem/1.2 "Literata", Georgia, serif;
+}
+
+.lb-clase-cabeza p {
+    color: var(--lb-suave);
+}
+
+.lb-clase-cabeza .lb-acciones {
+    margin-top: .4rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .lb-hoja {
+        animation: lb-llega .5s ease-out both;
+    }
+
+    @keyframes lb-llega {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+}
+
+/* =====================================================================================================================
+   Paper. The page box is the printer's (A4 or Letter): the sheet is 186 × 250 mm, which fits both with 12 mm margins.
+   Everything that matters is ink: images, text and borders; backgrounds are a bonus that most schools print without.
+   ===================================================================================================================== */
+@page {
+    margin: 12mm;
+}
+
+@media print {
+    :root,
+    :root:not([data-tema="claro"]),
+    :root[data-tema="oscuro"] {
+        --lb-acento: #17574c;
+        --lb-coral: #a8402a;
+        --lb-mesa: #fff;
+        --lb-papel: #fff;
+        --lb-velo: transparent;
+        --lb-tinta: #111;
+        --lb-suave: #333;
+        --lb-linea: #9a9a9a;
+        color-scheme: light;
+    }
+
+    html,
+    body {
+        background: #fff;
+        font-size: 9.5pt;
+    }
+
+    .lb {
+        max-width: none;
+        padding: 0;
+    }
+
+    .lb-barra,
+    .lb-pie,
+    .lb-indice,
+    .lb-clase-cabeza,
+    .lb-solo-pantalla {
+        display: none !important;
+    }
+
+    .lb-solo-papel {
+        display: flex;
+    }
+
+    .lb-hoja {
+        width: 186mm;
+        margin: 0 auto;
+        padding: 0;
+        border-radius: 0;
+        background: #fff;
+        box-shadow: none;
+        animation: none;
+        break-after: page;
+    }
+
+    .lb-hoja:last-child {
+        break-after: auto;
+    }
+
+    /* One course, one sheet. */
+    .lb-curso {
+        display: flex;
+        flex-direction: column;
+        height: 250mm;
+        overflow: hidden;
+    }
+
+    .lb-portada {
+        flex: none;
+        grid-template-columns: minmax(0, 1fr) 40mm;
+        grid-template-areas: "titulo medalla" "nombre medalla" "clase medalla";
+        gap: 1mm 8mm;
+        justify-items: start;
+        text-align: left;
+    }
+
+    .lb-titulo {
+        font-size: 24pt;
+    }
+
+    .lb-etiqueta {
+        justify-self: start;
+        margin: 2.5mm 0 2mm;
+        filter: none;
+    }
+
+    .lb-nombre {
+        padding: 0 11mm .8mm 5mm;
+        font-size: 40pt;
+    }
+
+    .lb-nombre::before {
+        top: 1.2mm;
+        right: 6.5mm;
+        bottom: 1.2mm;
+        left: 1.2mm;
+        border-color: #a8402a;
+    }
+
+    .lb-clase {
+        font-size: 11pt;
+    }
+
+    .lb-medalla {
+        width: 40mm;
+        margin: 0;
+        gap: 1mm;
+    }
+
+    .lb-medalla .ayv-layered {
+        box-shadow: none;
+        border: .35mm solid #9a9a9a;
+    }
+
+    .lb-medalla figcaption {
+        font-size: 7.5pt;
+        line-height: 1.2;
+    }
+
+    .lb-medalla figcaption b {
+        font-size: 10pt;
+    }
+
+    .lb-seccion {
+        margin: 4mm 0 2mm;
+        font-size: 12pt;
+    }
+
+    .lb-seccion::after {
+        border-bottom: .25mm solid #9a9a9a;
+    }
+
+    .lb-cuenta {
+        font-size: 10pt;
+    }
+
+    .lb-leyenda {
+        margin: -1mm 0 2.5mm;
+        font-size: 8pt;
+    }
+
+    .lb-libros {
+        flex: 0 1 auto;
+        min-height: 0;
+    }
+
+    /* The library's slip always at the foot of the sheet. */
+    .lb-curso .lb-nota {
+        margin-top: auto;
+    }
+
+
+    /* The covers: as many columns as the server says, so that the year fits (--lb-cols-papel). */
+    .lb-balda {
+        grid-template-columns: repeat(var(--lb-cols-papel, 8), minmax(0, 1fr));
+        gap: 2.5mm 3mm;
+    }
+
+    .lb-tapa {
+        border: .25mm solid #777;
+        box-shadow: none;
+    }
+
+    .lb-tapa-sin {
+        padding: 1mm;
+        font-size: 6.5pt;
+    }
+
+    /* Covers too small to read a title: a plain binding, two rules, no letters. */
+    .lb-balda:not(.lb-balda-titulos) .lb-tapa-sin {
+        position: relative;
+        font-size: 0;
+    }
+
+    .lb-balda:not(.lb-balda-titulos) .lb-tapa-sin::before,
+    .lb-balda:not(.lb-balda-titulos) .lb-tapa-sin::after {
+        content: "";
+        position: absolute;
+        right: 1.2mm;
+        left: 1.2mm;
+        border-top: .3mm solid #555;
+    }
+
+    .lb-balda:not(.lb-balda-titulos) .lb-tapa-sin::before {
+        top: 22%;
+    }
+
+    .lb-balda:not(.lb-balda-titulos) .lb-tapa-sin::after {
+        top: 30%;
+    }
+
+    .lb-estreno {
+        top: .8mm;
+        right: -.8mm;
+        padding: .4mm .8mm;
+        border-width: .3mm;
+        font-size: 5pt;
+        box-shadow: none;
+    }
+
+    .lb-libro-titulo {
+        display: none;
+    }
+
+    .lb-balda-titulos .lb-libro-titulo {
+        display: -webkit-box;
+        font-size: 7.5pt;
+    }
+
+    .lb-cuerpo {
+        flex: none;
+        grid-template-columns: 64mm minmax(0, 1fr);
+        gap: 0 7mm;
+    }
+
+    .lb-isla-figura {
+        border-radius: 2mm;
+        border: .25mm solid #777;
+    }
+
+    .lb-cuerpo-isla {
+        flex: 1 1 auto;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lb-cuerpo-isla .lb-isla-figura {
+        width: 150mm;
+    }
+
+    .lb-plantado {
+        gap: 1mm;
+        margin-top: 1.5mm;
+    }
+
+    .lb-plantado li {
+        padding: 0 1.5mm;
+        border: .25mm solid #777;
+        font-size: 6.5pt;
+    }
+
+    .lb-cromos {
+        grid-template-columns: repeat(auto-fill, minmax(16mm, 1fr));
+        gap: 2mm;
+    }
+
+    .lb-cromo {
+        font-size: 6.5pt;
+    }
+
+    .lb-cromo-carta {
+        filter: none;
+    }
+
+    .lb-cromo-nombre {
+        font-size: 4.6pt;
+    }
+
+    .lb-dibujos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 3mm;
+    }
+
+    /* What was told: the drawings, and the QR of the voice beside them. */
+    .lb-conte {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 30mm;
+        column-gap: 4mm;
+        align-items: start;
+    }
+
+    .lb-conte .lb-seccion {
+        grid-column: 1 / -1;
+    }
+
+    .lb-conte .lb-qr {
+        grid-column: 2;
+        grid-row: 2;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1mm;
+        margin: 0;
+        font-size: 6.5pt;
+        line-height: 1.2;
+    }
+
+    .lb-conte .lb-dibujos + .lb-voz + .lb-qr,
+    .lb-conte .lb-dibujos ~ .lb-qr {
+        grid-column: 2;
+    }
+
+    .lb-dibujo img {
+        border: .25mm solid #777;
+    }
+
+    .lb-dibujo figcaption {
+        margin-top: .8mm;
+        font-size: 7pt;
+    }
+
+    .lb-voz {
+        display: none;
+    }
+
+    .lb-qr {
+        margin-top: 3mm;
+        font-size: 8.5pt;
+        line-height: 1.3;
+    }
+
+    .lb-cartilla {
+        grid-template-columns: 34mm minmax(0, 1fr);
+        align-items: center;
+        gap: 3mm;
+    }
+
+    .lb-cartilla-foto {
+        margin: 0;
+        transform: none;
+    }
+
+    .lb-cartilla-foto img {
+        border: .25mm solid #777;
+        box-shadow: none;
+    }
+
+    .lb-cartilla-foto::before,
+    .lb-cartilla-foto::after {
+        display: none;
+    }
+
+    .lb-cartilla-texto b {
+        font-size: 10.5pt;
+    }
+
+    .lb-cartilla-texto span {
+        font-size: 8.5pt;
+    }
+
+    .lb-nota {
+        flex: none;
+        margin-top: 4mm;
+        padding: 1mm 28mm 1.5mm 5mm;
+        border: .3mm solid #777;
+        background-color: #fff;
+        background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 6.75mm, #b9c4d2 6.75mm, #b9c4d2 7mm);
+        background-position: 0 1mm;
+        box-shadow: none;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .lb-nota-texto {
+        font-size: 15pt;
+        line-height: 7mm;
+    }
+
+    .lb-nota-firma {
+        font-size: 8pt;
+        line-height: 7mm;
+    }
+
+    .lb-sello {
+        top: 50%;
+        right: 5mm;
+        bottom: auto;
+        width: 20mm;
+        height: 20mm;
+        margin-top: -10mm;
+        padding: 2mm;
+        border-width: .45mm;
+        font-size: 5pt;
+    }
+
+    /* «Mis años en libros»: a cover sheet, the years flowing (a year never splits), and the closing sheet. */
+    .lb-tapa-vida {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 250mm;
+    }
+
+    .lb-tapa-vida .lb-titulo {
+        font-size: 34pt;
+    }
+
+    .lb-tapa-vida .lb-etiqueta {
+        justify-self: auto;
+        margin: 5mm 0 4mm;
+    }
+
+    .lb-tapa-vida .lb-clase {
+        font-size: 12pt;
+    }
+
+    .lb-camino {
+        gap: 3mm 2mm;
+        margin: 10mm 0 2mm;
+    }
+
+    .lb-camino {
+        gap: 3mm 1.5mm;
+    }
+
+    .lb-camino li {
+        width: 11.5mm;
+        font-size: 6.5pt;
+    }
+
+    .lb-camino .ayv-layered,
+    .lb-anos-solo .ayv-layered {
+        border: .25mm solid #9a9a9a;
+    }
+
+    .lb-anos-solo {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4mm;
+    }
+
+    .lb-anos-solo li {
+        grid-template-columns: 14mm minmax(0, 1fr);
+        gap: 2.5mm;
+    }
+
+    .lb-anos-solo b {
+        font-size: 10pt;
+    }
+
+    .lb-anos-solo span {
+        font-size: 8pt;
+    }
+
+    .lb-primero {
+        grid-template-columns: 30mm minmax(0, 1fr);
+        gap: 6mm;
+        max-width: 120mm;
+        margin-top: 10mm;
+    }
+
+    .lb-primero .lb-tapa::before,
+    .lb-primero .lb-tapa::after {
+        display: none;
+    }
+
+    .lb-primero-titulo {
+        font-size: 14pt;
+    }
+
+    .lb-cifras {
+        margin-top: 8mm;
+        font-size: 11pt;
+    }
+
+    .lb-hoja.lb-ano {
+        break-after: auto;
+        break-inside: avoid;
+        margin-bottom: 7mm;
+        padding-bottom: 6mm;
+        border-bottom: .3mm solid #9a9a9a;
+    }
+
+    .lb-ano-cabeza {
+        grid-template-columns: 22mm minmax(0, 1fr);
+        gap: 5mm;
+    }
+
+    .lb-ano-medalla .ayv-layered {
+        border: .25mm solid #9a9a9a;
+    }
+
+    .lb-ano-curso {
+        font-size: 16pt;
+    }
+
+    .lb-ano-solo {
+        margin-top: 2mm;
+    }
+
+    .lb-ano-fila {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0 8mm;
+    }
+
+    .lb-ano .lb-isla-figura {
+        width: 62mm;
+    }
+
+    .lb-ano .lb-cromos {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .lb-cierre {
+        break-before: page;
+    }
+
+    .lb-archipielago {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4mm;
+    }
+
+    .lb-archipielago figcaption {
+        margin-top: 1mm;
+        font-size: 7pt;
+    }
+
+    .lb-cierre .lb-cromos {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+}

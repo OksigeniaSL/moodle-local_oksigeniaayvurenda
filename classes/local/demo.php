@@ -67,8 +67,63 @@ final class demo {
             '82' => 'Literature', '821' => 'National literatures', '821.134.2-3' => 'Novels', '821.134.2-1' => 'Poetry',
             '9' => 'Geography and history', '91' => 'Geography', '929' => 'Biographies', '94' => 'History'],
     ];
+    /** @var array[] The words in Portuguese and in French: their nouns with their gender, and their adjectives in both. */
+    private const OTHERS = [
+        'pt' => [
+            'nouns' => ['segredo' => 'm', 'farol' => 'm', 'floresta' => 'f', 'dragão' => 'm', 'ilha' => 'f', 'relógio' => 'm',
+                'viagem' => 'f', 'jardim' => 'm', 'mapa' => 'm', 'tempestade' => 'f', 'castelo' => 'm', 'rio' => 'm',
+                'estrela' => 'f', 'ladra' => 'f', 'ponte' => 'f', 'vulcão' => 'm', 'cometa' => 'm', 'avó' => 'f',
+                'pirata' => 'm', 'nuvem' => 'f', 'tesouro' => 'm', 'inverno' => 'm', 'beija-flor' => 'm', 'semente' => 'f',
+                'montanha' => 'f', 'labirinto' => 'm', 'barco' => 'm', 'loba' => 'f', 'cidade' => 'f', 'espelho' => 'm'],
+            'adjectives' => [['perdido', 'perdida'], ['adormecido', 'adormecida'], ['invisível', 'invisível'],
+                ['pequeno', 'pequena'], ['valente', 'valente'], ['esquecido', 'esquecida'], ['mágico', 'mágica'],
+                ['secreto', 'secreta'], ['antigo', 'antiga'], ['novo', 'nova'], ['selvagem', 'selvagem'],
+                ['escondido', 'escondida']],
+            'subjects' => ['Aventuras', 'Mistério', 'Animais', 'Amizade', 'Ciência', 'Humor', 'Fantasia', 'História',
+                'Natureza', 'Poesia', 'Esportes', 'Família', 'Viagens', 'Espaço', 'Dinossauros'],
+            'publishers' => ['Editora Beija-flor', 'Edições do Farol', 'A Semente', 'Livros do Vale', 'Edições Nuvem',
+                'Editora Bússola'],
+            'locations' => ['Estante infantil', 'Estante juvenil', 'Quadrinhos', 'Consulta', 'Novidades', 'Canto da poesia',
+                'Ciências', 'História'],
+            'stages' => [['Educação infantil', 3], ['Primário', 6], ['Secundário', 4], ['Pré-universitário', 2]],
+            'classes' => ['0' => 'Generalidades', '004' => 'Informática', '02' => 'Bibliotecas', '03' => 'Enciclopédias',
+                '3' => 'Ciências sociais', '33' => 'Economia', '37' => 'Educação', '398' => 'Contos populares', '5' => 'Ciências',
+                '51' => 'Matemática', '52' => 'Astronomia', '57' => 'Biologia', '58' => 'Botânica', '59' => 'Zoologia',
+                '6' => 'Ciências aplicadas', '62' => 'Engenharia', '629' => 'Veículos', '641' => 'Culinária', '7' => 'Artes',
+                '75' => 'Pintura', '78' => 'Música', '79' => 'Jogos e esportes', '8' => 'Língua e literatura',
+                '82' => 'Literatura', '821' => 'Literaturas nacionais', '821.134.2-3' => 'Romance', '821.134.2-1' => 'Poesia',
+                '9' => 'Geografia e história', '91' => 'Geografia', '929' => 'Biografias', '94' => 'História'],
+        ],
+        'fr' => [
+            'nouns' => ['secret' => 'm', 'phare' => 'm', 'forêt' => 'f', 'dragon' => 'm', 'île' => 'f', 'horloge' => 'f',
+                'voyage' => 'm', 'jardin' => 'm', 'carte' => 'f', 'tempête' => 'f', 'château' => 'm', 'rivière' => 'f',
+                'étoile' => 'f', 'voleuse' => 'f', 'pont' => 'm', 'volcan' => 'm', 'comète' => 'f', 'grand-mère' => 'f',
+                'pirate' => 'm', 'nuage' => 'm', 'trésor' => 'm', 'hiver' => 'm', 'colibri' => 'm', 'graine' => 'f',
+                'montagne' => 'f', 'labyrinthe' => 'm', 'bateau' => 'm', 'louve' => 'f', 'ville' => 'f', 'miroir' => 'm'],
+            'adjectives' => [['perdu', 'perdue'], ['endormi', 'endormie'], ['invisible', 'invisible'], ['oublié', 'oubliée'],
+                ['magique', 'magique'], ['secret', 'secrète'], ['sauvage', 'sauvage'], ['caché', 'cachée'],
+                ['mystérieux', 'mystérieuse'], ['enchanté', 'enchantée'], ['lointain', 'lointaine'],
+                ['courageux', 'courageuse']],
+            'subjects' => ['Aventure', 'Mystère', 'Animaux', 'Amitié', 'Sciences', 'Humour', 'Fantasy', 'Histoire', 'Nature',
+                'Poésie', 'Sport', 'Famille', 'Voyages', 'Espace', 'Dinosaures'],
+            'publishers' => ['Éditions Colibri', 'Éditions du Phare', 'La Graine', 'Livres de la Vallée', 'Éditions Nuage',
+                'Éditions Boussole'],
+            'locations' => ['Rayon jeunesse', 'Rayon ados', 'Bandes dessinées', 'Documentaires', 'Nouveautés', 'Coin poésie',
+                'Sciences', 'Histoire'],
+            'stages' => [['Maternelle', 3], ['Élémentaire', 5], ['Collège', 4], ['Lycée', 3]],
+            'classes' => ['0' => 'Généralités', '004' => 'Informatique', '02' => 'Bibliothèques', '03' => 'Encyclopédies',
+                '3' => 'Sciences sociales', '33' => 'Économie', '37' => 'Éducation', '398' => 'Contes populaires',
+                '5' => 'Sciences', '51' => 'Mathématiques', '52' => 'Astronomie', '57' => 'Biologie', '58' => 'Botanique',
+                '59' => 'Zoologie', '6' => 'Sciences appliquées', '62' => 'Ingénierie', '629' => 'Véhicules', '641' => 'Cuisine',
+                '7' => 'Arts', '75' => 'Peinture', '78' => 'Musique', '79' => 'Jeux et sports', '8' => 'Langue et littérature',
+                '82' => 'Littérature', '821' => 'Littératures nationales', '821.134.2-3' => 'Romans', '821.134.2-1' => 'Poésie',
+                '9' => 'Géographie et histoire', '91' => 'Géographie', '929' => 'Biographies', '94' => 'Histoire'],
+        ],
+    ];
+    /** @var string[] The language codes of the records (MARC), by the language of the made-up words. */
+    private const MARCLANG = ['es' => 'spa', 'en' => 'eng', 'pt' => 'por', 'fr' => 'fre'];
 
-    /** @var string The language of the made-up words: es, or en. */
+    /** @var string The language of the made-up words: es, en, pt or fr. */
     private static string $lang = 'es';
 
     /** @var string[] Made-up first names. */
@@ -110,12 +165,12 @@ final class demo {
      * @param int $records Titles in the catalogue; copies come to about a fifth more.
      * @param int $readers
      * @param int $seed
-     * @param string $lang es, or en for a site that does not speak Spanish.
+     * @param string $lang es, en, pt or fr: the language of the site.
      * @return int The entity id.
      */
     public static function create(string $name, int $records, int $readers, int $seed = 20261023, string $lang = 'es'): int {
         global $DB;
-        self::$lang = $lang === 'en' ? 'en' : 'es';
+        self::$lang = isset(self::MARCLANG[$lang]) ? $lang : 'es';
         mt_srand($seed);
         $now = time();
         $transaction = $DB->start_delegated_transaction();
@@ -182,7 +237,7 @@ final class demo {
                 'doctype' => 'book',
                 'title' => $title,
                 'pubyear' => (string) mt_rand(1985, 2026),
-                'lang' => self::$lang === 'en' ? 'eng' : 'spa',
+                'lang' => self::MARCLANG[self::$lang],
                 'extent' => mt_rand(24, 320) . ' p.',
                 'searchtext' => text::normalise($title . ' ' . $authors[$author] . ' ' . $subjects[$subject]),
                 'timecreated' => $now,
@@ -415,7 +470,7 @@ final class demo {
                 'entityid' => $entityid,
                 'kind' => 'class',
                 'code' => $code,
-                'label' => self::$lang === 'en' ? (self::ENGLISH['classes'][$code] ?? $label) : $label,
+                'label' => self::$lang === 'es' ? $label : (self::words('classes', [])[$code] ?? $label),
                 'parentid' => $parent === null ? null : $ids[$parent],
                 'timecreated' => $now,
                 'timemodified' => $now,
@@ -463,7 +518,7 @@ final class demo {
         foreach (self::words('stages', self::STAGES) as [$stage, $years]) {
             for ($y = 1; $y <= $years; $y++) {
                 foreach (['A', 'B'] as $letter) {
-                    $groups[] = [$stage, self::$lang === 'en' ? $stage . ' ' . $y . $letter : $y . '.º ' . $stage . ' ' . $letter];
+                    $groups[] = [$stage, self::$lang === 'es' ? $y . '.º ' . $stage . ' ' . $letter : $stage . ' ' . $y . $letter];
                 }
             }
         }
@@ -712,6 +767,12 @@ final class demo {
      * @return string
      */
     private static function title(): string {
+        if (self::$lang === 'pt') {
+            return self::title_pt();
+        }
+        if (self::$lang === 'fr') {
+            return self::title_fr();
+        }
         if (self::$lang === 'en') {
             $noun = ucfirst(self::pick(self::ENGLISH['nouns']));
             $other = ucfirst(self::pick(self::ENGLISH['nouns']));
@@ -743,14 +804,67 @@ final class demo {
     }
 
     /**
+     * A made-up title in Portuguese: «O farol perdido», «A ilha do dragão», «Um mapa na floresta».
+     *
+     * @return string
+     */
+    private static function title_pt(): string {
+        $nouns = self::OTHERS['pt']['nouns'];
+        $noun = self::pick(array_keys($nouns));
+        $other = self::pick(array_keys($nouns));
+        $female = $nouns[$noun] === 'f';
+        $otherfemale = $nouns[$other] === 'f';
+        switch (mt_rand(1, 3)) {
+            case 1:
+                $adjectives = self::OTHERS['pt']['adjectives'];
+                $adjective = $adjectives[mt_rand(0, count($adjectives) - 1)][$female ? 1 : 0];
+                return ($female ? 'A ' : 'O ') . $noun . ' ' . $adjective;
+            case 2:
+                return ($female ? 'A ' : 'O ') . $noun . ' ' . ($otherfemale ? 'da' : 'do') . ' ' . $other;
+            default:
+                return ($female ? 'Uma ' : 'Um ') . $noun . ' ' . ($otherfemale ? 'na' : 'no') . ' ' . $other;
+        }
+    }
+
+    /**
+     * A made-up title in French: «Le phare perdu», «L'île du dragon», «Une carte dans la forêt».
+     *
+     * @return string
+     */
+    private static function title_fr(): string {
+        $nouns = self::OTHERS['fr']['nouns'];
+        $noun = self::pick(array_keys($nouns));
+        $other = self::pick(array_keys($nouns));
+        $female = $nouns[$noun] === 'f';
+        // Before a vowel or a silent h, the article loses its vowel: «l'île», «de l'hiver».
+        $vowel = fn(string $word) => (bool) preg_match('/^[aeiouyhàâéèêîïôû]/u', $word);
+        $the = fn(string $word, bool $f) => $vowel($word) ? "l'" : ($f ? 'la ' : 'le ');
+        $of = fn(string $word, bool $f) => $vowel($word) ? "de l'" : ($f ? 'de la ' : 'du ');
+        $otherfemale = $nouns[$other] === 'f';
+        switch (mt_rand(1, 3)) {
+            case 1:
+                $adjectives = self::OTHERS['fr']['adjectives'];
+                $adjective = $adjectives[mt_rand(0, count($adjectives) - 1)][$female ? 1 : 0];
+                return ucfirst($the($noun, $female)) . $noun . ' ' . $adjective;
+            case 2:
+                return ucfirst($the($noun, $female)) . $noun . ' ' . $of($other, $otherfemale) . $other;
+            default:
+                return ($female ? 'Une ' : 'Un ') . $noun . ' dans ' . $the($other, $otherfemale) . $other;
+        }
+    }
+
+    /**
      * A list of made-up words in the language of the library being made.
      *
-     * @param string $what A key of ENGLISH.
+     * @param string $what A key of ENGLISH and of OTHERS.
      * @param array $spanish The Spanish list.
      * @return array
      */
     private static function words(string $what, array $spanish): array {
-        return self::$lang === 'en' ? self::ENGLISH[$what] : $spanish;
+        if (self::$lang === 'es') {
+            return $spanish;
+        }
+        return self::$lang === 'en' ? self::ENGLISH[$what] : self::OTHERS[self::$lang][$what];
     }
 
     /**

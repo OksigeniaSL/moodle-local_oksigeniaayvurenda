@@ -40,6 +40,8 @@ use local_oksigeniaayvurenda\local\window;
 define('NO_MOODLE_COOKIES', !empty($_GET['embed']));
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- the window is for everyone; managing it checks the capability.
 require(__DIR__ . '/../../config.php');
+// So many pages a minute for whoever comes without an account (the shield against robots).
+\local_oksigeniaayvurenda\local\shield::guard('window');
 
 $ref = \local_oksigeniaayvurenda\local\shell::library_ref();
 $query = trim(optional_param('q', '', PARAM_TEXT));

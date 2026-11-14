@@ -29,6 +29,8 @@ define('NO_MOODLE_COOKIES', true);
 
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- an open public window is for everyone.
 require(__DIR__ . '/../../config.php');
+// So many pages a minute for each address (the shield against robots).
+\local_oksigeniaayvurenda\local\shield::guard('opds');
 
 $library = window::open(\local_oksigeniaayvurenda\local\shell::library_ref());
 if (!$library) {

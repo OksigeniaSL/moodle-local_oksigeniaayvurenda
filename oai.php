@@ -29,6 +29,8 @@ define('NO_MOODLE_COOKIES', true);
 
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- an open public window is for everyone, harvesters included.
 require(__DIR__ . '/../../config.php');
+// So many pages a minute for each address (the shield against robots).
+\local_oksigeniaayvurenda\local\shield::guard('oai');
 
 $slug = trim((string) get_file_argument(), '/');
 $library = $slug !== '' && preg_match('/^[a-z0-9_-]+$/i', $slug) ? window::open($slug) : null;

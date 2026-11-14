@@ -241,6 +241,30 @@ final class demo_test extends \advanced_testcase {
     }
 
     /**
+     * A site in Portuguese or French gets its sample in its language: titles, the language of the records, the subjects
+     * and the classes.
+     */
+    public function test_languages(): void {
+        global $DB;
+        $this->resetAfterTest();
+        foreach (
+            ['pt' => ['por', 'Aventuras', 'Generalidades', '/^(O|A|Um|Uma) /'],
+            'fr' => ['fre', 'Aventure', 'Généralités', "/^(Le|La|L'|Un|Une)\\b/"]] as $lang => [$code, $subject, $class, $start]
+        ) {
+            $entityid = demo::create('Demo ' . $lang, 10, 3, 11, $lang);
+            $records = $DB->get_records(self::T . 'record', ['entityid' => $entityid]);
+            $this->assertSame([$code], array_values(array_unique(array_column($records, 'lang'))));
+            foreach ($records as $record) {
+                $this->assertMatchesRegularExpression($start, $record->title);
+            }
+            $this->assertTrue($DB->record_exists(self::T . 'authority', ['entityid' => $entityid, 'kind' => 'subject',
+                'label' => $subject]));
+            $this->assertTrue($DB->record_exists(self::T . 'authority', ['entityid' => $entityid, 'kind' => 'class',
+                'code' => '0', 'label' => $class]));
+        }
+    }
+
+    /**
      * Made-up covers go only to made-up books: a centre with records brought from a catalogue gets none. With the art
      * package, one book in seven keeps its drawn cover; without it, nothing changes.
      */

@@ -29,6 +29,8 @@ define('NO_MOODLE_COOKIES', true);
 
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- a catalogue the window shows to anyone, other catalogues included.
 require(__DIR__ . '/../../config.php');
+// So many pages a minute for each address (the shield against robots).
+\local_oksigeniaayvurenda\local\shield::guard('sru');
 
 $slug = trim((string) get_file_argument(), '/');
 $library = $slug !== '' && preg_match('/^[a-z0-9_-]+$/i', $slug) ? window::open($slug) : null;
