@@ -44,6 +44,29 @@ $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' =
 if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
+// A function presented at its moment (day zero, point 6): «Turn it on», «Show me» or «Not now», by whoever may act on it.
+$timelydo = optional_param('timely', '', PARAM_ALPHA);
+$timelykind = optional_param('kind', '', PARAM_ALPHA);
+if (
+    in_array($timelydo, ['on', 'show', 'no'], true) && in_array($timelykind, \local_oksigeniaayvurenda\local\timely::KINDS, true)
+    && confirm_sesskey() && \local_oksigeniaayvurenda\local\timely::theirs($library, $timelykind, (int) $USER->id)
+) {
+    $situation = ['kind' => $timelykind] + (\local_oksigeniaayvurenda\local\timely::situation(
+        $library,
+        $timelykind,
+        time(),
+        (int) $USER->id
+    ) ?? []);
+    \local_oksigeniaayvurenda\local\timely::answer($library, $timelykind, $timelydo, time());
+    $back = ['library' => $library->slug];
+    if ($timelydo === 'show') {
+        redirect(\local_oksigeniaayvurenda\local\timely::show_url($library, $situation));
+    } else if ($timelydo === 'on') {
+        redirect(new moodle_url('/local/oksigeniaayvurenda/desk.php', $back + ['lit' => $timelykind]));
+    }
+    $times = (int) (\local_oksigeniaayvurenda\local\timely::state((int) $library->entityid)['no'][$timelykind] ?? 1);
+    redirect(new moodle_url('/local/oksigeniaayvurenda/desk.php', $back + ['folded' => min(2, $times)]));
+}
 $desk = new desk($library, (int) $USER->id, null, $own);
 $today = $desk->today();
 // From a reader's record: the desk opens with them.
@@ -157,8 +180,24 @@ if ($steps) {
             . $step(false, 'deskstartlabels', $link('labels.php', 'menulabels', 'local/oksigeniaayvurenda:catalogue')
                 . $link('cardprint.php', 'menucards', 'local/oksigeniaayvurenda:desk'))
             . '</ol></section>';
+    } else {
+        // A function presented at its moment (Jujol): one card, at most one a week, in this same place.
+        $timely = \local_oksigeniaayvurenda\local\timely::context(
+            $library,
+            (int) $USER->id,
+            time(),
+            optional_param('lit', '', PARAM_ALPHA)
+        );
+        $start = $timely ? $OUTPUT->render_from_template('local_oksigeniaayvurenda/timely_card', $timely) : '';
     }
 }
+// After «Not now»: it comes back if it happens again; the second time, never, and where it always is.
+$folded = optional_param('folded', 0, PARAM_INT);
+$foldednote = $folded === 1 ? '<p class="ayv-notice" role="status">' . s($str('timelyfolded')) . '</p>'
+    : ($folded === 2 ? '<p class="ayv-notice" role="status">' . $str('timelyfoldedtwice', '<a href="' . (new moodle_url(
+        '/local/oksigeniaayvurenda/functions.php',
+        ['library' => $library->slug]
+    ))->out() . '">' . s($str('functionsheading')) . '</a>') . '</p>' : '');
 // What there is to celebrate this week, quietly under the desk's cards: the desk is work, and it also has its days.
 $moment = '';
 if (!$help) {
@@ -180,7 +219,7 @@ if ($help) {
     $tools['html'] = '<div class="ayv-tools"><button type="button" class="ayv-toggle" id="ayv-camera-open" hidden>' .
         s($str('camerabutton')) . '</button></div>';
 }
-$main = '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
+$main = $foldednote . '<section class="ayv-desk" aria-labelledby="ayv-desk-title">
 <h1 id="ayv-desk-title" class="ayv-sr">' . s($str('desktitle')) . '</h1>
 <form id="ayv-scan" class="ayv-scan" autocomplete="off">
     <label for="ayv-code" class="ayv-scan-label">' . s($str('deskprompt')) . '</label>

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.266.0 (2026-11-14)
+
+- **The functions present themselves at their moment** (the first day, point 6), from Jujol's mock-ups.
+  - When something real happens in a library, its staff see one card on the desk with the function that answers it,
+    as a book of the house with its spine:
+    - the first late books with the notices off;
+    - three readers or more waiting for the same book;
+    - a catalogue just imported with its codes;
+    - the last day of the school year three weeks away;
+    - the public window closed with the catalogue ready;
+    - readers' voices waiting to be heard.
+  - Each card has «Turn it on» where the function has a light (it says what happens from tomorrow), «Show me» and «Not
+    now». One at a time, at most one a week. «Not now» puts it away until the situation comes again, and a second time
+    for good. Only whoever may act on it sees it.
+  - **«What your library can do»**, from «More»: every function on four shelves, with what it solves, what it did this
+    school year (a number of real use, or words when there is nothing yet) and its light, turned on and off right there.
+
 ## 0.265.0 (2026-11-14)
 
 - **The reader's booklet**, the last two «subidones» of the review of 12 November, from Jujol's mock-ups and Gaudí's

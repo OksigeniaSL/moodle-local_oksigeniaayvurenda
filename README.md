@@ -46,6 +46,11 @@ network a connector or an off-server copy may reach (`internalhosts`, `offsiteho
 catalogues that only speak Z39.50, a Google client for copies in Drive, a site that is only a library, and one category
 per centre for a site shared by several.
 
+**Behind a proxy.** The public window, OAI-PMH, SRU and OPDS allow so many pages a minute from each address that comes
+without an account (the shield against robots), and never count private addresses. Behind a reverse proxy, Moodle has to
+see the visitor's address: set *Logged IP address source* (`getremoteaddrconf`) to read `X-Forwarded-For`, and the
+shield counts each visitor. The setting `shield` of the plugin at 0 turns it off.
+
 **Optional.** The block `block_oksigeniaayvurenda` shows each reader their library on their Moodle dashboard. The
 illustrations, the characters' drawings and voices, the visit and the illustrated card come in a separate art package
 of the hosted service: without it, the library keeps its drawn look and everything works. The Moodle app shows the

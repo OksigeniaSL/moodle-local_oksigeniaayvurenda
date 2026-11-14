@@ -1,0 +1,56 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/abilities
+
+    «What your library can do» (Jujol, 14 November): four shelves, and on them each function as a book of the house, with
+    its spine, its name, what it solves, what it did this school year (a big number, or words when there is nothing yet;
+    never a 0), its lamp where it has one, or «Always at hand», and «Show me».
+
+    Example context (json):
+    {
+        "heading": "Lo que puede hacer tu biblioteca", "intro": "Cada función, lo que resuelve y lo que ha hecho este curso.",
+        "showme": "Enséñamelo",
+        "shelves": [{"shelfid": "ayv-em-b-desk", "title": "En el mostrador", "colour": "green", "books": [
+            {"key": "notices", "spine": "AVI", "spinecolour": "coral", "name": "Los avisos de retraso",
+                "solves": "Que los libros vuelvan sin ir a buscarlos.", "number": 38, "words": "préstamos avisados este curso",
+                "nothing": false, "light": {"action": "https://example.com/functions.php", "sesskey": "abc", "fn": "notices",
+                    "value": "0", "pressed": true, "label": "Avisar a lectores y familias"}, "always": "",
+                "url": "https://example.com/rules.php"},
+            {"key": "selfloan", "spine": "AUT", "spinecolour": "green", "name": "El autopréstamo",
+                "solves": "Que los lectores se lleven y devuelvan los libros solos.", "number": "",
+                "words": "Todavía nada este curso.", "nothing": true, "light": null, "always": "Siempre a mano",
+                "url": "https://example.com/selfloan.php"}
+        ]}]
+    }
+}}
+<div class="ayv-em-pagina">
+    <header><h1 class="ayv-results-title">{{heading}}</h1>
+        <p class="ayv-em-entrada">{{intro}}</p></header>
+    {{#shelves}}
+    <section aria-labelledby="{{shelfid}}"><h2 class="ayv-em-balda-t ayv-cf-balda-{{colour}}" id="{{shelfid}}">{{title}}</h2>
+        <ul class="ayv-em-libros">{{#books}}<li class="ayv-em-libro" id="ayv-em-{{key}}">
+            <span class="ayv-cf-lomo ayv-cf-lomo-{{spinecolour}}" aria-hidden="true"><span>{{spine}}</span></span>
+            <div class="ayv-em-ficha">
+                <h3>{{name}}</h3>
+                <p>{{solves}}</p>
+                <p class="ayv-em-hizo">{{^nothing}}<b>{{number}}</b><span>{{words}}</span>{{/nothing}}{{#nothing}}<span class="ayv-em-hizo-nada">{{words}}</span>{{/nothing}}</p>
+                <div class="ayv-em-ficha-gestos">{{#light}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="fn" value="{{fn}}"><input type="hidden" name="on" value="{{value}}"><button type="submit" class="ayv-cf-luz" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></form>{{/light}}{{#always}}<span class="ayv-em-siempre">{{always}}</span>{{/always}}<a class="ayv-em-ensename" href="{{url}}">{{showme}}</a></div>
+            </div>
+        </li>{{/books}}</ul></section>
+    {{/shelves}}
+</div>

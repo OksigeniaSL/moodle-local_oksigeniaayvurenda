@@ -13190,3 +13190,283 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
         grid-column: 1 / -1;
     }
 }
+
+/* Functions shown at their moment (Jujol, 14 Nov 2026): when something real happens in the library, the desk shows
+   one card with the function that solves it, and «Lo que puede hacer tu biblioteca» shows them all with what each has
+   done. Each function is a book of the house, as each setting of «Cómo funciona»: its spine with its label («AVI»,
+   «RES»…), in the same colours, so the card on the desk and its place on the page are the same book. The gestures are
+   the house's: «Encender» is the lamp of «Cómo funciona», a submit button of its own form; «Enséñamelo» goes to its
+   page; «Ahora no» is quiet. Everything works without JavaScript. After ayvurenda.css. Prefix .ayv-em-. */
+.ayv .ayv-em,
+.ayv .ayv-em-pagina {
+    --cf-tinta-fija: #1e2b2a;
+    --cf-crema: #fbf6ec;
+}
+
+/* ---------- The card on the desk ---------- */
+.ayv .ayv-em {
+    display: flex;
+    margin: 1rem 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: var(--surface);
+    box-shadow: 0 10px 22px -18px rgba(30, 43, 42, .55);
+}
+
+.ayv .ayv-em .ayv-cf-lomo {
+    width: 44px;
+    padding-bottom: 12px;
+}
+
+.ayv .ayv-em .ayv-cf-lomo > span {
+    font-size: .7rem;
+}
+
+.ayv .ayv-em-cuerpo {
+    display: grid;
+    flex: 1;
+    gap: .45rem;
+    min-width: 0;
+    padding: 1rem 1.25rem 1.1rem;
+}
+
+/* What happened, said as it is in this library: the heading of the card. */
+.ayv .ayv-em-pasa {
+    margin: 0;
+    color: var(--ink);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    opacity: .78;
+    text-transform: uppercase;
+}
+
+.ayv .ayv-em-titulo {
+    margin: 0;
+    color: var(--ink);
+    font-family: Literata, Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.ayv .ayv-em-que {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.ayv .ayv-em-gestos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem .8rem;
+    margin-top: .4rem;
+}
+
+.ayv .ayv-em-gestos form {
+    display: contents;
+}
+
+.ayv .ayv-em-gestos .ayv-button {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+}
+
+.ayv .ayv-em-gestos .ayv-button svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+/* «Ahora no»: quiet, at the end of the line, but a full target for a finger. */
+.ayv .ayv-em-no {
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 .4rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    opacity: .78;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+
+.ayv .ayv-em-no:focus-visible {
+    outline: 3px solid var(--coral);
+    outline-offset: 2px;
+}
+
+/* Lit: the card says what changed, and where to see it, with the lamp lit before «Encendido». It does not come back. */
+.ayv .ayv-em-hecho .ayv-em-pasa {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    opacity: 1;
+}
+
+.ayv .ayv-em-hecho .ayv-em-pasa::before {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #fff4cf, var(--sun) 62%, #d99418);
+    box-shadow: 0 0 8px 1px rgba(240, 180, 60, .55);
+}
+
+@media (max-width: 30rem) {
+    .ayv .ayv-em .ayv-cf-lomo {
+        width: 30px;
+    }
+
+    .ayv .ayv-em-cuerpo {
+        padding: .9rem 1rem 1rem;
+    }
+
+    .ayv .ayv-em-titulo {
+        font-size: 1.15rem;
+    }
+
+    .ayv .ayv-em-gestos .ayv-cf-luz,
+    .ayv .ayv-em-gestos .ayv-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .ayv .ayv-em-no {
+        margin: 0 auto;
+    }
+}
+
+/* ---------- «Lo que puede hacer tu biblioteca» ---------- */
+.ayv .ayv-em-pagina {
+    display: grid;
+    gap: 1.6rem;
+}
+
+.ayv .ayv-em-entrada {
+    margin: .2rem 0 0;
+    font-size: 1.05rem;
+}
+
+/* Each shelf: its title over a strip of wood, as the shelves of «Cómo funciona». */
+.ayv .ayv-em-balda-t {
+    margin: 0 0 .7rem;
+    padding-bottom: .4rem;
+    border-bottom: 4px solid var(--balda, var(--green));
+    color: var(--ink);
+    font-family: Literata, Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-em-libros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: .9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-em-libro {
+    display: flex;
+    min-height: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line), 0 8px 18px -14px rgba(30, 43, 42, .45);
+}
+
+.ayv .ayv-em-libro .ayv-cf-lomo {
+    width: 38px;
+}
+
+.ayv .ayv-em-ficha {
+    display: grid;
+    flex: 1;
+    grid-template-rows: auto auto 1fr auto;
+    gap: .45rem;
+    min-width: 0;
+    padding: .9rem 1rem 1rem;
+}
+
+.ayv .ayv-em-ficha h3 {
+    margin: 0;
+    color: var(--ink);
+    font-family: Literata, Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-em-ficha p {
+    margin: 0;
+}
+
+/* What it has done: the number big, as on the desk's cards; with nothing yet, said in words. */
+.ayv .ayv-em-hizo {
+    display: flex;
+    align-items: baseline;
+    gap: .45rem;
+    padding: .5rem 0 0;
+    border-top: 1px dashed var(--line);
+}
+
+.ayv .ayv-em-hizo b {
+    color: var(--ink);
+    font-family: Literata, Georgia, serif;
+    font-size: 1.7rem;
+    line-height: 1;
+}
+
+.ayv .ayv-em-hizo span {
+    font-size: .95rem;
+}
+
+.ayv .ayv-em-hizo-nada {
+    font-style: italic;
+    opacity: .78;
+}
+
+.ayv .ayv-em-ficha-gestos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .8rem;
+}
+
+.ayv .ayv-em-ficha-gestos form {
+    display: contents;
+}
+
+/* A function that has no lamp says so plainly instead: always on. */
+.ayv .ayv-em-siempre {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 44px;
+    font-weight: 700;
+}
+
+.ayv .ayv-em-siempre::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+}
+
+.ayv .ayv-em-ensename {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-left: auto;
+    color: var(--ink);
+    font-weight: 700;
+    text-underline-offset: 4px;
+}

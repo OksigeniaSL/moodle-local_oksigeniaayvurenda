@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/timely_card
+
+    A function presented at its moment, on the desk (Jujol, 14 November): each function is a book of the house, with its
+    spine; what happened here with its numbers as the title, what answers it ending in how it is today, and the gestures:
+    the lamp that turns it on, «Show me» and, quiet at the end, «Not now». Once lit, the same card says what happens from
+    tomorrow. Everything works without JavaScript.
+
+    Example context (json):
+    {
+        "lit": false, "spine": "AVI", "colour": "coral", "when": "Está pasando ahora",
+        "title": "Hay libros que vuelven tarde: 4 ahora mismo.",
+        "what": "Ayvurenda puede avisar a cada lector y a su familia cuando un libro se pasa de fecha. Ahora los avisos están apagados.",
+        "action": "https://example.com/local/oksigeniaayvurenda/desk.php?library=demo-1", "sesskey": "abc", "kind": "late",
+        "light": {"label": "Encender los avisos"}, "show": {"url": "https://example.com/rules.php", "label": "Enséñamelo"},
+        "notnow": "Ahora no"
+    }
+}}
+<section class="ayv-em{{#lit}} ayv-em-hecho{{/lit}}" aria-labelledby="ayv-em-t"{{#lit}} role="status"{{/lit}}>
+    <span class="ayv-cf-lomo ayv-cf-lomo-{{colour}}" aria-hidden="true"><span>{{spine}}</span></span>
+    <div class="ayv-em-cuerpo">
+        <p class="ayv-em-pasa">{{when}}</p>
+        <h2 class="ayv-em-titulo" id="ayv-em-t">{{title}}</h2>
+        <p class="ayv-em-que">{{what}}</p>
+        <div class="ayv-em-gestos">
+            {{#light}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="timely" value="on"><input type="hidden" name="kind" value="{{kind}}"><button type="submit" class="ayv-cf-luz" aria-pressed="false"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></form>{{/light}}
+            {{#show}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>{{/show}}
+            {{#notnow}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="timely" value="no"><input type="hidden" name="kind" value="{{kind}}"><button type="submit" class="ayv-em-no">{{notnow}}</button></form>{{/notnow}}
+        </div>
+    </div>
+</section>
