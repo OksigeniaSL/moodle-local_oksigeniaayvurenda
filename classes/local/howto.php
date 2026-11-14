@@ -255,6 +255,81 @@ final class howto {
         return array_slice(array_values(array_filter($found, fn($t) => 2 * $t['score'] >= $best)), 0, 3);
     }
 
+    /** @var int The questions without an answer a centre keeps, the most asked: to tune the finder by its use. */
+    public const MISSES = 200;
+
+    /**
+     * Keeps a question the finder could not answer, without anybody's data: only its words, and of them, none with a digit
+     * and none that is the first name or the surname of someone of the site or of the centre's readers. Who asked is not
+     * kept. The most asked stay; the rest go.
+     *
+     * @param string $query The question as it was sent (not while it is typed: those are pieces of words).
+     * @param \stdClass $library
+     * @param int $now
+     */
+    public static function missed(string $query, \stdClass $library, int $now): void {
+        global $DB;
+        $all = preg_split('/[^\p{L}\p{N}]+/u', text::normalise($query)) ?: [];
+        $words = array_filter($all, fn($w) => \core_text::strlen($w) >= 3 && !in_array($w, self::QUIET, true));
+        $kept = [];
+        foreach ($words as $word) {
+            if (preg_match('/\d/u', $word) || self::someone($word, (int) $library->entityid)) {
+                continue;
+            }
+            $kept[] = $word;
+        }
+        if (!$kept) {
+            return;
+        }
+        $question = implode(' ', $kept);
+        $entityid = (int) $library->entityid;
+        $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
+            ?: [];
+        $misses = (array) ($settings['howtomisses'] ?? []);
+        $misses[$question] = [(int) ($misses[$question][0] ?? 0) + 1, $now];
+        if (count($misses) > self::MISSES) {
+            uasort($misses, fn($a, $b) => [$b[0], $b[1]] <=> [$a[0], $a[1]]);
+            $misses = array_slice($misses, 0, self::MISSES, true);
+        }
+        $settings['howtomisses'] = $misses;
+        $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $entityid]);
+    }
+
+    /**
+     * Whether a word is the first name or the surname of someone: of the site, or a reader of the centre without an account.
+     *
+     * @param string $word
+     * @param int $entityid
+     * @return bool
+     */
+    private static function someone(string $word, int $entityid): bool {
+        global $DB;
+        // The same letters, whatever their accents and capitals.
+        $named = '(' . $DB->sql_like('firstname', ':a', false, false) . ' OR '
+            . $DB->sql_like('lastname', ':b', false, false) . ')';
+        return $DB->record_exists_select('user', 'deleted = 0 AND ' . $named, ['a' => $word, 'b' => $word])
+            || $DB->record_exists_select('local_oksigeniaayvurenda_reader', 'entityid = :e AND ' . $named, ['e' => $entityid,
+                'a' => $word, 'b' => $word]);
+    }
+
+    /**
+     * The questions a centre asked the finder that it could not answer, the most asked first.
+     *
+     * @param int $entityid
+     * @return array[] question, times and last (when).
+     */
+    public static function misses(int $entityid): array {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
+            ?: [];
+        $out = [];
+        foreach ((array) ($settings['howtomisses'] ?? []) as $question => [$times, $last]) {
+            $out[] = ['question' => (string) $question, 'times' => (int) $times, 'last' => (int) $last];
+        }
+        usort($out, fn($a, $b) => [$b['times'], $b['last']] <=> [$a['times'], $a['last']]);
+        return $out;
+    }
+
     /** @var string[] Tasks that need readers first, and tasks that need books first: the answer says so. */
     private const NEED_READERS = ['cards', 'newcard', 'profile', 'late', 'applink', 'match', 'tutors'];
 

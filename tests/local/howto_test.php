@@ -163,4 +163,25 @@ final class howto_test extends \advanced_testcase {
             }
         }
     }
+
+    /**
+     * A question sent that found nothing is kept with its words only: no digit, nobody's first name or surname, and who
+     * asked is not kept; the same one again counts twice.
+     */
+    public function test_missed(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $this->getDataGenerator()->create_user(['firstname' => 'Begoña', 'lastname' => 'Zubiría']);
+        $gen->create_reader(['entityid' => $entityid, 'firstname' => 'Tomasín', 'lastname' => 'Quirós']);
+        howto::missed('¿Cómo hago la gymkana de verano de Begoña con 2025 libros?', $library, 1000);
+        howto::missed('gymkana verano Zubiria', $library, 2000);
+        howto::missed('Gymkana de verano', $library, 2500);
+        howto::missed('Quiros tomasin', $library, 3000);
+        $this->assertSame([
+            ['question' => 'gymkana verano', 'times' => 2, 'last' => 2500],
+            ['question' => 'gymkana verano libros', 'times' => 1, 'last' => 1000],
+        ], howto::misses($entityid));
+    }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.266.1 (2026-11-14)
+
+- «What do you want to do?» keeps the questions it could not answer, to tune it by its use: only their words, without who
+  asked, without digits and without any word that is somebody's first name or surname; each centre keeps its most asked
+  200. `cli/howto_misses.php` lists them.
+
 ## 0.266.0 (2026-11-14)
 
 - **The functions present themselves at their moment** (the first day, point 6), from Jujol's mock-ups.

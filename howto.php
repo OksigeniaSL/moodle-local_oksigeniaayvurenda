@@ -64,6 +64,10 @@ $found = howto::find($query, $library, (int) $USER->id);
 // What it answered with, with its screen and its guided help.
 $named = $answer ? howto::named($answer['tasks'], $library, (int) $USER->id) : [];
 $found = $named ?: $found;
+// A question sent that found nothing is kept, without anybody's data, to tune the finder by its use.
+if ($query !== '' && !$found) {
+    howto::missed($query, $library, time());
+}
 $all = $query !== '' ? howto::find('', $library, (int) $USER->id) : [];
 $card = fn(array $task) => ['title' => $task['title'], 'steps' => array_map(fn($s) => ['step' => $s], $task['steps']),
     'url' => $task['url'], 'help' => $task['help']];
