@@ -35,6 +35,12 @@ final class mine {
     /** @var int Days before a book is due back from which the app offers more time on the home. */
     private const SOON = 3;
 
+    /** @var string The library's icon in the app: the menu's, the family's card and the child's line. */
+    private const ICON = 'fas-book-open-reader';
+
+    /** @var int Books read this year that a child's page shows with their covers. */
+    private const READ_SHOWN = 8;
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -323,8 +329,104 @@ final class mine {
         if ($out > 1) {
             $line = $str('mobilechildfacetcount', (object) ['line' => $line, 'count' => $out]);
         }
-        return [['heading' => $str('mobilechildheading'), 'items' => array_slice($items, 0, self::HOME_ROWS),
-            'layout' => 'shelf', 'facet' => ['text' => $line, 'icon' => 'fas-book', 'urgent' => $rank < 2]]];
+        return [['heading' => $str('mobilechildheading'), 'icon' => self::ICON, 'items' => array_slice($items, 0, self::HOME_ROWS),
+            'layout' => 'shelf', 'facet' => ['text' => $line, 'icon' => self::ICON, 'urgent' => $rank < 2],
+            'seeall' => ['label' => $str('mobilechildall'), 'method' => 'mobile_child_view', 'args' => ['child' => $childuserid],
+                'pagetitle' => $str('mobilelibrary')]]];
+    }
+
+    /**
+     * A child's library for their family, behind «Their library» in Oksigenia Aty: every book they have and until when,
+     * what waits for them at the desk or in a queue, the textbooks of the year in one line and, up to the flower, what they
+     * read this school year, with covers. From the sky, as on the card: a book and its date, never which one.
+     *
+     * @param int $childuserid
+     * @param int|null $now
+     * @return array One per centre: name, notice, textbooks, books (title, detail, urgent, pickup, hascover, cover, opens,
+     *     where, recordid), young, and the young's read (the same, without detail) and readcount.
+     */
+    public static function child_page(int $childuserid, ?int $now = null): array {
+        global $DB;
+        $now = $now ?? time();
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $out = [];
+        foreach (self::summary($childuserid, $now) as $library) {
+            $reader = $DB->get_record(self::T . 'reader', ['id' => $library['readerid']]);
+            if (!$reader || (access::apart() && !plans::allows((int) $reader->entityid, 'app'))) {
+                continue;
+            }
+            $young = cards::look_of($reader, $now) === 'flower';
+            $book = function (array $row, string $title, string $detail, bool $urgent, string $where, bool $pickup) use ($young) {
+                $cover = $young ? covers::inline((int) $row['recordid'], 60 * 1024) : '';
+                return ['title' => $young ? (string) $row['title'] : $title, 'detail' => $detail, 'urgent' => $urgent,
+                    'pickup' => $pickup, 'hascover' => $cover !== '', 'cover' => $cover, 'opens' => $young, 'where' => $where,
+                    'recordid' => $young ? (int) $row['recordid'] : 0];
+            };
+            $books = [];
+            foreach ($library['loans'] as $loan) {
+                $soon = (int) $loan['timedue'] <= $now + self::SOON * DAYSECS;
+                $books[] = $book(
+                    $loan,
+                    $str('mobilechildbook'),
+                    $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $loan['due']),
+                    $loan['late'] || $soon,
+                    (string) $loan['where'],
+                    false
+                );
+            }
+            foreach ($library['holds'] as $hold) {
+                $books[] = $book(
+                    $hold,
+                    $str($hold['ready'] ? 'mobilechildpickup' : 'mobilechildqueued'),
+                    $hold['ready'] ? $str($young ? 'mobilechildreadyyoung' : 'mobilechildready', $hold['until'])
+                        : $str('mobilechildqueue'),
+                    false,
+                    (string) $hold['slug'],
+                    (bool) $hold['ready']
+                );
+            }
+            $read = $young ? self::read_this_year($reader, $now) : ['count' => 0, 'books' => []];
+            $out[] = ['name' => $library['name'], 'notice' => (string) ($library['notice'] ?? ''),
+                'textbooks' => $library['textbooks'], 'books' => $books, 'hasbooks' => (bool) $books, 'young' => $young,
+                'read' => $read['books'], 'hasread' => (bool) $read['books'], 'readline' => $read['count'] ? $str(
+                    $read['count'] === 1 ? 'mobilechildreadone' : 'mobilechildreadmany',
+                    $read['count']
+                ) : ''];
+        }
+        return $out;
+    }
+
+    /**
+     * What a young reader brought back this school year: how many books, and the last ones with their covers.
+     *
+     * @param \stdClass $reader
+     * @param int $now
+     * @return array count and books (title, hascover, cover, opens, where, recordid), the last first.
+     */
+    private static function read_this_year(\stdClass $reader, int $now): array {
+        global $DB;
+        $year = years::around((int) $reader->entityid, $now);
+        $rows = $DB->get_records_sql(
+            "SELECT r.id, r.title, MAX(l.timereturned) AS lastback, MAX(b.slug) AS slug
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+               JOIN {" . self::T . "library} b ON b.id = l.libraryid
+              WHERE l.readerid = :readerid AND l.timereturned IS NOT NULL AND l.timeloaned >= :start
+                AND b.kind <> :bank
+           GROUP BY r.id, r.title
+           ORDER BY MAX(l.timereturned) DESC, r.id DESC",
+            ['readerid' => $reader->id, 'start' => (int) $year->timestart, 'bank' => bank::KIND]
+        );
+        $books = [];
+        foreach (array_slice($rows, 0, self::READ_SHOWN) as $row) {
+            $cover = covers::inline((int) $row->id, 40 * 1024);
+            // Each with all its flags: a missing one would be looked for in the page around it.
+            $books[] = ['title' => (string) $row->title, 'detail' => '', 'urgent' => false, 'pickup' => false,
+                'hascover' => $cover !== '', 'cover' => $cover, 'opens' => true, 'where' => (string) $row->slug,
+                'recordid' => (int) $row->id];
+        }
+        return ['count' => count($rows), 'books' => $books];
     }
 
     /**

@@ -85,6 +85,7 @@ final class notices_test extends \advanced_testcase {
         $byname = [];
         foreach ($messages as $message) {
             $byname[$message->eventtype] = $message;
+            $this->assertStringContainsString('notificationiconurl', (string) $message->customdata, 'the app draws our icon');
         }
         $this->assertStringContainsString('El faro dormido', $byname['overdue']->fullmessage);
         $this->assertStringContainsString('La nube de tinta', $byname['overdue']->fullmessage);

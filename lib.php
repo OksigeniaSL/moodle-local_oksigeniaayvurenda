@@ -218,13 +218,17 @@ function local_oksigeniaayvurenda_oksigeniaaty_user_allowed(int $userid): bool {
 }
 
 /**
- * What a family sees in Oksigenia Aty of a child's library. Aty has checked that this adult is of this child's family.
+ * What a family sees in Oksigenia Aty of a child's library. Aty has checked that this adult is of this child's family;
+ * checked here too, whatever the caller did, as the family record (Oksigenia Family) says.
  *
  * @param int $adultuserid
  * @param int $childuserid
  * @return array A list of cards, as Aty's homecards class describes them.
  */
 function local_oksigeniaayvurenda_oksigeniaaty_child_cards(int $adultuserid, int $childuserid): array {
+    if (!\local_oksigeniaayvurenda\output\mobile::is_family($adultuserid, $childuserid)) {
+        return [];
+    }
     return \local_oksigeniaayvurenda\local\mine::child_cards($childuserid);
 }
 

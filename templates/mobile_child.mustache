@@ -1,0 +1,77 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/mobile_child
+
+    A child's library for their family in the app, behind «Their library» in Oksigenia Aty: the books they have and until
+    when, what waits for them, and, up to the flower, what they read this year. Its look is in the page itself, with the
+    app's colours: the family may have no library of their own, and so no sheet of it loaded.
+
+    Example context (json):
+    {
+        "allowed": true, "refused": "Esta página es de la familia del lector.", "haslibraries": true,
+        "empty": "Ahora no tiene ningún libro.", "readheading": "Leídos este curso",
+        "private": "Lo que lee es suyo: aquí ves que tiene un libro y hasta cuándo, no cuál.",
+        "libraries": [{"name": "Biblioteca", "notice": "", "textbooks": "2 libros de texto del banco", "hasbooks": true,
+            "young": true, "hasread": true, "readline": "Este curso ha leído 9 libros",
+            "books": [{"title": "El faro dormido", "detail": "se devuelve el 3 nov", "urgent": true, "pickup": false,
+                "hascover": true, "cover": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "opens": true, "where": "demo-1",
+                "recordid": 3},
+                {"title": "Un libro, para recoger", "detail": "en la biblioteca hasta el 5 nov", "urgent": false, "pickup": true,
+                "hascover": false, "opens": false, "where": "demo-1", "recordid": 0}],
+            "read": [{"title": "La isla del cometa", "detail": "", "urgent": false, "pickup": false, "hascover": false,
+                "opens": true, "where": "demo-1", "recordid": 4}]}]
+    }
+}}
+<div class="local-oksigeniaayvurenda-mobile">
+{{^allowed}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{refused}}</ion-label></ion-item></ion-list>{{/allowed}}
+{{#allowed}}{{^haslibraries}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{empty}}</ion-label></ion-item></ion-list>{{/haslibraries}}{{/allowed}}
+{{#libraries}}
+<section style="padding: 16px 16px 8px;">
+    <h2 style="margin: 0 0 12px; font-size: 1.15rem; font-weight: 700;">{{name}}</h2>
+    {{#notice}}<p style="margin: 0 0 12px; color: var(--ion-color-danger);">{{notice}}</p>{{/notice}}
+    {{^hasbooks}}<p style="margin: 0 0 12px;">{{empty}}</p>{{/hasbooks}}
+    {{#books}}
+    {{#opens}}<ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">{{/opens}}
+    {{^opens}}<ion-item lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent;">{{/opens}}
+        <div style="display: flex; gap: 14px; align-items: center; width: 100%; padding: 6px 0;">
+            {{#hascover}}<img src="{{cover}}" alt="" style="flex: 0 0 56px; width: 56px; height: auto; border-radius: 2px 6px 6px 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);">{{/hascover}}
+            {{^hascover}}<span aria-hidden="true" style="flex: 0 0 22px; width: 22px; height: 84px; border-radius: 3px; background: {{#pickup}}repeating-linear-gradient(135deg, var(--ion-color-primary) 0 7px, transparent 7px 14px); border: 2px solid var(--ion-color-primary){{/pickup}}{{^pickup}}var(--ion-color-primary){{/pickup}}; opacity: .8;"></span>{{/hascover}}
+            <span style="flex: 1 1 auto; min-width: 0;">
+                <strong style="display: block; font-size: 1.05rem;">{{title}}</strong>
+                <span style="display: block;{{#urgent}} color: var(--ion-color-danger); font-weight: 700;{{/urgent}}">{{detail}}</span>
+            </span>
+        </div>
+    </ion-item>
+    {{/books}}
+    {{#textbooks}}<p style="margin: 8px 0 0; color: var(--ion-color-medium);">{{textbooks}}</p>{{/textbooks}}
+    {{#young}}{{#hasread}}
+    <h3 style="margin: 20px 0 4px; font-size: 1rem; font-weight: 700;">{{readheading}}</h3>
+    <p style="margin: 0 0 10px;">{{readline}}</p>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        {{#read}}
+        <ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent; --min-height: 0;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">
+            {{#hascover}}<img src="{{cover}}" alt="{{title}}" style="display: block; width: 100%; height: auto; border-radius: 2px 6px 6px 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);">{{/hascover}}
+            {{^hascover}}<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 96px; padding: 6px; border-radius: 2px 6px 6px 2px; background: var(--ion-color-primary); color: var(--ion-color-primary-contrast); font-size: .75rem; line-height: 1.2; text-align: center; overflow: hidden;">{{title}}</span>{{/hascover}}
+        </ion-item>
+        {{/read}}
+    </div>
+    {{/hasread}}{{/young}}
+    {{^young}}{{#hasbooks}}<p style="margin: 14px 0 0; color: var(--ion-color-medium);">{{private}}</p>{{/hasbooks}}{{/young}}
+</section>
+{{/libraries}}
+</div>

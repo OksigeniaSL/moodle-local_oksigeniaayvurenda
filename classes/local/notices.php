@@ -551,6 +551,7 @@ final class notices {
         string $from = '',
         ?array $design = null
     ): bool {
+        global $OUTPUT;
         // While every centre is getting ready, only its staff hear from the library.
         if (access::shut_for((int) $user->id)) {
             return false;
@@ -576,6 +577,9 @@ final class notices {
         $message->fullmessagehtml = mail::html(($design ?? mail::plain($subject, $body)) + ['userid' => (int) $user->id]);
         $message->smallmessage = $subject;
         $message->notification = 1;
+        // The app draws its own icon only beside notices of activities; anyone else's, it takes from the notice itself.
+        // The coloured one, not the monologo: one ink would go black on the dark theme.
+        $message->customdata = ['notificationiconurl' => $OUTPUT->image_url('icon', 'local_oksigeniaayvurenda')->out(false)];
         if ($url !== '') {
             $message->contexturl = $url;
             $message->contexturlname = $urlname;

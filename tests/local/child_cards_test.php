@@ -67,7 +67,7 @@ final class child_cards_test extends \advanced_testcase {
      */
     public function test_a_young_child(): void {
         $w = $this->world('Primaria');
-        $cards = local_oksigeniaayvurenda_oksigeniaaty_child_cards((int) $w->adult->id, (int) $w->child->id);
+        $cards = mine::child_cards((int) $w->child->id, $w->now);
         $this->assertCount(1, $cards);
         $this->assertCount(1, $cards[0]['items']);
         $row = $cards[0]['items'][0];
@@ -86,7 +86,7 @@ final class child_cards_test extends \advanced_testcase {
      */
     public function test_an_older_child(): void {
         $w = $this->world('Secundaria');
-        $cards = local_oksigeniaayvurenda_oksigeniaaty_child_cards((int) $w->adult->id, (int) $w->child->id);
+        $cards = mine::child_cards((int) $w->child->id, $w->now);
         $text = json_encode($cards, JSON_UNESCAPED_UNICODE);
         $this->assertStringNotContainsString('faro', $text);
         $this->assertStringNotContainsString((string) $w->record->id . ',', json_encode($cards[0]['items'][0]['args'] ?? []));
@@ -123,7 +123,7 @@ final class child_cards_test extends \advanced_testcase {
         $start = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda', '');
         $card = mine::child_cards((int) $w->child->id, $w->now)[0];
         $this->assertSame('shelf', $card['layout']);
-        $this->assertSame('fas-book', $card['facet']['icon']);
+        $this->assertSame('fas-book-open-reader', $card['facet']['icon']);
         $this->assertStringStartsWith($start('mobilechildfacetout'), $card['facet']['text']);
         $this->assertFalse($card['facet']['urgent']);
         $this->assertFalse($card['items'][0]['urgent']);
@@ -162,6 +162,63 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertStringNotContainsString('faro', json_encode($card, JSON_UNESCAPED_UNICODE));
         $this->assertStringStartsWith($start('mobilechildfacetready'), $card['facet']['text']);
         $this->assertFalse($card['facet']['urgent']);
+    }
+
+    /**
+     * The card leads to the child's page; an adult who is not of the child's family, as the family record says, gets
+     * neither the card nor the page.
+     */
+    public function test_only_the_family(): void {
+        $w = $this->world('Primaria');
+        $card = mine::child_cards((int) $w->child->id, $w->now)[0];
+        $this->assertSame('mobile_child_view', $card['seeall']['method']);
+        $this->assertSame(['child' => (int) $w->child->id], $card['seeall']['args']);
+        $this->assertSame('fas-book-open-reader', $card['icon']);
+        if (!\local_oksigeniaayvurenda\output\mobile::is_family((int) $w->adult->id, (int) $w->child->id)) {
+            $this->assertSame([], local_oksigeniaayvurenda_oksigeniaaty_child_cards((int) $w->adult->id, (int) $w->child->id));
+            $this->setUser($w->adult);
+            $page = \local_oksigeniaayvurenda\output\mobile::mobile_child_view(['child' => (int) $w->child->id]);
+            $html = $page['templates'][0]['html'];
+            $this->assertStringContainsString(s(get_string('mobilechildrefused', 'local_oksigeniaayvurenda')), $html);
+            $this->assertStringNotContainsString('faro', $html);
+        }
+    }
+
+    /**
+     * The child's page: up to the flower, the books with their titles and covers and what they read this year; from the
+     * sky, a book and its date, and why not which one.
+     */
+    public function test_the_child_page(): void {
+        global $DB;
+        $w = $this->world('Primaria');
+        $this->assertTrue(covers::store((int) $w->record->id, self::jpeg(), 'test'));
+        $year = years::around((int) $w->library->entityid, $w->now);
+        $read = $w->gen->create_record(['entityid' => $w->library->entityid, 'title' => 'La isla del cometa']);
+        $item = $w->gen->create_item(['libraryid' => $w->library->id, 'recordid' => $read->id, 'barcode' => '100002L']);
+        foreach ([20, 10] as $ago) {
+            $DB->insert_record(self::T . 'loan', ['libraryid' => $w->library->id, 'itemid' => $item->id,
+                'readerid' => $w->reader->id, 'yearid' => $year->id, 'timeloaned' => $w->now - $ago * DAYSECS,
+                'timedue' => $w->now - ($ago - 7) * DAYSECS, 'timereturned' => $w->now - ($ago - 5) * DAYSECS, 'renewals' => 0,
+                'timecreated' => $w->now, 'timemodified' => $w->now]);
+        }
+        $page = mine::child_page((int) $w->child->id, $w->now)[0];
+        $this->assertTrue($page['young']);
+        $this->assertSame('El faro secreto', $page['books'][0]['title']);
+        $this->assertTrue($page['books'][0]['hascover']);
+        $this->assertTrue($page['books'][0]['opens']);
+        $this->assertCount(1, $page['read'], 'a book read twice counts once');
+        $this->assertSame('La isla del cometa', $page['read'][0]['title']);
+        $this->assertSame(get_string('mobilechildreadone', 'local_oksigeniaayvurenda'), $page['readline']);
+
+        $w = $this->world('Secundaria');
+        $this->assertTrue(covers::store((int) $w->record->id, self::jpeg(), 'test'));
+        $page = mine::child_page((int) $w->child->id, $w->now)[0];
+        $this->assertFalse($page['young']);
+        $this->assertSame(get_string('mobilechildbook', 'local_oksigeniaayvurenda'), $page['books'][0]['title']);
+        $this->assertFalse($page['books'][0]['hascover']);
+        $this->assertFalse($page['books'][0]['opens']);
+        $this->assertSame([], $page['read']);
+        $this->assertStringNotContainsString('faro', json_encode($page, JSON_UNESCAPED_UNICODE));
     }
 
     /**

@@ -154,6 +154,51 @@ class mobile {
     }
 
     /**
+     * Whether an adult is family of a child, as the family record (Oksigenia Family) says: without it, nobody is.
+     *
+     * @param int $adultuserid
+     * @param int $childuserid
+     * @return bool
+     */
+    public static function is_family(int $adultuserid, int $childuserid): bool {
+        return $adultuserid > 0 && $childuserid > 0 && $adultuserid !== $childuserid
+            && method_exists('\\local_oksigeniafamily\\api', 'is_guardian')
+            && \local_oksigeniafamily\api::is_guardian($adultuserid, $childuserid);
+    }
+
+    /**
+     * A child's library for their family, behind «Their library» on the child's page in Oksigenia Aty: only for an adult
+     * of the child's family.
+     *
+     * @param array $args What the app sends: child, the child's account.
+     * @return array
+     */
+    public static function mobile_child_view(array $args): array {
+        global $OUTPUT, $USER;
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $child = (int) ($args['child'] ?? 0);
+        $allowed = self::is_family((int) $USER->id, $child);
+        $libraries = $allowed ? mine::child_page($child) : [];
+        $data = [
+            'allowed' => $allowed,
+            'refused' => $str('mobilechildrefused'),
+            'libraries' => $libraries,
+            'haslibraries' => (bool) $libraries,
+            'empty' => $str('mobilechildnone'),
+            'readheading' => $str('mobilechildreadheading'),
+            'private' => $str('mobilechildprivate'),
+        ];
+        return [
+            'templates' => [['id' => 'main', 'html' => $OUTPUT->render_from_template(
+                'local_oksigeniaayvurenda/mobile_child',
+                self::inert($data)
+            )]],
+            'javascript' => '',
+            'otherdata' => '',
+        ];
+    }
+
+    /**
      * The reader's card alone, to show at the desk: their name, the library, the QR and the barcode, big.
      *
      * @param array $args What the app sends.

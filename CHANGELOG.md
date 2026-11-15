@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.4 (2026-11-15)
+
+- **«Their library»**, a child's library for their family in Oksigenia Aty, at the foot of the child's card
+  (`mobile_child_view`): every book they have and until when, what waits for them at the desk or in a queue, the
+  textbooks of the year in one line and, up to the flower, what they read this school year with covers. From the sky,
+  a book and its date, never which one, and a line that says why.
+- Only for an adult of the child's family, as Oksigenia Family says: the page checks it, and the child's card now checks
+  it too, whatever the caller did. The card is called «Library», with the library's icon.
+- The library's notices carry its icon for the app (`customdata`, `notificationiconurl`): the app draws its own icon only
+  beside notices of activities, and showed a pencil beside the library's.
+
 ## 1.0.3 (2026-11-15)
 
 - A child's library in Oksigenia Aty, as Jujol drew it: the card asks for the shelf for any reader (`layout`), so an
