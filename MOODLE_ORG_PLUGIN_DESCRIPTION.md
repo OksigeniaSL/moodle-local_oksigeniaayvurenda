@@ -1,59 +1,45 @@
-<p>A whole library inside Moodle: the catalogue, the circulation desk, the readers and their cards, holds, late notices and reports, for any library, a school's, a university's, a town's, a company's or a bookmobile. Readers find it in the main menu, the staff at their desk. Try it without installing anything: the <a href="https://campus.oksigenia.com/local/oksigeniacampus/demo.php?as=bibliotecaria&amp;to=/local/oksigeniaayvurenda/desk.php%3Flibrary%3Ddemo-1%26lang%3Den">desk</a> and the <a href="https://campus.oksigenia.com/local/oksigeniacampus/demo.php?as=lector&amp;to=/local/oksigeniaayvurenda/index.php%3Flang%3Den">reader's library</a> of a demo library with sample data, erased every night.</p>
-<h3>The first day</h3>
+<p>A whole library inside Moodle: the catalogue, the circulation desk, readers and their cards, holds, late notices and reports, for any library: a school's, a university's, a town's, a company's or a bookmobile. Readers find it in the main menu, the staff at their desk. Try it without installing anything: the <a href="https://campus.oksigenia.com/local/oksigeniacampus/demo.php?as=bibliotecaria&amp;to=/local/oksigeniaayvurenda/desk.php%3Flibrary%3Ddemo-1%26lang%3Den">desk</a> and the <a href="https://campus.oksigenia.com/local/oksigeniacampus/demo.php?as=lector&amp;to=/local/oksigeniaayvurenda/index.php%3Flang%3Den">reader's library</a> of a demo library with sample data, erased every night.</p>
+<p><strong>The first day</strong></p>
 <ul>
-<li><strong>Library: start here</strong> appears in the navigation bar. Give the first library a name and you are at its desk, with <strong>To open your library</strong> in five steps (the catalogue, the readers, the loan rules, the team and opening the library), each ticked when it is really done, not when it has been seen.</li>
-<li><strong>See a full sample library</strong>, before setting up yours: made-up books, readers and loans, kept apart and removed with one touch.</li>
-<li><strong>What do you want to do?</strong> answers while you type, forgives typos and knows the library's settings with their current values. Whoever is given a place at the desk gets a welcome and <strong>Your first day here</strong>: lend a book, take one back, print a card.</li>
-<li>Later, each function introduces itself on the desk when something real calls for it (the first late books, three readers waiting for the same book, the end of the school year three weeks away), and <strong>What your library can do</strong> shows them all, with what each one did this year and its switch.</li>
+<li><strong>Library: start here</strong> appears in the navigation bar. Name the first library and you are at its desk, with <strong>To open your library</strong> in five steps (the catalogue, the readers, the loan rules, the team, opening), each ticked when it is really done.</li>
+<li><strong>See a full sample library</strong> first: made-up books, readers and loans, kept apart and removed with one touch.</li>
+<li><strong>What do you want to do?</strong> answers as you type, forgives typos and knows the library's settings. New staff get a welcome and <strong>Your first day here</strong>: lend a book, take one back, print a card.</li>
+<li>Later, each function introduces itself on the desk when something real calls for it, and <strong>What your library can do</strong> shows them all, with what each did this year and its switch.</li>
 </ul>
-<h3>The desk</h3>
+<p><strong>The desk</strong></p>
 <ul>
-<li><strong>One field for everything</strong>: scan a card or a book with a barcode reader, the camera or a phone, or type a name or a title. It lends, returns and renews without modes, with sounds, undo and a note in one tap; a book without a label is found by its title or by the ISBN on its back cover.</li>
-<li><strong>Holds</strong> with a queue and a notice when the book is set aside, <strong>late notices</strong> to the reader (and, in a school, to the form tutor), closed days and a return deadline, and, only if the library wants them, days without loans or fines that are just written down.</li>
-<li><strong>Keeps working offline</strong>: what is scanned is kept in the browser and sent when the connection is back.</li>
-<li><strong>Self-loan posts</strong> that open without an account, and a <strong>SIP2 bridge</strong> for self-service machines, return boxes and RFID.</li>
+<li><strong>One field for everything</strong>: scan a card or a book with a barcode reader, the camera or a phone, or type a name or a title. It lends, returns and renews without modes, with undo and a note in one tap; a book without a label is found by its title or its ISBN.</li>
+<li><strong>Holds</strong> with a queue, <strong>late notices</strong> to the reader (and, in a school, to the form tutor), closed days, and only if the library wants them, days without loans or fines.</li>
+<li><strong>Works offline</strong>: what is scanned waits in the browser until the connection is back.</li>
+<li><strong>Self-loan posts</strong> without an account, and a <strong>SIP2 bridge</strong> for self-service machines, return boxes and RFID.</li>
 </ul>
-<h3>The catalogue</h3>
+<p><strong>The catalogue</strong></p>
 <ul>
-<li>A search that forgives accents and typos, corners by subject (UDC or Dewey) or by genre, new arrivals, and a record page that says where the book is on the shelf; the <strong>shelves</strong> drawn as spines in call-number order, with the gap of a book that is out.</li>
-<li>A <strong>public catalogue without an account</strong>, closed until the library opens it, which can also be embedded in any website, with OPDS, OAI-PMH (Dublin Core and MARCXML) and SRU.</li>
-<li>The <strong>digital collection</strong>: EPUB, PDF, audio and video read in the browser, and free works from Project Gutenberg and Wikisource.</li>
-<li>Citations in RIS, BibTeX and CSL-JSON, and COinS for Zotero and Mendeley.</li>
+<li>A search that forgives accents and typos, corners by subject (UDC or Dewey) or genre, new arrivals, a record that says where the book is, and the <strong>shelves</strong> drawn as spines in call-number order.</li>
+<li>A <strong>public catalogue</strong> without an account, closed until the library opens it, embeddable in any website, with OPDS, OAI-PMH and SRU.</li>
+<li>The <strong>digital collection</strong>: EPUB, PDF, audio and video in the browser, and free works from Project Gutenberg and Wikisource. Citations in RIS, BibTeX and CSL-JSON.</li>
 </ul>
-<h3>Bringing a library in</h3>
+<p><strong>Bringing a library in</strong></p>
 <ul>
-<li>From any system that exports <strong>MARC21 or UNIMARC</strong> (copies in 852, Koha's 952, 995, 949 or 999; old character sets read right), a <strong>spreadsheet</strong> (LibraryThing, Goodreads, Calibre and Libib as they come), publishers' ONIX, or an Abies Web export with its readers and loans. You see the books it brings before importing, and importing again adds only what is new.</li>
-<li>New books by <strong>ISBN or by title</strong> from some twenty-five national libraries and shared catalogues: the Library of Congress, the national libraries of Spain, France, Germany and Portugal, and catalogues of Europe and the Americas.</li>
-<li>Readers from <strong>cohorts</strong>, courses with groups, a list, <strong>OneRoster</strong> (its files or its REST API) or <strong>LTI 1.3</strong>, matched with their Moodle accounts.</li>
+<li>From any system that exports <strong>MARC21 or UNIMARC</strong> (Koha's 952 and other holdings fields; old character sets read right), a <strong>spreadsheet</strong> (LibraryThing, Goodreads, Calibre, Libib), ONIX or an Abies Web export. You see the books before importing, and importing again adds only what is new.</li>
+<li>New books by <strong>ISBN or title</strong> from some twenty-five national libraries and shared catalogues.</li>
+<li>Readers from <strong>cohorts</strong>, courses with groups, a list, <strong>OneRoster</strong> or <strong>LTI 1.3</strong>, matched with their Moodle accounts.</li>
 </ul>
-<h3>Readers who come back</h3>
+<p><strong>Readers who come back</strong></p>
 <ul>
-<li>A <strong>reader card that grows</strong> with each book (a flower for the youngest, a sky from twelve, or a plain card), with an album at the end of the year. No rankings and no comparisons.</li>
-<li><strong>Class challenges</strong>, cooperative and anonymous, and <strong>library challenges with dates</strong>: counting books, or a <strong>reading bingo card</strong> of nine squares (corners, genres, a new book, one with a voice, one nobody took home for years) that the desk fills as books go out.</li>
-<li><strong>Blind dates with a book</strong>: the library wraps a copy with three clues and readers ask for it by its number; back home, they see which book it was and say how it went in one touch.</li>
-<li>The book of the week chosen by the library, the first reader of a new copy who premieres it, reviews in a sentence, a drawing or a voice, and an idea a day from the library for each reader.</li>
-<li>For the families of the youngest, if the library wants it, a message the morning after their child's first book, with the way to record it for them in their own voice.</li>
+<li>A <strong>reader card that grows</strong> with each book (a flower for the youngest, a sky from twelve, or a plain card), with an album at the end of the year. No rankings.</li>
+<li><strong>Class challenges</strong>, cooperative and anonymous, and <strong>library challenges with dates</strong>, such as a reading bingo card the desk fills as books go out.</li>
+<li><strong>Blind dates with a book</strong>, the book of the week, the first reader who premieres a new copy, and reviews in a sentence, a drawing or a voice.</li>
 <li>In the Moodle app: their books, holds, renewals and their card.</li>
 </ul>
-<h3>Everything a library does</h3>
-<p>Several libraries in one site (a central one and one per classroom, department or branch, with loans of batches between them), the textbook bank with its sets by course, course reading lists and reserves, purchases with the budget and the order sheet, interlibrary loans, accessible formats, stocktake with a phone, weeding with its record, labels and spine labels for any sheet, printed reader cards, reports and the year in review, who did what, and nightly copies in open formats, optionally encrypted and sent to the library's own WebDAV, S3 or Google Drive.</p>
-<h3>Each library in its own words</h3>
-<p>Six looks, each with its words and what is switched on: public or foundation library, university or academy, company, mobile library, secondary school and primary school. A site can also keep each centre apart, with its own staff, for a service shared by many libraries.</p>
-<h3>Help for the staff</h3>
-<p>Guided tours on a practice library of one's own, and «How do I…?» with over eighty tasks; from Moodle 4.5, the site's AI can answer in its own words, using only the guide.</p>
-<h3>Configuration</h3>
-<p>Under Site administration → Plugins → Local plugins → Library (Oksigenia Ayvurenda), and the rest from the library itself, by its staff. Two roles come with it, Librarian and Library manager.</p>
-<h3>Privacy</h3>
-<p>Covered by the Privacy API (export and deletion), and a reader can be erased on request. Loans older than the years a centre keeps stop saying who took them. Everything stays in your Moodle; external services are used only when the library asks for them (catalogue lookups and covers, copies to its own storage).</p>
-<h3>Languages</h3>
-<p>English, Spanish, French and Portuguese (Brazil and Portugal).</p>
-<h3>Support</h3>
+<p><strong>Everything a library does</strong></p>
+<p>Several libraries in one site with loans of batches between them, the textbook bank, course reading lists, purchases with the budget, interlibrary loans, stocktake with a phone, weeding, labels and spine labels for any sheet, printed reader cards, reports and the year in review, and nightly copies in open formats, optionally encrypted and sent to the library's own WebDAV, S3 or Google Drive.</p>
+<p><strong>Each library in its own words</strong></p>
+<p>Six looks, each with its words and what is switched on: public library, university or academy, company, mobile library, secondary school and primary school. A site can also keep each centre apart, with its own staff, for a service shared by many libraries.</p>
+<p><strong>Help for the staff</strong></p>
+<p>Guided tours on a practice library of one's own, «How do I…?» with over eighty tasks, and printable guides at <a href="https://ayvurenda.com/en/guides/">ayvurenda.com/en/guides</a>. From Moodle 4.5, the site's AI can answer in its own words, using only the guide.</p>
+<p><strong>Configuration and privacy</strong></p>
+<p>Site administration → Plugins → Local plugins → Library (Oksigenia Ayvurenda); the rest from the library itself. Two roles come with it, Librarian and Library manager. Covered by the Privacy API; a reader can be erased on request, and old loans stop saying who took them. Everything stays in your Moodle; outside services only when the library asks for them (catalogue lookups and covers, copies to its own storage).</p>
+<p><strong>Languages and requirements</strong></p>
+<p>English, Spanish, French and Portuguese (Brazil and Portugal). Moodle 4.5 to 5.3, any theme. Tested with PHPUnit and Behat in CI. GPL v3 or later; bundled libraries in thirdpartylibs.xml.</p>
 <p>Free and open source. The same library, hosted with nothing to install and with its illustrated building to visit, at <a href="https://ayvurenda.com/en/">ayvurenda.com</a>.</p>
-<h3>Requirements</h3>
-<ul>
-<li>Moodle 4.5 to 5.3, PHP 8.1 or later, MariaDB, MySQL or PostgreSQL.</li>
-<li>Tested with PHPUnit and Behat in CI on Moodle 4.5, 5.0, 5.1, 5.2 and 5.3.</li>
-<li>Any theme and any modern browser.</li>
-</ul>
-<h3>License</h3>
-<p>GPL v3 or later. Bundled ZXing (Apache 2.0), epub.js (BSD 2-clause), JSZip (MIT), three.js (MIT), Lucide icons (ISC), and the Andika and Literata fonts (SIL OFL 1.1).</p>
