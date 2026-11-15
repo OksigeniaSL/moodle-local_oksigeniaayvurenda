@@ -2,7 +2,7 @@
 
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3+-blue.svg)](LICENSE)
 ![Moodle](https://img.shields.io/badge/Moodle-4.5%E2%80%935.3-orange)
-![Status](https://img.shields.io/badge/status-beta-yellow)
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
 [![Sponsor](https://img.shields.io/badge/sponsor-Oksigenia-00d4ff)](https://oksigenia.com/en/open-source#sponsor)
 
 **Ayvurenda** is online library management, for any library: the desk, the catalogue, each reader's card and a library
@@ -14,8 +14,9 @@ Developed by [Oksigenia](https://oksigenia.com).
 
 ## Status
 
-**Beta.** In daily use in a library, and the base of the hosted service at [ayvurenda.com](https://ayvurenda.com). It
-grows in small versions, each one tested before it is released; what each one brings is in the [CHANGELOG](CHANGELOG.md).
+**Stable since 1.0.0** (15 November 2026). In daily use in a library, and the base of the hosted service at
+[ayvurenda.com](https://ayvurenda.com). It keeps growing in small versions, each one tested before it is released;
+what each one brings is in the [CHANGELOG](CHANGELOG.md).
 
 ## Install
 

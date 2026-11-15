@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0 (2026-11-15)
+
+- The first stable version, with the same code as the 0.266.2, and the description of the plugins directory with
+  the first day: «Library: start here», «To open your library», the sample library, «What do you want to do?», «Your
+  first day here» and «What your library can do».
+
 ## 0.266.2 (2026-11-14)
 
 - The finder's kept questions leave out names with accents on every database: the 0.266.1 compared them with the

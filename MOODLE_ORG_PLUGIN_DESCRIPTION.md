@@ -1,4 +1,11 @@
 <p>A whole library inside Moodle: the catalogue, the circulation desk, the readers and their cards, holds, late notices and reports, for any library, a school's, a university's, a town's, a company's or a bookmobile. Readers find it in the main menu, the staff at their desk. Try it without installing anything: the <a href="https://campus.oksigenia.com/local/oksigeniacampus/demo.php?as=bibliotecaria&amp;to=/local/oksigeniaayvurenda/desk.php%3Flibrary%3Ddemo-1%26lang%3Den">desk</a> and the <a href="https://campus.oksigenia.com/local/oksigeniacampus/demo.php?as=lector&amp;to=/local/oksigeniaayvurenda/index.php%3Flang%3Den">reader's library</a> of a demo library with sample data, erased every night.</p>
+<h3>The first day</h3>
+<ul>
+<li><strong>Library: start here</strong> appears in the navigation bar. Give the first library a name and you are at its desk, with <strong>To open your library</strong> in five steps (the catalogue, the readers, the loan rules, the team and opening the library), each ticked when it is really done, not when it has been seen.</li>
+<li><strong>See a full sample library</strong>, before setting up yours: made-up books, readers and loans, kept apart and removed with one touch.</li>
+<li><strong>What do you want to do?</strong> answers while you type, forgives typos and knows the library's settings with their current values. Whoever is given a place at the desk gets a welcome and <strong>Your first day here</strong>: lend a book, take one back, print a card.</li>
+<li>Later, each function introduces itself on the desk when something real calls for it (the first late books, three readers waiting for the same book, the end of the school year three weeks away), and <strong>What your library can do</strong> shows them all, with what each one did this year and its switch.</li>
+</ul>
 <h3>The desk</h3>
 <ul>
 <li><strong>One field for everything</strong>: scan a card or a book with a barcode reader, the camera or a phone, or type a name or a title. It lends, returns and renews without modes, with sounds, undo and a note in one tap; a book without a label is found by its title or by the ISBN on its back cover.</li>
