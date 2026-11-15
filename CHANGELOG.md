@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2 (2026-11-15)
+
+- A family's view of a young reader in Oksigenia Aty carries each book's cover with its row (`cover`, a data address,
+  up to 60 KB), for the child's shelf in the app; from the sky on, still «A book» and no cover.
+
 ## 1.0.1 (2026-11-15)
 
 - The green «Returned» stamp on a desk line keeps its own size: the line is a grid, and the stamp stretched across it

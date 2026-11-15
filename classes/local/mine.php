@@ -233,8 +233,9 @@ final class mine {
      * What a family sees of a child's library in Oksigenia Aty: what the child has out and what is set aside for them, and
      * until when, so that it gets back. See, not act: they do not renew or reserve for the child. What a child reads is theirs:
      * from the age the sky replaces the flower, the family sees that there is a book and its date, not which one, as a
-     * tutor does, and its row opens nothing, since any page would be the adult's library and not the child's. A textbook
-     * lent for the year is left out, as on the child's own home.
+     * tutor does, and its row opens nothing, since any page would be the adult's library and not the child's. Up to the
+     * flower, a row carries the book's cover too, inside it (`cover`, a data address), for the child's shelf in the app. A
+     * textbook lent for the year is left out, as on the child's own home.
      *
      * @param int $childuserid
      * @param int|null $now
@@ -268,9 +269,12 @@ final class mine {
                 $young,
                 $str
             ) {
+                // The cover of a young reader's book, small enough that five of them do not weigh down the page.
+                $cover = $young ? covers::inline((int) $book['recordid'], 60 * 1024) : '';
                 return ['title' => $young ? $book['title'] : $str('mobilechildbook'), 'detail' => $detail, 'date' => $date,
                     'urgent' => $late] + ($kind !== '' ? ['kind' => $kind] : []) + ($young ? ['method' => 'mobile_record_view',
-                    'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['plain' => true]);
+                    'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['plain' => true])
+                    + ($cover !== '' ? ['cover' => $cover] : []);
             };
             foreach ($library['loans'] as $loan) {
                 if (!$loan['textbook']) {

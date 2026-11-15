@@ -75,6 +75,10 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertFalse($row['urgent']);
         $this->assertSame('mobile_record_view', $row['method']);
         $this->assertSame($w->library->slug, $row['args']['library']);
+        $this->assertArrayNotHasKey('cover', $row, 'a book without a cover sends none');
+        $this->assertTrue(covers::store((int) $w->record->id, self::jpeg(), 'test'));
+        $row = mine::child_cards((int) $w->child->id, $w->now)[0]['items'][0];
+        $this->assertStringStartsWith('data:image/jpeg;base64,', $row['cover']);
     }
 
     /**
@@ -90,6 +94,8 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertTrue($cards[0]['items'][0]['plain']);
         $this->assertArrayNotHasKey('method', $cards[0]['items'][0]);
         $this->assertGreaterThan(0, $cards[0]['items'][0]['date']);
+        $this->assertTrue(covers::store((int) $w->record->id, self::jpeg(), 'test'));
+        $this->assertArrayNotHasKey('cover', mine::child_cards((int) $w->child->id, $w->now)[0]['items'][0], 'nor its cover');
     }
 
     /**
@@ -120,5 +126,17 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertStringNotContainsString('renew_loan', $html);
         $this->assertStringNotContainsString(get_string('mobilestateloan', 'local_oksigeniaayvurenda'), $html);
         $this->assertFalse($DB->record_exists(self::T . 'reader', ['userid' => $w->adult->id]), 'opening it makes nobody a reader');
+    }
+
+    /**
+     * A small JPEG, as a cover.
+     *
+     * @return string
+     */
+    private static function jpeg(): string {
+        $image = imagecreatetruecolor(20, 30);
+        ob_start();
+        imagejpeg($image);
+        return (string) ob_get_clean();
     }
 }

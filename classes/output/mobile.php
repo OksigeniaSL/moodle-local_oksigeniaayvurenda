@@ -393,18 +393,7 @@ class mobile {
      * @return string A data address, or '' when it has none (or it is too big to carry).
      */
     private static function cover(int $recordid, int $most = 200 * 1024): string {
-        $file = get_file_storage()->get_file(
-            \context_system::instance()->id,
-            'local_oksigeniaayvurenda',
-            'cover',
-            $recordid,
-            '/',
-            'cover.jpg'
-        );
-        if (!$file || $file->get_filesize() > $most) {
-            return '';
-        }
-        return 'data:image/jpeg;base64,' . base64_encode($file->get_content());
+        return \local_oksigeniaayvurenda\local\covers::inline($recordid, $most);
     }
 
     /**

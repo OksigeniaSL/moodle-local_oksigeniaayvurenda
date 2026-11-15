@@ -236,6 +236,29 @@ final class covers {
     }
 
     /**
+     * A book's cover inside the page, as a data address: the app carries no session to ask the site for a file, and an adult
+     * who sees a child's books may have no right to the library's own files (int-app-oficial 6).
+     *
+     * @param int $recordid
+     * @param int $most Bytes it may have: a list of them carries smaller ones.
+     * @return string A data address, or '' when it has none (or it is too big to carry).
+     */
+    public static function inline(int $recordid, int $most = 200 * 1024): string {
+        $file = get_file_storage()->get_file(
+            \context_system::instance()->id,
+            'local_oksigeniaayvurenda',
+            'cover',
+            $recordid,
+            '/',
+            'cover.jpg'
+        );
+        if (!$file || $file->get_filesize() > $most) {
+            return '';
+        }
+        return 'data:image/jpeg;base64,' . base64_encode($file->get_content());
+    }
+
+    /**
      * An image as covers are kept (made small, as JPEG), to keep the same one for many records without making it small
      * each time.
      *
