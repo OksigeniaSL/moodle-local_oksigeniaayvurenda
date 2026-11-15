@@ -234,8 +234,10 @@ final class mine {
      * until when, so that it gets back. See, not act: they do not renew or reserve for the child. What a child reads is theirs:
      * from the age the sky replaces the flower, the family sees that there is a book and its date, not which one, as a
      * tutor does, and its row opens nothing, since any page would be the adult's library and not the child's. Up to the
-     * flower, a row carries the book's cover too, inside it (`cover`, a data address), for the child's shelf in the app. A
-     * textbook lent for the year is left out, as on the child's own home.
+     * flower, a row carries the book's cover too, inside it (`cover`, a data address), for the child's shelf in the app; a
+     * book waiting at the desk says `pickup`, for its striped spine. The card asks Aty for the shelf even without covers
+     * (`layout`), and brings the child's line of today for the family's home (`facet`). A textbook lent for the year is
+     * left out, as on the child's own home.
      *
      * @param int $childuserid
      * @param int|null $now
@@ -246,6 +248,8 @@ final class mine {
         $now = $now ?? time();
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $items = [];
+        $lines = [];
+        $out = 0;
         foreach (self::summary($childuserid, $now) as $library) {
             $reader = $DB->get_record(
                 self::T . 'reader',
@@ -262,41 +266,48 @@ final class mine {
                 array $book,
                 string $detail,
                 int $date,
-                bool $late,
+                bool $urgent,
                 string $where,
-                string $kind = ''
+                array $more = []
             ) use (
                 $young,
                 $str
             ) {
                 // The cover of a young reader's book, small enough that five of them do not weigh down the page.
                 $cover = $young ? covers::inline((int) $book['recordid'], 60 * 1024) : '';
-                return ['title' => $young ? $book['title'] : $str('mobilechildbook'), 'detail' => $detail, 'date' => $date,
-                    'urgent' => $late] + ($kind !== '' ? ['kind' => $kind] : []) + ($young ? ['method' => 'mobile_record_view',
-                    'args' => ['library' => $where, 'id' => (int) $book['recordid']]] : ['plain' => true])
-                    + ($cover !== '' ? ['cover' => $cover] : []);
+                $title = $young ? $book['title'] : $str(!empty($more['pickup']) ? 'mobilechildpickup' : 'mobilechildbook');
+                return ['title' => $title, 'detail' => $detail, 'date' => $date, 'urgent' => $urgent] + $more
+                    + ($young ? ['method' => 'mobile_record_view', 'args' => ['library' => $where, 'id' => (int) $book['recordid']]]
+                    : ['plain' => true]) + ($cover !== '' ? ['cover' => $cover] : []);
             };
             foreach ($library['loans'] as $loan) {
                 if (!$loan['textbook']) {
+                    $soon = (int) $loan['timedue'] <= $now + self::SOON * DAYSECS;
                     $items[] = $row(
                         $loan,
                         $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $loan['due']),
                         self::noon((int) $loan['timedue'], $library['entityid']),
-                        (bool) $loan['late'],
+                        $loan['late'] || $soon,
                         (string) $loan['where'],
-                        'due'
+                        ['kind' => 'due']
                     );
+                    $out++;
+                    $lines[] = [$loan['late'] ? 0 : ($soon ? 1 : 3), (int) $loan['timedue'],
+                        $loan['late'] ? 'late' : ($soon ? 'soon' : 'out'), $loan['due']];
                 }
             }
             foreach ($library['holds'] as $hold) {
                 if ($hold['ready']) {
+                    // A book set aside for the child: a striped spine on the shelf, to collect at the library.
                     $items[] = $row(
                         $hold,
-                        $str('mobilechildready', $hold['until']),
+                        $str($young ? 'mobilechildreadyyoung' : 'mobilechildready', $hold['until']),
                         self::noon((int) $hold['expires'], $library['entityid']),
                         false,
-                        (string) $hold['slug']
+                        (string) $hold['slug'],
+                        ['pickup' => true]
                     );
+                    $lines[] = [2, (int) $hold['expires'], 'ready', $hold['until']];
                 }
             }
         }
@@ -304,7 +315,16 @@ final class mine {
             return [];
         }
         usort($items, fn($a, $b) => [$b['urgent'], $a['date']] <=> [$a['urgent'], $b['date']]);
-        return [['heading' => $str('mobilechildheading'), 'items' => array_slice($items, 0, self::HOME_ROWS)]];
+        // The child's line on the family's home: the most pressing thing, late before soon before waiting at the desk, and
+        // how many books are out when there are more; red when one is late or due in a few days.
+        sort($lines);
+        [$rank, , $what, $when] = $lines[0];
+        $line = $str('mobilechildfacet' . $what, $when);
+        if ($out > 1) {
+            $line = $str('mobilechildfacetcount', (object) ['line' => $line, 'count' => $out]);
+        }
+        return [['heading' => $str('mobilechildheading'), 'items' => array_slice($items, 0, self::HOME_ROWS),
+            'layout' => 'shelf', 'facet' => ['text' => $line, 'icon' => 'fas-book', 'urgent' => $rank < 2]]];
     }
 
     /**

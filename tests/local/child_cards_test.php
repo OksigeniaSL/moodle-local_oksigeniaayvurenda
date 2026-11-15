@@ -114,6 +114,57 @@ final class child_cards_test extends \advanced_testcase {
     }
 
     /**
+     * The card asks for the shelf; a book due in a few days is red, here and in the child's line on the family's home,
+     * which says how many there are; a book waiting at the desk, a striped spine «to collect».
+     */
+    public function test_the_shelf_and_the_line(): void {
+        global $DB;
+        $w = $this->world('Primaria');
+        $start = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda', '');
+        $card = mine::child_cards((int) $w->child->id, $w->now)[0];
+        $this->assertSame('shelf', $card['layout']);
+        $this->assertSame('fas-book', $card['facet']['icon']);
+        $this->assertStringStartsWith($start('mobilechildfacetout'), $card['facet']['text']);
+        $this->assertFalse($card['facet']['urgent']);
+        $this->assertFalse($card['items'][0]['urgent']);
+        $DB->set_field(self::T . 'loan', 'timedue', $w->now + DAYSECS, ['itemid' => $w->item->id]);
+        $record = $w->gen->create_record(['entityid' => $w->library->entityid, 'title' => 'La isla del cometa']);
+        $item = $w->gen->create_item(['libraryid' => $w->library->id, 'recordid' => $record->id, 'barcode' => '100001L',
+            'status' => 'onloan']);
+        $loan = $DB->get_record(self::T . 'loan', ['itemid' => $w->item->id]);
+        unset($loan->id);
+        $loan->itemid = $item->id;
+        $loan->timedue = $w->now + 20 * DAYSECS;
+        $DB->insert_record(self::T . 'loan', $loan);
+        $card = mine::child_cards((int) $w->child->id, $w->now)[0];
+        $this->assertTrue($card['items'][0]['urgent'], 'due tomorrow');
+        $this->assertFalse($card['items'][1]['urgent'], 'due in twenty days');
+        $this->assertTrue($card['facet']['urgent']);
+        $this->assertStringStartsWith($start('mobilechildfacetsoon'), $card['facet']['text']);
+        $this->assertStringEndsWith(get_string(
+            'mobilechildfacetcount',
+            'local_oksigeniaayvurenda',
+            (object) ['line' => '', 'count' => 2]
+        ), $card['facet']['text']);
+
+        // An older reader's book set aside: «A book to collect», nothing that says which, and the line says so.
+        $w = $this->world('Secundaria');
+        $DB->delete_records(self::T . 'loan');
+        $DB->insert_record(self::T . 'hold', ['libraryid' => $w->library->id, 'recordid' => $w->record->id,
+            'readerid' => $w->reader->id, 'status' => 'ready', 'timecreated' => $w->now - DAYSECS, 'timemodified' => $w->now,
+            'timeready' => $w->now - HOURSECS, 'timeexpires' => $w->now + 3 * DAYSECS]);
+        $card = mine::child_cards((int) $w->child->id, $w->now)[0];
+        $row = $card['items'][0];
+        $this->assertSame(get_string('mobilechildpickup', 'local_oksigeniaayvurenda'), $row['title']);
+        $this->assertTrue($row['pickup']);
+        $this->assertTrue($row['plain']);
+        $this->assertStringStartsWith($start('mobilechildready'), $row['detail']);
+        $this->assertStringNotContainsString('faro', json_encode($card, JSON_UNESCAPED_UNICODE));
+        $this->assertStringStartsWith($start('mobilechildfacetready'), $card['facet']['text']);
+        $this->assertFalse($card['facet']['urgent']);
+    }
+
+    /**
      * An adult who opens the book of a child's loan is not told it is theirs, and cannot act as its reader.
      */
     public function test_the_book_as_the_adult(): void {

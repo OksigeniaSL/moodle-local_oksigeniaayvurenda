@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.3 (2026-11-15)
+
+- A child's library in Oksigenia Aty, as Jujol drew it: the card asks for the shelf for any reader (`layout`), so an
+  older reader's books stand as plain spines; a book waiting at the desk says `pickup` («A book to collect», «at the
+  library until…»), for its striped spine; a book due in three days or less is red as well as a late one, and a loan
+  says «back by…».
+- The child's line on the family's home (`facet`): the most pressing book (late, then due soon, then waiting at the
+  desk, then the next one back) and how many are out, red when one is late or due soon.
+
 ## 1.0.2 (2026-11-15)
 
 - A family's view of a young reader in Oksigenia Aty carries each book's cover with its row (`cover`, a data address,
