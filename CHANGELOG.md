@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 (2026-11-15)
+
+- The green «Returned» stamp on a desk line keeps its own size: the line is a grid, and the stamp stretched across it
+  and, turned, crossed the notes and the buttons below.
+- «Open the library» without the herald (a site with the plugin alone) gives the text the whole card instead of leaving
+  an empty column beside it, and «Back to the home page» sits beside the button.
+
 ## 1.0.0 (2026-11-15)
 
 - The first stable version, with the same code as the 0.266.2, and the description of the plugins directory with

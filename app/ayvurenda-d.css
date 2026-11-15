@@ -845,6 +845,7 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
 .ayv .ayv-opening-text .ayv-results-title { margin-top: 0; }
 .ayv .ayv-opening-figure { grid-area: figure; display: block; width: 180px; }
 .ayv .ayv-opening-figure img { display: block; width: 100%; height: auto; }
+.ayv .ayv-opening.ayv-opening-alone { grid-template-columns: minmax(0, 1fr); grid-template-areas: "text"; }
 
 @media (max-width: 40rem) {
     .ayv .ayv-opening { grid-template-columns: minmax(0, 1fr); grid-template-areas: "figure" "text"; }

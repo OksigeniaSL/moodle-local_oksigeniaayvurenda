@@ -70,7 +70,8 @@ $open = $steps['open']['done'];
 $step = characters::step($entityid);
 $figure = characters::whole($entityid) ? characters::figure('herald', $open ? 'celebra' : 'senala', $step) : null;
 $puppet = $figure ? characters::puppet('herald', $open ? 'celebra' : 'senala', $step) : '';
-$html = '<section class="ayv-open ayv-opening">';
+// Without the herald, the text takes the whole card: an empty column would narrow it.
+$html = '<section class="ayv-open ayv-opening' . ($figure ? '' : ' ayv-opening-alone') . '">';
 if ($figure) {
     $html .= '<span class="ayv-figure ayv-opening-figure"><img src="' . s($figure) . '" alt="" width="512" height="512"' .
         ($puppet !== '' ? ' data-puppet="' . s($puppet) . '"' : '') . '></span>';
@@ -85,17 +86,19 @@ if ($open) {
         s($str('openhome')) . '</a></p>';
 } else {
     $html .= '<h1 class="ayv-results-title">' . s($str('openpagetitle')) . '</h1><p>' . s($str('openpageintro')) . '</p>';
+    // The way back sits beside the button, on one row, not under it as a second step.
+    $back = '<a class="ayv-button ayv-button-quiet" href="' . $home->out() . '">' . s($str('openhome')) . '</a>';
     if ($steps['open']['blocked']) {
-        $html .= '<p class="ayv-open-meta ayv-open-meta-why">' . s($str('openblocked')) . '</p>';
+        $html .= '<p class="ayv-open-meta ayv-open-meta-why">' . s($str('openblocked')) . '</p>' .
+            '<p class="ayv-book-actions">' . $back . '</p>';
     } else if (access::can('local/oksigeniaayvurenda:manage', $library)) {
         $html .= '<form method="post" action="' . $PAGE->url->out() . '"><input type="hidden" name="sesskey" value="' .
             sesskey() . '"><p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="open">' .
-            s($str('openpagego')) . '</button></p></form>';
+            s($str('openpagego')) . '</button> ' . $back . '</p></form>';
     } else {
-        $html .= '<p class="ayv-open-meta ayv-open-meta-who">' . s($steps['open']['who']) . '</p>';
+        $html .= '<p class="ayv-open-meta ayv-open-meta-who">' . s($steps['open']['who']) . '</p>' .
+            '<p class="ayv-book-actions">' . $back . '</p>';
     }
-    $html .= '<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="' . $home->out() . '">' . s($str('openhome')) .
-        '</a></p>';
 }
 $html .= '</div></section>';
 shell::output($str($open ? 'openeddone' : 'openpagetitle'), $html, $library, '', ['search' => false]);

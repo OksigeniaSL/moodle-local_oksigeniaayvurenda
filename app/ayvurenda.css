@@ -5338,6 +5338,9 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     transform: rotate(-6deg); opacity: .88; }
 .ayv .ayv-loan-stamp { color: #b5523d; }
 .ayv .ayv-line-stamp { color: #1d7349; }
+/* The line is a grid: the stamp keeps its own size at the start of its row, or it stretches across the line and, turned,
+   crosses the buttons below. */
+.ayv .ayv-line > .ayv-line-stamp { justify-self: start; margin-left: 0; }
 .ayv .ayv-stamp-new { animation: ayv-stamp .5s cubic-bezier(.2, .8, .2, 1) both; }
 .ayv #ayv-reader.ayv-card-land { animation: ayv-card-land .45s cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes ayv-stamp {
