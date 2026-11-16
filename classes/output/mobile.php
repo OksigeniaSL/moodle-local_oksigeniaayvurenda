@@ -187,6 +187,8 @@ class mobile {
             'empty' => $str('mobilechildnone'),
             'readheading' => $str('mobilechildreadheading'),
             'private' => $str('mobilechildprivate'),
+            'nowheading' => $str('mobilechildnow'),
+            'pickuplabel' => $str('mobilechildpickuplabel'),
         ];
         return [
             'templates' => [['id' => 'main', 'html' => $OUTPUT->render_from_template(

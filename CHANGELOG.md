@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.5 (2026-11-16)
+
+- **«Their library», as Jujol drew it:** the child's books stand on a shelf, three a row, as on the child's card: the one
+  due soon first and in red, then the one to pick up, raised, edged in the app's colour and labelled «To collect», then
+  the rest, and a reservation still in its queue last. Up to the flower, covers and titles, and what they read this year
+  as a grid of covers with their titles; from the sky, spines only, «A book» and its date, and why not which one, in a
+  quiet box with a padlock. Light and dark, with the app's colours, as the official Moodle app shows it too.
+- Short dates on the page («back by 18/11»): under a book a third of the screen wide, the long date took three lines.
+- The page's bar says whose library it is («Leo's library»), as Meals says whose canteen; the link to it is «Their
+  library» in every language now, as in Spanish.
+
 ## 1.0.4 (2026-11-15)
 
 - **«Their library»**, a child's library for their family in Oksigenia Aty, at the foot of the child's card

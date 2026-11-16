@@ -18,13 +18,16 @@
     @template local_oksigeniaayvurenda/mobile_child
 
     A child's library for their family in the app, behind «Their library» in Oksigenia Aty: the books they have and until
-    when, what waits for them, and, up to the flower, what they read this year. Its look is in the page itself, with the
-    app's colours: the family may have no library of their own, and so no sheet of it loaded.
+    when, on a shelf as in the child's file (the one due soon first, then the one to pick up, raised and marked, then the
+    rest), and, up to the flower, what they read this year with its covers and titles. From the sky up, only spines, «A
+    book» and the date, and the line that what they read is theirs. Its look is in the page itself, with the app's
+    colours, in light and in dark: the family may have no library of their own, and so no sheet of it loaded.
 
     Example context (json):
     {
         "allowed": true, "refused": "Esta página es de la familia del lector.", "haslibraries": true,
-        "empty": "Ahora no tiene ningún libro.", "readheading": "Leídos este curso",
+        "empty": "Ahora no tiene ningún libro.", "readheading": "Leídos este curso", "nowheading": "Ahora tiene",
+        "pickuplabel": "Para recoger",
         "private": "Lo que lee es suyo: aquí ves que tiene un libro y hasta cuándo, no cuál.",
         "libraries": [{"name": "Biblioteca", "notice": "", "textbooks": "2 libros de texto del banco", "hasbooks": true,
             "young": true, "hasread": true, "readline": "Este curso ha leído 9 libros",
@@ -37,41 +40,58 @@
                 "opens": true, "where": "demo-1", "recordid": 4}]}]
     }
 }}
-<div class="local-oksigeniaayvurenda-mobile">
+<div class="local-oksigeniaayvurenda-mobile" style="padding: 6px 16px 28px;">
 {{^allowed}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{refused}}</ion-label></ion-item></ion-list>{{/allowed}}
 {{#allowed}}{{^haslibraries}}<ion-list><ion-item><ion-label class="ion-text-wrap">{{empty}}</ion-label></ion-item></ion-list>{{/haslibraries}}{{/allowed}}
 {{#libraries}}
-<section style="padding: 16px 16px 8px;">
-    <h2 style="margin: 0 0 12px; font-size: 1.15rem; font-weight: 700;">{{name}}</h2>
-    {{#notice}}<p style="margin: 0 0 12px; color: var(--ion-color-danger);">{{notice}}</p>{{/notice}}
-    {{^hasbooks}}<p style="margin: 0 0 12px;">{{empty}}</p>{{/hasbooks}}
+<section style="margin: 0 0 26px;">
+    <p style="margin: 12px 0 2px; color: var(--ion-color-medium); font-size: .74rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;">{{name}}</p>
+    <h2 style="margin: 0 0 14px; font-size: 1.35rem; font-weight: 800; line-height: 1.2;">{{nowheading}}</h2>
+    {{#notice}}<p style="margin: 0 0 14px; color: var(--ion-color-danger); font-weight: 700;">{{notice}}</p>{{/notice}}
+    {{^hasbooks}}
+    <p style="margin: 0 0 8px; color: var(--ion-color-medium);">{{empty}}</p>
+    <span aria-hidden="true" style="display: block; height: 5px; border-radius: 2px; background: rgba(var(--ion-color-primary-rgb), .3);"></span>
+    {{/hasbooks}}
+    {{#hasbooks}}
+    {{! The shelf: three books a row, each standing on its piece of the board; the rows are shelves one under another. }}
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 22px;">
     {{#books}}
-    {{#opens}}<ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">{{/opens}}
-    {{^opens}}<ion-item lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent;">{{/opens}}
-        <div style="display: flex; gap: 14px; align-items: center; width: 100%; padding: 6px 0;">
-            {{#hascover}}<img src="{{cover}}" alt="" style="flex: 0 0 56px; width: 56px; height: auto; border-radius: 2px 6px 6px 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);">{{/hascover}}
-            {{^hascover}}<span aria-hidden="true" style="flex: 0 0 22px; width: 22px; height: 84px; border-radius: 3px; background: {{#pickup}}repeating-linear-gradient(135deg, var(--ion-color-primary) 0 7px, transparent 7px 14px); border: 2px solid var(--ion-color-primary){{/pickup}}{{^pickup}}var(--ion-color-primary){{/pickup}}; opacity: .8;"></span>{{/hascover}}
-            <span style="flex: 1 1 auto; min-width: 0;">
-                <strong style="display: block; font-size: 1.05rem;">{{title}}</strong>
-                <span style="display: block;{{#urgent}} color: var(--ion-color-danger); font-weight: 700;{{/urgent}}">{{detail}}</span>
+    {{#opens}}<ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent; --min-height: 0; --ripple-color: transparent; min-width: 0;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">{{/opens}}
+    {{^opens}}<div style="min-width: 0;">{{/opens}}
+        <div style="display: grid; grid-template-rows: {{#young}}158px{{/young}}{{^young}}132px{{/young}} 5px auto; width: 100%;">
+            <span style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; padding: 0 8px{{#pickup}} 14px{{/pickup}};">
+                {{#pickup}}<span style="padding: 2px 8px; border-radius: 999px; background: var(--ion-color-primary); color: var(--ion-color-primary-contrast); font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;">{{pickuplabel}}</span>{{/pickup}}
+                {{#hascover}}<img src="{{cover}}" alt="" style="display: block; width: 100%; max-width: 92px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 14px -8px rgba(0, 0, 0, .6);{{#pickup}} outline: 2px solid var(--ion-color-primary); outline-offset: 2px;{{/pickup}}">{{/hascover}}
+                {{^hascover}}<span aria-hidden="true" style="display: block; width: 30px; height: {{#young}}120px{{/young}}{{^young}}104px{{/young}}; border-radius: 4px; box-shadow: inset -5px 0 0 rgba(0, 0, 0, .14), 0 8px 14px -8px rgba(0, 0, 0, .6); background: {{#pickup}}repeating-linear-gradient(135deg, var(--ion-color-primary) 0 7px, rgba(var(--ion-color-primary-rgb), .45) 7px 14px){{/pickup}}{{^pickup}}{{#urgent}}var(--ion-color-danger){{/urgent}}{{^urgent}}linear-gradient(180deg, transparent 0 14px, rgba(255, 255, 255, .35) 14px 17px, transparent 17px), rgba(var(--ion-color-primary-rgb), .8){{/urgent}}{{/pickup}};"></span>{{/hascover}}
+            </span>
+            <span aria-hidden="true" style="display: block; background: rgba(var(--ion-color-primary-rgb), .3);"></span>
+            <span style="display: block; padding: 8px 6px 0; font-size: .86rem; line-height: 1.25; text-align: left;">
+                <strong style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .95rem;{{#urgent}} color: var(--ion-color-danger);{{/urgent}}">{{title}}</strong>
+                <span style="display: block; margin-top: 2px;{{#urgent}} color: var(--ion-color-danger); font-weight: 700;{{/urgent}}{{^urgent}} color: var(--ion-color-medium);{{/urgent}}">{{detail}}</span>
             </span>
         </div>
-    </ion-item>
+    {{#opens}}</ion-item>{{/opens}}{{^opens}}</div>{{/opens}}
     {{/books}}
-    {{#textbooks}}<p style="margin: 8px 0 0; color: var(--ion-color-medium);">{{textbooks}}</p>{{/textbooks}}
+    </div>
+    {{/hasbooks}}
+    {{#textbooks}}<p style="display: flex; align-items: center; gap: 8px; margin: 18px 0 0; color: var(--ion-color-medium);"><svg viewBox="0 0 24 24" aria-hidden="true" style="flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round;"><path d="M4 7h16v4H4zM5 11h14v4H5zM4 15h16v4H4z"/></svg>{{textbooks}}</p>{{/textbooks}}
     {{#young}}{{#hasread}}
-    <h3 style="margin: 20px 0 4px; font-size: 1rem; font-weight: 700;">{{readheading}}</h3>
-    <p style="margin: 0 0 10px;">{{readline}}</p>
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+    {{! What they read this year: a second shelf of covers with their titles, smaller, all of them. }}
+    <h3 style="margin: 28px 0 2px; font-size: 1.15rem; font-weight: 800;">{{readheading}}</h3>
+    <p style="margin: 0 0 12px; color: var(--ion-color-medium);">{{readline}}</p>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px;">
         {{#read}}
-        <ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent; --min-height: 0;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">
-            {{#hascover}}<img src="{{cover}}" alt="{{title}}" style="display: block; width: 100%; height: auto; border-radius: 2px 6px 6px 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);">{{/hascover}}
-            {{^hascover}}<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 96px; padding: 6px; border-radius: 2px 6px 6px 2px; background: var(--ion-color-primary); color: var(--ion-color-primary-contrast); font-size: .75rem; line-height: 1.2; text-align: center; overflow: hidden;">{{title}}</span>{{/hascover}}
+        <ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent; --min-height: 0; min-width: 0;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">
+            <span style="display: grid; gap: 6px; width: 100%;">
+                {{#hascover}}<img src="{{cover}}" alt="" style="display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 2px 5px 5px 2px; box-shadow: 0 6px 12px -8px rgba(0, 0, 0, .6);">{{/hascover}}
+                {{^hascover}}<span aria-hidden="true" style="display: block; width: 100%; height: 0; padding-top: 150%; border-radius: 2px 5px 5px 2px; background: rgba(var(--ion-color-primary-rgb), .8);"></span>{{/hascover}}
+                <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .82rem; font-weight: 700; line-height: 1.25;">{{title}}</span>
+            </span>
         </ion-item>
         {{/read}}
     </div>
     {{/hasread}}{{/young}}
-    {{^young}}{{#hasbooks}}<p style="margin: 14px 0 0; color: var(--ion-color-medium);">{{private}}</p>{{/hasbooks}}{{/young}}
+    {{^young}}{{#hasbooks}}<p style="display: flex; align-items: flex-start; gap: 10px; margin: 20px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(var(--ion-color-primary-rgb), .08); color: var(--ion-text-color); font-size: .95rem; line-height: 1.35;"><svg viewBox="0 0 24 24" aria-hidden="true" style="flex: none; width: 22px; height: 22px; margin-top: 1px; fill: none; stroke: var(--ion-color-primary); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>{{private}}</p>{{/hasbooks}}{{/young}}
 </section>
 {{/libraries}}
 </div>

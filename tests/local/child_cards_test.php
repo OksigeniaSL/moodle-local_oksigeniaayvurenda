@@ -174,6 +174,11 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertSame('mobile_child_view', $card['seeall']['method']);
         $this->assertSame(['child' => (int) $w->child->id], $card['seeall']['args']);
         $this->assertSame('fas-book-open-reader', $card['icon']);
+        $this->assertSame(
+            get_string('mobilechildpagetitle', 'local_oksigeniaayvurenda', $w->child->firstname),
+            $card['seeall']['pagetitle'],
+            'the bar says whose library it is'
+        );
         if (!\local_oksigeniaayvurenda\output\mobile::is_family((int) $w->adult->id, (int) $w->child->id)) {
             $this->assertSame([], local_oksigeniaayvurenda_oksigeniaaty_child_cards((int) $w->adult->id, (int) $w->child->id));
             $this->setUser($w->adult);
@@ -209,14 +214,34 @@ final class child_cards_test extends \advanced_testcase {
         $this->assertCount(1, $page['read'], 'a book read twice counts once');
         $this->assertSame('La isla del cometa', $page['read'][0]['title']);
         $this->assertSame(get_string('mobilechildreadone', 'local_oksigeniaayvurenda'), $page['readline']);
+        $short = \local_oksigeniaayvurenda\local\zones::date((int) $DB->get_field(self::T . 'loan', 'timedue', [
+            'readerid' => $w->reader->id, 'timereturned' => null]), '%d/%m', (int) $w->library->entityid);
+        $this->assertSame(
+            get_string('mobilechilddue', 'local_oksigeniaayvurenda', $short),
+            $page['books'][0]['detail'],
+            'a short date, under a book a third of the screen wide'
+        );
+        $this->assertArrayNotHasKey('order', $page['books'][0]);
 
+        // From the sky, and in the order of the shelf: the book to pick up before the one due in five days.
         $w = $this->world('Secundaria');
         $this->assertTrue(covers::store((int) $w->record->id, self::jpeg(), 'test'));
+        $DB->insert_record(self::T . 'hold', ['libraryid' => $w->library->id, 'recordid' => $w->record->id,
+            'readerid' => $w->reader->id, 'status' => 'ready', 'timecreated' => $w->now - DAYSECS, 'timemodified' => $w->now,
+            'timeready' => $w->now - HOURSECS, 'timeexpires' => $w->now + 6 * DAYSECS]);
         $page = mine::child_page((int) $w->child->id, $w->now)[0];
         $this->assertFalse($page['young']);
-        $this->assertSame(get_string('mobilechildbook', 'local_oksigeniaayvurenda'), $page['books'][0]['title']);
-        $this->assertFalse($page['books'][0]['hascover']);
-        $this->assertFalse($page['books'][0]['opens']);
+        $this->assertCount(2, $page['books']);
+        $this->assertTrue($page['books'][0]['pickup']);
+        $this->assertSame(get_string('mobilechildpickup', 'local_oksigeniaayvurenda'), $page['books'][0]['title']);
+        $this->assertSame(get_string('mobilechildready', 'local_oksigeniaayvurenda', \local_oksigeniaayvurenda\local\zones::date(
+            $w->now + 6 * DAYSECS,
+            '%d/%m',
+            (int) $w->library->entityid
+        )), $page['books'][0]['detail'], 'the label above says to collect it; the line, until when');
+        $this->assertSame(get_string('mobilechildbook', 'local_oksigeniaayvurenda'), $page['books'][1]['title']);
+        $this->assertFalse($page['books'][1]['hascover']);
+        $this->assertFalse($page['books'][1]['opens']);
         $this->assertSame([], $page['read']);
         $this->assertStringNotContainsString('faro', json_encode($page, JSON_UNESCAPED_UNICODE));
     }

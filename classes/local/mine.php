@@ -320,6 +320,8 @@ final class mine {
         if (!$items) {
             return [];
         }
+        // The page's bar says whose library it is, as Meals says whose canteen.
+        $first = (string) $DB->get_field('user', 'firstname', ['id' => $childuserid]);
         usort($items, fn($a, $b) => [$b['urgent'], $a['date']] <=> [$a['urgent'], $b['date']]);
         // The child's line on the family's home: the most pressing thing, late before soon before waiting at the desk, and
         // how many books are out when there are more; red when one is late or due in a few days.
@@ -332,13 +334,15 @@ final class mine {
         return [['heading' => $str('mobilechildheading'), 'icon' => self::ICON, 'items' => array_slice($items, 0, self::HOME_ROWS),
             'layout' => 'shelf', 'facet' => ['text' => $line, 'icon' => self::ICON, 'urgent' => $rank < 2],
             'seeall' => ['label' => $str('mobilechildall'), 'method' => 'mobile_child_view', 'args' => ['child' => $childuserid],
-                'pagetitle' => $str('mobilelibrary')]]];
+                'pagetitle' => $first !== '' ? $str('mobilechildpagetitle', $first) : $str('mobilelibrary')]]];
     }
 
     /**
      * A child's library for their family, behind «Their library» in Oksigenia Aty: every book they have and until when,
      * what waits for them at the desk or in a queue, the textbooks of the year in one line and, up to the flower, what they
-     * read this school year, with covers. From the sky, as on the card: a book and its date, never which one.
+     * read this school year, with covers. From the sky, as on the card: a book and its date, never which one. The books
+     * go as on the shelf of the child's file (the one due soon first, then the one to pick up, then the rest, and a
+     * reservation still in its queue last), with short dates, since each stands a third of the screen wide.
      *
      * @param int $childuserid
      * @param int|null $now
@@ -356,11 +360,20 @@ final class mine {
                 continue;
             }
             $young = cards::look_of($reader, $now) === 'flower';
-            $book = function (array $row, string $title, string $detail, bool $urgent, string $where, bool $pickup) use ($young) {
+            $short = fn(int $time) => zones::date($time, $str('mobilechildshortdate'), (int) $library['entityid']);
+            $book = function (
+                array $row,
+                string $title,
+                string $detail,
+                bool $urgent,
+                string $where,
+                bool $pickup,
+                array $order
+            ) use ($young) {
                 $cover = $young ? covers::inline((int) $row['recordid'], 60 * 1024) : '';
                 return ['title' => $young ? (string) $row['title'] : $title, 'detail' => $detail, 'urgent' => $urgent,
                     'pickup' => $pickup, 'hascover' => $cover !== '', 'cover' => $cover, 'opens' => $young, 'where' => $where,
-                    'recordid' => $young ? (int) $row['recordid'] : 0];
+                    'recordid' => $young ? (int) $row['recordid'] : 0, 'order' => $order];
             };
             $books = [];
             foreach ($library['loans'] as $loan) {
@@ -368,23 +381,27 @@ final class mine {
                 $books[] = $book(
                     $loan,
                     $str('mobilechildbook'),
-                    $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $loan['due']),
+                    $str($loan['late'] ? 'mobilechildlate' : 'mobilechilddue', $short((int) $loan['timedue'])),
                     $loan['late'] || $soon,
                     (string) $loan['where'],
-                    false
+                    false,
+                    [$loan['late'] || $soon ? 0 : 2, (int) $loan['timedue']]
                 );
             }
             foreach ($library['holds'] as $hold) {
                 $books[] = $book(
                     $hold,
                     $str($hold['ready'] ? 'mobilechildpickup' : 'mobilechildqueued'),
-                    $hold['ready'] ? $str($young ? 'mobilechildreadyyoung' : 'mobilechildready', $hold['until'])
-                        : $str('mobilechildqueue'),
+                    // The label above the book on the page says «To collect», so its line only says until when.
+                    $hold['ready'] ? $str('mobilechildready', $short((int) $hold['expires'])) : $str('mobilechildqueue'),
                     false,
                     (string) $hold['slug'],
-                    (bool) $hold['ready']
+                    (bool) $hold['ready'],
+                    [$hold['ready'] ? 1 : 3, (int) $hold['expires']]
                 );
             }
+            usort($books, fn($a, $b) => $a['order'] <=> $b['order']);
+            $books = array_map(fn($one) => array_diff_key($one, ['order' => true]), $books);
             $read = $young ? self::read_this_year($reader, $now) : ['count' => 0, 'books' => []];
             $out[] = ['name' => $library['name'], 'notice' => (string) ($library['notice'] ?? ''),
                 'textbooks' => $library['textbooks'], 'books' => $books, 'hasbooks' => (bool) $books, 'young' => $young,
