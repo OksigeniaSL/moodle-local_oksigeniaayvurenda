@@ -53,12 +53,13 @@
     <span aria-hidden="true" style="display: block; height: 5px; border-radius: 2px; background: rgba(var(--ion-color-primary-rgb), .3);"></span>
     {{/hasbooks}}
     {{#hasbooks}}
-    {{! The shelf: three books a row, each standing on its piece of the board; the rows are shelves one under another. }}
+    {{! The shelf: three books a row, each standing on its piece of the board; the rows are shelves one under another. A
+        young reader's row is tall enough for the raised cover and its label: the app's ion-item clips what sticks out. }}
     <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 22px;">
     {{#books}}
     {{#opens}}<ion-item button detail="false" lines="none" style="--padding-start: 0; --inner-padding-end: 0; --background: transparent; --min-height: 0; --ripple-color: transparent; min-width: 0;" core-site-plugins-new-content [preSets]="{getFromCache: 0}" component="local_oksigeniaayvurenda" method="mobile_record_view" title="{{title}}" [args]="{library: '{{where}}', id: {{recordid}} }">{{/opens}}
     {{^opens}}<div style="min-width: 0;">{{/opens}}
-        <div style="display: grid; grid-template-rows: {{#young}}158px{{/young}}{{^young}}132px{{/young}} 5px auto; width: 100%;">
+        <div style="display: grid; grid-template-rows: {{#young}}180px{{/young}}{{^young}}132px{{/young}} 5px auto; width: 100%;">
             <span style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; padding: 0 8px{{#pickup}} 14px{{/pickup}};">
                 {{#pickup}}<span style="padding: 2px 8px; border-radius: 999px; background: var(--ion-color-primary); color: var(--ion-color-primary-contrast); font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;">{{pickuplabel}}</span>{{/pickup}}
                 {{#hascover}}<img src="{{cover}}" alt="" style="display: block; width: 100%; max-width: 92px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 2px 6px 6px 2px; box-shadow: 0 8px 14px -8px rgba(0, 0, 0, .6);{{#pickup}} outline: 2px solid var(--ion-color-primary); outline-offset: 2px;{{/pickup}}">{{/hascover}}

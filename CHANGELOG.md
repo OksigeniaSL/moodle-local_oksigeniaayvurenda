@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6 (2026-11-16)
+
+- «Their library»: a young reader's book to pick up shows its «To collect» label again. The raised cover reached the top
+  of its shelf, and the app's row clipped the label above it; the young reader's shelf is a little taller now.
+
 ## 1.0.5 (2026-11-16)
 
 - **«Their library», as Jujol drew it:** the child's books stand on a shelf, three a row, as on the child's card: the one
