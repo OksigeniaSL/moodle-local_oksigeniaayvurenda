@@ -99,9 +99,11 @@ final class runner {
                 $again[] = $str('importabiesmade');
             }
             $relabelled = array_map(fn($copy) => $copy[0] . ' → ' . $copy[1], $importer->relabelled());
+            $paired = array_map(fn($copy) => $copy[2] . ' (' . $copy[0] . ' = ' . $copy[1] . ')', $importer->paired());
             catalogue::purge($entityid);
             return ['figures' => $figures, 'again' => implode(' ', $again),
-                'newcodes' => $relabelled ? $str('importrelabelled', implode(', ', $relabelled)) : ''];
+                'newcodes' => trim(($paired ? $str('importpaired', implode('; ', $paired)) : '') . ' '
+                    . ($relabelled ? $str('importrelabelled', implode(', ', $relabelled)) : ''))];
         }
         $map = array_filter((array) ($options['map'] ?? []), fn($f) => in_array($f, catalogue_csv::FIELDS, true));
         $records = $pending['kind'] === 'csv' ? files::csv_records($pending['path'], $map)

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.7 (2026-11-19)
+
+- **The same book, catalogued here and in Abies, is one copy.** A library that started from an Abies export and went on
+  cataloguing here may add books that Abies had also catalogued after that export, each with a new code here. A newer
+  export no longer brings them in twice: each new copy of the export joins a copy made here of the same record (known by
+  its ISBN or by the label code), with the loans of both and the code it has here, or the one of Abies with
+  `--abies-codes` in `cli/import_abies.php` when that is the label on the book. The import lists both codes of each one.
+
 ## 1.0.6 (2026-11-16)
 
 - «Their library»: a young reader's book to pick up shows its «To collect» label again. The raised cover reached the top

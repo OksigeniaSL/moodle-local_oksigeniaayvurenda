@@ -41,7 +41,10 @@ use local_oksigeniaayvurenda\local\years;
  * new, updates what changed in Abies, leaves the rest alone and never duplicates. What the library did here since wins:
  * a row changed here is not touched, one deleted here does not come back (nor a reader erased at their request), and a
  * copy made here with the code of its Abies label is recognised as that copy, with its record. A copy made here whose
- * new code Abies had printed on another copy gets a new code, to be relabelled: the printed label wins.
+ * new code Abies had printed on another copy gets a new code, to be relabelled: the printed label wins. And a book
+ * catalogued here with a new code that Abies had catalogued too, after the export the library started from, is one book:
+ * each new copy of the export joins a copy made here of the same record, with the code it has here (or the one of Abies,
+ * with_abies_codes()), and both are listed.
  */
 final class abies_import {
     /** @var string Prefix of the plugin tables. */
@@ -75,6 +78,15 @@ final class abies_import {
 
     /** @var bool Whether the export is history: its copies come in on the shelf and its loans out as returned. */
     private bool $asreturned;
+
+    /** @var bool Whether a copy made here that is a copy of the export takes the code of Abies, not keeping its own. */
+    private bool $abiescodes = false;
+
+    /** @var array Copies made here that came from no import, by record: recordid => item ids, oldest first. */
+    private array $madecopies = [];
+
+    /** @var array Copies of the export that were a copy made here, the same book twice: [Abies code, code kept, title]. */
+    private array $paired = [];
 
     /** @var int */
     private int $now;
@@ -141,6 +153,7 @@ final class abies_import {
         global $DB;
         $this->stats = [];
         $this->relabelled = [];
+        $this->paired = [];
         $this->exportcodes = [];
         $this->outthen = [];
         $this->load_maps();
@@ -191,9 +204,13 @@ final class abies_import {
             ['entityid' => $this->entityid]
         ), true);
         $this->codes = [];
-        $rows = $DB->get_recordset(self::T . 'item', ['entityid' => $this->entityid], '', 'id, barcode');
+        $this->madecopies = [];
+        $rows = $DB->get_recordset(self::T . 'item', ['entityid' => $this->entityid], 'id', 'id, barcode, recordid');
         foreach ($rows as $row) {
             $this->codes[strtoupper((string) $row->barcode)] = (int) $row->id;
+            if (!isset($this->fromabies['item'][(int) $row->id])) {
+                $this->madecopies[(int) $row->recordid][] = (int) $row->id;
+            }
         }
         $rows->close();
         $this->madeisbns = [];
@@ -438,6 +455,10 @@ final class abies_import {
                 $this->count('item', 'relabelled');
                 $holder = null;
             }
+            if ($known === null && $holder === null && ($twin = $this->twin($recordid)) !== null) {
+                $this->pair($twin, $abiesid, $this->item_data($item, $recordid, $barcode, $types, $tz));
+                continue;
+            }
             if ($barcode === '' || ($holder !== null && $holder !== $known)) {
                 $barcode = ($barcode === '' ? 'ABIES' : $barcode) . '-' . $abiesid;
                 $this->count('item', 'recoded');
@@ -454,6 +475,46 @@ final class abies_import {
             }
         }
         $this->stats['item']['missing'] = count(array_diff_key($this->map['item'], $seen));
+    }
+
+    /**
+     * A copy made here of a record, not yet taken as a copy of the export: the same book, when the export brings a copy
+     * of that record that is not here.
+     *
+     * @param int $recordid
+     * @return int|null
+     */
+    private function twin(int $recordid): ?int {
+        while ($this->madecopies[$recordid] ?? []) {
+            $itemid = array_shift($this->madecopies[$recordid]);
+            if (isset($this->here['item'][$itemid]) && !isset($this->fromabies['item'][$itemid])) {
+                return $itemid;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Takes a copy made here as the copy of the export it is, with what the desk did with it: it keeps its code, or
+     * takes the one of Abies when asked and no other copy has it. Both codes are listed.
+     *
+     * @param int $itemid
+     * @param string $abiesid
+     * @param array $data The copy as the export has it.
+     */
+    private function pair(int $itemid, string $abiesid, array $data): void {
+        global $DB;
+        $mine = $DB->get_record(self::T . 'item', ['id' => $itemid], 'id, recordid, barcode', MUST_EXIST);
+        $kept = (string) $mine->barcode;
+        $abies = (string) $data['barcode'];
+        if ($this->abiescodes && $abies !== '' && !isset($this->codes[$abies])) {
+            $DB->update_record(self::T . 'item', (object) ['id' => $itemid, 'barcode' => $abies, 'timemodified' => $this->now]);
+            unset($this->codes[strtoupper($kept)]);
+            $this->codes[$abies] = $itemid;
+            $kept = $abies;
+        }
+        $this->adopt('item', $abiesid, $itemid, sha1(json_encode([$data, []])), 'paired');
+        $this->paired[] = [$abies, $kept, (string) $DB->get_field(self::T . 'record', 'title', ['id' => $mine->recordid])];
     }
 
     /**
@@ -840,8 +901,9 @@ final class abies_import {
      * @param string $externalid
      * @param int $localid
      * @param string $hash The fingerprint of what the export has.
+     * @param string $how What it counts as.
      */
-    private function adopt(string $table, string $externalid, int $localid, string $hash): void {
+    private function adopt(string $table, string $externalid, int $localid, string $hash, string $how = 'madehere'): void {
         global $DB;
         $row = $DB->get_record(self::T . $table, ['id' => $localid], '*', MUST_EXIST);
         $own = self::own_hash($table, $row, $this->links_here($table, $localid));
@@ -857,7 +919,7 @@ final class abies_import {
         ]);
         $this->map[$table][$externalid] = [$localid, $hash, $own, $sourceid];
         $this->fromabies[$table][$localid] = true;
-        $this->count($table, 'madehere');
+        $this->count($table, $how);
     }
 
     /**
@@ -1007,6 +1069,26 @@ final class abies_import {
             }
             $rows->close();
         }
+    }
+
+    /**
+     * From now on, a copy made here that is a copy of the export takes the code of Abies (the label printed by Abies is
+     * the one on the book); without it, the copy keeps the code it has here.
+     *
+     * @return self
+     */
+    public function with_abies_codes(): self {
+        $this->abiescodes = true;
+        return $this;
+    }
+
+    /**
+     * Copies of the export that were a copy made here, the same book catalogued twice, now one copy.
+     *
+     * @return array [Abies code, code it keeps, title]
+     */
+    public function paired(): array {
+        return $this->paired;
     }
 
     /**

@@ -375,6 +375,47 @@ final class abies_import_test extends \advanced_testcase {
     }
 
     /**
+     * A book catalogued here with a new code, that Abies catalogued too after the export the library started from, is
+     * one copy, with the loans of both; it keeps its code here, or takes the one of Abies when asked; nothing doubles
+     * on the next import.
+     */
+    public function test_same_book_twice(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        foreach ([false, true] as $abiescodes) {
+            $library = $generator->create_library();
+            $faro = $generator->create_record(['entityid' => $library->entityid, 'title' => 'Faro',
+                'isbn' => '9780306406157']);
+            $mine = $generator->create_item(['libraryid' => $library->id, 'recordid' => $faro->id, 'barcode' => '030000P']);
+            $reader = $generator->create_reader(['entityid' => $library->entityid, 'cardcode' => '100000T']);
+            $generator->create_loan(['libraryid' => $library->id, 'itemid' => $mine->id, 'readerid' => $reader->id]);
+
+            $importer = new abies_import($library->id, true, true);
+            if ($abiescodes) {
+                $importer->with_abies_codes();
+            }
+            $stats = $importer->run($this->export());
+
+            // The first copy of the export is the one made here; the second comes in as a copy of its own.
+            $this->assertSame(1, $stats['item']['paired']);
+            $this->assertSame(2, $DB->count_records(self::T . 'item', ['recordid' => $faro->id]));
+            $code = $abiescodes ? '100000L' : '030000P';
+            $this->assertSame([['100000L', $code, 'Faro']], $importer->paired());
+            $this->assertSame($code, $DB->get_field(self::T . 'item', 'barcode', ['id' => $mine->id]));
+            $this->assertTrue($DB->record_exists(self::T . 'item', ['recordid' => $faro->id, 'barcode' => '100001C']));
+            // The loan made here and the one Abies had of that copy, both on the same copy.
+            $this->assertSame(2, $DB->count_records(self::T . 'loan', ['itemid' => $mine->id]));
+
+            $again = new abies_import($library->id, true, true);
+            $stats = $again->run($this->export());
+            $this->assertSame([], $again->paired());
+            $this->assertArrayNotHasKey('paired', $stats['item']);
+            $this->assertSame(2, $DB->count_records(self::T . 'item', ['recordid' => $faro->id]));
+        }
+    }
+
+    /**
      * A reader erased at their request does not come back with the export, and only a fingerprint of their Abies id
      * stays.
      */

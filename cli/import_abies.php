@@ -33,7 +33,7 @@ use local_oksigeniaayvurenda\local\import\abies_import;
 
 [$options, $unrecognized] = cli_get_params(
     ['help' => false, 'file' => '', 'library' => 0, 'create' => '', 'closed' => false, 'dry-run' => false,
-        'without-notes' => false, 'with-readers' => false, 'as-returned' => false],
+        'without-notes' => false, 'with-readers' => false, 'as-returned' => false, 'abies-codes' => false],
     ['h' => 'help', 'n' => 'dry-run']
 );
 
@@ -47,9 +47,12 @@ publishers, places, copies with their own codes, types and loan rules. Run it ag
 library up to date: nothing is duplicated, and what the library did since wins. A row changed here is left as it is,
 one deleted here does not come back, nor a reader erased at their request; a copy made here with the code of its Abies
 label is taken as that copy, with its record; and a copy made here whose new code Abies printed on another copy gets a
-new code, listed at the end to print its label. With --with-readers, also the readers and their loans; they come
-without an account, to be matched with the site's accounts in «Readers». An old export, from before the library
-lent with Ayvurenda, goes with --as-returned: what it had out comes in on the shelf and as returned.
+new code, listed at the end to print its label. A book catalogued here with a new code that Abies had catalogued too
+after the export the library started from is one book: the copy of the export joins the copy made here, with the code
+it has here (or with --abies-codes, the one of Abies), and both codes are listed at the end. With --with-readers,
+also the readers and their loans; they come without an account, to be matched with the site's accounts in «Readers».
+An old export, from before the library lent with Ayvurenda, goes with --as-returned: what it had out comes in on the
+shelf and as returned.
 
 Options:
   --file=PATH       The export: the zip Abies Web gives, or the XML inside it
@@ -62,6 +65,7 @@ Options:
   --with-readers    Bring the readers and their loans too
   --as-returned     The export is old: the copies it had out come in on the shelf, its loans still out come in
                     returned on the day of the export, and copies already here keep their status
+  --abies-codes     A copy made here that is a copy of the export takes the code of Abies, the label on the book
   -h, --help        This help
 
 Example:
@@ -138,6 +142,9 @@ $importer = new abies_import(
     (bool) $options['with-readers'],
     (bool) $options['as-returned']
 );
+if ($options['abies-codes']) {
+    $importer->with_abies_codes();
+}
 $stats = $importer->run($export);
 $entityid = (int) $DB->get_field('local_oksigeniaayvurenda_library', 'entityid', ['id' => $libraryid]);
 \local_oksigeniaayvurenda\local\catalogue::purge($entityid);
@@ -150,6 +157,12 @@ if ($importer->out_then()) {
     cli_heading('Out in the export, come in as returned on its day, and not seen here since: look whether they are back');
     foreach ($importer->out_then() as [$code, $title, $card, $when]) {
         cli_writeln($code . "\t" . userdate($when, '%Y-%m-%d', 99, false) . "\t" . $card . "\t" . $title);
+    }
+}
+if ($importer->paired()) {
+    cli_heading('The same book catalogued here and in Abies, now one copy: the code of Abies and the one it keeps');
+    foreach ($importer->paired() as [$abies, $kept, $title]) {
+        cli_writeln($abies . ' = ' . $kept . "\t" . $title);
     }
 }
 if ($importer->relabelled()) {

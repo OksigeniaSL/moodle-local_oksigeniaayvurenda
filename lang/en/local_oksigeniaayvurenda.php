@@ -3069,6 +3069,7 @@ $string['importnextreadershint'] = 'From a list, from OneRoster or from your Moo
 $string['importnocodehint'] = 'Those without a code get one.';
 $string['importnotes'] = 'With the notes of the copies';
 $string['importnotitle'] = 'Without a title no book comes in: tell us which column it is.';
+$string['importpaired'] = 'These books had been added here and in Abies too; they are now one copy each, with their loans (Abies code = code kept): {$a}.';
 $string['importqueued'] = '«{$a->name}» is big: it is being imported apart since {$a->time}. A message will tell you when it is done and, meanwhile, you can go on working. Until then no other import can start in this library.';
 $string['importqueuedmeanwhile'] = 'Meanwhile';
 $string['importqueuedtitle'] = 'Importing apart';

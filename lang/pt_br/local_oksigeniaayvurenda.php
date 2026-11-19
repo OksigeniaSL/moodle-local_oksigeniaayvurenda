@@ -3112,6 +3112,7 @@ $string['importnextreadershint'] = 'De uma lista, do OneRoster ou do seu Moodle.
 $string['importnocodehint'] = 'Os que não têm código recebem um.';
 $string['importnotes'] = 'Com as notas dos exemplares';
 $string['importnotitle'] = 'Sem título nenhum livro entra: diga qual é a coluna.';
+$string['importpaired'] = 'Estes livros tinham sido cadastrados aqui e também no Abies; agora cada um é um só exemplar, com seus empréstimos (código do Abies = código que fica): {$a}.';
 $string['importqueued'] = '«{$a->name}» é grande: está sendo importado à parte desde as {$a->time}. Você vai receber um aviso quando terminar e, enquanto isso, pode continuar trabalhando. Até lá, não dá para começar outra importação nesta biblioteca.';
 $string['importqueuedmeanwhile'] = 'Enquanto isso';
 $string['importqueuedtitle'] = 'Importando à parte';
