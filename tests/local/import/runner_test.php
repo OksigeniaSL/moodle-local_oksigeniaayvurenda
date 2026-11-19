@@ -58,6 +58,31 @@ final class runner_test extends \advanced_testcase {
     }
 
     /**
+     * An Abies export into an empty library says nothing of bringing up to date; the same one again does.
+     */
+    public function test_abies_again(): void {
+        $this->resetAfterTest();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $upload = fn() => ['path' => $this->copy_of('abies/small.xml'), 'name' => 'small.xml', 'kind' => 'abies'];
+        $first = runner::run($library, $upload(), ['notes' => 1, 'readers' => 1]);
+        $this->assertSame('', $first['again']);
+        $second = runner::run($library, $upload(), ['notes' => 1, 'readers' => 1]);
+        $this->assertSame(get_string('importabiesagain', 'local_oksigeniaayvurenda'), $second['again']);
+    }
+
+    /**
+     * A fixture copied where an upload would leave it.
+     *
+     * @param string $fixture
+     * @return string
+     */
+    private function copy_of(string $fixture): string {
+        $path = make_request_directory() . '/subido.upload';
+        copy(__DIR__ . '/../../fixtures/' . $fixture, $path);
+        return $path;
+    }
+
+    /**
      * In the background: the file kept apart, the library marked (a mark older than six hours holds nothing); the task
      * imports as the person who started it, tells them, takes the mark away and leaves no file behind.
      */

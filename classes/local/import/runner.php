@@ -87,11 +87,14 @@ final class runner {
             }
             $here = 0;
             $made = 0;
+            $before = 0;
             foreach ($stats as $counts) {
                 $here += ($counts['changedhere'] ?? 0) + ($counts['deletedhere'] ?? 0) + ($counts['erased'] ?? 0);
-                $made += $counts['madehere'] ?? 0;
+                $made += ($counts['madehere'] ?? 0) + ($counts['paired'] ?? 0);
+                $before += ($counts['unchanged'] ?? 0) + ($counts['updated'] ?? 0);
             }
-            $again = [$str('importabiesagain')];
+            // Only when something was there already: the first import into an empty library has nothing to bring up to date.
+            $again = $before ? [$str('importabiesagain')] : [];
             if ($here) {
                 $again[] = $str('importabieshere');
             }

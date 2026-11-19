@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8 (2026-11-19)
+
+- After the first import of an Abies Web export into an empty library, the page no longer says that what was already
+  there has been brought up to date: it says so only when there was something to bring up to date. Copies joined to the
+  same book catalogued here count as recognised too.
+
 ## 1.0.7 (2026-11-19)
 
 - **The same book, catalogued here and in Abies, is one copy.** A library that started from an Abies export and went on
