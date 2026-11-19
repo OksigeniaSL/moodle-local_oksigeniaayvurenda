@@ -105,7 +105,8 @@ final class signup {
             $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entity->id]);
         }
 
-        // Whoever runs it: their account, or a new one that gets its password by e-mail and changes it on entering.
+        // Whoever runs it: their account, or a new one that gets its password by the library's own e-mail (not Moodle's)
+        // and changes it on entering.
         $user = self::account_of($email);
         $mailed = false;
         if (!$user) {
@@ -124,14 +125,18 @@ final class signup {
             $userid = (int) (method_exists('\core\user', 'create_user') ? \core\user::create_user($account, false, true)
                 : user_create_user($account, false, true));
             $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
-            $mailed = (bool) setnew_password_and_mail($user);
+            $password = generate_password();
+            update_internal_user_password($user, $password);
             set_user_preference('auth_forcepasswordchange', 1, $user);
+            $first = $DB->get_record(self::T . 'library', ['id' => $library->id], '*', MUST_EXIST);
+            $mailed = welcome::account($user, $first, $password);
             $created['account'] = true;
         }
         $context = \context_coursecat::instance($categoryid);
         if (!$DB->record_exists('role_assignments', ['roleid' => $roleid, 'userid' => $user->id, 'contextid' => $context->id])) {
-            // The account's own e-mail already brings them in: not a second notice for the same thing.
-            welcome::$quiet = true;
+            // A new account's own e-mail already brings them in: not a second notice for the same thing. An account that
+            // was already here hears of its new centre by the welcome of the staff.
+            welcome::$quiet = $created['account'];
             try {
                 role_assign($roleid, $user->id, $context->id);
             } finally {

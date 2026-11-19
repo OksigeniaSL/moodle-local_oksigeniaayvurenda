@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.9 (2026-11-19)
+
+- **A centre signed up on a shared site gets its library's own e-mail, not Moodle's.** Whoever will run it receives, with
+  the look of the library, their user name, a first password they change on entering, a button to the desk and, if they
+  come from another program, where to bring its catalogue; the site's support address, when it has one, for questions.
+  An account that was already on the site, given a new centre, now hears of it by the staff's welcome (it heard nothing).
+- Before importing, the review also says when the file brings more readers than the plan has room for: ticked, they
+  would refuse the whole import.
+
 ## 1.0.8 (2026-11-19)
 
 - After the first import of an Abies Web export into an empty library, the page no longer says that what was already

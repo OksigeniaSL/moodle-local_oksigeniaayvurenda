@@ -26,8 +26,9 @@ namespace local_oksigeniaayvurenda\local;
 #[\PHPUnit\Framework\Attributes\CoversClass(signup::class)]
 final class signup_test extends \advanced_testcase {
     /**
-     * The first time makes everything and mails the password; the second makes nothing, changes the plan; the manager
-     * may manage that centre and no other.
+     * The first time makes everything and mails the password in the library's own e-mail, not Moodle's; the second makes
+     * nothing, changes the plan; the manager may manage that centre and no other; an account already here hears of a new
+     * centre by the staff's welcome.
      */
     public function test_centre(): void {
         global $DB;
@@ -43,7 +44,11 @@ final class signup_test extends \advanced_testcase {
         $this->assertSame(['centre' => true, 'account' => true, 'role' => true], $first['created']);
         $this->assertTrue($first['mailed']);
         $this->assertCount(1, $sink->get_messages());
-        $this->assertSame('ana.lopez@example.org', $sink->get_messages()[0]->to);
+        $mail = $sink->get_messages()[0];
+        $this->assertSame('ana.lopez@example.org', $mail->to);
+        $this->assertSame(get_string('signupmailsubject', 'local_oksigeniaayvurenda', 'Sala central'), $mail->subject);
+        $this->assertStringContainsString('ana.lopez@example.org', quoted_printable_decode($mail->body));
+        $this->assertStringContainsString('desk.php', quoted_printable_decode($mail->body));
         $sink->clear();
         $user = $DB->get_record('user', ['id' => $first['userid']]);
         $this->assertSame('ana.lopez@example.org', $user->username);
@@ -76,6 +81,15 @@ final class signup_test extends \advanced_testcase {
         $this->assertSame(strtotime('2026-11-03'), signup::terms($first['entity'])['time'], 'the first acceptance counts');
         $this->assertSame(25000, plans::of($first['entity'])['copies']);
         $this->assertSame(['centre' => $first['entity'], 'account' => $first['userid']], signup::look($data));
+
+        $messages = $this->redirectMessages();
+        $third = signup::centre(['name' => 'Colegio Monte Alto', 'plan' => 'free', 'email' => $data['email']]);
+        $this->assertSame(['centre' => true, 'account' => false, 'role' => true], $third['created']);
+        $this->assertFalse($third['mailed']);
+        $this->assertCount(0, $sink->get_messages());
+        $this->assertCount(1, $messages->get_messages());
+        $this->assertSame('staffwelcome', $messages->get_messages()[0]->eventtype);
+        $messages->close();
     }
 
     /**

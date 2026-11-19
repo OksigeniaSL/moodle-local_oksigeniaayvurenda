@@ -111,6 +111,51 @@ final class welcome {
     }
 
     /**
+     * Whoever a centre was just signed up for, with an account made for it: one e-mail with the look of its library, in
+     * place of Moodle's own, with their user name, a first password they change on entering, the way in and what comes
+     * first. Only by e-mail: a password goes by no other way.
+     *
+     * @param \stdClass $user
+     * @param \stdClass $library
+     * @param string $password
+     * @return bool Whether it was sent.
+     */
+    public static function account(\stdClass $user, \stdClass $library, string $password): bool {
+        global $CFG;
+        $language = force_current_language((string) $user->lang);
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $name = format_string($library->name, true, ['escape' => false]);
+        $desk = (new \moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);
+        $import = (new \moodle_url('/local/oksigeniaayvurenda/import.php', ['library' => $library->slug]))->out(false);
+        $subject = $str('signupmailsubject', $name);
+        $hello = $str('mailhello', $user->firstname);
+        $help = !empty($CFG->supportemail) ? [$str('signupmailhelp', $CFG->supportemail)] : [];
+        $text = implode("\n\n", array_merge([
+            $hello,
+            $str('signupmaillead'),
+            $str('signupmailuser') . ': ' . $user->username . "\n" . $str('signupmailpassword') . ': ' . $password,
+            $str('signupmailbutton') . ': ' . $desk,
+            $str('signupmailfirst') . ' ' . $import,
+        ], $help));
+        $html = mail::html([
+            'library' => $library,
+            'entityid' => (int) $library->entityid,
+            'hello' => $hello,
+            'heading' => $str('signupmailheading'),
+            'lead' => [$str('signupmaillead')],
+            'people' => [
+                ['name' => $str('signupmailuser'), 'line' => $user->username],
+                ['name' => $str('signupmailpassword'), 'line' => $password],
+            ],
+            'button' => ['url' => $desk, 'text' => $str('signupmailbutton')],
+            'after' => array_merge([$str('signupmailfirst')], $help),
+            'why' => $str('mailwhysignup'),
+        ]);
+        force_current_language($language);
+        return (bool) email_to_user($user, mail::from(), $subject, $text, $html);
+    }
+
+    /**
      * The centre a context belongs to: its category on a site of several centres; the site, on a site of one.
      *
      * @param \context $context

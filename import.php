@@ -144,7 +144,7 @@ if ($pending) {
             $export = new export_reader(files::abies_xml($pending['path']));
             $report = survey::run($export);
             $look = ['records' => array_sum($report['records']), 'items' => $report['items'],
-                'books' => preview::abies_books($export)];
+                'books' => preview::abies_books($export), 'readers' => (int) $report['readers']];
             $review['kind'] = $str('importkindabies');
             $review['abies'] = true;
             $review['figures'] = [$figure($look['records'], 'importfigrecords'), $figure($look['items'], 'importfigitems'),
@@ -201,11 +201,16 @@ if ($pending) {
                 . (count($look['badisbn']) > 5 ? '…' : '')]
             ));
         $review['gowords'] = $look['records'] === 1 ? $str('importgoone') : $str('importgomany', screens::number($look['records']));
+        // What does not fit in the plan refuses the whole import: said before, not after. The readers too, which come
+        // only if ticked.
         $left = plans::left($entityid, 'copies');
-        if ($left !== null && $look['items'] > $left) {
-            $review['tight'] = $str('importtight', (object) ['left' => screens::number($left),
-                'items' => screens::number($look['items'])]);
-        }
+        $leftreaders = plans::left($entityid, 'readers');
+        $copiesout = $left !== null && $look['items'] > $left;
+        $readersout = $leftreaders !== null && ($look['readers'] ?? 0) > $leftreaders;
+        $a = (object) ['left' => screens::number((int) $left), 'items' => screens::number($look['items']),
+            'leftreaders' => screens::number((int) $leftreaders), 'readers' => screens::number($look['readers'] ?? 0)];
+        $review['tight'] = $copiesout && $readersout ? $str('importtightboth', $a) : ($copiesout ? $str('importtight', $a)
+            : ($readersout ? $str('importtightreaders', (object) ['left' => $a->leftreaders, 'readers' => $a->readers]) : ''));
         $data['review'] = $review;
         $data['upload'] = false;
         // What the review counted decides whether it goes apart: a small zip may carry a big catalogue.
