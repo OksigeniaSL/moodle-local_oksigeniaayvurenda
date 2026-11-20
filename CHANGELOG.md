@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10 (2026-11-20)
+
+- **Readers with the same name and the same class link by themselves, however each program writes the class.** «1º PRI
+  E» from an import and «PRI 1º E» from the platform's cohort are the same class: the reader and the account no longer
+  wait in doubt for that (an Abies Web export of this year's pupils left almost all of them there).
+
 ## 1.0.9 (2026-11-19)
 
 - **A centre signed up on a shared site gets its library's own e-mail, not Moodle's.** Whoever will run it receives, with

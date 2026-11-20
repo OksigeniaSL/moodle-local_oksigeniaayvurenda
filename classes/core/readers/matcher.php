@@ -71,7 +71,7 @@ final class matcher {
             }
             $words[$account['id']] = $set;
             $parts[$account['id']] = self::parts($account);
-            $groups[$account['id']] = text::normalise((string) ($account['group'] ?? ''));
+            $groups[$account['id']] = self::group((string) ($account['group'] ?? ''));
             $exact[self::ordered((string) $account['name'])][] = $account['id'];
             $sameset[self::key($set)][] = $account['id'];
             foreach ($set as $word) {
@@ -81,7 +81,7 @@ final class matcher {
         $piles = [self::SURE => [], self::DOUBT => [], self::NONE => []];
         foreach ($readers as $reader) {
             $set = self::words((string) $reader['name']);
-            $group = text::normalise((string) ($reader['group'] ?? ''));
+            $group = self::group((string) ($reader['group'] ?? ''));
             $same = $set ? ($exact[self::ordered((string) $reader['name'])] ?? []) : [];
             if (count($same) === 1) {
                 $account = $same[0];
@@ -180,6 +180,20 @@ final class matcher {
     private static function ordered(string $name): string {
         $words = \local_oksigeniaayvurenda\core\text::words($name);
         return implode(' ', array_filter($words, fn($w) => strlen($w) > 1 || ctype_digit($w)));
+    }
+
+    /**
+     * A class name as a key that does not depend on the order of its parts or the ordinal marks: «1º PRI E», «PRI 1º E»
+     * and «1ºE PRI» are the same class, written the way each programme writes it.
+     *
+     * @param string $name
+     * @return string Empty when there is no class.
+     */
+    private static function group(string $name): string {
+        preg_match_all('/\d+|[^\d\s]+/u', str_replace(['º', 'ª'], '', text::normalise($name)), $found);
+        $parts = $found[0];
+        sort($parts, SORT_STRING);
+        return implode(' ', $parts);
     }
 
     /**

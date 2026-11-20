@@ -28,8 +28,8 @@ namespace local_oksigeniaayvurenda\core\readers;
 #[\PHPUnit\Framework\Attributes\CoversClass(matcher::class)]
 final class matcher_test extends \basic_testcase {
     /**
-     * The same words in the same order match by themselves; another order, several, close or with another group are
-     * in doubt; the rest, not there.
+     * The same words in the same order match by themselves, also with the class written in another order; another order,
+     * several, close or with another group are in doubt; the rest, not there.
      */
     public function test_piles(): void {
         $readers = [
@@ -40,6 +40,8 @@ final class matcher_test extends \basic_testcase {
             ['id' => 5, 'name' => 'Hugo Olmo'],
             ['id' => 6, 'name' => 'Iker Duna Faro', 'group' => '4º B'],
             ['id' => 7, 'name' => 'Adrián Montes Lago'],
+            ['id' => 8, 'name' => 'Sara Vela Mar', 'group' => '1º PRI E'],
+            ['id' => 9, 'name' => 'Unai Roca Sol', 'group' => '2ºB ESO'],
         ];
         $accounts = [
             ['id' => 10, 'name' => 'Ana María Montes Prado', 'group' => '3º A'],
@@ -49,9 +51,11 @@ final class matcher_test extends \basic_testcase {
             ['id' => 14, 'name' => 'Hugo Olmos'],
             ['id' => 15, 'name' => 'Iker Duna Faro', 'group' => '1º A'],
             ['id' => 16, 'name' => 'Adrián Lago Montes'],
+            ['id' => 17, 'name' => 'Sara Vela Mar', 'group' => 'PRI 1º E'],
+            ['id' => 18, 'name' => 'Unai Roca Sol', 'group' => 'ESO 2º B'],
         ];
         $piles = matcher::piles($readers, $accounts);
-        $this->assertSame([1 => 10], $piles['sure']);
+        $this->assertSame([1 => 10, 8 => 17, 9 => 18], $piles['sure']);
         $this->assertSame([11], $piles['doubt'][2]);
         $this->assertSame([12, 13], $piles['doubt'][4]);
         $this->assertSame([14], $piles['doubt'][5]);
