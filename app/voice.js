@@ -514,7 +514,8 @@
         if (backdrop() !== null) {
             body.append('backdrop', backdrop());
         }
-        body.append('seconds', String(Math.round(measured / 1000)));
+        // Whole seconds, as players count them.
+        body.append('seconds', String(Math.floor(measured / 1000)));
         body.append('forlittle', pressed(little) ? '1' : '0');
         body.append('tellfamily', pressed(little) && pressed(family) ? '1' : '0');
         var signature = document.getElementById('ayv-signature');

@@ -73,7 +73,7 @@
         <div class="ayv-oye-indice">
             <h2>{{partsheading}}</h2>
             <ol class="ayv-oye-partes">
-                {{#parts}}<li><button type="button" class="ayv-oye-parte{{#partheard}} is-oida{{/partheard}}" data-id="{{partid}}" data-url="{{parturl}}" data-seconds="{{partseconds}}" data-title="{{parttitle}}" data-name="{{partname}}" data-num="{{partnum}}"{{#partcurrent}} aria-current="true"{{/partcurrent}}><span class="ayv-oye-num">{{#partheard}}✓{{/partheard}}{{^partheard}}{{partnum}}{{/partheard}}</span><span class="ayv-oye-tit">{{parttitle}}{{#partname}}<small>{{partname}}</small>{{/partname}}</span><span class="ayv-oye-puntos" aria-hidden="true"></span><span class="ayv-oye-dura">{{partduration}}</span></button></li>{{/parts}}
+                {{#parts}}<li><button type="button" class="ayv-oye-parte{{#partheard}} is-oida{{/partheard}}" data-id="{{partid}}" data-url="{{parturl}}" data-seconds="{{partseconds}}" data-title="{{parttitle}}" data-name="{{partname}}" data-num="{{partnum}}"{{#partcurrent}} aria-current="true"{{/partcurrent}}><span class="ayv-oye-num">{{#partcurrent}}<span class="ayv-oye-barras" aria-hidden="true"><i></i><i></i><i></i></span>{{/partcurrent}}{{^partcurrent}}{{#partheard}}✓{{/partheard}}{{^partheard}}{{partnum}}{{/partheard}}{{/partcurrent}}</span><span class="ayv-oye-tit">{{parttitle}}{{#partname}}<small>{{partname}}</small>{{/partname}}</span><span class="ayv-oye-puntos" aria-hidden="true"></span><span class="ayv-oye-dura">{{partduration}}</span></button></li>{{/parts}}
             </ol>
             <p class="ayv-oye-nota">{{note}}</p>
         </div>

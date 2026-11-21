@@ -138,7 +138,9 @@ foreach ($cards as $group) {
         'share' => $share,
         'minor' => $item->readerid && $who['type'] === 'student',
         'permission' => $item->readerid ? voices::has_permission((int) $item->readerid) : false,
-        'licences' => array_map(fn($l) => ['value' => $l, 'label' => $str('licence' . str_replace('-', '', $l)),
+        // A voice is heard, not read: its own words for someone else's rights.
+        'licences' => array_map(fn($l) => ['value' => $l, 'label' => $str($l === 'rights' ? 'licencerightsvoice'
+            : 'licence' . str_replace('-', '', $l)),
             'selected' => $l === 'rights'], digital_rules::LICENCES),
         'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a, $class['group'] ?? '')], $offered),
         'privatehint' => $str($invite ? 'voicefamilyprivate' : 'voiceprivatehint'),

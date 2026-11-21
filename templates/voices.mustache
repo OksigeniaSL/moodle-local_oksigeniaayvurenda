@@ -86,7 +86,7 @@
         {{#share}}<div class="ayv-vp" role="group" aria-labelledby="ayv-aud-{{id}}"><p class="ayv-vp-title" id="ayv-aud-{{id}}"><b>{{voiceaudience}}</b></p>
             <div class="ayv-vp-chips">{{#audiences}}<label class="ayv-vp-chip"><input type="checkbox" name="audience[]" value="{{value}}"><span class="ayv-vp-word">{{label}}</span></label>{{/audiences}}</div></div>{{/share}}
         {{^share}}<p class="ayv-field-hint">{{privatehint}}</p>{{/share}}
-        <label class="ayv-field ayv-field-wide">{{voicesignaturereview}} <span class="ayv-field-hint">{{voicesignaturereviewhint}}</span>
+        <label class="ayv-field ayv-field-wide ayv-vp-firma">{{voicesignaturereview}} <span class="ayv-field-hint">{{voicesignaturereviewhint}}</span>
             <input type="text" name="signature" maxlength="60" value="{{signature}}"></label>
         {{#hasparts}}<input type="hidden" name="all" value="1">{{/hasparts}}
         <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{approvelabel}}</button>

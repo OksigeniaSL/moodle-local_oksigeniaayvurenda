@@ -19,6 +19,8 @@
     --surface: #fff;
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317574c' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     --muted: #8b9591;
+    /* The second ink, for what goes under a title (Jujol, 21 Nov 2026): 7.3:1 on the paper. */
+    --ink-2: #4a5451;
     --chip-hover: #e8dcc6;
     --late: #a3321e;
     --late-bg: #f7d9d2;
@@ -54,6 +56,7 @@ html[data-bs-theme="dark"] .ayv {
     --surface: #142624;
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238fd3c1' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     --muted: #9aa6a2;
+    --ink-2: #c0bcaf;
     --chip-hover: #26423c;
     --late: #ff9f8a;
     --late-bg: #4a231b;
@@ -1759,7 +1762,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 /* «Escuchar» a reading in parts (Jujol, 21 Nov 2026): the page where a child listens to their teacher read them a whole
    book. Over app/ayvurenda.css; everything new is .ayv-oye-*. The book in front, like a present just opened (the cover
    of «Leyó para los pequeños»); who reads it; one big «play»; and the parts as the contents page of the book, with the
-   one that sounds marked by its moving bars. Works without :has() or color-mix(); dark follows Moodle's data-bs-theme. */
+   one that sounds marked by its moving bars. Works without :has() or color-mix(): the second ink is a colour of its own; dark follows Moodle's data-bs-theme. */
 .ayv .ayv-oye {
     display: grid;
     gap: 28px;
@@ -1848,7 +1851,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     font-family: var(--text);
     font-size: .95rem;
     font-weight: 400;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
 }
 
 /* The bars that move while something sounds; still when it is paused */
@@ -1866,6 +1869,9 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     border-radius: 2px;
     background: var(--coral);
 }
+/* At rest, still but standing: the part that comes is seen, not only a dot (Jujol). */
+.ayv .ayv-oye-barras i:nth-child(2) { height: 100%; }
+.ayv .ayv-oye-barras i:nth-child(3) { height: 65%; }
 .ayv .is-sonando .ayv-oye-barras i {
     animation: ayv-oye-barra 1s ease-in-out infinite;
 }
@@ -1946,7 +1952,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     display: flex;
     justify-content: space-between;
     font-size: .9rem;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
     font-variant-numeric: tabular-nums;
 }
 /* The whole book: one segment per part, as long as the part; done, filled; the one sounding, half */
@@ -1970,7 +1976,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-oye-todo small {
     margin-inline-start: 8px;
     font-size: .85rem;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
     white-space: nowrap;
 }
 
@@ -2081,7 +2087,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-oye-num {
     font-family: var(--title);
     font-weight: 600;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
     text-align: center;
 }
 .ayv .ayv-oye-tit {
@@ -2094,7 +2100,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     font-family: var(--text);
     font-size: .9rem;
     font-weight: 400;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
 }
 .ayv .ayv-oye-puntos {
     border-bottom: 2px dotted var(--line);
@@ -2102,7 +2108,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 }
 .ayv .ayv-oye-dura {
     font-size: .95rem;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
     font-variant-numeric: tabular-nums;
 }
 .ayv .ayv-oye-parte.is-oida .ayv-oye-num {
@@ -2118,7 +2124,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-oye-nota {
     margin: 10px 0 0;
     font-size: .9rem;
-    color: color-mix(in srgb, currentColor 80%, transparent);
+    color: var(--ink-2);
 }
 
 /* On a phone: the book smaller, so the player is in sight; the strip of the book on its own line */
@@ -13969,3 +13975,6 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     font-weight: 700;
     text-underline-offset: 4px;
 }
+/* Approving a voice: the signature as a line of the card, its box under it, the whole width (Jujol). */
+.ayv .ayv-vp-firma { display: block; }
+.ayv .ayv-vp-firma input { display: block; width: 100%; margin-top: .35rem; }

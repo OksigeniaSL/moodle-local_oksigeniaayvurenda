@@ -100,7 +100,8 @@ if ($parts) {
         'byafter' => $str('readingbyafter', count($parts)),
         'byanon' => $str('readingbyanon', count($parts)),
         // Back where they were: the part and the minute; else what sounds, with its own name.
-        'nowtext' => $str($at > 0 ? 'readingresume' : 'readingnow', voices::part_title((int) $current->part)),
+        // At the start, where it starts; «Now: …» only once it sounds.
+        'nowtext' => $str($at > 0 ? 'readingresume' : 'readingstart', voices::part_title((int) $current->part)),
         'nowsmall' => $at > 0 ? $str('readingresumeat', max(1, (int) round($at / 60))) : ($name !== '' ? '«' . $name . '»' : ''),
         'starturl' => digital::file_url($current),
         'startduration' => $current->seconds ? $mmss((int) $current->seconds) : '',
@@ -110,7 +111,7 @@ if ($parts) {
         'notnow' => $str('readingnotnow'),
         'partsheading' => $str('readingparts'),
         // A voice is never downloaded: it is personal and stays in the library.
-        'note' => $str('readingnote') . ' ' . $str('readnodownload'),
+        'note' => $str('readingnote') . ' ' . $str('readingnodownload'),
         'parts' => array_map(fn($p, $i) => [
             'partid' => (int) $p->id,
             'parturl' => digital::file_url($p),

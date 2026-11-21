@@ -128,8 +128,9 @@
             } else {
                 b.removeAttribute('aria-current');
             }
-            if (i === index && sounding) {
-                num.innerHTML = '<span class="ayv-oye-barras is-sonando" aria-hidden="true"><i></i><i></i><i></i></span>';
+            // The part that sounds or comes next keeps its bars: still at rest, moving while it sounds.
+            if (i === index) {
+                num.innerHTML = '<span class="ayv-oye-barras" aria-hidden="true"><i></i><i></i><i></i></span>';
             } else {
                 num.textContent = i < index ? '✓' : b.getAttribute('data-num');
             }
@@ -329,6 +330,7 @@
     }
     voice.addEventListener('play', function() {
         soundOn();
+        tell();
         mark();
     });
     voice.addEventListener('pause', function() {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.2 (2026-11-21)
+
+- Listening to a reading, after Jujol's review: the part that comes keeps its bars, still at rest and moving while it
+  sounds; at the start the page says where it starts, and «Now: …» once it sounds; the lengths are whole seconds
+  everywhere, as players count them; «You listen to it here», not «read»; the second ink is a colour of its own, also
+  on the browsers of the classroom.
+- Approving a voice: someone else's rights are «heard here only», and the signature's box goes under its label, the
+  whole width.
+- «3 min» no longer breaks between the number and its unit.
+
 ## 1.1.1 (2026-11-21)
 
 - **A reading in parts sounds like a book, as Jujol drew it.** The cover standing large, who reads it («Read to you by
