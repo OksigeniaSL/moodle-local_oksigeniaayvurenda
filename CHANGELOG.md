@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.1 (2026-11-21)
+
+- **A reading in parts sounds like a book, as Jujol drew it.** The cover standing large, who reads it («Read to you by
+  …, in five parts»), what sounds now with the part's own name, one big «play», the bar of the part and, under it, the
+  whole book as a strip of its parts, each as long as it lasts, with the minutes left. Between two parts, «Next: chapter
+  3», a count of three and «Not now». The parts as the book's contents page: number, title and own name, dotted leader,
+  length, a tick on what was heard and moving bars on what sounds. The soft sound underneath is a switch that says what
+  it is. Without JavaScript the browser's own player stays.
+- **A recording made in a browser says how long it lasts.** The WebM the browser makes leaves its length out, so players
+  showed 0:00 and could not go forward: the recorder now writes it into the file before sending it, and the length is
+  also kept with the voice.
+- **A part may have a name of its own** («The lighthouse that never goes out»), besides being chapter 2.
+- **On a phone, the part and the record button stay at the foot of the screen**, to read the book and record at once.
+- Approving a voice: no empty gap under the card's title, and the licence and who else hears it as pills.
+- A reading's line on the record's page and in Ayvu rande says how long it lasts: «Enrique · 3 parts · 33 min».
+
 ## 1.1.0 (2026-11-21)
 
 - **A long book is read aloud in parts.** Giving a book a voice now starts by choosing the part: the opening or a

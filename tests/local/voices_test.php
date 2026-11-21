@@ -134,7 +134,8 @@ final class voices_test extends \advanced_testcase {
             ?int $n,
             int $at,
             string $title = '',
-            ?string $backdrop = null
+            ?string $backdrop = null,
+            int $seconds = 0
         ) use (
             $library,
             $record,
@@ -154,7 +155,8 @@ final class voices_test extends \advanced_testcase {
                 $at,
                 '',
                 $n,
-                $backdrop
+                $backdrop,
+                $seconds
             );
         };
 
@@ -205,6 +207,17 @@ final class voices_test extends \advanced_testcase {
         $this->assertSame([0, 1, 2], array_map(fn($v) => (int) $v->part, $groups[0]['parts']));
         $this->assertSame((int) $again, (int) $groups[0]['parts'][1]->id);
         $this->assertSame((int) $loose, (int) $groups[1]['item']->id);
+
+        // A part with a name of its own, and how long it lasts as the recorder measured it.
+        $named = digital::get($part(3, $now + 40, 'El faro que no se apaga', null, 125), $library);
+        $this->assertSame(125, (int) $named->seconds);
+        $this->assertSame('El faro que no se apaga', voices::part_name($named));
+        $this->assertSame(voices::part_title(3) . ' · El faro que no se apaga', voices::part_label($named));
+        $this->assertSame('', voices::part_name(digital::get($again, $library)), 'a title that only says the part is no name');
+        $this->assertStringContainsString(
+            '4',
+            voices::reading_label(voices::reading((int) $record->id, $library, (int) $teacher->id))
+        );
 
         // A voice named as a part before there were parts finds its place; a family's, through a link, does not.
         require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');

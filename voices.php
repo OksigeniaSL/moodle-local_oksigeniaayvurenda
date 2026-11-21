@@ -132,7 +132,7 @@ foreach ($cards as $group) {
     $pending[] = [
         'id' => (int) $item->id,
         'book' => $item->booktitle,
-        'title' => (string) $item->title,
+        'title' => voices::part_label($item),
         'who' => trim($who['name'] . ($who['group'] !== '' ? ' (' . $who['group'] . ')' : '')),
         'url' => digital::file_url($item),
         'share' => $share,
@@ -148,7 +148,7 @@ foreach ($cards as $group) {
         'marks' => $item->forlittle ? ['bud' => \local_oksigeniaayvurenda\local\screens::art('carne/flor/capullo'),
             'little' => $str('voicemarklittle'), 'family' => $item->tellfamily ? $str('voicemarkfamily') : ''] : null,
         'hasparts' => count($group) > 1,
-        'parts' => count($group) > 1 ? array_map(fn($v) => ['partid' => (int) $v->id, 'parttitle' => (string) $v->title,
+        'parts' => count($group) > 1 ? array_map(fn($v) => ['partid' => (int) $v->id, 'parttitle' => voices::part_label($v),
             'parturl' => digital::file_url($v)], $group) : [],
         'approvelabel' => count($group) > 1 ? $str('voiceapproveall', count($group)) : $str('voiceapprove'),
     ];

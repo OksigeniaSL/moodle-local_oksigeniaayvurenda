@@ -640,14 +640,9 @@ final class screens {
             $item = $group['item'];
             // A reading in parts is one line: who reads it and how many parts, and it opens where its listener was.
             if ($item->kind === 'voice' && $item->part !== null) {
-                $signed = array_values(array_filter($group['parts'], fn($p) => $p->status === 'published'
-                    && (string) $p->signature !== ''));
-                $who = $signed ? (string) $signed[0]->signature : self::str('digitalreadingname');
                 $waits = (bool) array_filter($group['parts'], fn($p) => $p->status === 'pending');
                 $items[] = [
-                    'label' => (count($group['parts']) === 1 ? $who . ' · ' . $item->title
-                        : self::str('digitalreadingparts', (object) ['who' => $who, 'count' => count($group['parts'])]))
-                        . ($waits ? ' ' . self::str('voicependingshort') : ''),
+                    'label' => voices::reading_label($group['parts']) . ($waits ? ' ' . self::str('voicependingshort') : ''),
                     'action' => self::str('digitalactionaudio'),
                     'book' => false,
                     'url' => self::url('read.php', $library, ['id' => $item->id]),

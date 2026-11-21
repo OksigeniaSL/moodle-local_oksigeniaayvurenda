@@ -72,7 +72,8 @@ $id = voices::record(
     optional_param('signature', '', PARAM_TEXT),
     // Which part of the book, if it is read in parts; and the sound under the whole reading.
     optional_param('part', -1, PARAM_INT) >= 0 ? optional_param('part', -1, PARAM_INT) : null,
-    optional_param('backdrop', null, PARAM_ALPHA)
+    optional_param('backdrop', null, PARAM_ALPHA),
+    optional_param('seconds', 0, PARAM_INT)
 );
 // Read for the little ones, and whether the reader's family hears it once approved («Leyó para los pequeños»).
 $reader = $viewer['readerid'] ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $viewer['readerid']]) : null;

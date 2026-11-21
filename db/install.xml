@@ -459,6 +459,7 @@
         <FIELD NAME="timetold" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: when their family was sent the way to hear it"/>
         <FIELD NAME="part" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice read in parts: which, 0 the opening and from 1 the chapters"/>
         <FIELD NAME="backdrop" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice read in parts: the soft sound its reader chose to play under it"/>
+        <FIELD NAME="seconds" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: how long it lasts, as the recorder measured it"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

@@ -31,7 +31,8 @@
         "voicesignature": "Firma", "voicesignaturehint": "si quieres", "askemail": true, "voiceemail": "Tu correo",
         "voiceemailhint": "si quieres el enlace para borrarla", "voicepause": "Pausa", "voiceresume": "Seguir",
         "parts": {"partswhich": "Qué vas a leer ahora", "partsprogress": "Llevas la presentación y el capítulo 1.",
-            "partschapter": "Capítulo", "partsmore": "Más", "partsother": "Otra cosa", "partsopening": {"chipvalue": 0,
+            "partschapter": "Capítulo", "partsmore": "Más", "partsother": "Otra cosa", "partsname": "Título de esta parte",
+            "partsnamehint": "si quieres", "barpart": "Capítulo 2", "partsopening": {"chipvalue": 0,
                 "chiptitle": "Presentación", "chiplabel": "Presentación", "chipdone": true, "chipwaiting": false,
                 "chipchecked": false, "chipstate": "ya grabada"},
             "chips": [{"chipvalue": 1, "chiptitle": "Capítulo 1", "chiplabel": "1", "chipdone": false, "chipwaiting": true,
@@ -73,11 +74,12 @@
             <button type="button" class="ayv-rec-big ayv-rec-pause" id="ayv-pause" hidden aria-pressed="false" data-pause="{{voicepause}}" data-resume="{{voiceresume}}"><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_pause}}</span><span class="ayv-rec-word">{{voicepause}}</span></button>
         </div>
         <div class="ayv-meter" aria-hidden="true"><span id="ayv-level"></span></div>
+        {{#parts}}<div class="ayv-vp-barra" id="ayv-vp-barra" data-record="{{voicerecord}}" data-stop="{{voicestop}}"><span class="ayv-vp-barra-parte" id="ayv-vp-barra-parte">{{barpart}}</span><button type="button" class="ayv-vp-barra-boton"><span class="ayv-vp-barra-punto" aria-hidden="true"></span><span class="ayv-vp-barra-word">{{voicerecord}}</span></button></div>{{/parts}}
         <span class="ayv-field-hint" id="ayv-time" role="status"></span>
     </div>
     <div class="ayv-rec-after" id="ayv-after" hidden>
         <audio id="ayv-preview" class="ayv-media" controls></audio>
-        <label class="ayv-field ayv-field-wide ayv-field-quiet" id="ayv-what-field"{{#parts}} hidden{{/parts}}>{{voicewhat}} <span class="ayv-field-hint">{{voicewhathint}}</span>
+        <label class="ayv-field ayv-field-wide ayv-field-quiet" id="ayv-what-field" data-other="{{voicewhat}}" data-otherhint="{{voicewhathint}}"{{#parts}} data-part="{{partsname}}" data-parthint="{{partsnamehint}}"{{/parts}}><span class="ayv-what-word">{{#parts}}{{partsname}}{{/parts}}{{^parts}}{{voicewhat}}{{/parts}}</span> <span class="ayv-field-hint ayv-what-hint">{{#parts}}{{partsnamehint}}{{/parts}}{{^parts}}{{voicewhathint}}{{/parts}}</span>
             <input type="text" id="ayv-what" maxlength="255"></label>
         <label class="ayv-field ayv-field-wide ayv-field-quiet">{{voicesignature}} <span class="ayv-field-hint">{{voicesignaturehint}}</span>
             <input type="text" id="ayv-signature" maxlength="60"></label>

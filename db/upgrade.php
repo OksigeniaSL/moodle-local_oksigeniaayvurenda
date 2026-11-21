@@ -865,6 +865,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112100, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112101) {
+        // How long a voice lasts, as the recorder measured it: a browser's WebM does not always say it.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $field = new xmldb_field('seconds', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'backdrop');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026112101, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

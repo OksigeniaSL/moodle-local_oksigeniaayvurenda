@@ -65,7 +65,7 @@
 <section class="ayv-book">
     <h2 class="ayv-section-title">{{book}}{{#title}} · {{title}}{{/title}}</h2>
     {{#marks}}<p class="ayv-lp-marcas"><span class="ayv-lp-marca">{{#bud}}<img src="{{bud}}" alt="">{{/bud}}{{little}}</span>{{#family}}<span class="ayv-lp-marca ayv-lp-marca-familia"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg>{{family}}</span>{{/family}}</p>{{/marks}}
-    <p>{{who}}</p>
+    {{#who}}<p>{{who}}</p>{{/who}}
     {{^hasparts}}<audio class="ayv-media" controls preload="none" src="{{url}}"></audio>{{/hasparts}}
     {{#hasparts}}<ol class="ayv-vp-review">
         {{#parts}}<li><p class="ayv-vp-review-title"><b>{{parttitle}}</b></p>
@@ -81,15 +81,16 @@
     </form>
     {{/minor}}
     <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
-        <label class="ayv-field">{{voicelicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
-        {{#share}}<fieldset class="ayv-fieldset"><legend>{{voiceaudience}}</legend><div class="ayv-choices">
-            {{#audiences}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="audience[]" value="{{value}}"> {{label}}</label>{{/audiences}}</div></fieldset>{{/share}}
+        <div class="ayv-vp" role="radiogroup" aria-labelledby="ayv-lic-{{id}}"><p class="ayv-vp-title" id="ayv-lic-{{id}}"><b>{{voicelicence}}</b></p>
+            <div class="ayv-vp-chips">{{#licences}}<label class="ayv-vp-chip"><input type="radio" name="licence" value="{{value}}"{{#selected}} checked{{/selected}}><span class="ayv-vp-word">{{label}}</span></label>{{/licences}}</div></div>
+        {{#share}}<div class="ayv-vp" role="group" aria-labelledby="ayv-aud-{{id}}"><p class="ayv-vp-title" id="ayv-aud-{{id}}"><b>{{voiceaudience}}</b></p>
+            <div class="ayv-vp-chips">{{#audiences}}<label class="ayv-vp-chip"><input type="checkbox" name="audience[]" value="{{value}}"><span class="ayv-vp-word">{{label}}</span></label>{{/audiences}}</div></div>{{/share}}
         {{^share}}<p class="ayv-field-hint">{{privatehint}}</p>{{/share}}
         <label class="ayv-field ayv-field-wide">{{voicesignaturereview}} <span class="ayv-field-hint">{{voicesignaturereviewhint}}</span>
             <input type="text" name="signature" maxlength="60" value="{{signature}}"></label>
         {{#hasparts}}<input type="hidden" name="all" value="1">{{/hasparts}}
         <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{approvelabel}}</button>
-            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></p>
+            {{^hasparts}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button>{{/hasparts}}</p>
     </form>
 </section>
 {{/pending}}

@@ -71,6 +71,7 @@ final class voices {
      * @param string $signature How its author wants it signed, if at all.
      * @param int|null $part Which part of the book, for a reading in parts: 0 the opening, from 1 the chapters.
      * @param string|null $backdrop The soft sound under the whole reading, '' none; null leaves it as it was.
+     * @param int $seconds How long it lasts, as the recorder measured it; 0 if it does not know.
      * @return int
      */
     public static function record(
@@ -84,7 +85,8 @@ final class voices {
         ?int $now = null,
         string $signature = '',
         ?int $part = null,
-        ?string $backdrop = null
+        ?string $backdrop = null,
+        int $seconds = 0
     ): int {
         global $DB;
         plans::require((int) $library->entityid, 'voices');
@@ -105,7 +107,9 @@ final class voices {
         // The signature waits for approval like the voice: nobody sees it before someone has read it.
         $DB->update_record(self::T . 'digital', (object) ['id' => $id, 'kind' => 'voice', 'format' => 'audio',
             'status' => 'pending', 'readerid' => $readerid ?: null, 'audience' => '',
-            'signature' => self::signature($signature), 'deletetoken' => bin2hex(random_bytes(24)), 'part' => $part]);
+            'signature' => self::signature($signature), 'deletetoken' => bin2hex(random_bytes(24)), 'part' => $part,
+            // A recording lasts twenty minutes at most, and a little more with its pauses' rounding.
+            'seconds' => $seconds > 0 ? min($seconds, 25 * 60) : null]);
         if ($part !== null) {
             // The reading keeps the sound it had, or takes the one chosen now.
             $siblings = self::reading($recordid, $library, $userid);
@@ -636,6 +640,51 @@ final class voices {
     public static function part_title(int $part): string {
         return $part === 0 ? get_string('voicepartopening', 'local_oksigeniaayvurenda')
             : get_string('voicepartchapter', 'local_oksigeniaayvurenda', $part);
+    }
+
+    /**
+     * The name a part has of its own, if its reader gave it one: «El faro que no se apaga» of the second chapter. A title
+     * that only says which part it is (in any language) is no name.
+     *
+     * @param \stdClass $item
+     * @return string
+     */
+    public static function part_name(\stdClass $item): string {
+        $title = trim((string) $item->title);
+        return $item->part === null || self::part_of($title) === (int) $item->part ? '' : $title;
+    }
+
+    /**
+     * How a voice is called in a list: a part by which it is and its own name, «Capítulo 2 · El faro que no se apaga»; any
+     * other voice, by what its reader called it.
+     *
+     * @param \stdClass $item
+     * @return string
+     */
+    public static function part_label(\stdClass $item): string {
+        if ($item->part === null) {
+            return (string) $item->title;
+        }
+        $name = self::part_name($item);
+        return self::part_title((int) $item->part) . ($name !== '' ? ' · ' . $name : '');
+    }
+
+    /**
+     * How a reading is called in a list: who reads it, how many parts and, if the recorder measured them, how long it lasts.
+     *
+     * @param \stdClass[] $parts
+     * @return string
+     */
+    public static function reading_label(array $parts): string {
+        $signed = array_values(array_filter($parts, fn($p) => $p->status === 'published' && (string) $p->signature !== ''));
+        $who = $signed ? format_string((string) $signed[0]->signature, true, ['escape' => false])
+            : get_string('digitalreadingname', 'local_oksigeniaayvurenda');
+        if (count($parts) === 1) {
+            return $who . ' · ' . self::part_label($parts[0]);
+        }
+        $seconds = array_sum(array_map(fn($p) => (int) $p->seconds, $parts));
+        return get_string($seconds ? 'digitalreadingpartsmin' : 'digitalreadingparts', 'local_oksigeniaayvurenda', (object) [
+            'who' => $who, 'count' => count($parts), 'minutes' => max(1, (int) round($seconds / 60))]);
     }
 
     /**

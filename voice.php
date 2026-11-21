@@ -118,6 +118,9 @@ $parts = [
     'partschapter' => $str('voicepartschapter'),
     'partsmore' => $str('voicepartsmore'),
     'partsother' => $str('voicepartsother'),
+    'partsname' => $str('voicepartname'),
+    'partsnamehint' => $str('voicepartnamehint'),
+    'barpart' => voices::part_title($next),
     'partsopening' => $chip(0),
     'chips' => array_map($chip, range(1, $last)),
 ];
@@ -140,7 +143,7 @@ $recorded = array_merge($reading, array_values(array_filter(
 )));
 $mine = array_map(fn($v) => [
     'id' => (int) $v->id,
-    'title' => (string) $v->title . ((string) $v->signature !== '' ? ' · ' . $v->signature : ''),
+    'title' => voices::part_label($v) . ((string) $v->signature !== '' ? ' · ' . $v->signature : ''),
     'url' => digital::file_url($v),
     'state' => $str($v->status === 'pending' ? 'voicepending' : 'voiceapproved'),
 ], $recorded);

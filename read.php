@@ -63,7 +63,6 @@ $candownload = digital_rules::can_download($item->licence, (bool) $item->downloa
 // A reading in parts: its parts that this person may hear, in the book's order, and where they were in it.
 $reading = null;
 $parts = [];
-$subtitle = '';
 if (!$anyone && $item->kind === 'voice' && $item->part !== null && $item->createdby) {
     $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
     $siblings = array_values(array_filter($DB->get_records_select(
@@ -87,24 +86,52 @@ if ($parts) {
     $sounds = voices::backdrops();
     $sound = $sounds[(string) $first->backdrop] ?? null;
     $signed = array_values(array_filter($parts, fn($p) => $p->status === 'published' && (string) $p->signature !== ''));
-    $subtitle = $str('digitalreadingparts', (object) ['who' => $signed ? (string) $signed[0]->signature
-        : $str('digitalreadingname'), 'count' => count($parts)]);
+    $who = $signed ? format_string((string) $signed[0]->signature, true, ['escape' => false]) : '';
+    $mmss = fn(int $s) => intdiv($s, 60) . ':' . str_pad((string) ($s % 60), 2, '0', STR_PAD_LEFT);
+    $index = array_search($start, $ids, true);
+    $name = voices::part_name($current);
     $reading = [
         'cover' => \local_oksigeniaayvurenda\local\covers::urls([(int) $item->recordid])[(int) $item->recordid] ?? '',
-        'nowplaying' => $str('readingnow', (string) $current->title),
+        'coveralt' => $str('readingcoveralt', $title),
+        'booktitle' => $title,
+        'who' => $who,
+        'initial' => $who !== '' ? \core_text::strtoupper(\core_text::substr($who, 0, 1)) : '',
+        'bybefore' => $str('readingbybefore'),
+        'byafter' => $str('readingbyafter', count($parts)),
+        'byanon' => $str('readingbyanon', count($parts)),
+        // Back where they were: the part and the minute; else what sounds, with its own name.
+        'nowtext' => $str($at > 0 ? 'readingresume' : 'readingnow', voices::part_title((int) $current->part)),
+        'nowsmall' => $at > 0 ? $str('readingresumeat', max(1, (int) round($at / 60))) : ($name !== '' ? '«' . $name . '»' : ''),
         'starturl' => digital::file_url($current),
-        'resume' => $at > 0 ? $str('readingresume', voices::part_title((int) $current->part)) : '',
+        'startduration' => $current->seconds ? $mmss((int) $current->seconds) : '',
+        'playlabel' => $str('readingplay'),
+        'pauselabel' => $str('readingpause'),
+        'wherelabel' => $str('readingwhere'),
+        'notnow' => $str('readingnotnow'),
         'partsheading' => $str('readingparts'),
-        'parts' => array_map(fn($p) => ['partid' => (int) $p->id, 'parturl' => digital::file_url($p),
-            'parttitle' => (string) $p->title, 'partcurrent' => (int) $p->id === $start], $parts),
-        'backdrop' => $sound ? $sound + ['bdon' => $str('readingbackdropon'), 'bdoff' => $str('readingbackdropoff'),
-            'bdname' => $str('readingbackdropname', \core_text::strtolower($str('voicebackdrop' . $first->backdrop)))] : null,
+        // A voice is never downloaded: it is personal and stays in the library.
+        'note' => $str('readingnote') . ' ' . $str('readnodownload'),
+        'parts' => array_map(fn($p, $i) => [
+            'partid' => (int) $p->id,
+            'parturl' => digital::file_url($p),
+            'parttitle' => voices::part_title((int) $p->part),
+            'partname' => voices::part_name($p),
+            'partnum' => $p->part ? (string) $p->part : '·',
+            'partseconds' => (int) $p->seconds,
+            'partduration' => $p->seconds ? $mmss((int) $p->seconds) : '',
+            'partflex' => max(1, (int) ($p->seconds ?: 60)),
+            'partheard' => $i < $index,
+            'partcurrent' => (int) $p->id === $start,
+        ], $parts, array_keys($parts)),
+        'backdrop' => $sound ? $sound + [
+            'bdon' => $str('readingbackdropunder', $str('voicebackdropthe' . $first->backdrop)),
+            'bdoff' => $str('voicebackdropnone'),
+        ] : null,
     ];
 }
 $data = [
     'heading' => $title,
-    'subtitle' => $reading ? $subtitle : ($item->title !== '' && $item->title !== null ? $item->title
-        : $str('format' . $item->format)),
+    'subtitle' => $item->title !== '' && $item->title !== null ? $item->title : $str('format' . $item->format),
     'licence' => $str('licence' . str_replace('-', '', $item->licence)),
     'epub' => $item->format === 'epub',
     'pdf' => $item->format === 'pdf',
@@ -152,6 +179,8 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
         'bookmarks' => $place['bookmarks'],
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage'), 'readingnow' => $str('readingnow'),
+            'readingnext' => $str('readingnext'), 'readingleft' => $str('readingleft'), 'readingplay' => $str('readingplay'),
+            'readingpause' => $str('readingpause'),
             'readmarkdrop' => $str('readmarkdrop')],
     ],
 ]);

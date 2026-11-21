@@ -29,43 +29,61 @@
         "readnodownload": "Se lee aquí", "backtorecord": "Volver a la ficha", "readloading": "Abriendo el libro…",
         "readprogress": "Cuánto llevas", "marks": true, "readfullscreen": "Pantalla completa",
         "readfullscreenexit": "Salir de pantalla completa",
-        "reading": {"starturl": "https://example.com/capitulo-3.webm", "resume": "Sigues por el capítulo 3.",
-            "cover": "https://example.com/tapa.jpg", "nowplaying": "Ahora: Capítulo 1.",
-            "partsheading": "Las partes",
-            "parts": [{"partid": 11, "parturl": "https://example.com/presentacion.webm", "parttitle": "Presentación", "partcurrent": false},
-                {"partid": 12, "parturl": "https://example.com/capitulo-1.webm", "parttitle": "Capítulo 1", "partcurrent": true}],
-            "backdrop": {"ogg": "https://example.com/mar.ogg", "m4a": "https://example.com/mar.m4a",
-                "bdon": "Poner el fondo", "bdoff": "Quitar el fondo", "bdname": "Fondo: lluvia"} }
+        "reading": {"cover": "https://example.com/tapa.jpg", "coveralt": "La portada de «El faro dormido»",
+            "booktitle": "El faro dormido", "who": "Enrique", "initial": "E", "bybefore": "Te lo lee",
+            "byafter": ", en 2 partes", "byanon": "Lectura en voz alta, en 2 partes", "nowtext": "Ahora: Capítulo 1",
+            "nowsmall": "«La barca de la abuela»", "starturl": "https://example.com/capitulo-1.webm", "startduration": "7:42",
+            "playlabel": "Escuchar", "pauselabel": "Pausa", "wherelabel": "Por dónde va", "notnow": "Ahora no",
+            "partsheading": "Las partes", "note": "Al acabar una parte empieza la siguiente.",
+            "parts": [{"partid": 11, "parturl": "https://example.com/presentacion.webm", "parttitle": "Presentación",
+                "partname": "", "partnum": "·", "partseconds": 66, "partduration": "1:06", "partflex": 66,
+                "partheard": true, "partcurrent": false},
+                {"partid": 12, "parturl": "https://example.com/capitulo-1.webm", "parttitle": "Capítulo 1",
+                "partname": "La barca de la abuela", "partnum": "1", "partseconds": 462, "partduration": "7:42",
+                "partflex": 462, "partheard": false, "partcurrent": true}],
+            "backdrop": {"ogg": "https://example.com/lluvia.ogg", "m4a": "https://example.com/lluvia.m4a",
+                "bdon": "Debajo suena la lluvia, muy bajito", "bdoff": "Sin fondo"} }
     }
 }}
 <section class="ayv-read">
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p class="ayv-field-hint">{{subtitle}} · {{licence}}</p>
+{{^reading}}<h1 class="ayv-results-title">{{heading}}</h1>
+<p class="ayv-field-hint">{{subtitle}} · {{licence}}</p>{{/reading}}
 {{#epub}}<div class="ayv-read-stage">{{> local_oksigeniaayvurenda/read_book}}</div>{{/epub}}
 {{#pdf}}<iframe class="ayv-pdf" src="{{fileurl}}" title="{{heading}}"></iframe>{{/pdf}}
 {{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></audio>{{/audio}}
 {{#reading}}
-<div class="ayv-lectura" id="ayv-lectura">
-    <div class="ayv-lectura-cabeza">
-        {{#cover}}<img class="ayv-lectura-tapa" src="{{cover}}" alt="">{{/cover}}
-        <div class="ayv-lectura-dice">
-            <p class="ayv-lectura-suena" id="ayv-lectura-ahora" role="status">{{nowplaying}}</p>
-            {{#resume}}<p class="ayv-field-hint">{{resume}}</p>{{/resume}}
+<section class="ayv-oye" id="ayv-oye">
+    <div class="ayv-oye-libro">{{#cover}}<img src="{{cover}}" alt="{{coveralt}}">{{/cover}}{{^cover}}<span class="ayv-oye-sintapa">{{booktitle}}</span>{{/cover}}</div>
+    <div>
+        <div class="ayv-oye-quien">{{#who}}<span class="ayv-oye-cara" aria-hidden="true">{{initial}}</span><p>{{bybefore}} <b>{{who}}</b>{{byafter}}</p>{{/who}}{{^who}}<p>{{byanon}}</p>{{/who}}</div>
+        <h1>{{booktitle}}</h1>
+        <p class="ayv-oye-ahora" role="status"><span class="ayv-oye-barras" aria-hidden="true"><i></i><i></i><i></i></span><span><span id="ayv-oye-ahora-texto">{{nowtext}}</span><small id="ayv-oye-ahora-nombre">{{nowsmall}}</small></span></p>
+        <audio id="ayv-lectura-voz" class="ayv-media ayv-oye-nativo" controls preload="metadata" src="{{starturl}}"></audio>
+        <div class="ayv-oye-rep" id="ayv-oye-rep" hidden>
+            <button type="button" class="ayv-oye-play" id="ayv-oye-play" aria-pressed="false" aria-label="{{playlabel}}"><svg class="ayv-oye-icono-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 4.5v15l13-7.5z"/></svg><svg class="ayv-oye-icono-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg></button>
+            <div class="ayv-oye-pista">
+                <div class="ayv-oye-barra" id="ayv-oye-barra" role="slider" tabindex="0" aria-label="{{wherelabel}}" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00"><i></i><b></b></div>
+                <div class="ayv-oye-tiempo"><span id="ayv-oye-ya">0:00</span><span id="ayv-oye-total">{{startduration}}</span></div>
+            </div>
+            <div class="ayv-oye-todo" aria-hidden="true">{{#parts}}<span data-id="{{partid}}" style="flex:{{partflex}}"></span>{{/parts}}<small id="ayv-oye-quedan"></small></div>
+        </div>
+        <p class="ayv-oye-sigue" id="ayv-oye-sigue" role="status" hidden><span class="ayv-oye-cuenta" id="ayv-oye-cuenta">3</span><span id="ayv-oye-sigue-texto"></span><button type="button" class="ayv-button ayv-button-quiet" id="ayv-oye-ahora-no">{{notnow}}</button></p>
+        {{#backdrop}}<audio id="ayv-lectura-fondo" loop preload="none"><source src="{{ogg}}" type="audio/ogg; codecs=opus"><source src="{{m4a}}" type="audio/mp4"></audio>
+        <button type="button" class="ayv-oye-fondo" id="ayv-oye-fondo" aria-pressed="true" data-on="{{bdon}}" data-off="{{bdoff}}"><span class="ayv-oye-int" aria-hidden="true"></span><span class="ayv-oye-fondo-texto">{{bdon}}</span></button>{{/backdrop}}
+        <div class="ayv-oye-indice">
+            <h2>{{partsheading}}</h2>
+            <ol class="ayv-oye-partes">
+                {{#parts}}<li><button type="button" class="ayv-oye-parte{{#partheard}} is-oida{{/partheard}}" data-id="{{partid}}" data-url="{{parturl}}" data-seconds="{{partseconds}}" data-title="{{parttitle}}" data-name="{{partname}}" data-num="{{partnum}}"{{#partcurrent}} aria-current="true"{{/partcurrent}}><span class="ayv-oye-num">{{#partheard}}✓{{/partheard}}{{^partheard}}{{partnum}}{{/partheard}}</span><span class="ayv-oye-tit">{{parttitle}}{{#partname}}<small>{{partname}}</small>{{/partname}}</span><span class="ayv-oye-puntos" aria-hidden="true"></span><span class="ayv-oye-dura">{{partduration}}</span></button></li>{{/parts}}
+            </ol>
+            <p class="ayv-oye-nota">{{note}}</p>
         </div>
     </div>
-    <audio id="ayv-lectura-voz" class="ayv-media" controls preload="metadata" src="{{starturl}}"></audio>
-    {{#backdrop}}<audio id="ayv-lectura-fondo" loop preload="none"><source src="{{ogg}}" type="audio/ogg; codecs=opus"><source src="{{m4a}}" type="audio/mp4"></audio>
-    <p class="ayv-lectura-fondo-linea"><button type="button" class="ayv-button ayv-button-quiet" id="ayv-lectura-quitar" aria-pressed="true" data-on="{{bdon}}" data-off="{{bdoff}}">{{> local_oksigeniaayvurenda/icon_volume}}<span>{{bdoff}}</span></button> <span class="ayv-field-hint">{{bdname}}</span></p>{{/backdrop}}
-    <h2 class="ayv-section-title">{{partsheading}}</h2>
-    <ol class="ayv-lectura-partes">
-        {{#parts}}<li><button type="button" class="ayv-lectura-parte" data-id="{{partid}}" data-url="{{parturl}}"{{#partcurrent}} aria-current="true"{{/partcurrent}}>{{parttitle}}</button></li>{{/parts}}
-    </ol>
-</div>
+</section>
 {{/reading}}
 {{#video}}<video id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></video>{{/video}}
 {{#link}}<p class="ayv-more"><a class="ayv-button" href="{{link}}" target="_blank" rel="noopener">{{readopenlink}}</a></p>{{/link}}
 {{#throughproxy}}<p class="ayv-field-hint">{{readthroughproxy}}</p>{{/throughproxy}}
 <div id="ayv-marks" class="ayv-read-marks" hidden><h2 class="ayv-section-title">{{readmarks}}</h2><ul class="ayv-holds"></ul></div>
 {{#downloadurl}}<p class="ayv-more"><a class="ayv-button ayv-button-quiet" href="{{downloadurl}}">{{readdownload}}</a></p>{{/downloadurl}}
-{{^downloadurl}}{{^link}}<p class="ayv-field-hint">{{readnodownload}}</p>{{/link}}{{/downloadurl}}
+{{^reading}}{{^downloadurl}}{{^link}}<p class="ayv-field-hint">{{readnodownload}}</p>{{/link}}{{/downloadurl}}{{/reading}}
 </section>

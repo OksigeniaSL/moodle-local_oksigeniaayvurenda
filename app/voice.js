@@ -90,17 +90,21 @@
         var checked = document.querySelector('input[name="ayv-part"]:checked');
         return checked ? checked : null;
     };
+    // A part may have a name of its own («El faro que no se apaga»); «Otra cosa» says what was read.
+    var barPart = document.getElementById('ayv-vp-barra-parte');
     var showPart = function() {
         var checked = chosenPart();
         if (!checked || !whatField) {
             return;
         }
         var other = Number(checked.value) < 0;
-        whatField.hidden = !other;
-        if (what && !other) {
-            what.value = checked.getAttribute('data-title') || '';
-        } else if (what && other) {
+        whatField.querySelector('.ayv-what-word').textContent = whatField.getAttribute(other ? 'data-other' : 'data-part');
+        whatField.querySelector('.ayv-what-hint').textContent = whatField.getAttribute(other ? 'data-otherhint' : 'data-parthint');
+        if (what) {
             what.value = '';
+        }
+        if (barPart) {
+            barPart.textContent = other ? whatField.getAttribute('data-other') : checked.getAttribute('data-title');
         }
     };
     document.querySelectorAll('input[name="ayv-part"]').forEach(function(radio) {
@@ -153,7 +157,8 @@
             if (ogg || m4a) {
                 sample = new Audio();
                 sample.src = sample.canPlayType('audio/ogg; codecs=opus') ? ogg : m4a;
-                sample.volume = 0.35;
+                // Alone, a little above how it sounds under a voice, to know which it is.
+                sample.volume = 0.15;
                 sample.play().catch(function() {
                     return null;
                 });
@@ -196,6 +201,25 @@
     var after = document.getElementById('ayv-after');
     var pause = document.getElementById('ayv-pause');
     var pausedAt = 0;
+    // On a phone, the part and the button stay at the foot of the screen, to read the book and record at once.
+    var bar = document.getElementById('ayv-vp-barra');
+    var sayBar = function(state) {
+        if (!bar) {
+            return;
+        }
+        bar.hidden = state === 'done';
+        bar.classList.toggle('is-grabando', state === 'recording');
+        bar.querySelector('.ayv-vp-barra-word').textContent = bar.getAttribute(state === 'recording' ? 'data-stop' : 'data-record');
+    };
+    if (bar) {
+        bar.querySelector('button').addEventListener('click', function() {
+            if (!stop.hidden) {
+                stop.click();
+            } else if (!rec.hidden && !rec.disabled) {
+                rec.click();
+            }
+        });
+    }
     var level = document.getElementById('ayv-level');
     var listening = null;
 
@@ -236,6 +260,106 @@
         }
     };
 
+    // A browser's WebM does not say how long it lasts: the player then cannot tell it nor go forward. The length the
+    // recorder measured goes into its header (Segment › Info › Duration) before it is sent.
+    var withDuration = function(recording, ms) {
+        if (recording.type.indexOf('webm') < 0 || !recording.arrayBuffer || !window.DataView) {
+            return Promise.resolve(recording);
+        }
+        return recording.arrayBuffer().then(function(buffer) {
+            var bytes = new Uint8Array(buffer);
+            var id = function(at) {
+                var first = bytes[at];
+                var length = first & 0x80 ? 1 : (first & 0x40 ? 2 : (first & 0x20 ? 3 : (first & 0x10 ? 4 : 0)));
+                var value = 0;
+                for (var i = 0; i < length; i++) {
+                    value = value * 256 + bytes[at + i];
+                }
+                return length ? {length: length, value: value} : null;
+            };
+            var size = function(at) {
+                var first = bytes[at];
+                var length = 1;
+                var mask = 0x80;
+                while (length <= 8 && !(first & mask)) {
+                    length++;
+                    mask >>= 1;
+                }
+                if (length > 8) {
+                    return null;
+                }
+                var value = first & (mask - 1);
+                var unknown = value === mask - 1;
+                for (var i = 1; i < length; i++) {
+                    value = value * 256 + bytes[at + i];
+                    unknown = unknown && bytes[at + i] === 0xff;
+                }
+                return {length: length, value: value, unknown: unknown};
+            };
+            var header = id(0);
+            if (!header || header.value !== 0x1A45DFA3) {
+                return recording;
+            }
+            var at = header.length + size(header.length).length + size(header.length).value;
+            var segment = id(at);
+            if (!segment || segment.value !== 0x18538067 || !size(at + segment.length).unknown) {
+                return recording;
+            }
+            at += segment.length + size(at + segment.length).length;
+            while (at < bytes.length) {
+                var child = id(at);
+                var length = child ? size(at + child.length) : null;
+                if (!child || !length || child.value === 0x1F43B675) {
+                    return recording;
+                }
+                if (child.value === 0x1549A966) {
+                    break;
+                }
+                at += child.length + length.length + length.value;
+            }
+            var info = id(at);
+            var infoSize = info ? size(at + info.length) : null;
+            if (!info || !infoSize || info.value !== 0x1549A966) {
+                return recording;
+            }
+            var start = at + info.length + infoSize.length;
+            var end = start + infoSize.value;
+            var scale = 1000000;
+            for (var here = start; here < end;) {
+                var element = id(here);
+                var elementSize = element ? size(here + element.length) : null;
+                if (!element || !elementSize) {
+                    return recording;
+                }
+                var data = here + element.length + elementSize.length;
+                if (element.value === 0x4489) {
+                    return recording;
+                }
+                if (element.value === 0x2AD7B1) {
+                    scale = 0;
+                    for (var k = 0; k < elementSize.value; k++) {
+                        scale = scale * 256 + bytes[data + k];
+                    }
+                }
+                here = data + elementSize.value;
+            }
+            var duration = new Uint8Array(11);
+            duration.set([0x44, 0x89, 0x88]);
+            new DataView(duration.buffer).setFloat64(3, ms * 1000000 / (scale || 1000000));
+            var grown = new Uint8Array(8);
+            var value = infoSize.value + 11;
+            grown[0] = 0x01;
+            for (var j = 7; j >= 1; j--) {
+                grown[j] = value % 256;
+                value = Math.floor(value / 256);
+            }
+            return new Blob([bytes.subarray(0, at + info.length), grown, bytes.subarray(start, end), duration,
+                bytes.subarray(end)], {type: recording.type});
+        }).catch(function() {
+            return recording;
+        });
+    };
+    var measured = 0;
     var type = function() {
         var options = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4'];
         for (var i = 0; i < options.length; i++) {
@@ -276,11 +400,17 @@
                 }
             });
             recorder.addEventListener('stop', function() {
-                blob = new Blob(chunks, {type: recorder.mimeType || mime || 'audio/webm'});
-                preview.src = URL.createObjectURL(blob);
-                // What was read and the signature come once there is something to send.
-                after.hidden = false;
-                send.disabled = false;
+                var made = new Blob(chunks, {type: recorder.mimeType || mime || 'audio/webm'});
+                withDuration(made, measured).then(function(fixed) {
+                    blob = fixed;
+                    preview.src = URL.createObjectURL(blob);
+                    // What was read and the signature come once there is something to send.
+                    after.hidden = false;
+                    send.disabled = false;
+                    return fixed;
+                }).catch(function() {
+                    return null;
+                });
                 quiet();
                 stream.getTracks().forEach(function(track) {
                     track.stop();
@@ -292,6 +422,7 @@
             ticker = setInterval(clock, 500);
             rec.hidden = true;
             stop.hidden = false;
+            sayBar('recording');
             hush();
             if (pause && recorder.pause) {
                 pause.hidden = false;
@@ -342,11 +473,14 @@
         }
         stop.hidden = true;
         // What was recorded, and how long it lasts.
-        var seconds = Math.floor((Date.now() - started) / 1000);
+        sayBar('done');
+        measured = Date.now() - started;
+        var seconds = Math.floor(measured / 1000);
         time.textContent = (str.voicelength || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' +
             String(seconds % 60).padStart(2, '0'); });
     });
     again.addEventListener('click', function() {
+        sayBar('ready');
         blob = null;
         after.hidden = true;
         send.disabled = true;
@@ -380,6 +514,7 @@
         if (backdrop() !== null) {
             body.append('backdrop', backdrop());
         }
+        body.append('seconds', String(Math.round(measured / 1000)));
         body.append('forlittle', pressed(little) ? '1' : '0');
         body.append('tellfamily', pressed(little) && pressed(family) ? '1' : '0');
         var signature = document.getElementById('ayv-signature');

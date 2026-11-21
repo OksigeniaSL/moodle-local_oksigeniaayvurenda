@@ -57,8 +57,7 @@ foreach ($found['records'] as $record) {
         'colour' => $record['id'] % 6,
         // A reading in parts is one line that opens its player; any other voice plays here.
         'voices' => array_map(fn($group) => $group['item']->part !== null ? [
-            'label' => $str('digitalreadingparts', (object) ['who' => (string) $group['item']->signature !== ''
-                ? (string) $group['item']->signature : $str('digitalreadingname'), 'count' => count($group['parts'])]),
+            'label' => voices::reading_label($group['parts']),
             'audio' => '',
             'listen' => $url('read.php', ['id' => $group['item']->id]),
             'listenlabel' => $str('digitalactionaudio'),

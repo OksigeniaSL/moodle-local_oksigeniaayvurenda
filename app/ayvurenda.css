@@ -1713,36 +1713,445 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     cursor: pointer;
 }
 .ayv .ayv-vp-more-button .ayv-icon { margin: 0; }
+/* On a phone, the part and the button at the foot of the screen, to read the book and record at once (Jujol). */
+.ayv .ayv-vp-barra { display: none; }
+@media (max-width: 47.99rem) {
+    .ayv .ayv-vp-barra {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1030;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: .6rem 1rem calc(.6rem + env(safe-area-inset-bottom));
+        background: var(--surface);
+        box-shadow: 0 -4px 14px rgba(40, 30, 10, .14);
+    }
+    .ayv .ayv-recorder { padding-bottom: 4.5rem; }
+}
+.ayv .ayv-vp-barra-parte { min-width: 0; overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.ayv .ayv-vp-barra-boton {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-vp-barra-punto { width: .7rem; height: .7rem; border-radius: 50%; background: var(--coral); }
+.ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-punto { border-radius: 2px; }
 
 /* The new parts of one reading, to hear one by one before approving them together. */
 .ayv .ayv-vp-review { display: grid; gap: .25rem; margin: .5rem 0 1rem; padding: 0; list-style: none; }
 .ayv .ayv-vp-review li { display: grid; gap: .4rem; padding: .7rem 0; border-top: 1px solid var(--line); }
 .ayv .ayv-vp-review-title { margin: 0; }
 
-/* A reading in parts, heard as one book: its parts in the book's order, the one that sounds lit. */
-.ayv .ayv-lectura { display: grid; gap: .85rem; }
-.ayv .ayv-lectura-cabeza { display: flex; align-items: center; gap: 1rem; }
-.ayv .ayv-lectura-tapa { flex: none; width: 84px; height: auto; border-radius: 3px 8px 8px 3px; box-shadow: 0 4px 12px rgba(40, 30, 10, .18); }
-.ayv .ayv-lectura-dice { display: grid; gap: .25rem; min-width: 0; }
-.ayv .ayv-lectura-dice p { margin: 0; }
-.ayv .ayv-lectura-suena { font-family: var(--title); font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
-.ayv .ayv-lectura-fondo-linea { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0; }
-.ayv .ayv-lectura-fondo-linea .ayv-button .ayv-icon { margin-right: .4em; }
-.ayv .ayv-lectura-partes { display: flex; flex-wrap: wrap; gap: .45rem; margin: 0; padding: 0; list-style: none; }
-.ayv .ayv-lectura-parte {
-    min-height: 2.75rem;
-    padding: 0 1rem;
-    border: 2px solid var(--line);
-    border-radius: 999px;
+/* «Escuchar» a reading in parts (Jujol, 21 Nov 2026): the page where a child listens to their teacher read them a whole
+   book. Over app/ayvurenda.css; everything new is .ayv-oye-*. The book in front, like a present just opened (the cover
+   of «Leyó para los pequeños»); who reads it; one big «play»; and the parts as the contents page of the book, with the
+   one that sounds marked by its moving bars. Works without :has() or color-mix(); dark follows Moodle's data-bs-theme. */
+.ayv .ayv-oye {
+    display: grid;
+    gap: 28px;
+    margin: 8px 0 24px;
+}
+@media (min-width: 860px) {
+    .ayv .ayv-oye {
+        grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+        column-gap: 48px;
+        align-items: start;
+    }
+}
+
+/* The book, standing, with its shadow and a slight lean; its spine lit */
+.ayv .ayv-oye-libro {
+    position: relative;
+    justify-self: center;
+    width: min(100%, 300px);
+    padding: 22px 22px 30px;
+    border-radius: 22px;
+    background: var(--paper2);
+}
+.ayv .ayv-oye-libro img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px 12px 12px 4px;
+    box-shadow: -6px 0 0 -2px rgba(0, 0, 0, .12) inset, 0 18px 30px -12px rgba(40, 30, 10, .45), 0 2px 4px rgba(40, 30, 10, .15);
+    transform: rotate(-1.5deg);
+}
+/* While it sounds, the book breathes a little: as if someone were holding it */
+.ayv .ayv-oye.is-sonando .ayv-oye-libro img {
+    animation: ayv-oye-respira 5.5s ease-in-out infinite;
+}
+@keyframes ayv-oye-respira {
+    0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+    50% { transform: rotate(-1deg) translateY(-3px); }
+}
+
+/* Who reads it, and what sounds now */
+.ayv .ayv-oye-quien {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 0 0 6px;
+}
+.ayv .ayv-oye-cara {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--sun);
+    color: #3b2a05;
+    font-family: var(--title);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.ayv .ayv-oye-quien p {
+    margin: 0;
+    font-size: 1.05rem;
+}
+.ayv .ayv-oye-quien b {
+    font-family: var(--title);
+    font-weight: 600;
+}
+.ayv .ayv-oye h1 {
+    margin: 0 0 14px;
+    font-family: var(--title);
+    font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+    line-height: 1.1;
+}
+.ayv .ayv-oye-ahora {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+.ayv .ayv-oye-ahora small {
+    display: block;
+    font-family: var(--text);
+    font-size: .95rem;
+    font-weight: 400;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+}
+
+/* The bars that move while something sounds; still when it is paused */
+.ayv .ayv-oye-barras {
+    flex: none;
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    width: 22px;
+    height: 20px;
+}
+.ayv .ayv-oye-barras i {
+    flex: 1;
+    height: 40%;
+    border-radius: 2px;
+    background: var(--coral);
+}
+.ayv .is-sonando .ayv-oye-barras i {
+    animation: ayv-oye-barra 1s ease-in-out infinite;
+}
+.ayv .is-sonando .ayv-oye-barras i:nth-child(2) { animation-delay: -.35s; }
+.ayv .is-sonando .ayv-oye-barras i:nth-child(3) { animation-delay: -.7s; }
+@keyframes ayv-oye-barra {
+    0%, 100% { height: 30%; }
+    50% { height: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-oye.is-sonando .ayv-oye-libro img,
+    .ayv .is-sonando .ayv-oye-barras i { animation: none; }
+    .ayv .is-sonando .ayv-oye-barras i:nth-child(2) { height: 100%; }
+    .ayv .is-sonando .ayv-oye-barras i:nth-child(3) { height: 65%; }
+}
+
+/* The player: one big round «play», the time of the part, and under it the whole book as a strip of its parts */
+.ayv .ayv-oye-rep {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 18px;
+    align-items: center;
+    margin: 18px 0 0;
+    padding: 18px 20px;
+    border-radius: 22px;
     background: var(--surface);
-    color: inherit;
-    font: inherit;
-    font-weight: 700;
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 24px -18px rgba(40, 30, 10, .45);
+}
+.ayv .ayv-oye-play {
+    grid-row: 1 / span 2;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    background: var(--coral);
+    color: #fff;
+    box-shadow: 0 0 0 8px rgba(226, 101, 76, .16);
     cursor: pointer;
 }
-.ayv .ayv-lectura-parte:hover { background: var(--chip-hover); }
-.ayv .ayv-lectura-parte[aria-current="true"] { border-color: var(--accent); background: var(--accent); color: var(--surface); }
-.ayv .ayv-lectura-parte:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-oye-play svg {
+    width: 34px;
+    height: 34px;
+}
+.ayv .ayv-oye-play:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+}
+.ayv .ayv-oye-pista {
+    display: grid;
+    gap: 4px;
+}
+.ayv .ayv-oye-barra {
+    position: relative;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--paper2);
+}
+.ayv .ayv-oye-barra i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: var(--accent);
+}
+.ayv .ayv-oye-barra b {
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid var(--accent);
+}
+.ayv .ayv-oye-tiempo {
+    display: flex;
+    justify-content: space-between;
+    font-size: .9rem;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+    font-variant-numeric: tabular-nums;
+}
+/* The whole book: one segment per part, as long as the part; done, filled; the one sounding, half */
+.ayv .ayv-oye-todo {
+    grid-column: 2;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+.ayv .ayv-oye-todo span {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--paper2);
+}
+.ayv .ayv-oye-todo span.is-hecha {
+    background: var(--green2);
+}
+.ayv .ayv-oye-todo span.is-ahora {
+    background: linear-gradient(90deg, var(--coral) var(--p, 30%), var(--paper2) var(--p, 30%));
+}
+.ayv .ayv-oye-todo small {
+    margin-inline-start: 8px;
+    font-size: .85rem;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+    white-space: nowrap;
+}
+
+/* The soft sound under it: a little switch with the name of the sound */
+.ayv .ayv-oye-fondo {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    margin: 14px 0 0;
+    padding: 6px 14px 6px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font: inherit;
+    font-size: .95rem;
+    color: var(--ink);
+    cursor: pointer;
+}
+.ayv .ayv-oye-fondo .ayv-oye-int {
+    position: relative;
+    width: 36px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--muted);
+}
+.ayv .ayv-oye-fondo .ayv-oye-int::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+}
+.ayv .ayv-oye-fondo[aria-pressed="true"] .ayv-oye-int {
+    background: var(--green2);
+}
+.ayv .ayv-oye-fondo[aria-pressed="true"] .ayv-oye-int::after {
+    left: 17px;
+}
+
+/* Between two parts: the next one comes by itself, and it can wait */
+.ayv .ayv-oye-sigue {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 14px 0 0;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--notice-bg);
+    font-size: 1rem;
+}
+.ayv .ayv-oye-sigue b {
+    font-family: var(--title);
+    font-weight: 600;
+}
+.ayv .ayv-oye-cuenta {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--surface);
+    font-weight: 700;
+}
+
+/* The parts, as the contents page of the book: number, title, dotted leader, length; what is heard, ticked */
+.ayv .ayv-oye-indice {
+    margin: 30px 0 0;
+}
+.ayv .ayv-oye-indice h2 {
+    margin: 0 0 8px;
+    font-family: var(--title);
+    font-size: 1.3rem;
+}
+.ayv .ayv-oye-partes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+}
+.ayv .ayv-oye-parte {
+    display: grid;
+    grid-template-columns: 34px minmax(0, auto) minmax(12px, 1fr) auto;
+    gap: 12px;
+    align-items: baseline;
+    width: 100%;
+    padding: 12px 10px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    font: inherit;
+    color: var(--ink);
+    text-align: start;
+    cursor: pointer;
+}
+.ayv .ayv-oye-parte:hover {
+    background: var(--paper2);
+}
+.ayv .ayv-oye-parte:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+}
+.ayv .ayv-oye-num {
+    font-family: var(--title);
+    font-weight: 600;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+    text-align: center;
+}
+.ayv .ayv-oye-tit {
+    font-family: var(--title);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.ayv .ayv-oye-tit small {
+    display: block;
+    font-family: var(--text);
+    font-size: .9rem;
+    font-weight: 400;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+}
+.ayv .ayv-oye-puntos {
+    border-bottom: 2px dotted var(--line);
+    transform: translateY(-5px);
+}
+.ayv .ayv-oye-dura {
+    font-size: .95rem;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+    font-variant-numeric: tabular-nums;
+}
+.ayv .ayv-oye-parte.is-oida .ayv-oye-num {
+    color: var(--green2);
+}
+.ayv .ayv-oye-parte[aria-current="true"] {
+    background: var(--surface);
+    box-shadow: inset 4px 0 0 var(--coral);
+}
+.ayv .ayv-oye-parte[aria-current="true"] .ayv-oye-num {
+    color: var(--coral);
+}
+.ayv .ayv-oye-nota {
+    margin: 10px 0 0;
+    font-size: .9rem;
+    color: color-mix(in srgb, currentColor 80%, transparent);
+}
+
+/* On a phone: the book smaller, so the player is in sight; the strip of the book on its own line */
+@media (max-width: 600px) {
+    .ayv .ayv-oye-libro {
+        width: 200px;
+        padding: 14px 14px 20px;
+    }
+    .ayv .ayv-oye-rep {
+        padding: 14px 16px;
+        gap: 8px 14px;
+    }
+    .ayv .ayv-oye-play {
+        width: 64px;
+        height: 64px;
+    }
+    .ayv .ayv-oye-todo {
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+    }
+    .ayv .ayv-oye-todo small {
+        flex-basis: 100%;
+        margin: 2px 0 0;
+    }
+}
+/* Without JavaScript, the browser's own player; with it, Jujol's. */
+.ayv .ayv-oye.is-js .ayv-oye-nativo { display: none; }
+.ayv .ayv-oye-play .ayv-oye-icono-pausa,
+.ayv .ayv-oye-play[aria-pressed="true"] .ayv-oye-icono-play { display: none; }
+.ayv .ayv-oye-play[aria-pressed="true"] .ayv-oye-icono-pausa { display: block; }
+.ayv .ayv-oye-barra { cursor: pointer; touch-action: none; }
+.ayv .ayv-oye-barra:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.ayv .ayv-oye-sintapa { display: grid; place-items: center; aspect-ratio: 2 / 3; padding: 1rem; border-radius: 4px 12px 12px 4px; background: var(--green); color: #fff; font-family: var(--title); font-size: 1.3rem; text-align: center; transform: rotate(-1.5deg); }
 .ayv .ayv-field-quiet { font-size: .9rem; }
 
 /* Recording: the text on one side, the recorder on the other, which stays in sight while reading. */
