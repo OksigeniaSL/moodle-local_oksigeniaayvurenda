@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.4 (2026-11-21)
+
+- **Readers from Cifra:** a student's brothers and sisters, a relative who is a student and one whose account has left
+  are not adults of the family; each adult says which children they are a legal guardian of. Brought from the copy in
+  Oksigenia Family (0.3.35 and 0.3.36), where it was made first.
+- A booklet's sheet looks only at the challenges of its school year.
+
 ## 1.2.3 (2026-11-21)
 
 The middle faults of the second part of the review of 21 November.

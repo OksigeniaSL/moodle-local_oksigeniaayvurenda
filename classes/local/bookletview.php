@@ -190,7 +190,16 @@ class bookletview {
             return null;
         }
         $found = null;
-        foreach ($DB->get_records(self::T . 'questreader', ['readerid' => $reader->id], 'id') as $joined) {
+        // Only the challenges of that school year: a sheet looked at every card of the reader's life.
+        $joins = $DB->get_records_sql(
+            "SELECT qr.id
+               FROM {" . self::T . "questreader} qr
+               JOIN {" . self::T . "quest} q ON q.id = qr.questid
+              WHERE qr.readerid = :readerid AND q.timestart < :yearend AND q.timeend >= :yearstart
+           ORDER BY qr.id",
+            ['readerid' => $reader->id, 'yearend' => $year->timeend, 'yearstart' => $year->timestart]
+        );
+        foreach ($joins as $joined) {
             $full = diploma::of((int) $joined->id, $now);
             if ($full && $full['day'] >= (int) $year->timestart && $full['day'] < (int) $year->timeend) {
                 $found = ['img' => mail::diploma((int) $joined->id), 'day' => (int) $full['day'],
