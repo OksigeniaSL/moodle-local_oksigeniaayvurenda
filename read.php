@@ -101,7 +101,11 @@ if ($parts) {
         'byanon' => $str('readingbyanon', count($parts)),
         // Back where they were: the part and the minute; else what sounds, with its own name.
         // At the start, where it starts; «Now: …» only once it sounds.
-        'nowtext' => $str($at > 0 ? 'readingresume' : 'readingstart', voices::part_title((int) $current->part)),
+        // With parts heard before it, where it goes on; the first time, where it starts.
+        'nowtext' => $str(
+            $at > 0 ? 'readingresume' : ($index > 0 ? 'readingcarryon' : 'readingstart'),
+            voices::part_title((int) $current->part)
+        ),
         'nowsmall' => $at > 0 ? $str('readingresumeat', max(1, (int) round($at / 60))) : ($name !== '' ? '«' . $name . '»' : ''),
         'starturl' => digital::file_url($current),
         'startduration' => $current->seconds ? $mmss((int) $current->seconds) : '',

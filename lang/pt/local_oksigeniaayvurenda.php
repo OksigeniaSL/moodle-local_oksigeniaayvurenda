@@ -5081,6 +5081,7 @@ $string['readingbackdropunder'] = 'Por baixo ouve-se {$a}, muito baixinho';
 $string['readingbyafter'] = ', em {$a} partes';
 $string['readingbyanon'] = 'Leitura em voz alta, em {$a} partes';
 $string['readingbybefore'] = 'Lê para ti';
+$string['readingcarryon'] = 'Continuas por aqui: {$a}';
 $string['readingchose'] = 'Para esta parte, {$a->who} escolheu {$a->sound}. Se preferires outro, só muda para ti:';
 $string['readingchosenone'] = 'Para esta parte, {$a} não escolheu fundo. Se quiseres um, só muda para ti:';
 $string['readingcoveralt'] = 'A capa de «{$a}»';

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (2026-11-21)
+
+- Coming back to a reading with parts already heard, the page says «Carry on here», not «Start here».
+
 ## 1.2.0 (2026-11-21)
 
 - **Each part of a reading has its own soft sound** (Enrique: «can't the reader choose the background sound they want

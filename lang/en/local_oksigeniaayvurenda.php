@@ -5007,6 +5007,7 @@ $string['readingbackdropunder'] = 'Softly underneath: {$a}';
 $string['readingbyafter'] = ', in {$a} parts';
 $string['readingbyanon'] = 'Read aloud, in {$a} parts';
 $string['readingbybefore'] = 'Read to you by';
+$string['readingcarryon'] = 'Carry on here: {$a}';
 $string['readingchose'] = 'For this part, {$a->who} chose {$a->sound}. If you prefer another, it only changes for you:';
 $string['readingchosenone'] = 'For this part, {$a} chose no background. If you want one, it only changes for you:';
 $string['readingcoveralt'] = 'The cover of “{$a}”';
