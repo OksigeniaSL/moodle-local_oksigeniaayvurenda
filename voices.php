@@ -86,13 +86,15 @@ if (data_submitted() && confirm_sesskey()) {
         $choices = ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),
             'audience' => optional_param_array('audience', [], PARAM_ALPHA),
             'signature' => optional_param('signature', '', PARAM_TEXT)];
-        // The new parts of one reading, all at once and with the same choices.
+        // The new parts of one reading, all at once and with the same choices: those the card showed, never one that came
+        // while it was being heard and nobody has heard.
         $together = [$item];
-        if (optional_param('all', 0, PARAM_BOOL) && $item->part !== null && $item->createdby) {
+        $shown = array_map('intval', optional_param_array('parts', [], PARAM_INT));
+        if (optional_param('all', 0, PARAM_BOOL) && $item->part !== null && $item->createdby && $shown) {
             $together = array_filter(
                 voices::pending($library, (int) $USER->id),
                 fn($v) => (int) $v->recordid === (int) $item->recordid && (int) $v->createdby === (int) $item->createdby
-                    && $v->part !== null
+                    && $v->part !== null && in_array((int) $v->id, $shown, true)
             );
         }
         foreach ($together as $one) {

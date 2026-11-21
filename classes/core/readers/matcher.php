@@ -183,17 +183,19 @@ final class matcher {
     }
 
     /**
-     * A class name as a key that does not depend on the order of its parts or the ordinal marks: «1º PRI E», «PRI 1º E»
-     * and «1ºE PRI» are the same class, written the way each programme writes it.
+     * A class name as a key that does not depend on the order of its words or the ordinal marks: «1º PRI E», «PRI 1º E»
+     * and «1ºE PRI» are the same class, written the way each programme writes it. Its numbers keep their order: «1° 2°»
+     * (first year, second class) is not «2° 1°».
      *
      * @param string $name
      * @return string Empty when there is no class.
      */
     private static function group(string $name): string {
-        preg_match_all('/\d+|[^\d\s]+/u', str_replace(['º', 'ª'], '', text::normalise($name)), $found);
-        $parts = $found[0];
-        sort($parts, SORT_STRING);
-        return implode(' ', $parts);
+        preg_match_all('/\d+|[^\d\s]+/u', str_replace(['º', 'ª', '°'], '', text::normalise($name)), $found);
+        $numbers = array_values(array_filter($found[0], 'ctype_digit'));
+        $words = array_values(array_filter($found[0], fn($part) => !ctype_digit($part)));
+        sort($words, SORT_STRING);
+        return implode(' ', array_merge($numbers, $words));
     }
 
     /**

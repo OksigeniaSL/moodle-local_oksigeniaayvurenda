@@ -117,6 +117,34 @@ final class zones {
     }
 
     /**
+     * From when a morning notice of a centre looks: from its last morning, so that a morning that comes late misses
+     * nothing and one that comes early tells nothing twice; the day before the first time, and never more than a week back.
+     *
+     * @param string $what The notice (letters only).
+     * @param int $entityid
+     * @param int $now
+     * @return int
+     */
+    public static function told_since(string $what, int $entityid, int $now): int {
+        $last = (int) get_config('local_oksigeniaayvurenda', 'told_' . $what . '_' . $entityid);
+        return $last > 0 ? max(min($last, $now), $now - WEEKSECS) : $now - DAYSECS;
+    }
+
+    /**
+     * Notes that a morning notice of these centres was told up to now. Before telling: a run that stops halfway leaves a
+     * family without one notice rather than with two.
+     *
+     * @param string $what
+     * @param int[] $centres
+     * @param int $now
+     */
+    public static function told(string $what, array $centres, int $now): void {
+        foreach ($centres as $id) {
+            set_config('told_' . $what . '_' . (int) $id, $now, 'local_oksigeniaayvurenda');
+        }
+    }
+
+    /**
      * Notes that these centres were told this morning.
      *
      * @param int[] $centres

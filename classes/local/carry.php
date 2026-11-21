@@ -88,6 +88,25 @@ final class carry {
     }
 
     /**
+     * A loan undone at the desk: the book found in the visit that it took home was not taken after all, and its seal
+     * goes back.
+     *
+     * @param int $readerid
+     * @param int $recordid
+     * @param int $when When it was lent.
+     */
+    public static function untaken(int $readerid, int $recordid, int $when): void {
+        global $DB;
+        $DB->set_field_select(
+            self::T,
+            'timetaken',
+            null,
+            'readerid = :readerid AND recordid = :recordid AND timetaken >= :from AND timetaken <= :until',
+            ['readerid' => $readerid, 'recordid' => $recordid, 'from' => $when - MINSECS, 'until' => $when + MINSECS]
+        );
+    }
+
+    /**
      * A book lent at the desk: if this reader found it in the visit this week and has not taken it yet, now they have.
      *
      * @param int $readerid

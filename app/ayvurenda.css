@@ -5405,7 +5405,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 /* A sheet on US Letter, and the test sheet: each label with its outline and its number, to hold against the light. */
 .ayv .ayv-labelsheet-letter { width: 215.9mm; min-height: 279.4mm; page: ayv-letter; }
 /* The library's nudge for its printer moves every label, not the page: a sheet without margins can go up or left too. */
-.ayv .ayv-labelsheet .ayv-label { translate: var(--dx, 0) var(--dy, 0); }
+.ayv .ayv-labelsheet .ayv-label { transform: translate(var(--dx, 0), var(--dy, 0)); }
 .ayv .ayv-labelsheet { overflow: hidden; }
 .ayv .ayv-labelsheet-test .ayv-label { outline: .3mm solid #1e2b2a; outline-offset: -.15mm; align-items: center;
     justify-content: center; }

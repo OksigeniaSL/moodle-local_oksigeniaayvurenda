@@ -3575,6 +3575,7 @@ $string['mailwhyfamily'] = 'You get this because you are down as family of a rea
 $string['mailwhyreader'] = 'You get this because you have a card at this library.';
 $string['mailwhysignup'] = 'You get this because you were signed up to run this library.';
 $string['mailwhystaff'] = 'You get this because you run this library.';
+$string['mailwhystop'] = 'If you would rather not get these e-mails, tell the library.';
 $string['mailwhytutor'] = 'You get this because you are the tutor of this group.';
 $string['mailwhyvoice'] = 'You get this because you recorded your voice at this library.';
 $string['marandu:post_big_number'] = 'The library\'s numbers';

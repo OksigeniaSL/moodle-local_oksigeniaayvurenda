@@ -90,6 +90,13 @@ final class challenges_test extends \advanced_testcase {
         $this->assertSame('sail', challenges::ship($entityid, $end - 6 * HOURSECS));
         // The next term starts without it.
         $this->assertSame('', challenges::ship($entityid, $end + DAYSECS));
+        // The third sails on the last day of classes, not when the school year ends after the summer.
+        $last = challenges::classes_end($year, 3);
+        $this->assertSame('2027-06-18', (new \DateTimeImmutable('@' . $last))->setTimezone($tz)->format('Y-m-d'));
+        $this->assertSame('wait', challenges::ship($entityid, $last - 5 * DAYSECS));
+        $this->assertSame('sail', challenges::ship($entityid, $last - 6 * HOURSECS));
+        $this->assertSame('', challenges::ship($entityid, $last + DAYSECS));
+        $this->assertSame((int) $year->timeend, challenges::bounds($year, 3)[1]);
     }
 
     /**

@@ -88,7 +88,7 @@
         {{^share}}<p class="ayv-field-hint">{{privatehint}}</p>{{/share}}
         <label class="ayv-field ayv-field-wide ayv-vp-firma">{{voicesignaturereview}} <span class="ayv-field-hint">{{voicesignaturereviewhint}}</span>
             <input type="text" name="signature" maxlength="60" value="{{signature}}"></label>
-        {{#hasparts}}<input type="hidden" name="all" value="1">{{/hasparts}}
+        {{#hasparts}}<input type="hidden" name="all" value="1">{{#parts}}<input type="hidden" name="parts[]" value="{{partid}}">{{/parts}}{{/hasparts}}
         <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{approvelabel}}</button>
             {{^hasparts}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button>{{/hasparts}}</p>
     </form>

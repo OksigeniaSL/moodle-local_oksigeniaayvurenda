@@ -3618,6 +3618,7 @@ $string['mailwhyfamily'] = 'Você recebe esta mensagem porque consta como famíl
 $string['mailwhyreader'] = 'Você recebe esta mensagem porque tem carteirinha nesta biblioteca.';
 $string['mailwhysignup'] = 'Você recebeu esta mensagem porque foi cadastrado para cuidar desta biblioteca.';
 $string['mailwhystaff'] = 'Você recebe esta mensagem porque cuida desta biblioteca.';
+$string['mailwhystop'] = 'Se você prefere não receber estes e-mails, avise a biblioteca.';
 $string['mailwhytutor'] = 'Você recebe esta mensagem porque é tutor desta turma.';
 $string['mailwhyvoice'] = 'Você recebe esta mensagem porque gravou sua voz nesta biblioteca.';
 $string['marandu:post_big_number'] = 'Os números da biblioteca';

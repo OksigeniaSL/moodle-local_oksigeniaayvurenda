@@ -884,6 +884,11 @@ document.addEventListener(\'error\', function(e) {
      * @return string Attributes for the html element.
      */
     private static function colour_mode(): string {
+        // Inside the app (the official one or Aty), the page follows the phone, as the app around it does, whatever was
+        // chosen on the web or whether the site has colour modes at all.
+        if (\core_useragent::is_moodle_app()) {
+            return ' data-bs-theme="light" data-colourmode="auto"';
+        }
         $class = '\\theme_boost\\colour_mode';
         if (!class_exists($class) || !$class::is_boost_theme() || !$class::is_enabled()) {
             return '';

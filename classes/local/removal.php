@@ -128,7 +128,8 @@ final class removal {
         return array_filter(
             $all,
             fn($name) => preg_match(
-                '/^(cifrakey|cifrasecret)' . $entityid . '$|^offsite' . $entityid . '_|^howtomisses_' . $entityid . '$/',
+                '/^(cifrakey|cifrasecret)' . $entityid . '$|^offsite' . $entityid . '_|^howtomisses_' . $entityid
+                    . '$|^told_[a-z]+_' . $entityid . '$/',
                 (string) $name
             ) === 1,
             ARRAY_FILTER_USE_KEY

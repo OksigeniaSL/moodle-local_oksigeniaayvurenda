@@ -198,7 +198,10 @@ final class forlittle {
      */
     public static function today(\stdClass $library, array $viewer, int $now): ?array {
         $shelf = self::shelf($library, $viewer);
-        return $shelf ? $shelf[intdiv($now, DAYSECS) % count($shelf)] : null;
+        // The day of the centre's zone: in America the story changed at teatime, at midnight in Greenwich.
+        $local = new \DateTimeImmutable('@' . $now);
+        $day = intdiv($now + zones::of($library)->getOffset($local), DAYSECS);
+        return $shelf ? $shelf[$day % count($shelf)] : null;
     }
 
     /**

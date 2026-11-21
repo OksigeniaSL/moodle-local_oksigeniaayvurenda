@@ -118,6 +118,8 @@ final class diploma_test extends \advanced_testcase {
             $this->assertSame(diploma::SMALL, getimagesizefromstring($jpeg)[0]);
             $this->assertCount(1, diploma::of_reader($reader, $now, $str));
         }
+        // Told once: the same morning again tells nothing twice.
+        $this->assertSame(0, diploma::run($now));
         $messages->close();
         $emails->close();
         $this->assertStringContainsString('s=' . mail::seal('diploma', $joinedid, 'd'), mail::diploma($joinedid));

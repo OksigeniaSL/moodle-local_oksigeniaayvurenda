@@ -42,6 +42,7 @@ final class matcher_test extends \basic_testcase {
             ['id' => 7, 'name' => 'Adrián Montes Lago'],
             ['id' => 8, 'name' => 'Sara Vela Mar', 'group' => '1º PRI E'],
             ['id' => 9, 'name' => 'Unai Roca Sol', 'group' => '2ºB ESO'],
+            ['id' => 19, 'name' => 'Tomás Gil Paz', 'group' => '1° 2°'],
         ];
         $accounts = [
             ['id' => 10, 'name' => 'Ana María Montes Prado', 'group' => '3º A'],
@@ -53,6 +54,7 @@ final class matcher_test extends \basic_testcase {
             ['id' => 16, 'name' => 'Adrián Lago Montes'],
             ['id' => 17, 'name' => 'Sara Vela Mar', 'group' => 'PRI 1º E'],
             ['id' => 18, 'name' => 'Unai Roca Sol', 'group' => 'ESO 2º B'],
+            ['id' => 20, 'name' => 'Tomás Gil Paz', 'group' => '2° 1°'],
         ];
         $piles = matcher::piles($readers, $accounts);
         $this->assertSame([1 => 10, 8 => 17, 9 => 18], $piles['sure']);
@@ -61,6 +63,8 @@ final class matcher_test extends \basic_testcase {
         $this->assertSame([14], $piles['doubt'][5]);
         $this->assertSame([15], $piles['doubt'][6]);
         $this->assertSame([16], $piles['doubt'][7]);
+        // Two numbers in their order: first year, second class is not second year, first class.
+        $this->assertSame([20], $piles['doubt'][19]);
         $this->assertSame([3], $piles['none']);
     }
 

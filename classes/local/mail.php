@@ -152,7 +152,10 @@ final class mail {
             'signinitial' => $sign['initial'] ?? '',
             'signtext' => $sign['text'] ?? '',
             'linkurl' => self::link($content, $library),
-            'why' => (string) ($content['why'] ?? ''),
+            // Whoever has no account (a family's adult from the families' file) has no preferences to turn it off: they are
+            // told how.
+            'why' => (string) ($content['why'] ?? '') . (!empty($content['why']) && empty($content['prefs'])
+                ? ' ' . get_string('mailwhystop', self::COMPONENT) : ''),
             'prefsurl' => !empty($content['prefs'])
                 ? (new \moodle_url('/message/notificationpreferences.php'))->out(false) : '',
             'prefstext' => get_string('mailprefs', self::COMPONENT),

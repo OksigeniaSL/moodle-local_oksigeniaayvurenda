@@ -71,6 +71,13 @@ final class blind_test extends \advanced_testcase {
         $answer = $desk->scan($item->barcode, (int) $ana->id);
         $this->assertSame(['lent', 1], [$answer['kind'], $answer['blind'] ?? null]);
         $this->assertSame([3], array_column(blind::open($library), 'number'));
+        // Lent by mistake and undone: back on the shelf, still wrapped; lent again, a date again.
+        $loanid = (int) $DB->get_field('local_oksigeniaayvurenda_loan', 'id', ['itemid' => $item->id, 'timereturned' => null]);
+        $desk->undo($loanid, 'lent');
+        $this->assertSame([1, 3], array_column(blind::open($library), 'number'));
+        $this->assertNotNull(blind::of_item((int) $item->id));
+        $answer = $desk->scan($item->barcode, (int) $ana->id);
+        $this->assertSame(['lent', 1], [$answer['kind'], $answer['blind'] ?? null]);
         $this->assertSame('blinderritem', blind::wrap($library, (int) $item->id, $three('Fuera'), 2, $now));
         $mine = blind::mine((int) $ana->id, $now);
         $this->assertSame([1, true, 'El faro del fin del mundo'], [$mine[0]['number'], $mine[0]['out'], $mine[0]['title']]);

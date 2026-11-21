@@ -89,6 +89,9 @@ final class firstbook_test extends \advanced_testcase {
             $this->assertMatchesRegularExpression('#family\.php\?t=[0-9a-f]+#', $tomother[0]->fullmessage, 'the page reads «t»');
             $this->assertSame(1, $DB->count_records('local_oksigeniaayvurenda_voiceinvite', ['readerid' => $reader->id]));
         }
+        // Told once: the same morning again, or one that comes an hour later, tells nothing twice.
+        $this->assertSame(0, firstbook::run($now));
+        $this->assertSame(0, firstbook::run($now + HOURSECS, [(int) $library->entityid]));
         $messages->close();
         $emails->close();
         if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {

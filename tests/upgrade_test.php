@@ -122,6 +122,84 @@ final class upgrade_test extends \advanced_testcase {
     }
 
     /**
+     * A site at the 0.235.0 upgrades to the end in one go, and ends with the tables exactly as install.xml makes them: a
+     * step that drifted from it (a field, a default, an index) shows here, and the old voices take their parts.
+     */
+    public function test_from_0235(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        require_once($CFG->libdir . '/upgradelib.php');
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        $dbman = $DB->get_manager();
+
+        // The tables as the 0.235.0 left them.
+        foreach (['find', 'blind', 'booklet'] as $name) {
+            $dbman->drop_table(new \xmldb_table('local_oksigeniaayvurenda_' . $name));
+        }
+        $dbman->drop_field(new \xmldb_table('local_oksigeniaayvurenda_quest'), new \xmldb_field('squares'));
+        $digital = new \xmldb_table('local_oksigeniaayvurenda_digital');
+        foreach (['forlittle', 'tellfamily', 'timetold', 'part', 'backdrop', 'seconds'] as $name) {
+            $dbman->drop_field($digital, new \xmldb_field($name));
+        }
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Un libro largo']);
+        $user = $this->getDataGenerator()->create_user();
+        $now = time();
+        $voice = $DB->insert_record('local_oksigeniaayvurenda_digital', ['entityid' => $library->entityid,
+            'recordid' => $record->id, 'kind' => 'voice', 'format' => 'audio', 'title' => 'Capítulo 3',
+            'status' => 'published', 'audience' => 'students', 'licence' => 'rights', 'createdby' => $user->id,
+            'timecreated' => $now, 'timemodified' => $now]);
+
+        set_config('version', 2026111219, 'local_oksigeniaayvurenda');
+        $this->assertTrue(xmldb_local_oksigeniaayvurenda_upgrade(2026111219));
+        $file = new \xmldb_file($CFG->dirroot . '/local/oksigeniaayvurenda/db/install.xml');
+        $file->loadXMLStructure();
+        $ours = array_filter(
+            $dbman->check_database_schema($file->getStructure()),
+            fn($table) => str_starts_with((string) $table, 'local_oksigeniaayvurenda_'),
+            ARRAY_FILTER_USE_KEY
+        );
+        $this->assertSame([], $ours);
+        $this->assertEquals(3, $DB->get_field('local_oksigeniaayvurenda_digital', 'part', ['id' => $voice]));
+    }
+
+    /**
+     * The old voices take their parts from their names, once: the opening and the chapters, never a title that starts with
+     * a number, a family's voice by its link or one without who recorded it.
+     */
+    public function test_upgrade_parts(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Un libro largo']);
+        $user = $this->getDataGenerator()->create_user();
+        $now = time();
+        $voice = fn(string $title, ?int $by = null) => (int) $DB->insert_record('local_oksigeniaayvurenda_digital', [
+            'entityid' => $library->entityid, 'recordid' => $record->id, 'kind' => 'voice', 'format' => 'audio',
+            'title' => $title, 'status' => 'published', 'audience' => 'students', 'licence' => 'rights',
+            'createdby' => $by ?? $user->id, 'timecreated' => $now, 'timemodified' => $now]);
+        $ids = ['Capítulo 3' => $voice('Capítulo 3'), 'Presentación' => $voice('Presentación'),
+            'Chapitre IV' => $voice('Chapitre IV'), '3. El bosque' => $voice('3. El bosque'),
+            '101 dálmatas' => $voice('101 dálmatas'), '20.000 leguas' => $voice('20.000 leguas')];
+        $family = $voice('Capítulo 1');
+        $DB->insert_record('local_oksigeniaayvurenda_voiceinvite', ['entityid' => $library->entityid,
+            'recordid' => $record->id, 'token' => str_repeat('a', 48),
+            'digitalid' => $family, 'timecreated' => $now, 'timeexpires' => $now + DAYSECS]);
+        $placed = $voice('Capítulo 2');
+        $DB->set_field('local_oksigeniaayvurenda_digital', 'part', 7, ['id' => $placed]);
+        local_oksigeniaayvurenda_upgrade_parts();
+        local_oksigeniaayvurenda_upgrade_parts();
+        $part = fn(int $id) => $DB->get_field('local_oksigeniaayvurenda_digital', 'part', ['id' => $id]);
+        $this->assertEquals([3, 0, 4, 3, null, null], array_map($part, array_values($ids)));
+        $this->assertNull($part($family));
+        $this->assertEquals(7, $part($placed));
+    }
+
+    /**
      * The stored search text takes the letters as the search now writes them.
      */
     public function test_letters(): void {

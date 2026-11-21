@@ -9,6 +9,11 @@ class AyvurendaLinks extends that.CoreContentLinksHandlerBase {
         this.pattern = /\/local\/oksigeniaayvurenda\/(record|index)\.php/;
     }
 
+    // «My library» is the reader's own page: the staff's catalogue (index.php?library=…) stays out of it.
+    isEnabled(siteId, url, params) {
+        return url.includes('/record.php') || !params.library;
+    }
+
     getActions(siteIds, url, params) {
         const record = url.includes('/record.php');
         const method = record ? 'mobile_record_view' : 'mobile_library_view';

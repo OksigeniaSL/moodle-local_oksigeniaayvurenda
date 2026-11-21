@@ -70,5 +70,10 @@ cli_writeln('Centre ' . $done['entity'] . ($done['created']['centre'] ? ' create
 cli_writeln('Account ' . $done['userid'] . ($done['created']['account'] ? ' created' : ' kept')
     . ($done['mailed'] ? ', its password sent by e-mail' : '') . '; role '
     . ($done['created']['role'] ? 'given' : 'already there') . '.');
+if ($done['created']['account'] && !$done['mailed']) {
+    // Its password left only in that e-mail: without it, nobody knows it, and running the sign-up again gives no other.
+    cli_problem('The e-mail with its password did not leave. Give it a new one: php admin/cli/reset_password.php --username='
+        . $DB->get_field('user', 'username', ['id' => $done['userid']]) . ' --password=… and tell them.');
+}
 cli_writeln('Library: ' . (new moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $done['library']]))->out(false));
 cli_writeln('Way in: ' . get_login_url());

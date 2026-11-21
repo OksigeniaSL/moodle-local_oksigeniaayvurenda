@@ -209,8 +209,14 @@ final class voices_test extends \advanced_testcase {
         voices::approve($one, $library, ['licence' => 'rights', 'audience' => ['students']]);
         $again = $part(1, $now + 30);
         $this->assertTrue($DB->record_exists(self::T . 'digital', ['id' => $one]));
+        // Someone listening was in chapter 1, with the place kept on it and on the opening: both follow the new chapter.
+        $listener = $this->getDataGenerator()->create_user();
+        digital::keep_place($one, (int) $listener->id, $one . ':95', null, $now);
+        digital::keep_place($opening, (int) $listener->id, $one . ':40', null, $now);
         voices::approve($again, $library, ['licence' => 'rights', 'audience' => ['students']]);
         $this->assertFalse($DB->record_exists(self::T . 'digital', ['id' => $one]));
+        $this->assertSame($again . ':95', digital::place($again, (int) $listener->id)['position']);
+        $this->assertSame($again . ':40', digital::place($opening, (int) $listener->id)['position']);
         $this->assertTrue($DB->record_exists(self::T . 'digital', ['id' => $opening]), 'other parts stay');
 
         // Heard together, in the book's order, at the place of the first; anything else alone.

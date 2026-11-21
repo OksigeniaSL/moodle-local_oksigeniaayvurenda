@@ -114,7 +114,15 @@ final class voices {
             // Each part has its sound (Enrique, 21 Nov 2026); unchosen, the one of the part before it.
             self::set_backdrop($id, $library, $userid, $backdrop ?? self::backdrop_before($recordid, $library, $userid, $part));
         }
-        if ($userid) {
+        // A book read in parts says it arrived once a sitting, not once a chapter (twelve chapters were twelve messages).
+        $sitting = $part !== null && $DB->record_exists_select(
+            self::T . 'digital',
+            "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL
+                AND id <> :id AND status = 'pending' AND timecreated >= :since",
+            ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $userid, 'id' => $id,
+                'since' => ($now ?? time()) - 12 * HOURSECS]
+        );
+        if ($userid && !$sitting) {
             self::tell_received(digital::get($id, $library), $userid);
         }
         return $id;
@@ -348,6 +356,29 @@ final class voices {
                     'before' => $id]
             );
             foreach ($older as $old) {
+                // Whoever was listening keeps their place: it moves to the part that replaces this one, and a place in it
+                // («which part:second») points to the new one.
+                foreach ($DB->get_records(self::T . 'digitalread', ['digitalid' => $old->id]) as $place) {
+                    $DB->delete_records(self::T . 'digitalread', ['digitalid' => $id, 'userid' => $place->userid]);
+                    $DB->update_record(self::T . 'digitalread', (object) ['id' => $place->id, 'digitalid' => $id,
+                        'position' => preg_replace('/^' . (int) $old->id . ':/', $id . ':', (string) $place->position)]);
+                }
+                $reading = $DB->get_fieldset_select(
+                    self::T . 'digital',
+                    'id',
+                    "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL",
+                    ['entityid' => $library->entityid, 'recordid' => $item->recordid, 'userid' => $item->createdby]
+                );
+                [$in, $params] = $DB->get_in_or_equal($reading, SQL_PARAMS_NAMED, 'rp');
+                $pointing = $DB->get_records_select(
+                    self::T . 'digitalread',
+                    "digitalid $in AND " . $DB->sql_like('position', ':was'),
+                    $params + ['was' => (int) $old->id . ':%']
+                );
+                foreach ($pointing as $place) {
+                    $second = substr((string) $place->position, strlen((string) (int) $old->id));
+                    $DB->set_field(self::T . 'digitalread', 'position', $id . $second, ['id' => $place->id]);
+                }
                 self::remove($old);
             }
         }
@@ -634,9 +665,10 @@ final class voices {
         if (preg_match('/^' . $opening . '(\b|$)/u', $title)) {
             return 0;
         }
-        // Roman numerals only after the word for a chapter: «Vi un fantasma» is no sixth chapter.
+        // Roman numerals only after the word for a chapter: «Vi un fantasma» is no sixth chapter. A number alone, or with
+        // its mark before the chapter's name («3. El bosque»): «101 dálmatas» and «20.000 leguas» are titles, not parts.
         $chapter = '/^(?:cap[ií]tulo|chapter|chapitre|cap\.)\s*([0-9]{1,3}|[ivxlc]{1,8})(?:\b|[.:,]|$)/u';
-        if (!preg_match($chapter, $title, $found) && !preg_match('/^([0-9]{1,3})(?:\b|[.:,]|$)/u', $title, $found)) {
+        if (!preg_match($chapter, $title, $found) && !preg_match('/^([0-9]{1,3})(?:\s*$|[.:)\-–]\s*(?![0-9]))/u', $title, $found)) {
             return null;
         }
         $number = ctype_digit($found[1]) ? (int) $found[1] : self::roman($found[1]);

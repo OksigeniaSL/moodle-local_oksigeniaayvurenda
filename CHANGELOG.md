@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.3 (2026-11-21)
+
+The middle faults of the second part of the review of 21 November.
+
+- **The ship and the clock of the third term** count to the last day of classes, not to September: the ship sailed in
+  the holidays.
+- **The postcard of the first book and the diploma** are told from each centre's last morning: a morning that comes
+  late misses none, one that comes early tells none twice. Turned on again, they start from the day before.
+- **«Approve all»** approves the parts the card showed, never one that came while it was being heard.
+- **Where a listener is** is kept every twelve seconds while it plays and as the page closes; it follows a chapter read
+  again and an opening recorded later; at the end of the book, the next time starts from the beginning.
+- A blind date lent by mistake goes back to the shelf still wrapped when the loan is undone, and a book found in the
+  visit gives back its «Take it home» seal.
+- Inside the app, the library's pages follow the phone's dark mode; a staff page of the library stays out of «My
+  library».
+- The printer offset of the labels works on Chrome 93.
+- Matching readers keeps the order of a class's numbers: «1° 2°» is not «2° 1°».
+- An old voice whose title starts with a number («101 dálmatas», «20.000 leguas») is not taken for that chapter.
+- «Today's story» changes at the centre's midnight.
+- A reading in parts says it arrived once a sitting; e-mails to families say how to stop them.
+- The review of an Abies export loaded on top no longer says it does not fit when what it brings is already here.
+- `cli/add_entity.php` says when the e-mail with the password did not leave.
+- A test upgrades from 0.235.0 and checks the tables against install.xml.
+
 ## 1.2.2 (2026-11-21)
 
 The privacy and security part of the review of 21 November (everything new since 0.236.0), and the worst faults of

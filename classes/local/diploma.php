@@ -64,6 +64,8 @@ final class diploma {
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $entity['diploma'] = $on;
         $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
+        // Turned on (again), it starts from the day before: not from a morning of long ago.
+        unset_config('told_diploma_' . $entityid, 'local_oksigeniaayvurenda');
     }
 
     /**
@@ -151,11 +153,13 @@ final class diploma {
      *
      * @param int $now
      * @param int[]|null $centres Only these centres.
+     * @param \Closure|null $from From when, for a centre (the day before now when not given).
      * @return array[] joinedid, entityid and day, as of() gives them with the rest.
      */
-    public static function due(int $now, ?array $centres = null): array {
+    public static function due(int $now, ?array $centres = null, ?\Closure $from = null): array {
         global $DB;
-        $since = $now - DAYSECS;
+        $from = $from ?? fn(int $entityid) => $now - DAYSECS;
+        $since = $now - WEEKSECS;
         $rows = $DB->get_records_sql(
             "SELECT qr.id, qr.questid, b.entityid
                FROM {" . self::T . "questreader} qr
@@ -174,12 +178,13 @@ final class diploma {
             if ($centres !== null && !in_array((int) $row->entityid, $centres, true)) {
                 continue;
             }
+            $after = $from((int) $row->entityid);
             $full = self::of((int) $row->id, $now);
-            if (!$full || $full['day'] < $since) {
+            if (!$full || $full['day'] < $after) {
                 continue;
             }
-            // Full a day ago already: it is no news.
-            $before = cartilla::card($full['quest'], $full['library'], (int) $full['reader']->id, $since, self::str());
+            // Full at the last morning already: it is no news.
+            $before = cartilla::card($full['quest'], $full['library'], (int) $full['reader']->id, $after, self::str());
             if (!$before['full']) {
                 $due[] = $full + ['joinedid' => (int) $row->id, 'entityid' => (int) $row->entityid];
             }
@@ -198,7 +203,22 @@ final class diploma {
     public static function run(int $now, ?array $centres = null): int {
         global $DB;
         $told = 0;
-        foreach (self::due($now, $centres) as $full) {
+        // Each centre from its last morning, as the postcard of the first book.
+        $since = [];
+        $from = function (int $id) use (&$since, $now): int {
+            return $since[$id] ??= zones::told_since('diploma', $id, $now);
+        };
+        // Only where it is told: a centre with it off notes the day each card filled, as ever, from the day before.
+        $telling = fn(int $id) => class_exists('\\local_oksigeniafamily\\api') && self::drawable() && self::on($id)
+            && !practice::is($id) && !access::closed($id);
+        foreach ($centres ?? [] as $id) {
+            $from((int) $id);
+        }
+        zones::told('diploma', array_filter(array_map('intval', $centres ?? []), $telling), $now);
+        foreach (self::due($now, $centres, fn(int $id) => $telling($id) ? $from($id) : $now - DAYSECS) as $full) {
+            if ($centres === null && $telling((int) $full['entityid'])) {
+                zones::told('diploma', [(int) $full['entityid']], $now);
+            }
             if (empty($full['joined']->timedone)) {
                 $DB->set_field(self::T . 'questreader', 'timedone', $full['day'], ['id' => $full['joinedid']]);
             }

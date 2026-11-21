@@ -69,24 +69,41 @@
     page.classList.add('is-js');
     player.hidden = false;
 
-    // Where the listener is, kept for the next time: soon while it plays, at once when it stops.
+    // Where the listener is, kept for the next time: every twelve seconds while it plays, two seconds after a jump, at
+    // once when it stops, and as the page goes (a phone that closes the browser sends no pause).
     var timer = null;
-    var send = function() {
-        if (!window.fetch || !config.ajaxurl) {
-            return;
-        }
+    var lastSent = 0;
+    var params = function(position) {
         var body = new URLSearchParams();
         body.set('sesskey', config.sesskey);
         body.set('item', config.item);
-        body.set('position', current + ':' + Math.floor(voice.currentTime || 0));
-        fetch(config.ajaxurl, {method: 'POST', credentials: 'same-origin', body: body}).catch(function() {
+        body.set('position', position || current + ':' + Math.floor(voice.currentTime || 0));
+        return body;
+    };
+    var send = function(position) {
+        if (!window.fetch || !config.ajaxurl) {
+            return;
+        }
+        lastSent = Date.now();
+        fetch(config.ajaxurl, {method: 'POST', credentials: 'same-origin', body: params(position)}).catch(function() {
             return null;
         });
     };
     var keep = function() {
         clearTimeout(timer);
-        timer = setTimeout(send, 2000);
+        if (!voice.paused && Date.now() - lastSent > 12000) {
+            send();
+            return;
+        }
+        timer = setTimeout(function() {
+            send();
+        }, 2000);
     };
+    window.addEventListener('pagehide', function() {
+        if (navigator.sendBeacon && config.ajaxurl && voice.currentTime) {
+            navigator.sendBeacon(config.ajaxurl, params());
+        }
+    });
 
     // What is drawn: the bar of the part, its times, the strip of the book, what is left, the index.
     var paint = function() {
@@ -522,8 +539,9 @@
         if (index >= 0 && index < ids.length - 1) {
             countTo(ids[index + 1]);
         } else {
+            // The whole book heard: the next time it starts from the beginning, not at its last second.
             soundOff();
-            send();
+            send(ids[0] + ':0');
         }
     });
     mark();

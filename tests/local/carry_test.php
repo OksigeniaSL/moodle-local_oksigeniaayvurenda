@@ -62,6 +62,10 @@ final class carry_test extends \advanced_testcase {
         }
         $seal = carry::seal((int) $reader->id);
         $this->assertSame([2, false, 3, 1], [$seal['level'], $seal['gold'], $seal['taken'], $seal['lit']]);
+        // A loan undone at the desk gives its seal back: the book is found again, ready to go home.
+        carry::untaken((int) $reader->id, (int) $more->id, $now);
+        $this->assertSame(2, carry::seal((int) $reader->id)['taken']);
+        $this->assertTrue(carry::taken((int) $reader->id, (int) $more->id, $now));
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $this->assertStringContainsString('3', carry::says($seal, $str));
         $this->assertSame($str('cardsealwaiting'), carry::says(['level' => 0, 'gold' => false, 'taken' => 0, 'lit' => 0], $str));

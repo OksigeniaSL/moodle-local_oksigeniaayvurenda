@@ -205,8 +205,13 @@ if ($pending) {
         // only if ticked.
         $left = plans::left($entityid, 'copies');
         $leftreaders = plans::left($entityid, 'readers');
-        $copiesout = $left !== null && $look['items'] > $left;
-        $readersout = $leftreaders !== null && ($look['readers'] ?? 0) > $leftreaders;
+        // An export of Abies brought on top of an earlier one: what it already brought does not grow the library.
+        $already = fn(string $table) => $pending['kind'] === 'abies' ? $DB->count_records(
+            'local_oksigeniaayvurenda_source',
+            ['entityid' => $entityid, 'origin' => 'abies', 'tablename' => $table]
+        ) : 0;
+        $copiesout = $left !== null && $look['items'] - $already('item') > $left;
+        $readersout = $leftreaders !== null && ($look['readers'] ?? 0) - $already('reader') > $leftreaders;
         $a = (object) ['left' => screens::number((int) $left), 'items' => screens::number($look['items']),
             'leftreaders' => screens::number((int) $leftreaders), 'readers' => screens::number($look['readers'] ?? 0)];
         $review['tight'] = $copiesout && $readersout ? $str('importtightboth', $a) : ($copiesout ? $str('importtight', $a)

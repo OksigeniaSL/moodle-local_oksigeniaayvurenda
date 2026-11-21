@@ -59,6 +59,8 @@ final class firstbook {
         $entity = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
         $entity['firstbook'] = $on;
         $DB->set_field(self::T . 'entity', 'settings', json_encode($entity), ['id' => $entityid]);
+        // Turned on (again), it starts from the day before: not from a morning of long ago.
+        unset_config('told_firstbook_' . $entityid, 'local_oksigeniaayvurenda');
     }
 
     /**
@@ -67,9 +69,10 @@ final class firstbook {
      *
      * @param int $now
      * @param int[]|null $centres Only these centres.
+     * @param int|null $since From when (the day before now when not given).
      * @return \stdClass[] The loan (id, recordid, title, timeloaned, libraryid) with its reader (readerid, userid, entityid).
      */
-    public static function due(int $now, ?array $centres = null): array {
+    public static function due(int $now, ?array $centres = null, ?int $since = null): array {
         global $DB;
         $rows = $DB->get_records_sql(
             "SELECT l.id, l.readerid, l.libraryid, l.timeloaned, i.recordid, rec.title, r.userid, r.entityid
@@ -85,7 +88,7 @@ final class firstbook {
                                      WHERE o.readerid = l.readerid AND ob.kind <> :bank
                                            AND (o.timeloaned < l.timeloaned OR (o.timeloaned = l.timeloaned AND o.id < l.id)))
            ORDER BY l.timeloaned, l.id",
-            ['since' => $now - DAYSECS, 'now' => $now, 'ill' => ill::READERTYPE, 'bank' => bank::KIND]
+            ['since' => $since ?? $now - DAYSECS, 'now' => $now, 'ill' => ill::READERTYPE, 'bank' => bank::KIND]
         );
         return array_values(array_filter($rows, fn($row) => $centres === null || in_array((int) $row->entityid, $centres, true)));
     }
@@ -104,10 +107,24 @@ final class firstbook {
             return 0;
         }
         $told = 0;
-        foreach (self::due($now, $centres) as $loan) {
+        // Each centre from its last morning: none missed when a morning comes late, none told twice when it comes early.
+        $since = [];
+        $from = function (int $id) use (&$since, $now): int {
+            return $since[$id] ??= zones::told_since('firstbook', $id, $now);
+        };
+        $telling = fn(int $id) => self::on($id) && !practice::is($id) && !access::closed($id);
+        $centres = $centres === null ? null : array_values(array_filter(array_map('intval', $centres), $telling));
+        foreach ($centres ?? [] as $id) {
+            $from($id);
+        }
+        zones::told('firstbook', $centres ?? [], $now);
+        foreach (self::due($now, $centres, $since ? min($since) : $now - WEEKSECS) as $loan) {
             $entityid = (int) $loan->entityid;
-            if (!self::on($entityid) || practice::is($entityid) || access::closed($entityid)) {
+            if ((int) $loan->timeloaned < $from($entityid) || !$telling($entityid)) {
                 continue;
+            }
+            if ($centres === null) {
+                zones::told('firstbook', [$entityid], $now);
             }
             $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
             if (!$reader || cards::look_of($reader, $now) !== 'flower') {

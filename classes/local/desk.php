@@ -1185,6 +1185,11 @@ final class desk {
                 $item->status = 'available';
                 holds::place($item, $this->now);
             }
+            // A book found in the visit goes back to being found, not taken; a blind date lent by mistake goes back to the
+            // shelf still wrapped, waiting for someone else.
+            carry::untaken((int) $loan->readerid, (int) $item->recordid, (int) $loan->timeloaned);
+            $DB->set_field(self::T . 'blind', 'readerid', null, ['loanid' => $loan->id]);
+            $DB->set_field(self::T . 'blind', 'loanid', null, ['loanid' => $loan->id]);
             $DB->delete_records(self::T . 'loan', ['id' => $loan->id]);
         } else if ($what === 'returned' && $loan->timereturned !== null) {
             holds::undo_return((int) $item->id, $this->now);

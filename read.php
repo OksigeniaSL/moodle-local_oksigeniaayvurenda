@@ -75,10 +75,21 @@ if (!$anyone && $item->kind === 'voice' && $item->part !== null && $item->create
 }
 if ($parts) {
     $first = $parts[0];
-    // Where the listener was, kept on the reading's first part: «which part:second».
-    $kept = (string) (digital::place((int) $first->id, (int) $USER->id)['position'] ?? '');
-    [$keptid, $keptat] = array_pad(array_map('intval', explode(':', $kept)), 2, 0);
     $ids = array_map(fn($p) => (int) $p->id, $parts);
+    // Where the listener was, «which part:second», kept on the reading's first part; an opening recorded later, or a part
+    // read again, left it on another part of the reading: the newest of them.
+    [$in, $inparams] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'kp');
+    $places = $DB->get_records_select(
+        'local_oksigeniaayvurenda_digitalread',
+        "userid = :userid AND digitalid $in AND position IS NOT NULL",
+        ['userid' => $USER->id] + $inparams,
+        'timemodified DESC, id DESC',
+        'id, position',
+        0,
+        1
+    );
+    $kept = $places ? (string) reset($places)->position : '';
+    [$keptid, $keptat] = array_pad(array_map('intval', explode(':', $kept)), 2, 0);
     $start = (int) $item->id === (int) $first->id && in_array($keptid, $ids, true) ? $keptid : (int) $item->id;
     $start = in_array($start, $ids, true) ? $start : (int) $first->id;
     $at = $start === $keptid ? $keptat : 0;

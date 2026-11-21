@@ -149,7 +149,7 @@ final class challenges {
         if (!$challenge) {
             return null;
         }
-        $end = self::bounds(years::around($entityid, $now), (int) $challenge->term)[1];
+        $end = self::classes_end(years::around($entityid, $now), (int) $challenge->term);
         $days = (int) ceil(($end - $now) / DAYSECS);
         if ($days < 1) {
             return null;
@@ -282,13 +282,26 @@ final class challenges {
         $now = $now ?? time();
         $year = years::around($entityid, $now);
         for ($term = 1; $term <= 3; $term++) {
-            [$start, $end] = self::bounds($year, $term);
+            [$start] = self::bounds($year, $term);
+            $end = self::classes_end($year, $term);
             if ($now >= $start && $now < $end) {
                 $days = (int) ceil(($end - $now) / DAYSECS);
                 return $days <= 1 ? 'sail' : ($days <= 7 ? 'wait' : '');
             }
         }
         return '';
+    }
+
+    /**
+     * When a term's classes end: what its clock counts down to and when its ship sails. The third term's loans count
+     * until the school year ends (bounds()), but its classes end before the summer.
+     *
+     * @param \stdClass $year
+     * @param int $term
+     * @return int
+     */
+    public static function classes_end(\stdClass $year, int $term): int {
+        return self::ends($year)[max(1, min(3, $term)) - 1];
     }
 
     /**
@@ -621,7 +634,7 @@ final class challenges {
         $urgent = false;
         if (!$challenge->complete) {
             $now = time();
-            $end = self::bounds(years::around($entityid, $now), (int) $challenge->term)[1];
+            $end = self::classes_end(years::around($entityid, $now), (int) $challenge->term);
             $days = (int) ceil(($end - $now) / DAYSECS);
             if ($days > 0) {
                 $clock = $days === 1 ? $str('challengeclockone') : $str('challengeclock', (object) ['days' => $days,
