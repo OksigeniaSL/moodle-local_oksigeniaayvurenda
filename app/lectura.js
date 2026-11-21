@@ -345,7 +345,15 @@
         paint();
         keep();
     });
-    voice.addEventListener('loadedmetadata', paint);
+    // Once the file says how long it lasts, the index says the same as the player.
+    voice.addEventListener('loadedmetadata', function() {
+        if (isFinite(voice.duration) && voice.duration > 0) {
+            var row = button(current);
+            row.setAttribute('data-seconds', String(Math.floor(voice.duration)));
+            row.querySelector('.ayv-oye-dura').textContent = mmss(voice.duration);
+        }
+        paint();
+    });
     voice.addEventListener('durationchange', paint);
     voice.addEventListener('ended', function() {
         var index = ids.indexOf(current);

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.3 (2026-11-21)
+
+- **Recording at night reads well again:** the recorder's plate is light in both modes, and its chips, numbers and
+  sounds were dark on dark; they take the light colours now, and the bar at the foot of a phone keeps the page's night.
+- The index of a reading says the length its file says once it has loaded, the same as the player.
+- How far into the book while recording: a bar of its own, the same in every browser.
+- Voices to approve and one's own voices show how long they last before they are played.
+
 ## 1.1.2 (2026-11-21)
 
 - Listening to a reading, after Jujol's review: the part that comes keeps its bars, still at rest and moving while it

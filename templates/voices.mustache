@@ -66,10 +66,10 @@
     <h2 class="ayv-section-title">{{book}}{{#title}} · {{title}}{{/title}}</h2>
     {{#marks}}<p class="ayv-lp-marcas"><span class="ayv-lp-marca">{{#bud}}<img src="{{bud}}" alt="">{{/bud}}{{little}}</span>{{#family}}<span class="ayv-lp-marca ayv-lp-marca-familia"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg>{{family}}</span>{{/family}}</p>{{/marks}}
     {{#who}}<p>{{who}}</p>{{/who}}
-    {{^hasparts}}<audio class="ayv-media" controls preload="none" src="{{url}}"></audio>{{/hasparts}}
+    {{^hasparts}}<audio class="ayv-media" controls preload="metadata" src="{{url}}"></audio>{{/hasparts}}
     {{#hasparts}}<ol class="ayv-vp-review">
         {{#parts}}<li><p class="ayv-vp-review-title"><b>{{parttitle}}</b></p>
-            <audio class="ayv-media" controls preload="none" src="{{parturl}}"></audio>
+            <audio class="ayv-media" controls preload="metadata" src="{{parturl}}"></audio>
             <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{partid}}">
                 <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></form></li>{{/parts}}
     </ol>{{/hasparts}}

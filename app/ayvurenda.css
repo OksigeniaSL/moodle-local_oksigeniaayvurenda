@@ -13978,3 +13978,33 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
 /* Approving a voice: the signature as a line of the card, its box under it, the whole width (Jujol). */
 .ayv .ayv-vp-firma { display: block; }
 .ayv .ayv-vp-firma input { display: block; width: 100%; margin-top: .35rem; }
+/* The recorder's plate is light in both modes (ayvurenda-d.css): what sits on it takes the light tokens (Jujol). */
+html[data-bs-theme="dark"] .ayv .ayv-recorder {
+    --surface: #fff;
+    --ink: #1e2b2a;
+    --ink-2: #4a5451;
+    --line: rgba(30, 43, 42, .14);
+    --accent: #17574c;
+    --chip-hover: #e8dcc6;
+}
+/* The bar at the foot is on the page, not on the plate: it keeps the page's night. */
+html[data-bs-theme="dark"] .ayv .ayv-vp-barra {
+    --surface: #142624;
+    --ink: #ece4d4;
+    --accent: #8fd3c1;
+}
+.ayv .ayv-vp-barra { color: var(--ink); }
+html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
+/* How far into the book: a bar of its own, the same in every browser (Firefox 98 does not take accent-color). */
+.ayv .ayv-read-foot progress {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    background: var(--paper2);
+    overflow: hidden;
+}
+.ayv .ayv-read-foot progress::-webkit-progress-bar { border-radius: 999px; background: var(--paper2); }
+.ayv .ayv-read-foot progress::-webkit-progress-value { border-radius: 999px; background: var(--coral); }
+.ayv .ayv-read-foot progress::-moz-progress-bar { border-radius: 999px; background: var(--coral); }
+

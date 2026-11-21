@@ -53,7 +53,7 @@
 <ul class="ayv-holds">
 {{#mine}}
     <li class="ayv-holds-row"><span class="ayv-holds-title">{{title}}</span> <span class="ayv-holds-who">{{state}}</span>
-        <audio class="ayv-media" controls preload="none" src="{{url}}"></audio>
+        <audio class="ayv-media" controls preload="metadata" src="{{url}}"></audio>
         <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
             <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{voicedelete}}</button></form></li>
 {{/mine}}
