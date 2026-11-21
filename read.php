@@ -84,7 +84,7 @@ if ($parts) {
     $at = $start === $keptid ? $keptat : 0;
     $current = $parts[array_search($start, $ids, true)];
     $sounds = voices::backdrops();
-    $sound = $sounds[(string) $first->backdrop] ?? null;
+    $soundof = fn($p) => isset($sounds[(string) $p->backdrop]) ? (string) $p->backdrop : '';
     $signed = array_values(array_filter($parts, fn($p) => $p->status === 'published' && (string) $p->signature !== ''));
     $who = $signed ? format_string((string) $signed[0]->signature, true, ['escape' => false]) : '';
     $mmss = fn(int $s) => intdiv($s, 60) . ':' . str_pad((string) ($s % 60), 2, '0', STR_PAD_LEFT);
@@ -117,6 +117,9 @@ if ($parts) {
             'parturl' => digital::file_url($p),
             'parttitle' => voices::part_title((int) $p->part),
             'partname' => voices::part_name($p),
+            'partsound' => $soundof($p),
+            'partsoundname' => $soundof($p) !== '' ? $str('voicebackdrop' . $soundof($p)) : '',
+            'partsmall' => voices::part_name($p) !== '' || $soundof($p) !== '',
             'partnum' => $p->part ? (string) $p->part : '·',
             'partseconds' => (int) $p->seconds,
             'partduration' => $p->seconds ? $mmss((int) $p->seconds) : '',
@@ -124,9 +127,11 @@ if ($parts) {
             'partheard' => $i < $index,
             'partcurrent' => (int) $p->id === $start,
         ], $parts, array_keys($parts)),
-        'backdrop' => $sound ? $sound + [
-            'bdon' => $str('readingbackdropunder', $str('voicebackdropthe' . $first->backdrop)),
-            'bdoff' => $str('voicebackdropnone'),
+        // Each part with the sound its reader chose; whoever listens may take another for themselves.
+        'backdrop' => $sounds ? [
+            'bdnow' => $soundof($current) !== '' ? $str('readingbackdropunder', $str('voicebackdropthe' . $soundof($current)))
+                : $str('voicebackdropnone'),
+            'bdother' => $str('readingothersound'),
         ] : null,
     ];
 }
@@ -175,13 +180,19 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
         'sesskey' => sesskey(),
         'item' => $reading ? (int) $parts[0]->id : (int) $item->id,
         'start' => $reading ? $start : 0,
+        'who' => $reading ? $who : '',
+        'sounds' => $reading ? array_map(fn($key, $files) => $files + ['key' => $key, 'name' => $str('voicebackdrop' . $key),
+            'the' => $str('voicebackdropthe' . $key)], array_keys(voices::backdrops()), voices::backdrops()) : [],
         'at' => $reading ? $at : 0,
         'position' => $place['position'],
         'bookmarks' => $place['bookmarks'],
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage'), 'readingnow' => $str('readingnow'),
             'readingnext' => $str('readingnext'), 'readingleft' => $str('readingleft'), 'readingplay' => $str('readingplay'),
-            'readingpause' => $str('readingpause'),
+            'readingpause' => $str('readingpause'), 'readingbackdropunder' => $str('readingbackdropunder'),
+            'voicebackdropnone' => $str('voicebackdropnone'), 'readingchose' => $str('readingchose'),
+            'readingchosenone' => $str('readingchosenone'), 'readingtheirs' => $str('readingtheirs'),
+            'readingsomeone' => $str('readingsomeone'), 'readingwith' => $str('readingwith'),
             'readmarkdrop' => $str('readmarkdrop')],
     ],
 ]);

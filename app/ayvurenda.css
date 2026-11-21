@@ -2150,6 +2150,84 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
         margin: 2px 0 0;
     }
 }
+/* Each part with its own soft sound (Enrique, 21 Nov 2026: «¿Y no puede el lector elegir el sonido de fondo que quiere para
+   cada capítulo?»). Its reader chooses it while recording; here it is named under each part, the switch says the one that
+   sounds now, and whoever listens may pick another one for themselves. */
+.ayv .ayv-oye-son {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    margin-inline-start: 10px;
+    color: var(--accent);
+    font-size: .85rem;
+    font-weight: 700;
+}
+.ayv .ayv-oye-son svg {
+    width: 15px;
+    height: 15px;
+}
+.ayv .ayv-oye-fondos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    margin: 14px 0 0;
+}
+.ayv .ayv-oye-fondos .ayv-oye-fondo {
+    margin: 0;
+}
+.ayv .ayv-oye-otro {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 4px;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+}
+.ayv .ayv-oye-otro svg {
+    width: 18px;
+    height: 18px;
+}
+.ayv .ayv-oye-sonidos {
+    margin: 10px 0 0;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--paper2);
+}
+.ayv .ayv-oye-sonidos p {
+    margin: 0 0 10px;
+    font-size: .95rem;
+}
+.ayv .ayv-oye-sonidos > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.ayv .ayv-oye-sonidos button {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font: inherit;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+}
+.ayv .ayv-oye-sonidos button small {
+    font-weight: 400;
+}
+.ayv .ayv-oye-sonidos button[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--surface);
+}
 /* Without JavaScript, the browser's own player; with it, Jujol's. */
 .ayv .ayv-oye.is-js .ayv-oye-nativo { display: none; }
 .ayv .ayv-oye-play .ayv-oye-icono-pausa,
@@ -14008,3 +14086,7 @@ html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
 .ayv .ayv-read-foot progress::-webkit-progress-value { border-radius: 999px; background: var(--coral); }
 .ayv .ayv-read-foot progress::-moz-progress-bar { border-radius: 999px; background: var(--coral); }
 
+/* One's own voices: each part says its sound and changes it with a touch, without recording again. */
+.ayv .ayv-vp-son { margin: .35rem 0 .5rem; }
+.ayv .ayv-vp-son summary { display: inline-block; cursor: pointer; font-weight: 700; color: var(--accent); }
+.ayv .ayv-vp-son .ayv-vp-chips { margin-top: .5rem; }

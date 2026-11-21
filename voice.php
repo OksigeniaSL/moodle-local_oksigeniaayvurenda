@@ -104,7 +104,19 @@ $state = [];
 foreach ($reading as $part) {
     $state[(int) $part->part] = $part->status === 'published' || ($state[(int) $part->part] ?? '') === 'done' ? 'done' : 'waiting';
 }
-$chip = fn(int $n) => ['chipvalue' => $n, 'chiptitle' => voices::part_title($n),
+// The sound of each part: its own, if recorded; if not, the one of the nearest part before it.
+$own = [];
+foreach ($reading as $part) {
+    $own[(int) $part->part] = (string) ($part->backdrop ?? '');
+}
+$soundof = function (int $n) use ($own): string {
+    if (array_key_exists($n, $own)) {
+        return $own[$n];
+    }
+    $before = array_filter(array_keys($own), fn($k) => $k < $n);
+    return $before ? $own[max($before)] : '';
+};
+$chip = fn(int $n) => ['chipvalue' => $n, 'chiptitle' => voices::part_title($n), 'chipsound' => $soundof($n),
     'chiplabel' => $n ? (string) $n : voices::part_title(0),
     'chipdone' => ($state[$n] ?? '') === 'done', 'chipwaiting' => ($state[$n] ?? '') === 'waiting', 'chipchecked' => $n === $next,
     'chipstate' => isset($state[$n]) ? $str($state[$n] === 'done' ? 'voicepartdone' : 'voicepartwaiting') : ''];
@@ -126,9 +138,9 @@ $parts = [
 ];
 // The soft sound under the whole reading, if the site has any: chosen with a touch, heard for a moment.
 $sounds = voices::backdrops();
-$current = $reading ? (string) ($reading[0]->backdrop ?? '') : '';
+$current = $soundof($next);
 $backdrops = $sounds ? [
-    'backdropwhich' => $str('voicebackdropwhich'),
+    'backdropwhich' => $str('voicebackdropforpart', voices::part_title($next)),
     'backdrophint' => $str('voicebackdrophint'),
     'options' => array_merge(
         [['bdkey' => '', 'bdogg' => '', 'bdm4a' => '', 'bdlabel' => $str('voicebackdropnone'), 'bdchecked' => $current === '']],
@@ -141,7 +153,18 @@ $recorded = array_merge($reading, array_values(array_filter(
     voices::mine($recordid, $library, (int) $USER->id),
     fn($v) => $v->part === null
 )));
+// Each part says its sound and changes it with a touch, without recording again.
+$soundsays = fn(string $key) => $key !== '' && isset($sounds[$key])
+    ? $str('voicemysound', \core_text::strtolower($str('voicebackdrop' . $key))) : $str('voicebackdropnone');
 $mine = array_map(fn($v) => [
+    'sound' => $v->part !== null && $sounds,
+    'soundsays' => $soundsays((string) $v->backdrop),
+    'soundoptions' => array_merge(
+        [['sokey' => '', 'sosays' => $str('voicebackdropnone'), 'solabel' => $str('voicebackdropnone'),
+            'sochecked' => (string) $v->backdrop === '']],
+        array_map(fn($key) => ['sokey' => $key, 'sosays' => $soundsays($key), 'solabel' => $str('voicebackdrop' . $key),
+            'sochecked' => (string) $v->backdrop === $key], array_keys($sounds))
+    ),
     'id' => (int) $v->id,
     'title' => voices::part_label($v) . ((string) $v->signature !== '' ? ' · ' . $v->signature : ''),
     'url' => digital::file_url($v),
@@ -235,6 +258,6 @@ shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksi
         'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicesent'),
             'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
             'voicelength' => $str('voicelength'), 'copied' => $str('voiceinvitecopied'), 'readpage' => $str('readpage'),
-            'voicepartchapter' => $str('voicepartchapter')],
+            'voicepartchapter' => $str('voicepartchapter'), 'voicebackdropforpart' => $str('voicebackdropforpart')],
     ],
 ]);

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0 (2026-11-21)
+
+- **Each part of a reading has its own soft sound** (Enrique: «can't the reader choose the background sound they want
+  for each chapter?»). While recording, the sound is the chosen part's, and an unchosen one takes the part before's; in
+  «Your voices of this book» each part says its sound and changes it with a touch, without recording again.
+- Listening: under each part, its sound; the switch says the one that sounds now and follows the parts, with a short
+  fade between two sounds; between parts, «Next: chapter 3 · with the sea». **«Another sound»**: what the reader chose
+  for this part and the rest, and what is touched changes only for whoever listens, kept in their browser.
+
 ## 1.1.3 (2026-11-21)
 
 - **Recording at night reads well again:** the recorder's plate is light in both modes, and its chips, numbers and

@@ -172,13 +172,17 @@ final class voices_test extends \advanced_testcase {
         $reading = voices::reading((int) $record->id, $library, (int) $teacher->id);
         $this->assertSame([0, 1, 2], array_map(fn($v) => (int) $v->part, $reading));
         $this->assertSame(array_map([voices::class, 'part_title'], [0, 1, 2]), array_column($reading, 'title'));
-        $this->assertSame(['mar'], array_values(array_unique(array_column($reading, 'backdrop'))), 'one sound, the whole reading');
+        $this->assertSame([null, 'mar', 'mar'], array_column($reading, 'backdrop'), 'each part its sound, or the one before');
         $this->assertSame(3, voices::next_part($reading));
-        voices::set_backdrop((int) $record->id, $library, (int) $teacher->id, 'ruido');
-        $this->assertSame([null], array_values(array_unique(array_column(
+        $this->assertSame('mar', voices::backdrop_before((int) $record->id, $library, (int) $teacher->id, 3));
+        $this->assertTrue(voices::set_backdrop((int) $reading[2]->id, $library, (int) $teacher->id, 'lluvia'));
+        $stranger = (int) $reader->userid + 1000;
+        $this->assertFalse(voices::set_backdrop((int) $reading[2]->id, $library, $stranger, 'mar'), 'only its reader');
+        voices::set_backdrop((int) $reading[1]->id, $library, (int) $teacher->id, 'ruido');
+        $this->assertSame([null, null, 'lluvia'], array_column(
             voices::reading((int) $record->id, $library, (int) $teacher->id),
             'backdrop'
-        ))), 'what is not a sound of the list is none');
+        ), 'what is not a sound of the list is none');
 
         // Chapter 1 read again: the old one stays until the new one is approved, and then goes.
         voices::approve($opening, $library, ['licence' => 'rights', 'audience' => ['students']]);

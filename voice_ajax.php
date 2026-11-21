@@ -42,15 +42,14 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
-// The soft sound under someone's reading, chosen with a touch: it is kept at once.
+// The soft sound under one part someone recorded, changed with a touch: it is kept at once.
 if ($viewer['who'] !== 'nobody' && optional_param('do', '', PARAM_ALPHA) === 'backdrop') {
-    voices::set_backdrop(
-        required_param('record', PARAM_INT),
+    echo json_encode(['ok' => voices::set_backdrop(
+        required_param('item', PARAM_INT),
         $library,
         (int) $USER->id,
         optional_param('backdrop', '', PARAM_ALPHA)
-    );
-    echo json_encode(['ok' => true]);
+    )]);
     die;
 }
 if ($viewer['who'] === 'nobody' || empty($_FILES['voice']['tmp_name']) || !is_uploaded_file($_FILES['voice']['tmp_name'])) {

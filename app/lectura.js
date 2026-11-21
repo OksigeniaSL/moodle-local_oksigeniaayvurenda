@@ -144,24 +144,61 @@
         nowName.textContent = name ? '«' + name + '»' : '';
     };
 
-    // The soft sound: low, from part to part, faded in and out; whoever listens may take it away, and it stays away.
+    // Each part's soft sound (Enrique, 21 Nov 2026): the one its reader chose, or the one whoever listens took for that
+    // part, kept in their browser. Low, faded in and out, from part to part; the switch says which one and takes them away.
     var sound = document.getElementById('ayv-lectura-fondo');
     var toggle = document.getElementById('ayv-oye-fondo');
+    var other = document.getElementById('ayv-oye-otro');
+    var panel = document.getElementById('ayv-oye-sonidos');
+    var sounds = {};
+    (config.sounds || []).forEach(function(s) {
+        sounds[s.key] = s;
+    });
     // Thirty below the voice (Enrique, 21 Nov 2026, after hearing it at 8 to 34): the sounds come at −24 LUFS and the voice
     // of a browser near −20, so −26 dB.
     var LOW = 0.05;
-    var stored = 'ayv-lectura-sin-fondo';
-    var wanted = true;
-    try {
-        wanted = window.localStorage.getItem(stored) !== '1';
-    } catch (e) {
-        wanted = true;
-    }
+    var get = function(key) {
+        try {
+            return window.localStorage.getItem(key);
+        } catch (e) {
+            return null;
+        }
+    };
+    var put = function(key, value) {
+        try {
+            if (value === null) {
+                window.localStorage.removeItem(key);
+            } else {
+                window.localStorage.setItem(key, value);
+            }
+        } catch (e) {
+            return;
+        }
+    };
+    var mine = function(id) {
+        return 'ayv-lectura-fondo-' + id;
+    };
+    var wanted = get('ayv-lectura-sin-fondo') !== '1';
+    var theirs = function(id) {
+        var b = button(id);
+        return b ? b.getAttribute('data-sound') || '' : '';
+    };
+    var soundOf = function(id) {
+        var chosen = get(mine(id));
+        var key = chosen === null ? theirs(id) : (chosen === 'none' ? '' : chosen);
+        return sounds[key] ? key : '';
+    };
+    var fill = function(text, values) {
+        return (text || '').replace(/\{\$a->(\w+)\}|\{\$a\}/g, function(found, key) {
+            return key ? values[key] : values.a;
+        });
+    };
+    var playing = '';
     var fade = null;
     var fadeTo = function(target, then) {
         clearInterval(fade);
         fade = setInterval(function() {
-            var step = target > sound.volume ? 0.05 : -0.05;
+            var step = target > sound.volume ? 0.01 : -0.01;
             var value = sound.volume + step;
             if ((step > 0 && value >= target) || (step < 0 && value <= target)) {
                 sound.volume = Math.max(0, Math.min(1, target));
@@ -172,18 +209,15 @@
                 return;
             }
             sound.volume = Math.max(0, Math.min(1, value));
-        }, 80);
+        }, 60);
     };
-    var soundOn = function() {
-        if (!sound || !wanted) {
-            return;
-        }
-        if (sound.paused) {
-            sound.volume = 0;
-            sound.play().catch(function() {
-                return null;
-            });
-        }
+    var begin = function(key) {
+        playing = key;
+        sound.src = sound.canPlayType('audio/ogg; codecs=opus') ? sounds[key].ogg : sounds[key].m4a;
+        sound.volume = 0;
+        sound.play().catch(function() {
+            return null;
+        });
         fadeTo(LOW);
     };
     var soundOff = function() {
@@ -193,27 +227,90 @@
             });
         }
     };
-    var sayToggle = function() {
-        if (toggle) {
-            toggle.setAttribute('aria-pressed', wanted ? 'true' : 'false');
-            toggle.querySelector('.ayv-oye-fondo-texto').textContent = toggle.getAttribute(wanted ? 'data-on' : 'data-off');
+    // From one part to the next: the same sound goes on; another one comes in after a short fade.
+    var soundOn = function() {
+        if (!sound) {
+            return;
         }
+        var key = wanted ? soundOf(current) : '';
+        if (!key) {
+            soundOff();
+        } else if (key === playing && !sound.paused) {
+            fadeTo(LOW);
+        } else if (!sound.paused) {
+            fadeTo(0, function() {
+                begin(key);
+            });
+        } else {
+            begin(key);
+        }
+    };
+    var sayToggle = function() {
+        if (!toggle) {
+            return;
+        }
+        var key = soundOf(current);
+        toggle.setAttribute('aria-pressed', wanted && key ? 'true' : 'false');
+        toggle.querySelector('.ayv-oye-fondo-texto').textContent = wanted && key
+            ? say(str.readingbackdropunder, sounds[key].the) : (str.voicebackdropnone || '');
+    };
+    // «Otro sonido»: what its reader chose for this part, and the rest; what is touched changes only for whoever listens.
+    var drawPanel = function() {
+        if (!panel || panel.hidden) {
+            return;
+        }
+        var key = sounds[theirs(current)] ? theirs(current) : '';
+        var who = config.who || str.readingsomeone || '';
+        document.getElementById('ayv-oye-sonidos-dice').textContent = key
+            ? fill(str.readingchose, {who: who, sound: sounds[key].the}) : fill(str.readingchosenone, {a: who});
+        var box = document.getElementById('ayv-oye-sonidos-botones');
+        box.textContent = '';
+        var now = wanted ? soundOf(current) : '';
+        var keys = Object.keys(sounds).filter(function(k) {
+            return k !== key;
+        });
+        (key ? [key] : []).concat(keys, ['']).forEach(function(k) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = k ? sounds[k].name : (str.voicebackdropnone || '');
+            if (k && k === key) {
+                var small = document.createElement('small');
+                small.textContent = ' ' + say(str.readingtheirs, who);
+                b.appendChild(small);
+            }
+            b.setAttribute('aria-pressed', k === now ? 'true' : 'false');
+            b.addEventListener('click', function() {
+                put(mine(current), k === key ? null : (k || 'none'));
+                wanted = true;
+                put('ayv-lectura-sin-fondo', null);
+                sayToggle();
+                drawPanel();
+                if (!voice.paused) {
+                    soundOn();
+                }
+            });
+            box.appendChild(b);
+        });
     };
     if (toggle) {
         sayToggle();
         toggle.addEventListener('click', function() {
             wanted = !wanted;
-            try {
-                window.localStorage.setItem(stored, wanted ? '0' : '1');
-            } catch (e) {
-                wanted = !!wanted;
-            }
+            put('ayv-lectura-sin-fondo', wanted ? null : '1');
             sayToggle();
+            drawPanel();
             if (wanted && !voice.paused) {
                 soundOn();
             } else {
                 soundOff();
             }
+        });
+    }
+    if (other && panel) {
+        other.addEventListener('click', function() {
+            panel.hidden = !panel.hidden;
+            other.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+            drawPanel();
         });
     }
 
@@ -236,6 +333,8 @@
         }
         tell();
         mark();
+        sayToggle();
+        drawPanel();
         if (go) {
             voice.play().catch(function() {
                 return null;
@@ -246,8 +345,10 @@
     var countTo = function(id) {
         var b = button(id);
         var name = b.getAttribute('data-name');
+        var key = wanted ? soundOf(id) : '';
         document.getElementById('ayv-oye-sigue-texto').textContent = say(str.readingnext,
-            b.getAttribute('data-title').toLowerCase() + (name ? ', «' + name + '»' : ''));
+            b.getAttribute('data-title').toLowerCase() + (name ? ', «' + name + '»' : ''))
+            + (key ? ' · ' + say(str.readingwith, sounds[key].the) : '');
         var count = document.getElementById('ayv-oye-cuenta');
         var remaining = 3;
         count.textContent = String(remaining);

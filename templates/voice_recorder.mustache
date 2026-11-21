@@ -34,12 +34,12 @@
             "partschapter": "Capítulo", "partsmore": "Más", "partsother": "Otra cosa", "partsname": "Título de esta parte",
             "partsnamehint": "si quieres", "barpart": "Capítulo 2", "partsopening": {"chipvalue": 0,
                 "chiptitle": "Presentación", "chiplabel": "Presentación", "chipdone": true, "chipwaiting": false,
-                "chipchecked": false, "chipstate": "ya grabada"},
+                "chipchecked": false, "chipstate": "ya grabada", "chipsound": "mar"},
             "chips": [{"chipvalue": 1, "chiptitle": "Capítulo 1", "chiplabel": "1", "chipdone": false, "chipwaiting": true,
-                "chipchecked": false, "chipstate": "esperando a que la aprueben"},
+                "chipchecked": false, "chipstate": "esperando a que la aprueben", "chipsound": "mar"},
                 {"chipvalue": 2, "chiptitle": "Capítulo 2", "chiplabel": "2", "chipdone": false, "chipwaiting": false,
-                "chipchecked": true, "chipstate": ""}]},
-        "backdrops": {"backdropwhich": "Un fondo bajito", "backdrophint": "suena debajo de tu voz; quien escucha lo puede quitar",
+                "chipchecked": true, "chipstate": "", "chipsound": ""}]},
+        "backdrops": {"backdropwhich": "Un fondo bajito para «Capítulo 2», si quieres", "backdrophint": "suena debajo de tu voz; quien escucha lo puede quitar",
             "options": [{"bdkey": "", "bdogg": "", "bdm4a": "", "bdlabel": "Sin fondo", "bdchecked": true},
                 {"bdkey": "mar", "bdogg": "https://example.com/mar.ogg", "bdm4a": "https://example.com/mar.m4a",
                 "bdlabel": "Mar", "bdchecked": false}]}
@@ -51,9 +51,9 @@
         <p class="ayv-vp-title" id="ayv-vp-t"><b>{{partswhich}}</b></p>
         <p class="ayv-field-hint ayv-vp-progress">{{partsprogress}}</p>
         <div class="ayv-vp-chips" id="ayv-vp-chips-parts">
-            {{#partsopening}}<label class="ayv-vp-chip{{#chipdone}} is-done{{/chipdone}}{{#chipwaiting}} is-waiting{{/chipwaiting}}"><input type="radio" name="ayv-part" value="{{chipvalue}}" data-title="{{chiptitle}}"{{#chipchecked}} checked{{/chipchecked}}><span class="ayv-vp-word">{{chiplabel}}</span>{{#chipstate}}<span class="ayv-sr"> · {{chipstate}}</span>{{/chipstate}}</label>{{/partsopening}}
+            {{#partsopening}}<label class="ayv-vp-chip{{#chipdone}} is-done{{/chipdone}}{{#chipwaiting}} is-waiting{{/chipwaiting}}"><input type="radio" name="ayv-part" value="{{chipvalue}}" data-title="{{chiptitle}}" data-sound="{{chipsound}}"{{#chipchecked}} checked{{/chipchecked}}><span class="ayv-vp-word">{{chiplabel}}</span>{{#chipstate}}<span class="ayv-sr"> · {{chipstate}}</span>{{/chipstate}}</label>{{/partsopening}}
             <span class="ayv-vp-label" aria-hidden="true">{{partschapter}}</span>
-            {{#chips}}<label class="ayv-vp-chip ayv-vp-number{{#chipdone}} is-done{{/chipdone}}{{#chipwaiting}} is-waiting{{/chipwaiting}}"><input type="radio" name="ayv-part" value="{{chipvalue}}" data-title="{{chiptitle}}" aria-label="{{chiptitle}}{{#chipstate}} · {{chipstate}}{{/chipstate}}"{{#chipchecked}} checked{{/chipchecked}}><span class="ayv-vp-word" aria-hidden="true">{{chiplabel}}</span></label>{{/chips}}
+            {{#chips}}<label class="ayv-vp-chip ayv-vp-number{{#chipdone}} is-done{{/chipdone}}{{#chipwaiting}} is-waiting{{/chipwaiting}}"><input type="radio" name="ayv-part" value="{{chipvalue}}" data-title="{{chiptitle}}" data-sound="{{chipsound}}" aria-label="{{chiptitle}}{{#chipstate}} · {{chipstate}}{{/chipstate}}"{{#chipchecked}} checked{{/chipchecked}}><span class="ayv-vp-word" aria-hidden="true">{{chiplabel}}</span></label>{{/chips}}
             <button type="button" class="ayv-vp-more-button" id="ayv-vp-more">{{> local_oksigeniaayvurenda/icon_plus}}<span>{{partsmore}}</span></button>
             <label class="ayv-vp-chip"><input type="radio" name="ayv-part" value="-1" data-title=""><span class="ayv-vp-word">{{partsother}}</span></label>
         </div>
@@ -61,7 +61,7 @@
     {{/parts}}
     {{#backdrops}}
     <div class="ayv-vp ayv-vp-backdrops" id="ayv-vp-backdrops" role="radiogroup" aria-labelledby="ayv-vp-bt">
-        <p class="ayv-vp-title" id="ayv-vp-bt"><b>{{backdropwhich}}</b> <span class="ayv-field-hint">{{backdrophint}}</span></p>
+        <p class="ayv-vp-title" id="ayv-vp-bt"><b id="ayv-vp-bt-word">{{backdropwhich}}</b> <span class="ayv-field-hint">{{backdrophint}}</span></p>
         <div class="ayv-vp-chips">
             {{#options}}<label class="ayv-vp-chip"><input type="radio" name="ayv-backdrop" value="{{bdkey}}" data-ogg="{{bdogg}}" data-m4a="{{bdm4a}}"{{#bdchecked}} checked{{/bdchecked}}><span class="ayv-vp-word">{{bdlabel}}</span></label>{{/options}}
         </div>

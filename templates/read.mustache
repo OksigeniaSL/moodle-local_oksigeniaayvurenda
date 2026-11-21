@@ -37,12 +37,13 @@
             "partsheading": "Las partes", "note": "Al acabar una parte empieza la siguiente.",
             "parts": [{"partid": 11, "parturl": "https://example.com/presentacion.webm", "parttitle": "Presentación",
                 "partname": "", "partnum": "·", "partseconds": 66, "partduration": "1:06", "partflex": 66,
+                "partsound": "", "partsoundname": "", "partsmall": false,
                 "partheard": true, "partcurrent": false},
                 {"partid": 12, "parturl": "https://example.com/capitulo-1.webm", "parttitle": "Capítulo 1",
                 "partname": "La barca de la abuela", "partnum": "1", "partseconds": 462, "partduration": "7:42",
+                "partsound": "mar", "partsoundname": "Mar", "partsmall": true,
                 "partflex": 462, "partheard": false, "partcurrent": true}],
-            "backdrop": {"ogg": "https://example.com/lluvia.ogg", "m4a": "https://example.com/lluvia.m4a",
-                "bdon": "Debajo suena la lluvia, muy bajito", "bdoff": "Sin fondo"} }
+            "backdrop": {"bdnow": "Debajo suena el mar, muy bajito", "bdother": "Otro sonido"} }
     }
 }}
 <section class="ayv-read">
@@ -68,12 +69,16 @@
             <div class="ayv-oye-todo" aria-hidden="true">{{#parts}}<span data-id="{{partid}}" style="flex:{{partflex}}"></span>{{/parts}}<small id="ayv-oye-quedan"></small></div>
         </div>
         <p class="ayv-oye-sigue" id="ayv-oye-sigue" role="status" hidden><span class="ayv-oye-cuenta" id="ayv-oye-cuenta">3</span><span id="ayv-oye-sigue-texto"></span><button type="button" class="ayv-button ayv-button-quiet" id="ayv-oye-ahora-no">{{notnow}}</button></p>
-        {{#backdrop}}<audio id="ayv-lectura-fondo" loop preload="none"><source src="{{ogg}}" type="audio/ogg; codecs=opus"><source src="{{m4a}}" type="audio/mp4"></audio>
-        <button type="button" class="ayv-oye-fondo" id="ayv-oye-fondo" aria-pressed="true" data-on="{{bdon}}" data-off="{{bdoff}}"><span class="ayv-oye-int" aria-hidden="true"></span><span class="ayv-oye-fondo-texto">{{bdon}}</span></button>{{/backdrop}}
+        {{#backdrop}}<audio id="ayv-lectura-fondo" loop preload="none"></audio>
+        <div class="ayv-oye-fondos">
+            <button type="button" class="ayv-oye-fondo" id="ayv-oye-fondo" aria-pressed="true"><span class="ayv-oye-int" aria-hidden="true"></span><span class="ayv-oye-fondo-texto">{{bdnow}}</span></button>
+            <button type="button" class="ayv-oye-otro" id="ayv-oye-otro" aria-expanded="false" aria-controls="ayv-oye-sonidos"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg>{{bdother}}</button>
+        </div>
+        <div class="ayv-oye-sonidos" id="ayv-oye-sonidos" hidden><p id="ayv-oye-sonidos-dice"></p><div id="ayv-oye-sonidos-botones"></div></div>{{/backdrop}}
         <div class="ayv-oye-indice">
             <h2>{{partsheading}}</h2>
             <ol class="ayv-oye-partes">
-                {{#parts}}<li><button type="button" class="ayv-oye-parte{{#partheard}} is-oida{{/partheard}}" data-id="{{partid}}" data-url="{{parturl}}" data-seconds="{{partseconds}}" data-title="{{parttitle}}" data-name="{{partname}}" data-num="{{partnum}}"{{#partcurrent}} aria-current="true"{{/partcurrent}}><span class="ayv-oye-num">{{#partcurrent}}<span class="ayv-oye-barras" aria-hidden="true"><i></i><i></i><i></i></span>{{/partcurrent}}{{^partcurrent}}{{#partheard}}✓{{/partheard}}{{^partheard}}{{partnum}}{{/partheard}}{{/partcurrent}}</span><span class="ayv-oye-tit">{{parttitle}}{{#partname}}<small>{{partname}}</small>{{/partname}}</span><span class="ayv-oye-puntos" aria-hidden="true"></span><span class="ayv-oye-dura">{{partduration}}</span></button></li>{{/parts}}
+                {{#parts}}<li><button type="button" class="ayv-oye-parte{{#partheard}} is-oida{{/partheard}}" data-id="{{partid}}" data-url="{{parturl}}" data-seconds="{{partseconds}}" data-title="{{parttitle}}" data-name="{{partname}}" data-num="{{partnum}}" data-sound="{{partsound}}"{{#partcurrent}} aria-current="true"{{/partcurrent}}><span class="ayv-oye-num">{{#partcurrent}}<span class="ayv-oye-barras" aria-hidden="true"><i></i><i></i><i></i></span>{{/partcurrent}}{{^partcurrent}}{{#partheard}}✓{{/partheard}}{{^partheard}}{{partnum}}{{/partheard}}{{/partcurrent}}</span><span class="ayv-oye-tit">{{parttitle}}{{#partsmall}}<small>{{partname}}{{#partsound}}<span class="ayv-oye-son"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg>{{partsoundname}}</span>{{/partsound}}</small>{{/partsmall}}</span><span class="ayv-oye-puntos" aria-hidden="true"></span><span class="ayv-oye-dura">{{partduration}}</span></button></li>{{/parts}}
             </ol>
             <p class="ayv-oye-nota">{{note}}</p>
         </div>

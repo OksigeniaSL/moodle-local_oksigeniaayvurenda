@@ -106,6 +106,17 @@
         if (barPart) {
             barPart.textContent = other ? whatField.getAttribute('data-other') : checked.getAttribute('data-title');
         }
+        // Each part has its sound: the one it has, or the one of the part before it.
+        var which = document.getElementById('ayv-vp-bt-word');
+        if (!other && which) {
+            which.textContent = (str.voicebackdropforpart || '{$a}').replace('{$a}', function() {
+                return checked.getAttribute('data-title');
+            });
+            var sound = document.querySelector('input[name="ayv-backdrop"][value="' + (checked.getAttribute('data-sound') || '') + '"]');
+            if (sound) {
+                sound.checked = true;
+            }
+        }
     };
     document.querySelectorAll('input[name="ayv-part"]').forEach(function(radio) {
         radio.addEventListener('change', showPart);
@@ -137,7 +148,7 @@
             }
         });
     }
-    // The soft sound under the reading: a touch chooses it, keeps it and lets it be heard for a moment.
+    // The soft sound under the part about to be read: a touch chooses it and lets it be heard for a moment.
     var sample = null;
     var hush = function() {
         if (sample) {
@@ -169,11 +180,18 @@
                     }
                 }, 6000);
             }
+        });
+    });
+    // A part already recorded changes its sound with a touch, without recording again: it plays apart from the voice.
+    document.querySelectorAll('.ayv-vp-son [data-item] input').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var box = radio.closest('.ayv-vp-son');
+            box.querySelector('summary').textContent = radio.getAttribute('data-says');
             if (window.fetch && config.sendurl) {
                 var body = new FormData();
                 body.append('sesskey', config.sesskey);
                 body.append('library', config.library);
-                body.append('record', config.record);
+                body.append('item', radio.closest('[data-item]').getAttribute('data-item'));
                 body.append('do', 'backdrop');
                 body.append('backdrop', radio.value);
                 fetch(config.sendurl, {method: 'POST', credentials: 'same-origin', body: body}).catch(function() {

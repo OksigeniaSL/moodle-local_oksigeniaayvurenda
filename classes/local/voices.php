@@ -70,7 +70,7 @@ final class voices {
      * @param int|null $now
      * @param string $signature How its author wants it signed, if at all.
      * @param int|null $part Which part of the book, for a reading in parts: 0 the opening, from 1 the chapters.
-     * @param string|null $backdrop The soft sound under the whole reading, '' none; null leaves it as it was.
+     * @param string|null $backdrop The soft sound under this part, '' none; null takes the one of the part before.
      * @param int $seconds How long it lasts, as the recorder measured it; 0 if it does not know.
      * @return int
      */
@@ -111,10 +111,8 @@ final class voices {
             // A recording lasts twenty minutes at most, and a little more with its pauses' rounding.
             'seconds' => $seconds > 0 ? min($seconds, 25 * 60) : null]);
         if ($part !== null) {
-            // The reading keeps the sound it had, or takes the one chosen now.
-            $siblings = self::reading($recordid, $library, $userid);
-            $kept = $siblings ? (string) ($siblings[0]->backdrop ?? '') : '';
-            self::set_backdrop($recordid, $library, $userid, $backdrop ?? $kept);
+            // Each part has its sound (Enrique, 21 Nov 2026); unchosen, the one of the part before it.
+            self::set_backdrop($id, $library, $userid, $backdrop ?? self::backdrop_before($recordid, $library, $userid, $part));
         }
         if ($userid) {
             self::tell_received(digital::get($id, $library), $userid);
@@ -718,23 +716,38 @@ final class voices {
     }
 
     /**
-     * Chooses the soft sound under someone's whole reading of a book: one of BACKDROPS, or '' for none.
+     * Chooses the soft sound under one part of someone's reading: one of BACKDROPS, or '' for none. It plays apart from the
+     * voice, so it changes without recording again; only whoever recorded it changes it.
+     *
+     * @param int $id The voice.
+     * @param \stdClass $library
+     * @param int $userid
+     * @param string $backdrop
+     * @return bool Whether it was theirs to change.
+     */
+    public static function set_backdrop(int $id, \stdClass $library, int $userid, string $backdrop): bool {
+        global $DB;
+        $item = $DB->get_record(self::T . 'digital', ['id' => $id, 'entityid' => $library->entityid, 'kind' => 'voice']);
+        if (!$item || (int) $item->createdby !== $userid || $item->part === null) {
+            return false;
+        }
+        $backdrop = in_array($backdrop, self::BACKDROPS, true) ? $backdrop : null;
+        $DB->set_field(self::T . 'digital', 'backdrop', $backdrop, ['id' => $id]);
+        return true;
+    }
+
+    /**
+     * The soft sound a part takes when its reader chooses none: the one of the nearest part before it.
      *
      * @param int $recordid
      * @param \stdClass $library
      * @param int $userid
-     * @param string $backdrop
+     * @param int $part
+     * @return string '' for none.
      */
-    public static function set_backdrop(int $recordid, \stdClass $library, int $userid, string $backdrop): void {
-        global $DB;
-        $backdrop = in_array($backdrop, self::BACKDROPS, true) ? $backdrop : null;
-        $DB->set_field_select(
-            self::T . 'digital',
-            'backdrop',
-            $backdrop,
-            "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL",
-            ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $userid]
-        );
+    public static function backdrop_before(int $recordid, \stdClass $library, int $userid, int $part): string {
+        $before = array_values(array_filter(self::reading($recordid, $library, $userid), fn($v) => (int) $v->part < $part));
+        return $before ? (string) ($before[count($before) - 1]->backdrop ?? '') : '';
     }
 
     /**
