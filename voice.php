@@ -97,12 +97,53 @@ if (data_submitted() && confirm_sesskey() && optional_param('do', '', PARAM_ALPH
         $notice = $str('voicedeleted');
     }
 }
+// A long book is read in parts: its chapters as chips, the next one ready, and what is done and what waits.
+$reading = voices::reading($recordid, $library, (int) $USER->id);
+$next = voices::next_part($reading);
+$state = [];
+foreach ($reading as $part) {
+    $state[(int) $part->part] = $part->status === 'published' || ($state[(int) $part->part] ?? '') === 'done' ? 'done' : 'waiting';
+}
+$chip = fn(int $n) => ['chipvalue' => $n, 'chiptitle' => voices::part_title($n),
+    'chiplabel' => $n ? (string) $n : voices::part_title(0),
+    'chipdone' => ($state[$n] ?? '') === 'done', 'chipwaiting' => ($state[$n] ?? '') === 'waiting', 'chipchecked' => $n === $next,
+    'chipstate' => isset($state[$n]) ? $str($state[$n] === 'done' ? 'voicepartdone' : 'voicepartwaiting') : ''];
+$last = min(voices::LASTPART, max(5, $next + 2, $state ? max(array_keys($state)) + 3 : 0));
+$parts = [
+    'partswhich' => $str('voicepartswhich'),
+    'partsprogress' => !$state ? $str('voicepartsfirst') : $str(
+        count($state) === 1 ? 'voicepartsdoneone' : 'voicepartsdone',
+        (object) ['count' => count($state), 'next' => \core_text::strtolower(voices::part_title($next))]
+    ),
+    'partschapter' => $str('voicepartschapter'),
+    'partsmore' => $str('voicepartsmore'),
+    'partsother' => $str('voicepartsother'),
+    'partsopening' => $chip(0),
+    'chips' => array_map($chip, range(1, $last)),
+];
+// The soft sound under the whole reading, if the site has any: chosen with a touch, heard for a moment.
+$sounds = voices::backdrops();
+$current = $reading ? (string) ($reading[0]->backdrop ?? '') : '';
+$backdrops = $sounds ? [
+    'backdropwhich' => $str('voicebackdropwhich'),
+    'backdrophint' => $str('voicebackdrophint'),
+    'options' => array_merge(
+        [['bdkey' => '', 'bdogg' => '', 'bdm4a' => '', 'bdlabel' => $str('voicebackdropnone'), 'bdchecked' => $current === '']],
+        array_map(fn($key, $files) => ['bdkey' => $key, 'bdogg' => $files['ogg'], 'bdm4a' => $files['m4a'],
+            'bdlabel' => $str('voicebackdrop' . $key), 'bdchecked' => $current === $key], array_keys($sounds), $sounds)
+    ),
+] : null;
+// What this person recorded of the book: the reading in the book's order, then the rest.
+$recorded = array_merge($reading, array_values(array_filter(
+    voices::mine($recordid, $library, (int) $USER->id),
+    fn($v) => $v->part === null
+)));
 $mine = array_map(fn($v) => [
     'id' => (int) $v->id,
     'title' => (string) $v->title . ((string) $v->signature !== '' ? ' · ' . $v->signature : ''),
     'url' => digital::file_url($v),
     'state' => $str($v->status === 'pending' ? 'voicepending' : 'voiceapproved'),
-], voices::mine($recordid, $library, (int) $USER->id));
+], $recorded);
 $data = [
     'heading' => $str('voicetitle', $found['record']->title),
     'how' => $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'voicehow')),
@@ -118,6 +159,8 @@ $data = [
     'children' => array_map(fn($id, $label) => ['id' => $id, 'label' => $label], array_keys($children), $children),
     'haschildren' => (bool) $children,
     'invites' => [],
+    'parts' => $parts,
+    'backdrops' => $backdrops,
 ];
 // The text to read from, if the book has one this person may open; if not, the paper book.
 $text = voices::text_of($recordid, $library, $viewer);
@@ -167,7 +210,7 @@ foreach (
         'voicewhathint', 'voicesend', 'voicemine',
         'voicedelete', 'voicenomic', 'backtorecord', 'voiceinvitetitle', 'voiceinvitehint', 'voiceinvitename',
         'voiceinvitenamehint', 'voiceinvitemake', 'voicesignature', 'voicesignaturehint', 'voicetextheading', 'voicepaper',
-        'voiceinvitechild', 'voiceinvitechildnone', 'voiceinvitechildhint'] as $key
+        'voiceinvitechild', 'voiceinvitechildnone', 'voiceinvitechildhint', 'voicepause', 'voiceresume'] as $key
 ) {
     $data[$key] = $str($key);
 }
@@ -188,6 +231,7 @@ shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksi
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicesent'),
             'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
-            'voicelength' => $str('voicelength'), 'copied' => $str('voiceinvitecopied'), 'readpage' => $str('readpage')],
+            'voicelength' => $str('voicelength'), 'copied' => $str('voiceinvitecopied'), 'readpage' => $str('readpage'),
+            'voicepartchapter' => $str('voicepartchapter')],
     ],
 ]);

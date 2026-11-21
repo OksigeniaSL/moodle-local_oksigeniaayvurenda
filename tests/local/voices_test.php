@@ -114,6 +114,108 @@ final class voices_test extends \advanced_testcase {
     }
 
     /**
+     * A long book read in parts: each part knows which it is, the next chapter is the first not yet recorded, the whole
+     * reading has one soft sound under it, a part read again replaces the old one once approved, and the listener hears
+     * the parts together, in the book's order. What was named «Capítulo 3» before parts existed finds its place.
+     */
+    public function test_reading_in_parts(): void {
+        global $CFG, $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'El principito']);
+        $teacher = $this->getDataGenerator()->create_user();
+        $reader = $gen->create_reader(['entityid' => $entityid, 'userid' => $teacher->id, 'readertype' => 'teacher']);
+        $path = make_request_directory() . '/voz.webm';
+        $now = time() - HOURSECS;
+        $part = function (
+            ?int $n,
+            int $at,
+            string $title = '',
+            ?string $backdrop = null
+        ) use (
+            $library,
+            $record,
+            $reader,
+            $teacher,
+            $path
+) {
+            file_put_contents($path, 'made-up recording');
+            return voices::record(
+                $library,
+                (int) $record->id,
+                (int) $reader->id,
+                (int) $teacher->id,
+                $path,
+                $title,
+                'webm',
+                $at,
+                '',
+                $n,
+                $backdrop
+            );
+        };
+
+        $this->assertSame(
+            [3, 3, 0, 0, 12, 4, null, null, null, null],
+            array_map([voices::class, 'part_of'], ['Capítulo 3', 'capitulo III', 'Presentación', 'Prólogo del autor', '12',
+                'Chapter 4: The fox', 'unas páginas', 'Capítulo 0', '', 'Vi un fantasma'])
+        );
+
+        $opening = $part(0, $now);
+        $one = $part(1, $now + 10, '', 'mar');
+        $part(2, $now + 20);
+        $reading = voices::reading((int) $record->id, $library, (int) $teacher->id);
+        $this->assertSame([0, 1, 2], array_map(fn($v) => (int) $v->part, $reading));
+        $this->assertSame(array_map([voices::class, 'part_title'], [0, 1, 2]), array_column($reading, 'title'));
+        $this->assertSame(['mar'], array_values(array_unique(array_column($reading, 'backdrop'))), 'one sound, the whole reading');
+        $this->assertSame(3, voices::next_part($reading));
+        voices::set_backdrop((int) $record->id, $library, (int) $teacher->id, 'ruido');
+        $this->assertSame([null], array_values(array_unique(array_column(
+            voices::reading((int) $record->id, $library, (int) $teacher->id),
+            'backdrop'
+        ))), 'what is not a sound of the list is none');
+
+        // Chapter 1 read again: the old one stays until the new one is approved, and then goes.
+        voices::approve($opening, $library, ['licence' => 'rights', 'audience' => ['students']]);
+        voices::approve($one, $library, ['licence' => 'rights', 'audience' => ['students']]);
+        $again = $part(1, $now + 30);
+        $this->assertTrue($DB->record_exists(self::T . 'digital', ['id' => $one]));
+        voices::approve($again, $library, ['licence' => 'rights', 'audience' => ['students']]);
+        $this->assertFalse($DB->record_exists(self::T . 'digital', ['id' => $one]));
+        $this->assertTrue($DB->record_exists(self::T . 'digital', ['id' => $opening]), 'other parts stay');
+
+        // Heard together, in the book's order, at the place of the first; anything else alone.
+        file_put_contents($path, 'made-up recording');
+        $loose = voices::record(
+            $library,
+            (int) $record->id,
+            (int) $reader->id,
+            (int) $teacher->id,
+            $path,
+            'Unas páginas',
+            'webm',
+            $now + 5
+        );
+        $items = array_values($DB->get_records(self::T . 'digital', ['recordid' => $record->id], 'timecreated, id'));
+        $groups = voices::readings($items);
+        $this->assertCount(2, $groups);
+        $this->assertSame([0, 1, 2], array_map(fn($v) => (int) $v->part, $groups[0]['parts']));
+        $this->assertSame((int) $again, (int) $groups[0]['parts'][1]->id);
+        $this->assertSame((int) $loose, (int) $groups[1]['item']->id);
+
+        // A voice named as a part before there were parts finds its place; a family's, through a link, does not.
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        $DB->set_field(self::T . 'digital', 'part', null, ['id' => $again]);
+        $DB->set_field(self::T . 'digital', 'title', 'Capítulo 5', ['id' => $loose]);
+        local_oksigeniaayvurenda_upgrade_parts();
+        $this->assertSame(1, (int) $DB->get_field(self::T . 'digital', 'part', ['id' => $again]));
+        $this->assertSame(5, (int) $DB->get_field(self::T . 'digital', 'part', ['id' => $loose]));
+    }
+
+    /**
      * Who needs their family to share their voice: up to fourteen, by the age band or the stage, whatever kind of reader
      * they are; from fifteen on and grown-ups, nobody else decides (priv-menores 7).
      */

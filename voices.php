@@ -83,9 +83,21 @@ if (data_submitted() && confirm_sesskey()) {
         shell::refuse(get_string('voicenotyours', 'local_oksigeniaayvurenda'), $library);
     }
     if ($do === 'approve') {
-        voices::approve((int) $item->id, $library, ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),
+        $choices = ['licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT),
             'audience' => optional_param_array('audience', [], PARAM_ALPHA),
-            'signature' => optional_param('signature', '', PARAM_TEXT)]);
+            'signature' => optional_param('signature', '', PARAM_TEXT)];
+        // The new parts of one reading, all at once and with the same choices.
+        $together = [$item];
+        if (optional_param('all', 0, PARAM_BOOL) && $item->part !== null && $item->createdby) {
+            $together = array_filter(
+                voices::pending($library, (int) $USER->id),
+                fn($v) => (int) $v->recordid === (int) $item->recordid && (int) $v->createdby === (int) $item->createdby
+                    && $v->part !== null
+            );
+        }
+        foreach ($together as $one) {
+            voices::approve((int) $one->id, $library, $choices);
+        }
         $notice = $str('voiceapprovednow');
     } else if ($do === 'reject') {
         voices::remove($item);
@@ -97,7 +109,15 @@ if (data_submitted() && confirm_sesskey()) {
 }
 $desk = new desk($library, 0);
 $pending = [];
+// The new parts of one person's reading of a book go in one card, in the book's order, approved together.
+$cards = [];
 foreach (voices::pending($library, (int) $USER->id) as $item) {
+    $key = $item->part !== null && $item->createdby ? 'r' . $item->createdby . '-' . $item->recordid : 'i' . $item->id;
+    $cards[$key][] = $item;
+}
+foreach ($cards as $group) {
+    usort($group, fn($a, $b) => [(int) $a->part, (int) $a->timecreated] <=> [(int) $b->part, (int) $b->timecreated]);
+    $item = $group[0];
     $who = $item->readerid ? $desk->reader((int) $item->readerid) : ['name' => '', 'group' => '', 'type' => 'staff'];
     $share = voices::may_share($item);
     // A family who recorded with a link chose who else may hear it: that is the most the approval gives.
@@ -127,7 +147,14 @@ foreach (voices::pending($library, (int) $USER->id) as $item) {
         // Whom what is approved reaches: the little ones, and their family (Jujol).
         'marks' => $item->forlittle ? ['bud' => \local_oksigeniaayvurenda\local\screens::art('carne/flor/capullo'),
             'little' => $str('voicemarklittle'), 'family' => $item->tellfamily ? $str('voicemarkfamily') : ''] : null,
+        'hasparts' => count($group) > 1,
+        'parts' => count($group) > 1 ? array_map(fn($v) => ['partid' => (int) $v->id, 'parttitle' => (string) $v->title,
+            'parturl' => digital::file_url($v)], $group) : [],
+        'approvelabel' => count($group) > 1 ? $str('voiceapproveall', count($group)) : $str('voiceapprove'),
     ];
+    if (count($group) > 1) {
+        $pending[count($pending) - 1]['title'] = $str('voicereadingnew', count($group));
+    }
 }
 $settings = json_decode(
     (string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $library->entityid]),

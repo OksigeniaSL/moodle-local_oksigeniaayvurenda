@@ -636,7 +636,24 @@ final class screens {
         $recordid = (int) $found['record']->id;
         $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
         $items = [];
-        foreach (digital::of_record($recordid, $library, $viewer) as $item) {
+        foreach (voices::readings(digital::of_record($recordid, $library, $viewer)) as $group) {
+            $item = $group['item'];
+            // A reading in parts is one line: who reads it and how many parts, and it opens where its listener was.
+            if ($item->kind === 'voice' && $item->part !== null) {
+                $signed = array_values(array_filter($group['parts'], fn($p) => $p->status === 'published'
+                    && (string) $p->signature !== ''));
+                $who = $signed ? (string) $signed[0]->signature : self::str('digitalreadingname');
+                $waits = (bool) array_filter($group['parts'], fn($p) => $p->status === 'pending');
+                $items[] = [
+                    'label' => (count($group['parts']) === 1 ? $who . ' · ' . $item->title
+                        : self::str('digitalreadingparts', (object) ['who' => $who, 'count' => count($group['parts'])]))
+                        . ($waits ? ' ' . self::str('voicependingshort') : ''),
+                    'action' => self::str('digitalactionaudio'),
+                    'book' => false,
+                    'url' => self::url('read.php', $library, ['id' => $item->id]),
+                ];
+                continue;
+            }
             $label = $item->title !== '' && $item->title !== null ? $item->title : self::str('format' . $item->format);
             // A voice's signature, once someone has read and approved it.
             if ($item->kind === 'voice' && $item->status === 'published' && (string) $item->signature !== '') {
@@ -777,14 +794,15 @@ final class screens {
      *
      * @param string $name
      * @param string $type webp, svg for the drawings used as masks, glb for the models of the island in 3D, or json for
-     *     the puppets' data (a name may then carry one more part, «marionetas/memoria.atlas»).
+     *     the puppets' data (a name may then carry one more part, «marionetas/memoria.atlas»), ogg or m4a for the soft
+     *     sounds under a reading.
      * @return string|null Its address.
      */
     public static function art(string $name, string $type = 'webp'): ?string {
         $dir = \core_component::get_component_directory('local_oksigeniaayvurendaarte');
         if (
             !$dir || !preg_match('#^[a-z0-9-]+(/[a-z0-9-]+(\.[a-z]+)?)*$#', $name)
-                || !in_array($type, ['webp', 'svg', 'glb', 'json', 'jpg', 'png'], true)
+                || !in_array($type, ['webp', 'svg', 'glb', 'json', 'jpg', 'png', 'ogg', 'm4a'], true)
                 || !is_readable($dir . '/pix/' . $name . '.' . $type)
         ) {
             return null;

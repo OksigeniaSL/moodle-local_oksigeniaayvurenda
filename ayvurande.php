@@ -55,11 +55,20 @@ foreach ($found['records'] as $record) {
         'cover' => $record['cover'],
         'hascover' => (bool) $record['cover'],
         'colour' => $record['id'] % 6,
-        'voices' => array_map(fn($voice) => [
-            'label' => trim(((string) $voice->title !== '' ? $voice->title : $str('ayvurandevoice')) .
-                ((string) $voice->signature !== '' ? ' · ' . $voice->signature : '')),
-            'audio' => digital::file_url($voice),
-        ], $record['voices']),
+        // A reading in parts is one line that opens its player; any other voice plays here.
+        'voices' => array_map(fn($group) => $group['item']->part !== null ? [
+            'label' => $str('digitalreadingparts', (object) ['who' => (string) $group['item']->signature !== ''
+                ? (string) $group['item']->signature : $str('digitalreadingname'), 'count' => count($group['parts'])]),
+            'audio' => '',
+            'listen' => $url('read.php', ['id' => $group['item']->id]),
+            'listenlabel' => $str('digitalactionaudio'),
+        ] : [
+            'label' => trim(((string) $group['item']->title !== '' ? $group['item']->title : $str('ayvurandevoice')) .
+                ((string) $group['item']->signature !== '' ? ' · ' . $group['item']->signature : '')),
+            'audio' => digital::file_url($group['item']),
+            'listen' => '',
+            'listenlabel' => '',
+        ], voices::readings($record['voices'])),
     ];
 }
 $data = [

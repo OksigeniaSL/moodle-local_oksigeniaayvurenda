@@ -146,6 +146,26 @@ final class forlittle {
                 $items[$row->recordid] = $row;
             }
         }
+        // A book read in parts starts at its first part the little one may hear.
+        foreach ($items as $recordid => $row) {
+            if ($row->part === null || !$row->createdby) {
+                continue;
+            }
+            $parts = $DB->get_records_select(
+                self::T . 'digital',
+                "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND status = 'published' AND createdby = :userid
+                    AND part IS NOT NULL",
+                ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $row->createdby],
+                'part, timecreated DESC'
+            );
+            foreach ($parts as $part) {
+                if (voices::can_hear($part, $viewer)) {
+                    $items[$recordid] = clone $part;
+                    $items[$recordid]->recordtitle = $row->recordtitle;
+                    break;
+                }
+            }
+        }
         $covers = covers::urls(array_map('intval', array_keys($items)));
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         return array_values(array_map(function ($row) use ($library, $covers, $str) {

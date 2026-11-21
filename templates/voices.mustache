@@ -19,6 +19,8 @@
     Voices waiting for approval, with the family's permission for each minor; for managers, the centre's settings as
     cards with their gestures in sight (settingcard).
 
+    A reading in parts brings its new parts in one card, each to hear and to turn down, and approved together.
+
     Example context (json):
     {
         "heading": "Voces", "intro": "Las que esperan.", "notice": "", "action": "#", "sesskey": "abc", "haspending": true,
@@ -28,7 +30,14 @@
                 "family": "Su familia recibirá el enlace"},
             "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
             "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "Sin permiso, solo su docente",
-            "signature": "La mamá de Ana"}],
+            "signature": "La mamá de Ana", "hasparts": false, "parts": [], "approvelabel": "Aprobar"},
+            {"id": 2, "book": "El principito", "title": "3 partes nuevas de la misma lectura", "who": "Enrique", "url": "#",
+            "share": true, "minor": false, "permission": false, "marks": null,
+            "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
+            "audiences": [{"value": "students", "label": "Alumnos"}], "privatehint": "", "signature": "Enrique",
+            "hasparts": true, "parts": [{"partid": 2, "parttitle": "Presentación", "parturl": "https://example.com/p.webm"},
+                {"partid": 3, "parttitle": "Capítulo 1", "parturl": "https://example.com/c1.webm"}],
+            "approvelabel": "Aprobar las 3"}],
         "manage": true, "infourl": "https://example.com/voicesinfo.php", "savedword": "Guardado",
         "settings": [{"id": "ayv-nr-oyen", "set": "hear", "title": "Quién puede oírlas", "says": "Lo que eligen las familias.",
             "justsaved": false, "notes": [], "dates": null, "presets": null, "currency": null, "link": null, "help": null,
@@ -57,7 +66,13 @@
     <h2 class="ayv-section-title">{{book}}{{#title}} · {{title}}{{/title}}</h2>
     {{#marks}}<p class="ayv-lp-marcas"><span class="ayv-lp-marca">{{#bud}}<img src="{{bud}}" alt="">{{/bud}}{{little}}</span>{{#family}}<span class="ayv-lp-marca ayv-lp-marca-familia"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 5l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg>{{family}}</span>{{/family}}</p>{{/marks}}
     <p>{{who}}</p>
-    <audio class="ayv-media" controls preload="none" src="{{url}}"></audio>
+    {{^hasparts}}<audio class="ayv-media" controls preload="none" src="{{url}}"></audio>{{/hasparts}}
+    {{#hasparts}}<ol class="ayv-vp-review">
+        {{#parts}}<li><p class="ayv-vp-review-title"><b>{{parttitle}}</b></p>
+            <audio class="ayv-media" controls preload="none" src="{{parturl}}"></audio>
+            <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{partid}}">
+                <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></form></li>{{/parts}}
+    </ol>{{/hasparts}}
     {{#minor}}
     <form method="post" action="{{action}}" class="ayv-book-actions"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
         <span class="ayv-field-hint">{{#permission}}{{voicepermissionhas}}{{/permission}}{{^permission}}{{voicepermissionnot}}{{/permission}}</span>
@@ -72,7 +87,8 @@
         {{^share}}<p class="ayv-field-hint">{{privatehint}}</p>{{/share}}
         <label class="ayv-field ayv-field-wide">{{voicesignaturereview}} <span class="ayv-field-hint">{{voicesignaturereviewhint}}</span>
             <input type="text" name="signature" maxlength="60" value="{{signature}}"></label>
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{voiceapprove}}</button>
+        {{#hasparts}}<input type="hidden" name="all" value="1">{{/hasparts}}
+        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="approve">{{approvelabel}}</button>
             <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></p>
     </form>
 </section>

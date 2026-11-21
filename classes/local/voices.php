@@ -51,6 +51,12 @@ final class voices {
     /** @var int Longest signature. */
     public const SIGNATURE = 60;
 
+    /** @var string[] The soft sounds a reading may have under it, in the art package's «fondos», each an ogg and an m4a. */
+    public const BACKDROPS = ['noche', 'mar', 'bosque', 'lluvia', 'hogar', 'musica'];
+
+    /** @var int The last chapter a reading may have. */
+    public const LASTPART = 300;
+
     /**
      * Keeps a recording of a reader, waiting for approval.
      *
@@ -63,6 +69,8 @@ final class voices {
      * @param string $extension Of the recording as the browser made it: webm, ogg or m4a.
      * @param int|null $now
      * @param string $signature How its author wants it signed, if at all.
+     * @param int|null $part Which part of the book, for a reading in parts: 0 the opening, from 1 the chapters.
+     * @param string|null $backdrop The soft sound under the whole reading, '' none; null leaves it as it was.
      * @return int
      */
     public static function record(
@@ -74,11 +82,17 @@ final class voices {
         string $title,
         string $extension = 'webm',
         ?int $now = null,
-        string $signature = ''
+        string $signature = '',
+        ?int $part = null,
+        ?string $backdrop = null
     ): int {
         global $DB;
         plans::require((int) $library->entityid, 'voices');
         $extension = in_array($extension, ['webm', 'ogg', 'm4a'], true) ? $extension : 'webm';
+        $part = $part !== null && $part >= 0 && $part <= self::LASTPART && $userid ? $part : null;
+        if ($part !== null && trim($title) === '') {
+            $title = self::part_title($part);
+        }
         $id = digital::add_file(
             $library,
             $recordid,
@@ -91,7 +105,13 @@ final class voices {
         // The signature waits for approval like the voice: nobody sees it before someone has read it.
         $DB->update_record(self::T . 'digital', (object) ['id' => $id, 'kind' => 'voice', 'format' => 'audio',
             'status' => 'pending', 'readerid' => $readerid ?: null, 'audience' => '',
-            'signature' => self::signature($signature), 'deletetoken' => bin2hex(random_bytes(24))]);
+            'signature' => self::signature($signature), 'deletetoken' => bin2hex(random_bytes(24)), 'part' => $part]);
+        if ($part !== null) {
+            // The reading keeps the sound it had, or takes the one chosen now.
+            $siblings = self::reading($recordid, $library, $userid);
+            $kept = $siblings ? (string) ($siblings[0]->backdrop ?? '') : '';
+            self::set_backdrop($recordid, $library, $userid, $backdrop ?? $kept);
+        }
         if ($userid) {
             self::tell_received(digital::get($id, $library), $userid);
         }
@@ -315,6 +335,20 @@ final class voices {
             'signature' => array_key_exists('signature', $data) ? self::signature((string) $data['signature'])
                 : $item->signature]);
         \local_oksigeniaayvurenda\event\voice_published::fire((int) $library->entityid, $id);
+        // A part read again replaces, once approved, what was recorded of that part before; a newer one still waits.
+        if ($item->part !== null && $item->createdby) {
+            $older = $DB->get_records_select(
+                self::T . 'digital',
+                "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part = :part
+                    AND id <> :id AND (timecreated < :time OR (timecreated = :same AND id < :before))",
+                ['entityid' => $library->entityid, 'recordid' => $item->recordid, 'userid' => $item->createdby,
+                    'part' => $item->part, 'id' => $id, 'time' => $item->timecreated, 'same' => $item->timecreated,
+                    'before' => $id]
+            );
+            foreach ($older as $old) {
+                self::remove($old);
+            }
+        }
         // The home's board tells of a new voice now, not within the hour its moments are kept.
         \cache::make('local_oksigeniaayvurenda', 'moments')->purge();
     }
@@ -550,6 +584,156 @@ final class voices {
         global $DB;
         return array_values($DB->get_records(self::T . 'digital', ['recordid' => $recordid, 'entityid' => $library->entityid,
             'kind' => 'voice', 'createdby' => $userid], 'timecreated, id'));
+    }
+
+    /**
+     * Which part of a book a recording is, from the name its reader gave it: the opening (a presentation, a prologue, a
+     * foreword, a dedication) is 0, and a chapter its number, in figures or in Roman numerals; anything else is no part.
+     *
+     * @param string $title
+     * @return int|null
+     */
+    public static function part_of(string $title): ?int {
+        $title = \core_text::strtolower(trim($title));
+        $opening = '(presentaci[oó]n|pr[oó]logo|dedicatoria|introducci[oó]n|prologue|foreword|introduction|dedication|preface'
+            . '|apresenta[cç][aã]o|introdu[cç][aã]o|pref[aá]cio|pr[ée]face|d[ée]dicace|avant-propos)';
+        if (preg_match('/^' . $opening . '(\b|$)/u', $title)) {
+            return 0;
+        }
+        // Roman numerals only after the word for a chapter: «Vi un fantasma» is no sixth chapter.
+        $chapter = '/^(?:cap[ií]tulo|chapter|chapitre|cap\.)\s*([0-9]{1,3}|[ivxlc]{1,8})(?:\b|[.:,]|$)/u';
+        if (!preg_match($chapter, $title, $found) && !preg_match('/^([0-9]{1,3})(?:\b|[.:,]|$)/u', $title, $found)) {
+            return null;
+        }
+        $number = ctype_digit($found[1]) ? (int) $found[1] : self::roman($found[1]);
+        return $number >= 1 && $number <= self::LASTPART ? $number : null;
+    }
+
+    /**
+     * A Roman numeral as a number, or 0 if it is not one.
+     *
+     * @param string $roman
+     * @return int
+     */
+    private static function roman(string $roman): int {
+        $values = ['i' => 1, 'v' => 5, 'x' => 10, 'l' => 50, 'c' => 100];
+        $total = 0;
+        $letters = str_split($roman);
+        foreach ($letters as $i => $letter) {
+            $value = $values[$letter] ?? 0;
+            $next = $values[$letters[$i + 1] ?? ''] ?? 0;
+            $total += $value < $next ? -$value : $value;
+        }
+        return $total;
+    }
+
+    /**
+     * How a part is called: the opening, or the chapter by its number.
+     *
+     * @param int $part
+     * @return string
+     */
+    public static function part_title(int $part): string {
+        return $part === 0 ? get_string('voicepartopening', 'local_oksigeniaayvurenda')
+            : get_string('voicepartchapter', 'local_oksigeniaayvurenda', $part);
+    }
+
+    /**
+     * The parts someone has recorded of a book, in the book's order; a part read again, after what it replaces.
+     *
+     * @param int $recordid
+     * @param \stdClass $library
+     * @param int $userid
+     * @return \stdClass[]
+     */
+    public static function reading(int $recordid, \stdClass $library, int $userid): array {
+        $parts = array_values(array_filter(self::mine($recordid, $library, $userid), fn($v) => $v->part !== null));
+        usort($parts, fn($a, $b) => [(int) $a->part, (int) $a->timecreated, (int) $a->id]
+            <=> [(int) $b->part, (int) $b->timecreated, (int) $b->id]);
+        return $parts;
+    }
+
+    /**
+     * The chapter that comes next: the first one not yet recorded.
+     *
+     * @param \stdClass[] $parts
+     * @return int
+     */
+    public static function next_part(array $parts): int {
+        $done = array_flip(array_map(fn($v) => (int) $v->part, $parts));
+        $next = 1;
+        while (isset($done[$next])) {
+            $next++;
+        }
+        return $next;
+    }
+
+    /**
+     * Chooses the soft sound under someone's whole reading of a book: one of BACKDROPS, or '' for none.
+     *
+     * @param int $recordid
+     * @param \stdClass $library
+     * @param int $userid
+     * @param string $backdrop
+     */
+    public static function set_backdrop(int $recordid, \stdClass $library, int $userid, string $backdrop): void {
+        global $DB;
+        $backdrop = in_array($backdrop, self::BACKDROPS, true) ? $backdrop : null;
+        $DB->set_field_select(
+            self::T . 'digital',
+            'backdrop',
+            $backdrop,
+            "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL",
+            ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $userid]
+        );
+    }
+
+    /**
+     * The soft sounds there are to choose: those the art package brings, each with its two files.
+     *
+     * @return array key => ogg, m4a (addresses).
+     */
+    public static function backdrops(): array {
+        $found = [];
+        foreach (self::BACKDROPS as $key) {
+            $ogg = screens::art('fondos/' . $key, 'ogg');
+            $m4a = screens::art('fondos/' . $key, 'm4a');
+            if ($ogg && $m4a) {
+                $found[$key] = ['ogg' => $ogg, 'm4a' => $m4a];
+            }
+        }
+        return $found;
+    }
+
+    /**
+     * Voices as they are heard: the parts of one person's reading of a book together, in the book's order and at the
+     * place of the first of them; any other voice, and anything that is not a voice, alone and where it was.
+     *
+     * @param \stdClass[] $items Of one record, in the order they are shown.
+     * @return array Each: item (the first), parts (the items in order; one for what is alone).
+     */
+    public static function readings(array $items): array {
+        $groups = [];
+        $at = [];
+        foreach ($items as $item) {
+            $key = $item->kind === 'voice' && $item->part !== null && $item->createdby ? 'r' . $item->createdby : 'i' . $item->id;
+            if (!isset($at[$key])) {
+                $at[$key] = count($groups);
+                $groups[] = [];
+            }
+            $groups[$at[$key]][] = $item;
+        }
+        return array_map(function (array $parts) {
+            usort($parts, fn($a, $b) => [(int) $a->part, (int) $a->timecreated, (int) $a->id]
+                <=> [(int) $b->part, (int) $b->timecreated, (int) $b->id]);
+            // Of a part read twice, what is heard is the newest the listener may hear.
+            $latest = [];
+            foreach ($parts as $part) {
+                $latest[$part->part === null ? 'i' . $part->id : 'p' . $part->part] = $part;
+            }
+            $parts = array_values($latest);
+            return ['item' => $parts[0], 'parts' => $parts];
+        }, $groups);
     }
 
     /**

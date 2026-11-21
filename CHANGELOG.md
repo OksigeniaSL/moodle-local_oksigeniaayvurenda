@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.0 (2026-11-21)
+
+- **A long book is read aloud in parts.** Giving a book a voice now starts by choosing the part: the opening or a
+  chapter, as chips, with the next one ready and a dot on what is done or waits for approval. The reading goes on another
+  day where it was left; a part read again replaces the old one once it is approved. The recorder has a pause.
+- **A reading in parts is heard as one book.** On the record's page and in Ayvu rande it is one line, «who · how many
+  parts», that opens one player: the parts in order, one going on into the next, and the listener comes back to the part
+  and the second where they were.
+- **A soft sound under the reading, if its reader wants it.** Night, sea, forest, rain, fireside or soft music, when the
+  art package brings them: chosen with a touch and heard for a moment while recording, played low under the voice from
+  part to part, never mixed into the recording, and the listener can turn it off.
+- **The new parts of one reading are approved together**, with the same licence, audience and signature; each can still
+  be turned down on its own.
+- What was recorded before with «Capítulo 3» or «Presentación» as its name takes its place in its reading.
+
 ## 1.0.10 (2026-11-20)
 
 - **Readers with the same name and the same class link by themselves, however each program writes the class.** «1º PRI

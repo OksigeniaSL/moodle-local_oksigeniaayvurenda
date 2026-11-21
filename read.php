@@ -26,6 +26,7 @@ use local_oksigeniaayvurenda\core\digital_rules;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\shell;
+use local_oksigeniaayvurenda\local\voices;
 use local_oksigeniaayvurenda\local\window;
 
 // phpcs:ignore moodle.Files.RequireLogin.Missing -- what is in an open window is read without an account; the rest logs in.
@@ -59,13 +60,56 @@ $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda'
 $title = (string) $DB->get_field('local_oksigeniaayvurenda_record', 'title', ['id' => $item->recordid]);
 $place = $anyone ? ['position' => null, 'bookmarks' => []] : digital::place((int) $item->id, (int) $USER->id);
 $candownload = digital_rules::can_download($item->licence, (bool) $item->download);
+// A reading in parts: its parts that this person may hear, in the book's order, and where they were in it.
+$reading = null;
+$parts = [];
+$subtitle = '';
+if (!$anyone && $item->kind === 'voice' && $item->part !== null && $item->createdby) {
+    $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
+    $siblings = array_values(array_filter($DB->get_records_select(
+        'local_oksigeniaayvurenda_digital',
+        "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL",
+        ['entityid' => $library->entityid, 'recordid' => $item->recordid, 'userid' => $item->createdby],
+        'timecreated, id'
+    ), fn($v) => digital::visible($v, $viewer)));
+    $parts = $siblings ? voices::readings($siblings)[0]['parts'] : [];
+}
+if ($parts) {
+    $first = $parts[0];
+    // Where the listener was, kept on the reading's first part: «which part:second».
+    $kept = (string) (digital::place((int) $first->id, (int) $USER->id)['position'] ?? '');
+    [$keptid, $keptat] = array_pad(array_map('intval', explode(':', $kept)), 2, 0);
+    $ids = array_map(fn($p) => (int) $p->id, $parts);
+    $start = (int) $item->id === (int) $first->id && in_array($keptid, $ids, true) ? $keptid : (int) $item->id;
+    $start = in_array($start, $ids, true) ? $start : (int) $first->id;
+    $at = $start === $keptid ? $keptat : 0;
+    $current = $parts[array_search($start, $ids, true)];
+    $sounds = voices::backdrops();
+    $sound = $sounds[(string) $first->backdrop] ?? null;
+    $signed = array_values(array_filter($parts, fn($p) => $p->status === 'published' && (string) $p->signature !== ''));
+    $subtitle = $str('digitalreadingparts', (object) ['who' => $signed ? (string) $signed[0]->signature
+        : $str('digitalreadingname'), 'count' => count($parts)]);
+    $reading = [
+        'cover' => \local_oksigeniaayvurenda\local\covers::urls([(int) $item->recordid])[(int) $item->recordid] ?? '',
+        'nowplaying' => $str('readingnow', (string) $current->title),
+        'starturl' => digital::file_url($current),
+        'resume' => $at > 0 ? $str('readingresume', voices::part_title((int) $current->part)) : '',
+        'partsheading' => $str('readingparts'),
+        'parts' => array_map(fn($p) => ['partid' => (int) $p->id, 'parturl' => digital::file_url($p),
+            'parttitle' => (string) $p->title, 'partcurrent' => (int) $p->id === $start], $parts),
+        'backdrop' => $sound ? $sound + ['bdon' => $str('readingbackdropon'), 'bdoff' => $str('readingbackdropoff'),
+            'bdname' => $str('readingbackdropname', \core_text::strtolower($str('voicebackdrop' . $first->backdrop)))] : null,
+    ];
+}
 $data = [
     'heading' => $title,
-    'subtitle' => $item->title !== '' && $item->title !== null ? $item->title : $str('format' . $item->format),
+    'subtitle' => $reading ? $subtitle : ($item->title !== '' && $item->title !== null ? $item->title
+        : $str('format' . $item->format)),
     'licence' => $str('licence' . str_replace('-', '', $item->licence)),
     'epub' => $item->format === 'epub',
     'pdf' => $item->format === 'pdf',
-    'audio' => $item->format === 'audio',
+    'audio' => $item->format === 'audio' && !$reading,
+    'reading' => $reading,
     'video' => $item->format === 'video',
     'link' => $item->kind === 'link' ? \local_oksigeniaayvurenda\local\links::out($library, $item) : '',
     'throughproxy' => $item->kind === 'link'
@@ -88,7 +132,7 @@ foreach (
 ) {
     $data[$key] = $str($key);
 }
-$scripts = $item->format === 'epub' ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader'] : ['reader'];
+$scripts = $item->format === 'epub' ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader'] : [$reading ? 'lectura' : 'reader'];
 // A book may ask other sites for its styles, pictures or scripts, and that would tell them who is reading it.
 @header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' blob:; "
     . "img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' blob:; "
@@ -101,11 +145,13 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
         'local' => $anyone,
         'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/digital_ajax.php'))->out(false),
         'sesskey' => sesskey(),
-        'item' => (int) $item->id,
+        'item' => $reading ? (int) $parts[0]->id : (int) $item->id,
+        'start' => $reading ? $start : 0,
+        'at' => $reading ? $at : 0,
         'position' => $place['position'],
         'bookmarks' => $place['bookmarks'],
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
-        'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage'),
+        'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage'), 'readingnow' => $str('readingnow'),
             'readmarkdrop' => $str('readmarkdrop')],
     ],
 ]);

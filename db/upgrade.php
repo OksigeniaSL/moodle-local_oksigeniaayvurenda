@@ -850,6 +850,21 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026111331, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112100) {
+        // A reading in parts: which part each voice is, and the soft sound under the whole reading.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        foreach (
+            [new xmldb_field('part', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'timetold'),
+                new xmldb_field('backdrop', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'part')] as $field
+        ) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        local_oksigeniaayvurenda_upgrade_parts();
+        upgrade_plugin_savepoint(true, 2026112100, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;
@@ -896,6 +911,28 @@ function local_oksigeniaayvurenda_upgrade_letters(): void {
         $text = strtr((string) $row->searchtext, $letters);
         if ($text !== $row->searchtext) {
             $DB->set_field('local_oksigeniaayvurenda_record', 'searchtext', $text, ['id' => $row->id]);
+        }
+    }
+    $rows->close();
+}
+
+/**
+ * The voices recorded before a reading had parts, put in their place by the name their reader gave them: «Capítulo 3» is
+ * the third part of that person's reading of the book, «Presentación» its opening. A family's voice through a link is
+ * nobody's reading. Nothing changes where it is done already.
+ */
+function local_oksigeniaayvurenda_upgrade_parts(): void {
+    global $DB;
+    $rows = $DB->get_recordset_sql(
+        "SELECT d.id, d.title
+           FROM {local_oksigeniaayvurenda_digital} d
+      LEFT JOIN {local_oksigeniaayvurenda_voiceinvite} i ON i.digitalid = d.id
+          WHERE d.kind = 'voice' AND d.part IS NULL AND d.createdby IS NOT NULL AND i.id IS NULL"
+    );
+    foreach ($rows as $row) {
+        $part = \local_oksigeniaayvurenda\local\voices::part_of((string) $row->title);
+        if ($part !== null) {
+            $DB->set_field('local_oksigeniaayvurenda_digital', 'part', $part, ['id' => $row->id]);
         }
     }
     $rows->close();

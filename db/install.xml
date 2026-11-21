@@ -457,6 +457,8 @@
         <FIELD NAME="forlittle" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a voice: an older reader read it for the little ones"/>
         <FIELD NAME="tellfamily" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="For a voice: whoever recorded it wants their family to hear it once approved"/>
         <FIELD NAME="timetold" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice: when their family was sent the way to hear it"/>
+        <FIELD NAME="part" TYPE="int" LENGTH="4" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice read in parts: which, 0 the opening and from 1 the chapters"/>
+        <FIELD NAME="backdrop" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="For a voice read in parts: the soft sound its reader chose to play under it"/>
         <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

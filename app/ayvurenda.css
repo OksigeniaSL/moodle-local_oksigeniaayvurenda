@@ -1656,6 +1656,93 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     transition: transform .08s linear;
 }
 .ayv .ayv-rec-after { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+.ayv .ayv-rec-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+.ayv .ayv-rec-pause .ayv-rec-dot { background: var(--paper2); color: inherit; box-shadow: none; }
+.ayv .ayv-rec-pause[aria-pressed="true"] .ayv-rec-dot { background: var(--sun); color: #1e2b2a; }
+
+/* A reading in parts: the book's chapters as chips, the one about to be read lit; a dot on what is done or waits. */
+.ayv .ayv-vp { display: grid; gap: .4rem; margin: 0 0 1.25rem; }
+.ayv .ayv-vp-title, .ayv .ayv-vp-progress { margin: 0; }
+.ayv .ayv-vp-chips { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+.ayv .ayv-vp-label { margin: 0 .1rem 0 .35rem; font-size: .9rem; font-weight: 700; }
+.ayv .ayv-vp-chip { position: relative; display: inline-flex; cursor: pointer; }
+.ayv .ayv-vp-chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.ayv .ayv-vp-word {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0 .9rem;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-weight: 700;
+    line-height: 1.1;
+}
+.ayv .ayv-vp-number .ayv-vp-word { padding: 0; }
+.ayv .ayv-vp-chip:hover .ayv-vp-word { background: var(--chip-hover); }
+.ayv .ayv-vp-chip input:checked + .ayv-vp-word { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+.ayv .ayv-vp-chip input:focus-visible + .ayv-vp-word { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-vp-chip.is-done::after,
+.ayv .ayv-vp-chip.is-waiting::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: .8rem;
+    height: .8rem;
+    border: 2px solid var(--surface);
+    border-radius: 50%;
+    background: var(--green2);
+    pointer-events: none;
+}
+.ayv .ayv-vp-chip.is-waiting::after { background: var(--sun); }
+.ayv .ayv-vp-more-button {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    min-height: 2.75rem;
+    padding: 0 .9rem;
+    border: 2px dashed var(--line);
+    border-radius: 999px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-vp-more-button .ayv-icon { margin: 0; }
+
+/* The new parts of one reading, to hear one by one before approving them together. */
+.ayv .ayv-vp-review { display: grid; gap: .25rem; margin: .5rem 0 1rem; padding: 0; list-style: none; }
+.ayv .ayv-vp-review li { display: grid; gap: .4rem; padding: .7rem 0; border-top: 1px solid var(--line); }
+.ayv .ayv-vp-review-title { margin: 0; }
+
+/* A reading in parts, heard as one book: its parts in the book's order, the one that sounds lit. */
+.ayv .ayv-lectura { display: grid; gap: .85rem; }
+.ayv .ayv-lectura-cabeza { display: flex; align-items: center; gap: 1rem; }
+.ayv .ayv-lectura-tapa { flex: none; width: 84px; height: auto; border-radius: 3px 8px 8px 3px; box-shadow: 0 4px 12px rgba(40, 30, 10, .18); }
+.ayv .ayv-lectura-dice { display: grid; gap: .25rem; min-width: 0; }
+.ayv .ayv-lectura-dice p { margin: 0; }
+.ayv .ayv-lectura-suena { font-family: var(--title); font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
+.ayv .ayv-lectura-fondo-linea { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0; }
+.ayv .ayv-lectura-fondo-linea .ayv-button .ayv-icon { margin-right: .4em; }
+.ayv .ayv-lectura-partes { display: flex; flex-wrap: wrap; gap: .45rem; margin: 0; padding: 0; list-style: none; }
+.ayv .ayv-lectura-parte {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-lectura-parte:hover { background: var(--chip-hover); }
+.ayv .ayv-lectura-parte[aria-current="true"] { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+.ayv .ayv-lectura-parte:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .ayv .ayv-field-quiet { font-size: .9rem; }
 
 /* Recording: the text on one side, the recorder on the other, which stays in sight while reading. */

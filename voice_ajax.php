@@ -42,6 +42,17 @@ if (!$library) {
     throw new moodle_exception('nolibrary', 'local_oksigeniaayvurenda');
 }
 $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
+// The soft sound under someone's reading, chosen with a touch: it is kept at once.
+if ($viewer['who'] !== 'nobody' && optional_param('do', '', PARAM_ALPHA) === 'backdrop') {
+    voices::set_backdrop(
+        required_param('record', PARAM_INT),
+        $library,
+        (int) $USER->id,
+        optional_param('backdrop', '', PARAM_ALPHA)
+    );
+    echo json_encode(['ok' => true]);
+    die;
+}
 if ($viewer['who'] === 'nobody' || empty($_FILES['voice']['tmp_name']) || !is_uploaded_file($_FILES['voice']['tmp_name'])) {
     throw new moodle_exception('voicefailed', 'local_oksigeniaayvurenda');
 }
@@ -58,7 +69,10 @@ $id = voices::record(
     optional_param('title', '', PARAM_TEXT),
     optional_param('ext', 'webm', PARAM_ALPHANUM),
     null,
-    optional_param('signature', '', PARAM_TEXT)
+    optional_param('signature', '', PARAM_TEXT),
+    // Which part of the book, if it is read in parts; and the sound under the whole reading.
+    optional_param('part', -1, PARAM_INT) >= 0 ? optional_param('part', -1, PARAM_INT) : null,
+    optional_param('backdrop', null, PARAM_ALPHA)
 );
 // Read for the little ones, and whether the reader's family hears it once approved («Leyó para los pequeños»).
 $reader = $viewer['readerid'] ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $viewer['readerid']]) : null;

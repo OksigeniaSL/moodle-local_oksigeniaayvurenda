@@ -24,7 +24,8 @@
         "hasrecords": true, "empty": "Todavía no hay voces.", "quiet": null, "searchurl": "#", "searchlabel": "Buscar un libro", "nexturl": "", "prevurl": "", "windownext": "Más",
         "windowprev": "Antes", "infourl": "#", "voiceinfo": "Cómo se tratan las voces",
         "records": [{"title": "El faro dormido", "url": "#", "cover": "https://example.org/c.jpg", "hascover": false, "colour": 3,
-            "voices": [{"label": "Capítulo 1 · La mamá de Ana", "audio": "https://example.org/v.webm"}]}]
+            "voices": [{"label": "Capítulo 1 · La mamá de Ana", "audio": "https://example.org/v.webm", "listen": "", "listenlabel": ""},
+                {"label": "Enrique · 5 partes", "listen": "https://example.org/read.php?id=4", "listenlabel": "Escuchar"}]}]
     }
 }}
 <section class="ayv-spring">
@@ -47,7 +48,8 @@
             <ul class="ayv-spring-voices">
             {{#voices}}
                 <li><span>{{label}}</span>
-                    <audio class="ayv-media" controls preload="none" src="{{audio}}" aria-label="{{label}}"></audio></li>
+                    {{#audio}}<audio class="ayv-media" controls preload="none" src="{{audio}}" aria-label="{{label}}"></audio>{{/audio}}
+                    {{#listen}}<a class="ayv-button ayv-button-quiet" href="{{listen}}">{{listenlabel}}</a>{{/listen}}</li>
             {{/voices}}
             </ul>
         </div>

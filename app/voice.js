@@ -15,7 +15,8 @@
 
 /**
  * Ayvurenda: recording a reading with the browser's microphone. Record, stop, listen, record again if it did not sound
- * right, say what was read, send. The recording waits for approval; nobody else hears it until then.
+ * right, say what was read, send. The recording waits for approval; nobody else hears it until then. A long book goes in
+ * parts: its chapter chosen first, a pause between pages, and a soft sound under the whole reading, heard for a moment.
  *
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -83,6 +84,99 @@
             }
         });
     });
+    // The part about to be read: a chapter of the chips, or «Otra cosa», which asks what it is.
+    var whatField = document.getElementById('ayv-what-field');
+    var chosenPart = function() {
+        var checked = document.querySelector('input[name="ayv-part"]:checked');
+        return checked ? checked : null;
+    };
+    var showPart = function() {
+        var checked = chosenPart();
+        if (!checked || !whatField) {
+            return;
+        }
+        var other = Number(checked.value) < 0;
+        whatField.hidden = !other;
+        if (what && !other) {
+            what.value = checked.getAttribute('data-title') || '';
+        } else if (what && other) {
+            what.value = '';
+        }
+    };
+    document.querySelectorAll('input[name="ayv-part"]').forEach(function(radio) {
+        radio.addEventListener('change', showPart);
+    });
+    showPart();
+    // «Más»: five chapters more, after the last one shown.
+    var more = document.getElementById('ayv-vp-more');
+    if (more) {
+        more.addEventListener('click', function() {
+            var numbers = document.querySelectorAll('.ayv-vp-number');
+            var last = numbers[numbers.length - 1];
+            if (!last) {
+                return;
+            }
+            var from = Number(last.querySelector('input').value);
+            for (var n = from + 1; n <= from + 5 && n <= 300; n++) {
+                var chip = last.cloneNode(true);
+                chip.classList.remove('is-done', 'is-waiting');
+                var input = chip.querySelector('input');
+                var title = (str.voicepartchapter || '{$a}').replace('{$a}', String(n));
+                input.value = String(n);
+                input.checked = false;
+                input.setAttribute('data-title', title);
+                input.setAttribute('aria-label', title);
+                input.addEventListener('change', showPart);
+                chip.querySelector('.ayv-vp-word').textContent = String(n);
+                more.parentNode.insertBefore(chip, more);
+                last = chip;
+            }
+        });
+    }
+    // The soft sound under the reading: a touch chooses it, keeps it and lets it be heard for a moment.
+    var sample = null;
+    var hush = function() {
+        if (sample) {
+            sample.pause();
+            sample = null;
+        }
+    };
+    var backdrop = function() {
+        var checked = document.querySelector('input[name="ayv-backdrop"]:checked');
+        return checked ? checked.value : null;
+    };
+    document.querySelectorAll('input[name="ayv-backdrop"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            hush();
+            var ogg = radio.getAttribute('data-ogg');
+            var m4a = radio.getAttribute('data-m4a');
+            if (ogg || m4a) {
+                sample = new Audio();
+                sample.src = sample.canPlayType('audio/ogg; codecs=opus') ? ogg : m4a;
+                sample.volume = 0.35;
+                sample.play().catch(function() {
+                    return null;
+                });
+                var playing = sample;
+                window.setTimeout(function() {
+                    if (sample === playing) {
+                        hush();
+                    }
+                }, 6000);
+            }
+            if (window.fetch && config.sendurl) {
+                var body = new FormData();
+                body.append('sesskey', config.sesskey);
+                body.append('library', config.library);
+                body.append('record', config.record);
+                body.append('do', 'backdrop');
+                body.append('backdrop', radio.value);
+                fetch(config.sendurl, {method: 'POST', credentials: 'same-origin', body: body}).catch(function() {
+                    return null;
+                });
+            }
+        });
+    });
     if (!rec || !window.fetch) {
         return;
     }
@@ -100,6 +194,8 @@
     var ticker = null;
     var stream = null;
     var after = document.getElementById('ayv-after');
+    var pause = document.getElementById('ayv-pause');
+    var pausedAt = 0;
     var level = document.getElementById('ayv-level');
     var listening = null;
 
@@ -153,6 +249,9 @@
         return mime.indexOf('ogg') >= 0 ? 'ogg' : (mime.indexOf('mp4') >= 0 ? 'm4a' : 'webm');
     };
     var clock = function() {
+        if (pausedAt) {
+            return;
+        }
         var seconds = Math.floor((Date.now() - started) / 1000);
         time.textContent = (str.voicetime || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'); });
         if (seconds >= MAX) {
@@ -193,6 +292,10 @@
             ticker = setInterval(clock, 500);
             rec.hidden = true;
             stop.hidden = false;
+            hush();
+            if (pause && recorder.pause) {
+                pause.hidden = false;
+            }
             send.disabled = true;
             said.textContent = '';
             return recorder;
@@ -200,8 +303,40 @@
             said.textContent = str.voicenomic || '';
         });
     });
+    // A pause between pages, for water or a cough: the recording goes on afterwards, in the same file.
+    var word = function(text) {
+        pause.querySelector('.ayv-rec-word').textContent = text;
+    };
+    if (pause) {
+        pause.addEventListener('click', function() {
+            if (!recorder) {
+                return;
+            }
+            if (recorder.state === 'recording') {
+                recorder.pause();
+                pausedAt = Date.now();
+                pause.setAttribute('aria-pressed', 'true');
+                word(pause.getAttribute('data-resume'));
+            } else if (recorder.state === 'paused') {
+                recorder.resume();
+                started += Date.now() - pausedAt;
+                pausedAt = 0;
+                pause.setAttribute('aria-pressed', 'false');
+                word(pause.getAttribute('data-pause'));
+            }
+        });
+    }
     stop.addEventListener('click', function() {
         clearInterval(ticker);
+        if (pausedAt) {
+            started += Date.now() - pausedAt;
+            pausedAt = 0;
+        }
+        if (pause) {
+            pause.hidden = true;
+            pause.setAttribute('aria-pressed', 'false');
+            word(pause.getAttribute('data-pause'));
+        }
         if (recorder && recorder.state !== 'inactive') {
             recorder.stop();
         }
@@ -238,6 +373,13 @@
             body.append('record', config.record);
         }
         body.append('title', what ? what.value : '');
+        var part = chosenPart();
+        if (part && Number(part.value) >= 0) {
+            body.append('part', part.value);
+        }
+        if (backdrop() !== null) {
+            body.append('backdrop', backdrop());
+        }
         body.append('forlittle', pressed(little) ? '1' : '0');
         body.append('tellfamily', pressed(little) && pressed(family) ? '1' : '0');
         var signature = document.getElementById('ayv-signature');
