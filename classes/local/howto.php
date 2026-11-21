@@ -281,18 +281,27 @@ final class howto {
         if (!$kept) {
             return;
         }
-        $question = implode(' ', $kept);
+        // A question is a few words, not a text.
+        $question = \core_text::substr(implode(' ', array_slice($kept, 0, 8)), 0, 120);
         $entityid = (int) $library->entityid;
-        $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
-            ?: [];
-        $misses = (array) ($settings['howtomisses'] ?? []);
+        // Apart from the centre's settings: a reader's search never writes over what its staff set.
+        $misses = self::stored_misses($entityid);
         $misses[$question] = [(int) ($misses[$question][0] ?? 0) + 1, $now];
         if (count($misses) > self::MISSES) {
             uasort($misses, fn($a, $b) => [$b[0], $b[1]] <=> [$a[0], $a[1]]);
             $misses = array_slice($misses, 0, self::MISSES, true);
         }
-        $settings['howtomisses'] = $misses;
-        $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $entityid]);
+        set_config('howtomisses_' . $entityid, json_encode($misses), 'local_oksigeniaayvurenda');
+    }
+
+    /**
+     * The questions without an answer a centre keeps, as stored: question => [times, last].
+     *
+     * @param int $entityid
+     * @return array
+     */
+    private static function stored_misses(int $entityid): array {
+        return (array) (json_decode((string) get_config('local_oksigeniaayvurenda', 'howtomisses_' . $entityid), true) ?: []);
     }
 
     /**
@@ -306,19 +315,30 @@ final class howto {
         global $DB;
         // Whatever the database does with accents (PostgreSQL and a binary collation keep them): the letters that may
         // carry one go as a wildcard, and what comes back is compared in its words, as the finder writes them.
-        $pattern = '%' . preg_replace('/[aeiouncy]/u', '_', $DB->sql_like_escape($word)) . '%';
-        $named = '(' . $DB->sql_like('firstname', ':a', false) . ' OR ' . $DB->sql_like('lastname', ':b', false) . ')';
+        // The word whole, at the start, in the middle or at the end of a name (never «somewhere inside»: a short word of
+        // wildcards would match every name and the one that counts could be left out), and every name it brings looked at.
+        $wild = preg_replace('/[aeiouncy]/u', '_', $DB->sql_like_escape($word));
+        $likes = [];
+        $params = [];
+        foreach (['firstname', 'lastname'] as $field) {
+            foreach ([$wild, $wild . ' %', '% ' . $wild, '% ' . $wild . ' %', $wild . '-%', '%-' . $wild] as $i => $pattern) {
+                $likes[] = $DB->sql_like($field, ':' . $field . $i, false);
+                $params[$field . $i] = $pattern;
+            }
+        }
+        $named = '(' . implode(' OR ', $likes) . ')';
         $where = [['user', 'deleted = 0 AND ' . $named, []],
             ['local_oksigeniaayvurenda_reader', 'entityid = :e AND ' . $named, ['e' => $entityid]]];
         foreach ($where as [$table, $select, $more]) {
-            $params = ['a' => $pattern, 'b' => $pattern] + $more;
-            $rows = $DB->get_records_select($table, $select, $params, '', 'id, firstname, lastname', 0, 200);
+            $rows = $DB->get_recordset_select($table, $select, $params + $more, '', 'id, firstname, lastname');
             foreach ($rows as $row) {
                 $words = preg_split('/[^\p{L}\p{N}]+/u', text::normalise($row->firstname . ' ' . $row->lastname)) ?: [];
                 if (in_array($word, $words, true)) {
+                    $rows->close();
                     return true;
                 }
             }
+            $rows->close();
         }
         return false;
     }
@@ -331,10 +351,8 @@ final class howto {
      */
     public static function misses(int $entityid): array {
         global $DB;
-        $settings = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_entity', 'settings', ['id' => $entityid]), true)
-            ?: [];
         $out = [];
-        foreach ((array) ($settings['howtomisses'] ?? []) as $question => [$times, $last]) {
+        foreach (self::stored_misses($entityid) as $question => [$times, $last]) {
             $out[] = ['question' => (string) $question, 'times' => (int) $times, 'last' => (int) $last];
         }
         usort($out, fn($a, $b) => [$b['times'], $b['last']] <=> [$a['times'], $a['last']]);

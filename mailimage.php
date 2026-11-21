@@ -55,9 +55,17 @@ if ($area === 'postcard' || $area === 'diploma') {
     die;
 }
 $file = hash_equals(mail::seal($area, $itemid, $name), $seal) ? mail::file_of($area, $itemid, $name) : null;
+// A reader's drawing, only while its review is published, and kept by no cache but the browser's.
+$drawing = $area === 'reviewdrawing';
+if (
+    $file && $drawing
+        && !$DB->record_exists('local_oksigeniaayvurenda_review', ['id' => $itemid, 'status' => 'published'])
+) {
+    $file = null;
+}
 if (!$file) {
     http_response_code(404);
     die;
 }
 @header('X-Content-Type-Options: nosniff');
-send_stored_file($file, 30 * DAYSECS, 0, false, ['cacheability' => 'public']);
+send_stored_file($file, 30 * DAYSECS, 0, false, ['cacheability' => $drawing ? 'private' : 'public']);

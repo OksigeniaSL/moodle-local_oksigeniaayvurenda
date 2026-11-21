@@ -198,7 +198,8 @@ foreach ($readers as $reader) {
             'islandlabel' => $str('islandlabel', count($plantedall))] : null;
     }
     // From twelve, the booklet is theirs (Jujol): when it is ready, a line to see it and to say if their family gets it.
-    $bookletrow = $sky ? \local_oksigeniaayvurenda\local\booklet::on_card($reader, time()) : null;
+    // By their age, whatever card they chose (the classic one or none decide as much as the sky).
+    $bookletrow = $look !== 'flower' ? \local_oksigeniaayvurenda\local\booklet::on_card($reader, time()) : null;
     $bookletcard = null;
     if ($bookletrow && \local_oksigeniaayvurenda\local\booklet::theirs($reader, (int) $bookletrow->yearid)) {
         $bookletyear = $DB->get_record('local_oksigeniaayvurenda_year', ['id' => $bookletrow->yearid]);

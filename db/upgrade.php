@@ -875,6 +875,28 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112101, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112106) {
+        // The questions the finder could not answer, apart from the centre's settings: a reader's search wrote over them.
+        foreach ($DB->get_records('local_oksigeniaayvurenda_entity', null, 'id', 'id, settings') as $entity) {
+            $settings = json_decode((string) $entity->settings, true) ?: [];
+            if (array_key_exists('howtomisses', $settings)) {
+                set_config('howtomisses_' . $entity->id, json_encode((array) $settings['howtomisses']), 'local_oksigeniaayvurenda');
+                unset($settings['howtomisses']);
+                $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $entity->id]);
+            }
+        }
+        // What a child has out, in their family's app, is now a setting of the centre, off for a new one; where families
+        // already saw it, it stays on.
+        foreach ($DB->get_records('local_oksigeniaayvurenda_entity', null, 'id', 'id, settings') as $entity) {
+            $settings = json_decode((string) $entity->settings, true) ?: [];
+            if (!array_key_exists('familyloans', $settings)) {
+                $settings['familyloans'] = true;
+                $DB->set_field('local_oksigeniaayvurenda_entity', 'settings', json_encode($settings), ['id' => $entity->id]);
+            }
+        }
+        upgrade_plugin_savepoint(true, 2026112106, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

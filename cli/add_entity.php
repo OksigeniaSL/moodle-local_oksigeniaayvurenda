@@ -30,14 +30,15 @@ require_once($CFG->libdir . '/clilib.php');
 use local_oksigeniaayvurenda\local\signup;
 
 [$options] = cli_get_params([
-    'name' => '', 'library' => '', 'plan' => '', 'email' => '', 'firstname' => '', 'lastname' => '', 'lang' => '',
+    'name' => '', 'entity' => 0, 'library' => '', 'plan' => '', 'email' => '', 'firstname' => '', 'lastname' => '', 'lang' => '',
     'role' => '', 'accepted' => '', 'terms' => '', 'privacy' => '', 'dpa' => '', 'yes' => false, 'help' => false,
 ], ['h' => 'help']);
 if ($options['help'] || $options['name'] === '' || $options['email'] === '' || $options['plan'] === '') {
     cli_writeln("Signs a centre up: the centre, its first library and its category, its plan, an account for whoever runs it\n"
         . "with the manager's role there, an e-mail with how to get in, and when it accepted the terms. Without --yes, it\n"
-        . "only says what it would do. Run again, it changes nothing that is already there (it does set the plan).\n\n"
+        . "only says what it would do. Run again with --entity, it changes nothing already there (it does set the plan).\n\n"
         . "--name=\"…\"        The centre.\n"
+        . "--entity=N        A centre already here, to complete (a new plan, another account); without it, always a new one.\n"
         . "--library=\"…\"     Its first library (the centre's name if not given).\n"
         . "--plan=free|small|medium\n"
         . "--email=…         Whoever runs it.\n"
@@ -50,7 +51,9 @@ if ($options['help'] || $options['name'] === '' || $options['email'] === '' || $
     exit($options['help'] ? 0 : 1);
 }
 $look = signup::look($options);
-cli_writeln('Centre: ' . ($look['centre'] ? 'already here (' . $look['centre'] . ')' : 'new'));
+cli_writeln('Centre: ' . ($look['centre'] ? 'already here (' . $look['centre'] . '), completed'
+    : ($look['named'] ? 'there is already one called so (' . $look['named'] . '): give --entity=' . $look['named']
+        . ' to complete it, or another name' : 'new')));
 cli_writeln('Account: ' . ($look['account'] ? 'already here (' . $look['account'] . ')' : 'new, mailed its password'));
 if (!$options['yes']) {
     cli_writeln('Nothing done: add --yes.');

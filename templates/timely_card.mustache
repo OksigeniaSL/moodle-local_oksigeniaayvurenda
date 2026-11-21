@@ -28,7 +28,7 @@
         "title": "Hay libros que vuelven tarde: 4 ahora mismo.",
         "what": "Ayvurenda puede avisar a cada lector y a su familia cuando un libro se pasa de fecha. Ahora los avisos están apagados.",
         "action": "https://example.com/local/oksigeniaayvurenda/desk.php?library=demo-1", "sesskey": "abc", "kind": "late",
-        "light": {"label": "Encender los avisos"}, "show": {"url": "https://example.com/rules.php", "label": "Enséñamelo"},
+        "light": {"label": "Encender los avisos"}, "show": {"label": "Enséñamelo"},
         "notnow": "Ahora no"
     }
 }}
@@ -40,7 +40,7 @@
         <p class="ayv-em-que">{{what}}</p>
         <div class="ayv-em-gestos">
             {{#light}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="timely" value="on"><input type="hidden" name="kind" value="{{kind}}"><button type="submit" class="ayv-cf-luz" aria-pressed="false"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button></form>{{/light}}
-            {{#show}}<a class="ayv-button ayv-button-quiet" href="{{url}}">{{label}}<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>{{/show}}
+            {{#show}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="timely" value="show"><input type="hidden" name="kind" value="{{kind}}"><button type="submit" class="ayv-button ayv-button-quiet">{{label}}<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>{{/show}}
             {{#notnow}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="timely" value="no"><input type="hidden" name="kind" value="{{kind}}"><button type="submit" class="ayv-em-no">{{notnow}}</button></form>{{/notnow}}
         </div>
     </div>

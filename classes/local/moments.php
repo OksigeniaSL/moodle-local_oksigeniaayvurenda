@@ -62,6 +62,7 @@ class moments {
      * @return array[] Each with kind, key and a (to say it as the herald), text, url and recordid.
      */
     public static function of(\stdClass $library, int $now, bool $staff): array {
+        global $DB, $USER;
         $entityid = (int) $library->entityid;
         if (practice::is($entityid) || bank::is($library)) {
             return [];
@@ -81,6 +82,13 @@ class moments {
             $few = ($moment['people'] ?? anonymity::FEW) < anonymity::FEW;
             if (!$staff && (!in_array($moment['kind'], self::PUBLIC, true) || $few)) {
                 continue;
+            }
+            // A new voice, only to whoever may hear it: one for the pupils is not told, nor signed, to a family or a guest.
+            if (!$staff && $moment['kind'] === 'voice') {
+                $item = $DB->get_record(self::T . 'digital', ['id' => (int) ($moment['digitalid'] ?? 0)]);
+                if (!$item || !voices::can_hear($item, digital::viewer($entityid, (int) ($USER->id ?? 0)))) {
+                    continue;
+                }
             }
             $key = $moment['key'];
             $page = $staff ? ($moment['staffpage'] ?? '') : ($moment['readerpage'] ?? '');
@@ -153,8 +161,8 @@ class moments {
             $who = trim(format_string((string) $row->signature, true, ['escape' => false]));
             return ['kind' => 'voice', 'key' => $who !== '' ? 'momentvoice' : 'momentvoiceanon',
                 'a' => ['who' => $who, 'title' => self::title((int) $row->recordid)],
-                'recordid' => (int) $row->recordid, 'staffpage' => 'record.php', 'readerpage' => 'record.php',
-                'params' => ['id' => (int) $row->recordid], 'audio' => digital::file_url($row)];
+                'recordid' => (int) $row->recordid, 'digitalid' => (int) $row->id, 'staffpage' => 'record.php',
+                'readerpage' => 'record.php', 'params' => ['id' => (int) $row->recordid], 'audio' => digital::file_url($row)];
         }
         return null;
     }

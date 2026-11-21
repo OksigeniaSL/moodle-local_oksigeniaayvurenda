@@ -45,7 +45,8 @@ final class workings {
 
     /** @var string[] The colours of the spines, by shelf and kind. */
     private const SPINES = ['rule' => 'green', 'door' => 'coral', 'lights' => 'sun', 'route' => 'green2', 'postcard' => 'coral',
-        'diploma' => 'sun', 'booklet' => 'sun', 'forlittle' => 'green2', 'sign' => 'coral', 'challenges' => 'sun',
+        'diploma' => 'sun', 'booklet' => 'sun', 'forlittle' => 'green2', 'familyloans' => 'green', 'sign' => 'coral',
+        'challenges' => 'sun',
         'card' => 'green2', 'history' => 'green', 'photos' => 'coral', 'skin' => 'night', 'name' => 'green', 'year' => 'coral',
         'classification' => 'sun', 'letter' => 'green2', 'zone' => 'night'];
 
@@ -101,6 +102,11 @@ final class workings {
             return 'ayv-hiw-firstbook';
         }
         // What a reader read for the little ones, to their family.
+        $familyloans = optional_param('familyloans', -1, PARAM_INT);
+        if ($familyloans !== -1) {
+            mine::save_family_sees($entityid, (bool) $familyloans);
+            return 'ayv-hiw-familyloans';
+        }
         $readforlittle = optional_param('readforlittle', -1, PARAM_INT);
         if ($readforlittle !== -1) {
             forlittle::save($entityid, (bool) $readforlittle);
@@ -438,6 +444,18 @@ final class workings {
                 'lights' => [
                     'list' => [$chip('readforlittle', $told ? '0' : '1', $str('hiwforlittlelight'), $told)],
                     'note' => $str('hiwforlittlenote'),
+                ],
+            ]);
+        }
+        // What a child has out, in their family's app: only if the centre lets them (off unless it turns it on).
+        if (class_exists('\\local_oksigeniafamily\\api')) {
+            $sees = mine::family_sees($entityid);
+            $voice[] = $phrase('familyloans', 'familyloans', $str('hiwspinefamilyloans'), $str(
+                $sees ? 'hiwfamilyloanson' : 'hiwfamilyloansoff'
+            ), [
+                'lights' => [
+                    'list' => [$chip('familyloans', $sees ? '0' : '1', $str('hiwfamilyloanslight'), $sees)],
+                    'note' => $str('hiwfamilyloansnote'),
                 ],
             ]);
         }

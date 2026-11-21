@@ -98,6 +98,10 @@ final class booklet_test extends \advanced_testcase {
         $page = booklet::year($leo, $year);
         $this->assertSame(['2026-2027', 'flower', '6º A'], [$page['year'], $page['look'], $page['group']]);
         $this->assertSame(['La isla del cometa', 'El faro de papel'], array_column($page['books'], 'title'));
+        // A minor's voice goes in the booklet, which is shared, only with the permission their family gave.
+        $this->assertSame([], $page['voices']);
+        voices::permission((int) $leo->id, true, 0, $at('2027-02-13'));
+        $page = booklet::year($leo, $year);
         $this->assertSame(['El faro de papel'], array_column($page['voices'], 'title'));
         $this->assertSame('', $page['line']);
         booklet::save_line($entityid, (int) $year->id, '  Gracias por   llenar la biblioteca de vida. ');
@@ -225,6 +229,14 @@ final class booklet_test extends \advanced_testcase {
         $this->assertSame(1, booklet::plan($end + HOURSECS));
         $row = $DB->get_record(self::T . 'booklet', ['readerid' => $iker->id]);
         $this->assertTrue(booklet::theirs($iker, (int) $year->id));
+        // By age, not by the card: the sober sky and a chosen classic card decide too; a young reader does not.
+        $older = $gen->create_reader(['entityid' => $entityid, 'band' => 'skysober']);
+        $this->assertTrue(booklet::theirs($older, (int) $year->id));
+        set_user_preference('local_oksigeniaayvurenda_cardlook', 'classic', $kid->id);
+        $this->assertTrue(booklet::theirs($iker, (int) $year->id));
+        unset_user_preference('local_oksigeniaayvurenda_cardlook', $kid->id);
+        $little = $gen->create_reader(['entityid' => $entityid, 'band' => 'flower']);
+        $this->assertFalse(booklet::theirs($little, (int) $year->id));
         $this->assertSame((int) $row->id, (int) booklet::on_card($iker, $end + DAYSECS)->id);
         $this->assertSame(0, booklet::run($end + HOURSECS));
         $this->assertNull($DB->get_field(self::T . 'booklet', 'timesent', ['id' => $row->id]));

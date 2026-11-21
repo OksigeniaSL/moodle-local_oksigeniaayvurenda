@@ -32,8 +32,8 @@ use local_oksigeniaayvurenda\core\abies\survey;
 use local_oksigeniaayvurenda\local\import\abies_import;
 
 [$options, $unrecognized] = cli_get_params(
-    ['help' => false, 'file' => '', 'library' => 0, 'create' => '', 'closed' => false, 'dry-run' => false,
-        'without-notes' => false, 'with-readers' => false, 'as-returned' => false, 'abies-codes' => false],
+    ['help' => false, 'file' => '', 'library' => '', 'create' => '', 'closed' => false, 'dry-run' => false,
+        'without-notes' => false, 'with-readers' => false, 'as-returned' => false, 'abies-codes' => false, 'yes' => false],
     ['h' => 'help', 'n' => 'dry-run']
 );
 
@@ -56,7 +56,9 @@ shelf and as returned.
 
 Options:
   --file=PATH       The export: the zip Abies Web gives, or the XML inside it
-  --library=ID      The library to import into
+  --library=SLUG    The library to import into, by its short name (library-12) or its number; it says which library of
+                    which centre and what it has, and imports only with --yes
+  --yes             Import into that library
   --create=NAME     Or create a new entity with a central library of that name
   --closed          With --create, the new entity starts open only to its staff: its readers see no way in
                     and hear nothing until it opens (cli/centre.php --entity=ID --closed=0)
@@ -122,7 +124,27 @@ if ($options['dry-run']) {
     exit(0);
 }
 
-$libraryid = (int) $options['library'];
+// A library already here is named and shown before anything is written: a wrong number would put one school's readers in
+// another's.
+$libraryid = 0;
+$wanted = trim((string) $options['library']);
+if ($wanted !== '') {
+    $target = $DB->get_record('local_oksigeniaayvurenda_library', ['slug' => $wanted])
+        ?: (ctype_digit($wanted) ? $DB->get_record('local_oksigeniaayvurenda_library', ['id' => (int) $wanted]) : false);
+    if (!$target) {
+        cli_error('There is no library ' . $wanted . '.');
+    }
+    $centre = $DB->get_record('local_oksigeniaayvurenda_entity', ['id' => $target->entityid], 'id, name', MUST_EXIST);
+    cli_heading('Into «' . $target->name . '» (' . $target->slug . ', ' . $target->id . ') of «' . $centre->name . '» ('
+        . $centre->id . ')');
+    cli_writeln('It has now: ' . $DB->count_records('local_oksigeniaayvurenda_item', ['libraryid' => $target->id])
+        . ' copies, ' . $DB->count_records('local_oksigeniaayvurenda_reader', ['entityid' => $centre->id]) . ' readers.');
+    if (!$options['yes']) {
+        cli_writeln('Nothing imported: add --yes.');
+        exit(0);
+    }
+    $libraryid = (int) $target->id;
+}
 if ($libraryid === 0 && $options['create'] !== '') {
     $now = time();
     $entityid = $DB->insert_record('local_oksigeniaayvurenda_entity', ['name' => $options['create'], 'yearstart' => '09-01',

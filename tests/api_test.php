@@ -28,6 +28,57 @@ namespace local_oksigeniaayvurenda;
 #[\PHPUnit\Framework\Attributes\CoversClass(api::class)]
 final class api_test extends \advanced_testcase {
     /**
+     * The moments other plugins show on screens anyone sees, as in a hall: a new voice only when anyone may hear it, and
+     * without who read it.
+     */
+    public function test_moments_without_names(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'El faro dormido']);
+        $user = $this->getDataGenerator()->create_user();
+        $reader = $gen->create_reader(['entityid' => $library->entityid, 'userid' => $user->id, 'readertype' => 'teacher']);
+        $path = make_request_directory() . '/voz.webm';
+        file_put_contents($path, 'made-up recording');
+        $id = local\voices::record($library, (int) $record->id, (int) $reader->id, (int) $user->id, $path, '');
+        local\voices::approve($id, $library, ['licence' => 'rights', 'audience' => ['students'], 'signature' => 'Lucía, 6.º B']);
+        $voice = fn() => array_values(array_filter(api::moments((int) $library->entityid), fn($m) => $m['kind'] === 'voice'));
+        $this->assertSame([], $voice());
+        // Public, and in the public domain: someone else's rights never go public.
+        $DB->update_record('local_oksigeniaayvurenda_digital', (object) ['id' => $id, 'audience' => 'public', 'licence' => 'pd']);
+        $voices = $voice();
+        $this->assertCount(1, $voices);
+        $this->assertStringContainsString('El faro dormido', $voices[0]['text']);
+        $this->assertStringNotContainsString('Lucía', $voices[0]['text']);
+    }
+
+    /**
+     * Where centres are apart, another plugin asks for one centre, found by its category: a null centre is none, never all.
+     */
+    public function test_centres_apart(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $top = $this->getDataGenerator()->create_category();
+        $inside = $this->getDataGenerator()->create_category(['parent' => $top->id]);
+        $DB->set_field('local_oksigeniaayvurenda_entity', 'categoryid', $top->id, ['id' => $entityid]);
+        $this->assertSame($entityid, api::centre_of_category((int) $inside->id));
+        $this->assertSame($entityid, api::centre_of_category((int) $top->id));
+        $this->assertNull(api::centre_of_category((int) $this->getDataGenerator()->create_category()->id));
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'El faro dormido']);
+        $gen->create_item(['libraryid' => $library->id, 'recordid' => $record->id]);
+        $this->assertCount(1, api::new_books(time() - DAYSECS));
+        set_config('entitycategories', 1, 'local_oksigeniaayvurenda');
+        $this->assertSame([], api::new_books(time() - DAYSECS));
+        $this->assertSame([], api::moments());
+        $this->assertSame([], api::activities(time(), time() + WEEKSECS));
+        $this->assertCount(1, api::new_books(time() - DAYSECS, 12, $entityid));
+    }
+
+    /**
      * The new books: newest first, once each, with the library of the newest copy; never a bank, a withdrawn copy, a
      * device, something older or a closed centre.
      */

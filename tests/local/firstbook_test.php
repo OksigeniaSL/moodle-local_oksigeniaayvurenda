@@ -86,7 +86,7 @@ final class firstbook_test extends \advanced_testcase {
         $this->assertCount(1, $toivan);
         // The way to record it with their voice, if the centre has voices: one link for the family.
         if (plans::allows((int) $library->entityid, 'voices')) {
-            $this->assertStringContainsString('family.php', $tomother[0]->fullmessage);
+            $this->assertMatchesRegularExpression('#family\.php\?t=[0-9a-f]+#', $tomother[0]->fullmessage, 'the page reads «t»');
             $this->assertSame(1, $DB->count_records('local_oksigeniaayvurenda_voiceinvite', ['readerid' => $reader->id]));
         }
         $messages->close();

@@ -165,10 +165,14 @@ final class moments_test extends \advanced_testcase {
         $voice('Para una etapa', 'students', '["Primaria"]', 'Ana', $now - HOURSECS);
         $voice('Para la clase', 'class', null, 'Luis', $now - 2 * HOURSECS);
         $this->assertSame([], array_column(moments::find($entityid, $now), 'kind'));
-        $voice('La isla del cometa', 'students', null, 'Enrique, profe de EF', $now - 3 * HOURSECS);
+        $island = $voice('La isla del cometa', 'students', null, 'Enrique, profe de EF', $now - 3 * HOURSECS);
         $found = moments::find($entityid, $now);
         $this->assertSame('voice', $found[0]['kind']);
         $this->assertSame(['who' => 'Enrique, profe de EF', 'title' => 'La isla del cometa'], $found[0]['a']);
+        // Told only to whoever may hear it: a voice for the pupils, to nobody who is not one of them.
+        $this->assertSame([], array_filter(moments::of($library, $now, false), fn($m) => $m['kind'] === 'voice'));
+        $DB->update_record('local_oksigeniaayvurenda_digital', (object) ['id' => $island, 'audience' => 'students,public',
+            'licence' => 'pd']);
         $said = moments::of($library, $now, false)[0];
         $this->assertStringContainsString('Enrique, profe de EF', $said['text']);
         $this->assertStringContainsString('record.php', $said['url']);

@@ -1,5 +1,49 @@
 # Changelog
 
+## 1.2.2 (2026-11-21)
+
+The privacy and security part of the review of 21 November (everything new since 0.236.0), and the worst faults of
+its second part.
+
+- **A copy paired with Abies keeps the code of its label:** a newer export that changed anything else of that copy wrote
+  the code of Abies over it, and the label stopped reading at the desk. A copy here keeps its code whatever the export
+  says, and only copies of the library it imports into are taken as the same book (never the book bank's).
+- **The soft sound of a reading on iPhone and iPad** played at full volume and did not stop when paused: those devices
+  leave the volume to their buttons. The sound goes through Web Audio there, and a fade always ends.
+- **«Challenges» works out every player's bingo card at once:** some ten queries a challenge, where it was some fifteen
+  a player on every visit (a school of 600 players waited about 20 seconds).
+- **«Ayvu rande» pages by book in the database:** it cut at the newest thousand voices, and a book read in thirty parts
+  is thirty voices, so older readings were on no page.
+- The square «a book with a voice» counts a voice the book had when it was lent and that someone can hear.
+
+- **A reader's booklet is theirs from twelve by their age, not by the card they chose:** with the sober sky, the classic
+  card or none, the family gets it only if the reader says so, and the card offers that line to all of them. The
+  booklet draws the sky for them, not a flower.
+- **A centre is signed up by its number, never by its name:** two schools may share a name, and `cli/add_entity.php`
+  without `--entity=N` now stops when there is already a centre called so, instead of completing the other one and
+  giving its new manager the way into it.
+- **A tutor prints the class's booklets from «My class» when it offers them** (from three weeks before the last day),
+  only for this school year's class, the whole life only for a group that leaves, and of the readers over twelve only
+  those who let their family have it. Another school year stays with the library.
+- **A minor's voice goes in a booklet, its QR and «Read for the little ones» only with their family's permission**, and
+  those links stop the day it is taken back; nothing is told to a family of a voice the little ones cannot hear.
+- **A new voice is told only to whoever may hear it**, and to other plugins (the screens of a centre) without who read
+  it and only when anyone may hear it.
+- The postcard of the first book: the button to record the book with your voice opens again.
+- **«What their child has out, in the family's app»** is a setting of the centre in «How your library works», off for a
+  new centre (Enrique, 12 November); where families already saw it, it stays on.
+- A book read in parts tells the family once, not once per chapter.
+- Turning a function on for the whole centre from the desk is whoever runs it; «Show me» is sent as a form.
+- The finder keeps its unanswered questions apart from the centre's settings, short (eight words), and finds a name
+  in a large centre without a limit that could leave it out.
+- On a site with centres apart: other plugins get one centre's new books, moments and activities, found by
+  `api::centre_of_category()`, never every centre's; the list of libraries leaves out a centre still getting ready; the
+  welcome badge goes with the site's name; a child's card in Aty is looked for in its own centre.
+- `cli/import_abies.php --library` takes the library's short name, says which library of which centre and what it has,
+  and imports only with `--yes`.
+- A reader's drawing is served only while its review is published, kept by no shared cache; a reader keeps at most 120
+  recordings waiting for approval.
+
 ## 1.2.1 (2026-11-21)
 
 - Coming back to a reading with parts already heard, the page says «Carry on here», not «Start here».

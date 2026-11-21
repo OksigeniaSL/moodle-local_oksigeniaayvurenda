@@ -50,6 +50,8 @@ $timelykind = optional_param('kind', '', PARAM_ALPHA);
 if (
     in_array($timelydo, ['on', 'show', 'no'], true) && in_array($timelykind, \local_oksigeniaayvurenda\local\timely::KINDS, true)
     && confirm_sesskey() && \local_oksigeniaayvurenda\local\timely::theirs($library, $timelykind, (int) $USER->id)
+    // Turning a function on for the whole centre is whoever runs it: the card is shown to others, the switch is not theirs.
+    && ($timelydo !== 'on' || access::can('local/oksigeniaayvurenda:manage', $library))
 ) {
     $situation = ['kind' => $timelykind] + (\local_oksigeniaayvurenda\local\timely::situation(
         $library,

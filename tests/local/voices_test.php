@@ -104,6 +104,26 @@ final class voices_test extends \advanced_testcase {
         $this->assertSame(['El faro dormido'], array_column($spring($leo), 'title'));
         $this->assertCount(1, $spring($leo)[0]['voices']);
         $this->assertSame([], $spring($stranger));
+        // Twenty books a page, by the newest voice of each, however many voices there are; the older ones on the next.
+        $adultrow = $DB->get_record(self::T . 'digital', ['id' => $adult]);
+        $added = [];
+        for ($n = 1; $n <= 21; $n++) {
+            $book = $gen->create_record(['entityid' => $entityid, 'title' => 'Libro ' . $n]);
+            $copy = clone $adultrow;
+            unset($copy->id);
+            $copy->recordid = $book->id;
+            $copy->timecreated = $now - 100 + $n;
+            $copy->deletetoken = 'pagina' . $n;
+            $added[] = $DB->insert_record(self::T . 'digital', $copy);
+        }
+        $first = voices::spring($library, digital::viewer($entityid, (int) $leo->id));
+        $this->assertTrue($first['more']);
+        $this->assertSame(['El faro dormido', 'Libro 21'], array_slice(array_column($first['records'], 'title'), 0, 2));
+        $this->assertCount(20, $first['records']);
+        $second = voices::spring($library, digital::viewer($entityid, (int) $leo->id), 1);
+        $this->assertFalse($second['more']);
+        $this->assertSame(['Libro 2', 'Libro 1'], array_column($second['records'], 'title'));
+        $DB->delete_records_list(self::T . 'digital', 'id', $added);
 
         voices::remove(digital::get($adult, $library));
         $this->assertFalse($DB->record_exists(self::T . 'digital', ['id' => $adult]));

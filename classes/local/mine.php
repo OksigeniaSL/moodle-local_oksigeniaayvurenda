@@ -236,6 +236,32 @@ final class mine {
     }
 
     /**
+     * Whether a centre lets each child's family see in their app what the child has out (Enrique, 12 Nov 2026: yes, as a
+     * setting of the centre, off unless it turns it on).
+     *
+     * @param int $entityid
+     * @return bool
+     */
+    public static function family_sees(int $entityid): bool {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        return !empty($settings['familyloans']);
+    }
+
+    /**
+     * Saves whether a centre lets families see what their children have out.
+     *
+     * @param int $entityid
+     * @param bool $on
+     */
+    public static function save_family_sees(int $entityid, bool $on): void {
+        global $DB;
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $entityid]), true) ?: [];
+        $settings['familyloans'] = $on;
+        $DB->set_field(self::T . 'entity', 'settings', json_encode($settings), ['id' => $entityid]);
+    }
+
+    /**
      * What a family sees of a child's library in Oksigenia Aty: what the child has out and what is set aside for them, and
      * until when, so that it gets back. See, not act: they do not renew or reserve for the child. What a child reads is theirs:
      * from the age the sky replaces the flower, the family sees that there is a book and its date, not which one, as a
@@ -259,12 +285,17 @@ final class mine {
         foreach (self::summary($childuserid, $now) as $library) {
             $reader = $DB->get_record(
                 self::T . 'reader',
-                ['userid' => $childuserid, 'cardcode' => $library['cardcode'], 'status' => 'active'],
+                ['userid' => $childuserid, 'cardcode' => $library['cardcode'], 'status' => 'active',
+                    'entityid' => $library['entityid']],
                 '*',
                 IGNORE_MULTIPLE
             );
-            // A centre whose plan has no app shows nothing in it, not even of a child (int-aty-pixel 3).
-            if (access::apart() && $reader && !plans::allows((int) $reader->entityid, 'app')) {
+            // A centre whose plan has no app shows nothing in it, not even of a child (int-aty-pixel 3); nor one that does
+            // not let families see what their children have out.
+            if (
+                $reader && ((access::apart() && !plans::allows((int) $reader->entityid, 'app'))
+                    || !self::family_sees((int) $reader->entityid))
+            ) {
                 continue;
             }
             $young = $reader && cards::look_of($reader, $now) === 'flower';
@@ -356,7 +387,10 @@ final class mine {
         $out = [];
         foreach (self::summary($childuserid, $now) as $library) {
             $reader = $DB->get_record(self::T . 'reader', ['id' => $library['readerid']]);
-            if (!$reader || (access::apart() && !plans::allows((int) $reader->entityid, 'app'))) {
+            if (
+                !$reader || (access::apart() && !plans::allows((int) $reader->entityid, 'app'))
+                    || !self::family_sees((int) $reader->entityid)
+            ) {
                 continue;
             }
             $young = cards::look_of($reader, $now) === 'flower';

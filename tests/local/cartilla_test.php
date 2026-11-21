@@ -66,6 +66,19 @@ final class cartilla_test extends \advanced_testcase {
         $this->assertSame($str('cartillanew'), $card['squares'][0]['label']);
         $this->assertSame(2, quests::stamps($quest, (int) $reader->id, $now));
         $this->assertCount(1, quests::open($reader, $now));
+
+        // The sums of every player, worked out all at once, are those of their cards: who has not joined does not count.
+        $other = $gen->create_reader(['entityid' => $library->entityid]);
+        $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item('Tercero recién llegado', $now - 9 * DAYSECS)->id,
+            'readerid' => $other->id, 'timeloaned' => $now - 2 * DAYSECS]);
+        $this->assertSame(0, cartilla::stats($quest, $library, $now, $str)['players']);
+        $this->assertTrue(quests::join($id, $reader, $now));
+        $this->assertTrue(quests::join($id, $other, $now));
+        $stats = cartilla::stats($quest, $library, $now, $str);
+        $this->assertSame([2, 0, 0], [$stats['players'], $stats['lines'], $stats['full']]);
+        $this->assertSame(['label' => $str('cartillavoice'), 'count' => 0], $stats['hardest']);
+        $other = cartilla::card($quest, $library, (int) $other->id, $now, $str);
+        $this->assertSame([1, 'Tercero recién llegado'], [$other['filled'], $other['squares'][0]['title']]);
     }
 
     /**
@@ -87,8 +100,10 @@ final class cartilla_test extends \advanced_testcase {
             'timeacquired' => $acquired]);
         $new = $item('Recién llegado', $now - 10 * DAYSECS);
         $voiced = $item('Con su voz', $now - 400 * DAYSECS);
+        // A voice the book had before it was lent, that someone can hear: one recorded afterwards fills nothing.
         $DB->insert_record('local_oksigeniaayvurenda_digital', ['entityid' => $library->entityid, 'recordid' => $voiced->recordid,
-            'kind' => 'voice', 'format' => 'audio', 'status' => 'published', 'timecreated' => $now, 'timemodified' => $now]);
+            'kind' => 'voice', 'format' => 'audio', 'status' => 'published', 'audience' => 'students',
+            'timecreated' => $now - 30 * DAYSECS, 'timemodified' => $now - 30 * DAYSECS]);
         $old = $item('Olvidado', $now - 5 * 365 * DAYSECS);
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         // The lists of a square that is no corner: one new book, one waiting to be rescued.

@@ -127,7 +127,10 @@ final class removal {
         $all = (array) get_config('local_oksigeniaayvurenda');
         return array_filter(
             $all,
-            fn($name) => preg_match('/^(cifrakey|cifrasecret)' . $entityid . '$|^offsite' . $entityid . '_/', (string) $name) === 1,
+            fn($name) => preg_match(
+                '/^(cifrakey|cifrasecret)' . $entityid . '$|^offsite' . $entityid . '_|^howtomisses_' . $entityid . '$/',
+                (string) $name
+            ) === 1,
             ARRAY_FILTER_USE_KEY
         );
     }

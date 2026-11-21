@@ -59,6 +59,13 @@ if ($viewer['who'] === 'nobody' || empty($_FILES['voice']['tmp_name']) || !is_up
 if (filesize($_FILES['voice']['tmp_name']) > 60 * 1024 * 1024) {
     throw new moodle_exception('voicefailed', 'local_oksigeniaayvurenda');
 }
+// A whole book in parts is a few dozen waiting at once; hundreds are not readings.
+if (
+    $DB->count_records('local_oksigeniaayvurenda_digital', ['createdby' => $USER->id, 'kind' => 'voice', 'status' => 'pending',
+        'entityid' => $library->entityid]) >= 120
+) {
+    throw new moodle_exception('voicefailed', 'local_oksigeniaayvurenda');
+}
 $id = voices::record(
     $library,
     required_param('record', PARAM_INT),

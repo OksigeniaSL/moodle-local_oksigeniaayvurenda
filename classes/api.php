@@ -59,11 +59,15 @@ final class api {
      *
      * @param int $since Only what came from this time on.
      * @param int $limit How many, from 1 to 50.
-     * @param int|null $entityid Only the libraries of this centre; null, those of every centre on the site.
+     * @param int|null $entityid Only the libraries of this centre; null, those of every centre on a site of one centre (on a
+     *     site with centres apart, none: ask for the centre, see centre_of_category()).
      * @return array[]
      */
     public static function new_books(int $since, int $limit = 12, ?int $entityid = null): array {
         global $DB;
+        if ($entityid === null && access::apart()) {
+            return [];
+        }
         $open = [];
         $entities = $DB->get_fieldset_select(
             self::T . 'entity',
@@ -174,7 +178,9 @@ final class api {
     public static function libraries(): array {
         $out = [];
         foreach (catalogue::libraries() as $library) {
-            if ($library->kind === bank::KIND || practice::is((int) $library->entityid)) {
+            // Nor a centre still getting ready: its name is not for others to see yet.
+            $centre = (int) $library->entityid;
+            if ($library->kind === bank::KIND || practice::is($centre) || access::closed($centre)) {
                 continue;
             }
             $open = (bool) window::settings($library)['open'];
@@ -187,6 +193,30 @@ final class api {
             ];
         }
         return $out;
+    }
+
+    /**
+     * The centre a course category belongs to: the one whose category is it or holds it, the nearest first. For a plugin
+     * that knows the categories of what it shows (a screen, a course) and asks for one centre's books and moments.
+     *
+     * @param int $categoryid
+     * @return int|null The centre, or null when no centre has that category (or the site keeps no centres apart).
+     */
+    public static function centre_of_category(int $categoryid): ?int {
+        global $DB;
+        $path = (string) $DB->get_field('course_categories', 'path', ['id' => $categoryid]);
+        if ($path === '') {
+            return null;
+        }
+        $ids = array_reverse(array_map('intval', array_filter(explode('/', $path))));
+        [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+        $found = $DB->get_records_select_menu(self::T . 'entity', 'categoryid ' . $in, $params, '', 'categoryid, id');
+        foreach ($ids as $id) {
+            if (isset($found[$id])) {
+                return (int) $found[$id];
+            }
+        }
+        return null;
     }
 
     /**
@@ -212,16 +242,21 @@ final class api {
      * without names. For the screens of a centre, a newsletter, a block. Never a practice library nor a centre still
      * closed to its readers.
      *
-     * Each moment: kind (anniversary, loans, book, record, quest or first); text (plain text, in the current language and
+     * Each moment: kind (anniversary, voice, loans, book, record, quest, challenge or first; a new voice told without who
+     * read it); text (plain text, in the current language and
      * in the words of the centre's kind of library, to be escaped when shown); recordid (the book it is about, or 0) and
      * cover (the stored_file of its picture, or null); library (the name of the centre's main library) and entityid.
      *
-     * @param int|null $entityid Only this centre; null, every centre on the site.
+     * @param int|null $entityid Only this centre; null, every centre on a site of one centre (on a site with centres apart,
+     *     none: ask for the centre, see centre_of_category()).
      * @param int|null $now
      * @return array[] Each centre's, the most worth telling first.
      */
     public static function moments(?int $entityid = null, ?int $now = null): array {
         global $DB;
+        if ($entityid === null && access::apart()) {
+            return [];
+        }
         $now = $now ?? time();
         $fs = get_file_storage();
         $context = \context_system::instance();
@@ -232,9 +267,13 @@ final class api {
                 continue;
             }
             foreach (local\moments::of($main, $now, false) as $moment) {
+                // Without names, as promised: a new voice is told without who read it (a screen in a hall is public).
+                $text = $moment['kind'] === 'voice' && $moment['key'] !== 'momentvoiceanon'
+                    ? local\skins::say((int) $id, 'momentvoiceanon', (object) ['title' => $moment['a']['title'] ?? ''])
+                    : $moment['text'];
                 $out[] = [
                     'kind' => $moment['kind'],
-                    'text' => $moment['text'],
+                    'text' => $text,
                     'recordid' => $moment['recordid'],
                     'cover' => $moment['recordid'] ? ($fs->get_file(
                         $context->id,
@@ -263,12 +302,16 @@ final class api {
      *
      * @param int $from Only what has not ended by this time.
      * @param int $until Only what starts up to this time.
-     * @param int|null $entityid Only the libraries of this centre; null, those of every centre on the site.
+     * @param int|null $entityid Only the libraries of this centre; null, those of every centre on a site of one centre (on a
+     *     site with centres apart, none: ask for the centre, see centre_of_category()).
      * @param int $limit How many, from 1 to 50.
      * @return array[]
      */
     public static function activities(int $from, int $until, ?int $entityid = null, int $limit = 20): array {
         global $DB;
+        if ($entityid === null && access::apart()) {
+            return [];
+        }
         $limit = max(1, min(50, $limit));
         $entities = $DB->get_fieldset_select(self::T . 'entity', 'id', $entityid ? 'id = :id' : '1 = 1', ['id' => $entityid]);
         $found = [];

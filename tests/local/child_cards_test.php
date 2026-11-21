@@ -46,6 +46,7 @@ final class child_cards_test extends \advanced_testcase {
         $w->library = $gen->create_library();
         $w->now = time();
         $entityid = (int) $w->library->entityid;
+        mine::save_family_sees($entityid, true);
         $w->child = $this->getDataGenerator()->create_user();
         $w->adult = $this->getDataGenerator()->create_user();
         $w->reader = $gen->create_reader(['entityid' => $entityid, 'cardcode' => '10000H', 'userid' => $w->child->id]);
@@ -60,6 +61,18 @@ final class child_cards_test extends \advanced_testcase {
             'yearid' => $year->id, 'timeloaned' => $w->now - DAYSECS, 'timedue' => $w->now + 5 * DAYSECS, 'renewals' => 0,
             'timecreated' => $w->now, 'timemodified' => $w->now]);
         return $w;
+    }
+
+    /**
+     * A centre that has not turned it on shows the family nothing of what their child has out (off to begin with).
+     */
+    public function test_off_unless_the_centre_says(): void {
+        $w = $this->world('Primaria');
+        mine::save_family_sees((int) $w->library->entityid, false);
+        $this->assertSame([], mine::child_cards((int) $w->child->id, $w->now));
+        $this->assertSame([], mine::child_page((int) $w->child->id, $w->now));
+        mine::save_family_sees((int) $w->library->entityid, true);
+        $this->assertNotEmpty(mine::child_page((int) $w->child->id, $w->now));
     }
 
     /**

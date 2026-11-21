@@ -154,7 +154,7 @@ final class forlittle {
             $parts = $DB->get_records_select(
                 self::T . 'digital',
                 "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND status = 'published' AND createdby = :userid
-                    AND part IS NOT NULL",
+                    AND part IS NOT NULL AND forlittle = 1",
                 ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $row->createdby],
                 'part, timecreated DESC'
             );
@@ -230,7 +230,8 @@ final class forlittle {
         $record = $voice ? $DB->get_record(self::T . 'record', ['id' => $voice->recordid]) : null;
         $reader = $voice && $voice->readerid ? $DB->get_record(self::T . 'reader', ['id' => $voice->readerid]) : null;
         $library = $voice ? mail::main_library((int) $voice->entityid) : null;
-        if (!$record || !$reader || !$library || !digital::file($voice)) {
+        // A minor's voice opens only with the permission their family gave: the day it is taken back, the link stops.
+        if (!$record || !$reader || !$library || !voices::may_share($voice) || !digital::file($voice)) {
             return null;
         }
         return ['voice' => $voice, 'record' => $record, 'library' => $library, 'reader' => $reader];
@@ -269,6 +270,7 @@ final class forlittle {
             return 0;
         }
         $told = 0;
+        $toldreading = [];
         foreach (self::due($now, $centres) as $voice) {
             $entityid = (int) $voice->entityid;
             if (!self::on($entityid) || practice::is($entityid) || access::closed($entityid)) {
@@ -276,6 +278,22 @@ final class forlittle {
             }
             // Once: a family that gets nothing now (none left, a message that fails) is not asked again every morning.
             $DB->set_field(self::T . 'digital', 'timetold', $now, ['id' => $voice->id]);
+            // A book read in parts is told once, for its first part approved: not one message a chapter, nor one a day.
+            if ($voice->part !== null && $voice->createdby) {
+                $reading = "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid
+                    AND part IS NOT NULL";
+                $its = ['entityid' => $voice->entityid, 'recordid' => $voice->recordid, 'userid' => $voice->createdby];
+                $before = $DB->record_exists_select(
+                    self::T . 'digital',
+                    $reading . ' AND timetold IS NOT NULL AND timetold < :now',
+                    $its + ['now' => $now]
+                );
+                $DB->set_field_select(self::T . 'digital', 'timetold', $now, $reading . ' AND timetold IS NULL', $its);
+                if ($before || !empty($toldreading[$voice->recordid . '-' . $voice->createdby])) {
+                    continue;
+                }
+                $toldreading[$voice->recordid . '-' . $voice->createdby] = true;
+            }
             try {
                 $told += self::tell($voice);
             } catch (\Throwable $e) {
@@ -297,7 +315,8 @@ final class forlittle {
         $child = $reader && $reader->userid ? \core_user::get_user((int) $reader->userid) : null;
         $record = $DB->get_record(self::T . 'record', ['id' => $voice->recordid]);
         $library = mail::main_library((int) $voice->entityid);
-        if (!$child || !$record || !$library) {
+        // Nothing to tell of a voice the little ones cannot hear (a minor's, without their family's permission).
+        if (!$child || !$record || !$library || !voices::may_share($voice)) {
             return 0;
         }
         $entityid = (int) $voice->entityid;

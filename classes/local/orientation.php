@@ -347,7 +347,7 @@ final class orientation {
      * @return int|null
      */
     public static function badge(int $entityid, ?string $image = null): ?int {
-        global $CFG, $DB;
+        global $CFG, $DB, $SITE;
         if (empty($CFG->enablebadges)) {
             return null;
         }
@@ -365,13 +365,16 @@ final class orientation {
             true,
             ['escape' => false]
         );
+        // A site badge is listed to everyone on the site: where centres are apart, it goes with the site's name, never with
+        // the names of the other centres it serves. The message, to the reader alone, keeps their centre's.
+        $listed = access::apart() ? format_string((string) $SITE->fullname, true, ['escape' => false]) : $name;
         $admin = get_admin();
         $now = time();
         $id = (int) $DB->insert_record('badge', (object) [
-            'name' => \core_text::substr(get_string('orientationbadge', 'local_oksigeniaayvurenda', $name), 0, 255),
-            'description' => get_string('orientationbadgedesc', 'local_oksigeniaayvurenda', $name),
+            'name' => \core_text::substr(get_string('orientationbadge', 'local_oksigeniaayvurenda', $listed), 0, 255),
+            'description' => get_string('orientationbadgedesc', 'local_oksigeniaayvurenda', $listed),
             'timecreated' => $now, 'timemodified' => $now, 'usercreated' => $admin->id, 'usermodified' => $admin->id,
-            'issuername' => \core_text::substr($name, 0, 255), 'issuerurl' => $CFG->wwwroot,
+            'issuername' => \core_text::substr($listed, 0, 255), 'issuerurl' => $CFG->wwwroot,
             'issuercontact' => (string) ($CFG->badges_defaultissuercontact ?? ''),
             'expiredate' => null, 'expireperiod' => null, 'type' => BADGE_TYPE_SITE, 'courseid' => null,
             'messagesubject' => get_string('orientationbadgesubject', 'local_oksigeniaayvurenda'),

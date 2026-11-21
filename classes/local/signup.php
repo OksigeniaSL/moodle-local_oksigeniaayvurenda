@@ -36,18 +36,21 @@ final class signup {
     /**
      * What would be done, without doing it.
      *
-     * @param array $data name, email.
-     * @return array centre (id or 0), account (id or 0).
+     * @param array $data name, email, entity (the centre to complete, if any).
+     * @return array centre (the one to complete, or 0 for a new one), named (another centre already called so, or 0),
+     *     account (id or 0).
      */
     public static function look(array $data): array {
-        return ['centre' => (int) (self::centre_named((string) ($data['name'] ?? ''))->id ?? 0),
+        $entityid = (int) ($data['entity'] ?? 0);
+        return ['centre' => $entityid, 'named' => (int) (self::centre_named((string) ($data['name'] ?? ''))->id ?? 0),
             'account' => (int) (self::account_of((string) ($data['email'] ?? ''))->id ?? 0)];
     }
 
     /**
      * Signs a centre up, or completes what is missing of it.
      *
-     * @param array $data name, library (its first one's name; the centre's when empty), plan (free, small or medium),
+     * @param array $data name, entity (a centre already here to complete; without it, always a new one), library (its first
+     *     one's name; the centre's when empty), plan (free, small or medium),
      *     email, firstname, lastname, lang, role (a role's short name; the plugin's manager when empty), accepted (when it
      *     accepted the terms; now when empty), terms and privacy (where they are).
      * @param int|null $now
@@ -73,8 +76,19 @@ final class signup {
         }
         $created = ['centre' => false, 'account' => false, 'role' => false];
 
-        // The centre, with its first library and its category.
-        $entity = self::centre_named($name);
+        // The centre, with its first library and its category. One already here is completed only when it is named by its
+        // number: two schools may share a name, and the second must never get the way into the first one's readers.
+        $entityid = (int) ($data['entity'] ?? 0);
+        $entity = null;
+        if ($entityid) {
+            $entity = $DB->get_record(self::T . 'entity', ['id' => $entityid]);
+            if (!$entity || practice::is($entityid)) {
+                throw new \invalid_parameter_exception('There is no centre ' . $entityid . ' to complete.');
+            }
+        } else if ($same = self::centre_named($name)) {
+            throw new \invalid_parameter_exception('There is already a centre called «' . $same->name . '» (' . $same->id
+                . '). To complete it, name it with --entity=' . $same->id . '; for a new centre, give it another name.');
+        }
         if (!$entity) {
             $library = libraries::create_entity(
                 ['name' => $name, 'library' => trim((string) ($data['library'] ?? '')), 'closed' => true],

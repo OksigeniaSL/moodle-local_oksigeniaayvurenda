@@ -145,7 +145,9 @@ class booklet {
     }
 
     /**
-     * Whether a booklet is its reader's to give: from twelve (the sky), their family gets it only if they say so.
+     * Whether a booklet is its reader's to give: from twelve, their family gets it only if they say so. By their age that
+     * year (their band, or their stage and group), never by the card they chose: a reader of fifteen with the sober sky,
+     * the classic card or none decides as much as one with the sky.
      *
      * @param \stdClass $reader
      * @param int $yearid
@@ -154,7 +156,21 @@ class booklet {
     public static function theirs(\stdClass $reader, int $yearid): bool {
         global $DB;
         $year = $DB->get_record(self::T . 'year', ['id' => $yearid]);
-        return $year && cards::look_of($reader, max((int) $year->timestart, self::classes_end($year) - 1)) === 'sky';
+        if (!$year) {
+            return false;
+        }
+        $member = $DB->get_record(
+            self::T . 'member',
+            ['readerid' => $reader->id, 'yearid' => $yearid],
+            'id, groupname, stage',
+            IGNORE_MULTIPLE
+        );
+        $settings = json_decode((string) $DB->get_field(self::T . 'entity', 'settings', ['id' => $reader->entityid]), true) ?: [];
+        $student = $reader->readertype === 'student' || ($member && (string) $member->stage !== '');
+        $as = $student ? (object) ['readertype' => 'student', 'entityid' => $reader->entityid, 'band' => $reader->band ?? null]
+            : $reader;
+        [$guess] = cards::base($as, $member ? (string) $member->stage : '', $member ? (string) $member->groupname : '', $settings);
+        return $guess !== 'flower';
     }
 
     /**
@@ -291,7 +307,8 @@ class booklet {
                 ['readerid' => $reader->id]
             ) as $voice
         ) {
-            if ($within((int) $voice->timecreated)) {
+            // The booklet is shared: a minor's voice goes in it only with the permission their family gave.
+            if ($within((int) $voice->timecreated) && voices::may_share((object) ['readerid' => $reader->id])) {
                 $voices[] = ['id' => (int) $voice->id, 'title' => $voice->title, 'forlittle' => !empty($voice->forlittle)];
             }
         }
@@ -330,7 +347,8 @@ class booklet {
      */
     private static function flower_of(\stdClass $reader, \stdClass $year): array {
         global $DB;
-        $look = cards::look_of($reader, max((int) $year->timestart, self::classes_end($year) - 1)) === 'sky' ? 'sky' : 'flower';
+        // The sky for a reader whose booklet is theirs (by their age, not by the card they chose); the flower for a young one.
+        $look = self::theirs($reader, (int) $year->id) ? 'sky' : 'flower';
         $kept = $DB->get_field(self::T . 'keepsake', 'flower', ['readerid' => $reader->id, 'yearid' => $year->id]);
         $flower = $kept ? json_decode((string) $kept, true) : null;
         if (!is_array($flower) || !isset($flower['levels'], $flower['stage'])) {

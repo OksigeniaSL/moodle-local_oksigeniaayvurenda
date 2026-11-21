@@ -38,7 +38,7 @@ final class signup_test extends \advanced_testcase {
         $data = ['name' => 'Biblioteca Municipal de Riosalto', 'library' => 'Sala central', 'plan' => 'small',
             'email' => 'Ana.Lopez@Example.org', 'firstname' => 'Ana', 'lastname' => 'López', 'lang' => 'es',
             'accepted' => '2026-11-03'];
-        $this->assertSame(['centre' => 0, 'account' => 0], signup::look($data));
+        $this->assertSame(['centre' => 0, 'named' => 0, 'account' => 0], signup::look($data));
         $sink = $this->redirectEmails();
         $first = signup::centre($data);
         $this->assertSame(['centre' => true, 'account' => true, 'role' => true], $first['created']);
@@ -71,7 +71,15 @@ final class signup_test extends \advanced_testcase {
         $this->assertFalse(access::can('local/oksigeniaayvurenda:manage', $other['entity'], $first['userid']));
         $this->assertFalse(access::can('local/oksigeniaayvurenda:plans', $first['entity'], $first['userid']));
 
-        $again = signup::centre(['plan' => 'medium', 'accepted' => '2027-01-01'] + $data);
+        // The same name again, without its number: refused, so another school called so never gets into this one.
+        try {
+            signup::centre(['email' => 'intrusa@example.org'] + $data);
+            $this->fail('A centre with the same name was completed without its number');
+        } catch (\invalid_parameter_exception $e) {
+            $this->assertStringContainsString('--entity=' . $first['entity'], $e->debuginfo);
+        }
+        $this->assertFalse($DB->record_exists('user', ['email' => 'intrusa@example.org']));
+        $again = signup::centre(['plan' => 'medium', 'accepted' => '2027-01-01', 'entity' => $first['entity']] + $data);
         $this->assertSame(['centre' => false, 'account' => false, 'role' => false], $again['created']);
         $this->assertFalse($again['mailed']);
         $this->assertCount(0, $sink->get_messages());
@@ -80,7 +88,7 @@ final class signup_test extends \advanced_testcase {
         $this->assertSame(1, $DB->count_records('local_oksigeniaayvurenda_entity', ['name' => $data['name']]));
         $this->assertSame(strtotime('2026-11-03'), signup::terms($first['entity'])['time'], 'the first acceptance counts');
         $this->assertSame(25000, plans::of($first['entity'])['copies']);
-        $this->assertSame(['centre' => $first['entity'], 'account' => $first['userid']], signup::look($data));
+        $this->assertSame(['centre' => 0, 'named' => $first['entity'], 'account' => $first['userid']], signup::look($data));
 
         $messages = $this->redirectMessages();
         $third = signup::centre(['name' => 'Colegio Monte Alto', 'plan' => 'free', 'email' => $data['email']]);

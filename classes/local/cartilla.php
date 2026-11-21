@@ -443,12 +443,41 @@ final class cartilla {
         $full = 0;
         $filled = array_fill(0, self::SIZE, 0);
         $squares = self::squares($quest);
-        foreach ($readers as $readerid) {
-            $card = self::card($quest, $library, (int) $readerid, $now, $str);
-            $lines += $card['lines'];
-            $full += $card['full'] ? 1 : 0;
-            foreach ($card['squares'] as $at => $square) {
-                $filled[$at] += $square['filled'] ? 1 : 0;
+        if ($readers && $squares) {
+            // Every player's card at once, as each would be drawn: their loans in one query, and the loans that fit each
+            // square in one query for all of them (a card a player was some fifteen queries each, on every visit).
+            [$from, $params] = quests::loans_sql($quest, $now);
+            $within = "IN (SELECT ql.id
+                             FROM {" . self::T . "loan} ql
+                             JOIN {" . self::T . "questreader} qr ON qr.readerid = ql.readerid AND qr.questid = :squest
+                            WHERE ql.id IN (SELECT l.id $from))";
+            $params += ['squest' => $quest->id];
+            $byreader = [];
+            $rows = $DB->get_recordset_sql(
+                "SELECT l.id, l.readerid FROM {" . self::T . "loan} l WHERE l.id $within ORDER BY l.timeloaned, l.id",
+                $params
+            );
+            foreach ($rows as $row) {
+                $byreader[(int) $row->readerid][] = (int) $row->id;
+            }
+            $rows->close();
+            $fits = [];
+            foreach ($squares as $at => $spec) {
+                $fits[$at] = $byreader && $spec !== '' ? array_flip(self::fitting_in($spec, $library, $within, $params)) : [];
+            }
+            foreach ($byreader as $ids) {
+                $mine = array_map(fn($fit) => array_values(array_filter($ids, fn($id) => isset($fit[$id]))), $fits);
+                $by = self::match($mine, $ids);
+                foreach (array_keys($by) as $at) {
+                    $filled[$at]++;
+                }
+                if (count($squares) === self::SIZE) {
+                    $lines += count(array_filter(
+                        self::LINES,
+                        fn($line) => count(array_intersect_key($by, array_flip($line))) === 3
+                    ));
+                }
+                $full += count($by) === count($squares) ? 1 : 0;
             }
         }
         $hardest = null;
@@ -470,6 +499,20 @@ final class cartilla {
     private static function fitting(string $spec, \stdClass $library, array $loanids): array {
         global $DB;
         [$in, $params] = $DB->get_in_or_equal($loanids, SQL_PARAMS_NAMED, 'fl');
+        return self::fitting_in($spec, $library, $in, $params);
+    }
+
+    /**
+     * The loans, of those an SQL condition gives, whose book fits a square.
+     *
+     * @param string $spec
+     * @param \stdClass $library
+     * @param string $in The condition on the loan's id («IN (…)» or «= …»).
+     * @param array $params Its parameters.
+     * @return int[]
+     */
+    private static function fitting_in(string $spec, \stdClass $library, string $in, array $params): array {
+        global $DB;
         $base = "SELECT l.id
                    FROM {" . self::T . "loan} l
                    JOIN {" . self::T . "item} i ON i.id = l.itemid
@@ -478,8 +521,10 @@ final class cartilla {
             $sql = "$base AND i.timeacquired IS NOT NULL AND i.timeacquired >= l.timeloaned - :fresh";
             $params['fresh'] = premieres::DAYS * DAYSECS;
         } else if ($spec === 'voice') {
+            // A book that had a voice when it was lent, one that someone could hear: not one recorded afterwards.
             $sql = "$base AND EXISTS (SELECT 1 FROM {" . self::T . "digital} d
-                                       WHERE d.recordid = i.recordid AND d.kind = 'voice' AND d.status = 'published')";
+                                       WHERE d.recordid = i.recordid AND d.kind = 'voice' AND d.status = 'published'
+                                             AND d.audience <> '' AND d.timecreated <= l.timeloaned)";
         } else if ($spec === 'rescued') {
             $sql = "$base AND NOT EXISTS (SELECT 1
                                            FROM {" . self::T . "loan} o

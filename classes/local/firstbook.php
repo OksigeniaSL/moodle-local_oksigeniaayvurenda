@@ -148,7 +148,7 @@ final class firstbook {
             $now,
             (int) $reader->id
         ) : '';
-        $voice = $token !== '' ? (new \moodle_url('/local/oksigeniaayvurenda/family.php', ['token' => $token]))->out(false)
+        $voice = $token !== '' ? (new \moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $token]))->out(false)
             : '';
         $told = 0;
         $seen = [];

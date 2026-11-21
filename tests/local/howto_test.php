@@ -179,9 +179,22 @@ final class howto_test extends \advanced_testcase {
         howto::missed('gymkana verano Zubiria', $library, 2000);
         howto::missed('Gymkana de verano', $library, 2500);
         howto::missed('Quiros tomasin', $library, 3000);
+        // A short name whose letters may all carry an accent, among many others: still left out.
+        for ($i = 0; $i < 250; $i++) {
+            $this->getDataGenerator()->create_user(['firstname' => 'Luis', 'lastname' => 'Pons']);
+        }
+        $this->getDataGenerator()->create_user(['firstname' => 'Unai', 'lastname' => 'Lazkano']);
+        howto::missed('cuentos de unai', $library, 3500);
         $this->assertSame([
             ['question' => 'gymkana verano', 'times' => 2, 'last' => 2500],
+            ['question' => 'cuentos', 'times' => 1, 'last' => 3500],
             ['question' => 'gymkana verano libros', 'times' => 1, 'last' => 1000],
         ], howto::misses($entityid));
+        // Kept apart from the centre's settings: a reader's search never writes over them.
+        $this->assertStringNotContainsString('gymkana', (string) $GLOBALS['DB']->get_field(
+            'local_oksigeniaayvurenda_entity',
+            'settings',
+            ['id' => $entityid]
+        ));
     }
 }

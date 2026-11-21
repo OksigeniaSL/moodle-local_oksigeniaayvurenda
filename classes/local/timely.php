@@ -337,13 +337,13 @@ class timely {
             'voices' => $str('timelywaiting'),
             default => $str('timelyhappeningnow'),
         };
-        $through = new \moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug, 'timely' => 'show',
-            'kind' => $kind, 'sesskey' => sesskey()]);
-        $show = $kind === 'window' ? null : ['url' => $through->out(false),
-            'label' => $str('timely' . $kind . 'show' . ($kind === 'voices' ? $one : ''))];
+        // Sent as a form, like the switch and «Not now»: a session key in an address stays in a shared desk's history.
+        $show = $kind === 'window' ? null : ['label' => $str('timely' . $kind . 'show' . ($kind === 'voices' ? $one : ''))];
         return ['lit' => false, 'spine' => $str('timelyspine' . $kind), 'colour' => self::SPINES[$kind], 'when' => $when,
             'title' => $title, 'what' => $what, 'action' => $action, 'sesskey' => sesskey(), 'kind' => $kind,
-            'light' => self::can_turn_on($library, $kind) ? ['label' => $str('timely' . $kind . 'light')] : null,
+            // The switch for the whole centre, only to whoever runs it; the rest see the card and its way through.
+            'light' => self::can_turn_on($library, $kind) && access::can('local/oksigeniaayvurenda:manage', $library)
+                ? ['label' => $str('timely' . $kind . 'light')] : null,
             'show' => $show, 'notnow' => $str('timelynotnow')];
     }
 

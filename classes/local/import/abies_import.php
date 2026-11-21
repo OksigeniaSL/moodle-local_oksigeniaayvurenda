@@ -205,10 +205,11 @@ final class abies_import {
         ), true);
         $this->codes = [];
         $this->madecopies = [];
-        $rows = $DB->get_recordset(self::T . 'item', ['entityid' => $this->entityid], 'id', 'id, barcode, recordid');
+        $rows = $DB->get_recordset(self::T . 'item', ['entityid' => $this->entityid], 'id', 'id, barcode, recordid, libraryid');
         foreach ($rows as $row) {
             $this->codes[strtoupper((string) $row->barcode)] = (int) $row->id;
-            if (!isset($this->fromabies['item'][(int) $row->id])) {
+            // The same book made here is a copy of this library: never one of the book bank or of another library.
+            if (!isset($this->fromabies['item'][(int) $row->id]) && (int) $row->libraryid === $this->libraryid) {
                 $this->madecopies[(int) $row->recordid][] = (int) $row->id;
             }
         }
@@ -470,7 +471,7 @@ final class abies_import {
                 $oninsert['status'] = 'available';
             }
             [$itemid] = $this->upsert_tracked('item', $abiesid, $data, [], $oninsert);
-            if ($itemid) {
+            if ($itemid && $known === null) {
                 $this->codes[$barcode] = $itemid;
             }
         }
@@ -862,6 +863,11 @@ final class abies_import {
                     json_decode((string) $row->extra, true) ?: [],
                     json_decode($data['extra'], true) ?: []
                 ));
+            }
+            if ($table === 'item') {
+                // A copy here keeps its code, the one on its label: a copy paired with Abies has its own, and a newer
+                // export that changes anything else of it must not write the code of Abies over it.
+                unset($data['barcode']);
             }
             $DB->update_record(self::T . $table, (object) (['id' => $known[0], 'timemodified' => $this->now] + $data));
             $own = self::own_hash($table, $data + (array) $row, $links);

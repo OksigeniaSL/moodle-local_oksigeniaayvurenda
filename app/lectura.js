@@ -195,26 +195,86 @@
     };
     var playing = '';
     var fade = null;
+    // iPhone and iPad leave an audio element's volume to the buttons of the device (it always reads 1): there the sound
+    // goes through Web Audio, whose gain does follow; with neither, the reading goes without its sound.
+    var settable = (function() {
+        if (!sound) {
+            return false;
+        }
+        try {
+            sound.volume = 0.5;
+            var moved = Math.abs(sound.volume - 0.5) < 0.01;
+            sound.volume = 1;
+            return moved;
+        } catch (e) {
+            return false;
+        }
+    })();
+    var gain = null;
+    var audio = null;
+    var routed = function() {
+        if (settable || gain) {
+            return true;
+        }
+        var Context = window.AudioContext || window.webkitAudioContext;
+        if (!Context) {
+            return false;
+        }
+        try {
+            audio = new Context();
+            gain = audio.createGain();
+            gain.gain.value = 0;
+            audio.createMediaElementSource(sound).connect(gain);
+            gain.connect(audio.destination);
+        } catch (e) {
+            gain = null;
+            return false;
+        }
+        return true;
+    };
+    var level = function(value) {
+        if (value === undefined) {
+            return gain ? gain.gain.value : sound.volume;
+        }
+        value = Math.max(0, Math.min(1, value));
+        if (gain) {
+            gain.gain.value = value;
+        } else {
+            sound.volume = value;
+        }
+        return value;
+    };
+    // A fade always ends, in two seconds at most, even where the level does not move as asked.
     var fadeTo = function(target, then) {
         clearInterval(fade);
+        var steps = 0;
         fade = setInterval(function() {
-            var step = target > sound.volume ? 0.01 : -0.01;
-            var value = sound.volume + step;
-            if ((step > 0 && value >= target) || (step < 0 && value <= target)) {
-                sound.volume = Math.max(0, Math.min(1, target));
+            var now = level();
+            var step = target > now ? 0.01 : -0.01;
+            var value = now + step;
+            steps++;
+            if ((step > 0 && value >= target) || (step < 0 && value <= target) || steps > 34) {
+                level(target);
                 clearInterval(fade);
                 if (then) {
                     then();
                 }
                 return;
             }
-            sound.volume = Math.max(0, Math.min(1, value));
+            level(value);
         }, 60);
     };
     var begin = function(key) {
+        if (!routed()) {
+            playing = '';
+            return;
+        }
         playing = key;
         sound.src = sound.canPlayType('audio/ogg; codecs=opus') ? sounds[key].ogg : sounds[key].m4a;
-        sound.volume = 0;
+        level(0);
+        if (audio && audio.state === 'suspended') {
+            audio.resume();
+        }
         sound.play().catch(function() {
             return null;
         });

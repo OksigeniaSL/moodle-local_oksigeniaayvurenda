@@ -412,7 +412,37 @@ final class abies_import_test extends \advanced_testcase {
             $this->assertSame([], $again->paired());
             $this->assertArrayNotHasKey('paired', $stats['item']);
             $this->assertSame(2, $DB->count_records(self::T . 'item', ['recordid' => $faro->id]));
+
+            // A newer export that changes that copy in Abies brings the change, never the code of Abies over the one of
+            // its label here.
+            $newer = make_request_directory() . '/newer.xml';
+            file_put_contents($newer, str_replace(
+                'CodigoEjemplar="100000L" NumRegistro="100000" Signatura1="821.134.2-3"',
+                'CodigoEjemplar="100000L" NumRegistro="100000" Signatura1="821.134.2-34"',
+                file_get_contents(__DIR__ . '/../../fixtures/abies/small.xml')
+            ));
+            (new abies_import($library->id, true, true))->run(new export_reader($newer));
+            $copy = $DB->get_record(self::T . 'item', ['id' => $mine->id]);
+            $this->assertSame([$code, '821.134.2-34'], [$copy->barcode, $copy->callnumber1]);
         }
+    }
+
+    /**
+     * A copy of the book bank is never taken as the copy of the export: only those of the library it imports into.
+     */
+    public function test_bank_copy_not_paired(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $generator = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $generator->create_library();
+        $bank = $generator->create_library(['entityid' => $library->entityid, 'name' => 'Banco de libros', 'kind' => 'bank']);
+        $faro = $generator->create_record(['entityid' => $library->entityid, 'title' => 'Faro', 'isbn' => '9780306406157']);
+        $lent = $generator->create_item(['libraryid' => $bank->id, 'recordid' => $faro->id, 'barcode' => 'B000001']);
+        $importer = new abies_import($library->id, true, true);
+        $stats = $importer->run($this->export());
+        $this->assertArrayNotHasKey('paired', $stats['item']);
+        $this->assertSame('B000001', $DB->get_field(self::T . 'item', 'barcode', ['id' => $lent->id]));
+        $this->assertSame((int) $bank->id, (int) $DB->get_field(self::T . 'item', 'libraryid', ['id' => $lent->id]));
     }
 
     /**

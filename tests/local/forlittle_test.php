@@ -130,7 +130,9 @@ final class forlittle_test extends \advanced_testcase {
         $this->assertSame('La isla del cometa', forlittle::today($library, $staff, $now)['title']);
         $this->assertNull(forlittle::today($library, $nobody, $now));
 
-        // The sealed link: only with its seal.
+        // The sealed link: only with its seal, and a minor's voice only with their family's permission.
+        $this->assertNull(forlittle::heard($read, mail::seal('hear', $read, 'h')));
+        voices::permission((int) $older->id, true, 0, $now);
         $this->assertNull(forlittle::heard($read, 'abc'));
         $this->assertNull(forlittle::heard($mine, mail::seal('hear', $mine, 'h')));
         $heard = forlittle::heard($read, mail::seal('hear', $read, 'h'));
@@ -151,6 +153,17 @@ final class forlittle_test extends \advanced_testcase {
         $this->assertCount(1, array_filter($emails->get_messages(), fn($m) => $m->to === 'ivan.familia@example.org'));
         $this->assertEquals($now, $DB->get_field(self::T . 'digital', 'timetold', ['id' => $read]));
         $this->assertSame(0, forlittle::run($now + DAYSECS));
+        // A book read in parts: its family is told once, not again for each chapter approved later.
+        $DB->update_record(self::T . 'digital', (object) ['id' => $read, 'part' => 1, 'createdby' => $teen->id]);
+        $chapter = $DB->get_record(self::T . 'digital', ['id' => $read]);
+        unset($chapter->id);
+        $chapter->part = 2;
+        $chapter->timetold = null;
+        $chapter->timemodified = $now + DAYSECS;
+        $chapter->deletetoken = 'otro';
+        $two = $DB->insert_record(self::T . 'digital', $chapter);
+        $this->assertSame(0, forlittle::run($now + 2 * DAYSECS));
+        $this->assertNotNull($DB->get_field(self::T . 'digital', 'timetold', ['id' => $two]));
         $messages->close();
         $emails->close();
         if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {

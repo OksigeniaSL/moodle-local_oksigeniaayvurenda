@@ -545,26 +545,58 @@ final class voices {
      */
     public static function spring(\stdClass $library, array $viewer, int $page = 0): array {
         global $DB;
-        $rows = $DB->get_records_sql(
-            "SELECT d.*, r.title AS booktitle
-               FROM {" . self::T . "digital} d
-               JOIN {" . self::T . "record} r ON r.id = d.recordid
-              WHERE d.entityid = :entityid AND d.kind = 'voice' AND d.status = 'published'
-           ORDER BY d.timecreated DESC, d.id DESC",
-            ['entityid' => $library->entityid],
-            0,
-            1000
-        );
-        $records = [];
-        foreach ($rows as $row) {
-            if (!self::can_hear($row, $viewer)) {
-                continue;
-            }
-            $id = (int) $row->recordid;
-            $records[$id] = $records[$id] ?? ['id' => $id, 'title' => $row->booktitle, 'voices' => []];
-            $records[$id]['voices'][] = $row;
-        }
+        // By record, the one with the newest voice first, and only as far as this page needs: a book read in thirty parts
+        // is thirty voices, and a cut at the newest thousand voices left the older readings out of every page.
         $per = 20;
+        $wanted = ($page + 1) * $per + 1;
+        $records = [];
+        $books = $DB->get_recordset_sql(
+            "SELECT d.recordid, MAX(d.timecreated) AS latest
+               FROM {" . self::T . "digital} d
+              WHERE d.entityid = :entityid AND d.kind = 'voice' AND d.status = 'published'
+           GROUP BY d.recordid
+           ORDER BY latest DESC, d.recordid DESC",
+            ['entityid' => $library->entityid]
+        );
+        $batch = [];
+        $look = function (array $ids) use (&$records, $DB, $library, $viewer) {
+            [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'sr');
+            $rows = $DB->get_records_sql(
+                "SELECT d.*, r.title AS booktitle
+                   FROM {" . self::T . "digital} d
+                   JOIN {" . self::T . "record} r ON r.id = d.recordid
+                  WHERE d.entityid = :entityid AND d.kind = 'voice' AND d.status = 'published' AND d.recordid $in
+               ORDER BY d.timecreated DESC, d.id DESC",
+                ['entityid' => $library->entityid] + $params
+            );
+            $found = [];
+            foreach ($rows as $row) {
+                if (self::can_hear($row, $viewer)) {
+                    $id = (int) $row->recordid;
+                    $found[$id] = $found[$id] ?? ['id' => $id, 'title' => $row->booktitle, 'voices' => []];
+                    $found[$id]['voices'][] = $row;
+                }
+            }
+            foreach ($ids as $id) {
+                if (isset($found[$id])) {
+                    $records[$id] = $found[$id];
+                }
+            }
+        };
+        foreach ($books as $book) {
+            $batch[] = (int) $book->recordid;
+            if (count($batch) === 50) {
+                $look($batch);
+                $batch = [];
+                if (count($records) >= $wanted) {
+                    break;
+                }
+            }
+        }
+        $books->close();
+        if ($batch && count($records) < $wanted) {
+            $look($batch);
+        }
         $more = count($records) > ($page + 1) * $per;
         $records = array_slice($records, $page * $per, $per, true);
         $covers = covers::urls(array_keys($records));

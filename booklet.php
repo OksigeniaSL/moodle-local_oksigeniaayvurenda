@@ -54,7 +54,9 @@ if ($voiceid) {
         'local_oksigeniaayvurenda_digital',
         ['id' => $voiceid, 'kind' => 'voice', 'status' => 'published']
     ) : null;
-    $file = $voice && $voice->readerid ? digital::file($voice) : null;
+    // The booklet can be shared, and so its voices with it: a minor's only with the permission their family gave, and it
+    // stops opening the day that permission is taken back.
+    $file = $voice && $voice->readerid && \local_oksigeniaayvurenda\local\voices::may_share($voice) ? digital::file($voice) : null;
     if (!$file) {
         http_response_code(404);
         die;
@@ -141,13 +143,23 @@ if ($id) {
         + ($wholelife ? ['life' => 1] : [])));
     $year = years::around($entityid, $now);
     $yearid = optional_param('year', 0, PARAM_INT);
-    if ($yearid) {
+    // Another school year is the staff's: a tutor prints this year's class, the children who are theirs now.
+    if ($yearid && $staff) {
         $year = $DB->get_record('local_oksigeniaayvurenda_year', ['id' => $yearid, 'entityid' => $entityid], '*', MUST_EXIST);
     }
     if ($group !== '') {
         // The tutor of the group, or the library's staff.
         if (!$staff && !in_array($group, challenges::tutored($entityid, (int) $USER->id, $now), true)) {
             shell::require('local/oksigeniaayvurenda:desk', $library);
+        }
+        // A tutor, only when «My class» offers it: from three weeks before the last day, and the whole life only for a group
+        // that leaves the centre this year.
+        $from = booklet::classes_end($year) - 21 * DAYSECS;
+        if (
+            !$staff && ($now < $from || $now >= $from + (21 + booklet::ONCARD) * DAYSECS
+                || ($wholelife && !in_array($group, booklet::leaving($entityid, (int) $year->id), true)))
+        ) {
+            shell::refuse($str('bookletclassnotnow'), $library);
         }
         $readers = $DB->get_records_sql(
             "SELECT r.*
@@ -158,6 +170,16 @@ if ($id) {
             ['entityid' => $entityid, 'yearid' => $year->id, 'groupname' => $group]
         );
         foreach ($readers as $reader) {
+            // From twelve, a reader's books are theirs: their tutor prints them only if they let their family have them.
+            if (
+                !$staff && booklet::theirs($reader, (int) $year->id) && !$DB->record_exists_select(
+                    'local_oksigeniaayvurenda_booklet',
+                    'readerid = :readerid AND yearid = :yearid AND tellfamily = 1',
+                    ['readerid' => $reader->id, 'yearid' => $year->id]
+                )
+            ) {
+                continue;
+            }
             if ($wholelife) {
                 $life = bookletview::life($reader, $library);
                 if ($life) {
