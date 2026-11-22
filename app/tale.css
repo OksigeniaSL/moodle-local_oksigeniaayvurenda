@@ -1,4 +1,4 @@
-/* A story to read at home, as Gaudí drew its reader (8 November 2026): the page of the book, the bar on top and the two
+/* A story to read at home, as its reader was drawn (8 November 2026): the page of the book, the bar on top and the two
    big buttons at the bottom; night as a lamp, not a screen; the open book when the phone lies down. The pages come from
    the e-book through epub.js, in .rd-area (app/tale.js); app/tale-page.css dresses them inside. */
 /* ---------- The reader: the page of the book, the bar on top and the two big buttons at the bottom ---------- */
@@ -155,7 +155,7 @@ body.ayv { display: flex; flex-direction: column; height: calc(var(--vh, 1vh) * 
     .rd-page.rd-epub > .rd-sheet { padding: 6px 24px 4px; }
 }
 
-/* What the plugin adds around Gaudí's reader. */
+/* What the plugin adds around the reader. */
 .rd-symbols { position: absolute; width: 0; height: 0; overflow: hidden; }
 .rd svg.i { width: 1.25em; height: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .rd :focus-visible { outline: 3px solid #f0b43c; outline-offset: 3px; }
@@ -180,7 +180,7 @@ body.ayv { display: flex; flex-direction: column; height: calc(var(--vh, 1vh) * 
     .rd, .rd * { transition: none !important; }
 }
 
-/* Text that flows: a thin line of how far through the whole book, in place of the dots (Gaudí). */
+/* Text that flows: a thin line of how far through the whole book, in place of the dots. */
 .rd-progress { display: block; width: min(220px, 50vw); height: 4px; border-radius: 999px; background: var(--rd-dot); overflow: hidden; }
 .rd-progress[hidden] { display: none; }
 .rd-progress i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--rd-dot-on); transition: width .3s ease; }
@@ -188,7 +188,7 @@ body.ayv { display: flex; flex-direction: column; height: calc(var(--vh, 1vh) * 
 .rd-sheet.is-spread::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 46px; transform: translateX(-50%); pointer-events: none;
     background: linear-gradient(90deg, rgba(15, 58, 51, 0), rgba(15, 58, 51, .10) 46%, rgba(15, 58, 51, .14) 50%, rgba(15, 58, 51, .10) 54%, rgba(15, 58, 51, 0)); }
 .rd.is-night .rd-sheet.is-spread::after { background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .35) 50%, rgba(0, 0, 0, 0)); }
-/* The cover takes the picture's own proportion, with its cap on height: no empty band above the drawing (Gaudí). */
+/* The cover takes the picture's own proportion, with its cap on height: no empty band above the drawing. */
 .rd-cover img, .rd-end-pic img { aspect-ratio: auto; height: auto; width: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
 .rd-cover img { max-height: min(420px, 100%); }
 /* The end lying down: the cover on the left and, on the right, the end, good night, the buttons and the credits. */

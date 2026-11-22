@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * A story to read at home, as Gaudí drew its reader: the cover, the e-book's pages one at a time (epub.js) and the end;
+ * A story to read at home, as its reader was drawn: the cover, the e-book's pages one at a time (epub.js) and the end;
  * the two big buttons, the arrows, Page Up and Down, the space bar and a finger to turn them, Escape to go back; four
  * sizes of letter and night, both kept in this browser; and the screen that does not go off while reading.
  *
@@ -66,8 +66,8 @@
         return null;
     };
 
-    // The letters: four sizes, 28 and 34 px to begin with on a phone and a big screen (Gaudí).
-    // On a short screen (a phone lying down) a little less, so a page still holds some lines (Gaudí).
+    // The letters: four sizes, 28 and 34 px to begin with on a phone and a big screen.
+    // On a short screen (a phone lying down) a little less, so a page still holds some lines.
     var sizes = function() {
         var query = function(media) {
             return window.matchMedia && window.matchMedia(media).matches;
@@ -94,7 +94,7 @@
     var index = 0;
     var atStart = true;
     var atEnd = false;
-    // A picture book laid out page by page, or text that flows: they say where one is differently (Gaudí).
+    // A picture book laid out page by page, or text that flows: they say where one is differently.
     var fixed = false;
     var spot = null;
     var share = null;
@@ -209,7 +209,7 @@
         rendition.themes.default({
             'body': {'font-family': '"Ayvurenda Andika", Andika, system-ui, sans-serif !important',
                 'line-height': '1.42 !important'},
-            // The text flows from one screen to the next: a paragraph may split, with two lines at least on each side (Gaudí).
+            // The text flows from one screen to the next: a paragraph may split, with two lines at least on each side.
             'p': {'margin': '0 0 .6em !important', 'break-inside': 'auto !important', 'orphans': '2 !important',
                 'widows': '2 !important'},
             'h1, h2, h3': {'margin-top': '0 !important', 'line-height': '1.2 !important'},

@@ -29,7 +29,7 @@
     }
     // Mounts the island of one figure: what this browser saw last (under its own key) shows at once, and what is new
     // grows. «Enseñar a la clase» mounts it again on the whiteboard with a key of its own, so that what grew since it
-    // was last shown to the class grows in front of the class (Jujol).
+    // was last shown to the class grows in front of the class.
     var mountFigure = function(figure, place) {
         var state = JSON.parse(figure.getAttribute('data-island'));
         var key = 'ayv-island-' + (place ? place + '-' : '') + figure.getAttribute('data-island-key');
@@ -52,7 +52,7 @@
             assets = {};
         }
         // The ship of the term goes with what is now, not with what this browser saw.
-        // On the whiteboard, the island centre-right and a little further, clear of the sign and the herald (Jujol).
+        // On the whiteboard, the island centre-right and a little further, clear of the sign and the herald.
         // There the herald's bubble covers the front beach, so the ship waits behind the island and sails away to the right.
         var board = !!figure.closest('.ayv-bc-pizarra');
         var frame = board ? {x: 0.14, y: 0.07, zoom: 1.24} : null;

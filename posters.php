@@ -110,7 +110,7 @@ foreach ($posters as $i => $poster) {
             [(string) $item->callnumber1, (string) $item->callnumber2, (string) $item->callnumber3],
             fn($l) => trim($l) !== ''
         ))), 'figure' => (string) ($memory['figure'] ?? ''), 'say' => (string) ($memory['text'] ?? $str('postersclueask'))];
-        // As big as the longest line lets it be in half the card: to be read from the library's door (Gaudí).
+        // As big as the longest line lets it be in half the card: to be read from the library's door.
         $longest = max(array_map(fn($l) => \core_text::strlen($l['line']), $hidden['lines']) ?: [1]);
         $hidden['size'] = $longest <= 3 ? 'xl' : ($longest <= 5 ? 'l' : ($longest <= 8 ? 'm' : 's'));
     }

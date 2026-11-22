@@ -1,4 +1,4 @@
-/* «Stories to read at home» (the families' library, part 1), as Gaudí drew it on 8 November 2026
+/* «Stories to read at home» (the families' library, part 1), as it was drawn on 8 November 2026
    (~/Downloads/arte-local/entregas/ayvurenda/cuentos-en-casa/): the room where the memory reads, the ages, the stories
    and how to read together. Only on that page (shell option styles). The D layer's tokens it needs and the plugin does
    not have, kept to the page. Chrome 93 and Firefox 98: no :has(), no container queries, no color-mix(), no dvh. */
@@ -293,6 +293,6 @@ html[data-bs-theme="dark"] .tl-foot-name .on-light { display: none; }
 .is-big .tl-cover .tl-drawn { width: 120px; }
 @media (min-width: 760px) { .ayv .tl-cover .tl-drawn { width: 112px; } .is-big .tl-cover .tl-drawn { width: 140px; } }
 
-/* Four stories: two by two, or four in a row on a very wide screen, never one alone in its row (Gaudí). */
+/* Four stories: two by two, or four in a row on a very wide screen, never one alone in its row. */
 @media (min-width: 1180px) { .ayv .tl-grid.tl-grid-four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1600px) { .ayv .tl-grid.tl-grid-four { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Ayvurenda: «Enseñar a la clase» (Jujol, 13 November 2026), the class's island over the whole whiteboard. Opened from
+ * Ayvurenda: «Enseñar a la clase» (13 November 2026), the class's island over the whole whiteboard. Opened from
  * «My class» by its button (data-bc-abrir), it asks the browser for full screen where it can; − and + make everything
  * bigger or smaller (the boards with no zoom), Esc or «Salir» close it, and the herald's sentence plays on a touch
  * (never by itself). The island mounts with a key of its own, so what grew since the class last saw it grows in front

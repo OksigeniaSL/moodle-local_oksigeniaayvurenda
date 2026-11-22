@@ -25,7 +25,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 /**
- * When a reader fills the nine squares of a bingo card, the library gives them a diploma with its name and its logo: Gaudí's
+ * When a reader fills the nine squares of a bingo card, the library gives them a diploma with its name and its logo: the
  * background, the reader's first name, the card's name, the day and the nine drawings, each with its seal. Drawn each time
  * from the card, nothing kept, and only with the art package. The reader downloads it from their card; the staff print it
  * for a reader without an account; and, once the centre turns it on, the family of a young reader (the card of the flower)
@@ -69,7 +69,7 @@ final class diploma {
     }
 
     /**
-     * Whether diplomas can be drawn here: the art package brings Gaudí's, and GD writes with fonts.
+     * Whether diplomas can be drawn here: the art package brings their drawing, and GD writes with fonts.
      *
      * @return bool
      */
@@ -391,7 +391,7 @@ final class diploma {
     }
 
     /**
-     * Draws a diploma: Gaudí's background, the nine drawings in the grid, the logo, what goes on top, and the texts.
+     * Draws a diploma: the background, the nine drawings in the grid, the logo, what goes on top, and the texts.
      *
      * @param array $data name, cartilla, day, library, logo (or null), squares (art: the drawing's name, label).
      * @param int $width Smaller than the drawing, for a page or a mail.
@@ -414,7 +414,7 @@ final class diploma {
             $step = (min($grid['w'], $grid['h']) - 2 * $gap) / 3;
             $cell = (int) round($step);
             $seal = @imagecreatefrompng($art . self::DIR . 'sello.png');
-            // The seal on the corner up and to the right, a little out of the square, as Gaudí lays it.
+            // The seal on the corner up and to the right, a little out of the square, as it is drawn.
             $sealside = (int) round($step * (float) ($holes['sello']['lado'] ?? 0.4));
             $out = (int) round($step * (float) ($holes['sello']['fuera'] ?? 0));
             $paper = imagecolorallocate($base, 0xf2, 0xea, 0xdb);
@@ -456,7 +456,7 @@ final class diploma {
                 }
             }
         }
-        // The centre's logo, whole and centred in its box; without one, the box stays as Gaudí drew it.
+        // The centre's logo, whole and centred in its box; without one, the box stays as it was drawn.
         $box = $holes['logo'] ?? null;
         if ($box && $data['logo']) {
             [$lw, $lh] = [imagesx($data['logo']), imagesy($data['logo'])];

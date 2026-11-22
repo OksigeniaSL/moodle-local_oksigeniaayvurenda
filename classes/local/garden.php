@@ -146,7 +146,7 @@ final class garden {
     /**
      * The album's collector cards: one for each corner of the library, won with the first book taken home from it, in
      * any school year, and kept for good. Only the corners the library shows (a card nobody could win is no game) and
-     * the ones already won. Only with Gaudí's cards in the art package; without them, nothing. A reader of the sky gets
+     * the ones already won. Only with the cards in the art package; without them, nothing. A reader of the sky gets
      * the sky's card of a corner when the package brings it, and the flower's when not.
      *
      * @param \stdClass $reader

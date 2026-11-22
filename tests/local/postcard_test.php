@@ -28,7 +28,7 @@ namespace local_oksigeniaayvurenda\local;
 #[\PHPUnit\Framework\Attributes\CoversClass(postcard::class)]
 final class postcard_test extends \advanced_testcase {
     /**
-     * With the art package's postcard, a JPEG of the size of Gaudí's background; without it, none. A loan that is not
+     * With the art package's postcard, a JPEG of the size of the background; without it, none. A loan that is not
      * there, none; and its address is sealed as the other pictures of a notice.
      */
     public function test_make(): void {

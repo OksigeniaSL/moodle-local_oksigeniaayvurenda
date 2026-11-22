@@ -150,7 +150,7 @@ foreach ($shown as $i => $group) {
         'offstage' => $off !== null ? $str('classoff', $off) : '',
         'current' => $challenge ? challenges::view($challenge, $entityid, $pupil === null) : null,
         'canchoose' => $off === null && $pupil === null,
-        // The challenge of the term as cards (Jujol): each with what it asks and its garland, still empty.
+        // The challenge of the term as cards: each with what it asks and its garland, still empty.
         'kinds' => array_map(fn($k) => array_merge($k, [
             // The card «This term's» is the one chosen; choosing another after one met marks none (the met one is above).
             'checked' => !$choices['again'] && $k['checked'],
@@ -183,10 +183,10 @@ foreach ($shown as $i => $group) {
                 // The ship of the term (P5): the last week it waits, the last day it sails, among sparks if met.
                 'ship' => challenges::ship($entityid, $now), 'shipmet' => $challenge && !empty($challenge->complete)]) : '',
             'islandkey' => $library->id . '-' . md5($group),
-            // Gaudí's models of the art package, for the pieces that have one; the drawn ones without them.
+            // The models of the art package, for the pieces that have one; the drawn ones without them.
             'islandassets' => json_encode(array_filter(['hut' => screens::art('isla3d/caseta-q', 'glb'),
                 'ship' => screens::art('isla3d/velero', 'glb')]))] : null,
-        // The board «Enseñar a la clase» (Jujol): the class's, on the whiteboard, for its tutor, while the term has a
+        // The board «Enseñar a la clase»: the class's, on the whiteboard, for its tutor, while the term has a
         // challenge.
         'board' => ($board = $pupil === null && $challenge ? challenges::board($challenge, $group, $entityid, $now) : null)
             ? $board + ['island' => $island, 'islandlabel' => $island['islandlabel'] ?? '', 'page' => false,
@@ -196,7 +196,7 @@ foreach ($shown as $i => $group) {
             'show' => $str('boardshow'), 'showhint' => $str('boardshowhint'), 'smaller' => $str('boardsmaller'),
             'bigger' => $str('boardbigger'), 'full' => $str('boardfull'), 'exit' => $str('boardexit'), 'listen' => $str('listen')]
             : null,
-        // The year's booklets (Jujol): for the tutor, from three weeks before the last day, to print the class's at once.
+        // The year's booklets: for the tutor, from three weeks before the last day, to print the class's at once.
         'booklets' => $pupil === null && $now >= ($bookletsfrom = \local_oksigeniaayvurenda\local\booklet::classes_end($year)
             - 21 * DAYSECS) && $now < $bookletsfrom + (21 + \local_oksigeniaayvurenda\local\booklet::ONCARD) * DAYSECS ? [
             'bandmedal' => str_replace('role="img"', 'aria-hidden="true"', \local_oksigeniaayvurenda\local\bookletview::medal(

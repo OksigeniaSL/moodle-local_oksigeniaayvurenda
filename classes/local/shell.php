@@ -108,7 +108,7 @@ final class shell {
      * @param string $title
      * @param string $why
      * @param \stdClass|null $library
-     * @param string $figure Gaudí's drawing of the memory in a pose, or ''.
+     * @param string $figure the drawing of the memory in a pose, or ''.
      * @param string $puppet Its puppet for that pose (JSON), or ''.
      * @param array|null $back Another way back than the library's home: its address and its words.
      * @param string $line What the memory says, under the title.
@@ -342,7 +342,7 @@ final class shell {
                 : $str('backto', format_string($SITE->shortname, true, ['escape' => false]))))
             . ' <span aria-hidden="true">→</span></a>';
         // On a phone, a reader sees four tabs: the first three doors and «More», a sheet from below with the rest and
-        // the way out (Gaudí's mock-up of 7 November 2026). The staff keep their own «More».
+        // the way out (the mock-up of 7 November 2026). The staff keep their own «More».
         $readermore = !in_array('more', array_column($doors, 'key'), true);
         if ($readermore) {
             $rest = '';

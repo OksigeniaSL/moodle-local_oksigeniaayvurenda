@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Ayvurenda: a reading in parts, heard as one book (Jujol's page, 21 Nov 2026). One big «play», the bar of the part and
+ * Ayvurenda: a reading in parts, heard as one book (the page, 21 Nov 2026). One big «play», the bar of the part and
  * the whole book as a strip of its parts, each as long as it lasts; between two parts, a count of three and «Not now»;
  * the listener comes back to the part and the second where they were (kept on the reading's first part, «part:second»);
  * and the soft sound its reader chose plays low under the voice, from part to part, until the listener takes it away.

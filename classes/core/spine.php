@@ -27,7 +27,7 @@ namespace local_oksigeniaayvurenda\core;
 /**
  * As big as the book is, when the record says it: the height from its centimetres and the thickness from its pages.
  * The colour comes from the cover, kept between a lightness and a chroma that look like a book and not like mud, or
- * from the corner (Gaudí, 26 October 2026). Plain PHP, without Moodle.
+ * from the corner (26 October 2026). Plain PHP, without Moodle.
  */
 final class spine {
     /** @var float Shortest and tallest spine on the shelf, in centimetres. */

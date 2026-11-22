@@ -18,7 +18,7 @@
     @template local_oksigeniaayvurenda/class
 
     My class: for each group someone is tutor of, the challenge of the term (chosen there while it is not met), the
-    class's garden (drawn as Gaudí's island when the art package brings it) and what the class reads, never who.
+    class's garden (drawn as the island when the art package brings it) and what the class reads, never who.
 
     Example context (json):
     {
@@ -61,10 +61,10 @@
     <h2 id="ayv-class-{{index}}" class="ayv-section-title">{{group}}</h2>
     {{#offstage}}<p class="ayv-field-hint">{{offstage}}</p>{{/offstage}}
     {{#current}}{{> local_oksigeniaayvurenda/challenge}}{{/current}}
-    {{! «Enseñar a la clase» (Jujol): the island on the whiteboard, over the page; without script, as a page of its own. }}
+    {{! «Enseñar a la clase»: the island on the whiteboard, over the page; without script, as a page of its own. }}
     {{#board}}<p class="ayv-bc-ensenar"><a class="ayv-button" href="{{pageurl}}" data-bc-abrir="ayv-bc-molde-{{index}}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 2 2 4-4"/></svg>{{show}}</a><span>{{showhint}}</span></p>
     <template id="ayv-bc-molde-{{index}}">{{> local_oksigeniaayvurenda/class_board}}</template>{{/board}}
-    {{! The challenge of the term as cards (Jujol): a touch chooses it and keeps it. }}
+    {{! The challenge of the term as cards: a touch chooses it and keeps it. }}
     {{#canchoose}}<form id="ayv-bc-reto-{{index}}" method="post" action="{{action}}#ayv-class-{{index}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}"></form>
     <h3 class="ayv-section-title">{{choose}}</h3>
     <p class="ayv-field-hint">{{choosehint}}</p>

@@ -705,7 +705,7 @@ final class demo {
     }
 
     /**
-     * Gives the made-up books of a library the made-up covers of the art package (Gaudí's, pix/portadas/): by the class
+     * Gives the made-up books of a library the made-up covers of the art package (pix/portadas/): by the class
      * of a book that is not a story, else by the noun of its title. One book in seven keeps its drawn cover, as in any
      * library; books that already have one keep it.
      *

@@ -30,7 +30,7 @@ namespace local_oksigeniaayvurenda\local;
  * how many are lent. To add another, a dashed tile per kind opens with its name already written.
  */
 final class materialshelf {
-    /** @var string[] The kinds, each with its drawing (Jujol's line icons, 13 November 2026). */
+    /** @var string[] The kinds, each with its drawing (the line icons, 13 November 2026). */
     public const KINDS = ['portatil', 'tableta', 'calculadora', 'camara', 'juego', 'auriculares', 'otra'];
 
     /** @var string[] The drawing of each kind: the inside of a 24 × 24 SVG drawn with a line. */

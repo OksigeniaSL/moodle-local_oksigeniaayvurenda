@@ -15,7 +15,7 @@
 
 /**
  * Stories to read at home: on a wide screen the drawn room hangs from the right edge, so the lamp is never cut; on a
- * phone, from the middle (Gaudí). preserveAspectRatio is not a CSS property, hence these lines.
+ * phone, from the middle. preserveAspectRatio is not a CSS property, hence these lines.
  *
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

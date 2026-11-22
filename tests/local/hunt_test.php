@@ -137,7 +137,7 @@ final class hunt_test extends \advanced_testcase {
         $grown = hunt::game($library, $ids[1], false, false, true);
         $this->assertTrue($grown['grown']);
         $this->assertStringContainsString('Montes', $grown['author']);
-        // Their spines carry no title, as seen from the aisle (Gaudí).
+        // Their spines carry no title, as seen from the aisle.
         $html = $GLOBALS['OUTPUT']->render_from_template('local_oksigeniaayvurenda/spine', $grown['spines'][0]);
         $this->assertStringNotContainsString('>' . $grown['spines'][0]['shown'] . '<', $html);
     }

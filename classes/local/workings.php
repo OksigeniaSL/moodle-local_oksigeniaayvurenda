@@ -384,7 +384,7 @@ final class workings {
                 ))),
                 'note' => $str('hiwlightsnote'),
             ]]);
-        // The welcome route, behind the lights it needs (Jujol, 13 November).
+        // The welcome route, behind the lights it needs (13 November).
         $route = orientation::settings($entityid);
         $needs = empty($play['visit']) || empty($play['games']);
         $grown = array_values(array_filter($stages, fn($stage) => !cartilla::infant($stage)));
@@ -420,13 +420,13 @@ final class workings {
             'list' => array_map(fn($s) => $chip('set[reviewsign]', $s, $str('reviewsign' . $s), $s === $sign) + [
                 'text' => $str('hiwsignsample'), 'signature' => $str(skins::words($entityid, 'hiwsignby' . $s))], reviews::SIGNS),
         ]]);
-        // The postcard of the first book, to the family of a young reader (the first «subidón»; Jujol, 13 November).
+        // The postcard of the first book, to the family of a young reader (the first «subidón»; 13 November).
         $postcard = firstbook::on($entityid);
         $voice[] = $phrase('firstbook', 'postcard', $str('hiwspinepostcard'), $str(
             $postcard ? 'hiwfirstbookon' : 'hiwfirstbookoff'
         ), [
             'firstbook' => [
-                // Gaudí's postcard itself, small, with example data (Jujol); the drawn one without the art package.
+                // The postcard itself, small, with example data; the drawn one without the art package.
                 'postcard' => postcard::sample($library),
                 'cover' => screens::art('portadas/libro-abuela'),
                 'sampletitle' => $str('hiwfirstbooksampletitle'),
@@ -472,7 +472,7 @@ final class workings {
                 ],
             ]);
         }
-        // The reader's booklet: each reader's at the end of the year; to their family, if the centre turns it on (Jujol).
+        // The reader's booklet: each reader's at the end of the year; to their family, if the centre turns it on.
         $sends = booklet::on($entityid);
         $voice[] = $phrase('booklet', 'booklet', $str('hiwspinebooklet'), $str($sends ? 'hiwbookleton' : 'hiwbookletoff'), [
             'booklet' => [

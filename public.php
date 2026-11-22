@@ -187,7 +187,7 @@ if ($recordid) {
     die;
 }
 
-// Tales to read at home, by age (the families' library, part 1; docs/24), as Gaudí drew them: what the library looked at
+// Tales to read at home, by age (the families' library, part 1; docs/24), as they were drawn: what the library looked at
 // and offers to read together, for anyone, also for a family that has not joined the centre yet. Read aloud by a
 // grown-up, never «Listen». The age comes in years (Eguahe's link, age=4) or as a band (age=3-5), also as edad.
 if (optional_param('tales', 0, PARAM_BOOL)) {
@@ -233,7 +233,7 @@ if (optional_param('tales', 0, PARAM_BOOL)) {
     usort($tales, fn($a, $b) => [$a['order'], $a['length'], $a['title']] <=> [$b['order'], $b['length'], $b['title']]);
     $here = fn(array $params = []) => (new moodle_url('/local/oksigeniaayvurenda/public.php', ['library' => $library->slug] +
         $params))->out(false);
-    // Who speaks, by skin (Gaudí): the memory whole and reading where the little ones are; a portrait at a secondary
+    // Who speaks, by skin: the memory whole and reading where the little ones are; a portrait at a secondary
     // school or a university; at a company, the library itself. A centre's own memory, as it drew her.
     $memory = \local_oksigeniaayvurenda\local\characters::of($entityid)['memory'] ?? null;
     $speaks = $memory && $memory['enabled'] && $skin !== 'company';
@@ -275,7 +275,7 @@ if (optional_param('tales', 0, PARAM_BOOL)) {
             'count' => count($tales) === 1 ? $str('talescountone') : $str('talescount', count($tales)),
             'tales' => $tales,
             'hastales' => (bool) $tales,
-            // Four in rows of three leave one alone (Gaudí): rows of two, or of four on a very wide screen.
+            // Four in rows of three leave one alone: rows of two, or of four on a very wide screen.
             'four' => count($tales) === 4,
             'empty' => $tales ? null : [
                 'face' => $whole && !$own ? screens::art('personajes/recorte/memoria-piensa') : null,

@@ -86,7 +86,7 @@ final class dashboard {
         if (!$centres) {
             return null;
         }
-        // The desks of all the libraries someone lends in, together: one with its numbers, several a row each (Gaudí).
+        // The desks of all the libraries someone lends in, together: one with its numbers, several a row each.
         $desks = array_merge(...array_map(fn($c) => $c['desks'], $centres));
         $desk = null;
         if (count($desks) === 1) {
@@ -234,7 +234,7 @@ final class dashboard {
     }
 
     /**
-     * A character's round portrait, still: the centre's own if it has one, else Gaudí's of the flower or of the sky
+     * A character's round portrait, still: the centre's own if it has one, else the of the flower or of the sky
      * from the art package. None in a company, and none for a character the centre turned off.
      *
      * @param int $entityid

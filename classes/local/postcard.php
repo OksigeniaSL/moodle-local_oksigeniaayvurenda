@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The postcard «Mi primer libro» (Gaudí, 13 November): what a young reader's family keeps and sends on.
+ * The postcard «Mi primer libro» (13 November): what a young reader's family keeps and sends on.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -25,7 +25,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 /**
- * Drawn from a loan each time it is asked for, nothing kept: Gaudí's background (by day or at dusk, so that two siblings do
+ * Drawn from a loan each time it is asked for, nothing kept: the background (by day or at dusk, so that two siblings do
  * not have the same one), the cover of the book held by its tapes, the child's first name on the label of the seed, the
  * day and the library. A JPEG: some servers' GD has no WebP, and every phone shows a JPEG.
  */
@@ -69,7 +69,7 @@ final class postcard {
         $extra = json_decode((string) $loan->extra, true);
         return self::compose([
             'cover' => $file ? $file->get_content() : null,
-            // The covers of the example library leave a band for the title, which the pages write over (Gaudí).
+            // The covers of the example library leave a band for the title, which the pages write over.
             'band' => ($extra['cover']['source'] ?? '') === 'demo',
             'title' => format_string($loan->title, true, ['escape' => false]),
             'name' => trim((string) ($user->firstname ?? $loan->firstname)),
@@ -84,7 +84,7 @@ final class postcard {
     }
 
     /**
-     * The postcard with example data, small, for «How your library works» to show what families get (Jujol): a cover of
+     * The postcard with example data, small, for «How your library works» to show what families get: a cover of
      * the art package, «Leo», today, and the library's own name.
      *
      * @param \stdClass $library
@@ -108,7 +108,7 @@ final class postcard {
     }
 
     /**
-     * Draws a postcard: Gaudí's background, the cover in its hole under the tapes, and the texts in their boxes.
+     * Draws a postcard: the background, the cover in its hole under the tapes, and the texts in their boxes.
      *
      * @param array $data cover (its bytes, or null), band (the title written on the cover), title, name, day, library,
      *     night.

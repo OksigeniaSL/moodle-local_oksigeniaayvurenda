@@ -298,7 +298,7 @@ class timely {
         'window' => 'green2', 'voices' => 'coral'];
 
     /**
-     * The card of the desk (Jujol): the situation happening now that is this person's, or, once turned on, what happens
+     * The card of the desk: the situation happening now that is this person's, or, once turned on, what happens
      * from tomorrow.
      *
      * @param \stdClass $library

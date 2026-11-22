@@ -82,7 +82,7 @@ void main() {
 
   vec3 cShallow = vec3(0.44, 0.86, 0.75);
   vec3 cMid = vec3(0.09, 0.75, 0.72);
-  // Darker with the distance, from turquoise at the shore to #0f6f86 far away (Gaudí).
+  // Darker with the distance, from turquoise at the shore to #0f6f86 far away.
   vec3 cDeep = vec3(0.059, 0.435, 0.525);
   vec3 base = mix(cShallow, cMid, smoothstep(0.05, 0.95, sd));
   base = mix(base, cDeep, smoothstep(0.6, 3.6, sd));
@@ -90,7 +90,7 @@ void main() {
   base *= mix(0.93, 1.07, smoothstep(-3.5, 3.0, p.y + 0.35 * p.x));
   vec3 blob = base * (0.8 + 0.14 * v1.z + 0.05 * smoothstep(0.0, 0.7, v1.x)) * (0.94 + 0.1 * v2.z);
   vec3 light = mix(base * 1.12 + vec3(0.04, 0.06, 0.03), vec3(0.62, 0.93, 0.80), 0.55 * shallow);
-  // The light cells, at a third of their strength: they weighed too much (Gaudí).
+  // The light cells, at a third of their strength: they weighed too much.
   vec3 col = mix(blob, light, gap * mix(0.2, 0.85, shallow) * 0.3);
   col = mix(col, col * 1.06 + 0.02, gap2 * 0.12);
   col += vec3(0.12, 0.13, 0.09) * thin * mix(0.03, 0.65, shallow) * 0.3;

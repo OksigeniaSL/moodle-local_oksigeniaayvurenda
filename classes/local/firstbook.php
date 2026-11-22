@@ -210,7 +210,7 @@ final class firstbook {
                 'hello' => $hello,
                 'heading' => $subject,
                 'lead' => [$str('firstbooklead')],
-                // The postcard to keep and send on, when the art package has it (Gaudí).
+                // The postcard to keep and send on, when the art package has it.
                 'postcard' => screens::art('postal/huecos', 'json') ? ['url' => mail::postcard((int) $loan->id),
                     'alt' => $str('firstbookpostcardalt')] : null,
                 'books' => [['line' => $str('firstbookline')] + mail::book((int) $loan->recordid, $a->title)],

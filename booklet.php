@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The reader's booklet (Jujol, 13 November), as a page of its own:
+ * The reader's booklet (13 November), as a page of its own:
  * - the family's, from the sealed link they got by e-mail, without an account (b and s), and its cover for the chats
  *   (cover); the voice in it, sealed (voice and s);
  * - the staff's, from the reader's record (library, reader, and year or life);

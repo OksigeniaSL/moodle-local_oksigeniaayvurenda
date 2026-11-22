@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * A story to read at home, as Gaudí drew its reader (8 November 2026): one page at a time, big letters to read aloud,
+ * A story to read at home, as its reader was drawn (8 November 2026): one page at a time, big letters to read aloud,
  * the two big buttons within the thumb's reach, night for the dark bedroom, the screen that does not go off, and the open
  * book when the phone lies down. For anyone, without an account: only what a library marked to read at home and shows at
  * its open door. An e-book; anything else opens in the library's reader.

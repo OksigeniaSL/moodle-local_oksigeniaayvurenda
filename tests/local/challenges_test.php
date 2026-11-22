@@ -100,7 +100,7 @@ final class challenges_test extends \advanced_testcase {
     }
 
     /**
-     * The garland (Jujol): a pennant for each step up to its most, ten tenths past that.
+     * The garland: a pennant for each step up to its most, ten tenths past that.
      */
     public function test_garland(): void {
         $lit = fn(array $marks) => count(array_filter(array_column($marks, 'lit')));

@@ -1,5 +1,5 @@
 /**
- * Ayvurenda's bookmark (Gaudí, 24 October 2026): beside the browser's scrollbar, the fore-edge of a book, its pages
+ * Ayvurenda's bookmark (24 October 2026): beside the browser's scrollbar, the fore-edge of a book, its pages
  * as fine lines; a thumb index, as in a dictionary, with a notch and the initial of each section of the page (its h2
  * headings); and a satin ribbon with a swallow-tailed end that comes down to where you are reading. The notch of the
  * section you are in takes the ribbon's colour, and its name shows for a moment while you scroll. With «reduce motion»,

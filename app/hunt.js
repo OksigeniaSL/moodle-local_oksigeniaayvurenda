@@ -86,7 +86,7 @@
         }
     };
     // For a grown reader the spines have no titles, as seen from the aisle: a book touched comes out a little and shows
-    // its title, as someone takes it out to check, and goes back (Gaudí, JV-D11).
+    // its title, as someone takes it out to check, and goes back (JV-D11).
     var grown = dialog.hasAttribute('data-grown');
     var pull = function(spine, back) {
         var title = spine.querySelector('.ayv-spine-title');

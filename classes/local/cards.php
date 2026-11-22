@@ -179,7 +179,7 @@ final class cards {
     }
 
     /**
-     * The flower drawn in the page, with the marks of each path lit up to its level (Gaudí's drawing: drops for back,
+     * The flower drawn in the page, with the marks of each path lit up to its level (the drawing: drops for back,
      * sparkles for explore, speech bubbles for tell, roots for stay; what is missing shows dotted, nothing withers).
      *
      * @param int $stage
@@ -199,7 +199,7 @@ final class cards {
 
     /**
      * The sky drawn in the page, for twelve and over: a constellation for each path, lit up to its level, and the moon
-     * as the stage (Gaudí's drawing). Sober from fifteen and for adults.
+     * as the stage (the drawing). Sober from fifteen and for adults.
      *
      * @param int $stage
      * @param array $levels
@@ -218,7 +218,7 @@ final class cards {
     private const SMALL = 140;
 
     /**
-     * Gaudí's drawing of the card, when the art package brings it: the base of the stage and, on it, each mark in its
+     * The drawing of the card, when the art package brings it: the base of the stage and, on it, each mark in its
      * box, lit up to the level of its path and waiting beyond (the sober sky leaves out the waiting ones). Its layers
      * and boxes come from the package's carne.json.
      *
@@ -229,7 +229,7 @@ final class cards {
      * @param int $size Pixels, at most (it shrinks with its box).
      * @param bool $sober
      * @param array|null $seal The seal of «Llévatelo»: level (0 to 3) and gold; stamped on the edge of the medallion, over
-     *     the marks, one image at a time (Gaudí, 13 November).
+     *     the marks, one image at a time (13 November).
      * @return string|null HTML; null without the art package's drawing.
      */
     private static function layered(

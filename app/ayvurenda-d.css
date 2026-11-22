@@ -1,4 +1,4 @@
-/* Ayvurenda, house style D (Gaudí, 24 October 2026): one layer after ayvurenda.css. Flat shapes built in layers, soft
+/* Ayvurenda, house style D (24 October 2026): one layer after ayvurenda.css. Flat shapes built in layers, soft
    shadows between them, cream plates for what is drawn and warm light. Made by agents/arte/kit/marca-ayvurenda/estilo-d.py. */
 
 /* 1. Tokens: depth and the plate. In dark mode the plates stay cream, like a lit picture on a dark wall. */
@@ -450,9 +450,9 @@ html[data-bs-theme="dark"] .ayv .ayv-corner.ayv-cover-5 { background: #3a3326; c
     .ayv .ayv-record-cover .ayv-cover-big { transform: none; }
 }
 
-/* The day zero (0.232.0, Jujol's design of 11 November 2026): «To open your library», the staff's home while the
+/* The day zero (0.232.0, the design of 11 November 2026): «To open your library», the staff's home while the
    library is not open yet, and «More» with its search on top. */
-/* Day zero (Jujol, 11 November 2026): «To open your library», the new «More» and the staff's home while the library is
+/* Day zero (11 November 2026): «To open your library», the new «More» and the staff's home while the library is
    not open. To go after ayvurenda-d.css (or at the end of ayvurenda.css). Everything hangs from .ayv and uses the tokens
    of the house: paper, surface, the cream plate, the ring, the soft shadows and the wood of the shelves. */
 
@@ -817,7 +817,7 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
     .ayv .ayv-open-case .ayv-bookcase { --end: 14px; justify-content: center; padding: 0 20px; }
     .ayv .ayv-open-case .ayv-spine-slot { --w: 37px !important; }
     .ayv .ayv-open-case .ayv-spine-title { font-size: 11px; }
-    /* On a phone the crier perches on the top right corner of the frame, reading (Gaudí, 11 November 2026). */
+    /* On a phone the crier perches on the top right corner of the frame, reading (11 November 2026). */
     .ayv .ayv-open-big .ayv-open-stage { position: relative; padding-top: 48px; }
     .ayv .ayv-open-crier { position: absolute; top: 0; right: 12px; width: 64px; height: 64px; padding: 0; justify-content: center; align-items: center; border-radius: 50%; font-size: .68rem; line-height: 1.1; }
     .ayv .ayv-open-crier span { display: none; }
@@ -852,7 +852,7 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
     .ayv .ayv-opening-figure { width: 140px; }
 }
 
-/* Jujol, 11 November: the quick way out of a step (the rules that come with it, running it alone) reads as a line, not
+/* 11 November: the quick way out of a step (the rules that come with it, running it alone) reads as a line, not
    as a third button; the gaps of the shelf keep their muted ink at night. */
 .ayv .ayv-open-alt { margin: .15rem 0 0; }
 .ayv .ayv-open-skip {

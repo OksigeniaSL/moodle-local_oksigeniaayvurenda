@@ -174,7 +174,7 @@ final class visit_test extends \advanced_testcase {
             $this->assertSame(950.0, (float) $page['characters'][0]['left']);
             $this->assertStringContainsString('search.php', $page['characters'][0]['search']['action']);
         } else {
-            $this->assertSame([], $page['characters'], 'without Gaudí\'s drawings, nobody stands in the room');
+            $this->assertSame([], $page['characters'], 'without the drawings, nobody stands in the room');
         }
         $this->assertSame(
             [$page['back'][0]['day'], $page['back'][1]['day']],

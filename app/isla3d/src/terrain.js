@@ -27,7 +27,7 @@ const px = (x) => (x - BOUNDS.x0) / (BOUNDS.x1 - BOUNDS.x0) * W;
 const pz = (z) => (z - BOUNDS.z0) / (BOUNDS.z1 - BOUNDS.z0) * H;
 const scale = W / (BOUNDS.x1 - BOUNDS.x0);
 
-// The sun comes from the top left and in front (Gaudí's 2D), so shadows fall to the back right.
+// The sun comes from the top left and in front (the 2D), so shadows fall to the back right.
 const SHADOW = { dx: 0.15, dz: -0.12 };
 
 // What each piece leaves on the ground: grass around it, and its shadow.
@@ -88,7 +88,7 @@ export function paintGround(canvas, pieces) {
       const sd = shoreSD(x, z);
       const k = smooth(-0.05, -0.55, sd);
       const n = vnoise(x * 6, z * 6) * 0.06 + vnoise(x * 23, z * 23) * 0.04 - 0.05;
-      // The wet band right before the foam (Gaudí: #d9b26a).
+      // The wet band right before the foam (#d9b26a).
       const band = smooth(-0.22, -0.12, sd) * (1 - smooth(-0.02, 0.02, sd));
       const c = sd > 0 ? deep : wet.map((w, m) => w + (dry[m] - w) * k).map((v, m) => v + ([217, 178, 106][m] - v) * band);
       const o = (j * W + i) * 4;

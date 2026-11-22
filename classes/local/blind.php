@@ -249,7 +249,7 @@ final class blind {
     }
 
     /**
-     * The wrapped book of a date as the pages draw it: Gaudí's drawing of its paper, or the one in CSS.
+     * The wrapped book of a date as the pages draw it: the drawing of its paper, or the one in CSS.
      *
      * @param int $number
      * @param int $paper One of PAPERS.

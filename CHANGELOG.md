@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.6 (2026-11-22)
+
+- The notes in the code and in this changelog say what each piece does and when it was decided, not who drew it.
+
 ## 1.2.5 (2026-11-22)
 
 The rest of the second part of the review of 21 November: scale, and the low faults.
@@ -116,7 +120,7 @@ its second part.
 
 ## 1.1.2 (2026-11-21)
 
-- Listening to a reading, after Jujol's review: the part that comes keeps its bars, still at rest and moving while it
+- Listening to a reading, after the review: the part that comes keeps its bars, still at rest and moving while it
   sounds; at the start the page says where it starts, and «Now: …» once it sounds; the lengths are whole seconds
   everywhere, as players count them; «You listen to it here», not «read»; the second ink is a colour of its own, also
   on the browsers of the classroom.
@@ -126,7 +130,7 @@ its second part.
 
 ## 1.1.1 (2026-11-21)
 
-- **A reading in parts sounds like a book, as Jujol drew it.** The cover standing large, who reads it («Read to you by
+- **A reading in parts sounds like a book, as it was drawn.** The cover standing large, who reads it («Read to you by
   …, in five parts»), what sounds now with the part's own name, one big «play», the bar of the part and, under it, the
   whole book as a strip of its parts, each as long as it lasts, with the minutes left. Between two parts, «Next: chapter
   3», a count of three and «Not now». The parts as the book's contents page: number, title and own name, dotted leader,
@@ -191,7 +195,7 @@ its second part.
 
 ## 1.0.5 (2026-11-16)
 
-- **«Their library», as Jujol drew it:** the child's books stand on a shelf, three a row, as on the child's card: the one
+- **«Their library», as it was drawn:** the child's books stand on a shelf, three a row, as on the child's card: the one
   due soon first and in red, then the one to pick up, raised, edged in the app's colour and labelled «To collect», then
   the rest, and a reservation still in its queue last. Up to the flower, covers and titles, and what they read this year
   as a grid of covers with their titles; from the sky, spines only, «A book» and its date, and why not which one, in a
@@ -213,7 +217,7 @@ its second part.
 
 ## 1.0.3 (2026-11-15)
 
-- A child's library in Oksigenia Aty, as Jujol drew it: the card asks for the shelf for any reader (`layout`), so an
+- A child's library in Oksigenia Aty, as it was drawn: the card asks for the shelf for any reader (`layout`), so an
   older reader's books stand as plain spines; a book waiting at the desk says `pickup` («A book to collect», «at the
   library until…»), for its striped spine; a book due in three days or less is red as well as a late one, and a loan
   says «back by…».
@@ -252,7 +256,7 @@ its second part.
 
 ## 0.266.0 (2026-11-14)
 
-- **The functions present themselves at their moment** (the first day, point 6), from Jujol's mock-ups.
+- **The functions present themselves at their moment** (the first day, point 6), from the mock-ups.
   - When something real happens in a library, its staff see one card on the desk with the function that answers it,
     as a book of the house with its spine:
     - the first late books with the notices off;
@@ -269,7 +273,7 @@ its second part.
 
 ## 0.265.0 (2026-11-14)
 
-- **The reader's booklet**, the last two «subidones» of the review of 12 November, from Jujol's mock-ups and Gaudí's
+- **The reader's booklet**, the last two «subidones» of the review of 12 November, from the mock-ups and the
   cover.
   - **«My year in books»**: when the school year's classes end, each young reader's year on one sheet, in their own
     voice: their flower or their sky as the year ended, the books they took home in their order (with «I premiered
@@ -279,7 +283,7 @@ its second part.
     seed to the moons, their first book ever, each year in its block, the first years of which only the flower is kept
     together, and, to close, their collector cards, the islands of their classes and the library's farewell.
   - **For the family**: if the centre turns it on in «How your library works» (it starts off), the family gets it the
-    morning after the last day, or when the reader leaves, with Gaudí's cover in the e-mail and in the chats that show
+    morning after the last day, or when the reader leaves, with the cover in the e-mail and in the chats that show
     the link: a sealed page without an account, to see on a phone, print or keep, and send on. From twelve the booklet
     is the reader's own: their card says it is ready, and their family gets it only if they turn on «Let my family
     have it».
@@ -300,7 +304,7 @@ its second part.
 
 ## 0.264.1 (2026-11-13)
 
-- Jujol's review of the board: the sign and the herald's bubble are opaque paper (the palm showed through them), the
+- The review of the board: the sign and the herald's bubble are opaque paper (the palm showed through them), the
   island stands a little further right and further away, so what grows is seen whole, and there is room below the
   challenge's cards.
 - The day the ship sails says its date when it is more than a week away («on 22 December»), not a weekday that read
@@ -308,7 +312,7 @@ its second part.
 
 ## 0.264.0 (2026-11-13)
 
-- «The ship of the term» (P5 of the review of 12 November), from Jujol's mock-ups and Gaudí's ship.
+- «The ship of the term» (P5 of the review of 12 November), from the mock-ups and the ship.
   - **The ship**: the last week of the term a ship waits off the beach of the class island, its sail furled; on the
     term's last day it hoists its sail and sails away, with sparks if the class met its challenge. The rest of the
     term it is not there. With «reduce motion», on its last day it has simply gone.
@@ -337,7 +341,7 @@ its second part.
 
 ## 0.262.0 (2026-11-13)
 
-- «Leyó para los pequeños», a «subidón» of the review of 12 November, from Jujol's mock-ups.
+- «Leyó para los pequeños», a «subidón» of the review of 12 November, from the mock-ups.
   - **The recorder**: a reader past the flower says «Who is it for?» with two lights before sending, «I read it for
     the little ones» and, where their account has a family, «Let my family hear it» (only once the first is on); a
     sentence says what will happen.
@@ -356,8 +360,8 @@ its second part.
 
 ## 0.261.0 (2026-11-13)
 
-- The diploma of a full bingo card, a «subidón» of the review of 12 November, from Gaudí's art (art package 0.1.68).
-  - When a reader fills the nine squares of a bingo card, they get a diploma: Gaudí's paper, the nine drawings of
+- The diploma of a full bingo card, a «subidón» of the review of 12 November, from the art (art package 0.1.68).
+  - When a reader fills the nine squares of a bingo card, they get a diploma: the paper, the nine drawings of
     their card with their seals, their first name, the card's name (in two lines when it is long), the day of the
     ninth book, the library's name and its logo when it has one.
   - It is drawn each time from the card, nothing kept, as a JPEG that prints on A4 and reads on a phone.
@@ -375,7 +379,7 @@ its second part.
 ## 0.260.2 (2026-11-13)
 
 - A reader's page and the late notice count the days a book is late as the desk and the list of late books do: calendar
-  days where the centre is, not hours. The same loan said 19 days on the reader's page and 20 at the desk (Jujol, from
+  days where the centre is, not hours. The same loan said 19 days on the reader's page and 20 at the desk (from
   the Marketplace screenshots).
 
 ## 0.260.1 (2026-11-13)
@@ -385,7 +389,7 @@ its second part.
 
 ## 0.260.0 (2026-11-13)
 
-- «La orientación con insignia» (P8 of the review), from Jujol's mock-up and Gaudí's badge.
+- «La orientación con insignia» (P8 of the review), from the mock-up and the badge.
   - A newcomer gets to know the library in the visit by finding the hidden book in three different rooms.
   - **The hall** shows the route until then: a path of three stones that light up with each room, the badge waiting at
     the end, and the way to the next room of the board.
@@ -401,7 +405,7 @@ its second part.
 - «Su primer libro», the first «subidón».
   - **The family**: the morning after a young reader (the card of the flower) takes home their very first book, their
     family hears of it, through their account or by e-mail, where the site keeps its families (Oksigenia Family).
-  - **The postcard «Mi primer libro»**, Gaudí's: the cover, the child's name and the day, to keep and send on. It is
+  - **The postcard «Mi primer libro»**: the cover, the child's name and the day, to keep and send on. It is
     drawn from the loan each time it is opened (`mailimage.php`), and nothing of it is kept.
   - **Their voice**: a button to record that book for the child with their own voice, with the one-time link of family
     voices.
@@ -411,7 +415,7 @@ its second part.
 
 ## 0.259.0 (2026-11-13)
 
-- «La cita a ciegas» (P7 of the review), from Jujol's mock-up and Gaudí's drawings.
+- «La cita a ciegas» (P7 of the review), from the mock-up and the drawings.
   - **The staff**, on a book's page: a free copy is wrapped in paper with three clues, without title or author. It gets
     the next number of the centre and one of six papers, the first no other date on the shelf wears. Wrapped, the card
     shows its number, its clues, «Print its label» and how to unwrap it, with how its dates went below, never with names.
@@ -431,7 +435,7 @@ its second part.
 
 ## 0.258.0 (2026-11-13)
 
-- Jujol's review of the bingo card:
+- The review of the bingo card:
   - A square no book fills yet (no book with a voice, say) is turned off in the box, with «None with a voice yet»: a card
     with it could never be full. «Few» is for one to nine.
   - The dates of a challenge say their month and year once: «From 8 to 29 November» in one month, «From 13 November to
@@ -440,7 +444,7 @@ its second part.
 
 ## 0.257.0 (2026-11-13)
 
-- «La cartilla», its two screens, from Jujol's mock-up.
+- «La cartilla», its two screens, from the mock-up.
   - **The reader**, on their card: a printed bingo card of nine squares. A filled square carries the desk's date stamp
     and the book; an empty one leads to the books that fill it (its corner or genre on the shelves, the books with a
     voice, or new lists of the new books and of those waiting to be rescued). A line is drawn in highlighter, and a full
@@ -460,7 +464,7 @@ its second part.
 
 ## 0.256.0 (2026-11-13)
 
-- «La cartilla» (P3 of the review), its engine; the screens come with Jujol's mock-up. A library challenge may be a
+- «La cartilla» (P3 of the review), its engine; the screens come with the mock-up. A library challenge may be a
   bingo card of nine squares instead of a number of books: a corner, a genre of the library, a new book, a book with
   a voice in Ayvu rande, a book rescued (nobody took it home in two years). Each loan in its days fills one square it
   fits, as many as can be filled; a row or a column is a line, nine the full card, which is its goal. New field
@@ -483,7 +487,7 @@ its second part.
 
 ## 0.253.0 (2026-11-13)
 
-- «Take it home» (P1 of the review), with Gaudí's art (art 0.1.64): the hidden book of the visit is a game now. It
+- «Take it home» (P1 of the review), with the art (art 0.1.64): the hidden book of the visit is a game now. It
   starts with three paper lanterns and each wrong spine puts one out; it always ends. The book found is kept for a
   reader with a card, with the lanterns left; if they take it home from the desk that week, the desk celebrates it
   («the book they found in the visit») and their card carries a seal stamped on the edge of its medallion: the seal,
@@ -509,13 +513,13 @@ its second part.
   on the home and walks into its hall in the visit, not the infants'; the moments to celebrate keep their paper
   pennants only for the young of a school; the two games of the visit speak with a university's words where the
   centre is one (or a company).
-- Self-service, from Jujol's look at it: «Books are returned at the posts too», the same in the sentence and the light;
+- Self-service, from the look at it: «Books are returned at the posts too», the same in the sentence and the light;
   «Undo the last day» only on a post that has been used; the name of a new post written on a dashed line, as in
   Material, with its hint under it.
 
 ## 0.250.0 (2026-11-13)
 
-- Purchases and self-service, from Jujol's mock-ups, the last two of the second round. Purchases: what is spent this
+- Purchases and self-service, from the mock-ups, the last two of the second round. Purchases: what is spent this
   year, against the budget in a bar, and the budget with «−» and «+» in steps of 50 (down to nothing, only the count of
   what is spent), the currency folded; whether readers ask for books, a light, and which stages, as chips; then the
   tabs and «Add a book» as before. Self-service: each post drawn as a stand with its name and when it was last used,
@@ -523,7 +527,7 @@ its second part.
   is (a tablet or computer, or a machine) as chips; who may use them and whether books are returned at them, as a card.
   Each gesture is kept at once and back to its card; the sheets and their «Change» are gone. Their guided helps follow
   the new screens.
-- Reservations, from Jujol's look at them: the stages say who reserves online, who renews online, or both, as what is
+- Reservations, from the look at them: the stages say who reserves online, who renews online, or both, as what is
   on.
 - The currency and the dates of a setting card are sent for its own card (the currency of the budget went to the late
   books).
@@ -532,7 +536,7 @@ its second part.
 
 ## 0.249.0 (2026-11-13)
 
-- Reservations and the voices of the readers, from Jujol's mock-ups: their settings are cards with their sentence on top
+- Reservations and the voices of the readers, from the mock-ups: their settings are cards with their sentence on top
   and their gestures in sight, instead of a line and «Change» opening a sheet. Reservations: reserving from home as a
   light, the days a book is kept set aside and the reservations at a time with «−» and «+», renewing even if someone
   waits and from home as lights, and who reserves online as stage chips. Voices: how long they are kept, in school
@@ -544,7 +548,7 @@ its second part.
 
 ## 0.248.0 (2026-11-13)
 
-- Loan rules, from Jujol's mock-up: each rule is a library loan card, its band in the colour of its readers, its
+- Loan rules, from the mock-up: each rule is a library loan card, its band in the colour of its readers, its
   sentence and its counters in sight («At a time», «For», «Renew», «Each renewal», with «−» and «+»), and two lights,
   «No limit at a time» and «Only in the library»; at its foot, who and what it is for, and taking it away. Another rule
   is a dashed card that opens on who and what, as chips. Every other setting is a card with its sentence on top and its
@@ -556,14 +560,14 @@ its second part.
   the new screen, with their voices (art 0.1.63).
 - How it works: a new rule for «Any reader» was kept for a kind of reader called «any», which no one is; now it is for
   any reader.
-- Characters, from Jujol's look at them mounted: on its stage each one stands whole, as it says its line (or the
+- Characters, from the look at them mounted: on its stage each one stands whole, as it says its line (or the
   centre's own figure, or the house's), not its round portrait on a cream square; a portrait the centre uploaded hangs
   on the wall in a thin frame. Material: under some 360 px the tiles go in one column; the links on the back of a tile
   in the size of «Its data»; with nothing yet, «Add» instead of «Add another», with room under the empty line.
 
 ## 0.247.0 (2026-11-13)
 
-- Characters, from Jujol's mock-up: the memory and the herald each stand on their own stage, with their figure, a line
+- Characters, from the mock-up: the memory and the herald each stand on their own stage, with their figure, a line
   of theirs in a bubble and their name on a brass plate where it is written (Enter keeps it, without touching anything
   else). Under it, gestures that keep themselves: the curtain to take them off the stage or bring them back, how they
   speak («I am sure» said by her or by him) and, for the herald, whether it signs the notices to the readers. Another
@@ -574,7 +578,7 @@ its second part.
 
 ## 0.246.0 (2026-11-13)
 
-- Material, from Jujol's mock-up: each thing is a tile with its line drawing standing on a plank (laptop, tablet,
+- Material, from the mock-up: each thing is a tile with its line drawing standing on a plank (laptop, tablet,
   calculator, camera, game, headphones or something else), its name, where it lives and its units with «−» and «+»,
   each kept at once and back to the tile; below, how many are lent; on its back, its brand, model and codes, its labels
   and its record. «−» takes out the last unit added that is in its place (with a record of it, as weeding does), and is
@@ -584,7 +588,7 @@ its second part.
 
 ## 0.245.0 (2026-11-13)
 
-- The home of a young reader (the card of the flower), from Jujol's mock-up: one screen, with the herald greeting them
+- The home of a young reader (the card of the flower), from the mock-up: one screen, with the herald greeting them
   by name («Hello, Leo! Where shall we go today?») and three big doors, each a drawing with its word on a plate and its
   own voice in a round yellow button (hearing it does not open the door): «A story for today», the book the memory
   recommends with its cover and the memory pointing at it; «Come into the library», the hall of the visit; and «My
@@ -592,13 +596,13 @@ its second part.
   «For the grown-ups: the whole home» opens the home of always.
 - The herald's new lines, with the herald and the herald girl, in Spanish and English (art 0.1.62); the flower says what
   it already said on the card.
-- Stocktake, from Jujol's look at it: while it is open, a shelf says «Not read: 2,856» in quiet ink, and «Missing» in
+- Stocktake, from the look at it: while it is open, a shelf says «Not read: 2,856» in quiet ink, and «Missing» in
   coral only once it is closed; a shelf with one book read already lights its first spine; the camera and the phone are
   gestures, without the circle of a radio button (also at the desk).
 
 ## 0.244.0 (2026-11-13)
 
-- Stocktake, from Jujol's mock-up: each place of the library is a piece of furniture with its name on a plate and a
+- Stocktake, from the mock-up: each place of the library is a piece of furniture with its name on a plate and a
   shelf of twenty spines. To start, the shelf (or the whole library) is touched, and the stocktake names itself with the
   day and what it covers; the ones before are minutes, the open one first. While reading, the figure says how many are
   read of how many, the plan says where one stands (touched, the light goes with it; the list is gone) and each shelf's
@@ -624,12 +628,12 @@ its second part.
 - Chrome 93 and Firefox 98, still in many classrooms: the borders and backgrounds made with color-mix() have plain
   colours there, and what :has() shows (the option chosen, the connector's fields, an open genre or plate) comes from
   classes the script puts. An anchor is no longer hidden under the fixed header in them.
-- From Jujol's look at Labels and Corners: with nothing added today, it says so quietly instead of a chip that leads
+- From the look at Labels and Corners: with nothing added today, it says so quietly instead of a chip that leads
   nowhere; an open genre writes its name only on the plate.
 
 ## 0.242.0 (2026-11-13)
 
-- Labels, from Jujol's mock-up, as one sample sheet. On the left, what is printed (the code or the spine label, each a
+- Labels, from the mock-up, as one sample sheet. On the left, what is printed (the code or the spine label, each a
   card with its sample label), of which copies (chips with how many: added today, since a day, a list of codes) and the
   sheet (each drawn small with its grid, its size and how many it holds; the favourites and the chosen one first, the rest
   under «Other sheets»). «Since a day» offers the last days things came in as small sheets, and today, and any other day
@@ -641,7 +645,7 @@ its second part.
   page of its own with all of them, which opens the print window once. «Adjust the print» opens four arrows that move it
   half a millimetre each, kept at once, «Back to its place», and the test sheet. The favourite is one button.
 - The guided help of Labels follows the new screen; its words and voices stay.
-- The corners, from Jujol's second look: the gestures of every plate stand in line at the foot of the shelf; an opened
+- The corners, from the second look: the gestures of every plate stand in line at the foot of the shelf; an opened
   genre takes the whole row, with its name written on the plate, its topics as chips that turn on and off at a touch
   (its own lit, the most used in the stories off) and «+ Another topic», and the start of its shelf mark drawn on a
   spine label. «Another genre» asks only for its name, which becomes its first topic.
@@ -649,7 +653,7 @@ its second part.
 
 ## 0.241.0 (2026-11-13)
 
-- The corners of the room, from Jujol's mock-up: each corner is its plate standing on a wooden shelf, in the order the
+- The corners of the room, from the mock-up: each corner is its plate standing on a wooden shelf, in the order the
   hall of the visit shows them, with its name and its books under it. «◀» and «▶» move it one place, «Hide» turns it
   round (greyed, its name crossed out) and «Show» back, and «Change the name» opens its back, where a blank name brings
   back the classification's. The genres of the stories: those the library has, each opening its name, topics and shelf
@@ -659,7 +663,7 @@ its second part.
   checkboxes, the one «Save» and the windows are gone.
 - A button that asks to be touched twice (remove a genre, a closure, a lot, a challenge…) asks again on every page: on
   the pages with no search box it did what it said at the first touch.
-- From Jujol's look at the screens already made: a rule of one book says «one at a time», not «up to 1 at a time»; the
+- From the look at the screens already made: a rule of one book says «one at a time», not «up to 1 at a time»; the
   year's sentence in «How your library works» carries the link to the year sheet; «29 of 30 groups with a tutor»; the
   loans by group say their period without repeating the year when both ends share it, and «in October» for a whole
   month, the figure in the letter of titles; each group's bar runs along the bottom of its card; the tutor cards of a
@@ -668,7 +672,7 @@ its second part.
 
 ## 0.240.0 (2026-11-12)
 
-- Reports, from Jujol's mock-up: the reports are tabs on a sheet, and the period of «Loans by group» and «Most lent» is a
+- Reports, from the mock-up: the reports are tabs on a sheet, and the period of «Loans by group» and «Most lent» is a
   row of sheets, each with its dates under its name: this week, this month, each term of the year sheet, the year, last
   year, and «Another». Each term is named by the month the centre opens in after the one before (past its closures).
   «Another» opens the strip of the twelve months of the year: touch the first and then the last. Exact days come from
@@ -680,7 +684,7 @@ its second part.
 
 ## 0.239.0 (2026-11-12)
 
-- Tutors, from Jujol's mock-up: each stage a shelf, each group a card with its tutor's face (initials, or their photo
+- Tutors, from the mock-up: each stage a shelf, each group a card with its tutor's face (initials, or their photo
   where the centre shows them) and a dashed coral face where it has none; above, how many have one and the first that
   does not, with the way to it. Touching a group opens one tray of faces for the whole page, each person with the groups
   they already look after and «No tutor» last; touching a face saves it and goes back to the group's card. Last year's
@@ -690,7 +694,7 @@ its second part.
 
 ## 0.238.0 (2026-11-12)
 
-- The year page is one sheet, from Jujol's mock-up: the twelve months as a wall calendar, each day saying what it is
+- The year page is one sheet, from the mock-up: the twelve months as a wall calendar, each day saying what it is
   (its term as a band, closed, closed every week, the first day, the date to have everything back, today). A day touched
   (a link, no JavaScript needed) comes up as a card that says what it is now and what can be done with it: close it, close
   from it to another day touched (with a name), end a term on it, make it the date to have everything back, or take its
@@ -701,7 +705,7 @@ its second part.
 
 ## 0.237.0 (2026-11-12)
 
-- «How your library works», a new page from Jujol's mock-up, in «More»: the centre's settings and the library's loan
+- «How your library works», a new page from the mock-up, in «More»: the centre's settings and the library's loan
   rules read as sentences on three shelves (day to day, the library's voice, the house), each a book with its spine.
   Touched, its gesture opens in place: who and what in chips, days, books at once and renewals with − and +, the sign on
   the door, a light for each thing that can be on, the same review signed three ways, a light per stage for the class
@@ -816,7 +820,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 
 ## 0.232.1 (2026-11-11)
 
-- «To open your library», Jujol's review: each spine of the shelf carries a short name that fits (Catalogue, Readers,
+- «To open your library», the review: each spine of the shelf carries a short name that fits (Catalogue, Readers,
   Rules, Team, Open); «The ones it comes with will do» and «For now, I run it» read as a line under the step instead of
   a third button, so the row keeps «Do it» and «Show me»; and the gaps of the shelf keep their muted ink at night.
 
@@ -832,7 +836,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
   any other way, goes on as before.
 - The staff's home, while the centre is closed, is that list, with the drawn shelf of the steps and the herald reading
   beside it; folded, it is a line on top of the readers' home, and it stays as each person left it. The desk shows the
-  same steps instead of «To begin», and «More» their line on top. Jujol's design.
+  same steps instead of «To begin», and «More» their line on top.
 - «More», new: «What do you want to do?» on top (it searches «How do I…?» for now) with «How do I…?» beside it;
   «Waiting for you» first, with its number or «nothing now»; «Setting the library up» with the five steps (bringing
   a catalogue and the readers moved there); «Every school year» (stocktake, weeding, the year's report, the change of
@@ -992,7 +996,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 
 ## 0.221.0 (2026-11-08)
 
-- The story reader, as Gaudí drew it (`tale.php`): a story to read at home opens on its cover («Read it aloud, slowly.
+- The story reader, as it was drawn (`tale.php`): a story to read at home opens on its cover («Read it aloud, slowly.
   If they like, let them turn the page»), then the e-book one page at a time, and «The end» with «Good night», choose
   another story, start again and its credits («… chose it to read at home, after reading it all the way through»).
   Big letters for reading aloud, in four sizes, smaller on a short screen; night as a lamp, dim and amber, on when the
@@ -1001,14 +1005,14 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
   big screen. A recording the work brings is offered quietly on the cover; never a made voice. For anyone, without an
   account, only for what a library marked to read at home at its open door. Anything but an e-book opens in the
   library's reader, as before.
-- Where one is (Gaudí): a picture book laid out page by page says «Page 2 of 4» with its dots; text that flows says the
+- Where one is: a picture book laid out page by page says «Page 2 of 4» with its dots; text that flows says the
   chapter and the screen inside it («One · 2 of 4») over a thin line of how far through the whole book (its places,
   worked out once and kept in the browser for that book). The spine's shadow between two pages side by side; on a
   short screen, the chapter's title smaller so the text starts on its screen; the end, lying down, beside its cover.
 
 ## 0.220.0 (2026-11-08)
 
-- Stories to read at home, as Gaudí drew them (Enrique: «Lovely»): a living room drawn on the page, which turns to
+- Stories to read at home, as they were drawn (Enrique: «Lovely»): a living room drawn on the page, which turns to
   night in dark mode with the moon and the lamp lit; the memory reading beside her words for the age, as each skin
   has her (whole where the little ones are, a portrait at a secondary school or a university, the library itself at a
   company); the four ages, each with its little book; each story with its cover, minutes, pages or chapters, why it is
@@ -1033,7 +1037,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 - «Your work» (Oksigenia Tembiapo, version 2 of its contract): each alert with a deadline says it (`due`), so the block
   can put the whole centre's alerts in one list, the oldest first in each level: the oldest book missed, the end of
   today for what is due today, the oldest interlibrary loan past its date. And the plugin has its icon, `pix/icon.svg`:
-  the small emblem of the brand, as it is (Gaudí's delivery of 24 October, `emblema-pequeno.svg`).
+  the small emblem of the brand, as it is (the delivery of 24 October, `emblema-pequeno.svg`).
 
 ## 0.217.0 (2026-11-08)
 
@@ -1055,7 +1059,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 - Portuguese (audit, MD-04; Enrique, 8 November): the whole library in Brazilian Portuguese (`pt_br`) and in European
   Portuguese (`pt`), translated by machine from the Spanish with a glossary for each, every string checked to keep its
   placeholders, tags and line breaks. Where a voice of the help has no Portuguese recording, the step goes without voice.
-- The library's card in «Your work» (Oksigenia Tembiapo, `block_oksigeniatembiapo`; Nuryana, with Enrique's OK): for
+- The library's card in «Your work» (Oksigenia Tembiapo, `block_oksigeniatembiapo`): for
   whoever lends, keeps a library or manages, `local_oksigeniaayvurenda_oksigenia_work()` gives one card per centre, with
   the desk as its door, a line of numbers (out on loan, late, set aside) and what has to be solved, the urgent first:
   books more than a month late, a self-checkout point that stopped, copies that have not left the server; late, due
@@ -1070,7 +1074,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 
 - A cover that does not load is never a blank (Enrique, 8 November): the card shows its drawn cover with the title, as a
   book without a picture; the small covers of the board go away.
-- The reader's home board (Gaudí and Enrique): the herald's card spreads what it says over its height, and on a wide
+- The reader's home board: the herald's card spreads what it says over its height, and on a wide
   screen brings six new arrivals in two rows, bigger; three on smaller screens.
 
 ## 0.214.0 (2026-11-08)
@@ -1113,13 +1117,13 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
   - On «Corners»: the genres your catalogue has, proposed from the topics of its stories with how many books each would
     take, to add one by one or all at once; each genre in a card, changed in its window; where they take books from.
   - In the catalogue: the genres as corners on the home page (with the initial where the others have a drawing, until
-    Gaudí draws them), their own page, and in the search to narrow it.
+    there is one), their own page, and in the search to narrow it.
 - The reader's home board ends its two columns together: the last card of the shorter one grows, with what it says in
   the middle, instead of leaving a hole beside the other; the new arrivals' covers, half as big again.
 
 ## 0.211.0 (2026-11-08)
 
-- The album's collector cards of a reader of the sky are the sky's, Gaudí's night cards with a moon (art package
+- The album's collector cards of a reader of the sky are the sky's, the night cards with a moon (art package
   0.1.54), and the flower's where the package has none; corner 4, for a library whose corner 4 holds languages, as the
   Dewey 400. The art package 0.1.54 also brings the home picture of each skin, which the home page already looked for.
 
@@ -1237,7 +1241,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
   the empty album of Infantil.
 
 ## 0.200.0 (2026-11-08)
-- From the audit's ideas, with Gaudí:
+- From the audit's ideas,:
   - «Show it big» on the card: the codes on the whole screen, black on white, the screen kept awake, closed by itself in
     half a minute;
   - at the desk, a child who brings back their last book sees the hummingbird cross their card once and leave a feather
@@ -1250,7 +1254,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
   - the desk's stamps: the date of the loan just made falls on the card and sets sharp, «Returned» is stamped green on
     the line, and the reader's card lands on the desk;
   - the way into the library one visits opens as a door, on its hinges, with the hall's light;
-  - the hall's clock keeps the library's own time (Gaudí painted the face without its hands, art 0.1.52);
+  - the hall's clock keeps the library's own time (the face is painted without its hands, art 0.1.52);
   - the hummingbird crossing a child's card flies along its top edge and out, never stopping over a button.
 - 0.199.0 did not get installed (a test of the late notice depended on the day); it goes inside this one.
 
@@ -1265,11 +1269,11 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
     news, and the herald searches;
   - while a free work is brought, the herald carries it, and hummingbirds are small; while the cards are made, cutting
     them out is still yours.
-- The herald's round (with Gaudí): each day it is in one room of the visit only, the same for everyone; in the hall, a
-  feather of it (Gaudí's, art 0.1.51) on the board's row of that room, for the young; the sky looks for it.
+- The herald's round: each day it is in one room of the visit only, the same for everyone; in the hall, a
+  feather of it (art 0.1.51) on the board's row of that room, for the young; the sky looks for it.
 
 ## 0.198.0 (2026-11-08)
-- The lines of humour, first part (from the audit, with Gaudí): written for each age, a bag of them the same all day for
+- The lines of humour, first part (from the audit): written for each age, a bag of them the same all day for
   each reader (`characters::bag`, `characters::band`):
   - a search with nothing found, by age (the glasses for Infantil, under the rug for Primaria, dry for secondary,
     short for grown-ups), and three Easter eggs: the name of a character (who answers), «nothing», and «book» with
@@ -1277,14 +1281,14 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
   - a page not found, with the memory's line by age; a shared book no longer in the catalogue, its own;
   - the herald's word as a book comes home, by the age of whoever brings it and the nights it slept out; «Undone» now
     and then says that nothing happened here;
-  - the visit by the library's night: the memory speaks low, the hummingbird sleeps on its book (Gaudí's new pose, art
+  - the visit by the library's night: the memory speaks low, the hummingbird sleeps on its book (the new pose, art
     0.1.51) and says so with its eyes shut, and the board counts the books sleeping out; with nothing out, the herald
     watches the door; the third tap in a row on a character says something else;
   - a new reader with nothing taken yet is welcomed by the memory; the empty album of Infantil, as a plate before
     dinner; the staff's reservations with nothing waiting, in the university's words.
 
 ## 0.197.0 (2026-11-08)
-- Play and the visit (audit batch 10, with Gaudí):
+- Play and the visit (audit batch 10):
   - the hidden book by age: a shorter shelf for the youngest; for a reader past the flower, the memory gives the title
     and the author, the label is folded under «See its label», the spines carry no title (as seen from the aisle), and
     a book touched comes out a little with its title and goes back;
@@ -1297,7 +1301,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 - A shared link to a book no longer in the public catalogue shows the memory and the way back to the door.
 
 ## 0.196.1 (2026-11-07)
-- The personal area's block, after Gaudí's review: whoever lends at several desks gets one section with a row for each
+- The personal area's block, after the review: whoever lends at several desks gets one section with a row for each
   library (its name, what waits, in red with books late, and «Desk»); the buttons «Go to the library» and «My card» come
   once, at the end, and each library's name links to it; a class challenge met says «Met!» by its count. A university or
   a company looks like one whatever the reader's card.
@@ -1346,11 +1350,11 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
 - A class named twice in the catalogue no longer warns when the corners are listed.
 
 ## 0.193.0 (2026-11-07)
-- The reader's home as one board, from Gaudí's mock-up (dis-pase-04): on the left, the herald once and whole, with three
+- The reader's home as one board, from the mock-up (dis-pase-04): on the left, the herald once and whole, with three
   covers of what just arrived and the book of the week on a plate; on the right, what the memory recommends with its cover,
   and the reader's flower with «My card» and the class's challenge inside; one «Listen» per card, by its title. The visit,
   as a card with «Enter» and the other two ways in (Ayvu rande and the window) beside the hall.
-- The header on a phone, from Gaudí's mock-up (dis-pase-21): a bar with the emblem, the name and a magnifier; the search
+- The header on a phone, from the mock-up (dis-pase-21): a bar with the emblem, the name and a magnifier; the search
   opens over the bar, with the keyboard, a cross and Esc, and starts open on the results; a reader has four tabs, the fourth
   «More», a sheet from below with the rest and the way out, closed with a tap outside it.
 
@@ -1379,7 +1383,7 @@ The highs of the review of 12 November: a big catalogue (a university's, hundred
     opens its readers; «One reader borrowed», not «1 readers»;
   - on a phone, the desk hides «Read with the phone» and the camera leads; the start of the year in the centre settings
     is a day and a month from lists;
-  - Gaudí's review of 0.191.0: the shelf places without the repeated drawing, the corners' hint once, characters
+  - The review of 0.191.0: the shelf places without the repeated drawing, the corners' hint once, characters
     «spoken of as» she or he, and the flower's row a point bigger.
   - a «How do I…?» task to put the library on everyone's dashboard (UXL-17).
 
@@ -2394,11 +2398,11 @@ The first screens redone from the design reviews of 31 October:
 ## 0.103.1 (2026-10-31)
 
 - The sky's medallion on the card wears a thin ring of cream paper and a soft shadow, so that it stands apart from the
-  card's green as the flower does on its plate (Gaudí's review).
+  card's green as the flower does on its plate (the review).
 
 ## 0.103.0 (2026-10-31)
 
-- The card's drawing by Gaudí, in cut paper, when the art package brings it (`pix/carne/flor/` and `pix/carne/cielo/`,
+- The card's drawing, in cut paper, when the art package brings it (`pix/carne/flor/` and `pix/carne/cielo/`,
   from the art package 0.1.28): the base of the stage (seed, sprout, bud, flower; new, crescent, half and full moon)
   and each mark of the four paths in its box, lit up to its level and waiting beyond, as `carne.json` lays them out.
   Up to 140 px the sky takes the marks drawn thicker; the sober sky leaves out the waiting ones. On the card, the home,
@@ -2771,7 +2775,7 @@ Fixes from a review of the whole project:
 
 ## 0.73.4 (2026-10-27)
 
-- A herald of the other sex keeps Gaudí's hummingbird on the home and the card when the art package has no portrait
+- A herald of the other sex keeps the hummingbird on the home and the card when the art package has no portrait
   of her, instead of the initial of her name.
 
 ## 0.73.3 (2026-10-27)
@@ -3201,7 +3205,7 @@ Fixes from a review of the whole project:
 
 ## 0.24.0 (2026-10-27)
 
-- House style D, first part, by Gaudí: a layer after the plugin's own styles (`app/ayvurenda-d.css`). Flat shapes in
+- House style D, first part,: a layer after the plugin's own styles (`app/ayvurenda-d.css`). Flat shapes in
   layers with soft shadows and warm light: the header floats, boxes are cards, drawn covers carry a motif by colour,
   the record has its cover on a cream plate and its actions in one card, the reader is an open book with round page
   turns, and the recorder sits on a cream plate with a halo round the coral button. In dark mode the book's page is
@@ -3311,7 +3315,7 @@ Fixes from a review of the whole project:
 
 ## 0.19.0 (2026-10-27)
 
-- The card by age. The flower stays for Infantil and Primaria; from Secundaria on, the sky by Gaudí: a constellation
+- The card by age. The flower stays for Infantil and Primaria; from Secundaria on, the sky: a constellation
   for each path (The Tide, The Compass, The Voice, The Anchor) and the moon as the stage, lively from twelve to
   fourteen and sober from fifteen and for adults. The centre sets it by stage in «Libraries» (automatic by what the
   stage is called); from twelve on, each reader may choose the sky, a classic look (a list, without a picture) or none
@@ -3373,12 +3377,12 @@ Fixes from a review of the whole project:
   keeps what is read and sends it by itself when the network comes back. At the end: what is missing, by place and in
   a list to download; what was out of its place; and, with one tap each, marking the missing as lost and putting back
   what turned up. Counted by the database, for libraries with tens of thousands of copies.
-- The legend of how the flower grows shows the flower's own marks (drops, sparkles, speech bubbles, roots), by Gaudí,
+- The legend of how the flower grows shows the flower's own marks (drops, sparkles, speech bubbles, roots),,
   with what each path has for a screen reader.
 
 ## 0.12.1 (2026-10-27)
 
-- The flower of the card, drawn by Gaudí, Oksigenia's art director: seed, sprout, bud and flower, each with a place
+- The flower of the card, drawn, Oksigenia's art director: seed, sprout, bud and flower, each with a place
   for every path (drops for coming back, sparkles for exploring, speech bubbles for telling, roots for staying) whose
   three marks light up as the reader goes; what is missing shows dotted and nothing withers. Drawn in the page, in
   light and dark, also for the flowers of other years. The drawings are dual-licensed CC BY-SA 4.0 or GPL v3
@@ -3427,7 +3431,7 @@ Fixes from a review of the whole project:
 
 ## 0.9.8 (2026-10-27)
 
-- Until Gaudí's puppets arrive, each character shows the initial of its name in a circle, instead of a makeshift
+- Until the puppets arrive, each character shows the initial of its name in a circle, instead of a makeshift
   drawing.
 
 ## 0.9.7 (2026-10-27)
@@ -3471,7 +3475,7 @@ Fixes from a review of the whole project:
   happens. By default the two of Ayvurenda (Memoria and Mainumby); each centre gives them a name and a sex, so the
   words agree, turns them off, and chooses whether the herald signs the notices to readers. They speak little: the
   memory when a search finds nothing, the herald with the new books and with the flower of the card. Portraits are
-  placeholders until Gaudí's puppets.
+  placeholders until the puppets.
 
 ## 0.9.1 (2026-10-27)
 
@@ -3489,7 +3493,7 @@ Fixes from a review of the whole project:
   rankings. Everything comes from the desk. Only the reader sees it.
 - Reader cards to print, by group, ten to an A4 sheet (85.6 × 54 mm), with the barcode (Code 39) and the QR code.
 - Own Code 39 barcodes as SVG, in plain PHP.
-- The flower's stages are placeholders until Gaudí's art.
+- The flower's stages are placeholders until the art.
 
 ## 0.8.3 (2026-10-26)
 
@@ -3520,7 +3524,7 @@ Fixes from a review of the whole project:
 - A phone as the reader of a computer, for a desk without a scanner: «Read with the phone» shows the phone's address
   as a QR code; whatever the phone's camera reads there appears on the desk or the adding screen the same person has
   open. Codes wait at most five minutes.
-- The emblem for dark pages, by Gaudí, instead of the round of paper.
+- The emblem for dark pages,, instead of the round of paper.
 - Fixed: the home page failed for those who may not add books, because Mustache took the name «add» for one of its
   own methods.
 

@@ -1852,7 +1852,7 @@ final class desk {
         $said = $this->herald_word($keys[crc32((string) $loan->id) % count($keys)], ['nights' => $nights]);
         if ($said && $look === 'flower') {
             // A child who brings back their last book: the hummingbird crosses their card once and leaves a feather by
-            // their name (Gaudí, dis-efectos 17). Whether it is the last, the screen knows.
+            // their name (dis-efectos 17). Whether it is the last, the screen knows.
             $said['cross'] = ['figure' => (string) characters::figure('herald', 'celebra'),
                 'feather' => (string) screens::art('visita/pluma-mainumby', 'svg')];
         }

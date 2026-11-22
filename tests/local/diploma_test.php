@@ -101,7 +101,7 @@ final class diploma_test extends \advanced_testcase {
         $jpeg = diploma::make($joinedid, diploma::SMALL, $now);
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         if (!diploma::drawable()) {
-            // Without Gaudí's diploma there is nothing to send nor to show.
+            // Without the diploma there is nothing to send nor to show.
             $this->assertSame([0, null, []], [$told, $jpeg, diploma::of_reader($reader, $now, $str)]);
         } else {
             $this->assertSame(2, $told);

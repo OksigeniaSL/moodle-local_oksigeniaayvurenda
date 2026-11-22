@@ -108,7 +108,7 @@ final class challenges {
         return 3;
     }
 
-    /** @var int Pennants a garland shows one for each step; past this many, ten, each a tenth (Jujol). */
+    /** @var int Pennants a garland shows one for each step; past this many, ten, each a tenth. */
     public const GARLAND = 12;
 
     /** @var int On the board, one for each step up to this many: «everyone» in a class of 25 reads well there. */
@@ -119,7 +119,7 @@ final class challenges {
         'zarpa-sin' => 'piensa'];
 
     /**
-     * A challenge's garland (Jujol): a pennant for each step, coloured when done; with more steps than fit, ten, each a
+     * A challenge's garland: a pennant for each step, coloured when done; with more steps than fit, ten, each a
      * tenth of the way (18 of 25 lights 7), and the words beside it say the number.
      *
      * @param int $done
@@ -190,7 +190,7 @@ final class challenges {
     }
 
     /**
-     * «Enseñar a la clase» (Jujol): the class's board, for the whiteboard of the classroom. The island, the class with
+     * «Enseñar a la clase»: the class's board, for the whiteboard of the classroom. The island, the class with
      * its challenge, its garland and how far it is, the harbour's board with the days, and the herald with a sentence
      * to hear. Never a pupil's name.
      *
@@ -244,7 +244,7 @@ final class challenges {
     }
 
     /**
-     * The line of a reader's card about their class's ship (Jujol): how far the class is and when it sails.
+     * The line of a reader's card about their class's ship: how far the class is and when it sails.
      *
      * @param \stdClass|null $challenge The class's, this term.
      * @param int $entityid
@@ -625,7 +625,7 @@ final class challenges {
             'notes' => $str('challengenotes', $challenge->target),
             default => $str('challengeeveryone'),
         };
-        // The garland: a pennant a step, or ten tenths for a long one (Jujol).
+        // The garland: a pennant a step, or ten tenths for a long one.
         $marks = self::garland((int) $challenge->done, (int) $challenge->target);
         $left = $challenge->kind === 'everyone' && !$challenge->complete && $challenge->target > $challenge->done
             ? $str('challengeeveryoneleft', $challenge->target - $challenge->done) : '';

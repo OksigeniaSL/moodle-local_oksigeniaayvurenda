@@ -183,7 +183,7 @@ if ($steps) {
                 . $link('cardprint.php', 'menucards', 'local/oksigeniaayvurenda:desk'))
             . '</ol></section>';
     } else {
-        // A function presented at its moment (Jujol): one card, at most one a week, in this same place.
+        // A function presented at its moment: one card, at most one a week, in this same place.
         $timely = \local_oksigeniaayvurenda\local\timely::context(
             $library,
             (int) $USER->id,

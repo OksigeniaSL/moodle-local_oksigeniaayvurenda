@@ -346,7 +346,7 @@ final class forlittle {
             $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda', $a);
             $subject = $str('forlittlesubject');
             $hello = get_string('mailhello', 'local_oksigeniaayvurenda', $adult->firstname);
-            // Jujol's: the book with who reads it, the button, and why it comes.
+            // The book with who reads it, the button, and why it comes.
             $design = [
                 'library' => $library,
                 'entityid' => $entityid,

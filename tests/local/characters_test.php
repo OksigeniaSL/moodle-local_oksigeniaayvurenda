@@ -115,7 +115,7 @@ final class characters_test extends \advanced_testcase {
     }
 
     /**
-     * A herald of the other sex keeps Gaudí's hummingbird when the art package has no portrait of her: never the
+     * A herald of the other sex keeps the hummingbird when the art package has no portrait of her: never the
      * initial while there is a drawing.
      */
     public function test_portrait_of_either_sex(): void {

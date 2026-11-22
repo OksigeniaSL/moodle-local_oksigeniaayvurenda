@@ -144,7 +144,7 @@ final class hunt {
             }
         }
         // In the game the spines keep their title for the screen reader, not in a tooltip to match with the cover (D15);
-        // for a grown reader, not on the spine either: they come to it by its label (Gaudí, JV-D11).
+        // for a grown reader, not on the spine either: they come to it by its label (JV-D11).
         $cards = $grown ? catalogue::cards_of([$recordid], $library) : [];
         $author = $cards ? (string) reset($cards)['authors'] : '';
         foreach ($spines as &$spine) {

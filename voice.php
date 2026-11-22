@@ -220,7 +220,7 @@ if ($caninvite) {
     }
 }
 $data['hasinvites'] = (bool) $data['invites'];
-// The box «¿Para quién es?»: a reader past the flower reads it for the little ones, and their family may hear it (Jujol).
+// The box «¿Para quién es?»: a reader past the flower reads it for the little ones, and their family may hear it.
 $me = !empty($viewer['readerid']) ? $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $viewer['readerid']]) : null;
 // A teacher or the librarian reads for the little ones too.
 $data['forwho'] = \local_oksigeniaayvurenda\local\forlittle::can_read($me ?: null, time())

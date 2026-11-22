@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * «What your library can do» (Jujol, 14 November): every function of the library, what it solves and what it did this
+ * «What your library can do» (14 November): every function of the library, what it solves and what it did this
  * school year; those with a light are turned on and off right here.
  *
  * @package    local_oksigeniaayvurenda

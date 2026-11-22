@@ -17,7 +17,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 /**
- * «What your library can do» (Jujol, 14 November): each function a book of the house on its shelf, with what it solves,
+ * «What your library can do» (14 November): each function a book of the house on its shelf, with what it solves,
  * what it did this school year (a number of real use, never a 0: without anything yet, in words), its light where it has
  * one, and «Show me». The functions the desk presents at their moment are here always.
  *
@@ -131,7 +131,7 @@ class abilities {
             'yearsheet' => $by ? $str('abilityreturnby', zones::date($by, 'strftimedate', $entityid)) : $str('abilitynoreturnby'),
             'weekpick' => $pick ? $str('abilityweekpick', format_string($pick['title'], true, ['escape' => false]))
                 : $str('abilitynoweekpick'),
-            // A light off says so first, or nothing done would look like the function failing (Jujol).
+            // A light off says so first, or nothing done would look like the function failing.
             default => $str(in_array($key, self::LIGHTS, true) && !self::on($library, $key) ? 'abilityoff' . $key
                 : 'abilitynotyet'),
         }];

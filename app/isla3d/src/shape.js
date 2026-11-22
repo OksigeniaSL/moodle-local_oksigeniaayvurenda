@@ -15,7 +15,7 @@
 
 // The class island of Ayvurenda: its shoreline and its ground, shared by the terrain, the sea shader and the
 // placement of the pieces. World frame: x to the right of the screen, -z away from the camera, y up.
-// The shape follows Gaudí's island (pix/isla/base.webp): a wide oval with a soft wobble.
+// The shape follows the island (pix/isla/base.webp): a wide oval with a soft wobble.
 
 export function rng(seed) {
   let a = seed >>> 0;
@@ -74,7 +74,7 @@ export const SEA_Y = 0.02;
 export function terrainH(x, z) {
   const sd = shoreSD(x, z);
   if (sd < 0) {
-    // A soft dome (a quarter of a unit in the middle) and a low mound under the tree (Gaudí).
+    // A soft dome (a quarter of a unit in the middle) and a low mound under the tree.
     const mound = 0.07 * Math.exp(-((x - MOUND.x) ** 2 + (z - MOUND.z) ** 2) / 0.22);
     return SEA_Y + 0.25 * smooth(0, 1.5, -sd) + mound * smooth(0, 0.4, -sd)
       + 0.012 * (vnoise(x * 2.3, z * 2.3) - 0.5) * smooth(0, 0.5, -sd);
@@ -83,7 +83,7 @@ export function terrainH(x, z) {
 }
 const MOUND = { x: -0.05, z: -0.88 };
 
-// Where everything stands, after Gaudí's layers: the palm and the rocks of the base, and the pieces the class wins.
+// Where everything stands, after the layers: the palm and the rocks of the base, and the pieces the class wins.
 export const SPOTS = {
   palm: { x: -1.45, z: -0.62 },
   tree: { x: -0.05, z: -0.88 },

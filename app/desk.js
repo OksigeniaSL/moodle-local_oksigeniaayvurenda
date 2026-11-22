@@ -228,7 +228,7 @@
             paintHand();
             return;
         }
-        // A card that comes to the desk lands on it; the same one painted again stays where it is (Gaudí, dis-efectos 07).
+        // A card that comes to the desk lands on it; the same one painted again stays where it is (dis-efectos 07).
         if (reader.id !== readerid && !still) {
             panel.classList.remove('ayv-card-land');
             panel.getBoundingClientRect();
@@ -390,7 +390,7 @@
     var line = function(answer, code) {
         var li = el('li', 'ayv-line ayv-line-' + answer.kind + ' ayv-sound-' + (answer.sound || 'ok'));
         li.appendChild(el('p', 'ayv-line-text', answer.message));
-        // Back home: the green stamp «Returned» on the line (Gaudí, dis-efectos 07).
+        // Back home: the green stamp «Returned» on the line (dis-efectos 07).
         if (answer.kind === 'returned' && str.deskstampback) {
             li.appendChild(el('span', 'ayv-line-stamp' + (still ? '' : ' ayv-stamp-new'), str.deskstampback));
         }
@@ -656,7 +656,7 @@
     };
 
     // The hummingbird crosses the card of a child who has just brought back their last book, once, and leaves a feather
-    // by their name that goes by itself (Gaudí). Nothing with «reduce motion».
+    // by their name that goes by itself. Nothing with «reduce motion».
     var cross = function(what) {
         if (still || !what.figure || panel.hidden) {
             return;

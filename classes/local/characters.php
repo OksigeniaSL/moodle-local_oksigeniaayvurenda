@@ -34,7 +34,7 @@ final class characters {
     /**
      * @var bool Whether the puppets move: off since 7 November 2026. They turned pieces cut out of a drawing made whole,
      * which the common norm forbids (shared/animacion-de-personajes.md); each character stands in its pose, drawn whole,
-     * until Gaudí's kit brings them back by one of the norm's ways.
+     * until the kit brings them back by one of the norm's ways.
      */
     public const MOVING = false;
 
@@ -72,7 +72,7 @@ final class characters {
                 'name' => $name !== '' ? $name : get_string($role . 'defaultname', 'local_oksigeniaayvurenda'),
                 // The grandmother who remembers and the hummingbird who heralds: one of each.
                 'sex' => $sex,
-                // Gaudí's portrait, when the art package is there: one of the other sex if it has it, else the same
+                // The portrait, when the art package is there: one of the other sex if it has it, else the same
                 // grandmother and hummingbird as their drawings whole.
                 'portrait' => images::url('portrait', $entityid, $role) ?? self::own_figure($entityid, $role, 'saluda')
                     ?? ($sex === ($role === 'herald' ? 'm' : 'f') ? null : screens::art($drawn . '-' . $sex))
@@ -228,7 +228,7 @@ final class characters {
     }
 
     /**
-     * Gaudí's drawing of a character whole, in a pose, from the art package (null without it): the memory, or
+     * The drawing of a character whole, in a pose, from the art package (null without it): the memory, or
      * Mainumby for the herald; of the sky's step when asked and drawn, else the flower's.
      *
      * @param string $role memory or herald.
@@ -242,7 +242,7 @@ final class characters {
     }
 
     /**
-     * Gaudí's puppet of a character doing the gesture of a pose, from the art package: what the page needs to bring it to
+     * The puppet of a character doing the gesture of a pose, from the art package: what the page needs to bring it to
      * life over the pose drawn still ('' without it, and the pose stays).
      *
      * @param string $role memory or herald.
@@ -274,7 +274,7 @@ final class characters {
     /**
      * Takes a character of the centre's own, whole, from a zip: its portrait (retrato), its five poses (saluda, senala,
      * celebra, lee, piensa) and its puppet (marioneta.webp with marioneta.atlas.json, .rig.json and .anim.json), as
-     * Gaudí's kit gives them. Only those names are read, each picture checked and each file of data parsed.
+     * The kit gives them. Only those names are read, each picture checked and each file of data parsed.
      *
      * @param int $entityid
      * @param string $role

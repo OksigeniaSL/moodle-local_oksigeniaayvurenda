@@ -92,7 +92,7 @@ if (data_submitted() && confirm_sesskey()) {
             \local_oksigeniaayvurenda\local\blind::note($dateid, (int) $noter->id, optional_param('note', '', PARAM_ALPHA), time());
         }
     } else if ($do === 'bookletfamily') {
-        // A reader of twelve or over says whether their family gets their booklet (Jujol): only their own.
+        // A reader of twelve or over says whether their family gets their booklet: only their own.
         $bookletid = required_param('booklet', PARAM_INT);
         $mine = $DB->record_exists_sql(
             'SELECT 1 FROM {local_oksigeniaayvurenda_booklet} b
@@ -197,7 +197,7 @@ foreach ($readers as $reader) {
         $classisland = $layers ? ['islandlayers' => array_map(fn($u) => ['layer' => $u], $layers),
             'islandlabel' => $str('islandlabel', count($plantedall))] : null;
     }
-    // From twelve, the booklet is theirs (Jujol): when it is ready, a line to see it and to say if their family gets it.
+    // From twelve, the booklet is theirs: when it is ready, a line to see it and to say if their family gets it.
     // By their age, whatever card they chose (the classic one or none decide as much as the sky).
     $bookletrow = $look !== 'flower' ? \local_oksigeniaayvurenda\local\booklet::on_card($reader, time()) : null;
     $bookletcard = null;
@@ -228,7 +228,7 @@ foreach ($readers as $reader) {
                 'bookletid' => (int) $bookletrow->id, 'action' => $PAGE->url->out(false), 'sesskey' => sesskey()] : null,
         ];
     }
-    // The ship of the class this term (P5, Jujol): how far the class is and when it sails, in one line.
+    // The ship of the class this term (P5): how far the class is and when it sails, in one line.
     $classship = $group !== '' && ($look === 'flower' || $sky) ? \local_oksigeniaayvurenda\local\challenges::card_line(
         \local_oksigeniaayvurenda\local\challenges::of((int) $reader->entityid, $group, time()),
         (int) $reader->entityid,

@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 // What stands on the island, all made of simple shapes with vertex colours (Lambert: cheap and warm): the palm, the
-// bushes and the rocks of the base, and the pieces a class wins (Gaudí's layers): the flowering tree with its round
+// bushes and the rocks of the base, and the pieces a class wins (the layers): the flowering tree with its round
 // bench, the reading hut, the garden, the lighthouse of books, and the dock with the boat that brings the book the
 // class asked for. Each piece is a group whose origin is its foot, so it can grow from the ground.
 import * as THREE from 'three';
@@ -43,7 +43,7 @@ export function materials() {
   const halo = new THREE.CanvasTexture(canvas);
   halo.colorSpace = THREE.SRGBColorSpace;
   return {
-    // Flat facets, as the house's style D and the dioramas of campus (Gaudí).
+    // Flat facets, as the house's style D and the dioramas of campus.
     solid: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
     leaf: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide, flatShading: true }),
     glow: new THREE.MeshBasicMaterial({ color: '#ffd77a' }),
@@ -293,7 +293,7 @@ export function makeTree(mat) {
   // The crown: leafy balls in a dome, sprinkled with white and red flowers.
   const crown = [];
   const greens = ['#9cd14a', '#b6dc52', '#7fbe3e', '#c8e35c'];
-  // Eleven lumps, deep into each other, so it reads as one mass with bumps (Gaudí): each one welded and jittered by a
+  // Eleven lumps, deep into each other, so it reads as one mass with bumps: each one welded and jittered by a
   // tenth of its radius, so it shows no cracks.
   for (let i = 0; i < 11; i++) {
     const ring = i === 0 ? 0 : i < 6 ? 1 : 2;
@@ -344,7 +344,7 @@ export function makeHut(mat) {
   }
   // The roof: two pitched halves of shingles, the ridge running from the open front to the back, the gable closed
   // at the back.
-  // Three rows of shingles on each side, stepped, steeper, with an eave of 0.08 at the front (Gaudí).
+  // Three rows of shingles on each side, stepped, steeper, with an eave of 0.08 at the front.
   for (const side of [-1, 1]) {
     for (let row = 0; row < 3; row++) {
       const along = 0.07 + row * 0.11;
@@ -526,7 +526,7 @@ export function makeShip(mat) {
   pennant.add(mesh([paint(new THREE.ShapeGeometry(flag), '#e2654c', '#c8443a', 0.04, 22)], mat.leaf));
   group.add(pennant);
   group.userData = { sail, pennant, furl: null, hoist: 0, size: 1 };
-  // Gaudí's model (velero.glb) brings its own sail, its furled sail and its pennant, by name: the page moves those.
+  // The model (velero.glb) brings its own sail, its furled sail and its pennant, by name: the page moves those.
   group.userData.rehook = (scene) => {
     const ud = group.userData;
     ud.sail = scene.getObjectByName('vela') || ud.sail;

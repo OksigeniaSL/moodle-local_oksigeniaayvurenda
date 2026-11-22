@@ -43,7 +43,7 @@ class booklet {
     /** @var int Days after the end of the classes in which the year's booklets are still made, if the cron missed it. */
     private const LATE = 7;
 
-    /** @var int The longest line of the library, in characters: what fits its slip (Jujol). */
+    /** @var int The longest line of the library, in characters: what fits its slip. */
     public const LINE = 140;
 
     /** @var int Days a reader of twelve or over has to say their family may get it; then it is theirs alone. */
@@ -634,7 +634,7 @@ class booklet {
     }
 
     /**
-     * The cover of a booklet, for its e-mail and for the chats that show its link (Gaudí).
+     * The cover of a booklet, for its e-mail and for the chats that show its link.
      *
      * @param \stdClass $row The booklet.
      * @param \stdClass $reader

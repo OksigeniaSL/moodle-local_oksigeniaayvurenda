@@ -61,7 +61,7 @@ final class cards_test extends \basic_testcase {
     }
 
     /**
-     * With Gaudí's drawing in the art package: the base of the stage and each mark lit up to its path's level, waiting
+     * With the drawing in the art package: the base of the stage and each mark lit up to its path's level, waiting
      * beyond; the sober sky without the waiting ones; the small sky with the thicker marks.
      */
     public function test_layered(): void {

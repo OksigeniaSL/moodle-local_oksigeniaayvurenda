@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The library one visits: rooms painted by Gaudí that one walks through.
+ * The library one visits: rooms painted that one walks through.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -314,7 +314,7 @@ final class visit {
         $home = $public ? $url('public.php') : $url('index.php');
         $goes = fn(string $corner) => isset($rooms[$corner]) ? $url('visit.php', ['room' => $rooms[$corner]])
             : $url('stacks.php', ['corner' => $corner]);
-        // The herald's round: each day in one room only, the same for everyone (Gaudí, JV-I1); finding it is the news.
+        // The herald's round: each day in one room only, the same for everyone (JV-I1); finding it is the news.
         $round = $rooms ? array_values($rooms)[crc32(zones::date(time(), '%Y%m%d', $library) . '-' . $library->id) %
             count($rooms)] : '';
         // In the hall, a feather of it on the row of that room; not for the sky, who look for it.
@@ -721,7 +721,7 @@ final class visit {
 
     /**
      * The hall's clock with the library's own time: two hands over the painted face, on the layer it is painted on
-     * (KIMI-19, Gaudí). The page keeps them turning.
+     * (KIMI-19). The page keeps them turning.
      *
      * @param array $zone
      * @param \stdClass $library
@@ -874,7 +874,7 @@ final class visit {
                 'left' => $str('huntlanternsleft', '{n}'),
                 'leftone' => $str('huntlanternsleftone'),
                 'none' => $str('huntlanternsnone'),
-                // With a seal already, a book found with a lantern counts towards gilding it, not always gilds it (Gaudí).
+                // With a seal already, a book found with a lantern counts towards gilding it, not always gilds it.
                 'promise' => $str('huntcarrypromise'),
                 'promisegold' => $str(carry::seal((int) $game['readerid'])['level'] ? 'huntcarrypromisegoldmore'
                     : 'huntcarrypromisegold'),

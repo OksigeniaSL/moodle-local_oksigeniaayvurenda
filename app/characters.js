@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Ayvurenda: the characters, alive. Where the art package brings Gaudí's puppets, a pose drawn still (an image with
+ * Ayvurenda: the characters, alive. Where the art package brings the puppets, a pose drawn still (an image with
  * data-puppet) becomes the puppet doing that gesture, then breathing a while; a touch plays the gesture again. It only
  * moves while it is in sight and for a little while, and never with «reduce motion»; without the puppet, the pose stays.
  *

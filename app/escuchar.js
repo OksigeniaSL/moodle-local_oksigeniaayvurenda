@@ -1,4 +1,4 @@
-// «Leyó para los pequeños»: the family's player (Jujol, 13 Nov 2026). Without this file the page keeps the browser's own
+// «Leyó para los pequeños»: the family's player (13 Nov 2026). Without this file the page keeps the browser's own
 // player. The big button plays and pauses, the line moves along with the voice, and «Mandárselo a alguien» uses the
 // phone's own way of sharing (WhatsApp, mail…), or copies the address where there is none.
 (function () {

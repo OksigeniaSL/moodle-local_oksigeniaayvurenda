@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 // The class island of Ayvurenda in 3D, for «My class»: the island and its sea, and a piece for each thing the class
-// met this school year, as in Gaudí's layers (pix/isla/). When a piece arrives it grows from the ground with a bounce and
+// met this school year, as in the layers (pix/isla/). When a piece arrives it grows from the ground with a bounce and
 // a few sparks, and then everything stops: the loop only runs while something moves, so an old Chromebook rests.
 // With «reduce motion» nothing moves. Without WebGL2, mount() gives null and the page keeps the 2D layers.
 //
@@ -86,7 +86,7 @@ export function mount(element, options = {}) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#0f6f86');
   scene.add(new THREE.HemisphereLight('#cdeefa', '#e2c38a', 1.2));
-  // The sun from the top left and in front, as in Gaudí's 2D island.
+  // The sun from the top left and in front, as in the 2D island.
   const sun = new THREE.DirectionalLight('#ffe2b0', 2.3);
   sun.position.set(-3, 5, 3.5);
   scene.add(sun);
@@ -104,7 +104,7 @@ export function mount(element, options = {}) {
   scene.add(makeGrass(grassOf('base'), 5), makePalm(mat), makeBushes(mat), makeRocks(mat));
   const rings = ROCKS.filter(([x, z]) => Math.hypot(x / 2.55, z / 1.62) > 0.92).map(([x, z, r]) => ({ x, z, r: r * 0.9 }));
   rings.push({ x: SPOTS.lighthouse.x, z: SPOTS.lighthouse.z, r: 0.2 });
-  // Four rings of foam for the ship (Gaudí): one round its hull, so it floats, and three that follow it as its wake.
+  // Four rings of foam for the ship: one round its hull, so it floats, and three that follow it as its wake.
   const SHIP_RING = rings.length;
   for (let i = 0; i < 4; i++) {
     rings.push({ x: 0, z: 0, r: -1 });
@@ -116,7 +116,7 @@ export function mount(element, options = {}) {
   const sparkles = makeSparkles();
   scene.add(sparkles);
 
-  // Pieces Gaudí modelled (GLB in the art package) replace the drawn ones once loaded; the drawn ones stay without them.
+  // Modelled pieces (GLB in the art package) replace the drawn ones once loaded; the drawn ones stay without them.
   const assets = options.assets || {};
   let gone = false;
   function dress(name, group) {
@@ -199,7 +199,7 @@ export function mount(element, options = {}) {
   let last = 0;
 
   // Where the island stands in its box: in the middle, or (frame) moved right and down and a little further away, as
-  // on the whiteboard, clear of the sign at the top left and the herald below (Jujol).
+  // on the whiteboard, clear of the sign at the top left and the herald below.
   const framing = options.frame || null;
   // Where the ship waits and where it goes: off the front beach and away to the left, or (berth) elsewhere, as on the
   // whiteboard, where the herald's bubble covers the front beach and the ship waits behind the island instead.

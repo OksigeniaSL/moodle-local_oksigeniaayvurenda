@@ -689,7 +689,7 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026110819) {
-        // Tales to read at home, as Gaudí drew them: minutes, pages, a line for each age, for bedtime and the order.
+        // Tales to read at home, as they were drawn: minutes, pages, a line for each age, for bedtime and the order.
         $table = new xmldb_table('local_oksigeniaayvurenda_digital');
         $fields = [
             new xmldb_field('homeminutes', XMLDB_TYPE_INTEGER, '4', null, null, null, null, 'homeages'),

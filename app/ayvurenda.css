@@ -1,4 +1,4 @@
-/* Ayvurenda: the library's own screens. Brand by Gaudí (agents/arte/docs/fichas/ayvurenda.md): Literata 600 for names
+/* Ayvurenda: the library's own screens. Brand (agents/arte/docs/fichas/ayvurenda.md): Literata 600 for names
    and headings, Andika for text; paper, ink, two greens, coral, sun and night green. Everything hangs from .ayv, so
    nothing here touches Moodle's pages. Works from Chrome 93 on. */
 @font-face { font-family: "Literata"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/literata-600.woff2") format("woff2"); }
@@ -19,7 +19,7 @@
     --surface: #fff;
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317574c' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     --muted: #8b9591;
-    /* The second ink, for what goes under a title (Jujol, 21 Nov 2026): 7.3:1 on the paper. */
+    /* The second ink, for what goes under a title (21 Nov 2026): 7.3:1 on the paper. */
     --ink-2: #4a5451;
     --chip-hover: #e8dcc6;
     --late: #a3321e;
@@ -66,7 +66,7 @@ html[data-bs-theme="dark"] .ayv {
     color-scheme: dark;
 }
 
-/* The emblem for dark pages, by Gaudí: light petals and the coral seed. */
+/* The emblem for dark pages,: light petals and the coral seed. */
 .ayv .ayv-brand-dark { display: none; }
 
 html[data-bs-theme="dark"] .ayv .ayv-brand-light { display: none; }
@@ -786,7 +786,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-notice { padding: .75rem 1rem; background: var(--notice-bg); border-left: 6px solid var(--green2); border-radius: 8px; }
 
 .ayv .ayv-sources { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
-/* The class's island: layers of the same size, one on top of another, as Gaudí draws them. */
+/* The class's island: layers of the same size, one on top of another, as they are drawn. */
 .ayv .ayv-island { position: relative; aspect-ratio: 16 / 10; margin: 1rem 0 0; border-radius: var(--radius); overflow: hidden; }
 .ayv .ayv-island img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* The island in 3D, over its layers (0.65.0); the layers stay underneath for when it cannot be drawn. */
@@ -1116,7 +1116,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv.ayv-skin-school.ayv-young .ayv-facet-label,
 .ayv.ayv-skin-school.ayv-young .ayv-cromo-when,
 .ayv.ayv-skin-school.ayv-young .ayv-chip-count { font-size: .875rem; }
-/* A young reader reads the flower's row a point bigger (Gaudí, 7 November). */
+/* A young reader reads the flower's row a point bigger (7 November). */
 .ayv.ayv-young .ayv-path-hint { font-size: 1rem; }
 .ayv.ayv-young .ayv-path-detail { font-size: 1.1rem; }
 
@@ -1504,7 +1504,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-shelf-group { margin: .75rem 0 .4rem; font-size: 1rem; font-weight: 700; color: var(--accent); }
 
 /* The sky of the card, from twelve on: its own night, in light mode too. */
-/* Round by its picture, not by clipping: the seal of «Llévatelo» is stamped half over the edge (Gaudí, 13 Nov). */
+/* Round by its picture, not by clipping: the seal of «Llévatelo» is stamped half over the edge (13 Nov). */
 .ayv .ayv-card-sky { border-radius: 50%; overflow: visible; }
 .ayv .ayv-card-sky .ayv-layered-base { border-radius: 50%; }
 .ayv .ayv-card-sky > svg { clip-path: circle(50%); }
@@ -1716,7 +1716,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     cursor: pointer;
 }
 .ayv .ayv-vp-more-button .ayv-icon { margin: 0; }
-/* On a phone, the part and the button at the foot of the screen, to read the book and record at once (Jujol). */
+/* On a phone, the part and the button at the foot of the screen, to read the book and record at once. */
 .ayv .ayv-vp-barra { display: none; }
 @media (max-width: 47.99rem) {
     .ayv .ayv-vp-barra {
@@ -1759,7 +1759,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-vp-review li { display: grid; gap: .4rem; padding: .7rem 0; border-top: 1px solid var(--line); }
 .ayv .ayv-vp-review-title { margin: 0; }
 
-/* «Escuchar» a reading in parts (Jujol, 21 Nov 2026): the page where a child listens to their teacher read them a whole
+/* «Escuchar» a reading in parts (21 Nov 2026): the page where a child listens to their teacher read them a whole
    book. Over app/ayvurenda.css; everything new is .ayv-oye-*. The book in front, like a present just opened (the cover
    of «Leyó para los pequeños»); who reads it; one big «play»; and the parts as the contents page of the book, with the
    one that sounds marked by its moving bars. Works without :has() or color-mix(): the second ink is a colour of its own; dark follows Moodle's data-bs-theme. */
@@ -1869,7 +1869,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     border-radius: 2px;
     background: var(--coral);
 }
-/* At rest, still but standing: the part that comes is seen, not only a dot (Jujol). */
+/* At rest, still but standing: the part that comes is seen, not only a dot. */
 .ayv .ayv-oye-barras i:nth-child(2) { height: 100%; }
 .ayv .ayv-oye-barras i:nth-child(3) { height: 65%; }
 .ayv .is-sonando .ayv-oye-barras i {
@@ -2228,7 +2228,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     background: var(--accent);
     color: var(--surface);
 }
-/* Without JavaScript, the browser's own player; with it, Jujol's. */
+/* Without JavaScript, the browser's own player; with it. */
 .ayv .ayv-oye.is-js .ayv-oye-nativo { display: none; }
 .ayv .ayv-oye-play .ayv-oye-icono-pausa,
 .ayv .ayv-oye-play[aria-pressed="true"] .ayv-oye-icono-play { display: none; }
@@ -3165,7 +3165,7 @@ html[data-bs-theme="dark"] .ayv .ayv-featured .ayv-button { background: var(--pa
 .ayv .ayv-howto .ayv-section-title { margin: 0; }
 .ayv .ayv-howto-steps { margin: 0; padding-left: 1.4rem; display: grid; gap: .3rem; }
 
-/* The shelves (0.59.0, with Gaudí's adjustments of 26 October 2026): books as spines, as tall and thick as they are,
+/* The shelves (0.59.0, with the adjustments of 26 October 2026): books as spines, as tall and thick as they are,
    in the colour of their cover, with their label at the foot and the gap of the ones that are out. Wood planks drawn
    by a repeating gradient, one each row: every slot is a row tall, so rows and planks always meet. */
 .ayv .ayv-bookcase-wrap {
@@ -3276,7 +3276,7 @@ html[data-bs-theme="dark"] .ayv .ayv-spine { background: var(--bgd); }
 }
 .ayv .ayv-spine-topdown .ayv-spine-title { transform: none; }
 .ayv .ayv-spine-small .ayv-spine-title { font-size: 11px; }
-/* The label at the foot, in the order of Gaudí's figure: class, three capitals of the author, three letters of the
+/* The label at the foot, in the order of the figure: class, three capitals of the author, three letters of the
    title; with a stripe of its place's colour when the place is a colour, like the sticker in the room. */
 .ayv .ayv-spine-label {
     position: absolute;
@@ -3339,7 +3339,7 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     overflow: hidden;
 }
 .ayv .ayv-spine-here .ayv-spine { transform: translateY(-12px); box-shadow: 0 0 0 3px var(--sun), 0 10px 16px -8px rgba(0, 0, 0, .5); }
-/* A bookend at each end of each plank, whole and with a little air from the books (Gaudí), put there by the script once
+/* A bookend at each end of each plank, whole and with a little air from the books, put there by the script once
    it knows where rows start and end; the shelf keeps room for them at both sides. */
 .ayv .ayv-row-end::after,
 .ayv .ayv-row-start::before {
@@ -3475,7 +3475,7 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
 }
 .ayv .ayv-place:hover { transform: translateY(-2px); }
 /* A place says its name and how many books it has, big, with its colour down the side: the same drawing eight times
-   said nothing (Gaudí, 7 November). */
+   said nothing (7 November). */
 .ayv .ayv-place-label { font: 600 1.2rem/1.2 var(--title); overflow-wrap: anywhere; }
 .ayv .ayv-place-count { font-size: .95rem; font-weight: 600; color: var(--ayv-muted, #5f6b67); }
 .ayv .ayv-nav-stacks svg { width: 20px; height: 20px; }
@@ -3512,7 +3512,7 @@ html[data-bs-theme="dark"] .ayv .ayv-spine-gap .ayv-spine { background: transpar
     .ayv .ayv-lectern-in { animation: ayv-lectern-in .2s ease both; }
 }
 
-/* The album's collector cards (0.60.0), by Gaudí: one for each corner, with the corner's name and the day it was won
+/* The album's collector cards (0.60.0),: one for each corner, with the corner's name and the day it was won
    written in the plain band at the foot (y 672 to 780 of 840, 58 px in from each side of 600). One not yet won, grey. */
 .ayv .ayv-cromos-count { margin-left: .4rem; font: 400 1rem var(--text); color: var(--ayv-muted, #5f6b67); }
 .ayv .ayv-cromos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr)); gap: 1rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
@@ -3592,7 +3592,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cromo-missing .ayv-cromo-band { color: #b3b
     .ayv .ayv-pulse li:first-child::before { animation: none; }
 }
 
-/* Where is it? (0.62.0): the label of a book, big, with what each line says (in the order of Gaudí's figure, «the label
+/* Where is it? (0.62.0): the label of a book, big, with what each line says (in the order of the figure, «the label
    inside out»), on the record and folded on the lectern. */
 .ayv .ayv-where-box { margin-top: 1.5rem; }
 .ayv .ayv-where-in { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; padding: 1rem 1.25rem; border-radius: 18px; background: var(--surface); box-shadow: var(--ayv-shadow, 0 10px 28px -14px rgba(15, 58, 51, .32)); }
@@ -3660,7 +3660,7 @@ html[data-bs-theme="dark"] .ayv.ayv-embed {
     .ayv .ayv-postersheet { margin: 0; box-shadow: none; break-after: page; }
 }
 
-/* The characters whole, in a pose (0.66.0, with Gaudí's touches): Gaudí's drawings beside what they say and in the
+/* The characters whole, in a pose (0.66.0, with the touches): the drawings beside what they say and in the
    empty states, standing on a soft shadow of ground; the bubble points to the face of whoever speaks. */
 .ayv .ayv-figure { position: relative; flex: none; display: inline-block; line-height: 0; }
 .ayv .ayv-figure::after { content: ""; position: absolute; left: 22%; right: 22%; bottom: 3%; height: 9%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(15, 58, 51, .15), rgba(15, 58, 51, 0) 70%); pointer-events: none; }
@@ -3675,7 +3675,7 @@ html[data-bs-theme="dark"] .ayv.ayv-embed {
     .ayv .ayv-bubble-posed .ayv-bubble-text { margin-top: 1rem; }
 }
 
-/* The library one visits (0.68.0): Gaudí's painted rooms, scaled to the screen by the script; the places light up as
+/* The library one visits (0.68.0): the painted rooms, scaled to the screen by the script; the places light up as
    lamplight, the board and the blackboard carry the library's own words, real covers stand on the painted stand, and
    the same places go as words below. */
 .ayv .ayv-visit { margin: 0 0 2rem; }
@@ -3822,7 +3822,7 @@ html[data-bs-theme="dark"] .ayv .ayv-visit-card-night { display: block; }
     .ayv .ayv-hunt-yes .ayv-spine { transition: none; }
 }
 .ayv .ayv-visit-offer { margin: .6rem 0 0; }
-/* The herald's shelf (0.70.0): the new book of the turn with its label, and the corners as doors, with Gaudí's
+/* The herald's shelf (0.70.0): the new book of the turn with its label, and the corners as doors, with the
    drawing of each corner when the art package has it. */
 .ayv .ayv-sort-books { margin: 0; padding: 0; list-style: none; }
 .ayv .ayv-sort-book { display: flex; gap: 1rem; align-items: center; }
@@ -4670,7 +4670,7 @@ html[data-bs-theme="dark"] .ayv .ayv-button-danger { color: var(--late); }
     .ayv .ayv-desk-herald { transition: none; transform: none; }
 }
 
-/* Gaudí's drawing of the card, in layers: the base of the stage, and each mark in its box on top. */
+/* The drawing of the card, in layers: the base of the stage, and each mark in its box on top. */
 .ayv .ayv-layered { position: relative; display: block; max-width: 100%; aspect-ratio: 1 / 1; }
 .ayv .ayv-layered img { position: absolute; display: block; }
 .ayv .ayv-layered .ayv-layered-base { inset: 0; width: 100%; height: 100%; }
@@ -4680,7 +4680,7 @@ html[data-bs-theme="dark"] .ayv .ayv-button-danger { color: var(--late); }
 .ayv .ayv-garden li > .ayv-layered { padding: 8px; border-radius: 50%; background: var(--ayv-plate); box-sizing: content-box; }
 
 /* The sky's medallion on the card: a thin ring of paper and a soft shadow, so that it reads as a piece apart from the
-   card's green, as the flower does on its cream plate (Gaudí, 31 October 2026). */
+   card's green, as the flower does on its cream plate (31 October 2026). */
 .ayv .ayv-card-face .ayv-card-flower.ayv-card-sky { box-shadow: 0 0 0 3px #efe3c4, 0 12px 24px -12px rgba(0, 0, 0, .55); }
 
 /* Tabs of a page (weeding: candidates and records). */
@@ -5537,7 +5537,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-self-still { margin: 1rem 0 0; padding: .6rem 1rem; border-radius: .8rem; font-weight: 700; background: color-mix(in srgb, var(--sun) 35%, transparent); }
 .ayv .ayv-reader-holds .ayv-loan { justify-content: space-between; }
 
-/* The reader's home as one board (Gaudí's mock-up of 7 November 2026): the herald once, whole, with what just arrived and
+/* The reader's home as one board (the mock-up of 7 November 2026): the herald once, whole, with what just arrived and
    the book of the week on the left; what the memory recommends and the reader's flower, with the class's challenge, on the
    right. One «Listen» per card, by its title. */
 .ayv .ayv-board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.4rem; align-items: stretch; margin: 1.4rem 0; }
@@ -5559,7 +5559,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-board-listen { position: absolute; top: 1.3rem; right: 1.3rem; }
 .ayv .ayv-board-who img { display: block; width: 100%; height: auto; filter: drop-shadow(0 8px 14px rgba(15, 58, 51, .18)); }
 .ayv .ayv-board-herald { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: .5rem 1.4rem; align-items: start; align-content: space-evenly; }
-/* Stretched beside a taller column (Gaudí, 8 November): the new arrivals as big as the room allows, the herald above
+/* Stretched beside a taller column (8 November): the new arrivals as big as the room allows, the herald above
    and the week's book below, spread in its height rather than bunched in the middle. */
 @media (min-width: 72rem) {
     .ayv .ayv-board-herald .ayv-board-covers img { width: 6.2rem; }
@@ -5694,7 +5694,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     .ayv .ayv-visit-home-picture { order: -1; height: 12.5rem; }
 }
 
-/* The header on a phone (Gaudí's mock-up of 7 November 2026): a bar with the emblem, the name and a magnifier; the search
+/* The header on a phone (the mock-up of 7 November 2026): a bar with the emblem, the name and a magnifier; the search
    opens over the bar; a reader has four tabs, the fourth «More», a sheet from below with the rest and the way out. */
 .ayv .ayv-search-toggle,
 .ayv .ayv-search .ayv-search-close,
@@ -5770,7 +5770,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
     .ayv .ayv-navs-reader .ayv-nav { font-size: .875rem; }
 }
 
-/* Gaudí's review of 0.193.0. On the board, the challenge met is a line, not Mainumby a second time, and the flower's
+/* The review of 0.193.0. On the board, the challenge met is a line, not Mainumby a second time, and the flower's
    «Listen» reads the challenge too. */
 .ayv .ayv-board-challenge .ayv-bubble,
 .ayv .ayv-board-challenge .ayv-listen { display: none; }
@@ -5860,7 +5860,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-hold-later > summary { cursor: pointer; font-weight: 700; color: var(--green); }
 .ayv .ayv-hold-later-choices { display: flex; flex-wrap: wrap; gap: .5rem; }
 
-/* The herald's feather on the hall's board: the room it is in today (Gaudí's, 20 px). */
+/* The herald's feather on the hall's board: the room it is in today (20 px). */
 .ayv .ayv-visit-feather { display: inline-block; width: 1em; height: 1em; margin-left: .3em; vertical-align: -.1em; }
 
 /* The card at the desk: the codes big, black on white whatever the mode, so that any gun reads them. */
@@ -5878,7 +5878,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 
 /* The hummingbird crossing the card of a child who brought back their last book, and its feather by the name. */
 .ayv #ayv-reader { position: relative; overflow: hidden; }
-/* It flies along the top edge of the card, small, and out the other side: it never stops over a button (Gaudí). */
+/* It flies along the top edge of the card, small, and out the other side: it never stops over a button. */
 .ayv .ayv-desk-cross { position: absolute; z-index: 2; top: .2rem; left: -5rem; height: 3rem; width: auto; pointer-events: none;
     transition: left 1.2s ease-in-out; }
 .ayv .ayv-desk-cross.ayv-desk-cross-go { left: calc(100% + 5rem); }
@@ -5894,7 +5894,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-neighbour-pick.ayv-neighbour-no { border-color: var(--coral, #e2654c); }
 .ayv .ayv-neighbour-say { margin: .4rem 0 0; font-weight: 700; }
 
-/* The clue of the week, an A5 by corner (Gaudí): the words on top, the memory thinking below on the left, and the
+/* The clue of the week, an A5 by corner: the words on top, the memory thinking below on the left, and the
    label as the hero, on the right half and nearly all its height, as the real label of a spine: white, with its border
    and the line of the class apart. To be read from the library's door. */
 .ayv .ayv-poster-clue { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 3mm 6mm;
@@ -5910,7 +5910,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-poster-bigl-m { font-size: 34pt; }
 .ayv .ayv-poster-bigl-s { font-size: 26pt; }
 
-/* The desk's stamps (Gaudí, dis-efectos 07): the date of the loan just made on the card, «Returned» on the line. They
+/* The desk's stamps (dis-efectos 07): the date of the loan just made on the card, «Returned» on the line. They
    fall big and blurred and set sharp, a little askew, in uneven ink. The card that comes lands on the desk. */
 .ayv .ayv-loan-stamp,
 .ayv .ayv-line-stamp { display: inline-block; margin-left: .6rem; padding: .05rem .45rem; border: 2px solid currentColor;
@@ -5939,7 +5939,7 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 html[data-bs-theme="dark"] .ayv .ayv-loan-stamp { color: #ff9f8a; }
 html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
 
-/* The door into the library one visits (Gaudí, dis-efectos 09): two leaves of wood over the hall, unseen until the way in
+/* The door into the library one visits (dis-efectos 09): two leaves of wood over the hall, unseen until the way in
    is taken; then shut for a moment, they turn on their hinges, a warm light comes through and the hall comes closer. */
 .ayv .ayv-visit-card-picture,
 .ayv .ayv-visit-home-picture { position: relative; overflow: hidden; perspective: 900px; }
@@ -5962,7 +5962,7 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
     .ayv .ayv-hinge { display: none; }
 }
 
-/* The hall's clock: the hands over the painted face, in the painting's ink by day and by night (Gaudí). */
+/* The hall's clock: the hands over the painted face, in the painting's ink by day and by night. */
 .ayv .ayv-visit-clockface { pointer-events: none; }
 .ayv .ayv-visit-clock { display: block; width: 100%; height: 100%; overflow: visible; }
 .ayv .ayv-visit-hand { stroke: var(--visit-ink, #7a4b26); stroke-linecap: round; }
@@ -5974,7 +5974,7 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
 .ayv .ayv-spine-upside { transform: rotate(180deg); }
 .ayv .ayv-lectern-said { margin: .3rem 0 0; font-style: italic; color: var(--muted, #5f6b67); }
 
-/* «Cómo funciona tu biblioteca» (Jujol, 12 Nov 2026): the page that replaces the window «Ajustes del centro» and
+/* «Cómo funciona tu biblioteca» (12 Nov 2026): the page that replaces the window «Ajustes del centro» and
    gathers the loan rules and the start of the year. Three shelves, from what is touched most to what is set once; each
    setting is a book on its shelf (its spine with its label) and says in a sentence what happens today. Touching it
    opens its gesture in place: chips, «−» and «+», a lamp, the sign of the door, a label of the spine. Every gesture is a
@@ -6677,7 +6677,7 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
     }
 }
 
-/* How the page fills Jujol's places: the herald itself in the slot by the title, the colours of the spines and planks
+/* How the page fills the places: the herald itself in the slot by the title, the colours of the spines and planks
    by class (no style attributes), and «Saved» on the sentence just changed. */
 .ayv .ayv-cf-pregonera {
     padding: 0;
@@ -6739,7 +6739,7 @@ html[data-bs-theme="dark"] .ayv .ayv-line-stamp { color: #7fd6a6; }
     opacity: .75;
 }
 
-/* «Curso» (personal-year) as the sheet of the school year (Jujol, 12 Nov 2026). The twelve months on one wall planner:
+/* «Curso» (personal-year) as the sheet of the school year (12 Nov 2026). The twelve months on one wall planner:
    the terms as bands of colour, the closed days hatched in coral, the days that close every week in grey, today ringed,
    the first day in green and the return deadline in sun. A day is a link (?dia=) that opens its card with what can be
    done on it, so it works without JavaScript. Under it, the rules of the year as sentences on a shelf, with the
@@ -7145,7 +7145,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     opacity: .75;
 }
 
-/* «Tutores» (personal-tutors) as faces on the shelves of each stage (Jujol, 12 Nov 2026). Each group is a card with
+/* «Tutores» (personal-tutors) as faces on the shelves of each stage (12 Nov 2026). Each group is a card with
    the face of its tutor, standing on the plank of its stage; a group without a tutor shows an empty, dashed face in
    coral. Touching a card opens one tray with every teacher's face (?grupo=), and touching a face saves it. After
    como-funciona.css (its head and shelves) and curso.css (its «×»). */
@@ -7411,7 +7411,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     color: var(--coral);
 }
 
-/* «Informes» (personal-reports): periods that are touched instead of selects (Jujol, 12 Nov 2026). The reports are
+/* «Informes» (personal-reports): periods that are touched instead of selects (12 Nov 2026). The reports are
    index cards on top of their sheet; the period is a row of leaves (this week, this month, each term, the year, last
    year, another), each a link with its dates under its name; «Otro» opens the strip of the months of the year to touch
    the first and the last. After como-funciona.css. The rows of each report stay as they are. */
@@ -7645,7 +7645,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
         grid-column: auto;
     }
 }
-/* «Rincones» (personal-corners): the plates of the corners standing on a shelf in the order of the room (Jujol, 12 Nov
+/* «Rincones» (personal-corners): the plates of the corners standing on a shelf in the order of the room (12 Nov
    2026). Each moves with «◀» and «▶», hides (it turns its back, greyed) and keeps its name on its back; the genres of
    the narrative are dashed plates to add with one touch, and where they take their books from, lamps. After
    como-funciona.css. */
@@ -7971,7 +7971,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     justify-self: center;
 }
 
-/* The sentence of the period: the figure in the letter of titles, the rest in that of the text (Jujol, 13 Nov 2026). */
+/* The sentence of the period: the figure in the letter of titles, the rest in that of the text (13 Nov 2026). */
 .ayv .ayv-report-sum.ayv-in-cifra {
     font-family: var(--text);
     font-size: 1.125rem;
@@ -8020,7 +8020,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
         background: linear-gradient(to right, var(--lomo, var(--green)) 28px, transparent 28px);
     }
 }
-/* «Etiquetas» (personal-labels) as one sample sheet (Jujol, 12 Nov 2026): on the left, what is printed (two cards with
+/* «Etiquetas» (personal-labels) as one sample sheet (12 Nov 2026): on the left, what is printed (two cards with
    their sample label), of which copies (chips) and the sheet (drawings of sheets, the favourites first); on the right,
    the first sheet as it will come out, drawn to its grid, its first free label touched on it. The page says how many
    sheets instead of painting every label. After como-funciona.css. */
@@ -8401,7 +8401,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     margin: 0;
 }
 
-/* Rincones, Jujol's second look (13 Nov 2026): the gestures at the foot of each place, in line along the shelf. */
+/* Rincones, the second look (13 Nov 2026): the gestures at the foot of each place, in line along the shelf. */
 .ayv .ayv-ri-rincon {
     grid-template-rows: 1fr auto auto;
     align-content: stretch;
@@ -8685,7 +8685,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     }
 }
 
-/* «Inventario» (stocktake) as the plan of the shelves of the room (Jujol, 13 Nov 2026). Each place of the library is a
+/* «Inventario» (stocktake) as the plan of the shelves of the room (13 Nov 2026). Each place of the library is a
    piece of furniture: its name on a plate and one shelf of twenty spines. To start, the shelf (or the whole library) is
    touched and the stocktake begins, named by itself. While reading, the spines light up as their books are read, the
    shelf where the reader stands carries the light and «Estás aquí», and touching another shelf says where one is now.
@@ -9055,7 +9055,7 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     margin: 0;
 }
 
-/* The home of a young reader (Infantil) on a phone, as one screen (Jujol, 13 Nov 2026): Mainumby says hello in a
+/* The home of a young reader (Infantil) on a phone, as one screen (13 Nov 2026): Mainumby says hello in a
    bubble with its voice, and three big doors, each with its picture, its word and its voice: a story for today, into
    the library, and my flower. No field to type, nothing to read before the pictures. After como-funciona.css. */
 .ayv .ayv-pq {
@@ -9296,7 +9296,7 @@ html[data-bs-theme="dark"] .ayv .ayv-pq-flor .ayv-pq-entra {
     content: none;
 }
 
-/* «Material» (material.php) as tiles on their shelf (Jujol, 13 Nov 2026): each kind of thing the library lends that is
+/* «Material» (material.php) as tiles on their shelf (13 Nov 2026): each kind of thing the library lends that is
    not a book (laptops, tablets, calculators, cameras, games…) is a tile with its drawing standing on a plank, its name,
    how many units there are and how many are out, and where it lives; «−» and «+» take one unit away or add one, each
    saved by itself; its data on its back. To add a new one, the dashed tile of its kind opens its back: the name
@@ -9675,7 +9675,7 @@ html[data-bs-theme="dark"] .ayv .ayv-pq-flor .ayv-pq-entra {
     cursor: default;
 }
 
-/* «Los personajes» (characters.php) in big, on their stage (Jujol, 13 Nov 2026): each character stands on its own stage,
+/* «Los personajes» (characters.php) in big, on their stage (13 Nov 2026): each character stands on its own stage,
    as big as the stage allows, saying a line in its bubble, its name on a brass plate under it. One gesture takes it out
    of the scene (it waits behind the curtain, in shadow) or brings it in. How it is named (she or he) is said with an
    example, not with a grammar word; writing the name is the only field, on the plate itself; the portrait or the whole
@@ -9934,7 +9934,7 @@ html[data-bs-theme="dark"] .ayv .ayv-pq-flor .ayv-pq-entra {
     --pj-b: rgba(226, 101, 76, .32);
 }
 
-/* «Normas de préstamo» (rules.php), from Jujol's mock-up (13 Nov 2026). Each loan rule is a library loan card, ruled like
+/* «Normas de préstamo» (rules.php), from the mock-up (13 Nov 2026). Each loan rule is a library loan card, ruled like
    the ones in a book pocket, its band in the colour of its readers and its counters in sight; every other setting a
    card with its sentence on top and its gestures under it, each a submit button that saves by itself. The tints are
    plain rgba, not color-mix(), for the old browsers of the classrooms. */
@@ -10213,7 +10213,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     }
 }
 
-/* Material, Jujol's look at it mounted (13 Nov 2026): under some 360 px the tiles go in one column (two of 145 px broke
+/* Material, the look at it mounted (13 Nov 2026): under some 360 px the tiles go in one column (two of 145 px broke
    their names and «None lent»); the links on its back in the size of «Its data»; room under the line of an empty shelf. */
 .ayv .ayv-mt .ayv-mt-dorso p,
 .ayv .ayv-mt .ayv-mt-dorso p .ayv-cf-enlace {
@@ -10252,7 +10252,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     }
 }
 
-/* What is spent, as a bar against the budget (Compras, Jujol's mock-up): green, coral once it is passed. */
+/* What is spent, as a bar against the budget (Compras, the mock-up): green, coral once it is passed. */
 .ayv .ayv-nr-barra {
     display: block;
     height: 12px;
@@ -10272,7 +10272,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     background: var(--coral);
 }
 
-/* The posts of self-service (Autopréstamo, Jujol's mock-up): each a stand drawn, its name, when it was last used and,
+/* The posts of self-service (Autopréstamo, the mock-up): each a stand drawn, its name, when it was last used and,
    folded, what can be done with it; a dashed post to make another, which opens across the row. */
 .ayv .ayv-nr-puestos {
     display: grid;
@@ -10466,7 +10466,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     font-weight: 700;
 }
 
-/* «Llévatelo» (P1): the three lanterns of the hidden book, Gaudí's paper lanterns (or the house's lamps without the art
+/* «Llévatelo» (P1): the three lanterns of the hidden book, the paper lanterns (or the house's lamps without the art
    package); each wrong spine puts one out. */
 .ayv .ayv-hunt-farolillos {
     display: flex;
@@ -10541,8 +10541,8 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     color: #fff;
 }
 
-/* «La cartilla» (P3), from Jujol's mock-up (13 Nov 2026): the reader's card and the staff's table. */
-/* «La cartilla» (P3 of the review of 12 November), Jujol, 13 Nov 2026. After como-funciona.css; everything hangs from
+/* «La cartilla» (P3), from the mock-up (13 Nov 2026): the reader's card and the staff's table. */
+/* «La cartilla» (P3 of the review of 12 November), 13 Nov 2026. After como-funciona.css; everything hangs from
    .ayv and carries the prefix .ayv-ct-. The card is a printed lottery card on the cream paper of the house, in light
    and in dark alike, as the drawings of the corners and the genres are: an object on the desk, not a panel. */
 
@@ -11548,8 +11548,8 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     }
 }
 
-/* «La cita a ciegas» (P7 of the review of 12 November), Jujol, 13 Nov 2026. After como-funciona.css; everything hangs from
-   .ayv and carries the prefix .ayv-cc-. The wrapped books are Gaudí's (pix/cita-1 to cita-6.webp, 320 × 480, the book
+/* «La cita a ciegas» (P7 of the review of 12 November), 13 Nov 2026. After como-funciona.css; everything hangs from
+   .ayv and carries the prefix .ayv-cc-. The wrapped books are the (pix/cita-1 to cita-6.webp, 320 × 480, the book
    standing on the bottom edge), objects on the desk, the same in light and in dark; the tag with the number is HTML, hung
    from the knot, which in all six falls at 56 % of the width and 61 % of the height. Chrome 93 and Firefox 98: no :has(),
    no color-mix(); aspect-ratio is there (88 and 89). */
@@ -11563,7 +11563,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     --cc-coral: #c4513a;
 }
 
-/* ---------- The wrapped book: Gaudí's drawing, and the round tag of its number hanging from the knot ---------- */
+/* ---------- The wrapped book: the drawing, and the round tag of its number hanging from the knot ---------- */
 /* The drawing is 2:3 with the book from 20 % of its height down; the frame is 4:5 and shows it from the bottom, so the
    top sixth of empty air is left out and the book keeps a little room over its head. The knot, at 61 % of the drawing,
    falls at 53 % of the frame. */
@@ -12282,7 +12282,7 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     left: calc(60% + 6px);
 }
 
-/* As mounted: a clue left empty when wrapping, its line in coral and what is missing under it (Jujol). */
+/* As mounted: a clue left empty when wrapping, its line in coral and what is missing under it. */
 .ayv .ayv-cc-falta input {
     border-bottom-color: var(--cc-coral);
     border-bottom-style: solid;
@@ -12312,8 +12312,8 @@ html[data-bs-theme="dark"] .ayv .ayv-nr {
     }
 }
 
-/* «La orientación con insignia» (P8 of the review of 12 November) and «Su primer libro», Jujol, 13 Nov 2026. After
-   como-funciona.css; everything hangs from .ayv and carries the prefix .ayv-or-. The route is the drawing of Gaudí's
+/* «La orientación con insignia» (P8 of the review of 12 November) and «Su primer libro», 13 Nov 2026. After
+   como-funciona.css; everything hangs from .ayv and carries the prefix .ayv-or-. The route is the drawing of the
    badge laid on the floor: three stepping stones to the open door. A stone lights up, warm as the lantern of the game,
    with the room where the book was found; the badge waits at the end, grey, until the third. Chrome 93 and Firefox 98:
    no :has(), no color-mix(). */
@@ -12627,7 +12627,7 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
     height: 72px;
 }
 
-/* A postcard in miniature, until Gaudí's: the cover, the name and the day, with its stamp. */
+/* A postcard in miniature, until the drawn one comes: the cover, the name and the day, with its stamp. */
 .ayv .ayv-or-postal {
     position: relative;
     display: grid;
@@ -12676,8 +12676,8 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
     border-radius: 2px;
 }
 
-/* As mounted: in «How your library works», Gaudí's postcard itself, small, keeping the turn and the shadow of the drawn
-   one (Jujol); its own stamp is in the picture. */
+/* As mounted: in «How your library works», the postcard itself, small, keeping the turn and the shadow of the drawn
+   one; its own stamp is in the picture. */
 .ayv .ayv-or-postal.ayv-or-postal-gaudi {
     display: block;
     padding: 0;
@@ -12745,7 +12745,7 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
     min-width: 0;
 }
 
-/* «Leyó para los pequeños», Jujol, 13 Nov 2026: the pieces inside the library (the recorder of an older reader, the shelf of
+/* «Leyó para los pequeños», 13 Nov 2026: the pieces inside the library (the recorder of an older reader, the shelf of
    the flower home, the story of today in Infantil, the mark on the staff's table). After the plugin's sheets; everything
    hangs from .ayv and carries the prefix .ayv-lp-. The family's page has its own sheet (escuchar.css). Chrome 93 and
    Firefox 98: no :has(), no color-mix(). */
@@ -12979,7 +12979,7 @@ html[data-bs-theme="dark"] .ayv .ayv-or-camino {
     justify-items: start;
 }
 
-/* «El barco del trimestre» (P5 of the review of 12 November), Jujol, 13 Nov 2026: the class's island on the classroom board,
+/* «El barco del trimestre» (P5 of the review of 12 November), 13 Nov 2026: the class's island on the classroom board,
    the place to open it in «Mi clase» with the challenge chosen as a gesture, and the line on the reader's card. After the
    plugin's sheets; everything carries the prefix .ayv-bc-. The progress is a garland of pennants, the ship's: one per step,
    coloured when it is done. Firefox 98 and Chrome 93 (the boards of the classrooms): no :has(), no color-mix(), no
@@ -13522,7 +13522,7 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     min-width: 0;
 }
 
-/* The reader's booklet inside the library (Jujol, 13 Nov 2026): the band in «Mi clase» that prints the class, the
+/* The reader's booklet inside the library (13 Nov 2026): the band in «Mi clase» that prints the class, the
    booklets in the reader's record, the slips where the library writes its line in «Cómo funciona», and the line on the
    card of twelve and over that asks before anything reaches the family. After the plugin's sheets, with its colours
    (--ink, --paper2, --line…), so it follows light and dark. Prefix .ayv-lb-. No :has(), no color-mix(). */
@@ -13689,7 +13689,7 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     box-shadow: 0 8px 16px -14px rgba(30, 43, 42, .7);
 }
 
-/* An empty slip says what goes in its place, in the same hand and lighter (Jujol, 0.265). */
+/* An empty slip says what goes in its place, in the same hand and lighter (0.265). */
 .ayv .ayv-lb-escribir textarea::placeholder {
     color: rgba(36, 64, 107, .5);
     opacity: 1;
@@ -13774,7 +13774,7 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     }
 }
 
-/* Functions shown at their moment (Jujol, 14 Nov 2026): when something real happens in the library, the desk shows
+/* Functions shown at their moment (14 Nov 2026): when something real happens in the library, the desk shows
    one card with the function that solves it, and «Lo que puede hacer tu biblioteca» shows them all with what each has
    done. Each function is a book of the house, as each setting of «Cómo funciona»: its spine with its label («AVI»,
    «RES»…), in the same colours, so the card on the desk and its place on the page are the same book. The gestures are
@@ -14053,10 +14053,10 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     font-weight: 700;
     text-underline-offset: 4px;
 }
-/* Approving a voice: the signature as a line of the card, its box under it, the whole width (Jujol). */
+/* Approving a voice: the signature as a line of the card, its box under it, the whole width. */
 .ayv .ayv-vp-firma { display: block; }
 .ayv .ayv-vp-firma input { display: block; width: 100%; margin-top: .35rem; }
-/* The recorder's plate is light in both modes (ayvurenda-d.css): what sits on it takes the light tokens (Jujol). */
+/* The recorder's plate is light in both modes (ayvurenda-d.css): what sits on it takes the light tokens. */
 html[data-bs-theme="dark"] .ayv .ayv-recorder {
     --surface: #fff;
     --ink: #1e2b2a;

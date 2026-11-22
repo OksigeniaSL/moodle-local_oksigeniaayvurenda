@@ -140,7 +140,7 @@ final class orientation {
     }
 
     /**
-     * The path of the route as the pages draw it (Jujol's mock-up of 13 November): a stone for each room, lit with the name
+     * The path of the route as the pages draw it (the mock-up of 13 November): a stone for each room, lit with the name
      * of the room where the book was found, and the badge waiting at the end, grey until the third.
      *
      * @param string[] $done The corners of the rooms done, the first first.

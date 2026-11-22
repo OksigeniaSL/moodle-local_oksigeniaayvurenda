@@ -29,7 +29,7 @@
     var stop = document.getElementById('ayv-stop');
     var again = document.getElementById('ayv-again');
     var send = document.getElementById('ayv-send');
-    // «¿Para quién es?» (Jujol): for the little ones, and then, only then, the family too; the sentence says what happens.
+    // «¿Para quién es?»: for the little ones, and then, only then, the family too; the sentence says what happens.
     var forwho = document.querySelector('.ayv-lp-para');
     var little = document.getElementById('ayv-lp-little');
     var family = document.getElementById('ayv-lp-family');

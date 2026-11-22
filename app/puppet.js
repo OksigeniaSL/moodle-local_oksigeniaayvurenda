@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// Gaudí's puppet player, from the art kit of Oksigenia (agents/arte/kit/marionetas/marioneta.js), as it is.
+// The puppet player, from the art kit of Oksigenia (agents/arte/kit/marionetas/marioneta.js), as it is.
 
 /**
  * Reference player for the puppets of cortar.py: plain JS, no dependencies, drawing on a 2D canvas.

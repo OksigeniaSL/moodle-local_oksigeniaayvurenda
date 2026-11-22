@@ -934,7 +934,7 @@ final class screens {
     }
 
     /**
-     * The class's garden as Gaudí's island: its base, a piece for each challenge met this school year (three, one a
+     * The class's garden as the island: its base, a piece for each challenge met this school year (three, one a
      * term), the lighthouse when one was of everyone, and the boat when the book the class asked for arrived. Layers of
      * the same size, one on top of another; null without the art package, and then the garden stays a list.
      *
@@ -1084,7 +1084,7 @@ final class screens {
     }
 
     /**
-     * The home of a young reader (the card of the flower), from Jujol's mock-up: one screen, the herald greeting with its
+     * The home of a young reader (the card of the flower), from the mock-up: one screen, the herald greeting with its
      * voice and three big doors, each with its drawing, its word and its voice apart (hearing it does not open it): a
      * story for today (the memory's book), into the library (the visit) and their flower (their card). No field to
      * type in; «For the grown-ups» opens the whole home.

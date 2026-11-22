@@ -333,7 +333,7 @@ final class cartilla {
                 ? $str('cartillaoneline') : $str('cartillalines', count($lines))) : '') : '',
             'cheer' => $cheer ? ['text' => $said['text'] ?? get_string($cheer[0], 'local_oksigeniaayvurenda', (object) $cheer[1]),
                 'figure' => $said['figure'] ?? null] : null,
-            // The diploma of the full card (Gaudí's), to keep, print and send on.
+            // The diploma of the full card, to keep, print and send on.
             'diploma' => $full && diploma::drawable() ? self::diploma_links($quest, $library, (int) $reader->id, $str, false)
                 : null,
         ];

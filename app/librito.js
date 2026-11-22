@@ -1,4 +1,4 @@
-// The reader's booklet (Jujol, 13 Nov 2026): what the buttons do. Without this file the page still reads, prints from
+// The reader's booklet (13 Nov 2026): what the buttons do. Without this file the page still reads, prints from
 // the browser's menu and plays the voice with the browser's own player. «Imprimirlo o guardarlo» opens the print
 // dialog (where «Guardar como PDF» lives, also on phones); «Mandárselo a alguien» uses the phone's own way of sharing
 // (WhatsApp, mail…), or copies the address where there is none; the voice plays and pauses with one big button.

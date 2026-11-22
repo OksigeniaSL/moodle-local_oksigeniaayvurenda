@@ -19,8 +19,8 @@ namespace local_oksigeniaayvurenda\local;
 use local_oksigeniaayvurenda\core\flower;
 
 /**
- * The reader's booklet as it is shown and printed (Jujol, 13 November): «Mi curso en libros», one school year on one
- * sheet, and «Mis años en libros», every year of a reader who leaves; and its cover for the e-mail and the chats (Gaudí).
+ * The reader's booklet as it is shown and printed (13 November): «Mi curso en libros», one school year on one
+ * sheet, and «Mis años en libros», every year of a reader who leaves; and its cover for the e-mail and the chats.
  * Every picture goes sealed, as the e-mails carry them, so the family's page needs no session.
  *
  * @package    local_oksigeniaayvurenda
@@ -46,9 +46,9 @@ class bookletview {
     }
 
     /**
-     * How many covers go in a row on paper so that a year fits in what is left of its sheet (Jujol's sum, measured on
+     * How many covers go in a row on paper so that a year fits in what is left of its sheet (the sum, measured on
      * paper): the fewest columns, from a least, whose rows fit, on a sheet 186 mm wide; with eight or fewer, their titles
-     * go under them. At least four, or one book alone is a poster (Jujol).
+     * go under them. At least four, or one book alone is a poster.
      *
      * @param int $count Books.
      * @param float $budget Millimetres left for them.
@@ -255,7 +255,7 @@ class bookletview {
         }
         $told = $drawings || $voice ? ['toldhead' => self::str($sky ? 'bookletvoice' : 'booklettold'),
             'hasdrawings' => (bool) $drawings, 'drawings' => $drawings, 'voice' => $voice] : null;
-        // The millimetres left for the covers, measured on paper (Jujol): the sheet, its cover, the books' heading and
+        // The millimetres left for the covers, measured on paper: the sheet, its cover, the books' heading and
         // legend, the island and the cards (a second row of cards past five), the bingo card or what was told, the
         // library's slip and a margin, as fonts measure a little differently in each browser.
         $premieres = count(array_filter($books, fn($b) => $b['premiere'] !== ''));
@@ -423,7 +423,7 @@ class bookletview {
                 'to' => s(end($groups)), 'years' => s($span)]) : ($groups ? '<b>' . s($groups[0]) . '</b> · ' : '') . s($span),
             'library' => $librarian,
             'emblem' => (new \moodle_url('/local/oksigeniaayvurenda/app/emblema-pequeno.svg'))->out(false),
-            // One year makes no road: the year comes right after the cover (Jujol).
+            // One year makes no road: the year comes right after the cover.
             'hasroad' => $count > 1,
             'road' => $count > 1 ? array_map(fn($y) => ['roadanchor' => $anchor($y), 'roadmedal' => $medal($y, 64),
                 'roadshort' => self::short($y['year'])], $years) : [],
@@ -457,7 +457,7 @@ class bookletview {
     }
 
     /**
-     * The booklet's cover for the e-mail and the chats (Gaudí): the background of its edition and skin, the medallion
+     * The booklet's cover for the e-mail and the chats: the background of its edition and skin, the medallion
      * (and, for the whole life, one small one for each year), the title, the name on its tag, the class and the year,
      * and the library. Drawn each time, nothing kept.
      *

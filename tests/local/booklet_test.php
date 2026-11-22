@@ -192,7 +192,7 @@ final class booklet_test extends \advanced_testcase {
     }
 
     /**
-     * On paper the covers take as many columns as the year needs to fit its sheet, as Jujol measured: Lucía's 22 books in
+     * On paper the covers take as many columns as the year needs to fit its sheet, as measured: Lucía's 22 books in
      * 11, Aitana's 64 in 16, Hugo's 7 big and with their titles; a year among many, at least six.
      */
     public function test_columns(): void {

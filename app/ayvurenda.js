@@ -378,7 +378,7 @@
         });
     });
     // The way into the library one visits opens as a door: the leaves turn on their hinges, the hall's light comes
-    // through, and then the page goes in (Gaudí, dis-efectos 09). Not with «reduce motion», nor with a key held down.
+    // through, and then the page goes in (dis-efectos 09). Not with «reduce motion», nor with a key held down.
     var stillpage = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.querySelectorAll('[data-ayv-hinge]').forEach(function(link) {
         link.addEventListener('click', function(e) {
@@ -1381,7 +1381,7 @@
     }
 })();
 
-// The library's slips in «Cómo funciona» (Jujol, 13 Nov 2026): each one is saved when you leave it, as every gesture
+// The library's slips in «Cómo funciona» (13 Nov 2026): each one is saved when you leave it, as every gesture
 // of that page; without this file, the «Guardar» button under them does it.
 (function () {
     'use strict';
