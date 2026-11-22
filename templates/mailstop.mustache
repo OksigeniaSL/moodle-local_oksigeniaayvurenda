@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/mailstop
+
+    «No more mail, please», from the sealed link at the foot of a library's mail to an adult without an account: one
+    button, and the way back.
+
+    Context variables required for this template:
+    * heading, lead - what it says
+    * action, entity, hash, seal, sesskey - where the button goes
+    * stopping - whether the button asks for no more (else it asks to receive them again)
+    * button - its words; hint - under it
+
+    Example context (json):
+    {
+        "heading": "¿Dejamos de escribirte?",
+        "lead": "Con un toque, la biblioteca deja de enviar correos a esta dirección.",
+        "action": "https://example.com/local/oksigeniaayvurenda/stop.php", "entity": 3, "hash": "ab12", "seal": "cd34",
+        "sesskey": "s1", "stopping": true, "button": "No quiero recibir más correos",
+        "hint": "Los préstamos y las reservas siguen como siempre en la biblioteca."
+    }
+}}
+<section class="ayv-stop" aria-labelledby="ayv-stop-title">
+    <h1 class="ayv-results-title" id="ayv-stop-title">{{heading}}</h1>
+    <p class="ayv-stop-lead">{{lead}}</p>
+    <form method="post" action="{{action}}" class="ayv-stop-form">
+        <input type="hidden" name="e" value="{{entity}}">
+        <input type="hidden" name="h" value="{{hash}}">
+        <input type="hidden" name="s" value="{{seal}}">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="stop" value="{{#stopping}}1{{/stopping}}{{^stopping}}0{{/stopping}}">
+        <button type="submit" class="ayv-button{{^stopping}} ayv-button-quiet{{/stopping}}">{{button}}</button>
+    </form>
+    <p class="ayv-stop-hint">{{hint}}</p>
+</section>

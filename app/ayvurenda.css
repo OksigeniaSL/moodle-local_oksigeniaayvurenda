@@ -14308,3 +14308,19 @@ html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
 .ayv .ayv-vp-son { margin: .35rem 0 .5rem; }
 .ayv .ayv-vp-son summary { display: inline-block; cursor: pointer; font-weight: 700; color: var(--accent); }
 .ayv .ayv-vp-son .ayv-vp-chips { margin-top: .5rem; }
+
+/* «No more mail, please» (1.2.9): one card in the middle of the page, its words as wide as the card. */
+.ayv .ayv-stop {
+    margin: 2rem auto;
+    padding: 1.75rem 1.5rem 1.5rem;
+    width: 100%;
+    max-width: 36rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border-top: 6px solid var(--accent);
+    box-shadow: 0 1px 2px rgba(30, 43, 42, .08), 0 8px 24px rgba(30, 43, 42, .08);
+}
+.ayv .ayv-stop .ayv-results-title { margin: 0 0 .75rem; }
+.ayv .ayv-stop-lead { margin: 0 0 1.25rem; font-size: 1.1rem; }
+.ayv .ayv-stop-form { margin: 0 0 1rem; }
+.ayv .ayv-stop-hint { margin: 0; color: var(--ink-2); font-size: .95rem; }

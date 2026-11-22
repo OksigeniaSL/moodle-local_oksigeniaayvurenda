@@ -122,6 +122,7 @@ final class copies {
         'selfpost' => 'the key of a self-loan station opens it without an account',
         'relay' => 'a phone paired with a desk for a few minutes',
         'digitalread' => 'where each person goes in a digital book, by Moodle account',
+        'mailstop' => 'the «no more mail» of an adult without an account is a hash of an address, kept by the site that sent',
     ];
 
     /**

@@ -245,6 +245,62 @@ final class holds_test extends \advanced_testcase {
     }
 
     /**
+     * A young reader's reservation set aside reaches their family too, where the centre tells families of late books:
+     * the adult with an account by a message, the one without by mail with the way to ask for no more; and nothing to
+     * a family when the centre does not tell families.
+     */
+    public function test_family_hears_ready(): void {
+        global $CFG, $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        if (!class_exists('\\local_oksigeniafamily\\api')) {
+            require_once($CFG->dirroot . '/local/oksigeniaayvurenda/tests/fixtures/family_api.php');
+        }
+        if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {
+            \local_oksigeniafamily\api::reset();
+        }
+        $w = $this->make_world();
+        $lib = $w->library;
+        $child = $this->getDataGenerator()->create_user(['firstname' => 'Marta']);
+        $DB->set_field(self::T . 'reader', 'userid', $child->id, ['id' => $w->marta->id]);
+        $marta = $DB->get_record(self::T . 'reader', ['id' => $w->marta->id]);
+        $this->assertSame('flower', cards::look_of($marta));
+        $mother = $this->getDataGenerator()->create_user(['firstname' => 'Rosa']);
+        $family = \local_oksigeniafamily\api::create_family();
+        \local_oksigeniafamily\api::add_adult($family, ['firstname' => 'Rosa', 'email' => $mother->email,
+            'userid' => (int) $mother->id]);
+        \local_oksigeniafamily\api::add_adult($family, ['firstname' => 'Iván', 'email' => 'ivan.familia@example.org']);
+        \local_oksigeniafamily\api::add_child($family, (int) $child->id);
+        $hold = holds::add($lib, (int) $w->record->id, (int) $marta->id, (int) $child->id)['hold'];
+        (new desk($lib, (int) $w->staff->id))->scan($w->one->barcode);
+        $messages = $this->redirectMessages();
+        $emails = $this->redirectEmails();
+        $this->assertTrue(holds::notify((int) $hold->id));
+        $to = fn(int $userid) => array_values(array_filter($messages->get_messages(), fn($m) => (int) $m->useridto === $userid));
+        $this->assertCount(1, $to((int) $child->id));
+        $tomother = $to((int) $mother->id);
+        $this->assertCount(1, $tomother);
+        $this->assertStringContainsString('Marta', $tomother[0]->subject);
+        $this->assertEmpty($tomother[0]->contexturl);
+        $toivan = array_values(array_filter($emails->get_messages(), fn($m) => $m->to === 'ivan.familia@example.org'));
+        $this->assertCount(1, $toivan);
+        $this->assertStringContainsString('stop.php?e=', quoted_printable_decode($toivan[0]->body));
+        $messages->close();
+        $emails->close();
+
+        // A centre that does not tell families of late books does not tell them of reservations either.
+        sanctions::save_settings((int) $lib->entityid, ['noticefamilies' => false] + sanctions::settings((int) $lib->entityid));
+        $DB->set_field(self::T . 'hold', 'timenotified', null, ['id' => $hold->id]);
+        $messages = $this->redirectMessages();
+        $this->assertTrue(holds::notify((int) $hold->id));
+        $this->assertCount(0, array_filter($messages->get_messages(), fn($m) => (int) $m->useridto === (int) $mother->id));
+        $messages->close();
+        if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {
+            \local_oksigeniafamily\api::reset();
+        }
+    }
+
+    /**
      * What was set aside and not collected: whoever was told it was ready hears it is not kept any more; whoever was
      * never told (a centre getting ready) hears nothing.
      */

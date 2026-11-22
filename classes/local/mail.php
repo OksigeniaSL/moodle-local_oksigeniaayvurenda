@@ -94,7 +94,7 @@ final class mail {
      *     postcard (url, alt), stamp and place (label, value), books (rows from book() with line, urgent), shelf (from book()),
      *     more, people (name,
      *     line), tasks (text, url), button (url, text), after (paragraphs), quiet (hint, url, text), sign (from sign()), why,
-     *     prefs,
+     *     prefs, stopurl (the link of mailstop, for an adult without an account),
      *     young (for a reader with the flower), userid (who it is for, so its button can open their app).
      * @return string The whole page.
      */
@@ -154,8 +154,12 @@ final class mail {
             'linkurl' => self::link($content, $library),
             // Whoever has no account (a family's adult from the families' file) has no preferences to turn it off: they are
             // told how.
+            // Whoever got it without an account has a sealed link to ask for no more (mailstop); where there is none, they
+            // are told how.
             'why' => (string) ($content['why'] ?? '') . (!empty($content['why']) && empty($content['prefs'])
-                ? ' ' . get_string('mailwhystop', self::COMPONENT) : ''),
+                && empty($content['stopurl']) ? ' ' . get_string('mailwhystop', self::COMPONENT) : ''),
+            'stopurl' => (string) ($content['stopurl'] ?? ''),
+            'stoptext' => get_string('mailstoptext', self::COMPONENT),
             'prefsurl' => !empty($content['prefs'])
                 ? (new \moodle_url('/message/notificationpreferences.php'))->out(false) : '',
             'prefstext' => get_string('mailprefs', self::COMPONENT),

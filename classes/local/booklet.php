@@ -827,12 +827,16 @@ class booklet {
             if ($user) {
                 $sent = notices::send('booklet', $user, $subject, $text, $url, $str('bookletopen'), $a->library, $design);
             } else {
-                $to = clone \core_user::get_noreply_user();
-                $to->email = $email;
-                $to->firstname = (string) $adult->firstname;
-                $to->lastname = (string) $adult->lastname;
-                $to->mailformat = 1;
-                $sent = (bool) email_to_user($to, mail::from($a->library), $subject, $text, mail::html($design));
+                $sent = mailstop::send(
+                    $entityid,
+                    $email,
+                    (string) $adult->firstname,
+                    (string) $adult->lastname,
+                    $a->library,
+                    $subject,
+                    $text,
+                    $design
+                );
             }
             force_current_language($language);
             $told += $sent ? 1 : 0;

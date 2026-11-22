@@ -563,11 +563,94 @@ final class holds {
             ]
         );
         force_current_language($language);
+        // A young reader does not read it: their family hears it too, where the centre tells families of late books.
+        if (cards::look_of($reader) === 'flower' && sanctions::settings((int) $library->entityid)['noticefamilies']) {
+            $sent = self::tell_family($hold, $user, $library) > 0 || $sent;
+        }
         // Taken as told when it went; one that did not go (the mail failed) is tried again in the next morning.
         if (!$sent) {
             $DB->set_field(self::T . 'hold', 'timenotified', null, ['id' => $hold->id]);
         }
         return $sent;
+    }
+
+    /**
+     * Tells the family of a young reader that the book they reserved is set aside, where the site keeps its families
+     * (Oksigenia Family): through their account, or to their e-mail if they have none (unless they asked for no more).
+     *
+     * @param \stdClass $hold
+     * @param \stdClass $child The reader's account.
+     * @param \stdClass $library
+     * @return int How many adults were told.
+     */
+    public static function tell_family(\stdClass $hold, \stdClass $child, \stdClass $library): int {
+        global $DB;
+        $entityid = (int) $library->entityid;
+        if (!class_exists('\\local_oksigeniafamily\\api') || practice::is($entityid)) {
+            return 0;
+        }
+        $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $hold->recordid]);
+        $told = 0;
+        $seen = [];
+        foreach (\local_oksigeniafamily\api::adults_of_child((int) $child->id) as $adult) {
+            $user = $adult->userid ? \core_user::get_user((int) $adult->userid) : null;
+            if ($user && (!empty($user->deleted) || !empty($user->suspended))) {
+                continue;
+            }
+            $email = trim((string) $adult->email);
+            if (!$user && !validate_email($email)) {
+                continue;
+            }
+            // One message each, even if they are in the family twice.
+            $key = $user ? 'u' . $user->id : 'e' . \core_text::strtolower($email);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $language = force_current_language((string) ($user->lang ?? ''));
+            $a = (object) [
+                'child' => $child->firstname,
+                'title' => $title,
+                'library' => format_string($library->name, true, ['escape' => false]),
+                'until' => zones::date((int) $hold->timeexpires, 'strftimedateshort', $library),
+            ];
+            $str = fn(string $key) => get_string($key, 'local_oksigeniaayvurenda', $a);
+            $subject = $str('holdfamilysubject');
+            $hello = get_string('mailhello', 'local_oksigeniaayvurenda', $adult->firstname);
+            $design = [
+                'library' => $library,
+                'entityid' => $entityid,
+                'hello' => $hello,
+                'heading' => $subject,
+                'lead' => [$str('holdfamilylead')],
+                'book' => mail::book((int) $hold->recordid, $title, catalogue::authors_of((int) $hold->recordid)),
+                'stamp' => ['label' => $str('holdfamilyuntil'), 'value' => $a->until],
+                'place' => ['label' => get_string('mailwhere', 'local_oksigeniaayvurenda'), 'value' => $a->library],
+                'after' => [$str('holdfamilyafter')],
+                'sign' => mail::library_sign($library),
+                'why' => get_string('mailwhyfamily', 'local_oksigeniaayvurenda'),
+                // The library's pages are for its readers: the message itself says the book, the day and the place.
+                'outsider' => true,
+            ];
+            $text = $hello . "\n\n" . $str('holdfamilylead') . "\n\n" . $str('holdfamilyafter');
+            if ($user) {
+                $sent = notices::send('holdready', $user, $subject, $text, '', $title, $a->library, $design + ['prefs' => true]);
+            } else {
+                $sent = mailstop::send(
+                    $entityid,
+                    $email,
+                    (string) $adult->firstname,
+                    (string) $adult->lastname,
+                    $a->library,
+                    $subject,
+                    $text,
+                    $design
+                );
+            }
+            force_current_language($language);
+            $told += $sent ? 1 : 0;
+        }
+        return $told;
     }
 
     /**

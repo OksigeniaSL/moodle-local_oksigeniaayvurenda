@@ -936,6 +936,22 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112202, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112300) {
+        // An adult without an account can say from any mail that they want no more: kept by a hash of their address.
+        $table = new xmldb_table('local_oksigeniaayvurenda_mailstop');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('entityid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('emailhash', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('entityid', XMLDB_KEY_FOREIGN, ['entityid'], 'local_oksigeniaayvurenda_entity', ['id']);
+            $table->add_index('entityhash', XMLDB_INDEX_UNIQUE, ['entityid', 'emailhash']);
+            $dbman->create_table($table);
+        }
+        upgrade_plugin_savepoint(true, 2026112300, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

@@ -266,6 +266,11 @@ class provider implements
             'userid' => 'privacy:metadata:relay:userid',
             'code' => 'privacy:metadata:relay:code',
         ], 'privacy:metadata:relay');
+        $collection->add_database_table(self::T . 'mailstop', [
+            'entityid' => 'privacy:metadata:mailstop:entityid',
+            'emailhash' => 'privacy:metadata:mailstop:emailhash',
+            'timecreated' => 'privacy:metadata:mailstop:timecreated',
+        ], 'privacy:metadata:mailstop');
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
         $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
         $collection->add_plugintype_link('logstore', [], 'privacy:metadata:logstore');

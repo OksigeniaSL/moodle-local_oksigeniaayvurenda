@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.9 (2026-11-23)
+
+Two medium points of the review's third part, for families.
+
+- **«No more mail», from the mail itself**: an adult without an account (a family from the families' file) gets at the
+  foot of every mail a sealed link, «I do not want any more mail from the library». It opens a page with one button,
+  and the same page takes it back; opening the link changes nothing by itself. Only a hash of the address is kept, per
+  centre. Who has an account goes on choosing in their notification preferences.
+- **A young reader's reservation reaches their family**: when the book they reserved is set aside, the family hears it
+  too, with the day it is kept until, where the centre tells families of late books.
+
 ## 1.2.8 (2026-11-22)
 
 What was left of the medium points of the review's third part.

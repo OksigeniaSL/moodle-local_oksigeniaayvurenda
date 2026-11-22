@@ -1156,5 +1156,20 @@
         <INDEX NAME="duesent" UNIQUE="false" FIELDS="timesent, timedue"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_mailstop" COMMENT="Who said, from a mail's link, that they want no more mail from a centre's library: an adult without an account, by a hash of their address">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="emailhash" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="SHA-256 of the address in lower case: the address itself is not kept"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="entityid" TYPE="foreign" FIELDS="entityid" REFTABLE="local_oksigeniaayvurenda_entity" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="entityhash" UNIQUE="true" FIELDS="entityid, emailhash"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

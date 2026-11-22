@@ -290,6 +290,9 @@ final class notices_test extends \advanced_testcase {
         $toivan = array_values(array_filter($emails->get_messages(), fn($m) => $m->to === 'ivan.familia@example.org'));
         $this->assertCount(1, $toivan);
         $this->assertStringNotContainsString('index.php', $toivan[0]->body);
+        // Without an account, the way to ask for no more is in the mail itself; with one, it is in the preferences.
+        $this->assertStringContainsString('stop.php?e=', quoted_printable_decode($toivan[0]->body));
+        $this->assertStringNotContainsString('stop.php', $tomother[0]->fullmessagehtml);
         $messages->close();
         $emails->close();
         if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {
