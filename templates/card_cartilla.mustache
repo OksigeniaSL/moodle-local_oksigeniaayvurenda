@@ -71,7 +71,7 @@
         {{#cheer}}<div class="ayv-ct-pajaro">{{#figure}}<img src="{{figure}}" alt="" width="96" height="96">{{/figure}}<p>{{text}}</p></div>{{/cheer}}
         {{#diploma}}<div class="ayv-ct-diploma"><a href="{{url}}" download><img src="{{img}}" alt="{{alt}}" width="640" height="452" loading="lazy"></a><a class="ayv-button ayv-ct-diploma-bajar" href="{{url}}" download>{{save}}</a></div>{{/diploma}}
         {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button ayv-ct-jugar">{{cartillajoin}}</button></form>{{/canjoin}}
-        {{^full}}<p class="ayv-ct-como"><b>{{cartillahowtitle}}</b> {{#joined}}{{cartillahow}}{{/joined}}{{^joined}}{{cartillahownew}}{{/joined}}</p>{{/full}}
+        {{^full}}<p class="ayv-ct-como"><b>{{cartillahowtitle}}</b> {{#joined}}{{cartillahow}}{{/joined}}{{^joined}}{{cartillahownew}}{{/joined}}</p>{{#cartillalisten}}{{> local_oksigeniaayvurenda/listen}}{{/cartillalisten}}{{/full}}
         <p class="ayv-ct-solo">{{cartillaonlyyou}}</p>
     </div>
 </div>

@@ -86,7 +86,7 @@
     {{! Who has never chosen sees the choice first: an adult need not go through the whole game to put it aside. }}
     {{#choosefirst}}<div class="ayv-mine-first">{{> local_oksigeniaayvurenda/card_lookchoice}}</div>{{/choosefirst}}
     {{#herald}}{{> local_oksigeniaayvurenda/bubble}}{{/herald}}
-    {{#classship}}<div class="ayv-bc-carne" data-estado="{{state}}">{{> local_oksigeniaayvurenda/garland}}<p>{{{line}}}</p></div>{{/classship}}
+    {{#classship}}<div class="ayv-bc-carne" data-estado="{{state}}">{{> local_oksigeniaayvurenda/garland}}<p>{{{line}}}</p>{{#listen}}{{> local_oksigeniaayvurenda/listen}}{{/listen}}</div>{{/classship}}
     {{#bookletcard}}
     <div class="ayv-lb-carne">{{{medal}}}
         <p>{{{ready}}}</p>

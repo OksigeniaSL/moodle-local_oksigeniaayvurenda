@@ -246,12 +246,17 @@ final class challenges {
     /**
      * The line of a reader's card about their class's ship: how far the class is and when it sails.
      *
+     * A young reader (the flower) does not read «3 of 79»: the herald says it instead, as on the class's board, with
+     * its voice.
+     *
      * @param \stdClass|null $challenge The class's, this term.
      * @param int $entityid
      * @param int $now
-     * @return array|null state, line (HTML: the numbers in bold), marks and progresslabel; null without a voyage.
+     * @param bool $young
+     * @return array|null state, line (HTML: the numbers in bold), marks, progresslabel and listen (the herald's voice, or
+     *     false); null without a voyage.
      */
-    public static function card_line(?\stdClass $challenge, int $entityid, int $now): ?array {
+    public static function card_line(?\stdClass $challenge, int $entityid, int $now, bool $young = false): ?array {
         $voyage = self::voyage($challenge, $entityid, $now);
         if (!$voyage) {
             return null;
@@ -265,7 +270,18 @@ final class challenges {
             'hecho' => 'cardshipmet',
             default => 'cardshiptoday',
         };
-        return ['state' => $state, 'line' => get_string($key, 'local_oksigeniaayvurenda', $a),
+        $line = get_string($key, 'local_oksigeniaayvurenda', $a);
+        $listen = false;
+        if ($young) {
+            $line = s(get_string(
+                'boardsays' . str_replace('-', '', $state),
+                'local_oksigeniaayvurenda',
+                self::sailday($voyage, $entityid, true)
+            ));
+            $sex = (characters::of($entityid)['herald']['sex'] ?? 'm') === 'f' ? 'f' : 'm';
+            $listen = screens::listen(['herald-' . $sex . '/{lang}/barco-' . $state]) ?: false;
+        }
+        return ['state' => $state, 'line' => $line, 'listen' => $listen,
             'marks' => self::garland((int) $challenge->done, (int) $challenge->target), 'progresslabel' => self::march($challenge)];
     }
 

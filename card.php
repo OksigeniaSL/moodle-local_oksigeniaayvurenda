@@ -232,7 +232,8 @@ foreach ($readers as $reader) {
     $classship = $group !== '' && ($look === 'flower' || $sky) ? \local_oksigeniaayvurenda\local\challenges::card_line(
         \local_oksigeniaayvurenda\local\challenges::of((int) $reader->entityid, $group, time()),
         (int) $reader->entityid,
-        time()
+        time(),
+        $look === 'flower'
     ) : null;
     $herald = $look === 'flower' || $sky ? \local_oksigeniaayvurenda\local\characters::say(
         (int) $reader->entityid,
@@ -475,6 +476,9 @@ $data = [
     'cartillahowtitle' => $str('cartillahowtitle'),
     'cartillahow' => $str('cartillahow'),
     'cartillahownew' => $str('cartillahownew'),
+    // The rules of the cartilla, spoken, for the readers of the sky who are still learning to read (from six).
+    'cartillalisten' => $look === 'sky' ? (\local_oksigeniaayvurenda\local\screens::listen(['ui/{lang}/cartillahowshort'])
+        ?: false) : false,
     'cartillaonlyyou' => $str('cartillaonlyyou'),
     'cartillaemblem' => (new moodle_url('/local/oksigeniaayvurenda/app/emblema-pequeno.svg'))->out(false),
     'goaltitle' => $str('goaltitle'),

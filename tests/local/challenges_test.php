@@ -187,6 +187,11 @@ final class challenges_test extends \advanced_testcase {
             [$board['state'], $board['phrase'], $board['small']]
         );
         $this->assertSame($str('cardshiptoday'), challenges::card_line($challenge, $entityid, $end - 6 * HOURSECS)['line']);
+        // A young reader hears the herald's words of the board instead of the numbers; the others have no voice to play.
+        $young = challenges::card_line($challenge, $entityid, $end - 6 * HOURSECS, true);
+        $this->assertSame(s($str('boardsayszarpahecho')), $young['line']);
+        $this->assertStringNotContainsString('<b>', $young['line']);
+        $this->assertFalse(challenges::card_line($challenge, $entityid, $end - 6 * HOURSECS)['listen']);
         // The challenge «Everyone» in a class of 25: one pennant for each on the board, ten tenths on the card.
         $everyone = (object) ['term' => 1, 'kind' => 'everyone', 'done' => 18, 'target' => 25, 'complete' => false];
         $this->assertCount(25, challenges::board($everyone, '2.º B', $entityid, $end - 20 * DAYSECS)['marks']);

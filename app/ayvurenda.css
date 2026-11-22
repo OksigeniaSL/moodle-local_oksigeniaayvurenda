@@ -13707,6 +13707,27 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
     color: var(--accent);
 }
 
+/* The herald says the ship's line to a young reader (1.2.10): its «Listen» under the words, not under the garland. */
+.ayv .ayv-bc-carne .ayv-listen {
+    grid-column: 2;
+    justify-self: start;
+    background: var(--surface);
+}
+
+.ayv .ayv-bc-carne .ayv-listen:hover {
+    background: var(--chip-hover);
+}
+
+.ayv .ayv-bc-carne .ayv-listen[aria-pressed="true"] {
+    background: var(--accent);
+}
+
+.ayv .ayv-ct-lado .ayv-listen {
+    justify-self: start;
+    align-self: flex-start;
+    margin: -.25rem 0 .75rem;
+}
+
 @media (max-width: 420px) {
     .ayv .ayv-bc-carne {
         grid-template-columns: minmax(0, 1fr);
@@ -13714,6 +13735,10 @@ html[data-bs-theme="dark"] .ayv-bc-guirnalda::before {
 
     .ayv .ayv-bc-carne .ayv-bc-guirnalda {
         width: 7.5rem;
+    }
+
+    .ayv .ayv-bc-carne .ayv-listen {
+        grid-column: auto;
     }
 }
 

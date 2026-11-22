@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.10 (2026-11-23)
+
+- **The card speaks to who does not read yet**: on a young reader's card (the flower), the class's ship is said by the
+  herald with the board's words and voice, not as «3 of 79»; on the card of the sky, the cartilla's «How it is played»
+  has its «Listen», a short spoken version of the rules (art package 0.1.73).
+
 ## 1.2.9 (2026-11-23)
 
 Two medium points of the review's third part, for families.
