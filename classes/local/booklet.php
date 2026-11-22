@@ -612,8 +612,9 @@ class booklet {
     }
 
     /**
-     * The booklet a sealed link opens, while its reader is here and its centre sends booklets: null with a wrong seal,
-     * once they were forgotten or once the centre stopped.
+     * The booklet a sealed link opens, while its reader is here and the link was not taken back: null with a wrong seal
+     * or once they were forgotten. A centre that stops sending booklets keeps those it gave: the reader opens theirs with
+     * the same link (decisiones, 21-11).
      *
      * @param int $id
      * @param string $seal
@@ -627,10 +628,6 @@ class booklet {
         $row = $DB->get_record(self::T . 'booklet', ['id' => $id]);
         $reader = $row ? $DB->get_record(self::T . 'reader', ['id' => $row->readerid]) : null;
         if (!$reader || $reader->status === 'deleted') {
-            return null;
-        }
-        // A centre that stops sending booklets, or closes, takes back the links it sent.
-        if (!self::on((int) $row->entityid) || access::closed((int) $row->entityid)) {
             return null;
         }
         return ['booklet' => $row, 'reader' => $reader];

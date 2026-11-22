@@ -148,10 +148,10 @@ final class booklet_test extends \advanced_testcase {
         $this->assertSame((int) $leo->id, (int) booklet::opened($id, booklet::seal($id))['reader']->id);
         $this->assertNull(booklet::opened($id, 'abc'));
         $this->assertStringContainsString('s=' . booklet::seal($id), booklet::url($id));
-        // A centre that stops sending booklets takes back its links; one made before seals had a part of their own keeps
-        // the seal its family got.
+        // A centre that stops sending booklets keeps those it gave; one made before seals had a part of their own keeps the
+        // seal its family got.
         booklet::save($entityid, false);
-        $this->assertNull(booklet::opened($id, booklet::seal($id)));
+        $this->assertNotNull(booklet::opened($id, booklet::seal($id)));
         booklet::save($entityid, true);
         $DB->set_field(self::T . 'booklet', 'token', null, ['id' => $id]);
         $this->assertSame(\local_oksigeniaayvurenda\local\mail::seal('booklet', $id, 'b'), booklet::seal($id));

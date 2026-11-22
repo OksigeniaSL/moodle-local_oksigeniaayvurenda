@@ -6,8 +6,7 @@ The rest of the second part of the review of 21 November: scale, and the low fau
 
 - **A booklet's link can be taken back.** A reader of twelve or over decides while their card shows the booklet, also
   once it went: turned off, the link their family got stops opening; turned on again, they get a new one the next
-  morning. A centre that stops sending booklets, or closes, takes back the links it sent. Links sent before keep
-  opening.
+  morning. Links sent before keep opening, also when a centre stops sending booklets.
 - **The farewell booklet reaches the family** also when the child left it the night before (their account suspended
   when the source dropped them), with an Oksigenia Family that can say so.
 - **The square «a book with a voice» stays filled** if the voice goes later: the book keeps since when it had one.
