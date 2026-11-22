@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.12 (2026-11-23)
+
+- **The card in wide**: the four paths in one row, with the orientation card above them; a whole set of collector cards
+  in one row when it fits, never one left alone below; on the flower's card, the paths bigger and the class's island
+  beside the shelf; air between the shelf and what comes after it.
+- **A cartilla being played goes before the constellations** on the card of the sky: it is what is played this term.
+- **The licence of a voice**: four words a teacher knows first («Public domain», «Free licence», «The institution's
+  own work», «With others' rights»), and the free licences with conditions folded under them, by their sigla.
+
 ## 1.2.11 (2026-11-23)
 
 - **«The class's prize» is a request slip of the library**, not a form: a card of the card catalogue, cream also in

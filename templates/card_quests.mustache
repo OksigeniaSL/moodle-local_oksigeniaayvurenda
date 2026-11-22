@@ -1,0 +1,52 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/card_quests
+
+    The library's challenges on a reader's card: each cartilla as its printed card, the others with their stamps. Before
+    the constellations while a cartilla is being played; after the books otherwise.
+
+    Example context (json):
+    {
+        "hasquests": true, "code": "12000V", "questsheading": "Retos de la biblioteca",
+        "quests": [{"cartilla": false, "reached": false, "name": "Lee tres libros de miedo", "when": "Hasta el 30 de noviembre",
+            "text": "", "joined": true, "stampslabel": "Sellos", "stamps": [{"on": true}, {"on": false}],
+            "line": "1 de 2", "canjoin": false}]
+    }
+}}
+{{#hasquests}}
+<section class="ayv-card-quests" id="ayv-quests-{{code}}" aria-labelledby="ayv-quests-title-{{code}}">
+    <h2 class="ayv-section-title" id="ayv-quests-title-{{code}}">{{questsheading}}</h2>
+    <ul class="ayv-quest-plays">
+    {{#quests}}
+        {{#cartilla}}<li class="ayv-quest-play-cartilla ayv-ct">{{> local_oksigeniaayvurenda/card_cartilla}}</li>{{/cartilla}}
+        {{^cartilla}}
+        <li class="ayv-quest-play{{#reached}} ayv-quest-play-reached{{/reached}}">
+            <h3 class="ayv-quest-card-name">{{name}}</h3>
+            <p class="ayv-field-hint">{{when}}</p>
+            {{#text}}<p>{{text}}</p>{{/text}}
+            {{#joined}}
+            <ol class="ayv-stamps" aria-label="{{stampslabel}}">{{#stamps}}<li class="ayv-stamp{{#on}} ayv-stamp-on{{/on}}"></li>{{/stamps}}</ol>
+            <p class="ayv-quest-line">{{line}}</p>
+            {{/joined}}
+            {{#canjoin}}<form method="post" action="{{action}}#ayv-quests-{{code}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="quest"><input type="hidden" name="quest" value="{{id}}"><button type="submit" class="ayv-button">{{questjoin}}</button></form>{{/canjoin}}
+        </li>
+        {{/cartilla}}
+    {{/quests}}
+    </ul>
+</section>
+{{/hasquests}}

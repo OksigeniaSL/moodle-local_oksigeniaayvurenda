@@ -157,9 +157,16 @@ foreach ($cards as $group) {
         'minor' => $item->readerid && $who['type'] === 'student',
         'permission' => $item->readerid ? voices::has_permission((int) $item->readerid) : false,
         // A voice is heard, not read: its own words for someone else's rights.
-        'licences' => array_map(fn($l) => ['value' => $l, 'label' => $str($l === 'rights' ? 'licencerightsvoice'
-            : 'licence' . str_replace('-', '', $l)),
-            'selected' => $l === 'rights'], digital_rules::LICENCES),
+        // Four words a teacher knows first; the sigla of each free licence with conditions, folded under them.
+        'licences' => array_map(fn($l) => ['value' => $l, 'label' => $str(match ($l) {
+            'rights' => 'licencerightsvoice',
+            'cc-by' => 'licencefree',
+            default => 'licence' . str_replace('-', '', $l),
+        }), 'selected' => $l === 'rights'], ['pd', 'cc-by', 'own', 'rights']),
+        'licencesother' => array_map(
+            fn($l) => ['value' => $l, 'label' => $str('licence' . str_replace('-', '', $l))],
+            array_values(array_diff(digital_rules::LICENCES, ['pd', 'cc-by', 'own', 'rights']))
+        ),
         'audiences' => array_map(fn($a) => ['value' => $a, 'label' => $str('audience' . $a, $class['group'] ?? '')], $offered),
         'privatehint' => $str($invite ? 'voicefamilyprivate' : 'voiceprivatehint'),
         // The signature is read here first: it shows only once approved, as it is left here.
@@ -274,7 +281,7 @@ $data['settings'] = !$manage ? [] : [
     ),
 ];
 foreach (
-    ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voiceaudience',
+    ['voicesnone', 'voiceapprove', 'voicereject', 'voicelicence', 'voicelicenceother', 'voiceaudience',
         'voicepermissiongive', 'voicepermissiontake', 'voicepermissionhas', 'voicepermissionnot', 'voicessettings',
         'voiceskeepdays', 'voicestext', 'voicestexthint', 'voicessave', 'voiceinfo', 'voicesignaturereview',
         'voicesignaturereviewhint', 'voicesfamilyoptions', 'holdschange', 'offsiteclose'] as $key

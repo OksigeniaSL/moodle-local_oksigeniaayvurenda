@@ -1,0 +1,36 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/card_garden
+
+    The class's garden on a reader's card: its island, or its plants without the art package. Below the books, or
+    beside them on a young reader's card in wide.
+
+    Example context (json):
+    {
+        "hasclassgarden": true, "classgardenheading": "El jardín de la clase", "classgardenhint": "Cada reto cumplido planta algo.",
+        "classisland": false, "classgarden": [{"svg": "<svg viewBox=\"0 0 10 10\" width=\"10\" height=\"10\"></svg>", "label": "Trimestre 1"}]
+    }
+}}
+{{#hasclassgarden}}
+<h2 class="ayv-section-title">{{classgardenheading}}</h2>
+<p class="ayv-field-hint">{{classgardenhint}}{{#listengarden}} {{> local_oksigeniaayvurenda/listen}}{{/listengarden}}</p>
+{{#classisland}}<figure class="ayv-island ayv-card-island" role="img" aria-label="{{islandlabel}}">{{#islandlayers}}<img src="{{layer}}" alt="" loading="lazy">{{/islandlayers}}</figure>{{/classisland}}
+{{^classisland}}<ul class="ayv-garden">
+{{#classgarden}}<li>{{{svg}}}<span>{{label}}</span></li>{{/classgarden}}
+</ul>{{/classisland}}
+{{/hasclassgarden}}

@@ -14476,3 +14476,67 @@ html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
     /* On a phone the head takes two lines: the stamp goes in the flow, under what is written, to the right. */
     .ayv .ayv-sello { position: static; width: max-content; margin: .7rem 0 0 auto; font-size: .9rem; }
 }
+
+/* ---------- The card in wide (1.2.12): the four paths in one row, the orientation card above them, the flower's
+   pieces bigger, its collector cards in one row and the class's island beside the shelf ---------- */
+.ayv .ayv-paths-grandes .ayv-path {
+    padding: 1.1rem 1.2rem;
+}
+
+.ayv .ayv-paths-grandes .ayv-path-name {
+    font-size: 1.25rem;
+}
+
+.ayv .ayv-paths-grandes .ayv-path-marks svg {
+    height: 44px;
+}
+
+.ayv .ayv-paths-grandes .ayv-path-detail {
+    font-size: 1.15rem;
+}
+
+.ayv .ayv-album {
+    margin-bottom: 1.75rem;
+}
+
+.ayv .ayv-card-pareja-jardin .ayv-card-island {
+    max-width: none;
+}
+
+@media (min-width: 60rem) {
+    .ayv .ayv-paths {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .ayv .ayv-or-carne-ancha {
+        grid-column: 1 / -1;
+    }
+
+    /* The whole set of collector cards in one row when it fits (seven or eight), never one left alone below. */
+    .ayv .ayv-cromos {
+        grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    }
+
+    .ayv .ayv-card-pareja {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+        gap: 0 2.5rem;
+        align-items: start;
+    }
+}
+
+/* The free licences with conditions, folded under the four a teacher knows (1.2.12). */
+.ayv .ayv-vp-otra {
+    margin-top: .5rem;
+}
+
+.ayv .ayv-vp-otra > summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: .92rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-vp-otra > .ayv-vp-chips {
+    margin-top: .45rem;
+}

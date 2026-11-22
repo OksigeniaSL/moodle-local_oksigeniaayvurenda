@@ -372,6 +372,13 @@ foreach ($readers as $reader) {
         'sanctionline' => \local_oksigeniaayvurenda\local\sanctions::for_reader((int) $reader->entityid, (int) $reader->id, time()),
         'herald' => $herald,
         'paths' => $paths,
+        // The flower's pieces bigger and as wide as the page: what a child of five touches and looks at (1.2.12).
+        'flowerlook' => $look === 'flower',
+        // A cartilla being played goes before the constellations: it is what is played this term.
+        'questsfirst' => $look === 'sky' && (bool) array_filter($questcards, fn($q) => !empty($q['joined'])
+            && empty($q['full']) && empty($q['reached'])),
+        // On the flower's card, the class's island beside the shelf, not under it.
+        'gardenbeside' => $look === 'flower' && (bool) $classgarden,
         'haspaths' => (bool) $paths || (bool) $orientation,
         'listenpaths' => $young ? \local_oksigeniaayvurenda\local\screens::listen(array_map(
             fn($p) => 'ui/{lang}/path' . $p,
