@@ -48,6 +48,8 @@
         "phrases": [{"id": "ayv-cs-deadline", "spine": "DEV", "spinecolour": "coral", "says": "Sin fecha",
             "deadline": {"has": false, "none": "Sin fecha", "note": "Se pone desde la hoja."} }],
         "groupstitle": "Los grupos del curso", "groupsintro": "Cada noche se apuntan.", "sync": "Traer ahora los grupos",
+        "hasleaving": true, "leavinglabel": "Dejan el centro este curso", "leavingnote": "Toca un grupo para marcarlo.",
+        "leavinggroups": [{"leavinggroup": "6º A", "leavingpressed": true}, {"leavinggroup": "6º B", "leavingpressed": false}],
         "left": [], "hasleft": false, "leftheading": "", "leftintro": "", "last": null,
         "action": "https://example.com/year.php", "sesskey": "abc", "change": "Cambiar", "close": "Cerrar",
         "lesslabel": "Uno menos", "morelabel": "Uno más", "savedword": "Guardado"
@@ -122,6 +124,8 @@
     <h2 class="ayv-cf-estante-t" id="ayv-cs-groups-t">{{groupstitle}}</h2>
     <p>{{groupsintro}}</p>
     <p><button class="ayv-button" type="submit" form="ayv-cs-form" name="sync" value="1">{{sync}}</button></p>
+    {{#hasleaving}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{leavinglabel}}</span><span class="ayv-cf-chapas">{{#leavinggroups}}<button class="ayv-cf-chapa" type="submit" form="ayv-cs-form" name="leaving" value="{{leavinggroup}}" aria-pressed="{{#leavingpressed}}true{{/leavingpressed}}{{^leavingpressed}}false{{/leavingpressed}}">{{leavinggroup}}</button>{{/leavinggroups}}</span></div>
+    <p class="ayv-cf-nota">{{leavingnote}}</p>{{/hasleaving}}
     {{#lastnone}}<p class="ayv-cf-nota">{{lastnone}}</p>{{/lastnone}}
 </section>
 {{#hasleft}}

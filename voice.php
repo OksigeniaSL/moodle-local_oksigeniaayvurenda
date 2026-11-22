@@ -141,7 +141,6 @@ $sounds = voices::backdrops();
 $current = $soundof($next);
 $backdrops = $sounds ? [
     'backdropwhich' => $str('voicebackdropforpart', voices::part_title($next)),
-    'backdrophint' => $str('voicebackdrophint'),
     'options' => array_merge(
         [['bdkey' => '', 'bdogg' => '', 'bdm4a' => '', 'bdlabel' => $str('voicebackdropnone'), 'bdchecked' => $current === '']],
         array_map(fn($key, $files) => ['bdkey' => $key, 'bdogg' => $files['ogg'], 'bdm4a' => $files['m4a'],
@@ -173,6 +172,12 @@ $mine = array_map(fn($v) => [
 $data = [
     'heading' => $str('voicetitle', $found['record']->title),
     'how' => $str(\local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'voicehow')),
+    // On a phone, two lines and the rest folded (the review of 21 Nov 2026, with the mock-up).
+    'howshort' => $str('voicehowshort'),
+    'backdroptitle' => $str('voicebackdroptitle'),
+    'backdropchip' => $str('voicebackdropchip'),
+    'backdropdone' => $str('voicebackdropdone'),
+    'aftertitle' => $str('voiceaftertitle'),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),

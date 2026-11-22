@@ -75,7 +75,7 @@
         <div>
             <p class="ayv-lb-banda-titulo">{{bandtitle}}</p>
             <p>{{bandhint}} {{bandleaving}}</p>
-            <p class="ayv-lb-banda-acciones"><a class="ayv-button" href="{{printurl}}">{{printtext}}</a><a class="ayv-button ayv-button-quiet" href="{{lifeurl}}">{{lifetext}}</a><span class="ayv-field-hint">{{sheets}}</span></p>
+            <p class="ayv-lb-banda-acciones"><a class="ayv-button" href="{{printurl}}">{{printtext}}</a>{{#lifeurl}}<a class="ayv-button ayv-button-quiet" href="{{lifeurl}}">{{lifetext}}</a>{{/lifeurl}}<span class="ayv-field-hint">{{sheets}}</span></p>
         </div>
     </div>
     {{/booklets}}

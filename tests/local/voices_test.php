@@ -186,6 +186,7 @@ final class voices_test extends \advanced_testcase {
                 'Chapter 4: The fox', 'unas páginas', 'Capítulo 0', '', 'Vi un fantasma'])
         );
 
+        $received = $this->redirectMessages();
         $opening = $part(0, $now);
         $one = $part(1, $now + 10, '', 'mar');
         $part(2, $now + 20);
@@ -249,6 +250,16 @@ final class voices_test extends \advanced_testcase {
             '4',
             voices::reading_label(voices::reading((int) $record->id, $library, (int) $teacher->id))
         );
+
+        // Once a sitting for the reading, also with every part approved before recording the next; a loose voice, its own.
+        foreach ($DB->get_records(self::T . 'digital', ['recordid' => $record->id, 'status' => 'pending']) as $waiting) {
+            if ($waiting->part !== null) {
+                voices::approve((int) $waiting->id, $library, ['licence' => 'rights', 'audience' => ['students']]);
+            }
+        }
+        $part(4, $now + 50);
+        $this->assertCount(2, array_filter($received->get_messages(), fn($m) => $m->eventtype === 'voicereceived'));
+        $received->close();
 
         // A voice named as a part before there were parts finds its place; a family's, through a link, does not.
         require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');

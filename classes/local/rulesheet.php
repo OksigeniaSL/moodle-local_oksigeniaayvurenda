@@ -578,7 +578,8 @@ final class rulesheet {
                     5,
                     $money($late['cents']),
                     '',
-                    $str
+                    $str,
+                    100
                 ),
                 gestures::step(
                     $form,
@@ -590,7 +591,8 @@ final class rulesheet {
                     50,
                     $money($late['maxcents']),
                     '',
-                    $str
+                    $str,
+                    100
                 ),
                 gestures::step(
                     $form,
@@ -602,7 +604,8 @@ final class rulesheet {
                     50,
                     $money($late['block']),
                     '',
-                    $str
+                    $str,
+                    100
                 ),
             ];
             $counters[] = gestures::step(

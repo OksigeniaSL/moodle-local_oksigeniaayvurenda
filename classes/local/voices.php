@@ -114,11 +114,12 @@ final class voices {
             // Each part has its sound (Enrique, 21 Nov 2026); unchosen, the one of the part before it.
             self::set_backdrop($id, $library, $userid, $backdrop ?? self::backdrop_before($recordid, $library, $userid, $part));
         }
-        // A book read in parts says it arrived once a sitting, not once a chapter (twelve chapters were twelve messages).
+        // A book read in parts says it arrived once a sitting, not once a chapter (twelve chapters were twelve messages),
+        // also when whoever reads approves each part before recording the next.
         $sitting = $part !== null && $DB->record_exists_select(
             self::T . 'digital',
             "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL
-                AND id <> :id AND status = 'pending' AND timecreated >= :since",
+                AND id <> :id AND timecreated >= :since",
             ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $userid, 'id' => $id,
                 'since' => ($now ?? time()) - 12 * HOURSECS]
         );
@@ -199,7 +200,8 @@ final class voices {
             $slug !== '' ? (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $slug, 'id' => $item->recordid]))
                 ->out(false) : '',
             $title,
-            '',
+            // Signed by the library, as every other notice: not by «Do not reply».
+            (string) (mail::main_library((int) $item->entityid)->name ?? ''),
             self::received_mail($item, $title, $subject) + ['prefs' => true, 'entityid' => (int) $item->entityid]
         );
         force_current_language($language);
@@ -304,6 +306,36 @@ final class voices {
             $viewer['who'],
             $viewer['stage']
         );
+    }
+
+    /**
+     * A voice and the rest of its reading, in the book's order: the newest take of each part that $keep lets through,
+     * published, so that a reading in parts is heard whole wherever it sounds (the little ones' shelf, the moment, the
+     * family's link), not its opening alone. A voice that is not a part, alone.
+     *
+     * @param \stdClass $voice
+     * @param callable $keep Whether a part may be heard here.
+     * @return \stdClass[]
+     */
+    public static function sequence(\stdClass $voice, callable $keep): array {
+        global $DB;
+        if ($voice->part === null || !$voice->createdby) {
+            return $keep($voice) ? [$voice] : [];
+        }
+        $parts = $DB->get_records_select(
+            self::T . 'digital',
+            "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND status = 'published' AND createdby = :userid
+                AND part IS NOT NULL",
+            ['entityid' => $voice->entityid, 'recordid' => $voice->recordid, 'userid' => $voice->createdby],
+            'part, timecreated DESC, id DESC'
+        );
+        $out = [];
+        foreach ($parts as $part) {
+            if (!isset($out[(int) $part->part]) && $keep($part)) {
+                $out[(int) $part->part] = $part;
+            }
+        }
+        return array_values($out);
     }
 
     /**

@@ -44,7 +44,9 @@
 }}
 <section class="ayv-voice">
 <h1 class="ayv-results-title">{{heading}}</h1>
-<p class="ayv-notice">{{how}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
+<p class="ayv-notice ayv-voz-largo">{{how}} <a href="{{infourl}}">{{voiceinfo}}</a></p>
+<div class="ayv-notice ayv-voz-corto">{{howshort}}
+    <details class="ayv-voz-mas"><summary>{{voiceinfo}}</summary><p>{{how}}</p><p><a href="{{infourl}}">{{voiceinfo}}</a></p></details></div>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 <div class="ayv-voice-grid">
 {{> local_oksigeniaayvurenda/voice_text}}

@@ -54,6 +54,11 @@ ilustraciones, los dibujos y las voces de los personajes, la visita y el carné 
 del servicio alojado: sin él, la biblioteca mantiene su aspecto dibujado y todo funciona. La app de Moodle enseña la
 biblioteca (préstamos, reservas, búsqueda y el carné) cuando el sitio tiene encendido el servicio móvil.
 
+**Las familias.** La postal del primer libro, el diploma de la cartilla, el librito de fin de curso, el enlace de lo
+leído para los pequeños, los avisos de retraso a las familias y «Su biblioteca» en la app llegan solo donde el sitio
+tiene la ficha de familias, Oksigenia Family (`local_oksigeniafamily`), que dice quién es familia de quién. Sin ella, esas
+luces no salen en «Cómo funciona tu biblioteca» y no se escribe a ninguna familia; lo demás funciona igual.
+
 **Por consola** (`cli/`): una biblioteca inventada para probarla (`demo.php`), importaciones (`import_catalogue.php`,
 `import_abies.php`), dar de alta o quitar un centro (`add_entity.php`, `centre.php`, `remove_entity.php`), los préstamos
 apuntados en papel (`paper_loans.php`) y los ficheros de un centro recuperado (`recover_files.php`). Cada uno dice cómo

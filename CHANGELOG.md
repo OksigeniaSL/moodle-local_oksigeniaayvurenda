@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.7 (2026-11-22)
+
+The third part of the review of 21 November: the interface, the helps and what was left behind.
+
+- **Recording on a phone**, in a new order: how the voice is kept in two lines, which part before the text in a row
+  that slides, the soft sound as a chip of the bar that opens its sheet, the time while recording, and the recording
+  coming up from the foot afterwards, with its name. In wide, as it was.
+- **A reading in parts is heard whole wherever it sounds**: on the little ones' shelf and «Today's story» (whose cover
+  now opens the reading's page), in «To celebrate», from its first part, and on the family's link, one part after
+  another.
+- **Figures with «−» and «+» can be written**: a touch on the figure opens a box for the number (a budget, a fine in any
+  currency).
+- **The groups that leave the centre** are marked in the year's sheet, a touch each: their booklet is the one of all
+  their years, and «My class» offers it only to them.
+- **A stocktake half done** is gone on with when its shelf is touched again, not started anew.
+- **Four guided helps stopped halfway** (voices, «My class» and the two of the book bank): all of them reach their end
+  now.
+- **Without Oksigenia Family**, the postcard, the diploma and the booklet no longer promise families what cannot reach
+  them; the README says what needs it.
+- The lamp to turn a function on is a drawn bulb, not a ring that read as a choice. «1 of 79 with their book» and
+  «81 still to take their book home» say what they count. The booklet of a reader of the sky without books speaks of
+  their sky. Missing collector cards are seen in dark mode. A reading's «received» notice is sent once a sitting, also
+  when each part is approved before the next.
+- Texts: the steps of «How do I…?» that no longer matched the screens; one alone in the singular; «Show me step by step»
+  for the guided help; the postcard, the diploma and «Read for the little ones» signed; the new books and «We received
+  your voice» signed by the library; the class's warning of the last days as a calm note; four columns of functions;
+  the reports' tabs and the tags' A4 sheet on a phone; a smaller cover on the listening page on a phone.
+
 ## 1.2.6 (2026-11-22)
 
 - The notes in the code and in this changelog say what each piece does and when it was decided, not who drew it.

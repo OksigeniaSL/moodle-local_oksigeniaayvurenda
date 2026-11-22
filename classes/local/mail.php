@@ -176,6 +176,35 @@ final class mail {
     }
 
     /**
+     * The signature of a message to the family of a young reader: the library's memory, with her portrait; the same in
+     * every message of theirs (the booklet, the postcard, the diploma), so that they know who writes.
+     *
+     * @param int $entityid
+     * @return array portrait, initial, text.
+     */
+    public static function memory_sign(int $entityid): array {
+        return ['portrait' => (string) screens::art('correo/memoria', 'png'), 'initial' => '', 'text' => get_string(
+            'bookletsignmemory',
+            'local_oksigeniaayvurenda',
+            characters::of($entityid)['memory']['name']
+        )];
+    }
+
+    /**
+     * The signature of a message from the library itself.
+     *
+     * @param \stdClass $library
+     * @return array portrait, initial, text.
+     */
+    public static function library_sign(\stdClass $library): array {
+        return ['portrait' => '', 'initial' => '', 'text' => get_string(
+            'mailsignlibrary',
+            'local_oksigeniaayvurenda',
+            format_string($library->name, true, ['escape' => false])
+        )];
+    }
+
+    /**
      * A book for a notice, with its cover if it has one; if not, a cover of its colour with its title.
      *
      * @param int $recordid

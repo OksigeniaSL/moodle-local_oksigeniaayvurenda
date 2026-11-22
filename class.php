@@ -208,13 +208,17 @@ foreach ($shown as $i => $group) {
             )),
             'bandtitle' => $str('bookletcourse'),
             'bandhint' => $str('bookletcoursehint'),
-            'bandleaving' => $str('bookletcourseleaving'),
+            // The whole life's, only for a group that leaves the centre this year (the year's sheet says which).
+            'bandleaving' => ($leaves = in_array($group, \local_oksigeniaayvurenda\local\booklet::leaving(
+                $entityid,
+                (int) $year->id
+            ), true)) ? $str('bookletcourseleaving') : '',
             'printurl' => (new moodle_url('/local/oksigeniaayvurenda/booklet.php', ['library' => $library->slug,
                 'group' => $group]))
                 ->out(false),
             'printtext' => $str('bookletcourseprint'),
-            'lifeurl' => (new moodle_url('/local/oksigeniaayvurenda/booklet.php', ['library' => $library->slug, 'group' => $group,
-                'life' => 1]))->out(false),
+            'lifeurl' => $leaves ? (new moodle_url('/local/oksigeniaayvurenda/booklet.php', ['library' => $library->slug,
+                'group' => $group, 'life' => 1]))->out(false) : '',
             'lifetext' => $str('bookletcourselife'),
             'sheets' => $str('bookletcoursesheets', $steps['everyone']),
         ] : null,

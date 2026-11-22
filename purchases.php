@@ -242,7 +242,8 @@ $cards = [gestures::card(
         5000,
         $money((int) $amount),
         '',
-        $str
+        $str,
+        100
     )], [], [])],
     [
         'bar' => $amount ? ['share' => min(100, (int) round($budget['spent'] * 100 / max(1, $amount))),

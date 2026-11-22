@@ -290,6 +290,7 @@ final class diploma {
                 'postcard' => ['url' => $image, 'alt' => $str('diplomaalt')],
                 'button' => ['url' => $image, 'text' => $str('diplomasave')],
                 'after' => [$str('diplomaafter')],
+                'sign' => mail::memory_sign($entityid),
                 'why' => get_string('mailwhyfamily', 'local_oksigeniaayvurenda'),
             ];
             $text = $hello . "\n\n" . $str('diplomalead') . "\n\n" . $str('diplomaafter') . "\n" . $image;

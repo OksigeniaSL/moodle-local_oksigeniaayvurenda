@@ -119,7 +119,11 @@ class abilities {
             default => 0,
         };
         if ($count > 0) {
-            return ['number' => screens::number($count), 'words' => $str('abilitydid' . $key, $count)];
+            // One alone in the singular: «1 idea apuntada», not «1 ideas apuntadas».
+            return [
+                'number' => screens::number($count),
+                'words' => $str('abilitydid' . $key . ($count === 1 ? 'one' : ''), $count),
+            ];
         }
         // Without anything yet, in words, as it stands.
         $by = $key === 'yearsheet' ? closures::return_by($entityid) : null;
@@ -177,9 +181,12 @@ class abilities {
         $year = years::around($entityid, $now);
         $manages = access::can('local/oksigeniaayvurenda:manage', $library);
         $action = (new \moodle_url('/local/oksigeniaayvurenda/functions.php', ['library' => $library->slug]))->out(false);
+        // The postcard and the diploma's light only write to families: without the families' record, they are not here.
+        $families = class_exists('\\local_oksigeniafamily\\api');
         $there = fn(string $key) => match ($key) {
             'voices' => plans::allows($entityid, 'voices'),
-            'diploma' => diploma::drawable(),
+            'firstbook' => $families,
+            'diploma' => diploma::drawable() && $families,
             'selfloan' => !bank::is($library),
             default => true,
         };

@@ -136,6 +136,14 @@ body {
     text-transform: uppercase;
 }
 
+/* A reading in parts says how many, once, before its player. */
+.lp-partes {
+    margin: -1rem 0 1rem;
+    color: var(--lp-suave);
+    font-size: .95rem;
+    text-align: center;
+}
+
 /* The sentence: who read it, what, and for whom. */
 .lp-frase {
     margin: 0 0 1.5rem;

@@ -32,6 +32,7 @@ require(__DIR__ . '/../../config.php');
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\forlittle;
 use local_oksigeniaayvurenda\local\mail;
+use local_oksigeniaayvurenda\local\voices;
 
 $id = required_param('i', PARAM_INT);
 $seal = required_param('s', PARAM_ALPHANUM);
@@ -42,9 +43,14 @@ if (!$heard) {
     http_response_code(404);
     die;
 }
+// A reading in parts is heard whole, one part after another: each part, sealed by the link of the reading, by its place.
+$parts = voices::sequence($heard['voice'], fn($part) => !empty($part->forlittle) && voices::may_share($part)
+    && digital::file($part));
+$parts = $parts ?: [$heard['voice']];
 if ($play) {
+    $part = $parts[min(max(0, optional_param('p', 0, PARAM_INT)), count($parts) - 1)];
     @header('X-Content-Type-Options: nosniff');
-    send_stored_file(digital::file($heard['voice']), 0, 0, false, ['cacheability' => 'private']);
+    send_stored_file(digital::file($part), 0, 0, false, ['cacheability' => 'private']);
 }
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/hear.php', ['i' => $id, 's' => $seal]));
@@ -81,6 +87,10 @@ echo $OUTPUT->render_from_template('local_oksigeniaayvurenda/hear', [
     'name' => $name,
     'sentence' => $str('familypagesentence', $title),
     'audio' => (new moodle_url('/local/oksigeniaayvurenda/hear.php', ['i' => $id, 's' => $seal, 'play' => 1]))->out(false),
+    // The rest of the reading, in order, for the page to go on by itself; and how many parts, said once.
+    'parts' => implode(' ', array_map(fn($i) => (new moodle_url('/local/oksigeniaayvurenda/hear.php', ['i' => $id, 's' => $seal,
+        'play' => 1, 'p' => $i]))->out(false), array_keys($parts))),
+    'partsline' => count($parts) > 1 ? $str('familypageparts', count($parts)) : '',
     'play' => $str('familypageplay'),
     'pause' => $str('familypagepause'),
     'seek' => $str('familypageseek'),

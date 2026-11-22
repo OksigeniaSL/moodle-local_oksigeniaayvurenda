@@ -420,10 +420,12 @@ final class workings {
             'list' => array_map(fn($s) => $chip('set[reviewsign]', $s, $str('reviewsign' . $s), $s === $sign) + [
                 'text' => $str('hiwsignsample'), 'signature' => $str(skins::words($entityid, 'hiwsignby' . $s))], reviews::SIGNS),
         ]]);
-        // The postcard of the first book, to the family of a young reader (the first «subidón»; 13 November).
+        // The postcard of the first book, to the family of a young reader (the first «subidón»; 13 November). Without the
+        // families' record nobody is written to: it says so, without a light that would promise it.
+        $families = class_exists('\\local_oksigeniafamily\\api');
         $postcard = firstbook::on($entityid);
         $voice[] = $phrase('firstbook', 'postcard', $str('hiwspinepostcard'), $str(
-            $postcard ? 'hiwfirstbookon' : 'hiwfirstbookoff'
+            !$families ? 'hiwfirstbooknofamily' : ($postcard ? 'hiwfirstbookon' : 'hiwfirstbookoff')
         ), [
             'firstbook' => [
                 // The postcard itself, small, with example data; the drawn one without the art package.
@@ -431,8 +433,8 @@ final class workings {
                 'cover' => screens::art('portadas/libro-abuela'),
                 'sampletitle' => $str('hiwfirstbooksampletitle'),
                 'sampleline' => $str('hiwfirstbooksampleline'),
-                'light' => $chip('firstbook', $postcard ? '0' : '1', $str('hiwfirstbooklight'), $postcard),
-                'note' => $str('hiwfirstbooknote'),
+                'light' => $families ? $chip('firstbook', $postcard ? '0' : '1', $str('hiwfirstbooklight'), $postcard) : false,
+                'note' => $str($families ? 'hiwfirstbooknote' : 'hiwfamilyneedednote'),
             ],
         ]);
         // What an older reader read for the little ones: the family of whoever wants it hears it, if the centre wants.
@@ -463,18 +465,20 @@ final class workings {
         if (diploma::drawable()) {
             $diploma = diploma::on($entityid);
             $voice[] = $phrase('diploma', 'diploma', $str('hiwspinediploma'), $str(
-                $diploma ? 'hiwdiplomaon' : 'hiwdiplomaoff'
+                !$families ? 'hiwdiplomanofamily' : ($diploma ? 'hiwdiplomaon' : 'hiwdiplomaoff')
             ), [
                 'diploma' => [
                     'img' => diploma::sample($library),
-                    'light' => $chip('diploma', $diploma ? '0' : '1', $str('hiwdiplomalight'), $diploma),
-                    'note' => $str('hiwdiplomanote'),
+                    'light' => $families ? $chip('diploma', $diploma ? '0' : '1', $str('hiwdiplomalight'), $diploma) : false,
+                    'note' => $str($families ? 'hiwdiplomanote' : 'hiwfamilyneedednote'),
                 ],
             ]);
         }
         // The reader's booklet: each reader's at the end of the year; to their family, if the centre turns it on.
         $sends = booklet::on($entityid);
-        $voice[] = $phrase('booklet', 'booklet', $str('hiwspinebooklet'), $str($sends ? 'hiwbookleton' : 'hiwbookletoff'), [
+        $voice[] = $phrase('booklet', 'booklet', $str('hiwspinebooklet'), $str(
+            $sends ? ($families ? 'hiwbookleton' : 'hiwbookletonnofamily') : 'hiwbookletoff'
+        ), [
             'booklet' => [
                 'img' => bookletview::sample($library),
                 'light' => $chip('booklet', $sends ? '0' : '1', $str('hiwbookletlight'), $sends),

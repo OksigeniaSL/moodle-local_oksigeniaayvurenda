@@ -117,6 +117,11 @@ final class booklet_test extends \advanced_testcase {
         booklet::save($entityid, true);
         booklet::save_leaving($entityid, (int) $year->id, ['6º A', ' ', '6º A']);
         $this->assertSame(['6º A'], booklet::leaving($entityid, (int) $year->id));
+        // Touched in the year's sheet: marked, and unmarked (the review of 21-11, C4: there was no screen for it).
+        $this->assertTrue(booklet::toggle_leaving($entityid, (int) $year->id, '6º B'));
+        $this->assertSame(['6º A', '6º B'], booklet::leaving($entityid, (int) $year->id));
+        $this->assertFalse(booklet::toggle_leaving($entityid, (int) $year->id, '6º B'));
+        $this->assertSame(['6º A'], booklet::leaving($entityid, (int) $year->id));
         $this->assertSame(0, booklet::plan($end - HOURSECS));
         $this->assertSame(2, booklet::plan($end + HOURSECS));
         $this->assertSame(0, booklet::plan($end + 2 * HOURSECS));

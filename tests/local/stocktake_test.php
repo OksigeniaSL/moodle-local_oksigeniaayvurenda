@@ -111,6 +111,13 @@ final class stocktake_test extends \advanced_testcase {
             [['id' => (int) $w->poesia, 'label' => 'Poesía', 'count' => 1]],
             array_values(array_filter(stocktake::places($w->library), fn($p) => $p['label'] === 'Poesía'))
         );
+        // Touching the same shelf again goes on with the open one; the whole library is another; once closed, a new one.
+        $this->assertSame((int) $st->id, stocktake::start($w->library, 'Poesía otra vez', $w->poesia, (int) $w->user->id));
+        $whole = stocktake::start($w->library, 'Todo', null, (int) $w->user->id);
+        $this->assertNotSame((int) $st->id, $whole);
+        $this->assertSame($whole, stocktake::start($w->library, 'Todo otra vez', null, (int) $w->user->id));
+        stocktake::close($st);
+        $this->assertNotSame((int) $st->id, stocktake::start($w->library, 'Poesía, de nuevo', $w->poesia, (int) $w->user->id));
     }
 
     /**

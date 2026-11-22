@@ -146,24 +146,16 @@ final class forlittle {
                 $items[$row->recordid] = $row;
             }
         }
-        // A book read in parts starts at its first part the little one may hear.
+        // A book read in parts sounds whole, from its first part the little one may hear to its last, one after another.
         foreach ($items as $recordid => $row) {
             if ($row->part === null || !$row->createdby) {
                 continue;
             }
-            $parts = $DB->get_records_select(
-                self::T . 'digital',
-                "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND status = 'published' AND createdby = :userid
-                    AND part IS NOT NULL AND forlittle = 1",
-                ['entityid' => $library->entityid, 'recordid' => $recordid, 'userid' => $row->createdby],
-                'part, timecreated DESC'
-            );
-            foreach ($parts as $part) {
-                if (voices::can_hear($part, $viewer)) {
-                    $items[$recordid] = clone $part;
-                    $items[$recordid]->recordtitle = $row->recordtitle;
-                    break;
-                }
+            $parts = voices::sequence($row, fn($part) => !empty($part->forlittle) && voices::can_hear($part, $viewer));
+            if ($parts) {
+                $items[$recordid] = clone $parts[0];
+                $items[$recordid]->recordtitle = $row->recordtitle;
+                $items[$recordid]->allparts = $parts;
             }
         }
         $covers = covers::urls(array_map('intval', array_keys($items)));
@@ -176,12 +168,15 @@ final class forlittle {
             return [
                 'recordid' => (int) $row->recordid,
                 'title' => $title,
-                'url' => (new \moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
-                    'id' => (int) $row->recordid]))->out(false),
+                // A reading in parts opens on its own page, with its player; anything else, on the book's page.
+                'url' => (new \moodle_url(
+                    '/local/oksigeniaayvurenda/' . (!empty($row->allparts) ? 'read.php' : 'record.php'),
+                    ['library' => $library->slug, 'id' => (int) (!empty($row->allparts) ? $row->id : $row->recordid)]
+                ))->out(false),
                 'hascover' => isset($covers[$row->recordid]),
                 'coverurl' => $covers[$row->recordid] ?? '',
                 'colour' => (int) $row->recordid % 6,
-                'audio' => digital::file_url($row),
+                'audio' => implode(' ', array_filter(array_map(fn($part) => digital::file_url($part), $row->allparts ?? [$row]))),
                 'by' => $by,
                 'playlabel' => $str('littleplay', (object) ['title' => $title, 'who' => $by]),
             ];
@@ -357,6 +352,7 @@ final class forlittle {
                 'place' => ['label' => $str('forlittlereadby'), 'value' => (string) $voice->signature !== ''
                     ? format_string($voice->signature, true, ['escape' => false]) : $a->child],
                 'button' => ['url' => $url, 'text' => $str('forlittlelisten')],
+                'sign' => mail::library_sign($library),
                 'why' => $str('forlittlewhy'),
             ];
             $text = $hello . "\n\n" . $str('forlittlelead') . "\n\n" . $str('forlittleafter') . "\n" . $url;

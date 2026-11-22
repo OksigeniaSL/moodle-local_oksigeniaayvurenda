@@ -33,6 +33,8 @@
         "kicker": "Leído para los pequeños", "name": "Iker",
         "sentence": "ha leído «La isla del cometa» para los lectores más pequeños de su biblioteca.",
         "audio": "https://example.com/hear.php?i=1&s=x&play=1", "play": "Escuchar", "pause": "Pausa",
+        "parts": "https://example.com/hear.php?i=1&s=x&play=1&p=0 https://example.com/hear.php?i=1&s=x&play=1&p=1",
+        "partsline": "Son 2 partes: suenan una detrás de otra.",
         "seek": "Por dónde va", "share": "Mandárselo a alguien", "sharetitle": "Iker ha leído «La isla del cometa»",
         "sharetext": "Escúchalo: Iker lo ha leído para los pequeños de su biblioteca.",
         "copied": "Copiado: ya puedes pegarlo donde quieras.",
@@ -61,7 +63,8 @@
     <div class="lp-libro">{{#cover}}<img src="{{cover}}" alt="{{coveralt}}" width="400" height="600">{{/cover}}{{^cover}}<span class="lp-tapa-sin" style="background: {{coverbg}}; color: {{coverink}};">{{booktitle}}</span>{{/cover}}</div>
     <p class="lp-etiqueta">{{kicker}}</p>
     <h1 class="lp-frase"><b>{{name}}</b> {{sentence}}</h1>
-    <audio class="lp-audio-sin-js" controls preload="metadata" src="{{audio}}"></audio>
+    {{#partsline}}<p class="lp-partes">{{partsline}}</p>{{/partsline}}
+    <audio class="lp-audio-sin-js" controls preload="metadata" src="{{audio}}" data-parts="{{parts}}"></audio>
     <div class="lp-reproductor">
         <button type="button" class="lp-play" aria-pressed="false" aria-label="{{play}}" data-escuchar="{{play}}" data-pausar="{{pause}}">
             <svg class="lp-icono lp-icono-play" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>

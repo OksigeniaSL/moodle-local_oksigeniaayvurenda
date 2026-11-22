@@ -60,6 +60,16 @@
         medir();
     }
     pintar();
+    // A reading in parts goes on by itself to the next part, as its own page does.
+    var partes = (audio.dataset.parts || '').split(' ').filter(Boolean);
+    var parte = 0;
+    audio.addEventListener('ended', function () {
+        if (parte + 1 < partes.length) {
+            parte++;
+            audio.src = partes[parte];
+            audio.play();
+        }
+    });
 
     var pasar = document.querySelector('.lp-pasar');
     var dicho = document.querySelector('.lp-pasado');

@@ -248,6 +248,25 @@ class booklet {
     }
 
     /**
+     * Marks a group as leaving the centre this year, or unmarks it.
+     *
+     * @param int $entityid
+     * @param int $yearid
+     * @param string $group
+     * @return bool Whether it leaves now.
+     */
+    public static function toggle_leaving(int $entityid, int $yearid, string $group): bool {
+        $groups = self::leaving($entityid, $yearid);
+        $leaves = !in_array($group, $groups, true);
+        self::save_leaving(
+            $entityid,
+            $yearid,
+            $leaves ? array_merge($groups, [$group]) : array_values(array_diff($groups, [$group]))
+        );
+        return $leaves;
+    }
+
+    /**
      * A reader's group in a school year.
      *
      * @param int $readerid
@@ -755,15 +774,7 @@ class booklet {
         $whole = $life ? self::life($reader) : null;
         $first = $whole ? $whole['first'] : null;
         $count = $whole ? count($whole['years']) : 0;
-        $memory = characters::of($entityid)['memory'];
-        $sign = $theirs ? ['portrait' => '', 'initial' => '', 'text' => get_string(
-            'mailsignlibrary',
-            'local_oksigeniaayvurenda',
-            format_string($library->name, true, ['escape' => false])
-        )] : ['portrait' => (string) screens::art(
-            'correo/memoria',
-            'png'
-        ), 'initial' => '', 'text' => get_string('bookletsignmemory', 'local_oksigeniaayvurenda', $memory['name'])];
+        $sign = $theirs ? mail::library_sign($library) : mail::memory_sign($entityid);
         $told = 0;
         $seen = [];
         // A whole life's booklet is a farewell: it reaches the family also once the child left it, their account suspended
@@ -791,8 +802,10 @@ class booklet {
                 $lead = $str($count > 1 && $first ? 'bookletlifelead' : 'bookletlifeleadone');
             } else {
                 $subject = $str('bookletyearsubject');
-                $lead = $str(!$page['books'] ? 'bookletyearleadnone' : ($page['look'] === 'sky' ? 'bookletyearleadsky'
-                    : 'bookletyearlead'));
+                // The sky's words for a reader of the sky, with books or without.
+                $sky = $page['look'] === 'sky';
+                $lead = $str(!$page['books'] ? ($sky ? 'bookletyearleadnonesky' : 'bookletyearleadnone')
+                    : ($sky ? 'bookletyearleadsky' : 'bookletyearlead'));
             }
             $why = $theirs ? get_string('bookletwhytheirs', 'local_oksigeniaayvurenda', $name)
                 : $str($life ? 'bookletwhylife' : 'bookletwhyyear');

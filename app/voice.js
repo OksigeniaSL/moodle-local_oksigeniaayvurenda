@@ -263,7 +263,7 @@
         bar.querySelector('.ayv-vp-barra-word').textContent = bar.getAttribute(state === 'recording' ? 'data-stop' : 'data-record');
     };
     if (bar) {
-        bar.querySelector('button').addEventListener('click', function() {
+        bar.querySelector('.ayv-vp-barra-boton').addEventListener('click', function() {
             if (!stop.hidden) {
                 stop.click();
             } else if (!rec.hidden && !rec.disabled) {
@@ -271,6 +271,138 @@
             }
         });
     }
+    // On a phone (the review of 21 Nov 2026, with the mock-up): which part to read goes above the text, the soft sound
+    // opens as a sheet from the bar, the bar counts the time while recording, and after recording the plate comes up from
+    // the foot. Widened again, everything goes back where it was.
+    var narrow = window.matchMedia ? window.matchMedia('(max-width: 47.99rem)') : null;
+    var plate = document.getElementById('ayv-recorder');
+    var parts = document.getElementById('ayv-vp');
+    var reading = document.querySelector('.ayv-voice-grid') || document.querySelector('.ayv-voice-text');
+    var sounds = document.getElementById('ayv-vp-backdrops');
+    var sheet = document.getElementById('ayv-vp-hoja');
+    var veil = document.getElementById('ayv-vp-velo');
+    var sheetDone = document.getElementById('ayv-vp-listo');
+    var soundChip = document.getElementById('ayv-vp-barra-fondo');
+    var barClock = document.getElementById('ayv-vp-barra-tiempo');
+    var afterTitle = document.getElementById('ayv-rec-titulo');
+    var home = function(node) {
+        if (!node || !node.parentNode) {
+            return null;
+        }
+        var mark = document.createComment('');
+        node.parentNode.insertBefore(mark, node);
+        return mark;
+    };
+    var partsHome = home(parts);
+    var soundsHome = home(sounds);
+    // The veil and the sheet hang from the page, not from the plate: risen after recording, the plate makes a layer of its
+    // own, and a veil inside it would cover it.
+    var section = document.querySelector('.ayv-voice');
+    if (section && veil && sheet) {
+        section.appendChild(veil);
+        section.appendChild(sheet);
+    }
+    var small = function() {
+        return narrow ? narrow.matches : false;
+    };
+    var closeSheet = function() {
+        if (!sheet || sheet.hidden) {
+            return;
+        }
+        sheet.hidden = true;
+        veil.hidden = !(plate && plate.classList.contains('is-despues') && small());
+        if (soundChip) {
+            soundChip.focus();
+        }
+    };
+    var sayChip = function() {
+        if (!soundChip) {
+            return;
+        }
+        var picked = document.querySelector('input[name="ayv-backdrop"]:checked');
+        var word = picked && picked.parentNode.querySelector('.ayv-vp-word') ? picked.parentNode.querySelector('.ayv-vp-word')
+            .textContent.trim() : '';
+        // «Sin fondo» says itself; a sound, «Fondo: mar».
+        soundChip.querySelector('.ayv-vp-barra-sonido').textContent = !picked || picked.value === '' ? word
+            : (soundChip.getAttribute('data-says') || '{$a}').replace('{$a}', function() {
+                return word.charAt(0).toLocaleLowerCase() + word.slice(1);
+            });
+    };
+    var place = function() {
+        if (parts && reading && partsHome) {
+            if (small()) {
+                reading.parentNode.insertBefore(parts, reading);
+            } else {
+                partsHome.parentNode.insertBefore(parts, partsHome.nextSibling);
+            }
+        }
+        if (sounds && sheet && soundsHome) {
+            if (small()) {
+                sheet.insertBefore(sounds, sheetDone);
+            } else {
+                closeSheet();
+                soundsHome.parentNode.insertBefore(sounds, soundsHome.nextSibling);
+            }
+        }
+        if (plate && !small()) {
+            plate.classList.remove('is-despues');
+            if (veil) {
+                veil.hidden = true;
+            }
+        }
+    };
+    if (soundChip && sheet) {
+        soundChip.addEventListener('click', function() {
+            sheet.hidden = false;
+            veil.hidden = false;
+            var picked = sheet.querySelector('input[name="ayv-backdrop"]:checked') || sheet.querySelector('input');
+            if (picked) {
+                picked.focus();
+            }
+        });
+        sheetDone.addEventListener('click', closeSheet);
+        veil.addEventListener('click', closeSheet);
+        sheet.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeSheet();
+            }
+        });
+    }
+    document.querySelectorAll('input[name="ayv-backdrop"], input[name="ayv-part"]').forEach(function(radio) {
+        radio.addEventListener('change', sayChip);
+    });
+    sayChip();
+    place();
+    if (narrow) {
+        if (narrow.addEventListener) {
+            narrow.addEventListener('change', place);
+        } else if (narrow.addListener) {
+            narrow.addListener(place);
+        }
+    }
+    // What was just recorded comes with its name; on a phone, as a sheet from the foot.
+    var showAfter = function() {
+        if (afterTitle) {
+            afterTitle.textContent = (afterTitle.getAttribute('data-says') || '{$a}').replace('{$a}', function() {
+                return barPart ? barPart.textContent : '';
+            });
+            afterTitle.hidden = !barPart;
+        }
+        if (plate && small()) {
+            plate.classList.add('is-despues');
+            if (veil) {
+                veil.hidden = false;
+            }
+        }
+    };
+    var hideAfter = function() {
+        if (plate) {
+            plate.classList.remove('is-despues');
+        }
+        if (veil && (!sheet || sheet.hidden)) {
+            veil.hidden = true;
+        }
+    };
     var level = document.getElementById('ayv-level');
     var listening = null;
 
@@ -429,6 +561,9 @@
         }
         var seconds = Math.floor((Date.now() - started) / 1000);
         time.textContent = (str.voicetime || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'); });
+        if (barClock) {
+            barClock.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+        }
         if (seconds >= MAX) {
             stop.click();
         }
@@ -457,6 +592,7 @@
                     preview.src = URL.createObjectURL(blob);
                     // What was read and the signature come once there is something to send.
                     after.hidden = false;
+                    showAfter();
                     send.disabled = false;
                     return fixed;
                 }).catch(function() {
@@ -534,6 +670,7 @@
         sayBar('ready');
         blob = null;
         after.hidden = true;
+        hideAfter();
         send.disabled = true;
         time.textContent = '';
         rec.hidden = false;

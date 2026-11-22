@@ -84,6 +84,7 @@ final class gestures {
      * @param string $shown The number as it is read.
      * @param string $unit What it counts, under it.
      * @param callable $str
+     * @param int $scale How many of what is kept make one of what is written: 100 for an amount kept in cents.
      * @return array
      */
     public static function step(
@@ -96,12 +97,15 @@ final class gestures {
         int $by,
         string $shown,
         string $unit,
-        callable $str
+        callable $str,
+        int $scale = 1
     ): array {
+        // The figure can also be written (a budget of 20,000 is not 400 touches): its value, limits and scale go with it.
         return ['form' => $form, 'field' => $field, 'label' => $label, 'shown' => $shown, 'unit' => $unit,
             'less' => max($min, $value - $by), 'more' => min($max, $value + $by), 'atmin' => $value <= $min,
             'atmax' => $value >= $max, 'lesslabel' => $str('hiwless') . ': ' . $label,
-            'morelabel' => $str('hiwmore') . ': ' . $label, 'still' => false];
+            'morelabel' => $str('hiwmore') . ': ' . $label, 'still' => false, 'typedvalue' => $value, 'typedmin' => $min,
+            'typedmax' => $max, 'typedscale' => max(1, $scale)];
     }
 
     /**

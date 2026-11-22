@@ -379,10 +379,18 @@ final class shell {
             $as .= sample::line($library);
         }
         // What only this page needs (back to a course, its guided help), in a small row, without what the header has.
-        // Inside a guided help's frame, none: a help within the help, or a way out of the screen it explains.
-        $links = optional_param('help', 0, PARAM_BOOL) ? [] : ($options['nav'] ?? []);
+        // Inside a guided help's frame, neither a help within the help nor a way out of the library; the pages a help goes
+        // on to (a bank's classes, its round) stay, or that help stops there.
+        $links = $options['nav'] ?? [];
         if (isset($links['url'])) {
             $links = [$links];
+        }
+        if (optional_param('help', 0, PARAM_BOOL)) {
+            $links = array_values(array_filter(
+                $links,
+                fn($link) => str_contains((string) $link['url'], '/local/oksigeniaayvurenda/')
+                    && basename((string) parse_url((string) $link['url'], PHP_URL_PATH)) !== 'help.php'
+            ));
         }
         $covered = menu::covered($doors);
         $row = '';

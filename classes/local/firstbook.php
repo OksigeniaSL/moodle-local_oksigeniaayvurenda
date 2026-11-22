@@ -216,6 +216,7 @@ final class firstbook {
                 'books' => [['line' => $str('firstbookline')] + mail::book((int) $loan->recordid, $a->title)],
                 'button' => $voice !== '' ? ['url' => $voice, 'text' => $str('firstbookvoice')] : null,
                 'after' => [$voice !== '' ? $str('firstbookaftervoice') : $str('firstbookafter')],
+                'sign' => mail::memory_sign($entityid),
                 'why' => get_string('mailwhyfamily', 'local_oksigeniaayvurenda'),
             ];
             $text = $hello . "\n\n" . $str('firstbooklead') . "\n\n" . ($voice !== '' ? $str('firstbookaftervoice') . "\n"

@@ -143,6 +143,12 @@ if ($status['last'] && !(int) $status['last']['loans']) {
     ];
 }
 $sheet = yearsheet::months($library, $year, time(), $touched, $from, '/local/oksigeniaayvurenda/year.php', $pick);
+// The groups that leave the centre this year: without classes, none to mark.
+$leavers = \local_oksigeniaayvurenda\local\booklet::leaving($entityid, (int) $year->id);
+$leavinggroups = \local_oksigeniaayvurenda\local\skins::no_classes($entityid) ? [] : array_map(
+    fn($g) => ['leavinggroup' => $g['group'], 'leavingpressed' => in_array($g['group'], $leavers, true)],
+    \local_oksigeniaayvurenda\local\tutors::groups($entityid, (int) $year->id)
+);
 $step = characters::step($entityid);
 $pose = $saved !== '' ? 'celebra' : 'lee';
 $crier = characters::whole($entityid) ? characters::figure('herald', $pose, $step) : null;
@@ -193,6 +199,11 @@ $data = [
     'phrases' => yearsheet::rules($library, $year, $str, $saved),
     'groupstitle' => $str('yearsheetgroupstitle'),
     'groupsintro' => $str('yearstartintro'),
+    // The groups that leave the centre this year, a touch each: their booklet is the one of all their years here.
+    'leavinglabel' => $str('yearleavinglabel'),
+    'leavingnote' => $str('yearleavingnote'),
+    'leavinggroups' => $leavinggroups,
+    'hasleaving' => (bool) $leavinggroups,
     'sync' => $str('yearsync'),
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),

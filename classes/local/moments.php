@@ -171,10 +171,17 @@ class moments {
                 continue;
             }
             $who = trim(format_string((string) $row->signature, true, ['escape' => false]));
+            // A reading in parts is told from its first part, and sounds whole: not the last part someone approved.
+            $parts = voices::sequence($row, fn($part) => !json_decode((string) $part->stages, true)
+                && array_intersect(array_filter(explode(',', (string) $part->audience)), ['students', 'public']));
+            $first = $parts[0] ?? $row;
+            $reading = count($parts) > 1;
             return ['kind' => 'voice', 'key' => $who !== '' ? 'momentvoice' : 'momentvoiceanon',
                 'a' => ['who' => $who, 'title' => self::title((int) $row->recordid)],
-                'recordid' => (int) $row->recordid, 'digitalid' => (int) $row->id, 'staffpage' => 'record.php',
-                'readerpage' => 'record.php', 'params' => ['id' => (int) $row->recordid], 'audio' => digital::file_url($row)];
+                'recordid' => (int) $row->recordid, 'digitalid' => (int) $first->id,
+                'staffpage' => $reading ? 'read.php' : 'record.php', 'readerpage' => $reading ? 'read.php' : 'record.php',
+                'params' => ['id' => $reading ? (int) $first->id : (int) $row->recordid],
+                'audio' => implode(' ', array_filter(array_map(fn($part) => digital::file_url($part), $parts ?: [$row])))];
         }
         return null;
     }

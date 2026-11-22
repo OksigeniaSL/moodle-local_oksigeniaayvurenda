@@ -145,9 +145,14 @@ $card = function (\stdClass $quest) use ($library, $str, $now, $art) {
             cartilla::squares($quest)
         ),
         'draft' => !cartilla::complete($quest),
-        'sums' => $str('cartillaplayers', (object) ['players' => screens::number($stats['players']),
+        'sums' => $str((int) $stats['players'] === 1 ? 'cartillaplayersone' : 'cartillaplayers', (object) [
+            'players' => screens::number($stats['players']),
             'lines' => screens::number($stats['lines']), 'full' => screens::number($stats['full'])]),
-        'hardest' => $stats['hardest'] ? $str('cartillahardest', (object) $stats['hardest']) : '',
+        'hardest' => $stats['hardest'] ? $str(match ((int) $stats['hardest']['count']) {
+            0 => 'cartillahardestnone',
+            1 => 'cartillahardestone',
+            default => 'cartillahardest',
+        }, (object) $stats['hardest']) : '',
         'url' => (new moodle_url('/local/oksigeniaayvurenda/quests.php', ['library' => $library->slug,
             'cartilla' => $quest->id], 'rt-' . $quest->id))->out(false),
     ];

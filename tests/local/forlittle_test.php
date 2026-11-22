@@ -164,6 +164,19 @@ final class forlittle_test extends \advanced_testcase {
         $two = $DB->insert_record(self::T . 'digital', $chapter);
         $this->assertSame(0, forlittle::run($now + 2 * DAYSECS));
         $this->assertNotNull($DB->get_field(self::T . 'digital', 'timetold', ['id' => $two]));
+        // Heard whole wherever it sounds: on the little ones' shelf, both parts in order, and its cover to the reading's
+        // page; the family's link, both parts too (the review of 21-11, C2).
+        get_file_storage()->create_file_from_string(['contextid' => \context_system::instance()->id,
+            'component' => 'local_oksigeniaayvurenda', 'filearea' => 'digital', 'itemid' => $two, 'filepath' => '/',
+            'filename' => 'voz.webm'], 'voz');
+        $entry = forlittle::shelf($library, $staff)[0];
+        $this->assertCount(2, explode(' ', $entry['audio']));
+        $this->assertStringContainsString('read.php', $entry['url']);
+        $first = $DB->get_record(self::T . 'digital', ['id' => $read]);
+        $this->assertSame([$read, (int) $two], array_map(
+            fn($v) => (int) $v->id,
+            voices::sequence($first, fn($v) => !empty($v->forlittle) && voices::may_share($v))
+        ));
         $messages->close();
         $emails->close();
         if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {

@@ -225,7 +225,8 @@ final class newsletter {
             $body,
             $url,
             format_string($news['library']->name, true, ['escape' => false]),
-            '',
+            // Signed by the library, as every other notice: not by «Do not reply».
+            format_string($news['library']->name, true, ['escape' => false]),
             [
                 'library' => $DB->get_record(self::T . 'library', ['id' => $news['library']->id]),
                 'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),

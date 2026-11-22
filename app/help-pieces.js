@@ -184,7 +184,7 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(2);
         }).then(function() {
-            return h.point('.ayv-book select[name="licence"]');
+            return h.point('.ayv-book .ayv-vp input[name="licence"]:checked + .ayv-vp-word');
         }).then(function() {
             return h.say(3);
         }).then(function() {
@@ -912,11 +912,11 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.go('.ayv-reward-form button[type="submit"]');
         }).then(function() {
-            return h.point(second + 'fieldset');
+            return h.point(second + '.ayv-bc-retos');
         }).then(function() {
             return h.say(4);
         }).then(function() {
-            return h.you(5, second + 'input[value="notes"]');
+            return h.you(5, second + 'button[name="challenge"][value="notes"]');
         }).then(function() {
             return h.say(6);
         });

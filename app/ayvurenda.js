@@ -1338,6 +1338,101 @@
     });
 })();
 
+// A figure with its «−» and «+» can also be written (the review of 21 Nov 2026): a budget of 20,000 was four hundred
+// touches, and a fine in a currency of many units could not be set. A touch on the figure opens a box for the number;
+// Enter, or leaving it, sends it as the signs do (the server keeps its limits); Escape leaves it as it was. Without
+// this file, the signs still work.
+(function() {
+    'use strict';
+    document.querySelectorAll('.ayv .ayv-cf-cifra[data-ayv-write]').forEach(function(figure) {
+        var group = figure.closest('.ayv-cf-paso');
+        var less = group ? group.querySelector('.ayv-cf-menos') : null;
+        var form = less ? document.getElementById(less.getAttribute('form')) : null;
+        var value = Number(figure.getAttribute('data-value'));
+        if (!less || !form || figure.getAttribute('data-value') === '' || isNaN(value)) {
+            return;
+        }
+        var scale = Number(figure.getAttribute('data-scale')) || 1;
+        var min = Number(figure.getAttribute('data-min')) || 0;
+        var max = Number(figure.getAttribute('data-max')) || Infinity;
+        var says = figure.getAttribute('data-ayv-write');
+        figure.setAttribute('role', 'button');
+        figure.setAttribute('tabindex', '0');
+        figure.setAttribute('title', says);
+        figure.setAttribute('aria-label', says + ': ' + (group.getAttribute('aria-label') || '') + ', '
+            + figure.textContent.trim());
+        var open = function() {
+            if (figure.querySelector('input')) {
+                return;
+            }
+            var before = Array.prototype.slice.call(figure.childNodes);
+            var input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'ayv-cf-escrita';
+            input.setAttribute('inputmode', scale > 1 ? 'decimal' : 'numeric');
+            input.step = scale > 1 ? String(1 / scale) : '1';
+            input.min = String(min / scale);
+            if (isFinite(max)) {
+                input.max = String(max / scale);
+            }
+            input.value = String(value / scale);
+            input.setAttribute('aria-label', group.getAttribute('aria-label') || says);
+            figure.textContent = '';
+            figure.appendChild(input);
+            input.focus();
+            input.select();
+            var done = false;
+            var restore = function() {
+                done = true;
+                figure.textContent = '';
+                before.forEach(function(node) {
+                    figure.appendChild(node);
+                });
+                figure.focus();
+            };
+            var send = function() {
+                if (done) {
+                    return;
+                }
+                var typed = Math.round(parseFloat(String(input.value).replace(',', '.')) * scale);
+                if (isNaN(typed) || typed === value) {
+                    restore();
+                    return;
+                }
+                done = true;
+                typed = Math.min(Math.max(typed, min), max);
+                var field = document.createElement('input');
+                field.type = 'hidden';
+                field.name = less.name;
+                field.value = String(typed);
+                form.appendChild(field);
+                if (form.requestSubmit) {
+                    form.requestSubmit();
+                } else {
+                    form.submit();
+                }
+            };
+            input.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    send();
+                } else if (event.key === 'Escape') {
+                    event.preventDefault();
+                    restore();
+                }
+            });
+            input.addEventListener('blur', send);
+        };
+        figure.addEventListener('click', open);
+        figure.addEventListener('keydown', function(event) {
+            if (event.target === figure && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault();
+                open();
+            }
+        });
+    });
+})();
+
 // What :has() says, also for the browsers that do not know it (Chrome 93, Firefox 98, still in classrooms): a box with
 // a checked input inside gets «ayv-has-checked», a form says its connector mode in data-mode and data-auth, and a list
 // item whose details are open gets «ayv-is-open». The style sheet uses both.

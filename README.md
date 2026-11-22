@@ -57,6 +57,11 @@ illustrations, the characters' drawings and voices, the visit and the illustrate
 of the hosted service: without it, the library keeps its drawn look and everything works. The Moodle app shows the
 library (books out, reservations, search and the card) when the site has the mobile service on.
 
+**Families.** The postcard of the first book, the bingo card's diploma, the end-of-year booklet, the link to what was read
+for the little ones, the late notices to families and «Their library» in the app reach families only where the site has
+the families' record, Oksigenia Family (`local_oksigeniafamily`), which says who is family of whom. Without it, those
+lights do not show in «How your library works» and no family is written to; everything else works the same.
+
 **From the command line** (`cli/`): a made-up library to try it (`demo.php`), imports (`import_catalogue.php`,
 `import_abies.php`), a centre set up or removed (`add_entity.php`, `centre.php`, `remove_entity.php`), loans written
 on paper (`paper_loans.php`) and the files of a recovered centre (`recover_files.php`). Each one says how with `--help`.

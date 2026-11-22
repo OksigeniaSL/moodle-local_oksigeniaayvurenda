@@ -627,8 +627,10 @@ final class challenges {
         };
         // The garland: a pennant a step, or ten tenths for a long one.
         $marks = self::garland((int) $challenge->done, (int) $challenge->target);
-        $left = $challenge->kind === 'everyone' && !$challenge->complete && $challenge->target > $challenge->done
-            ? $str('challengeeveryoneleft', $challenge->target - $challenge->done) : '';
+        // What is still missing, said with what it counts: «Faltan 81 por llevarse su libro», and one alone in the singular.
+        $missing = (int) $challenge->target - (int) $challenge->done;
+        $left = $challenge->kind === 'everyone' && !$challenge->complete && $missing > 0
+            ? $str($missing === 1 ? 'challengeeveryoneleftone' : 'challengeeveryoneleft', $missing) : '';
         // Its clock, in sight (P5 of the review: the challenge had a deadline nobody saw): the days left in the term.
         $clock = '';
         $urgent = false;

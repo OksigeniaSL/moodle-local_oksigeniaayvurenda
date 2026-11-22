@@ -71,6 +71,12 @@ final class yearsheet {
             }
             return ['ayv-cs-sheet', ['dia' => $m[2], 'order' => 1]];
         }
+        // A group that leaves the centre this year: touched, it is marked or unmarked (its booklet, the whole life's).
+        $leaving = trim(optional_param('leaving', '', PARAM_TEXT));
+        if ($leaving !== '') {
+            booklet::toggle_leaving($entityid, (int) years::around($entityid, $now)->id, $leaving);
+            return ['ayv-cs-groups', ['saved' => 1]];
+        }
         if (optional_param('termsreset', 0, PARAM_BOOL)) {
             challenges::set_ends($entityid, []);
             return ['ayv-cs-terms', ['saved' => 1]];

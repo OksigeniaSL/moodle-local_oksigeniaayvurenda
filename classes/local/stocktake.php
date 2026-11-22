@@ -49,9 +49,23 @@ final class stocktake {
     public static function start(\stdClass $library, string $name, ?int $locationid, int $userid, ?int $now = null): int {
         global $DB;
         $now = $now ?? time();
+        $locationid = cataloguer::own_location((int) $library->entityid, $locationid);
+        // A place that has one open already goes on with it: whoever comes back to finish never starts from nothing.
+        $open = $DB->get_records_select(
+            self::T . 'stocktake',
+            "libraryid = :libraryid AND status = 'open' AND " . ($locationid ? 'locationid = :locationid' : 'locationid IS NULL'),
+            ['libraryid' => $library->id, 'locationid' => $locationid],
+            'timecreated DESC, id DESC',
+            'id',
+            0,
+            1
+        );
+        if ($open) {
+            return (int) reset($open)->id;
+        }
         return (int) $DB->insert_record(self::T . 'stocktake', ['libraryid' => $library->id,
             'name' => \core_text::substr(trim($name), 0, 100),
-            'locationid' => cataloguer::own_location((int) $library->entityid, $locationid), 'status' => 'open',
+            'locationid' => $locationid, 'status' => 'open',
             'createdby' => $userid ?: null, 'timecreated' => $now, 'timemodified' => $now]);
     }
 
