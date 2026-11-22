@@ -322,14 +322,19 @@
             begin(key);
         }
     };
+    // A part without a sound says so and is not touched: the switch did nothing there and turned every sound off in secret
+    // (the review of 21 Nov 2026). Turned off by whoever listens, it says so, and turns on again.
     var sayToggle = function() {
         if (!toggle) {
             return;
         }
         var key = soundOf(current);
+        var bare = wanted && !key;
+        toggle.disabled = bare;
         toggle.setAttribute('aria-pressed', wanted && key ? 'true' : 'false');
         toggle.querySelector('.ayv-oye-fondo-texto').textContent = wanted && key
-            ? say(str.readingbackdropunder, sounds[key].the) : (str.voicebackdropnone || '');
+            ? say(str.readingbackdropunder, sounds[key].the)
+            : (bare ? (str.readingpartnosound || '') : (str.voicebackdropnone || ''));
     };
     // «Otro sonido»: what its reader chose for this part, and the rest; what is touched changes only for whoever listens.
     var drawPanel = function() {
@@ -372,6 +377,9 @@
     if (toggle) {
         sayToggle();
         toggle.addEventListener('click', function() {
+            if (wanted && !soundOf(current)) {
+                return;
+            }
             wanted = !wanted;
             put('ayv-lectura-sin-fondo', wanted ? null : '1');
             sayToggle();

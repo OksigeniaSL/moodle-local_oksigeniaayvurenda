@@ -89,6 +89,14 @@ $messageproviders = [
             'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
+    // To whoever recorded a voice: it sounds in the library now (once a reading, not once a chapter).
+    'voicepublished' => [
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'airnotifier' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+        ],
+    ],
     // To whoever recorded a voice: it was received, with the link that deletes it without asking anyone.
     'voicereceived' => [
         'defaults' => [

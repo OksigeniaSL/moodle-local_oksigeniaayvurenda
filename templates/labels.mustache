@@ -124,16 +124,16 @@
     {{#haslabels}}
     <p class="ayv-et-dice">{{{says}}}</p>
     {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
-    {{#paper}}
-    <div class="ayv-et-papel{{#letter}} ayv-et-papel-carta{{/letter}}" style="--c: {{cols}}; --r: {{rows}};">{{#cells}}<a class="ayv-et-celda{{#first}} ayv-et-primera{{/first}}" href="{{url}}"{{#first}} aria-current="true"{{/first}}><span class="ayv-sr">{{aria}}</span><span class="ayv-et-e{{#used}} ayv-et-usada{{/used}}{{#spine}} ayv-et-tej{{/spine}}{{#code}} ayv-et-cod{{/code}}" aria-hidden="true">{{#spine}}{{#lines}}{{#top}}<b>{{line}}</b>{{/top}}{{^top}}<span>{{line}}</span>{{/top}}{{/lines}}{{/spine}}{{#code}}<small>{{library}}</small><span class="ayv-et-codigo">{{{svg}}}</span><b>{{barcode}}</b><small>{{title}}</small>{{/code}}</span></a>{{/cells}}</div>
-    {{/paper}}
-    <p class="ayv-cf-nota">{{note}}</p>
     <div class="ayv-cf-fila">
         <a class="ayv-button" href="{{printurl}}">{{printlabel}}</a>
         <form method="post" action="{{favaction}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="fav">
             {{#fav}}<button class="ayv-cf-chapa" type="submit" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><span aria-hidden="true">{{#pressed}}★{{/pressed}}{{^pressed}}☆{{/pressed}}</span> {{label}}</button>{{#justsaved}} <span class="ayv-cf-guardado" role="status">{{savedword}}</span>{{/justsaved}}{{/fav}}</form>
         <a class="ayv-cf-enlace" href="{{adjusturl}}">{{adjustlabel}}</a>
     </div>
+    {{#paper}}
+    <div class="ayv-et-papel{{#letter}} ayv-et-papel-carta{{/letter}}" style="--c: {{cols}}; --r: {{rows}};">{{#cells}}<a class="ayv-et-celda{{#first}} ayv-et-primera{{/first}}" href="{{url}}"{{#first}} aria-current="true"{{/first}}><span class="ayv-sr">{{aria}}</span><span class="ayv-et-e{{#used}} ayv-et-usada{{/used}}{{#spine}} ayv-et-tej{{/spine}}{{#code}} ayv-et-cod{{/code}}" aria-hidden="true">{{#spine}}{{#lines}}{{#top}}<b>{{line}}</b>{{/top}}{{^top}}<span>{{line}}</span>{{/top}}{{/lines}}{{/spine}}{{#code}}<small>{{library}}</small><small>{{title}}</small><span class="ayv-et-codigo">{{{svg}}}</span>{{/code}}</span></a>{{/cells}}</div>
+    {{/paper}}
+    <p class="ayv-cf-nota">{{note}}</p>
     {{/haslabels}}
     {{^haslabels}}<p class="ayv-et-dice">{{empty}}</p>{{/haslabels}}
     {{#adjust}}

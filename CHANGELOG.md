@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.8 (2026-11-22)
+
+What was left of the medium points of the review's third part.
+
+- **A tutor who left the centre** is said so in «Tutors», with a call to choose another, and no longer counts as a class
+  with its tutor.
+- **Voices to approve**: a reading recorded by the library's staff says so; a part recorded twice shows the newer take
+  next to the earlier one, and that approving it replaces the earlier one; the button says how many parts it approves.
+- **Whoever recorded a reading is told when it is approved** and sounds in the library, once a sitting, with its link
+  (a new notification, «My voice, approved»).
+- **A part without its own sound** says so on the listening page, and its switch does nothing instead of seeming broken.
+- **«How do I…?»** answers three more tasks: printing or sending the class's booklets, recording a book aloud as staff
+  and recommending the book of the week.
+- **A stocktake half done** is offered first, «You have one half done», with «Start another» beside it; the list below
+  keeps only the closed ones.
+- **The labels' sample** follows the order of the printed label (library, title, code), with the print row above the
+  sheet.
+
 ## 1.2.7 (2026-11-22)
 
 The third part of the review of 21 November: the interface, the helps and what was left behind.

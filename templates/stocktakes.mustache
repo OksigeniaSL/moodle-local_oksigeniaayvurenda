@@ -31,6 +31,9 @@
         "sesskey": "abc", "whole": {"label": "Toda la biblioteca", "says": "<b>120</b> libros en 2 estanterías",
             "spines": [{"on": false}]},
         "furniture": [{"id": 3, "label": "Ciencias", "says": "<b>60</b> libros", "spines": [{"on": false}]}],
+        "hashalfway": true, "halfwaytitle": "Tienes uno a medias", "startother": "Empezar otro",
+        "halfway": [{"name": "Inventario de junio", "url": "https://example.com/stocktake.php?id=3", "open": true,
+            "state": "Toda la biblioteca · leídos 5 de 23.620", "line": "Seguir pasando libros"}],
         "before": "Los de antes", "hasminutes": true,
         "minutes": [{"name": "Inventario del 3 de noviembre", "url": "https://example.com/stocktake.php?id=1", "open": true,
             "state": "Toda la biblioteca · abierto", "line": "Seguir pasando libros"}]
@@ -43,6 +46,13 @@
         </div>
     {{#crier}}<span class="ayv-cf-pregonera"><span class="ayv-figure"><img src="{{figure}}" alt="" width="512" height="512"{{#puppet}} data-puppet="{{puppet}}"{{/puppet}}></span></span>{{/crier}}
 </header>
+{{#hashalfway}}<section class="ayv-st-amedias" aria-labelledby="ayv-st-amedias-t">
+    <h2 id="ayv-st-amedias-t" class="ayv-cf-estante-t">{{halfwaytitle}}</h2>
+    <ul class="ayv-st-actas">
+        {{#halfway}}<li><a class="ayv-st-acta ayv-st-acta-abierta" href="{{url}}"><b>{{name}}</b><span>{{state}}</span><span class="ayv-button">{{line}}</span></a></li>{{/halfway}}
+    </ul>
+</section>
+<h2 class="ayv-cf-estante-t">{{startother}}</h2>{{/hashalfway}}
 <form id="ayv-st-empezar" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
 <ul class="ayv-st-plano">
     {{#whole}}<li class="ayv-st-todo"><button class="ayv-st-mueble" type="submit" form="ayv-st-empezar" name="location" value="0"><span class="ayv-st-placa">{{label}}</span>{{> local_oksigeniaayvurenda/stocktake_shelf}}{{> local_oksigeniaayvurenda/stocktake_shelf}}<span class="ayv-st-cuenta">{{{says}}}</span></button></li>{{/whole}}

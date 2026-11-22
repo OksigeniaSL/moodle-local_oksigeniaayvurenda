@@ -206,6 +206,7 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
         'strings' => ['readmarklabel' => $str('readmarklabel'), 'readpage' => $str('readpage'), 'readingnow' => $str('readingnow'),
             'readingnext' => $str('readingnext'), 'readingleft' => $str('readingleft'), 'readingplay' => $str('readingplay'),
             'readingpause' => $str('readingpause'), 'readingbackdropunder' => $str('readingbackdropunder'),
+            'readingpartnosound' => $str('readingpartnosound'),
             'voicebackdropnone' => $str('voicebackdropnone'), 'readingchose' => $str('readingchose'),
             'readingchosenone' => $str('readingchosenone'), 'readingtheirs' => $str('readingtheirs'),
             'readingsomeone' => $str('readingsomeone'), 'readingwith' => $str('readingwith'),

@@ -103,9 +103,10 @@ foreach ($groups as $index => $row) {
     $userid = (int) $row['userid'];
     $gone = $userid && !isset($candidates[$userid]) ? core_user::get_user($userid) : null;
     $name = $userid ? ($candidates[$userid] ?? ($gone ? $str('tutorgone', fullname($gone)) : '')) : '';
-    $with += $userid && !$row['proposed'] ? 1 : 0;
+    // A tutor who is no longer here leaves the group without one: it is not counted, and it is marked like an empty one.
+    $with += $userid && !$row['proposed'] && !$gone ? 1 : 0;
     $proposed += $row['proposed'] ? 1 : 0;
-    if (!$userid && $missing === null) {
+    if ((!$userid || $gone) && $missing === null) {
         $missing = $index;
     }
     $stage = (string) ($row['stage'] ?? '');
@@ -116,7 +117,7 @@ foreach ($groups as $index => $row) {
         'url' => $back(['grupo' => $index], 'ayv-tu-bandeja')->out(false),
         'group' => $row['group'],
         'who' => $userid ? $name : $str('tutornone'),
-        'none' => !$userid,
+        'none' => !$userid || (bool) $gone,
         'proposed' => (bool) $row['proposed'],
         'chosen' => $index === $open,
         'aria' => $str('tutorscardaria', (object) ['group' => $row['group'], 'who' => $userid ? $name : $str('tutornone')]),

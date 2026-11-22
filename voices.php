@@ -121,6 +121,22 @@ foreach ($cards as $group) {
     usort($group, fn($a, $b) => [(int) $a->part, (int) $a->timecreated] <=> [(int) $b->part, (int) $b->timecreated]);
     $item = $group[0];
     $who = $item->readerid ? $desk->reader((int) $item->readerid) : ['name' => '', 'group' => '', 'type' => 'staff'];
+    // Someone of the staff who recorded says so: never a voice without who read it.
+    if (!$item->readerid && $item->createdby && ($by = core_user::get_user((int) $item->createdby))) {
+        $who['name'] = $str('voicebystaff', fullname($by));
+    }
+    // A part read twice: the newest take replaces the other once approved, and the page says which is which.
+    $takes = array_count_values(array_map(fn($v) => (string) $v->part, $group));
+    $seen = [];
+    $parts = [];
+    foreach (array_reverse($group) as $v) {
+        $twice = $v->part !== null && $takes[(string) $v->part] > 1;
+        $newest = $twice && !isset($seen[(string) $v->part]);
+        $seen[(string) $v->part] = true;
+        $parts[] = ['partid' => (int) $v->id, 'parttitle' => voices::part_label($v), 'parturl' => digital::file_url($v),
+            'parttake' => $twice ? $str($newest ? 'voicetakenewer' : 'voicetakeolder') : ''];
+    }
+    $parts = array_reverse($parts);
     $share = voices::may_share($item);
     // A family who recorded with a link chose who else may hear it: that is the most the approval gives.
     $invite = voices::invite_of((int) $item->id);
@@ -152,9 +168,9 @@ foreach ($cards as $group) {
         'marks' => $item->forlittle ? ['bud' => \local_oksigeniaayvurenda\local\screens::art('carne/flor/capullo'),
             'little' => $str('voicemarklittle'), 'family' => $item->tellfamily ? $str('voicemarkfamily') : ''] : null,
         'hasparts' => count($group) > 1,
-        'parts' => count($group) > 1 ? array_map(fn($v) => ['partid' => (int) $v->id, 'parttitle' => voices::part_label($v),
-            'parturl' => digital::file_url($v)], $group) : [],
-        'approvelabel' => count($group) > 1 ? $str('voiceapproveall', count($group)) : $str('voiceapprove'),
+        'parts' => count($group) > 1 ? $parts : [],
+        // What stays once approved: the parts, not the takes.
+        'approvelabel' => count($group) > 1 ? $str('voiceapproveparts', count($takes)) : $str('voiceapprove'),
     ];
     if (count($group) > 1) {
         $pending[count($pending) - 1]['title'] = $str('voicereadingnew', count($group));

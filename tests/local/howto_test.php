@@ -131,7 +131,7 @@ final class howto_test extends \advanced_testcase {
         // A teacher who only sees the library: only what is theirs.
         $teacher = $this->getDataGenerator()->create_user();
         $keys = array_column(howto::find('', $library, (int) $teacher->id), 'key');
-        $this->assertSame(array_merge(['myclass', 'stacks'], array_values($readers)), $keys);
+        $this->assertSame(array_merge(['myclass', 'booklets', 'stacks'], array_values($readers)), $keys);
         $this->assertSame('readerhold', howto::find('reserve a book that is out', $library, (int) $teacher->id)[0]['key']);
     }
 

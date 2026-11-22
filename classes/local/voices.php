@@ -209,6 +209,39 @@ final class voices {
     }
 
     /**
+     * Tells whoever recorded a voice that it sounds in the library now, with the way to hear it.
+     *
+     * @param \stdClass $item
+     * @param \stdClass $library
+     * @return bool
+     */
+    private static function tell_published(\stdClass $item, \stdClass $library): bool {
+        global $DB;
+        $user = \core_user::get_user((int) $item->createdby);
+        if (!$user || $user->deleted || $user->suspended) {
+            return false;
+        }
+        $language = force_current_language((string) $user->lang);
+        $title = (string) $DB->get_field(self::T . 'record', 'title', ['id' => $item->recordid]);
+        $reading = $item->part !== null;
+        $url = (new \moodle_url(
+            '/local/oksigeniaayvurenda/' . ($reading ? 'read.php' : 'record.php'),
+            ['library' => $library->slug, 'id' => $reading ? (int) $item->id : (int) $item->recordid]
+        ))->out(false);
+        $sent = notices::send(
+            'voicepublished',
+            $user,
+            get_string('voicepublishedsubject', 'local_oksigeniaayvurenda', $title),
+            get_string('voicepublishedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => $url]),
+            $url,
+            $title,
+            (string) (mail::main_library((int) $item->entityid)->name ?? $library->name)
+        );
+        force_current_language($language);
+        return $sent;
+    }
+
+    /**
      * Sends a family, once, the link that deletes what they recorded; the address is not kept.
      *
      * @param \stdClass $item
@@ -378,7 +411,7 @@ final class voices {
      * @param int|null $now
      */
     public static function approve(int $id, \stdClass $library, array $data, ?int $now = null): void {
-        global $DB;
+        global $DB, $USER;
         $item = digital::get($id, $library);
         $licence = in_array($data['licence'] ?? '', digital_rules::LICENCES, true) ? $data['licence'] : 'rights';
         // Nobody beyond the recorder and their teachers unless it may be shared, and then only whom was chosen.
@@ -394,6 +427,16 @@ final class voices {
         if ($invite) {
             $audience = array_values(array_intersect($audience, explode(',', (string) $invite->audience)));
         }
+        // Whoever recorded hears that it sounds now: once a reading (its first part approved in a while), never for their
+        // own approval, and never again when an approved voice is approved anew.
+        $tell = $item->status === 'pending' && $item->createdby && (int) $item->createdby !== (int) ($USER->id ?? 0)
+            && !($item->part !== null && $DB->record_exists_select(
+                self::T . 'digital',
+                "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL
+                    AND status = 'published' AND id <> :id AND timemodified >= :since",
+                ['entityid' => $library->entityid, 'recordid' => $item->recordid, 'userid' => $item->createdby, 'id' => $id,
+                    'since' => ($now ?? time()) - 12 * HOURSECS]
+            ));
         $class = in_array('class', $audience, true) ? $class : null;
         digital::update($id, $library, ['title' => $item->title, 'licence' => $licence, 'download' => 0], $now);
         $DB->update_record(self::T . 'digital', (object) ['id' => $id, 'status' => 'published',
@@ -402,6 +445,9 @@ final class voices {
             'signature' => array_key_exists('signature', $data) ? self::signature((string) $data['signature'])
                 : $item->signature]);
         \local_oksigeniaayvurenda\event\voice_published::fire((int) $library->entityid, $id);
+        if ($tell) {
+            self::tell_published($item, $library);
+        }
         // The book has had a voice since it was recorded, and keeps it in its challenges' squares if the voice goes.
         if ($audience) {
             $DB->set_field_select(

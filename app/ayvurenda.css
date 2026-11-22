@@ -2134,6 +2134,9 @@ html[data-bs-theme="dark"] .ayv .ayv-recorder { color-scheme: light; }
     color: var(--ink);
     cursor: pointer;
 }
+/* A part without a sound: the switch says so and rests. */
+.ayv .ayv-oye-fondo:disabled { cursor: default; }
+.ayv .ayv-oye-fondo:disabled .ayv-oye-int { opacity: .35; }
 .ayv .ayv-oye-fondo .ayv-oye-int {
     position: relative;
     width: 36px;
@@ -8491,11 +8494,11 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     opacity: .75;
 }
 
-/* The barcode of a sample or of a label on the first sheet: the real one, drawn small. */
+/* The barcode of a sample or of a label on the first sheet: the real one, drawn small, its figures under it readable. */
 .ayv .ayv-et-codigo {
     display: block;
     width: 80%;
-    height: 2.2em;
+    height: 2.9em;
 }
 
 .ayv .ayv-et-codigo svg {
@@ -9157,6 +9160,27 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 
 .ayv .ayv-st-acta:hover {
     box-shadow: 0 0 0 1.5px var(--green);
+}
+
+/* The one half done, on top: bigger, with its way on as a button (the review of 21 Nov 2026). */
+.ayv .ayv-st-amedias {
+    margin: 0 0 1.75rem;
+}
+
+.ayv .ayv-st-amedias .ayv-st-acta {
+    gap: 6px;
+    padding: 16px 18px 16px 22px;
+}
+
+.ayv .ayv-st-amedias .ayv-st-acta b {
+    font-size: 1.25rem;
+}
+
+.ayv .ayv-st-amedias .ayv-st-acta span.ayv-button {
+    justify-self: start;
+    margin-top: 6px;
+    color: #fff;
+    font-size: 1rem;
 }
 
 @media (max-width: 900px) {

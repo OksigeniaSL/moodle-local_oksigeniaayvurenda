@@ -56,6 +56,8 @@ final class howto {
         'reviews' => ['reviews.php', 'desk', 'reviews'],
         'wishes' => ['wishes.php', 'desk', 'wishes'],
         'myclass' => ['class.php', 'view', 'myclass'],
+        // The year's booklets, the book of the week and recording as staff (the review of 21-11: no task found them).
+        'booklets' => ['class.php', 'view', ''],
         'stacks' => ['stacks.php', 'view', 'stacks'],
         'posters' => ['posters.php', 'catalogue', ''],
         'reports' => ['reports.php', 'desk', 'reports'],
@@ -96,6 +98,8 @@ final class howto {
         'scanner' => ['phone.php', 'desk', ''],
         'settings' => ['howitworks.php', 'manage', ''],
         'voices' => ['voices.php', 'desk', 'voices'],
+        'staffvoice' => ['search.php', 'desk', ''],
+        'weekpick' => ['search.php', 'desk', ''],
         'match' => ['match.php', 'manage', ''],
         'readerslist' => ['readerslist.php', 'manage', 'readerslist'],
         'quests' => ['quests.php', 'manage', ''],
@@ -133,8 +137,8 @@ final class howto {
         'challenges' => 'challenges'];
 
     /** @var string[] The tasks that need classes, or courses, to mean anything. */
-    private const ONLY_WITH = ['myclass' => 'classes', 'wishes' => 'classes', 'tutors' => 'classes', 'bank' => 'classes',
-        'bankround' => 'classes', 'readings' => 'courses', 'roster' => 'courses', 'shareclass' => 'courses'];
+    private const ONLY_WITH = ['myclass' => 'classes', 'booklets' => 'classes', 'wishes' => 'classes', 'tutors' => 'classes',
+        'bank' => 'classes', 'bankround' => 'classes', 'readings' => 'courses', 'roster' => 'courses', 'shareclass' => 'courses'];
 
     /** @var array[] Each guided help: the permission it needs, the screen it plays on and how many steps it says. */
     public const PIECES = [

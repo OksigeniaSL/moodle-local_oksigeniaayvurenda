@@ -68,7 +68,7 @@
     {{#who}}<p>{{who}}</p>{{/who}}
     {{^hasparts}}<audio class="ayv-media" controls preload="metadata" src="{{url}}"></audio>{{/hasparts}}
     {{#hasparts}}<ol class="ayv-vp-review">
-        {{#parts}}<li><p class="ayv-vp-review-title"><b>{{parttitle}}</b></p>
+        {{#parts}}<li><p class="ayv-vp-review-title"><b>{{parttitle}}</b>{{#parttake}} <span class="ayv-field-hint">{{parttake}}</span>{{/parttake}}</p>
             <audio class="ayv-media" controls preload="metadata" src="{{parturl}}"></audio>
             <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{partid}}">
                 <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="reject">{{voicereject}}</button></form></li>{{/parts}}

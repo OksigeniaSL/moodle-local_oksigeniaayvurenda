@@ -122,9 +122,14 @@ if (!$id) {
             'spines' => stockplan::spines(0, 0), 'quiet' => true],
         'furniture' => array_map(fn($f) => $f + ['says' => $str('stocktakebooks', '<b>' . $f['countlabel'] . '</b>'),
             'quiet' => true], $furniture),
+        // The one half done, on top with the way on; the shelves under it start another; before, only the closed ones.
+        'halfway' => array_values(array_filter($minutes, fn($m) => $m['open'])),
+        'hashalfway' => (bool) array_filter($minutes, fn($m) => $m['open']),
+        'halfwaytitle' => $str('stocktakehalfway'),
+        'startother' => $str('stocktakestartother'),
         'before' => $str('stocktakebefore'),
-        'minutes' => $minutes,
-        'hasminutes' => (bool) $minutes,
+        'minutes' => array_values(array_filter($minutes, fn($m) => !$m['open'])),
+        'hasminutes' => (bool) array_filter($minutes, fn($m) => !$m['open']),
     ];
     $main = $OUTPUT->render_from_template('local_oksigeniaayvurenda/stocktakes', $data);
     shell::output($str('stocktaketitle'), $main, $library, '', ['search' => false, 'nav' => [
