@@ -3204,10 +3204,6 @@ html[data-bs-theme="dark"] .ayv .ayv-featured .ayv-button { background: var(--pa
 .ayv .ayv-review-card form { margin-top: .4rem; }
 
 /* The class reward: each challenge met, what the class chose or the form to choose it. */
-.ayv .ayv-reward { margin: 0 0 .9rem; padding: .9rem 1.1rem; border-radius: 16px; background: var(--paper2); }
-.ayv .ayv-reward-label { margin: 0 0 .3rem; font-weight: 700; color: var(--accent); }
-.ayv .ayv-reward-state { margin: 0; }
-.ayv .ayv-reward-form { display: grid; gap: .6rem; margin-top: .5rem; }
 /* In a grid of words, «Listen» keeps its own width. */
 .ayv .ayv-duo-words .ayv-listen, .ayv .ayv-challenge-text .ayv-listen { justify-self: start; margin-top: .3rem; }
 
@@ -14349,3 +14345,134 @@ html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
 .ayv .ayv-stop-lead { margin: 0 0 1.25rem; font-size: 1.1rem; }
 .ayv .ayv-stop-form { margin: 0 0 1rem; }
 .ayv .ayv-stop-hint { margin: 0; color: var(--ink-2); font-size: .95rem; }
+
+/* ---------- «El premio de la clase» as a request slip of the library (1.2.11) ----------
+   The card of a card catalogue: ruled lines, the red line at its head and the hole at its foot. What the class chose is
+   written by hand on its lines (Caveat), and each state is a rubber stamp. A plate: cream in dark mode too. */
+.ayv .ayv-ficha {
+    --ficha-papel: #fffaf0;
+    --ficha-linea: rgba(70, 120, 170, .22);
+    --ficha-roja: #d9534f;
+    --ficha-tinta: #1e2b2a;
+    --ficha-mano: #23466e;
+    position: relative;
+    margin: .5rem 0 1.25rem;
+    padding: 1.1rem 1.4rem 2.4rem;
+    border-radius: 6px;
+    color: var(--ficha-tinta);
+    color-scheme: light;
+    background: var(--ficha-papel);
+    box-shadow: 0 1px 0 rgba(30, 43, 42, .06), 0 12px 24px -16px rgba(40, 30, 10, .45), 3px 3px 0 -1px #efe6d3;
+}
+/* The hole of the card catalogue's rod. */
+.ayv .ayv-ficha::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: .7rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-left: -.55rem;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25);
+}
+.ayv .ayv-ficha-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .2rem 1rem;
+    padding-bottom: .5rem;
+    border-bottom: 2px solid var(--ficha-roja);
+}
+.ayv .ayv-ficha-tipo { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #b3322e; }
+.ayv .ayv-ficha-quien { font-weight: 700; }
+.ayv .ayv-ficha-cuerpo { display: grid; gap: .1rem; margin-top: .55rem; }
+/* Each line: its small printed word on the left (the same width on every line), and what is written by hand on its
+   ruled line. */
+.ayv .ayv-ficha-linea {
+    display: grid;
+    grid-template-columns: 10.5rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: .8rem;
+    margin: 0;
+    border-bottom: 1px solid var(--ficha-linea);
+}
+.ayv .ayv-ficha-linea > span { padding-top: .55rem; font-size: .8rem; font-weight: 700; color: #4f5755; }
+.ayv .ayv-ficha-mano {
+    width: 100%;
+    min-height: 2.4rem;
+    margin: 0;
+    padding: .2rem .2rem 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--ficha-mano);
+    font: 700 1.55rem/2.2rem "Caveat", "Comic Sans MS", cursive;
+    resize: none;
+}
+/* The note: lined as the card, two lines to write on. */
+.ayv textarea.ayv-ficha-mano {
+    min-height: 4.6rem;
+    background: repeating-linear-gradient(to bottom, transparent 0 calc(2.2rem - 1px), var(--ficha-linea) calc(2.2rem - 1px) 2.2rem) 0 .2rem / 100% 100% no-repeat;
+}
+.ayv .ayv-ficha-mano::placeholder { color: rgba(35, 70, 110, .5); font-size: 1.2rem; }
+.ayv .ayv-ficha-mano:focus { outline: none; background-color: rgba(240, 180, 60, .14); box-shadow: 0 2px 0 var(--sun); }
+.ayv p.ayv-ficha-mano { overflow-wrap: anywhere; }
+.ayv .ayv-ficha-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .6rem 1rem;
+    margin-top: .9rem;
+}
+.ayv .ayv-ficha-pie p { flex: 1 1 14rem; margin: 0; color: #4a5451; font-size: .92rem; }
+/* Sending is stamping it: the button as the library's stamp, still to press. */
+.ayv .ayv-ficha-enviar {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.75rem;
+    padding: 0 1.2rem;
+    border: 2px solid #17574c;
+    border-radius: 10px;
+    background: #17574c;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #0f3d35;
+}
+.ayv .ayv-ficha-enviar:active { transform: translateY(2px); box-shadow: 0 1px 0 #0f3d35; }
+/* The stamps of each state, in rubber ink, a little crooked. */
+.ayv .ayv-sello {
+    position: absolute;
+    top: 3.6rem;
+    right: 1.4rem;
+    display: grid;
+    justify-items: center;
+    padding: .35rem .8rem .3rem;
+    border: 3px double currentColor;
+    border-radius: 8px;
+    transform: rotate(-7deg);
+    opacity: .9;
+    font: 800 1.05rem/1.05 "Andika", sans-serif;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+}
+.ayv .ayv-sello small { font-size: .7rem; letter-spacing: .06em; }
+.ayv .ayv-sello.is-pedido { color: #2f5aa8; }
+.ayv .ayv-sello.is-llegado { color: #1f7a4d; }
+.ayv .ayv-sello.is-no { color: #c0392b; transform: rotate(-4deg); }
+.ayv .ayv-ficha.is-no .ayv-ficha-escrito { text-decoration: line-through 2px rgba(192, 57, 43, .7); }
+@media (max-width: 36rem) {
+    .ayv .ayv-ficha { padding: 1rem 1rem 2.4rem; }
+    .ayv .ayv-ficha-linea { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .ayv .ayv-ficha-linea > span { padding: .5rem 0 0; }
+    /* On a phone the head takes two lines: the stamp goes in the flow, under what is written, to the right. */
+    .ayv .ayv-sello { position: static; width: max-content; margin: .7rem 0 0 auto; font-size: .9rem; }
+}

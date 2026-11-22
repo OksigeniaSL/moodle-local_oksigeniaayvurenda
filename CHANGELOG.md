@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.11 (2026-11-23)
+
+- **«The class's prize» is a request slip of the library**, not a form: a card of the card catalogue, cream also in
+  dark mode, with its red line, its ruled lines and the hole of the rod; what the class chose is written by hand on its
+  lines, and «Send to the library» is a stamp to press. Each state is a rubber stamp with its date: «Asked», «It is
+  here», «It could not be», with the title crossed out and a new slip underneath to choose another.
+- A blank line too many in a file header, which the newer code checker flags.
+
 ## 1.2.10 (2026-11-23)
 
 - **The card speaks to who does not read yet**: on a young reader's card (the flower), the class's ship is said by the

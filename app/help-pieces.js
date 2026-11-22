@@ -904,13 +904,13 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.type('.ayv-reward-form input[name="title"]', h.codes.wish);
+            return h.type('.ayv-ficha form input[name="title"]', h.codes.wish);
         }).then(function() {
             return h.say(2);
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.go('.ayv-reward-form button[type="submit"]');
+            return h.go('.ayv-ficha form button[type="submit"]');
         }).then(function() {
             return h.point(second + '.ayv-bc-retos');
         }).then(function() {

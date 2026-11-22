@@ -30,6 +30,7 @@ use local_oksigeniaayvurenda\local\screens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\wishes;
 use local_oksigeniaayvurenda\local\years;
+use local_oksigeniaayvurenda\local\zones;
 
 require(__DIR__ . '/../../config.php');
 
@@ -136,12 +137,29 @@ foreach ($shown as $i => $group) {
     foreach (wishes::rewards($entityid, $group, $now) as $reward) {
         $wish = $reward['wish'];
         $boat = $boat || ($wish && $wish->status === 'got');
+        // A request slip of the library: what the class chose, written on its lines, and a rubber stamp for each state.
+        $stamped = $wish ? (int) ($wish->status === 'asked' ? $wish->timemodified : $wish->timedecided) : 0;
         $rewards[] = [
             'challengeid' => (int) $reward['challenge']->id,
-            'label' => $str('challengeplanted', $reward['challenge']->term) . ' · ' .
+            'who' => $group . ' · ' . $str('challengeplanted', $reward['challenge']->term) . ' · ' .
                 $str('challengekind' . $reward['challenge']->kind),
             'ask' => $pupil === null && (!$wish || $wish->status === 'declined'),
-            'state' => $wish ? $str('wishstate' . $wish->status, format_string($wish->title, true, ['escape' => false])) : '',
+            'written' => (bool) $wish,
+            'declined' => $wish && $wish->status === 'declined',
+            'booktitle' => $wish ? format_string($wish->title, true, ['escape' => false]) : '',
+            'booknote' => $wish ? format_string((string) $wish->note, true, ['escape' => false]) : '',
+            'stamp' => $wish ? $str(match ($wish->status) {
+                'got' => 'wishesgot',
+                'declined' => 'wishesdeclined',
+                default => 'wishstamp',
+            }) : '',
+            'stampkind' => $wish ? match ($wish->status) {
+                'got' => 'llegado',
+                'declined' => 'no',
+                default => 'pedido',
+            } : '',
+            'stampday' => $stamped && $wish->status !== 'declined' ? zones::date($stamped, 'strftimedateshort', $entityid) : '',
+            'state' => $wish ? $str('wishstate' . $wish->status . 'short') : '',
         ];
     }
     $data[] = [
@@ -285,7 +303,9 @@ shell::output($str('classtitle'), $OUTPUT->render_from_template('local_oksigenia
     'shelfnext' => $str('shelfnext'),
     'rewardheading' => $str('rewardheading'),
     'rewardhint' => $str('rewardhint'),
-    'wishtitle' => $str('wishtitle'),
+    'wishslip' => $str('wishslip'),
+    'wishbook' => $str('wishbook'),
+    'wishbookhint' => $str('wishbookhint'),
     'wishnote' => $str('wishnote'),
     'wishnotehint' => $str('wishnotehint'),
     'wishsend' => $str('wishsend'),

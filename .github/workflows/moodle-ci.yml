@@ -1,25 +1,19 @@
 # Moodle Plugin CI — the suite that Moodle Marketplace reviewers expect (validate, lint, codechecker, phpdoc,
 # savepoints, mustache, grunt) plus the plugin's PHPUnit and Behat tests.
 #
-# Pushes and pull requests run a short matrix (the lowest supported branch, 5.2 and the highest); once a week, tags or
-# a manual run go through every branch of the supported range, 5.0 and 5.1 too, plus main. main tracks the next Moodle
-# release and is allowed to fail, so upstream breakage shows up early.
+# Only as the final check of a version: every push is checked first on the laptop, with the same checks, and goes up
+# only in green; the minutes of Actions are not spent finding what the laptop finds in seconds. A version tag
+# (v*) runs a short matrix (the lowest and the highest supported branch, plus MariaDB); a manual run goes through every
+# branch of the supported range and main, once, before a release goes to the Moodle Marketplace. main tracks the next
+# Moodle release and is allowed to fail, so upstream breakage shows up early.
 #
 # Reference template: https://github.com/moodlehq/moodle-plugin-ci
 name: Moodle Plugin CI
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
-    # What is not code does not run the suite: the minutes of Actions are counted.
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.gitignore', 'provenance/**']
-  pull_request:
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.gitignore', 'provenance/**']
   workflow_dispatch:
-  # Every Monday, the whole range: what a centre on 5.0 or 5.1 runs is tested too, a few minutes a week.
-  schedule:
-    - cron: '17 5 * * 1'
 
 # A new push cancels the run of the one before it on the same branch, which nobody needs any more.
 concurrency:
@@ -40,10 +34,10 @@ jobs:
           b502='{"moodle-branch":"MOODLE_502_STABLE","php":"8.3","node":"22"}'
           high='{"moodle-branch":"MOODLE_503_STABLE","php":"8.3","node":"22","pg":"17"}'
           next='{"moodle-branch":"main","php":"8.4","node":"22","pg":"17","experimental":true}'
-          if [[ "$GITHUB_REF" == refs/tags/* || "$GITHUB_EVENT_NAME" == workflow_dispatch || "$GITHUB_EVENT_NAME" == schedule ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
             echo "include=[$low,$b500,$b501,$b502,$high,$next]" >> "$GITHUB_OUTPUT"
           else
-            echo "include=[$low,$b502,$high]" >> "$GITHUB_OUTPUT"
+            echo "include=[$low,$high]" >> "$GITHUB_OUTPUT"
           fi
 
   # The plugin's own scripts in app/, which the grunt step of moodle-plugin-ci does not look at (it reads amd/ only).

@@ -39,8 +39,9 @@
                 "steps": null}],
             "board": null,
             "garden": [{"label": "Trimestre 1 · Rincones"}], "hasgarden": true, "island": null, "cards": [], "hasreads": false,
-            "hasrewards": true, "rewards": [{"challengeid": 4, "label": "Trimestre 1 · Rincones", "ask": true, "state": ""}]}],
-        "rewardheading": "El premio de la clase", "rewardhint": "Más lectura.", "wishtitle": "El libro", "wishnote": "Por qué",
+            "hasrewards": true, "rewards": [{"challengeid": 4, "who": "2.º B · Trimestre 1 · Rincones", "ask": true, "written": false, "declined": false, "booktitle": "", "booknote": "", "stamp": "", "stampkind": "", "stampday": "", "state": ""}]}],
+        "rewardheading": "El premio de la clase", "rewardhint": "Más lectura.", "wishslip": "Petición de la clase", "wishbook": "El libro que eligieron",
+        "wishbookhint": "el título y, si lo sabes, quién lo escribió", "wishnote": "Por qué",
         "wishnotehint": "Opcional.", "wishsend": "Enviar"
     }
 }}
@@ -86,18 +87,27 @@
     {{#hasrewards}}
     <h3 class="ayv-section-title">{{rewardheading}}</h3>
     <p class="ayv-field-hint">{{rewardhint}}</p>
-    {{#rewards}}<div class="ayv-reward">
-        <p class="ayv-reward-label">{{label}}</p>
-        {{#state}}<p class="ayv-reward-state">{{state}}</p>{{/state}}
-        {{#ask}}<form method="post" action="{{action}}" class="ayv-reward-form">
+    {{#rewards}}
+    {{#written}}<article class="ayv-ficha{{#declined}} is-no{{/declined}}">
+        <header class="ayv-ficha-cabeza"><span class="ayv-ficha-tipo">{{wishslip}}</span><span class="ayv-ficha-quien">{{who}}</span></header>
+        <div class="ayv-ficha-cuerpo">
+            <div class="ayv-ficha-linea"><span>{{wishbook}}</span><p class="ayv-ficha-mano ayv-ficha-escrito">{{booktitle}}</p></div>
+            {{#booknote}}<div class="ayv-ficha-linea"><span>{{wishnote}}</span><p class="ayv-ficha-mano">{{booknote}}</p></div>{{/booknote}}
+        </div>
+        <span class="ayv-sello is-{{stampkind}}">{{stamp}}{{#stampday}}<small>{{stampday}}</small>{{/stampday}}</span>
+        <div class="ayv-ficha-pie"><p>{{state}}</p></div>
+    </article>{{/written}}
+    {{#ask}}<article class="ayv-ficha">
+        <header class="ayv-ficha-cabeza"><span class="ayv-ficha-tipo">{{wishslip}}</span><span class="ayv-ficha-quien">{{who}}</span></header>
+        <form method="post" action="{{action}}" class="ayv-ficha-cuerpo">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
             <input type="hidden" name="challengeid" value="{{challengeid}}"><input type="hidden" name="do" value="wish">
-            <label class="ayv-field ayv-field-wide">{{wishtitle}} <input type="text" name="title" maxlength="255" required></label>
-            <label class="ayv-field ayv-field-wide">{{wishnote}} <span class="ayv-field-hint">{{wishnotehint}}</span>
-                <input type="text" name="note" maxlength="255"></label>
-            <p class="ayv-book-actions"><button type="submit" class="ayv-button">{{wishsend}}</button></p>
-        </form>{{/ask}}
-    </div>{{/rewards}}
+            <label class="ayv-ficha-linea"><span>{{wishbook}}</span><input class="ayv-ficha-mano" type="text" name="title" maxlength="255" required placeholder="{{wishbookhint}}"></label>
+            <label class="ayv-ficha-linea"><span>{{wishnote}}</span><textarea class="ayv-ficha-mano" name="note" maxlength="255" rows="2" placeholder="{{wishnotehint}}"></textarea></label>
+            <div class="ayv-ficha-pie"><button type="submit" class="ayv-ficha-enviar">{{wishsend}}</button></div>
+        </form>
+    </article>{{/ask}}
+    {{/rewards}}
     {{/hasrewards}}
     <h3 class="ayv-section-title">{{readsheading}}</h3>
     <p class="ayv-field-hint">{{readshint}}</p>

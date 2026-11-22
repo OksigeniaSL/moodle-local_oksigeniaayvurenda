@@ -24,7 +24,6 @@
 
 namespace local_oksigeniaayvurenda\local;
 
-
 /**
  * A machine is one more self-loan post: it uses the address of a post, through a small bridge that runs in the library
  * (sip2-bridge/), with the same rules, limits and record, and whatever it does can be undone from the post's page. It
