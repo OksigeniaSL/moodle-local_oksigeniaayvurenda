@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.5 (2026-11-22)
+
+The rest of the second part of the review of 21 November: scale, and the low faults.
+
+- **A booklet's link can be taken back.** A reader of twelve or over decides while their card shows the booklet, also
+  once it went: turned off, the link their family got stops opening; turned on again, they get a new one the next
+  morning. A centre that stops sending booklets, or closes, takes back the links it sent. Links sent before keep
+  opening.
+- **The farewell booklet reaches the family** also when the child left it the night before (their account suspended
+  when the source dropped them), with an Oksigenia Family that can say so.
+- **The square «a book with a voice» stays filled** if the voice goes later: the book keeps since when it had one.
+- **The challenge card is full on the earliest day it could be**, and a loan that counted keeps counting.
+- **Scale.** A reading in parts asks once what is the same for all its parts, not once per part. A booklet's cover is
+  drawn once; the morning task stops asking every day about the booklets waiting for their reader's yes, and makes a
+  centre's booklets in two queries. Approving a voice starts again the moments of its centre only. «Imported», the
+  first books and the challenge squares are counted the way the indexes go.
+- In the family's app, the covers of a list come as narrow as they are drawn.
+- On iPhone and iPad, the sample of a reading's sound is heard soft, or not at all, never loud.
+
 ## 1.2.4 (2026-11-21)
 
 - **Readers from Cifra:** a student's brothers and sisters, a relative who is a student and one whose account has left

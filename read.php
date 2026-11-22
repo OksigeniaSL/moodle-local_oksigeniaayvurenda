@@ -52,7 +52,8 @@ $anyone = (!isloggedin() || isguestuser()) && window::shows($item);
 if (!$anyone) {
     require_login(null, false);
     shell::require('local/oksigeniaayvurenda:view', $library);
-    if (!digital::visible($item, digital::viewer((int) $library->entityid, (int) $USER->id))) {
+    $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
+    if (!digital::visible($item, $viewer)) {
         shell::refuse(get_string('readnotforyou', 'local_oksigeniaayvurenda'), $library);
     }
 }
@@ -64,13 +65,13 @@ $candownload = digital_rules::can_download($item->licence, (bool) $item->downloa
 $reading = null;
 $parts = [];
 if (!$anyone && $item->kind === 'voice' && $item->part !== null && $item->createdby) {
-    $viewer = digital::viewer((int) $library->entityid, (int) $USER->id);
-    $siblings = array_values(array_filter($DB->get_records_select(
+    // What is the same for every part (whose it is, their class) is asked once, not once per part.
+    $siblings = voices::audible(array_values($DB->get_records_select(
         'local_oksigeniaayvurenda_digital',
         "entityid = :entityid AND recordid = :recordid AND kind = 'voice' AND createdby = :userid AND part IS NOT NULL",
         ['entityid' => $library->entityid, 'recordid' => $item->recordid, 'userid' => $item->createdby],
         'timecreated, id'
-    ), fn($v) => digital::visible($v, $viewer)));
+    )), $viewer);
     $parts = $siblings ? voices::readings($siblings)[0]['parts'] : [];
 }
 if ($parts) {

@@ -106,4 +106,28 @@ final class timely_test extends \advanced_testcase {
         $this->assertTrue(booklet::on($entityid));
         $this->assertFalse(timely::can_turn_on($library, 'yearend'));
     }
+
+    /**
+     * «Imported» counts the copies of the centre's libraries that came in since the day of the import, not those of
+     * other centres (the review of 21-11, E7: by the index of the copies).
+     */
+    public function test_imported(): void {
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        set_config('enabled_stores', 'logstore_standard', 'tool_log');
+        set_config('buffersize', 0, 'logstore_standard');
+        get_log_manager(true);
+        $this->setAdminUser();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $other = $gen->create_library();
+        $now = time();
+        foreach ([$library, $library, $other] as $where) {
+            $gen->create_item(['libraryid' => $where->id,
+                'recordid' => $gen->create_record(['entityid' => $where->entityid])->id]);
+        }
+        $this->assertNull(timely::situation($library, 'imported', $now));
+        \local_oksigeniaayvurenda\event\catalogue_imported::fire((int) $library->entityid, null, ['how' => 'abies']);
+        $this->assertSame(2, timely::situation($library, 'imported', $now)['count']);
+    }
 }

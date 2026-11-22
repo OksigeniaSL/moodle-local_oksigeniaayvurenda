@@ -241,9 +241,11 @@ final class covers {
      *
      * @param int $recordid
      * @param int $most Bytes it may have: a list of them carries smaller ones.
+     * @param int $width For a list, as wide as it is drawn there (in pixels, for the sharpest phone): a few kilobytes and
+     *     not the whole cover for each book, made once for each cover.
      * @return string A data address, or '' when it has none (or it is too big to carry).
      */
-    public static function inline(int $recordid, int $most = 200 * 1024): string {
+    public static function inline(int $recordid, int $most = 200 * 1024, int $width = 0): string {
         $file = get_file_storage()->get_file(
             \context_system::instance()->id,
             'local_oksigeniaayvurenda',
@@ -252,10 +254,50 @@ final class covers {
             '/',
             'cover.jpg'
         );
-        if (!$file || $file->get_filesize() > $most) {
+        if (!$file) {
+            return '';
+        }
+        if ($width > 0 && function_exists('imagecreatefromstring')) {
+            $cache = \cache::make('local_oksigeniaayvurenda', 'coverthumb');
+            $key = $file->get_contenthash() . '_' . $width;
+            $thumb = $cache->get($key);
+            if ($thumb === false) {
+                $thumb = (string) self::thumb($file->get_content(), $width);
+                $cache->set($key, $thumb);
+            }
+            if ($thumb !== '') {
+                return 'data:image/jpeg;base64,' . base64_encode($thumb);
+            }
+        }
+        if ($file->get_filesize() > $most) {
             return '';
         }
         return 'data:image/jpeg;base64,' . base64_encode($file->get_content());
+    }
+
+    /**
+     * A cover as wide as a list draws it, as JPEG; one already as narrow goes as it is.
+     *
+     * @param string $data
+     * @param int $width
+     * @return string|null
+     */
+    private static function thumb(string $data, int $width): ?string {
+        $size = @getimagesizefromstring($data);
+        if ($size === false) {
+            return null;
+        }
+        if ($size[0] <= $width) {
+            return $data;
+        }
+        $image = @imagecreatefromstring($data);
+        if (!$image) {
+            return null;
+        }
+        $image = imagescale($image, $width, max(1, (int) round($size[1] * $width / $size[0])));
+        ob_start();
+        imagejpeg($image, null, 78);
+        return (string) ob_get_clean();
     }
 
     /**

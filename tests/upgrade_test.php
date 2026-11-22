@@ -142,6 +142,7 @@ final class upgrade_test extends \advanced_testcase {
         foreach (['forlittle', 'tellfamily', 'timetold', 'part', 'backdrop', 'seconds'] as $name) {
             $dbman->drop_field($digital, new \xmldb_field($name));
         }
+        $dbman->drop_field(new \xmldb_table('local_oksigeniaayvurenda_record'), new \xmldb_field('timevoiced'));
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = $gen->create_library();
         $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Un libro largo']);
@@ -163,6 +164,8 @@ final class upgrade_test extends \advanced_testcase {
         );
         $this->assertSame([], $ours);
         $this->assertEquals(3, $DB->get_field('local_oksigeniaayvurenda_digital', 'part', ['id' => $voice]));
+        // The book with a voice someone hears says since when.
+        $this->assertEquals($now, $DB->get_field('local_oksigeniaayvurenda_record', 'timevoiced', ['id' => $record->id]));
     }
 
     /**

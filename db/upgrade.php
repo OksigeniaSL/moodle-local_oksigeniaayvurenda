@@ -897,6 +897,45 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112106, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112202) {
+        // A booklet that waits for its reader's yes says since when, and the morning task stops asking every day; and its
+        // link's seal gets a part of its own, so that one link can be taken back (those already sent go on opening).
+        $table = new xmldb_table('local_oksigeniaayvurenda_booklet');
+        $fields = [
+            new xmldb_field('timeasked', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'tellfamily'),
+            new xmldb_field('token', XMLDB_TYPE_CHAR, '16', null, null, null, null, 'timeasked'),
+        ];
+        foreach ($fields as $field) {
+            if ($dbman->table_exists($table) && !$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        // A book says since when it has had a voice someone could hear, so that the square it filled stays filled if the
+        // voice goes: from the voices there are now.
+        $table = new xmldb_table('local_oksigeniaayvurenda_record');
+        $field = new xmldb_field('timevoiced', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'searchtext');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $voiced = $DB->get_recordset_sql(
+            "SELECT recordid, MIN(timecreated) AS since
+               FROM {local_oksigeniaayvurenda_digital}
+              WHERE kind = 'voice' AND status = 'published' AND audience <> ''
+           GROUP BY recordid"
+        );
+        foreach ($voiced as $row) {
+            $DB->set_field_select(
+                'local_oksigeniaayvurenda_record',
+                'timevoiced',
+                (int) $row->since,
+                'id = :id AND (timevoiced IS NULL OR timevoiced > :since)',
+                ['id' => $row->recordid, 'since' => $row->since]
+            );
+        }
+        $voiced->close();
+        upgrade_plugin_savepoint(true, 2026112202, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

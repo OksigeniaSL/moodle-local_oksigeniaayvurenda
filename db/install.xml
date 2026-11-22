@@ -57,6 +57,7 @@
         <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="extra" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON: fields of its document type and the entity's own fields"/>
         <FIELD NAME="searchtext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Title, authors and subjects without accents or case, for word search"/>
+        <FIELD NAME="timevoiced" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Since when it has had a voice someone could hear, kept when the voice goes: a square of a challenge it filled stays filled"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
@@ -1139,6 +1140,8 @@
         <FIELD NAME="kind" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="year or life"/>
         <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="When it may go to the family"/>
         <FIELD NAME="tellfamily" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="A reader of twelve or over wants their family to get it"/>
+        <FIELD NAME="timeasked" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When it was found to wait for its reader's yes, so that each morning does not ask again"/>
+        <FIELD NAME="token" TYPE="char" LENGTH="16" NOTNULL="false" SEQUENCE="false" COMMENT="Part of its link's seal: a new one takes back the link already sent"/>
         <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When its family was told, or it was done without one"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>

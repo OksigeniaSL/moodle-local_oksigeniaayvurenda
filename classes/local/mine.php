@@ -41,6 +41,9 @@ final class mine {
     /** @var int Books read this year that a child's page shows with their covers. */
     private const READ_SHOWN = 8;
 
+    /** @var int How wide a cover goes in the app's lists, in pixels: 92 drawn, two pixels to one (kept covers are ~200). */
+    private const COVERWIDTH = 184;
+
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
 
@@ -311,7 +314,7 @@ final class mine {
                 $str
             ) {
                 // The cover of a young reader's book, small enough that five of them do not weigh down the page.
-                $cover = $young ? covers::inline((int) $book['recordid'], 60 * 1024) : '';
+                $cover = $young ? covers::inline((int) $book['recordid'], 60 * 1024, self::COVERWIDTH) : '';
                 $title = $young ? $book['title'] : $str(!empty($more['pickup']) ? 'mobilechildpickup' : 'mobilechildbook');
                 return ['title' => $title, 'detail' => $detail, 'date' => $date, 'urgent' => $urgent] + $more
                     + ($young ? ['method' => 'mobile_record_view', 'args' => ['library' => $where, 'id' => (int) $book['recordid']]]
@@ -404,7 +407,7 @@ final class mine {
                 bool $pickup,
                 array $order
             ) use ($young) {
-                $cover = $young ? covers::inline((int) $row['recordid'], 60 * 1024) : '';
+                $cover = $young ? covers::inline((int) $row['recordid'], 60 * 1024, self::COVERWIDTH) : '';
                 return ['title' => $young ? (string) $row['title'] : $title, 'detail' => $detail, 'urgent' => $urgent,
                     'pickup' => $pickup, 'hascover' => $cover !== '', 'cover' => $cover, 'opens' => $young, 'where' => $where,
                     'recordid' => $young ? (int) $row['recordid'] : 0, 'order' => $order];
@@ -471,7 +474,7 @@ final class mine {
         );
         $books = [];
         foreach (array_slice($rows, 0, self::READ_SHOWN) as $row) {
-            $cover = covers::inline((int) $row->id, 40 * 1024);
+            $cover = covers::inline((int) $row->id, 40 * 1024, self::COVERWIDTH);
             // Each with all its flags: a missing one would be looked for in the page around it.
             $books[] = ['title' => (string) $row->title, 'detail' => '', 'urgent' => false, 'pickup' => false,
                 'hascover' => $cover !== '', 'cover' => $cover, 'opens' => true, 'where' => (string) $row->slug,

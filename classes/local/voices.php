@@ -275,21 +275,27 @@ final class voices {
      *
      * @param \stdClass $item
      * @param array $viewer As digital::viewer() gives it.
+     * @param \Closure|null $once Keeps what is asked of the same reader or class within one look (audible()).
      * @return bool
      */
-    public static function can_hear(\stdClass $item, array $viewer): bool {
+    public static function can_hear(\stdClass $item, array $viewer, ?\Closure $once = null): bool {
+        $once = $once ?? fn(string $key, callable $ask) => $ask();
         $userid = (int) ($viewer['userid'] ?? 0);
         if (
-            $viewer['who'] === 'desk' || ($userid && (int) $item->createdby === $userid) || self::tutors($item, $userid)
+            $viewer['who'] === 'desk' || ($userid && (int) $item->createdby === $userid)
+                || $once('t' . $item->entityid . '/' . (int) $item->readerid, fn() => self::tutors($item, $userid))
                 || self::inviter($item, $userid)
         ) {
             return true;
         }
-        if ($item->status !== 'published' || !self::may_share($item)) {
+        if ($item->status !== 'published' || !$once('m' . (int) $item->readerid, fn() => self::may_share($item))) {
             return false;
         }
         // The class is an audience of voices only, which digital::audience() leaves out.
-        if (in_array('class', explode(',', (string) $item->audience), true) && self::in_class($item, $viewer)) {
+        if (
+            in_array('class', explode(',', (string) $item->audience), true)
+                && $once('c' . (int) $item->classyearid . '/' . $item->classgroup, fn() => self::in_class($item, $viewer))
+        ) {
             return true;
         }
         return digital_rules::can_see(
@@ -298,6 +304,25 @@ final class voices {
             $viewer['who'],
             $viewer['stage']
         );
+    }
+
+    /**
+     * The voices someone hears out of many, asking once what is the same for all of them (whose they are, their class):
+     * a reading in thirty parts is not thirty times the same questions.
+     *
+     * @param \stdClass[] $items
+     * @param array $viewer As digital::viewer() gives it.
+     * @return \stdClass[]
+     */
+    public static function audible(array $items, array $viewer): array {
+        $memo = [];
+        $once = function (string $key, callable $ask) use (&$memo) {
+            if (!array_key_exists($key, $memo)) {
+                $memo[$key] = $ask();
+            }
+            return $memo[$key];
+        };
+        return array_values(array_filter($items, fn($item) => self::can_hear($item, $viewer, $once)));
     }
 
     /**
@@ -345,6 +370,16 @@ final class voices {
             'signature' => array_key_exists('signature', $data) ? self::signature((string) $data['signature'])
                 : $item->signature]);
         \local_oksigeniaayvurenda\event\voice_published::fire((int) $library->entityid, $id);
+        // The book has had a voice since it was recorded, and keeps it in its challenges' squares if the voice goes.
+        if ($audience) {
+            $DB->set_field_select(
+                self::T . 'record',
+                'timevoiced',
+                (int) $item->timecreated,
+                'id = :id AND (timevoiced IS NULL OR timevoiced > :since)',
+                ['id' => $item->recordid, 'since' => $item->timecreated]
+            );
+        }
         // A part read again replaces, once approved, what was recorded of that part before; a newer one still waits.
         if ($item->part !== null && $item->createdby) {
             $older = $DB->get_records_select(
@@ -383,7 +418,7 @@ final class voices {
             }
         }
         // The home's board tells of a new voice now, not within the hour its moments are kept.
-        \cache::make('local_oksigeniaayvurenda', 'moments')->purge();
+        moments::changed((int) $library->entityid);
     }
 
     /**

@@ -724,7 +724,7 @@ final class catalogue {
     public static function purge(int $entityid): void {
         \cache::make('local_oksigeniaayvurenda', 'vocabulary')->delete_many([$entityid, 'subjects' . $entityid]);
         global $DB;
-        $keys = [$entityid . '_reading', $entityid . '_bank'];
+        $keys = [$entityid . '_reading', $entityid . '_bank', 'squares_' . $entityid];
         foreach ($DB->get_records(self::T . 'library', ['entityid' => $entityid], '', 'id, parentid') as $id => $one) {
             if (!empty($one->parentid)) {
                 $keys[] = $entityid . '_reading_' . $id;

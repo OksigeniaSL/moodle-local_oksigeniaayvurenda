@@ -184,6 +184,35 @@ final class moments_test extends \advanced_testcase {
     }
 
     /**
+     * A voice approved in a centre starts its moments again at once, and only its own: the other centres of the site keep
+     * theirs for the hour (the review of 21-11, E6).
+     */
+    public function test_changed_centre(): void {
+        global $DB;
+        $this->resetAfterTest();
+        force_current_language('en');
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $now = time();
+        $voice = function (int $entityid, string $title) use ($gen, $DB, $now) {
+            $record = $gen->create_record(['entityid' => $entityid, 'title' => $title]);
+            $DB->insert_record('local_oksigeniaayvurenda_digital', ['entityid' => $entityid, 'recordid' => $record->id,
+                'kind' => 'voice', 'format' => 'audio', 'title' => 'Entero', 'status' => 'published',
+                'audience' => 'students,public', 'licence' => 'pd', 'signature' => 'Ana', 'timecreated' => $now - HOURSECS,
+                'timemodified' => $now - HOURSECS]);
+        };
+        $one = $gen->create_library();
+        $other = $gen->create_library();
+        $kinds = fn($library) => array_column(moments::of($library, $now, true), 'kind');
+        $this->assertNotContains('voice', $kinds($one));
+        $this->assertNotContains('voice', $kinds($other));
+        $voice((int) $one->entityid, 'La isla del cometa');
+        $voice((int) $other->entityid, 'El faro de papel');
+        moments::changed((int) $one->entityid);
+        $this->assertContains('voice', $kinds($one), 'its centre, at once');
+        $this->assertNotContains('voice', $kinds($other), 'the other centre keeps its hour');
+    }
+
+    /**
      * Past four classes that met their challenge, how many of them, never «and so many more».
      */
     public function test_many_classes(): void {

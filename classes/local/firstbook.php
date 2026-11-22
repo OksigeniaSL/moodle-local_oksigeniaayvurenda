@@ -74,13 +74,27 @@ final class firstbook {
      */
     public static function due(int $now, ?array $centres = null, ?int $since = null): array {
         global $DB;
+        // By the libraries of the centres asked, as the index of the loans goes: not every loan of the site in the range.
+        if ($centres === null) {
+            $libraries = $DB->get_fieldset_select(self::T . 'library', 'id', '1 = 1');
+        } else if ($centres) {
+            [$incentre, $centreparams] = $DB->get_in_or_equal(array_map('intval', $centres), SQL_PARAMS_NAMED, 'fe');
+            $libraries = $DB->get_fieldset_select(self::T . 'library', 'id', "entityid $incentre", $centreparams);
+        } else {
+            $libraries = [];
+        }
+        if (!$libraries) {
+            return [];
+        }
+        [$inlib, $libparams] = $DB->get_in_or_equal($libraries, SQL_PARAMS_NAMED, 'fl');
         $rows = $DB->get_records_sql(
             "SELECT l.id, l.readerid, l.libraryid, l.timeloaned, i.recordid, rec.title, r.userid, r.entityid
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
-              WHERE l.timeloaned >= :since AND l.timeloaned < :now AND r.userid IS NOT NULL AND r.status = 'active'
+              WHERE l.libraryid $inlib AND l.timeloaned >= :since AND l.timeloaned < :now
+                    AND r.userid IS NOT NULL AND r.status = 'active'
                     AND r.readertype <> :ill AND " . bank::reading('l.libraryid') . "
                     AND NOT EXISTS (SELECT 1
                                       FROM {" . self::T . "loan} o
@@ -88,9 +102,9 @@ final class firstbook {
                                      WHERE o.readerid = l.readerid AND ob.kind <> :bank
                                            AND (o.timeloaned < l.timeloaned OR (o.timeloaned = l.timeloaned AND o.id < l.id)))
            ORDER BY l.timeloaned, l.id",
-            ['since' => $since ?? $now - DAYSECS, 'now' => $now, 'ill' => ill::READERTYPE, 'bank' => bank::KIND]
+            ['since' => $since ?? $now - DAYSECS, 'now' => $now, 'ill' => ill::READERTYPE, 'bank' => bank::KIND] + $libparams
         );
-        return array_values(array_filter($rows, fn($row) => $centres === null || in_array((int) $row->entityid, $centres, true)));
+        return array_values($rows);
     }
 
     /**

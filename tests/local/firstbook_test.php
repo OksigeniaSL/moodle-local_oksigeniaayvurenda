@@ -62,6 +62,10 @@ final class firstbook_test extends \advanced_testcase {
         $loan('La nube de tinta', $now - 4 * HOURSECS);
         $this->assertSame(['El faro dormido'], array_column(firstbook::due($now), 'title'));
         $this->assertSame([], firstbook::due($now + 2 * DAYSECS));
+        // Only the centres asked, by their libraries.
+        $this->assertCount(1, firstbook::due($now, [(int) $library->entityid]));
+        $this->assertSame([], firstbook::due($now, [(int) $library->entityid + 1]));
+        $this->assertSame([], firstbook::due($now, []));
         $mother = $dg->create_user(['firstname' => 'Rosa']);
         $family = \local_oksigeniafamily\api::create_family();
         \local_oksigeniafamily\api::add_adult($family, ['firstname' => 'Rosa', 'email' => $mother->email,

@@ -148,12 +148,44 @@ final class booklet_test extends \advanced_testcase {
         $this->assertSame((int) $leo->id, (int) booklet::opened($id, booklet::seal($id))['reader']->id);
         $this->assertNull(booklet::opened($id, 'abc'));
         $this->assertStringContainsString('s=' . booklet::seal($id), booklet::url($id));
+        // A centre that stops sending booklets takes back its links; one made before seals had a part of their own keeps
+        // the seal its family got.
+        booklet::save($entityid, false);
+        $this->assertNull(booklet::opened($id, booklet::seal($id)));
+        booklet::save($entityid, true);
+        $DB->set_field(self::T . 'booklet', 'token', null, ['id' => $id]);
+        $this->assertSame(\local_oksigeniaayvurenda\local\mail::seal('booklet', $id, 'b'), booklet::seal($id));
+        $this->assertNotNull(booklet::opened($id, booklet::seal($id)));
+
+        // Its cover is drawn once and kept; it goes with the reader, whose name it carries.
+        $cache = \cache::make('local_oksigeniaayvurenda', 'bookletcover');
+        $cache->set($id, 'made-up cover');
+        $row = $DB->get_record(self::T . 'booklet', ['id' => $id]);
+        $this->assertSame('made-up cover', booklet::cover_of($row, $leo, $library, $year));
+        booklet::forget_covers((int) $leo->id);
+        $this->assertFalse($cache->get($id));
 
         // Leaving during the next year: the whole life's, once; the one who has it already, nothing.
         $next = $at('2027-10-10');
         $this->assertTrue(booklet::left($ana, $next));
         $this->assertFalse(booklet::left($ana, $next + DAYSECS));
         $this->assertFalse(booklet::left($leo, $next));
+        // A child whose family let them go the night before (their account suspended when the source dropped them): the
+        // farewell still reaches the family (the review of 21-11, B8).
+        if (method_exists('\\local_oksigeniafamily\\api', 'leave')) {
+            $miakid = $dg->create_user(['firstname' => 'Mía']);
+            $mia = $gen->create_reader(['entityid' => $entityid, 'userid' => $miakid->id, 'band' => 'flower']);
+            $this->lend($library, $mia, $year, 'El mar de noche', $at('2027-03-03'));
+            $miafamily = \local_oksigeniafamily\api::create_family();
+            \local_oksigeniafamily\api::add_adult($miafamily, ['firstname' => 'Tomás', 'email' => 'tomas.familia@example.org']);
+            \local_oksigeniafamily\api::add_child($miafamily, (int) $miakid->id);
+            \local_oksigeniafamily\api::leave((int) $miakid->id, $next - HOURSECS);
+            $this->assertTrue(booklet::left($mia, $next));
+            $emails = $this->redirectEmails();
+            $this->assertSame(1, booklet::run($next + HOURSECS));
+            $this->assertCount(1, array_filter($emails->get_messages(), fn($m) => $m->to === 'tomas.familia@example.org'));
+            $emails->close();
+        }
         if (method_exists('\\local_oksigeniafamily\\api', 'reset')) {
             \local_oksigeniafamily\api::reset();
         }
@@ -240,11 +272,24 @@ final class booklet_test extends \advanced_testcase {
         $this->assertSame((int) $row->id, (int) booklet::on_card($iker, $end + DAYSECS)->id);
         $this->assertSame(0, booklet::run($end + HOURSECS));
         $this->assertNull($DB->get_field(self::T . 'booklet', 'timesent', ['id' => $row->id]));
+        // Waiting for his yes, the next mornings do not ask again; his month over, it comes back to be done.
+        $this->assertNotNull($DB->get_field(self::T . 'booklet', 'timeasked', ['id' => $row->id]));
+        $this->assertSame([], booklet::due($end + 2 * HOURSECS));
+        $this->assertCount(1, booklet::due($end + 40 * DAYSECS));
+        $this->assertSame([], booklet::due($end + 40 * DAYSECS, [$entityid + 1]), 'only the centres asked');
         booklet::wish((int) $row->id, true);
         $messages = $this->redirectMessages();
         $this->assertSame(1, booklet::run($end + DAYSECS));
         $this->assertCount(1, $messages->get_messages());
         $messages->close();
+        // Sent, he takes it back: the link his family got stops opening; given again, a new one goes the next morning.
+        $sent = booklet::seal((int) $row->id);
+        $this->assertNotNull(booklet::opened((int) $row->id, $sent));
+        booklet::wish((int) $row->id, false);
+        $this->assertNull(booklet::opened((int) $row->id, $sent));
+        $this->assertNotNull(booklet::opened((int) $row->id, booklet::seal((int) $row->id)));
+        booklet::wish((int) $row->id, true);
+        $this->assertNull($DB->get_field(self::T . 'booklet', 'timesent', ['id' => $row->id]));
         // Without his yes, a month later it is his alone: done, and nothing sent.
         $DB->set_field(self::T . 'booklet', 'timesent', null, ['id' => $row->id]);
         booklet::wish((int) $row->id, false);

@@ -82,6 +82,19 @@ final class cartilla_test extends \advanced_testcase {
     }
 
     /**
+     * The card is full on the earliest day it could be: with A = {1, 4} and B = {1, 2}, the second loan fills it, not the
+     * fourth; and a loan that counted keeps counting when a later one comes (the review of 21-11, B3).
+     */
+    public function test_match(): void {
+        $match = new \ReflectionMethod(cartilla::class, 'match');
+        $this->assertSame([0 => 1, 1 => 2], $match->invoke(null, [0 => [1, 4], 1 => [1, 2]], [1, 2, 3, 4]));
+        $this->assertSame([0 => 1], $match->invoke(null, [0 => [1, 4], 1 => []], [1, 2, 3, 4]));
+        // The first loan fits only the second square: the first square waits for the fourth.
+        $this->assertSame([0 => 4, 1 => 1], $match->invoke(null, [0 => [1, 4], 1 => [1]], [1, 2, 3, 4]));
+        $this->assertSame([], $match->invoke(null, [0 => [], 1 => []], []));
+    }
+
+    /**
      * The reader's card: before joining, nothing filled and every square a link; joined, the first row filled is a
      * line and Mainumby cheers; a full card is noted as done. The new and the rescued books are listed by search.
      */
@@ -104,6 +117,8 @@ final class cartilla_test extends \advanced_testcase {
         $DB->insert_record('local_oksigeniaayvurenda_digital', ['entityid' => $library->entityid, 'recordid' => $voiced->recordid,
             'kind' => 'voice', 'format' => 'audio', 'status' => 'published', 'audience' => 'students',
             'timecreated' => $now - 30 * DAYSECS, 'timemodified' => $now - 30 * DAYSECS]);
+        // As approving it notes on the book.
+        $DB->set_field('local_oksigeniaayvurenda_record', 'timevoiced', $now - 30 * DAYSECS, ['id' => $voiced->recordid]);
         $old = $item('Olvidado', $now - 5 * 365 * DAYSECS);
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         // The lists of a square that is no corner: one new book, one waiting to be rescued.
@@ -132,5 +147,9 @@ final class cartilla_test extends \advanced_testcase {
         $this->assertStringContainsString('6', $view['cheer']['text']);
         $this->assertFalse($view['full']);
         $this->assertEmpty($DB->get_field('local_oksigeniaayvurenda_questreader', 'timedone', ['questid' => $id]));
+        // The voice goes later: the square it filled stays filled (the review of 21-11, F8).
+        $DB->delete_records('local_oksigeniaayvurenda_digital', ['recordid' => $voiced->recordid]);
+        $view = cartilla::view($quest(), $library, $reader, $now, $str);
+        $this->assertSame($titles, array_column(array_slice($view['squares'], 0, 4), 'title'));
     }
 }

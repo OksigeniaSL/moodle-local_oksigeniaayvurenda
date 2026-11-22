@@ -207,6 +207,7 @@ final class voices_test extends \advanced_testcase {
         // Chapter 1 read again: the old one stays until the new one is approved, and then goes.
         voices::approve($opening, $library, ['licence' => 'rights', 'audience' => ['students']]);
         voices::approve($one, $library, ['licence' => 'rights', 'audience' => ['students']]);
+        $this->assertEquals($now, $DB->get_field(self::T . 'record', 'timevoiced', ['id' => $record->id]), 'since its first voice');
         $again = $part(1, $now + 30);
         $this->assertTrue($DB->record_exists(self::T . 'digital', ['id' => $one]));
         // Someone listening was in chapter 1, with the place kept on it and on the opening: both follow the new chapter.
@@ -256,6 +257,76 @@ final class voices_test extends \advanced_testcase {
         local_oksigeniaayvurenda_upgrade_parts();
         $this->assertSame(1, (int) $DB->get_field(self::T . 'digital', 'part', ['id' => $again]));
         $this->assertSame(5, (int) $DB->get_field(self::T . 'digital', 'part', ['id' => $loose]));
+    }
+
+    /**
+     * The parts of a reading someone hears, asked once for what all of them share: the same parts as one by one, with
+     * far fewer queries (the review of 21-11, E3).
+     */
+    public function test_audible(): void {
+        global $DB;
+        $this->resetAfterTest();
+        /** @var \local_oksigeniaayvurenda_generator $gen */
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $entityid = (int) $library->entityid;
+        $now = time() - HOURSECS;
+        $gen->create_year(['entityid' => $entityid] + \local_oksigeniaayvurenda\core\school_year::around(
+            $now,
+            '09-01',
+            \core_date::get_server_timezone_object()
+        ));
+        $record = $gen->create_record(['entityid' => $entityid, 'title' => 'El faro dormido']);
+        $teacher = $this->getDataGenerator()->create_user();
+        $reader = $gen->create_reader(['entityid' => $entityid, 'userid' => $teacher->id, 'readertype' => 'teacher']);
+        $student = $this->getDataGenerator()->create_user();
+        $gen->create_reader(['entityid' => $entityid, 'userid' => $student->id, 'readertype' => 'student']);
+        $path = make_request_directory() . '/voz.webm';
+        $ids = [];
+        foreach (range(1, 8) as $n) {
+            file_put_contents($path, 'made-up recording');
+            $ids[] = voices::record(
+                $library,
+                (int) $record->id,
+                (int) $reader->id,
+                (int) $teacher->id,
+                $path,
+                '',
+                'webm',
+                $now + $n,
+                '',
+                $n
+            );
+        }
+        // Six approved for students, two still waiting.
+        foreach (array_slice($ids, 0, 6) as $id) {
+            voices::approve($id, $library, ['licence' => 'rights', 'audience' => ['students']]);
+        }
+        $items = array_values($DB->get_records_list(self::T . 'digital', 'id', $ids, 'part'));
+        $viewers = [
+            digital::viewer($entityid, (int) $teacher->id),
+            digital::viewer($entityid, (int) $student->id),
+            ['who' => 'desk', 'stage' => null, 'userid' => 0, 'readerid' => 0],
+            ['who' => 'families', 'stage' => null, 'userid' => 0, 'readerid' => 0],
+        ];
+        $ofids = fn(array $list) => array_map(fn($v) => (int) $v->id, $list);
+        foreach ($viewers as $viewer) {
+            $this->assertSame(
+                $ofids(array_values(array_filter($items, fn($v) => voices::can_hear($v, $viewer)))),
+                $ofids(voices::audible($items, $viewer)),
+                $viewer['who']
+            );
+        }
+        $this->assertCount(6, voices::audible($items, $viewers[1]), 'a student hears what was approved for students');
+        $this->assertCount(8, voices::audible($items, $viewers[0]), 'the recorder hears all of it');
+
+        $reads = $DB->perf_get_reads();
+        array_filter($items, fn($v) => voices::can_hear($v, $viewers[1]));
+        $onebyone = $DB->perf_get_reads() - $reads;
+        $reads = $DB->perf_get_reads();
+        voices::audible($items, $viewers[1]);
+        $together = $DB->perf_get_reads() - $reads;
+        $this->assertLessThan($onebyone / 4, $together, "$together queries together, $onebyone one by one");
     }
 
     /**

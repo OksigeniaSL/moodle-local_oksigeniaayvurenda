@@ -122,6 +122,7 @@ class provider implements
             'yearid' => 'privacy:metadata:booklet:yearid',
             'kind' => 'privacy:metadata:booklet:kind',
             'tellfamily' => 'privacy:metadata:booklet:tellfamily',
+            'timeasked' => 'privacy:metadata:booklet:timeasked',
             'timesent' => 'privacy:metadata:booklet:timesent',
         ], 'privacy:metadata:booklet');
         $collection->add_database_table(self::T . 'blind', [
@@ -760,6 +761,7 @@ class provider implements
         $DB->delete_records(self::T . 'formatask');
         $DB->delete_records(self::T . 'keepsake');
         $DB->delete_records(self::T . 'find');
+        \cache::make('local_oksigeniaayvurenda', 'bookletcover')->purge();
         $DB->delete_records(self::T . 'booklet');
         $DB->set_field_select(self::T . 'blind', 'readerid', null, 'readerid IS NOT NULL');
         $DB->set_field_select(self::T . 'blind', 'createdby', null, 'createdby IS NOT NULL');

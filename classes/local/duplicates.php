@@ -268,6 +268,10 @@ final class duplicates {
                     $keep->$field = $gone->$field;
                 }
             }
+            // Its voices move to the one that stays, and so does since when it has had one.
+            if ($gone->timevoiced !== null && ($keep->timevoiced === null || (int) $gone->timevoiced < (int) $keep->timevoiced)) {
+                $keep->timevoiced = $gone->timevoiced;
+            }
             // A cover the one that stays lacked.
             if (covers::url($keepid) === null && covers::url($goneid) !== null) {
                 $file = get_file_storage()->get_file(

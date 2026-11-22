@@ -83,6 +83,13 @@ final class cartilla {
      */
     public static function counts(\stdClass $library, int $now): array {
         global $DB;
+        // For a few minutes, with the corners: «rescued» looks over two years of loans, a while in a big centre.
+        $cache = \cache::make('local_oksigeniaayvurenda', 'corners');
+        $key = 'squares_' . $library->entityid;
+        $counts = $cache->get($key);
+        if ($counts !== false) {
+            return $counts;
+        }
         $counts = [];
         foreach (self::SPECIAL as $special) {
             [$condition, $params] = self::condition($library, $special, 'r.id', 'n' . $special, $now);
@@ -91,6 +98,7 @@ final class cartilla {
                 $params + ['rentity' => $library->entityid]
             );
         }
+        $cache->set($key, $counts);
         return $counts;
     }
 
@@ -521,10 +529,10 @@ final class cartilla {
             $sql = "$base AND i.timeacquired IS NOT NULL AND i.timeacquired >= l.timeloaned - :fresh";
             $params['fresh'] = premieres::DAYS * DAYSECS;
         } else if ($spec === 'voice') {
-            // A book that had a voice when it was lent, one that someone could hear: not one recorded afterwards.
-            $sql = "$base AND EXISTS (SELECT 1 FROM {" . self::T . "digital} d
-                                       WHERE d.recordid = i.recordid AND d.kind = 'voice' AND d.status = 'published'
-                                             AND d.audience <> '' AND d.timecreated <= l.timeloaned)";
+            // A book that had a voice when it was lent, one that someone could hear: not one recorded afterwards; and the
+            // square stays filled if the voice goes later.
+            $sql = "$base AND EXISTS (SELECT 1 FROM {" . self::T . "record} r
+                                       WHERE r.id = i.recordid AND r.timevoiced IS NOT NULL AND r.timevoiced <= l.timeloaned)";
         } else if ($spec === 'rescued') {
             $sql = "$base AND NOT EXISTS (SELECT 1
                                            FROM {" . self::T . "loan} o
@@ -546,34 +554,43 @@ final class cartilla {
     }
 
     /**
-     * As many squares filled as can be, each by one loan and each loan in one square, the earlier loans first.
+     * As many squares filled as can be, each by one loan and each loan in one square, the earlier loans first: the loans
+     * are taken in the order they were made, and each one that can fill a square without leaving an earlier one out does,
+     * so the card is full on the earliest day it could be and a loan that counted keeps counting.
      *
      * @param array $fits Square => the loans that fit it.
      * @param int[] $loanids In the order they were made.
      * @return int[] Square => the loan that fills it.
      */
     private static function match(array $fits, array $loanids): array {
-        $order = array_flip($loanids);
-        $owner = [];
-        $try = function (int $square, array &$seen) use (&$try, &$owner, $fits, $order): bool {
-            $loans = $fits[$square] ?? [];
-            usort($loans, fn($a, $b) => ($order[$a] ?? 0) <=> ($order[$b] ?? 0));
+        $squaresof = [];
+        foreach ($fits as $square => $loans) {
             foreach ($loans as $loan) {
-                if (isset($seen[$loan])) {
+                $squaresof[(int) $loan][] = (int) $square;
+            }
+        }
+        $owner = [];
+        $try = function (int $loan, array &$seen) use (&$try, &$owner, $squaresof): bool {
+            foreach ($squaresof[$loan] ?? [] as $square) {
+                if (isset($seen[$square])) {
                     continue;
                 }
-                $seen[$loan] = true;
-                if (!isset($owner[$loan]) || $try($owner[$loan], $seen)) {
-                    $owner[$loan] = $square;
+                $seen[$square] = true;
+                if (!isset($owner[$square]) || $try($owner[$square], $seen)) {
+                    $owner[$square] = $loan;
                     return true;
                 }
             }
             return false;
         };
-        foreach (array_keys($fits) as $square) {
+        foreach ($loanids as $loan) {
+            if (count($owner) === count($fits)) {
+                break;
+            }
             $seen = [];
-            $try($square, $seen);
+            $try((int) $loan, $seen);
         }
-        return array_flip(array_map('intval', $owner));
+        ksort($owner);
+        return $owner;
     }
 }

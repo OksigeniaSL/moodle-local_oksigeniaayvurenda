@@ -47,6 +47,32 @@ final class covers_test extends \advanced_testcase {
     }
 
     /**
+     * In the family's app a list carries each cover as narrow as it draws it, made once; the whole cover otherwise, and
+     * nothing when it is bigger than the page may carry (the review of 21-11, A3).
+     */
+    public function test_inline(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid]);
+        $this->assertSame('', covers::inline((int) $record->id));
+        $image = imagecreatetruecolor(200, 300);
+        for ($y = 0; $y < 300; $y += 3) {
+            imageline($image, 0, $y, 199, $y, imagecolorallocate($image, ($y * 7) % 256, ($y * 13) % 256, ($y * 3) % 256));
+        }
+        ob_start();
+        imagejpeg($image, null, 95);
+        $this->assertTrue(covers::store((int) $record->id, (string) ob_get_clean(), 'test'));
+        $whole = covers::inline((int) $record->id);
+        $thumb = covers::inline((int) $record->id, 200 * 1024, 100);
+        $this->assertStringStartsWith('data:image/jpeg;base64,', $thumb);
+        $this->assertSame(100, getimagesizefromstring(base64_decode(substr($thumb, 23)))[0]);
+        $this->assertLessThan(strlen($whole), strlen($thumb));
+        $this->assertSame($thumb, covers::inline((int) $record->id, 200 * 1024, 100), 'the same, kept');
+        $this->assertSame('', covers::inline((int) $record->id, 10));
+    }
+
+    /**
      * A book without a cover asks for it once, in the background, and is not asked again for a while; a book with no ISBN,
      * or with a cover, is not asked.
      */

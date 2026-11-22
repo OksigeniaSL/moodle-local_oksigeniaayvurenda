@@ -90,6 +90,20 @@ $definitions = [
         'simplekeys' => true,
         'ttl' => 120,
     ],
+    // Each cover as narrow as the family's app draws it in a list, by its content: a few kilobytes instead of the cover.
+    'coverthumb' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'ttl' => 30 * DAYSECS,
+    ],
+    // The cover of each booklet, made once with GD: the e-mail and the chats that show its link open it again and again.
+    'bookletcover' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'ttl' => 30 * DAYSECS,
+    ],
     // The moments to celebrate of each centre this week, for an hour: the home, the block and Aty ask for them.
     'moments' => [
         'mode' => cache_store::MODE_APPLICATION,

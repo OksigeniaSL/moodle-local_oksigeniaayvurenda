@@ -122,11 +122,17 @@ class timely {
                 }
                 $day = (new \DateTimeImmutable('@' . $last['time']))->setTimezone(zones::of($entityid))->setTime(0, 0);
                 $today = (new \DateTimeImmutable('@' . $now))->setTimezone(zones::of($entityid))->setTime(0, 0);
-                $count = $DB->count_records_select(
-                    self::T . 'item',
-                    'entityid = ? AND timecreated >= ?',
-                    [$entityid, $day->getTimestamp()]
-                );
+                // By the centre's libraries, as the index of the copies goes: not the whole site's copies on every load.
+                $libraries = $DB->get_fieldset_select(self::T . 'library', 'id', 'entityid = ?', [$entityid]);
+                $count = 0;
+                if ($libraries) {
+                    [$in, $params] = $DB->get_in_or_equal($libraries, SQL_PARAMS_NAMED, 'il');
+                    $count = $DB->count_records_select(
+                        self::T . 'item',
+                        "libraryid $in AND timecreated >= :since",
+                        $params + ['since' => $day->getTimestamp()]
+                    );
+                }
                 return $count ? ['count' => $count, 'day' => $day->format('Y-m-d'), 'today' => $day == $today] : null;
             case 'yearend':
                 $end = booklet::classes_end(years::around($entityid, $now));

@@ -70,7 +70,9 @@ class moments {
         $cache = \cache::make('local_oksigeniaayvurenda', 'moments');
         // Once an hour is enough: a moment lasts a week. In each language apart: its dates, figures and lists are written in
         // the language of whoever asked, and a reader in French read them in Spanish.
-        $key = $entityid . '_' . intdiv($now, HOURSECS) . '_' . current_language();
+        // Something new in the centre (a voice approved) starts its moments again, and only its own.
+        $since = (int) $cache->get('changed_' . $entityid);
+        $key = $entityid . '_' . $since . '_' . intdiv($now, HOURSECS) . '_' . current_language();
         $found = $cache->get($key);
         if ($found === false) {
             $found = self::find($entityid, $now);
@@ -108,6 +110,16 @@ class moments {
             ];
         }
         return $out;
+    }
+
+    /**
+     * Something worth telling happened in a centre (a voice approved): its moments are looked for again at the next
+     * visit, and the other centres of the site keep theirs.
+     *
+     * @param int $entityid
+     */
+    public static function changed(int $entityid): void {
+        \cache::make('local_oksigeniaayvurenda', 'moments')->set('changed_' . $entityid, (int) (microtime(true) * 1000));
     }
 
     /**

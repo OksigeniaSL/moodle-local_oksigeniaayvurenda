@@ -181,7 +181,20 @@ class booklet {
      */
     public static function wish(int $id, bool $on): void {
         global $DB;
-        $DB->set_field(self::T . 'booklet', 'tellfamily', $on ? 1 : 0, ['id' => $id]);
+        $row = $DB->get_record(self::T . 'booklet', ['id' => $id]);
+        if (!$row) {
+            return;
+        }
+        $changes = ['id' => $id, 'tellfamily' => $on ? 1 : 0];
+        // Once it went: taken back, the link their family got stops opening; given again, they get a new one tomorrow.
+        if ($row->timesent !== null && (bool) $row->tellfamily !== $on) {
+            if ($on) {
+                $changes['timesent'] = null;
+            } else {
+                $changes['token'] = random_string(16);
+            }
+        }
+        $DB->update_record(self::T . 'booklet', (object) $changes);
     }
 
     /**
@@ -439,9 +452,23 @@ class booklet {
         if ($DB->record_exists(self::T . 'booklet', ['readerid' => $reader->id, 'yearid' => $yearid, 'kind' => $kind])) {
             return false;
         }
-        $DB->insert_record(self::T . 'booklet', ['entityid' => $reader->entityid, 'readerid' => $reader->id,
-            'yearid' => $yearid, 'kind' => $kind, 'timedue' => $due, 'timesent' => null, 'timecreated' => $due]);
+        self::insert($reader, $yearid, $kind, $due);
         return true;
+    }
+
+    /**
+     * Writes a booklet to send.
+     *
+     * @param \stdClass $reader id and entityid.
+     * @param int $yearid
+     * @param string $kind year or life.
+     * @param int $due When it may go.
+     */
+    private static function insert(\stdClass $reader, int $yearid, string $kind, int $due): void {
+        global $DB;
+        $DB->insert_record(self::T . 'booklet', ['entityid' => $reader->entityid, 'readerid' => $reader->id,
+            'yearid' => $yearid, 'kind' => $kind, 'timedue' => $due, 'timesent' => null, 'token' => random_string(16),
+            'timecreated' => $due]);
     }
 
     /**
@@ -454,7 +481,7 @@ class booklet {
      */
     public static function plan(int $now, ?array $centres = null): int {
         global $DB;
-        $made = 0;
+        $count = 0;
         foreach ($DB->get_records(self::T . 'entity', null, 'id', 'id, settings') as $entity) {
             $entityid = (int) $entity->id;
             if (($centres !== null && !in_array($entityid, $centres, true)) || !self::on($entityid) || practice::is($entityid)) {
@@ -466,21 +493,40 @@ class booklet {
                 continue;
             }
             $leaving = array_flip(self::leaving($entityid, (int) $year->id));
-            $readers = $DB->get_records_sql(
-                "SELECT r.*
+            // Each reader with their group, and the booklets already made, in two queries: the week after the classes end,
+            // every morning, a university would otherwise ask twice for each of its students.
+            $have = [];
+            $existing = $DB->get_recordset_select(
+                self::T . 'booklet',
+                'entityid = :entityid AND yearid = :yearid',
+                ['entityid' => $entityid, 'yearid' => $year->id],
+                '',
+                'id, readerid, kind'
+            );
+            foreach ($existing as $row) {
+                $have[$row->readerid . '/' . $row->kind] = true;
+            }
+            $existing->close();
+            $readers = $DB->get_recordset_sql(
+                "SELECT r.id, r.entityid, (SELECT MAX(m.groupname) FROM {" . self::T . "member} m
+                                            WHERE m.readerid = r.id AND m.yearid = :myear) AS groupname
                    FROM {" . self::T . "reader} r
                   WHERE r.entityid = :entityid AND r.status = 'active' AND r.readertype = 'student'
                         AND EXISTS (SELECT 1 FROM {" . self::T . "loan} l
                                      WHERE l.readerid = r.id AND l.yearid = :yearid AND " . bank::reading('l.libraryid') . ")
                ORDER BY r.id",
-                ['entityid' => $entityid, 'yearid' => $year->id]
+                ['entityid' => $entityid, 'yearid' => $year->id, 'myear' => $year->id]
             );
             foreach ($readers as $reader) {
-                $kind = isset($leaving[self::group_of((int) $reader->id, (int) $year->id)]) ? 'life' : 'year';
-                $made += (int) self::make($reader, (int) $year->id, $kind, $end);
+                $kind = isset($leaving[(string) $reader->groupname]) ? 'life' : 'year';
+                if (!isset($have[$reader->id . '/' . $kind])) {
+                    self::insert($reader, (int) $year->id, $kind, $end);
+                    $count++;
+                }
             }
+            $readers->close();
         }
-        return $made;
+        return $count;
     }
 
     /**
@@ -492,13 +538,18 @@ class booklet {
      */
     public static function due(int $now, ?array $centres = null): array {
         global $DB;
-        $rows = $DB->get_records_select(
-            self::T . 'booklet',
-            'timesent IS NULL AND timedue <= :now',
-            ['now' => $now],
-            'timedue, id'
-        );
-        return array_values(array_filter($rows, fn($row) => $centres === null || in_array((int) $row->entityid, $centres, true)));
+        if ($centres === []) {
+            return [];
+        }
+        // One that waits for its reader's yes comes back when they say it, or when their month is over.
+        $where = 'timesent IS NULL AND timedue <= :now AND (timeasked IS NULL OR tellfamily = 1 OR timedue < :expire)';
+        $params = ['now' => $now, 'expire' => $now - self::YES * DAYSECS];
+        if ($centres !== null) {
+            [$in, $inparams] = $DB->get_in_or_equal($centres, SQL_PARAMS_NAMED, 'ce');
+            $where .= " AND entityid $in";
+            $params += $inparams;
+        }
+        return array_values($DB->get_records_select(self::T . 'booklet', $where, $params, 'timedue, id'));
     }
 
     /**
@@ -516,9 +567,12 @@ class booklet {
             $reader = $DB->get_record(self::T . 'reader', ['id' => $row->readerid]);
             // From twelve it is theirs: it waits for their yes, a month at most, and then it is theirs alone.
             if ($reader && empty($row->tellfamily) && self::theirs($reader, (int) $row->yearid)) {
-                if ((int) $row->timedue < $now - self::YES * DAYSECS) {
-                    $DB->set_field(self::T . 'booklet', 'timesent', $now, ['id' => $row->id]);
-                }
+                $DB->set_field(
+                    self::T . 'booklet',
+                    (int) $row->timedue < $now - self::YES * DAYSECS ? 'timesent' : 'timeasked',
+                    $now,
+                    ['id' => $row->id]
+                );
                 continue;
             }
             // One family whose message fails does not leave the others untold.
@@ -541,7 +595,10 @@ class booklet {
      * @return string
      */
     public static function seal(int $id): string {
-        return mail::seal('booklet', $id, 'b');
+        global $DB;
+        // A booklet made before its seal had a part of its own keeps the seal its family got.
+        $token = (string) $DB->get_field(self::T . 'booklet', 'token', ['id' => $id]);
+        return mail::seal('booklet', $id, 'b' . $token);
     }
 
     /**
@@ -555,7 +612,8 @@ class booklet {
     }
 
     /**
-     * The booklet a sealed link opens, while its reader is here: null with a wrong seal or once they were forgotten.
+     * The booklet a sealed link opens, while its reader is here and its centre sends booklets: null with a wrong seal,
+     * once they were forgotten or once the centre stopped.
      *
      * @param int $id
      * @param string $seal
@@ -571,6 +629,10 @@ class booklet {
         if (!$reader || $reader->status === 'deleted') {
             return null;
         }
+        // A centre that stops sending booklets, or closes, takes back the links it sent.
+        if (!self::on((int) $row->entityid) || access::closed((int) $row->entityid)) {
+            return null;
+        }
         return ['booklet' => $row, 'reader' => $reader];
     }
 
@@ -584,6 +646,40 @@ class booklet {
      * @return string|null The JPEG.
      */
     public static function cover_of(\stdClass $row, \stdClass $reader, \stdClass $library, \stdClass $year): ?string {
+        $cache = \cache::make('local_oksigeniaayvurenda', 'bookletcover');
+        $jpeg = $cache->get((int) $row->id);
+        if ($jpeg === false) {
+            $jpeg = self::compose_cover($row, $reader, $library, $year);
+            if ($jpeg !== null) {
+                $cache->set((int) $row->id, $jpeg);
+            }
+        }
+        return $jpeg;
+    }
+
+    /**
+     * Forgets the covers of a reader's booklets, which carry their name.
+     *
+     * @param int $readerid
+     */
+    public static function forget_covers(int $readerid): void {
+        global $DB;
+        $ids = $DB->get_fieldset_select(self::T . 'booklet', 'id', 'readerid = :readerid', ['readerid' => $readerid]);
+        if ($ids) {
+            \cache::make('local_oksigeniaayvurenda', 'bookletcover')->delete_many(array_map('intval', $ids));
+        }
+    }
+
+    /**
+     * Draws the cover of a booklet.
+     *
+     * @param \stdClass $row The booklet.
+     * @param \stdClass $reader
+     * @param \stdClass $library
+     * @param \stdClass $year
+     * @return string|null The JPEG.
+     */
+    private static function compose_cover(\stdClass $row, \stdClass $reader, \stdClass $library, \stdClass $year): ?string {
         $name = bookletview::name($reader);
         $librarian = format_string($library->name, true, ['escape' => false]);
         if ($row->kind === 'life') {
@@ -618,6 +714,22 @@ class booklet {
     public static function cover_url(int $id): string {
         return (new \moodle_url('/local/oksigeniaayvurenda/booklet.php', ['b' => $id, 's' => self::seal($id), 'cover' => 1]))
             ->out(false);
+    }
+
+    /**
+     * The adults of a child, and with a time, also of a child who left their family since then (a Family that can say
+     * it; an older one, only while the child is in it).
+     *
+     * @param int $childuserid
+     * @param int $leftsince
+     * @return \stdClass[]
+     */
+    private static function adults_of(int $childuserid, int $leftsince): array {
+        $api = '\\local_oksigeniafamily\\api';
+        if ($leftsince > 0 && (new \ReflectionMethod($api, 'adults_of_child'))->getNumberOfParameters() > 1) {
+            return $api::adults_of_child($childuserid, $leftsince);
+        }
+        return $api::adults_of_child($childuserid);
     }
 
     /**
@@ -657,7 +769,9 @@ class booklet {
         ), 'initial' => '', 'text' => get_string('bookletsignmemory', 'local_oksigeniaayvurenda', $memory['name'])];
         $told = 0;
         $seen = [];
-        foreach (\local_oksigeniafamily\api::adults_of_child((int) $child->id) as $adult) {
+        // A whole life's booklet is a farewell: it reaches the family also once the child left it, their account suspended
+        // when their source dropped them, while Family still knows who they were.
+        foreach (self::adults_of((int) $child->id, $life ? (int) $row->timedue - self::LATE * DAYSECS : 0) as $adult) {
             $user = $adult->userid ? \core_user::get_user((int) $adult->userid) : null;
             if ($user && (!empty($user->deleted) || !empty($user->suspended))) {
                 continue;

@@ -156,6 +156,36 @@
             sample = null;
         }
     };
+    // iPhone and iPad leave an audio element's volume to the device's buttons (it always reads 1): there the sample goes
+    // through Web Audio, whose gain does follow; with neither, it is not heard rather than heard loud.
+    var sampleContext = null;
+    var soft = function(audio, value) {
+        try {
+            audio.volume = value;
+            if (Math.abs(audio.volume - value) < 0.01) {
+                return true;
+            }
+        } catch (e) {
+            // Read-only: as on iOS.
+        }
+        var Context = window.AudioContext || window.webkitAudioContext;
+        if (!Context) {
+            return false;
+        }
+        try {
+            sampleContext = sampleContext || new Context();
+            if (sampleContext.state === 'suspended' && sampleContext.resume) {
+                sampleContext.resume();
+            }
+            var gain = sampleContext.createGain();
+            gain.gain.value = value;
+            sampleContext.createMediaElementSource(audio).connect(gain);
+            gain.connect(sampleContext.destination);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
     var backdrop = function() {
         var checked = document.querySelector('input[name="ayv-backdrop"]:checked');
         return checked ? checked.value : null;
@@ -169,7 +199,10 @@
                 sample = new Audio();
                 sample.src = sample.canPlayType('audio/ogg; codecs=opus') ? ogg : m4a;
                 // Alone, a little above how it sounds under a voice, to know which it is.
-                sample.volume = 0.15;
+                if (!soft(sample, 0.15)) {
+                    sample = null;
+                    return;
+                }
                 sample.play().catch(function() {
                     return null;
                 });

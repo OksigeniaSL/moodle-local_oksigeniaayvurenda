@@ -204,7 +204,9 @@ foreach ($readers as $reader) {
     if ($bookletrow && \local_oksigeniaayvurenda\local\booklet::theirs($reader, (int) $bookletrow->yearid)) {
         $bookletyear = $DB->get_record('local_oksigeniaayvurenda_year', ['id' => $bookletrow->yearid]);
         $bookletpage = \local_oksigeniaayvurenda\local\booklet::year($reader, $bookletyear);
-        $asks = \local_oksigeniaayvurenda\local\booklet::on((int) $reader->entityid) && $bookletrow->timesent === null;
+        // Theirs to decide while the card shows it, also once it went: taking it back closes the link their family got.
+        $asks = \local_oksigeniaayvurenda\local\booklet::on((int) $reader->entityid);
+        $hassent = $bookletrow->timesent !== null && $bookletrow->tellfamily;
         $bookletcard = [
             'medal' => \local_oksigeniaayvurenda\local\bookletview::medal(
                 'sky',
@@ -221,8 +223,9 @@ foreach ($readers as $reader) {
             'seeurl' => \local_oksigeniaayvurenda\local\booklet::url((int) $bookletrow->id),
             'see' => $str('bookletcardsee'),
             'family' => $asks ? ['value' => $bookletrow->tellfamily ? '0' : '1', 'pressed' => (bool) $bookletrow->tellfamily,
-                'label' => $str('bookletcardfamily'), 'hint' => $str('bookletcardfamilyhint'), 'bookletid' => (int) $bookletrow->id,
-                'action' => $PAGE->url->out(false), 'sesskey' => sesskey()] : null,
+                'label' => $str('bookletcardfamily'),
+                'hint' => $str($hassent ? 'bookletcardfamilyhintsent' : 'bookletcardfamilyhint'),
+                'bookletid' => (int) $bookletrow->id, 'action' => $PAGE->url->out(false), 'sesskey' => sesskey()] : null,
         ];
     }
     // The ship of the class this term (P5, Jujol): how far the class is and when it sails, in one line.

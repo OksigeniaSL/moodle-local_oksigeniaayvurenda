@@ -37,12 +37,16 @@ if (!class_exists('\local_oksigeniafamily\api', false)) {
         /** @var int The last id given. */
         private static int $next = 0;
 
+        /** @var int[] Children who left their family: user id => when. */
+        private static array $left = [];
+
         /**
          * Forgets every family: one test's families are not the next one's.
          */
         public static function reset(): void {
             self::$families = [];
             self::$next = 0;
+            self::$left = [];
         }
 
         /**
@@ -86,12 +90,27 @@ if (!class_exists('\local_oksigeniafamily\api', false)) {
         }
 
         /**
-         * The adults of a child.
+         * A child leaves their family (their account suspended or gone).
          *
          * @param int $childuserid
+         * @param int $when
+         */
+        public static function leave(int $childuserid, int $when): void {
+            self::$left[$childuserid] = $when;
+        }
+
+        /**
+         * The adults of a child; with a time, also if the child left their family since then.
+         *
+         * @param int $childuserid
+         * @param int $leftsince
          * @return \stdClass[]
          */
-        public static function adults_of_child(int $childuserid): array {
+        public static function adults_of_child(int $childuserid, int $leftsince = 0): array {
+            $left = self::$left[$childuserid] ?? null;
+            if ($left !== null && (!$leftsince || $left < $leftsince)) {
+                return [];
+            }
             $adults = [];
             foreach (self::$families as $family) {
                 if (in_array($childuserid, $family['children'], true)) {
