@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2 (2026-11-24)
+
+- **The year's big number goes to the channel once**: its detail said «from 1 September to today», so the post was
+  another every morning and the channel asked for its review again, even after a «No». It now says until the day the
+  round number was passed, and a milestone the channel already has is not sent again.
+
 ## 1.3.1 (2026-11-24)
 
 - **Upper secondary gets the sky, not the flower**: a reader of «Educación Media · 1.er curso», «2º Medio», the media

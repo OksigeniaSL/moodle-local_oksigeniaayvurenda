@@ -77,6 +77,10 @@ final class channel_test extends \advanced_testcase {
         $this->assertSame('1,000', $number['content']['card']['zones']['number']);
         $this->assertSame('books lent this school year', $number['content']['card']['zones']['phrase']);
         $this->assertStringEndsWith('-1000', $number['key']);
+        // Days later, the same post: it says until the day the thousand was passed, not until today.
+        $later = min($now + 3 * DAYSECS, (int) years::around($entityid, $now)->timeend - 1);
+        $this->assertSame($number['content'], channel::number($entityid, $later)['content']);
+        $this->assertStringContainsString(zones::date($start, 'strftimedate', $entityid), $number['content']['text']);
 
         // No channel of a centre on a site shared by centres, nor without Marandu.
         set_config('entitycategories', 1, 'local_oksigeniaayvurenda');

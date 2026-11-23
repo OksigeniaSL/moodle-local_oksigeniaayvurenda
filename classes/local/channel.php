@@ -156,8 +156,22 @@ final class channel {
         $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
         $number = screens::number($milestone);
         $phrase = skins::say($entityid, 'channelnumberphrase');
+        // Until the day the round number was passed, which does not change: with today's date the post would be another
+        // each morning, and the channel would ask for its review again.
+        $passed = $DB->get_records_sql(
+            "SELECT l.id, l.timeloaned
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "library} b ON b.id = l.libraryid
+              WHERE b.entityid = :entityid AND l.timeloaned >= :from AND l.timeloaned <= :now
+                    AND " . bank::reading('l.libraryid') . "
+           ORDER BY l.timeloaned, l.id",
+            ['entityid' => $entityid, 'from' => $from, 'now' => $now],
+            $milestone - 1,
+            1
+        );
+        $to = $passed ? (int) reset($passed)->timeloaned : $now;
         $detail = $str('channelnumberdetail', (object) ['from' => zones::date($from, 'strftimedate', $entityid),
-            'to' => zones::date($now, 'strftimedate', $entityid)]);
+            'to' => zones::date($to, 'strftimedate', $entityid)]);
         $out['key'] = 'big_number-' . $entityid . '-' . zones::date($from, '%Y', $entityid) . '-' . $milestone;
         $out['content'] = [
             'title' => $str('channelnumbertitle', (object) ['number' => $number, 'phrase' => $phrase]),
@@ -187,6 +201,13 @@ final class channel {
                 continue;
             }
             $number = self::number($entityid, $now);
+            // A milestone the channel already has (in review, ready, published or turned down) is not sent again.
+            if (
+                $number['content'] && method_exists('\local_oksigeniamarandu\api', 'channel_state')
+                && \local_oksigeniamarandu\api::channel_state(self::COMPONENT, 'big_number', $number['key']) !== null
+            ) {
+                continue;
+            }
             if (
                 $number['content'] && \local_oksigeniamarandu\api::channel_post(
                     self::COMPONENT,
