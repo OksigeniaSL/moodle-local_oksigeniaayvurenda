@@ -45,6 +45,11 @@ final class card_look {
     /** @var string Words of a grade counted by its number (Grado 2, Grade 7, Year 10, Klasse 3a, 4.º Básico). */
     private const NUMBERED = 'grado|grade|grades|year|yr|klasse|class|classe|clase|curso|basico|basica|ano|anno|ciclo basico';
 
+    /** @var string Words of upper secondary, fifteen to eighteen, whatever its course number (the Educación Media of
+     * Paraguay, Chile or Uruguay, «1º Medio», Mexico's media superior and preparatoria, high school, the French lycée). */
+    private const UPPER = 'educacion media|ensenanza media|media superior|nivel medio|medio|preparatoria|prepa|high school|'
+        . 'lycee|seconde|premiere|terminale';
+
     /** @var string Words of adults. */
     private const ADULT = 'bachillerato|bachiller|bac|fp|ciclo formativo|formativo|cfgm|cfgs|universidad|university|facultad|'
         . 'master|adultos|adults|adultas|mayores|senior|seniors|senioren|empleados|staff';
@@ -74,8 +79,8 @@ final class card_look {
             // First and second of secondary are twelve to fourteen.
             return in_array($number, [1, 2], true) ? 'sky' : 'skysober';
         }
-        // A university degree («Grado en Historia») and the grown-ups.
-        if (preg_match('/ grado en /', $words) || preg_match('/ (' . self::ADULT . ') /', $words)) {
+        // A university degree («Grado en Historia»), upper secondary and the grown-ups: its «1.er curso» is fifteen, not six.
+        if (preg_match('/ grado en /', $words) || preg_match('/ (' . self::UPPER . '|' . self::ADULT . ') /', $words)) {
             return 'skysober';
         }
         // Collège in France: sixième to quatrième, twelve to fourteen; troisième, fifteen.

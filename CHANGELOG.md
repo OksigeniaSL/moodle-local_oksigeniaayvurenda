@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1 (2026-11-24)
+
+- **Upper secondary gets the sky, not the flower**: a reader of «Educación Media · 1.er curso», «2º Medio», the media
+  superior or the preparatoria, high school or the lycée starts counting its courses from one again, and was taken for a
+  first grade of the youngest. They are fifteen to eighteen: the sober sky.
+
 ## 1.3.0 (2026-11-24)
 
 Loans by the hour, for what a library lends for a class or an afternoon: a laptop, a charger, a camera, a calculator.
