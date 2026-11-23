@@ -867,12 +867,508 @@ html[data-bs-theme="dark"] .ayv .ayv-ag-gestos {
 }
 
 
-/* The unit beside each margin, readable on the page (the muted ink of «How it works» is for its own plate). */
-.ayv .ayv-cp-margenes .ayv-cf-cifra {
+/* The unit beside each margin or each number of a digital form, readable on the page (the muted ink of «How it works»
+   is for its own plate). */
+.ayv .ayv-cp-margenes .ayv-cf-cifra,
+.ayv .ayv-dg-numeros .ayv-cf-cifra {
     color: var(--ink-2);
 }
 
-/* «Remove», folded under an activity's gestures: quiet, and readable. */
-.ayv .ayv-ag-gestos .ayv-cf-quitar > summary {
+/* «Remove», folded under an activity's or a digital form's gestures: quiet, and readable. */
+.ayv .ayv-ag-gestos .ayv-cf-quitar > summary,
+.ayv .ayv-dg-quitar > summary {
+    color: var(--ink-2);
+}
+/* ===================================================================================================================== */
+/* B7 · The digital forms of a record: a card changed opens across the page with the gestures of «Cómo funciona», in     */
+/* three groups (who sees it, to read at home, only for a course); adding asks only for the file or the link.            */
+/* ===================================================================================================================== */
+.ayv .ayv-dg {
+    --cf-tinta-fija: #1e2b2a;
+    --cf-crema: #fbf6ec;
+}
+/* Adding: the dashed card, with a file to choose and a link to write */
+.ayv .ayv-dg-nueva {
+    cursor: default;
+}
+.ayv .ayv-dg-nueva:hover {
+    background: transparent;
+}
+.ayv .ayv-dg-fichero {
+    position: relative;
+    display: inline-flex;
+    margin-top: 6px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: var(--green);
+    color: #fbf6ec;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-dg-fichero input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.ayv .ayv-dg-fichero:focus-within {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+.ayv .ayv-dg-nueva .ayv-dg-o {
+    color: var(--muted);
+    font-size: .875rem;
+}
+.ayv .ayv-dg-enlace {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+.ayv .ayv-dg-enlace input {
+    flex: 1 1 11rem;
+    min-width: 0;
+    padding: 6px 2px;
+    border: 0;
+    border-bottom: 1.5px dashed var(--line);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+}
+.ayv .ayv-dg-enlace input:focus {
+    outline: none;
+    border-bottom: 2px solid var(--accent);
+}
+.ayv .ayv-dig-new .ayv-dg-nota {
+    color: var(--muted);
+    font-size: .8125rem;
+}
+/* A card open: across the page, its face on the left and its gestures beside it */
+.ayv .ayv-dg-abierta {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    box-shadow: 0 0 0 2px var(--accent), 0 14px 28px -18px rgba(30, 43, 42, .55);
+}
+@media (min-width: 1100px) {
+    .ayv .ayv-dg-abierta {
+        grid-template-columns: 17rem minmax(0, 1fr);
+    }
+}
+.ayv .ayv-dg-cara {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    min-width: 0;
+}
+.ayv .ayv-dg-gestos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: 14px;
+    align-items: start;
+    min-width: 0;
+}
+.ayv .ayv-dg-titulo,
+.ayv .ayv-dg-guardado,
+.ayv .ayv-dg-quitar {
+    grid-column: 1 / -1;
+}
+.ayv .ayv-dg-guardado {
+    margin: 0;
+}
+.ayv .ayv-dg-grupo {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    min-width: 0;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--paper);
+}
+html[data-bs-theme="dark"] .ayv .ayv-dg-grupo {
+    background: var(--paper2);
+}
+.ayv .ayv-dg-grupo h3 {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+.ayv .ayv-dg-grupo .ayv-cf-rotulo {
+    min-width: 5rem;
+}
+.ayv .ayv-dg-grupo .ayv-cf-chapa {
+    min-height: 36px;
+    padding: 3px 13px;
+}
+/* To read at home only what anyone sees: the group says where to light it. */
+.ayv .ayv-dg-falta {
+    padding-left: 10px;
+    border-left: 3px solid var(--sun);
+    color: var(--ink-2);
+}
+.ayv .ayv-dg-interruptores {
+    display: grid;
+    gap: 6px;
+    justify-items: start;
+}
+.ayv .ayv-dg-numeros {
+    display: grid;
+    gap: 8px;
+}
+.ayv .ayv-dg-numeros .ayv-cf-numero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+}
+.ayv .ayv-dg-hasta {
+    justify-self: start;
+}
+/* the empty forms the gestures point at take no place in a grid or a row */
+.ayv .ayv-dg-abierta > form,
+.ayv .ayv-cp-fila > form {
+    display: none;
+}
+.ayv .ayv-dg-nueva {
+    place-content: center stretch;
+}
+.ayv .ayv-dg-nueva .ayv-dg-enlace {
+    justify-self: stretch;
+    width: auto;
+}
+.ayv .ayv-dig-new .ayv-dg-fichero span {
+    color: #fbf6ec;
+    font-size: 1rem;
+}
+.ayv .ayv-dg-nueva {
+    grid-template-columns: minmax(0, 1fr);
+}
+.ayv .ayv-dg-abierta .ayv-dg-cara {
+    align-self: start;
+}
+.ayv .ayv-dg-abierta .ayv-dig-actions {
+    margin-top: 6px;
+}
+
+/* ===================================================================================================================== */
+/* B6 · Weeding as a box: «Afinar» in sight; the candidates on their shelves, each dropped into the box with a tap; the  */
+/* box beside them, cardboard, with its count, every book in it and «Hacer el acta».                                     */
+/* ===================================================================================================================== */
+.ayv .ayv-ex a.ayv-cf-menos,
+.ayv .ayv-ex a.ayv-cf-mas {
+    text-decoration: none;
+}
+.ayv .ayv-ex-afinar {
+    display: grid;
+    gap: 10px;
+    margin: 4px 0 22px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line);
+}
+.ayv .ayv-ex-afinar .ayv-cf-rotulo {
+    min-width: 11rem;
+}
+.ayv .ayv-ex-afinar .ayv-cf-chapa {
+    min-height: 36px;
+    padding: 3px 13px;
+    text-decoration: none;
+}
+.ayv .ayv-ex-antes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+}
+.ayv .ayv-ex-mesa {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+}
+@media (min-width: 1100px) {
+    .ayv .ayv-ex-mesa {
+        grid-template-columns: minmax(0, 1fr) 20rem;
+    }
+    .ayv .ayv-ex-caja {
+        position: sticky;
+        top: 16px;
+    }
+}
+.ayv .ayv-ex-mesa > form {
+    display: none;
+}
+.ayv .ayv-ex-baldas {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+.ayv .ayv-ex-balda {
+    padding: 14px 16px 6px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--line);
+}
+.ayv .ayv-ex-balda-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.ayv .ayv-ex-balda-cab .ayv-weed-place {
+    margin: 0;
+}
+.ayv .ayv-ex-balda-cab .ayv-cf-chapa {
+    min-height: 34px;
+    padding: 2px 12px;
+    font-size: .9375rem;
+}
+.ayv .ayv-ex-libros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 2px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.ayv .ayv-ex-libro {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+    transition: opacity .2s;
+}
+.ayv .ayv-ex-tapa {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 52px;
+    border-radius: 3px 5px 5px 3px;
+    font-family: var(--title);
+    font-size: 1.125rem;
+}
+.ayv .ayv-ex-palabras {
+    display: grid;
+    min-width: 0;
+    line-height: 1.3;
+}
+.ayv .ayv-ex-palabras b {
+    overflow-wrap: anywhere;
+}
+.ayv .ayv-ex-palabras span {
+    color: var(--ink-2);
+    font-size: .875rem;
+}
+.ayv .ayv-ex-palabras .ayv-ex-ultima {
+    color: var(--ink-2);
+}
+/* The tap: «A la caja»; once in, the book fades and says so */
+.ayv .ayv-ex-tocar {
+    min-height: 36px;
+    padding: 3px 12px;
+    border: 1.5px dashed var(--muted);
+    border-radius: 18px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: .875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.ayv .ayv-ex-tocar:hover {
+    border-style: solid;
+    background: var(--chip-hover);
+}
+/* In the box, the book steps back by its cover and its line crossed out, its words still readable. */
+.ayv .ayv-ex-dentro .ayv-ex-tapa {
+    opacity: .45;
+}
+.ayv .ayv-ex-dentro .ayv-ex-palabras {
+    color: var(--ink-2);
+}
+.ayv .ayv-ex-dentro .ayv-ex-palabras b {
+    text-decoration: line-through;
+    text-decoration-color: var(--coral);
+}
+.ayv .ayv-ex-tocar[aria-pressed="true"] {
+    border: 1.5px solid #8a5a2b;
+    background: #c9955d;
+    color: #2a1a0c;
+}
+/* The box: cardboard, its flaps open, its count on its front */
+.ayv .ayv-ex-caja {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 0 0 2px #c9955d, 0 14px 26px -18px rgba(40, 30, 10, .6);
+}
+.ayv .ayv-ex-carton {
+    position: relative;
+    justify-self: center;
+    width: 9.5rem;
+    height: 6.6rem;
+    margin-top: 18px;
+}
+.ayv .ayv-ex-frente {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    border-radius: 4px;
+    background: linear-gradient(#d4a46c, #c08a52);
+    box-shadow: inset 0 -8px 0 rgba(0, 0, 0, .08), 0 6px 10px -6px rgba(40, 30, 10, .5);
+    color: #2a1a0c;
+}
+.ayv .ayv-ex-frente small {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.ayv .ayv-ex-frente b {
+    font-family: var(--title);
+    font-size: 2.4rem;
+    line-height: 1;
+}
+.ayv .ayv-ex-solapa {
+    position: absolute;
+    top: -16px;
+    width: 52%;
+    height: 22px;
+    background: #b47b45;
+}
+.ayv .ayv-ex-solapa-i {
+    left: -6%;
+    transform: skewX(-24deg) rotate(-10deg);
+    transform-origin: right bottom;
+}
+.ayv .ayv-ex-solapa-d {
+    right: -6%;
+    transform: skewX(24deg) rotate(10deg);
+    transform-origin: left bottom;
+}
+.ayv .ayv-ex-caja-t {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    text-align: center;
+}
+.ayv .ayv-ex-dentro-lista {
+    display: grid;
+    overflow-y: auto;
+    max-height: 18rem;
+    margin: 0;
+    padding: 0 4px 0 0;
+    list-style: none;
+    scrollbar-color: #c9955d transparent;
+    scrollbar-width: thin;
+}
+.ayv .ayv-ex-dentro-lista li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+    border-top: 1px solid var(--line);
+    font-size: .9375rem;
+    line-height: 1.3;
+}
+.ayv .ayv-ex-dentro-lista small {
+    color: var(--ink-2);
+}
+.ayv .ayv-ex-sacar {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+.ayv .ayv-ex-sacar:hover {
+    background: var(--chip-hover);
+    color: var(--ink);
+}
+.ayv .ayv-ex-acta {
+    display: grid;
+    gap: 8px;
+    margin: 4px 0 0;
+}
+/* The reason, its words above the line: a narrow box would cut them as a placeholder. */
+.ayv .ayv-ex-motivo small {
+    color: var(--ink-2);
+    font-size: .8125rem;
+}
+.ayv .ayv-ex-acta input {
+    padding: 6px 2px;
+    border: 0;
+    border-bottom: 1.5px dashed var(--line);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+}
+.ayv .ayv-ex-acta input:focus {
+    outline: none;
+    border-bottom: 2px solid var(--accent);
+}
+.ayv .ayv-ex-vaciar {
+    justify-self: center;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: .875rem;
+    cursor: pointer;
+}
+@media (max-width: 600px) {
+    .ayv .ayv-ex-afinar .ayv-cf-rotulo {
+        min-width: 100%;
+    }
+    /* on a phone the box comes first, compact: its count, and the record */
+    .ayv .ayv-ex-caja {
+        order: -1;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+    }
+    .ayv .ayv-ex-carton {
+        width: 5.4rem;
+        height: 3.8rem;
+        margin-top: 10px;
+    }
+    .ayv .ayv-ex-frente b {
+        font-size: 1.6rem;
+    }
+    .ayv .ayv-ex-solapa {
+        top: -10px;
+        height: 14px;
+    }
+    .ayv .ayv-ex-caja-t {
+        text-align: start;
+    }
+    .ayv .ayv-ex-caja > :not(.ayv-ex-carton):not(.ayv-ex-caja-t) {
+        grid-column: 1 / -1;
+    }
+    .ayv .ayv-ex-dentro-lista {
+        max-height: 9rem;
+    }
+}
+
+/* The year of «Refine», readable on the page. */
+.ayv .ayv-ex-afinar .ayv-cf-cifra {
     color: var(--ink-2);
 }

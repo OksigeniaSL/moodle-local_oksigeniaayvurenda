@@ -213,4 +213,83 @@ final class weeding {
         ));
         return ['record' => $record, 'copies' => $copies];
     }
+
+    /** @var string The box of each library, kept for whoever fills it: «…_weedbox_<library>», a list of copies. */
+    private const BOX = 'local_oksigeniaayvurenda_weedbox_';
+
+    /**
+     * The copies in the weeding box of a library: kept between pages and days, for the person filling it.
+     *
+     * @param \stdClass $library
+     * @return int[]
+     */
+    public static function box(\stdClass $library): array {
+        $ids = json_decode((string) get_user_preferences(self::BOX . $library->id, '[]'), true);
+        return array_values(array_unique(array_map('intval', is_array($ids) ? $ids : [])));
+    }
+
+    /**
+     * Puts copies in the box, takes one out (a second touch), or empties it.
+     *
+     * @param \stdClass $library
+     * @param int[] $ids
+     * @param string $how in, toggle or empty.
+     */
+    public static function box_change(\stdClass $library, array $ids, string $how): void {
+        global $DB;
+        $box = self::box($library);
+        if ($how === 'empty') {
+            $box = [];
+        } else {
+            // Only the library's own copies, still on its shelves.
+            [$in, $params] = $ids ? $DB->get_in_or_equal(array_map('intval', $ids), SQL_PARAMS_NAMED) : ['= 0', []];
+            $own = array_map('intval', $DB->get_fieldset_select(self::T . 'item', 'id', "id $in AND libraryid = :libraryid
+                AND status <> 'withdrawn'", $params + ['libraryid' => $library->id]));
+            foreach ($own as $id) {
+                $at = array_search($id, $box, true);
+                if ($at === false) {
+                    $box[] = $id;
+                } else if ($how === 'toggle') {
+                    unset($box[$at]);
+                }
+            }
+        }
+        $box = array_values($box);
+        if ($box) {
+            set_user_preference(self::BOX . $library->id, json_encode($box));
+        } else {
+            unset_user_preference(self::BOX . $library->id);
+        }
+    }
+
+    /**
+     * What is in the box, as lines: each copy's title and where it is.
+     *
+     * @param \stdClass $library
+     * @return array[] id, title, detail.
+     */
+    public static function box_items(\stdClass $library): array {
+        global $DB;
+        $ids = self::box($library);
+        if (!$ids) {
+            return [];
+        }
+        [$in, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+        $rows = $DB->get_records_sql(
+            "SELECT i.id, r.title, i.callnumber1, i.callnumber2, i.callnumber3, i.barcode
+               FROM {" . self::T . "item} i
+               JOIN {" . self::T . "record} r ON r.id = i.recordid
+              WHERE i.id $in AND i.libraryid = :libraryid AND i.status <> 'withdrawn'",
+            $params + ['libraryid' => $library->id]
+        );
+        $out = [];
+        foreach ($ids as $id) {
+            if (isset($rows[$id])) {
+                $out[] = ['id' => $id, 'title' => format_string($rows[$id]->title, true, ['escape' => false]),
+                    'detail' => trim(implode(' · ', array_filter([trim(implode(' ', array_filter([(string) $rows[$id]->callnumber1,
+                        (string) $rows[$id]->callnumber2, (string) $rows[$id]->callnumber3]))), (string) $rows[$id]->barcode])))];
+            }
+        }
+        return $out;
+    }
 }

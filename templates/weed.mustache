@@ -16,8 +16,11 @@
 {{!
     @template local_oksigeniaayvurenda/weed
 
-    Weeding: a card for each reason with its count, the copies of the chosen reason by place, a bar that takes the
-    marked ones out with a record, and the records in their own tab.
+    Weeding as a box (22 November 2026): a card for each reason with its count; «Afinar» in sight, as chips and «−» and
+    «+» (links: a view); the copies of the chosen reason on their shelves, by place, each dropped into the box with one
+    tap; and the box beside them, with its count, every book in it and «Hacer el acta». The box is kept by the server
+    (do=box toggles one copy, do=boxshelf drops a whole shelf of this page), so it fills across pages and visits;
+    the record takes what is in it. The records, in their own tab.
 
     Example context (json):
     {
@@ -40,8 +43,9 @@
         "weednext": "Siguientes", "offsiteclose": "Cerrar"
     }
 }}
-<h1 class="ayv-results-title">{{heading}}</h1>
-<p>{{intro}}</p>
+<div class="ayv-cf ayv-ex">
+<header class="ayv-cf-cabeza"><div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+    <p class="ayv-cf-entrada">{{intro}}</p></div></header>
 <nav class="ayv-tabs" aria-label="{{heading}}">{{#tabs}}<a class="ayv-tab" href="{{url}}"{{#current}} aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}</nav>
 {{#oncandidates}}
 {{> local_oksigeniaayvurenda/life }}
@@ -49,54 +53,55 @@
     {{#reasons}}<li><a class="ayv-weed-reason ayv-weed-reason-{{key}}{{#empty}} ayv-weed-reason-empty{{/empty}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}>
         <span class="ayv-weed-count">{{count}}</span> <span class="ayv-weed-label">{{label}}</span> <span class="ayv-weed-hint">{{hint}}</span></a></li>{{/reasons}}
 </ul>
-<p class="ayv-weed-tools"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-weed-refine">{{weedrefine}}</button></p>
+{{#refine}}
+{{! «Afinar», in sight: each choice a link that shows (a view), the chosen one aria-current. }}
+<section class="ayv-ex-afinar" aria-label="{{weedrefine}}">
+    <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{weedunused}}</span><span class="ayv-cf-chapas">{{#unused}}<a class="ayv-cf-chapa" href="{{url}}"{{#selected}} aria-current="true"{{/selected}}>{{label}}</a>{{/unused}}</span></div>
+    {{#before}}<div class="ayv-cf-numero ayv-ex-antes"><span class="ayv-cf-rotulo">{{weedbefore}}</span><span class="ayv-cf-paso" role="group" aria-label="{{weedbefore}}"><a class="ayv-cf-menos" href="{{lessurl}}" aria-label="{{lesslabel}}">−</a><span class="ayv-cf-cifra">{{#year}}<b>{{year}}</b>{{/year}}{{^year}}{{anyyear}}{{/year}}</span><a class="ayv-cf-mas" href="{{moreurl}}" aria-label="{{morelabel}}">+</a></span>
+        {{#year}}<a class="ayv-cf-chapa ayv-sd-ninguno" href="{{anyurl}}">{{anyyear}}</a>{{/year}}</div>{{/before}}
+    <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{weedplace}}</span><span class="ayv-cf-chapas"><a class="ayv-cf-chapa" href="{{allurl}}"{{#allplaces}} aria-current="true"{{/allplaces}}>{{stocktakeall}}</a>{{#places}}<a class="ayv-cf-chapa" href="{{url}}"{{#selected}} aria-current="true"{{/selected}}>{{label}}</a>{{/places}}</span></div>
+</section>
+{{/refine}}
 {{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}
+<div class="ayv-ex-mesa">
 {{#hasrows}}
-<form method="post" action="{{action}}" class="ayv-weed" data-ayv-marks>
-    <input type="hidden" name="sesskey" value="{{sesskey}}">
-    <label class="ayv-field ayv-field-check ayv-weed-all"><input type="checkbox" data-ayv-markall> {{weedallpage}}</label>
+<form id="ayv-ex-f" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="box"><input type="hidden" name="back" value="{{backvalue}}"></form>
+<div class="ayv-ex-baldas">
     {{#groups}}
-    <section class="ayv-weed-group">
-        <h2 class="ayv-weed-place">{{name}}</h2>
-        <ul class="ayv-weed-list">
+    <section class="ayv-ex-balda" aria-labelledby="ayv-ex-g-{{key}}">
+        <header class="ayv-ex-balda-cab"><h2 class="ayv-weed-place" id="ayv-ex-g-{{key}}">{{name}}</h2>
+            <button class="ayv-cf-chapa" type="submit" form="ayv-ex-f" name="boxshelf" value="{{key}}">{{weedallshelf}}</button></header>
+        <ul class="ayv-ex-libros">
         {{#rows}}
-            <li><label class="ayv-weed-row">
-                <input type="checkbox" class="ayv-weed-item" name="item[{{id}}]" value="1" data-ayv-mark>
-                <span class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}{{^cover}}{{initial}}{{/cover}}</span>
-                <span class="ayv-weed-words"><span class="ayv-weed-title">{{title}}</span> <span class="ayv-weed-detail">{{detail}}</span></span>
-            </label><input type="hidden" name="why[{{id}}]" value="{{why}}"></li>
+            <li class="ayv-ex-libro{{#inbox}} ayv-ex-dentro{{/inbox}}" id="ayv-ex-{{id}}">
+                <span class="ayv-ex-tapa ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}{{^cover}}<span>{{initial}}</span>{{/cover}}</span>
+                <span class="ayv-ex-palabras"><b>{{title}}</b><span>{{detail}}</span>{{#lastout}}<span class="ayv-ex-ultima">{{lastout}}</span>{{/lastout}}</span>
+                <button class="ayv-ex-tocar" type="submit" form="ayv-ex-f" name="box" value="{{id}}" aria-pressed="{{#inbox}}true{{/inbox}}{{^inbox}}false{{/inbox}}" aria-label="{{#inbox}}{{weedinbox}}{{/inbox}}{{^inbox}}{{weedtobox}}{{/inbox}}: {{title}}"><span aria-hidden="true">{{#inbox}}✓ {{weedinbox}}{{/inbox}}{{^inbox}}{{weedtobox}}{{/inbox}}</span></button>
+            </li>
         {{/rows}}
         </ul>
     </section>
     {{/groups}}
     {{#pageline}}<p class="ayv-weed-pages">{{#prev}}<a class="ayv-button ayv-button-quiet" href="{{prev}}">{{weedprev}}</a>{{/prev}} <span>{{pageline}}</span> {{#next}}<a class="ayv-button ayv-button-quiet" href="{{next}}">{{weednext}}</a>{{/next}}</p>{{/pageline}}
-    <div class="ayv-weed-bar">
-        <span class="ayv-weed-marked" data-ayv-marked data-none="{{weedmarkednone}}" data-one="{{weedmarkedone}}" data-many="{{weedmarkedmany}}">{{weedmarkednone}}</span>
-        <button type="button" class="ayv-button" data-ayv-open="ayv-weed-go" data-ayv-needs-mark>{{weedgo}}</button>
-    </div>
-    <dialog class="ayv-modal" id="ayv-weed-go" aria-labelledby="ayv-weed-go-title">
-        <div class="ayv-modal-head"><h3 id="ayv-weed-go-title" class="ayv-section-title">{{weedgoconfirm}}</h3>
-            <button type="button" class="ayv-modal-close" aria-label="{{offsiteclose}}" data-ayv-close>{{> local_oksigeniaayvurenda/icon_x}}</button></div>
-        <p data-ayv-marked data-none="{{weedmarkednone}}" data-one="{{weedmarkedone}}" data-many="{{weedmarkedmany}}">{{weedmarkednone}}</p>
-        <label class="ayv-field ayv-dig-field">{{weedreason}} <input type="text" name="reason" maxlength="255" placeholder="{{weedreasonhint}}"></label>
-        <p class="ayv-field-hint">{{weedgohint}}</p>
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{weedgoconfirm}}</button></p>
-    </dialog>
-</form>
+</div>
 {{/hasrows}}
-{{#refine}}
-<dialog class="ayv-modal" id="ayv-weed-refine" aria-labelledby="ayv-weed-refine-title">
-    <div class="ayv-modal-head"><h3 id="ayv-weed-refine-title" class="ayv-section-title">{{weedrefine}}</h3>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{offsiteclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <form method="get" action="{{self}}">
-        <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="why" value="{{why}}">
-        <label class="ayv-field ayv-dig-field">{{weedunused}} <select name="unused">{{#unused}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/unused}}</select></label>
-        <label class="ayv-field ayv-dig-field">{{weedbefore}} <input type="number" name="before" value="{{before}}" min="1500" max="2100"></label>
-        <label class="ayv-field ayv-dig-field">{{weedplace}} <select name="place"><option value="0">{{stocktakeall}}</option>{{#places}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/places}}</select></label>
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{weedshow}}</button></p>
-    </form>
-</dialog>
-{{/refine}}
+{{#box}}
+<aside class="ayv-ex-caja" id="ayv-ex-caja" aria-labelledby="ayv-ex-caja-t">
+    <div class="ayv-ex-carton" aria-hidden="true"><span class="ayv-ex-solapa ayv-ex-solapa-i"></span><span class="ayv-ex-solapa ayv-ex-solapa-d"></span>
+        <span class="ayv-ex-frente"><small>{{weedboxword}}</small><b>{{count}}</b></span></div>
+    <h2 class="ayv-ex-caja-t" id="ayv-ex-caja-t">{{countlabel}}</h2>
+    {{^hasitems}}<p class="ayv-cf-nota">{{weedboxempty}}</p>{{/hasitems}}
+    {{#hasitems}}
+    <ol class="ayv-ex-dentro-lista">{{#items}}<li><span><b>{{title}}</b> <small>{{detail}}</small></span><button class="ayv-ex-sacar" type="submit" form="ayv-ex-f" name="box" value="{{id}}" aria-label="{{weedtakeout}}: {{title}}">×</button></li>{{/items}}</ol>
+    <form class="ayv-ex-acta" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="weed">
+        <label class="ayv-ex-motivo" for="ayv-ex-motivo"><span class="ayv-cf-rotulo">{{weedreason}}</span> <small>{{weedreasonhint}}</small></label><input id="ayv-ex-motivo" name="reason" maxlength="255">
+        <button type="submit" class="ayv-button">{{weedgoconfirm}}</button>
+        <p class="ayv-cf-nota">{{weedgohint}}</p></form>
+    <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="boxempty"><button class="ayv-cf-enlace ayv-ex-vaciar" type="submit">{{weedboxclear}}</button></form>
+    {{/hasitems}}
+</aside>
+{{/box}}
+</div>
 {{/oncandidates}}
 {{#onrecords}}
 {{^hasrecords}}<p class="ayv-empty">{{weednorecords}}</p>{{/hasrecords}}
@@ -108,3 +113,4 @@
 </ul>
 {{/hasrecords}}
 {{/onrecords}}
+</div>

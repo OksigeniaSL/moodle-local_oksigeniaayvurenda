@@ -18,14 +18,16 @@
     @template local_oksigeniaayvurenda/digital
 
     The digital forms of a record, as cards: each with its format, licence, who it is for and, when it is only for a
-    course, which and until when; opening it, and changing or removing it in a sheet. Adding one is a card that opens
-    its sheet: a file or a link, its title, its licence, who it is for and, if the book is in some course's readings,
-    only for one of them.
+    course, which and until when. Changing one opens it in place, the card across the page (a link, as the day touched
+    on the course sheet), with the gestures of «How your library works»: the licence and who sees it as chips, the
+    stages and the switches as lights, minutes, pages and order with «−» and «+», the lines that keep themselves, the
+    course as chips and its date as a calendar sheet. Each gesture sends only what it changes (do=set, one field). Adding
+    one asks only for the file or the link: it comes in with the safest licence and for the staff, and is set on its card.
 
     Context variables required for this template:
     * heading, eyebrow, authors, hascover, coverurl, colour, intro, notice, action, sesskey, hasitems, recordurl, close
     * items - id, title, rawtitle, format, formatkey, licencelabel, audiencechips, onlyline, readurl, licences,
-      audiences, stages, download, courses, pages, until, homeages, homechip
+      audiences, stages, download, courses, pages, until, homeages, homechip, homepublic, homenotpublic
     * licences, audiences, stages, hasstages, hascourses, courses, until, newhomeages
     * digitaladd, digitaladdhint, digitalfile, digitalurl, digitalurlhint, digitaltitlefield, digitallicence,
       digitallicencehint, digitalaudience, digitalstages, digitaldownload, digitalsave, digitaldelete, digitalread,
@@ -35,7 +37,7 @@
     Example context (json):
     {
         "heading": "La ladrona del faro", "eyebrow": "En digital", "authors": "Ana Ruiz", "hascover": false, "coverurl": "data:image/gif;base64,R0lGODlhAQABAAAAACw=", "colour": 2,
-        "intro": "Manda su licencia.", "notice": "", "action": "#", "sesskey": "abc", "hasitems": true,
+        "intro": "Manda su licencia.", "notice": "", "action": "https://example.org/digital.php", "sesskey": "abc", "hasitems": true,
         "recordurl": "#", "close": "Cerrar", "hasstages": true, "hascourses": true, "until": "2027-06-30",
         "items": [{"id": 1, "title": "Capítulo 3", "rawtitle": "Capítulo 3", "format": "PDF", "formatkey": "pdf",
             "licencelabel": "Con derechos de otros", "audiencechips": ["Alumnos"], "onlyline": "Solo para Lengua 2.º, hasta el 30 jun",
@@ -43,7 +45,8 @@
             "audiences": [{"value": "students", "label": "Alumnos", "checked": true}],
             "stages": [{"value": "Primaria", "checked": false}], "download": false,
             "courses": [{"id": 3, "name": "Lengua 2.º", "selected": true}], "pages": "pp. 45-60", "until": "2027-06-30",
-            "homeages": [{"value": 3, "label": "3 a 5", "checked": true}], "homechip": "En casa: 3 a 5",
+            "homeages": [{"value": 3, "label": "3 a 5", "checked": true}], "homechip": "En casa: 3 a 5", "homepublic": true,
+            "homenotpublic": "Para leer en casa, primero tiene que verlo cualquiera: toca «Cualquiera (la ventana pública)» en «Quién lo ve».",
             "homelines": [{"value": 3, "linelabel": "Por qué es bonito, de 3 a 5", "line": "Corto y tranquilo."}],
             "homeminutes": 4, "homeparts": 12, "homenight": true, "homeorder": ""}],
         "licences": [{"value": "rights", "label": "Con derechos de otros", "selected": true}],
@@ -75,91 +78,88 @@
     </div>
 </header>
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
-<ul class="ayv-dig-grid">
-    <li><button type="button" class="ayv-dig-new" data-ayv-open="ayv-dig-add">
-        <span class="ayv-dig-plus" aria-hidden="true">{{> local_oksigeniaayvurenda/icon_plus}}</span>
-        <strong>{{digitaladd}}</strong><span>{{digitaladdhint}}</span></button></li>
+<ul class="ayv-dig-grid ayv-dg">
+    <li class="ayv-dg-nueva-li">
+        {{! Adding: the file or the link and nothing else; the rest is set on its card, as any other. }}
+        <form class="ayv-dig-new ayv-dg-nueva" method="post" action="{{action}}" enctype="multipart/form-data">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="add">
+            <span class="ayv-dig-plus" aria-hidden="true">{{> local_oksigeniaayvurenda/icon_plus}}</span>
+            <strong>{{digitaladd}}</strong><span>{{digitaladdhint}}</span>
+            <label class="ayv-dg-fichero"><input type="file" data-ayv-own name="file" accept=".epub,.pdf,.mp3,.m4a,.m4b,.ogg,.oga,.opus,.wav,.flac,.aac,.mp4,.webm,.ogv,.mov" data-ayv-submit><span>{{digitalfile}}</span></label>
+            <span class="ayv-dg-o">{{digitalor}}</span>
+            <span class="ayv-dg-enlace"><label class="ayv-sr" for="ayv-dg-url">{{digitalurl}}</label><input id="ayv-dg-url" type="text" name="url" inputmode="url" spellcheck="false" placeholder="{{digitalurlplaceholder}}"><button class="ayv-cf-chapa ayv-cf-chapa-sola" type="submit">{{digitaladdgo}}</button></span>
+            <span class="ayv-dg-nota">{{digitaladdafter}}</span>
+        </form></li>
     {{#items}}
-    <li class="ayv-dig-card">
-        <span class="ayv-dig-format ayv-dig-format-{{formatkey}}">{{format}}</span>
-        <h2 class="ayv-dig-title">{{title}}</h2>
-        <p class="ayv-dig-licence">{{licencelabel}}</p>
-        <ul class="ayv-dig-chips">{{#accessible}}<li class="ayv-dig-chip-access">{{digitalaccessiblechip}}</li>{{/accessible}}{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}{{#homechip}}<li class="ayv-dig-chip-home">{{homechip}}</li>{{/homechip}}</ul>
-        {{#onlyline}}<p class="ayv-dig-only">{{onlyline}}{{#pages}} · {{pages}}{{/pages}}</p>{{/onlyline}}
-        {{#proxied}}<p class="ayv-dig-only">{{digitalsubscribedline}}</p>{{/proxied}}
-        <p class="ayv-dig-actions"><a class="ayv-button" href="{{readurl}}">{{digitalread}}</a>
-            <button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-dig-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{digitalchange}}</button></p>
-        <dialog class="ayv-modal ayv-dig-sheet" id="ayv-dig-{{id}}" aria-labelledby="ayv-dig-{{id}}-title">
-            <div class="ayv-modal-head"><h3 id="ayv-dig-{{id}}-title" class="ayv-section-title">{{title}}</h3>
-                <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-            <form method="post" action="{{action}}" class="ayv-dig-form">
-                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
-                <label class="ayv-field ayv-dig-field">{{digitaltitlefield}} <input type="text" name="title" value="{{rawtitle}}" maxlength="255"></label>
-                <label class="ayv-field ayv-dig-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
-                <fieldset class="ayv-dig-set"><legend>{{digitalaudience}}</legend><div class="ayv-segmented">
-                    {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
-                {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
-                    {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
-                <fieldset class="ayv-dig-set"><legend>{{digitalhome}}</legend><p class="ayv-field-hint">{{digitalhomehint}}</p><div class="ayv-segmented">
-                    {{#homeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/homeages}}</div>
-                    <div class="ayv-dig-home">
-                        <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{digitalhomeminutes}} <input type="number" name="homeminutes" value="{{homeminutes}}" min="1" max="999"></label>
-                        <label class="ayv-field ayv-dig-field">{{digitalhomeparts}} <span class="ayv-field-hint">{{digitalhomepartshint}}</span> <input type="number" name="homeparts" value="{{homeparts}}" min="1" max="999"></label></div>
-                        {{#homelines}}<label class="ayv-field ayv-dig-field">{{linelabel}} <input type="text" name="homelines[{{value}}]" value="{{line}}" maxlength="160" placeholder="{{digitalhomelinehint}}"></label>{{/homelines}}
-                        <label class="ayv-field ayv-field-check"><input type="checkbox" name="homenight" value="1" {{#homenight}}checked{{/homenight}}> {{digitalhomenight}}</label>
-                        <label class="ayv-field ayv-dig-field">{{digitalhomeorder}} <span class="ayv-field-hint">{{digitalhomeorderhint}}</span> <input type="number" name="homeorder" value="{{homeorder}}" min="1" max="999"></label>
-                    </div></fieldset>
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1" {{#accessible}}checked{{/accessible}}> {{digitalaccessible}}</label>
-                {{#canproxy}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="subscribed" value="1" {{#subscribed}}checked{{/subscribed}}> {{digitalsubscribed}}</label>{{/canproxy}}
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1" {{#download}}checked{{/download}}> {{digitaldownload}}</label>
-                {{#hascourses}}
-                <fieldset class="ayv-dig-set ayv-dig-course"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
-                    <label class="ayv-field ayv-dig-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}</select></label>
-                    <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{fragmentpages}} <input type="text" name="pages" value="{{pages}}" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
-                    <label class="ayv-field ayv-dig-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></div></fieldset>
-                {{/hascourses}}
-                <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="save">{{digitalsave}}</button>
-                    <button type="submit" class="ayv-button ayv-button-danger" name="do" value="delete">{{digitaldelete}}</button></p>
-            </form>
-        </dialog>
+    <li class="ayv-dig-card{{#open}} ayv-dg-abierta{{/open}}" id="ayv-dg-{{id}}">
+        <div class="ayv-dg-cara">
+            <span class="ayv-dig-format ayv-dig-format-{{formatkey}}">{{format}}</span>
+            <h2 class="ayv-dig-title">{{title}}</h2>
+            <p class="ayv-dig-licence">{{licencelabel}}</p>
+            <ul class="ayv-dig-chips">{{#accessible}}<li class="ayv-dig-chip-access">{{digitalaccessiblechip}}</li>{{/accessible}}{{#audiencechips}}<li>{{.}}</li>{{/audiencechips}}{{#homechip}}<li class="ayv-dig-chip-home">{{homechip}}</li>{{/homechip}}</ul>
+            {{#onlyline}}<p class="ayv-dig-only">{{onlyline}}{{#pages}} · {{pages}}{{/pages}}</p>{{/onlyline}}
+            {{#proxied}}<p class="ayv-dig-only">{{digitalsubscribedline}}</p>{{/proxied}}
+            <p class="ayv-dig-actions"><a class="ayv-button" href="{{readurl}}">{{digitalread}}</a>
+                {{^open}}<a class="ayv-button ayv-button-quiet" href="{{changeurl}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{digitalchange}}</a>{{/open}}
+                {{#open}}<a class="ayv-button ayv-button-quiet" href="{{releaseurl}}">{{digitaldone}}</a>{{/open}}</p>
+        </div>
+        {{#open}}
+        <form id="ayv-dg-f-{{id}}" method="post" action="{{action}}#ayv-dg-{{id}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}"><input type="hidden" name="do" value="set"></form>
+        <div class="ayv-dg-gestos">
+            {{#justsaved}}<p class="ayv-dg-guardado"><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}
+            <form class="ayv-sd-escribir ayv-dg-titulo" method="post" action="{{action}}#ayv-dg-{{id}}" data-ayv-autosave="{{savedword}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}"><input type="hidden" name="do" value="set">
+                <label><span class="ayv-cf-rotulo">{{digitaltitlefield}}</span><input type="text" name="title" value="{{rawtitle}}" maxlength="255"></label>
+                <span class="ayv-autosaved" role="status" aria-live="polite"></span>
+                <p class="ayv-book-actions ayv-autosave-button"><button type="submit" class="ayv-button ayv-button-quiet">{{digitalsave}}</button></p></form>
+            <section class="ayv-dg-grupo" aria-labelledby="ayv-dg-{{id}}-quien">
+                <h3 id="ayv-dg-{{id}}-quien">{{digitalwhosees}}</h3>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{digitallicence}}</span><span class="ayv-cf-chapas">{{#licences}}<button class="ayv-cf-chapa" type="submit" form="ayv-dg-f-{{id}}" name="licence" value="{{value}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{label}}</button>{{/licences}}</span></div>
+                <p class="ayv-cf-nota">{{digitallicencehint}}</p>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{digitalaudience}}</span><span class="ayv-cf-chapas">{{#audiences}}<button class="ayv-cf-chapa" type="submit" form="ayv-dg-f-{{id}}" name="toggle" value="audience:{{value}}" aria-pressed="{{#checked}}true{{/checked}}{{^checked}}false{{/checked}}">{{label}}</button>{{/audiences}}</span></div>
+                {{#hasstages}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{digitalstages}}</span><span class="ayv-cf-luces">{{#stages}}<button class="ayv-cf-luz" type="submit" form="ayv-dg-f-{{id}}" name="toggle" value="stage:{{value}}" aria-pressed="{{#checked}}true{{/checked}}{{^checked}}false{{/checked}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{value}}</span></button>{{/stages}}</span></div>{{/hasstages}}
+                <div class="ayv-cf-luces ayv-dg-interruptores">
+                    <button class="ayv-cf-luz" type="submit" form="ayv-dg-f-{{id}}" name="download" value="{{#download}}0{{/download}}{{^download}}1{{/download}}" aria-pressed="{{#download}}true{{/download}}{{^download}}false{{/download}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{digitaldownload}}</span></button>
+                    <button class="ayv-cf-luz" type="submit" form="ayv-dg-f-{{id}}" name="accessible" value="{{#accessible}}0{{/accessible}}{{^accessible}}1{{/accessible}}" aria-pressed="{{#accessible}}true{{/accessible}}{{^accessible}}false{{/accessible}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{digitalaccessible}}</span></button>
+                    {{#canproxy}}<button class="ayv-cf-luz" type="submit" form="ayv-dg-f-{{id}}" name="subscribed" value="{{#subscribed}}0{{/subscribed}}{{^subscribed}}1{{/subscribed}}" aria-pressed="{{#subscribed}}true{{/subscribed}}{{^subscribed}}false{{/subscribed}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{digitalsubscribed}}</span></button>{{/canproxy}}
+                </div>
+            </section>
+            <section class="ayv-dg-grupo" aria-labelledby="ayv-dg-{{id}}-casa">
+                <h3 id="ayv-dg-{{id}}-casa">{{digitalhome}}</h3>
+                {{^homepublic}}<p class="ayv-cf-nota ayv-dg-falta">{{homenotpublic}}</p>{{/homepublic}}
+                {{#homepublic}}
+                <p class="ayv-cf-nota">{{digitalhomehint}}</p>
+                <div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{digitalhomeages}}</span><span class="ayv-cf-luces">{{#homeages}}<button class="ayv-cf-luz" type="submit" form="ayv-dg-f-{{id}}" name="toggle" value="homeage:{{value}}" aria-pressed="{{#checked}}true{{/checked}}{{^checked}}false{{/checked}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{label}}</span></button>{{/homeages}}</span></div>
+                {{#home}}
+                <div class="ayv-dg-numeros">
+                    <div class="ayv-cf-numero"><span class="ayv-cf-rotulo">{{digitalhomeminutes}}</span><span class="ayv-cf-paso" role="group" aria-label="{{digitalhomeminutes}}"><button class="ayv-cf-menos" type="submit" form="ayv-dg-f-{{id}}" name="homeminutes" value="{{minutesless}}" aria-label="{{lesslabel}}"{{#minutesmin}} disabled{{/minutesmin}}>−</button><span class="ayv-cf-cifra"><b>{{homeminutes}}</b> min</span><button class="ayv-cf-mas" type="submit" form="ayv-dg-f-{{id}}" name="homeminutes" value="{{minutesmore}}" aria-label="{{morelabel}}">+</button></span></div>
+                    <div class="ayv-cf-numero"><span class="ayv-cf-rotulo">{{digitalhomeparts}}</span><span class="ayv-cf-paso" role="group" aria-label="{{digitalhomeparts}}"><button class="ayv-cf-menos" type="submit" form="ayv-dg-f-{{id}}" name="homeparts" value="{{partsless}}" aria-label="{{lesslabel}}"{{#partsmin}} disabled{{/partsmin}}>−</button><span class="ayv-cf-cifra"><b>{{homeparts}}</b></span><button class="ayv-cf-mas" type="submit" form="ayv-dg-f-{{id}}" name="homeparts" value="{{partsmore}}" aria-label="{{morelabel}}">+</button></span></div>
+                    <div class="ayv-cf-numero"><span class="ayv-cf-rotulo">{{digitalhomeorder}}</span><span class="ayv-cf-paso" role="group" aria-label="{{digitalhomeorder}}"><button class="ayv-cf-menos" type="submit" form="ayv-dg-f-{{id}}" name="homeorder" value="{{orderless}}" aria-label="{{lesslabel}}"{{#ordermin}} disabled{{/ordermin}}>−</button><span class="ayv-cf-cifra">{{#homeorder}}<b>{{homeorder}}.º</b>{{/homeorder}}{{^homeorder}}{{digitalhomeorderauto}}{{/homeorder}}</span><button class="ayv-cf-mas" type="submit" form="ayv-dg-f-{{id}}" name="homeorder" value="{{ordermore}}" aria-label="{{morelabel}}">+</button></span></div>
+                </div>
+                <div class="ayv-cf-luces"><button class="ayv-cf-luz" type="submit" form="ayv-dg-f-{{id}}" name="homenight" value="{{#homenight}}0{{/homenight}}{{^homenight}}1{{/homenight}}" aria-pressed="{{#homenight}}true{{/homenight}}{{^homenight}}false{{/homenight}}"><span class="ayv-cf-bombilla" aria-hidden="true"></span><span>{{digitalhomenight}}</span></button></div>
+                <form class="ayv-sd-escribir" method="post" action="{{action}}#ayv-dg-{{id}}" data-ayv-autosave="{{savedword}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}"><input type="hidden" name="do" value="set">
+                    {{#homelines}}<label><span class="ayv-cf-rotulo">{{linelabel}}</span><input type="text" name="homelines[{{value}}]" value="{{line}}" maxlength="160" placeholder="{{digitalhomelinehint}}"></label>{{/homelines}}
+                    <span class="ayv-autosaved" role="status" aria-live="polite"></span>
+                    <p class="ayv-book-actions ayv-autosave-button"><button type="submit" class="ayv-button ayv-button-quiet">{{digitalsave}}</button></p></form>
+                {{/home}}
+                {{/homepublic}}
+            </section>
+            {{#hascourses}}
+            <section class="ayv-dg-grupo" aria-labelledby="ayv-dg-{{id}}-curso">
+                <h3 id="ayv-dg-{{id}}-curso">{{fragmentcourse}}</h3>
+                <p class="ayv-cf-nota">{{fragmenthint}}</p>
+                <div class="ayv-cf-chapas">{{#courses}}<button class="ayv-cf-chapa" type="submit" form="ayv-dg-f-{{id}}" name="forcourse" value="{{id}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{name}}</button>{{/courses}}<button class="ayv-cf-chapa ayv-sd-ninguno" type="submit" form="ayv-dg-f-{{id}}" name="forcourse" value="0" aria-pressed="{{#nocourse}}true{{/nocourse}}{{^nocourse}}false{{/nocourse}}">{{fragmentnone}}</button></div>
+                {{#course}}
+                <form class="ayv-sd-escribir" method="post" action="{{action}}#ayv-dg-{{id}}" data-ayv-autosave="{{savedword}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}"><input type="hidden" name="do" value="set">
+                    <label><span class="ayv-cf-rotulo">{{fragmentpages}}</span><input type="text" name="pages" value="{{pages}}" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
+                    <span class="ayv-autosaved" role="status" aria-live="polite"></span>
+                    <p class="ayv-book-actions ayv-autosave-button"><button type="submit" class="ayv-button ayv-button-quiet">{{digitalsave}}</button></p></form>
+                <span class="ayv-ct-fecha ayv-dg-hasta"><span class="ayv-cf-rotulo">{{fragmentuntil}}</span><span class="ayv-ct-fecha-fila"><button class="ayv-cf-menos" type="submit" form="ayv-dg-f-{{id}}" name="until" value="{{untilless}}" aria-label="{{fragmentuntil}}: {{weekless}}">−</button>{{#untilsheet}}<span class="ayv-cf-hoja ayv-ct-hoja"><small>{{month}}</small><b>{{day}}</b><small>{{week}}</small></span>{{/untilsheet}}<button class="ayv-cf-mas" type="submit" form="ayv-dg-f-{{id}}" name="until" value="{{untilmore}}" aria-label="{{fragmentuntil}}: {{weekmore}}">+</button></span></span>
+                {{/course}}
+            </section>
+            {{/hascourses}}
+            <details class="ayv-cf-quitar ayv-dg-quitar"><summary>{{digitaldelete}}</summary><button class="ayv-button ayv-cf-peligro" type="submit" form="ayv-dg-f-{{id}}" name="do" value="delete">{{digitaldeletesure}}</button></details>
+        </div>
+        {{/open}}
     </li>
     {{/items}}
 </ul>
-<dialog class="ayv-modal ayv-dig-sheet" id="ayv-dig-add" aria-labelledby="ayv-dig-add-title">
-    <div class="ayv-modal-head"><h3 id="ayv-dig-add-title" class="ayv-section-title">{{digitaladd}}</h3>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <form method="post" action="{{action}}" enctype="multipart/form-data" class="ayv-dig-form">
-        <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <div class="ayv-dig-what">
-            <label class="ayv-field ayv-dig-field">{{digitalfile}} <input type="file" name="file" accept=".epub,.pdf,.mp3,.m4a,.m4b,.ogg,.oga,.opus,.wav,.flac,.aac,.mp4,.webm,.ogv,.mov"></label>
-            <label class="ayv-field ayv-dig-field">{{digitalurl}} <span class="ayv-field-hint">{{digitalurlhint}}</span> <input type="text" name="url" inputmode="url" spellcheck="false"></label>
-        </div>
-        {{#hasproxy}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="subscribed" value="1" checked> {{digitalsubscribed}}</label>{{/hasproxy}}
-        <label class="ayv-field ayv-dig-field">{{digitaltitlefield}} <input type="text" name="title" maxlength="255"></label>
-        <label class="ayv-field ayv-dig-field">{{digitallicence}} <select name="licence">{{#licences}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/licences}}</select></label>
-        <p class="ayv-field-hint">{{digitallicencehint}}</p>
-        <fieldset class="ayv-dig-set"><legend>{{digitalaudience}}</legend><div class="ayv-segmented">
-            {{#audiences}}<label><input type="checkbox" name="audience[]" value="{{value}}" {{#checked}}checked{{/checked}}><span>{{label}}</span></label>{{/audiences}}</div></fieldset>
-        {{#hasstages}}<fieldset class="ayv-dig-set"><legend>{{digitalstages}}</legend><div class="ayv-segmented">
-            {{#stages}}<label><input type="checkbox" name="stages[]" value="{{value}}"><span>{{value}}</span></label>{{/stages}}</div></fieldset>{{/hasstages}}
-        <fieldset class="ayv-dig-set"><legend>{{digitalhome}}</legend><p class="ayv-field-hint">{{digitalhomehint}}</p><div class="ayv-segmented">
-            {{#newhomeages}}<label><input type="checkbox" name="homeages[]" value="{{value}}"><span>{{label}}</span></label>{{/newhomeages}}</div>
-            <div class="ayv-dig-home">
-                <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{digitalhomeminutes}} <input type="number" name="homeminutes" min="1" max="999"></label>
-                <label class="ayv-field ayv-dig-field">{{digitalhomeparts}} <span class="ayv-field-hint">{{digitalhomepartshint}}</span> <input type="number" name="homeparts" min="1" max="999"></label></div>
-                {{#newhomelines}}<label class="ayv-field ayv-dig-field">{{linelabel}} <input type="text" name="homelines[{{value}}]" maxlength="160" placeholder="{{digitalhomelinehint}}"></label>{{/newhomelines}}
-                <label class="ayv-field ayv-field-check"><input type="checkbox" name="homenight" value="1"> {{digitalhomenight}}</label>
-                <label class="ayv-field ayv-dig-field">{{digitalhomeorder}} <span class="ayv-field-hint">{{digitalhomeorderhint}}</span> <input type="number" name="homeorder" min="1" max="999"></label>
-            </div></fieldset>
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="download" value="1"> {{digitaldownload}}</label>
-        <label class="ayv-field ayv-field-check"><input type="checkbox" name="accessible" value="1"> {{digitalaccessible}}</label>
-        <p class="ayv-field-hint">{{digitalaccessiblehint}}</p>
-        {{#hascourses}}
-        <fieldset class="ayv-dig-set ayv-dig-course"><legend>{{fragmentcourse}}</legend><p class="ayv-field-hint">{{fragmenthint}}</p>
-            <label class="ayv-field ayv-dig-field"><select name="forcourse" aria-label="{{fragmentcourse}}"><option value="0">{{fragmentnone}}</option>{{#courses}}<option value="{{id}}">{{name}}</option>{{/courses}}</select></label>
-            <div class="ayv-dig-pair"><label class="ayv-field ayv-dig-field">{{fragmentpages}} <input type="text" name="pages" maxlength="100" placeholder="{{fragmentpageshint}}"></label>
-            <label class="ayv-field ayv-dig-field">{{fragmentuntil}} <input type="date" name="until" value="{{until}}"></label></div></fieldset>
-        {{/hascourses}}
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button" name="do" value="add">{{digitaladd}}</button></p>
-    </form>
-</dialog>

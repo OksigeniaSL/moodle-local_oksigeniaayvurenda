@@ -178,7 +178,7 @@ final class digital {
         \local_oksigeniaayvurenda\event\digital_changed::fire(
             (int) $library->entityid,
             (int) $item->id,
-            ['homeages' => (string) $fields['homeages']] + ($fields['homeages'] ? ['what' => 'home'] : [])
+            ['homeages' => (string) $fields['homeages']] + ((string) $fields['homeages'] !== '' ? ['what' => 'home'] : [])
         );
     }
 
@@ -464,8 +464,10 @@ final class digital {
      */
     private static function home(array $data, ?string $ages): array {
         $number = fn($key, $max) => (int) ($data[$key] ?? 0) > 0 ? min((int) $data[$key], $max) : null;
+        // Age 0 is an age, the youngest: only no ages at all is not to read at home.
+        $has = $ages !== null && $ages !== '';
         $lines = [];
-        foreach ($ages ? array_map('intval', explode(',', $ages)) : [] as $age) {
+        foreach ($has ? array_map('intval', explode(',', $ages)) : [] as $age) {
             $line = \core_text::substr(trim((string) (($data['homelines'] ?? [])[$age] ?? '')), 0, 160);
             if ($line !== '') {
                 $lines[(string) $age] = $line;
@@ -474,11 +476,11 @@ final class digital {
         return [
             // To read at home with the little ones, for these ages: only what the public may see.
             'homeages' => $ages,
-            'homeminutes' => $ages ? $number('homeminutes', 999) : null,
-            'homeparts' => $ages ? $number('homeparts', 999) : null,
+            'homeminutes' => $has ? $number('homeminutes', 999) : null,
+            'homeparts' => $has ? $number('homeparts', 999) : null,
             'homelines' => $lines ? json_encode($lines, JSON_UNESCAPED_UNICODE) : null,
-            'homenight' => $ages && !empty($data['homenight']) ? 1 : 0,
-            'homeorder' => $ages ? $number('homeorder', 999) : null,
+            'homenight' => $has && !empty($data['homenight']) ? 1 : 0,
+            'homeorder' => $has ? $number('homeorder', 999) : null,
         ];
     }
 }

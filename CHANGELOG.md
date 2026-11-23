@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.15 (2026-11-24)
+
+The last two screens that were still forms, redrawn with the gestures of «How your library works».
+
+- **Weeding** as a box: «Refine» in sight (how long unlent and the places as chips, the year of publication with «−»
+  and «+»); the candidates on their shelves, each dropped into the box with a tap, or a whole shelf at once;
+  the box beside them, cardboard, with its count, every book in it, «Take out» and «Empty the box». The record takes
+  out what is in the box and empties it. The box is kept for each person and library until it is used.
+- **The digital forms of a record**: adding asks only for the file or the link; a card touched opens across the page,
+  its face on the left and its gestures beside it, in three groups: who sees it (the audiences and the stages as
+  chips, the licence in four words), to read at home (the ages as chips; the minutes, the parts and the order with «−»
+  and «+»; the night as a switch) and only for a course (the course and until when, a week at a time). Each touch
+  saves only what it changes.
+  A form not open to the public window says so where the ages would be, and where to turn it on, instead of offering
+  ages that would not be kept.
+- **A reading at home for the youngest**: a form for ages 0 to 2 was taken for one with no ages, and its block to read
+  at home did not show, nor kept its minutes; a form with no ages showed the youngest lit.
+
 ## 1.2.14 (2026-11-24)
 
 Three more screens that were still forms, redrawn with the gestures of «How your library works».

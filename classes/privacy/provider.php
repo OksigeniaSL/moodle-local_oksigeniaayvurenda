@@ -288,6 +288,7 @@ class provider implements
         $collection->add_user_preference('local_oksigeniaayvurenda_openfolded', 'privacy:metadata:preference:openfolded');
         $collection->add_user_preference('local_oksigeniaayvurenda_firstdayfolded', 'privacy:metadata:preference:firstdayfolded');
         $collection->add_user_preference('local_oksigeniaayvurenda_firstentry', 'privacy:metadata:preference:firstentry');
+        $collection->add_user_preference('local_oksigeniaayvurenda_weedbox', 'privacy:metadata:preference:weedbox');
         return $collection;
     }
 
@@ -309,6 +310,15 @@ class provider implements
         // When they were last told what waited, once and then for each centre (since 0.175: «…_stafftold_<centre>»).
         foreach ((array) get_user_preferences(null, null, $userid) as $name => $told) {
             // The news of each centre (since 0.195: «…_newbooks_<centre>»).
+            // The weeding box of each library (since 1.2.15: «…_weedbox_<library>»).
+            if (str_starts_with($name, 'local_oksigeniaayvurenda_weedbox_')) {
+                writer::export_user_preference(
+                    'local_oksigeniaayvurenda',
+                    $name,
+                    $told,
+                    get_string('privacy:metadata:preference:weedbox', 'local_oksigeniaayvurenda')
+                );
+            }
             if (str_starts_with($name, 'local_oksigeniaayvurenda_newbooks_')) {
                 writer::export_user_preference(
                     'local_oksigeniaayvurenda',

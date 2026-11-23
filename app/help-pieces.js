@@ -60,7 +60,7 @@ window.AYVHelpPieces = {
             return h.say(8);
         });
     },
-    // Weeding: the reasons, one list, refining, marking one, its record to sign.
+    // Weeding: the reasons, one list, refining in sight, a book to the box, the box, and its record to sign.
     weed: function(h) {
         'use strict';
         return h.point('.ayv-weed-reasons').then(function() {
@@ -70,27 +70,27 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.go('.ayv-weed-reason-unused');
         }).then(function() {
-            return h.point('.ayv-weed-row');
+            return h.point('.ayv-ex-libro');
         }).then(function() {
             return h.say(2);
         }).then(function() {
-            return Promise.all([h.say(3), h.tap('[data-ayv-open="ayv-weed-refine"]').then(function() {
-                return h.point('#ayv-weed-refine form[method="get"]');
-            })]);
+            return h.point('.ayv-ex-afinar');
         }).then(function() {
-            return h.tap('#ayv-weed-refine .ayv-modal-close');
+            return h.say(3);
         }).then(function() {
-            return h.you(4, '.ayv-weed-item');
+            return h.point('.ayv-ex-libro:not(.ayv-ex-dentro) .ayv-ex-tocar');
         }).then(function() {
-            return h.point('.ayv-weed-bar');
+            return h.say(4);
+        }).then(function() {
+            return h.go('.ayv-ex-libro:not(.ayv-ex-dentro) .ayv-ex-tocar');
+        }).then(function() {
+            return h.point('.ayv-ex-caja');
         }).then(function() {
             return h.say(5);
         }).then(function() {
-            return Promise.all([h.say(6), h.tap('[data-ayv-needs-mark]').then(function() {
-                return h.type('#ayv-weed-go input[name="reason"]', h.codes.weedreason);
-            })]);
+            return Promise.all([h.say(6), h.type('#ayv-ex-motivo', h.codes.weedreason)]);
         }).then(function() {
-            return h.go('#ayv-weed-go button[type="submit"]');
+            return h.go('.ayv-ex-acta button[type="submit"]');
         }).then(function() {
             return h.point('.ayv-weedtable');
         }).then(function() {

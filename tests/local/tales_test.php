@@ -67,6 +67,14 @@ final class tales_test extends \advanced_testcase {
         $this->assertSame(1, (int) $row->homenight);
         $this->assertSame(2, (int) $row->homeorder);
         $this->assertSame(['3' => 'Corto y tranquilo.'], json_decode($row->homelines, true));
+        // A tale only for the youngest (age 0) keeps what was written of it too: «0» is an age, not nothing.
+        $cuna = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Nana del faro']);
+        $youngest = digital::get(digital::add_link($library, (int) $cuna->id, 'https://example.org/nana.epub', [
+            'licence' => 'cc-by', 'audience' => ['public'], 'homeages' => [0], 'homeminutes' => 3, 'homenight' => 1,
+        ], $admin), $library);
+        $this->assertSame('0', (string) $youngest->homeages);
+        $this->assertSame(3, (int) $youngest->homeminutes);
+        $this->assertSame(1, (int) $youngest->homenight);
         $kept = digital::get($closed, $library);
         $this->assertNull($kept->homeminutes);
         $this->assertSame(0, (int) $kept->homenight);
@@ -74,12 +82,12 @@ final class tales_test extends \advanced_testcase {
 
         $titles = fn(int $age) => array_column(window::records($library, '', 0, $age)['records'], 'title');
         $this->assertSame(['Buenas noches, faro', 'La luna que no quería dormir'], $titles(4));
-        $this->assertSame(['La luna que no quería dormir'], $titles(2));
+        $this->assertSame(['Nana del faro', 'La luna que no quería dormir'], $titles(2), 'the youngest one shows for a 2-year-old');
         $this->assertSame([], $titles(7));
         $this->assertSame(['El mar de los mayores'], $titles(11));
         $this->assertSame([0, 3, 9], window::tale_ages($library));
         // The door as always shows every public tale.
-        $this->assertCount(3, window::records($library)['records']);
+        $this->assertCount(4, window::records($library)['records']);
 
         // What admissions asks, without reading the library's tables.
         $mine = array_values(array_filter(\local_oksigeniaayvurenda\api::libraries(), fn($l) => $l['slug'] === $library->slug));

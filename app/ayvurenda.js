@@ -96,8 +96,9 @@
     // the work underneath (it takes the click and the keyboard, and says what it is to a screen reader).
     if (config.filechoose) {
         document.querySelectorAll('input[type="file"]').forEach(function(input) {
-            // A field a script fills by itself (the recorder's voice) stays out of sight.
-            if (input.hidden) {
+            // A field a script fills by itself (the recorder's voice) stays out of sight, and one whose label already
+            // carries our words keeps them.
+            if (input.hidden || input.hasAttribute('data-ayv-own')) {
                 return;
             }
             var box = document.createElement('span');

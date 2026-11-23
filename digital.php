@@ -62,6 +62,10 @@ $fields = fn() => [
     'homenight' => optional_param('homenight', 0, PARAM_BOOL),
     'homeorder' => optional_param('homeorder', 0, PARAM_INT),
 ];
+// Adding asks only for the file or the link: it comes in as the most careful, with others' rights and for the staff,
+// and the rest is set on its card.
+$addfields = fn() => array_replace($fields(), optional_param_array('audience', null, PARAM_ALPHA) === null
+    ? ['audience' => ['staff'], 'licence' => optional_param('licence', 'rights', PARAM_ALPHANUMEXT)] : []);
 // Only for the students of a course, until a date, with the part of the work it is.
 $fragment = function (int $id) use ($str, $library, $recordid) {
     // Only a course that already has the book in its readings.
@@ -97,12 +101,12 @@ if (data_submitted() && confirm_sesskey()) {
                 $recordid,
                 $_FILES['file']['tmp_name'],
                 (string) $_FILES['file']['name'],
-                $fields(),
+                $addfields(),
                 (int) $USER->id
             ));
             $notice = $str('digitaladded');
         } else if ($url !== '') {
-            $fragment(digital::add_link($library, $recordid, $url, $fields() + ['subscribed' => optional_param(
+            $fragment(digital::add_link($library, $recordid, $url, $addfields() + ['subscribed' => optional_param(
                 'subscribed',
                 0,
                 PARAM_BOOL
@@ -111,6 +115,73 @@ if (data_submitted() && confirm_sesskey()) {
         } else {
             $notice = $str('digitalnothing');
         }
+    } else if ($do === 'set') {
+        // One gesture of an open card: what the form has now, with the one thing that came changed.
+        $itemid = required_param('item', PARAM_INT);
+        $item = digital::get($itemid, $library);
+        $now = [
+            'title' => (string) $item->title,
+            'licence' => (string) $item->licence,
+            'audience' => digital::audience($item),
+            'stages' => json_decode((string) $item->stages, true) ?: [],
+            'download' => (int) $item->download,
+            'accessible' => empty($item->accessformat) ? 0 : 1,
+            // Age 0 is an age (the youngest): only an empty list is none.
+            'homeages' => array_map('intval', array_values(array_filter(
+                explode(',', (string) $item->homeages),
+                fn($age) => $age !== ''
+            ))),
+            'homeminutes' => (int) $item->homeminutes,
+            'homeparts' => (int) $item->homeparts,
+            'homelines' => json_decode((string) $item->homelines, true) ?: [],
+            'homenight' => (int) $item->homenight,
+            'homeorder' => (int) $item->homeorder,
+        ];
+        $toggle = optional_param('toggle', '', PARAM_TEXT);
+        if (preg_match('/^(audience|stage|homeage):(.+)$/', $toggle, $m)) {
+            $key = ['audience' => 'audience', 'stage' => 'stages', 'homeage' => 'homeages'][$m[1]];
+            $value = $m[1] === 'homeage' ? (int) $m[2] : $m[2];
+            $now[$key] = in_array($value, $now[$key], true) ? array_values(array_diff($now[$key], [$value]))
+                : array_merge($now[$key], [$value]);
+        }
+        foreach (['title' => PARAM_TEXT, 'licence' => PARAM_ALPHANUMEXT] as $name => $type) {
+            $value = optional_param($name, null, $type);
+            if ($value !== null) {
+                $now[$name] = $value;
+            }
+        }
+        foreach (['download', 'accessible', 'homenight', 'homeminutes', 'homeparts', 'homeorder'] as $name) {
+            $value = optional_param($name, null, PARAM_INT);
+            if ($value !== null) {
+                $now[$name] = max(0, $value);
+            }
+        }
+        $lines = optional_param_array('homelines', null, PARAM_TEXT);
+        if ($lines !== null) {
+            $now['homelines'] = array_replace($now['homelines'], $lines);
+        }
+        digital::update($itemid, $library, $now);
+        $subscribed = optional_param('subscribed', null, PARAM_INT);
+        if ($subscribed !== null) {
+            digital::mark_subscribed($itemid, $library, (bool) $subscribed);
+        }
+        // Only for a course: the course, the part and until when, each on its own.
+        $forcourse = optional_param('forcourse', null, PARAM_INT);
+        $until = optional_param('until', null, PARAM_TEXT);
+        $pages = optional_param('pages', null, PARAM_TEXT);
+        if ($forcourse !== null || $until !== null || $pages !== null) {
+            $only = \local_oksigeniaayvurenda\local\fragments::of_item($itemid);
+            $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time())->timeend - 1;
+            $day = $until !== null ? DateTimeImmutable::createFromFormat('!Y-m-d', $until, zones::of($library)) : false;
+            \local_oksigeniaayvurenda\local\fragments::set(
+                $itemid,
+                $forcourse ?? ($only ? (int) $only->courseid : 0),
+                $pages ?? ($only ? (string) $only->pages : ''),
+                $day ? $day->setTime(23, 59, 59)->getTimestamp() : ($only ? (int) $only->timeend : $yearend),
+                time()
+            );
+        }
+        redirect(new moodle_url($PAGE->url, ['open' => $itemid, 'saved' => 1], 'ayv-dg-' . $itemid));
     } else if ($do === 'save') {
         digital::update(required_param('item', PARAM_INT), $library, $fields());
         digital::mark_subscribed(required_param('item', PARAM_INT), $library, optional_param('subscribed', 0, PARAM_BOOL));
@@ -132,8 +203,9 @@ $audiences = fn(array $chosen) => array_map(fn($a) => ['value' => $a, 'label' =>
 $stagelist = fn(array $chosen) => array_map(fn($s) => ['value' => $s, 'checked' => in_array($s, $chosen, true)], $stages);
 // The ages a tale to read at home suits.
 $agelabel = fn(int $age) => $str('talesage' . $age);
+// Age 0 is an age (the youngest): only an empty list lights none.
 $homeages = fn(?string $chosen) => array_map(fn($age) => ['value' => $age, 'label' => $agelabel($age),
-    'checked' => in_array($age, array_map('intval', explode(',', (string) $chosen)), true)], window::AGES);
+    'checked' => in_array((string) $age, explode(',', (string) $chosen), true)], window::AGES);
 // Why a tale is lovely, a line for each age, as whoever looked at it wrote it.
 $homelines = fn(?string $json) => array_map(fn($age) => ['value' => $age, 'linelabel' => $str('digitalhomeline', $agelabel($age)),
     'line' => (string) ((json_decode((string) $json, true) ?: [])[(string) $age] ?? '')], window::AGES);
@@ -141,6 +213,9 @@ $courses = \local_oksigeniaayvurenda\local\fragments::courses($library, $recordi
 $yearend = (int) \local_oksigeniaayvurenda\local\years::around((int) $library->entityid, time())->timeend - 1;
 $courselist = fn(int $chosen) => array_values(array_map(fn($id, $name) => ['id' => $id, 'name' => $name,
     'selected' => $id === $chosen], array_keys($courses), $courses));
+$open = optional_param('open', 0, PARAM_INT);
+$pageurl = fn(array $params = []) => new moodle_url('/local/oksigeniaayvurenda/digital.php', ['library' => $ref,
+    'record' => $recordid] + $params);
 $items = [];
 $hasproxy = \local_oksigeniaayvurenda\local\links::settings($library)['proxy'] !== '';
 foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => null]) as $item) {
@@ -176,12 +251,41 @@ foreach (digital::of_record($recordid, $library, ['who' => 'desk', 'stage' => nu
         'stages' => $stagelist($chosenstages),
         'download' => (bool) $item->download,
         'homeages' => $homeages($item->homeages),
+        // Only what anyone sees goes to read at home: otherwise, the group says where to light it.
+        'homepublic' => in_array('public', digital::audience($item), true),
+        'homenotpublic' => $str('digitalhomenotpublic', $str(
+            \local_oksigeniaayvurenda\local\skins::words((int) $library->entityid, 'audiencepublic')
+        )),
         'homelines' => $homelines($item->homelines),
         'homeminutes' => $item->homeminutes ? (int) $item->homeminutes : '',
         'homeparts' => $item->homeparts ? (int) $item->homeparts : '',
         'homenight' => !empty($item->homenight),
         'homeorder' => $item->homeorder ? (int) $item->homeorder : '',
-        'homechip' => $item->homeages ? $str('digitalhomechip', implode(', ', array_map(
+        // The card open across the page, its gestures beside it; «Done» closes it.
+        'open' => (int) $item->id === $open,
+        'changeurl' => $pageurl(['open' => $item->id])->out(false) . '#ayv-dg-' . $item->id,
+        'releaseurl' => $pageurl()->out(false) . '#ayv-dg-' . $item->id,
+        'justsaved' => (int) $item->id === $open && optional_param('saved', 0, PARAM_BOOL) ? $str('hiwsaved') : '',
+        'nocourse' => !$only,
+        'course' => $only ? (function () use ($only, $library, $str) {
+            $end = (int) $only->timeend;
+            $at = fn(int $t) => zones::date($t, '%Y-%m-%d', $library);
+            return ['untilsheet' => ['month' => core_text::strtolower(zones::date($end, '%b', $library)),
+                'day' => zones::date($end, '%e', $library), 'week' => zones::date($end, '%A', $library)],
+                'untilless' => $at($end - 7 * DAYSECS), 'untilmore' => $at($end + 7 * DAYSECS)];
+        })() : false,
+        'home' => (string) $item->homeages !== '' ? [
+            'homeminutes' => (int) $item->homeminutes,
+            'minutesless' => max(0, (int) $item->homeminutes - 1), 'minutesmore' => (int) $item->homeminutes + 1,
+            'minutesmin' => (int) $item->homeminutes <= 0,
+            'homeparts' => (int) $item->homeparts,
+            'partsless' => max(0, (int) $item->homeparts - 1), 'partsmore' => (int) $item->homeparts + 1,
+            'partsmin' => (int) $item->homeparts <= 0,
+            'homeorder' => $item->homeorder ? (int) $item->homeorder : false,
+            'orderless' => max(0, (int) $item->homeorder - 1), 'ordermore' => (int) $item->homeorder + 1,
+            'ordermin' => (int) $item->homeorder <= 0,
+        ] : false,
+        'homechip' => (string) $item->homeages !== '' ? $str('digitalhomechip', implode(', ', array_map(
             fn($age) => $agelabel((int) $age),
             explode(',', (string) $item->homeages)
         ))) : '',
@@ -212,6 +316,11 @@ $data = [
     'hascourses' => (bool) $courses,
     'courses' => $courselist(0),
     'until' => zones::date($yearend, '%Y-%m-%d', $library),
+    'savedword' => $str('profilesaved'),
+    'lesslabel' => $str('hiwless'),
+    'morelabel' => $str('hiwmore'),
+    'weekless' => $str('digitalweekless'),
+    'weekmore' => $str('digitalweekmore'),
     'recordurl' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $recordid]))
         ->out(false),
 ];
@@ -223,7 +332,8 @@ foreach (
         'digitalread', 'digitalnone', 'backtorecord', 'digitalchange', 'digitaladdhint', 'fragmentcourse', 'fragmentnone',
         'fragmentpages', 'fragmentpageshint', 'fragmentuntil', 'fragmenthint', 'digitalhome', 'digitalhomehint',
         'digitalhomeminutes', 'digitalhomeparts', 'digitalhomepartshint', 'digitalhomelinehint', 'digitalhomenight',
-        'digitalhomeorder', 'digitalhomeorderhint'] as $key
+        'digitalhomeorder', 'digitalhomeorderhint', 'digitaldone', 'digitaladdgo', 'digitalurlplaceholder', 'digitalor',
+        'digitaladdafter', 'digitalwhosees', 'digitalhomeages', 'digitalhomeorderauto', 'digitaldeletesure'] as $key
 ) {
     $data[$key] = $str($key);
 }

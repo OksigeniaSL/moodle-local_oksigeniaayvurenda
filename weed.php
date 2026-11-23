@@ -56,16 +56,42 @@ if (data_submitted() && confirm_sesskey()) {
         weeding::restore($restore, $library, $now);
         redirect($url(['record' => $recordid]));
     }
-    $chosen = optional_param_array('item', [], PARAM_INT);
-    $why = optional_param_array('why', [], PARAM_ALPHA);
-    $id = weeding::withdraw(
-        $library,
-        array_keys(array_filter($chosen)),
-        optional_param('reason', '', PARAM_TEXT),
-        $why,
-        (int) $USER->id,
-        $now
-    );
+    $do = optional_param('do', '', PARAM_ALPHA);
+    // The box: a copy in or out with a touch, a whole shelf of this page in, or emptied; it stays between pages and days.
+    if ($do === 'box') {
+        $box = optional_param('box', 0, PARAM_INT);
+        if ($box) {
+            weeding::box_change($library, [$box], 'toggle');
+            redirect($PAGE->url->out(false) . '#ayv-ex-' . $box);
+        }
+        $shelf = optional_param('boxshelf', '', PARAM_ALPHANUM);
+        if ($shelf !== '') {
+            $boxfilters = ['unused' => max(0, optional_param('unused', 5, PARAM_INT)),
+                'before' => max(0, optional_param('before', 0, PARAM_INT)), 'worn' => 1, 'lost' => 1,
+                'place' => optional_param('place', 0, PARAM_INT)];
+            $boxwhy = optional_param('why', 'unused', PARAM_ALPHA);
+            $rows = array_values(array_filter(
+                weeding::candidates($library, $boxfilters, $now, 0)['rows'],
+                fn($row) => $row['why'] === $boxwhy
+            ));
+            $page = max(0, optional_param('page', 0, PARAM_INT));
+            $onpage = array_slice($rows, $page * 50, 50);
+            weeding::box_change($library, array_column(
+                array_filter($onpage, fn($row) => 'p' . (int) $row['locationid'] === $shelf),
+                'id'
+            ), 'in');
+        }
+        redirect($PAGE->url->out(false) . '#ayv-ex-caja');
+    }
+    if ($do === 'boxempty') {
+        weeding::box_change($library, [], 'empty');
+        redirect($PAGE->url->out(false));
+    }
+    // The record is made of what is in the box.
+    $id = weeding::withdraw($library, weeding::box($library), optional_param('reason', '', PARAM_TEXT), [], (int) $USER->id, $now);
+    if ($id) {
+        weeding::box_change($library, [], 'empty');
+    }
     redirect($id ? $url(['record' => $id]) : $url());
 }
 
@@ -147,10 +173,16 @@ foreach (stocktake::places($library) as $place) {
     $places[(int) $place['id']] = $place['label'];
 }
 $covers = \local_oksigeniaayvurenda\local\covers::urls(array_column($slice, 'recordid'));
+$inbox = array_flip(weeding::box($library));
 $groups = [];
+$keys = [];
 foreach ($slice as $row) {
     $where = $places[$row['locationid']] ?? $str('weednoplace');
+    $keys[$where] = 'p' . (int) $row['locationid'];
     $groups[$where][] = $row + [
+        'inbox' => isset($inbox[(int) $row['id']]),
+        'lastout' => $row['lastloan'] ? $str('weedlastout', zones::date((int) $row['lastloan'], '%Y', $library))
+            : $str('weedlastoutnever'),
         'cover' => $covers[$row['recordid']] ?? null,
         'colour' => $row['recordid'] % 6,
         'initial' => core_text::strtoupper(core_text::substr(trim($row['title']), 0, 1)),
@@ -158,7 +190,6 @@ foreach ($slice as $row) {
             $row['year'] ? (string) $row['year'] : '',
             $row['callnumber'],
             $row['barcode'],
-            $why === 'unused' ? ($row['lastloan'] ? $str('weedlastloan', $date($row['lastloan'])) : $str('weedneverlent')) : '',
         ]))),
     ];
 }
@@ -182,7 +213,11 @@ $data = [
     'onrecords' => $view === 'records',
     'reasons' => $reasons,
     'why' => $why,
-    'groups' => array_map(fn($name, $rows) => ['name' => $name, 'rows' => $rows], array_keys($groups), $groups),
+    'groups' => array_map(
+        fn($name, $rows) => ['name' => $name, 'key' => $keys[$name], 'rows' => $rows],
+        array_keys($groups),
+        $groups
+    ),
     'hasrows' => (bool) $slice,
     'empty' => $str('weednonereason'),
     'pageline' => $pages > 1 ? $str('weedpage', (object) ['page' => $page + 1, 'pages' => $pages,
@@ -192,22 +227,38 @@ $data = [
     'records' => $records,
     'hasrecords' => (bool) $records,
     // To refine: the years without lending, the year of publication, the place.
+    // «Refine», in sight: each choice a link, as it is a view; the year of publication five years at a time.
     'refine' => [
         'unused' => array_map(fn($y) => ['value' => $y, 'label' => $y ? $str('weedunusedyears', $y) : $str('weednofilter'),
-            'selected' => $filters['unused'] === $y], [0, 2, 3, 5, 10]),
-        'before' => $filters['before'] ?: '',
-        'places' => array_map(
-            fn($p) => $p + ['selected' => (int) $filters['place'] === (int) $p['id']],
-            stocktake::places($library)
-        ),
-        'self' => $url(),
-        'why' => $why,
+            'selected' => $filters['unused'] === $y, 'url' => $url(['unused' => $y] + $keep + ['why' => $why])], [0, 2, 3, 5, 10]),
+        'before' => (function () use ($filters, $url, $keep, $why, $now, $library, $str) {
+            $thisyear = (int) zones::date($now, '%Y', $library);
+            $year = (int) $filters['before'];
+            $at = fn(int $y) => $url(['before' => $y] + $keep + ['why' => $why]);
+            return ['year' => $year ?: false, 'lessurl' => $at(($year ?: $thisyear) - 5),
+                'moreurl' => $at(min($thisyear, ($year ?: $thisyear - 10) + 5)), 'anyurl' => $at(0),
+                'anyyear' => $str('weedanyyear')];
+        })(),
+        'allurl' => $url(['place' => 0] + $keep + ['why' => $why]),
+        'allplaces' => !$filters['place'],
+        'places' => array_map(fn($p) => ['label' => $p['label'], 'selected' => (int) $filters['place'] === (int) $p['id'],
+            'url' => $url(['place' => (int) $p['id']] + $keep + ['why' => $why])], stocktake::places($library)),
     ],
+    // The box beside the shelves: what is in it, to take out one by one, and the record made of it.
+    'box' => (function () use ($library, $str) {
+        $items = weeding::box_items($library);
+        return ['count' => count($items), 'countlabel' => count($items) === 1 ? $str('weedboxcountone')
+            : $str('weedboxcount', count($items)), 'hasitems' => (bool) $items, 'items' => $items];
+    })(),
+    'backvalue' => '',
+    'lesslabel' => $str('weedbeforeless'),
+    'morelabel' => $str('weedbeforemore'),
 ];
 foreach (
     ['weedrefine', 'weedunused', 'weedbefore', 'weedplace', 'stocktakeall', 'weedshow', 'weedallpage', 'weedreason',
         'weedreasonhint', 'weedgo', 'weedgoconfirm', 'weedgohint', 'weedmarkedone', 'weedmarkedmany', 'weedmarkednone',
-        'weedrecords', 'weednorecords', 'weedprev', 'weednext', 'offsiteclose'] as $key
+        'weedrecords', 'weednorecords', 'weedprev', 'weednext', 'offsiteclose', 'weedallshelf', 'weedtobox', 'weedinbox',
+        'weedtakeout', 'weedboxword', 'weedboxempty', 'weedboxclear'] as $key
 ) {
     $data[$key] = $str($key);
 }
