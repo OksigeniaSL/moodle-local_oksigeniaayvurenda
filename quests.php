@@ -75,11 +75,22 @@ if (data_submitted() && confirm_sesskey()) {
             redirect(new moodle_url($PAGE->url, ['cartilla' => $id], 'rt-' . $id));
         }
         $problem = $str($id);
-    } else if ($do === 'cartilla') {
-        // One gesture on the table: a square in or out, shuffled or filled, a day, a length, a stage, the name or the line.
+    } else if ($do === 'newcount') {
+        // The count starts on its table too: six books, four weeks from today, for every stage.
+        $id = quests::save($library, ['name' => $str('questcountnewname'), 'start' => zones::date($now, '%Y-%m-%d', $library),
+            'end' => zones::date($now + 27 * DAYSECS, '%Y-%m-%d', $library), 'goal' => 6,
+            'stages' => quests::stages($library, $now)], $now);
+        if (is_int($id)) {
+            redirect(new moodle_url($PAGE->url, ['count' => $id], 'rt-' . $id));
+        }
+        $problem = $str($id);
+    } else if ($do === 'cartilla' || $do === 'count') {
+        // One gesture on the table: a square in or out, shuffled or filled (a cartilla), the books (a count), a day, a
+        // length, a stage, the name or the line.
         $id = required_param('id', PARAM_INT);
         $quest = $DB->get_record('local_oksigeniaayvurenda_quest', ['id' => $id, 'libraryid' => $library->id], '*', MUST_EXIST);
-        $squares = cartilla::squares($quest) ?: array_fill(0, cartilla::SIZE, '');
+        $counting = $do === 'count';
+        $squares = $counting ? [] : (cartilla::squares($quest) ?: array_fill(0, cartilla::SIZE, ''));
         foreach (optional_param_array('squares', [], PARAM_RAW_TRIMMED) as $at => $spec) {
             if ((int) $at >= 0 && (int) $at < cartilla::SIZE) {
                 $squares[(int) $at] = cartilla::valid((string) $spec) ? (string) $spec : '';
@@ -88,7 +99,7 @@ if (data_submitted() && confirm_sesskey()) {
         if (optional_param('shuffle', 0, PARAM_BOOL)) {
             shuffle($squares);
         }
-        if (optional_param('fill', 0, PARAM_BOOL)) {
+        if (!$counting && optional_param('fill', 0, PARAM_BOOL)) {
             $squares = cartilla::fill($squares, cartilla::options($library, $str, $now));
         }
         $start = (int) $quest->timestart;
@@ -119,11 +130,11 @@ if (data_submitted() && confirm_sesskey()) {
             'text' => optional_param('text', (string) $quest->text, PARAM_TEXT),
             'start' => zones::date($start, '%Y-%m-%d', $library),
             'end' => zones::date(max($end, $start), '%Y-%m-%d', $library),
-            'squares' => $squares,
             'stages' => $for,
-        ], $now, $id);
+        ] + ($counting ? ['goal' => max(1, min(quests::MAXGOAL, optional_param('goal', (int) $quest->goal, PARAM_INT)))]
+            : ['squares' => $squares]), $now, $id);
         if (is_int($saved)) {
-            redirect(new moodle_url($PAGE->url, ['cartilla' => $id, 'saved' => 1], 'rt-' . $id));
+            redirect(new moodle_url($PAGE->url, [$counting ? 'count' : 'cartilla' => $id, 'saved' => 1], 'rt-' . $id));
         }
         $problem = $str($saved);
     }
@@ -181,6 +192,9 @@ foreach (quests::of($library) as $quest) {
         'stages' => array_map(fn($s) => ['name' => $s, 'on' => in_array($s, $for, true)], $stages),
         'removesure' => format_string($quest->name) . ': ' . $str('questremovesure'),
         'cartilla' => cartilla::squares($quest) ? $card($quest) : null,
+        // The «Change» of a count opens its table, as a cartilla's does.
+        'editurl' => (new moodle_url('/local/oksigeniaayvurenda/quests.php', ['library' => $library->slug,
+            'count' => $quest->id], 'rt-' . $quest->id))->out(false),
     ];
 }
 // The table of a cartilla: its card with nine places, what it is, and the box of squares.
@@ -252,7 +266,47 @@ if ($quest && cartilla::squares($quest)) {
         'hasgenres' => (bool) $tiles['genres'],
     ];
 }
+// The table of a count: its card of stamps (one a book) with «−» and «+», and what it is, as the cartilla's.
+$countmesa = null;
+$counting = optional_param('count', 0, PARAM_INT);
+$quest = $counting ? $DB->get_record('local_oksigeniaayvurenda_quest', ['id' => $counting, 'libraryid' => $library->id]) : null;
+if ($quest && !cartilla::squares($quest)) {
+    $sheet = fn(int $time) => ['month' => \core_text::strtolower(zones::date($time, '%b', $library)),
+        'day' => zones::date($time, '%e', $library), 'week' => zones::date($time, '%A', $library)];
+    $days = (int) round(((int) $quest->timeend - (int) $quest->timestart) / DAYSECS);
+    $known = quests::stages($library, $now);
+    $for = json_decode((string) $quest->stages, true) ?: $known;
+    $goal = (int) $quest->goal;
+    $countmesa = [
+        'id' => (int) $quest->id,
+        'form' => 'rt-count-' . $quest->id,
+        'state' => $str($goal === 1 ? 'questcountstateone' : 'questcountstate', (object) ['goal' => $goal,
+            'span' => \core_text::strtolower($str('questwhen', zones::span(
+                (int) $quest->timestart,
+                (int) $quest->timeend,
+                $library
+            ))),
+            'for' => $for ? implode(', ', $for) : $str('questcountforall')]),
+        'saved' => optional_param('saved', 0, PARAM_BOOL) ? $str('hiwsaved') : '',
+        'name' => format_string($quest->name, true, ['escape' => false]),
+        'text' => (string) $quest->text,
+        'goal' => $goal,
+        'goalless' => max(1, $goal - 1),
+        'goalmore' => min(quests::MAXGOAL, $goal + 1),
+        'atmin' => $goal <= 1,
+        'atmax' => $goal >= quests::MAXGOAL,
+        'stamps' => array_map(fn($n) => ['n' => $n], range(1, $goal)),
+        'start' => $sheet((int) $quest->timestart),
+        'end' => $sheet((int) $quest->timeend),
+        'lengths' => array_map(fn($value) => ['value' => $value, 'label' => $str('questlength' . $value),
+            'pressed' => (string) $days === $value], ['7', '14', '28', 'term']),
+        'stages' => array_map(fn($index, $stage) => ['index' => $index, 'label' => $stage, 'on' => in_array($stage, $for, true),
+            'value' => in_array($stage, $for, true) ? 0 : 1], array_keys($known), $known),
+        'hasstages' => (bool) $known,
+    ];
+}
 $data = [
+    'countmesa' => $countmesa,
     'mesa' => $mesa,
     'heading' => $str('queststitle'),
     'intro' => $str('questsintro'),
@@ -275,7 +329,8 @@ foreach (
         'questkindcartilla', 'questkindcartilladesc', 'cartillanewtitle', 'cartillaname', 'cartillasave', 'cartillastarts',
         'cartillaends', 'cartilladayless', 'cartilladaymore', 'questlength', 'cartillafor', 'cartillanoinfant', 'cartillaline',
         'cartillashuffle', 'cartillafill', 'cartillabox', 'cartillaboxcorners', 'cartillaboxgenres', 'cartillaboxevery',
-        'cartillaincard', 'cartillawhat', 'cartillasquares'] as $key
+        'cartillaincard', 'cartillawhat', 'cartillasquares', 'counttitle', 'countgoal', 'countless', 'countmore',
+        'countcard'] as $key
 ) {
     $data[$key] = $str($key);
 }

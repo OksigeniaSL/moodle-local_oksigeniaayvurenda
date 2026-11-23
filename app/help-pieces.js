@@ -518,7 +518,7 @@ window.AYVHelpPieces = {
         return h.point(box(0, 'h2')).then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('.ayv-cards-designs');
+            return h.point('.ayv-cp-disenos');
         }).then(function() {
             return h.say(1);
         }).then(function() {

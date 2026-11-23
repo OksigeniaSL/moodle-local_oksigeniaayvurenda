@@ -17,7 +17,8 @@
 {{!
     @template local_oksigeniaayvurenda/quests
 
-    The library's challenges with their own dates: a card each, with how it goes, and its window.
+    The library's challenges with their own dates: a card each, with how it goes. The two kinds are set on the same
+    table (22 November 2026): «Contar libros» as the cartilla, on its own (quests_count), with no window.
 
     Example context (json):
     {
@@ -42,6 +43,7 @@
 {{#notice}}<p class="ayv-notice" role="status">{{notice}}</p>{{/notice}}
 {{#problem}}<p class="ayv-notice ayv-notice-error" role="alert">{{problem}}</p>{{/problem}}
 {{#mesa}}{{> local_oksigeniaayvurenda/quests_cartilla}}{{/mesa}}
+{{#countmesa}}{{> local_oksigeniaayvurenda/quests_count}}{{/countmesa}}
 <ul class="ayv-quest-cards">
 {{#quests}}
     <li class="ayv-quest-card" id="ayv-quest-{{id}}">
@@ -66,49 +68,17 @@
         </dl>
         {{/cartilla}}
         <div class="ayv-quest-card-do">
-            {{^cartilla}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-quest-edit-{{id}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{questedit}}</button>{{/cartilla}}
+            {{^cartilla}}<a class="ayv-button ayv-button-quiet" href="{{editurl}}">{{> local_oksigeniaayvurenda/icon_pencil}} {{questedit}}</a>{{/cartilla}}
             <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}"><button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remove" data-ayv-twice="{{removesure}}">{{questremove}}</button></form>
         </div>
-        <dialog class="ayv-modal ayv-entity-edit" id="ayv-quest-edit-{{id}}" aria-labelledby="ayv-quest-edit-{{id}}-title">
-            <div class="ayv-modal-head"><h3 id="ayv-quest-edit-{{id}}-title" class="ayv-section-title">{{name}}</h3>
-                <form method="dialog"><button class="ayv-modal-close" aria-label="{{questclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-            <form method="post" action="{{action}}#ayv-quest-{{id}}">
-                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="id" value="{{id}}">
-                <label class="ayv-field">{{questname}} <input type="text" name="name" value="{{name}}" maxlength="120" required></label>
-                <label class="ayv-field">{{questtext}} <span class="ayv-field-hint">{{questtexthint}}</span> <input type="text" name="text" value="{{text}}" maxlength="255"></label>
-                <div class="ayv-quest-dates">
-                    <label class="ayv-field">{{queststart}} <input type="date" name="start" value="{{startvalue}}" required></label>
-                    <label class="ayv-field">{{questend}} <input type="date" name="end" value="{{endvalue}}" required></label>
-                    <label class="ayv-field">{{questgoal}} <input type="number" name="goal" value="{{goal}}" min="1" max="{{maxgoal}}" required></label>
-                </div>
-                {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{questfor}}</legend><p class="ayv-field-hint">{{questforhint}}</p><div class="ayv-choices">{{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{name}}" {{#on}}checked{{/on}}> {{name}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
-                <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{questsave}}</button></p>
-            </form>
-        </dialog>
     </li>
 {{/quests}}
 {{^hasquests}}<li class="ayv-quest-card ayv-quest-card-none"><p>{{questsnone}}</p></li>{{/hasquests}}
     <li class="ayv-quest-card ayv-ct-reto-nuevo"><h2 class="ayv-quest-card-name">{{questsnew}}</h2>
         <form id="rt-nuevo" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"></form>
         <div class="ayv-ct-tipos">
-            <button type="button" class="ayv-ct-tipo" data-ayv-open="ayv-quest-new"><span class="ayv-ct-tipo-dibujo ayv-ct-tipo-sellos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><b>{{questkindbooks}}</b><span>{{questkindbooksdesc}}</span></button>
+            <button type="submit" class="ayv-ct-tipo" form="rt-nuevo" name="do" value="newcount"><span class="ayv-ct-tipo-dibujo ayv-ct-tipo-sellos" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><b>{{questkindbooks}}</b><span>{{questkindbooksdesc}}</span></button>
             <button type="submit" class="ayv-ct-tipo" form="rt-nuevo" name="do" value="newcartilla"><span class="ayv-ct-tipo-dibujo ayv-ct-tipo-carton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>{{questkindcartilla}}</b><span>{{questkindcartilladesc}}</span></button>
         </div></li>
 </ul>
-<dialog class="ayv-modal ayv-entity-edit" id="ayv-quest-new" aria-labelledby="ayv-quest-new-title">
-    <div class="ayv-modal-head"><h2 id="ayv-quest-new-title" class="ayv-section-title">{{questsnew}}</h2>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{questclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <form method="post" action="{{action}}">
-        <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <label class="ayv-field">{{questname}} <span class="ayv-field-hint">{{questnamehint}}</span> <input type="text" name="name" maxlength="120" required></label>
-        <label class="ayv-field">{{questtext}} <span class="ayv-field-hint">{{questtexthint}}</span> <input type="text" name="text" maxlength="255"></label>
-        <div class="ayv-quest-dates">
-            <label class="ayv-field">{{queststart}} <input type="date" name="start" value="{{newstart}}" required></label>
-            <label class="ayv-field">{{questend}} <input type="date" name="end" value="{{newend}}" required></label>
-            <label class="ayv-field">{{questgoal}} <input type="number" name="goal" value="6" min="1" max="{{maxgoal}}" required></label>
-        </div>
-        {{#hasstages}}<fieldset class="ayv-fieldset"><legend>{{questfor}}</legend><p class="ayv-field-hint">{{questforhint}}</p><div class="ayv-choices">{{#stages}}<label class="ayv-field ayv-field-check"><input type="checkbox" name="stages[]" value="{{name}}"> {{name}}</label>{{/stages}}</div></fieldset>{{/hasstages}}
-        <p class="ayv-book-actions"><button type="submit" class="ayv-button" name="do" value="save">{{questsave}}</button></p>
-    </form>
-</dialog>
 </section>

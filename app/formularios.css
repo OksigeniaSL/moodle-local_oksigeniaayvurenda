@@ -395,3 +395,484 @@ html[data-bs-theme="dark"] .ayv .ayv-sd-escribir input:focus {
     }
 }
 
+/* ===================================================================================================================== */
+/* B5 · Printing cards: the classes as chips by stage; each stage's designs as small cards that are touched; the sheets   */
+/* drawn, as on Etiquetas; the margins with «−» and «+».                                                                 */
+/* ===================================================================================================================== */
+.ayv .ayv-cp-clases,
+.ayv .ayv-cp-disenos,
+.ayv .ayv-cp-margenes {
+    --cf-tinta-fija: #1e2b2a;
+    --cf-crema: #fbf6ec;
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+.ayv .ayv-cp-clases .ayv-cf-rotulo,
+.ayv .ayv-cp-fila > .ayv-cf-rotulo {
+    min-width: 6rem;
+}
+.ayv .ayv-cp-clases .ayv-cf-chapa {
+    min-height: 36px;
+    padding: 3px 13px;
+}
+.ayv .ayv-cp-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+}
+.ayv .ayv-cp-fila:first-child {
+    border-top: 0;
+}
+.ayv .ayv-cp-carnes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+/* a design: the card small, touched; the chosen one lifted, with its frame and a tick */
+.ayv .ayv-cp-carne {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    width: 9rem;
+    padding: 6px 6px 8px;
+    border: 1.5px solid transparent;
+    border-radius: 14px;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: .9375rem;
+    cursor: pointer;
+}
+.ayv button.ayv-cp-carne:hover {
+    border-color: var(--line);
+}
+.ayv .ayv-cp-carne .ayv-cp-cara {
+    width: 100%;
+    margin: 0;
+    transition: transform .15s ease;
+}
+.ayv .ayv-cp-carne[aria-pressed="false"] .ayv-cp-cara {
+    opacity: .72;
+    filter: saturate(.7);
+}
+.ayv .ayv-cp-carne[aria-pressed="true"] {
+    border-color: var(--green);
+    background: var(--surface);
+    box-shadow: 0 8px 18px -12px rgba(23, 87, 76, .55);
+}
+html[data-bs-theme="dark"] .ayv .ayv-cp-carne[aria-pressed="true"] {
+    border-color: var(--accent);
+}
+.ayv .ayv-cp-carne[aria-pressed="true"] .ayv-cp-cara {
+    transform: translateY(-3px) rotate(-1.5deg);
+}
+.ayv .ayv-cp-carne[aria-pressed="true"]::after {
+    content: "✓";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 2.5px var(--surface);
+    color: #fbf6ec;
+    font-size: .875rem;
+    font-weight: 700;
+}
+.ayv .ayv-cp-hojas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 8px 0 4px;
+}
+.ayv .ayv-cp-hojas .ayv-et-hoja-b {
+    flex: 0 1 13rem;
+}
+.ayv .ayv-cp-margenes {
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    margin-top: 6px;
+}
+@media (max-width: 600px) {
+    /* three designs to a row, and the sheets side by side, on a phone */
+    .ayv .ayv-cp-carnes {
+        gap: 6px;
+    }
+    .ayv .ayv-cp-carne {
+        width: calc((100% - 12px) / 3);
+        padding: 4px 3px 6px;
+        font-size: .8125rem;
+    }
+    .ayv .ayv-cp-carnes {
+        flex: 1 1 100%;
+    }
+    .ayv .ayv-cp-hojas .ayv-et-hoja-b {
+        flex: 1 1 8.5rem;
+        padding: 10px;
+    }
+}
+
+/* ===================================================================================================================== */
+/* B4 · The agenda: the sheet of the month (the course sheet's, one month large); a day touched opens as a card beside    */
+/* it, with its activities changed in place and a new one written on it; what is coming under it.                         */
+/* ===================================================================================================================== */
+.ayv .ayv-ag-mesa {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+@media (min-width: 1100px) {
+    .ayv .ayv-ag-mesa {
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+    .ayv .ayv-ag-dia-t {
+        position: sticky;
+        top: 16px;
+    }
+}
+.ayv .ayv-ag-hoja {
+    margin: 0;
+}
+.ayv .ayv-ag-mes-cab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.ayv .ayv-ag-mes-cab h2 {
+    text-transform: capitalize;
+}
+.ayv .ayv-ag-mes-cab h2 span {
+    color: var(--ink-2);
+    font-family: var(--text);
+    font-size: 1rem;
+}
+.ayv .ayv-ag-flecha {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    color: var(--ink);
+    font-size: 1.375rem;
+    line-height: 1;
+    text-decoration: none;
+}
+.ayv .ayv-ag-flecha:hover {
+    border-color: var(--muted);
+}
+.ayv .ayv-ag-semana {
+    margin: 14px 0 6px;
+    gap: 6px;
+}
+.ayv .ayv-ag-dias {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+.ayv .ayv-ag-dia {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    min-height: 86px;
+    padding: 6px;
+    border-radius: 10px;
+    background: var(--paper);
+    color: var(--ink);
+    text-decoration: none;
+}
+html[data-bs-theme="dark"] .ayv .ayv-ag-dia {
+    background: var(--paper2);
+}
+.ayv .ayv-ag-dia b {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    font-size: .9375rem;
+    font-variant-numeric: tabular-nums;
+}
+.ayv .ayv-ag-dia:hover {
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.ayv .ayv-ag-dia.ayv-ag-finde {
+    background: none;
+    color: var(--ink-2);
+}
+.ayv .ayv-ag-dia.ayv-ag-pasado {
+    /* Gone, but still readable: a lighter plate, not a fainter number. */
+    background: transparent;
+    color: var(--ink-2);
+}
+.ayv .ayv-ag-dia.ayv-ag-hoy b {
+    border-radius: 50%;
+    background: var(--coral);
+    color: #141c1b;
+}
+.ayv .ayv-ag-dia.ayv-ag-tocado {
+    background: var(--surface);
+    box-shadow: 0 0 0 2.5px var(--accent), 0 10px 18px -12px rgba(30, 43, 42, .55);
+}
+.ayv .ayv-ag-marca {
+    overflow: hidden;
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ayv .ayv-ag-m-coral { background: var(--coral); color: #141c1b; }
+.ayv .ayv-ag-m-green { background: var(--green); color: #fbf6ec; }
+.ayv .ayv-ag-m-sun { background: var(--sun); color: #1e2b2a; }
+.ayv .ayv-ag-m-night { background: var(--night); color: var(--sun); }
+/* The day touched: the card beside the sheet */
+.ayv .ayv-ag-dia-t {
+    min-width: 0;
+    margin: 0;
+}
+.ayv .ayv-ag-dia-cuerpo {
+    flex: 1 1 0%;   /* from nothing, so that its rows of chips never widen the card */
+    align-self: stretch;   /* on a phone the card is a column (the course sheet's rule): the body takes its width */
+    min-width: 0;
+}
+.ayv .ayv-ag-act {
+    --a: var(--green);
+    margin-top: 14px;
+    padding: 2px 0 4px 14px;
+    border-left: 4px solid var(--a);
+}
+.ayv .ayv-ag-a-coral { --a: var(--coral); }
+.ayv .ayv-ag-a-sun { --a: var(--sun); }
+.ayv .ayv-ag-a-night { --a: var(--night); }
+html[data-bs-theme="dark"] .ayv .ayv-ag-a-night { --a: var(--accent); }
+.ayv .ayv-ag-act-t {
+    margin: 0;
+    font-family: var(--title);
+    font-size: 1.1875rem;
+    font-weight: 600;
+}
+.ayv .ayv-ag-act-cuando {
+    margin: 2px 0 0;
+    font-weight: 700;
+}
+.ayv .ayv-ag-act-datos {
+    margin: 2px 0 0;
+}
+.ayv .ayv-ag-act-datos span + span::before {
+    content: " · ";
+}
+.ayv .ayv-ag-act-frase {
+    margin: 6px 0 0;
+}
+.ayv .ayv-ag-cambiar {
+    margin-top: 8px;
+}
+.ayv .ayv-ag-cambiar > summary {
+    display: inline-flex;
+    list-style: none;
+    cursor: pointer;
+}
+.ayv .ayv-ag-cambiar > summary::-webkit-details-marker {
+    display: none;
+}
+.ayv .ayv-ag-cambiar[open] > summary {
+    display: none;
+}
+.ayv .ayv-ag-gestos {
+    display: grid;
+    gap: 12px;
+    margin-top: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--paper);
+}
+html[data-bs-theme="dark"] .ayv .ayv-ag-gestos {
+    background: var(--paper2);
+}
+.ayv .ayv-ag-gestos .ayv-cf-rotulo {
+    min-width: 5.5rem;
+}
+.ayv .ayv-ag-gestos .ayv-cf-chapa {
+    min-height: 36px;
+    padding: 3px 13px;
+}
+.ayv .ayv-ag-gestos .ayv-cf-numero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+}
+.ayv .ayv-ag-otro {
+    width: 11rem;
+    padding: 6px 2px;
+    border: 0;
+    border-bottom: 1.5px dashed var(--line);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+}
+.ayv .ayv-ag-otro:focus {
+    outline: none;
+    border-bottom: 2px solid var(--accent);
+}
+/* A new one, written on the day */
+.ayv .ayv-ag-nueva {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 8px 8px 8px 12px;
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+}
+.ayv .ayv-ag-mas {
+    color: var(--accent);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+.ayv .ayv-ag-nueva input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 6px 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+}
+.ayv .ayv-ag-nueva input:focus {
+    outline: none;
+}
+.ayv .ayv-ag-nueva:focus-within {
+    border-style: solid;
+    border-color: var(--accent);
+}
+/* What is coming */
+.ayv .ayv-ag-viene {
+    margin-top: 28px;
+}
+.ayv .ayv-ag-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+.ayv .ayv-ag-lista .ayv-agenda-item {
+    display: block;   /* the whole item is the link: the leaf and the words inside it */
+}
+.ayv .ayv-ag-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    color: var(--ink);
+    text-decoration: none;
+}
+.ayv .ayv-ag-item .ayv-agenda-words {
+    display: grid;
+}
+.ayv .ayv-ag-item:hover .ayv-agenda-title {
+    text-decoration: underline;
+}
+@media (max-width: 600px) {
+    .ayv .ayv-ag-hoja {
+        padding: 12px 8px;
+    }
+    .ayv .ayv-ag-dias,
+    .ayv .ayv-ag-semana {
+        gap: 3px;
+    }
+    .ayv .ayv-ag-dia {
+        align-items: center;
+        min-height: 50px;
+        padding: 4px 2px;
+    }
+    /* on a phone, an activity is a dot under its day */
+    .ayv .ayv-ag-marca {
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+    }
+    .ayv .ayv-ag-dia-t {
+        padding: 14px 44px 14px 12px;
+    }
+    .ayv .ayv-ag-dia-t .ayv-cf-hoja {
+        display: none;
+    }
+}
+
+/* ===================================================================================================================== */
+/* B3 · «Contar libros» on the cartilla's table: its card of stamps (one per book) with «−» and «+» under it, and what it  */
+/* is set as the cartilla's. The table's own rules (.ayv-ct-*) do the rest.                                              */
+/* ===================================================================================================================== */
+.ayv .ayv-cl-lado {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: 12px;
+}
+.ayv .ayv-cl-carton {
+    width: 100%;
+    max-width: 22rem;
+}
+.ayv .ayv-cl-sellos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 12px 14px 16px;
+    list-style: none;
+}
+.ayv .ayv-cl-sellos li {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: 2.5px dashed rgba(23, 87, 76, .45);
+    border-radius: 50%;
+}
+.ayv .ayv-cl-sellos li span {
+    color: rgba(23, 87, 76, .6);
+    font-family: var(--title);
+    font-size: 1.5rem;
+}
+/* the first stamp, already put, as a reader sees it after their first book */
+.ayv .ayv-cl-sellos li:first-child {
+    border: 0;
+    background: radial-gradient(circle, var(--coral) 0 56%, transparent 57%), radial-gradient(circle, transparent 0 64%, var(--coral) 65% 70%, transparent 71%);
+    transform: rotate(-12deg);
+}
+.ayv .ayv-cl-sellos li:first-child span {
+    color: #fbf6ec;
+}
+.ayv .ayv-cl-cuantos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.ayv .ayv-cl-cuantos .ayv-cf-cifra b {
+    font-size: 1.75rem;
+}
+
+
+/* The unit beside each margin, readable on the page (the muted ink of «How it works» is for its own plate). */
+.ayv .ayv-cp-margenes .ayv-cf-cifra {
+    color: var(--ink-2);
+}
+
+/* «Remove», folded under an activity's gestures: quiet, and readable. */
+.ayv .ayv-ag-gestos .ayv-cf-quitar > summary {
+    color: var(--ink-2);
+}

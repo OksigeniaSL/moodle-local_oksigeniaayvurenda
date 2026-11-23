@@ -94,6 +94,7 @@ $typename = $type !== '' ? $str('readerstype' . $type) : '';
 $label = ['all' => $str('cardprintall'), 'stage' => $stage, 'group' => $group, 'reader' => $onename, 'type' => $typename,
     'pick' => ''][$who] ?? '';
 $notice = '';
+$justsaved = '';
 if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', '', PARAM_ALPHA);
     if ($do === 'back' && $manage) {
@@ -101,9 +102,16 @@ if (data_submitted() && confirm_sesskey()) {
             'notes' => core_text::substr(trim(optional_param('notes', '', PARAM_TEXT)), 0, 300)]);
         $notice = $str('cardprintsaved');
     } else if ($do === 'sheet' && $manage) {
-        $number = fn(string $name) => (float) str_replace(',', '.', optional_param($name, '0', PARAM_RAW_TRIMMED));
-        cardprint::save($entityid, ['left' => $number('left'), 'top' => $number('top'), 'gap' => $number('gap')]);
-        $notice = $str('cardprintsaved');
+        // Each «−» and «+» sends its own margin; the others stay as they are.
+        $margins = [];
+        foreach (['left', 'top', 'gap'] as $name) {
+            $value = optional_param($name, null, PARAM_RAW_TRIMMED);
+            if ($value !== null) {
+                $margins[$name] = max(0.0, min(30.0, round((float) str_replace(',', '.', $value), 1)));
+            }
+        }
+        cardprint::save($entityid, $margins);
+        $justsaved = $str('cardprintsaved');
     } else if ($do === 'plastic' && $manage) {
         $number = fn(string $name) => (float) str_replace(',', '.', optional_param($name, '0', PARAM_RAW_TRIMMED));
         cardprint::save($entityid, ['pwidth' => max(40, $number('pwidth')), 'pheight' => max(30, $number('pheight'))]);
@@ -119,13 +127,11 @@ if (data_submitted() && confirm_sesskey()) {
             }
         }
     } else if ($do === 'design' && $manage) {
-        $designs = optional_param_array('design', [], PARAM_ALPHA);
-        $chosen = [];
-        foreach (optional_param_array('designstage', [], PARAM_TEXT) as $index => $key) {
-            $chosen[$key] = (string) ($designs[$index] ?? '');
-        }
+        // One stage at a time: the small card touched is that stage's design; the other stages keep theirs.
+        $chosen = cardprint::settings($entityid)['designs'];
+        $chosen[optional_param('designstage', '', PARAM_TEXT)] = optional_param('design', '', PARAM_ALPHA);
         cardprint::choose_designs($entityid, $chosen);
-        $notice = $str('cardprintsaved');
+        $justsaved = $str('cardprintsaved');
     } else if ($do === 'logo' && $manage) {
         $kept = cardprint::keep_logo($entityid, 'logo');
         $notice = $kept === null ? '' : $str($kept ? 'cardprintsaved' : 'cardprintlogobad');
@@ -167,7 +173,8 @@ if ($type === '') {
     foreach (\local_oksigeniaayvurenda\local\readers::groups($library, $now) as $row) {
         if ($stage === '' || $row['stage'] === $stage) {
             $classes[$row['stage']] ??= ['stage' => $row['stage'], 'named' => $stage === '' && $row['stage'] !== '', 'rows' => []];
-            $classes[$row['stage']]['rows'][] = ['name' => $row['name'], 'selected' => $row['name'] === $group];
+            $classes[$row['stage']]['rows'][] = ['name' => $row['name'], 'selected' => $row['name'] === $group,
+                'url' => $url(array_filter(['how' => $how, 'stage' => $stage, 'group' => $row['name']]))];
         }
     }
 }
@@ -196,7 +203,9 @@ foreach (cardprint::DESIGNS as $design) {
         'whofor' => $map[$design] ? implode(' · ', array_map($whoname, $map[$design])) : $str('cardprintdesignnone')];
 }
 $chosen = $own['designs'];
-$option = fn(string $value, string $title, string $on) => ['value' => $value, 'title' => $title, 'selected' => $value === $on];
+$samples = array_column($designs, 'sampleurl', 'title');
+$option = fn(string $value, string $title, string $on) => ['value' => $value, 'title' => $title, 'selected' => $value === $on,
+    'sampleurl' => $value !== '' ? (string) ($samples[$title] ?? '') : ''];
 $choices = fn(string $none, string $on) => array_merge([$option('', $none, $on)], array_map(
     fn($design) => $option($design, $str('cardprintdesign' . $design), $on),
     cardprint::DESIGNS
@@ -255,9 +264,23 @@ $data = [
     'ways' => $ways,
     'sheet' => $how === 'sheet' ? ['left' => $own['left'], 'top' => $own['top'], 'gap' => $own['gap'],
         'testurl' => $url($state + ['test' => 1]), 'canset' => $manage,
+        // Each sheet drawn small with its grid, as the label sheets: ten cards, two by five.
         'models' => array_map(fn($key, $model) => ['value' => $key, 'label' => $key === 'other' ? $str('cardprintmodelother')
-            : $model['name'] . ' · ' . str_replace('.', ',', (string) $model['width']) . ' × ' . $model['height'] . ' mm',
-            'selected' => $key === $own['model']], array_keys(cardprint::MODELS), cardprint::MODELS)] : null,
+            : $model['name'], 'cols' => 2, 'rows' => 5, 'cells' => array_fill(0, 10, ['cell' => true]),
+            'sub' => $str('cardprintmodelsub', (object) ['w' => str_replace('.', ',', (string) $model['width']),
+                'h' => str_replace('.', ',', (string) $model['height'])]),
+            'selected' => $key === $own['model']], array_keys(cardprint::MODELS), cardprint::MODELS),
+        // The margins with «−» and «+», a tenth of a millimetre each.
+        'margins' => array_map(function ($field) use ($own, $str) {
+            $value = round((float) $own[$field], 1);
+            $say = fn(float $v) => str_replace('.', ',', sprintf('%.1f', $v));
+            return ['field' => $field, 'label' => $str('cardprintsheet' . $field), 'value' => $say($value),
+                'less' => sprintf('%.1f', max(0.0, $value - 0.1)), 'more' => sprintf('%.1f', min(30.0, $value + 0.1)),
+                'atmin' => $value <= 0.0, 'atmax' => $value >= 30.0];
+        }, ['left', 'top', 'gap'])] : null,
+    'justsaved' => $justsaved,
+    'lesslabel' => $str('hiwless'),
+    'morelabel' => $str('hiwmore'),
     'modellabel' => $str('cardprintmodel'),
     'sheetheading' => $str('cardprintsheetheading'),
     'sheethint' => $str('cardprintsheethint'),

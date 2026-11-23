@@ -100,6 +100,87 @@ final class agenda {
     }
 
     /**
+     * Changes one thing of an activity, as each gesture of its card sends one: the time (or the whole day, empty), how long
+     * it lasts in minutes (0: no end), where, for whom, how many seats (0: not counted), its name or its sentence.
+     *
+     * @param \stdClass $library
+     * @param int $id
+     * @param string $field time, lasts, place, audience, seats, title or text.
+     * @param string $value
+     * @param int $now
+     * @return bool Whether it changed.
+     */
+    public static function set(\stdClass $library, int $id, string $field, string $value, int $now): bool {
+        global $DB;
+        $row = $DB->get_record(self::T . 'activity', ['id' => $id, 'libraryid' => $library->id]);
+        if (!$row) {
+            return false;
+        }
+        $zone = zones::of((int) $library->entityid);
+        $start = (new \DateTimeImmutable('@' . $row->timestart))->setTimezone($zone);
+        $lasts = $row->timeend ? (int) $row->timeend - (int) $row->timestart : 0;
+        $change = ['id' => $id, 'timemodified' => $now];
+        switch ($field) {
+            case 'time':
+                if (!preg_match('/^([01]?\d|2[0-3]):([0-5]\d)$/', $value, $m) && $value !== '') {
+                    return false;
+                }
+                $moved = $value === '' ? $start->setTime(0, 0) : $start->setTime((int) $m[1], (int) $m[2]);
+                $change['timestart'] = $moved->getTimestamp();
+                $change['timeend'] = $lasts ? $moved->getTimestamp() + $lasts : null;
+                break;
+            case 'lasts':
+                $minutes = max(0, min(24 * 60, (int) $value));
+                $change['timeend'] = $minutes ? (int) $row->timestart + $minutes * MINSECS : null;
+                break;
+            case 'place':
+            case 'audience':
+                $change[$field] = self::line($value, 160);
+                break;
+            case 'text':
+                $change['text'] = self::line($value, 600);
+                break;
+            case 'title':
+                $title = \core_text::substr(trim($value), 0, 160);
+                if ($title === '') {
+                    return false;
+                }
+                $change['title'] = $title;
+                break;
+            case 'seats':
+                $seats = max(0, min(9999, (int) $value));
+                $change['seats'] = $seats ?: null;
+                break;
+            default:
+                return false;
+        }
+        $DB->update_record(self::T . 'activity', (object) $change);
+        return true;
+    }
+
+    /**
+     * The places and the audiences this library has used, the most recent first: the chips of an activity's card.
+     *
+     * @param \stdClass $library
+     * @param string $field place or audience.
+     * @return string[]
+     */
+    public static function used(\stdClass $library, string $field): array {
+        global $DB;
+        if (!in_array($field, ['place', 'audience'], true)) {
+            return [];
+        }
+        $values = $DB->get_fieldset_sql(
+            "SELECT $field FROM {" . self::T . "activity}
+              WHERE libraryid = :libraryid AND $field IS NOT NULL AND $field <> ''
+           GROUP BY $field
+           ORDER BY MAX(timemodified) DESC",
+            ['libraryid' => $library->id]
+        );
+        return array_slice(array_map('strval', $values), 0, 6);
+    }
+
+    /**
      * Takes an activity away.
      *
      * @param \stdClass $library

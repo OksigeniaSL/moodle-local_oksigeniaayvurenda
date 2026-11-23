@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.14 (2026-11-24)
+
+Three more screens that were still forms, redrawn with the gestures of «How your library works».
+
+- **Printing cards**: the classes as chips by stage; each stage's designs as small cards with their sample, the one
+  touched saved for that stage; the sheet models drawn with their grid, as the label sheets; the margins with «−» and
+  «+», a tenth of a millimetre each, each saving only its own.
+- **The agenda**: the sheet of the month, each day with its activities as marks of colour; a day touched opens as a
+  card beside it, where each activity changes in place (the time a quarter of an hour at a time, how long it lasts,
+  where and for whom as chips, the seats with «−» and «+»), and a new one is written on that day. Under the sheet,
+  what is coming, each leading to its day.
+- **«Count books»** on the cartilla's table: its card of stamps, one per book, with «−» and «+», and its dates, length
+  and stages as the cartilla's. No more windows: «New challenge» opens its table, as «A cartilla» does.
+
 ## 1.2.13 (2026-11-23)
 
 Two of the screens that were still forms, redrawn with the gestures of «How your library works».

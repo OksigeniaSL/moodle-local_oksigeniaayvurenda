@@ -48,37 +48,31 @@
     {{#whom}}<li><a class="ayv-cards-who" href="{{url}}"{{#on}} aria-current="true"{{/on}}><b>{{title}}</b><span>{{count}}</span></a></li>{{/whom}}
     </ul>{{/haswhom}}
     {{#hasclasses}}
-    <form method="get" action="{{action}}" class="ayv-cards-class">
-        <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="how" value="{{how}}">
-        {{#stage}}<input type="hidden" name="stage" value="{{stage}}">{{/stage}}
-        <label class="ayv-field">{{classlabel}} <select name="group" data-ayv-submit><option value="">{{classnone}}</option>{{#classes}}{{#named}}<optgroup label="{{stage}}">{{/named}}{{#rows}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/rows}}{{#named}}</optgroup>{{/named}}{{/classes}}</select></label>
-        <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{classlabel}}</button></noscript>
-    </form>
+    {{! A class, as cards by stage (the chips of Tutors and Etiquetas): each a link, the chosen one aria-current. }}
+    <div class="ayv-cp-clases" role="group" aria-label="{{classlabel}}">
+        {{#classes}}<div class="ayv-cf-fila">{{#named}}<span class="ayv-cf-rotulo">{{stage}}</span>{{/named}}<span class="ayv-cf-chapas">{{#rows}}<a class="ayv-cf-chapa" href="{{url}}"{{#selected}} aria-current="true"{{/selected}}>{{name}}</a>{{/rows}}</span></div>{{/classes}}
+    </div>
     {{/hasclasses}}
     <p class="ayv-field-hint">{{onehint}}</p>
 </div>
 <div class="ayv-mine-box ayv-cards-step">
     <h2 class="ayv-mine-title">{{designheading}}</h2>
     <p class="ayv-field-hint">{{designhint}}</p>
-    <ul class="ayv-cards-designs">
-    {{#designs}}
-        <li class="ayv-cards-design{{^used}} ayv-cards-design-off{{/used}}">
-            <span class="ayv-cards-design-face">{{#sampleurl}}<img src="{{sampleurl}}" alt="" loading="lazy">{{/sampleurl}}{{#logourl}}<span class="ayv-cards-design-plate"><img src="{{logourl}}" alt=""></span>{{/logourl}}</span>
-            <b>{{title}}</b>
-            <span class="ayv-field-hint">{{whofor}}</span>
-        </li>
-    {{/designs}}
-    </ul>
-    {{#manage}}<p class="ayv-book-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-cards-designform">{{backchange}}</button></p>
-    <dialog class="ayv-modal" id="ayv-cards-designform" aria-labelledby="ayv-cards-designtitle">
-        <div class="ayv-modal-head"><h3 id="ayv-cards-designtitle" class="ayv-section-title">{{designheading}}</h3>
-            <form method="dialog"><button class="ayv-modal-close" aria-label="{{close}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-        <form method="post" action="{{pageurl}}" class="ayv-dig-form">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="design">
-            {{#designrows}}<label class="ayv-field ayv-field-wide">{{label}} <input type="hidden" name="designstage[]" value="{{key}}"><select name="design[]">{{#options}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{title}}</option>{{/options}}</select></label>{{/designrows}}
-            <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{save}}</button></p>
-        </form>
-    </dialog>{{/manage}}
+    {{! Each stage its row, and its designs as small cards: the one touched is saved for that stage (do=design, one
+        stage), the chosen one pressed. Who cannot manage sees the chosen ones only. }}
+    <div class="ayv-cp-disenos">
+    {{#designrows}}
+        <div class="ayv-cp-fila">
+            <span class="ayv-cf-rotulo">{{label}}</span>
+            {{#manage}}<form id="ayv-cp-d-{{key}}" method="post" action="{{pageurl}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="design"><input type="hidden" name="designstage" value="{{key}}"></form>{{/manage}}
+            <span class="ayv-cp-carnes">
+            {{#manage}}{{#options}}<button class="ayv-cp-carne" type="submit" form="ayv-cp-d-{{key}}" name="design" value="{{value}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}"><span class="ayv-cards-design-face ayv-cp-cara">{{#sampleurl}}<img src="{{sampleurl}}" alt="" loading="lazy">{{/sampleurl}}</span><b>{{title}}</b></button>{{/options}}{{/manage}}
+            {{^manage}}{{#options}}{{#selected}}<span class="ayv-cp-carne" aria-pressed="true"><span class="ayv-cards-design-face ayv-cp-cara">{{#sampleurl}}<img src="{{sampleurl}}" alt="" loading="lazy">{{/sampleurl}}</span><b>{{title}}</b></span>{{/selected}}{{/options}}{{/manage}}
+            </span>
+        </div>
+    {{/designrows}}
+    </div>
+    {{#justsaved}}<p><span class="ayv-cf-guardado" role="status">{{justsaved}}</span></p>{{/justsaved}}
     <div class="ayv-cards-logo">
         {{#logourl}}<span class="ayv-cards-logo-plate"><img src="{{logourl}}" alt=""></span>{{/logourl}}
         <div class="ayv-cards-logo-words"><b>{{logoheading}}</b><p class="ayv-field-hint">{{logohint}}</p></div>
@@ -106,20 +100,14 @@
     {{#sheet}}
     <div class="ayv-cards-sheet">
         <h3 class="ayv-mine-title">{{sheetheading}}</h3>
-        {{#canset}}<form method="post" action="{{pageurl}}" class="ayv-cards-margins">
+        {{#canset}}<form class="ayv-cp-hojas" method="post" action="{{pageurl}}">
             <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="model">
-            <label class="ayv-field">{{modellabel}} <select name="model" data-ayv-submit>{{#models}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/models}}</select></label>
-            <noscript><button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button></noscript>
+            {{#models}}<button class="ayv-et-hoja-b" type="submit" name="model" value="{{value}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}"><span class="ayv-et-mini" style="--c: {{cols}}; --r: {{rows}};" aria-hidden="true">{{#cells}}<i></i>{{/cells}}</span><b>{{label}}</b><span>{{sub}}</span></button>{{/models}}
         </form>{{/canset}}
         <p class="ayv-field-hint">{{sheethint}}</p>
         <p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{testurl}}">{{sheettest}}</a></p>
-        {{#canset}}<form method="post" action="{{pageurl}}" class="ayv-cards-margins">
-            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sheet">
-            <label class="ayv-field">{{sheetleft}} <input type="number" name="left" step="0.1" min="0" max="60" value="{{left}}"></label>
-            <label class="ayv-field">{{sheettop}} <input type="number" name="top" step="0.1" min="0" max="60" value="{{top}}"></label>
-            <label class="ayv-field">{{sheetgap}} <input type="number" name="gap" step="0.1" min="0" max="30" value="{{gap}}"></label>
-            <button type="submit" class="ayv-button ayv-button-quiet">{{save}}</button>
-        </form>{{/canset}}
+        {{#canset}}<form id="ayv-cp-m" method="post" action="{{pageurl}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="sheet"></form>
+        <div class="ayv-cp-margenes">{{#margins}}<div class="ayv-cf-numero"><span class="ayv-cf-rotulo">{{label}}</span><span class="ayv-cf-paso" role="group" aria-label="{{label}}"><button class="ayv-cf-menos" type="submit" form="ayv-cp-m" name="{{field}}" value="{{less}}" aria-label="{{lesslabel}}"{{#atmin}} disabled{{/atmin}}>−</button><span class="ayv-cf-cifra"><b>{{value}}</b> mm</span><button class="ayv-cf-mas" type="submit" form="ayv-cp-m" name="{{field}}" value="{{more}}" aria-label="{{morelabel}}"{{#atmax}} disabled{{/atmax}}>+</button></span></div>{{/margins}}</div>{{/canset}}
     </div>
     {{/sheet}}
     {{#plastic}}
