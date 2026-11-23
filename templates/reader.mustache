@@ -48,7 +48,7 @@
         "past": [{"year": "2025-2026", "loans": "23 libros"}], "haspast": true,
         "backurl": "#", "backlabel": "Lectores", "profileback": "Volver a", "tutorof": [], "historyurl": "#",
         "historylabel": "Ver todo su historial (3)", "canedit": false, "gonenow": false,
-        "notes": "", "staffonly": true, "notice": "", "action": "#", "sesskey": "x", "deskurl": "#", "cardurl": "#", "canrecard": true, "profilenewcard": "Carné perdido", "profilenewcardintro": "Dejará de valer.", "profilenewcardgo": "Hacer otro carné", "selfclose": "Cerrar", "appheading": "La app",
+        "notes": "", "staffonly": true, "notice": "", "action": "https://example.com/local/oksigeniaayvurenda/reader.php?id=1", "sesskey": "x", "deskurl": "#", "cardurl": "#", "canrecard": true, "profilenewcard": "Carné perdido", "profilenewcardintro": "Dejará de valer.", "profilenewcardgo": "Hacer otro carné", "selfclose": "Cerrar", "appheading": "La app",
         "app": {"can": true, "button": "Mandarle la app", "hint": "Le llega un correo con un enlace."},
         "entry": {"url": "#", "heading": "Entrar por la web", "hint": "Una cuenta con una contraseña provisional.", "button": "Darle entrada"},
         "profiledesk": "Abrir en el mostrador", "profilecard": "Ver su carné", "profilenow": "Ahora tiene",
@@ -75,7 +75,7 @@
             <a class="ayv-button" href="{{deskurl}}">{{profiledesk}}</a>
             <a class="ayv-button ayv-button-quiet" href="{{cardurl}}">{{profilecard}}</a>
             {{#printurl}}<a class="ayv-button ayv-button-quiet" href="{{printurl}}">{{profileprint}}</a>{{/printurl}}
-            {{#canedit}}<button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-reader-data">{{profiledata}}</button>{{/canedit}}
+            {{#canedit}}<a class="ayv-button ayv-button-quiet" href="#ayv-sd">{{profiledata}}</a>{{/canedit}}
         </p>
     </div>
     <div class="ayv-profile-card">
@@ -88,28 +88,6 @@
         </div>
     </div>
 </header>
-{{#canedit}}
-<dialog class="ayv-modal" id="ayv-reader-data" aria-labelledby="ayv-reader-data-title">
-    <div class="ayv-modal-head"><h2 id="ayv-reader-data-title" class="ayv-section-title">{{profiledata}}</h2>
-        <form method="dialog"><button class="ayv-modal-close" aria-label="{{selfclose}}">{{> local_oksigeniaayvurenda/icon_x}}</button></form></div>
-    <form method="post" action="{{action}}" class="ayv-dig-form">
-        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="data">
-        {{^hasaccount}}
-        <label class="ayv-field">{{profiledatafirst}} <input type="text" name="firstname" value="{{formfirst}}" maxlength="255"></label>
-        <label class="ayv-field">{{profiledatalast}} <input type="text" name="lastname" value="{{formlast}}" maxlength="255"></label>
-        <label class="ayv-field">{{profiledataemail}} <input type="email" name="email" value="{{formemail}}" maxlength="254"></label>
-        {{/hasaccount}}
-        {{#hasaccount}}<p class="ayv-field-hint">{{profiledataaccount}}</p>{{/hasaccount}}
-        {{#formhastypes}}<label class="ayv-field">{{profiledatatype}} <select name="newtype">{{#formtypes}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtypes}}</select></label>{{/formhastypes}}
-        {{#formhasbands}}<label class="ayv-field">{{profiledataband}} <select name="newband">{{#formbands}}<option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formbands}}</select></label>{{/formhasbands}}
-        {{#formlocked}}<p class="ayv-field-hint">{{formlocked}}</p>{{/formlocked}}
-        {{^formlocked}}{{#formhasgroups}}<label class="ayv-field">{{profiledatagroup}} <select name="newgroup"><option value="">{{profiledatanogroup}}</option>{{#formgroups}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/formgroups}}</select></label>{{/formhasgroups}}{{/formlocked}}
-        {{#formcanteach}}<label class="ayv-field">{{profiledatatutor}} <select name="tutorof"><option value="">{{profiledatatutornone}}</option>{{#formtutors}}<option value="{{name}}" {{#selected}}selected{{/selected}}>{{label}}</option>{{/formtutors}}</select></label>
-        <p class="ayv-field-hint">{{profiledatatutorhint}}</p>{{/formcanteach}}
-        <p class="ayv-dig-sheet-actions"><button type="submit" class="ayv-button">{{profilesave}}</button></p>
-    </form>
-</dialog>
-{{/canedit}}
 {{#canrecard}}
 <dialog class="ayv-modal" id="ayv-profile-newcard" aria-labelledby="ayv-profile-newcard-title">
     <div class="ayv-modal-head"><h3 id="ayv-profile-newcard-title" class="ayv-section-title">{{profilenewcard}}</h3>
@@ -176,14 +154,17 @@
             {{#asks.0}}<h3 class="ayv-profile-sub">{{profileneedsasks}}</h3>
             <ul class="ayv-profile-holds">{{#asks}}<li><b>{{title}}</b> <span>{{format}} · {{state}}</span></li>{{/asks}}</ul>{{/asks.0}}
         </section>
-        <section class="ayv-profile-box">
+        <section class="ayv-profile-box ayv-notas">
             <h2 class="ayv-profile-heading">{{profilenotes}}</h2>
-            {{! The notes keep themselves on leaving the field; the button stays only where the script does not run. }}
+            {{! The notes on a ruled card pinned to the record: they keep themselves on leaving it; the button stays only where
+                the script does not run. Who wrote last, and when, under it. }}
             <form method="post" action="{{action}}" data-ayv-autosave="{{profilesaved}}">
                 <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="notes">
                 <label class="ayv-sr" for="ayv-profile-notes">{{profilenotes}}</label>
-                <textarea id="ayv-profile-notes" name="notes" rows="4" maxlength="1000">{{notes}}</textarea>
-                <p class="ayv-field-hint">{{profilenoteshint}} <span class="ayv-autosaved" role="status" aria-live="polite"></span></p>
+                <div class="ayv-notas-placa"><span class="ayv-notas-chincheta" aria-hidden="true"></span>
+                    <textarea id="ayv-profile-notes" name="notes" rows="5" maxlength="1000" placeholder="{{profilenotesempty}}">{{notes}}</textarea></div>
+                <p class="ayv-notas-pie"><span>{{profilenoteshint}}</span>{{#noteslast}}<span class="ayv-notas-ultima">{{noteslast}}</span>{{/noteslast}}
+                    <span class="ayv-autosaved" role="status" aria-live="polite"></span></p>
                 <p class="ayv-book-actions ayv-autosave-button"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
             </form>
         </section>
@@ -208,18 +189,46 @@
                 <p class="ayv-book-actions"><button type="submit" class="ayv-button ayv-button-quiet">{{button}}</button></p>
             </form>
             {{/can}}
-            {{#needsemail}}{{#canedit}}<p class="ayv-book-actions"><button type="button" class="ayv-button ayv-button-quiet" data-ayv-open="ayv-reader-data">{{appaddemail}}</button></p>{{/canedit}}{{/needsemail}}
+            {{#needsemail}}{{#canedit}}<p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="#ayv-sd">{{appaddemail}}</a></p>{{/canedit}}{{/needsemail}}
         </section>
         {{/app}}
     </div>
     <div class="ayv-profile-col">
+        {{#canedit}}
+        <section class="ayv-profile-box ayv-sd" id="ayv-sd" aria-labelledby="ayv-sd-t">
+            <h2 class="ayv-profile-heading" id="ayv-sd-t">{{profiledata}}</h2>
+            {{! Who they are, as cards: each tap saves only what it changes (do=data with one field), as in «How your library
+                works»; the one pressed is what is saved. The name and the e-mail, only without an account: lines that keep
+                themselves on leaving them. }}
+            <form id="ayv-sd-f" method="post" action="{{action}}#ayv-sd"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="data"></form>
+            {{^hasaccount}}
+            <form class="ayv-sd-escribir" method="post" action="{{action}}" data-ayv-autosave="{{profilesaved}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="data">
+                <label><span class="ayv-cf-rotulo">{{profiledatafirst}}</span><input type="text" name="firstname" value="{{formfirst}}" maxlength="255" autocomplete="off"></label>
+                <label><span class="ayv-cf-rotulo">{{profiledatalast}}</span><input type="text" name="lastname" value="{{formlast}}" maxlength="255" autocomplete="off"></label>
+                <label><span class="ayv-cf-rotulo">{{profiledataemail}}</span><input type="email" name="email" value="{{formemail}}" maxlength="254" autocomplete="off"></label>
+                <span class="ayv-autosaved" role="status" aria-live="polite"></span>
+                <p class="ayv-book-actions ayv-autosave-button"><button type="submit" class="ayv-button ayv-button-quiet">{{profilesave}}</button></p>
+            </form>
+            {{/hasaccount}}
+            {{#hasaccount}}<p class="ayv-field-hint">{{profiledataaccount}}</p>{{/hasaccount}}
+            {{#formhastypes}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{profiledatatype}}</span><span class="ayv-cf-chapas">{{#formtypes}}<button class="ayv-cf-chapa" type="submit" form="ayv-sd-f" name="newtype" value="{{value}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{label}}</button>{{/formtypes}}</span></div>{{/formhastypes}}
+            {{#formhasbands}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{profiledataband}}</span><span class="ayv-cf-chapas">{{#formbands}}<button class="ayv-cf-chapa" type="submit" form="ayv-sd-f" name="newband" value="{{value}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{label}}</button>{{/formbands}}</span></div>{{/formhasbands}}
+            {{#formlocked}}<p class="ayv-field-hint">{{formlocked}}</p>{{/formlocked}}
+            {{^formlocked}}{{#formhasgroups}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{profiledatagroup}}</span><span class="ayv-cf-chapas">{{#formgroups}}<button class="ayv-cf-chapa" type="submit" form="ayv-sd-f" name="newgroup" value="{{name}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{name}}</button>{{/formgroups}}<button class="ayv-cf-chapa ayv-sd-ninguno" type="submit" form="ayv-sd-f" name="newgroup" value="" aria-pressed="{{#formnogroup}}true{{/formnogroup}}{{^formnogroup}}false{{/formnogroup}}">{{profiledatanogroup}}</button></span></div>{{/formhasgroups}}{{/formlocked}}
+            {{#formcanteach}}<div class="ayv-cf-fila"><span class="ayv-cf-rotulo">{{profiledatatutor}}</span><span class="ayv-cf-chapas">{{#formtutors}}<button class="ayv-cf-chapa" type="submit" form="ayv-sd-f" name="tutorof" value="{{name}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{label}}</button>{{/formtutors}}<button class="ayv-cf-chapa ayv-sd-ninguno" type="submit" form="ayv-sd-f" name="tutorof" value="" aria-pressed="{{#formnotutor}}true{{/formnotutor}}{{^formnotutor}}false{{/formnotutor}}">{{profiledatatutornone}}</button></span></div>
+            <p class="ayv-field-hint">{{profiledatatutorhint}}</p>{{/formcanteach}}
+            {{#datasaved}}<p class="ayv-sd-guardado" role="status">{{datasaved}}</p>{{/datasaved}}
+        </section>
+        {{/canedit}}
         <section class="ayv-profile-box">
             <h2 class="ayv-profile-heading">{{readheading}}</h2>
             {{^hasread}}<p class="ayv-profile-empty">{{profilenoread}}</p>{{/hasread}}
             <ul class="ayv-profile-read">
                 {{#read}}
-                <li><a href="{{url}}"><span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>
-                    <span><b>{{title}}</b><span>{{when}}{{#note}} · {{note}}{{/note}}</span></span></a></li>
+                {{! The same book on the same day comes once, with how many times on its spine («×10»): data, «times». }}
+                <li><a href="{{url}}"><span class="ayv-sd-lomo"><span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">{{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}</span>{{#times}}<span class="ayv-sd-veces" aria-hidden="true">×{{times}}</span>{{/times}}</span>
+                    <span><b>{{title}}</b><span>{{when}}{{#timeslabel}} · {{timeslabel}}{{/timeslabel}}{{#note}} · {{note}}{{/note}}</span></span></a></li>
                 {{/read}}
             </ul>
             {{#historyurl}}<p class="ayv-book-actions"><a class="ayv-button ayv-button-quiet" href="{{historyurl}}">{{historylabel}}</a></p>{{/historyurl}}

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.13 (2026-11-23)
+
+Two of the screens that were still forms, redrawn with the gestures of «How your library works».
+
+- **The reader's record**: «Change their data» is a box of the record, not a window: the type, the band, the group and
+  the group they tutor as chips, each touch saving only what it changes; the name and the e-mail of whoever has no
+  account, as lines that keep themselves. The staff notes on a ruled card pinned to the record. In the history, the same
+  book the same day comes once, with how many times on its spine.
+- **Late books**: each class its shelf, by stage as in Tutors, with its tutor's face, «Tell Elena» in sight (or when
+  they were told today) and the late books standing on it, each with its reader and how long under it; the shelf
+  slides, with the arrows of the house's shelves. Where there are no classes, a shelf of readers. «Lost» is given from
+  the reader's record.
+
 ## 1.2.12 (2026-11-23)
 
 - **The card in wide**: the four paths in one row, with the orientation card above them; a whole set of collector cards

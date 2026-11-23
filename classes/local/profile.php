@@ -292,8 +292,10 @@ final class profile {
             return 'readernothere';
         }
         $row = (object) ['id' => $readerid, 'timemodified' => $now];
+        // Only what comes is changed: each card of the record sends its own field, and what does not come stays.
+        $named = array_key_exists('firstname', $form) || array_key_exists('lastname', $form) || array_key_exists('email', $form);
         // The name and the address of someone with an account are the account's.
-        if (empty($reader->userid)) {
+        if (empty($reader->userid) && $named) {
             $row->firstname = \core_text::substr(trim($form['firstname'] ?? ''), 0, 255);
             $row->lastname = \core_text::substr(trim($form['lastname'] ?? ''), 0, 255);
             $email = trim($form['email'] ?? '');
@@ -306,20 +308,22 @@ final class profile {
             $row->email = $email !== '' ? $email : null;
         }
         $type = (string) ($form['type'] ?? '');
-        if (in_array($type, readers::KINDS, true) && in_array($reader->readertype, readers::KINDS, true)) {
+        if (
+            array_key_exists('type', $form) && in_array($type, readers::KINDS, true)
+            && in_array($reader->readertype, readers::KINDS, true)
+        ) {
             $row->readertype = $type;
         }
         if (array_key_exists('band', $form) && in_array((string) $form['band'], array_merge([''], cards::BANDS), true)) {
             $row->band = $form['band'] !== '' ? (string) $form['band'] : null;
         }
-        $form = $form + ['group' => '', 'tutorof' => ''];
         $transaction = $DB->start_delegated_transaction();
         $DB->update_record(self::T . 'reader', $row);
         $view = self::form($library, $reader, $now, $cantutor);
-        if ($view['lockedgroup'] === '' && (string) $form['group'] !== $view['group']) {
+        if (array_key_exists('group', $form) && $view['lockedgroup'] === '' && (string) $form['group'] !== $view['group']) {
             self::move($library, $readerid, (string) $form['group'], $now);
         }
-        if ($view['canteach'] && (string) $form['tutorof'] !== $view['tutorof']) {
+        if (array_key_exists('tutorof', $form) && $view['canteach'] && (string) $form['tutorof'] !== $view['tutorof']) {
             $year = years::around($entityid, $now);
             if ($view['tutorof'] !== '') {
                 tutors::set((int) $year->id, $view['tutorof'], 0);

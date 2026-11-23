@@ -119,10 +119,31 @@ foreach ($people as $person) {
 }
 // The tutors of each group this year, by their names: the button says whom it tells.
 $tutornames = [];
+$tutorfirst = [];
+$tutorfaces = [];
+$toldat = [];
+$photoson = \local_oksigeniaayvurenda\local\profile::photos_on((int) $library->entityid);
+$colours = ['green', 'coral', 'sun', 'night', 'green2'];
+// A face, as in Tutors: the photo where the centre shows them, else the initials, in a colour of the house.
+$faceof = function (\stdClass $user) use ($colours, $photoson, $PAGE): array {
+    $photo = '';
+    if ($photoson && !empty($user->picture)) {
+        $picture = new user_picture($user);
+        $picture->size = 100;
+        $photo = $picture->get_url($PAGE)->out(false);
+    }
+    $initials = core_text::strtoupper(core_text::substr((string) $user->firstname, 0, 1)
+        . core_text::substr((string) $user->lastname, 0, 1));
+    return ['initials' => $initials, 'colour' => $colours[(int) $user->id % count($colours)], 'photo' => $photo];
+};
 foreach ($DB->get_records('local_oksigeniaayvurenda_tutor', ['yearid' => $year->id]) as $tutor) {
     $user = core_user::get_user((int) $tutor->userid);
     if ($user && !$user->deleted) {
-        $tutornames[(string) $tutor->groupname][] = fullname($user);
+        $group = (string) $tutor->groupname;
+        $tutornames[$group][] = fullname($user);
+        $tutorfirst[$group][] = (string) $user->firstname;
+        $tutorfaces[$group] ??= $faceof($user);
+        $toldat[$group] = max($toldat[$group] ?? 0, (int) $tutor->timenotified);
     }
 }
 // What is out says how long it has, when that is little.
@@ -164,8 +185,11 @@ foreach ($lines as $line) {
             : ($line['left'] <= 3 ? 'near' : ($line['left'] <= 7 ? 'week' : 'ok')),
         // In a box of one reader, the row is the book: its name is already the box's.
         'bybook' => $adults,
-        'bookurl' => $adults ? (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
-            'id' => $line['recordid']]))->out(false) : '',
+        'bookurl' => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug,
+            'id' => $line['recordid']]))->out(false),
+        // The book standing on its class's shelf: more than a month late hangs a ribbon; heights vary, as on a shelf.
+        'old' => $line['days'] > 30,
+        'height' => $line['recordid'] % 3 + 1,
         'wasdue' => $adults ? $str('latewasdue', $line['due']) : '',
         // Only what is late can be given up as lost from here.
         'canlose' => $line['days'] > 0 && !$all,
@@ -173,6 +197,18 @@ foreach ($lines as $line) {
 }
 uasort($boxes, fn($a, $b) => [$b['oldest'], $a['group'], $a['name']] <=> [$a['oldest'], $b['group'], $b['name']]);
 $shown = [];
+// Each group's stage, and the stages in their order, as in Tutors; told today is since the centre's midnight.
+$stageof = [];
+foreach (\local_oksigeniaayvurenda\local\readers::groups($library, $now) as $known) {
+    $stageof[(string) $known['name']] = (string) $known['stage'];
+}
+// Where there are no classes, the box is a reader's: their face.
+$readerface = fn(array $box) => ($faces[(int) $box['readerid']] ?? '')
+    ? ['photo' => $faces[(int) $box['readerid']], 'colour' => 'green', 'initials' => '']
+    : ['photo' => '', 'colour' => $colours[(int) $box['readerid'] % count($colours)],
+        'initials' => \local_oksigeniaayvurenda\local\profile::initial((string) $box['name'])];
+$midnight = (new DateTimeImmutable('@' . $now))->setTimezone(\local_oksigeniaayvurenda\local\zones::of((int) $library->entityid))
+    ->setTime(0, 0)->getTimestamp();
 // One day is «1 día», never «1 días».
 $days = fn(int $n) => $str($n === 1 ? 'latedayone' : 'latedaysof', \local_oksigeniaayvurenda\local\screens::number($n));
 foreach ($boxes as $box) {
@@ -190,7 +226,14 @@ foreach ($boxes as $box) {
             : $str($readers === 1 ? 'lategroupcountone' : 'lategroupcount', $readers);
     }
     $tutors = $tutornames[$box['group']] ?? [];
+    $told = !$all && !$adults && ($toldat[$box['group']] ?? 0) >= $midnight;
     $shown[] = [
+        'gid' => 'ayv-rt-g' . count($shown),
+        // The tutor's face, as in Tutors (or the reader's, where there are no classes); a question mark without one.
+        'face' => $adults ? $readerface($box) : ($tutorfaces[$box['group']] ?? false),
+        'tutorline' => $adults ? '' : ($tutors ? $str('latetutorline', implode(' · ', $tutors)) : $str('latenotutoryet')),
+        'told' => $told ? $str('latetoldtoday', userdate($toldat[$box['group']], get_string('strftimetime', 'langconfig'))) : '',
+        'stage' => $adults ? '' : ($stageof[$box['group']] ?? ''),
         'heading' => $heading,
         'group' => $box['group'],
         'summary' => $summary,
@@ -198,8 +241,8 @@ foreach ($boxes as $box) {
         'lines' => $box['lines'],
         'open' => $only !== '',
         // To whom it goes, by name: the group's tutors; at a university, the reader.
-        'tell' => !$all && !$adults && $box['group'] !== '' && $tutors
-            ? $str('latetellname', implode(' · ', $tutors)) : '',
+        'tell' => !$all && !$adults && $box['group'] !== '' && $tutors && !$told
+            ? $str('latetellname', implode(' · ', $tutorfirst[$box['group']])) : '',
         'settutor' => !$all && !$adults && $box['group'] !== '' && !$tutors
             ? (new moodle_url('/local/oksigeniaayvurenda/tutors.php', ['library' => $library->slug]))->out(false) : '',
         'remind' => !$all && $adults && $box['oldest'] > 0 ? $str('latetellname', $box['name']) : '',
@@ -235,6 +278,18 @@ if ($all && $only === '' && !$adults && count($showing) <= 24) {
     });
     $shown = [];
 }
+// The groups on the shelves of their stages, in the stages' order as in Tutors; where there are no classes, one shelf.
+$stages = [];
+$stagerank = array_flip(array_values(array_unique(array_values($stageof))));
+foreach ($shown as $box) {
+    $stage = $box['stage'];
+    $stages[$stage] ??= ['stage' => $stage !== '' ? $stage : $str($adults ? 'latereadersshelf' : 'readersnogroup'),
+        'rank' => $stagerank[$stage] ?? PHP_INT_MAX, 'groups' => []];
+    $stages[$stage]['groups'][] = $box;
+}
+uasort($stages, fn($a, $b) => $a['rank'] <=> $b['rank']);
+$stages = array_values(array_map(fn($s, $i) => $s + ['id' => 'ayv-rt-e' . $i,
+    'colour' => ['green', 'coral', 'sun', 'night'][$i % 4]], $stages, array_keys(array_values($stages))));
 $data = [
     'heading' => $str($all ? 'lateallheading' : 'lateheading'),
     // Beside what is late, what comes back: not on a class's printed list.
@@ -256,7 +311,7 @@ $data = [
         $counts[$key]
     ), 'label' => $str('latespan' . $key), 'url' => $url($span === $key ? [] : ['span' => $key]),
         'current' => $span === $key], ['old', 'mid', 'new']),
-        'groups' => $shown,
+        'stages' => $stages,
         'hasgroups' => (bool) $shown,
         'cards' => $cards,
         'hascards' => (bool) $cards,
@@ -271,7 +326,8 @@ $data = [
         'lostlabel' => $str('desklost'),
         'lostsure' => $str('desklostsure'),
 ];
-foreach (['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord', 'latefind'] as $key) {
+$words = ['lateprint', 'lateallgroups', 'printnow', 'latesettutor', 'lateseerecord', 'latefind', 'shelfprev', 'shelfnext'];
+foreach ($words as $key) {
     $data[$key] = $str($key);
 }
 $deskurl = (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);

@@ -451,6 +451,7 @@ final class shell {
     crossorigin>') . '
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'formularios.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">' . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
@@ -868,7 +869,8 @@ document.addEventListener(\'error\', function(e) {
 <title>' . s($title) . '</title>
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
-<link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">' . $sheets . '
+<link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'formularios.css?v=' . $version . '">' . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement;
     if (root.getAttribute(\'data-colourmode\') === \'auto\') {

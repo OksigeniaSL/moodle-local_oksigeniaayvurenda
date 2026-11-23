@@ -120,27 +120,25 @@ window.AYVHelpPieces = {
             return h.say(5);
         });
     },
-    // The late books: the spans, a box, who has what, and the two things to do with it.
+    // The late books: the spans, a class's shelf with its tutor, who has what, and the two things to do with it.
     late: function(h) {
         'use strict';
         return h.point('.ayv-late-spans').then(function() {
             return h.say(0);
         }).then(function() {
-            return h.point('.ayv-late-group summary');
+            return h.point('.ayv-rt-cab');
         }).then(function() {
             return h.say(1);
-        }).then(function() {
-            return h.tap('.ayv-late-group summary');
         }).then(function() {
             return h.point('.ayv-late-row');
         }).then(function() {
             return h.say(2);
         }).then(function() {
-            return h.point('.ayv-late-who');
+            return h.point('.ayv-rt-lector');
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.point('.ayv-late-actions');
+            return h.point('.ayv-rt-botones');
         }).then(function() {
             return h.say(4);
         }).then(function() {

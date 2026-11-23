@@ -59,6 +59,7 @@ if (!(new desk($library, (int) $USER->id, $now, $own))->allowed($id)) {
     shell::missing($str('readernothere'), $library);
 }
 $notice = '';
+$datasaved = '';
 $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id, 'entityid' => $library->entityid]);
 // A reader of another centre, or one erased, is nobody here: nothing is read, and nothing is written.
 if (!$reader || $reader->status === 'deleted') {
@@ -96,15 +97,16 @@ if (!$limited && data_submitted() && confirm_sesskey()) {
         $notice = $str('profileneedssaved');
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
     } else if (optional_param('do', '', PARAM_ALPHA) === 'data') {
-        $notice = $str(profile::change($library, $id, [
-            'firstname' => optional_param('firstname', '', PARAM_TEXT),
-            'lastname' => optional_param('lastname', '', PARAM_TEXT),
-            'email' => optional_param('email', '', PARAM_RAW_TRIMMED),
-            'type' => optional_param('newtype', '', PARAM_ALPHA),
-            'band' => optional_param('newband', '', PARAM_ALPHA),
-            'group' => optional_param('newgroup', '', PARAM_TEXT),
-            'tutorof' => optional_param('tutorof', '', PARAM_TEXT),
-        ], $now, access::can('local/oksigeniaayvurenda:manage', $library)));
+        // Each card of «Change their data» sends only its own field; what does not come is left as it is.
+        $datasaved = $str(profile::change($library, $id, array_filter([
+            'firstname' => optional_param('firstname', null, PARAM_TEXT),
+            'lastname' => optional_param('lastname', null, PARAM_TEXT),
+            'email' => optional_param('email', null, PARAM_RAW_TRIMMED),
+            'type' => optional_param('newtype', null, PARAM_ALPHA),
+            'band' => optional_param('newband', null, PARAM_ALPHA),
+            'group' => optional_param('newgroup', null, PARAM_TEXT),
+            'tutorof' => optional_param('tutorof', null, PARAM_TEXT),
+        ], fn($v) => $v !== null), $now, access::can('local/oksigeniaayvurenda:manage', $library)));
         $reader = $DB->get_record('local_oksigeniaayvurenda_reader', ['id' => $id]);
     } else if (in_array(optional_param('do', '', PARAM_ALPHA), ['left', 'back'], true)) {
         $gone = optional_param('do', '', PARAM_ALPHA) === 'left';
@@ -247,6 +249,10 @@ $data = [
     'formlocked' => $form['lockedgroup'] !== '' ? $str('profiledatalocked', $form['lockedgroup']) : '',
     'formhasgroups' => (bool) $form['groups'],
     'formcanteach' => $form['canteach'],
+    // The way out of each row, pressed when it is what holds: without a group, tutor of none.
+    'formnogroup' => $form['group'] === '',
+    'formnotutor' => $form['tutorof'] === '',
+    'datasaved' => $datasaved,
     'formtutors' => array_map(
         fn($g) => ['name' => $g['name'], 'selected' => $g['name'] === $form['tutorof'],
         'label' => $g['who'] !== '' ? $str('profiledatatutoris', (object) ['group' => $g['name'], 'who' => $g['who']])
@@ -279,10 +285,23 @@ $data = [
     'booklets' => \local_oksigeniaayvurenda\local\bookletview::record($reader, $library),
     'readheading' => $str($record['read']['total'] === 1 ? 'profilereadone' : 'profileread', (object) ['year' => $record['year'],
         'count' => $record['read']['total']]),
-    'read' => array_map(
-        fn($b) => $book($b) + ['when' => $day($b['when']), 'note' => $notes[$b['note']] ?? ''],
-        $record['read']['books']
-    ),
+    // The same book on the same day comes once, with how many times on its spine («×10»).
+    'read' => (function () use ($record, $book, $day, $notes, $str) {
+        $rows = [];
+        foreach ($record['read']['books'] as $b) {
+            $row = $book($b) + ['when' => $day($b['when']), 'note' => $notes[$b['note']] ?? ''];
+            $key = ($row['url'] ?? $row['title'] ?? '') . '|' . $row['when'];
+            if (isset($rows[$key])) {
+                $rows[$key]['times']++;
+                continue;
+            }
+            $rows[$key] = $row + ['times' => 1];
+        }
+        return array_values(array_map(fn($r) => array_merge($r, [
+            'times' => $r['times'] > 1 ? $r['times'] : false,
+            'timeslabel' => $r['times'] > 1 ? $str('profilereadtimes', $r['times']) : '',
+        ]), $rows));
+    })(),
     'hasread' => (bool) $record['read']['books'],
     'past' => array_map(fn($p) => ['year' => $p['year'], 'loans' => $p['loans'] === 1 ? $str('profilepastone')
         : $str('profilepast', $p['loans'])], $record['past']),
@@ -332,7 +351,8 @@ $data = [
 ];
 foreach (
     ['profiledesk', 'profilecard', 'profilenow', 'profilenothing', 'profileholds', 'profilenoread', 'profilepastheading',
-        'profilenotes', 'profilenoteshint', 'profilesave', 'profilesaved', 'profilegone', 'profilecode', 'appheading',
+        'profilenotes', 'profilenoteshint', 'profilenotesempty', 'profilesave', 'profilesaved', 'profilegone', 'profilecode',
+        'appheading',
         'profilenewcard', 'profilenewcardgo', 'selfclose', 'sanctionstitle', 'sanctionsboxnone', 'sanctionlift',
         'sanctionpay', 'sanctionwaive', 'sanctionreopen', 'sanctionchargeadd', 'sanctionchargeintro', 'sanctionchargeamount',
         'sanctionchargenote', 'sanctionchargego', 'profileneeds', 'profileneedslabel', 'profileneedshint',

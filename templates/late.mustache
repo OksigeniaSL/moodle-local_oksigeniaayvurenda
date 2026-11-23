@@ -26,13 +26,14 @@
         "tabs": [{"label": "Con retraso", "url": "#", "current": true}, {"label": "Prestados", "url": "#", "current": false}],
         "spans": [{"key": "old", "count": "4", "label": "Más de 30 días", "url": "#", "current": false}],
         "hasgroups": true, "hascards": false, "cards": [], "orders": [], "orderlabel": "Ordenar por",
-        "groups": [{"heading": "3º Primaria A", "group": "3º Primaria A", "summary": "2 lectores · el más antiguo, 31 días",
-            "tone": "late", "open": false, "tell": "Avisar a Irene López", "remind": "", "settutor": "", "readerid": 0,
-            "readerurl": "", "printurl": "#",
-            "lines": [{"bybook": false, "bookurl": "", "wasdue": "", "name": "Ana Montes", "url": "#", "title": "El faro dormido", "when": "31 días de retraso",
-                "tone": "late", "cover": null, "colour": 2, "canlose": true, "loanid": 7}]}],
+        "stages": [{"stage": "Primaria", "id": "ayv-rt-e0", "colour": "green", "groups": [{"gid": "ayv-rt-g0",
+            "heading": "3º Primaria A", "group": "3º Primaria A", "summary": "2 lectores · el más antiguo, 31 días",
+            "face": {"colour": "coral", "initials": "IL", "photo": "https://example.com/cara.png"}, "tutorline": "Tutoría: Irene López", "told": "",
+            "tone": "late", "tell": "Avisar a Irene", "remind": "", "settutor": "", "readerid": 0, "readerurl": "", "printurl": "#",
+            "lines": [{"bybook": false, "bookurl": "#", "wasdue": "", "name": "Ana Montes", "url": "#", "title": "El faro dormido",
+                "when": "31 días de retraso", "tone": "late", "old": true, "height": 2, "colour": 2, "canlose": true, "loanid": 7}]}]}],
         "empty": "No hay libros con retraso.", "latesettutor": "Poner tutor", "lateseerecord": "Su ficha", "lateprint": "La lista de la clase",
-        "lateallgroups": "Todos los grupos", "printnow": "Imprimir", "lostlabel": "Perdido", "lostsure": "Sí, se ha perdido"
+        "lateallgroups": "Todos los grupos", "printnow": "Imprimir", "lostlabel": "Perdido", "lostsure": "Sí, se ha perdido", "shelfprev": "Anteriores", "shelfnext": "Siguientes", "latefind": "Buscar un nombre o un título"
     }
 }}
 <h1 class="ayv-results-title">{{heading}}</h1>
@@ -61,35 +62,48 @@
 </ul>
 {{/hascards}}
 {{#hasgroups}}
-{{! A name or a title, typed, leaves only its lines and opens their groups: thirty folded groups are no way to find one. }}
-<p class="ayv-late-find"><label class="ayv-field ayv-field-wide">{{latefind}}
-    <input type="search" data-ayv-filter=".ayv-late-row" data-ayv-filter-groups=".ayv-late-group" autocomplete="off"></label></p>
-{{#groups}}
-<details class="ayv-late-group"{{#open}} open{{/open}}>
-    <summary><span class="ayv-late-name">{{heading}}</span> <span class="ayv-late-summary ayv-late-summary-{{tone}}">{{summary}}</span></summary>
-    <ul class="ayv-weed-list">
-    {{#lines}}
-        <li class="ayv-late-row">
-            {{#bybook}}<span class="ayv-weed-cover ayv-cover ayv-cover-{{colour}}" aria-hidden="true">{{#cover}}<img src="{{cover}}" alt="" loading="lazy">{{/cover}}</span>{{/bybook}}
-            {{^bybook}}<span class="ayv-person-face" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="" loading="lazy">{{/photo}}{{^photo}}{{initial}}{{/photo}}</span>{{/bybook}}
-            {{#bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{bookurl}}">{{title}}</a> <span class="ayv-weed-detail">{{wasdue}}</span></span>{{/bybook}}
-            {{^bybook}}<span class="ayv-weed-words"><a class="ayv-late-who" href="{{url}}">{{name}}</a> <span class="ayv-weed-detail">«{{title}}»</span></span>{{/bybook}}
-            <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span>
-            {{#canlose}}<details class="ayv-profile-lost ayv-late-lost"><summary>{{lostlabel}}</summary>
-                <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="lost">
-                    <input type="hidden" name="loan" value="{{loanid}}"><button type="submit" class="ayv-button ayv-button-quiet">{{lostsure}}</button></form>
-            </details>{{/canlose}}
-        </li>
-    {{/lines}}
-    </ul>
-    <div class="ayv-late-actions">{{^open}}{{#printurl}}<a class="ayv-button ayv-button-quiet" href="{{printurl}}">{{lateprint}}</a>{{/printurl}}{{/open}}
-        {{#readerurl}}<a class="ayv-button ayv-button-quiet" href="{{readerurl}}">{{lateseerecord}}</a>{{/readerurl}}
-        {{#tell}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
-            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="tell">{{tell}}</button></form>{{/tell}}
-        {{#remind}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="reader" value="{{readerid}}">
-            <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="remind">{{remind}}</button></form>{{/remind}}
-        {{#settutor}}<a class="ayv-button ayv-button-quiet" href="{{settutor}}">{{latesettutor}}</a>{{/settutor}}</div>
-</details>
-{{/groups}}
+{{! Each class its shelf, in the order of the stages as in Tutors: its tutor's face and «Tell Elena» in sight, and the books
+    out late standing on it, each with its reader and how long. The finder stays, without its label in sight. }}
+<p class="ayv-late-find ayv-rt-buscar"><label class="ayv-sr" for="ayv-rt-buscar">{{latefind}}</label>
+    <input id="ayv-rt-buscar" type="search" placeholder="{{latefind}}" data-ayv-filter=".ayv-late-row" data-ayv-filter-groups=".ayv-late-group" autocomplete="off"></p>
+{{#stages}}
+<section class="ayv-rt-etapa ayv-cf-balda-{{colour}}" aria-labelledby="{{id}}">
+    <h2 class="ayv-cf-estante-t" id="{{id}}">{{stage}}</h2>
+    <div class="ayv-rt-clases">
+    {{#groups}}
+    <article class="ayv-late-group ayv-rt-clase ayv-rt-tono-{{tone}}" aria-labelledby="{{gid}}">
+        <header class="ayv-rt-cab">
+            {{#face}}<span class="ayv-tu-cara ayv-tu-cara-{{colour}} ayv-rt-cara" aria-hidden="true">{{#photo}}<img src="{{photo}}" alt="">{{/photo}}{{^photo}}{{initials}}{{/photo}}</span>{{/face}}
+            {{^face}}<span class="ayv-tu-cara ayv-tu-cara-falta ayv-rt-cara" aria-hidden="true">?</span>{{/face}}
+            <span class="ayv-rt-quien"><b class="ayv-late-name" id="{{gid}}">{{heading}}</b>
+                <span class="ayv-rt-tutor">{{tutorline}}</span>
+                <span class="ayv-late-summary ayv-late-summary-{{tone}}">{{summary}}</span></span>
+            <div class="ayv-rt-botones">
+                {{#tell}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="group" value="{{group}}">
+                    <button type="submit" class="ayv-button" name="do" value="tell">{{tell}}</button></form>{{/tell}}
+                {{#remind}}<form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="reader" value="{{readerid}}">
+                    <button type="submit" class="ayv-button" name="do" value="remind">{{remind}}</button></form>{{/remind}}
+                {{#readerurl}}<a class="ayv-button ayv-button-quiet" href="{{readerurl}}">{{lateseerecord}}</a>{{/readerurl}}
+                {{#told}}<span class="ayv-rt-avisado">{{told}}</span>{{/told}}
+                {{#settutor}}<a class="ayv-button ayv-button-quiet" href="{{settutor}}">{{latesettutor}}</a>{{/settutor}}
+                {{#printurl}}<a class="ayv-button ayv-button-quiet ayv-rt-lista" href="{{printurl}}">{{lateprint}}</a>{{/printurl}}
+            </div>
+        </header>
+        <div class="ayv-rt-desliza">
+        <ul class="ayv-rt-balda">
+        {{#lines}}
+            <li class="ayv-late-row ayv-rt-libro">
+                <a class="ayv-rt-lomo ayv-rt-c{{colour}} ayv-rt-alto-{{height}}" href="{{bookurl}}" aria-hidden="true" tabindex="-1"><span>{{title}}</span>{{#old}}<i class="ayv-rt-cinta"></i>{{/old}}</a>
+                {{^bybook}}<a class="ayv-rt-lector" href="{{url}}">{{name}}</a>{{/bybook}}{{#bybook}}<span class="ayv-rt-lector">{{wasdue}}</span>{{/bybook}}
+                <span class="ayv-sr">«{{title}}»</span>
+                <span class="ayv-late-when ayv-late-{{tone}}">{{when}}</span>
+            </li>
+        {{/lines}}
+        </ul>{{> local_oksigeniaayvurenda/shelf_arrows}}</div>
+    </article>
+    {{/groups}}
+    </div>
+</section>
+{{/stages}}
 {{/hasgroups}}
 {{^hasgroups}}<p class="ayv-empty">{{empty}}</p>{{/hasgroups}}

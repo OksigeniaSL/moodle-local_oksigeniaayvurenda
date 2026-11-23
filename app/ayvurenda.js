@@ -768,8 +768,8 @@
         play(0);
     });
     // The shelves slide without a scrollbar: two arrows, shown when there is more that way.
-    document.querySelectorAll('.ayv-wood').forEach(function(wood) {
-        var list = wood.querySelector('.ayv-cards');
+    document.querySelectorAll('.ayv-wood, .ayv-rt-desliza').forEach(function(wood) {
+        var list = wood.querySelector('.ayv-cards, .ayv-rt-balda');
         var prev = wood.querySelector('.ayv-shelf-prev');
         var next = wood.querySelector('.ayv-shelf-next');
         if (!list || !prev || !next) {
