@@ -97,7 +97,7 @@ final class policy {
         if ($status !== 'available' && $status !== 'onloan' && $status !== 'held') {
             return self::UNAVAILABLE;
         }
-        if ($rule === null || (int) $rule['loandays'] <= 0) {
+        if ($rule === null || ((int) $rule['loandays'] <= 0 && loan_rules::hours($rule) === 0)) {
             return self::NOT_LENDABLE;
         }
         if (!$force && $inactive) {

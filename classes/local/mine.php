@@ -86,7 +86,7 @@ final class mine {
             ))->out(false);
             $loans = [];
             $rows = $DB->get_records_sql(
-                "SELECT l.id, l.timedue, l.libraryid, r.id AS recordid, r.title
+                "SELECT l.id, l.timedue, l.loanhours, l.libraryid, r.id AS recordid, r.title
                    FROM {" . self::T . "loan} l
                    JOIN {" . self::T . "item} i ON i.id = l.itemid
                    JOIN {" . self::T . "record} r ON r.id = i.recordid
@@ -107,7 +107,7 @@ final class mine {
                     'renewuntil' => $until ? zones::date($until, 'strftimedateshort', $where) : '',
                     'title' => $row->title,
                     'url' => $url('record.php', $where, ['id' => $row->recordid]),
-                    'due' => zones::date((int) $row->timedue, 'strftimedateshort', $where),
+                    'due' => zones::due((int) $row->timedue, $where, (int) $row->loanhours > 0),
                     'late' => (int) $row->timedue < $now,
                     'timedue' => (int) $row->timedue,
                     // A textbook lent for the year is not something to remember on a phone's home.

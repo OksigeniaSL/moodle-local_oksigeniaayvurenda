@@ -254,6 +254,24 @@ final class zones {
     }
 
     /**
+     * When a loan is due, as every screen and notice writes it: its date and, for a loan by hours, its time too («23 nov,
+     * a las 14:30»), so that it reads after «Vuelve el» as a date does.
+     *
+     * @param int $time
+     * @param \stdClass|int $where
+     * @param bool $byhours
+     * @return string
+     */
+    public static function due(int $time, $where, bool $byhours = false): string {
+        $day = self::date($time, 'strftimedateshort', $where);
+        if (!$byhours) {
+            return $day;
+        }
+        return get_string('dueattime', 'local_oksigeniaayvurenda', (object) ['day' => $day,
+            'time' => self::date($time, 'strftimetime', $where)]);
+    }
+
+    /**
      * A date in a centre's zone.
      *
      * @param int $time

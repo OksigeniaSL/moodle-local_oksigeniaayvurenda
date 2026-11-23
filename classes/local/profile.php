@@ -462,12 +462,12 @@ final class profile {
      * @param \stdClass $library
      * @param int $readerid
      * @param int $now
-     * @return array[] recordid, title, library, due, late (days).
+     * @return array[] recordid, title, library, due, hours (by hours: the hours it was lent for), late (days).
      */
     private static function loans(\stdClass $library, int $readerid, int $now): array {
         global $DB;
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.libraryid, i.recordid, r.title, b.name AS library
+            "SELECT l.id, l.timedue, l.loanhours, l.libraryid, i.recordid, r.title, b.name AS library
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} r ON r.id = i.recordid
@@ -481,6 +481,7 @@ final class profile {
         return array_values(array_map(fn($r) => ['loanid' => (int) $r->id, 'recordid' => (int) $r->recordid,
             'title' => $r->title, 'libraryid' => (int) $r->libraryid,
             'library' => format_string($r->library, true, ['escape' => false]), 'due' => (int) $r->timedue,
+            'hours' => (int) $r->loanhours,
             'late' => \local_oksigeniaayvurenda\core\loan_rules::days_late((int) $r->timedue, $now, $tz)], $rows));
     }
 

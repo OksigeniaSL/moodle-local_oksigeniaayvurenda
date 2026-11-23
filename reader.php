@@ -269,7 +269,8 @@ $data = [
     'gone' => !$record['active'],
     'drawing' => $drawing,
     'stagename' => $stagename,
-    'loans' => array_map(fn($l) => $book($l) + ['due' => $str('profiledue', $day($l['due'])), 'library' => $l['library'],
+    'loans' => array_map(fn($l) => $book($l) + ['due' => $str('profiledue', $l['hours'] > 0
+        ? zones::due($l['due'], $library, true) : $day($l['due'])), 'library' => $l['library'],
         'late' => $l['late'] ? $str($l['late'] === 1 ? 'profilelateone' : 'profilelate', $l['late']) : '',
         'loanid' => $l['loanid'], 'canlose' => !$limited], $record['loans']),
     'lostlabel' => $str('desklost'),

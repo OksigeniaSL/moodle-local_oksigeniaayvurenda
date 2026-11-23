@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.0 (2026-11-24)
+
+Loans by the hour, for what a library lends for a class or an afternoon: a laptop, a charger, a camera, a calculator.
+
+- **A rule by the hour**: on a loan rule, «By the hour» lends for 1 to 12 hours, with «−» and «+», and «Until the end of
+  the day» until closing; its renewals are hours too. Turned off, the rule lends by its days again. In «How your
+  library works», the same three ways besides «Only in the library».
+- **Its time, wherever its date is**: at the desk, on the reader's record, on their own pages, in the self-loan post,
+  in «Late books» and in the notices, a loan by the hour says its time with its date («23 Nov at
+  14:30»); the stamp of a loan due today, its time alone.
+- **Late at its hour**: a loan by the hour is late as soon as its time passes, at the desk and in «Late books», not the
+  next day; whoever has it hears it once, an hour later, at any hour of the day. Fines still count days.
+- **«Lend material by the hour»** in «How do I…?».
+- The date stamp of a loan just made at the desk reads at 4.8 to 1 (it was 4.0).
+
 ## 1.2.15 (2026-11-24)
 
 The last two screens that were still forms, redrawn with the gestures of «How your library works».

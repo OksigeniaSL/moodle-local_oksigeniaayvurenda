@@ -87,7 +87,8 @@ final class rules {
      * renewals cannot be negative.
      *
      * @param int $libraryid
-     * @param array[] $rows readertype, itemtype, loandays, maxloans, renewals, renewdays.
+     * @param array[] $rows readertype, itemtype, loandays, maxloans, renewals, renewdays; loanhours and renewhours for a
+     *     rule by hours.
      * @return int Rules kept.
      */
     public static function save(int $libraryid, array $rows): int {
@@ -105,6 +106,8 @@ final class rules {
                 'maxloans' => max(0, min(9999, (int) ($row['maxloans'] ?? 0))),
                 'renewals' => max(0, min(99, (int) ($row['renewals'] ?? 0))),
                 'renewdays' => max(0, min(9999, (int) ($row['renewdays'] ?? 0))),
+                'loanhours' => \local_oksigeniaayvurenda\core\loan_rules::hours(['loanhours' => (int) ($row['loanhours'] ?? 0)]),
+                'renewhours' => \local_oksigeniaayvurenda\core\loan_rules::hourly(['loanhours' => (int) ($row['renewhours'] ?? 0)]),
                 'timecreated' => $now,
                 'timemodified' => $now,
             ];

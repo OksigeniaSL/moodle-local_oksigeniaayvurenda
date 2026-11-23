@@ -61,8 +61,8 @@ final class notices {
     private static function readers(int $now, ?array $centres = null): int {
         global $DB;
         $loans = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.timenotified, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title,
-                    rec.id AS recordid
+            "SELECT l.id, l.timedue, l.loanhours, l.timenotified, l.readerid, r.userid, b.name AS library, b.slug, b.entityid,
+                    rec.title, rec.id AS recordid
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
                JOIN {" . self::T . "library} b ON b.id = l.libraryid
@@ -115,6 +115,85 @@ final class notices {
             }
         }
         return $sent;
+    }
+
+    /**
+     * Loans by hours (a laptop, a charger) an hour past their hour: whoever has one hears it once, at any hour, not on the
+     * centre's morning. Noted even where the centre tells its readers nothing, so that it is said once at most.
+     *
+     * @param int $now
+     * @return int Messages sent.
+     */
+    public static function hourly(int $now): int {
+        global $DB;
+        $loans = $DB->get_records_sql(
+            "SELECT l.id, l.timedue, l.readerid, r.userid, b.name AS library, b.slug, b.entityid, rec.title,
+                    rec.id AS recordid
+               FROM {" . self::T . "loan} l
+               JOIN {" . self::T . "reader} r ON r.id = l.readerid
+               JOIN {" . self::T . "library} b ON b.id = l.libraryid
+               JOIN {" . self::T . "item} i ON i.id = l.itemid
+               JOIN {" . self::T . "record} rec ON rec.id = i.recordid
+              WHERE l.timereturned IS NULL AND l.loanhours > 0 AND l.timedue <= :hourago AND l.timedue > :since
+                    AND (l.timenotified IS NULL OR l.timenotified < l.timedue)
+                    AND r.userid IS NOT NULL AND r.status IN ('active', 'left')
+           ORDER BY l.timedue",
+            ['hourago' => $now - HOURSECS, 'since' => $now - 2 * DAYSECS]
+        );
+        $sent = 0;
+        $settings = [];
+        foreach ($loans as $loan) {
+            $entityid = (int) $loan->entityid;
+            $settings[$entityid] ??= sanctions::settings($entityid);
+            $DB->set_field(self::T . 'loan', 'timenotified', $now, ['id' => $loan->id]);
+            if (!$settings[$entityid]['noticereaders'] || access::closed($entityid)) {
+                continue;
+            }
+            try {
+                $sent += self::tell_hour($loan) ? 1 : 0;
+            } catch (\Throwable $e) {
+                self::failed('hour ' . $loan->id, $e);
+            }
+        }
+        return $sent;
+    }
+
+    /**
+     * The message about a loan by hours past its hour: what, and when it was due.
+     *
+     * @param \stdClass $loan
+     * @return bool Whether it went.
+     */
+    private static function tell_hour(\stdClass $loan): bool {
+        global $DB;
+        $user = \core_user::get_user((int) $loan->userid);
+        if (!$user || $user->deleted || $user->suspended) {
+            return false;
+        }
+        $language = force_current_language((string) $user->lang);
+        $entityid = (int) $loan->entityid;
+        $library = format_string($loan->library, true, ['escape' => false]);
+        $time = zones::date((int) $loan->timedue, 'strftimetime', $entityid);
+        $a = (object) ['name' => $user->firstname, 'title' => $loan->title, 'time' => $time, 'library' => $library];
+        $subject = get_string('noticehoursubject', 'local_oksigeniaayvurenda', $a);
+        $body = get_string('noticehourbody', 'local_oksigeniaayvurenda', $a);
+        $url = (new \moodle_url('/local/oksigeniaayvurenda/index.php', ['library' => $loan->slug]))->out(false);
+        $reader = $DB->get_record(self::T . 'reader', ['id' => $loan->readerid]);
+        $told = self::send('overdue', $user, $subject, $body, $url, $library, $library, [
+            'library' => $DB->get_record(self::T . 'library', ['slug' => $loan->slug]),
+            'young' => mail::young($reader ?: null),
+            'hello' => get_string('mailhello', 'local_oksigeniaayvurenda', $user->firstname),
+            'heading' => $subject,
+            'lead' => [$body],
+            'books' => [['line' => get_string('desklatehour', 'local_oksigeniaayvurenda', $time), 'urgent' => true]
+                + mail::book((int) $loan->recordid, $loan->title)],
+            'button' => ['url' => $url, 'text' => get_string('noticereaderbutton', 'local_oksigeniaayvurenda')],
+            'sign' => mail::sign($entityid, $reader ?: null, false),
+            'why' => get_string('mailwhyreader', 'local_oksigeniaayvurenda'),
+            'prefs' => true,
+        ]);
+        force_current_language($language);
+        return $told;
     }
 
     /**
@@ -219,7 +298,7 @@ final class notices {
         $lines = [];
         $rows = [];
         foreach ($list as $loan) {
-            $due = zones::date((int) $loan->timedue, 'strftimedateshort', $entityid);
+            $due = zones::due((int) $loan->timedue, $entityid, (int) ($loan->loanhours ?? 0) > 0);
             $lines[] = $str('noticereaderline', (object) ['title' => $loan->title, 'due' => $due]);
             $rows[] = ['line' => $str('noticereaderdue', $due), 'urgent' => true] + mail::book((int) $loan->recordid, $loan->title);
         }

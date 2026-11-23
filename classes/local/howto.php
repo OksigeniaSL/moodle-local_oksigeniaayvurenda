@@ -87,6 +87,7 @@ final class howto {
         'platforms' => ['lti.php', 'manage', ''],
         'roster' => ['onerosterapi.php', 'manage', ''],
         'rules' => ['rules.php', 'manage', 'rules'],
+        'hours' => ['rules.php', 'manage', ''],
         'sanctions' => ['rules.php', 'manage', 'sanctions'],
         'noticeafter' => ['rules.php', 'manage', ''],
         'libraries' => ['libraries.php', 'manage', ''],

@@ -1486,7 +1486,7 @@ final class screens {
             return null;
         }
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.libraryid, r.id AS recordid, r.title
+            "SELECT l.id, l.timedue, l.loanhours, l.libraryid, r.id AS recordid, r.title
                FROM {local_oksigeniaayvurenda_loan} l
                JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
                JOIN {local_oksigeniaayvurenda_record} r ON r.id = i.recordid
@@ -1504,8 +1504,10 @@ final class screens {
                 continue;
             }
             $until = renewals::until($where, (int) $reader->id, (int) $row->id, (int) $USER->id, $now);
-            $late = (int) $row->timedue < zones::today((int) $library->entityid, $now);
-            $day = zones::date((int) $row->timedue, 'strftimedateshort', $library);
+            // A loan by hours is late as soon as its hour passes; one by days, the day after.
+            $byhours = (int) $row->loanhours > 0;
+            $late = (int) $row->timedue < ($byhours ? $now : zones::today((int) $library->entityid, $now));
+            $day = zones::due((int) $row->timedue, $library, $byhours);
             $books[] = [
                 'title' => format_string($row->title, true, ['escape' => false]),
                 'url' => self::url('record.php', $where, ['id' => $row->recordid]),

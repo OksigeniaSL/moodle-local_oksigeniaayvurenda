@@ -327,7 +327,7 @@ final class selfloan {
         if ($open || $item->status === 'onloan') {
             // Read twice in a row, a book just taken must not go back by itself.
             if ($open && $holder && (int) $open->readerid === $holder && $now - (int) $open->timeloaned < self::DOUBLE) {
-                $due = self::date((int) $open->timedue, $library);
+                $due = zones::due((int) $open->timedue, $library, (int) $open->loanhours > 0);
                 return self::say('look', 'selfalready', (object) ['title' => $title, 'due' => $due]);
             }
             // Read again at this same post soon after, with no card: whoever took it is checking it went, not returning it.
@@ -335,7 +335,7 @@ final class selfloan {
                 $open && !$holder && (int) ($open->postid ?? 0) === (int) $post->id
                 && $now - (int) $open->timeloaned < self::DOUBLE_ALONE
             ) {
-                $due = self::date((int) $open->timedue, $library);
+                $due = zones::due((int) $open->timedue, $library, (int) $open->loanhours > 0);
                 return self::say('look', 'selfalready', (object) ['title' => $title, 'due' => $due]);
             }
             // A loan noted by its title, without knowing which copy went: the desk sorts out which one this is.
@@ -370,7 +370,8 @@ final class selfloan {
         $answer = $desk->scan($item->barcode, $holder);
         if ($answer['kind'] === 'lent') {
             $DB->set_field(self::T . 'loan', 'postid', $post->id, ['id' => $answer['loanid']]);
-            $due = self::date((int) $DB->get_field(self::T . 'loan', 'timedue', ['id' => $answer['loanid']]), $library);
+            $lent = $DB->get_record(self::T . 'loan', ['id' => $answer['loanid']], 'timedue, loanhours');
+            $due = zones::due((int) $lent->timedue, $library, (int) $lent->loanhours > 0);
             return self::say('ok', 'selflent', (object) ['title' => $title, 'due' => $due], ['title' => $title, 'due' => $due]);
         }
         if ($answer['kind'] === 'stop' && in_array($answer['reason'] ?? '', self::STOPS, true)) {
@@ -667,17 +668,6 @@ final class selfloan {
         }
         \local_oksigeniaayvurenda\event\self_post_undone::fire((int) $library->entityid, $id, ['count' => $count]);
         return $count;
-    }
-
-    /**
-     * A date as a post says it.
-     *
-     * @param int $time
-     * @param \stdClass $library
-     * @return string
-     */
-    private static function date(int $time, \stdClass $library): string {
-        return zones::date($time, 'strftimedateshort', $library);
     }
 
     /**

@@ -17,6 +17,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\desk\sanction_rules;
+use local_oksigeniaayvurenda\core\loan_rules;
 
 /**
  * Tests for the rules with every setting in sight: each gesture changes only what it sends.
@@ -83,6 +84,48 @@ final class rulesheet_test extends \advanced_testcase {
         $this->assertNotFalse($at('*', 'device'));
         $this->assertSame('ayv-nr-las', $this->send($library, ['rule' => (string) $at('*', 'device'), 'remove' => 1]));
         $this->assertFalse($at('*', 'device'));
+    }
+
+    /**
+     * By hours: a light turns a rule to two hours, kept apart from its days; its steps and its sentence are in hours; until
+     * the end of the day has no hours to count; off, the rule lends by its days again; only in the library lends nothing,
+     * not even by hours; and by hours lends from a rule only for the library too.
+     */
+    public function test_by_hours(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        rules::save((int) $library->id, [
+            ['readertype' => '*', 'itemtype' => 'device', 'loandays' => 7, 'maxloans' => 1, 'renewals' => 1, 'renewdays' => 7],
+        ]);
+        $rule = fn() => rules::of((int) $library->id)[0];
+        $card = fn() => rulesheet::context($library, 'https://example.com/rules.php')['cards'][0];
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+
+        $this->send($library, ['rule' => '0', 'loanhours' => 2]);
+        $this->assertSame([7, 2], [(int) $rule()['loandays'], (int) $rule()['loanhours']]);
+        $this->assertContains('loanhours', array_column($card()['steps'], 'field'));
+        $this->assertContains('renewhours', array_column($card()['steps'], 'field'));
+        $this->assertNotContains('loandays', array_column($card()['steps'], 'field'));
+        $this->assertStringContainsString($str('ruleshoursn', 2), $card()['says']);
+        $this->send($library, ['rule' => '0', 'loanhours' => 3]);
+        $this->assertSame(3, (int) $rule()['loanhours']);
+
+        $this->send($library, ['rule' => '0', 'loanhours' => 24]);
+        $this->assertNotContains('loanhours', array_column($card()['steps'], 'field'));
+        $this->assertContains($str('rulesendofday'), array_column($card()['steps'], 'shown'));
+        $this->assertStringNotContainsString($str('ruleshoursn', 24), $card()['says']);
+
+        $this->send($library, ['rule' => '0', 'loanhours' => 0]);
+        $this->assertSame([7, 0], [(int) $rule()['loandays'], (int) $rule()['loanhours']]);
+        $this->assertContains('loandays', array_column($card()['steps'], 'field'));
+
+        $this->send($library, ['rule' => '0', 'loanhours' => 2]);
+        $this->send($library, ['rule' => '0', 'loandays' => 0]);
+        $this->assertSame([0, 0], [(int) $rule()['loandays'], (int) $rule()['loanhours']]);
+        $this->assertFalse(loan_rules::can_lend($rule(), 0));
+        $this->send($library, ['rule' => '0', 'loanhours' => 2]);
+        $this->assertTrue(loan_rules::can_lend($rule(), 0));
     }
 
     /**

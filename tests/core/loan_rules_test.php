@@ -122,6 +122,60 @@ final class loan_rules_test extends \basic_testcase {
     }
 
     /**
+     * A rule by hours lends even with no days; its loans are due so many hours later, at the same minute, moved past the
+     * days the library is closed; until the end of the day is due as a loan by days is; its renewals are hours too.
+     */
+    public function test_by_hours(): void {
+        $tz = new \DateTimeZone('Europe/Madrid');
+        $at = fn(string $when) => (new \DateTimeImmutable($when, $tz))->getTimestamp();
+        $laptop = ['readertype' => '*', 'itemtype' => 'device', 'loandays' => 0, 'maxloans' => 1, 'renewals' => 1,
+            'renewdays' => 0, 'loanhours' => 2, 'renewhours' => 1];
+        $this->assertTrue(loan_rules::can_lend($laptop, 0));
+        $this->assertFalse(loan_rules::can_lend($laptop, 1));
+        $this->assertFalse(loan_rules::can_lend(['loanhours' => 13] + $laptop, 0), 'past twelve, not hours');
+        $this->assertSame(2, loan_rules::hourly($laptop));
+        $this->assertSame(24, loan_rules::hours(['loanhours' => 24] + $laptop));
+        $this->assertSame(0, loan_rules::hourly(['loanhours' => 24] + $laptop), 'the end of the day is late as days are');
+
+        // Monday at ten, for two hours: at noon; until the end of the day: at its last second.
+        $this->assertSame($at('2026-11-23 12:00'), loan_rules::due_hours($at('2026-11-23 10:00'), 2, $tz));
+        $this->assertSame($at('2026-11-23 23:59:59'), loan_rules::due_hours($at('2026-11-23 10:00'), 24, $tz));
+        // Overnight from a Friday: past the weekend, at the same time; past a closed Tuesday too.
+        $this->assertSame($at('2026-11-30 08:00'), loan_rules::due_hours($at('2026-11-27 20:00'), 12, $tz));
+        $this->assertSame(
+            $at('2026-11-25 08:00'),
+            loan_rules::due_hours($at('2026-11-23 20:00'), 12, $tz, ['2026-11-24' => true])
+        );
+
+        // Renewed by its renewal hours: from now, or from the hour it was due; never less than now.
+        $due = $at('2026-11-23 12:00');
+        $this->assertTrue(loan_rules::can_renew($laptop, 0));
+        $this->assertFalse(loan_rules::can_renew($laptop, 1));
+        $this->assertSame($at('2026-11-23 12:30'), loan_rules::renewed_due($due, $at('2026-11-23 11:30'), $laptop, $tz));
+        $this->assertSame(
+            $at('2026-11-23 13:00'),
+            loan_rules::renewed_due($due, $at('2026-11-23 11:30'), $laptop, $tz, [], [6, 7], loan_rules::FROM_DUE)
+        );
+        $this->assertSame(
+            $at('2026-11-23 15:00'),
+            loan_rules::renewed_due($due, $at('2026-11-23 14:00'), $laptop, $tz, [], [6, 7], loan_rules::FROM_DUE)
+        );
+        // With no renewal hours, as many as it lends for.
+        $this->assertSame(2, loan_rules::renew_hours(['renewhours' => 0] + $laptop));
+        $this->assertSame(
+            $at('2026-11-23 13:30'),
+            loan_rules::renewed_due($due, $at('2026-11-23 11:30'), ['renewhours' => 0] + $laptop, $tz)
+        );
+        // Until the end of the day, renewed by days.
+        $day = ['loanhours' => 24, 'renewdays' => 1] + $laptop;
+        $this->assertTrue(loan_rules::can_renew($day, 0));
+        $this->assertSame(
+            $at('2026-11-24 23:59:59'),
+            loan_rules::renewed_due($at('2026-11-23 23:59:59'), $at('2026-11-23 18:00'), $day, $tz)
+        );
+    }
+
+    /**
      * Days late count whole days after the due date.
      */
     public function test_days_late(): void {

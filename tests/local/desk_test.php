@@ -450,6 +450,46 @@ final class desk_test extends \advanced_testcase {
     }
 
     /**
+     * A laptop lent by a rule by hours: it keeps its hours and is due two hours later, said with its time; an hour past it,
+     * the desk says it is late that same day; renewed, it gets its renewal hours.
+     */
+    public function test_by_hours(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $w = $this->make_world();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $now = time();
+        $DB->insert_record(self::T . 'rule', ['libraryid' => $w->library->id, 'readertype' => '*', 'itemtype' => 'device',
+            'loandays' => 0, 'maxloans' => 1, 'renewals' => 1, 'renewdays' => 0, 'loanhours' => 2, 'renewhours' => 1,
+            'timecreated' => $now, 'timemodified' => $now]);
+        $laptop = $gen->create_record(['entityid' => $w->library->entityid, 'doctype' => 'device', 'title' => 'Portátil']);
+        $gen->create_item(['libraryid' => $w->library->id, 'recordid' => $laptop->id, 'barcode' => '300001R',
+            'itemtype' => 'device', 'serial' => 'PC-12']);
+        // A Monday at ten, wherever the test runs: no weekend in the way.
+        $monday = (new \DateTimeImmutable('monday next week 10:00', zones::of($w->library)))->getTimestamp();
+        $time = fn(int $at) => zones::date($at, 'strftimetime', $w->library);
+
+        $lent = (new desk($w->library, (int) $w->staff->id, $monday))->scan('300001R', (int) $w->ana->id);
+        $this->assertSame('lent', $lent['kind']);
+        $loan = $DB->get_record(self::T . 'loan', ['id' => $lent['loanid']]);
+        $this->assertSame(2, (int) $loan->loanhours);
+        $this->assertSame($monday + 2 * HOURSECS, (int) $loan->timedue);
+        $this->assertStringContainsString($time($monday + 2 * HOURSECS), $lent['message']);
+
+        $later = (new desk($w->library, (int) $w->staff->id, $monday + 3 * HOURSECS))->scan('10000h');
+        $line = $later['reader']['loans'][0];
+        $this->assertStringContainsString($time($monday + 2 * HOURSECS), $line['due']);
+        $this->assertSame(get_string('desklatehour', 'local_oksigeniaayvurenda', $time($monday + 2 * HOURSECS)), $line['late']);
+
+        $renewed = (new desk($w->library, (int) $w->staff->id, $monday + HOURSECS))->renew((int) $loan->id);
+        $this->assertSame('renewed', $renewed['kind']);
+        $loan = $DB->get_record(self::T . 'loan', ['id' => $loan->id]);
+        $this->assertSame($monday + 3 * HOURSECS, (int) $loan->timedue, 'an hour more, from the hour it was due at the latest');
+        $this->assertSame(2, (int) $loan->loanhours);
+        $this->assertStringContainsString($time($monday + 3 * HOURSECS), $renewed['message']);
+    }
+
+    /**
      * Material: the unit is named by its serial number; its state is noted as it was when it goes, changed with a tap,
      * and offered as it is now when it comes back.
      */

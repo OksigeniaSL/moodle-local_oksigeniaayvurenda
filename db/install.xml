@@ -213,6 +213,7 @@
         <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timereturned" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Null while it is out"/>
         <FIELD NAME="renewals" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="loanhours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The hours it was lent for, when by hours (1 to 12); 0: by days"/>
         <FIELD NAME="staffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who lent it"/>
         <FIELD NAME="returnstaffid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Who took it back"/>
         <FIELD NAME="postid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The self-loan post it went out from"/>
@@ -252,6 +253,8 @@
         <FIELD NAME="maxloans" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0: no limit"/>
         <FIELD NAME="renewals" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="renewdays" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="loanhours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="By hours: 1 to 12, or 24 for the end of the day; 0: by days"/>
+        <FIELD NAME="renewhours" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The hours a renewal adds to a loan by hours"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>

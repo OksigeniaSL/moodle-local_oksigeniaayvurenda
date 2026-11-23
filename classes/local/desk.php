@@ -346,7 +346,7 @@ final class desk {
         [$in, $params] = $DB->get_in_or_equal(array_map('intval', $records), SQL_PARAMS_NAMED);
         $params['libraryid'] = $this->library->id;
         $loans = $DB->get_records_sql(
-            "SELECT l.id, l.readerid, l.timedue, r.title
+            "SELECT l.id, l.readerid, l.timedue, l.loanhours, r.title
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} r ON r.id = i.recordid
@@ -405,7 +405,7 @@ final class desk {
     /**
      * A loan out, as the desk offers it to bring back.
      *
-     * @param \stdClass $row id, readerid, timedue and title; intitle if it was found by words.
+     * @param \stdClass $row id, readerid, timedue, loanhours and title; intitle if it was found by words.
      * @return array loanid, title, who, due and intitle.
      */
     private function out_choice(\stdClass $row): array {
@@ -414,7 +414,7 @@ final class desk {
             'loanid' => (int) $row->id,
             'title' => format_string($row->title, true, ['escape' => false]),
             'who' => $who['name'] . ($who['group'] !== '' ? ' · ' . $who['group'] : ''),
-            'due' => $this->date((int) $row->timedue),
+            'due' => $this->due((int) $row->timedue, (int) ($row->loanhours ?? 0)),
             'intitle' => $row->intitle ?? true,
         ];
     }
@@ -528,7 +528,7 @@ final class desk {
             ], $rows));
         }
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.readerid, l.timedue, r.title
+            "SELECT l.id, l.readerid, l.timedue, l.loanhours, r.title
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} r ON r.id = i.recordid
@@ -861,7 +861,7 @@ final class desk {
         $loans = [];
         $late = 0;
         $rows = $DB->get_records_sql(
-            'SELECT l.id, l.timedue, l.libraryid, r.title
+            'SELECT l.id, l.timedue, l.loanhours, l.libraryid, r.title
                FROM {' . self::T . 'loan} l
                JOIN {' . self::T . 'item} i ON i.id = l.itemid
                JOIN {' . self::T . 'record} r ON r.id = i.recordid
@@ -871,18 +871,28 @@ final class desk {
         );
         foreach ($rows as $row) {
             $days = loan_rules::days_late((int) $row->timedue, $this->now, $this->tz);
-            $late += $days > 0 ? 1 : 0;
+            // A loan by hours is late as soon as its hour passes, that same day.
+            $hourslate = $days === 0 && (int) $row->loanhours > 0 && (int) $row->timedue < $this->now;
+            $late += $days > 0 || $hourslate ? 1 : 0;
             // More time without the book here (the reader at the desk, the family on the phone): by the rules, or by hand.
             $renew = $this->renew_choices((int) $row->id);
             $loans[] = [
                 'id' => (int) $row->id,
                 'title' => $row->title,
-                'due' => $this->date((int) $row->timedue),
+                'due' => $this->due((int) $row->timedue, (int) $row->loanhours),
+                // The stamp of a loan by hours due today: its time alone, which fits the stamp.
+                'stamp' => (int) $row->loanhours > 0 && zones::date((int) $row->timedue, '%Y-%m-%d', $this->library)
+                    === zones::date($this->now, '%Y-%m-%d', $this->library)
+                    ? zones::date((int) $row->timedue, 'strftimetime', $this->library) : $this->date((int) $row->timedue),
                 'late' => $days > 0 ? get_string(
                     $days === 1 ? 'desklateoneday' : 'desklatedays',
                     'local_oksigeniaayvurenda',
                     $days
-                ) : '',
+                ) : ($hourslate ? get_string(
+                    'desklatehour',
+                    'local_oksigeniaayvurenda',
+                    zones::date((int) $row->timedue, 'strftimetime', $this->library)
+                ) : ''),
                 'renew' => $renew,
                 'renewable' => !empty($renew['dates']),
             ];
@@ -978,9 +988,11 @@ final class desk {
             // Renewing right after the copy came back: it goes out again with the same loan.
             $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'onloan', 'timemodified' => $this->now]);
         }
+        // A day by hand is a loan by days from now on; by the rule, it is by hours if the rule is.
+        $hours = $byhand ? 0 : self::by_hours($rule);
         $DB->update_record(self::T . 'loan', (object) ['id' => $loan->id, 'timedue' => $due, 'timereturned' => null,
-            'returnstaffid' => null, 'renewals' => $loan->renewals + 1, 'timemodified' => $this->now]);
-        $a = (object) ['title' => $this->title($item), 'due' => $this->day($due)];
+            'returnstaffid' => null, 'renewals' => $loan->renewals + 1, 'loanhours' => $hours, 'timemodified' => $this->now]);
+        $a = (object) ['title' => $this->title($item), 'due' => $this->day_at($due, $hours)];
         // Renewed right after it came back: undoing it gives it back as it was, not a loan left open and late.
         $reopened = $loan->timereturned !== null ? ['reopened' => (int) $loan->timereturned,
             'reopenedby' => (int) $loan->returnstaffid] : [];
@@ -1034,7 +1046,7 @@ final class desk {
                 if ($time > (int) $loan->timedue && !in_array($time, array_column($dates, 'time'), true)) {
                     $dates[] = ['from' => $from, 'time' => $time, 'label' => $str(
                         $dates ? 'deskrenewchoice' . $from : 'deskrenewuntil',
-                        $this->day($time)
+                        $this->day_at($time, self::by_hours($rule))
                     )];
                 }
             }
@@ -1206,8 +1218,12 @@ final class desk {
             // A renewal made right after the book came back goes back to that return: the loan closed again, with its
             // day and who took it back, and the copy on the shelf (or set aside for whoever waits for it).
             $back = $reopened >= (int) $loan->timeloaned && $reopened <= $this->now ? $reopened : 0;
+            // A loan by hours renewed by hand to a day goes back to its hours: its old moment was not an end of day.
+            $byhours = (new \DateTimeImmutable('@' . $previousdue))->setTimezone($this->tz)->format('H:i:s') !== '23:59:59';
+            $readertype = (string) $DB->get_field(self::T . 'reader', 'readertype', ['id' => $loan->readerid]);
+            $hours = $byhours ? self::by_hours($this->rule($readertype, $item->itemtype, $this->home((int) $item->libraryid))) : 0;
             $DB->update_record(self::T . 'loan', (object) (['id' => $loan->id, 'timedue' => $previousdue,
-                'renewals' => $loan->renewals - 1, 'timemodified' => $this->now]
+                'renewals' => $loan->renewals - 1, 'loanhours' => $hours, 'timemodified' => $this->now]
                 + ($back ? ['timereturned' => $back, 'returnstaffid' => $reopenedby ?: null] : [])));
             if ($back) {
                 $DB->update_record(self::T . 'item', (object) ['id' => $item->id, 'status' => 'available',
@@ -1326,8 +1342,10 @@ final class desk {
             ['readerid' => $readerid, 'yearid' => $year->id],
             IGNORE_MULTIPLE
         );
-        // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today).
+        // From a textbook bank, until the school year ends; a copy on reserve for a course, short (or back today); by a
+        // rule by hours (a laptop, a charger), so many hours, or until the end of the day.
         $reserve = reserves::active((int) $item->id, $this->now);
+        $hours = !bank::is($home) && !$reserve ? loan_rules::hours($rule) : 0;
         $due = bank::is($home) ? bankround::due($home, $this->now)
             : ($reserve ? loan_rules::due(
                 $this->now,
@@ -1337,7 +1355,13 @@ final class desk {
                 $this->closed(),
                 zones::rest_days($this->library)
             )
-            : $this->capped($home, loan_rules::due(
+            : $this->capped($home, $hours > 0 ? loan_rules::due_hours(
+                $this->now,
+                $hours,
+                $this->tz,
+                $this->closed(),
+                zones::rest_days($this->library)
+            ) : loan_rules::due(
                 $this->now,
                 (int) $rule['loandays'],
                 $this->tz,
@@ -1355,7 +1379,9 @@ final class desk {
             if ($DB->record_exists_select(self::T . 'loan', 'itemid = ? AND timereturned IS NULL', [$item->id])) {
                 return $this->answer('stop', 'no', 'desktakenjust', $this->title($item));
             }
-            return $this->write_loan($item, $readerid, $year, $group ?: null, $due, $reserve);
+            // Until the end of the day is late as a loan by days is: only the hours are kept.
+            $byhours = $hours < loan_rules::END_OF_DAY ? $hours : 0;
+            return $this->write_loan($item, $readerid, $year, $group ?: null, $due, $reserve, $byhours);
         } finally {
             $lock->release();
         }
@@ -1370,9 +1396,18 @@ final class desk {
      * @param string|null $group
      * @param int $due
      * @param \stdClass|null $reserve
+     * @param int $hours The hours it is lent for, when by hours; 0 by days.
      * @return array As scan() answers.
      */
-    private function write_loan(\stdClass $item, int $readerid, \stdClass $year, ?string $group, int $due, $reserve): array {
+    private function write_loan(
+        \stdClass $item,
+        int $readerid,
+        \stdClass $year,
+        ?string $group,
+        int $due,
+        $reserve,
+        int $hours = 0
+    ): array {
         global $DB;
         $transaction = $DB->start_delegated_transaction();
         $loanid = $DB->insert_record(self::T . 'loan', [
@@ -1385,6 +1420,7 @@ final class desk {
             'timeloaned' => $this->now,
             'timedue' => $due,
             'renewals' => 0,
+            'loanhours' => $hours,
             'staffid' => $this->staffid ?: null,
             'timecreated' => $this->now,
             'timemodified' => $this->now,
@@ -1395,7 +1431,7 @@ final class desk {
         $transaction->allow_commit();
         // A book without a cover that moves asks for it, once, in the background.
         covers::seek((int) $item->recordid, $this->now);
-        $a = (object) ['title' => $this->title($item), 'due' => $this->date($due)];
+        $a = (object) ['title' => $this->title($item), 'due' => $this->due($due, $hours)];
         $message = $fulfilled ? 'desklentheld' : ($reserve ? 'desklentreserve' : 'desklent');
         if ($reserve) {
             $a->course = format_string(
@@ -1784,6 +1820,40 @@ final class desk {
      */
     private function date(int $time): string {
         return userdate($time, get_string('strftimedateshort', 'langconfig'), $this->tz->getName());
+    }
+
+    /**
+     * The hours a loan under a rule keeps: those of a rule by hours, short of the end of the day, which is late as a loan
+     * by days is.
+     *
+     * @param array|null $rule
+     * @return int
+     */
+    private static function by_hours(?array $rule): int {
+        return loan_rules::hourly($rule);
+    }
+
+    /**
+     * A day as the desk says it («jueves, 12 de noviembre») and, for a loan by hours, its time.
+     *
+     * @param int $time
+     * @param int $hours
+     * @return string
+     */
+    private function day_at(int $time, int $hours): string {
+        return $hours > 0 ? get_string('dueattime', 'local_oksigeniaayvurenda', (object) ['day' => $this->day($time),
+            'time' => zones::date($time, 'strftimetime', $this->library)]) : $this->day($time);
+    }
+
+    /**
+     * When a loan is due: its date and, for a loan by hours, its time.
+     *
+     * @param int $time
+     * @param int $hours The hours it was lent for; 0 by days.
+     * @return string
+     */
+    private function due(int $time, int $hours): string {
+        return zones::due($time, $this->library, $hours > 0);
     }
 
     /**

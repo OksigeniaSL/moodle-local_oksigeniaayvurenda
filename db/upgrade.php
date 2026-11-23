@@ -952,6 +952,28 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112300, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112402) {
+        // Loans by hours: a rule may lend for hours (or until the end of the day), and a loan keeps the hours it was lent
+        // for, so that it is late as soon as its hour passes and is told so once.
+        $table = new xmldb_table('local_oksigeniaayvurenda_rule');
+        foreach (
+            [
+                new xmldb_field('loanhours', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'renewdays'),
+                new xmldb_field('renewhours', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'loanhours'),
+            ] as $field
+        ) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        $table = new xmldb_table('local_oksigeniaayvurenda_loan');
+        $field = new xmldb_field('loanhours', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, '0', 'renewals');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026112402, 'local', 'oksigeniaayvurenda');
+    }
+
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
     return true;

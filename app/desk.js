@@ -305,7 +305,7 @@
             item.appendChild(el('span', 'ayv-loan-due', loan.late || loan.due));
             // The book just lent gets its date stamped: it falls big and blurred and sets sharp.
             if (stamped && loan.id === stamped && !loan.late) {
-                item.appendChild(el('span', 'ayv-loan-stamp' + (still ? '' : ' ayv-stamp-new'), loan.due));
+                item.appendChild(el('span', 'ayv-loan-stamp' + (still ? '' : ' ayv-stamp-new'), loan.stamp || loan.due));
                 stamped = 0;
             }
             // More time, without the book: the reader is here, or the family asks.

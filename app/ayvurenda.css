@@ -6060,7 +6060,8 @@ html[data-bs-theme="dark"] .ayv .ayv-late-spans .ayv-late-span-mid .ayv-weed-cou
 .ayv .ayv-line-stamp { display: inline-block; margin-left: .6rem; padding: .05rem .45rem; border: 2px solid currentColor;
     border-radius: 4px; font: 700 .78rem/1.25 var(--text); letter-spacing: .05em; text-transform: uppercase;
     transform: rotate(-6deg); opacity: .88; }
-.ayv .ayv-loan-stamp { color: #b5523d; }
+/* Dark enough to read at its ink's .88: 4.8 to 1 on the card. */
+.ayv .ayv-loan-stamp { color: #a3452f; }
 .ayv .ayv-line-stamp { color: #1d7349; }
 /* The line is a grid: the stamp keeps its own size at the start of its row, or it stretches across the line and, turned,
    crosses the buttons below. */

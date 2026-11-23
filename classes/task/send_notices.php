@@ -26,7 +26,8 @@ namespace local_oksigeniaayvurenda\task;
 
 /**
  * Every morning: readers with a book late hear about it (on the first day, then once a week), tutors get, once a
- * week, who in their group has books late, and whoever signed up gets the library's news, once a week at most.
+ * week, who in their group has books late, and whoever signed up gets the library's news, once a week at most. Every
+ * hour: whoever has a loan by hours an hour past its hour hears it, once.
  */
 class send_notices extends \core\task\scheduled_task {
     /**
@@ -56,6 +57,8 @@ class send_notices extends \core\task\scheduled_task {
             'first passwords nobody used' => fn() => \local_oksigeniaayvurenda\local\entry::lapse($now),
             'voices past the days the centre keeps them' => fn() => \local_oksigeniaayvurenda\local\voices::expire(),
             'voices of reviews past those days' => fn() => \local_oksigeniaayvurenda\local\reviews::expire_voices(),
+            // A laptop lent for two hours is late at its hour, not tomorrow morning.
+            'loans by hours past their hour' => fn() => \local_oksigeniaayvurenda\local\notices::hourly($now),
         ];
         if ($week) {
             $steps += [

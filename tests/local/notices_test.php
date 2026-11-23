@@ -107,6 +107,33 @@ final class notices_test extends \advanced_testcase {
     }
 
     /**
+     * A loan by hours an hour past its hour: whoever has it hears it once, with its time; not before the hour, not twice,
+     * and nothing about a loan by days late the same way.
+     */
+    public function test_hourly(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        [$library, $year, $now, $readers] = $this->library();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $laptop = $gen->create_loan(['libraryid' => $library->id, 'readerid' => $readers['leo']->id, 'yearid' => $year->id,
+            'itemid' => $gen->create_item(['libraryid' => $library->id, 'recordid' => $gen->create_record([
+                'entityid' => $library->entityid, 'title' => 'Portátil', 'doctype' => 'device'])->id])->id,
+            'timeloaned' => $now - 2 * HOURSECS, 'timedue' => $now, 'loanhours' => 2]);
+        $sink = $this->redirectMessages();
+        $this->assertSame(0, notices::hourly($now + 30 * MINSECS), 'not before an hour past it');
+        $this->assertSame(1, notices::hourly($now + HOURSECS + MINSECS));
+        $messages = $sink->get_messages();
+        $this->assertCount(1, $messages);
+        $this->assertStringContainsString('Portátil', $messages[0]->subject);
+        $this->assertStringContainsString(zones::date($now, 'strftimetime', $library), $messages[0]->subject);
+        $this->assertStringNotContainsString('faro', $messages[0]->fullmessage, 'the books by days are for the morning');
+        $this->assertSame(0, notices::hourly($now + 2 * HOURSECS), 'once');
+        $this->assertNotNull($DB->get_field(self::T . 'loan', 'timenotified', ['id' => $laptop->id]));
+        $sink->close();
+    }
+
+    /**
      * Each centre says how often: only by hand, nothing goes by itself; once a month, a week later only Leo hears, late by
      * then for the first time, and a month later Ana and the tutor again.
      */

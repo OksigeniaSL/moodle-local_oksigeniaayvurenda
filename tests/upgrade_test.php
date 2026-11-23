@@ -143,6 +143,11 @@ final class upgrade_test extends \advanced_testcase {
             $dbman->drop_field($digital, new \xmldb_field($name));
         }
         $dbman->drop_field(new \xmldb_table('local_oksigeniaayvurenda_record'), new \xmldb_field('timevoiced'));
+        // Nor were there loans by hours.
+        foreach (['loanhours', 'renewhours'] as $name) {
+            $dbman->drop_field(new \xmldb_table('local_oksigeniaayvurenda_rule'), new \xmldb_field($name));
+        }
+        $dbman->drop_field(new \xmldb_table('local_oksigeniaayvurenda_loan'), new \xmldb_field('loanhours'));
         $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
         $library = $gen->create_library();
         $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Un libro largo']);

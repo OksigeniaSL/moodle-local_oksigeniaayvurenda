@@ -237,9 +237,13 @@ final class rulesheet {
         $max = (int) $rule['maxloans'];
         $renewals = (int) $rule['renewals'];
         $renewdays = (int) $rule['renewdays'] ?: 7;
+        // By hours (a laptop, a charger): so many hours, or until the end of the day.
+        $hours = loan_rules::hours($rule);
+        $hourly = loan_rules::hourly($rule);
+        $lends = $loan > 0 || $hours > 0;
         $word = fn(int $n, string $one, string $many) => $str($n === 1 ? $one : $many);
         $steps = [];
-        if ($loan > 0) {
+        if ($lends) {
             $steps[] = $max === 0 ? gestures::still($str('hiwatonce'), $str('hiwnolimit'))
                 : gestures::step(
                     $form,
@@ -253,18 +257,35 @@ final class rulesheet {
                     $word($max, 'rulesunitbook', 'rulesunitbooks'),
                     $str
                 );
-            $steps[] = gestures::step(
-                $form,
-                'loandays',
-                $str('hiwdays'),
-                $loan,
-                1,
-                999,
-                1,
-                (string) $loan,
-                $word($loan, 'rulesunitday', 'rulesunitdays'),
-                $str
-            );
+            if ($hourly > 0) {
+                $steps[] = gestures::step(
+                    $form,
+                    'loanhours',
+                    $str('hiwdays'),
+                    $hourly,
+                    1,
+                    loan_rules::MAX_HOURS,
+                    1,
+                    (string) $hourly,
+                    $word($hourly, 'rulesunithour', 'rulesunithours'),
+                    $str
+                );
+            } else if ($hours === loan_rules::END_OF_DAY) {
+                $steps[] = gestures::still($str('hiwdays'), $str('rulesendofday'));
+            } else {
+                $steps[] = gestures::step(
+                    $form,
+                    'loandays',
+                    $str('hiwdays'),
+                    $loan,
+                    1,
+                    999,
+                    1,
+                    (string) $loan,
+                    $word($loan, 'rulesunitday', 'rulesunitdays'),
+                    $str
+                );
+            }
             $steps[] = gestures::step(
                 $form,
                 'renewals',
@@ -277,7 +298,21 @@ final class rulesheet {
                 $word($renewals, 'rulesunittime', 'rulesunittimes'),
                 $str
             );
-            if ($renewals > 0) {
+            if ($renewals > 0 && $hourly > 0) {
+                $more = loan_rules::renew_hours($rule);
+                $steps[] = gestures::step(
+                    $form,
+                    'renewhours',
+                    $str('hiwrenewdays'),
+                    $more,
+                    1,
+                    loan_rules::MAX_HOURS,
+                    1,
+                    (string) $more,
+                    $word($more, 'rulesunithourmore', 'rulesunithoursmore'),
+                    $str
+                );
+            } else if ($renewals > 0) {
                 $steps[] = gestures::step(
                     $form,
                     'renewdays',
@@ -293,12 +328,21 @@ final class rulesheet {
             }
         }
         $lights = [];
-        if ($loan > 0) {
+        if ($lends) {
             $lights[] = gestures::light($form, 'maxloans', $max === 0 ? 1 : 0, $max === 0, $str('rulesnolimitlight'));
+            // By hours starts at two; turned off, the rule lends by its days again.
+            $lights[] = gestures::light($form, 'loanhours', $hourly > 0 ? 0 : 2, $hourly > 0, $str('ruleshourslight'));
+            $lights[] = gestures::light(
+                $form,
+                'loanhours',
+                $hours === loan_rules::END_OF_DAY ? 0 : loan_rules::END_OF_DAY,
+                $hours === loan_rules::END_OF_DAY,
+                $str('rulesendofdaylight')
+            );
         }
         // Back home, a rule takes the days of the general one.
         $home = (int) (self::general($library)['loandays'] ?? 14) ?: 14;
-        $lights[] = gestures::light($form, 'loandays', $loan === 0 ? $home : 0, $loan === 0, $str('rulesroomlight'));
+        $lights[] = gestures::light($form, 'loandays', !$lends ? $home : 0, !$lends, $str('rulesroomlight'));
         $type = (string) $rule['readertype'];
         $items = array_merge(['*'], cataloguer::itemtypes((int) $library->entityid));
         return [
@@ -346,9 +390,17 @@ final class rulesheet {
      */
     private static function says(array $rule, callable $str): string {
         $days = fn(int $n) => $str($n === 1 ? 'rulesdayone' : 'rulesdaysn', $n);
-        if ((int) $rule['loandays'] === 0) {
+        $hours = loan_rules::hours($rule);
+        if ((int) $rule['loandays'] === 0 && $hours === 0) {
             return $str('rulesroomonly');
         }
+        // By hours, the time and the renewals are said in hours; until the end of the day, the renewals in days.
+        $long = $hours === loan_rules::END_OF_DAY ? ''
+            : ($hours > 0 ? $str($hours === 1 ? 'ruleshourone' : 'ruleshoursn', $hours) : $days((int) $rule['loandays']));
+        $more = loan_rules::hourly($rule) > 0 ? $str(
+            loan_rules::renew_hours($rule) === 1 ? 'ruleshourone' : 'ruleshoursn',
+            loan_rules::renew_hours($rule)
+        ) : $days((int) $rule['renewdays']);
         $max = match ((int) $rule['maxloans']) {
             0 => $str('rulesanynumber'),
             1 => $str('rulesuptoone'),
@@ -356,9 +408,10 @@ final class rulesheet {
         };
         $renew = (int) $rule['renewals'] === 0 ? $str('rulesnorenew') : $str(
             (int) $rule['renewals'] === 1 ? 'rulesrenewonce' : 'rulesrenewtimes',
-            (object) ['times' => (int) $rule['renewals'], 'days' => $days((int) $rule['renewdays'])]
+            (object) ['times' => (int) $rule['renewals'], 'days' => $more]
         );
-        return $str('rulessentence', (object) ['max' => $max, 'days' => $days((int) $rule['loandays']), 'renew' => $renew]);
+        return $str($long === '' ? 'rulessentenceday' : 'rulessentence', (object) ['max' => $max, 'days' => $long,
+            'renew' => $renew]);
     }
 
     /**

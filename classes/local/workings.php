@@ -26,6 +26,7 @@
 namespace local_oksigeniaayvurenda\local;
 
 use local_oksigeniaayvurenda\core\card_look;
+use local_oksigeniaayvurenda\core\loan_rules;
 
 /**
  * The settings window was a long form nobody read to the end: here each setting says in one sentence what happens today,
@@ -264,13 +265,17 @@ final class workings {
             $rule['itemtype'] = $what;
         }
         foreach (
-            ['loandays' => [0, 999], 'maxloans' => [0, 99], 'renewals' => [0, 20], 'renewdays' => [1,
-            999]] as $field => $range
+            ['loandays' => [0, 999], 'maxloans' => [0, 99], 'renewals' => [0, 20], 'renewdays' => [1, 999],
+            'loanhours' => [0, 24], 'renewhours' => [1, 12]] as $field => $range
         ) {
             $value = optional_param($field, -1, PARAM_INT);
             if ($value !== -1) {
                 $rule[$field] = max($range[0], min($range[1], $value));
             }
+        }
+        // Days given (to take home, or only in the library) are a rule by days again, not by hours.
+        if (optional_param('loandays', -1, PARAM_INT) !== -1) {
+            $rule['loanhours'] = 0;
         }
         $all[$at] = $rule;
         rules::save((int) $library->id, $all);
@@ -656,9 +661,17 @@ final class workings {
         $who = $b(self::who($library, (string) $rule['readertype'], $str)) . ' · '
             . s(\core_text::strtolower(self::what((string) $rule['itemtype'], $str))) . ': ';
         $low = fn(string $text) => \core_text::strtolower(\core_text::substr($text, 0, 1)) . \core_text::substr($text, 1);
-        if ((int) $rule['loandays'] === 0) {
+        $hours = loan_rules::hours($rule);
+        if ((int) $rule['loandays'] === 0 && $hours === 0) {
             return $who . s($low($str('rulesroomonly')));
         }
+        // By hours, the time and the renewals are said in hours; until the end of the day, the renewals in days.
+        $long = $hours === loan_rules::END_OF_DAY ? ''
+            : ($hours > 0 ? $b($str($hours === 1 ? 'ruleshourone' : 'ruleshoursn', $hours)) : $b($days((int) $rule['loandays'])));
+        $more = loan_rules::hourly($rule) > 0 ? $str(
+            loan_rules::renew_hours($rule) === 1 ? 'ruleshourone' : 'ruleshoursn',
+            loan_rules::renew_hours($rule)
+        ) : $days((int) $rule['renewdays']);
         // One is «one at a time», not «up to 1 at a time».
         $max = match ((int) $rule['maxloans']) {
             0 => $b($str('rulesanynumber')),
@@ -667,9 +680,9 @@ final class workings {
         };
         $renew = (int) $rule['renewals'] === 0 ? s($str('rulesnorenew')) : $str(
             (int) $rule['renewals'] === 1 ? 'rulesrenewonce' : 'rulesrenewtimes',
-            (object) ['times' => '<b>' . (int) $rule['renewals'] . '</b>', 'days' => s($days((int) $rule['renewdays']))]
+            (object) ['times' => '<b>' . (int) $rule['renewals'] . '</b>', 'days' => s($more)]
         );
-        return $who . $low($str('rulessentence', (object) ['max' => $max, 'days' => $b($days((int) $rule['loandays'])),
+        return $who . $low($str($long === '' ? 'rulessentenceday' : 'rulessentence', (object) ['max' => $max, 'days' => $long,
             'renew' => $renew]));
     }
 
@@ -690,7 +703,27 @@ final class workings {
             'atmin' => $value <= $min, 'atmax' => $value >= $max];
         $loan = (int) $rule['loandays'];
         $max = (int) $rule['maxloans'];
+        $hours = loan_rules::hours($rule);
+        $hourly = loan_rules::hourly($rule);
+        $lends = $loan > 0 || $hours > 0;
         $items = array_merge(['*'], cataloguer::itemtypes((int) $library->entityid));
+        // How long: days, hours (a laptop, a charger) or until the end of the day.
+        $long = match (true) {
+            $hourly > 0 => [$step('loanhours', $hourly, 1, loan_rules::MAX_HOURS, $str('hiwdays'), $str(
+                $hourly === 1 ? 'ruleshourone' : 'ruleshoursn',
+                $hourly
+            ))],
+            $hours === loan_rules::END_OF_DAY => [],
+            default => [$step('loandays', $loan, 1, 999, $str('hiwdays'), $str($loan === 1 ? 'rulesdayone' : 'rulesdaysn', $loan))],
+        };
+        $more = loan_rules::renew_hours($rule);
+        $renewby = $hourly > 0 ? $step('renewhours', $more, 1, loan_rules::MAX_HOURS, $str('hiwrenewdays'), $str(
+            $more === 1 ? 'ruleshourone' : 'ruleshoursn',
+            $more
+        )) : $step('renewdays', (int) $rule['renewdays'] ?: 7, 1, 999, $str('hiwrenewdays'), $str(
+            (int) $rule['renewdays'] === 1 ? 'rulesdayone' : 'rulesdaysn',
+            (int) $rule['renewdays'] ?: 7
+        ));
         return [
             'index' => $at,
             'who' => array_map(fn($w) => $chip(
@@ -705,9 +738,9 @@ final class workings {
                 self::what($w, $str),
                 $w === $rule['itemtype']
             ), $items),
-            'lent' => $loan > 0,
-            'steps' => $loan > 0 ? [
-                $step('loandays', $loan, 1, 999, $str('hiwdays'), $str($loan === 1 ? 'rulesdayone' : 'rulesdaysn', $loan)),
+            'lent' => $lends,
+            'steps' => $lends ? [
+                ...$long,
                 $step('maxloans', max(1, $max), 1, 99, $str('hiwatonce'), $max === 0 ? $str('rulesanynumber')
                     : $str($max === 1 ? 'hiwbookone' : 'hiwbooks', $max)) + ['nolimit' => $chip(
                         'maxloans',
@@ -719,13 +752,12 @@ final class workings {
                     (int) $rule['renewals'] === 1 ? 'hiwtimesone' : 'hiwtimes',
                     (int) $rule['renewals']
                 )),
-                $step('renewdays', (int) $rule['renewdays'] ?: 7, 1, 999, $str('hiwrenewdays'), $str(
-                    (int) $rule['renewdays'] === 1 ? 'rulesdayone' : 'rulesdaysn',
-                    (int) $rule['renewdays'] ?: 7
-                )),
+                $renewby,
             ] : [],
-            'home' => [$chip('loandays', $loan > 0 ? (string) $loan : '14', $str('hiwlent'), $loan > 0),
-                $chip('loandays', '0', $str('hiwroomonly'), $loan === 0)],
+            'home' => [$chip('loandays', $loan > 0 ? (string) $loan : '14', $str('hiwlent'), $loan > 0 && $hours === 0),
+                $chip('loanhours', (string) ($hourly ?: 2), $str('ruleshourslight'), $hourly > 0),
+                $chip('loanhours', (string) loan_rules::END_OF_DAY, $str('rulesendofdaylight'), $hours === loan_rules::END_OF_DAY),
+                $chip('loandays', '0', $str('hiwroomonly'), !$lends)],
             'removelabel' => $str('hiwremove'),
             'removeyes' => $str('hiwremoveyes'),
             'note' => $str('hiwrulenote'),

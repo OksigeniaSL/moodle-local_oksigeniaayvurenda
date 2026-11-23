@@ -64,17 +64,19 @@ final class late {
         $today = (new \DateTimeImmutable('@' . $now))->setTimezone($tz)->setTime(0, 0)->getTimestamp();
         $year = years::around((int) $library->entityid, $now);
         $rows = $DB->get_records_sql(
-            "SELECT l.id, l.timedue, l.readerid, i.recordid, r.firstname, r.lastname, r.userid, r.cardcode, rec.title, m.groupname,
-                    u.firstname AS ufirstname, u.lastname AS ulastname
+            "SELECT l.id, l.timedue, l.loanhours, l.readerid, i.recordid, r.firstname, r.lastname, r.userid, r.cardcode, rec.title,
+                    m.groupname, u.firstname AS ufirstname, u.lastname AS ulastname
                FROM {" . self::T . "loan} l
                JOIN {" . self::T . "reader} r ON r.id = l.readerid
           LEFT JOIN {user} u ON u.id = r.userid
                JOIN {" . self::T . "item} i ON i.id = l.itemid
                JOIN {" . self::T . "record} rec ON rec.id = i.recordid
           LEFT JOIN {" . self::T . "member} m ON m.readerid = r.id AND m.yearid = :yearid
-              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL" . ($onlylate ? ' AND l.timedue < :today' : '') . "
+              WHERE l.libraryid = :libraryid AND l.timereturned IS NULL"
+                // A loan by hours is late as soon as its hour passes, that same day.
+                . ($onlylate ? ' AND (l.timedue < :today OR (l.loanhours > 0 AND l.timedue < :now))' : '') . "
            ORDER BY m.groupname, l.timedue",
-            ['yearid' => $year->id, 'libraryid' => $library->id, 'today' => $today]
+            ['yearid' => $year->id, 'libraryid' => $library->id, 'today' => $today, 'now' => $now]
         );
         $groups = [];
         foreach ($rows as $row) {
@@ -87,7 +89,7 @@ final class late {
                 'readerid' => (int) $row->readerid,
                 'recordid' => (int) $row->recordid,
                 'title' => $row->title,
-                'due' => zones::date((int) $row->timedue, 'strftimedateshort', $library),
+                'due' => zones::due((int) $row->timedue, $library, (int) $row->loanhours > 0),
                 'days' => $days,
                 'left' => $days > 0 ? 0 : loan_rules::days_late($now, (int) $row->timedue, $tz),
                 'timedue' => (int) $row->timedue,
