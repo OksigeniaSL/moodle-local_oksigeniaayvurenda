@@ -309,7 +309,7 @@ final class shell {
                 // On top: «What do you want to do?» and «How do I…?»; then, while the centre is closed, its five steps.
                 $more = $door['library'] ?? null;
                 $ask = $more ? '<form class="ayv-more-ask" role="search" action="' . s($door['howto']) . '" data-ask="'
-                    . s((new \moodle_url('/local/oksigeniaayvurenda/ask_ajax.php'))->out(false)) . '">'
+                    . s(self::service('howto_ask')) . '">'
                     . '<input type="hidden" name="library" value="' . s($more->slug) . '">'
                     . '<label class="ayv-sr" for="ayv-more-q">' . $str('menuask') . '</label>'
                     . '<span class="ayv-more-ask-icon">' . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_search', [])
@@ -579,6 +579,18 @@ Oksigenia Ayvurenda</button>
     }
 
     /**
+     * Where a screen asks one of the plugin's external functions, with the session key: what ayvService() of ayvurenda.js
+     * takes.
+     *
+     * @param string $function Its name without the plugin's, as howto_ask.
+     * @return string
+     */
+    public static function service(string $function): string {
+        return (new \moodle_url('/lib/ajax/service.php', ['sesskey' => sesskey(),
+            'info' => 'local_oksigeniaayvurenda_' . $function]))->out(false);
+    }
+
+    /**
      * The nonce of this page: only the scripts the library writes into it carry it, so a script that slipped into the
      * page through some text would not run.
      *
@@ -817,7 +829,7 @@ document.addEventListener(\'error\', function(e) {
         return [
             'html' => $html,
             'config' => [
-                'relayurl' => (new \moodle_url('/local/oksigeniaayvurenda/relay_ajax.php'))->out(false),
+                'relayurl' => self::service('relay_pull'),
                 'zxing' => (new \moodle_url('/local/oksigeniaayvurenda/app/zxing/zxing.min.js'))->out(false),
             ],
             'strings' => $strings,

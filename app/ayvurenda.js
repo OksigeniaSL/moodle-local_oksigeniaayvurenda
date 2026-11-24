@@ -22,6 +22,32 @@
 (function() {
     'use strict';
     var config = window.AYV || {};
+    // What a screen asks the server without loading again, by Moodle's own way: an external function of the plugin. The
+    // address says which one (info) and brings the session key, as shell::service() wrote it.
+    window.ayvServiceBody = function(address, args) {
+        var method = new URL(address, window.location.href).searchParams.get('info');
+        return JSON.stringify([{index: 0, methodname: method, args: args}]);
+    };
+    // Its answer, or an error: with what Moodle calls it in «server» when it was the server that said no.
+    window.ayvService = function(address, args) {
+        return fetch(address, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'},
+            body: window.ayvServiceBody(address, args)}).then(function(response) {
+            if (!response.ok) {
+                throw new Error(response.status);
+            }
+            return response.json();
+        }).then(function(answers) {
+            // Moodle says its errors with a 200.
+            var answer = Array.isArray(answers) ? answers[0] : answers;
+            if (!answer || answer.error) {
+                var why = (answer && (answer.exception || answer)) || {};
+                var failed = new Error(why.message || 'service');
+                failed.server = why.errorcode || 'error';
+                throw failed;
+            }
+            return answer.data;
+        });
+    };
     // A cover that does not load (a file gone, a cache on the way) is never a blank (Enrique, 8 November): the card shows
     // its drawn cover with the title, and the small covers of the board go away.
     var covers = '.ayv-cover-img, .ayv-board-covers img, .ayv-board-book img';
@@ -574,11 +600,7 @@
                 return;
             }
             var mine = ++asked;
-            var url = form.getAttribute('data-ask') + '?library=' + encodeURIComponent(library.value) + '&q=' +
-                encodeURIComponent(q);
-            fetch(url, {credentials: 'same-origin'}).then(function(response) {
-                return response.json();
-            }).then(function(data) {
+            window.ayvService(form.getAttribute('data-ask'), {library: library.value, q: q}).then(function(data) {
                 // Only the answer to what is written now: a slow one for an older word does not cover it.
                 if (mine === asked && data && data.answers) {
                     show(data);

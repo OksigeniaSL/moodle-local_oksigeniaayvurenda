@@ -237,7 +237,7 @@
         /**
          * Wires the camera button and the phone panel of a page to what handles a code read.
          *
-         * @param {Object} config The page's config: sesskey, relayurl, zxing, strings.
+         * @param {Object} config The page's config: relayurl, zxing, strings.
          * @param {Function} handle What a code read does, as if a scanner had typed it.
          * @param {Function} refocus Gives the focus back to the page's field.
          */
@@ -262,12 +262,7 @@
                     timer = setTimeout(pull, 1500);
                     return;
                 }
-                var body = new URLSearchParams();
-                body.set('sesskey', config.sesskey);
-                body.set('action', 'pull');
-                fetch(config.relayurl, {method: 'POST', credentials: 'same-origin', body: body}).then(function(response) {
-                    return response.json();
-                }).then(function(answer) {
+                window.ayvService(config.relayurl, {}).then(function(answer) {
                     (answer.codes || []).forEach(handle);
                     return answer;
                 }).catch(function() {

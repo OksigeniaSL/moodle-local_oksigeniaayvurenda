@@ -306,8 +306,8 @@ shell::output($stocktake->name, $main, $library, '', [
     'scripts' => ['camera', 'stocktake'],
     'nav' => $nav,
     'config' => [
-        'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/stocktake_ajax.php'))->out(false),
-        'sesskey' => sesskey(),
+        'readurl' => shell::service('stocktake_read'),
+        'returnurl' => shell::service('stocktake_return'),
         'library' => $library->slug,
         'stocktake' => (int) $stocktake->id,
         'place' => (int) $stocktake->locationid,

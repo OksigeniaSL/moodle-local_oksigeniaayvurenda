@@ -861,8 +861,7 @@ final class visit {
             // The lanterns of «Llévatelo» (P1): three, each wrong spine puts one out; the book found is kept for a reader with a
             // card, and taken home from the desk this week it leaves a seal on the card.
             'carry' => !empty($game['readerid']) ? [
-                'url' => (new \moodle_url('/local/oksigeniaayvurenda/hunt_ajax.php'))->out(false),
-                'sesskey' => sesskey(),
+                'url' => shell::service('hunt_found'),
                 'library' => $library->slug,
                 'corner' => $corner,
                 'turn' => $turn,

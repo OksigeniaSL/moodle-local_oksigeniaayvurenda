@@ -39,16 +39,7 @@
         li.className = 'ayv-line';
         li.textContent = code;
         log.insertBefore(li, log.firstChild);
-        var body = new URLSearchParams();
-        body.set('sesskey', config.sesskey);
-        body.set('action', 'push');
-        body.set('code', code);
-        fetch(config.relayurl, {method: 'POST', credentials: 'same-origin', body: body}).then(function(response) {
-            return response.json();
-        }).then(function(answer) {
-            if (!answer || answer.error) {
-                throw new Error('relay');
-            }
+        window.ayvService(config.relayurl, {code: code}).then(function(answer) {
             li.textContent = String(str.phonesent).replace('{$a}', function() { return code; });
             return answer;
         }).catch(function() {

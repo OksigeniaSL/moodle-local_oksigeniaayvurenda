@@ -74,18 +74,14 @@
     var timer = null;
     var lastSent = 0;
     var params = function(position) {
-        var body = new URLSearchParams();
-        body.set('sesskey', config.sesskey);
-        body.set('item', config.item);
-        body.set('position', position || current + ':' + Math.floor(voice.currentTime || 0));
-        return body;
+        return {item: config.item, position: String(position || current + ':' + Math.floor(voice.currentTime || 0))};
     };
     var send = function(position) {
         if (!window.fetch || !config.ajaxurl) {
             return;
         }
         lastSent = Date.now();
-        fetch(config.ajaxurl, {method: 'POST', credentials: 'same-origin', body: params(position)}).catch(function() {
+        window.ayvService(config.ajaxurl, params(position)).catch(function() {
             return null;
         });
     };
@@ -101,7 +97,7 @@
     };
     window.addEventListener('pagehide', function() {
         if (navigator.sendBeacon && config.ajaxurl && voice.currentTime) {
-            navigator.sendBeacon(config.ajaxurl, params());
+            navigator.sendBeacon(config.ajaxurl, window.ayvServiceBody(config.ajaxurl, params()));
         }
     });
 

@@ -255,7 +255,7 @@ shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksi
         'sendurl' => (new moodle_url('/local/oksigeniaayvurenda/voice_ajax.php'))->out(false),
         'sesskey' => sesskey(),
         'record' => $recordid,
-        'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/digital_ajax.php'))->out(false),
+        'ajaxurl' => shell::service('digital_place'),
         'item' => $text ? (int) $text->id : 0,
         'position' => $place['position'],
         'bookmarks' => $place['bookmarks'],

@@ -192,8 +192,7 @@ shell::output($title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/re
     'nav' => [['url' => $data['recordurl'], 'label' => $str($anyone ? 'windowback' : 'backtorecord')]],
     'config' => [
         'local' => $anyone,
-        'ajaxurl' => (new moodle_url('/local/oksigeniaayvurenda/digital_ajax.php'))->out(false),
-        'sesskey' => sesskey(),
+        'ajaxurl' => shell::service('digital_place'),
         'item' => $reading ? (int) $parts[0]->id : (int) $item->id,
         'start' => $reading ? $start : 0,
         'who' => $reading ? $who : '',

@@ -58,9 +58,8 @@ shell::output($str('phonetitle'), $main, $library, '', [
     'search' => false,
     'scripts' => ['camera', 'phone'],
     'config' => [
-        'relayurl' => (new moodle_url('/local/oksigeniaayvurenda/relay_ajax.php'))->out(false),
+        'relayurl' => shell::service('relay_push'),
         'zxing' => (new moodle_url('/local/oksigeniaayvurenda/app/zxing/zxing.min.js'))->out(false),
-        'sesskey' => sesskey(),
         'strings' => $strings,
     ],
 ]);

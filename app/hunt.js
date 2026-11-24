@@ -126,19 +126,12 @@
             : (lanterns.getAttribute('data-left') || '').replace('{n}', lit));
     };
     var keep = function() {
-        if (!lanterns || !lanterns.getAttribute('data-url') || !window.fetch || !window.FormData) {
+        if (!lanterns || !lanterns.getAttribute('data-url') || !window.fetch) {
             return;
         }
-        var body = new FormData();
-        ['sesskey', 'library', 'corner', 'turn'].forEach(function(name) {
-            body.append(name, lanterns.getAttribute('data-' + name) || '');
-        });
-        body.append('record', target);
-        body.append('lanterns', String(lit));
-        window.fetch(lanterns.getAttribute('data-url'), {method: 'POST', body: body, credentials: 'same-origin'})
-            .then(function(response) {
-                return response.json();
-            })
+        window.ayvService(lanterns.getAttribute('data-url'), {library: lanterns.getAttribute('data-library') || '',
+            corner: lanterns.getAttribute('data-corner') || '', turn: Number(lanterns.getAttribute('data-turn') || 0),
+            record: Number(target), lanterns: lit})
             .then(function(answer) {
                 // A room more of the orientation: the rooms left, or the badge with the third (P8).
                 var route = dialog.querySelector('.ayv-hunt-ruta');

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.4 (2026-11-24)
+
+From the review of the Moodle Marketplace. Nothing changes on the screens.
+
+- **Six small JSON scripts are external functions now** (`db/services.php`, `classes/external/`): the stocktake's reads and
+  returns, the suggestions while filling a box, the place and bookmarks of a digital book, «What do you want to do?», the
+  hidden book found in the visit and the codes read with a phone. The screens ask them through Moodle's own AJAX service,
+  with their parameters and answers described and the same permissions as before.
+
 ## 1.3.3 (2026-11-24)
 
 From the review of the Moodle Marketplace.

@@ -137,8 +137,7 @@ if ($id) {
         'nav' => $nav,
         'scripts' => ['lots'],
         'config' => [
-            'suggesturl' => (new moodle_url('/local/oksigeniaayvurenda/lots_ajax.php'))->out(false),
-            'sesskey' => sesskey(),
+            'suggesturl' => shell::service('lot_suggest'),
             'library' => $library->slug,
             'lot' => (int) $lot->id,
             'strings' => ['lotadd' => $str('lotadd')],

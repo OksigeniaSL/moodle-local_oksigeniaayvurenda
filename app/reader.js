@@ -44,7 +44,7 @@
             try {
                 var place = JSON.parse(window.localStorage.getItem(stored) || '{}');
                 Object.keys(params).forEach(function(key) {
-                    place[key] = key === 'bookmarks' ? JSON.parse(params[key]) : params[key];
+                    place[key] = params[key];
                 });
                 window.localStorage.setItem(stored, JSON.stringify(place));
             } catch (e) {
@@ -52,13 +52,17 @@
             }
             return Promise.resolve(null);
         }
-        var body = new URLSearchParams();
-        body.set('sesskey', config.sesskey);
-        body.set('item', config.item);
-        Object.keys(params).forEach(function(key) {
-            body.set(key, params[key]);
-        });
-        return fetch(config.ajaxurl, {method: 'POST', credentials: 'same-origin', body: body}).catch(function() {
+        var args = {item: config.item};
+        if (params.position !== undefined) {
+            args.position = String(params.position);
+        }
+        if (params.bookmarks) {
+            args.marked = true;
+            args.bookmarks = params.bookmarks.map(function(mark) {
+                return {place: String(mark.place || ''), label: String(mark.label || '')};
+            });
+        }
+        return window.ayvService(config.ajaxurl, args).catch(function() {
             return null;
         });
     };
@@ -92,7 +96,7 @@
             drop.setAttribute('aria-label', (str.readmarkdrop || '{$a}').replace('{$a}', function() { return mark.label; }));
             drop.addEventListener('click', function() {
                 marks.splice(index, 1);
-                send({bookmarks: JSON.stringify(marks)});
+                send({bookmarks: marks});
                 showMarks(go);
             });
             li.appendChild(open);
@@ -255,7 +259,7 @@
                 return;
             }
             marks.push({place: location.start.cfi, label: (str.readmarklabel || '').replace('{$a}', function() { return marks.length + 1; })});
-            send({bookmarks: JSON.stringify(marks)});
+            send({bookmarks: marks});
             showMarks(go);
         });
         // Full screen: the book alone, or with the recorder beside it. Where the browser cannot (an iPhone), the same

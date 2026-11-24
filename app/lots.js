@@ -71,15 +71,16 @@
             return;
         }
         asked = text;
-        var params = new URLSearchParams({sesskey: config.sesskey, library: config.library, lot: config.lot, q: text});
-        fetch(config.suggesturl + '?' + params.toString(), {credentials: 'same-origin'}).then(function(response) {
-            return response.json();
-        }).then(function(answer) {
+        window.ayvService(config.suggesturl, {library: config.library, lot: config.lot, q: text}).then(function(answer) {
             if (input.value.trim() === text) {
                 show(answer.suggestions || []);
             }
             return answer;
-        }).catch(function() {
+        }).catch(function(failed) {
+            // The server said no: what it suggested before is not for these words.
+            if (failed && failed.server && input.value.trim() === text) {
+                show([]);
+            }
             return null;
         });
     };

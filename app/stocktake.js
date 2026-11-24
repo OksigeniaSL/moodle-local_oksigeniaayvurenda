@@ -137,7 +137,9 @@
             return;
         }
         document.querySelectorAll('.ayv-st-mueble[data-place]').forEach(function(shelf) {
-            var one = places[shelf.getAttribute('data-place')];
+            var one = places.filter(function(place) {
+                return String(place.place) === shelf.getAttribute('data-place');
+            })[0];
             if (!one) {
                 return;
             }
@@ -177,28 +179,10 @@
             : stalled ? str.stocktakeserver : offline ? str.stocktakeoffline : str.stocktakepending, queue.length);
     };
 
-    var post = function(params) {
-        var body = new URLSearchParams();
-        body.set('sesskey', config.sesskey);
-        body.set('library', config.library);
-        body.set('id', config.stocktake);
-        Object.keys(params).forEach(function(key) {
-            body.set(key, params[key]);
-        });
-        return fetch(config.ajaxurl, {method: 'POST', credentials: 'same-origin', body: body}).then(function(response) {
-            if (!response.ok) {
-                throw new Error(response.status);
-            }
-            return response.json();
-        }).then(function(answer) {
-            // Moodle says its errors with a 200 and {error, errorcode}: that is an answer, not a sent batch.
-            if (answer && answer.error) {
-                var failed = new Error(answer.error);
-                failed.server = answer.errorcode || 'error';
-                throw failed;
-            }
-            return answer;
-        });
+    var post = function(address, args) {
+        args.library = config.library;
+        args.stocktake = config.stocktake;
+        return window.ayvService(address, args);
     };
 
     var line = function(answer) {
@@ -212,7 +196,7 @@
             b.type = 'button';
             b.addEventListener('click', function() {
                 b.disabled = true;
-                post({action: 'return', code: answer.code}).then(function(returned) {
+                post(config.returnurl, {code: answer.code}).then(function(returned) {
                     actions.textContent = '';
                     li.appendChild(el('p', 'ayv-line-note', returned.message));
                     counts(returned.counts);
@@ -244,7 +228,9 @@
         }
         sending = true;
         var batch = queue.slice(0, 50);
-        post({action: 'read', reads: JSON.stringify(batch)}).then(function(answer) {
+        post(config.readurl, {reads: batch.map(function(read) {
+            return {code: String(read.code || ''), here: Number(read.here || 0)};
+        })}).then(function(answer) {
             stalled = '';
             queue = queue.slice(batch.length);
             save();
@@ -261,7 +247,7 @@
             sending = false;
             // A session that ran out keeps everything here until whoever counts comes back in; another refusal waits a
             // while; no network, a few seconds. Nothing read is thrown away.
-            var session = failed && (failed.server === 'requireloginerror' || failed.server === 'invalidsesskey');
+            var session = failed && ['servicerequireslogin', 'requireloginerror', 'invalidsesskey'].indexOf(failed.server) >= 0;
             stalled = session ? 'session' : (failed && failed.server ? 'server' : '');
             showPending(!stalled);
             if (stalled) {
