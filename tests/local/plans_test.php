@@ -246,4 +246,36 @@ final class plans_test extends \advanced_testcase {
         $this->assertNull(offsite::add_webdav($entityid, 'https://example.org/copias', 'u', 'p'));
         $this->assertNull(offsite::add_s3($entityid, 'https://s3.example.org', 'copias', 'eu', 'a', 'b'));
     }
+
+    /**
+     * «Made with Ayvurenda» is words: it leads only to the address the site's settings give, and to a web one. And nothing
+     * the plugin draws, writes or mails leads by itself to the front of the service that sells it hosted.
+     */
+    public function test_made_with(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $this->assertSame(['madewith' => '', 'madewithurl' => ''], plans::made_with(false));
+        $words = get_string('planmadewithfoot', 'local_oksigeniaayvurenda');
+        $this->assertSame(['madewith' => $words, 'madewithurl' => ''], plans::made_with(true));
+        set_config('planmadewithurl', 'javascript:alert(1)', 'local_oksigeniaayvurenda');
+        $this->assertSame('', plans::made_with(true)['madewithurl']);
+        set_config('planmadewithurl', 'https://library.example.org/', 'local_oksigeniaayvurenda');
+        $this->assertSame('https://library.example.org/', plans::made_with(true)['madewithurl']);
+        $this->assertSame('', plans::made_with(false)['madewithurl']);
+
+        $root = $CFG->dirroot . '/local/oksigeniaayvurenda';
+        $files = array_merge(
+            glob($root . '/templates/*.mustache'),
+            glob($root . '/*.php'),
+            glob($root . '/app/*.js'),
+            glob($root . '/classes/local/*.php')
+        );
+        $front = [];
+        foreach ($files as $file) {
+            if (preg_match('~href="https?://(www\.)?ayvurenda\.com~i', file_get_contents($file))) {
+                $front[] = basename($file);
+            }
+        }
+        $this->assertSame([], $front);
+    }
 }

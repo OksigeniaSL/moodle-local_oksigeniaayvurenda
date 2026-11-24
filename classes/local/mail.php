@@ -163,8 +163,7 @@ final class mail {
             'prefsurl' => !empty($content['prefs'])
                 ? (new \moodle_url('/message/notificationpreferences.php'))->out(false) : '',
             'prefstext' => get_string('mailprefs', self::COMPONENT),
-            'madewith' => $entityid && plans::allows($entityid, 'madewith') ? get_string('planmadewithfoot', self::COMPONENT) : '',
-        ];
+        ] + plans::made_with($entityid && plans::allows($entityid, 'madewith'));
         return $OUTPUT->render_from_template(self::COMPONENT . '/email_notice', $context);
     }
 

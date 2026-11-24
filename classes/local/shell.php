@@ -503,8 +503,10 @@ Oksigenia Ayvurenda</button>
         if (!$library || !plans::allows((int) $library->entityid, 'madewith')) {
             return '';
         }
-        return '<a class="ayv-foot-made" href="https://ayvurenda.com/">' .
-            s(get_string('planmadewithfoot', 'local_oksigeniaayvurenda')) . '</a>' . "\n";
+        $made = plans::made_with(true);
+        return ($made['madewithurl'] !== ''
+            ? '<a class="ayv-foot-made" href="' . s($made['madewithurl']) . '">' . s($made['madewith']) . '</a>'
+            : '<span class="ayv-foot-made">' . s($made['madewith']) . '</span>') . "\n";
     }
 
     /**
@@ -531,9 +533,7 @@ Oksigenia Ayvurenda</button>
             'spines' => $spines,
             'bird' => screens::art('estanteria/mainumby', 'svg'),
             'bookend' => screens::art('estanteria/sujetalibros', 'svg'),
-            'madewith' => plans::allows((int) $library->entityid, 'madewith')
-                ? get_string('planmadewithfoot', 'local_oksigeniaayvurenda') : '',
-        ]);
+        ] + plans::made_with(plans::allows((int) $library->entityid, 'madewith')));
         // Another website frames it: no X-Frame-Options, and any page may.
         @header('Content-Type: text/html; charset=utf-8');
         @header('Content-Security-Policy: frame-ancestors *', false);

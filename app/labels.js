@@ -16,6 +16,9 @@
 /**
  * The page that prints every sheet of labels opens the print window by itself, once: back to it (from the browser's
  * history), it does not open it again. Without JavaScript, its button does the same.
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 (function() {
     'use strict';

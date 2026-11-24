@@ -1,6 +1,26 @@
-// «Leyó para los pequeños»: the family's player (13 Nov 2026). Without this file the page keeps the browser's own
-// player. The big button plays and pauses, the line moves along with the voice, and «Mandárselo a alguien» uses the
-// phone's own way of sharing (WhatsApp, mail…), or copies the address where there is none.
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * «Leyó para los pequeños»: the family's player (13 Nov 2026). Without this file the page keeps the browser's own
+ * player. The big button plays and pauses, the line moves along with the voice, and «Mandárselo a alguien» uses the
+ * phone's own way of sharing (WhatsApp, mail…), or copies the address where there is none.
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 (function () {
     'use strict';
     var raiz = document.documentElement;

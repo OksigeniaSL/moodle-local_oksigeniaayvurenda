@@ -13,9 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// The ground of the island: a light mesh and a painted texture with the sand, the wet rim, the grass and the soft
-// shadows of what stands on it, baked into the picture (no shadow maps: an old Chromebook must keep up). The texture is
-// painted again when a piece arrives, with its grass and its shadow.
+/**
+ * The ground of the island: a light mesh and a painted texture with the sand, the wet rim, the grass and the soft
+ * shadows of what stands on it, baked into the picture (no shadow maps: an old Chromebook must keep up). The texture is
+ * painted again when a piece arrives, with its grass and its shadow.
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 import * as THREE from 'three';
 import { shoreSD, terrainH, vnoise, rng, smooth, SPOTS } from './shape.js';
 

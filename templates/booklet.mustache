@@ -16,6 +16,8 @@
 }}
 {{!
     @template local_oksigeniaayvurenda/booklet
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 
     The reader's booklet as a page of its own, without Moodle around it (13 November): the family's, from their
     sealed link, with «Print it or keep it» and «Send it to someone»; the one the staff open from the reader's record; and
@@ -33,7 +35,7 @@
         "classhead": null,
         "sheets": [], "lives": [],
         "foot": {"foottext": "La biblioteca se lo da a cada lector al acabar el curso.", "footlink": "El enlace no pide cuenta.",
-            "madewith": "Hecho con Ayvurenda"}
+            "madewith": "Hecho con Ayvurenda", "madewithurl": ""}
     }
 }}
 <!DOCTYPE html>
@@ -73,7 +75,7 @@
 {{#sheets}}{{> local_oksigeniaayvurenda/booklet_sheet }}{{/sheets}}
 {{#lives}}{{> local_oksigeniaayvurenda/booklet_life }}{{/lives}}
 {{#foot}}
-<p class="lb-pie">{{foottext}} {{footlink}}{{#madewith}}<br><a href="https://ayvurenda.com/">{{madewith}}</a>{{/madewith}}</p>
+<p class="lb-pie">{{foottext}} {{footlink}}{{#madewith}}<br>{{#madewithurl}}<a href="{{madewithurl}}">{{madewith}}</a>{{/madewithurl}}{{^madewithurl}}{{madewith}}{{/madewithurl}}{{/madewith}}</p>
 {{/foot}}
 </main>
 <script src="{{js}}"></script>

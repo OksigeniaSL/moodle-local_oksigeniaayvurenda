@@ -241,6 +241,270 @@
         </copyrights>
     </library>
     <library>
+        <location>templates/icon_bell.mustache</location>
+        <name>Lucide icon «bell»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_check.mustache</location>
+        <name>Lucide icon «check»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_circle_alert.mustache</location>
+        <name>Lucide icon «circle-alert»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_database.mustache</location>
+        <name>Lucide icon «database»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_file_archive.mustache</location>
+        <name>Lucide icon «file-archive»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_graduation_cap.mustache</location>
+        <name>Lucide icon «graduation-cap»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_help.mustache</location>
+        <name>Lucide icon «help»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_id_card.mustache</location>
+        <name>Lucide icon «id-card»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_library.mustache</location>
+        <name>Lucide icon «library»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_list.mustache</location>
+        <name>Lucide icon «list»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_message_text.mustache</location>
+        <name>Lucide icon «message-text»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_pause.mustache</location>
+        <name>Lucide icon «pause»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_play.mustache</location>
+        <name>Lucide icon «play»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_plug.mustache</location>
+        <name>Lucide icon «plug»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_refresh.mustache</location>
+        <name>Lucide icon «refresh»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_scan_line.mustache</location>
+        <name>Lucide icon «scan-line»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_search.mustache</location>
+        <name>Lucide icon «search»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_sheet.mustache</location>
+        <name>Lucide icon «sheet»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_shelf.mustache</location>
+        <name>Lucide icon «shelf»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_sprout.mustache</location>
+        <name>Lucide icon «sprout»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_tag.mustache</location>
+        <name>Lucide icon «tag»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
+        <location>templates/icon_users.mustache</location>
+        <name>Lucide icon «users»</name>
+        <description>An icon of Lucide, inline in a template. License text in app/icons/LICENSE-lucide.txt.</description>
+        <version>1.49.0</version>
+        <license>ISC</license>
+        <licenseversion></licenseversion>
+        <repository>https://github.com/lucide-icons/lucide</repository>
+        <copyrights>
+            <copyright>Copyright (c) 2026 Lucide Icons and Contributors</copyright>
+        </copyrights>
+    </library>
+    <library>
         <location>app/isla3d.js</location>
         <name>three.js</name>
         <description>The 3D library of the class island, bundled with its code (app/isla3d/src) for Chrome 93. License text in app/isla3d/LICENSE-three.txt.</description>

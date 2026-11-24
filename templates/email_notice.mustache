@@ -16,6 +16,8 @@
 }}
 {{!
     @template local_oksigeniaayvurenda/email_notice
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 
     A notice by e-mail: the library's picture and name, what it is about, the book as a slip with its date, one large button and
     who signs. Inline styles and tables, the only thing every mail program respects, without any image needed to read it; 600
@@ -35,7 +37,7 @@
     * haspeople, people - rows: name, line; hastasks, tasks - rows: text, url
     * button - url, text; after - smaller paragraphs; quiet - hint, url, text
     * sign, signpicture, signportrait, signinitial, signtext - who signs
-    * why, prefsurl, prefstext, stopurl, stoptext, madewith - the foot; linkurl - where the pictures lead
+    * why, prefsurl, prefstext, stopurl, stoptext, madewith, madewithurl - the foot; linkurl - where the pictures lead
 
     Example context (json):
     {
@@ -59,7 +61,7 @@
         "quiet": {"hint": "Si quieres borrarla:", "url": "https://example.com/b", "text": "Borrar mi voz"},
         "sign": true, "signpicture": true, "signportrait": "https://example.com/s.png", "signinitial": "M",
         "signtext": "— Mainumby, el pregonero de la biblioteca", "why": "Te llega porque tienes carné en esta biblioteca.",
-        "linkurl": "https://example.com/l", "prefsurl": "https://example.com/n", "prefstext": "Elegir qué avisos recibo", "madewith": "Hecho con Ayvurenda"
+        "linkurl": "https://example.com/l", "prefsurl": "https://example.com/n", "prefstext": "Elegir qué avisos recibo", "madewith": "Hecho con Ayvurenda", "madewithurl": ""
     }
 }}
 <!DOCTYPE html>
@@ -236,7 +238,7 @@ body > p a { color: inherit; }
 </td></tr>
 {{/sign}}
 <tr><td class="ayvm-pad" style="border:0;padding:20px 32px 22px;">
-    <p class="ayvm-soft ayvm-rule" style="margin:0;padding:14px 0 0;border-top:1px solid #e4d8bf;font-size:12px;line-height:1.6;color:#5f6b67;">{{why}}{{#prefsurl}} <a class="ayvm-link" href="{{prefsurl}}" style="color:{{accenttext}};">{{prefstext}}</a>{{/prefsurl}}{{#stopurl}} <a class="ayvm-link" href="{{stopurl}}" style="color:{{accenttext}};">{{stoptext}}</a>{{/stopurl}}{{#madewith}} · <a class="ayvm-link" href="https://ayvurenda.com/" style="color:{{accenttext}};">{{madewith}}</a>{{/madewith}}</p>
+    <p class="ayvm-soft ayvm-rule" style="margin:0;padding:14px 0 0;border-top:1px solid #e4d8bf;font-size:12px;line-height:1.6;color:#5f6b67;">{{why}}{{#prefsurl}} <a class="ayvm-link" href="{{prefsurl}}" style="color:{{accenttext}};">{{prefstext}}</a>{{/prefsurl}}{{#stopurl}} <a class="ayvm-link" href="{{stopurl}}" style="color:{{accenttext}};">{{stoptext}}</a>{{/stopurl}}{{#madewith}} · {{#madewithurl}}<a class="ayvm-link" href="{{madewithurl}}" style="color:{{accenttext}};">{{madewith}}</a>{{/madewithurl}}{{^madewithurl}}{{madewith}}{{/madewithurl}}{{/madewith}}</p>
 </td></tr>
 </table>
 <!--[if mso]></td></tr></table><![endif]-->

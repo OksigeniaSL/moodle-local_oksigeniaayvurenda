@@ -13,9 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// The class island of Ayvurenda: its shoreline and its ground, shared by the terrain, the sea shader and the
-// placement of the pieces. World frame: x to the right of the screen, -z away from the camera, y up.
-// The shape follows the island (pix/isla/base.webp): a wide oval with a soft wobble.
+/**
+ * The class island of Ayvurenda: its shoreline and its ground, shared by the terrain, the sea shader and the
+ * placement of the pieces. World frame: x to the right of the screen, -z away from the camera, y up.
+ * The shape follows the island (pix/isla/base.webp): a wide oval with a soft wobble.
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 export function rng(seed) {
   let a = seed >>> 0;

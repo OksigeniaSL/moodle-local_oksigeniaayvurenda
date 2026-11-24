@@ -13,9 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// Animated sea (from the island test of the incubator): one big plane with a custom shader. Colour by distance to the shore (light shallows
-// over the sand, turquoise, deep teal), moving caustic cells, a foam ring at the shoreline,
-// lacy foam and small rings around rocks and posts that stand in the water.
+/**
+ * Animated sea: one big plane with a custom shader. Colour by distance to the shore (light shallows
+ * over the sand, turquoise, deep teal), moving caustic cells, a foam ring at the shoreline,
+ * lacy foam and small rings around rocks and posts that stand in the water.
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 import * as THREE from 'three';
 import { SHORE_GLSL } from './shape.js';
 

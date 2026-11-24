@@ -13,10 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// What stands on the island, all made of simple shapes with vertex colours (Lambert: cheap and warm): the palm, the
-// bushes and the rocks of the base, and the pieces a class wins (the layers): the flowering tree with its round
-// bench, the reading hut, the garden, the lighthouse of books, and the dock with the boat that brings the book the
-// class asked for. Each piece is a group whose origin is its foot, so it can grow from the ground.
+/**
+ * What stands on the island, all made of simple shapes with vertex colours (Lambert: cheap and warm): the palm, the
+ * bushes and the rocks of the base, and the pieces a class wins (the layers): the flowering tree with its round
+ * bench, the reading hut, the garden, the lighthouse of books, and the dock with the boat that brings the book the
+ * class asked for. Each piece is a group whose origin is its foot, so it can grow from the ground.
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -151,7 +156,7 @@ function place(group, spot) {
   return group;
 }
 
-// ---------------------------------------------------------------- the palm (after the island test of the incubator)
+// ---------------------------------------------------------------- the palm
 function frond(L, W, lift, droop, nLeaf, rand) {
   const pos = [], col = [], idx = [];
   const c0 = new THREE.Color('#1d5a10'), c1 = new THREE.Color('#3f8c19'), c2 = new THREE.Color('#9fca35');

@@ -124,7 +124,8 @@ if ($id) {
     $ogimage = (new moodle_url('/local/oksigeniaayvurenda/booklet.php', ['b' => $id, 's' => $seal, 'cover' => 1]))->out(false);
     $bar = ['print' => $str('bookletprint'), 'share' => $str('bookletshare'), 'sharetitle' => $title,
         'sharetext' => $sharetext, 'copied' => $str('familypagecopied')];
-    $foot = ['foottext' => $foottext, 'footlink' => $str('familypagefootlink'), 'madewith' => $str('planmadewithfoot')];
+    $foot = ['foottext' => $foottext, 'footlink' => $str('familypagefootlink')]
+        + \local_oksigeniaayvurenda\local\plans::made_with(true);
 } else {
     // The staff's, and the tutor's: inside the library, with its permissions.
     $ref = shell::library_ref();

@@ -171,6 +171,14 @@ final class sitesettings {
                 $default
             ));
         }
+        // Where «Made with Ayvurenda» leads: nowhere, unless whoever runs a service for many centres says.
+        $settings->add(new \admin_setting_configtext(
+            'local_oksigeniaayvurenda/planmadewithurl',
+            $str('planmadewithurl'),
+            $str('planmadewithurl_desc'),
+            '',
+            PARAM_URL
+        ));
     }
 
     /**

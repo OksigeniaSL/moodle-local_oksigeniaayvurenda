@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.3 (2026-11-24)
+
+From the review of the Moodle Marketplace.
+
+- **«Made with Ayvurenda» is words, not a link**: in the foot, the shelf for another website, the mails and the reader's
+  booklet. Whoever runs a service for many centres may give the address it leads to in the site's settings; empty, it
+  leads nowhere.
+- **The full Moodle header, with copyright and licence, on every source file**: the templates, the styles and the
+  scripts too. The Lucide icons that were not yet in `thirdpartylibs.xml` are.
+
 ## 1.3.2 (2026-11-24)
 
 - **The year's big number goes to the channel once**: its detail said «from 1 September to today», so the post was

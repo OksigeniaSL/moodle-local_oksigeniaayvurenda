@@ -1,4 +1,24 @@
-/* Ayvurenda: the library's own screens. Brand (agents/arte/docs/fichas/ayvurenda.md): Literata 600 for names
+/**
+ * This file is part of Moodle - https://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * @package    local_oksigeniaayvurenda
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+/* Ayvurenda: the library's own screens. Brand: Literata 600 for names
    and headings, Andika for text; paper, ink, two greens, coral, sun and night green. Everything hangs from .ayv, so
    nothing here touches Moodle's pages. Works from Chrome 93 on. */
 @font-face { font-family: "Literata"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/literata-600.woff2") format("woff2"); }
@@ -1137,8 +1157,7 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 
 .ayv .ayv-garden li { display: grid; justify-items: center; gap: .25rem; font-weight: 700; }
 
-/* Reader cards to print. A proposal for app/ayvurenda.css, in place of the .ayv-sheet and .ayv-printcard rules: made by
-   agents/arte/kit/marca-ayvurenda/carne-impreso.py, change it there.
+/* Reader cards to print.
 
    What holds it up:
    - Nothing depends on a CSS background: browsers leave those out unless told otherwise. Lines and art are SVG and <img>.

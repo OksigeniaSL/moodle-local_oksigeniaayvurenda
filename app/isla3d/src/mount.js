@@ -13,18 +13,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-// The class island of Ayvurenda in 3D, for «My class»: the island and its sea, and a piece for each thing the class
-// met this school year, as in the layers (pix/isla/). When a piece arrives it grows from the ground with a bounce and
-// a few sparks, and then everything stops: the loop only runs while something moves, so an old Chromebook rests.
-// With «reduce motion» nothing moves. Without WebGL2, mount() gives null and the page keeps the 2D layers.
-//
-//   const island = AYVIsland3D.mount(element, {met: 2, everyone: false, boat: false, reduce: false});
-//   island.update({met: 3, everyone: true, boat: false});  // the new pieces grow
-//
-// The ship of the term (P5): with ship «wait» it is moored off the beach (the last week of the term); with «sail» (its
-// last day) it hoists its sail and sets off to the horizon on the left, among sparks if the class met the challenge
-// (shipmet), quietly if not, and the beach stays as it was.
-//   island.destroy();                                      // frees geometries, textures and the WebGL context
+/**
+ * The class island of Ayvurenda in 3D, for «My class»: the island and its sea, and a piece for each thing the class
+ * met this school year, as in the layers (pix/isla/). When a piece arrives it grows from the ground with a bounce and
+ * a few sparks, and then everything stops: the loop only runs while something moves, so an old Chromebook rests.
+ * With «reduce motion» nothing moves. Without WebGL2, mount() gives null and the page keeps the 2D layers.
+ *
+ * const island = AYVIsland3D.mount(element, {met: 2, everyone: false, boat: false, reduce: false});
+ * island.update({met: 3, everyone: true, boat: false});  // the new pieces grow
+ *
+ * The ship of the term (P5): with ship «wait» it is moored off the beach (the last week of the term); with «sail» (its
+ * last day) it hoists its sail and sets off to the horizon on the left, among sparks if the class met the challenge
+ * (shipmet), quietly if not, and the beach stays as it was.
+ * island.destroy();                                      // frees geometries, textures and the WebGL context
+ *
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { makeSea } from './sea.js';

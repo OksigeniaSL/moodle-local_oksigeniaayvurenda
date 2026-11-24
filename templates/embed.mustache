@@ -16,17 +16,19 @@
 }}
 {{!
     @template local_oksigeniaayvurenda/embed
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
     The newest books of a library as one plank of spines, for another website (a school's) to frame: each one opens its
     record in the window, in a new tab.
     Context variables required for this template:
     * name, heading, door, more - the library, what the plank is and the way to the whole library
     * spines - see spine
     * bird, bookend - the drawings, or nothing
-    * madewith - «Made with Ayvurenda», or nothing
+    * madewith, madewithurl - «Made with Ayvurenda», or nothing; and where it leads, if the site's settings say
     Example context (json):
     {
         "name": "Biblioteca de demostración", "heading": "Lo último que ha llegado", "door": "#",
-        "more": "Toda la biblioteca", "bird": null, "bookend": null, "madewith": "Hecho con Ayvurenda",
+        "more": "Toda la biblioteca", "bird": null, "bookend": null, "madewith": "Hecho con Ayvurenda", "madewithurl": "https://example.com/",
         "spines": [{"id": 7, "url": "#", "title": "El dragón que leía", "shown": "El dragón que leía",
             "authors": "Ana Montes", "callnumber": "82-3 MON dra", "place": "Rojo", "label": "El dragón que leía",
             "cm": 22, "width": 34, "background": "#2c7a6a", "dark": "#246a5c", "ink": "cream", "small": false,
@@ -47,6 +49,6 @@
 </div>
 <div class="ayv-embed-foot">
     <a href="{{door}}">{{more}}</a>
-    {{#madewith}}<a class="ayv-embed-made" href="https://ayvurenda.com/">{{madewith}}</a>{{/madewith}}
+    {{#madewith}}{{#madewithurl}}<a class="ayv-embed-made" href="{{madewithurl}}">{{madewith}}</a>{{/madewithurl}}{{^madewithurl}}<span class="ayv-embed-made">{{madewith}}</span>{{/madewithurl}}{{/madewith}}
 </div>
 </main>

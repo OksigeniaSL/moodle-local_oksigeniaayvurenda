@@ -64,6 +64,21 @@ final class plans {
     }
 
     /**
+     * «Made with Ayvurenda» at the foot, for a template: the words and where they lead. The plugin leads nowhere by itself:
+     * only to the address whoever runs a service for many centres gives in the site's settings, if they give one.
+     *
+     * @param bool $shown Whether the words are shown.
+     * @return string[] madewith and madewithurl, empty when there is none.
+     */
+    public static function made_with(bool $shown): array {
+        $url = $shown ? trim((string) get_config('local_oksigeniaayvurenda', 'planmadewithurl')) : '';
+        return [
+            'madewith' => $shown ? get_string('planmadewithfoot', 'local_oksigeniaayvurenda') : '',
+            'madewithurl' => preg_match('~^https?://~i', $url) ? $url : '',
+        ];
+    }
+
+    /**
      * The plan of a centre: its own, or the site's defaults.
      *
      * @param int $entityid
