@@ -917,3 +917,53 @@ html[data-bs-theme="dark"] .ayv [data-group="shelves"] { --g: #b8915f; }
         background: rgba(240, 180, 60, 0.2);
     }
 }
+
+/* «Propose an improvement»: quiet, beside «How do I…?» at the end of the page and at the foot of «More». */
+.ayv .ayv-improve {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    min-height: 44px;
+    padding: .4rem 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ayv .ayv-improve:hover { background: var(--paper2); }
+.ayv .ayv-improve:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.ayv .ayv-improve .ayv-icon { flex: none; }
+.ayv .ayv-page-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: .5rem 1rem;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 80rem;
+    margin: 0 auto 1.5rem;
+    padding: 0 clamp(.75rem, 3vw, 2rem);
+}
+.ayv .ayv-page-end .ayv-howto-dock { width: auto; max-width: 100%; margin: 0; padding: 0; }
+.ayv .ayv-more-foot { display: flex; justify-content: flex-end; margin-top: .4rem; padding-top: .4rem; border-top: 1px solid var(--line); }
+.ayv .ayv-phonemore .ayv-more-foot { justify-content: flex-start; }
+@media print {
+    .ayv .ayv-page-end { display: none !important; }
+}
+/* Its sheet, in the colours of the library. */
+.ayv .mrdp-capa {
+    --bs-body-bg: var(--surface);
+    --bs-body-color: var(--ink);
+    --bs-secondary-color: var(--ayv-muted);
+    --bs-border-color: var(--line);
+}
+.ayv .mrdp-capa .mrdp-cab h2, .ayv .mrdp-capa .mrdp-gracias { font-family: var(--title); font-weight: 600; }
+.ayv .mrdp-capa .btn { min-height: 44px; border-radius: 999px; }
+.ayv .mrdp-capa .btn-primary { background: var(--accent); color: var(--paper); }
+.ayv .mrdp-capa .btn-secondary { background: var(--paper2); color: var(--ink); }
+.ayv .mrdp-capa .btn-outline-secondary { border-color: var(--line); color: var(--accent); }
+.ayv .mrdp-capa :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }

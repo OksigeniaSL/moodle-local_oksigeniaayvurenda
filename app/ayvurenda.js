@@ -646,6 +646,18 @@
             }
         });
     });
+    // «Propose an improvement» inside «More»: the sheet closes first, so the picture is of the page underneath.
+    document.addEventListener('click', function(e) {
+        var improve = e.target && e.target.closest ? e.target.closest('[data-marandu-proposal]') : null;
+        var sheet = improve ? improve.closest('dialog') : null;
+        if (sheet) {
+            if (sheet.close) {
+                sheet.close();
+            } else {
+                sheet.removeAttribute('open');
+            }
+        }
+    }, true);
     // A sheet named in the address (from «More»: the centre's settings) opens with the page.
     if (window.location.hash.length > 1) {
         var named = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));

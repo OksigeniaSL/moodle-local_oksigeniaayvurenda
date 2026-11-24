@@ -271,6 +271,8 @@ final class shell {
         // On a page of no library (the list of them), the menu of the one this person works in: it never goes away.
         $menufor = $library ?: menu::home((int) ($USER->id ?? 0));
         $doors = $menufor ? menu::doors($menufor, (int) ($USER->id ?? 0)) : [];
+        // The button «Propose an improvement», where the site has it, for whoever works here; not inside a guided help's frame.
+        $improve = optional_param('help', 0, PARAM_BOOL) ? null : improve::assets($menufor ?: null, (int) ($USER->id ?? 0));
         if (!$menufor && access::can('local/oksigeniaayvurenda:manage', null)) {
             $doors[] = ['key' => 'libraries', 'url' => $base . 'libraries.php', 'label' => $str('navlibraries'),
                 'current' => menu::here() === 'libraries.php'];
@@ -328,7 +330,8 @@ final class shell {
                     . $OUTPUT->render_from_template('local_oksigeniaayvurenda/icon_x', []) . '</button></form></div>'
                     . ($steps ? $OUTPUT->render_from_template('local_oksigeniaayvurenda/open_steps', ['foldurl' => ''] + $steps)
                         : '')
-                    . '<div class="ayv-more-groups">' . $parts . '</div></dialog>';
+                    . '<div class="ayv-more-groups">' . $parts . '</div>'
+                    . ($improve ? '<div class="ayv-more-foot">' . improve::button($title) . '</div>' : '') . '</dialog>';
                 continue;
             }
             $nav .= '<a class="ayv-nav' . $on . '" href="' . s($door['url']) . '"'
@@ -356,7 +359,8 @@ final class shell {
             $nav .= '<button type="button" class="ayv-nav ayv-nav-phonemore" data-ayv-open="ayv-phonemore" aria-haspopup="dialog">'
                 . $str('menumore') . '</button>';
             $sheet .= '<dialog class="ayv-modal ayv-phonemore" id="ayv-phonemore" aria-label="' . $str('menumore') . '">'
-                . '<ul class="ayv-phonemore-list">' . $rest . '</ul></dialog>';
+                . '<ul class="ayv-phonemore-list">' . $rest . '</ul>'
+                . ($improve ? '<div class="ayv-more-foot">' . improve::button($title) . '</div>' : '') . '</dialog>';
         }
         $nav = '<nav class="ayv-navs' . ($readermore ? ' ayv-navs-reader' : '') . '" aria-label="' . $str('menulabel') . '">'
             . $nav . '</nav>';
@@ -421,6 +425,10 @@ final class shell {
         self::frame_header();
         self::guard();
         $howto = self::howto_box($library, $base);
+        // At the end of the page too, beside «How do I…?».
+        if ($improve) {
+            $howto = '<div class="ayv-page-end">' . improve::button($title) . $howto . '</div>';
+        }
         // The skin of the library's centre: what changes in the look hangs from its class.
         $skin = skins::of($library ? (int) $library->entityid : 0);
         // With the system's font there is no font to fetch.
@@ -452,7 +460,8 @@ final class shell {
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'formularios.css?v=' . $version . '">
-<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">' . $sheets . '
+<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">' . ($improve ? '
+<link rel="stylesheet" href="' . s($improve['css']) . '">' : '') . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
     var resolve = function() {
@@ -488,7 +497,10 @@ Oksigenia Ayvurenda</button>
 <script src="' . $app . 'ayvurenda.js?v=' . $version . '"></script>
 <script src="' . $app . 'marcapaginas.js?v=' . $version . '"></script>
 <script nonce="' . self::nonce() . '">ayvBookmark({root: document.getElementById(\'ayv-main\'), minWidth: 1000});</script>
-' . $scripts . self::access() . '
+' . $scripts . ($improve ? '<script type="application/json" id="marandu-proposal" nonce="' . self::nonce() . '">'
+            . $improve['data'] . '</script>
+<script src="' . s($improve['js']) . '"></script>
+' : '') . self::access() . '
 </body>
 </html>';
     }

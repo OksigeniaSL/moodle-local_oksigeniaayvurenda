@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.5 (2026-11-24)
+
+- **«Propose an improvement»**, where the site has Oksigenia Marandu 0.61.2 or later: at the foot of «More» and at the end
+  of the page, for the staff of the library, whoever keeps it and the tutors. It marks on a picture of the screen what
+  one would change and says how. Without Marandu nothing is added.
+
 ## 1.3.4 (2026-11-24)
 
 From the review of the Moodle Marketplace. Nothing changes on the screens.
