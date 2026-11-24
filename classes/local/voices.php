@@ -52,7 +52,8 @@ final class voices {
     public const SIGNATURE = 60;
 
     /** @var string[] The soft sounds a reading may have under it, in the art package's «fondos», each an ogg and an m4a. */
-    public const BACKDROPS = ['noche', 'mar', 'bosque', 'lluvia', 'hogar', 'musica'];
+    public const BACKDROPS = ['noche', 'amanecer', 'bosque', 'mar', 'lluvia', 'tormenta', 'verano', 'hogar', 'fuego',
+        'musica'];
 
     /** @var int The last chapter a reading may have. */
     public const LASTPART = 300;

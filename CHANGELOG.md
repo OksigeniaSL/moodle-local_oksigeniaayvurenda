@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.7 (2026-11-24)
+
+- **Four more sounds to read over**: the dawn, two storms and a lively fire, with the art package 0.1.74, where the night,
+  the forest, the sea, the rain and the fireside are real recordings now, two minutes long and unfiltered.
+
 ## 1.3.6 (2026-11-24)
 
 - **A reading being recorded is not lost by accident**: leaving the page with something recorded and not sent asks first;
