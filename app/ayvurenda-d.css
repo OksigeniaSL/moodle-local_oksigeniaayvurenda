@@ -54,6 +54,8 @@ html[data-bs-theme="dark"] .ayv {
 .ayv .ayv-button { box-shadow: var(--ayv-shadow-button); transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
 .ayv .ayv-button:hover, .ayv .ayv-search button:hover { transform: translateY(-1px); box-shadow: var(--ayv-shadow-lift); }
 .ayv .ayv-button-quiet { background: var(--surface); border: 0; box-shadow: inset 0 0 0 1.5px var(--ayv-ring), 0 4px 10px -8px rgba(15, 58, 51, .5); }
+/* Asked twice (data-ayv-twice): over the quiet button too, where its words were white on white. */
+.ayv .ayv-button.ayv-armed { color: #fff; background: var(--danger); box-shadow: none; }
 .ayv .ayv-button .ayv-icon { flex: none; }
 .ayv .ayv-book,
 .ayv .ayv-hold { border: 0; border-radius: var(--ayv-radius-lg); background: var(--surface); box-shadow: var(--ayv-shadow); }
@@ -189,8 +191,11 @@ html[data-bs-theme="dark"] .ayv .ayv-epub {
             0 26px 44px -18px rgba(0, 0, 0, .7);
     }
 }
-.ayv .ayv-page-turn { flex-basis: 52px; align-self: center; height: 52px; border-radius: 50%; background: var(--surface); box-shadow: var(--ayv-shadow); }
-.ayv .ayv-page-turn:hover, .ayv .ayv-page-turn:focus-visible { background: var(--surface); box-shadow: var(--ayv-shadow-lift); transform: scale(1.05); }
+/* Turning the page: the arrow in its circle and its word under it; in the circle, the word came out by the sides. */
+.ayv .ayv-page-turn { flex-basis: 76px; align-self: center; gap: .4rem; font-family: inherit; background: none; }
+.ayv .ayv-page-turn .ayv-icon { box-sizing: content-box; padding: 14px; border-radius: 50%; background: var(--surface); box-shadow: var(--ayv-shadow); transition: transform .15s ease, box-shadow .15s ease; }
+.ayv .ayv-page-turn:hover, .ayv .ayv-page-turn:focus-visible { background: none; }
+.ayv .ayv-page-turn:hover .ayv-icon, .ayv .ayv-page-turn:focus-visible .ayv-icon { box-shadow: var(--ayv-shadow-lift); transform: scale(1.05); }
 .ayv .ayv-read-foot progress { height: 4px; border-radius: 2px; accent-color: var(--coral); }
 .ayv .ayv-read-marks .ayv-holds-row { border: 0; border-radius: 14px; box-shadow: var(--ayv-shadow); }
 
@@ -456,7 +461,9 @@ html[data-bs-theme="dark"] .ayv .ayv-corner.ayv-cover-5 { background: #3a3326; c
     .ayv .ayv-record-cover { position: static; padding: 1.25rem; }
     .ayv .ayv-record-cover .ayv-cover-big { max-width: 10rem; }
     .ayv .ayv-facts > div + div { box-shadow: none; }
-    .ayv .ayv-page-turn { flex-basis: 40px; height: 40px; }
+    .ayv .ayv-page-turn { flex-basis: 40px; }
+    .ayv .ayv-page-turn .ayv-icon { padding: 8px; }
+    .ayv .ayv-page-turn-word { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .ayv .ayv-facet-label { flex-basis: 100%; }
     .ayv .ayv-window-search { border-radius: 22px; padding: .75rem; }
     .ayv .ayv-window-search .ayv-field { flex-direction: column; align-items: stretch; padding-left: 0; }

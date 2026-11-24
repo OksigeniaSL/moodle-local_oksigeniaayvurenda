@@ -24,7 +24,8 @@
 
     Example context (json):
     {
-        "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar", "voicewhat": "Qué has leído",
+        "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar",
+        "voiceagainsure": "¿Borrar esta y grabar otra? Toca otra vez", "voicewhat": "Qué has leído",
         "voicewhathint": "un capítulo, unas páginas", "voicesend": "Enviar", "consent": false,
         "voiceforwho": "¿Para quién es?", "voiceforlittle": "Lo he leído para los pequeños", "voicefamily": "Que lo oiga mi familia",
         "forwho": {"bud": "https://example.com/capullo.webp", "family": true,
@@ -84,6 +85,7 @@
     </div>
     <div class="ayv-rec-after" id="ayv-after" hidden>
         <p class="ayv-rec-titulo" id="ayv-rec-titulo" data-says="{{aftertitle}}"></p>
+        <p class="ayv-rec-nota" id="ayv-rec-nota" role="status"></p>
         <audio id="ayv-preview" class="ayv-media" controls></audio>
         <label class="ayv-field ayv-field-wide ayv-field-quiet" id="ayv-what-field" data-other="{{voicewhat}}" data-otherhint="{{voicewhathint}}"{{#parts}} data-part="{{partsname}}" data-parthint="{{partsnamehint}}"{{/parts}}><span class="ayv-what-word">{{#parts}}{{partsname}}{{/parts}}{{^parts}}{{voicewhat}}{{/parts}}</span> <span class="ayv-field-hint ayv-what-hint">{{#parts}}{{partsnamehint}}{{/parts}}{{^parts}}{{voicewhathint}}{{/parts}}</span>
             <input type="text" id="ayv-what" maxlength="255"></label>
@@ -101,7 +103,7 @@
             <input type="email" id="ayv-email" maxlength="254" autocomplete="email"></label>{{/askemail}}
         <p class="ayv-book-actions">
             <button type="button" class="ayv-button" id="ayv-send" disabled>{{voicesend}}</button>
-            <button type="button" class="ayv-button ayv-button-quiet" id="ayv-again">{{voiceagain}}</button>
+            <button type="button" class="ayv-button ayv-button-quiet" id="ayv-again" data-ayv-twice="{{voiceagainsure}}">{{voiceagain}}</button>
         </p>
     </div>
     <p class="ayv-field-hint" id="ayv-voice-said" role="status"></p>

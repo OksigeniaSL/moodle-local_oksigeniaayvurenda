@@ -238,7 +238,7 @@ $data['forwho'] = \local_oksigeniaayvurenda\local\forlittle::can_read($me ?: nul
 ] : null;
 foreach (
     ['voiceforwho', 'voiceforlittle', 'voicefamily', 'voiceinfo', 'voicerecord', 'voicestop', 'voiceagain', 'voicewhat',
-        'voicewhathint', 'voicesend', 'voicemine',
+        'voicewhathint', 'voicesend', 'voicemine', 'voiceagainsure',
         'voicedelete', 'voicenomic', 'backtorecord', 'voiceinvitetitle', 'voiceinvitehint', 'voiceinvitename',
         'voiceinvitenamehint', 'voiceinvitemake', 'voicesignature', 'voicesignaturehint', 'voicetextheading', 'voicepaper',
         'voiceinvitechild', 'voiceinvitechildnone', 'voiceinvitechildhint', 'voicepause', 'voiceresume'] as $key
@@ -262,6 +262,7 @@ shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksi
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicesent'),
             'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
+            'voicecut' => $str('voicecut'), 'voicelimit' => $str('voicelimit'),
             'voicelength' => $str('voicelength'), 'copied' => $str('voiceinvitecopied'), 'readpage' => $str('readpage'),
             'voicepartchapter' => $str('voicepartchapter'), 'voicebackdropforpart' => $str('voicebackdropforpart')],
     ],

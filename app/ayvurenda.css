@@ -1781,6 +1781,8 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
 .ayv .ayv-vp-backdrops .ayv-vp-title .ayv-field-hint { display: block; margin-top: .15rem; }
 .ayv .ayv-rec-titulo { margin: 0 0 .4rem; font-family: var(--serif, "Literata", Georgia, serif); font-size: 1.2rem; font-weight: 600; }
 .ayv .ayv-rec-titulo:empty { display: none; }
+.ayv .ayv-rec-nota { margin: 0 0 .8rem; padding: .75rem 1rem; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.ayv .ayv-rec-nota:empty { display: none; }
 .ayv .ayv-vp-barra-fondo, .ayv .ayv-vp-barra-tiempo { display: none; }
 .ayv .ayv-vp-hoja[hidden], .ayv .ayv-vp-velo[hidden] { display: none; }
 @media (max-width: 47.99rem) {

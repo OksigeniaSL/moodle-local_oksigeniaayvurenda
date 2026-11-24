@@ -99,7 +99,7 @@ $data = [
 foreach (
     ['voiceinfocentre', 'voicefamilyconsent', 'voicefamilywho', 'voicefamilywhohint', 'voicefamilydone', 'voicedelete',
         'voicerecord', 'voicestop', 'voicepause',
-        'voiceresume', 'voiceagain', 'voicewhat', 'voicewhathint', 'voicesend', 'voicefamilydeletedall',
+        'voiceresume', 'voiceagain', 'voiceagainsure', 'voicewhat', 'voicewhathint', 'voicesend', 'voicefamilydeletedall',
         'readprev', 'readnext', 'readsmaller', 'readbigger', 'readmark', 'readprogress', 'readloading', 'readfullscreen',
         'readfullscreenexit', 'voicesignature',
         'voicesignaturehint', 'voiceemail', 'voiceemailhint', 'voicetextheading', 'voicepaper'] as $key
@@ -124,6 +124,7 @@ shell::output(
             'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
             'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicefamilysent'),
                 'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
+                'voicecut' => $str('voicecut'), 'voicelimit' => $str('voicelimit'),
                 'voicelength' => $str('voicelength'), 'readpage' => $str('readpage')],
         ],
     ]

@@ -390,6 +390,7 @@
         }
         if (plate && small()) {
             plate.classList.add('is-despues');
+            plate.scrollTop = 0;
             if (veil) {
                 veil.hidden = false;
             }
@@ -543,6 +544,50 @@
         });
     };
     var measured = 0;
+    // Why it stopped by itself, over what was recorded.
+    var because = function(text) {
+        document.getElementById('ayv-rec-nota').textContent = text || '';
+    };
+    // Nothing recorded is lost by accident (24 Nov 2026): the screen stays on while the microphone is open, since whoever
+    // reads a paper book does not touch the phone, and leaving with something not sent asks first.
+    var awake = null;
+    var recording = function() {
+        return !!recorder && recorder.state !== 'inactive';
+    };
+    var keepAwake = function() {
+        if (!navigator.wakeLock || !recording()) {
+            return;
+        }
+        navigator.wakeLock.request('screen').then(function(held) {
+            if (recording()) {
+                awake = held;
+            } else {
+                held.release();
+            }
+            return held;
+        }).catch(function() {
+            return null;
+        });
+    };
+    var letSleep = function() {
+        if (awake) {
+            awake.release().catch(function() {
+                return null;
+            });
+            awake = null;
+        }
+    };
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            keepAwake();
+        }
+    });
+    window.addEventListener('beforeunload', function(event) {
+        if (recording() || blob) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    });
     var type = function() {
         var options = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4'];
         for (var i = 0; i < options.length; i++) {
@@ -566,6 +611,7 @@
         }
         if (seconds >= MAX) {
             stop.click();
+            because(str.voicelimit);
         }
     };
 
@@ -580,12 +626,23 @@
             var mime = type();
             recorder = mime ? new window.MediaRecorder(stream, {mimeType: mime}) : new window.MediaRecorder(stream);
             chunks = [];
+            // The take before this one goes only now that there is another, and is not heard under it.
+            preview.pause();
+            blob = null;
+            after.hidden = true;
+            because('');
+            hideAfter();
             recorder.addEventListener('dataavailable', function(event) {
                 if (event.data && event.data.size) {
                     chunks.push(event.data);
                 }
             });
             recorder.addEventListener('stop', function() {
+                // Stopped by itself: the microphone was cut (a call, headphones that went off). What there is stays.
+                if (!stop.hidden) {
+                    finish();
+                    because(str.voicecut);
+                }
                 var made = new Blob(chunks, {type: recorder.mimeType || mime || 'audio/webm'});
                 withDuration(made, measured).then(function(fixed) {
                     blob = fixed;
@@ -593,6 +650,10 @@
                     // What was read and the signature come once there is something to send.
                     after.hidden = false;
                     showAfter();
+                    var why = document.getElementById('ayv-rec-nota');
+                    if (why.textContent) {
+                        why.scrollIntoView({block: 'center'});
+                    }
                     send.disabled = false;
                     return fixed;
                 }).catch(function() {
@@ -605,6 +666,7 @@
             });
             recorder.start(1000);
             meter(stream);
+            keepAwake();
             started = Date.now();
             ticker = setInterval(clock, 500);
             rec.hidden = true;
@@ -644,8 +706,9 @@
             }
         });
     }
-    stop.addEventListener('click', function() {
+    var finish = function() {
         clearInterval(ticker);
+        letSleep();
         if (pausedAt) {
             started += Date.now() - pausedAt;
             pausedAt = 0;
@@ -655,25 +718,24 @@
             pause.setAttribute('aria-pressed', 'false');
             word(pause.getAttribute('data-pause'));
         }
-        if (recorder && recorder.state !== 'inactive') {
+        stop.hidden = true;
+        if (recording()) {
             recorder.stop();
         }
-        stop.hidden = true;
         // What was recorded, and how long it lasts.
         sayBar('done');
         measured = Date.now() - started;
         var seconds = Math.floor(measured / 1000);
         time.textContent = (str.voicelength || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' +
             String(seconds % 60).padStart(2, '0'); });
-    });
-    again.addEventListener('click', function() {
-        sayBar('ready');
-        blob = null;
-        after.hidden = true;
-        hideAfter();
-        send.disabled = true;
+    };
+    stop.addEventListener('click', finish);
+    // Recording again throws away what there is: it asks once more in its place (data-ayv-twice arms it after this).
+    again.addEventListener('click', function(event) {
+        if (event.isTrusted && again.getAttribute('data-ayv-armed') !== '1') {
+            return;
+        }
         time.textContent = '';
-        rec.hidden = false;
         rec.click();
     });
     send.addEventListener('click', function() {
@@ -723,6 +785,7 @@
             if (!answer || !answer.id) {
                 throw new Error('no id');
             }
+            blob = null;
             said.textContent = str.voicesent || '';
             window.setTimeout(function() {
                 window.location.reload();

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.6 (2026-11-24)
+
+- **A reading being recorded is not lost by accident**: leaving the page with something recorded and not sent asks first;
+  the screen stays on while recording, since whoever reads a paper book does not touch the phone; if the microphone is cut
+  (a call, headphones that go off), the recording ends there, says so and keeps what there was; «Record again» asks once
+  more before it throws away the take, which goes only when the new one has begun; and the twenty minutes of a part, when
+  they are over, are said.
+- **A quiet button that asks twice is read**: its words were white on white everywhere; it is red now, as it was meant.
+- **Turning the page of a book**: the arrow goes in its circle and its word under it; the word came out by the sides.
+
 ## 1.3.5 (2026-11-24)
 
 - **«Propose an improvement»**, where the site has Oksigenia Marandu 0.61.2 or later: at the foot of «More» and at the end
