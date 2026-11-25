@@ -209,3 +209,9 @@
 {"lang": "en", "region": "AU", "persona": "IT person who installed it", "q": "printer jammed", "need": "none"}
 {"lang": "en", "region": "US", "persona": "teacher running the school library", "q": "how do i create a quiz in moodle", "need": "none"}
 {"lang": "en", "region": "IN", "persona": "student assistant at the desk", "q": "canteen menu", "need": "none"}
+{"lang": "en", "region": "GB", "persona": "school librarian", "q": "how many books are there", "need": "figures"}
+{"lang": "en", "region": "GB", "persona": "school librarian", "q": "how many books do we have", "need": "figures"}
+{"lang": "en", "region": "GB", "persona": "school librarian", "q": "total copies", "need": "figures"}
+{"lang": "en", "region": "GB", "persona": "school librarian", "q": "percentage of loans", "need": "figures"}
+{"lang": "en", "region": "GB", "persona": "school librarian", "q": "trends", "need": "figures"}
+{"lang": "en", "region": "GB", "persona": "school librarian", "q": "loans going up or down compared with last year", "need": "figures"}

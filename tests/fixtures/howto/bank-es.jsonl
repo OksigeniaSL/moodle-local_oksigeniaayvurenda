@@ -209,3 +209,12 @@
 {"lang": "es", "region": "ES", "persona": "informático que lo instaló", "q": "la impresora se ha atascado", "need": "none"}
 {"lang": "es", "region": "AR", "persona": "profesor que lleva la biblioteca", "q": "como subo una tarea en moodle", "need": "none"}
 {"lang": "es", "region": "CO", "persona": "alumno ayudante en el mostrador", "q": "horario del comedor", "need": "none"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "cuántos libros hay", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "cuántos libros tenemos", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "total de ejemplares", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "porcentaje de préstamos", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "porcentaje de lectores", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "los más prestados", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "tendencias", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "evolución de los préstamos", "need": "figures"}
+{"lang": "es", "region": "ES", "persona": "bibliotecario escolar", "q": "va a más o a menos que el curso pasado", "need": "figures"}

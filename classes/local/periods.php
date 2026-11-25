@@ -27,12 +27,13 @@ namespace local_oksigeniaayvurenda\local;
 /**
  * A report of a period had six lists of day, month and year (with years from 2016) and a «Show». Now the periods are a row
  * of sheets, each with its dates under its name: this week, this month, each term of the sheet of the year, the year,
- * last year, and «Another», which opens the strip of the twelve months to touch the first and the last. Exact days come
- * from the sheet of the year. All are links: a report is something looked at.
+ * last year, since always, and «Another», which opens the strip of the twelve months of a year (and of the years before,
+ * while something was lent in them) to touch the first and the last. Exact days come from the sheet of the year. All are
+ * links: a report is something looked at.
  */
 final class periods {
     /** @var string[] The periods, in their order. */
-    public const KEYS = ['semana', 'mes', 't1', 't2', 't3', 'curso', 'pasado'];
+    public const KEYS = ['semana', 'mes', 't1', 't2', 't3', 'curso', 'pasado', 'siempre'];
 
     /**
      * The moments a period starts and ends (the end is the start of the next day), and which period it is.
@@ -111,7 +112,23 @@ final class periods {
         $last = years::around($entityid, (int) $year->timestart - DAYSECS);
         $periods[] = ['key' => 'pasado', 'from' => (int) $last->timestart, 'to' => (int) $last->timeend,
             'name' => $str(skins::words($entityid, 'periodlastyear')), 'dates' => (string) $last->name];
+        $first = self::first($library, $now);
+        $periods[] = ['key' => 'siempre', 'from' => $first, 'to' => (int) $year->timeend, 'name' => $str('periodalways'),
+            'dates' => $str('periodalwaysdates', $at($first)->format('Y'))];
         return $periods;
+    }
+
+    /**
+     * Where the history of a library begins: the start of the year of its first loan, or of this one.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @return int
+     */
+    private static function first(\stdClass $library, int $now): int {
+        global $DB;
+        $first = (int) $DB->get_field('local_oksigeniaayvurenda_loan', 'MIN(timeloaned)', ['libraryid' => $library->id]);
+        return (int) years::around((int) $library->entityid, $first ? min($first, $now) : $now)->timestart;
     }
 
     /**
@@ -149,11 +166,12 @@ final class periods {
      * @param int $now
      * @param string $desde The first month chosen, 'Y-m', or ''.
      * @param callable $url Makes the address of a month: fn(array $params): string.
+     * @param string $shown A month of the year to show, 'Y-m'; this year by default.
      * @return array[] label, url (or '' when off), first (the first month chosen).
      */
-    public static function months(\stdClass $library, int $now, string $desde, callable $url): array {
+    public static function months(\stdClass $library, int $now, string $desde, callable $url, string $shown = ''): array {
         $zone = zones::of($library);
-        $year = years::around((int) $library->entityid, $now);
+        $year = self::shown($library, $now, $shown);
         $month = (new \DateTimeImmutable('@' . (int) $year->timestart))->setTimezone($zone)->modify('first day of this month');
         $current = (new \DateTimeImmutable('@' . $now))->setTimezone($zone)->format('Y-m');
         $desde = preg_match('/^\d{4}-\d{2}$/', $desde) ? $desde : '';
@@ -169,5 +187,42 @@ final class periods {
             $month = $month->modify('first day of next month');
         }
         return $strip;
+    }
+
+    /**
+     * The years around the one of the strip of months: the one before, while something was lent in it or before it, and
+     * the one after, up to this one.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @param string $shown A month of the year shown, 'Y-m'; this year by default.
+     * @return array name, and earlier and later: name and month ('Y-m'), or null.
+     */
+    public static function years(\stdClass $library, int $now, string $shown = ''): array {
+        $entityid = (int) $library->entityid;
+        $year = self::shown($library, $now, $shown);
+        $one = fn(\stdClass $other) => ['name' => (string) $other->name,
+            'month' => zones::date((int) $other->timestart + DAYSECS, '%Y-%m', $library)];
+        return ['name' => (string) $year->name,
+            'earlier' => self::first($library, $now) < (int) $year->timestart
+                ? $one(years::around($entityid, (int) $year->timestart - DAYSECS)) : null,
+            'later' => (int) $year->timeend <= $now ? $one(years::around($entityid, (int) $year->timeend)) : null];
+    }
+
+    /**
+     * The year the strip of months shows: never one to come, nor one before the first loan.
+     *
+     * @param \stdClass $library
+     * @param int $now
+     * @param string $shown 'Y-m' or ''.
+     * @return \stdClass
+     */
+    private static function shown(\stdClass $library, int $now, string $shown): \stdClass {
+        $time = $now;
+        if (preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $shown)) {
+            $time = (new \DateTimeImmutable($shown . '-15 12:00', zones::of($library)))->getTimestamp();
+            $time = max(self::first($library, $now), min($now, $time));
+        }
+        return years::around((int) $library->entityid, $time);
     }
 }

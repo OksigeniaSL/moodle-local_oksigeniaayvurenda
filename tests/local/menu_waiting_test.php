@@ -55,4 +55,20 @@ final class menu_waiting_test extends \advanced_testcase {
         reviews::write((int) $practice->entityid, (int) $pitem->recordid, (int) $preader->id, 'De práctica.');
         $this->assertSame([], menu::waiting($practice, $admin));
     }
+
+    /**
+     * The figures are also in «More», where a librarian looked for how many books there are.
+     */
+    public function test_figures_in_more(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $library = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda')->create_library();
+        $more = array_values(array_filter(
+            menu::doors($library, (int) get_admin()->id),
+            fn($door) => $door['key'] === 'more'
+        ))[0];
+        $year = array_column($more['groups'], null, 'key')['year'];
+        $this->assertStringContainsString('reports.php', $year['links'][0]['url']);
+        $this->assertSame(get_string('menufigures', 'local_oksigeniaayvurenda'), $year['links'][0]['label']);
+    }
 }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * The six fixed reports of a library.
+ * The fixed reports of a library.
  *
  * @package    local_oksigeniaayvurenda
  * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
@@ -36,7 +36,10 @@ final class reports {
     private const T = 'local_oksigeniaayvurenda_';
 
     /** @var string[] The reports, in their order. */
-    public const ALL = ['loans', 'late', 'top', 'never', 'holdings', 'year'];
+    public const ALL = ['overall', 'loans', 'late', 'top', 'never', 'holdings', 'year'];
+
+    /** @var int How many of the most lent are shown; the sheet to download has them all. */
+    public const TOP = 50;
 
     /**
      * Loans in a period, by group: how many, how many readers of the group took something.
@@ -79,9 +82,9 @@ final class reports {
      * @param int $from
      * @param int $to
      * @param int $limit
-     * @return array[] label (title), value (loans), copies.
+     * @return array[] id (of the record), label (title), value (loans), copies.
      */
-    public static function top(\stdClass $library, int $from, int $to, int $limit = 25): array {
+    public static function top(\stdClass $library, int $from, int $to, int $limit = self::TOP): array {
         global $DB;
         $rows = $DB->get_records_sql(
             'SELECT r.id, r.title, COUNT(1) AS loans,
@@ -96,7 +99,7 @@ final class reports {
             0,
             $limit
         );
-        return array_values(array_map(fn($r) => ['label' => $r->title, 'value' => (int) $r->loans,
+        return array_values(array_map(fn($r) => ['id' => (int) $r->id, 'label' => $r->title, 'value' => (int) $r->loans,
             'copies' => (int) $r->copies], $rows));
     }
 

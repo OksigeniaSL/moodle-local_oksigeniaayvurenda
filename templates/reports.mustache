@@ -24,7 +24,8 @@
     Context variables required for this template:
     * heading, intro, summary, empty - texts
     * figure - the sentence of a period: lead (the figure, in the letter of titles) and rest; or nothing
-    * tabs - url, label, current
+    * tabs - url, label, short (its name on a phone), current
+    * overall - the sheet of the whole library, in place of the lines (report_overall), or nothing
     * action, library, report - the form; period (from, to) or never (unlent, older)
     * rows - label, value, note, share (bar, 0 to 100), part
     * csv - address of the CSV
@@ -33,13 +34,15 @@
     {
         "heading": "Préstamos por grupo",
         "intro": "Cuántos préstamos hubo en el periodo, por grupo.",
-        "tabs": [{"url": "#", "label": "Préstamos por grupo", "current": true}],
+        "tabs": [{"url": "#", "label": "Préstamos por grupo", "short": "Por grupo", "current": true}],
+        "overall": null,
         "action": "#",
         "library": "central",
         "report": "loans",
         "period": {"label": "El periodo", "sheets": [{"name": "Esta semana", "dates": "9 al 15 nov",
             "url": "https://example.org/reports.php?periodo=semana", "current": true, "other": false}],
-            "strip": {"prompt": "Desde <b>octubre</b>. Toca el último mes:", "months": [{"label": "oct",
+            "strip": {"prompt": "Desde <b>octubre</b>. Toca el último mes:", "year": "2026-2027",
+                "earlier": {"name": "2025-2026", "url": "#"}, "later": null, "months": [{"label": "oct",
                 "url": "https://example.org/reports.php?desde=2026-10", "first": true}],
                 "days": "https://example.org/year.php", "dayslabel": "Por días exactos"} },
         "reportsnav": "Informes",
@@ -53,19 +56,28 @@
         "reportolder": "Adquiridos hace más de (años)", "labelsshow": "Ver", "reportcsv": "Descargar en CSV"
     }
 }}
-{{> local_oksigeniaayvurenda/life }}
+<div class="ayv-in-estos-dias">{{> local_oksigeniaayvurenda/life }}</div>
 <div class="ayv-cf ayv-in">
+<div class="ayv-in-cabeza">
 <h1 class="ayv-results-title">{{heading}}</h1>
 <p>{{intro}}</p>
+</div>
 <nav class="ayv-in-fichas" aria-label="{{reportsnav}}">
-{{#tabs}}<a class="ayv-in-ficha" href="{{url}}" {{#current}}aria-current="page"{{/current}}>{{label}}</a>{{/tabs}}
+{{#tabs}}<a class="ayv-in-ficha" href="{{url}}" {{#current}}aria-current="page"{{/current}}><span class="ayv-in-larga">{{label}}</span><span class="ayv-in-corta">{{short}}</span></a>{{/tabs}}
 </nav>
-<section class="ayv-in-hoja">
+<section class="ayv-in-hoja{{#overall}} ayv-eg{{/overall}}">
+{{#overall}}{{#holdings}}
+<div class="ayv-eg-hay">
+    <h2 class="ayv-eg-fondo"><a href="{{url}}"><b>{{lead}}</b> {{rest}}</a></h2>
+    <ul class="ayv-eg-tipos">{{#kinds}}<li>{{label}} <b>{{value}}</b></li>{{/kinds}}</ul>
+</div>
+{{/holdings}}{{/overall}}
 {{#period}}
 <div class="ayv-in-periodo" role="group" aria-labelledby="ayv-in-p">
-    <span class="ayv-cf-rotulo" id="ayv-in-p">{{label}}</span>
+    <span class="ayv-sr" id="ayv-in-p">{{label}}</span>
     <div class="ayv-in-periodos">{{#sheets}}<a class="ayv-in-p{{#other}} ayv-in-p-otro{{/other}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}><b>{{name}}</b><span>{{dates}}</span></a>{{/sheets}}</div>
     {{#strip}}<div class="ayv-in-meses" id="ayv-in-meses"><p class="ayv-cf-nota">{{{prompt}}}</p>
+        <div class="ayv-in-cursos">{{#earlier}}<a class="ayv-in-curso" href="{{url}}" rel="prev"><span aria-hidden="true">‹</span> {{name}}</a>{{/earlier}}<b class="ayv-in-curso-este">{{year}}</b>{{#later}}<a class="ayv-in-curso" href="{{url}}" rel="next">{{name}} <span aria-hidden="true">›</span></a>{{/later}}</div>
         <div class="ayv-in-tira">{{#months}}{{#url}}<a class="ayv-in-m{{#first}} ayv-in-m-desde{{/first}}" href="{{url}}">{{label}}</a>{{/url}}{{^url}}<span class="ayv-in-m ayv-in-m-no">{{label}}</span>{{/url}}{{/months}}</div>
         <a class="ayv-cf-enlace" href="{{days}}">{{dayslabel}}</a></div>{{/strip}}
 </div>
@@ -78,6 +90,8 @@
     <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
 </form>
 {{/never}}
+{{#overall}}{{> local_oksigeniaayvurenda/report_overall }}{{/overall}}
+{{^overall}}
 <div class="ayv-report-top">
     {{#summary}}<p class="ayv-report-sum">{{summary}}</p>{{/summary}}
     {{#figure}}<p class="ayv-report-sum ayv-in-cifra"><b>{{lead}}</b> {{rest}}</p>{{/figure}}
@@ -96,5 +110,6 @@
 </ul>
 {{/hasrows}}
 {{^hasrows}}<p class="ayv-empty">{{empty}}</p>{{/hasrows}}
+{{/overall}}
 </section>
 </div>

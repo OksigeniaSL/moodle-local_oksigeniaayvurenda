@@ -1,0 +1,143 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/report_overall
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    The whole library in figures, under its periods: a shelf of a hundred spines (the part used), the trend beside the year
+    before, the figures of use, the most lent, the stages and the corners. What there is goes above the periods.
+
+    Context variables required for this template:
+    * shelf - lead and rest (the sentence), note, spines (used, part with its percentage in fill, other), keys (key: used,
+      other or never, label, value, url)
+    * trend - lead and rest, axis (the class of its width), count, keys (or nothing), columns: label, spoken, value, now and
+      before (heights, 0 to 100; hasbefore when there is one), past (has come), mark (its value is written), url
+    * use - lines: label, value, note, url
+    * top - heading, all (url, label), books: label, value, url, hascover, coverurl, colour; or nothing
+    * stages - heading, rows: label, value, share, width, url; or nothing
+    * corners - heading, keys, rows: label, value, width, hasbefore, before (width), change, hasart, arturl, url; or nothing
+    * csv, reportcsv - the sheet to download
+
+    Example context (json):
+    {
+        "shelf": {"lead": "1,6 %", "rest": "del catálogo se ha usado en el periodo", "note": "Cada lomo, uno de cada cien ejemplares.",
+            "spines": [{"used": true, "part": false, "fill": 0, "other": false},
+                {"used": false, "part": true, "fill": 60, "other": true}, {"used": false, "part": false, "fill": 0, "other": false}],
+            "keys": [{"key": "used", "label": "Usados en el periodo", "value": "308", "url": "#"},
+                {"key": "never", "label": "Nunca prestados", "value": "17.951 · 95 %", "url": "#"}]},
+        "trend": {"lead": "262 préstamos", "rest": "345 menos que en las mismas fechas de 2025-2026", "axis": "month", "count": 2,
+            "keys": {"now": "El periodo", "before": "2025-2026"},
+            "columns": [{"label": "sept", "spoken": "Septiembre: 62 préstamos; en 2025-2026, 152", "value": "62", "now": 25,
+                "before": 62, "hasbefore": true, "past": true, "mark": true, "url": "#"},
+                {"label": "dic", "spoken": "Diciembre: en 2025-2026, 142", "value": "", "now": 0, "before": 58,
+                "hasbefore": true, "past": false, "mark": false, "url": null}]},
+        "use": [{"label": "Prestados ahora", "value": "41", "note": "", "url": "#"}],
+        "top": {"heading": "Los más prestados", "all": {"url": "#", "label": "Todos"}, "books": [{"label": "El faro dormido",
+            "value": "14 préstamos", "url": "#", "hascover": true, "coverurl": "https://example.org/cover.webp", "colour": 2}]},
+        "stages": {"heading": "Por etapas", "rows": [{"label": "Primaria", "value": "128", "share": "49 %", "width": 100,
+            "url": "#"}]},
+        "corners": {"heading": "Por rincones", "keys": {"now": "El periodo", "before": "2025-2026"}, "rows": [{"label": "Arte",
+            "value": "35", "width": 26, "hasbefore": true, "before": 54, "change": "38 menos", "hasart": true, "arturl": "https://example.org/corner.webp",
+            "url": "#"}]},
+        "csv": "#",
+        "reportcsv": "Descargar la hoja"
+    }
+}}
+<div class="ayv-eg-dos">
+    {{#shelf}}
+    <section class="ayv-eg-parte" aria-labelledby="ayv-eg-usado">
+        <h2 class="ayv-eg-frase" id="ayv-eg-usado"><b>{{lead}}</b> {{rest}}</h2>
+        <div class="ayv-eg-balda" aria-hidden="true">{{#spines}}<i class="ayv-eg-lomo{{#used}} ayv-eg-lomo-usado{{/used}}{{#other}} ayv-eg-lomo-otra{{/other}}{{#part}} ayv-eg-lomo-parte{{/part}}"{{#part}} style="--fill: {{fill}}%"{{/part}}></i>{{/spines}}</div>
+        <ul class="ayv-eg-clave ayv-eg-clave-balda">
+            {{#keys}}<li>{{#url}}<a href="{{url}}">{{/url}}{{^url}}<span>{{/url}}<i class="ayv-eg-marca ayv-eg-marca-{{key}}" aria-hidden="true"></i><span class="ayv-eg-clave-dice"><span>{{label}}</span> <b>{{value}}</b></span>{{#url}}</a>{{/url}}{{^url}}</span>{{/url}}</li>{{/keys}}
+        </ul>
+        <p class="ayv-eg-nota">{{note}}</p>
+    </section>
+    {{/shelf}}
+    {{#trend}}
+    <section class="ayv-eg-parte" aria-labelledby="ayv-eg-tendencia">
+        <h2 class="ayv-eg-frase" id="ayv-eg-tendencia"><b>{{lead}}</b>{{#rest}}, {{rest}}{{/rest}}</h2>
+        <ol class="ayv-eg-grafica ayv-eg-por-{{axis}}" style="--n: {{count}}">
+            {{#columns}}
+            <li{{^past}} class="ayv-eg-aun-no"{{/past}}>{{#url}}<a class="ayv-eg-col" href="{{url}}">{{/url}}{{^url}}<span class="ayv-eg-col">{{/url}}<span class="ayv-eg-hueco" aria-hidden="true">{{#hasbefore}}<i class="ayv-eg-antes" style="height: {{before}}%"></i>{{/hasbefore}}<i class="ayv-eg-ahora" style="height: {{now}}%">{{#mark}}<em>{{value}}</em>{{/mark}}</i></span><span class="ayv-eg-rotulo" aria-hidden="true">{{label}}</span><span class="ayv-sr">{{spoken}}</span><span class="ayv-eg-globo" aria-hidden="true">{{spoken}}</span>{{#url}}</a>{{/url}}{{^url}}</span>{{/url}}</li>
+            {{/columns}}
+        </ol>
+        {{#keys}}
+        <ul class="ayv-eg-clave ayv-eg-clave-grafica">
+            <li><span><i class="ayv-eg-marca ayv-eg-marca-ahora" aria-hidden="true"></i>{{now}}</span></li>
+            <li><span><i class="ayv-eg-marca ayv-eg-marca-antes" aria-hidden="true"></i>{{before}}</span></li>
+        </ul>
+        {{/keys}}
+    </section>
+    {{/trend}}
+</div>
+<dl class="ayv-eg-ficha">
+    {{#use}}
+    <div class="ayv-eg-linea">
+        <dt>{{#url}}<a href="{{url}}">{{label}}</a>{{/url}}{{^url}}{{label}}{{/url}}</dt>
+        <dd><b>{{value}}</b>{{#note}} <span>{{note}}</span>{{/note}}</dd>
+    </div>
+    {{/use}}
+</dl>
+{{#top}}
+<section class="ayv-eg-parte" aria-labelledby="ayv-eg-top">
+    <div class="ayv-eg-cabeza">
+        <h2 class="ayv-eg-titulo" id="ayv-eg-top">{{heading}}</h2>
+        {{#all}}<a class="ayv-cf-enlace" href="{{url}}">{{label}}</a>{{/all}}
+    </div>
+    <ol class="ayv-eg-top">
+        {{#books}}
+        <li><a href="{{url}}">
+            <span class="ayv-cover ayv-cover-{{colour}}{{#hascover}} ayv-cover-photo{{/hascover}}" aria-hidden="true">
+                {{#hascover}}<img class="ayv-cover-img" src="{{coverurl}}" alt="" loading="lazy">{{/hascover}}
+                {{^hascover}}<span class="ayv-cover-title">{{label}}</span>{{/hascover}}
+            </span>
+            <span class="ayv-eg-top-titulo">{{label}}</span>
+            <span class="ayv-eg-top-n">{{value}}</span>
+        </a></li>
+        {{/books}}
+    </ol>
+</section>
+{{/top}}
+{{#stages}}
+<section class="ayv-eg-parte" aria-labelledby="ayv-eg-etapas">
+    <h2 class="ayv-eg-titulo" id="ayv-eg-etapas">{{heading}}</h2>
+    <ul class="ayv-eg-barras ayv-eg-etapas">
+        {{#rows}}
+        <li>{{#url}}<a class="ayv-eg-barra" href="{{url}}">{{/url}}{{^url}}<span class="ayv-eg-barra">{{/url}}<span class="ayv-eg-barra-rotulo">{{label}}</span><span class="ayv-eg-barra-n"><b>{{value}}</b> <span>{{share}}</span></span><span class="ayv-eg-carril" aria-hidden="true"><i class="ayv-eg-ahora" style="width: {{width}}%"></i></span>{{#url}}</a>{{/url}}{{^url}}</span>{{/url}}</li>
+        {{/rows}}
+    </ul>
+</section>
+{{/stages}}
+{{#corners}}
+<section class="ayv-eg-parte" aria-labelledby="ayv-eg-rincones">
+    <h2 class="ayv-eg-titulo" id="ayv-eg-rincones">{{heading}}</h2>
+    <ul class="ayv-eg-barras">
+        {{#rows}}
+        <li>{{#url}}<a class="ayv-eg-barra" href="{{url}}">{{/url}}{{^url}}<span class="ayv-eg-barra">{{/url}}<span class="ayv-eg-barra-rotulo">{{#hasart}}<img src="{{arturl}}" alt="" width="36" height="36" loading="lazy">{{/hasart}}{{label}}</span><span class="ayv-eg-barra-n"><b>{{value}}</b> <span>{{change}}</span></span><span class="ayv-eg-carril" aria-hidden="true">{{#hasbefore}}<i class="ayv-eg-antes" style="width: {{before}}%"></i>{{/hasbefore}}<i class="ayv-eg-ahora" style="width: {{width}}%"></i></span>{{#url}}</a>{{/url}}{{^url}}</span>{{/url}}</li>
+        {{/rows}}
+    </ul>
+    {{#keys}}
+    <ul class="ayv-eg-clave ayv-eg-clave-grafica">
+        <li><span><i class="ayv-eg-marca ayv-eg-marca-ahora" aria-hidden="true"></i>{{now}}</span></li>
+        <li><span><i class="ayv-eg-marca ayv-eg-marca-antes" aria-hidden="true"></i>{{before}}</span></li>
+    </ul>
+    {{/keys}}
+</section>
+{{/corners}}
+<p class="ayv-more ayv-eg-descarga"><a class="ayv-button ayv-button-quiet" href="{{csv}}">{{reportcsv}}</a></p>

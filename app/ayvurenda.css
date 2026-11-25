@@ -8175,6 +8175,130 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     justify-self: center;
 }
 
+/* The head of the reports (25 Nov 2026): the title and what it is in a line, «Estos días» side by side, the nine periods in a
+   row (three by three on a phone) and, on a phone, the short names of the cards. */
+@media (min-width: 1000px) {
+    .ayv .ayv-in-cabeza {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0 20px;
+    }
+
+    .ayv .ayv-in-cabeza > * {
+        margin-bottom: 4px;
+    }
+
+    .ayv .ayv-in-estos-dias .ayv-life {
+        display: flex;
+        align-items: baseline;
+        gap: 1.5rem;
+        padding: .6rem 1rem;
+    }
+
+    .ayv .ayv-in-estos-dias .ayv-life-lead {
+        flex: none;
+        margin: 0;
+    }
+
+    .ayv .ayv-in-estos-dias .ayv-life-items {
+        flex: 1;
+        grid-template-columns: repeat(auto-fit, minmax(14rem, auto));
+        justify-content: start;
+        gap: .2rem 1.5rem;
+    }
+}
+
+.ayv .ayv-in-corta {
+    display: none;
+}
+
+.ayv .ayv-in-cursos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+}
+
+.ayv .ayv-in-curso-este {
+    font-family: var(--title);
+    font-size: 1.125rem;
+}
+
+.ayv .ayv-in-curso {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ayv .ayv-in-curso:hover {
+    box-shadow: inset 0 0 0 1.5px var(--muted);
+}
+
+@media (min-width: 1200px) {
+    .ayv .ayv-in-periodos {
+        gap: 6px;
+    }
+
+    .ayv .ayv-in-p {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 10px 9px 9px;
+        font-size: .9375rem;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 720px) {
+    .ayv .ayv-in-larga {
+        display: none;
+    }
+
+    .ayv .ayv-in-corta {
+        display: inline;
+    }
+
+    .ayv .ayv-in-fichas {
+        gap: 4px;
+    }
+
+    .ayv .ayv-in-ficha {
+        padding: 10px 11px 8px;
+        font-size: .9375rem;
+    }
+
+    .ayv .ayv-in-curso-este {
+        order: -1;
+        flex-basis: 100%;
+    }
+
+    .ayv .ayv-in-periodos {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .ayv .ayv-in-p {
+        min-width: 0;
+        align-content: start;
+        padding: 9px 8px 8px;
+        line-height: 1.2;
+        font-size: .9375rem;
+    }
+
+    .ayv .ayv-in-p span {
+        font-size: .8125rem;
+    }
+}
+
 /* The sentence of the period: the figure in the letter of titles, the rest in that of the text (13 Nov 2026). */
 .ayv .ayv-report-sum.ayv-in-cifra {
     font-family: var(--text);
@@ -8186,6 +8310,717 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     font-family: var(--title);
     font-size: 1.5rem;
     font-weight: 700;
+}
+
+/* «Estadística general» (reports.php?report=overall), the first of the reports: the whole library in figures (25 Nov 2026).
+   Above the periods, what there is. Under them, a shelf of a hundred spines (the part of the catalogue used) and the trend
+   on the same wood, this period as green spines and the year before as the gap they left; then the index card of use, the
+   ten most lent, the stages and the corners. Everything that can be touched goes to its detail. */
+.ayv .ayv-eg {
+    --eg-usado: #17574c;
+    --eg-otra: #5f9a88;
+    --eg-nunca: #f3ead8;
+    --eg-canto: #a48f68;
+    --eg-hueco: #7c6f52;
+    --eg-rotulo: #f6ecd6;
+    --eg-tabla: #c99f6b;
+    --eg-tabla2: #a67c49;
+    gap: 22px;
+}
+
+html[data-bs-theme="dark"] .ayv .ayv-eg {
+    --eg-usado: #7cc7b3;
+    --eg-otra: #3f7d6e;
+    --eg-nunca: #20352f;
+    --eg-canto: #74857d;
+    --eg-hueco: #a3b0a9;
+    --eg-rotulo: #17322c;
+    --eg-tabla: #6b5336;
+    --eg-tabla2: #4a3823;
+}
+
+.ayv .ayv-eg h2 {
+    margin: 0;
+}
+
+/* What there is: it does not depend on the period, so it goes above it. */
+.ayv .ayv-eg-hay {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 32px;
+}
+
+.ayv .ayv-eg-fondo {
+    font-family: var(--text);
+    font-size: 1.125rem;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.ayv .ayv-eg-fondo b {
+    font-family: var(--title);
+    font-size: 2.125rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-eg-fondo a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.ayv .ayv-eg-fondo a:hover b,
+.ayv .ayv-eg-fondo a:focus-visible b {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: .15em;
+}
+
+.ayv .ayv-eg-tipos {
+    flex: 0 1 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--ink-2);
+}
+
+.ayv .ayv-eg-tipos b {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Two by two: the shelf and the trend; the stages and the corners. One alone takes the whole width. */
+.ayv .ayv-eg-dos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    gap: 26px 40px;
+    align-items: start;
+}
+
+.ayv .ayv-eg-dos:empty {
+    display: none;
+}
+
+.ayv .ayv-eg-parte {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.ayv .ayv-eg-frase {
+    font-family: var(--text);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    line-height: 1.35;
+}
+
+.ayv .ayv-eg-frase b {
+    font-family: var(--title);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-eg-nota {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: .875rem;
+}
+
+/* The shelf: fifty spines on each board (twenty-five on a phone). One spine is one copy of every hundred. */
+.ayv .ayv-eg-balda {
+    --alto: 54px;
+    --paso: 70px;
+    display: grid;
+    grid-template-columns: repeat(50, minmax(0, 1fr));
+    grid-auto-rows: var(--alto);
+    gap: 16px 2px;
+    align-items: end;
+    padding: 0 6px 16px;
+    background-image: linear-gradient(var(--eg-tabla) 0 6px, var(--eg-tabla2) 6px 9px, transparent 9px);
+    background-position: 0 var(--alto);
+    background-size: 100% var(--paso);
+    background-repeat: repeat-y;
+    border-radius: 2px;
+}
+
+.ayv .ayv-eg-lomo {
+    position: relative;
+    display: block;
+    height: 82%;
+    border-radius: 2px 2px 0 0;
+    background: var(--eg-nunca);
+    box-shadow: inset 0 0 0 1px var(--eg-canto);
+    overflow: hidden;
+}
+
+.ayv .ayv-eg-lomo:nth-child(5n + 2) {
+    height: 76%;
+}
+
+.ayv .ayv-eg-lomo:nth-child(7n + 4) {
+    height: 86%;
+}
+
+.ayv .ayv-eg-lomo:nth-child(11n + 6) {
+    height: 72%;
+}
+
+.ayv .ayv-eg-lomo-otra {
+    background: var(--eg-otra);
+    box-shadow: none;
+}
+
+/* Used in the period: out of the row, in green, with its label on the spine. */
+.ayv .ayv-eg-lomo-usado,
+.ayv .ayv-eg-lomo-usado:nth-child(n) {
+    height: 100%;
+    background:
+        linear-gradient(transparent 70%, var(--eg-rotulo) 70% 84%, transparent 84%),
+        linear-gradient(transparent 10%, var(--sun) 10% 14%, transparent 14%),
+        var(--eg-usado);
+    box-shadow: none;
+}
+
+.ayv .ayv-eg-lomo-parte:nth-child(n) {
+    height: 100%;
+}
+
+.ayv .ayv-eg-lomo-parte::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: var(--fill, 0);
+    background: var(--eg-usado);
+}
+
+/* The keys: each one goes to its books. */
+.ayv .ayv-eg-clave {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-eg-clave li > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-eg-clave-balda {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+}
+
+.ayv .ayv-eg-clave-dice {
+    display: grid;
+    line-height: 1.25;
+}
+
+.ayv .ayv-eg-clave-dice > span {
+    font-size: .9375rem;
+}
+
+.ayv .ayv-eg-clave a:hover .ayv-eg-clave-dice > span,
+.ayv .ayv-eg-clave a:focus-visible .ayv-eg-clave-dice > span {
+    text-decoration: underline;
+    text-underline-offset: .18em;
+}
+
+.ayv .ayv-eg-clave-grafica li > * {
+    min-height: 28px;
+    color: var(--ink-2);
+    font-size: .875rem;
+}
+
+.ayv .ayv-eg-marca {
+    flex: none;
+    width: 10px;
+    height: 22px;
+    border-radius: 2px 2px 0 0;
+}
+
+.ayv .ayv-eg-marca-used {
+    background:
+        linear-gradient(transparent 66%, var(--eg-rotulo) 66% 84%, transparent 84%),
+        linear-gradient(transparent 14%, var(--sun) 14% 22%, transparent 22%),
+        var(--eg-usado);
+}
+
+.ayv .ayv-eg-marca-other {
+    background: var(--eg-otra);
+}
+
+.ayv .ayv-eg-marca-never {
+    background: var(--eg-nunca);
+    box-shadow: inset 0 0 0 1px var(--eg-canto);
+}
+
+.ayv .ayv-eg-marca-ahora {
+    height: 14px;
+    background: var(--eg-usado);
+}
+
+.ayv .ayv-eg-marca-antes {
+    height: 14px;
+    box-shadow: inset 0 0 0 1.5px var(--eg-hueco);
+}
+
+/* The trend: this period as spines on the board, the year before as the gap a spine leaves. */
+.ayv .ayv-eg-grafica {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    margin: 0;
+    padding: 0 6px;
+    list-style: none;
+    background: linear-gradient(var(--eg-tabla) 0 6px, var(--eg-tabla2) 6px 9px) 0 142px / 100% 9px no-repeat;
+}
+
+.ayv .ayv-eg-grafica > li {
+    display: block;
+    min-width: 0;
+}
+
+.ayv .ayv-eg-col {
+    position: relative;
+    display: block;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-eg-hueco {
+    position: relative;
+    display: block;
+    height: 142px;
+    margin: 0 auto;
+    padding-top: 22px;
+    box-sizing: border-box;
+}
+
+.ayv .ayv-eg-hueco i {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    display: block;
+    max-height: calc(100% - 22px);
+    border-radius: 3px 3px 0 0;
+    transform: translateX(-50%);
+}
+
+.ayv .ayv-eg-hueco .ayv-eg-antes {
+    width: 80%;
+    max-width: 34px;
+    box-shadow: inset 0 0 0 1.5px var(--eg-hueco);
+}
+
+.ayv .ayv-eg-hueco .ayv-eg-ahora {
+    width: 48%;
+    max-width: 20px;
+    min-height: 2px;
+    background: var(--eg-usado);
+}
+
+.ayv .ayv-eg-aun-no .ayv-eg-ahora {
+    display: none;
+}
+
+.ayv .ayv-eg-aun-no .ayv-eg-antes {
+    opacity: .6;
+}
+
+.ayv .ayv-eg-hueco em {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    padding: 0 3px 1px;
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: .8125rem;
+    font-style: normal;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.ayv .ayv-eg-rotulo {
+    display: block;
+    padding-top: 13px;
+    color: var(--ink-2);
+    font-size: .8125rem;
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.ayv .ayv-eg-globo {
+    position: absolute;
+    z-index: 3;
+    bottom: calc(100% - 22px);
+    left: 50%;
+    display: none;
+    width: max-content;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--surface);
+    font-size: .875rem;
+    line-height: 1.3;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.ayv .ayv-eg-col:hover .ayv-eg-globo,
+.ayv a.ayv-eg-col:focus-visible .ayv-eg-globo {
+    display: block;
+}
+
+.ayv .ayv-eg-grafica > li:nth-child(-n + 2) .ayv-eg-globo {
+    left: 0;
+    transform: none;
+}
+
+.ayv .ayv-eg-grafica > li:nth-last-child(-n + 2) .ayv-eg-globo {
+    right: 0;
+    left: auto;
+    transform: none;
+}
+
+.ayv a.ayv-eg-col:hover .ayv-eg-rotulo,
+.ayv a.ayv-eg-col:focus-visible .ayv-eg-rotulo {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: .18em;
+}
+
+.ayv .ayv-eg-por-day .ayv-eg-hueco .ayv-eg-ahora {
+    width: 70%;
+    max-width: 20px;
+}
+
+.ayv .ayv-eg-por-year .ayv-eg-hueco .ayv-eg-ahora {
+    width: 48%;
+    max-width: 48px;
+}
+
+/* The card of use: ruled lines, as on the index cards of a catalogue. */
+.ayv .ayv-eg-ficha {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: 0 40px;
+    margin: 0;
+    padding: 10px 20px 14px;
+    border-radius: 6px;
+    background: linear-gradient(var(--coral) 0 2px, transparent 2px) 0 0 / 100% 100% no-repeat, var(--paper);
+}
+
+.ayv .ayv-eg-linea {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0 14px;
+    padding: 11px 0 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+.ayv .ayv-eg-linea dt {
+    margin: 0;
+    font-weight: 400;
+}
+
+.ayv .ayv-eg-linea dt a {
+    color: inherit;
+    text-decoration-color: var(--line);
+    text-underline-offset: .2em;
+}
+
+.ayv .ayv-eg-linea dt a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+}
+
+.ayv .ayv-eg-linea dd {
+    display: contents;
+}
+
+.ayv .ayv-eg-linea dd b {
+    font-family: var(--title);
+    font-size: 1.25rem;
+    text-align: right;
+}
+
+.ayv .ayv-eg-linea dd span {
+    grid-column: 1 / -1;
+    color: var(--ink-2);
+    font-size: .875rem;
+}
+
+.ayv .ayv-eg-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 20px;
+}
+
+.ayv .ayv-eg-titulo {
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* The ten most lent, in their covers. */
+.ayv .ayv-eg-top {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 18px 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-eg-top a {
+    display: grid;
+    gap: 2px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.ayv .ayv-eg-top .ayv-cover {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.ayv .ayv-eg-top .ayv-cover-title {
+    font-size: .8125rem;
+}
+
+.ayv .ayv-eg-top-titulo {
+    font-size: .9375rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.ayv .ayv-eg-top a:hover .ayv-eg-top-titulo,
+.ayv .ayv-eg-top a:focus-visible .ayv-eg-top-titulo {
+    text-decoration: underline;
+    text-underline-offset: .18em;
+}
+
+.ayv .ayv-eg-top-n {
+    color: var(--ink-2);
+    font-size: .875rem;
+}
+
+/* Stages and corners: a bar under each name, with last year's as its gap. */
+.ayv .ayv-eg-barras {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+    gap: 0 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-eg-etapas {
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.ayv .ayv-eg-barra {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 14px;
+    padding: 8px 0 10px;
+    border-bottom: 1px solid var(--line);
+    color: inherit;
+    text-decoration: none;
+}
+
+.ayv .ayv-eg-barra-rotulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ayv .ayv-eg-barra-rotulo img {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.ayv a.ayv-eg-barra:hover .ayv-eg-barra-rotulo,
+.ayv a.ayv-eg-barra:focus-visible .ayv-eg-barra-rotulo {
+    text-decoration: underline;
+    text-underline-offset: .18em;
+}
+
+.ayv .ayv-eg-barra-n {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.ayv .ayv-eg-barra-n > span {
+    display: inline-block;
+    min-width: 5rem;
+    color: var(--ink-2);
+    font-size: .9375rem;
+}
+
+.ayv .ayv-eg-carril {
+    position: relative;
+    grid-column: 1 / -1;
+    display: block;
+    height: 14px;
+}
+
+.ayv .ayv-eg-carril i {
+    position: absolute;
+    left: 0;
+    display: block;
+    border-radius: 0 3px 3px 0;
+}
+
+.ayv .ayv-eg-carril .ayv-eg-antes {
+    top: 0;
+    bottom: 0;
+    box-shadow: inset 0 0 0 1.5px var(--eg-hueco);
+}
+
+.ayv .ayv-eg-carril .ayv-eg-ahora {
+    top: 3px;
+    bottom: 3px;
+    min-width: 2px;
+    background: var(--eg-usado);
+}
+
+.ayv .ayv-eg-descarga {
+    margin: 0;
+}
+
+@media (max-width: 940px) {
+    .ayv .ayv-eg-dos,
+    .ayv .ayv-eg-barras:not(.ayv-eg-etapas) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 1100px) {
+    .ayv .ayv-eg-top {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+/* Twelve names of months do not fit in the narrowest phones: every other one. */
+@media (max-width: 370px) {
+    .ayv .ayv-eg-por-month > li:nth-child(even) .ayv-eg-rotulo {
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 720px) {
+    .ayv .ayv-eg {
+        gap: 20px;
+    }
+
+    .ayv .ayv-eg-balda {
+        --alto: 46px;
+        --paso: 60px;
+        grid-template-columns: repeat(25, minmax(0, 1fr));
+        row-gap: 14px;
+        padding: 0 4px 14px;
+    }
+
+    .ayv .ayv-eg-ficha {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 8px 14px 12px;
+    }
+
+    .ayv .ayv-eg-barras.ayv-eg-etapas {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* On a phone, a list: ten covers two by two were four screens. */
+    .ayv .ayv-eg-top {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .ayv .ayv-eg-top a {
+        grid-template-columns: 46px minmax(0, 1fr);
+        grid-template-rows: 1fr auto auto 1fr;
+        gap: 0 14px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .ayv .ayv-eg-top .ayv-cover {
+        grid-row: 1 / -1;
+        margin: 0;
+        padding: 0;
+    }
+
+    .ayv .ayv-eg-top .ayv-cover-title {
+        display: none;
+    }
+
+    .ayv .ayv-eg-top-titulo {
+        grid-row: 2;
+    }
+
+    .ayv .ayv-eg-top-n {
+        grid-row: 3;
+    }
+
+    .ayv .ayv-eg-fondo b,
+    .ayv .ayv-eg-fondo {
+        line-height: 1.15;
+    }
+
+    .ayv .ayv-eg-fondo b {
+        display: block;
+    }
+
+    .ayv .ayv-eg-clave-balda {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ayv .ayv-eg-clave-balda li > * {
+        display: flex;
+        min-height: 44px;
+    }
+
+    .ayv .ayv-eg-clave-balda .ayv-eg-clave-dice {
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: 12px;
+    }
+
+    .ayv .ayv-eg-barra-n > span {
+        min-width: 4.5rem;
+    }
 }
 
 /* Each group's bar runs along the whole bottom of its card, so 86 and 6 are told apart at a glance. */

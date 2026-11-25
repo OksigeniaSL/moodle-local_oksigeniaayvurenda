@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.8 (2026-11-25)
+
+- **Overall statistics**, the first sheet of «Reports» and also in «More»: how many books there are, the part of the
+  catalogue that is used, the readers who came, whether it goes up or down beside the year before, the most lent, and the
+  loans by stage and by corner, for the period one chooses. What a librarian looks for first was spread over six sheets.
+- **«All time»** among the periods, and in «Other» the months of any year, not only of this one: a range may start in one
+  year and end in another. «The most lent» shows fifty, and its sheet to download has them all.
+- **«What do you want to do?»** knows how many books there are, the percentages and the trends; the words around a question
+  («is there», «do we have») only break a tie.
+
 ## 1.3.7 (2026-11-24)
 
 - **Four more sounds to read over**: the dawn, two storms and a lively fire, with the art package 0.1.74, where the night,

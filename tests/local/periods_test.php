@@ -60,6 +60,35 @@ final class periods_test extends \advanced_testcase {
     }
 
     /**
+     * The history starts with the year of the first loan, and the strip of months goes back to it and no further.
+     */
+    public function test_years_before(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $now = (new \DateTimeImmutable('2026-11-25 12:00', zones::of($library)))->getTimestamp();
+        $this->assertSame(['name' => '2026-2027', 'earlier' => null, 'later' => null], periods::years($library, $now));
+        $time = (new \DateTimeImmutable('2025-03-02 12:00', zones::of($library)))->getTimestamp();
+        $gen->create_loan(['libraryid' => $library->id, 'itemid' => $gen->create_item(['libraryid' => $library->id])->id,
+            'readerid' => $gen->create_reader(['entityid' => $library->entityid])->id, 'timeloaned' => $time]);
+        [$from, , $key] = periods::resolve($library, $now, 'siempre', '', '');
+        $this->assertSame('siempre', $key);
+        $this->assertSame('2024-09-01', zones::date($from, '%Y-%m-%d', $library));
+        $this->assertSame('2025-2026', periods::years($library, $now)['earlier']['name']);
+        $middle = periods::years($library, $now, '2026-02');
+        $this->assertSame(['2025-2026', '2024-2025', '2026-2027'], [$middle['name'], $middle['earlier']['name'],
+            $middle['later']['name']]);
+        $first = periods::years($library, $now, '2019-02');
+        $this->assertSame('2024-2025', $first['name']);
+        $this->assertNull($first['earlier']);
+        $strip = periods::months($library, $now, '', fn(array $p) => json_encode($p), '2025-03');
+        $this->assertStringContainsString('2024-09', $strip[0]['url']);
+        // A range may start in one year and end in another.
+        $strip = periods::months($library, $now, '2025-05', fn(array $p) => json_encode($p), '2025-10');
+        $this->assertStringContainsString('2025-09', $strip[0]['url']);
+    }
+
+    /**
      * A term is named by the first day the centre opens: past the days of rest of its week and past its closures.
      */
     public function test_opens(): void {

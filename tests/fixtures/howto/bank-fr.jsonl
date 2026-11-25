@@ -209,3 +209,8 @@
 {"lang": "fr", "region": "BE", "persona": "informaticien qui l'a installé", "q": "imprimante bloquée", "need": "none"}
 {"lang": "fr", "region": "FR", "persona": "enseignant qui gère la bibliothèque", "q": "créer un devoir sur moodle", "need": "none"}
 {"lang": "fr", "region": "SN", "persona": "élève assistant au prêt", "q": "horaires de la cantine", "need": "none"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire scolaire", "q": "combien de livres y a-t-il", "need": "figures"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire scolaire", "q": "total des exemplaires", "need": "figures"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire scolaire", "q": "pourcentage de prêts", "need": "figures"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire scolaire", "q": "tendances", "need": "figures"}
+{"lang": "fr", "region": "FR", "persona": "bibliothécaire scolaire", "q": "évolution des prêts", "need": "figures"}

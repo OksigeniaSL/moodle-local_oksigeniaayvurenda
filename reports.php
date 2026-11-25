@@ -50,7 +50,7 @@ if ($report === 'late') {
 // Loans by group first where there are classes; elsewhere (a public library, a company) the most read first, and the
 // groups (a club, a workshop) last.
 $order = \local_oksigeniaayvurenda\local\skins::no_classes((int) $library->entityid)
-    ? ['top', 'late', 'never', 'holdings', 'year', 'loans'] : reports::ALL;
+    ? ['overall', 'top', 'late', 'never', 'holdings', 'year', 'loans'] : reports::ALL;
 $report = in_array($report, reports::ALL, true) ? $report : $order[0];
 $str = \local_oksigeniaayvurenda\local\skins::speaker($library ?? null);
 $date = fn(int $time) => zones::date($time, 'strftimedate', $library);
@@ -67,14 +67,32 @@ if ($desde === '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $oldfrom)) {
 }
 [$from, $to, $chosen] = \local_oksigeniaayvurenda\local\periods::resolve($library, time(), $periodkey, $desde, $hasta);
 $other = optional_param('otro', 0, PARAM_BOOL) || $chosen === 'otro';
+// What the other sheets need to keep the period: its name, or its days.
+$shown = fn(int $time) => zones::date($time, '%Y-%m-%d', $library);
+$carry = $chosen === 'otro' ? ['desde' => $shown($from), 'hasta' => $shown($to - 1)] : ['periodo' => $chosen];
 $unlent = max(0, optional_param('unlent', 3, PARAM_INT));
 $older = max(0, optional_param('older', 5, PARAM_INT));
 $rows = [];
 $columns = [];
 $summary = '';
 $figure = null;
-$period = $report === 'loans' || $report === 'top';
+$period = in_array($report, ['overall', 'loans', 'top'], true);
+$overall = null;
 switch ($report) {
+    case 'overall':
+        $found = \local_oksigeniaayvurenda\local\glance::of($library, $from, $to, time(), $chosen === 'siempre');
+        if ($format === 'csv') {
+            ['columns' => $columns, 'rows' => $sheetrows] = \local_oksigeniaayvurenda\local\overall::sheet(
+                $library,
+                $found,
+                $from,
+                $to
+            );
+            $rows = array_map(fn(array $row) => ['csv' => $row], $sheetrows);
+            break;
+        }
+        $overall = \local_oksigeniaayvurenda\local\overall::context($library, $found, $from, $to, time(), $carry);
+        break;
     case 'loans':
         $found = reports::loans($library, $from, $to);
         $columns = [$str('reportgroup'), $str('reportloans'), $str('reportreaders')];
@@ -120,7 +138,7 @@ switch ($report) {
         $figure = ['lead' => $lead, 'rest' => $rest];
         break;
     case 'top':
-        $found = reports::top($library, $from, $to);
+        $found = reports::top($library, $from, $to, $format === 'csv' ? 0 : reports::TOP);
         $columns = [$str('reporttitle'), $str('reportloans'), $str('reportcopies')];
         $max = max(array_merge([1], array_column($found, 'value')));
         foreach ($found as $row) {
@@ -195,23 +213,30 @@ if ($format === 'csv') {
     die();
 }
 $params = ['library' => $library->slug, 'report' => $report];
-$shown = fn(int $time) => zones::date($time, '%Y-%m-%d', $library);
-$extra = $period ? ['desde' => $shown($from), 'hasta' => $shown($to - 1)] : ($report === 'never'
+$extra = $period ? $carry : ($report === 'never'
     ? ['unlent' => $unlent, 'older' => $older] : []);
 // The row of sheets of the periods, and the strip of months of «Another».
 $here = fn(array $more) => (new moodle_url('/local/oksigeniaayvurenda/reports.php', $params + $more))->out(false);
-$sheets = [];
-foreach (\local_oksigeniaayvurenda\local\periods::all($library, time()) as $one) {
-    $sheets[] = ['name' => $one['name'], 'dates' => $one['dates'], 'url' => $here(['periodo' => $one['key']]),
-        'current' => !$other && $one['key'] === $chosen, 'other' => false];
-}
-$sheets[] = ['name' => $str('periodother'), 'dates' => $str('periodotherdates'), 'url' => $here(['otro' => 1]) . '#ayv-in-meses',
-    'current' => $chosen === 'otro' || $other, 'other' => true];
 $first = preg_match('/^\d{4}-\d{2}$/', $desde) && $hasta === '' ? $desde : '';
+// The strip can show the months of another year: a range may start in one and end in another.
+$shownyear = optional_param('curso', '', PARAM_TEXT);
+$stripyears = \local_oksigeniaayvurenda\local\periods::years($library, time(), $shownyear);
+$stripyear = fn(?array $one) => $one ? ['name' => $one['name'], 'url' => $here(['otro' => 1, 'curso' => $one['month']]
+    + ($first !== '' ? ['desde' => $first] : [])) . '#ayv-in-meses'] : null;
 $strip = $other && $hasta === '' ? [
     'prompt' => $first !== '' ? $str('periodfrom', '<b>' . s(userdate((new DateTimeImmutable($first . '-15 12:00'))
-        ->getTimestamp(), '%B')) . '</b>') : $str('periodfirst'),
-    'months' => \local_oksigeniaayvurenda\local\periods::months($library, time(), $first, fn(array $more) => $here($more)),
+        ->getTimestamp(), str_starts_with($shown(time()), substr($first, 0, 4)) ? '%B' : '%B %Y')) . '</b>')
+        : $str('periodfirst'),
+    'year' => $stripyears['name'],
+    'earlier' => $stripyear($stripyears['earlier']),
+    'later' => $stripyear($stripyears['later']),
+    'months' => \local_oksigeniaayvurenda\local\periods::months(
+        $library,
+        time(),
+        $first,
+        fn(array $more) => $here($more + ($shownyear !== '' ? ['curso' => $shownyear] : [])) . '#ayv-in-meses',
+        $shownyear
+    ),
     'days' => (new moodle_url(
         '/local/oksigeniaayvurenda/year.php',
         ['library' => $library->slug, 'elegir' => $report],
@@ -219,6 +244,22 @@ $strip = $other && $hasta === '' ? [
     ))->out(false),
     'dayslabel' => $str('perioddays'),
 ] : null;
+$sheets = [];
+foreach (\local_oksigeniaayvurenda\local\periods::all($library, time()) as $one) {
+    $sheets[] = ['name' => $one['name'], 'dates' => $one['dates'], 'url' => $here(['periodo' => $one['key']]),
+        'current' => !$other && $one['key'] === $chosen, 'other' => false];
+}
+// The sheet «Another», once chosen, says from when to when: by months, or by days.
+$range = $str('periodotherdates');
+if ($chosen === 'otro' && !$strip) {
+    $edges = (new DateTimeImmutable('@' . $from))->setTimezone(zones::of($library))->format('j') === '1'
+        && (new DateTimeImmutable('@' . $to))->setTimezone(zones::of($library))->format('j') === '1';
+    $edge = fn(int $time) => core_text::strtolower(trim(zones::date($time, $edges ? '%b %Y' : '%d %b %Y', $library)));
+    $range = $edge($from) === $edge($to - 1) ? $edge($from)
+        : $str('periodrange', (object) ['from' => $edge($from), 'to' => $edge($to - 1)]);
+}
+$sheets[] = ['name' => $str('periodother'), 'dates' => $range, 'url' => $here(['otro' => 1]) . '#ayv-in-meses',
+    'current' => $chosen === 'otro' || $other, 'other' => true];
 $data = [
     'heading' => $str('report' . $report . 'title'),
     // A little life above the numbers: this week, the year ahead of the last, what there is to celebrate.
@@ -226,8 +267,8 @@ $data = [
     'intro' => $str('report' . $report . 'intro'),
     'tabs' => array_map(fn($r) => ['url' => (new moodle_url(
         '/local/oksigeniaayvurenda/reports.php',
-        ['library' => $library->slug, 'report' => $r] + ($chosen !== 'curso' ? $extra : [])
-    ))->out(false), 'label' => $str('report' . $r . 'title'),
+        ['library' => $library->slug, 'report' => $r] + ($period && $chosen !== 'curso' ? $carry : [])
+    ))->out(false), 'label' => $str('report' . $r . 'title'), 'short' => $str('report' . $r . 'short'),
         'current' => $r === $report], $order),
     'action' => (new moodle_url('/local/oksigeniaayvurenda/reports.php'))->out(false),
     'library' => $library->slug,
@@ -237,6 +278,7 @@ $data = [
     'never' => $report === 'never' ? ['unlent' => $unlent, 'older' => $older] : null,
     'summary' => $summary,
     'figure' => $figure,
+    'overall' => $overall,
     'rows' => $rows,
     'hasrows' => (bool) $rows,
     'empty' => $str('reportempty'),

@@ -433,7 +433,7 @@ window.AYVHelpPieces = {
             return h.say(5);
         });
     },
-    // The six reports: their tabs, a period, a row, the most lent, the CSV, the year in numbers.
+    // The reports: their tabs, the whole library first, a period, a row, the most lent, the CSV, the year in numbers.
     reports: function(h) {
         'use strict';
         var tab = function(n) {
@@ -446,7 +446,7 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(1);
         }).then(function() {
-            return h.go(tab(3));
+            return h.go(tab(4));
         }).then(function() {
             return h.point('.ayv-report');
         }).then(function() {
@@ -456,7 +456,7 @@ window.AYVHelpPieces = {
         }).then(function() {
             return h.say(3);
         }).then(function() {
-            return h.go(tab(6));
+            return h.go(tab(7));
         }).then(function() {
             return h.point('.ayv-results-title');
         }).then(function() {

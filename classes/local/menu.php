@@ -74,8 +74,10 @@ final class menu {
             'shelves' => ['menushelves', [['stacks.php', 'menustacks', $d], ['labels.php', 'menulabels', $c],
                 ['posters.php', 'menuposters', $c]]],
             'reading' => ['menureading', [['quests.php', 'menuquests', $m], ['agenda.php', 'agendatitle', $d]]],
-            'year' => ['menuyeargroup', [['stocktake.php', 'menustocktake', $c], ['weed.php', 'menuweed', $c],
-                ['memoir.php', 'menumemoir', $d], ['year.php', 'menuyear', $m], ['activity.php', 'menuactivity', $m]]],
+            // The figures are also the door «Reports»: who looks for how many books there are, looks here.
+            'year' => ['menuyeargroup', [['reports.php', 'menufigures', $d], ['stocktake.php', 'menustocktake', $c],
+                ['weed.php', 'menuweed', $c], ['memoir.php', 'menumemoir', $d], ['year.php', 'menuyear', $m],
+                ['activity.php', 'menuactivity', $m]]],
             'setup' => ['menusetup', [['import.php', 'menuimport', $c], ['sources.php', 'menusources', $m],
                 ['rules.php', 'menurules', $m], ['team', 'menuteam', $m], ['open.php', 'menuopen', $m]]],
             'settings' => ['menusettings', [['howitworks.php', 'hiwtitle', $m], ['functions.php', 'functionsheading', $d],

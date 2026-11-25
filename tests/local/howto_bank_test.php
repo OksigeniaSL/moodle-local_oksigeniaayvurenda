@@ -40,7 +40,9 @@ final class howto_bank_test extends \advanced_testcase {
         'challenges' => ['settings', 'myclass'], 'corners' => ['settings', 'libraries'], 'drive' => ['offsite', 'copies'],
         'z3950' => ['add', 'settings'], 'readerhold' => ['holds'], 'readerrenew' => ['renew'],
         'readercard' => ['profile', 'cards'], 'readerreview' => ['reviews'], 'readervoice' => ['voices'],
-        'readerformat' => ['formats']];
+        'readerformat' => ['formats'],
+        // Both open the reports.
+        'reports' => ['figures'], 'figures' => ['reports']];
 
     /** @var float[] How much of each part the first answer has to get right, at least. */
     private const AT_LEAST = ['tune' => 0.90, 'held' => 0.84];

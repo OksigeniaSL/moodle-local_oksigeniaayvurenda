@@ -60,6 +60,8 @@ final class howto {
         'booklets' => ['class.php', 'view', ''],
         'stacks' => ['stacks.php', 'view', 'stacks'],
         'posters' => ['posters.php', 'catalogue', ''],
+        // How many books there are, how much they go out and whether it goes up: a librarian did not find it (25-11).
+        'figures' => ['reports.php', 'desk', ''],
         'reports' => ['reports.php', 'desk', 'reports'],
         'memoir' => ['memoir.php', 'desk', ''],
         'readings' => ['readings.php', 'desk', ''],
@@ -674,7 +676,9 @@ final class howto {
         'reader', 'readers', 'desk', 'library', 'libraries', 'livro', 'livros', 'leitor', 'leitores', 'balcao', 'livre',
         'livres', 'lecteur', 'lecteurs', 'bibliotheque', 'bibliotheques', 'alumno', 'alumnos', 'aluno', 'alunos', 'eleve',
         'eleves', 'student', 'students', 'pupil', 'pupils', 'estudiante', 'estudiantes', 'ejemplar', 'ejemplares', 'copy',
-        'copies', 'exemplar', 'exemplares', 'exemplaire', 'exemplaires', 'item', 'items'];
+        'copies', 'exemplar', 'exemplares', 'exemplaire', 'exemplaires', 'item', 'items',
+        // What a question says around what it asks: «is there a manual», «how many books do we have».
+        'hay', 'there', 'are', 'tenemos', 'tiene', 'have', 'has', 'temos', 'tem', 'avons', 'ont'];
 
     /**
      * How well a task answers some words. Each word of the question counts once, by the best place it is found in the

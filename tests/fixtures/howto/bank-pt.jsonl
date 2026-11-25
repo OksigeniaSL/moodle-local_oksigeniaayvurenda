@@ -209,3 +209,10 @@
 {"lang": "pt", "region": "BR", "persona": "técnico de informática que a instalou", "q": "impressora travou", "need": "none"}
 {"lang": "pt", "region": "PT", "persona": "professor que cuida da biblioteca", "q": "como criar um questionário no moodle", "need": "none"}
 {"lang": "pt", "region": "BR", "persona": "aluno monitor no balcão", "q": "cardápio da merenda", "need": "none"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário escolar", "q": "quantos livros há", "need": "figures"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário escolar", "q": "total de exemplares", "need": "figures"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário escolar", "q": "percentagem de empréstimos", "need": "figures"}
+{"lang": "pt", "region": "PT", "persona": "bibliotecário escolar", "q": "tendências", "need": "figures"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário escolar", "q": "quantos livros temos", "need": "figures"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário escolar", "q": "porcentagem de empréstimos", "need": "figures"}
+{"lang": "pt", "region": "BR", "persona": "bibliotecário escolar", "q": "evolução dos empréstimos", "need": "figures"}
