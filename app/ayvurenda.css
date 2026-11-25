@@ -4115,7 +4115,7 @@ html[data-bs-theme="dark"] .ayv .ayv-memoir { --bar: var(--accent); }
 .ayv .ayv-memoir-bars { margin: 0; padding: 0; list-style: none; }
 .ayv .ayv-memoir-bars > li {
     display: grid;
-    grid-template-columns: minmax(7rem, 11rem) minmax(5rem, 1fr) auto 7.5rem;
+    grid-template-columns: minmax(7rem, 11rem) minmax(5rem, 1fr) minmax(0, 11.5rem) minmax(0, 8.5rem);
     gap: .25rem 1rem;
     align-items: center;
     padding: .5rem 0;
@@ -8213,6 +8213,34 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
     display: none;
 }
 
+/* «Nunca prestados»: since when, and how old, as sheets to touch. */
+.ayv .ayv-in-desde {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+}
+
+.ayv .ayv-in-desde-rotulo {
+    flex: 0 0 17rem;
+}
+
+.ayv .ayv-in-desde .ayv-in-periodos {
+    flex: 1 1 20rem;
+}
+
+.ayv .ayv-in-p.ayv-in-a {
+    display: grid;
+    flex: 0 0 auto;
+    align-content: center;
+    place-items: center;
+    min-width: 5.5rem;
+    min-height: 48px;
+    padding: 8px 12px 6px;
+    line-height: 1.2;
+    text-align: center;
+}
+
 .ayv .ayv-in-cursos {
     display: flex;
     flex-wrap: wrap;
@@ -8296,6 +8324,14 @@ html[data-bs-theme="dark"] .ayv .ayv-cs {
 
     .ayv .ayv-in-p span {
         font-size: .8125rem;
+    }
+
+    .ayv .ayv-in-desde-rotulo {
+        flex-basis: 100%;
+    }
+
+    .ayv .ayv-in-desde .ayv-in-periodos {
+        flex-basis: 100%;
     }
 }
 

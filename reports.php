@@ -78,6 +78,8 @@ $summary = '';
 $figure = null;
 $period = in_array($report, ['overall', 'loans', 'top'], true);
 $overall = null;
+$record = fn(int $id) => (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' => $library->slug, 'id' => $id]))
+    ->out(false);
 switch ($report) {
     case 'overall':
         $found = \local_oksigeniaayvurenda\local\glance::of($library, $from, $to, time(), $chosen === 'siempre');
@@ -143,7 +145,7 @@ switch ($report) {
         $max = max(array_merge([1], array_column($found, 'value')));
         foreach ($found as $row) {
             $copies = (int) $row['copies'] === 1 ? $str('reportcopiesofone') : $str('reportcopiesof', $row['copies']);
-            $rows[] = ['label' => $row['label'], 'value' => $row['value'], 'note' => $copies,
+            $rows[] = ['label' => $row['label'], 'value' => $row['value'], 'note' => $copies, 'url' => $record($row['id']),
                 'share' => round(100 * $row['value'] / $max), 'csv' => [$row['label'], $row['value'], $row['copies']]];
         }
         break;
@@ -157,14 +159,18 @@ switch ($report) {
         );
         $columns = [$str('reporttitle'), $str('cardcode'), $str('addspine'), $str('reportacquired'), $str('reportlastloan')];
         foreach ($found['rows'] as $row) {
-            $rows[] = ['label' => $row['label'], 'value' => $row['barcode'],
+            $rows[] = ['label' => $row['label'], 'value' => $row['barcode'], 'url' => $record($row['id']),
                 'note' => trim($row['callnumber'] . ' · ' . ($row['lastloan'] ? $str('reportlastloanon', $date($row['lastloan']))
                     : $str('reportneverlent')), ' ·'),
                 'csv' => [$row['label'], $row['barcode'], $row['callnumber'],
                     $row['acquired'] ? zones::date((int) $row['acquired'], '%Y-%m-%d', $library) : '',
                     $row['lastloan'] ? zones::date((int) $row['lastloan'], '%Y-%m-%d', $library) : '']];
         }
-        $summary = $str('reportnevertotal', $found['total']);
+        $total = (int) $found['total'];
+        $figure = ['lead' => $str(
+            $total === 1 ? 'overallcopiesone' : 'overallcopies',
+            \local_oksigeniaayvurenda\local\screens::number($total)
+        ), 'rest' => $total > 200 ? $str('reportneverfirst') : ''];
         break;
     case 'holdings':
         $found = reports::holdings($library);
@@ -197,7 +203,7 @@ switch ($report) {
         break;
 }
 // Every line says what it has: in Mustache, a missing key is looked up in the page around it.
-$rows = array_map(fn($row) => $row + ['part' => '', 'share' => 0, 'note' => ''], $rows);
+$rows = array_map(fn($row) => $row + ['part' => '', 'share' => 0, 'note' => '', 'url' => ''], $rows);
 if ($format === 'csv') {
     \local_oksigeniaayvurenda\event\report_exported::fire((int) $library->entityid, null, ['report' => $report]);
     $filename = clean_filename('ayvurenda-' . $report . '-' . date('Ymd') . '.csv');
@@ -260,6 +266,22 @@ if ($chosen === 'otro' && !$strip) {
 }
 $sheets[] = ['name' => $str('periodother'), 'dates' => $range, 'url' => $here(['otro' => 1]) . '#ayv-in-meses',
     'current' => $chosen === 'otro' || $other, 'other' => true];
+// Since when they have not gone out, and how long ago they came: years to touch. One that is not among them (an address kept
+// from before) joins them.
+$never = [];
+if ($report === 'never') {
+    $years = fn(int $n) => $str($n === 1 ? 'reportyearsone' : 'reportyears', $n);
+    foreach (['unlent' => [0, 1, 2, 3, 5, 10], 'older' => [0, 1, 2, 5, 10]] as $key => $some) {
+        $chosenyears = $key === 'unlent' ? $unlent : $older;
+        $some = array_unique(array_merge($some, [$chosenyears]));
+        sort($some);
+        $never[] = ['key' => $key, 'label' => $str('report' . $key), 'options' => array_map(fn($n) => [
+            'name' => $n ? $years($n) : $str('report' . $key . 'zero'),
+            'url' => (new moodle_url('/local/oksigeniaayvurenda/reports.php', [$key => $n] + $params + $extra))->out(false),
+            'current' => $n === $chosenyears,
+        ], $some)];
+    }
+}
 $data = [
     'heading' => $str('report' . $report . 'title'),
     // A little life above the numbers: this week, the year ahead of the last, what there is to celebrate.
@@ -270,12 +292,9 @@ $data = [
         ['library' => $library->slug, 'report' => $r] + ($period && $chosen !== 'curso' ? $carry : [])
     ))->out(false), 'label' => $str('report' . $r . 'title'), 'short' => $str('report' . $r . 'short'),
         'current' => $r === $report], $order),
-    'action' => (new moodle_url('/local/oksigeniaayvurenda/reports.php'))->out(false),
-    'library' => $library->slug,
-    'report' => $report,
     'period' => $period ? ['label' => $str('periodlabel'), 'sheets' => $sheets, 'strip' => $strip] : null,
     'reportsnav' => $str('reportsnav'),
-    'never' => $report === 'never' ? ['unlent' => $unlent, 'older' => $older] : null,
+    'never' => $never,
     'summary' => $summary,
     'figure' => $figure,
     'overall' => $overall,
@@ -284,9 +303,7 @@ $data = [
     'empty' => $str('reportempty'),
     'csv' => (new moodle_url('/local/oksigeniaayvurenda/reports.php', $params + $extra + ['format' => 'csv']))->out(false),
 ];
-foreach (['reportfrom', 'reportto', 'reportunlent', 'reportolder', 'labelsshow', 'reportcsv'] as $key) {
-    $data[$key] = $str($key);
-}
+$data['reportcsv'] = $str('reportcsv');
 $deskurl = (new moodle_url('/local/oksigeniaayvurenda/desk.php', ['library' => $library->slug]))->out(false);
 shell::output(
     $data['heading'],

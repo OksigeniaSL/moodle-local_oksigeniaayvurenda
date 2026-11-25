@@ -237,10 +237,14 @@ final class glance_test extends \advanced_testcase {
         }
         $this->loan($item, $pupils[3], '2026-11-12');
         $last = years::around($entityid, $now - YEARSECS);
-        $this->gen->create_member(['readerid' => $pupils[0]->id, 'yearid' => $last->id, 'groupname' => '1º A']);
+        $this->gen->create_member(['readerid' => $pupils[0]->id, 'yearid' => $last->id, 'groupname' => '1º A',
+            'stage' => null]);
         $glance = $this->year();
         $this->assertSame(['borrowers' => 2, 'came' => 1, 'of' => 2, 'share' => 50.0], $glance['readers']);
         $this->assertSame(['borrowers' => 1, 'came' => 1, 'of' => 1, 'share' => 100.0], $glance['before']['readers']);
+        // Since always there are loans of a year whose stages nobody knows: the stages say nothing.
+        [$from, $to] = periods::resolve($this->library, $now, 'siempre', '', '');
+        $this->assertSame([], glance::of($this->library, $from, $to, $now, true)['stages']);
         // By stage, the rest last.
         $this->assertSame([['stage' => 'Primaria', 'loans' => 1, 'share' => 50.0], ['stage' => '', 'loans' => 1,
             'share' => 50.0]], $glance['stages']);

@@ -110,7 +110,7 @@ final class reports {
      * @param int $since Not lent since this moment (0: never lent).
      * @param int $acquired Acquired before this moment.
      * @param int $limit 0 for all of them.
-     * @return array rows (label, barcode, callnumber, acquired, lastloan), total.
+     * @return array rows (id of the record, label, barcode, callnumber, acquired, lastloan), total.
      */
     public static function never(\stdClass $library, int $since, int $acquired, int $limit = 200): array {
         global $DB;
@@ -119,7 +119,7 @@ final class reports {
         $params = ['libraryid' => $library->id, 'withdrawn' => 'withdrawn', 'acquired' => $acquired, 'since' => $since];
         $total = $DB->count_records_sql('SELECT COUNT(1) FROM {' . self::T . 'item} i WHERE ' . $where, $params);
         $rows = $DB->get_records_sql(
-            'SELECT i.id, i.barcode, i.callnumber1, i.callnumber2, i.callnumber3, i.timeacquired, r.title,
+            'SELECT i.id, i.barcode, i.callnumber1, i.callnumber2, i.callnumber3, i.timeacquired, i.recordid, r.title,
                     (SELECT MAX(l2.timeloaned) FROM {' . self::T . 'loan} l2 WHERE l2.itemid = i.id) AS lastloan
                FROM {' . self::T . 'item} i
                JOIN {' . self::T . 'record} r ON r.id = i.recordid
@@ -130,6 +130,7 @@ final class reports {
             $limit
         );
         return ['total' => $total, 'rows' => array_values(array_map(fn($r) => [
+            'id' => (int) $r->recordid,
             'label' => $r->title,
             'barcode' => $r->barcode,
             'callnumber' => trim($r->callnumber1 . ' ' . $r->callnumber2 . ' ' . $r->callnumber3),

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.9 (2026-11-25)
+
+- **«Never lent»** is chosen by touching how long copies have gone without a loan and how long they have been here, with no
+  boxes of numbers; there and in «The most lent», each title opens its record.
+- **The overall statistics say nothing by stage** when the period has loans of a year whose stages nobody knows (brought from
+  another programme): almost everything came out as «Staff and without a group».
+- **The year's report**: the bars of the stages are in line.
+
 ## 1.3.8 (2026-11-25)
 
 - **Overall statistics**, the first sheet of «Reports» and also in «More»: how many books there are, the part of the

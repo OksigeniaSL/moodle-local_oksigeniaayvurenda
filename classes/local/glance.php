@@ -314,15 +314,29 @@ final class glance {
     }
 
     /**
-     * The loans of each stage in a period, in the order of the school; the rest (the staff, who is in no group) last.
+     * The loans of each stage in a period, in the order of the school; the rest (the staff, who is in no group) last. Of a
+     * year brought from another programme nobody may know who was in each stage: with loans of one of those, the stages
+     * would say that almost everybody is in none, and say nothing.
      *
      * @param \stdClass $library
      * @param int $from
      * @param int $until
-     * @return array[] stage ('' for the rest), loans, share; nothing without a single stage.
+     * @return array[] stage ('' for the rest), loans, share; nothing without a single stage, or with a year without them.
      */
     private static function stages(\stdClass $library, int $from, int $until): array {
         global $DB;
+        $params = ['libraryid' => $library->id, 'a' => $from, 'b' => $until];
+        $unknown = $DB->record_exists_sql(
+            "SELECT 1
+               FROM {" . self::T . "loan} l
+              WHERE l.libraryid = :libraryid AND l.timeloaned >= :a AND l.timeloaned < :b
+                    AND NOT EXISTS (SELECT 1 FROM {" . self::T . "member} m
+                                     WHERE m.yearid = l.yearid AND m.stage IS NOT NULL AND m.stage <> '')",
+            $params
+        );
+        if ($unknown) {
+            return [];
+        }
         $rows = $DB->get_records_sql(
             "SELECT s.stage, COUNT(1) AS loans
                FROM (SELECT l.id, COALESCE(MIN(m.stage), '') AS stage
@@ -331,7 +345,7 @@ final class glance {
                       WHERE l.libraryid = :libraryid AND l.timeloaned >= :a AND l.timeloaned < :b
                    GROUP BY l.id) s
            GROUP BY s.stage",
-            ['libraryid' => $library->id, 'a' => $from, 'b' => $until]
+            $params
         );
         $total = array_sum(array_column($rows, 'loans'));
         $out = array_values(array_map(fn($r) => ['stage' => (string) $r->stage, 'loans' => (int) $r->loans,

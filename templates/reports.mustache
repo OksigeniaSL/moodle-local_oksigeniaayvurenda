@@ -26,7 +26,7 @@
     * figure - the sentence of a period: lead (the figure, in the letter of titles) and rest; or nothing
     * tabs - url, label, short (its name on a phone), current
     * overall - the sheet of the whole library, in place of the lines (report_overall), or nothing
-    * action, library, report - the form; period (from, to) or never (unlent, older)
+    * period, or never - rows of sheets to touch: key, label, options (name, url, current)
     * rows - label, value, note, share (bar, 0 to 100), part
     * csv - address of the CSV
 
@@ -36,9 +36,6 @@
         "intro": "Cuántos préstamos hubo en el periodo, por grupo.",
         "tabs": [{"url": "#", "label": "Préstamos por grupo", "short": "Por grupo", "current": true}],
         "overall": null,
-        "action": "#",
-        "library": "central",
-        "report": "loans",
         "period": {"label": "El periodo", "sheets": [{"name": "Esta semana", "dates": "9 al 15 nov",
             "url": "https://example.org/reports.php?periodo=semana", "current": true, "other": false}],
             "strip": {"prompt": "Desde <b>octubre</b>. Toca el último mes:", "year": "2026-2027",
@@ -46,14 +43,13 @@
                 "url": "https://example.org/reports.php?desde=2026-10", "first": true}],
                 "days": "https://example.org/year.php", "dayslabel": "Por días exactos"} },
         "reportsnav": "Informes",
-        "never": null,
+        "never": [],
         "summary": "", "figure": {"lead": "325 préstamos", "rest": "en octubre."},
         "hasrows": true,
         "rows": [{"label": "3º A", "url": "https://example.org/readers.php", "value": 40, "note": "18 de 25 lectores", "share": 100, "part": ""}],
         "empty": "",
         "csv": "#",
-        "reportfrom": "Desde", "reportto": "Hasta", "reportunlent": "Sin prestar desde hace (años)",
-        "reportolder": "Adquiridos hace más de (años)", "labelsshow": "Ver", "reportcsv": "Descargar en CSV"
+        "reportcsv": "Descargar en CSV"
     }
 }}
 <div class="ayv-in-estos-dias">{{> local_oksigeniaayvurenda/life }}</div>
@@ -83,12 +79,10 @@
 </div>
 {{/period}}
 {{#never}}
-<form method="get" action="{{action}}" class="ayv-inline-form">
-    <input type="hidden" name="library" value="{{library}}"><input type="hidden" name="report" value="{{report}}">
-    <label class="ayv-field">{{reportunlent}} <input type="number" min="0" max="50" name="unlent" value="{{unlent}}"></label>
-    <label class="ayv-field">{{reportolder}} <input type="number" min="0" max="80" name="older" value="{{older}}"></label>
-    <button type="submit" class="ayv-button ayv-button-quiet">{{labelsshow}}</button>
-</form>
+<div class="ayv-in-desde" role="group" aria-labelledby="ayv-in-{{key}}">
+    <span class="ayv-in-desde-rotulo" id="ayv-in-{{key}}">{{label}}</span>
+    <div class="ayv-in-periodos">{{#options}}<a class="ayv-in-p ayv-in-a" href="{{url}}"{{#current}} aria-current="true"{{/current}}><b>{{name}}</b></a>{{/options}}</div>
+</div>
 {{/never}}
 {{#overall}}{{> local_oksigeniaayvurenda/report_overall }}{{/overall}}
 {{^overall}}
