@@ -45,6 +45,8 @@ final class howto {
         'material' => ['material.php', 'catalogue', 'material'],
         'free' => ['free.php', 'catalogue', 'free'],
         'labels' => ['labels.php', 'catalogue', 'labels'],
+        // The places of the library, their names for readers and moving books among them (the librarian, 26-11).
+        'places' => ['places.php', 'catalogue', ''],
         'labelsheets' => ['labels.php', 'catalogue', ''],
         'cards' => ['cardprint.php', 'desk', 'cardprint'],
         'readers' => ['readers.php', 'desk', 'readers'],

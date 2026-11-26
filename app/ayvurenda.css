@@ -15433,3 +15433,965 @@ html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
 .ayv .ayv-vp-otra > .ayv-vp-chips {
     margin-top: .45rem;
 }
+
+/* «Los sitios de la biblioteca», «Mover libros» and «¿Es esta?» (26 Nov 2026). Each place is the piece of furniture of
+   «Inventario» (.ayv-st-mueble): its plate carries the name the readers see and is written on in place, the old name
+   stays below for searching, and its books stand on the plank, as many as it holds against the fullest place. Moving
+   is a route between two pieces of furniture. After ayvurenda.css. From Chrome 93: no :has(), no color-mix(). */
+
+.ayv .ayv-si-h2 {
+    margin: 0 0 8px;
+    font-family: var(--title);
+    font-size: 1.3125rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.ayv .ayv-si-h2 span {
+    color: var(--ink-2);
+    font-family: var(--text);
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.ayv .ayv-si-nota {
+    margin: 0 0 12px;
+    color: var(--ink-2);
+}
+
+.ayv .ayv-si .ayv-cf-cabeza {
+    flex-wrap: wrap;
+}
+
+.ayv .ayv-si-cabeza-ir {
+    margin: 0;
+}
+
+.ayv .ayv-si-hecho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin: 0 0 22px;
+}
+
+/* What is left to put in order: three tickets with their number, each opening its way. */
+.ayv .ayv-si-orden {
+    margin: 0 0 28px;
+}
+
+.ayv .ayv-si-tareas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-si-tarea {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 2px 14px;
+    height: 100%;
+    padding: 14px 16px 14px 22px;
+    border-radius: 4px 14px 14px 4px;
+    background: linear-gradient(90deg, var(--green2) 0 6px, transparent 6px), var(--surface);
+    box-shadow: 0 0 0 1.5px var(--line);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-si-tarea b {
+    grid-row: span 2;
+    font-family: var(--title);
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.ayv .ayv-si-tarea-none {
+    background: linear-gradient(90deg, var(--coral) 0 6px, transparent 6px), var(--surface);
+}
+
+.ayv .ayv-si-tarea-names {
+    background: linear-gradient(90deg, var(--sun) 0 6px, transparent 6px), var(--surface);
+}
+
+.ayv .ayv-si-tarea-ir {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.ayv .ayv-si-tarea-ir span {
+    white-space: nowrap;
+}
+
+.ayv .ayv-si-tarea:hover,
+.ayv .ayv-si-tarea:focus-visible {
+    box-shadow: 0 0 0 2px var(--green);
+}
+
+/* Two places that look the same: their old names side by side, the difference marked, joined by a ribbon. */
+.ayv .ayv-si-pares {
+    margin: 0 0 30px;
+}
+
+.ayv .ayv-si-pares-lista {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-si-par {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 12px 14px 12px 16px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1.5px var(--line);
+}
+
+.ayv .ayv-si-viejo {
+    display: block;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.ayv .ayv-si-viejo mark {
+    padding: 0 3px;
+    border-radius: 3px;
+    background: rgba(226, 101, 76, .28);
+    box-shadow: inset 0 -2px 0 var(--coral);
+    color: inherit;
+}
+
+.ayv .ayv-si-cuantos {
+    display: block;
+    color: var(--ink-2);
+    font-size: .9375rem;
+}
+
+.ayv .ayv-si-par-lazo {
+    position: relative;
+    height: 22px;
+}
+
+.ayv .ayv-si-par-lazo::before,
+.ayv .ayv-si-par-lazo::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    width: 26px;
+    height: 16px;
+    border: 3px solid var(--sun);
+    border-radius: 9px;
+}
+
+.ayv .ayv-si-par-lazo::before {
+    left: 0;
+}
+
+.ayv .ayv-si-par-lazo::after {
+    right: 0;
+}
+
+.ayv .ayv-si-par-botones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0;
+}
+
+/* The places, by the room their old names share. */
+.ayv .ayv-si-grupo {
+    margin: 0 0 26px;
+}
+
+.ayv .ayv-si-plano {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    margin-top: 4px;
+}
+
+.ayv .ayv-si-mueble {
+    gap: 6px;
+    cursor: default;
+}
+
+.ayv .ayv-si-mueble:hover,
+.ayv .ayv-si-mueble:focus-within {
+    border-color: var(--line);
+}
+
+/* The plate: the name the readers see. It opens to write on it; the pencil says so. */
+.ayv .ayv-si-nombre > summary {
+    list-style: none;
+}
+
+.ayv .ayv-si-nombre > summary::-webkit-details-marker {
+    display: none;
+}
+
+.ayv .ayv-si-placa {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    margin: 0;
+    padding: 7px 10px 5px;
+    border: 0;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.ayv .ayv-si-nombre[open] > summary {
+    display: none;
+}
+
+.ayv .ayv-si-lapiz {
+    display: inline-flex;
+    flex: none;
+    margin-top: 1px;
+    color: #17574c;
+}
+
+.ayv .ayv-si-lapiz .ayv-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.ayv .ayv-si-placa:hover .ayv-si-lapiz,
+.ayv .ayv-si-placa:focus-visible .ayv-si-lapiz {
+    color: #a3321e;
+}
+
+.ayv input.ayv-si-placa {
+    display: block;
+    cursor: text;
+}
+
+.ayv input.ayv-si-placa:focus {
+    outline: 3px solid var(--sun);
+    outline-offset: 2px;
+}
+
+/* No name for the readers yet: the plate is the field, dashed, with an example. */
+.ayv .ayv-si-placa-vacia {
+    background: transparent;
+    box-shadow: none;
+    outline: 2px dashed var(--green2);
+    outline-offset: -2px;
+    color: var(--ink);
+}
+
+.ayv .ayv-si-placa-vacia::placeholder {
+    color: var(--ink-2);
+    font-family: var(--text);
+    font-weight: 400;
+    opacity: 1;
+}
+
+.ayv .ayv-si-escribe {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.ayv .ayv-si-escribe .ayv-line-button {
+    justify-self: start;
+}
+
+/* What the readers see today, or the old name kept for searching. */
+.ayv .ayv-si-buscar {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: .875rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.ayv .ayv-si-buscar span {
+    color: var(--ink);
+}
+
+/* The plank: only the books that are there, lit; the rest of the plank, bare. */
+.ayv .ayv-si-balda {
+    height: 46px;
+    margin-top: 4px;
+}
+
+.ayv .ayv-si-balda i {
+    flex: 0 0 calc((100% - 38px) / 20);
+}
+
+.ayv .ayv-si-balda i:not(.si) {
+    visibility: hidden;
+}
+
+.ayv .ayv-si-balda-vacia {
+    justify-content: center;
+}
+
+.ayv .ayv-si-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin: 0;
+}
+
+.ayv .ayv-si-abrir {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 44px;
+    margin: -12px -6px -10px 0;
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ayv .ayv-si-quitar {
+    color: var(--danger);
+}
+
+html[data-bs-theme="dark"] .ayv .ayv-si-quitar {
+    color: var(--late);
+}
+
+.ayv .ayv-si-vacio .ayv-st-cuenta b {
+    color: var(--ink-2);
+}
+
+/* The books without a place and a new place, dashed, at the end. */
+.ayv .ayv-si-final {
+    margin-top: 0;
+}
+
+.ayv .ayv-si-sinsitio,
+.ayv .ayv-si-nuevo {
+    align-content: center;
+    min-height: 150px;
+    border-style: dashed;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-si-sinsitio {
+    border-color: var(--coral);
+    cursor: pointer;
+}
+
+.ayv .ayv-si-sinsitio .ayv-st-cuenta b {
+    font-size: 1.75rem;
+}
+
+.ayv .ayv-si-nuevo {
+    cursor: default;
+}
+
+.ayv .ayv-si-nuevo-t {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--title);
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-si-nuevo .ayv-line-button {
+    justify-self: start;
+}
+
+/* «Mover libros»: the route, from one piece of furniture to the other. */
+.ayv .ayv-mv-ruta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px 18px;
+    margin: 0 0 26px;
+}
+
+.ayv .ayv-mv-de,
+.ayv .ayv-mv-a,
+.ayv .ayv-mv-destino {
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.ayv .ayv-mv-paso {
+    margin: 0 0 6px;
+    color: var(--ink-2);
+    font-weight: 700;
+}
+
+.ayv .ayv-mv-mueble {
+    cursor: default;
+}
+
+.ayv .ayv-mv-mueble:hover {
+    border-color: var(--line);
+}
+
+.ayv .ayv-mv-mueble.ayv-st-aqui {
+    transform: none;
+    border-color: var(--sun);
+}
+
+.ayv .ayv-mv-mueble.ayv-st-sin {
+    min-height: 140px;
+}
+
+.ayv .ayv-mv-flecha {
+    align-self: center;
+    margin-top: 30px;
+    color: var(--green2);
+}
+
+html[data-bs-theme="dark"] .ayv .ayv-mv-flecha {
+    color: var(--accent);
+}
+
+/* Which books: four ways, each a tile with its little drawing. */
+.ayv .ayv-mv-que-sec,
+.ayv .ayv-mv-donde-sec {
+    margin: 0 0 24px;
+}
+
+.ayv .ayv-mv-que {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-mv-forma {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    align-items: center;
+    gap: 0 12px;
+    height: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.ayv .ayv-mv-forma b {
+    font-family: var(--title);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.ayv .ayv-mv-forma > span:last-child {
+    grid-column: 2;
+    color: var(--ink-2);
+    font-size: .9375rem;
+    line-height: 1.35;
+}
+
+.ayv .ayv-mv-dibujo {
+    grid-row: span 2;
+    width: 44px;
+    height: 40px;
+    border-bottom: 5px solid #7d5328;
+    border-radius: 2px;
+}
+
+.ayv .ayv-mv-forma:hover,
+.ayv .ayv-mv-forma:focus-visible {
+    border-color: var(--green);
+}
+
+.ayv .ayv-mv-forma[aria-current] {
+    border-color: var(--green);
+    background: var(--notice-bg);
+    box-shadow: 0 0 0 1.5px var(--green);
+}
+
+/* The drawings: a full shelf; a label of a spine with two letters; the colours of three corners; a code. */
+.ayv .ayv-mv {
+    --ayv-mv-todos: linear-gradient(90deg, var(--green) 0 5px, transparent 5px 7px, var(--coral) 7px 12px, transparent 12px 14px, var(--sun) 14px 19px, transparent 19px 21px, var(--green2) 21px 26px, transparent 26px 28px, var(--green) 28px 33px, transparent 33px 35px, var(--coral) 35px 40px, transparent 40px);
+    --ayv-mv-rincon: linear-gradient(90deg, transparent 0 4px, var(--coral) 4px 12px, transparent 12px 18px, var(--coral) 18px 26px, transparent 26px 32px, var(--coral) 32px 40px, transparent 40px);
+    --ayv-mv-codigo: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px);
+}
+
+.ayv .ayv-mv-forma-all .ayv-mv-dibujo {
+    background: var(--ayv-mv-todos) left bottom / 100% 32px no-repeat;
+}
+
+.ayv .ayv-mv-forma-letters .ayv-mv-dibujo {
+    border-bottom: 0;
+    border-radius: 4px;
+    background: #fbf6ec;
+    box-shadow: inset 0 5px 0 var(--green), 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+.ayv .ayv-mv-forma-letters .ayv-mv-dibujo::before {
+    content: "A–M";
+    display: block;
+    padding-top: 10px;
+    color: #1e2b2a;
+    font-family: var(--title);
+    font-size: .875rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.ayv .ayv-mv-forma-corner .ayv-mv-dibujo {
+    background: var(--ayv-mv-rincon) left bottom / 100% 28px no-repeat;
+}
+
+.ayv .ayv-mv-forma-scan .ayv-mv-dibujo {
+    border-bottom: 0;
+    background: var(--ayv-mv-codigo) center / 34px 28px no-repeat;
+}
+
+.ayv .ayv-mv-panel {
+    padding: 16px 18px 14px;
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1.5px var(--line);
+}
+
+/* From one letter to another: the letters as labels of spines, the range lit green, its two ends with the lamp. */
+.ayv .ayv-mv-abc {
+    display: grid;
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    gap: 8px 6px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.ayv .ayv-mv-tejuelo {
+    display: grid;
+    justify-items: center;
+    width: 100%;
+    min-height: 58px;
+    padding: 9px 0 4px;
+    border: 0;
+    border-radius: 4px;
+    background: #fbf6ec;
+    box-shadow: inset 0 5px 0 rgba(30, 43, 42, .18), 0 1px 2px rgba(0, 0, 0, .2);
+    color: #1e2b2a;
+    font: inherit;
+    cursor: pointer;
+}
+
+.ayv .ayv-mv-tejuelo b {
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+.ayv .ayv-mv-tejuelo span {
+    color: #4a5451;
+    font-size: .8125rem;
+}
+
+.ayv .ayv-mv-dentro {
+    background: #d5e8e0;
+    box-shadow: inset 0 5px 0 #17574c, 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+.ayv .ayv-mv-borde {
+    outline: 3px solid var(--sun);
+    outline-offset: 1px;
+}
+
+.ayv .ayv-mv-tejuelo:disabled {
+    opacity: .4;
+    cursor: default;
+}
+
+.ayv .ayv-mv-tejuelo:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.ayv .ayv-mv-cuenta {
+    margin: 0;
+    font-size: 1.0625rem;
+}
+
+.ayv .ayv-mv-cuenta b {
+    font-family: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ayv .ayv-mv-rincones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.ayv .ayv-mv-rincones .ayv-cf-chapa span {
+    color: var(--ink-2);
+    font-weight: 400;
+}
+
+.ayv .ayv-mv-rincones .ayv-cf-chapa[aria-pressed="true"] span {
+    color: inherit;
+}
+
+.ayv .ayv-mv-color {
+    width: 12px;
+    height: 22px;
+    border-radius: 2px 2px 0 0;
+}
+
+/* Where to: the plan, smaller, each place a radio; a new place is splitting the first in two. */
+.ayv .ayv-mv-plano {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+}
+
+.ayv .ayv-mv-sitio {
+    gap: 6px;
+    min-height: 88px;
+}
+
+.ayv .ayv-mv-sitio.ayv-st-aqui {
+    transform: none;
+}
+
+.ayv .ayv-mv-sitio.ayv-si-nuevo {
+    min-height: 88px;
+    border-style: dashed;
+    border-color: var(--green2);
+}
+
+.ayv .ayv-mv-sitio.ayv-si-nuevo.ayv-st-aqui {
+    border-style: solid;
+    border-color: var(--sun);
+}
+
+.ayv .ayv-mv-accion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--line);
+}
+
+.ayv .ayv-mv-accion .ayv-si-nota {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.ayv .ayv-mv-ir {
+    min-height: 56px;
+    padding-inline: 1.75rem;
+    font-size: 1.125rem;
+}
+
+/* One by one: the place where they go, lit; the reader; the last ones, each with «Deshacer». */
+.ayv .ayv-mv-dos {
+    margin-top: 0;
+}
+
+.ayv .ayv-mv-izq {
+    display: grid;
+    gap: 16px;
+}
+
+.ayv .ayv-mv-linea {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2px 12px;
+}
+
+.ayv .ayv-mv-linea .ayv-line-text,
+.ayv .ayv-mv-linea .ayv-line-note {
+    grid-column: 1;
+}
+
+.ayv .ayv-mv-deshaz {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0;
+}
+
+.ayv .ayv-mv-here {
+    border-left-color: var(--line);
+}
+
+.ayv .ayv-mv-unknown {
+    border-left-color: var(--coral);
+    background: var(--no-bg);
+}
+
+/* «¿Es esta?»: up to six covers, each with its publisher and year; the one like this record carries its tag. */
+.ayv .ayv-pc-buscar {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+    margin: 0;
+}
+
+.ayv .ayv-pc-buscar .ayv-line-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ayv .ayv-pc-nada {
+    color: var(--ayv-plate-ink, #1e2b2a);
+    font-size: .9375rem;
+    text-align: center;
+}
+
+/* On the cream plate of the cover, in both themes. */
+.ayv .ayv-record-cover .ayv-pc-buscar {
+    justify-items: center;
+}
+
+.ayv .ayv-record-cover .ayv-pc-buscar .ayv-line-button {
+    border-color: #17574c;
+    background: #fbf6ec;
+    color: #17574c;
+}
+
+.ayv .ayv-pc {
+    margin: 4px 0 24px;
+    padding: 16px 18px 14px;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 0 0 1.5px var(--sun), 0 10px 28px -14px rgba(15, 58, 51, .32);
+}
+
+.ayv .ayv-pc .ayv-section-title {
+    margin-top: 0;
+}
+
+.ayv .ayv-pc-nota {
+    margin: 0 0 4px;
+}
+
+.ayv .ayv-pc-esta {
+    margin: 0 0 14px;
+    color: var(--ink-2);
+}
+
+.ayv .ayv-pc-esta b {
+    color: var(--ink);
+}
+
+.ayv .ayv-pc-lista {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px 14px;
+    margin: 0 0 12px;
+}
+
+.ayv .ayv-pc-una {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 0 0 4px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+}
+
+.ayv .ayv-pc-una img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 3px 8px 8px 3px;
+    box-shadow: 0 6px 16px -8px rgba(15, 58, 51, .6), 0 0 0 1px var(--line);
+    object-fit: cover;
+    transition: transform .15s ease;
+}
+
+.ayv .ayv-pc-una:hover img,
+.ayv .ayv-pc-una:focus-visible img {
+    box-shadow: 0 0 0 3px var(--sun), 0 10px 20px -8px rgba(15, 58, 51, .6);
+    transform: translateY(-4px);
+}
+
+.ayv .ayv-pc-una:focus-visible {
+    outline: none;
+}
+
+.ayv .ayv-pc-datos {
+    color: var(--ink-2);
+    font-size: .875rem;
+    line-height: 1.3;
+}
+
+.ayv .ayv-pc-igual {
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: var(--sun);
+    color: #1e2b2a;
+    font-size: .8125rem;
+    font-weight: 700;
+}
+
+.ayv .ayv-pc-otras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.ayv .ayv-pc-foto {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-pc-una img {
+        transition: none;
+    }
+
+    .ayv .ayv-pc-una:hover img,
+    .ayv .ayv-pc-una:focus-visible img {
+        transform: none;
+    }
+}
+
+@media (max-width: 860px) {
+    .ayv .ayv-mv-que {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ayv .ayv-pc-lista {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .ayv .ayv-si-par {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .ayv .ayv-si-par-lazo {
+        width: 44px;
+    }
+
+    .ayv .ayv-si-par-botones {
+        justify-content: flex-start;
+        margin-top: 4px;
+    }
+
+    .ayv .ayv-si-plano {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .ayv .ayv-si-mueble {
+        padding: 10px 10px 8px;
+    }
+
+    .ayv .ayv-si-balda {
+        height: 34px;
+        border-bottom-width: 7px;
+    }
+
+    .ayv .ayv-si-sinsitio,
+    .ayv .ayv-si-nuevo {
+        min-height: 120px;
+    }
+
+    .ayv .ayv-mv-ruta {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 6px 8px;
+    }
+
+    .ayv .ayv-mv-flecha svg {
+        width: 28px;
+    }
+
+    .ayv .ayv-mv-ruta .ayv-st-mueble {
+        padding: 10px;
+    }
+
+    .ayv .ayv-mv-ruta .ayv-si-buscar {
+        display: none;
+    }
+
+    .ayv .ayv-mv-que {
+        gap: 8px;
+    }
+
+    .ayv .ayv-mv-forma {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+        padding: 10px 12px;
+    }
+
+    .ayv .ayv-mv-forma > span:last-child {
+        grid-column: 1;
+    }
+
+    .ayv .ayv-mv-dibujo {
+        grid-row: auto;
+        width: 36px;
+        height: 30px;
+    }
+
+    .ayv .ayv-mv-panel {
+        padding: 14px 12px 12px;
+    }
+
+    .ayv .ayv-mv-abc {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px 5px;
+    }
+
+    .ayv .ayv-mv-plano {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .ayv .ayv-mv-ir {
+        width: 100%;
+    }
+
+    .ayv .ayv-mv-accion .ayv-button-quiet {
+        width: 100%;
+    }
+
+    .ayv .ayv-pc {
+        padding: 14px 12px 12px;
+    }
+
+    .ayv .ayv-pc-lista {
+        gap: 14px 10px;
+    }
+}

@@ -1,0 +1,66 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/places_place
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    One place as a piece of furniture. With a name for the readers, the plate shows it and opens to write on it; without
+    one, the plate is the field itself, dashed, waiting. Below, what the readers see today, or the old name kept for
+    searching; the books stand on the plank, as many spines as it holds against the fullest place; and the way to move
+    them. An empty place can be taken away.
+
+    Context variables required for this template:
+    * id, name, oldname, searchline, noname, empty, count, countword, spines (on), url, openlabel
+    * action, sesskey, namelabel, example, savelabel, renamelabel; removelabel when empty
+
+    Example context (json):
+    {"id": 3, "name": "Estante redondo", "oldname": "Patio, estante redondo", "searchline": "Para buscar:", "noname": false,
+        "empty": false, "count": "131", "countword": "libros", "spines": [{"on": true}], "url": "#", "openlabel": "Mover",
+        "action": "#", "sesskey": "abc", "namelabel": "Nombre para los lectores", "example": "p. ej., Estante redondo",
+        "savelabel": "Guardar", "renamelabel": "Cambiar el nombre", "removelabel": ""}
+}}
+<div class="ayv-st-mueble ayv-si-mueble{{#noname}} ayv-si-sinnombre{{/noname}}{{#empty}} ayv-si-vacio{{/empty}}">
+    {{^noname}}
+    <details class="ayv-si-nombre">
+        <summary class="ayv-st-placa ayv-si-placa"><span>{{name}}</span><span class="ayv-si-lapiz">{{> local_oksigeniaayvurenda/icon_pencil}}<span class="ayv-sr">{{renamelabel}}</span></span></summary>
+        <form method="post" action="{{action}}" class="ayv-si-escribe" data-ayv-autosave>
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="place" value="{{id}}">
+            <label class="ayv-sr" for="ayv-si-n{{id}}">{{namelabel}}</label>
+            <input type="text" class="ayv-st-placa ayv-si-placa" id="ayv-si-n{{id}}" name="name" value="{{name}}" maxlength="60" autocomplete="off">
+            <button type="submit" class="ayv-line-button ayv-line-choice ayv-autosave-button">{{savelabel}}</button>
+        </form>
+    </details>
+    {{/noname}}
+    {{#noname}}
+    <form method="post" action="{{action}}" class="ayv-si-escribe" data-ayv-autosave>
+        <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="place" value="{{id}}">
+        <label class="ayv-sr" for="ayv-si-n{{id}}">{{namelabel}}</label>
+        <input type="text" class="ayv-st-placa ayv-si-placa ayv-si-placa-vacia" id="ayv-si-n{{id}}" name="name" placeholder="{{example}}" maxlength="60" autocomplete="off">
+        <button type="submit" class="ayv-line-button ayv-line-choice ayv-autosave-button">{{savelabel}}</button>
+    </form>
+    {{/noname}}
+    {{#searchline}}<p class="ayv-si-buscar">{{searchline}} <span>{{oldname}}</span></p>{{/searchline}}
+    {{^empty}}<span class="ayv-st-balda ayv-si-balda" aria-hidden="true">{{#spines}}<i{{#on}} class="si"{{/on}}></i>{{/spines}}</span>{{/empty}}
+    {{#empty}}<span class="ayv-st-balda ayv-si-balda ayv-si-balda-vacia" aria-hidden="true"></span>{{/empty}}
+    <p class="ayv-si-pie">
+        <span class="ayv-st-cuenta"><b>{{count}}</b> {{countword}}</span>
+        {{^empty}}<a class="ayv-si-abrir" href="{{url}}">{{openlabel}} <span aria-hidden="true">›</span></a>{{/empty}}
+        {{#empty}}{{#removelabel}}<button type="submit" form="ayv-si-quita{{id}}" class="ayv-si-abrir ayv-si-quitar">{{removelabel}}</button>{{/removelabel}}{{/empty}}
+    </p>
+    {{#empty}}{{#removelabel}}<form id="ayv-si-quita{{id}}" method="post" action="{{action}}" hidden><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="remove" value="{{id}}"></form>{{/removelabel}}{{/empty}}
+</div>

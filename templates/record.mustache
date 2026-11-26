@@ -28,6 +28,8 @@
     * hold - the reservation box, or nothing
     * where - how to find it on the shelf (heading, lines, placecolour, placeline, whys, order), or nothing
     * beside - the books beside it on its shelf (heading, spines, walk, walkurl, bird, bookend), or nothing
+    * coverseek - for the staff, on a record without a cover: action, sesskey, label, and none after a search found nothing
+    * covers - the covers found by title and author, to choose one (record_covers), or nothing
 
     Example context (json):
     {
@@ -75,6 +77,13 @@
         <p class="ayv-state ayv-state-{{stateclass}}">{{statelabel}}</p>
         {{#location}}<p class="ayv-where">{{location}}</p>{{/location}}
         {{/card}}
+        {{#coverseek}}
+        <form method="post" action="{{action}}" class="ayv-pc-buscar">
+            <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="cover" value="seek">
+            <button type="submit" class="ayv-line-button ayv-line-choice">{{> local_oksigeniaayvurenda/icon_search}} {{label}}</button>
+            {{#none}}<span class="ayv-pc-nada" role="status">{{none}}</span>{{/none}}
+        </form>
+        {{/coverseek}}
     </div>
     <div class="ayv-record-body">
         <h1 class="ayv-record-title">{{title}}</h1>
@@ -82,6 +91,7 @@
         <p class="ayv-record-authors">
             {{#authors}}<span class="ayv-author">{{name}}{{#role}} <span class="ayv-role">({{role}})</span>{{/role}}</span>{{/authors}}
         </p>
+        {{#covers}}{{> local_oksigeniaayvurenda/record_covers}}{{/covers}}
         {{#lend}}<p class="ayv-record-lend"><a class="ayv-button" href="{{url}}">{{label}}</a></p>{{/lend}}
         {{#hold}}
         <section class="ayv-hold" aria-label="{{boxlabel}}">

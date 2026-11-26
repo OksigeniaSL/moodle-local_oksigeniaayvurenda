@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0 (2026-11-26)
+
+- **The places of the library** (in «More»): each place is a piece of furniture whose plate carries the name readers see,
+  written on it in place; the name from the programme before stays for searching. Places written almost alike are offered
+  as one («Yes, it is the same», with «Undo»), places are made new, and empty ones removed.
+- **Move books**: from one place to another, all of them, from one letter of the spines to another, one corner, or one by
+  one with the reader or the camera; a new place splits one in two, and «It is the same place» joins them. Every move can
+  be undone for 30 days, and one by one, each book.
+- **«Is this the cover?»**: on a record without a cover, whoever catalogues asks for it now; without an ISBN, the covers
+  found by title and author are offered, up to six, the one of the same edition marked, and none is put by itself.
+
 ## 1.3.10 (2026-11-26)
 
 - **The missing covers come by themselves**: every ten minutes a few books without a cover are asked for theirs, the most

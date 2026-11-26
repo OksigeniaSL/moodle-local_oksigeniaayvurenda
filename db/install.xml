@@ -1174,5 +1174,24 @@
         <INDEX NAME="entityhash" UNIQUE="true" FIELDS="entityid, emailhash"/>
       </INDEXES>
     </TABLE>
+    <TABLE NAME="local_oksigeniaayvurenda_move" COMMENT="Copies moved from one place to another together, to undo the move">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="libraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="batch" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false" COMMENT="The copies moved together"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="fromid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The place it was in; none if it had none"/>
+        <FIELD NAME="toid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The place it went to"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="libraryid" TYPE="foreign" FIELDS="libraryid" REFTABLE="local_oksigeniaayvurenda_library" REFFIELDS="id"/>
+        <KEY NAME="itemid" TYPE="foreign" FIELDS="itemid" REFTABLE="local_oksigeniaayvurenda_item" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="librarybatch" UNIQUE="false" FIELDS="libraryid, batch"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

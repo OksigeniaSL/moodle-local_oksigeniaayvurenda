@@ -83,6 +83,13 @@ if ($channel && optional_param('channel', 0, PARAM_BOOL) && data_submitted() && 
     $posted = \local_oksigeniaayvurenda\local\channel::post_book($library, $id);
     redirect(new moodle_url($PAGE->url, ['channelsent' => $posted ? 1 : 2]));
 }
+// Whoever catalogues asks now for a missing cover, by its ISBN and, without one, by title and author: the covers found
+// that way are offered, never put by themselves.
+$coveraction = optional_param('cover', '', PARAM_ALPHANUM);
+if ($correct && $coveraction !== '' && data_submitted() && confirm_sesskey()) {
+    $asked = \local_oksigeniaayvurenda\local\covers::ask_now($id, $coveraction);
+    redirect(new moodle_url($PAGE->url, ['covers' => $asked], $asked === 'some' ? 'ayv-pc' : null));
+}
 // Whoever works at the desk picks this book as the book of the week, with a line of their own (P9), or takes it away.
 $pickable = access::can('local/oksigeniaayvurenda:desk', $library) && !\local_oksigeniaayvurenda\local\bank::is($library);
 $weekpick = optional_param('weekpick', '', PARAM_ALPHA);
@@ -177,6 +184,41 @@ $data['backresults'] = $came !== '' && str_contains($came, '/local/oksigeniaayvu
 $data['backresultslabel'] = get_string('recordbackresults', 'local_oksigeniaayvurenda');
 // A book without a cover that someone looks at asks for it, once, in the background.
 \local_oksigeniaayvurenda\local\covers::seek((int) $found['record']->id);
+// And whoever catalogues may ask now, and choose.
+if ($correct && \local_oksigeniaayvurenda\local\covers::url($id) === null) {
+    $asked = optional_param('covers', '', PARAM_ALPHA);
+    $say = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+    $data['coverseek'] = ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(),
+        'label' => $say($asked === 'none' ? 'coversseekagain' : 'coversseek'),
+        'none' => $asked === 'none' ? $say('coversnone') : ''];
+    $kept = $asked === 'some' ? \local_oksigeniaayvurenda\local\covers::kept($id) : [];
+    if ($kept) {
+        $edition = $DB->get_record('local_oksigeniaayvurenda_record', ['id' => $id], 'id, pubyear, isbn');
+        $edition->publisher = (string) $DB->get_field_sql(
+            "SELECT a.label FROM {local_oksigeniaayvurenda_recauth} ra
+               JOIN {local_oksigeniaayvurenda_authority} a ON a.id = ra.authorityid AND a.kind = 'publisher'
+              WHERE ra.recordid = :id ORDER BY ra.id",
+            ['id' => $id],
+            IGNORE_MULTIPLE
+        );
+        $mine = trim(implode(', ', array_filter([(string) $edition->publisher, (string) $edition->pubyear])));
+        $same = fn(array $c) => $mine !== '' && $c['year'] === (string) $edition->pubyear
+            && \local_oksigeniaayvurenda\core\text::normalise($c['publisher']) !== ''
+            && str_contains(
+                \local_oksigeniaayvurenda\core\text::normalise((string) $edition->publisher),
+                \local_oksigeniaayvurenda\core\text::normalise($c['publisher'])
+            );
+        $data['covers'] = ['heading' => $say('coversheading'), 'hint' => $say('covershint'),
+            'thisline' => $say('coversthis', (object) [
+                'edition' => $mine !== '' ? '<b>' . s($mine) . '</b>' : s($say('coversunknown')),
+                'isbn' => (string) $edition->isbn !== '' ? ' · ISBN ' . s($edition->isbn) : '']),
+            'action' => $PAGE->url->out(false), 'sesskey' => sesskey(),
+            'list' => array_map(fn($i, $c) => ['key' => (string) $i, 'src' => $c['src'], 'line' => $c['detail'],
+                'same' => $same($c),
+                'samelabel' => $say('coverssame'), 'picklabel' => $say('coverspick')], array_keys($kept), $kept),
+            'nonelabel' => $say('coversnotthese'), 'photolabel' => $say('coversphoto'), 'photourl' => '#ayv-fix-record'];
+    }
+}
 $data['reviews'] = screens::reviews($found, $library, optional_param('reviewed', '', PARAM_ALPHA));
 $data['hold'] = screens::hold($found, $library, optional_param('held', '', PARAM_ALPHA));
 $data['digital'] = screens::digital($found, $library);

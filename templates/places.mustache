@@ -1,0 +1,108 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/places
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    The places of a library, as the furniture of the room in «Inventario»: each with its plate, which carries the name
+    the readers see and is written on in place, the old name below for searching, and its books on the plank. Above,
+    what is left to put in order (books without a place, places that look the same, places without a name for the
+    readers); the pairs that look the same, joined with one touch; at the end, the books without a place and a new one.
+    Every gesture is a button of its own form and works without JavaScript.
+
+    Context variables required for this template:
+    * heading, intro, movesurl, moveslabel - the head
+    * done - after a change: text, action, sesskey, undo, undolabel
+    * hastodo, todoheading, todo (kind: none, pairs or names; count, text, go, url)
+    * haspairs, pairsheading, pairshint, pairs (action, sesskey, joinlabel, apartlabel, a and b: id, oldhtml, countlabel)
+    * groups (gid, name, countlabel, places: see places_place)
+    * unplaced (count, text, url, go), fresh (action, sesskey, heading, label, example, go)
+
+    Example context (json):
+    {
+        "heading": "Los sitios de la biblioteca", "intro": "Cada mueble es un sitio.", "movesurl": "#", "moveslabel": "Mover libros",
+        "done": null, "hastodo": true, "todoheading": "Para dejarlo en orden",
+        "todo": [{"kind": "none", "count": "766", "text": "libros no tienen sitio", "go": "Colocarlos", "url": "#"}],
+        "haspairs": false, "pairs": [],
+        "groups": [{"gid": 1, "name": "", "countlabel": "", "places": [{"id": 3, "name": "Estante redondo",
+            "oldname": "Patio, estante redondo", "searchline": "Para buscar:", "noname": false, "empty": false, "count": "131",
+            "countword": "libros", "spines": [{"on": true}], "url": "#", "openlabel": "Mover", "action": "#", "sesskey": "abc",
+            "namelabel": "Nombre para los lectores", "example": "p. ej., Estante redondo", "savelabel": "Guardar",
+            "renamelabel": "Cambiar el nombre"}]}],
+        "unplaced": {"count": "766", "text": "libros sin sitio", "url": "#", "go": "Colocarlos con el lector"},
+        "fresh": {"action": "#", "sesskey": "abc", "heading": "Un sitio nuevo", "label": "Su nombre",
+            "example": "p. ej., Estante redondo", "go": "Crear"}
+    }
+}}
+<div class="ayv-cf ayv-st ayv-si">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p></div>
+    <p class="ayv-si-cabeza-ir"><a class="ayv-button" href="{{movesurl}}">{{moveslabel}}</a></p>
+</header>
+{{#done}}
+<form class="ayv-notice ayv-si-hecho" method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="undo" value="{{undo}}">
+    <span role="status">{{text}}</span> <button type="submit" class="ayv-line-button ayv-line-quiet">{{undolabel}}</button>
+</form>
+{{/done}}
+{{#hastodo}}
+<section class="ayv-si-orden" aria-labelledby="ayv-si-orden-t">
+    <h2 class="ayv-si-h2" id="ayv-si-orden-t">{{todoheading}}</h2>
+    <ul class="ayv-si-tareas">
+        {{#todo}}<li><a class="ayv-si-tarea ayv-si-tarea-{{kind}}" href="{{url}}"><b>{{count}}</b><span>{{text}}</span><span class="ayv-si-tarea-ir">{{go}} <span aria-hidden="true">›</span></span></a></li>{{/todo}}
+    </ul>
+</section>
+{{/hastodo}}
+{{#haspairs}}
+<section class="ayv-si-pares" id="ayv-si-pares" aria-labelledby="ayv-si-pares-t">
+    <h2 class="ayv-si-h2" id="ayv-si-pares-t">{{pairsheading}}</h2>
+    <p class="ayv-si-nota">{{pairshint}}</p>
+    <ul class="ayv-si-pares-lista">
+        {{#pairs}}<li class="ayv-si-par">
+            <span class="ayv-si-par-uno"><span class="ayv-si-viejo">{{{a.oldhtml}}}</span> <span class="ayv-si-cuantos">{{a.countlabel}}</span></span>
+            <span class="ayv-si-par-lazo" aria-hidden="true"></span>
+            <span class="ayv-si-par-dos"><span class="ayv-si-viejo">{{{b.oldhtml}}}</span> <span class="ayv-si-cuantos">{{b.countlabel}}</span></span>
+            <form method="post" action="{{action}}" class="ayv-si-par-botones">
+                <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="into" value="{{a.id}}">
+                <button type="submit" class="ayv-line-button ayv-line-renew" name="join" value="{{b.id}}">{{joinlabel}}</button>
+                <button type="submit" class="ayv-line-button ayv-line-quiet" name="apart" value="{{b.id}}">{{apartlabel}}</button>
+            </form>
+        </li>{{/pairs}}
+    </ul>
+</section>
+{{/haspairs}}
+{{#groups}}
+<section class="ayv-si-grupo"{{#name}} aria-labelledby="ayv-si-g{{gid}}"{{/name}}>
+    {{#name}}<h2 class="ayv-si-h2" id="ayv-si-g{{gid}}">{{name}} <span>{{countlabel}}</span></h2>{{/name}}
+    <ul class="ayv-st-plano ayv-si-plano">
+        {{#places}}<li id="ayv-si-{{id}}">{{> local_oksigeniaayvurenda/places_place}}</li>{{/places}}
+    </ul>
+</section>
+{{/groups}}
+<ul class="ayv-st-plano ayv-si-plano ayv-si-final">
+    {{#unplaced}}<li><a class="ayv-st-mueble ayv-si-sinsitio" href="{{url}}"><span class="ayv-st-cuenta"><b>{{count}}</b> {{text}}</span><span class="ayv-si-tarea-ir">{{go}} <span aria-hidden="true">›</span></span></a></li>{{/unplaced}}
+    {{#fresh}}<li><form method="post" action="{{action}}" class="ayv-st-mueble ayv-si-nuevo">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <span class="ayv-si-nuevo-t">{{> local_oksigeniaayvurenda/icon_plus}} {{heading}}</span>
+        <label class="ayv-sr" for="ayv-si-nuevo">{{label}}</label>
+        <input class="ayv-st-placa ayv-si-placa ayv-si-placa-vacia" id="ayv-si-nuevo" name="name" placeholder="{{example}}" maxlength="60" autocomplete="off" required>
+        <button type="submit" class="ayv-line-button ayv-line-choice">{{go}}</button>
+    </form></li>{{/fresh}}
+</ul>
+</div>

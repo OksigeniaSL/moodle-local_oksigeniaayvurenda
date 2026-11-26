@@ -123,6 +123,7 @@ final class copies {
         'relay' => 'a phone paired with a desk for a few minutes',
         'digitalread' => 'where each person goes in a digital book, by Moodle account',
         'mailstop' => 'the «no more mail» of an adult without an account is a hash of an address, kept by the site that sent',
+        'move' => 'what is needed to undo a move of copies for a while, not the places they are in now',
     ];
 
     /**

@@ -976,6 +976,15 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
 
     // A setting a version brings gets its value now, so that Moodle does not stop on it on «New settings».
     \local_oksigeniaayvurenda\local\sitesettings::settle();
+    if ($oldversion < 2026112601) {
+        // Copies moved together, to undo a move from the places of the library.
+        $table = new xmldb_table('local_oksigeniaayvurenda_move');
+        if (!$dbman->table_exists($table)) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_oksigeniaayvurenda_move');
+        }
+        upgrade_plugin_savepoint(true, 2026112601, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

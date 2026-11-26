@@ -515,11 +515,59 @@ final class covers {
             }
             foreach ($ask() as $cover) {
                 $found[$cover['url']] = ['url' => $cover['url'], 'source' => $source, 'title' => $cover['title'],
+                    'publisher' => $cover['publisher'], 'year' => $cover['year'],
                     'detail' => implode(' · ', array_filter([$cover['authors'], $cover['publisher'], $cover['year']]))];
             }
             self::heed($source);
         }
         return array_slice(array_values($found), 0, self::CANDIDATES);
+    }
+
+    /**
+     * What whoever catalogues asks of a book without a cover, from its record: «seek» asks now by its ISBN and, without it,
+     * by title and author, keeping the candidates (with a small picture of each, inside the page) for the person; a number
+     * chooses one of them; «none» says none is this one.
+     *
+     * @param int $recordid
+     * @param string $action
+     * @return string found, some, none, chosen or dismissed.
+     */
+    public static function ask_now(int $recordid, string $action): string {
+        global $SESSION;
+        $kept = $SESSION->ayvcovers[$recordid] ?? [];
+        if ($action === 'none') {
+            unset($SESSION->ayvcovers[$recordid]);
+            return 'dismissed';
+        }
+        if (ctype_digit($action)) {
+            $chosen = $kept[(int) $action] ?? null;
+            unset($SESSION->ayvcovers[$recordid]);
+            return $chosen && self::choose($recordid, $chosen['url']) ? 'chosen' : 'none';
+        }
+        if (self::url($recordid) !== null || self::find($recordid)) {
+            return 'found';
+        }
+        $list = [];
+        foreach (self::candidates($recordid) as $candidate) {
+            $data = lookup::fetch($candidate['url']);
+            $small = $data !== null && strlen($data) >= 1000 ? self::thumb($data, 160) : null;
+            if ($small !== null) {
+                $list[] = $candidate + ['src' => 'data:image/jpeg;base64,' . base64_encode($small)];
+            }
+        }
+        $SESSION->ayvcovers = [$recordid => $list];
+        return $list ? 'some' : 'none';
+    }
+
+    /**
+     * The candidates kept for a person, for a record.
+     *
+     * @param int $recordid
+     * @return array[]
+     */
+    public static function kept(int $recordid): array {
+        global $SESSION;
+        return $SESSION->ayvcovers[$recordid] ?? [];
     }
 
     /**

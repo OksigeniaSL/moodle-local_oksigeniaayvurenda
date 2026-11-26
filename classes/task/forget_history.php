@@ -43,5 +43,7 @@ class forget_history extends \core\task\scheduled_task {
     public function execute(): void {
         $done = \local_oksigeniaayvurenda\local\forgetting::run();
         mtrace('Ayvurenda: ' . $done . ' readers\' years of history no longer say who.');
+        // And the moves of copies too old to be undone.
+        \local_oksigeniaayvurenda\local\moves::forget(time());
     }
 }

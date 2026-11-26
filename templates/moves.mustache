@@ -1,0 +1,139 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/moves
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Moving books from one place to another, as a route between two pieces of furniture. To choose: which books (all of
+    them, from one letter of the call number to another, one corner, or one by one with the reader) and where to (a
+    place of the plan, or a new one: that is splitting a place in two). With all of them, the two places can also be
+    joined. One by one: the place where they go stands lit, the reader below with how many have gone, and the last ones
+    each with «Deshacer», as in «Inventario». Every gesture is a button of its own form and works without JavaScript.
+
+    Context variables required for this template:
+    * heading, intro, done (text, action, sesskey, undo, undolabel)
+    * choose: fromheading, from (name, oldline, countlabel, spines), fromchange, fromchangeurl; toheading, to (name,
+      countlabel, spines) or toempty; whatheading, ways (url, title, text, current, kind); letters (hint, list: letter,
+      count, in, edge, none; line); corners (hint, list: id, label, count, colour, pressed; line); whereheading, targets
+      (id, name, countlabel, here, herelabel), fresh (label, example, value, chosen); action, sesskey, go (label, hint), join
+      (label, hint)
+    * reading: toheading, to (name, countlabel, spines), changeurl, changelabel; prompt, tools, cifra (seen, of);
+      action, sesskey; lastheading, log (title, note, kind: moved, here or unknown; undo), finishurl, finishlabel, hint
+
+    Example context (json):
+    {"heading": "Mover libros", "intro": "Elige qué libros y adónde.", "done": null, "choose": null, "reading": null}
+}}
+<div class="ayv-cf ayv-st ayv-mv">
+<header class="ayv-cf-cabeza">
+    <div class="ayv-cf-cabeza-texto"><h1 class="ayv-cf-titulo">{{heading}}</h1>
+        <p class="ayv-cf-entrada">{{intro}}</p></div>
+</header>
+{{#done}}
+<form class="ayv-notice ayv-si-hecho" method="post" action="{{action}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="undo" value="{{undo}}">
+    <span role="status">{{text}}</span> <button type="submit" class="ayv-line-button ayv-line-quiet">{{undolabel}}</button>
+</form>
+{{/done}}
+{{#choose}}
+<form method="post" action="{{action}}" class="ayv-mv-elige">
+<input type="hidden" name="sesskey" value="{{sesskey}}">
+<div class="ayv-mv-ruta">
+    <div class="ayv-mv-de">
+        <p class="ayv-mv-paso">{{fromheading}}</p>
+        {{#from}}<div class="ayv-st-mueble ayv-mv-mueble"><span class="ayv-st-placa">{{name}}</span>{{#oldline}}<span class="ayv-si-buscar">{{oldline}}</span>{{/oldline}}
+            <span class="ayv-st-balda ayv-si-balda" aria-hidden="true">{{#spines}}<i{{#on}} class="si"{{/on}}></i>{{/spines}}</span>
+            <span class="ayv-si-pie"><span class="ayv-st-cuenta">{{countlabel}}</span> <a class="ayv-si-abrir" href="{{fromchangeurl}}">{{fromchange}}</a></span></div>{{/from}}
+    </div>
+    <span class="ayv-mv-flecha" aria-hidden="true"><svg viewBox="0 0 64 24" width="64" height="24"><path d="M2 12h54M46 3l12 9-12 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <div class="ayv-mv-a">
+        <p class="ayv-mv-paso">{{toheading}}</p>
+        {{#to}}<div class="ayv-st-mueble ayv-mv-mueble ayv-st-aqui"><span class="ayv-st-placa">{{name}}</span>
+            <span class="ayv-st-balda ayv-si-balda" aria-hidden="true">{{#spines}}<i{{#on}} class="si"{{/on}}></i>{{/spines}}</span>
+            <span class="ayv-si-pie"><span class="ayv-st-cuenta">{{countlabel}}</span></span></div>{{/to}}
+        {{^to}}<div class="ayv-st-mueble ayv-st-sin ayv-mv-mueble">{{toempty}}</div>{{/to}}
+    </div>
+</div>
+
+<section class="ayv-mv-que-sec" aria-labelledby="ayv-mv-que-t">
+    <h2 class="ayv-si-h2" id="ayv-mv-que-t">{{whatheading}}</h2>
+    <ul class="ayv-mv-que">
+        {{#ways}}<li><a class="ayv-mv-forma ayv-mv-forma-{{kind}}" href="{{url}}"{{#current}} aria-current="true"{{/current}}><span class="ayv-mv-dibujo" aria-hidden="true"></span><b>{{title}}</b><span>{{text}}</span></a></li>{{/ways}}
+    </ul>
+    {{#letters}}
+    <div class="ayv-mv-panel">
+        <p class="ayv-si-nota">{{hint}}</p>
+        <ol class="ayv-mv-abc">
+            {{#list}}<li><button type="submit" class="ayv-mv-tejuelo{{#in}} ayv-mv-dentro{{/in}}{{#edge}} ayv-mv-borde{{/edge}}" name="letter" value="{{letter}}"{{#none}} disabled{{/none}}><b>{{letter}}</b><span>{{count}}</span></button></li>{{/list}}
+        </ol>
+        <p class="ayv-mv-cuenta" role="status">{{{line}}}</p>
+    </div>
+    {{/letters}}
+    {{#corners}}
+    <div class="ayv-mv-panel">
+        <p class="ayv-si-nota">{{hint}}</p>
+        <p class="ayv-cf-chapas ayv-mv-rincones">{{#list}}<button type="submit" class="ayv-cf-chapa" name="corner" value="{{id}}" aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"><i class="ayv-mv-color" style="background: {{colour}}"></i>{{label}} <span>{{count}}</span></button>{{/list}}</p>
+        <p class="ayv-mv-cuenta" role="status">{{{line}}}</p>
+    </div>
+    {{/corners}}
+</section>
+
+<section class="ayv-mv-donde-sec" aria-labelledby="ayv-mv-donde-t">
+    <h2 class="ayv-si-h2" id="ayv-mv-donde-t">{{whereheading}}</h2>
+    <ul class="ayv-st-plano ayv-mv-plano">
+        {{#targets}}<li><label class="ayv-st-mueble ayv-mv-sitio{{#here}} ayv-st-aqui{{/here}}"><input type="radio" name="to" value="{{id}}"{{#here}} checked{{/here}}><span class="ayv-st-aqui-t">{{herelabel}}</span><span class="ayv-st-placa">{{name}}</span><span class="ayv-st-cuenta">{{countlabel}}</span></label></li>{{/targets}}
+        {{#fresh}}<li><label class="ayv-st-mueble ayv-mv-sitio ayv-si-nuevo{{#chosen}} ayv-st-aqui{{/chosen}}"><input type="radio" name="to" value="new"{{#chosen}} checked{{/chosen}}><span class="ayv-si-nuevo-t">{{> local_oksigeniaayvurenda/icon_plus}} {{label}}</span><input class="ayv-st-placa ayv-si-placa ayv-si-placa-vacia" name="newname" value="{{value}}" placeholder="{{example}}" maxlength="60" autocomplete="off" aria-label="{{label}}"></label></li>{{/fresh}}
+    </ul>
+</section>
+
+<div class="ayv-mv-accion">
+    {{#go}}<button type="submit" class="ayv-button ayv-mv-ir" name="do" value="move">{{label}}</button>{{/go}}
+    {{#join}}<button type="submit" class="ayv-button ayv-button-quiet" name="do" value="join">{{label}}</button>{{/join}}
+    {{#go}}<p class="ayv-si-nota">{{hint}}</p>{{/go}}
+</div>
+</form>
+{{/choose}}
+{{#reading}}
+<div class="ayv-st-dos ayv-mv-dos">
+    <div class="ayv-mv-izq">
+        <div class="ayv-mv-destino">
+            <p class="ayv-mv-paso">{{toheading}}</p>
+            {{#to}}<div class="ayv-st-mueble ayv-mv-mueble ayv-st-aqui"><span class="ayv-st-placa">{{name}}</span>
+                <span class="ayv-st-balda ayv-si-balda" aria-hidden="true">{{#spines}}<i{{#on}} class="si"{{/on}}></i>{{/spines}}</span>
+                <span class="ayv-si-pie"><span class="ayv-st-cuenta">{{countlabel}}</span> <a class="ayv-si-abrir" href="{{changeurl}}">{{changelabel}}</a></span></div>{{/to}}
+        </div>
+        <div class="ayv-st-lector">
+            <form id="ayv-scan" class="ayv-scan" method="post" action="{{action}}" autocomplete="off">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <label for="ayv-code" class="ayv-scan-label">{{prompt}}</label>
+                <input id="ayv-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus maxlength="200">
+            </form>
+            {{#cifra}}<p class="ayv-st-cifra" id="ayv-progress" role="status"><b>{{seen}}</b><span>{{of}}</span></p>{{/cifra}}
+        </div>
+        {{{tools}}}
+    </div>
+    <section aria-labelledby="ayv-mv-ultimo-t">
+        <h2 class="ayv-si-h2" id="ayv-mv-ultimo-t">{{lastheading}}</h2>
+        <ol id="ayv-log" class="ayv-log ayv-mv-log" aria-live="polite">
+            {{#log}}<li class="ayv-line ayv-mv-linea ayv-mv-{{kind}}"><p class="ayv-line-text">{{title}}</p><p class="ayv-line-note">{{note}}</p>{{#undo}}<form method="post" action="{{action}}" class="ayv-mv-deshaz"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="undo" value="{{id}}"><button type="submit" class="ayv-line-button ayv-line-quiet">{{label}}</button></form>{{/undo}}</li>{{/log}}
+        </ol>
+        <p class="ayv-cf-fila"><a class="ayv-button ayv-button-quiet" href="{{finishurl}}">{{finishlabel}}</a></p>
+        <p class="ayv-cf-nota">{{hint}}</p>
+    </section>
+</div>
+{{/reading}}
+</div>

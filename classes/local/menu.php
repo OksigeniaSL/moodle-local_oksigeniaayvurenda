@@ -71,7 +71,8 @@ final class menu {
             'catalogue' => ['menucataloguing', [['add.php', 'menuadd', $c], ['catalogued.php', 'menucataloged', $c],
                 ['subjects.php', 'menusubjects', $c], ['duplicates.php', 'menuduplicates', $c], ['free.php', 'menufree', $c],
                 ['material.php', 'menumaterial', $c], ['purchases.php', 'menupurchases', $c]]],
-            'shelves' => ['menushelves', [['stacks.php', 'menustacks', $d], ['labels.php', 'menulabels', $c],
+            'shelves' => ['menushelves', [['stacks.php', 'menustacks', $d], ['places.php', 'menuplaces', $c],
+                ['labels.php', 'menulabels', $c],
                 ['posters.php', 'menuposters', $c]]],
             'reading' => ['menureading', [['quests.php', 'menuquests', $m], ['agenda.php', 'agendatitle', $d]]],
             // The figures are also the door «Reports»: who looks for how many books there are, looks here.

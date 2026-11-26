@@ -1,0 +1,49 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_oksigeniaayvurenda/record_covers
+    @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+    @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    «¿Es esta?»: the covers found by title and author for a record without one, up to six, each with its publisher and
+    year beside the ones of this record, so that the one of this edition is told apart. One touch puts it; none is
+    put by itself. «Ninguna es esta» keeps the drawn cover; a photo is the other way.
+
+    Context variables required for this template:
+    * heading, hint, thisline, action, sesskey, list (key, src, line, same, samelabel, picklabel), nonelabel, photolabel,
+      photourl
+
+    Example context (json):
+    {"heading": "¿Es esta la portada?", "hint": "Toca la de este libro.", "thisline": "Este libro: Alisio, 2014",
+        "action": "#", "sesskey": "abc", "list": [{"key": "ol1", "src": "https://example.com/c.jpg", "line": "Alisio · 2014",
+        "same": true, "samelabel": "Misma editorial y año", "picklabel": "Poner esta"}], "nonelabel": "Ninguna es esta",
+        "photolabel": "Hacerle una foto", "photourl": "#"}
+}}
+<section class="ayv-pc" id="ayv-pc" aria-labelledby="ayv-pc-t">
+    <h2 class="ayv-section-title" id="ayv-pc-t">{{heading}}</h2>
+    <p class="ayv-pc-nota">{{hint}}</p>
+    <p class="ayv-pc-esta">{{{thisline}}}</p>
+    <form method="post" action="{{action}}" class="ayv-pc-lista">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        {{#list}}<button type="submit" class="ayv-pc-una{{#same}} ayv-pc-misma{{/same}}" name="cover" value="{{key}}"><img src="{{src}}" alt="" loading="lazy"><span class="ayv-pc-datos">{{line}}</span>{{#same}}<span class="ayv-pc-igual">{{samelabel}}</span>{{/same}}<span class="ayv-sr">{{picklabel}}</span></button>{{/list}}
+    </form>
+    <p class="ayv-pc-otras">
+        <button type="submit" form="ayv-pc-ninguna" class="ayv-line-button ayv-line-quiet">{{nonelabel}}</button>
+        <a class="ayv-line-button ayv-line-quiet ayv-pc-foto" href="{{photourl}}">{{photolabel}}</a>
+    </p>
+    <form id="ayv-pc-ninguna" method="post" action="{{action}}" hidden><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="cover" value="none"></form>
+</section>
