@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.10 (2026-11-26)
+
+- **The missing covers come by themselves**: every ten minutes a few books without a cover are asked for theirs, the most
+  lent first and then the rest, each once in a while; from Open Library and, if it has nothing, Google Books (with a key of
+  the site's own, a new setting; without it, Google's common allowance, often spent). A source that says it is asked too
+  much is left alone for two hours. Before, a cover was asked once, and only for a book somebody opened.
+- **The days of the libraries**: Ayvurenda knows by itself the days libraries celebrate everywhere, and tells each in
+  «These days» and on the front page during its week. The first, World Read Aloud Day (the first Wednesday of February),
+  with the invitation to give a book a voice. A centre may leave a day out.
+
 ## 1.3.9 (2026-11-25)
 
 - **«Never lent»** is chosen by touching how long copies have gone without a loan and how long they have been here, with no

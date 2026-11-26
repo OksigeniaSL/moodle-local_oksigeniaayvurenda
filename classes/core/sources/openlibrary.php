@@ -96,6 +96,54 @@ final class openlibrary {
     }
 
     /**
+     * The address that asks for the covers of a title, and of an author if there is one.
+     *
+     * @param string $title
+     * @param string $author
+     * @param int $max
+     * @return string
+     */
+    public static function cover_search_url(string $title, string $author = '', int $max = 10): string {
+        $params = ['title' => trim($title), 'limit' => $max, 'fields' => 'title,author_name,cover_i,first_publish_year,publisher'];
+        if (trim($author) !== '') {
+            $params['author'] = trim($author);
+        }
+        return 'https://openlibrary.org/search.json?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * The covers in an answer to cover_search_url().
+     *
+     * @param string $json
+     * @return array[] url, title, authors, publisher, year.
+     */
+    public static function covers(string $json): array {
+        $data = json_decode($json, true);
+        $found = [];
+        foreach ((array) ($data['docs'] ?? []) as $doc) {
+            if (!is_array($doc) || empty($doc['cover_i'])) {
+                continue;
+            }
+            $found[] = ['url' => 'https://covers.openlibrary.org/b/id/' . (int) $doc['cover_i'] . '-M.jpg?default=false',
+                'title' => trim((string) ($doc['title'] ?? '')),
+                'authors' => implode(', ', array_slice(array_map('strval', (array) ($doc['author_name'] ?? [])), 0, 2)),
+                'publisher' => trim((string) (((array) ($doc['publisher'] ?? []))[0] ?? '')),
+                'year' => isset($doc['first_publish_year']) ? (string) (int) $doc['first_publish_year'] : ''];
+        }
+        return $found;
+    }
+
+    /**
+     * Whether an address is one of its pictures: what is chosen among the candidates is only fetched from here.
+     *
+     * @param string $url
+     * @return bool
+     */
+    public static function is_picture(string $url): bool {
+        return (bool) preg_match('#^https://covers\.openlibrary\.org/b/(id|isbn)/[0-9X]+-[SML]\.jpg(\?default=false)?$#', $url);
+    }
+
+    /**
      * The description in an answer.
      *
      * @param string $json

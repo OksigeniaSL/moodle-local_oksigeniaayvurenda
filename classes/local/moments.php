@@ -47,10 +47,10 @@ class moments {
     public const RECORD = 10;
 
     /** @var string[] The kinds readers hear too; the classes that met their challenge, only the staff. */
-    public const PUBLIC = ['anniversary', 'voice', 'loans', 'book', 'record', 'quest', 'first'];
+    public const PUBLIC = ['day', 'anniversary', 'voice', 'loans', 'book', 'record', 'quest', 'first'];
 
     /** @var string[] Most worth telling first. */
-    public const ORDER = ['anniversary', 'voice', 'loans', 'book', 'record', 'quest', 'challenge', 'first'];
+    public const ORDER = ['day', 'anniversary', 'voice', 'loans', 'book', 'record', 'quest', 'challenge', 'first'];
 
     /**
      * The moments of a centre this week, the most worth telling first.
@@ -132,6 +132,7 @@ class moments {
     public static function find(int $entityid, int $now): array {
         $since = $now - self::DAYS * DAYSECS;
         $moments = array_filter([
+            self::day($entityid, $now),
             self::anniversary($entityid, $now),
             self::voice($entityid, $now, $since),
             self::loans($entityid, $now, $since),
@@ -243,6 +244,26 @@ class moments {
             }
         }
         return null;
+    }
+
+    /**
+     * A day of the libraries in this week (libdays): World Read Aloud Day, with the invitation to give a book a voice.
+     *
+     * @param int $entityid
+     * @param int $now
+     * @return array|null
+     */
+    private static function day(int $entityid, int $now): ?array {
+        $day = libdays::this_week($entityid, $now)[0] ?? null;
+        if (!$day) {
+            return null;
+        }
+        $when = (new \DateTimeImmutable('@' . $day['time']))->setTimezone(zones::of($entityid))->setTime(0, 0);
+        $today = (new \DateTimeImmutable('@' . $now))->setTimezone(zones::of($entityid))->setTime(0, 0);
+        $tense = $today < $when ? '' : ($today == $when ? 'today' : 'past');
+        return ['kind' => 'day', 'key' => 'momentday' . $day['key'] . $tense,
+            'a' => ['day' => zones::date($day['time'], 'strftimedateshort', $entityid)], 'staffpage' => $day['staffpage'],
+            'readerpage' => $day['readerpage']];
     }
 
     /**

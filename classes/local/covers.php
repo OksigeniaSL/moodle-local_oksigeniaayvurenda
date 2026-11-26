@@ -24,6 +24,8 @@
 
 namespace local_oksigeniaayvurenda\local;
 
+use local_oksigeniaayvurenda\core\sources\googlebooks;
+
 /**
  * Covers fetched by the server when a book is added, made small (300 pixels high) and kept in the site, with where
  * they came from and when: the browser only sees the site's own files, the source is asked once, and a cover can be
@@ -343,10 +345,21 @@ final class covers {
     /** @var int How long a book that was asked for its cover in vain waits to be asked again. */
     private const ASK_AGAIN = 180 * DAYSECS;
 
+    /** @var int Books asked for in each round of the sweep: a round every ten minutes, so some 860 a day at most. */
+    public const SWEEP = 6;
+
+    /** @var int How long a source that said it was asked too much is left alone. */
+    private const CALM = 2 * HOURSECS;
+
+    /** @var int How far back the loans that put a book first are counted. */
+    private const DEMAND = 2 * 365 * DAYSECS;
+
+    /** @var int How many candidates a book without an ISBN shows at most. */
+    public const CANDIDATES = 6;
+
     /**
      * A book whose cover would help (it is lent, comes back, is looked at): if it has an ISBN and no cover, and it was not
-     * asked lately, it is asked for once in the background. One question per book, as Open Library asks, never a sweep of
-     * the catalogue: the books that move get their covers.
+     * asked lately, it is asked for once in the background, right away. The rest come with the sweep, a few at a time.
      *
      * @param int $recordid
      * @param int|null $now
@@ -372,7 +385,8 @@ final class covers {
     }
 
     /**
-     * Asks Open Library for the cover of a book by its ISBN, once, if it still has none.
+     * Asks for the cover of a book by its ISBN, if it still has none: Open Library first, then Google Books, each while it
+     * has not asked to be left alone.
      *
      * @param int $recordid
      * @return bool Whether it has a cover now.
@@ -383,6 +397,171 @@ final class covers {
         if ($isbn === '' || self::url($recordid) !== null) {
             return false;
         }
-        return self::fetch($recordid, \local_oksigeniaayvurenda\core\sources\openlibrary::cover_url($isbn), 'openlibrary');
+        if (self::calm('openlibrary')) {
+            $found = self::fetch($recordid, \local_oksigeniaayvurenda\core\sources\openlibrary::cover_url($isbn), 'openlibrary');
+            self::heed('openlibrary');
+            if ($found) {
+                return true;
+            }
+        }
+        if (!self::calm('googlebooks')) {
+            return false;
+        }
+        $answer = lookup::fetch(googlebooks::isbn_url($isbn, self::key()));
+        self::heed('googlebooks');
+        foreach ($answer === null ? [] : googlebooks::covers($answer) as $cover) {
+            if (self::fetch($recordid, $cover['url'], 'googlebooks')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * One round of the sweep: the books with an ISBN and no cover, the most lent of the last two years first, then those
+     * never asked, a few each time; each asked once in a while (ASK_AGAIN), and none while the sources ask for calm.
+     *
+     * @param int $now
+     * @param int $max
+     * @return int[] asked and found.
+     */
+    public static function sweep(int $now, int $max = self::SWEEP): array {
+        global $DB;
+        $asked = 0;
+        $found = 0;
+        if (!self::calm('openlibrary') && !self::calm('googlebooks')) {
+            return [0, 0];
+        }
+        $nocover = "NOT EXISTS (SELECT 1 FROM {files} f WHERE f.contextid = :ctx AND f.component = 'local_oksigeniaayvurenda'
+            AND f.filearea = 'cover' AND f.itemid = r.id AND f.filename = 'cover.jpg')";
+        $params = ['ctx' => \context_system::instance()->id, 'empty' => ''];
+        // The most lent first, and then the rest that were never asked, the newest first.
+        $rounds = [
+            "SELECT r.id, r.entityid, r.extra
+               FROM {local_oksigeniaayvurenda_record} r
+               JOIN (SELECT i.recordid, COUNT(1) AS demand
+                       FROM {local_oksigeniaayvurenda_loan} l
+                       JOIN {local_oksigeniaayvurenda_item} i ON i.id = l.itemid
+                      WHERE l.timeloaned >= :since
+                   GROUP BY i.recordid) d ON d.recordid = r.id
+              WHERE r.isbn IS NOT NULL AND r.isbn <> :empty AND $nocover
+           ORDER BY d.demand DESC, r.id DESC",
+            "SELECT r.id, r.entityid, r.extra
+               FROM {local_oksigeniaayvurenda_record} r
+              WHERE r.isbn IS NOT NULL AND r.isbn <> :empty AND $nocover
+                    AND " . $DB->sql_like('COALESCE(r.extra, :none)', ':asked', true, true, true) . "
+           ORDER BY r.id DESC",
+        ];
+        $params += ['since' => $now - self::DEMAND, 'none' => '', 'asked' => '%"coverasked"%'];
+        $practice = [];
+        foreach ($rounds as $sql) {
+            foreach ([0, 200, 400] as $from) {
+                $rows = $DB->get_records_sql($sql, $params, $from, 200);
+                foreach ($rows as $row) {
+                    $practice[$row->entityid] ??= practice::is((int) $row->entityid);
+                    $extra = json_decode((string) $row->extra, true) ?: [];
+                    if ($practice[$row->entityid] || (int) ($extra['coverasked'] ?? 0) > $now - self::ASK_AGAIN) {
+                        continue;
+                    }
+                    $extra['coverasked'] = $now;
+                    $DB->set_field('local_oksigeniaayvurenda_record', 'extra', json_encode($extra), ['id' => $row->id]);
+                    $asked++;
+                    $found += self::find((int) $row->id) ? 1 : 0;
+                    if ($asked >= $max || (!self::calm('openlibrary') && !self::calm('googlebooks'))) {
+                        return [$asked, $found];
+                    }
+                }
+                if (count($rows) < 200) {
+                    break;
+                }
+            }
+        }
+        return [$asked, $found];
+    }
+
+    /**
+     * The covers that may be a book's when its ISBN gives none or it has none, by its title and its first author, from
+     * Open Library and Google Books: never put by themselves (another edition's cover misleads a child), only offered.
+     *
+     * @param int $recordid
+     * @return array[] url, source, title, detail (authors, publisher and year).
+     */
+    public static function candidates(int $recordid): array {
+        global $DB;
+        $record = $DB->get_record('local_oksigeniaayvurenda_record', ['id' => $recordid], 'id, entityid, title');
+        if (!$record || practice::is((int) $record->entityid) || trim((string) $record->title) === '') {
+            return [];
+        }
+        $author = (string) $DB->get_field_sql(
+            "SELECT a.label FROM {local_oksigeniaayvurenda_recauth} ra
+               JOIN {local_oksigeniaayvurenda_authority} a ON a.id = ra.authorityid AND a.kind = 'author'
+              WHERE ra.recordid = :recordid ORDER BY ra.id",
+            ['recordid' => $recordid],
+            IGNORE_MULTIPLE
+        );
+        // An author written «Surname, Name» is asked as «Name Surname».
+        if (preg_match('/^([^,]+),\s*(.+)$/u', $author, $m)) {
+            $author = trim(preg_replace('/[\d\-–()]+$/u', '', $m[2])) . ' ' . $m[1];
+        }
+        $found = [];
+        $asks = ['openlibrary' => fn() => \local_oksigeniaayvurenda\core\sources\openlibrary::covers((string) lookup::fetch(
+            \local_oksigeniaayvurenda\core\sources\openlibrary::cover_search_url($record->title, $author)
+        )), 'googlebooks' => fn() => googlebooks::covers((string) lookup::fetch(
+            googlebooks::search_url($record->title, $author, 10, self::key())
+        ))];
+        foreach ($asks as $source => $ask) {
+            if (!self::calm($source)) {
+                continue;
+            }
+            foreach ($ask() as $cover) {
+                $found[$cover['url']] = ['url' => $cover['url'], 'source' => $source, 'title' => $cover['title'],
+                    'detail' => implode(' · ', array_filter([$cover['authors'], $cover['publisher'], $cover['year']]))];
+            }
+            self::heed($source);
+        }
+        return array_slice(array_values($found), 0, self::CANDIDATES);
+    }
+
+    /**
+     * Keeps as a book's cover one of its candidates: only a picture of the two sources is fetched.
+     *
+     * @param int $recordid
+     * @param string $url
+     * @return bool
+     */
+    public static function choose(int $recordid, string $url): bool {
+        $source = \local_oksigeniaayvurenda\core\sources\openlibrary::is_picture($url) ? 'openlibrary'
+            : (googlebooks::is_picture($url) ? 'googlebooks' : null);
+        return $source !== null && self::fetch($recordid, $url, $source);
+    }
+
+    /**
+     * The key of Google Books the site has, or ''.
+     *
+     * @return string
+     */
+    private static function key(): string {
+        return trim((string) get_config('local_oksigeniaayvurenda', 'googlebookskey'));
+    }
+
+    /**
+     * Whether a source may be asked now: not while it asks for calm.
+     *
+     * @param string $source
+     * @return bool
+     */
+    private static function calm(string $source): bool {
+        return (int) get_config('local_oksigeniaayvurenda', 'coverpause_' . $source) <= time();
+    }
+
+    /**
+     * After asking a source: if it said it was asked too much, it is left alone for a while.
+     *
+     * @param string $source
+     */
+    private static function heed(string $source): void {
+        if (lookup::limited()) {
+            set_config('coverpause_' . $source, time() + self::CALM, 'local_oksigeniaayvurenda');
+        }
     }
 }

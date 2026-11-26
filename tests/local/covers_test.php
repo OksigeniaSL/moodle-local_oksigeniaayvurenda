@@ -116,4 +116,116 @@ final class covers_test extends \advanced_testcase {
         $extra = json_decode((string) $DB->get_field('local_oksigeniaayvurenda_record', 'extra', ['id' => $book->id]), true);
         $this->assertArrayHasKey('coverasked', $extra);
     }
+
+    /**
+     * A picture with something in it, as a source would give it.
+     *
+     * @return string
+     */
+    private function picture(): string {
+        $image = imagecreatetruecolor(200, 300);
+        for ($i = 0; $i < 400; $i++) {
+            imagesetpixel($image, $i % 200, ($i * 7) % 300, imagecolorallocate($image, $i % 255, ($i * 3) % 255, ($i * 5) % 255));
+        }
+        ob_start();
+        imagejpeg($image, null, 85);
+        return (string) ob_get_clean();
+    }
+
+    /**
+     * The sweep asks the most lent first, a few each time, and not again for a while; what Open Library does not have,
+     * Google Books may; a source that says it was asked too much is left alone.
+     */
+    public function test_sweep(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $reader = $gen->create_reader(['entityid' => $library->entityid]);
+        $books = [];
+        foreach (['9780306406157', '9788419357977', '9788418949319'] as $n => $isbn) {
+            $books[$n] = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Zeta ' . $n, 'isbn' => $isbn]);
+            $item = $gen->create_item(['libraryid' => $library->id, 'recordid' => $books[$n]->id]);
+            for ($k = 0; $k < $n; $k++) {
+                $gen->create_loan(['libraryid' => $library->id, 'itemid' => $item->id, 'readerid' => $reader->id]);
+            }
+        }
+        $gen->create_record(['entityid' => $library->entityid, 'title' => 'Zeta sin ISBN']);
+        $jpeg = $this->picture();
+        $asked = [];
+        lookup::$fetcher = function (string $url) use (&$asked, $jpeg) {
+            $asked[] = $url;
+            if (str_contains($url, 'googleapis')) {
+                return json_encode(['items' => [['volumeInfo' => ['title' => 'Zeta', 'imageLinks' => [
+                    'thumbnail' => 'http://books.google.com/books/content?id=abc&printsec=frontcover&img=1&zoom=1&edge=curl']]]]]);
+            }
+            if (str_contains($url, 'books.google.com')) {
+                return $jpeg;
+            }
+            // Open Library only has the first one.
+            return str_contains($url, '9780306406157') ? $jpeg : null;
+        };
+        try {
+            $now = time();
+            // The most lent first: the third, then the second.
+            $this->assertSame([2, 2], covers::sweep($now, 2));
+            $this->assertStringContainsString('9788418949319', $asked[0]);
+            $this->assertStringContainsString('googleapis', $asked[1]);
+            $this->assertStringContainsString('books.google.com', $asked[2]);
+            $this->assertStringNotContainsString('edge=curl', $asked[2]);
+            $this->assertNotNull(covers::url((int) $books[2]->id));
+            $this->assertSame([1, 1], covers::sweep($now, 5));
+            // Asked, all of them: nothing more for a while.
+            $this->assertSame([0, 0], covers::sweep($now, 5));
+
+            // Told to wait, it waits.
+            $gen->create_record(['entityid' => $library->entityid, 'title' => 'Zeta nueva', 'isbn' => '9788411581608']);
+            lookup::$fetcher = fn(string $url) => 429;
+            $this->assertSame([1, 0], covers::sweep($now, 5));
+            $this->assertGreaterThan(time(), (int) get_config('local_oksigeniaayvurenda', 'coverpause_openlibrary'));
+        } finally {
+            lookup::$fetcher = null;
+        }
+    }
+
+    /**
+     * Without an ISBN, the covers that may be its own are offered and never put; one of them is kept when it is chosen,
+     * and nothing from elsewhere is fetched.
+     */
+    public function test_candidates(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $record = $gen->create_record(['entityid' => $library->entityid, 'title' => 'Primer día']);
+        $author = $DB->insert_record('local_oksigeniaayvurenda_authority', ['entityid' => $library->entityid, 'kind' => 'author',
+            'label' => 'Ruiz, Ana', 'timecreated' => time(), 'timemodified' => time()]);
+        $DB->insert_record('local_oksigeniaayvurenda_recauth', ['recordid' => $record->id, 'authorityid' => $author]);
+        $jpeg = $this->picture();
+        $asked = [];
+        lookup::$fetcher = function (string $url) use (&$asked, $jpeg) {
+            $asked[] = $url;
+            if (str_contains($url, 'search.json')) {
+                return json_encode(['docs' => [['title' => 'Primer día', 'author_name' => ['Ana Ruiz'], 'cover_i' => 12345,
+                    'first_publish_year' => 2023, 'publisher' => ['Lumen']], ['title' => 'Sin portada']]]);
+            }
+            if (str_contains($url, 'googleapis')) {
+                return json_encode(['items' => [['volumeInfo' => ['title' => 'Primer día', 'publisher' => 'Otra',
+                    'publishedDate' => '2021-03-01',
+                    'imageLinks' => ['thumbnail' => 'http://books.google.com/books/content?id=x']]]]]);
+            }
+            return $jpeg;
+        };
+        try {
+            $found = covers::candidates((int) $record->id);
+            $this->assertStringContainsString('author=Ana%20Ruiz', $asked[0]);
+            $this->assertSame(['openlibrary', 'googlebooks'], array_column($found, 'source'));
+            $this->assertSame('Ana Ruiz · Lumen · 2023', $found[0]['detail']);
+            $this->assertNull(covers::url((int) $record->id));
+            $this->assertFalse(covers::choose((int) $record->id, 'https://example.org/cover.jpg'));
+            $this->assertTrue(covers::choose((int) $record->id, $found[1]['url']));
+            $this->assertNotNull(covers::url((int) $record->id));
+        } finally {
+            lookup::$fetcher = null;
+        }
+    }
 }

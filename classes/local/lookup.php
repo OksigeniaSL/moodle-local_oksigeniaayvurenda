@@ -150,6 +150,17 @@ final class lookup {
     public static int $wait = 2;
 
     /**
+     * Whether a source said, since the last time this was asked, that it was asked too much; and forgets it.
+     *
+     * @return bool
+     */
+    public static function limited(): bool {
+        $limited = self::$limited;
+        self::$limited = false;
+        return $limited;
+    }
+
+    /**
      * What the catalogues say of an ISBN.
      *
      * @param int $entityid

@@ -26,6 +26,16 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = [
     [
+        // A few books without a cover are asked for theirs every ten minutes (covers::sweep).
+        'classname' => '\local_oksigeniaayvurenda\task\sweep_covers',
+        'blocking' => 0,
+        'minute' => '*/10',
+        'hour' => '*',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
+    [
         'classname' => '\local_oksigeniaayvurenda\task\sync_readers',
         'blocking' => 0,
         'minute' => '17',
