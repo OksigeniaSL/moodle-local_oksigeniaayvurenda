@@ -189,7 +189,7 @@ if ($correct && \local_oksigeniaayvurenda\local\covers::url($id) === null) {
     $asked = optional_param('covers', '', PARAM_ALPHA);
     $say = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
     $data['coverseek'] = ['action' => $PAGE->url->out(false), 'sesskey' => sesskey(),
-        'label' => $say($asked === 'none' ? 'coversseekagain' : 'coversseek'),
+        'label' => $say($asked === 'none' || $asked === 'some' ? 'coversseekagain' : 'coversseek'),
         'none' => $asked === 'none' ? $say('coversnone') : ''];
     $kept = $asked === 'some' ? \local_oksigeniaayvurenda\local\covers::kept($id) : [];
     if ($kept) {
@@ -202,6 +202,23 @@ if ($correct && \local_oksigeniaayvurenda\local\covers::url($id) === null) {
             IGNORE_MULTIPLE
         );
         $mine = trim(implode(', ', array_filter([(string) $edition->publisher, (string) $edition->pubyear])));
+        // What tells one edition from another is its publisher and its year; the authors, only when they are not the book's.
+        $ours = (string) $DB->get_field_sql(
+            "SELECT a.label FROM {local_oksigeniaayvurenda_recauth} ra
+               JOIN {local_oksigeniaayvurenda_authority} a ON a.id = ra.authorityid AND a.kind = 'author'
+              WHERE ra.recordid = :id ORDER BY ra.id",
+            ['id' => $id],
+            IGNORE_MULTIPLE
+        );
+        // The surname of «Surname, Name» or «Name Surname», as the sources write it, without accents or capitals.
+        $surname = \local_oksigeniaayvurenda\core\text::normalise(trim(str_contains($ours, ',') ? explode(',', $ours)[0]
+            : (string) preg_replace('/^.*\s/u', '', trim($ours))));
+        $theirs = fn(array $c) => \local_oksigeniaayvurenda\core\text::normalise((string) ($c['authors'] ?? ''));
+        $edition = fn(array $c) => implode(' · ', array_filter([
+            $surname !== '' && str_contains($theirs($c), $surname) ? '' : (string) ($c['authors'] ?? ''),
+            (string) ($c['publisher'] ?? ''),
+            (string) ($c['year'] ?? ''),
+        ], fn($part) => trim($part) !== ''));
         $same = fn(array $c) => $mine !== '' && $c['year'] === (string) $edition->pubyear
             && \local_oksigeniaayvurenda\core\text::normalise($c['publisher']) !== ''
             && str_contains(
@@ -213,7 +230,8 @@ if ($correct && \local_oksigeniaayvurenda\local\covers::url($id) === null) {
                 'edition' => $mine !== '' ? '<b>' . s($mine) . '</b>' : s($say('coversunknown')),
                 'isbn' => (string) $edition->isbn !== '' ? ' · ISBN ' . s($edition->isbn) : '']),
             'action' => $PAGE->url->out(false), 'sesskey' => sesskey(),
-            'list' => array_map(fn($i, $c) => ['key' => (string) $i, 'src' => $c['src'], 'line' => $c['detail'],
+            'list' => array_map(fn($i, $c) => ['key' => (string) $i, 'src' => $c['src'], 'line' => $edition($c),
+                'full' => $c['detail'],
                 'same' => $same($c),
                 'samelabel' => $say('coverssame'), 'picklabel' => $say('coverspick')], array_keys($kept), $kept),
             'nonelabel' => $say('coversnotthese'), 'photolabel' => $say('coversphoto'), 'photourl' => '#ayv-fix-record'];

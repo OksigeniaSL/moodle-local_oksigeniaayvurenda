@@ -674,9 +674,24 @@ final class catalogue {
             'libraryid, barcode'
         );
         $locations = self::labels(array_column($items, 'locationid'));
+        // The copies brought from another programme had their labels already.
+        $brought = [];
+        if ($items) {
+            [$in, $params] = $DB->get_in_or_equal(array_keys($items), SQL_PARAMS_NAMED);
+            $brought = array_flip(array_map('intval', $DB->get_fieldset_select(
+                self::T . 'source',
+                'localid',
+                "tablename = 'item' AND localid $in",
+                $params
+            )));
+        }
         $copies = [];
         foreach ($items as $item) {
             $copies[] = [
+                'added' => (int) $item->timecreated,
+                // Only with a call number: without one there is no spine label to print.
+                'spinepending' => !isset($brought[(int) $item->id]) && empty($item->timespine)
+                    && trim($item->callnumber1 . $item->callnumber2 . $item->callnumber3) !== '',
                 'id' => (int) $item->id,
                 'libraryid' => (int) $item->libraryid,
                 'here' => (int) $item->libraryid === (int) $library->id,

@@ -55,7 +55,11 @@ final class labelpage {
         $kind = $state['kind'];
         $sheet = $state['sheet'];
         $here = ['library' => $library->slug, 'kind' => $kind, 'sheet' => $sheet, 'which' => $state['which'],
-            'since' => $state['since'], 'codes' => $state['codes']];
+            'since' => $state['since'], 'until' => $state['until'] ?? '', 'codes' => $state['codes']];
+        $pending = labels::pending_count($library, $kind);
+        global $SESSION;
+        $last = $SESSION->ayvlabelsprinted ?? null;
+        $last = $last && (int) $last['library'] === (int) $library->id ? $last : null;
         $url = fn(array $change, string $anchor = '') => (new \moodle_url(
             '/local/oksigeniaayvurenda/labels.php',
             array_filter($change + $here, fn($v) => $v !== '' && $v !== null),
@@ -70,7 +74,7 @@ final class labelpage {
         $name = $model['brand'] . ' ' . $model['ref'];
         $isfav = in_array($sheet, $own['favs'][$kind], true);
         [$nudgex, $nudgey] = $own['nudge'][$sheet] ?? [0.0, 0.0];
-        $first = labels::items($library, 'today', 0, []);
+        $first = labels::items($library, 'today', 0, [], null, 0, $kind);
         $sample = $items[0] ?? $first[0] ?? null;
         $pose = $saved !== '' ? 'celebra' : 'lee';
         $crier = characters::whole($entityid) ? characters::figure('herald', $pose, characters::step($entityid)) : null;
@@ -95,22 +99,47 @@ final class labelpage {
             ],
             'whichtitle' => $str('labelswhich'),
             'whiches' => [
+                // What is still to print, first: a sheet is printed when it is full.
+                // With none left (just printed), «All have their spine label», quiet and not chosen.
+                ['url' => $pending
+                    ? $url(['which' => 'pending', 'since' => null, 'until' => null, 'codes' => null, 'start' => null]) : null,
+                    'current' => $pending && $state['which'] === 'pending', 'label' => $pending
+                        ? $str(
+                            $kind === 'spines' ? 'labelswhichpendingspines' : 'labelswhichpendinglabels',
+                            screens::number($pending)
+                        )
+                        : $str($kind === 'spines' ? 'labelswhichpendingspinesnone' : 'labelswhichpendinglabelsnone')],
                 // Nothing today: said quietly, not a chip that leads to an empty sheet.
                 ['url' => $first || $state['which'] === 'today'
                     ? $url(['which' => 'today', 'since' => null, 'codes' => null, 'start' => null]) : null,
                     'current' => $state['which'] === 'today', 'label' => $first || $state['which'] === 'today'
-                        ? $str('labelswhichtodayn', screens::number(count($first))) : $str('labelswhichtodaynone')],
+                        ? self::today($library, $kind, count($first), $str) : $str('labelswhichtodaynone')],
                 ['url' => $url(['which' => 'since', 'codes' => null, 'start' => null], 'ayv-et-dias'),
                     'current' => $state['which'] === 'since', 'label' => $state['which'] === 'since' && $state['since'] !== ''
-                        ? $str('labelswhichsincen', (object) ['day' => self::day($library, $state['since']),
-                            'count' => screens::number($count)]) : $str('labelswhichsinceany')],
+                        ? (($state['until'] ?? '') !== '' ? $str('labelswhichrangen', (object) [
+                            'from' => self::day($library, $state['since']), 'to' => self::day($library, $state['until']),
+                            'count' => screens::number($count)]) : $str('labelswhichsincen', (object) [
+                            'day' => self::day($library, $state['since']), 'count' => screens::number($count)]))
+                        : $str('labelswhichsinceany')],
                 ['url' => $url(['which' => 'codes', 'since' => null, 'start' => null], 'ayv-et-lista'),
                     'current' => $state['which'] === 'codes', 'label' => $str('labelswhichcodes')],
             ],
             'days' => $state['which'] === 'since' ? [
-                'lead' => $str('labelsdayslead'),
-                'list' => array_map(fn($day) => ['url' => $url(['which' => 'since', 'since' => $day['date'], 'start' => null]),
-                    'label' => $day['label'], 'current' => $day['date'] === $state['since']], self::days($library)),
+                // The first day touched is where it starts; then the last, or today if none.
+                'lead' => $str($state['since'] !== '' && ($state['until'] ?? '') === '' ? 'labelsdaysuntil' : 'labelsdayslead'),
+                // Asking for the last day: only the days after the first, none marked until one is touched.
+                'list' => array_values(array_map(function ($day) use ($state, $url) {
+                    $since = $state['since'];
+                    $until = $state['until'] ?? '';
+                    $range = $since !== '' && $until === '' && $day['date'] > $since;
+                    return ['url' => $url(['which' => 'since', 'since' => $range ? $since : $day['date'],
+                        'until' => $range ? $day['date'] : null, 'start' => null]), 'label' => $day['label'],
+                        'current' => !($since !== '' && $until === '') && ($day['date'] === $since || $day['date'] === $until
+                            || ($until !== '' && $day['date'] > $since && $day['date'] < $until))];
+                }, array_filter(
+                    self::days($library),
+                    fn($day) => $state['since'] === '' || ($state['until'] ?? '') !== '' || $day['date'] > $state['since']
+                ))),
                 'otherurl' => (new \moodle_url('/local/oksigeniaayvurenda/year.php', ['library' => $library->slug,
                     'elegir' => 'labels', 'kind' => $kind, 'sheet' => $sheet], 'ayv-cs-sheet'))->out(false),
                 'otherlabel' => $str(skins::words($entityid, 'labelsotherday')),
@@ -135,9 +164,30 @@ final class labelpage {
                 'sheets' => $b($plural($sheets, 'labelsonesheet', 'labelsnsheets')),
                 'sheet' => s($name), 'per' => $format['per'],
                 'start' => $state['start'] > 1 ? $str('labelssaysstart', $state['start']) : '',
-            ]) : '',
+            ]) . ($state['which'] === 'pending' && !$toomany && $count % $format['per'] ? ' ' . $str(
+                'labelssaysfill',
+                screens::number($format['per'] - $count % $format['per'])
+            ) : '') : '',
+            // The last sheets, given for printed: if they came out badly, they go back to «still to print».
+            'printed' => $last ? ['text' => $str(
+                $last['kind'] === 'spines' ? 'labelsprintedspines' : 'labelsprintedlabels',
+                screens::number(count($last['ids']))
+            ), 'action' => $url([]), 'sesskey' => sesskey(),
+                'undo' => $str('labelsunprint'),
+                // The last sheet not filled: the next labels go on from where it was left.
+                'resume' => ($last['next'] ?? 1) > 1 && ($last['sheet'] ?? '') === $sheet && $state['start'] <= 1 ? [
+                    'url' => $url(['start' => $last['next']], 'ayv-et-hoja'),
+                    'text' => $str('labelsresume', (object) ['used' => $last['next'] - 1, 'next' => $last['next']]),
+                ] : null] : null,
+            'unprinted' => $saved === 'unprint' ? ($state['back'] ?? 0 ? $str(
+                $kind === 'spines' ? 'labelsunprintedspines' : 'labelsunprintedlabels',
+                screens::number((int) $state['back'])
+            ) : $str('labelsunprinted')) : '',
             'haslabels' => (bool) $count,
-            'empty' => $str('labelsempty'),
+            // From a day not chosen yet, it asks for the day; nothing is offered to print.
+            // Just printed and nothing left: the notice says it all; «nothing with what is chosen» would not fit.
+            'empty' => $last && !$pending && $state['which'] === 'pending' ? ''
+                : $str($state['which'] === 'since' && $state['since'] === '' ? 'labelspickday' : 'labelsempty'),
             'toomany' => $toomany ? $str('labelstoomany', screens::number(labels::LIMIT)) : '',
             'paper' => [
                 'cols' => $format['cols'], 'rows' => $format['rows'],
@@ -145,7 +195,8 @@ final class labelpage {
                 'cells' => self::cells($pages[0]['labels'] ?? [], $format['per'], $state['start'], $kind, $url, $str),
             ],
             'note' => $str('labelsnote'),
-            'printurl' => $url(['print' => 1, 'start' => $state['start'] > 1 ? $state['start'] : null]),
+            // With the session key: printing marks the copies as printed, which a link from elsewhere must not do.
+            'printurl' => $url(['print' => 1, 'start' => $state['start'] > 1 ? $state['start'] : null, 'sesskey' => sesskey()]),
             'printlabel' => $sheets === 1 ? $str('labelsprintone') : $str('labelsprintn', screens::number($sheets)),
             'favaction' => $url([]),
             'sesskey' => sesskey(),
@@ -301,5 +352,27 @@ final class labelpage {
         $at = new \DateTimeImmutable($date . ' 12:00', zones::of($library));
         return get_string('reportdaymonth', 'local_oksigeniaayvurenda', (object) ['day' => $at->format('j'),
             'month' => userdate($at->getTimestamp(), '%B', zones::name($library))]);
+    }
+
+    /**
+     * «Added today», saying how many of them have their label already: chosen again, they would be printed twice.
+     *
+     * @param \stdClass $library
+     * @param string $kind spines or labels.
+     * @param int $count Added today.
+     * @param callable $str
+     * @return string
+     */
+    private static function today(\stdClass $library, string $kind, int $count, callable $str): string {
+        $done = labels::done_today($library, $kind);
+        $which = $kind === 'spines' ? 'spines' : 'labels';
+        if (!$done) {
+            return $str('labelswhichtodayn', screens::number($count));
+        }
+        return $done >= $count ? $str('labelswhichtodaydone' . $which, screens::number($count))
+            : $str('labelswhichtodaysome' . $which, (object) [
+                'count' => screens::number($count),
+                'done' => screens::number($done),
+            ]);
     }
 }

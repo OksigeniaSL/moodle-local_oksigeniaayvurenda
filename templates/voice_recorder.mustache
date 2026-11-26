@@ -22,9 +22,20 @@
     The recorder: record, pause, stop, listen, say what was read, send. A reading in parts chooses its part first, from
     the book's chapters as chips (the next one ready), and the soft sound under the whole reading, if the site has any.
 
+    Recording with calm (26 Nov 2026): three seconds counted before the microphone opens; every pause closes a piece,
+    which can be heard again or read again; at the end, the whole reading as a wave with its two ends already cleaned and
+    two handles to move them, heard with its soft sound, and a line about how the voice was levelled. What is recorded
+    stays in the device until it is sent: back on the page, a reading left half-done says so. app/voiceview.js draws it
+    all; data-estado on the plate says which moment it is (listo, cuenta, grabando, pausa, despues, borrador), and
+    is-entera marks a browser that records in one file (Safari), where pieces cannot be thrown away nor ends cut.
+
     Example context (json):
     {
-        "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar",
+        "calm": {"drafttoday": "hoy a las {$a}", "draftyesterday": "ayer a las {$a}", "length": "Dura {$a}",
+            "listenwithhint": "Con {$a} de fondo, bajito.", "pieces": "{$a} trozos", "piecesmax": "de {$a} min",
+            "trimfrom": "Empieza en {$a}", "trimseconds": "{$a} s", "trimto": "Acaba en {$a}",
+            "trimdonestart": "Quitado al principio: {$a}.", "trimdoneend": "Quitado al final: {$a}."},
+        "voicerecord": "Grabar", "voicestop": "Terminar", "voiceagain": "Volver a grabar",
         "voiceagainsure": "¿Borrar esta y grabar otra? Toca otra vez", "voicewhat": "Qué has leído",
         "voicewhathint": "un capítulo, unas páginas", "voicesend": "Enviar", "consent": false,
         "voiceforwho": "¿Para quién es?", "voiceforlittle": "Lo he leído para los pequeños", "voicefamily": "Que lo oiga mi familia",
@@ -46,12 +57,26 @@
         "backdroptitle": "Un fondo bajito, si quieres", "backdropchip": "Fondo: {$a}", "backdropdone": "Listo",
         "aftertitle": "Así ha quedado: {$a}",
         "backdrops": {"backdropwhich": "Suena debajo de tu voz en «Capítulo 2». Quien escucha lo puede quitar.",
-            "options": [{"bdkey": "", "bdogg": "", "bdm4a": "", "bdlabel": "Sin fondo", "bdchecked": true},
+            "options": [{"bdkey": "", "bdogg": "", "bdm4a": "", "bdlabel": "Sin fondo", "bdthe": "", "bdchecked": true},
                 {"bdkey": "mar", "bdogg": "https://example.com/mar.ogg", "bdm4a": "https://example.com/mar.m4a",
-                "bdlabel": "Mar", "bdchecked": false}]}
+                "bdlabel": "Mar", "bdthe": "el mar", "bdchecked": false}]}
     }
 }}
-<div class="ayv-book ayv-recorder" id="ayv-recorder">
+<div class="ayv-book ayv-recorder" id="ayv-recorder" data-estado="listo">
+    <div class="ayv-rec-borrador" id="ayv-borrador" data-en="borrador" role="group" aria-labelledby="ayv-borrador-t"
+        data-today="{{calm.drafttoday}}"
+        data-yesterday="{{calm.draftyesterday}}"
+        data-day="{{#str}} voicedraftday, local_oksigeniaayvurenda {{/str}}"
+        data-line="{{#str}} voicedraftline, local_oksigeniaayvurenda {{/str}}">
+        <p class="ayv-rec-borrador-titulo" id="ayv-borrador-t">{{#str}} voicedraft, local_oksigeniaayvurenda {{/str}}</p>
+        <p class="ayv-rec-borrador-linea"><b class="ayv-rec-borrador-parte"></b> <span class="ayv-rec-borrador-dice"></span></p>
+        <div class="ayv-rec-tira" aria-hidden="true"></div>
+        <p class="ayv-rec-borrador-botones">
+            <button type="button" class="ayv-button" id="ayv-borrador-seguir">{{> local_oksigeniaayvurenda/icon_mic}}{{#str}} voicedraftgo, local_oksigeniaayvurenda {{/str}}</button>
+            <button type="button" class="ayv-line-button ayv-rec-con-icono" id="ayv-borrador-oir" aria-pressed="false">{{> local_oksigeniaayvurenda/icon_play}}<span>{{#str}} voicedraftlisten, local_oksigeniaayvurenda {{/str}}</span></button>
+            <button type="button" class="ayv-button ayv-button-quiet" id="ayv-borrador-tirar" data-ayv-twice="{{#str}} voicedraftdropsure, local_oksigeniaayvurenda {{/str}}">{{#str}} voicedraftdrop, local_oksigeniaayvurenda {{/str}}</button>
+        </p>
+    </div>
     {{#parts}}
     <div class="ayv-vp" id="ayv-vp" role="radiogroup" aria-labelledby="ayv-vp-t">
         <p class="ayv-vp-title" id="ayv-vp-t"><b>{{partswhich}}</b></p>
@@ -69,23 +94,81 @@
     <div class="ayv-vp ayv-vp-backdrops" id="ayv-vp-backdrops" role="radiogroup" aria-labelledby="ayv-vp-bt">
         <p class="ayv-vp-title" id="ayv-vp-bt"><b>{{backdroptitle}}</b> <span class="ayv-field-hint" id="ayv-vp-bt-word">{{backdropwhich}}</span></p>
         <div class="ayv-vp-chips">
-            {{#options}}<label class="ayv-vp-chip"><input type="radio" name="ayv-backdrop" value="{{bdkey}}" data-ogg="{{bdogg}}" data-m4a="{{bdm4a}}"{{#bdchecked}} checked{{/bdchecked}}><span class="ayv-vp-word">{{bdlabel}}</span></label>{{/options}}
+            {{#options}}<label class="ayv-vp-chip"><input type="radio" name="ayv-backdrop" value="{{bdkey}}" data-ogg="{{bdogg}}" data-m4a="{{bdm4a}}" data-the="{{bdthe}}"{{#bdchecked}} checked{{/bdchecked}}><span class="ayv-vp-word">{{bdlabel}}</span></label>{{/options}}
         </div>
     </div>
     {{/backdrops}}
     <div class="ayv-rec-controls">
+        <p class="ayv-rec-resumen"{{#backdrops}} data-sound="{{backdropchip}}"{{/backdrops}}><b class="ayv-rec-resumen-parte"></b><span class="ayv-rec-resumen-fondo"></span></p>
         <button type="button" class="ayv-rec-big" id="ayv-rec" {{#consent}}disabled{{/consent}}><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_mic}}</span><span class="ayv-rec-word">{{voicerecord}}</span></button>
+        <div class="ayv-rec-cuenta" id="ayv-cuenta" data-en="cuenta">
+            <span class="ayv-rec-cuenta-aro" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path class="ayv-rec-cuenta-pasa" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50" pathLength="100"/></svg><b class="ayv-rec-cuenta-n">3</b></span>
+            <span class="ayv-rec-cuenta-dice">{{#str}} voicecountdown, local_oksigeniaayvurenda {{/str}}</span>
+            <button type="button" class="ayv-line-button" id="ayv-cuenta-ya">{{#str}} voicecountdownnow, local_oksigeniaayvurenda {{/str}}</button>
+            <span class="ayv-sr" role="status" data-says="{{#str}} voicecountdownsays, local_oksigeniaayvurenda {{/str}}"></span>
+        </div>
         <div class="ayv-rec-row">
             <button type="button" class="ayv-rec-big ayv-rec-stop" id="ayv-stop" hidden><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_stop}}</span><span class="ayv-rec-word">{{voicestop}}</span></button>
             <button type="button" class="ayv-rec-big ayv-rec-pause" id="ayv-pause" hidden aria-pressed="false" data-pause="{{voicepause}}" data-resume="{{voiceresume}}"><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_pause}}</span><span class="ayv-rec-word">{{voicepause}}</span></button>
         </div>
         <div class="ayv-meter" aria-hidden="true"><span id="ayv-level"></span></div>
-        {{#parts}}<div class="ayv-vp-barra" id="ayv-vp-barra" data-record="{{voicerecord}}" data-stop="{{voicestop}}"><span class="ayv-vp-barra-parte" id="ayv-vp-barra-parte">{{barpart}}</span>{{#backdrops}}<button type="button" class="ayv-vp-barra-fondo" id="ayv-vp-barra-fondo" aria-haspopup="dialog" aria-controls="ayv-vp-hoja" data-says="{{backdropchip}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg><span class="ayv-vp-barra-sonido"></span></button>{{/backdrops}}<span class="ayv-vp-barra-tiempo" id="ayv-vp-barra-tiempo"></span><button type="button" class="ayv-vp-barra-boton"><span class="ayv-vp-barra-punto" aria-hidden="true"></span><span class="ayv-vp-barra-word">{{voicerecord}}</span></button></div>{{/parts}}
+        <div class="ayv-rec-trozos" data-en="grabando" data-one="{{#str}} voicepiece, local_oksigeniaayvurenda {{/str}}" data-many="{{calm.pieces}}">
+            <p class="ayv-rec-trozos-cuenta"><b class="ayv-rec-trozos-n"></b> <span class="ayv-rec-trozos-t"></span> <span class="ayv-rec-trozos-max">{{calm.piecesmax}}</span></p>
+            <div class="ayv-rec-tira" aria-hidden="true"></div>
+        </div>
+        <div class="ayv-rec-pausa" id="ayv-pausa" data-en="pausa" role="group" aria-labelledby="ayv-pausa-t">
+            <p class="ayv-rec-pausa-titulo" id="ayv-pausa-t">{{#str}} voicepaused, local_oksigeniaayvurenda {{/str}}</p>
+            <p class="ayv-rec-pausa-guarda">{{#str}} voicedraftkept, local_oksigeniaayvurenda {{/str}}</p>
+            <div class="ayv-rec-trozos" data-one="{{#str}} voicepiece, local_oksigeniaayvurenda {{/str}}" data-many="{{calm.pieces}}">
+                <p class="ayv-rec-trozos-cuenta"><b class="ayv-rec-trozos-n"></b> <span class="ayv-rec-trozos-t"></span> <span class="ayv-rec-trozos-max">{{calm.piecesmax}}</span></p>
+                <div class="ayv-rec-tira" aria-hidden="true"></div>
+            </div>
+            <button type="button" class="ayv-rec-big" id="ayv-pausa-seguir"><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_mic}}</span><span class="ayv-rec-word">{{voiceresume}}</span></button>
+            <div class="ayv-rec-pausa-mas">
+                <button type="button" class="ayv-rec-eleccion" id="ayv-pausa-oir" aria-pressed="false">{{> local_oksigeniaayvurenda/icon_play}}<span><b>{{#str}} voicepauselisten, local_oksigeniaayvurenda {{/str}}</b><small>{{#str}} voicepauselistenhint, local_oksigeniaayvurenda {{/str}}</small></span></button>
+                <button type="button" class="ayv-rec-eleccion ayv-rec-junta" id="ayv-pausa-repetir" data-ayv-twice="{{#str}} voicepauseagainsure, local_oksigeniaayvurenda {{/str}}">{{> local_oksigeniaayvurenda/icon_refresh}}<span><b class="ayv-twice-text">{{#str}} voicepauseagain, local_oksigeniaayvurenda {{/str}}</b><small>{{#str}} voicepauseagainhint, local_oksigeniaayvurenda {{/str}}</small></span></button>
+            </div>
+            <button type="button" class="ayv-button ayv-button-quiet" id="ayv-pausa-terminar">{{voicestop}}</button>
+        </div>
+        {{#parts}}<div class="ayv-vp-barra" id="ayv-vp-barra" data-record="{{voicerecord}}" data-stop="{{voicestop}}"><span class="ayv-vp-barra-parte" id="ayv-vp-barra-parte">{{barpart}}</span>{{#backdrops}}<button type="button" class="ayv-vp-barra-fondo" id="ayv-vp-barra-fondo" aria-haspopup="dialog" aria-controls="ayv-vp-hoja" data-says="{{backdropchip}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg><span class="ayv-vp-barra-sonido"></span></button>{{/backdrops}}<span class="ayv-vp-barra-tiempo" id="ayv-vp-barra-tiempo"></span><button type="button" class="ayv-vp-barra-pausa" id="ayv-vp-barra-pausa">{{> local_oksigeniaayvurenda/icon_pause}}<span>{{voicepause}}</span></button><button type="button" class="ayv-vp-barra-boton"><span class="ayv-vp-barra-punto" aria-hidden="true"></span><span class="ayv-vp-barra-word">{{voicerecord}}</span></button></div>{{/parts}}
         <span class="ayv-field-hint" id="ayv-time" role="status"></span>
     </div>
     <div class="ayv-rec-after" id="ayv-after" hidden>
-        <p class="ayv-rec-titulo" id="ayv-rec-titulo" data-says="{{aftertitle}}"></p>
+        <div class="ayv-rec-cabecera"><p class="ayv-rec-titulo" id="ayv-rec-titulo" data-says="{{aftertitle}}"></p>
+            <button type="button" class="ayv-rec-cambiar" aria-expanded="false">{{#str}} voicechange, local_oksigeniaayvurenda {{/str}}</button></div>
         <p class="ayv-rec-nota" id="ayv-rec-nota" role="status"></p>
+        <div class="ayv-rec-recorte" id="ayv-recorte" data-seconds="{{calm.trimseconds}}">
+            <div class="ayv-rec-entera"><svg class="ayv-rec-onda" id="ayv-onda" preserveAspectRatio="none" aria-hidden="true"></svg><span class="ayv-rec-cabeza" aria-hidden="true"></span></div>
+            <p class="ayv-rec-dura" id="ayv-dura-t" data-says="{{calm.length}}"></p>
+        </div>
+        <div class="ayv-rec-oir" data-with="{{#str}} voicelistenwith, local_oksigeniaayvurenda {{/str}}" data-withhint="{{calm.listenwithhint}}" data-alone="{{#str}} voicelistenalone, local_oksigeniaayvurenda {{/str}}" data-alonehint="{{#str}} voicelistenalonehint, local_oksigeniaayvurenda {{/str}}">
+            <button type="button" class="ayv-rec-oir-boton" id="ayv-oir" aria-pressed="false" aria-labelledby="ayv-oir-t">{{> local_oksigeniaayvurenda/icon_play}}{{> local_oksigeniaayvurenda/icon_pause}}</button>
+            <p><b id="ayv-oir-t"></b><span class="ayv-rec-oir-dice"></span></p>
+        </div>
+        <p class="ayv-rec-nivel ayv-rec-junta" id="ayv-nivel" hidden data-same="{{#str}} voicelevelsame, local_oksigeniaayvurenda {{/str}}" data-up="{{#str}} voicelevelup, local_oksigeniaayvurenda {{/str}}" data-upmore="{{#str}} voicelevelupmore, local_oksigeniaayvurenda {{/str}}" data-down="{{#str}} voiceleveldown, local_oksigeniaayvurenda {{/str}}" data-downmore="{{#str}} voiceleveldownmore, local_oksigeniaayvurenda {{/str}}"><svg class="ayv-rec-nivel-dibujo" viewBox="0 0 64 20" aria-hidden="true"><line class="ayv-rec-nivel-raya" x1="4" y1="10" x2="60" y2="10"/><line class="ayv-rec-nivel-marca" x1="32" y1="3" x2="32" y2="17"/><line class="ayv-rec-nivel-paso" x1="32" y1="10" x2="32" y2="10"/><circle class="ayv-rec-nivel-antes" cx="32" cy="10" r="3.5"/><circle class="ayv-rec-nivel-ahora" cx="32" cy="10" r="4"/></svg><span class="ayv-rec-nivel-dice"></span></p>
+        <div class="ayv-rec-extremos ayv-rec-junta">
+            <div class="ayv-rec-puntas">
+                <div class="ayv-rec-punta">
+                    <p class="ayv-rec-punta-t">{{#str}} voicetrimhead, local_oksigeniaayvurenda {{/str}}</p>
+                    <div class="ayv-rec-onda-caja" data-punta="a">
+                        <svg class="ayv-rec-onda" preserveAspectRatio="none" aria-hidden="true"></svg>
+                        <input type="range" class="ayv-rec-rango" id="ayv-empieza" min="0" max="1000" step="100" value="0" aria-label="{{#str}} voicetrimstart, local_oksigeniaayvurenda {{/str}}">
+                        <span class="ayv-rec-fuera" aria-hidden="true"></span><span class="ayv-rec-tirador" aria-hidden="true"></span>
+                    </div>
+                    <p class="ayv-rec-punta-dice" id="ayv-empieza-t" data-says="{{calm.trimfrom}}"></p>
+                </div>
+                <div class="ayv-rec-punta">
+                    <p class="ayv-rec-punta-t">{{#str}} voicetrimtail, local_oksigeniaayvurenda {{/str}}</p>
+                    <div class="ayv-rec-onda-caja" data-punta="b">
+                        <svg class="ayv-rec-onda" preserveAspectRatio="none" aria-hidden="true"></svg>
+                        <input type="range" class="ayv-rec-rango" id="ayv-acaba" min="0" max="1000" step="100" value="1000" aria-label="{{#str}} voicetrimend, local_oksigeniaayvurenda {{/str}}">
+                        <span class="ayv-rec-fuera" aria-hidden="true"></span><span class="ayv-rec-tirador" aria-hidden="true"></span>
+                    </div>
+                    <p class="ayv-rec-punta-dice" id="ayv-acaba-t" data-says="{{calm.trimto}}"></p>
+                </div>
+            </div>
+            <p class="ayv-rec-recorte-nota ayv-rec-junta" id="ayv-recorte-nota" data-says="{{#str}} voicetrimdone, local_oksigeniaayvurenda {{/str}}" data-none="{{#str}} voicetrimnone, local_oksigeniaayvurenda {{/str}}" data-start="{{calm.trimdonestart}}" data-end="{{calm.trimdoneend}}"></p>
+        </div>
         <audio id="ayv-preview" class="ayv-media" controls></audio>
         <label class="ayv-field ayv-field-wide ayv-field-quiet" id="ayv-what-field" data-other="{{voicewhat}}" data-otherhint="{{voicewhathint}}"{{#parts}} data-part="{{partsname}}" data-parthint="{{partsnamehint}}"{{/parts}}><span class="ayv-what-word">{{#parts}}{{partsname}}{{/parts}}{{^parts}}{{voicewhat}}{{/parts}}</span> <span class="ayv-field-hint ayv-what-hint">{{#parts}}{{partsnamehint}}{{/parts}}{{^parts}}{{voicewhathint}}{{/parts}}</span>
             <input type="text" id="ayv-what" maxlength="255"></label>
@@ -107,6 +190,6 @@
         </p>
     </div>
     <p class="ayv-field-hint" id="ayv-voice-said" role="status"></p>
-    {{#backdrops}}<div class="ayv-vp-velo" id="ayv-vp-velo" hidden></div>
-    <div class="ayv-vp-hoja" id="ayv-vp-hoja" role="dialog" aria-modal="true" aria-labelledby="ayv-vp-bt" hidden><button type="button" class="ayv-button ayv-vp-listo" id="ayv-vp-listo">{{backdropdone}}</button></div>{{/backdrops}}
+    <div class="ayv-vp-velo" id="ayv-vp-velo" hidden></div>
+    {{#backdrops}}<div class="ayv-vp-hoja" id="ayv-vp-hoja" role="dialog" aria-modal="true" aria-labelledby="ayv-vp-bt" hidden><button type="button" class="ayv-button ayv-vp-listo" id="ayv-vp-listo">{{backdropdone}}</button></div>{{/backdrops}}
 </div>

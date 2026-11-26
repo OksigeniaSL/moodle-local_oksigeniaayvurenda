@@ -985,6 +985,24 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112601, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112603) {
+        // When each copy's spine label and code label were printed: what is still to print fills a sheet.
+        $table = new xmldb_table('local_oksigeniaayvurenda_item');
+        foreach (
+            [new xmldb_field('timespine', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'timeacquired'),
+                new xmldb_field('timelabel', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'timespine')] as $field
+        ) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        // The copies there were before count as printed (their labels are on the books, or were asked for by day): only
+        // what is added from now on waits to fill a sheet. A day of them still to print is asked for by its dates.
+        $DB->execute('UPDATE {local_oksigeniaayvurenda_item} SET timespine = timecreated WHERE timespine IS NULL');
+        $DB->execute('UPDATE {local_oksigeniaayvurenda_item} SET timelabel = timecreated WHERE timelabel IS NULL');
+        upgrade_plugin_savepoint(true, 2026112603, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

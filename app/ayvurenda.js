@@ -1342,14 +1342,16 @@
             return;
         }
         event.preventDefault();
-        var before = button.textContent;
+        // Only the words change: an icon or a second line inside stays (.ayv-twice-text marks the words).
+        var words = button.querySelector('.ayv-twice-text') || button;
+        var before = words.textContent;
         button.setAttribute('data-ayv-armed', '1');
         button.classList.add('ayv-armed');
-        button.textContent = button.getAttribute('data-ayv-twice');
+        words.textContent = button.getAttribute('data-ayv-twice');
         window.setTimeout(function() {
             button.removeAttribute('data-ayv-armed');
             button.classList.remove('ayv-armed');
-            button.textContent = before;
+            words.textContent = before;
         }, 5000);
     });
 })();

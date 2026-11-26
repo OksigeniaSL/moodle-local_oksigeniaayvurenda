@@ -42,6 +42,8 @@ $kind = optional_param('kind', 'labels', PARAM_ALPHA) === 'spines' ? 'spines' : 
 $which = optional_param('which', '', PARAM_ALPHA);
 $since = optional_param('since', '', PARAM_RAW_TRIMMED);
 $since = preg_match('/^\d{4}-\d{2}-\d{2}$/', $since) ? $since : '';
+$until = optional_param('until', '', PARAM_RAW_TRIMMED);
+$until = $since !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $until) && $until >= $since ? $until : '';
 $codes = optional_param('codes', '', PARAM_TEXT);
 $sheet = labels::chosen($library, $kind, optional_param('sheet', '', PARAM_ALPHANUMEXT));
 $format = label_sheets::placed($sheet);
@@ -49,6 +51,15 @@ $start = max(1, min($format['per'], optional_param('start', 1, PARAM_INT)));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url(new moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $library->slug, 'kind' => $kind]));
 $zone = \local_oksigeniaayvurenda\local\zones::of($library);
+// Just printed: the page stays on what is still to print (now nothing), not on another choice that offers them again.
+$justprinted = $SESSION->ayvlabelsprinted ?? null;
+if ($which === '' && $justprinted && (int) $justprinted['library'] === (int) $library->id && $justprinted['kind'] === $kind) {
+    $which = 'pending';
+}
+// What is still to print comes first: labels are printed when a sheet is full, not on the day the books came in.
+if ($which === '' && labels::pending_count($library, $kind)) {
+    $which = 'pending';
+}
 // Nothing added today: the page opens on the last day something came in (an import of last week), not on «0 copies».
 if ($which === '' && !labels::items($library, 'today', 0, [])) {
     $last = (int) $DB->get_field_sql(
@@ -60,13 +71,30 @@ if ($which === '' && !labels::items($library, 'today', 0, [])) {
         $since = (new DateTimeImmutable('@' . $last))->setTimezone($zone)->format('Y-m-d');
     }
 }
-$which = in_array($which, ['today', 'since', 'codes'], true) ? $which : 'today';
+$which = in_array($which, ['pending', 'today', 'since', 'codes'], true) ? $which : 'today';
 $here = array_filter(['library' => $library->slug, 'kind' => $kind, 'sheet' => $sheet, 'which' => $which, 'since' => $since,
+    'until' => $which === 'since' ? $until : '',
     'codes' => $codes, 'start' => $start > 1 ? $start : ''], fn($v) => $v !== '');
 // The two things kept: a sheet among the favourites (or out of them), and the print moved half a millimetre.
 if (data_submitted() && confirm_sesskey()) {
     $do = optional_param('do', '', PARAM_ALPHA);
     $back = $here + ['saved' => $do];
+    // The last sheets did not come out well: their copies are to print again.
+    if ($do === 'unprint') {
+        $last = $SESSION->ayvlabelsprinted ?? null;
+        $back = 0;
+        if ($last && (int) $last['library'] === (int) $library->id) {
+            labels::printed($library, $last['kind'], $last['ids'], null);
+            $back = count($last['ids']);
+        }
+        unset($SESSION->ayvlabelsprinted);
+        // Back to what is still to print, which is what came back, saying how many.
+        redirect(new moodle_url(
+            '/local/oksigeniaayvurenda/labels.php',
+            ['which' => 'pending', 'saved' => 'unprint', 'back' => $back] + $here,
+            'ayv-et-hoja'
+        ));
+    }
     if ($do === 'fav') {
         labels::favourite($library, $kind, $sheet);
         redirect(new moodle_url('/local/oksigeniaayvurenda/labels.php', $back, 'ayv-et-hoja'));
@@ -90,7 +118,10 @@ $from = 0;
 if ($since !== '') {
     $from = (new DateTimeImmutable($since . ' 00:00', $zone))->getTimestamp();
 }
-$items = labels::items($library, $which, $from, preg_split('/[\s,;]+/', $codes) ?: []);
+$to = $until !== '' ? (new DateTimeImmutable($until . ' 00:00', $zone))->modify('+1 day')->getTimestamp() : 0;
+// From a day not chosen yet: nothing, until the day is touched (not every copy of the library).
+$items = $which === 'since' && $since === '' ? []
+    : labels::items($library, $which, $from, preg_split('/[\s,;]+/', $codes) ?: [], null, $to, $kind);
 // One more than fit says there are more.
 $toomany = count($items) > labels::LIMIT;
 $items = array_slice($items, 0, labels::LIMIT);
@@ -105,6 +136,14 @@ if (optional_param('print', 0, PARAM_BOOL)) {
     [$nudgex, $nudgey] = labels::own($library)['nudge'][$sheet] ?? [0.0, 0.0];
     $pages = $test ? [['labels' => array_map(fn($n) => ['blank' => true, 'testnumber' => $n], range(1, $format['per']))]]
         : labels::sheets($items, $sheet, $start);
+    // What is printed is no longer to print; if the sheets come out badly, «Undo» on the page of labels brings them back.
+    if (!$test && $items && optional_param('sesskey', '', PARAM_RAW) === sesskey()) {
+        labels::printed($library, $kind, array_column($items, 'id'), time());
+        // Where the next label goes on the last sheet, if it was not filled: «this sheet has 12 already, start at 13».
+        $next = ($start - 1 + count($items)) % $format['per'] + 1;
+        $SESSION->ayvlabelsprinted = ['library' => (int) $library->id, 'kind' => $kind, 'ids' => array_column($items, 'id'),
+            'sheet' => $sheet, 'next' => $next];
+    }
     $data = [
         'says' => $test ? $str('labelstest') : (count($pages) === 1 ? $str('labelsprintone') : $str(
             'labelsprintn',
@@ -149,8 +188,9 @@ if (optional_param('print', 0, PARAM_BOOL)) {
 
 $data = labelpage::context(
     $library,
-    ['kind' => $kind, 'which' => $which, 'since' => $since, 'codes' => $codes,
-    'sheet' => $sheet, 'start' => $start, 'adjust' => optional_param('adjust', 0, PARAM_BOOL)],
+    ['kind' => $kind, 'which' => $which, 'since' => $since, 'until' => $until, 'codes' => $codes,
+    'sheet' => $sheet, 'start' => $start, 'adjust' => optional_param('adjust', 0, PARAM_BOOL),
+    'back' => optional_param('back', 0, PARAM_INT)],
     $items,
     $toomany,
     optional_param('saved', '', PARAM_ALPHA)

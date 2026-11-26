@@ -24,12 +24,13 @@
     put by itself. «Ninguna es esta» keeps the drawn cover; a photo is the other way.
 
     Context variables required for this template:
-    * heading, hint, thisline, action, sesskey, list (key, src, line, same, samelabel, picklabel), nonelabel, photolabel,
+    * heading, hint, thisline, action, sesskey, list (key, src, line, full, same, samelabel, picklabel), nonelabel, photolabel,
       photourl
 
     Example context (json):
     {"heading": "¿Es esta la portada?", "hint": "Toca la de este libro.", "thisline": "Este libro: Alisio, 2014",
         "action": "#", "sesskey": "abc", "list": [{"key": "ol1", "src": "https://example.com/c.jpg", "line": "Alisio · 2014",
+        "full": "Andrés Lagos · Alisio · 2014",
         "same": true, "samelabel": "Misma editorial y año", "picklabel": "Poner esta"}], "nonelabel": "Ninguna es esta",
         "photolabel": "Hacerle una foto", "photourl": "#"}
 }}
@@ -39,7 +40,7 @@
     <p class="ayv-pc-esta">{{{thisline}}}</p>
     <form method="post" action="{{action}}" class="ayv-pc-lista">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
-        {{#list}}<button type="submit" class="ayv-pc-una{{#same}} ayv-pc-misma{{/same}}" name="cover" value="{{key}}"><img src="{{src}}" alt="" loading="lazy"><span class="ayv-pc-datos">{{line}}</span>{{#same}}<span class="ayv-pc-igual">{{samelabel}}</span>{{/same}}<span class="ayv-sr">{{picklabel}}</span></button>{{/list}}
+        {{#list}}<button type="submit" class="ayv-pc-una{{#same}} ayv-pc-misma{{/same}}" name="cover" value="{{key}}" title="{{full}}"><img src="{{src}}" alt="" loading="lazy"><span class="ayv-pc-datos">{{line}}</span>{{#same}}<span class="ayv-pc-igual">{{samelabel}}</span>{{/same}}<span class="ayv-sr">{{picklabel}}</span></button>{{/list}}
     </form>
     <p class="ayv-pc-otras">
         <button type="submit" form="ayv-pc-ninguna" class="ayv-line-button ayv-line-quiet">{{nonelabel}}</button>

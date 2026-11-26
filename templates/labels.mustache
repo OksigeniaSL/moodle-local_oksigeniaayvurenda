@@ -32,6 +32,8 @@
     * sheettitle, sheets (top, others, hasothers; each url, current, name, sub, cols, rows, cells), otherslabel, othersnote
     * firstsheet, says, haslabels, empty, toomany, paper (cols, rows, letter, cells: url, aria, used, first, blank,
       spine, code), note, printurl, printlabel, favaction, sesskey, fav (pressed, label, justsaved), adjusturl,
+      printed (text, action, sesskey, undo: the last sheets given for printed, to bring back; resume: url and text to go on
+      where the last sheet was left) and unprinted (said once),
       adjustlabel, adjust (title, hint, now, justsaved, moves, reset, testhint, testurl, testlabel, close, closelabel)
 
     Example context (json):
@@ -57,6 +59,9 @@
             "others": [{"url": "https://example.com/labels.php?sheet=b", "current": false, "name": "Avery L7160", "sub": "63,5 × 38,1 mm",
                 "cols": 3, "rows": 7, "cells": [{"x": 1}]}]},
         "firstsheet": "La primera hoja", "says": "<b>2 tejuelos</b> en <b>1 hoja</b>.", "haslabels": true,
+        "printed": {"text": "Los 24 tejuelos de la última vez se dan por impresos.", "action": "https://example.com/labels.php",
+            "sesskey": "abc", "undo": "No salieron bien: volver a imprimirlos",
+            "resume": {"url": "https://example.com/labels.php?start=13", "text": "Esta hoja ya lleva 12: empieza en la 13"} }, "unprinted": "",
         "empty": "Nada.", "toomany": "",
         "paper": {"cols": 3, "rows": 8, "letter": false, "cells": [
             {"url": "https://example.com/labels.php?start=1", "aria": "Empezar en la 1", "used": true, "first": false,
@@ -123,8 +128,12 @@
 </div>
 <section class="ayv-et-muestra-hoja" id="ayv-et-hoja" aria-labelledby="ayv-et-hoja-t">
     <h2 id="ayv-et-hoja-t" class="ayv-sr">{{firstsheet}}</h2>
+    {{#haslabels}}<p class="ayv-et-dice">{{{says}}}</p>{{/haslabels}}
+    {{^haslabels}}{{#empty}}<p class="ayv-et-dice">{{empty}}</p>{{/empty}}{{/haslabels}}
+    {{#printed}}<form class="ayv-notice" method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="do" value="unprint"><span role="status">{{text}}</span> <button type="submit" class="ayv-line-button ayv-line-quiet">{{undo}}</button></form>{{/printed}}
+    {{#unprinted}}<p class="ayv-notice" role="status">{{unprinted}}</p>{{/unprinted}}
     {{#haslabels}}
-    <p class="ayv-et-dice">{{{says}}}</p>
+    {{#printed}}{{#resume}}<p class="ayv-et-sigue"><a class="ayv-cf-enlace" href="{{url}}">{{text}}</a></p>{{/resume}}{{/printed}}
     {{#toomany}}<p class="ayv-notice" role="status">{{toomany}}</p>{{/toomany}}
     <div class="ayv-cf-fila">
         <a class="ayv-button" href="{{printurl}}">{{printlabel}}</a>
@@ -137,7 +146,6 @@
     {{/paper}}
     <p class="ayv-cf-nota">{{note}}</p>
     {{/haslabels}}
-    {{^haslabels}}<p class="ayv-et-dice">{{empty}}</p>{{/haslabels}}
     {{#adjust}}
     <div class="ayv-et-ajuste" id="ayv-et-ajuste">
         <h3>{{title}}</h3>{{#justsaved}}<p><span class="ayv-cf-guardado" role="status">{{savedword}}</span></p>{{/justsaved}}

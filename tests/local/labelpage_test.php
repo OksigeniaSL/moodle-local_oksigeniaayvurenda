@@ -68,8 +68,14 @@ final class labelpage_test extends \advanced_testcase {
         $this->assertTrue($page['paper']['cells'][2]['spine']['lines'][0]['top']);
         $this->assertStringContainsString('<b>', $page['says']);
         $this->assertTrue($page['kinds'][1]['current']);
-        $this->assertTrue($page['whiches'][1]['current']);
-        $this->assertContains(true, array_column($page['days']['list'], 'current'));
+        // First, what is still to print (the four were added here); then today, since and the codes.
+        $this->assertStringContainsString('4', $page['whiches'][0]['label']);
+        $this->assertTrue($page['whiches'][2]['current']);
+        // A first day chosen and no last one: the row asks up to which day, with only the later days and none marked.
+        $this->assertNotContains(true, array_column($page['days']['list'], 'current'));
+        foreach ($page['days']['list'] as $day) {
+            $this->assertStringContainsString('until=', $day['url']);
+        }
         $this->assertNull($page['codes']);
         $this->assertNull($page['adjust']);
         // The chosen sheet is among the first ones; the rest wait under «Other sheets».

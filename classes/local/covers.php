@@ -515,7 +515,7 @@ final class covers {
             }
             foreach ($ask() as $cover) {
                 $found[$cover['url']] = ['url' => $cover['url'], 'source' => $source, 'title' => $cover['title'],
-                    'publisher' => $cover['publisher'], 'year' => $cover['year'],
+                    'authors' => $cover['authors'], 'publisher' => $cover['publisher'], 'year' => $cover['year'],
                     'detail' => implode(' · ', array_filter([$cover['authors'], $cover['publisher'], $cover['year']]))];
             }
             self::heed($source);

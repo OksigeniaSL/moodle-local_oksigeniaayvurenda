@@ -24,12 +24,12 @@
  */
 (function () {
     'use strict';
-    var raiz = document.documentElement;
-    raiz.classList.remove('lb-sin-js');
-    raiz.classList.add('lb-con-js');
+    var root = document.documentElement;
+    root.classList.remove('lb-sin-js');
+    root.classList.add('lb-con-js');
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-lb="imprimir"]'), function (boton) {
-        boton.addEventListener('click', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lb="imprimir"]'), function (button) {
+        button.addEventListener('click', function () {
             window.print();
         });
     });
@@ -41,48 +41,48 @@
         });
     }
 
-    Array.prototype.forEach.call(document.querySelectorAll('[data-lb="pasar"]'), function (boton) {
-        var dicho = document.querySelector('.lb-pasado');
-        boton.addEventListener('click', function () {
-            var datos = {title: boton.getAttribute('data-titulo'), text: boton.getAttribute('data-texto'), url: location.href};
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lb="pasar"]'), function (button) {
+        var said = document.querySelector('.lb-pasado');
+        button.addEventListener('click', function () {
+            var shared = {title: button.getAttribute('data-titulo'), text: button.getAttribute('data-texto'), url: location.href};
             if (navigator.share) {
-                navigator.share(datos).catch(function () {
+                navigator.share(shared).catch(function () {
                     // Closed without sharing: nothing to say.
                 });
-            } else if (navigator.clipboard && dicho) {
+            } else if (navigator.clipboard && said) {
                 navigator.clipboard.writeText(location.href).then(function () {
-                    dicho.textContent = boton.getAttribute('data-copiado');
+                    said.textContent = button.getAttribute('data-copiado');
                 });
             }
         });
     });
 
     // Each voice: its own <audio>, played by the round button next to it; one at a time.
-    var sonando = null;
+    var playing = null;
     Array.prototype.forEach.call(document.querySelectorAll('.lb-voz'), function (voz) {
         var audio = voz.querySelector('audio');
         var play = voz.querySelector('.lb-voz-play');
         if (!audio || !play) {
             return;
         }
-        var pintar = function () {
+        var paint = function () {
             play.setAttribute('aria-pressed', String(!audio.paused));
             play.setAttribute('aria-label', audio.paused ? play.getAttribute('data-escuchar') : play.getAttribute('data-pausar'));
         };
         play.addEventListener('click', function () {
             if (audio.paused) {
-                if (sonando && sonando !== audio) {
-                    sonando.pause();
+                if (playing && playing !== audio) {
+                    playing.pause();
                 }
-                sonando = audio;
+                playing = audio;
                 audio.play();
             } else {
                 audio.pause();
             }
         });
         ['play', 'pause', 'ended'].forEach(function (ev) {
-            audio.addEventListener(ev, pintar);
+            audio.addEventListener(ev, paint);
         });
-        pintar();
+        paint();
     });
 })();

@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.5.0 (2026-11-26)
+
+- **Recording with calm.** Three seconds are counted before the microphone records, and «Start now» does not wait. Where
+  the browser records WebM (Chrome, Edge, Firefox), every pause closes a piece of the reading: in the pause, the last
+  fifteen seconds can be heard, and the last piece, read badly, thrown away and read again (two touches). At the end the
+  pieces are joined without encoding anything again, the silence and the tap of the button are cut from both ends, and
+  the voice is set at the level of the others, with a line that says how. The whole reading is drawn, its joins marked;
+  its two ends are seen close up, each with a handle that moves it, and the cut is heard on letting it go. It is heard
+  with its soft sound under it, as listeners will. What is recorded stays in the device until it is sent: back on the
+  page, a reading left half-done says so, and goes on, is heard or is thrown away. In Safari, which records one file,
+  the count, the pause and the draft work as before, without throwing pieces away nor cutting the ends. «Stop» says
+  «Finish» now, with «Pause» by it.
+- **Spine labels still to print**: the labels page offers first the copies whose spine label or barcode label has not
+  been printed yet, and marks them as printed once the sheet is printed from it («Undo» if the printer failed, saying
+  how many come back). The copies brought from another programme, and those there were before this version, count as
+  printed. A sheet that is not full says how many labels it still has room for, and the next time offers to start where
+  it was left («This sheet has 12 already: start at 13»). Labels can also be asked from one day to another: nothing is
+  offered until the day is touched. A copy without a call number gives no blank spine label.
+- **When each copy was added**, in the record, under the copy; if its spine label is still to print, a touch takes it to
+  the labels page with that copy chosen.
+
+## 1.4.1 (2026-11-26)
+
+- **«Is this the cover?»** says under each cover what tells one edition from another, its publisher and year, and the
+  authors only when they are not the book's; the whole line, on hovering. While the covers are being chosen, the record
+  offers to look again.
+- **A Google Books key put or changed is tried at once**: the two hours of calm the common allowance asked for are over.
+
 ## 1.4.0 (2026-11-26)
 
 - **The places of the library** (in «More»): each place is a piece of furniture whose plate carries the name readers see,

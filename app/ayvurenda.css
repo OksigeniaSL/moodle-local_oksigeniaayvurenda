@@ -447,6 +447,9 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     border-radius: 6px;
 }
 
+/* When the copy was added, and whether its spine label is still to print: a quiet line under it, for whoever catalogues. */
+.ayv .ayv-copy-added { flex-basis: 100%; font-size: .85rem; color: var(--ink-2); }
+
 .ayv .ayv-foot {
     /* Room on the left for the floating button of an accessibility plugin, which sits there. */
     padding-left: max(4.5rem, clamp(.75rem, 3vw, 2rem)) !important;
@@ -1881,8 +1884,16 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
     .ayv .ayv-voice .ayv-rec-controls > .ayv-rec-big,
     .ayv .ayv-voice .ayv-rec-controls > .ayv-rec-row,
     .ayv .ayv-voice .ayv-rec-controls > .ayv-meter { display: none; }
-    .ayv .ayv-voice .ayv-recorder:not(.is-despues) { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
-    .ayv .ayv-voice .ayv-recorder.is-despues {
+    .ayv .ayv-voice .ayv-recorder:not(.is-despues):not([data-estado="pausa"]):not([data-estado="borrador"]) {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        box-shadow: none;
+    }
+    .ayv .ayv-voice .ayv-recorder.is-despues,
+    .ayv .ayv-voice .ayv-recorder[data-estado="pausa"],
+    .ayv .ayv-voice .ayv-recorder[data-estado="borrador"] {
         position: fixed;
         right: 0;
         bottom: 0;
@@ -1896,7 +1907,9 @@ html:has(body.ayv) { scroll-padding-top: 7rem; }
         box-shadow: 0 -10px 30px rgba(14, 28, 26, .3);
     }
     .ayv .ayv-voice .ayv-recorder.is-despues .ayv-vp-barra,
-    .ayv .ayv-voice .ayv-recorder.is-despues #ayv-time { display: none; }
+    .ayv .ayv-voice .ayv-recorder.is-despues #ayv-time,
+    .ayv .ayv-voice .ayv-recorder[data-estado="pausa"] .ayv-vp-barra,
+    .ayv .ayv-voice .ayv-recorder[data-estado="borrador"] .ayv-vp-barra { display: none; }
     /* Room under the text for the bar at the foot, so that it never covers the last lines. */
     .ayv .ayv-voice { padding-bottom: 4.5rem; }
 }
@@ -2415,7 +2428,8 @@ html[data-bs-theme="dark"] .ayv .ayv-recorder { color-scheme: light; }
 .ayv .ayv-voice-side .ayv-book { margin: 0 0 1rem; }
 @media (min-width: 900px) {
     .ayv .ayv-voice-grid { grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr); }
-    .ayv .ayv-voice-side { position: sticky; top: 1rem; }
+    /* Below the sticky header (about 67 px), not under it, when the text on the left makes the page scroll. */
+    .ayv .ayv-voice-side { position: sticky; top: 5.5rem; }
 }
 
 .ayv .ayv-pdf { display: block; width: 100%; height: 80vh; border: 1px solid var(--line); border-radius: var(--radius); }
@@ -9239,6 +9253,11 @@ html[data-bs-theme="dark"] .ayv .ayv-eg {
     font-size: 1.125rem;
 }
 
+/* After a sheet not filled: the next labels go on where it was left. */
+.ayv .ayv-et-sigue {
+    margin: 0 0 10px;
+}
+
 .ayv .ayv-et-dice b {
     font-family: var(--title);
 }
@@ -9315,6 +9334,18 @@ html[data-bs-theme="dark"] .ayv .ayv-eg {
     padding: 1px 4px;
     border-radius: 2px;
     background: #f0b43c;
+}
+
+/* On a phone the cells of the sample sheet are about 70 × 36 px: the spine label goes smaller, but whole, not cut. */
+@media (max-width: 47.99rem) {
+    .ayv .ayv-et-muestra-hoja .ayv-et-tej {
+        font-size: 1.9vw;
+        line-height: 1.1;
+    }
+
+    .ayv .ayv-et-muestra-hoja .ayv-et-tej b {
+        padding: 0 2px;
+    }
 }
 
 /* Labels already used on the sheet: crossed, they are not printed. */
@@ -16395,3 +16426,399 @@ html[data-bs-theme="dark"] .ayv .ayv-mv-flecha {
         gap: 14px 10px;
     }
 }
+
+/* Recording with calm (26 Nov 2026, the mock-up over 1.5.0): the moment is data-estado on the plate, drawn by
+   app/voiceview.js. Three seconds counted in a ring before the microphone opens; the pieces of the reading as a strip
+   against the twenty minutes of a part; the pause with «Seguir» and two choices; at the end, the reading as a wave with
+   its two cleaned ends and their handles, heard with its soft sound, and how the voice was levelled; and a reading left
+   half-done, as a slip with a bookmark. The plate is light in both modes, so everything here takes its light tokens. */
+html[data-bs-theme="dark"] .ayv .ayv-recorder {
+    --paper: #fbf6ec;
+    --paper2: #f2eadb;
+    --muted: #8b9591;
+    --notice-bg: #e6f1ec;
+    --danger: #a3321e;
+}
+.ayv .ayv-recorder [data-en] { display: none; }
+.ayv .ayv-recorder[data-estado="borrador"] [data-en~="borrador"],
+.ayv .ayv-recorder[data-estado="cuenta"] [data-en~="cuenta"],
+.ayv .ayv-recorder[data-estado="grabando"] [data-en~="grabando"],
+.ayv .ayv-recorder[data-estado="pausa"] [data-en~="pausa"] { display: grid; }
+.ayv .ayv-recorder[data-estado="borrador"] #ayv-rec,
+.ayv .ayv-recorder[data-estado="cuenta"] #ayv-rec,
+.ayv .ayv-recorder[data-estado="pausa"] .ayv-rec-row,
+.ayv .ayv-recorder[data-estado="pausa"] #ayv-time,
+.ayv .ayv-recorder:not([data-estado="grabando"]) .ayv-meter { display: none; }
+/* While counting, reading or paused, the part and the sound cannot change: their chips are put away and one line says
+   them; with a reading half-done, the slip is all there is. After recording, «Cambiar» brings the chips back. */
+.ayv .ayv-recorder[data-estado="cuenta"] #ayv-vp,
+.ayv .ayv-recorder[data-estado="grabando"] #ayv-vp,
+.ayv .ayv-recorder[data-estado="pausa"] #ayv-vp,
+.ayv .ayv-recorder[data-estado="borrador"] #ayv-vp,
+.ayv .ayv-recorder[data-estado="despues"]:not(.is-eligiendo) #ayv-vp,
+.ayv .ayv-recorder[data-estado="cuenta"] #ayv-vp-backdrops,
+.ayv .ayv-recorder[data-estado="grabando"] #ayv-vp-backdrops,
+.ayv .ayv-recorder[data-estado="pausa"] #ayv-vp-backdrops,
+.ayv .ayv-recorder[data-estado="borrador"] #ayv-vp-backdrops,
+.ayv .ayv-recorder[data-estado="despues"]:not(.is-eligiendo) #ayv-vp-backdrops { display: none; }
+.ayv .ayv-rec-resumen { display: none; }
+.ayv .ayv-recorder[data-estado="cuenta"] .ayv-rec-resumen,
+.ayv .ayv-recorder[data-estado="grabando"] .ayv-rec-resumen,
+.ayv .ayv-recorder[data-estado="pausa"] .ayv-rec-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .2rem .6rem;
+    align-self: stretch;
+    margin: 0 0 1.1rem;
+    padding: 0 0 .7rem;
+    border-bottom: 1px solid var(--line);
+}
+.ayv .ayv-rec-resumen-parte { font-family: var(--title); font-size: 1.2rem; font-weight: 600; }
+.ayv .ayv-rec-resumen-fondo { color: var(--ink-2); }
+.ayv .ayv-rec-resumen-fondo:empty { display: none; }
+.ayv .ayv-rec-cabecera { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem; }
+.ayv .ayv-rec-cabecera .ayv-rec-titulo { flex: 1 1 auto; }
+.ayv .ayv-rec-cambiar {
+    display: none;
+    flex: none;
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 .25rem;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.ayv .ayv-recorder[data-estado="despues"] .ayv-rec-cambiar { display: inline-block; }
+.ayv .ayv-recorder.is-eligiendo .ayv-rec-cambiar { text-decoration: none; }
+/* The slip of a reading half-done is all the plate has. */
+.ayv .ayv-recorder[data-estado="borrador"] .ayv-rec-controls,
+.ayv .ayv-recorder[data-estado="despues"] .ayv-rec-controls { display: none; }
+.ayv .ayv-recorder[data-estado="borrador"] .ayv-rec-borrador { margin: 0; }
+/* Where a browser records one file (Safari), nothing that throws a piece away or cuts an end. */
+.ayv .ayv-recorder.is-entera .ayv-rec-junta { display: none !important; }
+/* The voice is played by «Escucharlo», over the wave: the browser's player stays out of sight. */
+.ayv .ayv-recorder #ayv-preview { display: none; }
+
+/* The strip: each piece read, as long as it lasted against the twenty minutes of a part, a gap of the plate between
+   them; the last one darker (what «Repetir el último trozo» throws away), the one being read in coral. */
+.ayv .ayv-rec-trozos { display: grid; gap: .35rem; width: 100%; }
+.ayv .ayv-rec-pausa .ayv-rec-trozos { margin: 0 0 .35rem; text-align: left; }
+.ayv .ayv-rec-trozos-cuenta { display: flex; align-items: baseline; gap: .35rem; margin: 0; font-variant-numeric: tabular-nums; }
+.ayv .ayv-rec-trozos-max { margin-left: auto; color: var(--ink-2); font-size: .9rem; }
+.ayv .ayv-rec-tira { display: flex; gap: 2px; height: .8rem; overflow: hidden; border-radius: 999px; }
+.ayv .ayv-rec-tira i { flex: none; min-width: 3px; height: 100%; background: var(--green2); }
+.ayv .ayv-rec-tira i.is-ultimo { background: var(--accent); }
+.ayv .ayv-rec-tira i.is-vivo { background: var(--coral); }
+.ayv .ayv-rec-tira i.is-resto { flex: 1; background: var(--paper2); }
+
+/* Three, two, one: the ring of the record button empties each second from its top; «Empezar ya» does not wait. */
+.ayv .ayv-rec-cuenta { justify-items: center; gap: .55rem; text-align: center; }
+.ayv .ayv-rec-cuenta-aro { position: relative; display: grid; place-items: center; width: 84px; height: 84px; }
+.ayv .ayv-rec-cuenta-aro svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ayv .ayv-rec-cuenta-aro circle { fill: var(--paper); stroke: var(--paper2); stroke-width: 8; }
+.ayv .ayv-rec-cuenta-aro .ayv-rec-cuenta-pasa {
+    fill: none;
+    stroke: var(--coral);
+    stroke-width: 8;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    animation: ayv-rec-cuenta 1s linear forwards;
+}
+@keyframes ayv-rec-cuenta { to { stroke-dashoffset: 100; } }
+@keyframes ayv-rec-respira { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-rec-cuenta-aro .ayv-rec-cuenta-pasa,
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-tiempo::before { animation: none; }
+}
+.ayv .ayv-rec-cuenta-n { position: relative; font-family: var(--title); font-size: 2.6rem; font-weight: 600; line-height: 1; }
+.ayv .ayv-rec-cuenta-dice { color: var(--ink-2); }
+
+/* The pause: what is kept, «Seguir» as the record button, the two choices side by side, and «Terminar» quiet. */
+.ayv .ayv-rec-pausa { justify-items: center; gap: .7rem; width: 100%; text-align: center; }
+.ayv .ayv-rec-pausa-titulo { margin: 0; font-family: var(--title); font-size: 1.35rem; font-weight: 600; line-height: 1.2; }
+.ayv .ayv-rec-pausa-guarda { margin: -.35rem 0 .2rem; color: var(--ink-2); font-size: .95rem; }
+.ayv .ayv-rec-pausa-mas { display: grid; grid-template-columns: minmax(0, 1fr); gap: .55rem; width: 100%; }
+.ayv .ayv-rec-eleccion {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    min-height: 3.6rem;
+    padding: .6rem .9rem;
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    /* While it sounds, the part already heard fills it from the left. */
+    background: linear-gradient(to right, var(--notice-bg) var(--avance, 0%), var(--surface) 0);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.ayv .ayv-rec-eleccion:hover { border-color: var(--accent); }
+.ayv .ayv-rec-eleccion:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ayv .ayv-rec-eleccion .ayv-icon { flex: none; width: 1.6rem; height: 1.6rem; margin: 0; color: var(--accent); }
+.ayv .ayv-rec-eleccion b { display: block; line-height: 1.25; }
+.ayv .ayv-rec-eleccion small { display: block; margin-top: .1rem; color: var(--ink-2); font-size: .85rem; line-height: 1.3; }
+.ayv .ayv-rec-eleccion[aria-pressed="true"] { border-color: var(--green2); }
+.ayv .ayv-rec-eleccion.ayv-armed { border-color: var(--danger); }
+.ayv .ayv-rec-eleccion.ayv-armed b, .ayv .ayv-rec-eleccion.ayv-armed .ayv-icon { color: var(--danger); }
+.ayv .ayv-rec-eleccion.ayv-armed small { display: none; }
+
+/* The bar at the foot of a phone, while reading: the part and the time, «Pausa», and «Terminar» in coral. */
+.ayv .ayv-vp-barra-pausa { display: none; }
+@media (max-width: 47.99rem) {
+    .ayv .ayv-vp-barra { grid-template-columns: minmax(0, 1fr); grid-auto-columns: auto; grid-auto-flow: column; }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-pausa {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        min-height: 2.75rem;
+        padding: 0 .9rem;
+        border: 1.5px solid var(--line);
+        border-radius: 999px;
+        background: none;
+        color: var(--ink);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .ayv .ayv-vp-barra-pausa .ayv-icon { width: 1.1rem; height: 1.1rem; margin: 0; }
+    /* Reading: the part small over the time, with a red dot that breathes; «Pausa» and «Terminar» at full height. */
+    .ayv .ayv-vp-barra.is-grabando { grid-template-columns: minmax(0, 1fr) auto auto; grid-auto-flow: row; row-gap: 0; }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-parte { grid-column: 1; grid-row: 1; font-size: .85rem; }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-tiempo { display: flex; grid-column: 1; grid-row: 2; align-items: center; gap: .35rem; color: var(--ink); font-size: 1.1rem; }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-tiempo::before {
+        content: "";
+        width: .6rem;
+        height: .6rem;
+        border-radius: 50%;
+        background: var(--coral);
+        animation: ayv-rec-respira 1.6s ease-in-out infinite;
+    }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-pausa { grid-column: 2; grid-row: 1 / span 2; }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-boton { grid-column: 3; grid-row: 1 / span 2; color: #1e2b2a; font-size: 1.2rem; }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-punto { background: #1e2b2a; }
+    .ayv .ayv-voice .ayv-recorder:not(.is-despues):not([data-estado="pausa"]):not([data-estado="borrador"]) #ayv-time { display: none; }
+    .ayv .ayv-voice .ayv-recorder[data-estado="borrador"] .ayv-rec-borrador { margin: 0; padding: .25rem 3rem 0 0; background: none; box-shadow: none; }
+    .ayv .ayv-voice .ayv-recorder[data-estado="borrador"] .ayv-rec-borrador::before { top: -1rem; right: .25rem; }
+    .ayv .ayv-recorder[data-estado="cuenta"] .ayv-vp-barra-boton { visibility: hidden; }
+    /* The three seconds, in the middle of the screen over the veil: whoever reads a paper book looks up and sees them. */
+    .ayv .ayv-voice .ayv-recorder[data-estado="cuenta"] .ayv-rec-cuenta {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        z-index: 1050;
+        width: min(18rem, calc(100vw - 2rem));
+        padding: 1.5rem 1rem 1.25rem;
+        border-radius: 22px;
+        background: var(--ayv-plate, var(--surface));
+        box-shadow: 0 18px 40px rgba(14, 28, 26, .35);
+        transform: translate(-50%, -50%);
+    }
+    .ayv .ayv-voice .ayv-recorder[data-estado="cuenta"] .ayv-rec-cuenta-aro { width: 112px; height: 112px; }
+    .ayv .ayv-voice .ayv-recorder[data-estado="cuenta"] .ayv-rec-cuenta-n { font-size: 3.4rem; }
+    /* The pause and the reading half-done rise from the foot, as the plate does after recording; the strip under the
+       text while reading is not needed: the bar counts the time. */
+    .ayv .ayv-voice .ayv-recorder[data-estado="grabando"] .ayv-rec-trozos { display: none; }
+    .ayv .ayv-voice .ayv-recorder[data-estado="cuenta"] .ayv-rec-resumen,
+    .ayv .ayv-voice .ayv-recorder[data-estado="grabando"] .ayv-rec-resumen { display: none; }
+}
+@media (max-width: 22.5rem) {
+    .ayv .ayv-vp-barra-pausa span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+    .ayv .ayv-vp-barra.is-grabando .ayv-vp-barra-pausa { padding: 0 .75rem; }
+}
+
+/* At the end: the whole reading as a wave, its pauses as thin marks, a coral line running over it while it sounds and
+   a touch on it to play from there; how long it lasts. Then its two ends close up, ten seconds each, where the handles
+   are: outside them, a hatch of the paper; each handle a line with a grip, moved by a range laid over the wave (its
+   thumb is the size of a finger and is not seen), and under it where the reading starts or ends, to a tenth. */
+.ayv .ayv-rec-recorte { display: grid; gap: .3rem; }
+.ayv .ayv-rec-entera {
+    position: relative;
+    height: 4.25rem;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--line);
+    cursor: pointer;
+}
+.ayv .ayv-rec-onda { position: absolute; top: .45rem; left: .5rem; width: calc(100% - 1rem); height: calc(100% - .9rem); }
+.ayv .ayv-rec-onda rect, .ayv .ayv-rec-onda path { fill: var(--accent); }
+.ayv .ayv-rec-entera .ayv-rec-onda path { fill: var(--green2); }
+.ayv .ayv-rec-onda rect.is-junta { fill: var(--coral); }
+.ayv .ayv-rec-cabeza {
+    position: absolute;
+    top: -.2rem;
+    bottom: -.2rem;
+    left: calc(.5rem + (100% - 1rem) * var(--f, 0));
+    display: none;
+    width: 2px;
+    margin-left: -1px;
+    border-radius: 2px;
+    background: var(--coral);
+    pointer-events: none;
+}
+.ayv .ayv-rec-entera.is-sonando .ayv-rec-cabeza { display: block; }
+.ayv .ayv-rec-dura { margin: 0; color: var(--ink-2); font-size: .9rem; text-align: right; font-variant-numeric: tabular-nums; }
+.ayv .ayv-rec-dura b { color: var(--ink); }
+.ayv .ayv-rec-extremos { display: grid; gap: .5rem; }
+.ayv .ayv-rec-puntas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.ayv .ayv-rec-punta { display: grid; gap: .3rem; min-width: 0; }
+.ayv .ayv-rec-punta-t { margin: 0; color: var(--ink-2); font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ayv .ayv-rec-onda-caja { position: relative; height: 5rem; margin: 0 .6rem; border-radius: 10px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+.ayv .ayv-rec-onda-caja .ayv-rec-onda { top: .45rem; left: 0; width: 100%; height: calc(100% - .9rem); }
+.ayv .ayv-rec-fuera {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(135deg, rgba(242, 234, 219, .78) 0 5px, rgba(251, 246, 236, .62) 5px 10px);
+    pointer-events: none;
+}
+.ayv .ayv-rec-onda-caja[data-punta="a"] .ayv-rec-fuera { left: 0; width: var(--x, 0%); border-radius: 10px 0 0 10px; }
+.ayv .ayv-rec-onda-caja[data-punta="b"] .ayv-rec-fuera { right: 0; left: var(--x, 100%); border-radius: 0 10px 10px 0; }
+.ayv .ayv-rec-tirador { position: absolute; top: -.35rem; bottom: -.35rem; left: var(--x, 0%); width: 0; pointer-events: none; }
+.ayv .ayv-rec-tirador::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1.5px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--green);
+}
+.ayv .ayv-rec-tirador::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -.6rem;
+    width: 1.2rem;
+    height: 2.4rem;
+    border-radius: 999px;
+    background:
+        linear-gradient(#fff, #fff) 35% 50% / 2px 40% no-repeat,
+        linear-gradient(#fff, #fff) 65% 50% / 2px 40% no-repeat,
+        var(--green);
+    box-shadow: 0 3px 8px rgba(14, 28, 26, .3);
+    transform: translateY(-50%);
+}
+.ayv .ayv-recorder input.ayv-rec-rango {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    /* The thumb's middle at the ends of the wave: the range is a finger wider on each side. */
+    left: -22px;
+    width: calc(100% + 44px);
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: none;
+}
+.ayv .ayv-rec-rango::-webkit-slider-runnable-track { height: 100%; background: none; }
+.ayv .ayv-rec-rango::-moz-range-track { height: 100%; background: none; }
+.ayv .ayv-rec-rango::-webkit-slider-thumb {
+    width: 44px;
+    height: 5rem;
+    border: 0;
+    background: transparent;
+    cursor: ew-resize;
+    pointer-events: auto;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.ayv .ayv-rec-rango::-moz-range-thumb { width: 44px; height: 5rem; border: 0; background: transparent; cursor: ew-resize; pointer-events: auto; }
+.ayv .ayv-rec-rango:focus { outline: none; }
+.ayv .ayv-rec-rango:focus-visible ~ .ayv-rec-tirador::after { outline: 3px solid var(--coral); outline-offset: 2px; }
+.ayv .ayv-rec-punta-dice { margin: 0; color: var(--ink-2); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.ayv .ayv-rec-punta + .ayv-rec-punta .ayv-rec-punta-t,
+.ayv .ayv-rec-punta + .ayv-rec-punta .ayv-rec-punta-dice { text-align: right; }
+.ayv .ayv-rec-punta-dice b { color: var(--ink); }
+.ayv .ayv-rec-recorte-nota { margin: 0; color: var(--ink-2); font-size: .9rem; line-height: 1.4; }
+
+/* Listening as whoever listens will: a round play button and what sounds under the voice. */
+.ayv .ayv-rec-oir { display: flex; align-items: center; gap: .85rem; padding: .7rem .9rem; border-radius: 16px; background: var(--paper); }
+.ayv .ayv-rec-oir p { display: grid; margin: 0; line-height: 1.3; }
+.ayv .ayv-rec-oir-dice { color: var(--ink-2); font-size: .9rem; }
+.ayv .ayv-rec-oir-boton {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--green);
+    color: #fff;
+    box-shadow: 0 6px 14px -8px rgba(23, 87, 76, .7);
+    cursor: pointer;
+}
+.ayv .ayv-rec-oir-boton:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.ayv .ayv-rec-oir-boton .ayv-icon { width: 1.6rem; height: 1.6rem; margin: 0; }
+.ayv .ayv-rec-oir-boton .ayv-icon circle { display: none; }
+.ayv .ayv-rec-oir-boton .ayv-icon + .ayv-icon,
+.ayv .ayv-rec-oir-boton[aria-pressed="true"] .ayv-icon:first-child { display: none; }
+.ayv .ayv-rec-oir-boton[aria-pressed="true"] .ayv-icon + .ayv-icon { display: block; }
+
+/* How the voice was levelled: a small line with the mark of the others in the middle, where it was (hollow) and where
+   it is now (full), and the words. */
+.ayv .ayv-rec-nivel { display: flex; align-items: center; gap: .65rem; margin: 0 .2rem; color: var(--ink-2); font-size: .95rem; line-height: 1.35; }
+.ayv .ayv-rec-nivel[hidden] { display: none; }
+.ayv .ayv-rec-nivel-dibujo { flex: none; width: 4.5rem; height: 1.4rem; overflow: visible; }
+.ayv .ayv-rec-nivel-raya { stroke: var(--paper2); stroke-width: 3; stroke-linecap: round; }
+.ayv .ayv-rec-nivel-marca { stroke: var(--ink-2); stroke-width: 1.5; }
+.ayv .ayv-rec-nivel-paso { stroke: var(--green2); stroke-width: 3; }
+.ayv .ayv-rec-nivel-antes { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.5; }
+.ayv .ayv-rec-nivel-ahora { fill: var(--green); }
+.ayv .ayv-rec-nivel.is-igual .ayv-rec-nivel-antes { display: none; }
+
+/* A reading left half-done: a slip of the paper with a bookmark, the part, when and how long, its strip, and what to do. */
+.ayv .ayv-rec-borrador {
+    position: relative;
+    gap: .55rem;
+    margin: 0 0 1.25rem;
+    padding: 1rem 3.25rem 1.1rem 1.1rem;
+    border-radius: var(--radius);
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1.5px var(--line);
+}
+.ayv .ayv-rec-borrador::before {
+    content: "";
+    position: absolute;
+    top: -.4rem;
+    right: 1.1rem;
+    width: 1.35rem;
+    height: 2.8rem;
+    border-radius: 2px 2px 0 0;
+    background: var(--sun);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+}
+.ayv .ayv-rec-borrador-titulo { margin: 0; font-family: var(--title); font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+.ayv .ayv-rec-borrador-linea { margin: 0; line-height: 1.35; }
+.ayv .ayv-rec-borrador-parte { display: block; font-size: 1.05rem; }
+.ayv .ayv-rec-borrador-dice { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ayv .ayv-rec-borrador .ayv-rec-tira { margin: .2rem 0; }
+.ayv .ayv-rec-borrador-botones { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .6rem; margin: .3rem 0 0; }
+.ayv .ayv-rec-borrador-botones .ayv-button .ayv-icon { margin-right: .4em; }
+.ayv .ayv-rec-con-icono { display: inline-flex; align-items: center; gap: .4rem; border-color: var(--line); }
+.ayv .ayv-rec-con-icono .ayv-icon { margin: 0; }
+.ayv .ayv-rec-con-icono[aria-pressed="true"] { background: linear-gradient(to right, var(--green2) var(--avance, 0%), var(--paper2) 0); color: var(--ink); }

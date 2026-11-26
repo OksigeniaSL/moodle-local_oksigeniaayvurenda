@@ -350,10 +350,22 @@ final class screens {
             $subjects[] = ['label' => $subject['label'], 'url' => self::url('search.php', $library, ['q' => $subject['label']])];
         }
         $copies = [];
+        // Whoever catalogues sees when each copy was added, and whether its spine label is still to print.
+        $catalogues = access::can('local/oksigeniaayvurenda:catalogue', $library);
         foreach ($found['copies'] as $copy) {
             $copies[] = $copy + [
                 'statelabel' => self::str('state' . $copy['state']),
                 'where' => $copy['here'] ? self::str('here') : $copy['library'],
+                'addedline' => $catalogues && !empty($copy['added']) ? self::str('copyadded', zones::date(
+                    (int) $copy['added'],
+                    'strftimedate',
+                    $library
+                )) : '',
+                // Its spine label still to print: a touch takes it to the labels, with this copy already chosen.
+                'spineurl' => $catalogues && !empty($copy['spinepending']) && !empty($copy['barcode'])
+                    ? (new \moodle_url('/local/oksigeniaayvurenda/labels.php', ['library' => $library->slug, 'kind' => 'spines',
+                        'which' => 'codes', 'codes' => $copy['barcode']]))->out(false) : '',
+                'spinelabel' => self::str('copynospine'),
             ];
         }
         // A reader does not need sixty lines of a textbook: past a dozen in one library, one line says how many are free.

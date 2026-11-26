@@ -50,13 +50,16 @@ final class sitesettings {
                 (new \moodle_url('/local/oksigeniaayvurenda/index.php'))->out(false)
             )
         ));
-        // A key of Google Books of the site's own: without it, it shares Google's common allowance, often spent.
-        $settings->add(new \admin_setting_configpasswordunmask(
+        // A key of Google Books of the site's own: without it, it shares Google's common allowance, often spent. A key put
+        // or changed is tried at once: the calm the common allowance asked for is over.
+        $googlebooks = new \admin_setting_configpasswordunmask(
             'local_oksigeniaayvurenda/googlebookskey',
             $str('googlebookskey'),
             $str('googlebookskey_desc'),
             ''
-        ));
+        );
+        $googlebooks->set_updatedcallback(fn() => unset_config('coverpause_googlebooks', 'local_oksigeniaayvurenda'));
+        $settings->add($googlebooks);
         // The Z39.50 bridge: catalogues that only speak Z39.50 (REBECA), asked as SRU through a service of Oksigenia.
         $settings->add(new \admin_setting_configtext(
             'local_oksigeniaayvurenda/z3950bridge',

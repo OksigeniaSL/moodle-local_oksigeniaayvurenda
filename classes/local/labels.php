@@ -37,6 +37,9 @@ final class labels {
 
     /** @var string Prefix of the plugin tables. */
     private const T = 'local_oksigeniaayvurenda_';
+    /** A copy with something to write on its spine: one without a call number would give a blank spine label. */
+    private const SPINE = "(COALESCE(i.callnumber1, '') <> '' OR COALESCE(i.callnumber2, '') <> ''
+        OR COALESCE(i.callnumber3, '') <> '')";
 
     /**
      * What a library keeps of its sheets: its favourites of each kind, in its order, and how much it moves the print of
@@ -142,13 +145,23 @@ final class labels {
      * The copies of a library to label.
      *
      * @param \stdClass $library
-     * @param string $which today, since or codes.
+     * @param string $which today, since (to until, if given), codes, or pending (not printed yet, of the kind given).
      * @param int $since For since: a moment.
      * @param string[] $codes For codes: the codes, in their order.
      * @param int|null $now
-     * @return array[] barcode, title, callnumber (the three lines), library.
+     * @param int $until For since: the moment it ends; 0, now.
+     * @param string $kind For pending: spines or labels.
+     * @return array[] id, barcode, title, callnumber (the three lines), library.
      */
-    public static function items(\stdClass $library, string $which, int $since = 0, array $codes = [], ?int $now = null): array {
+    public static function items(
+        \stdClass $library,
+        string $which,
+        int $since = 0,
+        array $codes = [],
+        ?int $now = null,
+        int $until = 0,
+        string $kind = 'spines'
+    ): array {
         global $DB;
         $now = $now ?? time();
         $fields = 'i.id, i.barcode, i.callnumber1, i.callnumber2, i.callnumber3, i.serial, r.title';
@@ -169,17 +182,27 @@ final class labels {
                 $bycode[$row->barcode] = $row;
             }
             $rows = array_values(array_filter(array_map(fn($c) => $bycode[$c] ?? null, $codes)));
+        } else if ($which === 'pending') {
+            $rows = array_values($DB->get_records_sql(
+                "SELECT $fields FROM $from WHERE " . self::pending($kind) . " ORDER BY i.id",
+                ['libraryid' => $library->id],
+                0,
+                self::LIMIT + 1
+            ));
         } else {
             $start = $which === 'since' ? $since : zones::today($library, $now);
+            $ranged = $which === 'since' && $until;
+            $end = ($ranged ? ' AND i.timecreated < :end' : '') . ($kind === 'spines' ? ' AND ' . self::SPINE : '');
             $rows = array_values($DB->get_records_sql(
-                "SELECT $fields FROM $from WHERE i.libraryid = :libraryid AND i.timecreated >= :start ORDER BY i.id",
-                ['libraryid' => $library->id, 'start' => $start],
+                "SELECT $fields FROM $from WHERE i.libraryid = :libraryid AND i.timecreated >= :start$end ORDER BY i.id",
+                ['libraryid' => $library->id, 'start' => $start] + ($ranged ? ['end' => $until] : []),
                 0,
                 self::LIMIT + 1
             ));
         }
         $name = format_string($library->name, true, ['escape' => false]);
         return array_map(fn($row) => [
+            'id' => (int) $row->id,
             'blank' => false,
             'barcode' => $row->barcode,
             'title' => $row->title,
@@ -190,6 +213,76 @@ final class labels {
             'library' => $name,
             'svg' => code39::can($row->barcode) ? code39::svg($row->barcode, 40, true) : '',
         ], $rows);
+    }
+
+    /**
+     * The copies of a library whose label of a kind is still to print: added here and not printed since. What came from
+     * another programme had its labels already.
+     *
+     * @param string $kind spines or labels.
+     * @return string A condition on «i», for :libraryid.
+     */
+    private static function pending(string $kind): string {
+        $field = $kind === 'labels' ? 'timelabel' : 'timespine';
+        return "i.libraryid = :libraryid AND i.status <> 'withdrawn' AND i.$field IS NULL
+            AND NOT EXISTS (SELECT 1 FROM {" . self::T . "source} s WHERE s.tablename = 'item' AND s.localid = i.id)"
+            . ($kind === 'labels' ? '' : ' AND ' . self::SPINE);
+    }
+
+    /**
+     * How many copies added today have their label of a kind printed already.
+     *
+     * @param \stdClass $library
+     * @param string $kind spines or labels.
+     * @param int|null $now
+     * @return int
+     */
+    public static function done_today(\stdClass $library, string $kind, ?int $now = null): int {
+        global $DB;
+        $field = $kind === 'labels' ? 'timelabel' : 'timespine';
+        return $DB->count_records_sql(
+            'SELECT COUNT(1) FROM {' . self::T . "item} i WHERE i.libraryid = :libraryid AND i.timecreated >= :start
+                AND i.$field IS NOT NULL" . ($kind === 'labels' ? '' : ' AND ' . self::SPINE),
+            ['libraryid' => $library->id, 'start' => zones::today($library, $now ?? time())]
+        );
+    }
+
+    /**
+     * How many copies of a library have a label of a kind still to print.
+     *
+     * @param \stdClass $library
+     * @param string $kind
+     * @return int
+     */
+    public static function pending_count(\stdClass $library, string $kind): int {
+        global $DB;
+        return $DB->count_records_sql(
+            'SELECT COUNT(1) FROM {' . self::T . 'item} i WHERE ' . self::pending($kind),
+            ['libraryid' => $library->id]
+        );
+    }
+
+    /**
+     * Some copies' labels of a kind, printed now; or, undone, still to print.
+     *
+     * @param \stdClass $library
+     * @param string $kind
+     * @param int[] $ids
+     * @param int|null $when The moment; null to have them to print again.
+     */
+    public static function printed(\stdClass $library, string $kind, array $ids, ?int $when): void {
+        global $DB;
+        $field = $kind === 'labels' ? 'timelabel' : 'timespine';
+        foreach (array_chunk(array_values(array_filter(array_map('intval', $ids))), 500) as $chunk) {
+            [$in, $params] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED);
+            $DB->set_field_select(
+                self::T . 'item',
+                $field,
+                $when,
+                "libraryid = :libraryid AND id $in",
+                $params + ['libraryid' => $library->id]
+            );
+        }
     }
 
     /**

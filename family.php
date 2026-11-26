@@ -95,6 +95,7 @@ $data = [
     'fileurl' => $text ? (new moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $token, 'text' => 1]))->out(false) : '',
     'marks' => false,
     'spread' => false,
+    'calm' => voices::calm_strings(),
 ];
 foreach (
     ['voiceinfocentre', 'voicefamilyconsent', 'voicefamilywho', 'voicefamilywhohint', 'voicefamilydone', 'voicedelete',
@@ -106,7 +107,8 @@ foreach (
 ) {
     $data[$key] = $str($key);
 }
-$scripts = $data['epub'] ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader', 'voice'] : ['voice'];
+$scripts = $data['epub'] ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader', 'voiceedit', 'voiceview', 'voice']
+    : ['voiceedit', 'voiceview', 'voice'];
 shell::output(
     $str('voicetitle', $title),
     $OUTPUT->render_from_template('local_oksigeniaayvurenda/family', $data),
@@ -124,7 +126,7 @@ shell::output(
             'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
             'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicefamilysent'),
                 'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
-                'voicecut' => $str('voicecut'), 'voicelimit' => $str('voicelimit'),
+                'voicecut' => $str('voicecut'), 'voicelimit' => $str('voicelimit'), 'voicepreparing' => $str('voicepreparing'),
                 'voicelength' => $str('voicelength'), 'readpage' => $str('readpage')],
         ],
     ]

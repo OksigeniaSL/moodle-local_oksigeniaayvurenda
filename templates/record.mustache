@@ -291,6 +291,7 @@
                     </form>
                 </dialog>{{/fix}}
                 {{#callnumber}}<span class="ayv-copy-call" title="{{callnumberlabel}}"><span class="ayv-sr">{{callnumberlabel}}: </span>{{callnumber}}</span>{{/callnumber}}
+                {{#addedline}}<span class="ayv-copy-added">{{addedline}}{{#spineurl}} · <a href="{{spineurl}}">{{spinelabel}}</a>{{/spineurl}}</span>{{/addedline}}
             </li>
             {{/copies}}
         </ul>

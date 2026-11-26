@@ -60,6 +60,48 @@ final class labels_test extends \advanced_testcase {
     }
 
     /**
+     * From one day to another; and what is still to print, of each kind: a copy brought from another programme had its
+     * labels, a copy printed is not to print any more, and one whose sheet came out badly is to print again.
+     */
+    public function test_range_and_pending(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $now = time();
+        $copies = [];
+        foreach ([10, 5, 1] as $days) {
+            $copies[] = $gen->create_item(['libraryid' => $library->id, 'barcode' => 'D' . $days, 'callnumber1' => '82',
+                'timecreated' => $now - $days * DAYSECS]);
+        }
+        $range = labels::items($library, 'since', $now - 11 * DAYSECS, [], $now, $now - 4 * DAYSECS);
+        $this->assertSame(['D10', 'D5'], array_column($range, 'barcode'));
+
+        $DB->insert_record('local_oksigeniaayvurenda_source', ['entityid' => $library->entityid, 'origin' => 'abies',
+            'tablename' => 'item', 'externalid' => 'abies-1', 'localid' => $copies[0]->id, 'timecreated' => $now]);
+        $this->assertSame(['D5', 'D1'], array_column(labels::items($library, 'pending', 0, [], $now, 0, 'spines'), 'barcode'));
+        $this->assertSame(2, labels::pending_count($library, 'spines'));
+        labels::printed($library, 'spines', [$copies[1]->id], $now);
+        $this->assertSame(['D1'], array_column(labels::items($library, 'pending', 0, [], $now, 0, 'spines'), 'barcode'));
+        // The labels with the code are apart from the spines.
+        $this->assertSame(2, labels::pending_count($library, 'labels'));
+        labels::printed($library, 'spines', [$copies[1]->id], null);
+        $this->assertSame(2, labels::pending_count($library, 'spines'));
+        // A copy without a call number has nothing for its spine: no blank spine label; its code label, yes.
+        $gen->create_item(['libraryid' => $library->id, 'barcode' => 'SIN', 'timecreated' => $now]);
+        $this->assertSame(2, labels::pending_count($library, 'spines'));
+        $this->assertSame(3, labels::pending_count($library, 'labels'));
+        $this->assertNotContains('SIN', array_column(labels::items($library, 'today', 0, [], $now, 0, 'spines'), 'barcode'));
+        $this->assertContains('SIN', array_column(labels::items($library, 'today', 0, [], $now, 0, 'labels'), 'barcode'));
+        // The copies added today know which of them have their label already, not to print them twice.
+        $today = $gen->create_item(['libraryid' => $library->id, 'barcode' => 'HOY', 'callnumber1' => '82', 'timecreated' => $now]);
+        $this->assertSame(0, labels::done_today($library, 'spines', $now));
+        labels::printed($library, 'spines', [$today->id], $now);
+        $this->assertSame(1, labels::done_today($library, 'spines', $now));
+        $this->assertSame(0, labels::done_today($library, 'labels', $now));
+    }
+
+    /**
      * Every sheet fits its paper and says how many labels it has; the old keys still lead to their sheet; a library marks
      * its favourites of each kind, the first of them is the one the page starts with, and the print moves within its
      * limits only for that sheet.

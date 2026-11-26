@@ -123,6 +123,8 @@
         <FIELD NAME="itemcondition" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="State of the item as last checked"/>
         <FIELD NAME="notes" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timeacquired" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timespine" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When its spine label was printed here; none for a copy brought from another programme, which had one"/>
+        <FIELD NAME="timelabel" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When its label with the code was printed here"/>
         <FIELD NAME="shelfkey" TYPE="char" LENGTH="200" NOTNULL="false" SEQUENCE="false" COMMENT="Its place in the order of the shelf (class as the UDC files it, author, title), made of digits and small letters so any collation sorts it alike"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

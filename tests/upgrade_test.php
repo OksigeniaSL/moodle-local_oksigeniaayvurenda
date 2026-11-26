@@ -174,6 +174,34 @@ final class upgrade_test extends \advanced_testcase {
     }
 
     /**
+     * The copies there were before 1.5.0 count as printed: only what is added from then on waits to fill a sheet.
+     */
+    public function test_from_141_labels(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/local/oksigeniaayvurenda/db/upgrade.php');
+        require_once($CFG->libdir . '/upgradelib.php');
+        $this->resetAfterTest();
+        $this->preventResetByRollback();
+        $dbman = $DB->get_manager();
+        $items = new \xmldb_table('local_oksigeniaayvurenda_item');
+        foreach (['timelabel', 'timespine'] as $name) {
+            $dbman->drop_field($items, new \xmldb_field($name));
+        }
+        $gen = $this->getDataGenerator()->get_plugin_generator('local_oksigeniaayvurenda');
+        $library = $gen->create_library();
+        $old = $gen->create_item(['libraryid' => $library->id, 'timecreated' => 1790000000]);
+
+        set_config('version', 2026112602, 'local_oksigeniaayvurenda');
+        $this->assertTrue(xmldb_local_oksigeniaayvurenda_upgrade(2026112602));
+        $this->assertEquals(1790000000, $DB->get_field('local_oksigeniaayvurenda_item', 'timespine', ['id' => $old->id]));
+        $this->assertEquals(1790000000, $DB->get_field('local_oksigeniaayvurenda_item', 'timelabel', ['id' => $old->id]));
+        $this->assertSame(0, \local_oksigeniaayvurenda\local\labels::pending_count($library, 'spines'));
+        // A copy added afterwards waits for its labels.
+        $gen->create_item(['libraryid' => $library->id, 'callnumber1' => '82']);
+        $this->assertSame(1, \local_oksigeniaayvurenda\local\labels::pending_count($library, 'spines'));
+    }
+
+    /**
      * The old voices take their parts from their names, once: the opening and the chapters, never a title that starts with
      * a number, a family's voice by its link or one without who recorded it.
      */

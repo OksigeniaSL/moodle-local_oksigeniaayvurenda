@@ -583,7 +583,7 @@
         }
     });
     window.addEventListener('beforeunload', function(event) {
-        if (recording() || blob) {
+        if (recording() || blob || (pieces && pieces.length)) {
             event.preventDefault();
             event.returnValue = '';
         }
@@ -601,10 +601,14 @@
         return mime.indexOf('ogg') >= 0 ? 'ogg' : (mime.indexOf('mp4') >= 0 ? 'm4a' : 'webm');
     };
     var clock = function() {
-        if (pausedAt) {
+        if (pausedAt || !recording()) {
             return;
         }
-        var seconds = Math.floor((Date.now() - started) / 1000);
+        var live = Date.now() - pieceStarted;
+        var seconds = Math.floor((byPieces ? total() + live : Date.now() - started) / 1000);
+        if (byPieces && view) {
+            view.pieces(lengths, live);
+        }
         time.textContent = (str.voicetime || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'); });
         if (barClock) {
             barClock.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
@@ -620,95 +624,425 @@
         said.textContent = str.voicenomic || '';
         return;
     }
-    rec.addEventListener('click', function() {
-        navigator.mediaDevices.getUserMedia({audio: true}).then(function(s) {
-            stream = s;
-            var mime = type();
-            recorder = mime ? new window.MediaRecorder(stream, {mimeType: mime}) : new window.MediaRecorder(stream);
-            chunks = [];
-            // The take before this one goes only now that there is another, and is not heard under it.
-            preview.pause();
-            blob = null;
-            after.hidden = true;
-            because('');
-            hideAfter();
-            recorder.addEventListener('dataavailable', function(event) {
-                if (event.data && event.data.size) {
-                    chunks.push(event.data);
+    // A reading is recorded in pieces where the browser records WebM (Chrome, Edge, Firefox): each pause closes one, a
+    // piece read badly can be thrown away, and at the end they are joined, their ends cut and the voice levelled, without
+    // encoding anything again (voiceedit.js); app/voiceview.js draws each moment. Elsewhere (Safari records MP4), one
+    // recording that pauses, as before. Three seconds are counted before the microphone records, where there is a view.
+    var edit = window.ayvVoiceEdit || null;
+    var view = window.ayvVoiceView || null;
+    var mime = '';
+    var byPieces = false;
+    // The pieces closed (Blobs) and how long each lasted (ms), side by side.
+    var pieces = [];
+    var lengths = [];
+    var pieceStarted = 0;
+    var closing = '';
+    var stopCount = null;
+    // The reading joined, after: its parsed pieces, where the voice starts and ends, and its gain.
+    var made = null;
+    var draftKey = 'v1:' + (config.library || '') + ':' + (config.record || config.token || '');
+    var total = function() {
+        return lengths.reduce(function(sum, ms) {
+            return sum + ms;
+        }, 0);
+    };
+    var partTitle = function() {
+        var part = chosenPart();
+        if (!part) {
+            return what ? what.value : '';
+        }
+        return part.getAttribute('data-title') || (part.parentNode ? part.parentNode.textContent.trim() : '');
+    };
+    var keepDraft = function(current, currentMs) {
+        if (!edit || !byPieces) {
+            return;
+        }
+        var part = chosenPart();
+        var all = pieces.concat(current ? [current] : []);
+        if (!all.length) {
+            edit.draft.drop(draftKey);
+            return;
+        }
+        edit.draft.save(draftKey, {pieces: all, lengths: lengths.concat(current ? [currentMs || 0] : []),
+            part: part ? part.value : '', parttitle: partTitle(), title: what ? what.value : '', backdrop: backdrop(), mime: mime,
+            time: Date.now()});
+    };
+    var startPiece = function() {
+        recorder = mime ? new window.MediaRecorder(stream, {mimeType: mime}) : new window.MediaRecorder(stream);
+        chunks = [];
+        closing = '';
+        recorder.addEventListener('dataavailable', function(event) {
+            if (event.data && event.data.size) {
+                chunks.push(event.data);
+                // What is being read is kept every ten seconds too, not only when a piece closes.
+                if (byPieces && chunks.length % 10 === 0) {
+                    keepDraft(new Blob(chunks, {type: mime}), Date.now() - pieceStarted);
                 }
+            }
+        });
+        recorder.addEventListener('stop', pieceStopped);
+        recorder.start(1000);
+        pieceStarted = Date.now();
+    };
+    var decode = function(sound) {
+        var Context = window.AudioContext || window.webkitAudioContext;
+        return sound.arrayBuffer().then(function(buffer) {
+            var context = new Context();
+            return context.decodeAudioData(buffer).then(function(audio) {
+                context.close();
+                return audio;
+            }, function(error) {
+                context.close();
+                throw error;
             });
-            recorder.addEventListener('stop', function() {
-                // Stopped by itself: the microphone was cut (a call, headphones that went off). What there is stays.
-                if (!stop.hidden) {
-                    finish();
-                    because(str.voicecut);
+        });
+    };
+    // The recording ready to hear and send: its address in the player, its length, and the button to send it.
+    var ready = function(sound, ms) {
+        blob = sound;
+        measured = ms;
+        var seconds = Math.floor(ms / 1000);
+        var says = (str.voicelength || '').replace('{$a}', function() {
+            return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+        });
+        // With the wave, its length goes under it (and follows the handles); above, it would be said twice.
+        var under = view ? document.getElementById('ayv-dura-t') : null;
+        time.textContent = under ? '' : says;
+        if (under && !under.textContent) {
+            under.textContent = says;
+        }
+        if (preview.src) {
+            URL.revokeObjectURL(preview.src);
+        }
+        preview.src = URL.createObjectURL(blob);
+        send.disabled = false;
+    };
+    var openAfter = function() {
+        after.hidden = false;
+        showAfter();
+        if (view) {
+            view.state('despues');
+        }
+        var why = document.getElementById('ayv-rec-nota');
+        if (why.textContent) {
+            why.scrollIntoView({block: 'center'});
+        }
+    };
+    // The reading as it will be sent, from where its ends are now; a moment after the last touch of a handle.
+    var recut = null;
+    var peekAt = null;
+    // A handle let go: the cut is heard, two seconds from the new start or the last three up to the new end.
+    var peek = function(which, length) {
+        var audio = new Audio(preview.src);
+        var from = which === 'ayv-acaba' ? Math.max(0, length - 3000) : 0;
+        var to = which === 'ayv-acaba' ? length : Math.min(length, 2000);
+        stopListening();
+        hearing = {audio: audio, button: null, url: '', under: null};
+        audio.addEventListener('loadedmetadata', function() {
+            audio.currentTime = from / 1000;
+            audio.play().catch(function() {
+                return null;
+            });
+        }, {once: true});
+        audio.addEventListener('timeupdate', function() {
+            if (audio.currentTime * 1000 >= to) {
+                audio.pause();
+            }
+        });
+    };
+    var trimmed = function() {
+        if (!made) {
+            return;
+        }
+        var ends = view ? view.trim() : {start: made.start, end: made.end};
+        var done = edit.cut(made.parsed, ends.start, ends.end, made.gain);
+        ready(done.blob, done.duration);
+        if (peekAt) {
+            peek(peekAt, done.duration);
+            peekAt = null;
+        }
+    };
+    // The pieces, as one reading: joined, its silent ends cut and its voice at the level of the others.
+    var assemble = function() {
+        said.textContent = str.voicepreparing || '';
+        made = null;
+        Promise.all(pieces.map(function(piece) {
+            return piece.arrayBuffer();
+        })).then(function(buffers) {
+            var parsed = buffers.map(edit.parse).filter(function(piece) {
+                return piece && piece.packets.length;
+            });
+            if (!parsed.length) {
+                throw new Error('not a WebM');
+            }
+            var joins = [];
+            parsed.slice(0, -1).reduce(function(sum, piece) {
+                joins.push(sum + edit.length(piece));
+                return sum + edit.length(piece);
+            }, 0);
+            var whole = edit.cut(parsed, 0, Infinity, 0);
+            return decode(whole.blob).then(function(audio) {
+                var found = edit.measure(audio);
+                made = {parsed: parsed, start: found.start, end: found.end, gain: edit.gainFor(found)};
+                said.textContent = '';
+                if (view) {
+                    view.wave(audio, joins, found.start, found.end);
+                    view.level(made.gain);
                 }
-                var made = new Blob(chunks, {type: recorder.mimeType || mime || 'audio/webm'});
-                withDuration(made, measured).then(function(fixed) {
-                    blob = fixed;
-                    preview.src = URL.createObjectURL(blob);
-                    // What was read and the signature come once there is something to send.
-                    after.hidden = false;
-                    showAfter();
-                    var why = document.getElementById('ayv-rec-nota');
-                    if (why.textContent) {
-                        why.scrollIntoView({block: 'center'});
-                    }
-                    send.disabled = false;
-                    return fixed;
+                trimmed();
+                openAfter();
+                return made;
+            }, function() {
+                // Not decoded here: joined as it was recorded, with nothing cut.
+                said.textContent = '';
+                made = {parsed: parsed, start: 0, end: whole.duration, gain: 0};
+                if (view) {
+                    view.whole(true);
+                }
+                ready(whole.blob, whole.duration);
+                openAfter();
+                return whole;
+            });
+        }).catch(function() {
+            said.textContent = str.voicefailed || '';
+        });
+    };
+    var stopStream = function() {
+        quiet();
+        if (stream) {
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+            stream = null;
+        }
+    };
+    var pieceStopped = function() {
+        var sound = new Blob(chunks, {type: (recorder && recorder.mimeType) || mime || 'audio/webm'});
+        var why = closing;
+        closing = '';
+        // Stopped by itself: the microphone was cut (a call, headphones that went off). What there is stays.
+        if (!why) {
+            if (byPieces) {
+                lengths.push(Date.now() - pieceStarted);
+            }
+            finish(true);
+            because(str.voicecut);
+            why = 'finish';
+        }
+        if (byPieces) {
+            if (sound.size) {
+                pieces.push(sound);
+            } else {
+                lengths.pop();
+            }
+            keepDraft(null);
+            if (view) {
+                view.pieces(lengths, null);
+            }
+            if (why === 'finish') {
+                stopStream();
+                assemble();
+            }
+            return;
+        }
+        stopStream();
+        withDuration(sound, measured).then(function(fixed) {
+            ready(fixed, measured);
+            openAfter();
+            if (view && window.AudioContext) {
+                // Safari's one file: drawn whole, without handles.
+                decode(fixed).then(function(audio) {
+                    view.wave(audio, [], 0, audio.duration * 1000);
+                    return audio;
                 }).catch(function() {
                     return null;
                 });
-                quiet();
-                stream.getTracks().forEach(function(track) {
-                    track.stop();
-                });
-            });
-            recorder.start(1000);
-            meter(stream);
-            keepAwake();
-            started = Date.now();
-            ticker = setInterval(clock, 500);
-            rec.hidden = true;
-            stop.hidden = false;
-            sayBar('recording');
-            hush();
-            if (pause && recorder.pause) {
-                pause.hidden = false;
             }
-            send.disabled = true;
-            said.textContent = '';
-            return recorder;
+            return fixed;
+        }).catch(function() {
+            return null;
+        });
+    };
+    // The microphone, asked for before the count: its question comes when the button is touched, not three seconds later.
+    var openMic = function() {
+        if (stream) {
+            return Promise.resolve(stream);
+        }
+        return navigator.mediaDevices.getUserMedia({audio: true}).then(function(s) {
+            stream = s;
+            meter(stream);
+            return s;
+        });
+    };
+    var begin = function() {
+        stopCount = null;
+        if (!stream) {
+            return;
+        }
+        if (pausedAt) {
+            started += Date.now() - pausedAt;
+            pausedAt = 0;
+        }
+        startPiece();
+        keepAwake();
+        ticker = ticker || setInterval(clock, 500);
+        rec.hidden = true;
+        stop.hidden = false;
+        sayBar('recording');
+        if (pause && (byPieces || recorder.pause)) {
+            pause.hidden = false;
+            pause.setAttribute('aria-pressed', 'false');
+        }
+        if (view) {
+            view.state('grabando');
+            if (byPieces) {
+                view.pieces(lengths, 1);
+            }
+        }
+    };
+    var counted = function() {
+        if (view) {
+            stopCount = view.countdown(begin);
+        } else {
+            begin();
+        }
+    };
+    var fresh = function(keep) {
+        // The take before this one goes only now that there is another, and is not heard under it.
+        preview.pause();
+        stopListening();
+        blob = null;
+        made = null;
+        after.hidden = true;
+        because('');
+        hideAfter();
+        if (!keep) {
+            pieces = [];
+            lengths = [];
+        }
+        send.disabled = true;
+        said.textContent = '';
+        hush();
+    };
+    rec.addEventListener('click', function() {
+        openMic().then(function() {
+            mime = type();
+            byPieces = !!edit && mime.indexOf('webm') >= 0;
+            if (view) {
+                view.whole(!byPieces);
+            }
+            fresh(false);
+            if (edit) {
+                edit.draft.drop(draftKey);
+            }
+            started = Date.now();
+            pausedAt = 0;
+            rec.hidden = true;
+            counted();
+            return stream;
         }).catch(function() {
             said.textContent = str.voicenomic || '';
         });
     });
-    // A pause between pages, for water or a cough: the recording goes on afterwards, in the same file.
+    // A pause between pages, for water or a cough: the recording goes on afterwards. By pieces, the pause closes one and
+    // the plate offers to hear the last of it, to read it again, to go on or to finish.
     var word = function(text) {
         pause.querySelector('.ayv-rec-word').textContent = text;
     };
+    var paused = function() {
+        return !!pausedAt;
+    };
+    var toPause = function() {
+        if (!recorder || paused() || !recording()) {
+            return;
+        }
+        pausedAt = Date.now();
+        if (byPieces) {
+            closing = 'pause';
+            lengths.push(Date.now() - pieceStarted);
+            recorder.stop();
+            letSleep();
+            if (view) {
+                view.pieces(lengths, null);
+                view.state('pausa');
+            }
+        } else {
+            recorder.pause();
+            if (view) {
+                view.state('pausa');
+            }
+        }
+        pause.setAttribute('aria-pressed', 'true');
+        word(pause.getAttribute('data-resume'));
+    };
+    var fromPause = function() {
+        stopListening();
+        if (byPieces) {
+            counted();
+        } else if (recorder && recorder.state === 'paused') {
+            recorder.resume();
+            started += Date.now() - pausedAt;
+            pausedAt = 0;
+            if (view) {
+                view.state('grabando');
+            }
+        }
+        pause.setAttribute('aria-pressed', 'false');
+        word(pause.getAttribute('data-pause'));
+    };
     if (pause) {
         pause.addEventListener('click', function() {
-            if (!recorder) {
-                return;
-            }
-            if (recorder.state === 'recording') {
-                recorder.pause();
-                pausedAt = Date.now();
-                pause.setAttribute('aria-pressed', 'true');
-                word(pause.getAttribute('data-resume'));
-            } else if (recorder.state === 'paused') {
-                recorder.resume();
-                started += Date.now() - pausedAt;
-                pausedAt = 0;
-                pause.setAttribute('aria-pressed', 'false');
-                word(pause.getAttribute('data-pause'));
+            if (paused()) {
+                fromPause();
+            } else {
+                toPause();
             }
         });
     }
-    var finish = function() {
+    var barPause = document.getElementById('ayv-vp-barra-pausa');
+    if (barPause) {
+        barPause.addEventListener('click', toPause);
+    }
+    var byId = function(id) {
+        return document.getElementById(id);
+    };
+    if (byId('ayv-pausa-seguir')) {
+        byId('ayv-pausa-seguir').addEventListener('click', fromPause);
+    }
+    if (byId('ayv-pausa-terminar')) {
+        byId('ayv-pausa-terminar').addEventListener('click', function() {
+            stopListening();
+            finish();
+        });
+    }
+    // The last piece read badly: thrown away, and read again after the count (data-ayv-twice arms it first).
+    if (byId('ayv-pausa-repetir')) {
+        byId('ayv-pausa-repetir').addEventListener('click', function(event) {
+            var button = event.currentTarget;
+            if (event.isTrusted && button.getAttribute('data-ayv-armed') !== '1') {
+                return;
+            }
+            stopListening();
+            if (byPieces && pieces.length) {
+                pieces.pop();
+                lengths.pop();
+                keepDraft(null);
+                if (view) {
+                    view.pieces(lengths, null);
+                }
+            }
+            fromPause();
+        });
+    }
+    var finish = function(cut) {
         clearInterval(ticker);
+        ticker = null;
         letSleep();
+        if (stopCount) {
+            stopCount();
+            stopCount = null;
+        }
+        var wasPaused = paused();
         if (pausedAt) {
             started += Date.now() - pausedAt;
             pausedAt = 0;
@@ -719,23 +1053,254 @@
             word(pause.getAttribute('data-pause'));
         }
         stop.hidden = true;
-        if (recording()) {
-            recorder.stop();
-        }
-        // What was recorded, and how long it lasts.
         sayBar('done');
-        measured = Date.now() - started;
-        var seconds = Math.floor(measured / 1000);
-        time.textContent = (str.voicelength || '').replace('{$a}', function() { return Math.floor(seconds / 60) + ':' +
-            String(seconds % 60).padStart(2, '0'); });
+        measured = byPieces ? total() : Date.now() - started;
+        if (cut) {
+            return;
+        }
+        if (recording()) {
+            closing = 'finish';
+            if (byPieces) {
+                lengths.push(Date.now() - pieceStarted);
+                measured = total();
+            }
+            recorder.stop();
+        } else if (byPieces && (wasPaused || pieces.length)) {
+            // The last piece closed with the pause.
+            stopStream();
+            assemble();
+        }
     };
-    stop.addEventListener('click', finish);
+    stop.addEventListener('click', function() {
+        finish();
+    });
+
+    // Listening while recording or after: one sound at a time, and the button that plays it says how far it went.
+    var hearing = null;
+    var stopListening = function() {
+        if (!hearing) {
+            return;
+        }
+        var was = hearing;
+        hearing = null;
+        was.audio.pause();
+        if (was.under) {
+            was.under.pause();
+        }
+        if (was.url) {
+            URL.revokeObjectURL(was.url);
+        }
+        if (view && was.button) {
+            view.playing(was.button, null);
+        }
+    };
+    var hear = function(button, sound, from, of, offset) {
+        if (hearing && hearing.button === button) {
+            stopListening();
+            return;
+        }
+        stopListening();
+        var audio = new Audio();
+        var url = sound ? URL.createObjectURL(sound) : '';
+        audio.src = sound ? url : preview.src;
+        hearing = {audio: audio, button: button, url: url, under: null};
+        var current = hearing;
+        audio.addEventListener('timeupdate', function() {
+            if (view && hearing === current) {
+                view.playing(button, (offset || 0) + audio.currentTime * 1000, of);
+            }
+        });
+        audio.addEventListener('ended', function() {
+            if (hearing === current) {
+                stopListening();
+            }
+        });
+        var go = function() {
+            if (from) {
+                audio.currentTime = from / 1000;
+            }
+            audio.play().catch(function() {
+                stopListening();
+            });
+        };
+        if (audio.readyState >= 1) {
+            go();
+        } else {
+            audio.addEventListener('loadedmetadata', go, {once: true});
+        }
+        if (view) {
+            view.playing(button, offset || 0, of);
+        }
+        return current;
+    };
+    // At the end, with the soft sound chosen under it, as low as whoever listens will hear it (lectura.js, 0.05).
+    var withSound = function(current) {
+        var picked = document.querySelector('input[name="ayv-backdrop"]:checked');
+        var ogg = picked ? picked.getAttribute('data-ogg') : '';
+        var m4a = picked ? picked.getAttribute('data-m4a') : '';
+        if (!current || !(ogg || m4a)) {
+            return;
+        }
+        var under = new Audio();
+        under.src = under.canPlayType('audio/ogg; codecs=opus') ? ogg : m4a;
+        under.loop = true;
+        if (!soft(under, 0.05)) {
+            return;
+        }
+        current.under = under;
+        under.play().catch(function() {
+            return null;
+        });
+    };
+    if (byId('ayv-oir')) {
+        byId('ayv-oir').addEventListener('click', function() {
+            if (!blob) {
+                return;
+            }
+            var ends = view && made ? view.trim() : {start: 0};
+            withSound(hear(byId('ayv-oir'), null, 0, 0, ends.start));
+        });
+    }
+    if (view) {
+        // A touch on the whole reading plays it from there.
+        view.onSeek(function(ms) {
+            if (!blob) {
+                return;
+            }
+            var ends = made ? view.trim() : {start: 0};
+            stopListening();
+            var current = hear(byId('ayv-oir'), null, ms - ends.start, 0, ends.start);
+            withSound(current);
+        });
+        // The ends moved: what is sent follows, a moment after the handle stops.
+        view.onTrim(function(start, end, released) {
+            stopListening();
+            if (released) {
+                peekAt = released;
+            }
+            clearTimeout(recut);
+            recut = setTimeout(trimmed, 250);
+        });
+    }
+    // The last fifteen seconds read, in a pause.
+    if (byId('ayv-pausa-oir')) {
+        byId('ayv-pausa-oir').addEventListener('click', function() {
+            var button = byId('ayv-pausa-oir');
+            if (hearing && hearing.button === button) {
+                stopListening();
+                return;
+            }
+            if (!byPieces || !pieces.length) {
+                return;
+            }
+            Promise.all(pieces.map(function(piece) {
+                return piece.arrayBuffer();
+            })).then(function(buffers) {
+                var parsed = buffers.map(edit.parse).filter(function(piece) {
+                    return piece && piece.packets.length;
+                });
+                var all = parsed.reduce(function(sum, piece) {
+                    return sum + edit.length(piece);
+                }, 0);
+                var from = Math.max(0, all - 15000);
+                var last = edit.cut(parsed, from, Infinity, 0);
+                hear(button, last.blob, 0, last.duration, 0);
+                return last;
+            }).catch(function() {
+                return null;
+            });
+        });
+    }
+
+    // A reading left half-done in this device: it says so, and goes on, is heard or is thrown away.
+    var draftFound = null;
+    var restore = function(found) {
+        draftFound = found;
+        var part = found.part !== '' ? document.querySelector('input[name="ayv-part"][value="' + found.part + '"]') : null;
+        if (part && !part.checked) {
+            part.checked = true;
+            part.dispatchEvent(new Event('change', {bubbles: true}));
+        }
+        var sound = found.backdrop !== null && found.backdrop !== undefined
+            ? document.querySelector('input[name="ayv-backdrop"][value="' + found.backdrop + '"]') : null;
+        if (sound && !sound.checked) {
+            sound.checked = true;
+            hush();
+        }
+        if (what && found.title && Number(found.part) < 0) {
+            what.value = found.title;
+        }
+        view.draft({part: found.parttitle || '', time: found.time, pieces: found.lengths});
+    };
+    if (edit && view && byId('ayv-borrador') && type().indexOf('webm') >= 0) {
+        edit.draft.load(draftKey).then(function(found) {
+            if (found && found.pieces && found.pieces.length && !recording() && !blob) {
+                restore(found);
+            }
+            return found;
+        }).catch(function() {
+            return null;
+        });
+        byId('ayv-borrador-seguir').addEventListener('click', function() {
+            if (!draftFound) {
+                return;
+            }
+            openMic().then(function() {
+                mime = draftFound.mime || type();
+                byPieces = true;
+                view.whole(false);
+                fresh(true);
+                pieces = draftFound.pieces.slice();
+                lengths = (draftFound.lengths || []).slice();
+                started = Date.now() - total();
+                pausedAt = 0;
+                draftFound = null;
+                rec.hidden = true;
+                counted();
+                return stream;
+            }).catch(function() {
+                said.textContent = str.voicenomic || '';
+            });
+        });
+        byId('ayv-borrador-oir').addEventListener('click', function() {
+            var button = byId('ayv-borrador-oir');
+            if (hearing && hearing.button === button) {
+                stopListening();
+                return;
+            }
+            if (!draftFound) {
+                return;
+            }
+            Promise.all(draftFound.pieces.map(function(piece) {
+                return piece.arrayBuffer();
+            })).then(function(buffers) {
+                var parsed = buffers.map(edit.parse).filter(function(piece) {
+                    return piece && piece.packets.length;
+                });
+                var whole = edit.cut(parsed, 0, Infinity, 0);
+                hear(button, whole.blob, 0, whole.duration, 0);
+                return whole;
+            }).catch(function() {
+                return null;
+            });
+        });
+        byId('ayv-borrador-tirar').addEventListener('click', function(event) {
+            if (event.isTrusted && event.currentTarget.getAttribute('data-ayv-armed') !== '1') {
+                return;
+            }
+            stopListening();
+            edit.draft.drop(draftKey);
+            draftFound = null;
+            view.state('listo');
+        });
+    }
     // Recording again throws away what there is: it asks once more in its place (data-ayv-twice arms it after this).
     again.addEventListener('click', function(event) {
         if (event.isTrusted && again.getAttribute('data-ayv-armed') !== '1') {
             return;
         }
         time.textContent = '';
+        // The draft goes only when the new take starts (rec's own click), not if the microphone says no.
         rec.click();
     });
     send.addEventListener('click', function() {
@@ -786,6 +1351,10 @@
                 throw new Error('no id');
             }
             blob = null;
+            pieces = [];
+            if (edit) {
+                edit.draft.drop(draftKey);
+            }
             said.textContent = str.voicesent || '';
             window.setTimeout(function() {
                 window.location.reload();

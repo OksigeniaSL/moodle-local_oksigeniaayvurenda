@@ -142,9 +142,11 @@ $current = $soundof($next);
 $backdrops = $sounds ? [
     'backdropwhich' => $str('voicebackdropforpart', voices::part_title($next)),
     'options' => array_merge(
-        [['bdkey' => '', 'bdogg' => '', 'bdm4a' => '', 'bdlabel' => $str('voicebackdropnone'), 'bdchecked' => $current === '']],
+        [['bdkey' => '', 'bdogg' => '', 'bdm4a' => '', 'bdlabel' => $str('voicebackdropnone'), 'bdthe' => '',
+            'bdchecked' => $current === '']],
         array_map(fn($key, $files) => ['bdkey' => $key, 'bdogg' => $files['ogg'], 'bdm4a' => $files['m4a'],
-            'bdlabel' => $str('voicebackdrop' . $key), 'bdchecked' => $current === $key], array_keys($sounds), $sounds)
+            'bdlabel' => $str('voicebackdrop' . $key), 'bdthe' => $str('voicebackdropthe' . $key),
+            'bdchecked' => $current === $key], array_keys($sounds), $sounds)
     ),
 ] : null;
 // What this person recorded of the book: the reading in the book's order, then the rest.
@@ -178,6 +180,7 @@ $data = [
     'backdropchip' => $str('voicebackdropchip'),
     'backdropdone' => $str('voicebackdropdone'),
     'aftertitle' => $str('voiceaftertitle'),
+    'calm' => voices::calm_strings(),
     'infourl' => (new moodle_url('/local/oksigeniaayvurenda/voicesinfo.php', ['library' => $library->slug]))->out(false),
     'notice' => $notice,
     'action' => $PAGE->url->out(false),
@@ -249,7 +252,8 @@ $recordurl = (new moodle_url('/local/oksigeniaayvurenda/record.php', ['library' 
     ->out(false);
 shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksigeniaayvurenda/voice', $data), $library, '', [
     'search' => false,
-    'scripts' => $data['epub'] ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader', 'voice'] : ['voice'],
+    'scripts' => $data['epub'] ? ['epubjs/jszip.min', 'epubjs/epub.min', 'reader', 'voiceedit', 'voiceview', 'voice']
+        : ['voiceedit', 'voiceview', 'voice'],
     'nav' => [['url' => $recordurl, 'label' => $str('backtorecord')]],
     'config' => [
         'sendurl' => (new moodle_url('/local/oksigeniaayvurenda/voice_ajax.php'))->out(false),
@@ -261,6 +265,7 @@ shell::output($found['record']->title, $OUTPUT->render_from_template('local_oksi
         'bookmarks' => $place['bookmarks'],
         'pagecss' => (new moodle_url('/local/oksigeniaayvurenda/app/reader-page.css'))->out(false),
         'strings' => ['voicesending' => $str('voicesending'), 'voicesent' => $str('voicesent'),
+            'voicepreparing' => $str('voicepreparing'),
             'voicefailed' => $str('voicefailed'), 'voicenomic' => $str('voicenomic'), 'voicetime' => $str('voicetime'),
             'voicecut' => $str('voicecut'), 'voicelimit' => $str('voicelimit'),
             'voicelength' => $str('voicelength'), 'copied' => $str('voiceinvitecopied'), 'readpage' => $str('readpage'),

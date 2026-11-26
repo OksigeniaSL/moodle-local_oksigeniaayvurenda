@@ -831,6 +831,24 @@ final class voices {
     }
 
     /**
+     * The words of the recorder that the page fills in as it goes («hoy a las {$a}»): the template's string helper would
+     * leave their {$a} empty, so they come in the context, whole.
+     *
+     * @return array<string, string>
+     */
+    public static function calm_strings(): array {
+        $out = [];
+        foreach (
+            ['voicedrafttoday', 'voicedraftyesterday', 'voicelength', 'voicelistenwithhint',
+                'voicepieces', 'voicepiecesmax', 'voicetrimfrom', 'voicetrimseconds', 'voicetrimto',
+                'voicetrimdonestart', 'voicetrimdoneend'] as $key
+        ) {
+            $out[substr($key, 5)] = get_string($key, 'local_oksigeniaayvurenda');
+        }
+        return $out;
+    }
+
+    /**
      * How a voice is called in a list: a part by which it is and its own name, «Capítulo 2 · El faro que no se apaga»; any
      * other voice, by what its reader called it.
      *
