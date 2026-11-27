@@ -260,7 +260,14 @@ final class voices_test extends \advanced_testcase {
         $part(4, $now + 50);
         $this->assertCount(2, array_filter($received->get_messages(), fn($m) => $m->eventtype === 'voicereceived'));
         // And it sounds now: told once for the reading, however many parts were approved (the review of 21-11, C2).
-        $this->assertCount(1, array_filter($received->get_messages(), fn($m) => $m->eventtype === 'voicepublished'));
+        $published = array_values(array_filter($received->get_messages(), fn($m) => $m->eventtype === 'voicepublished'));
+        $this->assertCount(1, $published);
+        // With the book and the button that plays it, not words alone.
+        $this->assertStringContainsString(
+            get_string('voicepublishedbutton', 'local_oksigeniaayvurenda'),
+            $published[0]->fullmessagehtml
+        );
+        $this->assertStringContainsString('read.php', $published[0]->fullmessagehtml);
         $received->close();
 
         // A voice named as a part before there were parts finds its place; a family's, through a link, does not.

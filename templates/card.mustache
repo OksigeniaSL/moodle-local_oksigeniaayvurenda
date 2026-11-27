@@ -35,7 +35,14 @@
                    "qr": "app/emblema.svg", "flower": "flor/bud.svg", "flowersvg": "", "stage": "Casi flor", "yearname": "2026-2027",
                    "paths": [{"label": "Volver", "hint": "Pasar por la biblioteca", "marks": "", "detail": "Última visita: el martes"}],
                    "haspaths": true, "pathsheading": "Cómo crece tu flor", "pastheading": "Tus flores de otros cursos",
-                   "sky": false, "haschoices": false, "choosefirst": false, "choices": [], "mine": false,
+                   "sky": false, "haschoices": false, "choosefirst": false, "choices": [],
+                   "mine": {"yearid": 3, "done": 4, "hasgoal": true, "goalreached": false, "goalwidth": 40, "goalstarted": true,
+                            "goalunder": "de 10", "goalline": "Llevas 4 de 10", "newbookson": false,
+                            "presets": [{"number": 5, "on": false}, {"number": 10, "on": true}],
+                            "mineheading": "Lo tuyo", "goaltitle": "Tu meta del curso", "goallabel": "Libros este curso",
+                            "goalother": "Otro número", "goaloff": "Sin meta", "goalhint": "Solo la ves tú.",
+                            "newbookstitle": "Lo nuevo de la biblioteca", "newbookshint": "Una vez a la semana como mucho.",
+                            "newbookslabel": "Recibir lo nuevo"},
                    "herald": null, "hasbooks": true, "albumpremiere": "Lo estrenaste", "books": [{"title": "El faro dormido", "cover": null, "premiere": true}], "haspast": false, "past": [],
                    "hasclassgarden": false, "classisland": null, "classgarden": [], "classgardenheading": "El jardín de la clase", "classgardenhint": "",
                    "hascromos": true, "cromosheading": "Tus cromos", "cromoscount": "1 de 2",
@@ -151,7 +158,7 @@
         <div class="ayv-mine-grid">
             <div class="ayv-mine-box ayv-mine-goal{{#goalreached}} ayv-mine-goal-met{{/goalreached}}">
                 <div class="ayv-mine-ring" aria-hidden="true">
-                    <svg viewBox="0 0 120 120"><circle class="ayv-mine-ring-track" cx="60" cy="60" r="52" pathLength="100"/>{{#goalstarted}}<circle class="ayv-mine-ring-done" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="{{goalwidth}} 100"/>{{/goalstarted}}</svg>
+                    <svg viewBox="0 0 120 120"><circle class="ayv-mine-ring-track" cx="60" cy="60" r="52"/>{{#goalstarted}}<path class="ayv-mine-ring-done" d="M112 60A52 52 0 1 1 8 60A52 52 0 1 1 112 60" pathLength="100" stroke-dasharray="{{goalwidth}} 100"/>{{/goalstarted}}</svg>
                     <span class="ayv-mine-ring-text"><b>{{done}}</b><span>{{goalunder}}</span></span>
                 </div>
                 <div class="ayv-mine-goal-text">

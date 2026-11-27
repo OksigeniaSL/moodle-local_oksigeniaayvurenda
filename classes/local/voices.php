@@ -229,14 +229,30 @@ final class voices {
             '/local/oksigeniaayvurenda/' . ($reading ? 'read.php' : 'record.php'),
             ['library' => $library->slug, 'id' => $reading ? (int) $item->id : (int) $item->recordid]
         ))->out(false);
+        $str = fn(string $key, $a = null) => get_string($key, 'local_oksigeniaayvurenda', $a);
+        $subject = $str('voicepublishedsubject', $title);
+        $main = mail::main_library((int) $item->entityid);
         $sent = notices::send(
             'voicepublished',
             $user,
-            get_string('voicepublishedsubject', 'local_oksigeniaayvurenda', $title),
-            get_string('voicepublishedbody', 'local_oksigeniaayvurenda', ['title' => $title, 'link' => $url]),
+            $subject,
+            $str('voicepublishedbody', ['title' => $title, 'link' => $url]),
             $url,
             $title,
-            (string) (mail::main_library((int) $item->entityid)->name ?? $library->name)
+            (string) ($main->name ?? $library->name),
+            // The book that sounds now, with its cover, and the button that plays it.
+            [
+                'library' => $main ?? $library,
+                'entityid' => (int) $item->entityid,
+                'preheader' => $str('voicepublishedlead'),
+                'hello' => $str('mailhello', $user->firstname),
+                'heading' => $subject,
+                'lead' => [$str('voicepublishedlead')],
+                'book' => mail::book((int) $item->recordid, $title, catalogue::authors_of((int) $item->recordid)),
+                'button' => ['url' => $url, 'text' => $str('voicepublishedbutton')],
+                'why' => $str('mailwhyvoice'),
+                'prefs' => true,
+            ]
         );
         force_current_language($language);
         return $sent;

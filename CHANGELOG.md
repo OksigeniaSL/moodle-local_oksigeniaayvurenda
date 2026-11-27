@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.1 (2026-11-27)
+
+- **«Your voice sounds in the library now»** comes as every other notice of the library: its picture and colours, the
+  book with its cover, and a «Listen to it» button that opens the reading or the record.
+- **The end of an import in the background** too: what came in, each figure on the slip with its words under it, what
+  was brought up to date, and a button to the library; if it could not be imported, why, and a button to try again.
+- **The ring of one's own goal** on the card is drawn as a path, the one shape the HTML validator accepts with a length
+  of its own; the template's example draws it, so that the checks see it.
+
 ## 1.5.0 (2026-11-26)
 
 - **Recording with calm.** Three seconds are counted before the microphone records, and «Start now» does not wait. Where

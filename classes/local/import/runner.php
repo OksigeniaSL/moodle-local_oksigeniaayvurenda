@@ -234,13 +234,32 @@ final class runner {
             $body = trim($str('importbgdonebody', (object) ['library' => $place, 'figures' => $figures]) . ' ' . $done['again']
                 . ' ' . $done['newcodes']);
             $page = 'index.php';
+            // What came in, on the slip: each figure with its words under it.
+            $design = ['lead' => [$str('importbgdonelead', $place)],
+                'people' => array_map(
+                    fn($figure) => ['name' => (string) $figure['count'], 'line' => $figure['label']],
+                    $done['figures']
+                ),
+                'after' => array_values(array_filter([trim($done['again']), trim($done['newcodes'])])),
+                'button' => $str('importbgdonebutton')];
         } else {
             $subject = $str('importbgfailedsubject', $name);
             $body = $str('importfailed', $why);
             $page = 'import.php';
+            // The heading already says it could not: the lead says only why.
+            $design = ['lead' => [trim($why) !== '' ? trim($why) : $body], 'button' => $str('importbgfailedbutton')];
         }
         $url = (new \moodle_url('/local/oksigeniaayvurenda/' . $page, ['library' => $library->slug]))->out(false);
-        $told = notices::send('stafftodo', $user, $subject, $body, $url, $place, $place);
+        $told = notices::send('stafftodo', $user, $subject, $body, $url, $place, $place, [
+            'library' => $library,
+            'entityid' => (int) $library->entityid,
+            'preheader' => $design['lead'][0],
+            'hello' => $str('mailhello', $user->firstname),
+            'heading' => $subject,
+            'button' => ['url' => $url, 'text' => $design['button']],
+            'why' => $str('mailwhyimport'),
+            'prefs' => true,
+        ] + $design);
         force_current_language($language);
         return $told;
     }

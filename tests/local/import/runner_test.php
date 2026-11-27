@@ -106,6 +106,15 @@ final class runner_test extends \advanced_testcase {
         $this->assertCount(1, $messages);
         $this->assertEquals($user->id, $messages[0]->useridto);
         $this->assertStringContainsString('programa.xml', $messages[0]->subject);
+        // What came in, with the button to the library.
+        $this->assertStringContainsString(
+            get_string('importbgdonebutton', 'local_oksigeniaayvurenda'),
+            $messages[0]->fullmessagehtml
+        );
+        $this->assertStringContainsString(
+            get_string('importnewrecords', 'local_oksigeniaayvurenda'),
+            $messages[0]->fullmessagehtml
+        );
         $this->assertNull(runner::running($library));
         $this->assertGreaterThan(0, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
         $this->assertSame([], glob(make_upload_directory('local_oksigeniaayvurenda/imports') . '/*'));
@@ -134,6 +143,10 @@ final class runner_test extends \advanced_testcase {
         $this->assertStringContainsString(
             get_string('importbgfailedsubject', 'local_oksigeniaayvurenda', 'programa.xml'),
             $messages[0]->subject
+        );
+        $this->assertStringContainsString(
+            get_string('importbgfailedbutton', 'local_oksigeniaayvurenda'),
+            $messages[0]->fullmessagehtml
         );
         $this->assertNull(runner::running($library));
         $this->assertSame(0, $DB->count_records(self::T . 'record', ['entityid' => $library->entityid]));
