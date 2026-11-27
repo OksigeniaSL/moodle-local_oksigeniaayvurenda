@@ -22,7 +22,7 @@
     The recorder: record, pause, stop, listen, say what was read, send. A reading in parts chooses its part first, from
     the book's chapters as chips (the next one ready), and the soft sound under the whole reading, if the site has any.
 
-    Recording with calm (26 Nov 2026): three seconds counted before the microphone opens; every pause closes a piece,
+    Recording with calm (26 Nov 2026): five seconds counted before the microphone opens; every pause closes a piece,
     which can be heard again or read again; at the end, the whole reading as a wave with its two ends already cleaned and
     two handles to move them, heard with its soft sound, and a line about how the voice was levelled. What is recorded
     stays in the device until it is sent: back on the page, a reading left half-done says so. app/voiceview.js draws it
@@ -102,9 +102,10 @@
         <p class="ayv-rec-resumen"{{#backdrops}} data-sound="{{backdropchip}}"{{/backdrops}}><b class="ayv-rec-resumen-parte"></b><span class="ayv-rec-resumen-fondo"></span></p>
         <button type="button" class="ayv-rec-big" id="ayv-rec" {{#consent}}disabled{{/consent}}><span class="ayv-rec-dot">{{> local_oksigeniaayvurenda/icon_mic}}</span><span class="ayv-rec-word">{{voicerecord}}</span></button>
         <div class="ayv-rec-cuenta" id="ayv-cuenta" data-en="cuenta">
-            <span class="ayv-rec-cuenta-aro" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path class="ayv-rec-cuenta-pasa" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50" pathLength="100"/></svg><b class="ayv-rec-cuenta-n">3</b></span>
+            <span class="ayv-rec-cuenta-aro" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path class="ayv-rec-cuenta-pasa" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50" pathLength="100"/></svg><b class="ayv-rec-cuenta-n">5</b></span>
             <span class="ayv-rec-cuenta-dice">{{#str}} voicecountdown, local_oksigeniaayvurenda {{/str}}</span>
-            <button type="button" class="ayv-line-button" id="ayv-cuenta-ya">{{#str}} voicecountdownnow, local_oksigeniaayvurenda {{/str}}</button>
+            <span class="ayv-rec-cuenta-botones"><button type="button" class="ayv-line-button" id="ayv-cuenta-ya">{{#str}} voicecountdownnow, local_oksigeniaayvurenda {{/str}}</button>
+                <button type="button" class="ayv-line-button ayv-line-quiet" id="ayv-cuenta-no">{{#str}} voicecountdownoff, local_oksigeniaayvurenda {{/str}}</button></span>
             <span class="ayv-sr" role="status" data-says="{{#str}} voicecountdownsays, local_oksigeniaayvurenda {{/str}}"></span>
         </div>
         <div class="ayv-rec-row">

@@ -16540,6 +16540,7 @@ html[data-bs-theme="dark"] .ayv .ayv-recorder {
 }
 .ayv .ayv-rec-cuenta-n { position: relative; font-family: var(--title); font-size: 2.6rem; font-weight: 600; line-height: 1; }
 .ayv .ayv-rec-cuenta-dice { color: var(--ink-2); }
+.ayv .ayv-rec-cuenta-botones { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem .75rem; }
 
 /* The pause: what is kept, «Seguir» as the record button, the two choices side by side, and «Terminar» quiet. */
 .ayv .ayv-rec-pausa { justify-items: center; gap: .7rem; width: 100%; text-align: center; }
@@ -16609,7 +16610,7 @@ html[data-bs-theme="dark"] .ayv .ayv-recorder {
     .ayv .ayv-voice .ayv-recorder[data-estado="borrador"] .ayv-rec-borrador { margin: 0; padding: .25rem 3rem 0 0; background: none; box-shadow: none; }
     .ayv .ayv-voice .ayv-recorder[data-estado="borrador"] .ayv-rec-borrador::before { top: -1rem; right: .25rem; }
     .ayv .ayv-recorder[data-estado="cuenta"] .ayv-vp-barra-boton { visibility: hidden; }
-    /* The three seconds, in the middle of the screen over the veil: whoever reads a paper book looks up and sees them. */
+    /* The five seconds, in the middle of the screen over the veil: whoever reads a paper book looks up and sees them. */
     .ayv .ayv-voice .ayv-recorder[data-estado="cuenta"] .ayv-rec-cuenta {
         position: fixed;
         top: 50%;

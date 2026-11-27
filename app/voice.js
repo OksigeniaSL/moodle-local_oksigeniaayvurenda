@@ -627,7 +627,7 @@
     // A reading is recorded in pieces where the browser records WebM (Chrome, Edge, Firefox): each pause closes one, a
     // piece read badly can be thrown away, and at the end they are joined, their ends cut and the voice levelled, without
     // encoding anything again (voiceedit.js); app/voiceview.js draws each moment. Elsewhere (Safari records MP4), one
-    // recording that pauses, as before. Three seconds are counted before the microphone records, where there is a view.
+    // recording that pauses, as before. Five seconds are counted before the microphone records, where there is a view.
     var edit = window.ayvVoiceEdit || null;
     var view = window.ayvVoiceView || null;
     var mime = '';
@@ -863,7 +863,7 @@
             return null;
         });
     };
-    // The microphone, asked for before the count: its question comes when the button is touched, not three seconds later.
+    // The microphone, asked for before the count: its question comes when the button is touched, not five seconds later.
     var openMic = function() {
         if (stream) {
             return Promise.resolve(stream);
@@ -900,11 +900,24 @@
             }
         }
     };
-    var counted = function() {
-        if (view) {
-            stopCount = view.countdown(begin);
-        } else {
+    // The count, then the recording. first() runs as the count ends, before the microphone records; back() puts things
+    // as they were if the count is called off.
+    var counted = function(first, back) {
+        var go = function() {
+            if (first) {
+                first();
+            }
             begin();
+        };
+        if (view) {
+            stopCount = view.countdown(go, 0, function() {
+                stopCount = null;
+                if (back) {
+                    back();
+                }
+            });
+        } else {
+            go();
         }
     };
     var fresh = function(keep) {
@@ -926,19 +939,35 @@
     };
     rec.addEventListener('click', function() {
         openMic().then(function() {
-            mime = type();
-            byPieces = !!edit && mime.indexOf('webm') >= 0;
-            if (view) {
-                view.whole(!byPieces);
-            }
-            fresh(false);
-            if (edit) {
-                edit.draft.drop(draftKey);
-            }
-            started = Date.now();
-            pausedAt = 0;
+            // The take before and its draft go only when the count is over: called off, they are there as they were.
+            var had = !!blob;
+            stopListening();
+            preview.pause();
+            hush();
+            after.hidden = true;
+            hideAfter();
             rec.hidden = true;
-            counted();
+            counted(function() {
+                mime = type();
+                byPieces = !!edit && mime.indexOf('webm') >= 0;
+                if (view) {
+                    view.whole(!byPieces);
+                }
+                fresh(false);
+                if (edit) {
+                    edit.draft.drop(draftKey);
+                }
+                started = Date.now();
+                pausedAt = 0;
+            }, function() {
+                stopStream();
+                if (had) {
+                    openAfter();
+                } else {
+                    rec.hidden = false;
+                    view.state('listo');
+                }
+            });
             return stream;
         }).catch(function() {
             said.textContent = str.voicenomic || '';
@@ -978,7 +1007,11 @@
     var fromPause = function() {
         stopListening();
         if (byPieces) {
-            counted();
+            counted(null, function() {
+                view.state('pausa');
+                pause.setAttribute('aria-pressed', 'true');
+                word(pause.getAttribute('data-resume'));
+            });
         } else if (recorder && recorder.state === 'paused') {
             recorder.resume();
             started += Date.now() - pausedAt;
@@ -1246,6 +1279,7 @@
                 return;
             }
             openMic().then(function() {
+                var found = draftFound;
                 mime = draftFound.mime || type();
                 byPieces = true;
                 view.whole(false);
@@ -1256,7 +1290,14 @@
                 pausedAt = 0;
                 draftFound = null;
                 rec.hidden = true;
-                counted();
+                counted(null, function() {
+                    stopStream();
+                    pieces = [];
+                    lengths = [];
+                    draftFound = found;
+                    rec.hidden = false;
+                    view.state('borrador');
+                });
                 return stream;
             }).catch(function() {
                 said.textContent = str.voicenomic || '';
@@ -1300,7 +1341,8 @@
             return;
         }
         time.textContent = '';
-        // The draft goes only when the new take starts (rec's own click), not if the microphone says no.
+        // The take and its draft go only when the new one starts, after the count: not if the microphone says no, nor if
+        // the count is called off.
         rec.click();
     });
     send.addEventListener('click', function() {

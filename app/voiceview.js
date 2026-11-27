@@ -15,7 +15,7 @@
 
 /**
  * Ayvurenda: what the recorder shows while recording with calm, drawn and nothing else (voice.js and voiceedit.js do the
- * sound). Three seconds counted before the microphone opens; the pieces of the reading as a strip, the one being read
+ * sound). Five seconds counted before the microphone opens; the pieces of the reading as a strip, the one being read
  * growing; the pause with its choices; at the end, the whole reading as a wave with two handles at its cleaned ends, the
  * line that runs over it while it sounds, and how the voice was levelled; and a reading left half-done in the device.
  *
@@ -125,19 +125,22 @@
     };
 
     /**
-     * Three, two, one: then done(). «Empezar ya» does not wait.
+     * Five, four… one: then done(). «Empezar ya» does not wait; «Ahora no», or Escape, calls it off and off() puts back
+     * what there was before.
      *
      * @param {Function} done
-     * @param {number} from 3 if not said.
+     * @param {number} from 5 if not said.
+     * @param {Function} off What to do when it is called off.
      * @return {Function} To stop it without starting.
      */
-    var countdown = function(done, from) {
+    var countdown = function(done, from, off) {
         var box = document.getElementById('ayv-cuenta');
         var number = box.querySelector('.ayv-rec-cuenta-n');
         var ring = box.querySelector('.ayv-rec-cuenta-pasa');
         var now = box.querySelector('#ayv-cuenta-ya');
+        var no = box.querySelector('#ayv-cuenta-no');
         var said = box.querySelector('[role="status"]');
-        var left = from || 3;
+        var left = from || 5;
         var timer = null;
         var over = false;
         var tick = function() {
@@ -154,6 +157,10 @@
             over = true;
             window.clearInterval(timer);
             now.removeEventListener('click', skip);
+            if (no) {
+                no.removeEventListener('click', back);
+            }
+            document.removeEventListener('keydown', key);
             if (go) {
                 done();
             }
@@ -161,12 +168,28 @@
         var skip = function() {
             end(true);
         };
+        var back = function() {
+            end(false);
+            if (off) {
+                off();
+            }
+        };
+        var key = function(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                back();
+            }
+        };
         state('cuenta');
         if (said) {
             said.textContent = said.getAttribute('data-says') || '';
         }
         tick();
         now.addEventListener('click', skip);
+        if (no) {
+            no.addEventListener('click', back);
+        }
+        document.addEventListener('keydown', key);
         timer = window.setInterval(function() {
             left--;
             if (left > 0) {

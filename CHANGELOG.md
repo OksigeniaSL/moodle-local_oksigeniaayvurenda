@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.2 (2026-11-27)
+
+- **Five seconds before recording**, not three.
+- **«Not now» in the count**, and Escape: it is called off and everything is as it was before it, so there is a way out
+  to the record again. Recording again throws away the take before only when the new one starts: called off, the take is
+  there to hear, cut and send; from a pause, the pause comes back with its pieces; from a reading half-done, it is still
+  waiting in the device.
+
 ## 1.5.1 (2026-11-27)
 
 - **«Your voice sounds in the library now»** comes as every other notice of the library: its picture and colours, the
