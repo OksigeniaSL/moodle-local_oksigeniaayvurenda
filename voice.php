@@ -157,6 +157,7 @@ $recorded = array_merge($reading, array_values(array_filter(
 // Each part says its sound and changes it with a touch, without recording again.
 $soundsays = fn(string $key) => $key !== '' && isset($sounds[$key])
     ? $str('voicemysound', \core_text::strtolower($str('voicebackdrop' . $key))) : $str('voicebackdropnone');
+$look = \local_oksigeniaayvurenda\local\listens::look((int) $library->entityid);
 $mine = array_map(fn($v) => [
     'sound' => $v->part !== null && $sounds,
     'soundsays' => $soundsays((string) $v->backdrop),
@@ -170,6 +171,8 @@ $mine = array_map(fn($v) => [
     'title' => voices::part_label($v) . ((string) $v->signature !== '' ? ' · ' . $v->signature : ''),
     'url' => digital::file_url($v),
     'state' => $str($v->status === 'pending' ? 'voicepending' : 'voiceapproved'),
+    // How many times it has been heard, as an audience; nothing while it waits for approval.
+    'listens' => \local_oksigeniaayvurenda\local\listens::of($v, 'mine', $look) ?? false,
 ], $recorded);
 $data = [
     'heading' => $str('voicetitle', $found['record']->title),

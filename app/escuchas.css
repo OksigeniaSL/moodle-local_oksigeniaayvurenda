@@ -1,0 +1,286 @@
+/**
+ * This file is part of Moodle - https://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * @package    local_oksigeniaayvurenda
+ * @copyright  2026 Oksigenia SL <dev@oksigenia.cc>
+ * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+/* The listens of a voice, as an audience (templates listens and listens_small, drawn by listens.php). The same rules
+   inside the library (after ayvurenda.css) and in the family's page (after escuchar.css). The plate keeps its colours
+   in dark mode, like every plate of the library; only the words around it follow the page. Two looks:
+   .ayv-esc-lamina, the cream plate with people in the colours of the library (the flower, the family's page), and
+   .ayv-esc-noche, the night green of the sky with people as warm lights. No :has(), no color-mix(). */
+
+.ayv-esc {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 22px;
+    width: 100%;
+    margin: 12px 0;
+}
+
+.ayv-esc-placa {
+    flex: 0 1 340px;
+    min-width: 0;
+    padding: 8px;
+    border-radius: 22px;
+    background: var(--e-placa);
+    box-shadow: var(--ayv-shadow, 0 1px 2px rgba(15, 58, 51, .06), 0 10px 28px -14px rgba(15, 58, 51, .32)),
+        inset 0 0 0 1px var(--ayv-ring, rgba(15, 58, 51, .1));
+}
+
+.ayv-esc-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.ayv-esc-texto {
+    flex: 1 1 190px;
+    min-width: 0;
+}
+
+.ayv-esc-texto p {
+    margin: 0;
+}
+
+.ayv-esc-cifra {
+    font-family: "Literata", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    line-height: 1.1;
+}
+
+.ayv-esc-cifra b {
+    margin-right: .1em;
+    font-size: 2.6rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.ayv-esc-frase {
+    padding-top: 6px;
+    font-size: 1.15rem;
+    line-height: 1.35;
+    text-wrap: balance;
+}
+
+.ayv-esc-luego {
+    padding-top: 6px;
+    font-size: .95rem;
+    line-height: 1.4;
+    color: var(--ayv-muted, #5f6b67);
+}
+
+/* The cream plate: the sofa and the stage in the green of the library, the book in coral, people in its colours. */
+.ayv-esc-lamina {
+    --e-placa: var(--ayv-plate, #f3e6cc);
+    --e-alfombra: #ead5ad;
+    --e-alfombra2: #e2c999;
+    --e-mueble: #17574c;
+    --e-asiento: #1f6658;
+    --e-suelo: #fbf6ec;
+    --e-sofa: #2c7a6a;
+    --e-sofa2: #3b8b79;
+    --e-cojin: #dec496;
+    --e-mesa: #d9bf90;
+    --e-butaca: #ece0c8;
+    --e-respaldo: #d6c29c;
+    --e-cara: #fbf6ec;
+    --e-ruedas: #1e2b2a;
+    --e-cristal: rgba(251, 246, 236, .75);
+    --e-libro: #e2654c;
+    --e-lomo: #fbf6ec;
+    --e-onda: #e2654c;
+    --e-vacio: rgba(23, 87, 76, .28);
+    --e-gente: #e2654c;
+    --e-p0: #e2654c;
+    --e-p1: #f0b43c;
+    --e-p2: #2c7a6a;
+    --e-p3: #b8915f;
+    --e-c0: #ef8f78;
+    --e-c1: #f6cd76;
+    --e-c2: #6fb3a1;
+    --e-c3: #d8b98f;
+    --e-s0: #b84a35;
+    --e-s1: #c98f1c;
+    --e-s2: #1d5a4d;
+    --e-s3: #8a6a40;
+    --e-brillo: none;
+}
+
+/* The night of the sky: the empty seats barely there, the people as warm lights, the book as the lamp. */
+.ayv-esc-noche {
+    --e-placa: #0f3a33;
+    --e-alfombra: #134840;
+    --e-alfombra2: #175247;
+    --e-mueble: #1f6355;
+    --e-asiento: #185447;
+    --e-suelo: #134840;
+    --e-sofa: rgba(251, 246, 236, .13);
+    --e-sofa2: rgba(251, 246, 236, .19);
+    --e-cojin: rgba(251, 246, 236, .13);
+    --e-mesa: rgba(251, 246, 236, .2);
+    --e-butaca: rgba(251, 246, 236, .12);
+    --e-respaldo: rgba(251, 246, 236, .22);
+    --e-cara: #fff3d6;
+    --e-ruedas: #0a2622;
+    --e-cristal: rgba(251, 246, 236, .32);
+    --e-libro: #f0b43c;
+    --e-lomo: #0f3a33;
+    --e-onda: #f0b43c;
+    --e-vacio: rgba(251, 246, 236, .2);
+    --e-gente: #f6c65f;
+    --e-p0: #f0b43c;
+    --e-p1: #f7cd72;
+    --e-p2: #f3a28f;
+    --e-p3: #fbe6b0;
+    --e-c0: #fff3d6;
+    --e-c1: #ffe9b8;
+    --e-c2: #fff3d6;
+    --e-c3: #ffe1a6;
+    --e-s0: #c98f1c;
+    --e-s1: #d9a64a;
+    --e-s2: #c9705e;
+    --e-s3: #d9b46a;
+    --e-brillo: drop-shadow(0 0 3px rgba(246, 198, 95, .55));
+}
+
+.ayv-esc .e-alfombra { fill: var(--e-alfombra); }
+.ayv-esc .e-alfombra2 { fill: var(--e-alfombra2); }
+.ayv-esc .e-mueble { fill: var(--e-mueble); }
+.ayv-esc .e-asiento { fill: var(--e-asiento); }
+.ayv-esc .e-suelo { fill: var(--e-suelo); }
+.ayv-esc .e-sofa { fill: var(--e-sofa); }
+.ayv-esc .e-sofa2 { fill: var(--e-sofa2); }
+.ayv-esc .e-cojin { fill: var(--e-cojin); }
+.ayv-esc .e-butaca { fill: var(--e-butaca); }
+.ayv-esc .e-respaldo { fill: var(--e-respaldo); }
+.ayv-esc .e-cara { fill: var(--e-cara); }
+.ayv-esc .e-mesa { fill: var(--e-mesa); }
+.ayv-esc .e-ruedas { fill: var(--e-ruedas); }
+.ayv-esc .e-cristal { fill: none; stroke: var(--e-cristal); stroke-width: 2; stroke-linecap: round; }
+.ayv-esc .e-libro { fill: var(--e-libro); }
+.ayv-esc .e-lomo { fill: none; stroke: var(--e-lomo); stroke-width: 1.4; }
+.ayv-esc .e-onda { fill: none; stroke: var(--e-onda); stroke-width: 2.2; stroke-linecap: round; }
+.ayv-esc .e-onda2 { opacity: .55; }
+.ayv-esc .e-vacio path,
+.ayv-esc .e-gente path { fill: none; stroke-linecap: round; }
+.ayv-esc .e-vacio { stroke: var(--e-vacio); }
+.ayv-esc .e-gente { stroke: var(--e-gente); }
+.ayv-esc .e-p0 { fill: var(--e-p0); }
+.ayv-esc .e-p1 { fill: var(--e-p1); }
+.ayv-esc .e-p2 { fill: var(--e-p2); }
+.ayv-esc .e-p3 { fill: var(--e-p3); }
+.ayv-esc .e-c0 { fill: var(--e-c0); }
+.ayv-esc .e-c1 { fill: var(--e-c1); }
+.ayv-esc .e-c2 { fill: var(--e-c2); }
+.ayv-esc .e-c3 { fill: var(--e-c3); }
+.ayv-esc .e-s0 { fill: var(--e-s0); }
+.ayv-esc .e-s1 { fill: var(--e-s1); }
+.ayv-esc .e-s2 { fill: var(--e-s2); }
+.ayv-esc .e-s3 { fill: var(--e-s3); }
+.ayv-esc-noche .e-on { filter: var(--e-brillo); }
+
+/* Each seat is taken one after another, quickly; still with «reduce motion». */
+.ayv-esc .e-on {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ayv-esc-entra .5s cubic-bezier(.2, .8, .3, 1.25) both;
+    animation-delay: calc(var(--i, 0) * 55ms + 150ms);
+}
+
+@keyframes ayv-esc-entra {
+    from {
+        opacity: 0;
+        transform: scale(.35);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ayv-esc .e-on {
+        animation: none;
+    }
+}
+
+/* The small one, in a line beside a voice. */
+.ayv-esc-chico {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .875rem;
+    line-height: 1.3;
+    color: var(--ayv-muted, #5f6b67);
+}
+
+.ayv-esc-glifo {
+    flex: none;
+    fill: currentColor;
+    opacity: .5;
+}
+
+.ayv-esc-glifo-on {
+    opacity: 1;
+}
+
+.ayv-esc-glifo-on .e-g0 { fill: #e2654c; }
+.ayv-esc-glifo-on .e-g1 { fill: #d99a1e; }
+.ayv-esc-glifo-on .e-g2 { fill: #2c7a6a; }
+
+[data-bs-theme="dark"] .ayv-esc-glifo-on .e-g0 { fill: #f08a72; }
+[data-bs-theme="dark"] .ayv-esc-glifo-on .e-g1 { fill: #f0b43c; }
+[data-bs-theme="dark"] .ayv-esc-glifo-on .e-g2 { fill: #8fd3c1; }
+
+/* In the family's page (hear.php, inside .lp): centred between the player and the share button, which it leads to,
+   with the colours of the page. */
+.lp .ayv-esc {
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    margin: 30px 0 22px;
+    text-align: center;
+}
+
+.lp .ayv-esc-placa {
+    flex: none;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 1px 2px rgba(15, 58, 51, .06), 0 14px 30px -18px rgba(15, 58, 51, .4), inset 0 0 0 1px var(--lp-linea);
+}
+
+.lp .ayv-esc-texto {
+    flex: none;
+    width: 100%;
+}
+
+.lp .ayv-esc-cifra {
+    color: var(--lp-acento);
+}
+
+.lp .ayv-esc-frase {
+    font-family: "Literata", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: var(--lp-tinta);
+}
+
+.lp .ayv-esc-luego {
+    color: var(--lp-suave);
+}
+
+/* Beside who reads, in «listen as a book». */
+.ayv .ayv-oye-escuchas { margin: .35rem 0 .6rem; }

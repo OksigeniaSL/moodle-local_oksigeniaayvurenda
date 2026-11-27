@@ -29,6 +29,10 @@
         "ogdescription": "Biblioteca de ejemplo · escúchalo y mándaselo a quien quieras",
         "ogimage": "https://example.com/mailimage.php?a=cover", "url": "https://example.com/hear.php?i=1&s=x",
         "css": "https://example.com/app/escuchar.css", "js": "https://example.com/app/escuchar.js",
+        "listenscss": "https://example.com/app/escuchas.css", "heardurl": "https://example.com/hear.php?i=1&s=x",
+        "listens": {"look": "lamina", "svg": "<svg class=\"ayv-esc-svg\" viewBox=\"0 0 320 190\" aria-hidden=\"true\"></svg>",
+            "hasnumber": true, "digits": "27", "unit": "escuchas", "phrase": "Ya es más que una clase entera.",
+            "next": "Para llenar el autobús faltan 30."},
         "emblem": "https://example.com/app/emblema.svg", "library": "Biblioteca de ejemplo",
         "cover": "https://example.com/mailimage.php?a=cover", "coveralt": "La portada de «La isla del cometa»",
         "coverbg": "#17574c", "coverink": "#ffffff", "booktitle": "La isla del cometa",
@@ -58,6 +62,7 @@
 <meta property="og:url" content="{{url}}">
 {{#ogimage}}<meta property="og:image" content="{{ogimage}}">{{/ogimage}}
 <link rel="stylesheet" href="{{css}}">
+<link rel="stylesheet" href="{{listenscss}}">
 </head>
 <body>
 <main class="lp"><div class="lp-contenido">
@@ -66,7 +71,7 @@
     <p class="lp-etiqueta">{{kicker}}</p>
     <h1 class="lp-frase"><b>{{name}}</b> {{sentence}}</h1>
     {{#partsline}}<p class="lp-partes">{{partsline}}</p>{{/partsline}}
-    <audio class="lp-audio-sin-js" controls preload="metadata" src="{{audio}}" data-parts="{{parts}}"></audio>
+    <audio class="lp-audio-sin-js" controls preload="metadata" src="{{audio}}" data-parts="{{parts}}" data-heard="{{heardurl}}"></audio>
     <div class="lp-reproductor">
         <button type="button" class="lp-play" aria-pressed="false" aria-label="{{play}}" data-escuchar="{{play}}" data-pausar="{{pause}}">
             <svg class="lp-icono lp-icono-play" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
@@ -75,6 +80,7 @@
         <div class="lp-pista"><input class="lp-barra" type="range" min="0" max="1" value="0" step="any" aria-label="{{seek}}">
             <span class="lp-tiempo"><span class="lp-ya">0:00</span><span class="lp-total"></span></span></div>
     </div>
+    {{#listens}}{{> local_oksigeniaayvurenda/listens}}{{/listens}}
     <button type="button" class="lp-pasar" data-titulo="{{sharetitle}}" data-texto="{{sharetext}}" data-copiado="{{copied}}">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4 9.5 14.5M20 4l-6.5 16-4-5.5L4 10.5z"/></svg>{{share}}</button>
     <p class="lp-pasado" aria-live="polite"></p>

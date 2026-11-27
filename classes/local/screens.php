@@ -652,12 +652,16 @@ final class screens {
             $item = $group['item'];
             // A reading in parts is one line: who reads it and how many parts, and it opens where its listener was.
             if ($item->kind === 'voice' && $item->part !== null) {
-                $waits = (bool) array_filter($group['parts'], fn($p) => $p->status === 'pending');
+                // Waiting whole, it says so; with parts approved already, how many are still to approve.
+                $waits = count(array_filter($group['parts'], fn($p) => $p->status === 'pending'));
+                $left = $waits === 1 ? self::str('voicependingpart') : self::str('voicependingparts', $waits);
+                $still = $waits === count($group['parts']) ? ' ' . self::str('voicependingshort') : ($waits ? ' · ' . $left : '');
                 $items[] = [
-                    'label' => voices::reading_label($group['parts']) . ($waits ? ' ' . self::str('voicependingshort') : ''),
+                    'label' => voices::reading_label($group['parts']) . $still,
                     'action' => self::str('digitalactionaudio'),
                     'book' => false,
                     'url' => self::url('read.php', $library, ['id' => $item->id]),
+                    'listens' => listens::reading($group['parts'], 'public') ?? false,
                 ];
                 continue;
             }
@@ -672,6 +676,8 @@ final class screens {
                 // A book to read: «Read the book», with what it is in small beside.
                 'book' => $item->kind === 'file' && in_array($item->format, ['epub', 'pdf'], true),
                 'url' => self::url('read.php', $library, ['id' => $item->id]),
+                // Once a voice has filled a sofa, a few words say so to whoever comes, without the number.
+                'listens' => $item->kind === 'voice' ? (listens::of($item, 'public') ?? false) : false,
             ];
         }
         $manage = access::can('local/oksigeniaayvurenda:catalogue', $library)

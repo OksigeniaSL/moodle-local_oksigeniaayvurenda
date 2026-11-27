@@ -90,6 +90,30 @@
             audio.play();
         }
     });
+    // A part heard for a while counts one listen, once per page: fifteen seconds of it, or most of a short one; never who.
+    var heard = {};
+    var played = 0;
+    var last = null;
+    audio.addEventListener('timeupdate', function () {
+        var at = audio.currentTime;
+        if (!measuring && last !== null && at > last && at - last < 1.5 && !audio.paused) {
+            played += at - last;
+        }
+        last = at;
+        var enough = isFinite(audio.duration) && audio.duration > 0 ? Math.min(15, audio.duration * 0.6) : 15;
+        if (audio.dataset.heard && !heard[part] && played >= enough) {
+            heard[part] = true;
+            fetch(audio.dataset.heard, {method: 'POST', credentials: 'omit',
+                body: new URLSearchParams({heard: '1', p: String(part)})}).catch(function () {});
+        }
+    });
+    audio.addEventListener('seeking', function () {
+        last = null;
+    });
+    audio.addEventListener('loadstart', function () {
+        played = 0;
+        last = null;
+    });
 
     var passOn = document.querySelector('.lp-pasar');
     var said = document.querySelector('.lp-pasado');

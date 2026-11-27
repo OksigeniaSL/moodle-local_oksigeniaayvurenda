@@ -405,6 +405,8 @@
     var load = function(id, at, go) {
         stopCount();
         current = id;
+        // Its listen counts as this part's (app/ayvurenda.js).
+        voice.setAttribute('data-ayv-heard', String(id));
         voice.src = button(id).getAttribute('data-url');
         if (at > 0) {
             voice.addEventListener('loadedmetadata', function seek() {

@@ -48,6 +48,44 @@
             return answer.data;
         });
     };
+    // A voice heard for a while counts one listen, once per page and voice: fifteen seconds of it played, or most of a
+    // short one; jumping ahead is not hearing. done(key) gets the voice in data-ayv-heard as it is then: a reading in
+    // parts changes it from part to part.
+    window.ayvHeard = function(audio, done) {
+        var played = 0;
+        var last = null;
+        var sent = {};
+        audio.addEventListener('timeupdate', function() {
+            var at = audio.currentTime;
+            if (last !== null && at > last && at - last < 1.5 && !audio.paused) {
+                played += at - last;
+            }
+            last = at;
+            var key = audio.getAttribute('data-ayv-heard');
+            var enough = isFinite(audio.duration) && audio.duration > 0 ? Math.min(15, audio.duration * 0.6) : 15;
+            if (key && !sent[key] && played >= enough) {
+                sent[key] = true;
+                done(key);
+            }
+        });
+        audio.addEventListener('seeking', function() {
+            last = null;
+        });
+        audio.addEventListener('loadstart', function() {
+            played = 0;
+            last = null;
+        });
+    };
+    var heardTo = (window.AYV || {}).heardurl;
+    if (heardTo) {
+        document.querySelectorAll('audio[data-ayv-heard]').forEach(function(audio) {
+            window.ayvHeard(audio, function(key) {
+                window.ayvService(heardTo, {item: Number(key)}).catch(function() {
+                    return null;
+                });
+            });
+        });
+    }
     // A cover that does not load (a file gone, a cache on the way) is never a blank (Enrique, 8 November): the card shows
     // its drawn cover with the title, and the small covers of the board go away.
     var covers = '.ayv-cover-img, .ayv-board-covers img, .ayv-board-book img';

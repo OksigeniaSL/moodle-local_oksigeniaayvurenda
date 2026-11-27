@@ -51,6 +51,7 @@
     <div class="ayv-book">
         <p>{{voicefamilydone}}</p>
         <audio class="ayv-media" controls preload="none" src="{{playurl}}"></audio>
+        {{#listens}}{{> local_oksigeniaayvurenda/listens}}{{/listens}}
         <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}">
             <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{voicedelete}}</button></form>
     </div>

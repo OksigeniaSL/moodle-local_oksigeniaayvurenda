@@ -1003,6 +1003,16 @@ function xmldb_local_oksigeniaayvurenda_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112603, 'local', 'oksigeniaayvurenda');
     }
 
+    if ($oldversion < 2026112702) {
+        // How many times each voice has been heard: a count, never who.
+        $table = new xmldb_table('local_oksigeniaayvurenda_digital');
+        $field = new xmldb_field('listens', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'seconds');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026112702, 'local', 'oksigeniaayvurenda');
+    }
+
     return true;
 }
 

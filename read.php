@@ -25,6 +25,7 @@
 use local_oksigeniaayvurenda\core\digital_rules;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
+use local_oksigeniaayvurenda\local\listens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
 use local_oksigeniaayvurenda\local\window;
@@ -120,6 +121,9 @@ if ($parts) {
         ),
         'nowsmall' => $at > 0 ? $str('readingresumeat', max(1, (int) round($at / 60))) : ($name !== '' ? '«' . $name . '»' : ''),
         'starturl' => digital::file_url($current),
+        // The part sounding, for its listen to count (app/ayvurenda.js); lectura.js changes it from part to part.
+        'startid' => (int) $current->id,
+        'listens' => listens::reading($parts, 'public') ?? false,
         'startduration' => $current->seconds ? $mmss((int) $current->seconds) : '',
         'playlabel' => $str('readingplay'),
         'pauselabel' => $str('readingpause'),
@@ -158,6 +162,8 @@ $data = [
     'epub' => $item->format === 'epub',
     'pdf' => $item->format === 'pdf',
     'audio' => $item->format === 'audio' && !$reading,
+    'heardid' => $item->kind === 'voice' && !$reading ? (int) $item->id : 0,
+    'listens' => $item->kind === 'voice' && !$reading ? (listens::of($item, 'public') ?? false) : false,
     'reading' => $reading,
     'video' => $item->format === 'video',
     'link' => $item->kind === 'link' ? \local_oksigeniaayvurenda\local\links::out($library, $item) : '',

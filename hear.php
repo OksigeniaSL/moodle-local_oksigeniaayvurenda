@@ -31,6 +31,7 @@ require(__DIR__ . '/../../config.php');
 
 use local_oksigeniaayvurenda\local\digital;
 use local_oksigeniaayvurenda\local\forlittle;
+use local_oksigeniaayvurenda\local\listens;
 use local_oksigeniaayvurenda\local\mail;
 use local_oksigeniaayvurenda\local\voices;
 
@@ -47,6 +48,13 @@ if (!$heard) {
 $parts = voices::sequence($heard['voice'], fn($part) => !empty($part->forlittle) && voices::may_share($part)
     && digital::file($part));
 $parts = $parts ?: [$heard['voice']];
+// A part heard for a while (app/escuchar.js): one more listen, never who.
+$sent = data_submitted();
+if ($sent && !empty($sent->heard)) {
+    voices::heard($parts[min(max(0, (int) ($sent->p ?? 0)), count($parts) - 1)], 0);
+    http_response_code(204);
+    die;
+}
 if ($play) {
     $part = $parts[min(max(0, optional_param('p', 0, PARAM_INT)), count($parts) - 1)];
     @header('X-Content-Type-Options: nosniff');
@@ -75,6 +83,9 @@ echo $OUTPUT->render_from_template('local_oksigeniaayvurenda/hear', [
     'ogimage' => $book['cover'],
     'url' => $PAGE->url->out(false),
     'css' => $app('escuchar.css'),
+    'listenscss' => $app('escuchas.css'),
+    // How many have heard it, as an audience: a reading in parts, as many as its most heard part (everyone starts there).
+    'listens' => listens::reading($parts, 'family') ?? false,
     'js' => $app('escuchar.js'),
     'emblem' => $app('emblema.svg'),
     'library' => $library,
@@ -87,6 +98,7 @@ echo $OUTPUT->render_from_template('local_oksigeniaayvurenda/hear', [
     'name' => $name,
     'sentence' => $str('familypagesentence', $title),
     'audio' => (new moodle_url('/local/oksigeniaayvurenda/hear.php', ['i' => $id, 's' => $seal, 'play' => 1]))->out(false),
+    'heardurl' => (new moodle_url('/local/oksigeniaayvurenda/hear.php', ['i' => $id, 's' => $seal]))->out(false),
     // The rest of the reading, in order, for the page to go on by itself; and how many parts, said once.
     'parts' => implode(' ', array_map(fn($i) => (new moodle_url('/local/oksigeniaayvurenda/hear.php', ['i' => $id, 's' => $seal,
         'play' => 1, 'p' => $i]))->out(false), array_keys($parts))),

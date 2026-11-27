@@ -252,6 +252,8 @@ final class shell {
             'library' => $library ? $library->slug : '',
             'searchurl' => $base . 'search.php',
             'homeurl' => $home,
+            // Where a voice heard for a while counts its listen (app/ayvurenda.js, audio[data-ayv-heard]).
+            'heardurl' => self::service('voice_heard'),
             // The words of the file button, in the library's language and not the browser's.
             'filechoose' => get_string('filechoose', 'local_oksigeniaayvurenda'),
             'filenone' => get_string('filenone', 'local_oksigeniaayvurenda'),
@@ -460,7 +462,8 @@ final class shell {
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'formularios.css?v=' . $version . '">
-<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">' . ($improve ? '
+<link rel="stylesheet" href="' . $app . 'marcapaginas.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'escuchas.css?v=' . $version . '">' . ($improve ? '
 <link rel="stylesheet" href="' . s($improve['css']) . '">' : '') . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement, query = window.matchMedia(\'(prefers-color-scheme: dark)\');
@@ -894,7 +897,8 @@ document.addEventListener(\'error\', function(e) {
 <link rel="icon" href="' . $app . 'favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="stylesheet" href="' . $app . 'ayvurenda.css?v=' . $version . '">
 <link rel="stylesheet" href="' . $app . 'ayvurenda-d.css?v=' . $version . '">
-<link rel="stylesheet" href="' . $app . 'formularios.css?v=' . $version . '">' . $sheets . '
+<link rel="stylesheet" href="' . $app . 'formularios.css?v=' . $version . '">
+<link rel="stylesheet" href="' . $app . 'escuchas.css?v=' . $version . '">' . $sheets . '
 <script nonce="' . self::nonce() . '">(function() {
     var root = document.documentElement;
     if (root.getAttribute(\'data-colourmode\') === \'auto\') {

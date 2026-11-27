@@ -25,6 +25,7 @@
 use local_oksigeniaayvurenda\local\access;
 use local_oksigeniaayvurenda\local\catalogue;
 use local_oksigeniaayvurenda\local\digital;
+use local_oksigeniaayvurenda\local\listens;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
 
@@ -59,14 +60,18 @@ foreach ($found['records'] as $record) {
         'voices' => array_map(fn($group) => $group['item']->part !== null ? [
             'label' => voices::reading_label($group['parts']),
             'audio' => '',
+            'heardid' => 0,
             'listen' => $url('read.php', ['id' => $group['item']->id]),
             'listenlabel' => $str('digitalactionaudio'),
+            'listens' => listens::reading($group['parts'], 'public') ?? false,
         ] : [
             'label' => trim(((string) $group['item']->title !== '' ? $group['item']->title : $str('ayvurandevoice')) .
                 ((string) $group['item']->signature !== '' ? ' · ' . $group['item']->signature : '')),
             'audio' => digital::file_url($group['item']),
+            'heardid' => (int) $group['item']->id,
             'listen' => '',
             'listenlabel' => '',
+            'listens' => listens::of($group['item'], 'public') ?? false,
         ], voices::readings($record['voices'])),
     ];
 }

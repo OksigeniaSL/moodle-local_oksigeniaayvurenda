@@ -82,6 +82,14 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'local_oksigeniaayvurenda_voice_heard' => [
+        'classname' => \local_oksigeniaayvurenda\external\voice_heard::class,
+        'description' => 'Counts one more listen of a voice heard for a while, never who heard it.',
+        'type' => 'write',
+        'capabilities' => 'local/oksigeniaayvurenda:view',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
     'local_oksigeniaayvurenda_howto_ask' => [
         'classname' => \local_oksigeniaayvurenda\external\howto_ask::class,
         'description' => 'The tasks and settings that answer what the staff ask.',

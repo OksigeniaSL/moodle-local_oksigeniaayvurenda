@@ -25,7 +25,10 @@
     {
         "heading": "Dale voz a «El faro dormido»", "how": "Tu voz se guarda aquí.", "infourl": "#", "notice": "",
         "action": "#", "sesskey": "abc", "hasmine": true,
-        "mine": [{"id": 1, "title": "Capítulo 1", "url": "#", "state": "Pendiente de aprobar",
+        "mine": [{"id": 1, "title": "Capítulo 1", "url": "#", "state": "Aprobada",
+            "listens": {"look": "noche", "svg": "<svg class=\"ayv-esc-svg\" viewBox=\"0 0 320 190\" aria-hidden=\"true\"></svg>",
+                "hasnumber": true, "digits": "27", "unit": "escuchas", "phrase": "Ya es más que una clase entera.",
+                "next": "Para llenar el autobús faltan 30."},
             "sound": true, "soundsays": "Fondo: lluvia", "soundoptions": [{"sokey": "", "sosays": "Sin fondo", "solabel": "Sin fondo",
                 "sochecked": false}, {"sokey": "lluvia", "sosays": "Fondo: lluvia", "solabel": "Lluvia", "sochecked": true}]}],
         "voiceinfo": "Cómo se tratan las voces", "voicerecord": "Grabar", "voicestop": "Parar", "voiceagain": "Volver a grabar",
@@ -65,6 +68,7 @@
         {{#sound}}<details class="ayv-vp-son"><summary>{{soundsays}}</summary>
             <div class="ayv-vp-chips" role="radiogroup" aria-label="{{soundsays}}" data-item="{{id}}">{{#soundoptions}}<label class="ayv-vp-chip"><input type="radio" name="ayv-son-{{id}}" value="{{sokey}}" data-says="{{sosays}}"{{#sochecked}} checked{{/sochecked}}><span class="ayv-vp-word">{{solabel}}</span></label>{{/soundoptions}}</div>
         </details>{{/sound}}
+        {{#listens}}{{> local_oksigeniaayvurenda/listens}}{{/listens}}
         <form method="post" action="{{action}}"><input type="hidden" name="sesskey" value="{{sesskey}}"><input type="hidden" name="item" value="{{id}}">
             <button type="submit" class="ayv-button ayv-button-quiet" name="do" value="delete">{{voicedelete}}</button></form></li>
 {{/mine}}

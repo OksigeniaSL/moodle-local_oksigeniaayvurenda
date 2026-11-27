@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.6.0 (2026-11-27)
+
+- **How many times a voice has been heard**, as an audience and not a bare number: each listen takes a seat, and the
+  place grows with the voice, from a sofa to a circle, a class, a bus, a school hall, a theatre and a sports hall. The
+  drawing shows the place being filled, and the sentence the biggest one already full («Already a whole class»).
+- **A listen** is a voice heard for a while (fifteen seconds, or most of a short one), once per visit and day; its own
+  reader's listens do not count, and nothing says who heard it.
+- **Where it shows**: big, under each approved voice of the reader who recorded it, on the family's page between the
+  player and «Send it to someone», and to a family that recorded through an invitation, with what is left to fill the
+  place; small, beside each voice on the record, in «listen as a book» and in Ayvu rande, only once a sofa is full and
+  without the number, and never at a university. A voice waiting for approval has none.
+- Two looks: the cream plate for the flower's readers and the families, and the night of the sky for the others; both
+  keep their colours in dark mode, and the seats fill one after another unless motion is reduced.
+- Around it: a reading in parts with some of them approved says how many are still to approve, not that it waits whole;
+  the sound of one's own voice unfolds with a chevron; and the shelf under a record's cover reads in dark mode.
+
 ## 1.5.2 (2026-11-27)
 
 - **Five seconds before recording**, not three.

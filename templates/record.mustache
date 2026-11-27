@@ -55,7 +55,9 @@
         "copies": [{"where": "Aquí", "statelabel": "Libre", "state": "free", "location": "Estantería infantil",
                     "callnumber": "821 MON far", "barcode": "100000L"}],
         "back": {"url": "#", "label": "Volver a la biblioteca"},
-        "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#", "book": true}],
+        "digital": {"heading": "En digital", "items": [{"label": "EPUB", "action": "Leer", "url": "#", "book": true, "listens": false},
+        {"label": "Capítulo 1 · Iker", "action": "Escuchar", "url": "#", "book": false, "listens": {"small": "Ya es un corro entero.",
+            "glyph": "<svg class=\"ayv-esc-glifo ayv-esc-glifo-on\" viewBox=\"0 0 26 16\" aria-hidden=\"true\"></svg>"} }],
                     "manage": null, "readbook": "Leer el libro", "spring": null,
                     "voice": {"url": "#", "question": "¿Quieres darle voz a este libro?", "label": "Darle voz"}
         },
@@ -148,7 +150,7 @@
         {{#digital}}
         <section class="ayv-hold" aria-label="{{heading}}">
             <h2 class="ayv-section-title">{{heading}}</h2>
-            {{#items}}<p>{{#book}}<a class="ayv-button" href="{{url}}">{{> local_oksigeniaayvurenda/icon_book}} {{readbook}}</a> <span class="ayv-field-hint">{{label}}</span>{{/book}}{{^book}}<a class="ayv-button" href="{{url}}">{{action}}: {{label}}</a>{{/book}}</p>{{/items}}
+            {{#items}}<p>{{#book}}<a class="ayv-button" href="{{url}}">{{> local_oksigeniaayvurenda/icon_book}} {{readbook}}</a> <span class="ayv-field-hint">{{label}}</span>{{/book}}{{^book}}<a class="ayv-button" href="{{url}}">{{action}}: {{label}}</a>{{/book}}{{#listens}} {{> local_oksigeniaayvurenda/listens_small}}{{/listens}}</p>{{/items}}
             {{#voice}}<p class="ayv-voice-ask">{{question}}</p><p><a class="ayv-button ayv-button-quiet ayv-button-voice" href="{{url}}">{{> local_oksigeniaayvurenda/icon_mic}} {{label}}</a></p>{{/voice}}
             {{#spring}}<p><a href="{{url}}">{{label}}</a></p>{{/spring}}
             {{#manage}}<p><a href="{{url}}">{{label}}</a></p>{{/manage}}

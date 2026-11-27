@@ -25,7 +25,7 @@
     Example context (json):
     {
         "heading": "El faro dormido", "subtitle": "EPUB", "licence": "Dominio público",
-        "epub": false, "pdf": false, "audio": true, "video": false, "link": "", "other": false,
+        "epub": false, "pdf": false, "audio": true, "heardid": 0, "video": false, "link": "", "other": false,
         "fileurl": "#", "downloadurl": "#", "recordurl": "#",
         "readprev": "Anterior", "readnext": "Siguiente", "readsmaller": "Letra más pequeña", "readbigger": "Letra más grande",
         "readmark": "Marcar aquí", "readmarks": "Tus marcas", "readdownload": "Descargar", "readopenlink": "Abrirlo",
@@ -35,7 +35,8 @@
         "reading": {"cover": "https://example.com/tapa.jpg", "coveralt": "La portada de «El faro dormido»",
             "booktitle": "El faro dormido", "who": "Enrique", "initial": "E", "bybefore": "Te lo lee",
             "byafter": ", en 2 partes", "byanon": "Lectura en voz alta, en 2 partes", "nowtext": "Ahora: Capítulo 1",
-            "nowsmall": "«La barca de la abuela»", "starturl": "https://example.com/capitulo-1.webm", "startduration": "7:42",
+            "nowsmall": "«La barca de la abuela»", "starturl": "https://example.com/capitulo-1.webm", "startid": 7,
+        "listens": {"small": "Ya es una clase entera.", "glyph": "<svg class=\"ayv-esc-glifo ayv-esc-glifo-on\" viewBox=\"0 0 26 16\" aria-hidden=\"true\"></svg>"}, "startduration": "7:42",
             "playlabel": "Escuchar", "pauselabel": "Pausa", "wherelabel": "Por dónde va", "notnow": "Ahora no",
             "partsheading": "Las partes", "note": "Al acabar una parte empieza la siguiente.",
             "parts": [{"partid": 11, "parturl": "https://example.com/presentacion.webm", "parttitle": "Presentación",
@@ -54,15 +55,17 @@
 <p class="ayv-field-hint">{{subtitle}} · {{licence}}</p>{{/reading}}
 {{#epub}}<div class="ayv-read-stage">{{> local_oksigeniaayvurenda/read_book}}</div>{{/epub}}
 {{#pdf}}<iframe class="ayv-pdf" src="{{fileurl}}" title="{{heading}}"></iframe>{{/pdf}}
-{{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"></audio>{{/audio}}
+{{#audio}}<audio id="ayv-media" class="ayv-media" controls preload="metadata" src="{{fileurl}}"{{#heardid}} data-ayv-heard="{{heardid}}"{{/heardid}}></audio>
+{{#listens}}{{#small}}<p class="ayv-more">{{> local_oksigeniaayvurenda/listens_small}}</p>{{/small}}{{/listens}}{{/audio}}
 {{#reading}}
 <section class="ayv-oye" id="ayv-oye">
     <div class="ayv-oye-libro">{{#cover}}<img src="{{cover}}" alt="{{coveralt}}">{{/cover}}{{^cover}}<span class="ayv-oye-sintapa">{{booktitle}}</span>{{/cover}}</div>
     <div>
         <div class="ayv-oye-quien">{{#who}}<span class="ayv-oye-cara" aria-hidden="true">{{initial}}</span><p>{{bybefore}} <b>{{who}}</b>{{byafter}}</p>{{/who}}{{^who}}<p>{{byanon}}</p>{{/who}}</div>
         <h1>{{booktitle}}</h1>
+        {{#listens}}{{#small}}<p class="ayv-oye-escuchas">{{> local_oksigeniaayvurenda/listens_small}}</p>{{/small}}{{/listens}}
         <p class="ayv-oye-ahora" role="status"><span class="ayv-oye-barras" aria-hidden="true"><i></i><i></i><i></i></span><span><span id="ayv-oye-ahora-texto">{{nowtext}}</span><small id="ayv-oye-ahora-nombre">{{nowsmall}}</small></span></p>
-        <audio id="ayv-lectura-voz" class="ayv-media ayv-oye-nativo" controls preload="metadata" src="{{starturl}}"></audio>
+        <audio id="ayv-lectura-voz" class="ayv-media ayv-oye-nativo" controls preload="metadata" src="{{starturl}}" data-ayv-heard="{{startid}}"></audio>
         <div class="ayv-oye-rep" id="ayv-oye-rep" hidden>
             <button type="button" class="ayv-oye-play" id="ayv-oye-play" aria-pressed="false" aria-label="{{playlabel}}"><svg class="ayv-oye-icono-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 4.5v15l13-7.5z"/></svg><svg class="ayv-oye-icono-pausa" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z"/></svg></button>
             <div class="ayv-oye-pista">

@@ -359,6 +359,35 @@ final class voices {
     }
 
     /**
+     * One more listen of a voice heard for a while by someone other than who recorded it: once per visit and day, and
+     * never who. A voice still waiting for its approval is not heard yet.
+     *
+     * @param \stdClass $item
+     * @param int $userid Who heard it; 0 without an account (the family's link).
+     * @param \stdClass|null $session Where the voices already counted in this visit are kept (Moodle's session); null
+     *     where there is none.
+     * @param int|null $now
+     * @return bool Whether it was counted.
+     */
+    public static function heard(\stdClass $item, int $userid, ?\stdClass $session = null, ?int $now = null): bool {
+        global $DB;
+        if ($item->kind !== 'voice' || $item->status !== 'published' || ($userid && (int) $item->createdby === $userid)) {
+            return false;
+        }
+        if ($session !== null) {
+            $day = (int) floor(($now ?? time()) / DAYSECS);
+            $counted = (array) ($session->ayvheard ?? []);
+            if (($counted[(int) $item->id] ?? null) === $day) {
+                return false;
+            }
+            $counted[(int) $item->id] = $day;
+            $session->ayvheard = $counted;
+        }
+        $DB->execute('UPDATE {' . self::T . 'digital} SET listens = listens + 1 WHERE id = ?', [(int) $item->id]);
+        return true;
+    }
+
+    /**
      * A voice and the rest of its reading, in the book's order: the newest take of each part that $keep lets through,
      * published, so that a reading in parts is heard whole wherever it sounds (the little ones' shelf, the moment, the
      * family's link), not its opening alone. A voice that is not a part, alone.

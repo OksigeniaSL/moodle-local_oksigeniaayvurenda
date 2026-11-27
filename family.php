@@ -25,6 +25,7 @@
  */
 
 use local_oksigeniaayvurenda\local\digital;
+use local_oksigeniaayvurenda\local\listens;
 use local_oksigeniaayvurenda\local\plans;
 use local_oksigeniaayvurenda\local\shell;
 use local_oksigeniaayvurenda\local\voices;
@@ -80,6 +81,8 @@ $data = [
     'notice' => $notice,
     'used' => (bool) $invite->timeused,
     'hasvoice' => (bool) $voice,
+    // How many times it has been heard, once approved: for the family that recorded it, the cream plate.
+    'listens' => $voice ? (listens::of($voice, 'mine', 'lamina') ?? false) : false,
     'playurl' => (new moodle_url('/local/oksigeniaayvurenda/family.php', ['t' => $token, 'play' => 1]))->out(false),
     'action' => $PAGE->url->out(false),
     'sesskey' => sesskey(),

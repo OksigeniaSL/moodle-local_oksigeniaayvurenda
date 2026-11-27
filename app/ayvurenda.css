@@ -15252,7 +15252,22 @@ html[data-bs-theme="dark"] .ayv .ayv-vp-barra-boton { color: #0e1c1a; }
 
 /* One's own voices: each part says its sound and changes it with a touch, without recording again. */
 .ayv .ayv-vp-son { margin: .35rem 0 .5rem; }
-.ayv .ayv-vp-son summary { display: inline-block; cursor: pointer; font-weight: 700; color: var(--accent); }
+/* A chevron that turns when it opens: it unfolds from the player, and is no heading of what comes under it. */
+.ayv .ayv-vp-son summary { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; font-weight: 700; color: var(--accent); list-style: none; }
+.ayv .ayv-vp-son summary::-webkit-details-marker { display: none; }
+.ayv .ayv-vp-son summary::after {
+    content: "";
+    width: .45rem;
+    height: .45rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-.15rem) rotate(45deg);
+    transition: transform .15s ease;
+}
+.ayv .ayv-vp-son[open] summary::after { transform: translateY(.1rem) rotate(-135deg); }
+@media (prefers-reduced-motion: reduce) {
+    .ayv .ayv-vp-son summary::after { transition: none; }
+}
 .ayv .ayv-vp-son .ayv-vp-chips { margin-top: .5rem; }
 
 /* «No more mail, please» (1.2.9): one card in the middle of the page, its words as wide as the card. */
